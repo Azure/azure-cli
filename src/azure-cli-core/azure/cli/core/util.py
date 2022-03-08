@@ -4,17 +4,18 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=too-many-lines
 
-import sys
-import json
-import getpass
 import base64
 import binascii
-import platform
-import ssl
-import re
+import getpass
+import json
 import logging
-
+import os
+import platform
+import re
+import ssl
+import sys
 from urllib.request import urlopen
+
 from knack.log import get_logger
 from knack.util import CLIError, to_snake_case
 
@@ -59,7 +60,7 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
     from azure.common import AzureException
     from azure.core.exceptions import AzureError
     from requests.exceptions import SSLError, HTTPError
-    import azure.cli.core.azclierror as azclierror
+    from azure.cli.core import azclierror
     import traceback
 
     logger.debug("azure.cli.core.util.handle_exception is called with an exception:")
@@ -184,8 +185,8 @@ def extract_http_operation_error(ex):
 
 
 def get_error_type_by_azure_error(ex):
-    import azure.core.exceptions as exceptions
-    import azure.cli.core.azclierror as azclierror
+    from azure.core import exceptions
+    from azure.cli.core import azclierror
 
     if isinstance(ex, exceptions.HttpResponseError):
         status_code = str(ex.status_code)
@@ -204,7 +205,7 @@ def get_error_type_by_azure_error(ex):
 
 # pylint: disable=too-many-return-statements
 def get_error_type_by_status_code(status_code):
-    import azure.cli.core.azclierror as azclierror
+    from azure.cli.core import azclierror
 
     if status_code == '400':
         return azclierror.BadRequestError
@@ -271,7 +272,7 @@ def get_installed_cli_distributions():
 def get_latest_from_github(package_path='azure-cli'):
     try:
         import requests
-        git_url = "https://raw.githubusercontent.com/Azure/azure-cli/master/src/{}/setup.py".format(package_path)
+        git_url = "https://raw.githubusercontent.com/Azure/azure-cli/main/src/{}/setup.py".format(package_path)
         response = requests.get(git_url, timeout=10)
         if response.status_code != 200:
             logger.info("Failed to fetch the latest version from '%s' with status code '%s' and reason '%s'",
@@ -379,7 +380,13 @@ def get_az_version_string(use_cache=False):  # pylint: disable=too-many-statemen
             else:
                 _print(ext.name.ljust(20) + (ext.version or 'Unknown').rjust(20))
         _print()
-    import os
+
+    _print('Dependencies:')
+    dependencies_versions = get_dependency_versions()
+    for k, v in dependencies_versions.items():
+        _print(k.ljust(20) + v.rjust(20))
+    _print()
+
     _print("Python location '{}'".format(os.path.abspath(sys.executable)))
     _print("Extensions directory '{}'".format(EXTENSIONS_DIR))
     if os.path.isdir(EXTENSIONS_SYS_DIR) and os.listdir(EXTENSIONS_SYS_DIR):
@@ -412,6 +419,31 @@ def get_az_version_json():
     if extensions:
         for ext in extensions:
             versions['extensions'][ext.name] = ext.version or 'Unknown'
+    return versions
+
+
+def get_dependency_versions():
+    versions = {}
+    # Add msal version
+    try:
+        from msal import __version__ as msal_version
+    except ImportError:
+        msal_version = "N/A"
+    versions['msal'] = msal_version
+
+    # Add azure-mgmt-resource version
+    try:
+        # Track 2 >=15.0.0
+        # pylint: disable=protected-access
+        from azure.mgmt.resource._version import VERSION as azure_mgmt_resource_version
+    except ImportError:
+        try:
+            # Track 1 <=13.0.0
+            from azure.mgmt.resource.version import VERSION as azure_mgmt_resource_version
+        except ImportError:
+            azure_mgmt_resource_version = "N/A"
+    versions['azure-mgmt-resource'] = azure_mgmt_resource_version
+
     return versions
 
 
@@ -522,8 +554,8 @@ def shell_safe_json_parse(json_or_dict_string, preserve_order=False, strict=True
                              "https://docs.microsoft.com/cli/azure/use-cli-effectively#quoting-issues"
 
             # Recommendation especially for PowerShell
-            parent_proc = get_parent_proc_name().lower()
-            if parent_proc in ("powershell.exe", "pwsh.exe"):
+            parent_proc = get_parent_proc_name()
+            if parent_proc and parent_proc.lower() in ("powershell.exe", "pwsh.exe"):
                 recommendation += "\nPowerShell requires additional quoting rules. See " \
                                   "https://github.com/Azure/azure-cli/blob/dev/doc/quoting-issues-with-powershell.md"
 
@@ -581,7 +613,6 @@ def hash_string(value, length=16, force_lower=False):
 
 
 def in_cloud_console():
-    import os
     return os.environ.get('ACC_CLOUD', None)
 
 
@@ -610,7 +641,6 @@ DISABLE_VERIFY_VARIABLE_NAME = "AZURE_CLI_DISABLE_CONNECTION_VERIFICATION"
 
 
 def should_disable_connection_verify():
-    import os
     return bool(os.environ.get(DISABLE_VERIFY_VARIABLE_NAME))
 
 
@@ -657,7 +687,8 @@ def open_page_in_browser(url):
         try:
             # https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_powershell_exe
             # Ampersand (&) should be quoted
-            return subprocess.Popen(['powershell.exe', '-Command', 'Start-Process "{}"'.format(url)])
+            return subprocess.Popen(
+                ['powershell.exe', '-NoProfile', '-Command', 'Start-Process "{}"'.format(url)]).wait()
         except OSError:  # WSL might be too old  # FileNotFoundError introduced in Python 3
             pass
     elif platform_name == 'darwin':
@@ -674,10 +705,7 @@ def open_page_in_browser(url):
 
 def _get_platform_info():
     uname = platform.uname()
-    # python 2, `platform.uname()` returns: tuple(system, node, release, version, machine, processor)
-    platform_name = getattr(uname, 'system', None) or uname[0]
-    release = getattr(uname, 'release', None) or uname[2]
-    return platform_name.lower(), release.lower()
+    return uname.system.lower(), uname.release.lower()
 
 
 def is_wsl():
@@ -695,28 +723,29 @@ def is_windows():
 
 
 def can_launch_browser():
-    import os
     import webbrowser
     platform_name, _ = _get_platform_info()
-    if is_wsl() or platform_name != 'linux':
-        return True
-    # per https://unix.stackexchange.com/questions/46305/is-there-a-way-to-retrieve-the-name-of-the-desktop-environment
-    # and https://unix.stackexchange.com/questions/193827/what-is-display-0
-    # we can check a few env vars
-    gui_env_vars = ['DESKTOP_SESSION', 'XDG_CURRENT_DESKTOP', 'DISPLAY']
-    result = True
-    if platform_name == 'linux':
-        if any(os.getenv(v) for v in gui_env_vars):
-            try:
-                default_browser = webbrowser.get()
-                if getattr(default_browser, 'name', None) == 'www-browser':  # text browser won't work
-                    result = False
-            except webbrowser.Error:
-                result = False
-        else:
-            result = False
 
-    return result
+    if platform_name != 'linux':
+        # Only Linux may have no browser
+        return True
+
+    # Using webbrowser to launch a browser is the preferred way.
+    try:
+        webbrowser.get()
+        return True
+    except webbrowser.Error:
+        # Don't worry. We may still try powershell.exe.
+        pass
+
+    if is_wsl():
+        # Docker container running on WSL 2 also shows WSL, but it can't launch a browser.
+        # If powershell.exe is on PATH, it can be called to launch a browser.
+        import shutil
+        if shutil.which("powershell.exe"):
+            return True
+
+    return False
 
 
 def get_command_type_kwarg(custom_command=False):
@@ -829,7 +858,6 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
     # Borrow AZURE_HTTP_USER_AGENT from msrest
     # https://github.com/Azure/msrest-for-python/blob/4cc8bc84e96036f03b34716466230fb257e27b36/msrest/pipeline/universal.py#L70
     _ENV_ADDITIONAL_USER_AGENT = 'AZURE_HTTP_USER_AGENT'
-    import os
     if _ENV_ADDITIONAL_USER_AGENT in os.environ:
         agents.append(os.environ[_ENV_ADDITIONAL_USER_AGENT])
 
@@ -1097,7 +1125,6 @@ def get_az_user_agent():
 
     agents = ["AZURECLI/{}".format(core_version)]
 
-    import os
     from azure.cli.core._environment import _ENV_AZ_INSTALLER
     if _ENV_AZ_INSTALLER in os.environ:
         agents.append('({})'.format(os.environ[_ENV_AZ_INSTALLER]))
@@ -1195,43 +1222,6 @@ def handle_version_update():
         logger.warning(ex)
 
 
-def resource_to_scopes(resource):
-    """Convert the ADAL resource ID to MSAL scopes by appending the /.default suffix and return a list.
-    For example:
-       'https://management.core.windows.net/' -> ['https://management.core.windows.net//.default']
-       'https://managedhsm.azure.com' -> ['https://managedhsm.azure.com/.default']
-
-    :param resource: The ADAL resource ID
-    :return: A list of scopes
-    """
-    # https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-permissions-and-consent#trailing-slash-and-default
-    # We should not trim the trailing slash, like in https://management.azure.com/
-    # In other word, the trailing slash should be preserved and scope should be https://management.azure.com//.default
-    scope = resource + '/.default'
-    return [scope]
-
-
-def scopes_to_resource(scopes):
-    """Convert MSAL scopes to ADAL resource by stripping the /.default suffix and return a str.
-    For example:
-       ['https://management.core.windows.net//.default'] -> 'https://management.core.windows.net/'
-       ['https://managedhsm.azure.com/.default'] -> 'https://managedhsm.azure.com'
-
-    :param scopes: The MSAL scopes. It can be a list or tuple of string
-    :return: The ADAL resource
-    :rtype: str
-    """
-    scope = scopes[0]
-
-    suffixes = ['/.default', '/user_impersonation']
-
-    for s in suffixes:
-        if scope.endswith(s):
-            return scope[:-len(s)]
-
-    return scope
-
-
 def _get_parent_proc_name():
     # Un-cached function to get parent process name.
     try:
@@ -1240,28 +1230,33 @@ def _get_parent_proc_name():
         logger.debug(ex)
         return None
 
-    import os
-    parent = psutil.Process(os.getpid()).parent()
+    try:
+        parent = psutil.Process(os.getpid()).parent()
 
-    # On Windows, when CLI is run inside a virtual env, there will be 2 python.exe.
-    if parent and parent.name().lower() == 'python.exe':
-        parent = parent.parent()
+        # On Windows, when CLI is run inside a virtual env, there will be 2 python.exe.
+        if parent and parent.name().lower() == 'python.exe':
+            parent = parent.parent()
 
-    if parent:
-        # On Windows, powershell.exe launches cmd.exe to launch python.exe.
-        grandparent = parent.parent()
-        if grandparent:
-            grandparent_name = grandparent.name().lower()
-            if grandparent_name in ("powershell.exe", "pwsh.exe"):
-                return grandparent.name()
-        # if powershell.exe or pwsh.exe is not the grandparent, simply return the parent's name.
-        return parent.name()
+        if parent:
+            # On Windows, powershell.exe launches cmd.exe to launch python.exe.
+            grandparent = parent.parent()
+            if grandparent:
+                grandparent_name = grandparent.name().lower()
+                if grandparent_name in ("powershell.exe", "pwsh.exe"):
+                    return grandparent.name()
+            # if powershell.exe or pwsh.exe is not the grandparent, simply return the parent's name.
+            return parent.name()
+    except psutil.AccessDenied as ex:
+        # Ignore due to https://github.com/giampaolo/psutil/issues/1980
+        logger.debug(ex)
     return None
 
 
 def get_parent_proc_name():
     # This function wraps _get_parent_proc_name, as psutil calls are time-consuming, so use a
     # function-level cache to save the result.
+    # NOTE: The return value may be None if getting parent proc name fails, so always remember to
+    # check it first before calling string methods like lower().
     if not hasattr(get_parent_proc_name, "return_value"):
         parent_proc_name = _get_parent_proc_name()
         setattr(get_parent_proc_name, "return_value", parent_proc_name)
@@ -1272,3 +1267,23 @@ def is_modern_terminal():
     """In addition to knack.util.is_modern_terminal, detect Cloud Shell."""
     import knack.util
     return knack.util.is_modern_terminal() or in_cloud_console()
+
+
+def rmtree_with_retry(path):
+    # A workaround for https://bugs.python.org/issue33240
+    # Retry shutil.rmtree several times, but even if it fails after several retries, don't block the command execution.
+    retry_num = 3
+    import time
+    while True:
+        try:
+            import shutil
+            shutil.rmtree(path)
+            return
+        except OSError as err:
+            if retry_num > 0:
+                logger.warning("Failed to delete '%s': %s. Retrying ...", path, err)
+                retry_num -= 1
+                time.sleep(1)
+            else:
+                logger.warning("Failed to delete '%s': %s. You may try to delete it manually.", path, err)
+                break

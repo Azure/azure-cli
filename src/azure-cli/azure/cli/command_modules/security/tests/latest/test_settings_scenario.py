@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.testsdk import ScenarioTest
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 
 class SecurityCenterSettingsTests(ScenarioTest):
@@ -16,3 +16,10 @@ class SecurityCenterSettingsTests(ScenarioTest):
         assert len(settings) >= 0
 
         self.cmd('az security setting show -n MCAS').get_output_in_json()
+
+    def test_security_settings_update(self):
+        setting = self.cmd('az security setting update -n Sentinel --enabled true' ).get_output_in_json()
+        assert setting['enabled'] == True
+
+        setting = self.cmd('az security setting update -n Sentinel --enabled false' ).get_output_in_json()
+        assert setting['enabled'] == False

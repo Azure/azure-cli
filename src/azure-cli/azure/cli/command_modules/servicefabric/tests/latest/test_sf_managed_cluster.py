@@ -7,11 +7,10 @@ import unittest
 import time
 
 from azure.cli.command_modules.servicefabric.tests.latest.test_util import (
-    _create_keyvault,
     _add_selfsigned_cert_to_keyvault
 )
 from azure.cli.core.util import CLIError
-from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer
+from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, KeyVaultPreparer
 from azure.core.exceptions import HttpResponseError
 
 
@@ -33,7 +32,7 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
                  checks=[self.check('provisioningState', 'Succeeded')])
 
         # 'InvalidParameter - Cluster must have at least one active primary node type'
-        with self.assertRaisesRegexp(HttpResponseError, 'Cluster must have at least one active primary node type'):
+        with self.assertRaisesRegex(HttpResponseError, 'Cluster must have at least one active primary node type'):
             self.cmd('az sf managed-node-type delete -g {rg} -c {cluster_name} -n pnt')
 
         self.cmd('az sf managed-cluster show -g {rg} -c {cluster_name}',
@@ -42,7 +41,7 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
         self.cmd('az sf managed-cluster delete -g {rg} -c {cluster_name}')
 
         # SystemExit 3 'not found'
-        with self.assertRaisesRegexp(SystemExit, '3'):
+        with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('az sf managed-cluster show -g {rg} -c {cluster_name}')
 
     @ResourceGroupPreparer()
@@ -97,7 +96,7 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
         self.cmd('az sf managed-node-type delete -g {rg} -c {cluster_name} -n snt')
 
         # SystemExit 3 'not found'
-        with self.assertRaisesRegexp(SystemExit, '3'):
+        with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('az sf managed-node-type show -g {rg} -c {cluster_name} -n snt')
 
         self.cmd('az sf managed-node-type list -g {rg} -c {cluster_name}',
@@ -106,11 +105,12 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
         self.cmd('az sf managed-cluster delete -g {rg} -c {cluster_name}')
 
         # SystemExit 3 'not found'
-        with self.assertRaisesRegexp(SystemExit, '3'):
+        with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('az sf managed-cluster show -g {rg} -c {cluster_name}')
 
     @ResourceGroupPreparer()
-    def test_cert_and_ext(self):
+    @KeyVaultPreparer(name_prefix='sfrp-cli-kv-', location='eastasia', additional_params='--enabled-for-deployment --enabled-for-template-deployment')
+    def test_cert_and_ext(self, key_vault, resource_group):
         self.kwargs.update({
             'cert_tp': '123BDACDCDFB2C7B250192C6078E47D1E1DB119B',
             'cert_tp2': '123BDACDCDFB2C7B250192C6078E47D1E1DB7777',
@@ -121,7 +121,7 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
             'publisher': 'Microsoft.Compute',
             'extType': 'BGInfo',
             'extVer': '2.1',
-            'kv_name': self.create_random_name('sfrp-cli-kv-', 24),
+            'kv_name': key_vault,
             'cert_name': self.create_random_name('sfrp-cli-', 24)
         })
 
@@ -141,7 +141,7 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
                  checks=[self.check('length(vmExtensions)', 1)])
 
         # add secret
-        kv = _create_keyvault(self, self.kwargs)
+        kv = self.cmd('keyvault show -n {kv_name} -g {rg}').get_output_in_json()
         self.kwargs.update({'kv_id': kv['id']})
         cert = _add_selfsigned_cert_to_keyvault(self, self.kwargs)
         cert_secret_id = cert['sid']
@@ -171,7 +171,7 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
         self.cmd('az sf managed-cluster delete -g {rg} -c {cluster_name}')
 
         # SystemExit 3 'not found'
-        with self.assertRaisesRegexp(SystemExit, '3'):
+        with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('az sf managed-cluster show -g {rg} -c {cluster_name}')
 
 

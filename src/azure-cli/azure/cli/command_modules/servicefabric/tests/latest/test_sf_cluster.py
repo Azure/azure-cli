@@ -9,16 +9,17 @@ import os
 import time
 from azure.cli.command_modules.servicefabric.tests.latest.test_util import _create_cluster, _create_cluster_with_separate_kv, _wait_for_cluster_state_ready, _add_selfsigned_cert_to_keyvault
 from azure.cli.core.util import CLIError
-from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer
+from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, KeyVaultPreparer
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 
 class ServiceFabricClusterTests(ScenarioTest):
     @ResourceGroupPreparer()
-    def test_create_cluster_with_separate_kv(self):
+    @KeyVaultPreparer(name_prefix='sfrp-cli-kv-', additional_params='--enabled-for-deployment --enabled-for-template-deployment')
+    def test_create_cluster_with_separate_kv(self, key_vault, resource_group):
         self.kwargs.update({
-            'kv_name': self.create_random_name('sfrp-cli-kv-', 24),
+            'kv_name': key_vault,
             'loc': 'westus',
             'cert_name': self.create_random_name('sfrp-cli-', 24),
             'cluster_name': self.create_random_name('sfrp-cli-', 24),

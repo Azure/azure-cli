@@ -133,7 +133,7 @@ def aro_create(cmd,  # pylint: disable=too-many-locals
     sp_obj_ids = [client_sp.object_id, rp_client_sp.object_id]
     ensure_resource_permissions(cmd.cli_ctx, oc, True, sp_obj_ids)
 
-    return sdk_no_wait(no_wait, client.create_or_update,
+    return sdk_no_wait(no_wait, client.begin_create_or_update,
                        resource_group_name=resource_group_name,
                        resource_name=resource_name,
                        parameters=oc)
@@ -145,7 +145,11 @@ def aro_delete(cmd, client, resource_group_name, resource_name, no_wait=False):
 
     try:
         oc = client.get(resource_group_name, resource_name)
-    except (CloudError, HttpOperationError) as e:
+    except CloudError as e:
+        if e.status_code == 404:
+            raise ResourceNotFoundError(e.message) from e
+        logger.info(e.message)
+    except HttpOperationError as e:
         logger.info(e.message)
 
     aad = AADManager(cmd.cli_ctx)
@@ -163,7 +167,7 @@ def aro_delete(cmd, client, resource_group_name, resource_name, no_wait=False):
     if rp_client_sp:
         ensure_resource_permissions(cmd.cli_ctx, oc, False, [rp_client_sp.object_id])
 
-    return sdk_no_wait(no_wait, client.delete,
+    return sdk_no_wait(no_wait, client.begin_delete,
                        resource_group_name=resource_group_name,
                        resource_name=resource_name)
 
@@ -207,7 +211,7 @@ def aro_update(cmd,
         if client_id is not None:
             ocUpdate.service_principal_profile.client_id = client_id
 
-    return sdk_no_wait(no_wait, client.update,
+    return sdk_no_wait(no_wait, client.begin_update,
                        resource_group_name=resource_group_name,
                        resource_name=resource_name,
                        parameters=ocUpdate)

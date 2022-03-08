@@ -2,9 +2,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-from azure.cli.testsdk import (ScenarioTest, JMESPathCheck, ResourceGroupPreparer,
+from azure.cli.testsdk import (ScenarioTest, JMESPathCheck, ResourceGroupPreparer, KeyVaultPreparer,
                                StorageAccountPreparer, api_version_constraint, live_only)
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.core.profiles import ResourceType
 from knack.util import CLIError
 
@@ -16,10 +16,10 @@ class StorageAccountEncryptionTests(StorageScenarioMixin, ScenarioTest):
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
     @ResourceGroupPreparer(name_prefix='cli_test_storage_encryption')
     @StorageAccountPreparer(name_prefix='encryption', kind="StorageV2")
-    def test_storage_account_encryption_scope(self, resource_group, storage_account):
+    @KeyVaultPreparer(name_prefix='envault', key='vault', additional_params='--enable-purge-protection')
+    def test_storage_account_encryption_scope(self, resource_group, storage_account, key_vault):
         self.kwargs.update({
             "encryption": self.create_random_name(prefix="encryption", length=24),
-            "vault": self.create_random_name(prefix="envault", length=24),
             "key": self.create_random_name(prefix="enkey", length=24)
         })
 
@@ -64,11 +64,11 @@ class StorageAccountEncryptionTests(StorageScenarioMixin, ScenarioTest):
         self.kwargs["sa_pid"] = storage["identity"]["principalId"]
 
         # Configure keyvault
-        self.cmd("keyvault create -n {vault} -g {rg} --enable-purge-protection --enable-soft-delete", checks=[
-            JMESPathCheck("name", self.kwargs["vault"]),
-            JMESPathCheck("properties.enablePurgeProtection", True),
-            JMESPathCheck("properties.enableSoftDelete", True)
-        ])
+        # self.cmd("keyvault create -n {vault} -g {rg} --enable-purge-protection --enable-soft-delete", checks=[
+        #     JMESPathCheck("name", self.kwargs["vault"]),
+        #     JMESPathCheck("properties.enablePurgeProtection", True),
+        #     JMESPathCheck("properties.enableSoftDelete", True)
+        # ])
 
         self.cmd("keyvault set-policy -n {vault} -g {rg} --object-id {sa_pid} --key-permissions get wrapKey unwrapkey")
 

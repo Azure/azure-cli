@@ -8,15 +8,16 @@ import os
 import platform
 import shutil
 import time
-import mock
+from unittest import mock
 import unittest
 from pathlib import Path
 
-from azure.cli.core.parser import IncorrectUsageError
-from azure_devtools.scenario_tests.const import MOCKED_SUBSCRIPTION_ID
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.core.parser import IncorrectUsageError, InvalidArgumentValueError
+from azure.cli.testsdk.scenario_tests.const import MOCKED_SUBSCRIPTION_ID
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer,
                                create_random_name, live_only, record_only)
+from azure.cli.testsdk.constants import AUX_SUBSCRIPTION, AUX_TENANT
 from azure.cli.core.util import get_file_json
 from knack.util import CLIError
 
@@ -42,6 +43,10 @@ class ResourceGroupScenarioTest(ScenarioTest):
             self.check('tags', {'a': 'b', 'c': ''})
         ])
         self.cmd('group list --tag a=b', checks=[
+            self.check('[0].name', '{rg}'),
+            self.check('[0].tags', {'a': 'b', 'c': ''})
+        ])
+        self.cmd('group list --tag a', checks=[
             self.check('[0].name', '{rg}'),
             self.check('[0].tags', {'a': 'b', 'c': ''})
         ])
@@ -334,6 +339,7 @@ class TagScenarioTest(ScenarioTest):
         self.cmd('tag list --query "[?tagName == \'{tag}\']"',
                  checks=self.is_empty())
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_tag_update_by_patch', location='westus')
     def test_tag_update_by_patch(self, resource_group, resource_group_location):
 
@@ -364,7 +370,8 @@ class TagScenarioTest(ScenarioTest):
             'rg_loc': resource_group_location,
             'uri': 'http://www.microsoft.com',
             'actions': 'push',
-            'sku': 'Standard'
+            'sku': 'Standard',
+            'ip_name': self.create_random_name('cli_ip', 20)
         })
 
         self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku}',
@@ -392,8 +399,15 @@ class TagScenarioTest(ScenarioTest):
             self.check('[0].tags', {'cli-test': 'test'})
         ])
 
+        # Test Microsoft.Network/publicIPAddresses
+        public_ip = self.cmd('network public-ip create -g {rg} -n {ip_name} --location {loc} --sku Standard ').\
+            get_output_in_json()
+        self.kwargs['public_ip_id'] = public_ip['publicIp']['id']
+        self.cmd('resource tag --ids {public_ip_id} --tags {tag}', checks=self.check('tags', {'cli-test': 'test'}))
+
         self.cmd('resource delete --id {vault_id}', checks=self.is_empty())
         self.cmd('resource delete --id {webhook_id}', checks=self.is_empty())
+        self.cmd('resource delete --id {public_ip_id}', checks=self.is_empty())
 
     @ResourceGroupPreparer(name_prefix='cli_test_tag_incrementally', location='westus')
     def test_tag_incrementally(self, resource_group, resource_group_location):
@@ -649,8 +663,6 @@ class ProviderRegistrationTest(ScenarioTest):
 
         result = self.cmd('provider show -n {prov}').get_output_in_json()
         if result['registrationState'] == 'Unregistered':
-            with self.assertRaisesRegexp(CLIError, '--accept-terms must be specified'):
-                self.cmd('provider register -n {prov}')
             self.cmd('provider register -n {prov} --accept-terms')
             result = self.cmd('provider show -n {prov}').get_output_in_json()
             self.assertTrue(result['registrationState'], 'Registered')
@@ -661,9 +673,26 @@ class ProviderRegistrationTest(ScenarioTest):
             self.cmd('provider unregister -n {prov}')
             result = self.cmd('provider show -n {prov}').get_output_in_json()
             self.assertTrue(result['registrationState'] in ['Unregistering', 'Unregistered'])
-            with self.assertRaisesRegexp(CLIError, '--accept-terms must be specified'):
-                self.cmd('provider register -n {prov}')
             self.cmd('provider register -n {prov} --accept-terms')
+            result = self.cmd('provider show -n {prov}').get_output_in_json()
+            self.assertTrue(result['registrationState'], 'Registered')
+
+    def test_provider_registration_rpaas_no_accept_terms(self):
+        self.kwargs.update({'prov': 'Microsoft.Confluent'})
+
+        result = self.cmd('provider show -n {prov}').get_output_in_json()
+        if result['registrationState'] == 'Unregistered':
+            self.cmd('provider register -n {prov}')
+            result = self.cmd('provider show -n {prov}').get_output_in_json()
+            self.assertTrue(result['registrationState'], 'Registered')
+            self.cmd('provider unregister -n {prov}')
+            result = self.cmd('provider show -n {prov}').get_output_in_json()
+            self.assertTrue(result['registrationState'] in ['Unregistering', 'Unregistered'])
+        else:
+            self.cmd('provider unregister -n {prov}')
+            result = self.cmd('provider show -n {prov}').get_output_in_json()
+            self.assertTrue(result['registrationState'] in ['Unregistering', 'Unregistered'])
+            self.cmd('provider register -n {prov}')
             result = self.cmd('provider show -n {prov}').get_output_in_json()
             self.assertTrue(result['registrationState'], 'Registered')
 
@@ -672,6 +701,28 @@ class ProviderRegistrationTest(ScenarioTest):
 
         result = self.cmd('provider register -n {prov} --m testmg')
         self.assertTrue(result, None)
+
+    def test_register_consent_to_permissions(self):
+
+        self.kwargs = {
+            'prov': "Microsoft.ClassicInfrastructureMigrate"
+        }
+
+        result = self.cmd('provider show -n {prov}').get_output_in_json()
+        if result['registrationState'] == 'Unregistered':
+            self.cmd('provider register -n {prov} --consent-to-permissions')
+            result = self.cmd('provider show -n {prov}').get_output_in_json()
+            self.assertTrue(result['registrationState'], 'Registered')
+            result = self.cmd('provider permission list -n {prov}').get_output_in_json()
+            self.assertGreaterEqual(len(result['value']), 1)
+            self.cmd('provider unregister -n {prov}')
+        else:
+            self.cmd('provider unregister -n {prov}')
+            self.cmd('provider register -n {prov} --consent-to-permissions')
+            result = self.cmd('provider show -n {prov}').get_output_in_json()
+            self.assertTrue(result['registrationState'], 'Registered')
+            result = self.cmd('provider permission list -n {prov}').get_output_in_json()
+            self.assertGreaterEqual(len(result['value']), 1)
 
 
 class ProviderOperationTest(ScenarioTest):
@@ -1346,8 +1397,16 @@ class DeploymentTestAtResourceGroup(ScenarioTest):
         self.cmd('deployment group export --resource-group {rg} -n {dn}', checks=[
         ])
 
-        self.cmd('deployment operation group list --resource-group {rg} -n {dn}', checks=[
+        operation_output = self.cmd('deployment operation group list --resource-group {rg} -n {dn}', checks=[
             self.check('length([])', 2)
+        ]).get_output_in_json()
+
+        self.kwargs.update({
+            'operation_id': operation_output[0]['operationId']
+        })
+        self.cmd('deployment operation group show --resource-group {rg} -n {dn} --operation-id {operation_id}', checks=[
+            self.check('[0].properties.provisioningOperation', 'Create'),
+            self.check('[0].properties.provisioningState', 'Succeeded')
         ])
 
         self.cmd('deployment group create --resource-group {rg} -n {dn2} --template-file "{tf}" --parameters @"{params}" --no-wait')
@@ -1402,8 +1461,18 @@ class DeploymentTestAtManagementGroup(ScenarioTest):
         self.cmd('deployment mg export --management-group-id {mg} -n {dn}', checks=[
         ])
 
-        self.cmd('deployment operation mg list --management-group-id {mg} -n {dn}', checks=[
+        operation_output = self.cmd('deployment operation mg list --management-group-id {mg} -n {dn}', checks=[
             self.check('length([])', 4)
+        ]).get_output_in_json()
+
+        self.kwargs.update({
+            'oid1': operation_output[0]['operationId'],
+            'oid2': operation_output[1]['operationId'],
+            'oid3': operation_output[2]['operationId']
+        })
+        self.cmd('deployment operation mg show --management-group-id {mg} -n {dn} --operation-ids {oid1} {oid2} {oid3}', checks=[
+            self.check('[].properties.provisioningOperation', '[\'Create\', \'Create\', \'Create\']'),
+            self.check('[].properties.provisioningState', '[\'Succeeded\', \'Succeeded\', \'Succeeded\']')
         ])
 
         self.cmd('deployment mg create --management-group-id {mg} --location WestUS -n {dn2} --template-file "{tf}" '
@@ -1763,6 +1832,9 @@ class DeploymentWhatIfAtSubscriptionScopeTest(ScenarioTest):
         deployment_output = self.cmd('deployment sub create --location westus --template-file "{tf}"').get_output_in_json()
         self.kwargs['policy_definition_id'] = deployment_output['properties']['outputs']['policyDefinitionId']['value']
 
+        # Make sure the formatter works without exception
+        self.cmd('deployment sub what-if --location westus --template-file "{tf}" --parameters "{params}"')
+
         self.cmd('deployment sub what-if --location westus --template-file "{tf}" --parameters "{params}" --no-pretty-print', checks=[
             self.check('status', 'Succeeded'),
             self.check("changes[?resourceId == '{policy_definition_id}'].changeType | [0]", 'Modify'),
@@ -2108,6 +2180,21 @@ class FeatureScenarioTest(ScenarioTest):
             self.check_pattern('properties.state', 'Unregistering|Unregistered')
         ])
 
+    @AllowLargeResponse(8192)
+    def test_feature_registration_list(self):
+        self.cmd('feature registration list', checks=self.check("length([?name=='Microsoft.Network/SkipPseudoVipGeneration'])", 1))
+
+        self.cmd('feature registration show --provider-namespace Microsoft.Network -n AllowLBPreview')
+    
+    @AllowLargeResponse(8192)
+    def test_feature_registration_create(self):
+        self.cmd('feature registration create --namespace Microsoft.Network --name AllowLBPreview', checks=[
+            self.check_pattern('properties.state', 'Registering|Registered')
+        ])
+
+    @AllowLargeResponse(8192)
+    def test_feature_registration_delete(self):
+        self.cmd('feature registration delete --namespace Microsoft.Network --name AllowLBPreview --yes')
 
 class PolicyScenarioTest(ScenarioTest):
 
@@ -2126,9 +2213,14 @@ class PolicyScenarioTest(ScenarioTest):
             'padn': self.create_random_name('test_assignment', 20)
         })
 
-        self.cmd('policy assignment create --policy {pn} -n {pan} --display-name {padn} -g {rg} --params "{params}"', checks=[
+        # create a policy assignment with invalid not scopes
+        with self.assertRaises(InvalidArgumentValueError):
+            self.cmd('policy assignment create --policy {pn} -n {pan} --display-name {padn} -g {rg} --params "{params}" --description "Policy description" --not-scopes "invalid"')
+
+        self.cmd('policy assignment create --policy {pn} -n {pan} --display-name {padn} -g {rg} --params "{params}" --description "Policy description"', checks=[
             self.check('name', '{pan}'),
-            self.check('displayName', '{padn}')
+            self.check('displayName', '{padn}'),
+            self.check('description', 'Policy description')
         ])
 
         # create a policy assignment with not scopes and standard sku
@@ -2138,13 +2230,21 @@ class PolicyScenarioTest(ScenarioTest):
             'sub': self.get_subscription_id()
         })
 
-        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet}')
-        self.kwargs['notscope'] = '/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Network/virtualNetworks'.format(**self.kwargs)
+        self.kwargs['notscope'] = '/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Network/virtualNetworks/vnetFoo'.format(**self.kwargs)
 
         self.cmd('policy assignment create --policy {pn} -n {pan} --display-name {padn} -g {rg} --not-scopes {notscope} --params "{params}"', checks=[
             self.check('name', '{pan}'),
             self.check('displayName', '{padn}'),
             self.check('notScopes[0]', '{notscope}')
+        ])
+
+        # update not scopes using the update command
+        self.kwargs['notscope2'] = '/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Compute/virtualMachines/foo'.format(**self.kwargs)
+        self.cmd('policy assignment update -n {pan} -g {rg} --not-scopes "{notscope} {notscope2}" --params "{params}"', checks=[
+            self.check('name', '{pan}'),
+            self.check('displayName', '{padn}'),
+            self.check('notScopes[0]', '{notscope}'),
+            self.check('notScopes[1]', '{notscope2}'),
         ])
 
         # create a policy assignment using a built in policy definition name
@@ -2172,7 +2272,7 @@ class PolicyScenarioTest(ScenarioTest):
         self.cmd('policy assignment delete -n {pan} -g {rg}')
         self.cmd('policy assignment list --disable-scope-strict-match', checks=self.check("length([?name=='{pan}'])", 0))
 
-    def applyPolicyAtScope(self, scope, policyId, enforcementMode='Default'):
+    def applyPolicyAtScope(self, scope, policyId, enforcementMode='Default', atMGLevel=False):
         # create a policy assignment at the given scope
         self.kwargs.update({
             'pol': policyId,
@@ -2182,11 +2282,19 @@ class PolicyScenarioTest(ScenarioTest):
             'em': enforcementMode
         })
 
-        self.cmd('policy assignment create --policy {pol} -n {pan} --display-name {padn} --params "{params}" --scope {scope} --enforcement-mode {em}', checks=[
-            self.check('name', '{pan}'),
-            self.check('displayName', '{padn}'),
-            self.check('enforcementMode', '{em}')
-        ])
+        # Not set not scope for MG level assignment
+        if atMGLevel:
+            self.cmd('policy assignment create --policy {pol} -n {pan} --display-name {padn} --params "{params}" --scope {scope} --enforcement-mode {em}', checks=[
+                self.check('name', '{pan}'),
+                self.check('displayName', '{padn}'),
+                self.check('enforcementMode', '{em}')
+            ])
+        else:
+            self.cmd('policy assignment create --policy {pol} -n {pan} --display-name {padn} --params "{params}" --scope {scope} --enforcement-mode {em} --not-scopes "{scope}/providers/Microsoft.Compute/virtualMachines/myVm"', checks=[
+                self.check('name', '{pan}'),
+                self.check('displayName', '{padn}'),
+                self.check('enforcementMode', '{em}')
+            ])
 
         # ensure the policy assignment shows up in the list result
         self.cmd('policy assignment list --scope {scope}', checks=self.check("length([?name=='{pan}'])", 1))
@@ -2263,7 +2371,7 @@ class PolicyScenarioTest(ScenarioTest):
         if management_group:
             scope = '/providers/Microsoft.Management/managementGroups/{mg}'.format(mg=management_group)
             policy = '{scope}/providers/Microsoft.Authorization/policyDefinitions/{pn}'.format(pn=self.kwargs['pn'], scope=scope)
-            self.applyPolicyAtScope(scope, policy)
+            self.applyPolicyAtScope(scope, policy, atMGLevel=True)
         elif subscription:
             policy = '/subscriptions/{sub}/providers/Microsoft.Authorization/policyDefinitions/{pn}'.format(sub=subscription, pn=self.kwargs['pn'])
             self.applyPolicyAtScope('/subscriptions/{sub}'.format(sub=subscription), policy, 'DoNotEnforce')
@@ -2273,7 +2381,8 @@ class PolicyScenarioTest(ScenarioTest):
         # delete the policy
         cmd = self.cmdstring('policy definition delete -n {pn}', management_group, subscription)
         self.cmd(cmd)
-        time.sleep(10)  # ensure the policy is gone when run live.
+        if not self.in_recording:
+            time.sleep(10)  # ensure the policy is gone when run live.
 
         cmd = self.cmdstring('policy definition list', management_group, subscription)
         self.cmd(cmd, checks=self.check("length([?name=='{pn}'])", 0))
@@ -2288,7 +2397,7 @@ class PolicyScenarioTest(ScenarioTest):
             'dpn': self.create_random_name('azure-cli-test-data-policy', 30),
             'dpdn': self.create_random_name('test_data_policy', 20),
             'dp_desc': 'desc_for_test_data_policy_123',
-            'dp_mode': 'Microsoft.DataCatalog.Data',
+            'dp_mode': 'Microsoft.KeyVault.Data',
             'psn': self.create_random_name('azure-cli-test-policyset', 30),
             'psdn': self.create_random_name('test_policyset', 20),
             'ps_desc': 'desc_for_test_policyset_123',
@@ -2304,7 +2413,8 @@ class PolicyScenarioTest(ScenarioTest):
         if (subscription):
             self.kwargs.update({'sub': subscription})
 
-        time.sleep(60)
+        if not self.in_recording:
+            time.sleep(60)
 
         # create a policy
         cmd = self.cmdstring('policy definition create -n {pn} --rules "{rf}" --params "{pdf}" --display-name {pdn} --description {desc}', management_group, subscription)
@@ -2372,7 +2482,8 @@ class PolicyScenarioTest(ScenarioTest):
         # delete the policy set
         cmd = self.cmdstring('policy set-definition delete -n {psn}', management_group, subscription)
         self.cmd(cmd)
-        time.sleep(10)  # ensure the policy is gone when run live.
+        if not self.in_recording:
+            time.sleep(10)  # ensure the policy is gone when run live.
 
         cmd = self.cmdstring('policy set-definition list', management_group, subscription)
         self.cmd(cmd, checks=self.check("length([?name=='{psn}'])", 0))
@@ -2407,7 +2518,8 @@ class PolicyScenarioTest(ScenarioTest):
         # delete the parameterized policy set
         cmd = self.cmdstring('policy set-definition delete -n {psn}', management_group, subscription)
         self.cmd(cmd)
-        time.sleep(10)  # ensure the policy is gone when run live.
+        if not self.in_recording:
+            time.sleep(10)  # ensure the policy is gone when run live.
 
         cmd = self.cmdstring('policy set-definition list', management_group, subscription)
         self.cmd(cmd, checks=self.check("length([?name=='{psn}'])", 0))
@@ -2415,12 +2527,14 @@ class PolicyScenarioTest(ScenarioTest):
         # delete the policy
         cmd = self.cmdstring('policy definition delete -n {pn}', management_group, subscription)
         self.cmd(cmd)
-        time.sleep(10)
+        if not self.in_recording:
+            time.sleep(10)
 
         # delete the data policy
         cmd = self.cmdstring('policy definition delete -n {dpn}', management_group, subscription)
         self.cmd(cmd)
-        time.sleep(10)
+        if not self.in_recording:
+            time.sleep(10)
 
         # ensure the policy is gone when run live.
         cmd = self.cmdstring('policy definition list', management_group, subscription)
@@ -2460,6 +2574,14 @@ class PolicyScenarioTest(ScenarioTest):
             self.check('type', assignmentIdentity['type']),
             self.check('principalId', assignmentIdentity['principalId']),
             self.check('tenantId', assignmentIdentity['tenantId'])
+        ])
+
+        # ensure the managed identity is not touched during update
+        self.cmd('policy assignment update -n {pan} -g {rg} --description "New description"', checks=[
+            self.check('description', 'New description'),
+            self.check('identity.type', 'SystemAssigned'),
+            self.exists('identity.principalId'),
+            self.exists('identity.tenantId')
         ])
 
         # remove the managed identity and ensure it is removed when retrieving the policy assignment
@@ -2527,6 +2649,295 @@ class PolicyScenarioTest(ScenarioTest):
 
         self.cmd('policy assignment delete -n {pan} -g {rg}')
 
+    @ResourceGroupPreparer(name_prefix='cli_test_policy_identity_systemassigned')
+    @AllowLargeResponse(8192)
+    def test_resource_policy_identity_systemassigned(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'pan': self.create_random_name('azurecli-test-policy-assignment', 40),
+            'bip': '06a78e20-9358-41c9-923c-fb736d382a4d',
+            'sub': self.get_subscription_id(),
+            'location': resource_group_location,
+            'em': 'DoNotEnforce'
+        })
+
+        # create a policy assignment with managed identity using a built in policy definition
+        assignmentIdentity = self.cmd('policy assignment create --policy {bip} -n {pan} -g {rg} --location {location} --mi-system-assigned --enforcement-mode {em}', checks=[
+            self.check('name', '{pan}'),
+            self.check('location', '{location}'),
+            self.check('identity.type', 'SystemAssigned'),
+            self.exists('identity.principalId'),
+            self.exists('identity.tenantId')
+        ]).get_output_in_json()['identity']
+
+        # ensure managed identity details are retrievable directly through 'policy assignment identity' commands
+        self.cmd('policy assignment identity show -n {pan} -g {rg}', checks=[
+            self.check('type', assignmentIdentity['type']),
+            self.check('principalId', assignmentIdentity['principalId']),
+            self.check('tenantId', assignmentIdentity['tenantId'])
+        ])
+
+        # ensure the managed identity is not touched during update
+        self.cmd('policy assignment update -n {pan} -g {rg} --description "New description"', checks=[
+            self.check('description', 'New description'),
+            self.check('identity.type', 'SystemAssigned'),
+            self.exists('identity.principalId'),
+            self.exists('identity.tenantId')
+        ])
+
+        # remove the managed identity and ensure it is removed when retrieving the policy assignment
+        self.cmd('policy assignment identity remove -n {pan} -g {rg}', checks=[
+            self.check('type', 'None')
+        ])
+        self.cmd('policy assignment show -n {pan} -g {rg}', checks=[
+            self.check('name', '{pan}'),
+            self.check('identity.type', 'None')
+        ])
+
+        # add an identity using 'identity assign'
+        self.cmd('policy assignment identity assign --system-assigned -n {pan} -g {rg}', checks=[
+            self.check('type', 'SystemAssigned'),
+            self.exists('principalId'),
+            self.exists('tenantId')
+        ])
+        self.cmd('policy assignment show -n {pan} -g {rg}', checks=[
+            self.check('name', '{pan}'),
+            self.check('identity.type', 'SystemAssigned'),
+            self.exists('identity.principalId'),
+            self.exists('identity.tenantId')
+        ])
+
+        self.cmd('policy assignment identity remove -n {pan} -g {rg}', checks=[
+            self.check('type', 'None')
+        ])
+
+        # create a role assignment for the identity using --mi-system-assigned
+        self.kwargs.update({
+            'idScope': '/subscriptions/{sub}/resourceGroups/{rg}'.format(**self.kwargs),
+            'idRole': 'Reader'
+        })
+        with mock.patch('azure.cli.core.commands.arm._gen_guid', side_effect=self.create_guid):
+            assignmentIdentity = self.cmd('policy assignment create --policy {bip} -n {pan} -g {rg} --location {location} --mi-system-assigned --identity-scope {idScope} --role {idRole}', checks=[
+                self.check('name', '{pan}'),
+                self.check('location', '{location}'),
+                self.check('identity.type', 'SystemAssigned'),
+                self.exists('identity.principalId'),
+                self.exists('identity.tenantId')
+            ]).get_output_in_json()['identity']
+
+        self.kwargs['principalId'] = assignmentIdentity['principalId']
+        self.cmd('role assignment list --resource-group {rg} --role {idRole}', checks=[
+            self.check("length([?principalId == '{principalId}'])", 1),
+            self.check("[?principalId == '{principalId}'].roleDefinitionName | [0]", '{idRole}')
+        ])
+        self.cmd('policy assignment identity remove -n {pan} -g {rg}', checks=[
+            self.check('type', 'None')
+        ])
+
+        # create a role assignment for the identity using 'identity assign'
+        with mock.patch('azure.cli.core.commands.arm._gen_guid', side_effect=self.create_guid):
+            assignmentIdentity = self.cmd('policy assignment identity assign -n {pan} -g {rg} --system-assigned --identity-scope {idScope} --role {idRole}', checks=[
+                self.check('type', 'SystemAssigned'),
+                self.exists('principalId'),
+                self.exists('tenantId')
+            ]).get_output_in_json()
+
+        self.kwargs['principalId'] = assignmentIdentity['principalId']
+        self.cmd('role assignment list --resource-group {rg} --role {idRole}', checks=[
+            self.check("length([?principalId == '{principalId}'])", 1),
+            self.check("[?principalId == '{principalId}'].roleDefinitionName | [0]", '{idRole}')
+        ])
+
+        self.cmd('policy assignment delete -n {pan} -g {rg}')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_policy_identity_userassigned')
+    @AllowLargeResponse(8192)
+    def test_resource_policy_identity_userassigned(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'pan': self.create_random_name('azurecli-test-assignment', 40),
+            'bip': '06a78e20-9358-41c9-923c-fb736d382a4d',
+            'sub': self.get_subscription_id(),
+            'location': resource_group_location,
+            'em': 'DoNotEnforce',
+            'msi': 'policyCliTestMsi'
+        })
+
+        # create a managed identity
+        msi_result = self.cmd('identity create -g {rg} -n {msi} --tags tag1=d1', checks=[
+            self.check('name', '{msi}')]).get_output_in_json()
+        self.kwargs['fullQualifiedMsi'] = msi_result['id']
+
+        # create a policy assignment with user assigned managed identity using a built in policy definition
+        assignmentIdentity = self.cmd('policy assignment create --policy {bip} -n {pan} -g {rg} --location {location} --mi-user-assigned {msi} --enforcement-mode {em}', checks=[
+            self.check('name', '{pan}'),
+            self.check('location', '{location}'),
+            self.check('identity.type', 'UserAssigned'),
+            self.exists('identity.userAssignedIdentities')
+        ]).get_output_in_json()['identity']
+        msis = [x.lower() for x in assignmentIdentity['userAssignedIdentities'].keys()]
+        self.assertEqual(msis[0], msi_result['id'].lower())
+
+        # ensure managed identity details are retrievable directly through 'policy assignment identity' commands
+        assignmentIdentity = self.cmd('policy assignment identity show -n {pan} -g {rg}', checks=[
+            self.check('type', assignmentIdentity['type']),
+            self.exists('userAssignedIdentities')
+        ]).get_output_in_json()
+        msis = [x.lower() for x in assignmentIdentity['userAssignedIdentities'].keys()]
+        self.assertEqual(msis[0], msi_result['id'].lower())
+
+        # ensure the managed identity is not touched during update
+        self.cmd('policy assignment update -n {pan} -g {rg} --description "New description"', checks=[
+            self.check('description', 'New description'),
+            self.check('identity.type', 'UserAssigned'),
+            self.exists('identity.userAssignedIdentities')
+        ])
+
+        # remove the managed identity and ensure it is removed when retrieving the policy assignment
+        self.cmd('policy assignment identity remove -n {pan} -g {rg}', checks=[
+            self.check('type', 'None')
+        ])
+        self.cmd('policy assignment show -n {pan} -g {rg}', checks=[
+            self.check('name', '{pan}'),
+            self.check('identity.type', 'None')
+        ])
+
+        # add an identity using 'identity assign'
+        assignmentIdentity = self.cmd('policy assignment identity assign --user-assigned {fullQualifiedMsi} -n {pan} -g {rg}', checks=[
+            self.check('type', 'UserAssigned'),
+            self.exists('userAssignedIdentities')
+        ]).get_output_in_json()
+        msis = [x.lower() for x in assignmentIdentity['userAssignedIdentities'].keys()]
+        self.assertEqual(msis[0], msi_result['id'].lower())
+
+        assignmentIdentity = self.cmd('policy assignment show -n {pan} -g {rg}', checks=[
+            self.check('name', '{pan}'),
+            self.check('identity.type', 'UserAssigned'),
+            self.exists('identity.userAssignedIdentities')
+        ]).get_output_in_json()['identity']
+        msis = [x.lower() for x in assignmentIdentity['userAssignedIdentities'].keys()]
+        self.assertEqual(msis[0], msi_result['id'].lower())
+
+        # replace an identity with system assigned msi
+        self.cmd('policy assignment identity assign --system-assigned -n {pan} -g {rg}', checks=[
+            self.check('type', 'SystemAssigned'),
+            self.exists('principalId'),
+            self.exists('tenantId')
+        ])
+        self.cmd('policy assignment show -n {pan} -g {rg}', checks=[
+            self.check('name', '{pan}'),
+            self.check('identity.type', 'SystemAssigned'),
+            self.exists('identity.principalId'),
+            self.exists('identity.tenantId')
+        ])
+        self.cmd('policy assignment identity remove -n {pan} -g {rg}', checks=[
+            self.check('type', 'None')
+        ])
+        self.cmd('policy assignment delete -n {pan} -g {rg}')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_policy_ncm')
+    @AllowLargeResponse(8192)
+    def test_resource_policy_non_compliance_messages(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'pan': self.create_random_name('azurecli-test-policy-assignment', 40),
+            'bip': '095e4ed9-c835-4ab6-9439-b5644362a06c',
+            'sub': self.get_subscription_id(),
+            'location': resource_group_location,
+            'em': 'DoNotEnforce',
+            'drid': 'AINE_MaximumPasswordAge'
+        })
+
+        # create a policy assignment of a built-in policy set
+        self.cmd('policy assignment create -d {bip} -n {pan} -g {rg} --enforcement-mode {em}', checks=[
+            self.check('name', '{pan}'),
+            self.not_exists('nonComplianceMessages')
+        ])
+
+        # list the non-compliance messages, should be none
+        self.cmd('policy assignment non-compliance-message list -n {pan} -g {rg}', checks=[
+            self.is_empty()
+        ])
+
+        # Add two non-compliance messages
+        self.cmd('policy assignment non-compliance-message create -n {pan} -g {rg} -m "General message"', checks=[
+            self.check('length([])', 1),
+            self.check('[0].message', 'General message'),
+            self.not_exists('[0].policyDefinitionReferenceId')
+        ])
+
+        self.cmd('policy assignment non-compliance-message create -n {pan} -g {rg} -m "Specific message" -r {drid}', checks=[
+            self.check('length([])', 2),
+            self.check('[0].message', 'General message'),
+            self.not_exists('[0].policyDefinitionReferenceId'),
+            self.check('[1].message', 'Specific message'),
+            self.check('[1].policyDefinitionReferenceId', '{drid}')
+        ])
+
+        # list the non-compliance messages, should be two
+        self.cmd('policy assignment non-compliance-message list -n {pan} -g {rg}', checks=[
+            self.check('length([])', 2),
+            self.check('[0].message', 'General message'),
+            self.not_exists('[0].policyDefinitionReferenceId'),
+            self.check('[1].message', 'Specific message'),
+            self.check('[1].policyDefinitionReferenceId', '{drid}')
+        ])
+
+        # show the assignment, should contain non-compliance messages
+        self.cmd('policy assignment show -n {pan} -g {rg}', checks=[
+            self.check('name', '{pan}'),
+            self.check('length(nonComplianceMessages)', 2),
+            self.check('nonComplianceMessages[0].message', 'General message'),
+            self.not_exists('nonComplianceMessages[0].policyDefinitionReferenceId'),
+            self.check('nonComplianceMessages[1].message', 'Specific message'),
+            self.check('nonComplianceMessages[1].policyDefinitionReferenceId', '{drid}')
+        ])
+
+        # update the assignment, should not touch non-compliance messages
+        self.cmd('policy assignment update -n {pan} -g {rg} --description "New description"', checks=[
+            self.check('name', '{pan}'),
+            self.check('description', 'New description'),
+            self.check('length(nonComplianceMessages)', 2),
+            self.check('nonComplianceMessages[0].message', 'General message'),
+            self.not_exists('nonComplianceMessages[0].policyDefinitionReferenceId'),
+            self.check('nonComplianceMessages[1].message', 'Specific message'),
+            self.check('nonComplianceMessages[1].policyDefinitionReferenceId', '{drid}')
+        ])
+
+        # remove a non-compliance message that does not exist
+        self.cmd('policy assignment non-compliance-message delete -n {pan} -g {rg} -m "Unknown message"', checks=[
+            self.check('length([])', 2),
+            self.check('[0].message', 'General message'),
+            self.not_exists('[0].policyDefinitionReferenceId'),
+            self.check('[1].message', 'Specific message'),
+            self.check('[1].policyDefinitionReferenceId', '{drid}')
+        ])
+
+        # remove a non-compliance message that exists but without the right reference ID
+        self.cmd('policy assignment non-compliance-message delete -n {pan} -g {rg} -m "Specific message"', checks=[
+            self.check('length([])', 2),
+            self.check('[0].message', 'General message'),
+            self.not_exists('[0].policyDefinitionReferenceId'),
+            self.check('[1].message', 'Specific message'),
+            self.check('[1].policyDefinitionReferenceId', '{drid}')
+        ])
+
+        # remove a non-compliance message
+        self.cmd('policy assignment non-compliance-message delete -n {pan} -g {rg} -m "General message"', checks=[
+            self.check('length([])', 1),
+            self.check('[0].message', 'Specific message'),
+            self.check('[0].policyDefinitionReferenceId', '{drid}')
+        ])
+
+        # remove a non-compliance message with a reference ID
+        self.cmd('policy assignment non-compliance-message delete -n {pan} -g {rg} -m "Specific message" -r {drid}', checks=[
+            self.is_empty()
+        ])
+
+        # list the non-compliance messages, should be 0
+        self.cmd('policy assignment non-compliance-message list -n {pan} -g {rg}', checks=[
+            self.is_empty()
+        ])
+
+        self.cmd('policy assignment delete -n {pan} -g {rg}')
+
     @ResourceGroupPreparer(name_prefix='cli_test_policy_management_group')
     @AllowLargeResponse(4096)
     def test_resource_policy_management_group(self, resource_group):
@@ -2536,7 +2947,7 @@ class PolicyScenarioTest(ScenarioTest):
             self.resource_policy_operations(resource_group, management_group_name)
 
             # Attempt to get a policy definition at an invalid management group scope
-            with self.assertRaises(SystemExit):
+            with self.assertRaises(IncorrectUsageError):
                 self.cmd(self.cmdstring('policy definition show -n "/providers/microsoft.management/managementgroups/myMg/providers/microsoft.authorization/missingsegment"'))
         finally:
             self.cmd('account management-group delete -n ' + management_group_name)
@@ -2639,7 +3050,9 @@ class PolicyScenarioTest(ScenarioTest):
 
         # delete the policy set
         self.cmd('policy set-definition delete -n {psn}')
-        time.sleep(10)  # ensure the policy is gone when run live.
+
+        if not self.in_recording:
+            time.sleep(10)  # ensure the policy is gone when run live.
 
         self.cmd('policy set-definition list',
                  checks=self.check("length([?name=='{psn}'])", 0))
@@ -2692,7 +3105,10 @@ class PolicyScenarioTest(ScenarioTest):
                  checks=self.check("length([?name=='{pan_random}'])", 0))
         cmd = self.cmdstring('policy definition delete -n {pn}', management_group, subscription)
         self.cmd(cmd)
-        time.sleep(10)
+
+        if not self.in_recording:
+            time.sleep(10)
+
         cmd = self.cmdstring('policy definition list', management_group, subscription)
         self.cmd(cmd, checks=self.check("length([?name=='{pn}'])", 0))
 
@@ -2706,7 +3122,7 @@ class PolicyScenarioTest(ScenarioTest):
             'dpn': self.create_random_name('clitest-dp', 30),
             'dpdn': self.create_random_name('clitest_dp', 20),
             'dp_desc': 'desc_for_clitest_data_policy_123',
-            'dp_mode': 'Microsoft.DataCatalog.Data',
+            'dp_mode': 'Microsoft.KeyVault.Data',
             'psn': self.create_random_name('clitest', 30),
             'psdn': self.create_random_name('clitest', 20),
             'pan': self.create_random_name('clitest', 24),
@@ -2726,7 +3142,8 @@ class PolicyScenarioTest(ScenarioTest):
         if (subscription):
             self.kwargs.update({'sub': subscription})
 
-        time.sleep(60)
+        if not self.in_recording:
+            time.sleep(60)
 
         # create a policy
         cmd = self.cmdstring('policy definition create -n {pn} --rules "{rf}" --params "{pdf}" --display-name {pdn} --description {desc}', management_group, subscription)
@@ -2864,7 +3281,8 @@ class PolicyScenarioTest(ScenarioTest):
         # delete the policy set
         cmd = self.cmdstring('policy set-definition delete -n {psn}', management_group, subscription)
         self.cmd(cmd)
-        time.sleep(10)  # ensure the policy is gone when run live.
+        if not self.in_recording:
+            time.sleep(10)  # ensure the policy is gone when run live.
 
         cmd = self.cmdstring('policy set-definition list', management_group, subscription)
         self.cmd(cmd, checks=self.check("length([?name=='{psn}'])", 0))
@@ -2872,12 +3290,14 @@ class PolicyScenarioTest(ScenarioTest):
         # delete the policy
         cmd = self.cmdstring('policy definition delete -n {pn}', management_group, subscription)
         self.cmd(cmd)
-        time.sleep(10)
+        if not self.in_recording:
+            time.sleep(10)
 
         # delete the data policy
         cmd = self.cmdstring('policy definition delete -n {dpn}', management_group, subscription)
         self.cmd(cmd)
-        time.sleep(10)
+        if not self.in_recording:
+            time.sleep(10)
 
         # ensure the policy is gone when run live.
         cmd = self.cmdstring('policy definition list', management_group, subscription)
@@ -3171,7 +3591,9 @@ class CrossRGDeploymentScenarioTest(ScenarioTest):
 class CrossTenantDeploymentScenarioTest(LiveScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_cross_tenant_deploy', location='eastus')
-    def test_group_deployment_cross_tenant(self, resource_group):
+    @ResourceGroupPreparer(name_prefix='cli_test_cross_tenant_deploy', location='eastus',
+                           parameter_name='another_resource_group', subscription=AUX_SUBSCRIPTION)
+    def test_group_deployment_cross_tenant(self, resource_group, another_resource_group):
         # Prepare Network Interface
         self.kwargs.update({
             'vm_rg': resource_group,
@@ -3197,12 +3619,11 @@ class CrossTenantDeploymentScenarioTest(LiveScenarioTest):
             'image': self.create_random_name('cli_crosstenantimage', 40),
             'version': '1.1.2',
             'captured': self.create_random_name('cli_crosstenantmanagedimage', 40),
-            'aux_sub': '1c638cf4-608f-4ee6-b680-c329e824c3a8',
-            'rg': self.create_random_name('cli_test_cross_tenant_rg', 40),
-            'aux_tenant': '72f988bf-86f1-41af-91ab-2d7cd011db47'
+            'aux_sub': AUX_SUBSCRIPTION,
+            'rg': another_resource_group,
+            'aux_tenant': AUX_TENANT
         })
-        self.cmd('group create -g {rg} --location {location} --subscription {aux_sub}',
-                 checks=self.check('name', self.kwargs['rg']))
+
         self.cmd('sig create -g {rg} --gallery-name {gallery} --subscription {aux_sub}', checks=self.check('name', self.kwargs['gallery']))
         self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type linux -p publisher1 -f offer1 -s sku1 --subscription {aux_sub}',
                  checks=self.check('name', self.kwargs['image']))
@@ -3294,7 +3715,9 @@ class CrossTenantDeploymentScenarioTest(LiveScenarioTest):
             self.cmd('group deployment create -g {vm_rg} -n {dn} --template-file "{tf}" --parameters SIG_ImageVersion_id={sig_id} NIC_id={nic_id} --aux-tenants "{aux_tenant}" --aux-subs "{aux_sub}"')
 
     @ResourceGroupPreparer(name_prefix='cli_test_deployment_group_cross_tenant', location='eastus')
-    def test_deployment_group_cross_tenant(self, resource_group):
+    @ResourceGroupPreparer(name_prefix='cli_test_deployment_group_cross_tenant', location='eastus',
+                           parameter_name='another_resource_group', subscription=AUX_SUBSCRIPTION)
+    def test_deployment_group_cross_tenant(self, resource_group, another_resource_group):
         # Prepare Network Interface
         self.kwargs.update({
             'vm_rg': resource_group,
@@ -3320,12 +3743,11 @@ class CrossTenantDeploymentScenarioTest(LiveScenarioTest):
             'image': self.create_random_name('cli_crosstenantimage', 40),
             'version': '1.1.2',
             'captured': self.create_random_name('cli_crosstenantmanagedimage', 40),
-            'aux_sub': '1c638cf4-608f-4ee6-b680-c329e824c3a8',
-            'rg': self.create_random_name('cli_test_cross_tenant_rg', 40),
-            'aux_tenant': '72f988bf-86f1-41af-91ab-2d7cd011db47'
+            'aux_sub': AUX_SUBSCRIPTION,
+            'rg': another_resource_group,
+            'aux_tenant': AUX_TENANT
         })
-        self.cmd('group create -g {rg} --location {location} --subscription {aux_sub}',
-                 checks=self.check('name', self.kwargs['rg']))
+
         self.cmd('sig create -g {rg} --gallery-name {gallery} --subscription {aux_sub}', checks=self.check('name', self.kwargs['gallery']))
         self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type linux -p publisher1 -f offer1 -s sku1 --subscription {aux_sub}',
                  checks=self.check('name', self.kwargs['image']))
@@ -3466,7 +3888,7 @@ class ResourceGroupLocalContextScenarioTest(LocalContextScenarioTest):
             self.check('name', self.kwargs['group1']),
             self.check('location', self.kwargs['location'])
         ])
-        with self.assertRaisesRegexp(SystemExit, '2'):
+        with self.assertRaisesRegex(SystemExit, '2'):
             self.cmd('group delete')
         self.cmd('group delete -n {group1} -y')
         self.cmd('group create -n {group2}', checks=[
@@ -3485,14 +3907,45 @@ class BicepScenarioTest(ScenarioTest):
         ])
 
 
-class DeploymentWithBicepScenarioTest(LiveScenarioTest):
+class BicepInstallationTest(LiveScenarioTest):
     def setup(self):
-        super.setup()
-        self._remove_bicep_cli()
+        super().setup()
+        self.cmd('az bicep uninstall')
 
     def tearDown(self):
         super().tearDown()
-        self._remove_bicep_cli()
+        self.cmd('az bicep uninstall')
+        
+    def test_install_and_upgrade(self):
+        self.cmd('az bicep install')
+        self.cmd('az bicep version')
+        
+        self.cmd('az bicep uninstall')
+        
+        self.cmd('az bicep install --target-platform win-x64')
+        self.cmd('az bicep version')
+
+        self.cmd('az bicep uninstall')
+
+        self.cmd('az bicep install --version v0.4.63')
+        self.cmd('az bicep upgrade')
+        self.cmd('az bicep version')
+        
+        self.cmd('az bicep uninstall')
+        
+        self.cmd('az bicep install --version v0.4.63')
+        self.cmd('az bicep upgrade -t win-x64')
+        self.cmd('az bicep version')
+
+
+class DeploymentWithBicepScenarioTest(LiveScenarioTest):
+    def setup(self):
+        super.setup()
+        self.cmd('az bicep uninstall')
+
+    def tearDown(self):
+        super().tearDown()
+        self.cmd('az bicep uninstall')
 
     @ResourceGroupPreparer(name_prefix='cli_test_deployment_with_bicep')
     def test_resource_group_level_deployment_with_bicep(self):
@@ -3570,17 +4023,31 @@ class DeploymentWithBicepScenarioTest(LiveScenarioTest):
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
-    def _remove_bicep_cli(self):
-        bicep_cli_path = self._get_bicep_cli_path()
-        if os.path.isfile(bicep_cli_path):
-            os.remove(bicep_cli_path)
+    @ResourceGroupPreparer(name_prefix='cli_test_template_specs', location='westus')
+    def test_create_template_specs_bicep(self, resource_group, resource_group_location):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        template_spec_name = self.create_random_name('cli-test-create-template-spec', 60)
+        self.kwargs.update({
+            'template_spec_name': template_spec_name,
+            'tf': os.path.join(curr_dir, 'storage_account_deploy.bicep').replace('\\', '\\\\'),
+            'resource_group_location': resource_group_location,
+            'description': '"AzCLI test root template spec from bicep"',
+            'version_description': '"AzCLI test version of root template spec from bicep"',
+        })
 
-    def _get_bicep_cli_path(self):
-        installation_folder = os.path.join(str(Path.home()), ".azure", "bin")
+        result = self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}" --description {description} --version-description {version_description}', checks=[
+            self.check('location', "westus"),
+            self.check('mainTemplate.functions', []),
+            self.check("name", "1.0")
+        ]).get_output_in_json()
 
-        if platform.system() == "Windows":
-            return os.path.join(installation_folder, "bicep.exe")
-        return os.path.join(installation_folder, "bicep")
+        with self.assertRaises(IncorrectUsageError) as err:
+            self.cmd('ts create --name {template_spec_name} -g {rg} -l {resource_group_location} --template-file "{tf}"')
+            self.assertTrue("please provide --template-uri if --query-string is specified" in str(err.exception))
+
+        # clean up
+        self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', '')
+        self.cmd('ts delete --template-spec {template_spec_id} --yes')
 
 
 if __name__ == '__main__':

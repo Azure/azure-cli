@@ -10,6 +10,11 @@ VOLUME_DEFAULT = "--service-level 'Premium' --usage-threshold 100"
 LOCATION = "southcentralusstage"
 VNET_LOCATION = "southcentralus"
 
+# No tidy up of tests required. The resource group is automatically removed
+
+# As a refactoring consideration for the future, consider use of authoring patterns described here
+# https://github.com/Azure/azure-cli/blob/dev/doc/authoring_tests.md#sample-5-get-more-from-resourcegrouppreparer
+
 
 class AzureNetAppFilesSnapshotServiceScenarioTest(ScenarioTest):
     def setup_vnet(self, vnet_name, subnet_name):
@@ -41,7 +46,7 @@ class AzureNetAppFilesSnapshotServiceScenarioTest(ScenarioTest):
                                                 file_path, vnet_name, subnet_name, tag)).get_output_in_json()
 
     @serial_test()
-    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_snapshot_')
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_snapshot_', additional_tags={'owner': 'cli_test'})
     def test_create_delete_snapshots(self):
         # create volume
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
@@ -68,7 +73,7 @@ class AzureNetAppFilesSnapshotServiceScenarioTest(ScenarioTest):
         assert len(snapshot_list) == 0
 
     @serial_test()
-    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_snapshot_')
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_snapshot_', additional_tags={'owner': 'cli_test'})
     def test_create_volume_from_snapshot(self):
         # create volume
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
@@ -97,7 +102,7 @@ class AzureNetAppFilesSnapshotServiceScenarioTest(ScenarioTest):
         assert restored_volume['name'] == account_name + '/' + pool_name + '/' + restored_volume_name
 
     @serial_test()
-    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_snapshot_')
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_snapshot_', additional_tags={'owner': 'cli_test'})
     def test_revert_volume_from_snapshot(self):
         # create volume
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
@@ -126,7 +131,7 @@ class AzureNetAppFilesSnapshotServiceScenarioTest(ScenarioTest):
         assert len(snapshot_list) == 1
 
     @serial_test()
-    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_snapshot_')
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_snapshot_', additional_tags={'owner': 'cli_test'})
     def test_list_snapshots(self):
         # create volume
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
@@ -148,7 +153,7 @@ class AzureNetAppFilesSnapshotServiceScenarioTest(ScenarioTest):
         assert len(snapshot_list) == 2
 
     @serial_test()
-    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_snapshot_')
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_snapshot_', additional_tags={'owner': 'cli_test'})
     def test_get_snapshot(self):
         # create volume
         account_name = self.create_random_name(prefix='cli-acc-', length=24)

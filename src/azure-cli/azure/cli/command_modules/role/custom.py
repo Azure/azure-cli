@@ -37,15 +37,10 @@ CREDENTIAL_WARNING = (
     "The output includes credentials that you must protect. Be sure that you do not include these credentials in "
     "your code or check the credentials into your source control. For more information, see https://aka.ms/azadsp-cli")
 
-ROLE_ASSIGNMENT_CREATE_WARNING = (
-    "In a future release, this command will NOT create a 'Contributor' role assignment by default. "
-    "If needed, use the --role argument to explicitly create a role assignment."
-)
-
-NAME_DEPRECATION_WARNING = \
-    "'name' property in the output is deprecated and will be removed in the future. Use 'appId' instead."
-
 logger = get_logger(__name__)
+
+SCOPE_WARNING = "Starting from Azure CLI 2.35.0, --scopes argument will become required for creating role " \
+                "assignments. Please explicitly specify --scopes."
 
 # pylint: disable=too-many-lines
 
@@ -147,7 +142,7 @@ def create_role_assignment(cmd, role, assignee=None, assignee_object_id=None, re
         raise CLIError('usage error: --assignee STRING | --assignee-object-id GUID')
 
     if assignee_principal_type and not assignee_object_id:
-        raise CLIError('usage error: --assignee-object-id GUID [--assignee-principal-type]')
+        raise CLIError('usage error: --assignee-object-id GUID --assignee-principal-type TYPE')
 
     # If condition is set and condition-version is empty, condition-version defaults to "2.0".
     if condition and not condition_version:
@@ -157,8 +152,18 @@ def create_role_assignment(cmd, role, assignee=None, assignee_object_id=None, re
     if condition_version and not condition:
         raise CLIError('usage error: When --condition-version is set, --condition must be set as well.')
 
-    object_id, principal_type = _resolve_assignee_object(cmd.cli_ctx, assignee, assignee_object_id,
-                                                         assignee_principal_type)
+    if assignee:
+        object_id, principal_type = _resolve_object_id_and_type(cmd.cli_ctx, assignee, fallback_to_object_id=True)
+    else:
+        object_id = assignee_object_id
+        if assignee_principal_type:
+            # If principal type is provided, nothing to resolve, do not call Graph
+            principal_type = assignee_principal_type
+        else:
+            # Try best to get principal type
+            logger.warning('RBAC service might reject creating role assignment without --assignee-principal-type '
+                           'in the future. Better to specify --assignee-principal-type manually.')
+            principal_type = _get_principal_type_from_object_id(cmd.cli_ctx, assignee_object_id)
 
     try:
         return _create_role_assignment(cmd.cli_ctx, role, object_id, resource_group_name, scope, resolve_assignee=False,
@@ -594,7 +599,7 @@ def list_apps(cmd, app_id=None, display_name=None, identifier_uri=None, query_fi
     if identifier_uri:
         sub_filters.append("identifierUris/any(s:s eq '{}')".format(identifier_uri))
 
-    result = client.applications.list(filter=(' and '.join(sub_filters)))
+    result = client.applications.list(filter=' and '.join(sub_filters) if sub_filters else None)
     if sub_filters or include_all:
         return list(result)
 
@@ -637,7 +642,7 @@ def list_sps(cmd, spn=None, display_name=None, query_filter=None, show_mine=None
     if display_name:
         sub_filters.append("startswith(displayName,'{}')".format(display_name))
 
-    result = client.service_principals.list(filter=(' and '.join(sub_filters)))
+    result = client.service_principals.list(filter=' and '.join(sub_filters) if sub_filters else None)
 
     if sub_filters or include_all:
         return result
@@ -665,7 +670,7 @@ def list_users(client, upn=None, display_name=None, query_filter=None):
     if display_name:
         sub_filters.append("startswith(displayName,'{}')".format(display_name))
 
-    return client.list(filter=(' and ').join(sub_filters))
+    return client.list(filter=' and '.join(sub_filters) if sub_filters else None)
 
 
 def create_user(client, user_principal_name, display_name, password,
@@ -746,7 +751,7 @@ def list_groups(client, display_name=None, query_filter=None):
         sub_filters.append(query_filter)
     if display_name:
         sub_filters.append("startswith(displayName,'{}')".format(display_name))
-    return client.list(filter=(' and ').join(sub_filters))
+    return client.list(filter=' and '.join(sub_filters) if sub_filters else None)
 
 
 def list_group_owners(cmd, group_id):
@@ -1394,14 +1399,18 @@ def _validate_app_dates(app_start_date, app_end_date, cert_start_date, cert_end_
 
 # pylint: disable=inconsistent-return-statements
 def create_service_principal_for_rbac(
-        # pylint:disable=too-many-statements,too-many-locals, too-many-branches
+        # pylint:disable=too-many-statements,too-many-locals, too-many-branches, unused-argument
         cmd, name=None, years=None, create_cert=False, cert=None, scopes=None, role=None,
         show_auth_for_sdk=None, skip_assignment=False, keyvault=None):
     import time
 
     graph_client = _graph_client_factory(cmd.cli_ctx)
     role_client = _auth_client_factory(cmd.cli_ctx).role_assignments
-    scopes = scopes or ['/subscriptions/' + role_client.config.subscription_id]
+
+    if role and not scopes:
+        logger.warning(SCOPE_WARNING)
+        scopes = ['/subscriptions/' + role_client.config.subscription_id]
+
     years = years or 1
     _RETRY_TIMES = 36
     existing_sps = None
@@ -1460,13 +1469,10 @@ def create_service_principal_for_rbac(
                     raise
     sp_oid = aad_sp.object_id
 
-    # retry while server replication is done
-    if not skip_assignment:
-        if not role:
-            role = "Contributor"
-            logger.warning(ROLE_ASSIGNMENT_CREATE_WARNING)
+    if role:
         for scope in scopes:
             logger.warning("Creating '%s' role assignment under scope '%s'", role, scope)
+            # retry till server replication is done
             for retry_time in range(0, _RETRY_TIMES):
                 try:
                     _create_role_assignment(cmd.cli_ctx, role, sp_oid, None, scope, resolve_assignee=False,
@@ -1490,7 +1496,6 @@ def create_service_principal_for_rbac(
                     raise
 
     logger.warning(CREDENTIAL_WARNING)
-    logger.warning(NAME_DEPRECATION_WARNING)
 
     if show_auth_for_sdk:
         from azure.cli.core._profile import Profile
@@ -1504,7 +1509,6 @@ def create_service_principal_for_rbac(
     result = {
         'appId': app_id,
         'password': password,
-        'name': app_id,
         'displayName': app_display_name,
         'tenant': graph_client.config.tenant_id
     }
@@ -1766,12 +1770,27 @@ def _encode_custom_key_description(key_description):
     return key_description.encode('utf-16')
 
 
-def _resolve_assignee_object(cli_ctx, assignee, assignee_object_id, assignee_principal_type):
+def _get_principal_type_from_object_id(cli_ctx, assignee_object_id):
+    client = _graph_client_factory(cli_ctx)
+    try:
+        result = _get_object_stubs(client, [assignee_object_id])
+        if result:
+            return result[0].object_type
+    except CloudError:
+        logger.warning('Failed to query --assignee-principal-type for --assignee-object-id %s by invoking Graph API.',
+                       assignee_object_id)
+    return None
+
+
+def _resolve_object_id(cli_ctx, assignee, fallback_to_object_id=False):
+    object_id, _ = _resolve_object_id_and_type(cli_ctx, assignee, fallback_to_object_id=fallback_to_object_id)
+    return object_id
+
+
+def _resolve_object_id_and_type(cli_ctx, assignee, fallback_to_object_id=False):
     client = _graph_client_factory(cli_ctx)
     result = None
-
-    # resolve assignee (same as _resolve_object_id)
-    if assignee:
+    try:
         if assignee.find('@') >= 0:  # looks like a user principal name
             result = list(client.users.list(filter="userPrincipalName eq '{}'".format(assignee)))
         if not result:
@@ -1787,46 +1806,13 @@ def _resolve_assignee_object(cli_ctx, assignee, assignee_object_id, assignee_pri
                            "with 'az ad sp create --id {assignee}'.".format(assignee=assignee))
 
         return result[0].object_id, result[0].object_type
-
-    # try to resolve assignee object id
-    try:
-        result = _get_object_stubs(client, [assignee_object_id])
-        if result:
-            return result[0].object_id, result[0].object_type
-    except CloudError:
-        pass
-
-    # If failed to verify assignee object id, DO NOT raise exception
-    # since --assignee-object-id is exposed to bypass Graph API
-    if not assignee_principal_type:
-        logger.warning('Failed to query --assignee-principal-type for %s by invoking Graph API.\n'
-                       'RBAC server might reject creating role assignment without --assignee-principal-type '
-                       'in the future. Better to specify --assignee-principal-type manually.', assignee_object_id)
-    return assignee_object_id, assignee_principal_type
-
-
-def _resolve_object_id(cli_ctx, assignee, fallback_to_object_id=False):
-    client = _graph_client_factory(cli_ctx)
-    result = None
-    try:
-        if assignee.find('@') >= 0:  # looks like a user principal name
-            result = list(client.users.list(filter="userPrincipalName eq '{}'".format(assignee)))
-        if not result:
-            result = list(client.service_principals.list(
-                filter="servicePrincipalNames/any(c:c eq '{}')".format(assignee)))
-        if not result and is_guid(assignee):  # assume an object id, let us verify it
-            result = _get_object_stubs(client, [assignee])
-
-        # 2+ matches should never happen, so we only check 'no match' here
-        if not result:
-            raise CLIError("Cannot find user or service principal in graph database for '{assignee}'. "
-                           "If the assignee is an appId, make sure the corresponding service principal is created "
-                           "with 'az ad sp create --id {assignee}'.".format(assignee=assignee))
-
-        return result[0].object_id
     except (CloudError, GraphErrorException):
+        logger.warning('Failed to query %s by invoking Graph API. '
+                       'If you don\'t have permission to query Graph API, please '
+                       'specify --assignee-object-id and --assignee-principal-type.', assignee)
         if fallback_to_object_id and is_guid(assignee):
-            return assignee
+            logger.warning('Assuming %s as an object ID.', assignee)
+            return assignee, None
         raise
 
 
@@ -1888,11 +1874,3 @@ def _random_password(length):
 
     password = first_character + ''.join(password_list)
     return password
-
-
-def list_user_assigned_identities(cmd, resource_group_name=None):
-    from azure.cli.command_modules.role._client_factory import _msi_client_factory
-    client = _msi_client_factory(cmd.cli_ctx)
-    if resource_group_name:
-        return client.user_assigned_identities.list_by_resource_group(resource_group_name)
-    return client.user_assigned_identities.list_by_subscription()

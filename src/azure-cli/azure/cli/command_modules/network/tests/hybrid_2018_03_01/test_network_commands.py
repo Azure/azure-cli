@@ -8,7 +8,7 @@
 import os
 import unittest
 
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.profiles import supported_api_version, ResourceType
 
@@ -1873,7 +1873,7 @@ class NetworkVpnClientPackageScenarioTest(LiveScenarioTest):
 
 # convert to ScenarioTest and re-record when #6009 is fixed
 class NetworkWatcherScenarioTest(LiveScenarioTest):
-    import mock
+    from unittest import mock
 
     def _mock_thread_count():
         return 1

@@ -298,6 +298,7 @@ def load_command_table(self, _):
                             client_factory=cf_security_settings) as g:
         g.custom_command('list', 'list_security_settings')
         g.custom_show_command('show', 'get_security_setting')
+        g.custom_command('update', 'update_security_setting')
 
     with self.command_group('security contact',
                             security_contacts_sdk,
@@ -427,5 +428,5 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_security_iot_recommendations')
         g.custom_show_command('show', 'show_security_iot_recommendations')
 
-    with self.command_group('security', is_preview=True):
+    with self.command_group('security'):
         pass

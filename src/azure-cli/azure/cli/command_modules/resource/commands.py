@@ -14,15 +14,35 @@ from azure.cli.core.profiles import ResourceType, PROFILE_TYPE
 from azure.cli.core.commands import CliCommandType, DeploymentOutputLongRunningOperation
 from azure.cli.core.commands.arm import handle_template_based_exception
 from azure.cli.command_modules.resource._client_factory import (
-    cf_resource_groups, cf_providers, cf_features, cf_tags, cf_deployments,
+    cf_resource_groups, cf_providers, cf_features, cf_feature_registrations, cf_tags, cf_deployments,
     cf_deployment_operations, cf_policy_definitions, cf_policy_set_definitions, cf_policy_exemptions, cf_resource_links,
-    cf_resource_deploymentscripts, cf_resource_managedapplications, cf_resource_managedappdefinitions, cf_management_groups, cf_management_group_subscriptions, cf_resource_templatespecs)
-from azure.cli.command_modules.resource._validators import process_deployment_create_namespace, process_ts_create_or_update_namespace, _validate_template_spec, _validate_template_spec_out
+    cf_resource_deploymentscripts, cf_resource_managedapplications, cf_resource_managedappdefinitions, cf_management_groups, cf_management_groups_mixin, cf_management_group_subscriptions, cf_management_group_entities, cf_hierarchy_settings, cf_resource_templatespecs)
+from azure.cli.command_modules.resource._validators import (
+    process_deployment_create_namespace, process_ts_create_or_update_namespace, _validate_template_spec, _validate_template_spec_out,
+    process_assign_identity_namespace, process_assignment_create_namespace)
 
 from ._exception_handler import managementgroups_exception_handler
 
 
 logger = get_logger(__name__)
+
+resource_managementgroups_subscriptions_sdk = CliCommandType(
+    operations_tmpl='azure.mgmt.managementgroups.operations#ManagementGroupSubscriptionsOperations.{}',
+    client_factory=cf_management_group_subscriptions,
+    exception_handler=managementgroups_exception_handler
+)
+
+resource_hierarchy_settings_sdk = CliCommandType(
+    operations_tmpl='azure.mgmt.managementgroups.operations#HierarchySettingsOperations.{}',
+    client_factory=cf_hierarchy_settings,
+    exception_handler=managementgroups_exception_handler
+)
+
+resource_managementgroups_entities_sdk = CliCommandType(
+    operations_tmpl='azure.mgmt.managementgroups.operations#EntitiesOperations.{}',
+    client_factory=cf_management_group_entities,
+    exception_handler=managementgroups_exception_handler
+)
 
 
 # Resource group commands
@@ -43,14 +63,18 @@ def transform_resource_list(result):
     return transformed
 
 
-# Resource group deployment commands
 def transform_deployment(result):
     r = result
-    return OrderedDict([('Name', r['name']),
-                        ('ResourceGroup', r['resourceGroup']),
-                        ('State', r['properties']['provisioningState']),
-                        ('Timestamp', r['properties']['timestamp']),
-                        ('Mode', r['properties']['mode'])])
+    format_result = OrderedDict([('Name', r['name']),
+                                 ('State', r['properties']['provisioningState']),
+                                 ('Timestamp', r['properties']['timestamp']),
+                                 ('Mode', r['properties']['mode'])])
+
+    # For deployments that are not under the resource group level, the return data does not contain 'resourceGroup'
+    if 'resourceGroup' in r and r['resourceGroup']:
+        format_result['ResourceGroup'] = r['resourceGroup']
+
+    return format_result
 
 
 def transform_deployments_list(result):
@@ -79,6 +103,12 @@ def load_command_table(self, _):
     resource_feature_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.resource.features.operations#FeaturesOperations.{}',
         client_factory=cf_features,
+        resource_type=ResourceType.MGMT_RESOURCE_FEATURES
+    )
+
+    resource_feature_registration_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.resource.features.operations#SubscriptionFeatureRegistrationsOperations.{}',
+        client_factory=cf_feature_registrations,
         resource_type=ResourceType.MGMT_RESOURCE_FEATURES
     )
 
@@ -147,19 +177,25 @@ def load_command_table(self, _):
         resource_type=ResourceType.MGMT_RESOURCE_RESOURCES
     )
 
+    resource_managementgroups_mixin_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.managementgroups.operations#ManagementGroupsAPIOperationsMixin.{}',
+        client_factory=cf_management_groups_mixin,
+        exception_handler=managementgroups_exception_handler
+    )
+
     resource_managementgroups_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.managementgroups.operations#ManagementGroupsOperations.{}',
         client_factory=cf_management_groups,
         exception_handler=managementgroups_exception_handler
     )
 
-    resource_managementgroups_subscriptions_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.managementgroups.operations#ManagementGroupSubscriptionsOperations.{}',
-        client_factory=cf_management_group_subscriptions,
+    resource_managementgroups_update_type = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.resource.custom#{}',
+        client_factory=cf_management_groups,
         exception_handler=managementgroups_exception_handler
     )
 
-    resource_managementgroups_update_type = CliCommandType(
+    resource_hierarchysettings_update_type = CliCommandType(
         operations_tmpl='azure.cli.command_modules.resource.custom#{}',
         client_factory=cf_management_groups,
         exception_handler=managementgroups_exception_handler
@@ -221,6 +257,7 @@ def load_command_table(self, _):
         g.custom_command('register', 'register_provider')
         g.custom_command('unregister', 'unregister_provider')
         g.custom_command('operation list', 'list_provider_operations')
+        g.custom_command('permission list', 'list_provider_permissions')
         g.custom_show_command('operation show', 'show_provider_operations')
 
     # Resource feature commands
@@ -231,6 +268,14 @@ def load_command_table(self, _):
         g.show_command('show', 'get', table_transformer=feature_table_transform)
         g.custom_command('register', 'register_feature')
         g.custom_command('unregister', 'unregister_feature')
+
+    with self.command_group('feature registration', resource_feature_registration_sdk, client_factory=cf_feature_registrations, resource_type=PROFILE_TYPE,
+                            min_api='2021-07-01') as g:
+        feature_table_transform = '{Name:name, RegistrationState:properties.state}'
+        g.custom_command('list', 'list_feature_registrations', table_transformer='[].' + feature_table_transform)
+        g.show_command('show', 'get', table_transformer=feature_table_transform)
+        g.custom_command('create', 'create_feature_registration')
+        g.custom_command('delete ', 'delete_feature_registration', confirmation=True)
 
     # Tag commands
     with self.command_group('tag', resource_tag_sdk, resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
@@ -303,7 +348,7 @@ def load_command_table(self, _):
         g.custom_command('show-log', 'get_deployment_script_logs')
         g.custom_command('delete', 'delete_deployment_script', confirmation=True)
 
-    with self.command_group('ts', resource_templatespecs_sdk, resource_type=ResourceType.MGMT_RESOURCE_TEMPLATESPECS, is_preview=True, min_api='2019-06-01-preview') as g:
+    with self.command_group('ts', resource_templatespecs_sdk, resource_type=ResourceType.MGMT_RESOURCE_TEMPLATESPECS, min_api='2019-06-01-preview') as g:
         g.custom_command('create', 'create_template_spec', validator=process_ts_create_or_update_namespace)
         g.custom_command('update', 'update_template_spec', validator=process_ts_create_or_update_namespace, confirmation=True)
         g.custom_command('export', 'export_template_spec', validator=_validate_template_spec_out)
@@ -369,15 +414,21 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'get_deployment_operations_at_tenant_scope', client_factory=cf_deployment_operations)
 
     with self.command_group('policy assignment', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as g:
-        g.custom_command('create', 'create_policy_assignment')
+        g.custom_command('create', 'create_policy_assignment', validator=process_assignment_create_namespace)
         g.custom_command('delete', 'delete_policy_assignment')
         g.custom_command('list', 'list_policy_assignment')
         g.custom_show_command('show', 'show_policy_assignment')
+        g.custom_command('update', 'update_policy_assignment')
 
     with self.command_group('policy assignment identity', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2018-05-01') as g:
-        g.custom_command('assign', 'set_identity')
+        g.custom_command('assign', 'set_identity', validator=process_assign_identity_namespace, min_api='2021-06-01')
         g.custom_show_command('show', 'show_identity')
         g.custom_command('remove', 'remove_identity')
+
+    with self.command_group('policy assignment non-compliance-message', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2020-09-01') as g:
+        g.custom_command('create', 'create_policy_non_compliance_message')
+        g.custom_command('list', 'list_policy_non_compliance_message')
+        g.custom_command('delete', 'delete_policy_non_compliance_message')
 
     with self.command_group('policy definition', resource_policy_definitions_sdk, resource_type=ResourceType.MGMT_RESOURCE_POLICY) as g:
         g.custom_command('create', 'create_policy_definition')
@@ -427,6 +478,13 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'show_applicationdefinition')
         g.command('list', 'list_by_resource_group', exception_handler=empty_on_404)
 
+    with self.command_group('account management-group tenant-backfill', resource_managementgroups_mixin_sdk, client_factory=cf_management_groups_mixin) as g:
+        g.custom_command('get', 'cli_managementgroups_get_tenant_backfill_status')
+        g.custom_command('start', 'cli_managementgroups_start_tenant_backfill')
+
+    with self.command_group('account management-group', resource_managementgroups_mixin_sdk, client_factory=cf_management_groups_mixin) as g:
+        g.custom_command('check-name-availability', 'cli_managementgroups_get_name_availability')
+
     with self.command_group('account management-group', resource_managementgroups_sdk, client_factory=cf_management_groups) as g:
         g.custom_command('list', 'cli_managementgroups_group_list')
         g.custom_show_command('show', 'cli_managementgroups_group_show')
@@ -444,12 +502,33 @@ def load_command_table(self, _):
 
     with self.command_group('account management-group subscription', resource_managementgroups_subscriptions_sdk, client_factory=cf_management_group_subscriptions) as g:
         g.custom_command('add', 'cli_managementgroups_subscription_add')
+        g.custom_show_command('show', 'cli_managementgroups_subscription_show')
+        g.custom_command('show-sub-under-mg', 'cli_managementgroups_subscription_show_sub_under_mg')
         g.custom_command('remove', 'cli_managementgroups_subscription_remove')
+
+    with self.command_group('account management-group entities', resource_managementgroups_entities_sdk, client_factory=cf_management_group_entities) as g:
+        g.custom_command('list', 'cli_managementgroups_entities_list')
+
+    with self.command_group('account management-group hierarchy-settings', resource_hierarchy_settings_sdk, client_factory=cf_hierarchy_settings) as g:
+        g.custom_command('list', 'cli_hierarchy_settings_list')
+        g.custom_command('create', 'cli_hierarchy_settings_create')
+        g.custom_command('delete', 'cli_hierarchy_settings_delete', confirmation=True)
+        g.generic_update_command(
+            'update',
+            getter_name='cli_hierarchysettings_group_update_get',
+            getter_type=resource_hierarchysettings_update_type,
+            setter_name='cli_hierarchysettings_group_update_set',
+            setter_type=resource_hierarchysettings_update_type,
+            custom_func_name='cli_hierarchysettings_group_update_custom_func',
+            custom_func_type=resource_hierarchysettings_update_type,
+            exception_handler=managementgroups_exception_handler)
 
     with self.command_group('bicep') as g:
         g.custom_command('install', 'install_bicep_cli')
+        g.custom_command('uninstall', 'uninstall_bicep_cli')
         g.custom_command('upgrade', 'upgrade_bicep_cli')
         g.custom_command('build', 'build_bicep_file')
         g.custom_command('decompile', 'decompile_bicep_file')
+        g.custom_command('publish', 'publish_bicep_file')
         g.custom_command('version', 'show_bicep_cli_version')
         g.custom_command('list-versions', 'list_bicep_cli_versions')

@@ -3,28 +3,26 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.testsdk import ScenarioTest, record_only
+from azure.cli.testsdk import ScenarioTest, record_only, ResourceGroupPreparer
 
 
 class TestClusterScenarios(ScenarioTest):
 
     @record_only()
-    def test_monitor_log_analytics_cluster_default(self):
+    @ResourceGroupPreparer(name_prefix='cli_test_monitor_log_analytics_cluster_c', parameter_name='rg1', key='rg1', location='centralus')
+    def test_monitor_log_analytics_cluster_default(self, rg1):
         new_cluster_name = self.create_random_name('clitest-cluster-', 20)
         sku_capacity = 1000
         self.kwargs.update({
-            'rg1': 'cli_test_monitor_cluster_rg_centralus',
-            'rg2': 'yu-test-eastus2-rg',
             'new_cluster_name': new_cluster_name,
-            'sku_capacity': sku_capacity,
-            'existing_cluster_name': 'yutestcluster4'
+            'sku_capacity': sku_capacity
         })
 
-        self.cmd("monitor log-analytics cluster create -g {rg1} -n {new_cluster_name} --sku-capacity {sku_capacity} --no-wait",
+        self.cmd("monitor log-analytics cluster create -g {rg1} -n {new_cluster_name} --sku-capacity {sku_capacity}",
                  checks=[])
 
         self.cmd("monitor log-analytics cluster show -g {rg1} -n {new_cluster_name}", checks=[
-            self.check('provisioningState', 'ProvisioningAccount'),
+            self.check('provisioningState', 'Succeeded'),
             self.check('name', new_cluster_name),
             self.check('sku.capacity', sku_capacity)
         ])
@@ -34,13 +32,13 @@ class TestClusterScenarios(ScenarioTest):
             'sku_capacity': new_sku_capacity
         })
 
-        self.cmd("monitor log-analytics cluster update -g {rg2} -n {existing_cluster_name} "
+        self.cmd("monitor log-analytics cluster update -g {rg1} -n {new_cluster_name} "
                  "--sku-capacity {sku_capacity}",
                  checks=[
                      self.check('sku.capacity', new_sku_capacity)
                  ])
 
-        self.cmd("monitor log-analytics cluster show -g {rg2} -n {existing_cluster_name}", checks=[
+        self.cmd("monitor log-analytics cluster show -g {rg1} -n {new_cluster_name}", checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('sku.capacity', new_sku_capacity)
         ])
@@ -49,10 +47,10 @@ class TestClusterScenarios(ScenarioTest):
             self.check('length(@)', 1)
         ])
 
-        self.cmd("monitor log-analytics cluster delete -g {rg2} -n {existing_cluster_name} -y", checks=[])
+        self.cmd("monitor log-analytics cluster delete -g {rg1} -n {new_cluster_name} -y", checks=[])
 
-        with self.assertRaisesRegexp(SystemExit, '3'):
-            self.cmd('monitor log-analytics cluster show -g {rg2} -n {existing_cluster_name}')
+        with self.assertRaisesRegex(SystemExit, '3'):
+            self.cmd('monitor log-analytics cluster show -g {rg1} -n {new_cluster_name}')
 
     @record_only()
     def test_monitor_log_analytics_cluster_update_key(self):

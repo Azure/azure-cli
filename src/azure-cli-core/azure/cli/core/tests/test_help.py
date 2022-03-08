@@ -9,7 +9,7 @@ import inspect
 from inspect import getmembers as inspect_getmembers
 
 import unittest
-import mock
+from unittest import mock
 import tempfile
 
 from knack.help import GroupHelpFile, HelpAuthoringException

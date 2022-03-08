@@ -12,15 +12,20 @@
     {
       "file": [
         "src\\azure-cli\\azure\\cli\\command_modules\\appconfig\\tests\\latest\\recordings\\test_appconfig_to_appconfig_import_export.yaml",
+        "src\\azure-cli\\azure\\cli\\command_modules\\appconfig\\tests\\latest\\recordings\\test_azconfig_import_export_kvset.yaml",
+        "src\\azure-cli\\azure\\cli\\command_modules\\appconfig\\tests\\latest\\recordings\\test_azconfig_strict_import.yaml",
         "src\\azure-cli\\azure\\cli\\command_modules\\appconfig\\tests\\latest\\recordings\\test_azconfig_aad_auth.yaml",
+        "src\\azure-cli\\azure\\cli\\command_modules\\appconfig\\tests\\latest\\recordings\\test_azconfig_local_auth.yaml",
         "src\\azure-cli\\azure\\cli\\command_modules\\appconfig\\tests\\latest\\recordings\\test_azconfig_credential.yaml",
         "src\\azure-cli\\azure\\cli\\command_modules\\appconfig\\tests\\latest\\recordings\\test_azconfig_feature.yaml",
+        "src\\azure-cli\\azure\\cli\\command_modules\\appconfig\\tests\\latest\\recordings\\test_azconfig_feature_namespacing.yaml",
         "src\\azure-cli\\azure\\cli\\command_modules\\appconfig\\tests\\latest\\recordings\\test_azconfig_feature_filter.yaml",
         "src\\azure-cli\\azure\\cli\\command_modules\\appconfig\\tests\\latest\\recordings\\test_azconfig_import_export_naming_conventions.yaml",
         "src\\azure-cli\\azure\\cli\\command_modules\\appconfig\\tests\\latest\\recordings\\test_azconfig_import_export.yaml",
         "src\\azure-cli\\azure\\cli\\command_modules\\appconfig\\tests\\latest\\recordings\\test_azconfig_json_content_type.yaml",
         "src\\azure-cli\\azure\\cli\\command_modules\\appconfig\\tests\\latest\\recordings\\test_azconfig_key_validation.yaml",
         "src\\azure-cli\\azure\\cli\\command_modules\\appconfig\\tests\\latest\\recordings\\test_azconfig_kv.yaml",
+        "src\\azure-cli\\azure\\cli\\command_modules\\appconfig\\tests\\latest\\recordings\\test_azconfig_kv_revision_list.yaml",
         "src\\azure-cli\\azure\\cli\\command_modules\\appconfig\\tests\\latest\\recordings\\test_azconfig_public_network_access.yaml",
         "src\\azure-cli\\azure\\cli\\command_modules\\appconfig\\tests\\latest\\recordings\\test_resolve_keyvault.yaml"
       ],
@@ -59,7 +64,8 @@
         "src\\azure-cli\\azure\\cli\\command_modules\\appservice\\tests\\latest\\recordings\\test_webapp_up_statichtml_e2e.yaml",
         "src\\azure-cli\\azure\\cli\\command_modules\\appservice\\tests\\latest\\recordings\\test_webapp_up_generate_default_name.yaml",
         "src\\azure-cli\\azure\\cli\\command_modules\\appservice\\tests\\latest\\recordings\\test_windows_to_linux_fail.yaml",
-        "src\\azure-cli\\azure\\cli\\command_modules\\appservice\\tests\\latest\\recordings\\test_one_deploy.yaml"
+        "src\\azure-cli\\azure\\cli\\command_modules\\appservice\\tests\\latest\\recordings\\test_one_deploy.yaml",
+        "src\\azure-cli\\azure\\cli\\command_modules\\appservice\\tests\\latest\\recordings\\test_webapp_up_linux_windows_sharing_resource_group.yaml"
       ],
       "_justification": "[AppService] response body contains random value recognized as secret"
     },
@@ -170,6 +176,12 @@
         "src\\azure-cli\\azure\\cli\\command_modules\\vm\\tests\\latest\\recordings\\test_vm_boot_diagnostics.yaml"
       ],
       "_justification": "[VM] response body contains random value recognized as secret in outdated recoding files of vm may remove in the future, and one-off password"
+    },
+    {
+      "file": [
+        "src\\azure-cli\\azure\\cli\\command_modules\\vm\\tests\\latest\\recordings\\test_snapshot_access.yaml"
+      ],
+      "_justification": "[Snapshot] response body contains the expired SAS token from the snapshot that will be removed after the test is completed"
     },
     {
       "placeholder": "testPassword0",
@@ -355,11 +367,34 @@
         "src\\azure-cli\\azure\\cli\\command_modules\\network\\tests\\hybrid_2018_03_01\\TestCert2.pfx",
         "src\\azure-cli\\azure\\cli\\command_modules\\network\\tests\\latest\\AuthCert.pfx",
         "src\\azure-cli\\azure\\cli\\command_modules\\network\\tests\\latest\\AuthCert2.pfx",
+        "src\\azure-cli\\azure\\cli\\command_modules\\network\\tests\\latest\\AuthCert3.pfx",
         "src\\azure-cli\\azure\\cli\\command_modules\\network\\tests\\latest\\TestCert.pfx",
         "src\\azure-cli\\azure\\cli\\command_modules\\network\\tests\\latest\\TestCert2.pfx"
       ],
       "_justification": "[Network] Test certs"
     },
+    {
+      "file": [
+        "src/azure-cli/azure/cli/command_modules/network/tests/latest/recordings/test_private_endpoint_connection_acfr.yaml",
+        "src/azure-cli/azure/cli/command_modules/network/tests/latest/recordings/test_private_link_resource_acfr.yaml"
+      ],
+      "_justification": "[Network] Ignore primaryKey and secondaryKey from test Microsoft.Cache/Redis resources."
+    },
+
+     {
+      "file": [
+        "src\\azure-cli\\azure\\cli\\command_modules\\network\\tests\\latest\\recordings\\test_network_ag_auth_cert.yaml"
+      ],
+      "_justification": "[Network] Ignore test certs."
+    },
+
+    {
+      "file": [
+        "src/azure-cli/azure/cli/command_modules/network/tests/latest/recordings/test_vpn_client_package.yaml"
+      ],
+      "_justification": "[Network] response body contains random value recognized as secret"
+    },
+
     {
       "file": [
         "src\\azure-cli\\azure\\cli\\command_modules\\keyvault\\tests\\hybrid_2018_03_01\\ec256.pem",
@@ -410,8 +445,12 @@
       "_justification": "[AppService] Test certs"
     },
     {
-      "file": "src\\azure-cli-core\\azure\\cli\\core\\tests\\sp_cert.pem",
+      "file": "src\\azure-cli-core\\azure\\cli\\core\\auth\\tests\\sp_cert.pem",
       "_justification": "[Core] Test certs"
+    },
+    {
+      "placeholder": "test_secret",
+      "_justification": "[Core] Test secret"
     },
     {
       "placeholder": "0abf356884d74b4aacbd7b1ebd3da0f7",
@@ -498,7 +537,7 @@
     },
     {
       "file": [
-        "src\\azure-cli\\azure\\cli\\command_modules\\servicefabric\\tests\\latest\\recordings\\test_application.yaml",
+        "src\\azure-cli\\azure\\cli\\command_modules\\servicefabric\\tests\\latest\\recordings\\test_application_related.yaml",
         "src\\azure-cli\\azure\\cli\\command_modules\\servicefabric\\tests\\latest\\recordings\\test_cluster_certs.yaml",
         "src\\azure-cli\\azure\\cli\\command_modules\\servicefabric\\tests\\latest\\recordings\\test_cluster_certs.yaml",
         "src\\azure-cli\\azure\\cli\\command_modules\\servicefabric\\tests\\latest\\recordings\\test_node_type.yaml"
@@ -511,5 +550,11 @@
       ],
       "_justification": "[ServiceFabric] response body contains random value recognized as secret"
     },
+    {
+      "file": [
+        "src\\azure-cli\\azure\\cli\\command_modules\\container\\tests\\latest\\recordings\\test_container_create_with_acr.yaml"
+      ],
+      "_justification": "[Container] one-off password used in test, not persisted"
+    }
   ]
 }

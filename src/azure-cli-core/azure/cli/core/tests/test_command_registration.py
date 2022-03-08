@@ -5,7 +5,7 @@
 
 import sys
 import logging
-import mock
+from unittest import mock
 import unittest
 from collections import namedtuple
 

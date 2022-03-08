@@ -8,7 +8,7 @@ import difflib
 import argparse
 import argcomplete
 
-import azure.cli.core.telemetry as telemetry
+from azure.cli.core import telemetry
 from azure.cli.core.extension import get_extension
 from azure.cli.core.commands import ExtensionCommandSource
 from azure.cli.core.commands import AzCliCommandInvoker

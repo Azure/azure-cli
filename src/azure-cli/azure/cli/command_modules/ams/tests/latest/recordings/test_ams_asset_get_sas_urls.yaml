@@ -1,8 +1,8 @@
 interactions:
 - request:
-    body: '{"location": "australiasoutheast", "properties": {"storageAccounts": [{"id":
-      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002",
-      "type": "Primary"}]}, "identity": {"type": "None"}}'
+    body: '{"location": "australiasoutheast", "identity": {"type": "None"}, "properties":
+      {"storageAccounts": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002",
+      "type": "Primary"}]}}'
     headers:
       Accept:
       - application/json
@@ -15,33 +15,32 @@ interactions:
       Content-Length:
       - '343'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -n -g --storage-account -l
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-media/3.0.0 Azure-SDK-For-Python AZURECLI/2.18.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.24.2 (MSI) azsdk-python-mgmt-media/7.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003?api-version=2021-05-01
   response:
     body:
       string: "{\r\n  \"name\":\"ams000003\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003\",\"type\":\"Microsoft.Media/mediaservices\",\"location\":\"Australia
-        Southeast\",\"properties\":{\r\n    \"mediaServiceId\":\"0a27c85a-3365-496f-8412-9b85a2072164\",\"storageAccounts\":[\r\n
+        Southeast\",\"properties\":{\r\n    \"mediaServiceId\":\"cf813b23-1ec7-4f70-a43d-b73061409d9e\",\"storageAccounts\":[\r\n
         \     {\r\n        \"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002\",\"type\":\"Primary\"\r\n
         \     }\r\n    ],\"storageAuthentication\":\"System\",\"encryption\":{\r\n
-        \     \"type\":\"SystemKey\"\r\n    }\r\n  },\"identity\":{\r\n    \"type\":\"None\"\r\n
-        \ }\r\n}"
+        \     \"type\":\"SystemKey\"\r\n    },\"keyDelivery\":{\r\n      \"accessControl\":{\r\n
+        \       \"defaultAction\":\"Allow\",\"ipAllowList\":[\r\n          \r\n        ]\r\n
+        \     }\r\n    }\r\n  },\"systemData\":{\r\n    \"createdBy\":\"phcooper@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2021-07-30T18:58:58.859354Z\",\"lastModifiedBy\":\"phcooper@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2021-07-30T18:58:58.859354Z\"\r\n
+        \ },\"identity\":{\r\n    \"type\":\"None\"\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '793'
+      - '1166'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Thu, 21 Jan 2021 00:29:58 GMT
+      - Fri, 30 Jul 2021 18:59:02 GMT
       expires:
       - '-1'
       odata-version:
@@ -55,7 +54,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -73,30 +72,27 @@ interactions:
       Content-Length:
       - '78'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -a -n -g --description --alternate-id
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-media/3.0.0 Azure-SDK-For-Python AZURECLI/2.18.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.24.2 (MSI) azsdk-python-mgmt-media/7.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/assets/asset000004?api-version=2020-05-01
   response:
     body:
       string: "{\r\n  \"name\":\"asset000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/assets/asset000004\",\"type\":\"Microsoft.Media/mediaservices/assets\",\"properties\":{\r\n
-        \   \"assetId\":\"5a510eac-c1a4-49b2-92f3-9d620ba720ec\",\"created\":\"2021-01-21T00:30:00.733Z\",\"lastModified\":\"2021-01-21T00:30:00.733Z\",\"alternateId\":\"aid000005\",\"description\":\"desc000006\",\"storageAccountName\":\"clitest000002\",\"storageEncryptionFormat\":\"None\"\r\n
+        \   \"assetId\":\"b082f9cf-f293-49f0-b820-0ba0e1f383f2\",\"created\":\"2021-07-30T18:59:04.71Z\",\"lastModified\":\"2021-07-30T18:59:04.71Z\",\"alternateId\":\"aid000005\",\"description\":\"desc000006\",\"storageAccountName\":\"clitest000002\",\"storageEncryptionFormat\":\"None\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '590'
+      - '588'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Thu, 21 Jan 2021 00:30:00 GMT
+      - Fri, 30 Jul 2021 18:59:05 GMT
       expires:
       - '-1'
       odata-version:
@@ -115,7 +111,7 @@ interactions:
       code: 201
       message: Created
 - request:
-    body: '{"permissions": "Read", "expiryTime": "2021-01-21T15:30:00.094245Z"}'
+    body: '{"permissions": "Read", "expiryTime": "2021-07-31T12:58:26.26388Z"}'
     headers:
       Accept:
       - application/json
@@ -126,31 +122,28 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '68'
+      - '67'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -a -n -g
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-media/3.0.0 Azure-SDK-For-Python AZURECLI/2.18.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.24.2 (MSI) azsdk-python-mgmt-media/7.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/assets/asset000004/listContainerSas?api-version=2020-05-01
   response:
     body:
-      string: "{\r\n  \"assetContainerSasUrls\":[\r\n    \"https://clitest000002.blob.core.windows.net/asset-5a510eac-c1a4-49b2-92f3-9d620ba720ec?sv=2019-02-02&sr=c&sig=XsniGQSilxLka8a7bhbdY6WuHeJNlnwErzvwqrgnlNA%3D&se=2021-01-21T15:30:00Z&sp=rl\",\"https://clitest000002.blob.core.windows.net/asset-5a510eac-c1a4-49b2-92f3-9d620ba720ec?sv=2019-02-02&sr=c&sig=mjgIeJixuHyi93G%2FEdo3Jdhg7sL8ZsXDDVct4grD8RA%3D&se=2021-01-21T15:30:00Z&sp=rl\"\r\n
+      string: "{\r\n  \"assetContainerSasUrls\":[\r\n    \"https://clitest000002.blob.core.windows.net/asset-b082f9cf-f293-49f0-b820-0ba0e1f383f2?sv=2019-02-02&sr=c&sig=0CptwG6Ydzo8%2BPDM%2F6en5MuVALUhvGcuwFLCWNtPZYU%3D&se=2021-07-31T12:58:26Z&sp=rl\",\"https://clitest000002.blob.core.windows.net/asset-b082f9cf-f293-49f0-b820-0ba0e1f383f2?sv=2019-02-02&sr=c&sig=xQsDWpXfqu2E1GJH9G9vGPzjwsG5hGJ78C4%2Bw%2Fbi650%3D&se=2021-07-31T12:58:26Z&sp=rl\"\r\n
         \ ]\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '445'
+      - '451'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Thu, 21 Jan 2021 00:30:03 GMT
+      - Fri, 30 Jul 2021 18:59:06 GMT
       expires:
       - '-1'
       odata-version:

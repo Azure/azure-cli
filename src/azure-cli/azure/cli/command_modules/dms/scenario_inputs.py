@@ -9,8 +9,10 @@ from azure.mgmt.datamigration.models import (MigrateSqlServerSqlDbTaskInput,
                                              MigratePostgreSqlAzureDbForPostgreSqlSyncTaskInput,
                                              MigratePostgreSqlAzureDbForPostgreSqlSyncDatabaseInput,
                                              MigratePostgreSqlAzureDbForPostgreSqlSyncDatabaseTableInput,
-                                             MigrateMySqlAzureDbForMySqlSyncTaskInput,
-                                             MigrateMySqlAzureDbForMySqlSyncDatabaseInput)
+                                             MigrateMySqlAzureDbForMySqlOfflineTaskInput,
+                                             MigrateMySqlAzureDbForMySqlOfflineDatabaseInput)
+
+from azure.cli.core.azclierror import ValidationError
 
 
 def get_migrate_sql_to_sqldb_offline_input(database_options_json,
@@ -39,31 +41,6 @@ def get_migrate_sql_to_sqldb_offline_input(database_options_json,
                                           validation_options=validation_options)
 
 
-def get_migrate_mysql_to_azuredbformysql_sync_input(database_options_json,
-                                                    source_connection_info,
-                                                    target_connection_info):
-    database_options = []
-
-    for d in database_options_json:
-        def_migration_setting_input = {"fullLoadSubTasks": "5",
-                                       "inlineLobMaxSize": "0",
-                                       "limitLOBSize": "true",
-                                       "lobChunkSize": "64",
-                                       "lobMaxSize": "32"}
-        database_options.append(
-            MigrateMySqlAzureDbForMySqlSyncDatabaseInput(
-                name=d.get('name', None),
-                target_database_name=d.get('target_database_name', None),
-                migration_setting=d.get('migrationSetting', def_migration_setting_input),
-                source_setting=d.get('sourceSetting', None),
-                target_setting=d.get('targetSetting', None),
-                table_map=d.get('tableMap', None)))
-
-    return MigrateMySqlAzureDbForMySqlSyncTaskInput(source_connection_info=source_connection_info,
-                                                    target_connection_info=target_connection_info,
-                                                    selected_databases=database_options)
-
-
 def get_migrate_postgresql_to_azuredbforpostgresql_sync_input(database_options_json,
                                                               source_connection_info,
                                                               target_connection_info):
@@ -84,3 +61,50 @@ def get_migrate_postgresql_to_azuredbforpostgresql_sync_input(database_options_j
     return MigratePostgreSqlAzureDbForPostgreSqlSyncTaskInput(source_connection_info=source_connection_info,
                                                               target_connection_info=target_connection_info,
                                                               selected_databases=database_options)
+
+
+def get_migrate_mysql_to_azuredbformysql_offline_input(database_options_json,
+                                                       source_connection_info,
+                                                       target_connection_info):
+    database_options = []
+    migration_level_settings = {}
+    make_source_server_read_only = False
+    selected_databases = []
+
+    if not isinstance(database_options_json, dict):
+        raise ValidationError('Format of the database option file is wrong')
+
+    if 'selected_databases' not in database_options_json:
+        raise ValidationError('Database option file should contain atleast one selected database for migration')
+    selected_databases = database_options_json.get('selected_databases')
+
+    for database in selected_databases:
+        if not isinstance(database, dict):
+            raise ValidationError('Format of the selected database file is wrong')
+        if 'name' not in database:
+            raise ValidationError('Selected database should have a name')
+        if 'target_database_name' not in database:
+            raise ValidationError('Selected database should have a target_database_name')
+        if 'table_map' in database and (not isinstance(database.get('table_map'), dict) or
+                                        len(database.get('table_map')) == 0):
+            raise ValidationError('Table map should be dictionary and non empty, to select all tables remove table_map')
+        database_options.append(
+            MigrateMySqlAzureDbForMySqlOfflineDatabaseInput(
+                name=database.get('name', None),
+                target_database_name=database.get('target_database_name', None),
+                table_map=database.get('table_map', None)))
+
+    if 'migration_level_settings' in database_options_json and \
+            (not isinstance(database_options_json, dict) or len(
+                database_options_json.get('migration_level_settings')) == 0):
+        raise ValidationError('migration_level_settings have wrong format or is empty')
+    if 'migration_level_settings' in database_options_json and isinstance(database_options_json, dict):
+        migration_level_settings = database_options_json.get('migration_level_settings', None)
+    if 'make_source_server_read_only' in database_options_json and isinstance(database_options_json, dict):
+        make_source_server_read_only = database_options_json.get('make_source_server_read_only', None)
+
+    return MigrateMySqlAzureDbForMySqlOfflineTaskInput(source_connection_info=source_connection_info,
+                                                       target_connection_info=target_connection_info,
+                                                       selected_databases=database_options,
+                                                       optional_agent_settings=migration_level_settings,
+                                                       make_source_server_read_only=make_source_server_read_only)

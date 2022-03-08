@@ -134,23 +134,36 @@ class StorageBlobCopyTests(StorageScenarioMixin, LiveScenarioTest):
         self.assertEqual(expect_content, actual_content)
 
     @ResourceGroupPreparer()
-    @StorageAccountPreparer(kind='storageV2')
-    def test_storage_blob_copy_requires_sync(self, resource_group, storage_account):
+    @StorageAccountPreparer(parameter_name='account1', kind='storageV2')
+    @StorageAccountPreparer(parameter_name='account2', kind='storageV2')
+    def test_storage_blob_copy_requires_sync(self, resource_group, account1, account2):
         source_file = self.create_temp_file(16, full_random=True)
-        account_info = self.get_account_info(resource_group, storage_account)
+        account1_info = self.get_account_info(resource_group, account1)
+        account2_info = self.get_account_info(resource_group, account2)
 
-        source_container = self.create_container(account_info)
-        target_container = self.create_container(account_info)
+        # Prepare
+        source_container = self.create_container(account1_info)
+        target_container1 = self.create_container(account1_info)
+        target_container2 = self.create_container(account2_info)
 
-        self.storage_cmd('storage blob upload -c {} -f "{}" -n src', account_info,
+        self.storage_cmd('storage blob upload -c {} -f "{}" -n src', account1_info,
                          source_container, source_file)
-        source_uri = self.storage_cmd('storage blob url -c {} -n src', account_info, source_container).output
-        self.storage_cmd('storage blob copy start -b dst -c {} --source-uri {}', account_info,
-                         target_container, source_uri)
 
-        self.storage_cmd('storage blob upload -c {} -f "{}" -n pagesrc --type page', account_info,
+        # with different account name and account key
+        self.storage_cmd('storage blob copy start --destination-blob dst --destination-container {} '
+                         '--source-account-name {} --source-container {} --source-blob src --requires-sync true',
+                         account2_info, target_container2, account1, source_container)
+
+        # with source uri in the same account
+        source_uri = self.storage_cmd('storage blob url -c {} -n src', account1_info, source_container).output
+        self.storage_cmd('storage blob copy start -b dst -c {} --source-uri {}', account1_info,
+                         target_container1, source_uri)
+
+        self.storage_cmd('storage blob upload -c {} -f "{}" -n pagesrc --type page', account1_info,
                          source_container, source_file)
-        source_uri = self.storage_cmd('storage blob url -c {} -n pagesrc', account_info, source_container).output
+        source_uri = self.storage_cmd('storage blob url -c {} -n pagesrc', account1_info, source_container).output
         # expect failure with page blob
-        self.storage_cmd_negative('storage blob copy start -b dst -c {} --source-uri {} --requires-sync', account_info,
-                                  target_container, source_uri)
+        self.storage_cmd_negative('storage blob copy start -b dst -c {} --source-uri {} --requires-sync', account1_info,
+                                  target_container1, source_uri)
+
+

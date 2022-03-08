@@ -286,3 +286,7 @@ def cf_virtual_appliance_skus(cli_ctx, _):
 
 def cf_virtual_appliance_sites(cli_ctx, _):
     return network_client_factory(cli_ctx).virtual_appliance_sites
+
+
+def cf_custom_ip_prefixes(cli_ctx, _):
+    return network_client_factory(cli_ctx).custom_ip_prefixes

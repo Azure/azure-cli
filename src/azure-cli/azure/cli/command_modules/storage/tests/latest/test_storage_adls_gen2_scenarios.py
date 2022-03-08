@@ -4,8 +4,9 @@
 # --------------------------------------------------------------------------------------------
 import unittest
 import os
+from datetime import datetime, timedelta
 
-from azure.cli.testsdk import (ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, JMESPathCheck, NoneCheck,
+from azure.cli.testsdk import (ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, JMESPathCheck, JMESPathCheckExists,
                                api_version_constraint, RoleBasedServicePrincipalPreparer)
 from azure.cli.core.profiles import ResourceType
 from ..storage_test_util import StorageScenarioMixin, StorageTestFilesPreparer
@@ -375,7 +376,7 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
 
         # Upload File to an existing non-empty file with default overwrite=false
         new_local_file = self.create_temp_file(512)
-        with self.assertRaisesRegexp(CLIError, 'You cannot upload to an existing non-empty file with overwrite=false.'):
+        with self.assertRaisesRegex(CLIError, 'You cannot upload to an existing non-empty file with overwrite=false.'):
             self.storage_cmd('storage fs file upload -p {} -f {} -s "{}"', account_info, file_path, filesystem,
                              new_local_file)
 
@@ -407,13 +408,18 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
         self.storage_cmd('storage fs file list -f {} --num-results 1 --marker {}',
                          account_info, filesystem, next_marker).assert_with_checks(JMESPathCheck('length(@)', 1))
 
+        # List files excluding directory with marker
+        result = self.storage_cmd('storage fs file list -f {} --num-results 1 --show-next-marker --exclude-dir',
+                                  account_info, filesystem).get_output_in_json()
+        self.assertIsNotNone(result[0]['nextMarker'])
+
         # Download file
         local_dir = self.create_temp_dir()
         self.storage_cmd('storage fs file download -p {} -f {} -d "{}"', account_info, file_path, filesystem, local_dir)
         import os
         self.assertEqual(1, sum(len(f) for r, d, f in os.walk(local_dir)))
 
-        with self.assertRaisesRegexp(CLIError, "The specified path already exists. Please change to a valid path."):
+        with self.assertRaisesRegex(CLIError, "The specified path already exists. Please change to a valid path."):
             self.storage_cmd('storage fs file download -p {} -f {} -d "{}" --overwrite false', account_info, file_path,
                              filesystem, local_dir)
 
@@ -458,6 +464,41 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
                          account_info, file, filesystem)
         self.storage_cmd('storage fs file metadata show -p {} -f {}', account_info, file, filesystem) \
             .assert_with_checks(JMESPathCheck('test', 'beta'), JMESPathCheck('cat', 'file'))
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer()
+    def test_storage_fs_generate_sas_full_uri(self, resource_group, storage_account):
+        account_info = self.get_account_info(resource_group, storage_account)
+        f = self.create_file_system(account_info)
+
+        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        fs_uri = self.storage_cmd('storage fs generate-sas -n {} --expiry {} --permissions '
+                                  'r --https-only --full-uri', account_info, f, expiry).output
+        self.assertTrue(fs_uri)
+        self.assertIn('&sig=', fs_uri)
+        self.assertTrue(fs_uri.startswith('"https://{}.dfs.core.windows.net/{}?s'.format(storage_account, f)))
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer()
+    def test_storage_fs_generate_sas_as_user(self, resource_group, storage_account):
+        account_info = self.get_account_info(resource_group, storage_account)
+        f = self.create_file_system(account_info)
+
+        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+
+        with self.assertRaisesRegex(CLIError, "incorrect usage: specify --as-user when --auth-mode login"):
+            self.cmd('storage fs generate-sas --account-name {} -n {} --expiry {} --permissions r --https-only '
+                     '--auth-mode login'.format(storage_account, f, expiry))
+
+        fs_sas = self.cmd('storage fs generate-sas --account-name {} -n {} --expiry {} --permissions '
+                          'dlrwop --https-only --as-user --auth-mode login'.format(storage_account, f, expiry)).output
+        self.assertIn('&sig=', fs_sas)
+        self.assertIn('skoid=', fs_sas)
+        self.assertIn('sktid=', fs_sas)
+        self.assertIn('skt=', fs_sas)
+        self.assertIn('ske=', fs_sas)
+        self.assertIn('sks=', fs_sas)
+        self.assertIn('skv=', fs_sas)
 
 
 class StorageADLSGen2LiveTests(StorageScenarioMixin, LiveScenarioTest):

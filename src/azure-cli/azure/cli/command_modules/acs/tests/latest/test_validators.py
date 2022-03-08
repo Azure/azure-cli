@@ -3,8 +3,44 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import unittest
+from unittest import mock
+from azure.cli.core.azclierror import CLIInternalError, InvalidArgumentValueError
+
+from knack import CLI
+
+from azure.cli.core._config import GLOBAL_CONFIG_DIR, ENV_VAR_PREFIX
+from azure.cli.core.cloud import get_active_cloud
+from azure.cli.core.profiles import get_sdk, ResourceType, supported_api_version
+
 from azure.cli.core.util import CLIError
 from azure.cli.command_modules.acs import _validators as validators
+
+class MockCLI(CLI):
+    def __init__(self):
+        super(MockCLI, self).__init__(cli_name='mock_cli', config_dir=GLOBAL_CONFIG_DIR,
+                                      config_env_var_prefix=ENV_VAR_PREFIX, commands_loader_cls=MockLoader)
+        self.cloud = get_active_cloud(self)
+
+
+class MockLoader(object):
+    def __init__(self, ctx):
+        self.ctx = ctx
+
+    def get_models(self, *attr_args, **_):
+        from azure.cli.core.profiles import get_sdk
+        return get_sdk(self.ctx, ResourceType.MGMT_CONTAINERSERVICE, 'ManagedClusterPropertiesAutoScalerProfile',
+                       mod='models', operation_group='managed_clusters')
+
+
+class MockCmd(object):
+    def __init__(self, ctx, arguments={}):
+        self.cli_ctx = ctx
+        self.loader = MockLoader(self.cli_ctx)
+        self.arguments = arguments
+
+    def get_models(self, *attr_args, **kwargs):
+        return get_sdk(self.cli_ctx, ResourceType.MGMT_CONTAINERSERVICE, 'ManagedClusterPropertiesAutoScalerProfile',
+                       mod='models', operation_group='managed_clusters')
 
 
 class TestValidateIPRanges(unittest.TestCase):
@@ -59,56 +95,6 @@ class TestValidateIPRanges(unittest.TestCase):
         with self.assertRaises(CLIError) as cm:
             validators.validate_ip_ranges(namespace)
         self.assertEqual(str(cm.exception), err)
-
-
-class TestClusterAutoscalerParamsValidators(unittest.TestCase):
-    def test_empty_key_empty_value(self):
-        cluster_autoscaler_profile = ["="]
-        namespace = Namespace(cluster_autoscaler_profile=cluster_autoscaler_profile)
-        err = "Empty key specified for cluster-autoscaler-profile"
-
-        with self.assertRaises(CLIError) as cm:
-            validators.validate_cluster_autoscaler_profile(namespace)
-        self.assertEqual(str(cm.exception), err)
-
-    def test_non_empty_key_empty_value(self):
-        cluster_autoscaler_profile = ["scan-interval="]
-        namespace = Namespace(cluster_autoscaler_profile=cluster_autoscaler_profile)
-
-        validators.validate_cluster_autoscaler_profile(namespace)
-
-    def test_two_empty_keys_empty_value(self):
-        cluster_autoscaler_profile = ["=", "="]
-        namespace = Namespace(cluster_autoscaler_profile=cluster_autoscaler_profile)
-        err = "Empty key specified for cluster-autoscaler-profile"
-
-        with self.assertRaises(CLIError) as cm:
-            validators.validate_cluster_autoscaler_profile(namespace)
-        self.assertEqual(str(cm.exception), err)
-
-    def test_one_empty_key_in_pair_one_non_empty(self):
-        cluster_autoscaler_profile = ["scan-interval=20s", "="]
-        namespace = Namespace(cluster_autoscaler_profile=cluster_autoscaler_profile)
-        err = "Empty key specified for cluster-autoscaler-profile"
-
-        with self.assertRaises(CLIError) as cm:
-            validators.validate_cluster_autoscaler_profile(namespace)
-        self.assertEqual(str(cm.exception), err)
-
-    def test_invalid_key(self):
-        cluster_autoscaler_profile = ["bad-key=val"]
-        namespace = Namespace(cluster_autoscaler_profile=cluster_autoscaler_profile)
-        err = "'bad-key' is an invalid key for cluster-autoscaler-profile"
-
-        with self.assertRaises(CLIError) as cm:
-            validators.validate_cluster_autoscaler_profile(namespace)
-        self.assertIn(err, str(cm.exception),)
-
-    def test_valid_parameters(self):
-        cluster_autoscaler_profile = ["scan-interval=20s", "scale-down-delay-after-add=15m"]
-        namespace = Namespace(cluster_autoscaler_profile=cluster_autoscaler_profile)
-
-        validators.validate_cluster_autoscaler_profile(namespace)
 
 
 class Namespace:
@@ -303,3 +289,95 @@ class TestAssignIdentity(unittest.TestCase):
         empty_identity_id = ""
         namespace = AssignIdentityNamespace(empty_identity_id)
         validators.validate_assign_identity(namespace)
+
+
+class TestExtractCommaSeparatedString(unittest.TestCase):
+    def test_extract_comma_separated_string(self):
+        s1 = None
+        t1 = validators.extract_comma_separated_string(s1, keep_none=True, default_value="")
+        g1 = None
+        self.assertEqual(t1, g1)
+
+        s2 = None
+        t2 = validators.extract_comma_separated_string(s2, keep_none=False, default_value="")
+        g2 = ""
+        self.assertEqual(t2, g2)
+
+        s3 = ""
+        t3 = validators.extract_comma_separated_string(s3, keep_none=True, default_value={})
+        g3 = {}
+        self.assertEqual(t3, g3)
+
+        s4 = "abc, xyz, 123"
+        t4 = validators.extract_comma_separated_string(s4)
+        g4 = ["abc", " xyz", " 123"]
+        self.assertEqual(t4, g4)
+
+        s5 = "abc, xyz, 123"
+        t5 = validators.extract_comma_separated_string(s5, enable_strip=True)
+        g5 = ["abc", "xyz", "123"]
+        self.assertEqual(t5, g5)
+
+        s6 = "abc = def, xyz = 123"
+        t6 = validators.extract_comma_separated_string(s6, extract_kv=True)
+        g6 = {"abc ": " def", " xyz ": " 123"}
+        self.assertEqual(t6, g6)
+
+        s7 = "abc = def, xyz = 123"
+        t7 = validators.extract_comma_separated_string(s7, enable_strip=True, extract_kv=True)
+        g7 = {"abc": "def", "xyz": "123"}
+        self.assertEqual(t7, g7)
+
+        s8 = "abc = def, xyz = "
+        t8 = validators.extract_comma_separated_string(s8, extract_kv=True, allow_empty_value=True)
+        g8 = {"abc ": " def", " xyz ": " "}
+        self.assertEqual(t8, g8)
+
+        s9 = "abc = def, xyz = "
+        t9 = validators.extract_comma_separated_string(s9, enable_strip=True, extract_kv=True, allow_empty_value=True)
+        g9 = {"abc": "def", "xyz": ""}
+        self.assertEqual(t9, g9)
+
+        s10 = "abc = def, xyz = "
+        with self.assertRaises(InvalidArgumentValueError):
+            validators.extract_comma_separated_string(s10, extract_kv=True)
+
+        s11 = "abc def, xyz 123"
+        with self.assertRaises(InvalidArgumentValueError):
+            validators.extract_comma_separated_string(s11, extract_kv=True)
+
+        s12 = "abc=def=xyz,123=456"
+        with self.assertRaises(InvalidArgumentValueError):
+            validators.extract_comma_separated_string(s12, extract_kv=True)
+
+        s13 = "WindowsContainerRuntime=containerd,AKSHTTPCustomFeatures=Microsoft.ContainerService/CustomNodeConfigPreview"
+        t13 = validators.extract_comma_separated_string(s13, enable_strip=True, extract_kv=True, default_value={},)
+        g13 = {"WindowsContainerRuntime": "containerd", "AKSHTTPCustomFeatures": "Microsoft.ContainerService/CustomNodeConfigPreview"}
+        self.assertEqual(t13, g13)
+
+        s14 = "="
+        t14 = validators.extract_comma_separated_string(s14, extract_kv=True, allow_empty_value=True)
+        g14 = {"": ""}
+        self.assertEqual(t14, g14)
+
+
+class CredentialFormatNamespace:
+    def __init__(self, credential_format):
+        self.credential_format = credential_format
+
+
+class TestCredentialFormat(unittest.TestCase):
+    def test_invalid_format(self):
+        credential_format = "foobar"
+        namespace = CredentialFormatNamespace(credential_format)
+        err = ("--format can only be azure or exec.")
+
+        with self.assertRaises(CLIError) as cm:
+            validators.validate_credential_format(namespace)
+        self.assertEqual(str(cm.exception), err)
+
+    def test_valid_format(self):
+        credential_format = "exec"
+        namespace = CredentialFormatNamespace(credential_format)
+
+        validators.validate_credential_format(namespace)

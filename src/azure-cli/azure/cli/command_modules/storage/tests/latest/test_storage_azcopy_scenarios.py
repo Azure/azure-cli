@@ -655,7 +655,7 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
 
         import os
         # Upload a single file
-        self.cmd('storage copy -s "{}" -d "{}"'
+        self.cmd('storage copy -s "{}" -d "{}" --cap-mbps 1.0'
                  .format(os.path.join(test_dir, 'readme'), share_url))
         self.cmd('storage file list -s {} --account-name {}'
                  .format(share, storage_account), checks=JMESPathCheck('length(@)', 1))
@@ -699,7 +699,7 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
 
         import os
         # Upload a single file
-        self.cmd('storage copy --source-local-path "{}" --destination-account-name {} --destination-share {}'
+        self.cmd('storage copy --source-local-path "{}" --destination-account-name {} --destination-share {} --cap-mbps 1.0'
                  .format(os.path.join(test_dir, 'readme'), storage_account, share))
         self.cmd('storage file list -s {} --account-name {}'
                  .format(share, storage_account), checks=JMESPathCheck('length(@)', 1))

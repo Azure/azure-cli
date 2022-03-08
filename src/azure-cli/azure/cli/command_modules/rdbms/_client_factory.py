@@ -331,6 +331,10 @@ def cf_mysql_check_resource_availability(cli_ctx, _):
     return get_mysql_flexible_management_client(cli_ctx).check_name_availability
 
 
+def cf_mysql_flexible_private_dns_zone_suffix_operations(cli_ctx, _):
+    return get_mysql_flexible_management_client(cli_ctx).get_private_dns_zone_suffix
+
+
 def cf_postgres_flexible_servers(cli_ctx, _):
     return get_postgresql_flexible_management_client(cli_ctx).servers
 

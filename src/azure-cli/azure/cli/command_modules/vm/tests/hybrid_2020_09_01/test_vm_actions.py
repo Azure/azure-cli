@@ -7,7 +7,7 @@ import os
 import shutil
 import tempfile
 import unittest
-import mock
+from unittest import mock
 
 from azure.cli.core.keys import is_valid_ssh_rsa_public_key
 from azure.cli.command_modules.vm._validators import (validate_ssh_key,
@@ -86,13 +86,13 @@ class TestActions(unittest.TestCase):
 
     def test_figure_out_storage_source(self):
         test_data = 'https://av123images.blob.core.windows.net/images/TDAZBET.vhd'
-        src_blob_uri, src_disk, src_snapshot = _figure_out_storage_source(DummyCli(), 'tg1', test_data)
+        src_blob_uri, src_disk, src_snapshot, _ = _figure_out_storage_source(DummyCli(), 'tg1', test_data)
         self.assertFalse(src_disk)
         self.assertFalse(src_snapshot)
         self.assertEqual(src_blob_uri, test_data)
 
         test_data = '/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/JAVACSMRG6017/providers/Microsoft.Compute/disks/ex.vhd'
-        src_blob_uri, src_disk, src_snapshot = _figure_out_storage_source(None, 'tg1', test_data)
+        src_blob_uri, src_disk, src_snapshot, _ = _figure_out_storage_source(None, 'tg1', test_data)
         self.assertEqual(src_disk, test_data)
         self.assertFalse(src_snapshot)
         self.assertFalse(src_blob_uri)
@@ -426,7 +426,7 @@ class TestActions(unittest.TestCase):
         np = mock.MagicMock()
         np.size = 'Standard_DS4_v2'
         np.accelerated_networking = None
-        np.os_publisher, np.os_offer, np.os_sku = 'coreos', 'coreos', 'alpha'
+        np.os_publisher, np.os_offer, np.os_sku = 'kinvolk', 'flatcar-container-linux-free', 'alpha'
         size_mock.number_of_cores, size_mock.name = 8, 'Standard_DS4_v2'
         _validate_vm_vmss_accelerated_networking(mock.MagicMock(), np)
         self.assertTrue(np.accelerated_networking)
@@ -434,7 +434,7 @@ class TestActions(unittest.TestCase):
         np = mock.MagicMock()
         np.size = 'Standard_D3_v2'  # known supported 4 core size
         np.accelerated_networking = None
-        np.os_publisher, np.os_offer, np.os_sku = 'coreos', 'coreos', 'alpha'
+        np.os_publisher, np.os_offer, np.os_sku = 'kinvolk', 'flatcar-container-linux-free', 'alpha'
         _validate_vm_vmss_accelerated_networking(None, np)
         self.assertTrue(np.accelerated_networking)
 

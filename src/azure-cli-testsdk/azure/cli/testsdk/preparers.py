@@ -6,7 +6,7 @@
 import os
 from datetime import datetime
 
-from azure_devtools.scenario_tests import AbstractPreparer, SingleValueReplacer
+from .scenario_tests import AbstractPreparer, SingleValueReplacer
 
 from .base import LiveScenarioTest
 from .exceptions import CliTestError
@@ -53,15 +53,17 @@ class ResourceGroupPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
                  parameter_name_for_location='resource_group_location', location='westus',
                  dev_setting_name='AZURE_CLI_TEST_DEV_RESOURCE_GROUP_NAME',
                  dev_setting_location='AZURE_CLI_TEST_DEV_RESOURCE_GROUP_LOCATION',
-                 random_name_length=75, key='rg'):
+                 random_name_length=75, key='rg', subscription=None, additional_tags=None):
         if ' ' in name_prefix:
             raise CliTestError('Error: Space character in resource group name prefix \'%s\'' % name_prefix)
         super(ResourceGroupPreparer, self).__init__(name_prefix, random_name_length)
         self.cli_ctx = get_dummy_cli()
         self.location = location
+        self.subscription = subscription
         self.parameter_name = parameter_name
         self.parameter_name_for_location = parameter_name_for_location
         self.key = key
+        self.additional_tags = additional_tags
 
         self.dev_setting_name = os.environ.get(dev_setting_name, None)
         self.dev_setting_location = os.environ.get(dev_setting_location, location)
@@ -76,7 +78,11 @@ class ResourceGroupPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
         if 'ENV_JOB_NAME' in os.environ:
             tags['job'] = os.environ['ENV_JOB_NAME']
         tags = ' '.join(['{}={}'.format(key, value) for key, value in tags.items()])
+        if self.additional_tags is not None:
+            tags = tags.join(['{}={}'.format(key, value) for key, value in self.additional_tags.items()])
         template = 'az group create --location {} --name {} --tag ' + tags
+        if self.subscription:
+            template += ' --subscription {} '.format(self.subscription)
         self.live_only_execute(self.cli_ctx, template.format(self.location, name))
 
         self.test_class_instance.kwargs[self.key] = name
@@ -85,17 +91,20 @@ class ResourceGroupPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
     def remove_resource(self, name, **kwargs):
         # delete group if test is being recorded and if the group is not a dev rg
         if not self.dev_setting_name:
-            self.live_only_execute(self.cli_ctx, 'az group delete --name {} --yes --no-wait'.format(name))
+            template = 'az group delete --name {} --yes --no-wait '
+            if self.subscription:
+                template += ' --subscription {} '.format(self.subscription)
+            self.live_only_execute(self.cli_ctx, template.format(name))
 
 
 # Storage Account Preparer and its shorthand decorator
 
 # pylint: disable=too-many-instance-attributes
 class StorageAccountPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
-    def __init__(self, name_prefix='clitest', sku='Standard_LRS', location='westus', kind='Storage', hns=False,
+    def __init__(self, name_prefix='clitest', sku='Standard_LRS', location='westus', kind='Storage', hns=False, length=24,
                  parameter_name='storage_account', resource_group_parameter_name='resource_group', skip_delete=True,
                  dev_setting_name='AZURE_CLI_TEST_DEV_STORAGE_ACCOUNT_NAME', key='sa'):
-        super(StorageAccountPreparer, self).__init__(name_prefix, 24)
+        super(StorageAccountPreparer, self).__init__(name_prefix, length)
         self.cli_ctx = get_dummy_cli()
         self.location = location
         self.sku = sku
@@ -148,34 +157,47 @@ class StorageAccountPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
 
 # pylint: disable=too-many-instance-attributes
 class KeyVaultPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
-    def __init__(self, name_prefix='clitest', sku='standard', location='westus', parameter_name='key_vault',
-                 resource_group_parameter_name='resource_group', skip_delete=True,
-                 dev_setting_name='AZURE_CLI_TEST_DEV_KEY_VAULT_NAME', key='kv'):
-        super(KeyVaultPreparer, self).__init__(name_prefix, 24)
+    def __init__(self, name_prefix='clitest', sku='standard', location='westus', enable_soft_delete=True,
+                 parameter_name='key_vault', resource_group_parameter_name='resource_group', skip_delete=False,
+                 dev_setting_name='AZURE_CLI_TEST_DEV_KEY_VAULT_NAME', key='kv', name_len=24, additional_params=None):
+        super(KeyVaultPreparer, self).__init__(name_prefix, name_len)
         self.cli_ctx = get_dummy_cli()
         self.location = location
         self.sku = sku
+        self.enable_soft_delete = enable_soft_delete
         self.resource_group_parameter_name = resource_group_parameter_name
         self.skip_delete = skip_delete
         self.parameter_name = parameter_name
         self.key = key
+        self.additional_params = additional_params
         self.dev_setting_name = os.environ.get(dev_setting_name, None)
 
     def create_resource(self, name, **kwargs):
         if not self.dev_setting_name:
             group = self._get_resource_group(**kwargs)
-            template = 'az keyvault create -n {} -g {} -l {} --sku {}'
+            template = 'az keyvault create -n {} -g {} -l {} --sku {} '
+            if self.enable_soft_delete:
+                template += '--enable-soft-delete --retention-days 7 '
+            if self.additional_params:
+                template += self.additional_params
             self.live_only_execute(self.cli_ctx, template.format(name, group, self.location, self.sku))
+            self.test_class_instance.kwargs[self.key] = name
             return {self.parameter_name: name}
 
-        self.test_class_instance.kwargs[self.key] = name
+        self.test_class_instance.kwargs[self.key] = self.dev_setting_name
         return {self.parameter_name: self.dev_setting_name}
 
     def remove_resource(self, name, **kwargs):
         if not self.skip_delete and not self.dev_setting_name:
             group = self._get_resource_group(**kwargs)
-            self.live_only_execute(self.cli_ctx, 'az keyvault delete -n {} -g {} --yes'.format(name, group))
-            self.live_only_execute(self.cli_ctx, 'az keyvault purge -n {} -l {}'.format(name, self.location))
+            self.live_only_execute(self.cli_ctx, 'az keyvault delete -n {} -g {}'.format(name, group))
+            if self.enable_soft_delete:
+                from azure.core.exceptions import HttpResponseError
+                try:
+                    self.live_only_execute(self.cli_ctx, 'az keyvault purge -n {} -l {}'.format(name, self.location))
+                except HttpResponseError:
+                    # purge operation will fail with HttpResponseError when --enable-purge-protection
+                    pass
 
     def _get_resource_group(self, **kwargs):
         try:

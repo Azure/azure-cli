@@ -7,30 +7,1411 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
+      - backup container register
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g --backup-management-type --workload-type --resource-id
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectableContainers?api-version=2021-10-01&$filter=backupManagementType%20eq%20%27AzureWorkload%27
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectableContainers/VMAppContainer;Compute;afstests;akkanaseSystem","name":"VMAppContainer;Compute;afstests;akkanaseSystem","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"akkanaseSystem","backupManagementType":"AzureWorkload","protectableContainerType":"VMAppContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/afstests/providers/Microsoft.Compute/virtualMachines/akkanaseSystem"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectableContainers/VMAppContainer;Compute;akkanaseCMK;akkanaseCMK","name":"VMAppContainer;Compute;akkanaseCMK;akkanaseCMK","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"akkanaseCMK","backupManagementType":"AzureWorkload","protectableContainerType":"VMAppContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akkanaseCMK/providers/Microsoft.Compute/virtualMachines/akkanaseCMK"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectableContainers/VMAppContainer;Compute;akkanaseGRSVault;jakavetVM","name":"VMAppContainer;Compute;akkanaseGRSVault;jakavetVM","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"jakavetVM","backupManagementType":"AzureWorkload","protectableContainerType":"VMAppContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akkanaseGRSVault/providers/Microsoft.Compute/virtualMachines/jakavetVM"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectableContainers/VMAppContainer;Compute;iaasvmsqlworkload.existing;iaassqlext3-win","name":"VMAppContainer;Compute;iaasvmsqlworkload.existing;iaassqlext3-win","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"iaassqlext3-win","backupManagementType":"AzureWorkload","protectableContainerType":"VMAppContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing/providers/Microsoft.Compute/virtualMachines/iaassqlext3-win"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectableContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2","name":"VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"saphana-clitest-vm2","backupManagementType":"AzureWorkload","protectableContainerType":"VMAppContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.Compute/virtualMachines/saphana-clitest-vm2"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3580'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:50:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '299'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"backupManagementType": "AzureWorkload", "containerType":
+      "VMAppContainer", "sourceResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/SAPHANA-CLITEST-RG/providers/Microsoft.Compute/virtualMachines/saphana-clitest-vm2",
+      "workloadType": "SAPHanaDatabase"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container register
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '300'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -v -g --backup-management-type --workload-type --resource-id
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bsaphana-clitest-rg%3Bsaphana-clitest-vm2?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationsStatus/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:50:30 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationResults/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container register
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g --backup-management-type --workload-type --resource-id
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bsaphana-clitest-rg%3Bsaphana-clitest-vm2/operationResults/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationsStatus/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:50:31 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationResults/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '299'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container register
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g --backup-management-type --workload-type --resource-id
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bsaphana-clitest-rg%3Bsaphana-clitest-vm2/operationResults/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationsStatus/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:50:36 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationResults/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '298'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container register
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g --backup-management-type --workload-type --resource-id
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bsaphana-clitest-rg%3Bsaphana-clitest-vm2/operationResults/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationsStatus/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:50:42 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationResults/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '297'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container register
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g --backup-management-type --workload-type --resource-id
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bsaphana-clitest-rg%3Bsaphana-clitest-vm2/operationResults/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationsStatus/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:50:47 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationResults/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '296'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container register
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g --backup-management-type --workload-type --resource-id
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bsaphana-clitest-rg%3Bsaphana-clitest-vm2/operationResults/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationsStatus/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:50:52 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationResults/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '295'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container register
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g --backup-management-type --workload-type --resource-id
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bsaphana-clitest-rg%3Bsaphana-clitest-vm2/operationResults/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationsStatus/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:50:57 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationResults/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '294'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container register
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g --backup-management-type --workload-type --resource-id
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bsaphana-clitest-rg%3Bsaphana-clitest-vm2/operationResults/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationsStatus/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:51:03 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationResults/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '293'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container register
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g --backup-management-type --workload-type --resource-id
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bsaphana-clitest-rg%3Bsaphana-clitest-vm2/operationResults/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationsStatus/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:51:08 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationResults/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '292'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container register
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g --backup-management-type --workload-type --resource-id
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bsaphana-clitest-rg%3Bsaphana-clitest-vm2/operationResults/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationsStatus/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:51:14 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationResults/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '291'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container register
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g --backup-management-type --workload-type --resource-id
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bsaphana-clitest-rg%3Bsaphana-clitest-vm2/operationResults/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationsStatus/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:51:19 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationResults/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '290'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container register
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g --backup-management-type --workload-type --resource-id
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bsaphana-clitest-rg%3Bsaphana-clitest-vm2/operationResults/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationsStatus/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:51:25 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationResults/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '289'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container register
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g --backup-management-type --workload-type --resource-id
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bsaphana-clitest-rg%3Bsaphana-clitest-vm2/operationResults/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationsStatus/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:51:31 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationResults/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '288'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container register
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g --backup-management-type --workload-type --resource-id
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bsaphana-clitest-rg%3Bsaphana-clitest-vm2/operationResults/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationsStatus/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:51:36 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationResults/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '287'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container register
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g --backup-management-type --workload-type --resource-id
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bsaphana-clitest-rg%3Bsaphana-clitest-vm2/operationResults/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationsStatus/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:51:41 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationResults/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '286'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container register
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g --backup-management-type --workload-type --resource-id
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bsaphana-clitest-rg%3Bsaphana-clitest-vm2/operationResults/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationsStatus/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:51:46 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationResults/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '285'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container register
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g --backup-management-type --workload-type --resource-id
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bsaphana-clitest-rg%3Bsaphana-clitest-vm2/operationResults/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationsStatus/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:51:52 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationResults/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '284'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container register
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g --backup-management-type --workload-type --resource-id
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bsaphana-clitest-rg%3Bsaphana-clitest-vm2/operationResults/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationsStatus/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:51:57 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationResults/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '283'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container register
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g --backup-management-type --workload-type --resource-id
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bsaphana-clitest-rg%3Bsaphana-clitest-vm2/operationResults/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationsStatus/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:52:02 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationResults/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '282'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container register
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g --backup-management-type --workload-type --resource-id
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bsaphana-clitest-rg%3Bsaphana-clitest-vm2/operationResults/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationsStatus/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:52:08 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationResults/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '281'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container register
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g --backup-management-type --workload-type --resource-id
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bsaphana-clitest-rg%3Bsaphana-clitest-vm2/operationResults/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationsStatus/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:52:14 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationResults/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '280'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container register
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g --backup-management-type --workload-type --resource-id
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bsaphana-clitest-rg%3Bsaphana-clitest-vm2/operationResults/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationsStatus/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:52:20 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationResults/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '279'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container register
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g --backup-management-type --workload-type --resource-id
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bsaphana-clitest-rg%3Bsaphana-clitest-vm2/operationResults/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationsStatus/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:52:25 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationResults/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '278'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container register
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g --backup-management-type --workload-type --resource-id
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bsaphana-clitest-rg%3Bsaphana-clitest-vm2/operationResults/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationsStatus/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:52:30 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationResults/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '277'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container register
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g --backup-management-type --workload-type --resource-id
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bsaphana-clitest-rg%3Bsaphana-clitest-vm2/operationResults/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationsStatus/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:52:36 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationResults/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '276'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container register
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g --backup-management-type --workload-type --resource-id
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bsaphana-clitest-rg%3Bsaphana-clitest-vm2/operationResults/1e458908-a25e-4a06-b72f-af96d157f0e0?api-version=2021-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2","name":"VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.Compute/virtualMachines/saphana-clitest-vm2","lastUpdatedTime":"2021-12-20T17:50:36.5845647Z","extendedInfo":{"hostServerName":"saphana-clitest-vm2","inquiryInfo":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"inquiryDetails":[{"type":"SAPHana","itemCount":2,"inquiryValidation":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"additionalDetail":"","protectableItemCount":{"SAPHanaSystem":1,"SAPHanaDatabase":2}}}]}},"friendlyName":"saphana-clitest-vm2","backupManagementType":"AzureWorkload","registrationStatus":"Registered","healthStatus":"Healthy","containerType":"VMAppContainer","protectableObjectType":"VMAppContainer"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1186'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:52:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '275'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
       - backup container list
       Connection:
       - keep-alive
       ParameterSetName:
       - -v -g --backup-management-type
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupProtectionContainers?api-version=2020-10-01&$filter=backupManagementType%20eq%20%27AzureWorkload%27%20and%20status%20eq%20%27Registered%27
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupProtectionContainers?api-version=2021-10-01&$filter=backupManagementType%20eq%20%27AzureWorkload%27%20and%20status%20eq%20%27Registered%27
   response:
     body:
-      string: '{"value":[{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;akneema;akneema-hana-ccy","name":"VMAppContainer;Compute;akneema;akneema-hana-ccy","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.Compute/virtualMachines/akneema-hana-ccy","lastUpdatedTime":"2021-01-13T11:21:01.1273867Z","extendedInfo":{"hostServerName":"hxehost","inquiryInfo":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"inquiryDetails":[{"type":"SAPHana","itemCount":2,"inquiryValidation":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"additionalDetail":""}}]}},"friendlyName":"akneema-hana-ccy","backupManagementType":"AzureWorkload","registrationStatus":"Registered","healthStatus":"Healthy","containerType":"VMAppContainer","protectableObjectType":"VMAppContainer"}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2","name":"VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.Compute/virtualMachines/saphana-clitest-vm2","lastUpdatedTime":"2021-12-20T17:50:36.5845647Z","extendedInfo":{"hostServerName":"saphana-clitest-vm2","inquiryInfo":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"inquiryDetails":[{"type":"SAPHana","itemCount":2,"inquiryValidation":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"additionalDetail":"","protectableItemCount":{"SAPHanaSystem":1,"SAPHanaDatabase":2}}}]}},"friendlyName":"saphana-clitest-vm2","backupManagementType":"AzureWorkload","registrationStatus":"Registered","healthStatus":"Healthy","containerType":"VMAppContainer","protectableObjectType":"VMAppContainer"}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1140'
+      - '1276'
       content-type:
       - application/json
       date:
-      - Wed, 13 Jan 2021 11:35:41 GMT
+      - Mon, 20 Dec 2021 17:52:42 GMT
       expires:
       - '-1'
       pragma:
@@ -46,7 +1427,1031 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '149'
+      - '298'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupProtectableItems?api-version=2021-10-01&$filter=backupManagementType%20eq%20%27AzureWorkload%27%20and%20workloadType%20eq%20%27SAPHanaDatabase%27
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;saphana-clitest-rg;saphana-clitest-vm2/protectableItems/saphanasystem;hxe","name":"saphanasystem;hxe","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"HXE","serverName":"saphana-clitest-vm2","isAutoProtectable":false,"isAutoProtected":false,"subinquireditemcount":2,"subprotectableitemcount":0,"prebackupvalidation":{"status":"Success","code":"Success"},"IsProtectable":false,"backupManagementType":"AzureWorkload","workloadType":"SAPHana","protectableItemType":"SAPHanaSystem","friendlyName":"HXE","protectionState":"NotProtected"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;saphana-clitest-rg;saphana-clitest-vm2/protectableItems/saphanadatabase;hxe;hxe","name":"saphanadatabase;hxe;hxe","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"HXE","serverName":"saphana-clitest-vm2","isAutoProtectable":false,"isAutoProtected":false,"subinquireditemcount":0,"subprotectableitemcount":0,"IsProtectable":true,"backupManagementType":"AzureWorkload","workloadType":"SAPHana","protectableItemType":"SAPHanaDatabase","friendlyName":"HXE","protectionState":"NotProtected"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;saphana-clitest-rg;saphana-clitest-vm2/protectableItems/saphanadatabase;hxe;systemdb","name":"saphanadatabase;hxe;systemdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"HXE","serverName":"saphana-clitest-vm2","isAutoProtectable":false,"isAutoProtected":false,"subinquireditemcount":0,"subprotectableitemcount":0,"IsProtectable":true,"backupManagementType":"AzureWorkload","workloadType":"SAPHana","protectableItemType":"SAPHanaDatabase","friendlyName":"SYSTEMDB","protectionState":"NotProtected"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;saphana-clitest-rg;saphana-clitest-vm2/protectableItems/saphanadbinstance;hxe;hxe(dbinstance)","name":"saphanadbinstance;hxe;hxe(dbinstance)","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"saphana-clitest-vm2","serverName":"saphana-clitest-vm2","isAutoProtectable":false,"isAutoProtected":false,"subinquireditemcount":2,"subprotectableitemcount":0,"prebackupvalidation":{"status":"Success","code":"Success"},"IsProtectable":true,"backupManagementType":"AzureWorkload","workloadType":"SAPHana","protectableItemType":"SAPHanaDBInstance","friendlyName":"HXE","protectionState":"NotProtected"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3319'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:52:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '298'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupPolicies/saphana-clitest-policy?api-version=2021-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupPolicies/saphana-clitest-policy","name":"saphana-clitest-policy","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SAPHanaDatabase","settings":{"timeZone":"UTC","issqlcompression":false,"isCompression":false},"subProtectionPolicy":[{"policyType":"Full","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2020-09-30T19:30:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2020-09-30T19:30:00Z"],"retentionDuration":{"count":180,"durationType":"Days"}},"weeklySchedule":{"daysOfTheWeek":["Sunday"],"retentionTimes":["2020-09-30T19:30:00Z"],"retentionDuration":{"count":104,"durationType":"Weeks"}},"monthlySchedule":{"retentionScheduleFormatType":"Weekly","retentionScheduleWeekly":{"daysOfTheWeek":["Sunday"],"weeksOfTheMonth":["First"]},"retentionTimes":["2020-09-30T19:30:00Z"],"retentionDuration":{"count":60,"durationType":"Months"}},"yearlySchedule":{"retentionScheduleFormatType":"Weekly","monthsOfYear":["January"],"retentionScheduleWeekly":{"daysOfTheWeek":["Sunday"],"weeksOfTheMonth":["First"]},"retentionTimes":["2020-09-30T19:30:00Z"],"retentionDuration":{"count":10,"durationType":"Years"}}}},{"policyType":"Log","schedulePolicy":{"schedulePolicyType":"LogSchedulePolicy","scheduleFrequencyInMins":120},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":15,"durationType":"Days"}}}],"protectedItemsCount":0}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1757'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:52:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '299'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"protectedItemType": "AzureVmWorkloadSAPHanaDatabase",
+      "backupManagementType": "AzureWorkload", "workloadType": "SAPHanaDatabase",
+      "policyId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupPolicies/saphana-clitest-policy"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '353'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/vmappcontainer%3Bcompute%3Bsaphana-clitest-rg%3Bsaphana-clitest-vm2/protectedItems/saphanadatabase%3Bhxe%3Bsystemdb?api-version=2021-10-01
+  response:
+    body:
+      string: ''
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;saphana-clitest-rg;saphana-clitest-vm2/protectedItems/saphanadatabase;hxe;systemdb/operationsStatus/42e152e4-f62b-45b7-94b1-7908f1991398?api-version=2021-10-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Mon, 20 Dec 2021 17:52:48 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;saphana-clitest-rg;saphana-clitest-vm2/protectedItems/saphanadatabase;hxe;systemdb/operationResults/42e152e4-f62b-45b7-94b1-7908f1991398?api-version=2021-10-01
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupOperations/42e152e4-f62b-45b7-94b1-7908f1991398?api-version=2021-10-01
+  response:
+    body:
+      string: '{"id":"42e152e4-f62b-45b7-94b1-7908f1991398","name":"42e152e4-f62b-45b7-94b1-7908f1991398","status":"InProgress","startTime":"2021-12-20T17:52:48.4996285Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:52:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '299'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupOperations/42e152e4-f62b-45b7-94b1-7908f1991398?api-version=2021-10-01
+  response:
+    body:
+      string: '{"id":"42e152e4-f62b-45b7-94b1-7908f1991398","name":"42e152e4-f62b-45b7-94b1-7908f1991398","status":"InProgress","startTime":"2021-12-20T17:52:48.4996285Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:52:56 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '298'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupOperations/42e152e4-f62b-45b7-94b1-7908f1991398?api-version=2021-10-01
+  response:
+    body:
+      string: '{"id":"42e152e4-f62b-45b7-94b1-7908f1991398","name":"42e152e4-f62b-45b7-94b1-7908f1991398","status":"InProgress","startTime":"2021-12-20T17:52:48.4996285Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:53:02 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '297'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupOperations/42e152e4-f62b-45b7-94b1-7908f1991398?api-version=2021-10-01
+  response:
+    body:
+      string: '{"id":"42e152e4-f62b-45b7-94b1-7908f1991398","name":"42e152e4-f62b-45b7-94b1-7908f1991398","status":"InProgress","startTime":"2021-12-20T17:52:48.4996285Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:53:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '296'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupOperations/42e152e4-f62b-45b7-94b1-7908f1991398?api-version=2021-10-01
+  response:
+    body:
+      string: '{"id":"42e152e4-f62b-45b7-94b1-7908f1991398","name":"42e152e4-f62b-45b7-94b1-7908f1991398","status":"InProgress","startTime":"2021-12-20T17:52:48.4996285Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:53:12 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '295'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupOperations/42e152e4-f62b-45b7-94b1-7908f1991398?api-version=2021-10-01
+  response:
+    body:
+      string: '{"id":"42e152e4-f62b-45b7-94b1-7908f1991398","name":"42e152e4-f62b-45b7-94b1-7908f1991398","status":"InProgress","startTime":"2021-12-20T17:52:48.4996285Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:53:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '294'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupOperations/42e152e4-f62b-45b7-94b1-7908f1991398?api-version=2021-10-01
+  response:
+    body:
+      string: '{"id":"42e152e4-f62b-45b7-94b1-7908f1991398","name":"42e152e4-f62b-45b7-94b1-7908f1991398","status":"InProgress","startTime":"2021-12-20T17:52:48.4996285Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:53:24 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '293'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupOperations/42e152e4-f62b-45b7-94b1-7908f1991398?api-version=2021-10-01
+  response:
+    body:
+      string: '{"id":"42e152e4-f62b-45b7-94b1-7908f1991398","name":"42e152e4-f62b-45b7-94b1-7908f1991398","status":"InProgress","startTime":"2021-12-20T17:52:48.4996285Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:53:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '292'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupOperations/42e152e4-f62b-45b7-94b1-7908f1991398?api-version=2021-10-01
+  response:
+    body:
+      string: '{"id":"42e152e4-f62b-45b7-94b1-7908f1991398","name":"42e152e4-f62b-45b7-94b1-7908f1991398","status":"InProgress","startTime":"2021-12-20T17:52:48.4996285Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:53:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '291'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupOperations/42e152e4-f62b-45b7-94b1-7908f1991398?api-version=2021-10-01
+  response:
+    body:
+      string: '{"id":"42e152e4-f62b-45b7-94b1-7908f1991398","name":"42e152e4-f62b-45b7-94b1-7908f1991398","status":"InProgress","startTime":"2021-12-20T17:52:48.4996285Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:53:40 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '290'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupOperations/42e152e4-f62b-45b7-94b1-7908f1991398?api-version=2021-10-01
+  response:
+    body:
+      string: '{"id":"42e152e4-f62b-45b7-94b1-7908f1991398","name":"42e152e4-f62b-45b7-94b1-7908f1991398","status":"InProgress","startTime":"2021-12-20T17:52:48.4996285Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:53:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '289'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupOperations/42e152e4-f62b-45b7-94b1-7908f1991398?api-version=2021-10-01
+  response:
+    body:
+      string: '{"id":"42e152e4-f62b-45b7-94b1-7908f1991398","name":"42e152e4-f62b-45b7-94b1-7908f1991398","status":"InProgress","startTime":"2021-12-20T17:52:48.4996285Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:53:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '288'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupOperations/42e152e4-f62b-45b7-94b1-7908f1991398?api-version=2021-10-01
+  response:
+    body:
+      string: '{"id":"42e152e4-f62b-45b7-94b1-7908f1991398","name":"42e152e4-f62b-45b7-94b1-7908f1991398","status":"InProgress","startTime":"2021-12-20T17:52:48.4996285Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:53:55 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '287'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupOperations/42e152e4-f62b-45b7-94b1-7908f1991398?api-version=2021-10-01
+  response:
+    body:
+      string: '{"id":"42e152e4-f62b-45b7-94b1-7908f1991398","name":"42e152e4-f62b-45b7-94b1-7908f1991398","status":"InProgress","startTime":"2021-12-20T17:52:48.4996285Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:54:01 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '286'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupOperations/42e152e4-f62b-45b7-94b1-7908f1991398?api-version=2021-10-01
+  response:
+    body:
+      string: '{"id":"42e152e4-f62b-45b7-94b1-7908f1991398","name":"42e152e4-f62b-45b7-94b1-7908f1991398","status":"Succeeded","startTime":"2021-12-20T17:52:48.4996285Z","endTime":"2021-12-20T17:52:48.4996285Z","properties":{"objectType":"OperationStatusJobExtendedInfo","jobId":"0e18c84f-cd65-43b6-8bd5-98f7ec59b487"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '304'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:54:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '285'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupJobs/0e18c84f-cd65-43b6-8bd5-98f7ec59b487?api-version=2021-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupJobs/0e18c84f-cd65-43b6-8bd5-98f7ec59b487","name":"0e18c84f-cd65-43b6-8bd5-98f7ec59b487","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJob","workloadType":"SAPHanaDatabase","duration":"PT1M13.2947675S","extendedInfo":{"tasksList":[],"propertyBag":{"Policy
+        Name":"saphana-clitest-policy"}},"isUserTriggered":true,"entityFriendlyName":"systemdb","backupManagementType":"AzureWorkload","operation":"ConfigureBackup","status":"Completed","startTime":"2021-12-20T17:52:48.4996285Z","endTime":"2021-12-20T17:54:01.794396Z","activityId":"a2022868-61bd-11ec-97a8-c8f750f92764"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '782'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:54:08 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '285'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -v -g --backup-management-type --query
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupProtectionContainers?api-version=2021-10-01&$filter=backupManagementType%20eq%20%27AzureWorkload%27%20and%20status%20eq%20%27Registered%27
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2","name":"VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.Compute/virtualMachines/saphana-clitest-vm2","lastUpdatedTime":"2021-12-20T17:50:36.5845647Z","extendedInfo":{"hostServerName":"saphana-clitest-vm2","inquiryInfo":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"inquiryDetails":[{"type":"SAPHana","itemCount":2,"inquiryValidation":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"additionalDetail":"","protectableItemCount":{"SAPHanaSystem":1,"SAPHanaDatabase":2}}}]}},"friendlyName":"saphana-clitest-vm2","backupManagementType":"AzureWorkload","registrationStatus":"Registered","healthStatus":"Healthy","containerType":"VMAppContainer","protectableObjectType":"VMAppContainer"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1276'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:54:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '299'
       x-powered-by:
       - ASP.NET
     status:
@@ -66,24 +2471,22 @@ interactions:
       ParameterSetName:
       - -g -v -c -i --workload-type --query
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bakneema%3Bakneema-hana-ccy/protectedItems/saphanadatabase%3Bhxe%3Bsystemdb?api-version=2020-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bsaphana-clitest-rg%3Bsaphana-clitest-vm2/protectedItems/saphanadatabase%3Bhxe%3Bsystemdb?api-version=2021-10-01
   response:
     body:
-      string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;akneema;akneema-hana-ccy/protectedItems/SAPHanaDatabase;hxe;systemdb","name":"SAPHanaDatabase;hxe;systemdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{},"friendlyName":"systemdb","serverName":"hxehost","parentName":"HXE","parentType":"AzureVmWorkloadSAPHanaSystem","protectionStatus":"Healthy","protectionState":"IRPending","lastBackupStatus":"IRPending","lastBackupErrorDetail":{"code":"Success","message":""},"protectedItemDataSourceId":"1187187888","protectedItemHealthStatus":"IRPending","extendedInfo":{"recoveryPointCount":0,"policyState":"Consistent"},"protectedItemType":"AzureVmWorkloadSAPHanaDatabase","backupManagementType":"AzureWorkload","workloadType":"SAPHanaDatabase","containerName":"VMAppContainer;compute;akneema;akneema-hana-ccy","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.Compute/virtualMachines/akneema-hana-ccy","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupPolicies/hana-policy-ccy"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;saphana-clitest-rg;saphana-clitest-vm2/protectedItems/SAPHanaDatabase;hxe;systemdb","name":"SAPHanaDatabase;hxe;systemdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{},"friendlyName":"systemdb","serverName":"saphana-clitest-vm2","parentName":"HXE","parentType":"AzureVmWorkloadSAPHanaSystem","protectionStatus":"Healthy","protectionState":"IRPending","lastBackupStatus":"IRPending","lastBackupErrorDetail":{"code":"Success","message":""},"protectedItemDataSourceId":"70368803601850","protectedItemHealthStatus":"IRPending","extendedInfo":{"recoveryPointCount":0,"policyState":"Consistent"},"protectedItemType":"AzureVmWorkloadSAPHanaDatabase","backupManagementType":"AzureWorkload","workloadType":"SAPHanaDatabase","containerName":"VMAppContainer;compute;saphana-clitest-rg;saphana-clitest-vm2","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.Compute/virtualMachines/saphana-clitest-vm2","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupPolicies/saphana-clitest-policy","isArchiveEnabled":false}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1376'
+      - '1498'
       content-type:
       - application/json
       date:
-      - Wed, 13 Jan 2021 11:35:43 GMT
+      - Mon, 20 Dec 2021 17:54:12 GMT
       expires:
       - '-1'
       pragma:
@@ -99,7 +2502,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '149'
+      - '298'
       x-powered-by:
       - ASP.NET
     status:
@@ -119,24 +2522,22 @@ interactions:
       ParameterSetName:
       - -g -v -c -i --workload-type --query
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Bakneema%3Bakneema-hana-ccy/protectedItems/SAPHanaDatabase%3Bhxe%3Bsystemdb/recoveryPoints?api-version=2020-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Bsaphana-clitest-rg%3Bsaphana-clitest-vm2/protectedItems/SAPHanaDatabase%3Bhxe%3Bsystemdb/recoveryPoints?api-version=2021-10-01
   response:
     body:
-      string: '{"value":[{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;akneema;akneema-hana-ccy/protectedItems/SAPHanaDatabase;hxe;systemdb/recoveryPoints/DefaultRangeRecoveryPoint","name":"DefaultRangeRecoveryPoint","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaPointInTimeRecoveryPoint","timeRanges":[],"type":"Log"}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;saphana-clitest-rg;saphana-clitest-vm2/protectedItems/SAPHanaDatabase;hxe;systemdb/recoveryPoints/DefaultRangeRecoveryPoint","name":"DefaultRangeRecoveryPoint","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaPointInTimeRecoveryPoint","timeRanges":[],"type":"Log"}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '578'
+      - '608'
       content-type:
       - application/json
       date:
-      - Wed, 13 Jan 2021 11:35:44 GMT
+      - Mon, 20 Dec 2021 17:54:14 GMT
       expires:
       - '-1'
       pragma:
@@ -152,7 +2553,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '149'
+      - '299'
       x-powered-by:
       - ASP.NET
     status:
@@ -172,24 +2573,22 @@ interactions:
       ParameterSetName:
       - -g -v -c -i --workload-type
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bakneema%3Bakneema-hana-ccy/protectedItems/saphanadatabase%3Bhxe%3Bsystemdb?api-version=2020-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bsaphana-clitest-rg%3Bsaphana-clitest-vm2/protectedItems/saphanadatabase%3Bhxe%3Bsystemdb?api-version=2021-10-01
   response:
     body:
-      string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;akneema;akneema-hana-ccy/protectedItems/SAPHanaDatabase;hxe;systemdb","name":"SAPHanaDatabase;hxe;systemdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{},"friendlyName":"systemdb","serverName":"hxehost","parentName":"HXE","parentType":"AzureVmWorkloadSAPHanaSystem","protectionStatus":"Healthy","protectionState":"IRPending","lastBackupStatus":"IRPending","lastBackupErrorDetail":{"code":"Success","message":""},"protectedItemDataSourceId":"1187187888","protectedItemHealthStatus":"IRPending","extendedInfo":{"recoveryPointCount":0,"policyState":"Consistent"},"protectedItemType":"AzureVmWorkloadSAPHanaDatabase","backupManagementType":"AzureWorkload","workloadType":"SAPHanaDatabase","containerName":"VMAppContainer;compute;akneema;akneema-hana-ccy","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.Compute/virtualMachines/akneema-hana-ccy","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupPolicies/hana-policy-ccy"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;saphana-clitest-rg;saphana-clitest-vm2/protectedItems/SAPHanaDatabase;hxe;systemdb","name":"SAPHanaDatabase;hxe;systemdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{},"friendlyName":"systemdb","serverName":"saphana-clitest-vm2","parentName":"HXE","parentType":"AzureVmWorkloadSAPHanaSystem","protectionStatus":"Healthy","protectionState":"IRPending","lastBackupStatus":"IRPending","lastBackupErrorDetail":{"code":"Success","message":""},"protectedItemDataSourceId":"70368803601850","protectedItemHealthStatus":"IRPending","extendedInfo":{"recoveryPointCount":0,"policyState":"Consistent"},"protectedItemType":"AzureVmWorkloadSAPHanaDatabase","backupManagementType":"AzureWorkload","workloadType":"SAPHanaDatabase","containerName":"VMAppContainer;compute;saphana-clitest-rg;saphana-clitest-vm2","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.Compute/virtualMachines/saphana-clitest-vm2","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupPolicies/saphana-clitest-policy","isArchiveEnabled":false}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1376'
+      - '1498'
       content-type:
       - application/json
       date:
-      - Wed, 13 Jan 2021 11:35:44 GMT
+      - Mon, 20 Dec 2021 17:54:16 GMT
       expires:
       - '-1'
       pragma:
@@ -205,7 +2604,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '149'
+      - '299'
       x-powered-by:
       - ASP.NET
     status:
@@ -225,24 +2624,22 @@ interactions:
       ParameterSetName:
       - -g -v -c -i --workload-type
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Bakneema%3Bakneema-hana-ccy/protectedItems/SAPHanaDatabase%3Bhxe%3Bsystemdb/recoveryPoints?api-version=2020-10-01&$filter=restorePointQueryType%20eq%20%27Log%27
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Bsaphana-clitest-rg%3Bsaphana-clitest-vm2/protectedItems/SAPHanaDatabase%3Bhxe%3Bsystemdb/recoveryPoints?api-version=2021-10-01&$filter=restorePointQueryType%20eq%20%27Log%27
   response:
     body:
-      string: '{"value":[{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;akneema;akneema-hana-ccy/protectedItems/SAPHanaDatabase;hxe;systemdb/recoveryPoints/DefaultRangeRecoveryPoint","name":"DefaultRangeRecoveryPoint","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaPointInTimeRecoveryPoint","timeRanges":[],"type":"Log"}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;saphana-clitest-rg;saphana-clitest-vm2/protectedItems/SAPHanaDatabase;hxe;systemdb/recoveryPoints/DefaultRangeRecoveryPoint","name":"DefaultRangeRecoveryPoint","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaPointInTimeRecoveryPoint","timeRanges":[],"type":"Log"}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '578'
+      - '608'
       content-type:
       - application/json
       date:
-      - Wed, 13 Jan 2021 11:35:45 GMT
+      - Mon, 20 Dec 2021 17:54:18 GMT
       expires:
       - '-1'
       pragma:
@@ -258,7 +2655,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '149'
+      - '299'
       x-powered-by:
       - ASP.NET
     status:
@@ -278,24 +2675,22 @@ interactions:
       ParameterSetName:
       - -g -v -c -i --workload-type
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bakneema%3Bakneema-hana-ccy/protectedItems/saphanadatabase%3Bhxe%3Bsystemdb?api-version=2020-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bsaphana-clitest-rg%3Bsaphana-clitest-vm2/protectedItems/saphanadatabase%3Bhxe%3Bsystemdb?api-version=2021-10-01
   response:
     body:
-      string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;akneema;akneema-hana-ccy/protectedItems/SAPHanaDatabase;hxe;systemdb","name":"SAPHanaDatabase;hxe;systemdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{},"friendlyName":"systemdb","serverName":"hxehost","parentName":"HXE","parentType":"AzureVmWorkloadSAPHanaSystem","protectionStatus":"Healthy","protectionState":"IRPending","lastBackupStatus":"IRPending","lastBackupErrorDetail":{"code":"Success","message":""},"protectedItemDataSourceId":"1187187888","protectedItemHealthStatus":"IRPending","extendedInfo":{"recoveryPointCount":0,"policyState":"Consistent"},"protectedItemType":"AzureVmWorkloadSAPHanaDatabase","backupManagementType":"AzureWorkload","workloadType":"SAPHanaDatabase","containerName":"VMAppContainer;compute;akneema;akneema-hana-ccy","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.Compute/virtualMachines/akneema-hana-ccy","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupPolicies/hana-policy-ccy"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;saphana-clitest-rg;saphana-clitest-vm2/protectedItems/SAPHanaDatabase;hxe;systemdb","name":"SAPHanaDatabase;hxe;systemdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{},"friendlyName":"systemdb","serverName":"saphana-clitest-vm2","parentName":"HXE","parentType":"AzureVmWorkloadSAPHanaSystem","protectionStatus":"Healthy","protectionState":"IRPending","lastBackupStatus":"IRPending","lastBackupErrorDetail":{"code":"Success","message":""},"protectedItemDataSourceId":"70368803601850","protectedItemHealthStatus":"IRPending","extendedInfo":{"recoveryPointCount":0,"policyState":"Consistent"},"protectedItemType":"AzureVmWorkloadSAPHanaDatabase","backupManagementType":"AzureWorkload","workloadType":"SAPHanaDatabase","containerName":"VMAppContainer;compute;saphana-clitest-rg;saphana-clitest-vm2","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.Compute/virtualMachines/saphana-clitest-vm2","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupPolicies/saphana-clitest-policy","isArchiveEnabled":false}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1376'
+      - '1498'
       content-type:
       - application/json
       date:
-      - Wed, 13 Jan 2021 11:35:53 GMT
+      - Mon, 20 Dec 2021 17:54:20 GMT
       expires:
       - '-1'
       pragma:
@@ -311,7 +2706,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '149'
+      - '298'
       x-powered-by:
       - ASP.NET
     status:
@@ -331,24 +2726,22 @@ interactions:
       ParameterSetName:
       - -g -v -c -i --workload-type
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Bakneema%3Bakneema-hana-ccy/protectedItems/SAPHanaDatabase%3Bhxe%3Bsystemdb/recoveryPoints?api-version=2020-10-01&$filter=restorePointQueryType%20eq%20%27Log%27
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Bsaphana-clitest-rg%3Bsaphana-clitest-vm2/protectedItems/SAPHanaDatabase%3Bhxe%3Bsystemdb/recoveryPoints?api-version=2021-10-01&$filter=restorePointQueryType%20eq%20%27Log%27
   response:
     body:
-      string: '{"value":[{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;akneema;akneema-hana-ccy/protectedItems/SAPHanaDatabase;hxe;systemdb/recoveryPoints/DefaultRangeRecoveryPoint","name":"DefaultRangeRecoveryPoint","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaPointInTimeRecoveryPoint","timeRanges":[],"type":"Log"}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;saphana-clitest-rg;saphana-clitest-vm2/protectedItems/SAPHanaDatabase;hxe;systemdb/recoveryPoints/DefaultRangeRecoveryPoint","name":"DefaultRangeRecoveryPoint","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaPointInTimeRecoveryPoint","timeRanges":[],"type":"Log"}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '578'
+      - '608'
       content-type:
       - application/json
       date:
-      - Wed, 13 Jan 2021 11:35:54 GMT
+      - Mon, 20 Dec 2021 17:54:21 GMT
       expires:
       - '-1'
       pragma:
@@ -364,7 +2757,1220 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '149'
+      - '297'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection disable
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -c --backup-management-type --workload-type -i -y --delete-backup-data
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bsaphana-clitest-rg%3Bsaphana-clitest-vm2/protectedItems/saphanadatabase%3Bhxe%3Bsystemdb?api-version=2021-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;saphana-clitest-rg;saphana-clitest-vm2/protectedItems/SAPHanaDatabase;hxe;systemdb","name":"SAPHanaDatabase;hxe;systemdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{},"friendlyName":"systemdb","serverName":"saphana-clitest-vm2","parentName":"HXE","parentType":"AzureVmWorkloadSAPHanaSystem","protectionStatus":"Healthy","protectionState":"IRPending","lastBackupStatus":"IRPending","lastBackupErrorDetail":{"code":"Success","message":""},"protectedItemDataSourceId":"70368803601850","protectedItemHealthStatus":"IRPending","extendedInfo":{"recoveryPointCount":0,"policyState":"Consistent"},"protectedItemType":"AzureVmWorkloadSAPHanaDatabase","backupManagementType":"AzureWorkload","workloadType":"SAPHanaDatabase","containerName":"VMAppContainer;compute;saphana-clitest-rg;saphana-clitest-vm2","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.Compute/virtualMachines/saphana-clitest-vm2","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupPolicies/saphana-clitest-policy","isArchiveEnabled":false}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1498'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:54:22 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '298'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection disable
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -v -g -c --backup-management-type --workload-type -i -y --delete-backup-data
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Bsaphana-clitest-rg%3Bsaphana-clitest-vm2/protectedItems/SAPHanaDatabase%3Bhxe%3Bsystemdb?api-version=2021-10-01
+  response:
+    body:
+      string: ''
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupOperations/f44cd63e-4e19-41a5-8c80-a4b6829d1980?api-version=2021-10-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Mon, 20 Dec 2021 17:54:24 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupOperationResults/f44cd63e-4e19-41a5-8c80-a4b6829d1980?api-version=2021-10-01
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection disable
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -c --backup-management-type --workload-type -i -y --delete-backup-data
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupOperations/f44cd63e-4e19-41a5-8c80-a4b6829d1980?api-version=2021-10-01
+  response:
+    body:
+      string: '{"id":"f44cd63e-4e19-41a5-8c80-a4b6829d1980","name":"f44cd63e-4e19-41a5-8c80-a4b6829d1980","status":"InProgress","startTime":"2021-12-20T17:54:24.7768201Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:54:25 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '299'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection disable
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -c --backup-management-type --workload-type -i -y --delete-backup-data
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupOperations/f44cd63e-4e19-41a5-8c80-a4b6829d1980?api-version=2021-10-01
+  response:
+    body:
+      string: '{"id":"f44cd63e-4e19-41a5-8c80-a4b6829d1980","name":"f44cd63e-4e19-41a5-8c80-a4b6829d1980","status":"InProgress","startTime":"2021-12-20T17:54:24.7768201Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:54:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '298'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection disable
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -c --backup-management-type --workload-type -i -y --delete-backup-data
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupOperations/f44cd63e-4e19-41a5-8c80-a4b6829d1980?api-version=2021-10-01
+  response:
+    body:
+      string: '{"id":"f44cd63e-4e19-41a5-8c80-a4b6829d1980","name":"f44cd63e-4e19-41a5-8c80-a4b6829d1980","status":"InProgress","startTime":"2021-12-20T17:54:24.7768201Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:54:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '297'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection disable
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -c --backup-management-type --workload-type -i -y --delete-backup-data
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupOperations/f44cd63e-4e19-41a5-8c80-a4b6829d1980?api-version=2021-10-01
+  response:
+    body:
+      string: '{"id":"f44cd63e-4e19-41a5-8c80-a4b6829d1980","name":"f44cd63e-4e19-41a5-8c80-a4b6829d1980","status":"InProgress","startTime":"2021-12-20T17:54:24.7768201Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:54:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '296'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection disable
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -c --backup-management-type --workload-type -i -y --delete-backup-data
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupOperations/f44cd63e-4e19-41a5-8c80-a4b6829d1980?api-version=2021-10-01
+  response:
+    body:
+      string: '{"id":"f44cd63e-4e19-41a5-8c80-a4b6829d1980","name":"f44cd63e-4e19-41a5-8c80-a4b6829d1980","status":"InProgress","startTime":"2021-12-20T17:54:24.7768201Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:54:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '295'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection disable
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -c --backup-management-type --workload-type -i -y --delete-backup-data
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupOperations/f44cd63e-4e19-41a5-8c80-a4b6829d1980?api-version=2021-10-01
+  response:
+    body:
+      string: '{"id":"f44cd63e-4e19-41a5-8c80-a4b6829d1980","name":"f44cd63e-4e19-41a5-8c80-a4b6829d1980","status":"InProgress","startTime":"2021-12-20T17:54:24.7768201Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:54:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '294'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection disable
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -c --backup-management-type --workload-type -i -y --delete-backup-data
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupOperations/f44cd63e-4e19-41a5-8c80-a4b6829d1980?api-version=2021-10-01
+  response:
+    body:
+      string: '{"id":"f44cd63e-4e19-41a5-8c80-a4b6829d1980","name":"f44cd63e-4e19-41a5-8c80-a4b6829d1980","status":"Succeeded","startTime":"2021-12-20T17:54:24.7768201Z","endTime":"2021-12-20T17:54:24.7768201Z","properties":{"objectType":"OperationStatusJobExtendedInfo","jobId":"c2a8acc1-5b36-4dfc-975d-f61a79301d06"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '304'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:54:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '293'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection disable
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -c --backup-management-type --workload-type -i -y --delete-backup-data
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupJobs/c2a8acc1-5b36-4dfc-975d-f61a79301d06?api-version=2021-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupJobs/c2a8acc1-5b36-4dfc-975d-f61a79301d06","name":"c2a8acc1-5b36-4dfc-975d-f61a79301d06","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJob","workloadType":"SAPHanaDatabase","duration":"PT32.0154364S","extendedInfo":{"tasksList":[],"propertyBag":{}},"isUserTriggered":true,"entityFriendlyName":"systemdb","backupManagementType":"AzureWorkload","operation":"DeleteBackupData","status":"Completed","startTime":"2021-12-20T17:54:24.7768201Z","endTime":"2021-12-20T17:54:56.7922565Z","activityId":"dcd735fe-61bd-11ec-a5d7-c8f750f92764"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '744'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:55:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '298'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container unregister
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -c -y
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupProtectionContainers?api-version=2021-10-01&$filter=backupManagementType%20eq%20%27AzureWorkload%27%20and%20status%20eq%20%27Registered%27
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2","name":"VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.Compute/virtualMachines/saphana-clitest-vm2","lastUpdatedTime":"2021-12-20T17:50:36.5845647Z","extendedInfo":{"hostServerName":"saphana-clitest-vm2","inquiryInfo":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"inquiryDetails":[{"type":"SAPHana","itemCount":2,"inquiryValidation":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"additionalDetail":"","protectableItemCount":{"SAPHanaSystem":1,"SAPHanaDatabase":2}}}]}},"friendlyName":"saphana-clitest-vm2","backupManagementType":"AzureWorkload","registrationStatus":"Registered","healthStatus":"Healthy","containerType":"VMAppContainer","protectableObjectType":"VMAppContainer"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1276'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:55:01 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '297'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container unregister
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -v -g -c -y
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bsaphana-clitest-rg%3Bsaphana-clitest-vm2?api-version=2021-10-01
+  response:
+    body:
+      string: ''
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/operationsStatus/6e060c39-fc4b-4f93-a250-95cf77f665fb?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Mon, 20 Dec 2021 17:55:02 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupOperationResults/6e060c39-fc4b-4f93-a250-95cf77f665fb?fabricName=Azure?api-version=2021-10-01
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container unregister
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -c -y
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bsaphana-clitest-rg%3Bsaphana-clitest-vm2/operationResults/6e060c39-fc4b-4f93-a250-95cf77f665fb?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationsStatus/6e060c39-fc4b-4f93-a250-95cf77f665fb?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:55:03 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationResults/6e060c39-fc4b-4f93-a250-95cf77f665fb?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '299'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container unregister
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -c -y
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bsaphana-clitest-rg%3Bsaphana-clitest-vm2/operationResults/6e060c39-fc4b-4f93-a250-95cf77f665fb?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationsStatus/6e060c39-fc4b-4f93-a250-95cf77f665fb?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:55:08 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationResults/6e060c39-fc4b-4f93-a250-95cf77f665fb?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '298'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container unregister
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -c -y
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bsaphana-clitest-rg%3Bsaphana-clitest-vm2/operationResults/6e060c39-fc4b-4f93-a250-95cf77f665fb?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationsStatus/6e060c39-fc4b-4f93-a250-95cf77f665fb?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:55:14 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationResults/6e060c39-fc4b-4f93-a250-95cf77f665fb?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '297'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container unregister
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -c -y
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bsaphana-clitest-rg%3Bsaphana-clitest-vm2/operationResults/6e060c39-fc4b-4f93-a250-95cf77f665fb?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationsStatus/6e060c39-fc4b-4f93-a250-95cf77f665fb?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:55:19 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationResults/6e060c39-fc4b-4f93-a250-95cf77f665fb?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '296'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container unregister
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -c -y
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bsaphana-clitest-rg%3Bsaphana-clitest-vm2/operationResults/6e060c39-fc4b-4f93-a250-95cf77f665fb?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationsStatus/6e060c39-fc4b-4f93-a250-95cf77f665fb?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:55:24 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationResults/6e060c39-fc4b-4f93-a250-95cf77f665fb?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '295'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container unregister
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -c -y
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bsaphana-clitest-rg%3Bsaphana-clitest-vm2/operationResults/6e060c39-fc4b-4f93-a250-95cf77f665fb?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationsStatus/6e060c39-fc4b-4f93-a250-95cf77f665fb?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:55:30 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationResults/6e060c39-fc4b-4f93-a250-95cf77f665fb?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '294'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container unregister
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -c -y
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bsaphana-clitest-rg%3Bsaphana-clitest-vm2/operationResults/6e060c39-fc4b-4f93-a250-95cf77f665fb?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationsStatus/6e060c39-fc4b-4f93-a250-95cf77f665fb?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:55:35 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationResults/6e060c39-fc4b-4f93-a250-95cf77f665fb?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '293'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container unregister
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -c -y
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bsaphana-clitest-rg%3Bsaphana-clitest-vm2/operationResults/6e060c39-fc4b-4f93-a250-95cf77f665fb?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationsStatus/6e060c39-fc4b-4f93-a250-95cf77f665fb?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:55:43 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationResults/6e060c39-fc4b-4f93-a250-95cf77f665fb?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '292'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container unregister
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -c -y
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bsaphana-clitest-rg%3Bsaphana-clitest-vm2/operationResults/6e060c39-fc4b-4f93-a250-95cf77f665fb?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationsStatus/6e060c39-fc4b-4f93-a250-95cf77f665fb?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:55:49 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationResults/6e060c39-fc4b-4f93-a250-95cf77f665fb?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '291'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container unregister
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -c -y
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bsaphana-clitest-rg%3Bsaphana-clitest-vm2/operationResults/6e060c39-fc4b-4f93-a250-95cf77f665fb?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationsStatus/6e060c39-fc4b-4f93-a250-95cf77f665fb?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:55:54 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2/operationResults/6e060c39-fc4b-4f93-a250-95cf77f665fb?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '290'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container unregister
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -c -y
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bsaphana-clitest-rg%3Bsaphana-clitest-vm2/operationResults/6e060c39-fc4b-4f93-a250-95cf77f665fb?api-version=2021-10-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 20 Dec 2021 17:56:01 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '289'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 204
+      message: No Content
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g --backup-management-type
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupProtectionContainers?api-version=2021-10-01&$filter=backupManagementType%20eq%20%27AzureWorkload%27%20and%20status%20eq%20%27Registered%27
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 17:56:03 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '299'
       x-powered-by:
       - ASP.NET
     status:

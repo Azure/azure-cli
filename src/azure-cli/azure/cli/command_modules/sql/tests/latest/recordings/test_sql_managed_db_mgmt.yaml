@@ -11,28 +11,28 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --capacity --storage --edition --family
+      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
+        --family --tags --proxy-override --public-data-endpoint-enabled
       User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.1 (Windows-10-10.0.14393-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westeurope/capabilities?include=supportedManagedInstanceVersions&api-version=2020-08-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/capabilities?include=supportedManagedInstanceVersions&api-version=2020-11-01-preview
   response:
     body:
-      string: '{"name":"West Europe","supportedManagedInstanceVersions":[{"name":"12.0","supportedEditions":[{"name":"GeneralPurpose","supportedFamilies":[{"name":"Gen5","sku":"GP_Gen5","supportedLicenseTypes":[{"name":"LicenseIncluded","status":"Default"},{"name":"BasePrice","status":"Available"}],"supportedVcoresValues":[{"name":"2","value":2,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":640,"unit":"Gigabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":false,"status":"Available"},{"name":"4","value":4,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":2,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"status":"Available"},{"name":"8","value":8,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":8,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"status":"Default"},{"name":"16","value":16,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":8,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"status":"Available"},{"name":"24","value":24,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":8,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"status":"Available"},{"name":"32","value":32,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":8,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"status":"Available"},{"name":"40","value":40,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":8,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"status":"Available"},{"name":"64","value":64,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":8,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"status":"Available"},{"name":"80","value":80,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":8,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"status":"Available"}],"status":"Default"}],"supportedStorageCapabilities":[{"storageAccountType":"GRS","status":"Default"},{"storageAccountType":"LRS","status":"Available"},{"storageAccountType":"ZRS","status":"Available","reason":"ZRS
-        is available in multi-az regions"}],"status":"Default"},{"name":"BusinessCritical","supportedFamilies":[{"name":"Gen5","sku":"BC_Gen5","supportedLicenseTypes":[{"name":"LicenseIncluded","status":"Default"},{"name":"BasePrice","status":"Available"}],"supportedVcoresValues":[{"name":"4","value":4,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":1,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"status":"Available"},{"name":"8","value":8,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":1,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"status":"Default"},{"name":"16","value":16,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":1,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"status":"Available"},{"name":"24","value":24,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":2,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"status":"Available"},{"name":"32","value":32,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":4,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"status":"Available"},{"name":"40","value":40,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":4,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"status":"Available"},{"name":"64","value":64,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":4,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"status":"Available"},{"name":"80","value":80,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":4,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"status":"Available"}],"status":"Default"}],"supportedStorageCapabilities":[{"storageAccountType":"GRS","status":"Default"},{"storageAccountType":"LRS","status":"Available"},{"storageAccountType":"ZRS","status":"Available","reason":"ZRS
-        is available in multi-az regions"}],"status":"Available"}],"supportedInstancePoolEditions":[{"name":"GeneralPurpose","supportedFamilies":[{"name":"Gen5","supportedLicenseTypes":[{"name":"LicenseIncluded","status":"Default"},{"name":"BasePrice","status":"Available"}],"supportedVcoresValues":[{"name":"GP_Gen5_8","value":8,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Default"},{"name":"GP_Gen5_16","value":16,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Available"},{"name":"GP_Gen5_24","value":24,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Available"},{"name":"GP_Gen5_32","value":32,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Available"},{"name":"GP_Gen5_40","value":40,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Available"},{"name":"GP_Gen5_64","value":64,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Available"},{"name":"GP_Gen5_80","value":80,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Available"}],"status":"Default"}],"status":"Default"}],"status":"Default"}],"status":"Available"}'
+      string: '{"name":"West Central US","supportedManagedInstanceVersions":[{"name":"12.0","supportedEditions":[{"name":"GeneralPurpose","supportedFamilies":[{"name":"Gen5","sku":"GP_Gen5","supportedLicenseTypes":[{"name":"LicenseIncluded","status":"Default"},{"name":"BasePrice","status":"Available"}],"supportedVcoresValues":[{"name":"2","value":2,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":640,"unit":"Gigabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":false,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"4","value":4,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":2,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"8","value":8,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":8,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Default"},{"name":"16","value":16,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"24","value":24,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"32","value":32,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"40","value":40,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"64","value":64,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"80","value":80,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"}],"status":"Default"}],"supportedStorageCapabilities":[{"storageAccountType":"GRS","status":"Default"},{"storageAccountType":"LRS","status":"Available"},{"storageAccountType":"ZRS","status":"Visible","reason":"ZRS
+        is available in multi-az regions"},{"storageAccountType":"GZRS","status":"Visible","reason":"GZRS
+        is available in multi-az regions"}],"zoneRedundant":false,"status":"Default"},{"name":"BusinessCritical","supportedFamilies":[{"name":"Gen5","sku":"BC_Gen5","supportedLicenseTypes":[{"name":"LicenseIncluded","status":"Default"},{"name":"BasePrice","status":"Available"}],"supportedVcoresValues":[{"name":"4","value":4,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":1,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"8","value":8,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":1,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Default"},{"name":"16","value":16,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":1,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"24","value":24,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":2,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"32","value":32,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":4,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"40","value":40,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":4,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"64","value":64,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":4,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"80","value":80,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":4,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"}],"status":"Default"}],"supportedStorageCapabilities":[{"storageAccountType":"GRS","status":"Default"},{"storageAccountType":"LRS","status":"Available"},{"storageAccountType":"ZRS","status":"Visible","reason":"ZRS
+        is available in multi-az regions"},{"storageAccountType":"GZRS","status":"Visible","reason":"GZRS
+        is available in multi-az regions"}],"zoneRedundant":false,"status":"Available"}],"supportedInstancePoolEditions":[{"name":"GeneralPurpose","supportedFamilies":[{"name":"Gen5","supportedLicenseTypes":[{"name":"LicenseIncluded","status":"Default"},{"name":"BasePrice","status":"Available"}],"supportedVcoresValues":[{"name":"GP_Gen5_8","value":8,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Default"},{"name":"GP_Gen5_16","value":16,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Available"},{"name":"GP_Gen5_24","value":24,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Available"},{"name":"GP_Gen5_32","value":32,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Available"},{"name":"GP_Gen5_40","value":40,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Available"},{"name":"GP_Gen5_64","value":64,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Available"},{"name":"GP_Gen5_80","value":80,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Available"}],"status":"Default"}],"status":"Default"}],"status":"Default"}],"status":"Available"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '7796'
+      - '11289'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 04 Sep 2020 21:26:18 GMT
+      - Thu, 30 Dec 2021 15:50:16 GMT
       expires:
       - '-1'
       pragma:
@@ -51,9 +51,12 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "westeurope", "sku": {"name": "GP_Gen5"}, "properties": {"administratorLogin":
-      "admin123", "administratorLoginPassword": "SecretPassword123", "subnetId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1",
-      "licenseType": "LicenseIncluded", "vCores": 4, "storageSizeInGB": 128}}'
+    body: '{"location": "westcentralus", "tags": {}, "sku": {"name": "GP_Gen5"}, "properties":
+      {"administratorLogin": "admin123", "administratorLoginPassword": "SecretPassword123SecretPassword",
+      "subnetId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance",
+      "licenseType": "LicenseIncluded", "vCores": 8, "storageSizeInGB": 32, "collation":
+      "Serbian_Cyrillic_100_CS_AS", "publicDataEndpointEnabled": true, "proxyOverride":
+      "Proxy", "administrators": {}}}'
     headers:
       Accept:
       - application/json
@@ -64,30 +67,28 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '397'
+      - '572'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --capacity --storage --edition --family
+      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
+        --family --tags --proxy-override --public-data-endpoint-enabled
       User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.1 (Windows-10-10.0.14393-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"identity":{"principalId":"00000000-0000-0000-0000-000000000000","type":"None","tenantId":"00000000-0000-0000-0000-000000000000"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":128,"collation":"SQL_Latin1_General_CP1_CI_AS","timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+      string: '{"identity":{"type":"None"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":8},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","licenseType":"LicenseIncluded","vCores":8,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"SystemDefault","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '708'
+      - '822'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 04 Sep 2020 21:26:32 GMT
+      - Thu, 30 Dec 2021 15:50:21 GMT
       expires:
       - '-1'
       pragma:
@@ -99,7 +100,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
     status:
       code: 201
       message: Created
@@ -107,7 +108,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -115,24 +116,24 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --capacity --storage --edition --family
+      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
+        --family --tags --proxy-override --public-data-endpoint-enabled
       User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
+      - AZURECLI/2.31.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.1 (Windows-10-10.0.14393-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":128,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":false,"timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":8},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":8,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '800'
+      - '1291'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 04 Sep 2020 21:27:32 GMT
+      - Thu, 30 Dec 2021 15:51:22 GMT
       expires:
       - '-1'
       pragma:
@@ -154,7 +155,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -162,24 +163,24 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --capacity --storage --edition --family
+      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
+        --family --tags --proxy-override --public-data-endpoint-enabled
       User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
+      - AZURECLI/2.31.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.1 (Windows-10-10.0.14393-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":128,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":false,"timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":8},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":8,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '800'
+      - '1291'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 04 Sep 2020 21:28:03 GMT
+      - Thu, 30 Dec 2021 15:51:51 GMT
       expires:
       - '-1'
       pragma:
@@ -201,7 +202,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -209,24 +210,24 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --capacity --storage --edition --family
+      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
+        --family --tags --proxy-override --public-data-endpoint-enabled
       User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
+      - AZURECLI/2.31.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.1 (Windows-10-10.0.14393-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":128,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":false,"timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":8},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":8,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '800'
+      - '1291'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 04 Sep 2020 21:28:33 GMT
+      - Thu, 30 Dec 2021 15:52:22 GMT
       expires:
       - '-1'
       pragma:
@@ -248,7 +249,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -256,24 +257,24 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --capacity --storage --edition --family
+      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
+        --family --tags --proxy-override --public-data-endpoint-enabled
       User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
+      - AZURECLI/2.31.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.1 (Windows-10-10.0.14393-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":128,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":false,"timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":8},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":8,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '800'
+      - '1291'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 04 Sep 2020 21:29:03 GMT
+      - Thu, 30 Dec 2021 15:52:52 GMT
       expires:
       - '-1'
       pragma:
@@ -295,7 +296,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -303,1951 +304,24 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --capacity --storage --edition --family
+      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
+        --family --tags --proxy-override --public-data-endpoint-enabled
       User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
+      - AZURECLI/2.31.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.1 (Windows-10-10.0.14393-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":128,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":false,"timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":8},"properties":{"provisioningState":"Succeeded","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Ready","licenseType":"LicenseIncluded","vCores":8,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '800'
+      - '1289'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 04 Sep 2020 21:29:34 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --capacity --storage --edition --family
-      User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":128,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":false,"timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '800'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 04 Sep 2020 21:30:03 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --capacity --storage --edition --family
-      User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":128,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":false,"timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '800'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 04 Sep 2020 21:30:33 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --capacity --storage --edition --family
-      User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":128,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":false,"timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '800'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 04 Sep 2020 21:31:04 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --capacity --storage --edition --family
-      User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":128,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":false,"timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '800'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 04 Sep 2020 21:31:34 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --capacity --storage --edition --family
-      User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":128,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":false,"timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '800'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 04 Sep 2020 21:32:04 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --capacity --storage --edition --family
-      User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":128,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":false,"timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '800'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 04 Sep 2020 21:32:34 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --capacity --storage --edition --family
-      User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":128,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":false,"timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '800'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 04 Sep 2020 21:33:04 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --capacity --storage --edition --family
-      User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":128,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":false,"timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '800'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 04 Sep 2020 21:33:35 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --capacity --storage --edition --family
-      User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":128,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":false,"timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '800'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 04 Sep 2020 21:34:05 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --capacity --storage --edition --family
-      User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":128,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":false,"timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '800'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 04 Sep 2020 21:34:34 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --capacity --storage --edition --family
-      User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":128,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":false,"timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '800'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 04 Sep 2020 21:35:05 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --capacity --storage --edition --family
-      User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":128,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":false,"timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '800'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 04 Sep 2020 21:35:35 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --capacity --storage --edition --family
-      User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":128,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":false,"timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '800'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 04 Sep 2020 21:36:06 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --capacity --storage --edition --family
-      User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":128,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":false,"timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '800'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 04 Sep 2020 21:36:35 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --capacity --storage --edition --family
-      User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":128,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":false,"timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '800'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 04 Sep 2020 21:37:05 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --capacity --storage --edition --family
-      User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":128,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":false,"timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '800'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 04 Sep 2020 21:37:36 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --capacity --storage --edition --family
-      User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":128,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":false,"timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '800'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 04 Sep 2020 21:38:06 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --capacity --storage --edition --family
-      User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":128,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":false,"timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '800'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 04 Sep 2020 21:38:36 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --capacity --storage --edition --family
-      User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":128,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":false,"timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '800'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 04 Sep 2020 21:39:06 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --capacity --storage --edition --family
-      User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":128,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":false,"timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '800'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 04 Sep 2020 21:39:36 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --capacity --storage --edition --family
-      User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":128,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":false,"timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '800'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 04 Sep 2020 21:40:06 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --capacity --storage --edition --family
-      User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":128,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":false,"timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '800'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 04 Sep 2020 21:40:37 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --capacity --storage --edition --family
-      User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":128,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":false,"timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '800'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 04 Sep 2020 21:41:08 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --capacity --storage --edition --family
-      User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":128,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":false,"timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '800'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 04 Sep 2020 21:41:38 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --capacity --storage --edition --family
-      User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":128,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":false,"timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '800'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 04 Sep 2020 21:42:08 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --capacity --storage --edition --family
-      User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":128,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":false,"timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '800'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 04 Sep 2020 21:42:38 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --capacity --storage --edition --family
-      User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":128,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":false,"timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '800'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 04 Sep 2020 21:43:09 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --capacity --storage --edition --family
-      User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":128,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":false,"timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '800'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 04 Sep 2020 21:43:39 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --capacity --storage --edition --family
-      User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":128,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":false,"timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '800'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 04 Sep 2020 21:44:09 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --capacity --storage --edition --family
-      User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":128,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":false,"timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '800'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 04 Sep 2020 21:44:40 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --capacity --storage --edition --family
-      User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":128,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":false,"timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '800'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 04 Sep 2020 21:45:10 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --capacity --storage --edition --family
-      User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":128,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":false,"timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '800'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 04 Sep 2020 21:45:41 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --capacity --storage --edition --family
-      User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":128,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":false,"timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '800'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 04 Sep 2020 21:46:12 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --capacity --storage --edition --family
-      User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":128,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":false,"timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '800'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 04 Sep 2020 21:46:42 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --capacity --storage --edition --family
-      User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":128,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":false,"timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '800'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 04 Sep 2020 21:47:12 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --capacity --storage --edition --family
-      User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":128,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":false,"timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '800'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 04 Sep 2020 21:47:43 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --capacity --storage --edition --family
-      User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":128,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":false,"timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '800'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 04 Sep 2020 21:48:13 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --capacity --storage --edition --family
-      User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.dbd83b138df7.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":128,"collation":"SQL_Latin1_General_CP1_CI_AS","dnsZone":"dbd83b138df7","publicDataEndpointEnabled":false,"timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '909'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 04 Sep 2020 21:48:43 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --capacity --storage --edition --family
-      User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.dbd83b138df7.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":128,"collation":"SQL_Latin1_General_CP1_CI_AS","dnsZone":"dbd83b138df7","publicDataEndpointEnabled":false,"timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '909'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 04 Sep 2020 21:49:13 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --capacity --storage --edition --family
-      User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.dbd83b138df7.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":128,"collation":"SQL_Latin1_General_CP1_CI_AS","dnsZone":"dbd83b138df7","publicDataEndpointEnabled":false,"timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '909'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 04 Sep 2020 21:49:44 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --capacity --storage --edition --family
-      User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Succeeded","fullyQualifiedDomainName":"clitestmi000001.dbd83b138df7.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Ready","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":128,"collation":"SQL_Latin1_General_CP1_CI_AS","dnsZone":"dbd83b138df7","publicDataEndpointEnabled":false,"timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '907'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 04 Sep 2020 21:50:14 GMT
+      - Thu, 30 Dec 2021 15:53:22 GMT
       expires:
       - '-1'
       pragma:
@@ -2279,24 +353,21 @@ interactions:
       ParameterSetName:
       - -g --mi -n --collation
       User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.1 (Windows-10-10.0.14393-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Succeeded","fullyQualifiedDomainName":"clitestmi000001.dbd83b138df7.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Ready","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":128,"collation":"SQL_Latin1_General_CP1_CI_AS","dnsZone":"dbd83b138df7","publicDataEndpointEnabled":false,"timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":8},"properties":{"provisioningState":"Succeeded","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Ready","licenseType":"LicenseIncluded","vCores":8,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '907'
+      - '1289'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 04 Sep 2020 21:50:16 GMT
+      - Thu, 30 Dec 2021 15:53:24 GMT
       expires:
       - '-1'
       pragma:
@@ -2315,7 +386,7 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "westeurope", "properties": {"collation": "Latin1_General_100_CS_AS_SC"}}'
+    body: '{"location": "westcentralus", "properties": {"collation": "Serbian_Cyrillic_100_CS_AS"}}'
     headers:
       Accept:
       - application/json
@@ -2326,24 +397,21 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '86'
+      - '88'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g --mi -n --collation
       User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.1 (Windows-10-10.0.14393-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/cliautomationdb01?api-version=2020-02-02-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/cliautomationdb01?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"operation":"CreateManagedDatabase","startTime":"2020-09-04T21:50:22.323Z"}'
+      string: '{"operation":"CreateManagedDatabase","startTime":"2021-12-30T15:53:29.233Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westeurope/managedDatabaseAzureAsyncOperation/3f9f30de-1484-46ee-bec6-74997a973f1d?api-version=2020-02-02-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/managedDatabaseAzureAsyncOperation/15a5eb2f-952e-4a5f-b9e0-cc69b03bc248?api-version=2020-11-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -2351,11 +419,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 04 Sep 2020 21:50:22 GMT
+      - Thu, 30 Dec 2021 15:53:28 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westeurope/managedDatabaseOperationResults/3f9f30de-1484-46ee-bec6-74997a973f1d?api-version=2020-02-02-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/managedDatabaseOperationResults/15a5eb2f-952e-4a5f-b9e0-cc69b03bc248?api-version=2020-11-01-preview
       pragma:
       - no-cache
       server:
@@ -2373,7 +441,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -2383,13 +451,12 @@ interactions:
       ParameterSetName:
       - -g --mi -n --collation
       User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
+      - AZURECLI/2.31.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.1 (Windows-10-10.0.14393-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westeurope/managedDatabaseAzureAsyncOperation/3f9f30de-1484-46ee-bec6-74997a973f1d?api-version=2020-02-02-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/managedDatabaseAzureAsyncOperation/15a5eb2f-952e-4a5f-b9e0-cc69b03bc248?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"name":"3f9f30de-1484-46ee-bec6-74997a973f1d","status":"Succeeded","startTime":"2020-09-04T21:50:22.323Z"}'
+      string: '{"name":"15a5eb2f-952e-4a5f-b9e0-cc69b03bc248","status":"Succeeded","startTime":"2021-12-30T15:53:29.233Z"}'
     headers:
       cache-control:
       - no-cache
@@ -2398,7 +465,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 04 Sep 2020 21:50:38 GMT
+      - Thu, 30 Dec 2021 15:53:44 GMT
       expires:
       - '-1'
       pragma:
@@ -2420,7 +487,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -2430,22 +497,21 @@ interactions:
       ParameterSetName:
       - -g --mi -n --collation
       User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
+      - AZURECLI/2.31.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.1 (Windows-10-10.0.14393-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/cliautomationdb01?api-version=2020-02-02-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/cliautomationdb01?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"properties":{"collation":"Latin1_General_100_CS_AS_SC","status":"Online","creationDate":"2020-09-04T21:50:22.62Z","defaultSecondaryLocation":"northeurope"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/cliautomationdb01","name":"cliautomationdb01","type":"Microsoft.Sql/managedInstances/databases"}'
+      string: '{"properties":{"collation":"Serbian_Cyrillic_100_CS_AS","status":"Online","creationDate":"2021-12-30T15:53:29.5Z","defaultSecondaryLocation":"westus2"},"location":"westcentralus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/cliautomationdb01","name":"cliautomationdb01","type":"Microsoft.Sql/managedInstances/databases"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '428'
+      - '488'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 04 Sep 2020 21:50:38 GMT
+      - Thu, 30 Dec 2021 15:53:44 GMT
       expires:
       - '-1'
       pragma:
@@ -2477,24 +543,21 @@ interactions:
       ParameterSetName:
       - -g --mi -n --dest-name --time
       User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.1 (Windows-10-10.0.14393-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Succeeded","fullyQualifiedDomainName":"clitestmi000001.dbd83b138df7.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Ready","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":128,"collation":"SQL_Latin1_General_CP1_CI_AS","dnsZone":"dbd83b138df7","publicDataEndpointEnabled":false,"timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":8},"properties":{"provisioningState":"Succeeded","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Ready","licenseType":"LicenseIncluded","vCores":8,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '907'
+      - '1289'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 04 Sep 2020 21:55:40 GMT
+      - Thu, 30 Dec 2021 15:58:45 GMT
       expires:
       - '-1'
       pragma:
@@ -2513,8 +576,8 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "westeurope", "properties": {"restorePointInTime": "2020-09-04T21:55:39.539847Z",
-      "createMode": "PointInTimeRestore", "sourceDatabaseId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/cliautomationdb01"}}'
+    body: '{"location": "westcentralus", "properties": {"restorePointInTime": "2021-12-30T15:58:44.881946Z",
+      "createMode": "PointInTimeRestore", "sourceDatabaseId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/cliautomationdb01"}}'
     headers:
       Accept:
       - application/json
@@ -2525,36 +588,33 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '316'
+      - '382'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g --mi -n --dest-name --time
       User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.1 (Windows-10-10.0.14393-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/restoredcliautomationdb01?api-version=2020-02-02-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/restoredcliautomationdb01?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"operation":"CreateManagedRestoreRequest","startTime":"2020-09-04T21:55:46.79Z"}'
+      string: '{"operation":"CreateManagedRestoreRequest","startTime":"2021-12-30T15:58:50.773Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westeurope/managedDatabaseAzureAsyncOperation/07f75243-dade-4756-bd29-ad08803d35ee?api-version=2020-02-02-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/managedDatabaseAzureAsyncOperation/7db8c827-c159-43c4-80b4-2280ca6f2a97?api-version=2020-11-01-preview
       cache-control:
       - no-cache
       content-length:
-      - '81'
+      - '82'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 04 Sep 2020 21:55:46 GMT
+      - Thu, 30 Dec 2021 15:58:50 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westeurope/managedDatabaseOperationResults/07f75243-dade-4756-bd29-ad08803d35ee?api-version=2020-02-02-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/managedDatabaseOperationResults/7db8c827-c159-43c4-80b4-2280ca6f2a97?api-version=2020-11-01-preview
       pragma:
       - no-cache
       server:
@@ -2572,7 +632,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -2582,13 +642,288 @@ interactions:
       ParameterSetName:
       - -g --mi -n --dest-name --time
       User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
+      - AZURECLI/2.31.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.1 (Windows-10-10.0.14393-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westeurope/managedDatabaseAzureAsyncOperation/07f75243-dade-4756-bd29-ad08803d35ee?api-version=2020-02-02-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/managedDatabaseAzureAsyncOperation/7db8c827-c159-43c4-80b4-2280ca6f2a97?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"name":"07f75243-dade-4756-bd29-ad08803d35ee","status":"InProgress","startTime":"2020-09-04T21:55:46.79Z"}'
+      string: '{"name":"7db8c827-c159-43c4-80b4-2280ca6f2a97","status":"InProgress","startTime":"2021-12-30T15:58:50.773Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 30 Dec 2021 15:59:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql midb restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --mi -n --dest-name --time
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.1 (Windows-10-10.0.14393-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/managedDatabaseAzureAsyncOperation/7db8c827-c159-43c4-80b4-2280ca6f2a97?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"name":"7db8c827-c159-43c4-80b4-2280ca6f2a97","status":"InProgress","startTime":"2021-12-30T15:58:50.773Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 30 Dec 2021 15:59:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql midb restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --mi -n --dest-name --time
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.1 (Windows-10-10.0.14393-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/managedDatabaseAzureAsyncOperation/7db8c827-c159-43c4-80b4-2280ca6f2a97?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"name":"7db8c827-c159-43c4-80b4-2280ca6f2a97","status":"InProgress","startTime":"2021-12-30T15:58:50.773Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 30 Dec 2021 15:59:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql midb restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --mi -n --dest-name --time
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.1 (Windows-10-10.0.14393-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/managedDatabaseAzureAsyncOperation/7db8c827-c159-43c4-80b4-2280ca6f2a97?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"name":"7db8c827-c159-43c4-80b4-2280ca6f2a97","status":"InProgress","startTime":"2021-12-30T15:58:50.773Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 30 Dec 2021 15:59:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql midb restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --mi -n --dest-name --time
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.1 (Windows-10-10.0.14393-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/managedDatabaseAzureAsyncOperation/7db8c827-c159-43c4-80b4-2280ca6f2a97?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"name":"7db8c827-c159-43c4-80b4-2280ca6f2a97","status":"InProgress","startTime":"2021-12-30T15:58:50.773Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 30 Dec 2021 16:00:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql midb restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --mi -n --dest-name --time
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.1 (Windows-10-10.0.14393-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/managedDatabaseAzureAsyncOperation/7db8c827-c159-43c4-80b4-2280ca6f2a97?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"name":"7db8c827-c159-43c4-80b4-2280ca6f2a97","status":"InProgress","startTime":"2021-12-30T15:58:50.773Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 30 Dec 2021 16:00:21 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql midb restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --mi -n --dest-name --time
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.1 (Windows-10-10.0.14393-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/managedDatabaseAzureAsyncOperation/7db8c827-c159-43c4-80b4-2280ca6f2a97?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"name":"7db8c827-c159-43c4-80b4-2280ca6f2a97","status":"Succeeded","startTime":"2021-12-30T15:58:50.773Z"}'
     headers:
       cache-control:
       - no-cache
@@ -2597,7 +932,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 04 Sep 2020 21:56:02 GMT
+      - Thu, 30 Dec 2021 16:00:37 GMT
       expires:
       - '-1'
       pragma:
@@ -2619,7 +954,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -2629,116 +964,21 @@ interactions:
       ParameterSetName:
       - -g --mi -n --dest-name --time
       User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
+      - AZURECLI/2.31.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.1 (Windows-10-10.0.14393-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westeurope/managedDatabaseAzureAsyncOperation/07f75243-dade-4756-bd29-ad08803d35ee?api-version=2020-02-02-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/restoredcliautomationdb01?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"name":"07f75243-dade-4756-bd29-ad08803d35ee","status":"InProgress","startTime":"2020-09-04T21:55:46.79Z"}'
+      string: '{"properties":{"collation":"Serbian_Cyrillic_100_CS_AS","status":"Online","creationDate":"2021-12-30T15:58:51.053Z","defaultSecondaryLocation":"westus2"},"location":"westcentralus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/restoredcliautomationdb01","name":"restoredcliautomationdb01","type":"Microsoft.Sql/managedInstances/databases"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '107'
+      - '506'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 04 Sep 2020 21:56:18 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql midb restore
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g --mi -n --dest-name --time
-      User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westeurope/managedDatabaseAzureAsyncOperation/07f75243-dade-4756-bd29-ad08803d35ee?api-version=2020-02-02-preview
-  response:
-    body:
-      string: '{"name":"07f75243-dade-4756-bd29-ad08803d35ee","status":"Succeeded","startTime":"2020-09-04T21:55:46.79Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '106'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 04 Sep 2020 21:56:33 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql midb restore
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g --mi -n --dest-name --time
-      User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/restoredcliautomationdb01?api-version=2020-02-02-preview
-  response:
-    body:
-      string: '{"properties":{"collation":"Latin1_General_100_CS_AS_SC","status":"Online","creationDate":"2020-09-04T21:55:47.24Z","defaultSecondaryLocation":"northeurope"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/restoredcliautomationdb01","name":"restoredcliautomationdb01","type":"Microsoft.Sql/managedInstances/databases"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '444'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 04 Sep 2020 21:56:33 GMT
+      - Thu, 30 Dec 2021 16:00:37 GMT
       expires:
       - '-1'
       pragma:
@@ -2770,24 +1010,21 @@ interactions:
       ParameterSetName:
       - -g --managed-instance
       User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.1 (Windows-10-10.0.14393-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases?api-version=2020-02-02-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"value":[{"properties":{"collation":"Latin1_General_100_CS_AS_SC","status":"Online","creationDate":"2020-09-04T21:50:22.62Z","earliestRestorePoint":"2020-09-04T21:51:12.09Z","defaultSecondaryLocation":"northeurope"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/cliautomationdb01","name":"cliautomationdb01","type":"Microsoft.Sql/managedInstances/databases"},{"properties":{"collation":"Latin1_General_100_CS_AS_SC","status":"Online","creationDate":"2020-09-04T21:55:47.24Z","defaultSecondaryLocation":"northeurope"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/restoredcliautomationdb01","name":"restoredcliautomationdb01","type":"Microsoft.Sql/managedInstances/databases"}]}'
+      string: '{"value":[{"properties":{"collation":"Serbian_Cyrillic_100_CS_AS","status":"Online","creationDate":"2021-12-30T15:58:51.053Z","defaultSecondaryLocation":"westus2"},"location":"westcentralus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/restoredcliautomationdb01","name":"restoredcliautomationdb01","type":"Microsoft.Sql/managedInstances/databases"},{"properties":{"collation":"Serbian_Cyrillic_100_CS_AS","status":"Online","creationDate":"2021-12-30T15:53:29.5Z","earliestRestorePoint":"2021-12-30T15:55:07.11Z","defaultSecondaryLocation":"westus2"},"location":"westcentralus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/cliautomationdb01","name":"cliautomationdb01","type":"Microsoft.Sql/managedInstances/databases"}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '934'
+      - '1056'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 04 Sep 2020 21:56:35 GMT
+      - Thu, 30 Dec 2021 16:00:38 GMT
       expires:
       - '-1'
       pragma:
@@ -2819,24 +1056,21 @@ interactions:
       ParameterSetName:
       - -g --managed-instance -n
       User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.1 (Windows-10-10.0.14393-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/cliautomationdb01?api-version=2020-02-02-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/cliautomationdb01?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"properties":{"collation":"Latin1_General_100_CS_AS_SC","status":"Online","creationDate":"2020-09-04T21:50:22.62Z","earliestRestorePoint":"2020-09-04T21:51:12.09Z","defaultSecondaryLocation":"northeurope"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/cliautomationdb01","name":"cliautomationdb01","type":"Microsoft.Sql/managedInstances/databases"}'
+      string: '{"properties":{"collation":"Serbian_Cyrillic_100_CS_AS","status":"Online","creationDate":"2021-12-30T15:53:29.5Z","earliestRestorePoint":"2021-12-30T15:55:07.11Z","defaultSecondaryLocation":"westus2"},"location":"westcentralus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/cliautomationdb01","name":"cliautomationdb01","type":"Microsoft.Sql/managedInstances/databases"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '477'
+      - '537'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 04 Sep 2020 21:56:36 GMT
+      - Thu, 30 Dec 2021 16:00:39 GMT
       expires:
       - '-1'
       pragma:
@@ -2866,26 +1100,23 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - --id
+      - --ids
       User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.1 (Windows-10-10.0.14393-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/restoredcliautomationdb01?api-version=2020-02-02-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/restoredcliautomationdb01?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"properties":{"collation":"Latin1_General_100_CS_AS_SC","status":"Online","creationDate":"2020-09-04T21:55:47.24Z","defaultSecondaryLocation":"northeurope"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/restoredcliautomationdb01","name":"restoredcliautomationdb01","type":"Microsoft.Sql/managedInstances/databases"}'
+      string: '{"properties":{"collation":"Serbian_Cyrillic_100_CS_AS","status":"Online","creationDate":"2021-12-30T15:58:51.053Z","defaultSecondaryLocation":"westus2"},"location":"westcentralus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/restoredcliautomationdb01","name":"restoredcliautomationdb01","type":"Microsoft.Sql/managedInstances/databases"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '444'
+      - '506'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 04 Sep 2020 21:56:38 GMT
+      - Thu, 30 Dec 2021 16:00:39 GMT
       expires:
       - '-1'
       pragma:
@@ -2907,7 +1138,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -2919,30 +1150,27 @@ interactions:
       ParameterSetName:
       - -g --managed-instance -n --yes
       User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.1 (Windows-10-10.0.14393-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/cliautomationdb01?api-version=2020-02-02-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/cliautomationdb01?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"operation":"DropManagedDatabase","startTime":"2020-09-04T21:56:41.16Z"}'
+      string: '{"operation":"DropManagedDatabase","startTime":"2021-12-30T16:00:41.903Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westeurope/managedDatabaseAzureAsyncOperation/0a700261-d19c-4d46-9b23-b7a28d418c18?api-version=2020-02-02-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/managedDatabaseAzureAsyncOperation/fad29669-4dbe-48f2-9a84-1af1369a3cce?api-version=2020-11-01-preview
       cache-control:
       - no-cache
       content-length:
-      - '73'
+      - '74'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 04 Sep 2020 21:56:40 GMT
+      - Thu, 30 Dec 2021 16:00:41 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westeurope/managedDatabaseOperationResults/0a700261-d19c-4d46-9b23-b7a28d418c18?api-version=2020-02-02-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/managedDatabaseOperationResults/fad29669-4dbe-48f2-9a84-1af1369a3cce?api-version=2020-11-01-preview
       pragma:
       - no-cache
       server:
@@ -2960,7 +1188,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -2970,22 +1198,21 @@ interactions:
       ParameterSetName:
       - -g --managed-instance -n --yes
       User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
+      - AZURECLI/2.31.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.1 (Windows-10-10.0.14393-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westeurope/managedDatabaseAzureAsyncOperation/0a700261-d19c-4d46-9b23-b7a28d418c18?api-version=2020-02-02-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/managedDatabaseAzureAsyncOperation/fad29669-4dbe-48f2-9a84-1af1369a3cce?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"name":"0a700261-d19c-4d46-9b23-b7a28d418c18","status":"Succeeded","startTime":"2020-09-04T21:56:41.16Z"}'
+      string: '{"name":"fad29669-4dbe-48f2-9a84-1af1369a3cce","status":"Succeeded","startTime":"2021-12-30T16:00:41.903Z"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '106'
+      - '107'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 04 Sep 2020 21:56:59 GMT
+      - Thu, 30 Dec 2021 16:00:56 GMT
       expires:
       - '-1'
       pragma:
@@ -3017,36 +1244,33 @@ interactions:
       ParameterSetName:
       - -g --managed-instance -n
       User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.1 (Windows-10-10.0.14393-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/cliautomationdb01?api-version=2020-02-02-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/cliautomationdb01?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"error":{"code":"ResourceNotFound","message":"The Resource ''Microsoft.Sql/managedInstances/clitestmi000001/databases/cliautomationdb01''
-        under resource group ''toki'' was not found. For more details please go to
-        https://aka.ms/ARMResourceNotFoundFix"}}'
+      string: '{"error":{"code":"ResourceNotFound","message":"The requested resource
+        of type ''Microsoft.Sql/managedInstances/databases'' with name ''cliautomationdb01''
+        was not found."}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '255'
+      - '168'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 04 Sep 2020 21:57:02 GMT
+      - Thu, 30 Dec 2021 16:00:57 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
-      x-ms-failure-cause:
-      - gateway
     status:
       code: 404
       message: Not Found
@@ -3054,7 +1278,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -3064,24 +1288,29 @@ interactions:
       Content-Length:
       - '0'
       ParameterSetName:
-      - --id --yes
+      - -g -n --yes --no-wait
       User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.1 (Windows-10-10.0.14393-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-11-01-preview
   response:
     body:
-      string: ''
+      string: '{"operation":"DropManagedServer","startTime":"2021-12-30T16:00:59.817Z"}'
     headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/managedInstanceAzureAsyncOperation/2a23a72d-83e7-41e7-a6e1-ffbfc9df295a?api-version=2020-11-01-preview
       cache-control:
       - no-cache
+      content-length:
+      - '72'
+      content-type:
+      - application/json; charset=utf-8
       date:
-      - Fri, 04 Sep 2020 21:57:08 GMT
+      - Thu, 30 Dec 2021 16:00:59 GMT
       expires:
       - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/managedInstanceOperationResults/2a23a72d-83e7-41e7-a6e1-ffbfc9df295a?api-version=2020-11-01-preview
       pragma:
       - no-cache
       server:
@@ -3093,6 +1322,6 @@ interactions:
       x-ms-ratelimit-remaining-subscription-deletes:
       - '14999'
     status:
-      code: 204
-      message: No Content
+      code: 202
+      message: Accepted
 version: 1

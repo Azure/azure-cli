@@ -94,12 +94,10 @@ def load_arguments(self, _):
 
         # Node
         c.argument('headnode_size', arg_type=node_size_type,
-                   help='Incoming BREAKING CHANGE: The default value "large" will be removed in next CLI version.'
-                        'The size of the node. See also: https://docs.microsoft.com/azure/'
+                   help='The size of the node. See also: https://docs.microsoft.com/azure/'
                         'hdinsight/hdinsight-hadoop-provision-linux-clusters#configure-cluster-size')
         c.argument('workernode_size', arg_type=node_size_type,
-                   help='Incoming BREAKING CHANGE: The default value "large" will be removed in next CLI version.'
-                        'The size of the node. See also: https://docs.microsoft.com/azure/'
+                   help='The size of the node. See also: https://docs.microsoft.com/azure/'
                         'hdinsight/hdinsight-hadoop-provision-linux-clusters#configure-cluster-size')
         c.argument('workernode_data_disks_per_node', arg_group='Node',
                    help='The number of data disks to use per worker node.')
@@ -230,11 +228,24 @@ def load_arguments(self, _):
         c.argument('enable_private_link', arg_group='Private Link', arg_type=get_three_state_flag(),
                    help='Indicate whether enable the private link or not.')
 
+        c.argument('private_link_configurations',
+                   options_list=['--private-link-config', '--private-link-configurations'],
+                   arg_group='Private Link', type=shell_safe_json_parse,
+                   completer=FilesCompleter(),
+                   help='The private link configurations when creating cluster. '
+                        'Private Link Configurations may be supplied from a file using the `@{path}` syntax '
+                        'or a JSON string. Please see https://github.com/Azure/azure-cli/blob/dev/src/azure-cli/azure'
+                        '/cli/command_modules/hdinsight/tests/latest/privatelinkconfigurations.json')
+
         # compute isolation
         c.argument('enable_compute_isolation', options_list=['--enable-compute-isolation', '--compute-isolation'],
                    arg_group="Compute Isolation", arg_type=get_three_state_flag(),
                    help='Indicate whether enable compute isolation or not.')
         c.argument('host_sku', arg_group='Compute Isolation', help="The dedicated host sku of compute isolation.")
+
+        # availability zones
+        c.argument('zones', nargs='+', arg_group='Availability Zone',
+                   help="A space-delimited list of availability zones where cluster will be created.")
 
         # resize
         with self.argument_context('hdinsight resize') as c:
@@ -288,6 +299,16 @@ def load_arguments(self, _):
 
         # Monitoring
         with self.argument_context('hdinsight monitor') as c:
+            c.argument('workspace', validator=validate_workspace,
+                       completer=get_resource_name_completion_list_under_subscription(
+                           'Microsoft.OperationalInsights/workspaces'),
+                       help='The name, resource ID or workspace ID of Log Analytics workspace.')
+            c.argument('primary_key', help='The certificate for the Log Analytics workspace. '
+                                           'Required when workspace ID is provided.')
+            c.ignore('workspace_type')
+
+        # Azure Monitor
+        with self.argument_context('hdinsight azure-monitor') as c:
             c.argument('workspace', validator=validate_workspace,
                        completer=get_resource_name_completion_list_under_subscription(
                            'Microsoft.OperationalInsights/workspaces'),

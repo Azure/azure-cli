@@ -26,8 +26,7 @@ def load_arguments(self, _):
         get_policy_completion_list, get_policy_set_completion_list, get_policy_assignment_completion_list, get_policy_exemption_completion_list,
         get_resource_types_completion_list, get_providers_completion_list)
     from azure.cli.command_modules.resource._validators import (
-        validate_lock_parameters, validate_resource_lock, validate_group_lock, validate_subscription_lock, validate_metadata, RollbackAction,
-        validate_msi)
+        validate_lock_parameters, validate_resource_lock, validate_group_lock, validate_subscription_lock, validate_metadata, RollbackAction)
     from azure.cli.command_modules.resource.parameters import TagUpdateOperation
 
     DeploymentMode, WhatIfResultFormat, ChangeType = self.get_models('DeploymentMode', 'WhatIfResultFormat', 'ChangeType')
@@ -52,15 +51,21 @@ def load_arguments(self, _):
     deployment_template_file_type = CLIArgumentType(options_list=['--template-file', '-f'], completer=FilesCompleter(), type=file_type,
                                                     help="a path to a template file or Bicep file in the file system")
     deployment_template_uri_type = CLIArgumentType(options_list=['--template-uri', '-u'], help='a uri to a remote template file')
-    deployment_template_spec_type = CLIArgumentType(options_list=['--template-spec', '-s'], is_preview=True, min_api='2019-06-01', help="The template spec resource id.")
-    deployment_query_string_type = CLIArgumentType(options_list=['--query-string', '-q'], is_preview=True, help="The query string (a SAS token) to be used with the template-uri in the case of linked templates.")
+    deployment_template_spec_type = CLIArgumentType(options_list=['--template-spec', '-s'], min_api='2019-06-01', help="The template spec resource id.")
+    deployment_query_string_type = CLIArgumentType(options_list=['--query-string', '-q'], help="The query string (a SAS token) to be used with the template-uri in the case of linked templates.")
     deployment_parameters_type = CLIArgumentType(options_list=['--parameters', '-p'], action='append', nargs='+', completer=FilesCompleter(), help='the deployment parameters')
     filter_type = CLIArgumentType(options_list=['--filter'], is_preview=True,
                                   help='Filter expression using OData notation. You can use --filter "provisioningState eq \'{state}\'" to filter provisioningState. '
-                                       'To get more information, please visit https://docs.microsoft.com/en-us/rest/api/resources/deployments/listatsubscriptionscope#uri-parameters')
+                                       'To get more information, please visit https://docs.microsoft.com/rest/api/resources/deployments/listatsubscriptionscope#uri-parameters')
     no_prompt = CLIArgumentType(arg_type=get_three_state_flag(), help='The option to disable the prompt of missing parameters for ARM template. '
                                 'When the value is true, the prompt requiring users to provide missing parameter will be ignored. The default value is false.')
 
+    deployment_what_if_type = CLIArgumentType(options_list=['--what-if', '-w'], action='store_true',
+                                              help='Instruct the command to run deployment What-If.',
+                                              min_api='2019-07-01')
+    deployment_what_if_proceed_if_no_change_type = CLIArgumentType(options_list=['--proceed-if-no-change'], action='store_true',
+                                                                   help='Instruct the command to execute the deployment if the What-If result contains no resource changes. Applicable when --confirm-with-what-if is set.',
+                                                                   min_api='2019-07-01')
     deployment_what_if_result_format_type = CLIArgumentType(options_list=['--result-format', '-r'],
                                                             arg_type=get_enum_type(WhatIfResultFormat, "FullResourcePayloads"),
                                                             min_api='2019-07-01')
@@ -88,8 +93,12 @@ def load_arguments(self, _):
     ts_display_name_type = CLIArgumentType(options_list=['--display-name', '-d'], help='The display name of the template spec')
     ts_description_type = CLIArgumentType(options_list=['--description'], help='The description of the parent template spec.')
     ts_version_description_type = CLIArgumentType(options_list=['--version-description'], help='The description of the template spec version.')
-    ui_form_definition_file_type = CLIArgumentType(options_list=['--ui-form-definition'], is_preview=True, completer=FilesCompleter(), type=file_type,
+    ui_form_definition_file_type = CLIArgumentType(options_list=['--ui-form-definition'], completer=FilesCompleter(), type=file_type,
                                                    help="A path to a uiFormDefinition file in the file system")
+
+    bicep_target_platform_type = CLIArgumentType(options_list=['--target-platform', '-t'],
+                                                 arg_type=get_enum_type(["win-x64", "linux-musl-x64", "linux-x64", "osx-x64"]),
+                                                 help="The platform the Bicep CLI will be running on. Set this to skip automatic platform detection if it does not work properly.")
 
     _PROVIDER_HELP_TEXT = 'the resource namespace, aka \'provider\''
 
@@ -143,8 +152,9 @@ def load_arguments(self, _):
 
     with self.argument_context('provider register') as c:
         c.argument('mg', help="The management group id to register.", options_list=['--management-group-id', '-m'])
-        c.argument('accept_terms', action='store_true', is_preview=True, help="Accept market place terms and RP terms for RPaaS. Required when registering RPs from RPaaS, such as 'Microsoft.Confluent' and 'Microsoft.Datadog'.")
+        c.argument('accept_terms', action='store_true', is_preview=True, help="Accept market place terms and RP terms for RPaaS. Required when registering RPs from RPaaS, such as 'Microsoft.Confluent' and 'Microsoft.Datadog'.", deprecate_info=c.deprecate(hide=True))
         c.argument('wait', action='store_true', help='wait for the registration to finish')
+        c.argument('consent_to_permissions', options_list=['--consent-to-permissions', '-c'], action='store_true', help='A value indicating whether authorization is consented or not.')
 
     with self.argument_context('provider unregister') as c:
         c.argument('wait', action='store_true', help='wait for unregistration to finish')
@@ -157,6 +167,13 @@ def load_arguments(self, _):
         c.argument('feature_name', options_list=['--name', '-n'], help='the feature name')
 
     with self.argument_context('feature list') as c:
+        c.argument('resource_provider_namespace', options_list='--namespace', required=False, help=_PROVIDER_HELP_TEXT)
+
+    with self.argument_context('feature registration') as c:
+        c.argument('resource_provider_namespace', options_list='--namespace', required=True, help=_PROVIDER_HELP_TEXT)
+        c.argument('feature_name', options_list=['--name', '-n'], help='the feature name')
+
+    with self.argument_context('feature registration list') as c:
         c.argument('resource_provider_namespace', options_list='--namespace', required=False, help=_PROVIDER_HELP_TEXT)
 
     with self.argument_context('policy') as c:
@@ -183,31 +200,40 @@ def load_arguments(self, _):
         c.argument('scope', help='Scope to which this policy assignment applies.')
         c.argument('disable_scope_strict_match', action='store_true', help='Include policy assignments either inherited from parent scope or at child scope.')
         c.argument('display_name', help='Display name of the policy assignment.')
+        c.argument('description', help='Description of the policy assignment.', min_api='2016-12-01')
         c.argument('policy', help='Name or id of the policy definition.', completer=get_policy_completion_list)
-
-    with self.argument_context('policy assignment create', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
-        c.argument('name', options_list=['--name', '-n'], help='Name of the new policy assignment.')
         c.argument('params', options_list=['--params', '-p'], help='JSON formatted string or a path to a file or uri with parameter values of the policy rule.', type=file_type, completer=FilesCompleter(), min_api='2016-12-01')
 
-    with self.argument_context('policy assignment create', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2017-06-01-preview') as c:
+    with self.argument_context('policy assignment', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2017-06-01-preview') as c:
         c.argument('policy_set_definition', options_list=['--policy-set-definition', '-d'], help='Name or id of the policy set definition.')
         c.argument('sku', options_list=['--sku', '-s'], help='policy sku.', arg_type=get_enum_type(['free', 'standard']), deprecate_info=c.deprecate(hide=True))
         c.argument('notscopes', options_list='--not-scopes', nargs='+')
 
+    with self.argument_context('policy assignment', resource_type=ResourceType.MGMT_RESOURCE_POLICY, arg_group='Managed Identity', min_api='2018-05-01') as c:
+        c.argument('assign_identity', nargs='*', help="Assigns a system assigned identity to the policy assignment. This argument will be deprecated, please use --mi-system-assigned instead", deprecate_info=c.deprecate(hide=True))
+        c.argument('mi_system_assigned', action='store_true', help='Provide this flag to use system assigned identity for policy assignment. Check out help for more examples')
+        c.argument('mi_user_assigned', min_api='2021-06-01', help='UserAssigned Identity Id to be used for policy assignment. Check out help for more examples')
+        c.argument('identity_scope', arg_type=identity_scope_type)
+        c.argument('identity_role', arg_type=identity_role_type)
+
+    with self.argument_context('policy assignment', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2019-06-01') as c:
+        c.argument('enforcement_mode', options_list=['--enforcement-mode', '-e'], help='Enforcement mode of the policy assignment, e.g. Default, DoNotEnforce. Please visit https://aka.ms/azure-policyAssignment-enforcement-mode for more information.', arg_type=get_enum_type(EnforcementMode))
+
+    with self.argument_context('policy assignment create', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
+        c.argument('name', options_list=['--name', '-n'], help='Name of the new policy assignment.')
+
     with self.argument_context('policy assignment create', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2018-05-01') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx), help='The location of the policy assignment. Only required when utilizing managed identity.')
 
-    with self.argument_context('policy assignment create', resource_type=ResourceType.MGMT_RESOURCE_POLICY, arg_group='Managed Identity', min_api='2018-05-01') as c:
-        c.argument('assign_identity', nargs='*', validator=validate_msi, help="Assigns a system assigned identity to the policy assignment.")
-        c.argument('identity_scope', arg_type=identity_scope_type)
-        c.argument('identity_role', arg_type=identity_role_type)
-
-    with self.argument_context('policy assignment create', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2019-06-01') as c:
-        c.argument('enforcement_mode', options_list=['--enforcement-mode', '-e'], help='Enforcement mode of the policy assignment, e.g. Default, DoNotEnforce. Please visit https://aka.ms/azure-policyAssignment-enforcement-mode for more information.', arg_type=get_enum_type(EnforcementMode))
-
     with self.argument_context('policy assignment identity', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2018-05-01') as c:
+        c.argument('mi_system_assigned', action='store_true', options_list=['--system-assigned'], help='Provide this flag to use system assigned identity for policy assignment. Check out help for more examples')
+        c.argument('mi_user_assigned', options_list=['--user-assigned'], min_api='2021-06-01', help='UserAssigned Identity Id to be used for policy assignment. Check out help for more examples')
         c.argument('identity_scope', arg_type=identity_scope_type)
         c.argument('identity_role', arg_type=identity_role_type)
+
+    with self.argument_context('policy assignment non-compliance-message', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2020-09-01') as c:
+        c.argument('message', options_list=['--message', '-m'], help='Message that will be shown when a resource is denied by policy or evaluation details are inspected.')
+        c.argument('policy_definition_reference_id', options_list=['--policy-definition-reference-id', '-r'], help='Policy definition reference ID within the assigned initiative (policy set) that the message applies to.')
 
     with self.argument_context('policy set-definition', min_api='2017-06-01-preview', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
         c.argument('policy_set_definition_name', arg_type=existing_policy_set_definition_name_type)
@@ -298,6 +324,8 @@ def load_arguments(self, _):
         c.argument('what_if_exclude_change_types', options_list=['--what-if-exclude-change-types', '-x'],
                    arg_type=deployment_what_if_exclude_change_types_type,
                    help="Space-separated list of resource change types to be excluded from What-If results. Applicable when --confirm-with-what-if is set.")
+        c.argument('what_if', arg_type=deployment_what_if_type)
+        c.argument('proceed_if_no_change', arg_type=deployment_what_if_proceed_if_no_change_type)
 
     with self.argument_context('deployment validate') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
@@ -325,6 +353,8 @@ def load_arguments(self, _):
         c.argument('what_if_exclude_change_types', options_list=['--what-if-exclude-change-types', '-x'],
                    arg_type=deployment_what_if_exclude_change_types_type,
                    help="Space-separated list of resource change types to be excluded from What-If results. Applicable when --confirm-with-what-if is set.")
+        c.argument('what_if', arg_type=deployment_what_if_type)
+        c.argument('proceed_if_no_change', arg_type=deployment_what_if_proceed_if_no_change_type)
 
     with self.argument_context('deployment sub what-if') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
@@ -364,6 +394,8 @@ def load_arguments(self, _):
         c.argument('what_if_exclude_change_types', options_list=['--what-if-exclude-change-types', '-x'],
                    arg_type=deployment_what_if_exclude_change_types_type,
                    help="Space-separated list of resource change types to be excluded from What-If results. Applicable when --confirm-with-what-if is set.")
+        c.argument('what_if', arg_type=deployment_what_if_type)
+        c.argument('proceed_if_no_change', arg_type=deployment_what_if_proceed_if_no_change_type)
 
     with self.argument_context('deployment group what-if') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
@@ -400,6 +432,8 @@ def load_arguments(self, _):
                    arg_type=deployment_what_if_exclude_change_types_type,
                    help="Space-separated list of resource change types to be excluded from What-If results. Applicable when --confirm-with-what-if is set.",
                    min_api="2019-10-01")
+        c.argument('what_if', arg_type=deployment_what_if_type)
+        c.argument('proceed_if_no_change', arg_type=deployment_what_if_proceed_if_no_change_type)
 
     with self.argument_context('deployment mg what-if') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
@@ -435,6 +469,8 @@ def load_arguments(self, _):
                    arg_type=deployment_what_if_exclude_change_types_type,
                    help="Space-separated list of resource change types to be excluded from What-If results. Applicable when --confirm-with-what-if is set.",
                    min_api="2019-10-01")
+        c.argument('what_if', arg_type=deployment_what_if_type)
+        c.argument('proceed_if_no_change', arg_type=deployment_what_if_proceed_if_no_change_type)
 
     with self.argument_context('deployment tenant what-if') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
@@ -541,6 +577,7 @@ def load_arguments(self, _):
 
     with self.argument_context('account management-group') as c:
         c.argument('group_name', options_list=['--name', '-n'])
+        c.argument('no_register', action='store_true', help='Skip registration for resource provider Microsoft.Management')
 
     with self.argument_context('account management-group show') as c:
         c.argument('expand', options_list=['--expand', '-e'], action='store_true')
@@ -553,6 +590,14 @@ def load_arguments(self, _):
     with self.argument_context('account management-group update') as c:
         c.argument('display_name', options_list=['--display-name', '-d'])
         c.argument('parent_id', options_list=['--parent', '-p'])
+
+    with self.argument_context('account management-group hierarchy-settings create') as c:
+        c.argument('default_management_group', options_list=['--default-management-group', '-m'])
+        c.argument('require_authorization_for_group_creation', options_list=['--require-authorization-for-group-creation', '-r'])
+
+    with self.argument_context('account management-group hierarchy-settings update') as c:
+        c.argument('default_management_group', options_list=['--default-management-group', '-m'])
+        c.argument('require_authorization_for_group_creation', options_list=['--require-authorization-for-group-creation', '-r'])
 
     with self.argument_context('ts') as c:
         c.argument('name', options_list=['--name', '-n'], help='The name of the template spec.')
@@ -607,5 +652,15 @@ def load_arguments(self, _):
         c.argument('file', arg_type=CLIArgumentType(options_list=['--file', '-f'], completer=FilesCompleter(),
                                                     type=file_type, help="The path to the ARM template to decompile in the file system."))
 
+    with self.argument_context('bicep publish') as c:
+        c.argument('file', arg_type=CLIArgumentType(options_list=['--file', '-f'], completer=FilesCompleter(),
+                                                    type=file_type, help="The path to the Bicep module file to publish in the file system."))
+        c.argument('target', arg_type=CLIArgumentType(options_list=['--target', '-t'],
+                                                      help="The target location where the Bicep module will be published."))
+
     with self.argument_context('bicep install') as c:
         c.argument('version', options_list=['--version', '-v'], help='The version of Bicep CLI to be installed. Default to the latest if not specified.')
+        c.argument('target_platform', arg_type=bicep_target_platform_type)
+
+    with self.argument_context('bicep upgrade') as c:
+        c.argument('target_platform', arg_type=bicep_target_platform_type)

@@ -5,7 +5,7 @@
 
 import os.path
 import unittest
-import mock
+from unittest import mock
 
 from azure.cli.core.cloud import CloudEndpointNotSetException
 from azure.cli.core.mock import DummyCli
@@ -27,18 +27,10 @@ def _get_test_cmd():
 
 
 class TestVMImage(unittest.TestCase):
-    @mock.patch('azure.cli.command_modules.vm.custom.urlopen', autospec=True)
-    def test_read_images_from_alias_doc(self, mock_urlopen):
+
+    def test_read_images_from_alias_doc(self):
         from azure.cli.command_modules.vm.custom import list_vm_images
         cmd = _get_test_cmd()
-        file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                 'aliases.json')
-        with open(file_path, 'r') as test_file:
-            test_data = test_file.read().encode()
-
-        mock_read = mock.MagicMock()
-        mock_read.read.return_value = test_data
-        mock_urlopen.return_value = mock_read
 
         # action
         images = list_vm_images(cmd)

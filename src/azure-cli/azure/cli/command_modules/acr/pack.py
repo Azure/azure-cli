@@ -54,7 +54,7 @@ def acr_pack_build(cmd,  # pylint: disable=too-many-locals
         raise CLIError('Building with Buildpacks requires a valid source location.')
 
     platform_os, platform_arch, platform_variant = get_validate_platform(cmd, platform)
-    OS = cmd.get_models('OS')
+    OS = cmd.get_models('OS', operation_group='task_runs')
     if platform_os != OS.linux.value.lower():
         raise CLIError('Building with Buildpacks is only supported on Linux.')
 
@@ -74,7 +74,10 @@ def acr_pack_build(cmd,  # pylint: disable=too-many-locals
         pack_image_tag=pack_image_tag,
         no_pull='--no-pull' if not pull else '')
 
-    EncodedTaskRunRequest, PlatformProperties = cmd.get_models('EncodedTaskRunRequest', 'PlatformProperties')
+    EncodedTaskRunRequest, PlatformProperties = cmd.get_models(
+        'EncodedTaskRunRequest',
+        'PlatformProperties',
+        operation_group='task_runs')
 
     request = EncodedTaskRunRequest(
         encoded_task_content=base64.b64encode(yaml_body.encode()).decode(),
@@ -92,7 +95,7 @@ def acr_pack_build(cmd,  # pylint: disable=too-many-locals
         agent_pool_name=agent_pool_name
     )
 
-    queued = LongRunningOperation(cmd.cli_ctx)(client_registries.schedule_run(
+    queued = LongRunningOperation(cmd.cli_ctx)(client_registries.begin_schedule_run(
         resource_group_name=resource_group_name,
         registry_name=registry_name,
         run_request=request))
@@ -109,4 +112,4 @@ def acr_pack_build(cmd,  # pylint: disable=too-many-locals
         from ._run_polling import get_run_with_polling
         return get_run_with_polling(cmd, client, run_id, registry_name, resource_group_name)
 
-    return stream_logs(cmd, client, run_id, registry_name, resource_group_name, no_format, True)
+    return stream_logs(cmd, client, run_id, registry_name, resource_group_name, timeout, no_format, True)

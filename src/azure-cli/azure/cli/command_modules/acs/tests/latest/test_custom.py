@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: skip-file
-import mock
+from unittest import mock
 import os
 import platform
 import requests
@@ -13,6 +13,12 @@ import shutil
 import unittest
 import yaml
 
+from knack import CLI
+
+from azure.cli.core._config import GLOBAL_CONFIG_DIR, ENV_VAR_PREFIX
+from azure.cli.core.cloud import get_active_cloud
+from azure.cli.core.profiles import get_sdk, ResourceType, supported_api_version
+
 from msrestazure.azure_exceptions import CloudError
 from azure.graphrbac.models import GraphErrorException
 from azure.cli.command_modules.acs._params import (regions_in_preview,
@@ -20,8 +26,8 @@ from azure.cli.command_modules.acs._params import (regions_in_preview,
 from azure.cli.command_modules.acs.custom import (merge_kubernetes_configurations, list_acs_locations,
                                                   _acs_browse_internal, _add_role_assignment, _get_default_dns_prefix,
                                                   create_application, _update_addons,
-                                                  _ensure_container_insights_for_monitoring,
                                                   k8s_install_kubectl, k8s_install_kubelogin)
+from azure.cli.command_modules.acs.addonconfiguration import ensure_container_insights_for_monitoring
 from azure.mgmt.containerservice.models import (ContainerServiceOrchestratorTypes,
                                                 ContainerService,
                                                 ContainerServiceOrchestratorProfile)
@@ -33,8 +39,37 @@ from azure.cli.command_modules.acs._consts import (CONST_HTTP_APPLICATION_ROUTIN
                                                    CONST_KUBE_DASHBOARD_ADDON_NAME,
                                                    CONST_AZURE_POLICY_ADDON_NAME)
 
+class MockCLI(CLI):
+    def __init__(self):
+        super(MockCLI, self).__init__(cli_name='mock_cli', config_dir=GLOBAL_CONFIG_DIR,
+                                      config_env_var_prefix=ENV_VAR_PREFIX, commands_loader_cls=MockLoader)
+        self.cloud = get_active_cloud(self)
+
+
+class MockLoader(object):
+    def __init__(self, ctx):
+        self.ctx = ctx
+
+    def get_models(self, *attr_args, **_):
+        from azure.cli.core.profiles import get_sdk
+        return get_sdk(self.ctx, ResourceType.MGMT_CONTAINERSERVICE, 'ManagedClusterAddonProfile',
+                       mod='models', operation_group='managed_clusters')
+
+
+class MockCmd(object):
+    def __init__(self, ctx, arguments={}):
+        self.cli_ctx = ctx
+        self.loader = MockLoader(self.cli_ctx)
+        self.arguments = arguments
+
+    def get_models(self, *attr_args, **kwargs):
+        return get_sdk(self.cli_ctx, ResourceType.MGMT_CONTAINERSERVICE, 'ManagedClusterAddonProfile',
+                       mod='models', operation_group='managed_clusters')
 
 class AcsCustomCommandTest(unittest.TestCase):
+    def setUp(self):
+        self.cli = MockCLI()
+
     def test_list_acs_locations(self):
         client, cmd = mock.MagicMock(), mock.MagicMock()
         regions = list_acs_locations(client, cmd)
@@ -583,38 +618,45 @@ class AcsCustomCommandTest(unittest.TestCase):
         self.assertTrue(
             'https://docs.microsoft.com/azure/azure-resource-manager/resource-group-create-service-principal-portal' in str(context.exception))
 
-    @mock.patch('azure.cli.command_modules.acs.custom._get_rg_location', return_value='eastus')
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_rg_location', return_value='eastus')
     @mock.patch('azure.cli.command_modules.acs.custom.cf_resource_groups', autospec=True)
     @mock.patch('azure.cli.command_modules.acs.custom.cf_resources', autospec=True)
     def test_update_addons(self, rg_def, cf_resource_groups, cf_resources):
         # http_application_routing enabled
         instance = mock.MagicMock()
         instance.addon_profiles = None
-        cmd = mock.MagicMock()
-        instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
+
+        instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
                                   'clitest000001', 'clitest000001', 'http_application_routing', enable=True)
         self.assertIn(CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME, instance.addon_profiles)
         addon_profile = instance.addon_profiles[CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME]
         self.assertTrue(addon_profile.enabled)
 
         # http_application_routing disabled
-        instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
+        instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
                                   'clitest000001', 'clitest000001', 'http_application_routing', enable=False)
         addon_profile = instance.addon_profiles[CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME]
         self.assertFalse(addon_profile.enabled)
 
         # monitoring added
-        instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
-                                  'clitest000001', 'clitest000001', 'monitoring', enable=True)
-        monitoring_addon_profile = instance.addon_profiles[CONST_MONITORING_ADDON_NAME]
-        self.assertTrue(monitoring_addon_profile.enabled)
-        routing_addon_profile = instance.addon_profiles[CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME]
-        self.assertFalse(routing_addon_profile.enabled)
+        with mock.patch(
+            "azure.cli.command_modules.acs.addonconfiguration.cf_resource_groups",
+            autospec=True,
+        ), mock.patch(
+            "azure.cli.command_modules.acs.addonconfiguration.cf_resources",
+            autospec=True,
+        ):
+            instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
+                                      'clitest000001', 'clitest000001', 'monitoring', enable=True)
+            monitoring_addon_profile = instance.addon_profiles[CONST_MONITORING_ADDON_NAME]
+            self.assertTrue(monitoring_addon_profile.enabled)
+            routing_addon_profile = instance.addon_profiles[CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME]
+            self.assertFalse(routing_addon_profile.enabled)
 
         # monitoring disabled, routing enabled
-        instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
+        instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
                                   'clitest000001', 'clitest000001', 'monitoring', enable=False)
-        instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
+        instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
                                   'clitest000001', 'clitest000001', 'http_application_routing', enable=True)
         monitoring_addon_profile = instance.addon_profiles[CONST_MONITORING_ADDON_NAME]
         self.assertFalse(monitoring_addon_profile.enabled)
@@ -623,7 +665,7 @@ class AcsCustomCommandTest(unittest.TestCase):
         self.assertEqual(sorted(list(instance.addon_profiles)), [CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME, CONST_MONITORING_ADDON_NAME])
 
         # azurepolicy added
-        instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
+        instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
                                   'clitest000001', 'clitest000001', 'azure-policy', enable=True)
         azurepolicy_addon_profile = instance.addon_profiles[CONST_AZURE_POLICY_ADDON_NAME]
         self.assertTrue(azurepolicy_addon_profile.enabled)
@@ -633,9 +675,9 @@ class AcsCustomCommandTest(unittest.TestCase):
         self.assertFalse(monitoring_addon_profile.enabled)
 
         # azurepolicy disabled, routing enabled
-        instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
+        instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
                                   'clitest000001', 'clitest000001', 'azure-policy', enable=False)
-        instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
+        instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
                                   'clitest000001', 'clitest000001', 'http_application_routing', enable=True)
         azurepolicy_addon_profile = instance.addon_profiles[CONST_AZURE_POLICY_ADDON_NAME]
         self.assertFalse(azurepolicy_addon_profile.enabled)
@@ -646,14 +688,14 @@ class AcsCustomCommandTest(unittest.TestCase):
         self.assertEqual(sorted(list(instance.addon_profiles)), [CONST_AZURE_POLICY_ADDON_NAME, CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME, CONST_MONITORING_ADDON_NAME])
 
         # kube-dashboard disabled, no existing dashboard addon profile
-        instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
+        instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
                                   'clitest000001', 'clitest000001', 'kube-dashboard', enable=False)
         dashboard_addon_profile = instance.addon_profiles[CONST_KUBE_DASHBOARD_ADDON_NAME]
         self.assertFalse(dashboard_addon_profile.enabled)
 
         # kube-dashboard enabled, no existing dashboard addon profile
         instance.addon_profiles.pop(CONST_KUBE_DASHBOARD_ADDON_NAME, None)
-        instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
+        instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
                                   'clitest000001', 'clitest000001', 'kube-dashboard', enable=True)
         dashboard_addon_profile = instance.addon_profiles[CONST_KUBE_DASHBOARD_ADDON_NAME]
         self.assertTrue(dashboard_addon_profile.enabled)
@@ -662,7 +704,7 @@ class AcsCustomCommandTest(unittest.TestCase):
         instance.addon_profiles.pop(CONST_KUBE_DASHBOARD_ADDON_NAME, None)
         # test lower cased key name
         instance.addon_profiles['kubedashboard'] = ManagedClusterAddonProfile(enabled=True)
-        instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
+        instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
                                   'clitest000001', 'clitest000001', 'kube-dashboard', enable=False)
         dashboard_addon_profile = instance.addon_profiles[CONST_KUBE_DASHBOARD_ADDON_NAME]
         self.assertFalse(dashboard_addon_profile.enabled)
@@ -671,7 +713,7 @@ class AcsCustomCommandTest(unittest.TestCase):
         instance.addon_profiles.pop(CONST_KUBE_DASHBOARD_ADDON_NAME, None)
         # test lower cased key name
         instance.addon_profiles['kubedashboard'] = ManagedClusterAddonProfile(enabled=False)
-        instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
+        instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
                                   'clitest000001', 'clitest000001', 'kube-dashboard', enable=True)
         dashboard_addon_profile = instance.addon_profiles[CONST_KUBE_DASHBOARD_ADDON_NAME]
         self.assertTrue(dashboard_addon_profile.enabled)
@@ -679,24 +721,31 @@ class AcsCustomCommandTest(unittest.TestCase):
         # monitoring enabled and then enabled again should error
         instance = mock.Mock()
         instance.addon_profiles = None
-        instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
-                                  'clitest000001', 'clitest000001', 'monitoring', enable=True)
-        with self.assertRaises(CLIError):
-            instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
+        with mock.patch(
+            "azure.cli.command_modules.acs.addonconfiguration.cf_resource_groups",
+            autospec=True,
+        ), mock.patch(
+            "azure.cli.command_modules.acs.addonconfiguration.cf_resources",
+            autospec=True,
+        ):
+            instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
                                       'clitest000001', 'clitest000001', 'monitoring', enable=True)
+            with self.assertRaises(CLIError):
+                instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
+                                          'clitest000001', 'clitest000001', 'monitoring', enable=True)
 
         # virtual-node enabled
         instance = mock.MagicMock()
         instance.addon_profiles = None
         cmd = mock.MagicMock()
-        instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
+        instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
                                   'clitest000001', 'clitest000001', 'virtual-node', enable=True, subnet_name='foo')
         self.assertIn('aciConnectorLinux', instance.addon_profiles)
         addon_profile = instance.addon_profiles['aciConnectorLinux']
         self.assertTrue(addon_profile.enabled)
 
         # virtual-node disabled
-        instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
+        instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
                                   'clitest000001', 'clitest000001', 'virtual-node', enable=False)
         addon_profile = instance.addon_profiles['aciConnectorLinux']
         self.assertFalse(addon_profile.enabled)
@@ -705,40 +754,17 @@ class AcsCustomCommandTest(unittest.TestCase):
         instance = mock.MagicMock()
         instance.addon_profiles = None
         cmd = mock.MagicMock()
-        instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
+        instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
                                   'clitest000001', 'clitest000001', 'ingress-appgw', enable=True, appgw_subnet_cidr='10.2.0.0/16')
         self.assertIn('ingressApplicationGateway', instance.addon_profiles)
         addon_profile = instance.addon_profiles['ingressApplicationGateway']
         self.assertTrue(addon_profile.enabled)
 
         # ingress-appgw disabled
-        instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
+        instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
                                   'clitest000001', 'clitest000001', 'ingress-appgw', enable=False)
         addon_profile = instance.addon_profiles['ingressApplicationGateway']
         self.assertFalse(addon_profile.enabled)
-
-    @mock.patch('azure.cli.command_modules.acs.custom.cf_resources', autospec=True)
-    @mock.patch('azure.cli.command_modules.acs.custom._invoke_deployment')
-    def test_ensure_container_insights_for_monitoring(self, invoke_def, cf_resources):
-        cmd = mock.Mock()
-        addon = mock.Mock()
-        wsID = "/subscriptions/1234abcd-cad5-417b-1234-aec62ffa6fe7/resourcegroups/mbdev/providers/microsoft.operationalinsights/workspaces/mbdev"
-        addon.config = {
-            CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: wsID
-        }
-        self.assertTrue(_ensure_container_insights_for_monitoring(cmd, addon))
-        args, kwargs = invoke_def.call_args
-        self.assertEqual(args[3]['resources'][0]['type'], "Microsoft.Resources/deployments")
-        self.assertEqual(args[4]['workspaceResourceId']['value'], wsID)
-
-        # when addon config key is lower cased
-        addon.config = {
-            CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: wsID
-        }
-        self.assertTrue(_ensure_container_insights_for_monitoring(cmd, addon))
-        args, kwargs = invoke_def.call_args
-        self.assertEqual(args[3]['resources'][0]['type'], "Microsoft.Resources/deployments")
-        self.assertEqual(args[4]['workspaceResourceId']['value'], wsID)
 
     @mock.patch('azure.cli.command_modules.acs.custom._urlretrieve')
     @mock.patch('azure.cli.command_modules.acs.custom.logger')

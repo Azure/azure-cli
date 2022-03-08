@@ -3,22 +3,25 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure_devtools.scenario_tests import AllowLargeResponse
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, create_random_name, record_only
+import time
 
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, create_random_name, record_only
+from azure.cli.testsdk.exceptions import JMESPathCheckAssertionError
 
 class PolicyInsightsTests(ScenarioTest):
 
     # Current recording was recorded against "Azure Governance Policy UX Test" (e78961ba-36fe-4739-9212-e3031b4c8db7)
     @record_only()
+    @AllowLargeResponse()
     def test_policy_insights(self):
         top_clause = '--top 2'
         filter_clause = '--filter "isCompliant eq false"'
         apply_clause = '--apply "groupby((policyAssignmentId, resourceId), aggregate($count as numRecords))"'
         select_clause = '--select "policyAssignmentId, resourceId, numRecords"'
         order_by_clause = '--order-by "numRecords desc"'
-        from_clause = '--from "2020-04-01T00:00:00Z"'
-        to_clause = '--to "2020-04-07T01:30:00Z"'
+        from_clause = '--from "2021-07-01T00:00:00Z"'
+        to_clause = '--to "2021-07-03T01:30:00Z"'
         scopes = [
             '-m "azgovtest5"',
             '',
@@ -103,6 +106,7 @@ class PolicyInsightsTests(ScenarioTest):
             self.check("length([])", 1)
         ])
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_remediation')
     @StorageAccountPreparer(name_prefix='cliremediation')
     def test_policy_insights_remediation(self, resource_group_location, storage_account):
@@ -234,6 +238,7 @@ class PolicyInsightsTests(ScenarioTest):
         finally:
             self.cmd('policy assignment delete -n {pan}')
 
+    @AllowLargeResponse()
     def test_policy_insights_remediation_policy_set(self):
         self.kwargs.update({
             'pan': self.create_random_name('azurecli-test-policy-assignment', 40),
@@ -380,17 +385,21 @@ class PolicyInsightsTests(ScenarioTest):
             self.check('policyAssignmentId', '{pid}'),
             self.check('policyDefinitionReferenceId', None),
             self.check('filters', None),
-            self.check('deploymentStatus.totalDeployments', 2),
             self.check('resourceDiscoveryMode', 'ExistingNonCompliant')
         ])
 
-        self.cmd('policy remediation show -n {rn} -g {rg}', checks=[
-            self.check('name', '{rn}'),
-            self.check('resourceGroup', '{rg}'),
-            self.check('policyAssignmentId', '{pid}'),
-            self.check('deploymentStatus.totalDeployments', 2),
-            self.check('resourceDiscoveryMode', 'ExistingNonCompliant')
-        ])
+        for i in range(5):
+            try:
+                self.cmd('policy remediation show -n {rn} -g {rg}', checks=[
+                    self.check('name', '{rn}'),
+                    self.check('resourceGroup', '{rg}'),
+                    self.check('policyAssignmentId', '{pid}'),
+                    self.check('deploymentStatus.totalDeployments', 2),
+                    self.check('resourceDiscoveryMode', 'ExistingNonCompliant')
+                ])
+                break
+            except JMESPathCheckAssertionError:
+                time.sleep(5)
 
         self.cmd('policy remediation list -g {rg}', checks=[
             self.check("length([?name == '{rn}'])", 1)
@@ -411,6 +420,7 @@ class PolicyInsightsTests(ScenarioTest):
         ])
 
     # Test a remediation that re-evaluates compliance results before remediating
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_remediation')
     @StorageAccountPreparer(name_prefix='cliremediation')
     def test_policy_insights_remediation_reevaluate(self, resource_group_location, storage_account):

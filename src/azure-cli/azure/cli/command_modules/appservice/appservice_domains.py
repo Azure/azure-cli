@@ -3,11 +3,12 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from azure.cli.core.azclierror import ValidationError
 from azure.cli.core.commands import DeploymentOutputLongRunningOperation
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
-from azure.mgmt.web.models import NameIdentifier
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import sdk_no_wait, random_string
+from azure.mgmt.web.models import NameIdentifier
 from knack.util import CLIError
 from knack.log import get_logger
 
@@ -50,6 +51,16 @@ def create_domain(cmd, resource_group_name, hostname, contact_info, privacy=True
     web_client = web_client_factory(cmd.cli_ctx)
     hostname_availability = web_client.domains.check_availability(NameIdentifier(name=hostname))
 
+    if not hostname_availability.available:
+        raise ValidationError("Custom domain name '{}' is not available. Please try again "
+                              "with a new hostname.".format(hostname))
+
+    tld = '.'.join(hostname.split('.')[1:])
+    TopLevelDomainAgreementOption = cmd.get_models('TopLevelDomainAgreementOption')
+    domain_agreement_option = TopLevelDomainAgreementOption(include_privacy=bool(privacy), for_transfer=False)
+    agreements = web_client.top_level_domains.list_agreements(name=tld, agreement_option=domain_agreement_option)
+    agreement_keys = [agreement.agreement_key for agreement in agreements]
+
     if dryrun:
         logger.warning("Custom domain will be purchased with the below configuration. Re-run command "
                        "without the --dryrun flag to purchase & create the custom domain")
@@ -59,6 +70,7 @@ def create_domain(cmd, resource_group_name, hostname, contact_info, privacy=True
             "resource_group_name": resource_group_name,
             "privacy": bool(privacy),
             "auto_renew": bool(auto_renew),
+            "agreement_keys": agreement_keys,
             "accept_terms": bool(accept_terms),
             "hostname_available": bool(hostname_availability.available),
             "price": "$11.99 USD" if hostname_availability.available else "N/A"
@@ -85,21 +97,12 @@ def create_domain(cmd, resource_group_name, hostname, contact_info, privacy=True
                     "privacy": "%(privacy)s",
                     "auto_renew": "%(auto_renew)s",
                     "accepted_hostname_purchase_terms": "%(accept_terms)s",
+                    "agreement_keys": "%(agreement_keys)s",
                     "hostname_available": "%(hostname_available)s",
                     "price": "%(price)s"
                     }
                     """ % dry_run_params
         return json.loads(dry_run_str)
-
-    if not hostname_availability.available:
-        raise CLIError("Custom domain name '{}' is not available. Please try again "
-                       "with a new hostname.".format(hostname))
-
-    tld = '.'.join(hostname.split('.')[1:])
-    from azure.mgmt.web.models import TopLevelDomainAgreementOption
-    domain_agreement_option = TopLevelDomainAgreementOption(include_privacy=True, for_transfer=True)
-    agreements = web_client.top_level_domains.list_agreements(name=tld, agreement_option=domain_agreement_option)
-    agreement_keys = [agreement.agreement_key for agreement in agreements]
 
     dns_zone_id = "[resourceId('Microsoft.Network/dnszones', '{}')]".format(hostname)
 

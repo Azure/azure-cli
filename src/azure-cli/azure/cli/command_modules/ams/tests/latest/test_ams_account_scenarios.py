@@ -46,7 +46,7 @@ class AmsAccountTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_create,
-            'location': 'southeastasia'
+            'location': 'southeastasia',
         })
 
         account = self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}').get_output_in_json()
@@ -55,7 +55,7 @@ class AmsAccountTests(ScenarioTest):
             'storageId': account['storageAccounts'][0]['id']
         })
 
-        self.cmd('az ams account storage sync-storage-keys -g {rg} -a {amsname} --id "{storageId}"')
+        self.cmd('az ams account storage sync-storage-keys -g {rg} -a {amsname} --storage-account-id "{storageId}"')
 
         self.cmd('az ams account delete -n {amsname} -g {rg}')
 

@@ -1,0 +1,134 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account keys list
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n -g --query -o
+      User-Agent:
+      - AZURECLI/2.33.1 azsdk-python-azure-mgmt-storage/19.1.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2021-08-01&$expand=kerb
+  response:
+    body:
+      string: '{"keys":[{"creationTime":"2022-02-23T03:31:35.1940722Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2022-02-23T03:31:35.1940722Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '260'
+      content-type:
+      - application/json
+      date:
+      - Wed, 23 Feb 2022 03:31:56 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11997'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage fs create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n --account-name --account-key
+      User-Agent:
+      - AZURECLI/2.33.1 azsdk-python-storage-dfs/12.3.1 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+      x-ms-date:
+      - Wed, 23 Feb 2022 03:31:56 GMT
+      x-ms-version:
+      - '2020-02-10'
+    method: PUT
+    uri: https://clitest000002.blob.core.windows.net/filesystem000003?restype=container
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      date:
+      - Wed, 23 Feb 2022 03:31:57 GMT
+      etag:
+      - '"0x8D9F67D0C05D57E"'
+      last-modified:
+      - Wed, 23 Feb 2022 03:31:58 GMT
+      server:
+      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-version:
+      - '2020-02-10'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: '<?xml version=''1.0'' encoding=''utf-8''?>
+
+      <KeyInfo><Start>2022-02-23T03:31:58Z</Start><Expiry>2022-02-23T04:31:00Z</Expiry></KeyInfo>'
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage fs generate-sas
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '130'
+      Content-Type:
+      - application/xml; charset=utf-8
+      ParameterSetName:
+      - --account-name -n --expiry --permissions --https-only --as-user --auth-mode
+      User-Agent:
+      - AZURECLI/2.33.1 azsdk-python-storage-blob/12.6.0b1 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+      x-ms-date:
+      - Wed, 23 Feb 2022 03:31:58 GMT
+      x-ms-version:
+      - '2020-02-10'
+    method: POST
+    uri: https://clitest000002.blob.core.windows.net/?restype=service&comp=userdelegationkey
+  response:
+    body:
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><UserDelegationKey><SignedOid>3707fb2f-ac10-4591-a04f-8b0d786ea37d</SignedOid><SignedTid>54826b22-38d6-4fb2-bad9-b7b93a3e9c5a</SignedTid><SignedStart>2022-02-23T03:31:58Z</SignedStart><SignedExpiry>2022-02-23T04:31:00Z</SignedExpiry><SignedService>b</SignedService><SignedVersion>2020-02-10</SignedVersion><Value>deD8BQ3+Ljdgi+q6TVsk8wDLu6eNB94fWYRnURvuETQ=</Value></UserDelegationKey>"
+    headers:
+      content-type:
+      - application/xml
+      date:
+      - Wed, 23 Feb 2022 03:32:01 GMT
+      server:
+      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      transfer-encoding:
+      - chunked
+      x-ms-version:
+      - '2020-02-10'
+    status:
+      code: 200
+      message: OK
+version: 1

@@ -67,15 +67,15 @@ class DnsZoneImportTest(ScenarioTest):
             self.skipTest('This test should run on Linux platform')
 
         from azure.cli.core.azclierror import FileOperationError
-        with self.assertRaisesRegexp(FileOperationError, 'No such file: ') as e:
+        with self.assertRaisesRegex(FileOperationError, 'No such file: ') as e:
             self._test_zone('404zone.com', 'non_existing_zone_description_file.txt')
             self.assertEqual(e.errno, 1)
 
-        with self.assertRaisesRegexp(FileOperationError, 'Is a directory: ') as e:
+        with self.assertRaisesRegex(FileOperationError, 'Is a directory: ') as e:
             self._test_zone('404zone.com', '')
             self.assertEqual(e.errno, 1)
 
-        with self.assertRaisesRegexp(FileOperationError, 'Permission denied: ') as e:
+        with self.assertRaisesRegex(FileOperationError, 'Permission denied: ') as e:
             self._test_zone('404zone.com', '/root/')
             self.assertEqual(e.errno, 1)
 
@@ -87,12 +87,12 @@ class DnsZoneImportTest(ScenarioTest):
             self.skipTest('This test should run on Windows platform')
 
         from azure.cli.core.azclierror import FileOperationError
-        with self.assertRaisesRegexp(FileOperationError, 'No such file: ') as e:
+        with self.assertRaisesRegex(FileOperationError, 'No such file: ') as e:
             self._test_zone('404zone.com', 'non_existing_zone_description_file.txt')
             self.assertEqual(e.errno, 1)
 
         # Difference with Linux platform while reading a directory
-        with self.assertRaisesRegexp(FileOperationError, 'Permission denied:') as e:
+        with self.assertRaisesRegex(FileOperationError, 'Permission denied:') as e:
             self._test_zone('404zone.com', '.')
             self.assertEqual(e.errno, 1)
 
@@ -168,6 +168,8 @@ class DnsScenarioTest(ScenarioTest):
             # test creating the record set and then adding records
             self.cmd('network dns record-set {0} create -n myrs{0} -g {{rg}} --zone-name {{zone}}'.format(t))
             add_command = 'set-record' if t == 'cname' else 'add-record'
+            self.cmd('network dns record-set {0} {2} -g {{rg}} --zone-name {{zone}} --record-set-name myrs{0} {1}'.format(t, args[t], add_command))
+            # Issue 10467: FIX add-record is not idempotent
             self.cmd('network dns record-set {0} {2} -g {{rg}} --zone-name {{zone}} --record-set-name myrs{0} {1}'.format(t, args[t], add_command))
             # test creating the record set at the same time you add records
             self.cmd('network dns record-set {0} {2} -g {{rg}} --zone-name {{zone}} --record-set-name myrs{0}alt {1}'.format(t, args[t], add_command))

@@ -15,7 +15,4 @@ def netappfiles_exception_handler(ex):
         message = ex
         raise CLIError(message)
 
-    import sys
-
-    from six import reraise
-    reraise(*sys.exc_info())
+    raise ex

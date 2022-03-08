@@ -13,7 +13,8 @@ from dateutil.relativedelta import relativedelta
 from knack.util import CLIError, todict
 from knack.log import get_logger
 from msrest.serialization import TZ_UTC
-from msrestazure.azure_exceptions import CloudError
+from azure.core.exceptions import HttpResponseError
+from azure.cli.core._profile import Profile
 from azure.graphrbac.models import (ApplicationCreateParameters,
                                     ApplicationUpdateParameters,
                                     GraphErrorException,
@@ -21,6 +22,7 @@ from azure.graphrbac.models import (ApplicationCreateParameters,
 
 from azure.cli.command_modules.ams._client_factory import (_graph_client_factory, _auth_client_factory)
 from azure.cli.command_modules.ams._utils import (_gen_guid, _is_guid)
+from azure.cli.core.commands.client_factory import get_subscription_id
 
 logger = get_logger(__name__)
 
@@ -31,7 +33,7 @@ def reset_sp_credentials_for_mediaservice(cmd, client, account_name, resource_gr
 
     graph_client = _graph_client_factory(cmd.cli_ctx)
 
-    sp_name = _create_sp_name(account_name, sp_name)
+    sp_name = _create_sp_name(account_name, sp_name) if sp_name is None else sp_name
     sp_password = _create_sp_password(sp_password)
 
     app_display_name = sp_name.replace('http://', '')
@@ -40,9 +42,13 @@ def reset_sp_credentials_for_mediaservice(cmd, client, account_name, resource_gr
     if not aad_sp:
         raise CLIError("Can't find a service principal matching '{}'".format(app_display_name))
 
-    tenant = graph_client.config.tenant_id
+    profile = Profile(cli_ctx=cmd.cli_ctx)
+    _, _, tenant_id = profile.get_login_credentials(
+        resource=cmd.cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
     sp_oid = aad_sp.object_id
     app_id = aad_sp.app_id
+
+    subscription_id = get_subscription_id(cmd.cli_ctx)
 
     app_object_id = _get_application_object_id(graph_client.applications, app_id)
 
@@ -50,8 +56,8 @@ def reset_sp_credentials_for_mediaservice(cmd, client, account_name, resource_gr
 
     _assign_role(cmd, role, sp_oid, ams.id)
 
-    return _build_sp_result(client.config.subscription_id, ams.location, resource_group_name, account_name,
-                            tenant, app_id, app_display_name, sp_password, cmd.cli_ctx.cloud.endpoints.management,
+    return _build_sp_result(subscription_id, ams.location, resource_group_name, account_name,
+                            tenant_id, app_id, app_display_name, sp_password, cmd.cli_ctx.cloud.endpoints.management,
                             cmd.cli_ctx.cloud.endpoints.active_directory,
                             cmd.cli_ctx.cloud.endpoints.resource_manager, role, xml)
 
@@ -61,6 +67,8 @@ def create_or_update_assign_sp_to_mediaservice(cmd, client, account_name, resour
                                                xml=False, years=None):
     ams = client.get(resource_group_name, account_name)
 
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+
     graph_client = _graph_client_factory(cmd.cli_ctx)
 
     sp_name = _create_sp_name(account_name, sp_name)
@@ -69,7 +77,7 @@ def create_or_update_assign_sp_to_mediaservice(cmd, client, account_name, resour
 
     aad_sp = _get_service_principal(graph_client, sp_name)
     if aad_sp:
-        return _update_sp(cmd, client, graph_client, aad_sp, ams, account_name, resource_group_name,
+        return _update_sp(cmd, graph_client, aad_sp, ams, account_name, resource_group_name,
                           app_display_name, new_sp_name, role, years, sp_password, xml)
 
     sp_password = _create_sp_password(sp_password)
@@ -78,28 +86,33 @@ def create_or_update_assign_sp_to_mediaservice(cmd, client, account_name, resour
                                          homepage=sp_name,
                                          years=years,
                                          password=sp_password,
-                                         identifier_uris=[sp_name],
                                          available_to_other_tenants=False)
 
     app_id = aad_application.app_id
-    tenant = graph_client.config.tenant_id
+    profile = Profile(cli_ctx=cmd.cli_ctx)
+    _, _, tenant_id = profile.get_login_credentials(
+        resource=cmd.cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
     sp_oid = _create_service_principal(graph_client, name=sp_name,
                                        app_id=app_id)
 
     _assign_role(cmd, role, sp_oid, ams.id)
 
-    return _build_sp_result(client.config.subscription_id, ams.location, resource_group_name, account_name,
-                            tenant, app_id, app_display_name, sp_password, cmd.cli_ctx.cloud.endpoints.management,
+    return _build_sp_result(subscription_id, ams.location, resource_group_name, account_name,
+                            tenant_id, app_id, app_display_name, sp_password, cmd.cli_ctx.cloud.endpoints.management,
                             cmd.cli_ctx.cloud.endpoints.active_directory,
                             cmd.cli_ctx.cloud.endpoints.resource_manager, role, xml)
 
 
-def _update_sp(cmd, client, graph_client, aad_sp, ams, account_name, resource_group_name, display_name,
+def _update_sp(cmd, graph_client, aad_sp, ams, account_name, resource_group_name, display_name,
                new_sp_name, role, years, sp_password, xml):
-    tenant = graph_client.config.tenant_id
+    profile = Profile(cli_ctx=cmd.cli_ctx)
+    _, _, tenant_id = profile.get_login_credentials(
+        resource=cmd.cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
     sp_oid = aad_sp.object_id
     app_id = aad_sp.app_id
     app_object_id = _get_application_object_id(graph_client.applications, app_id)
+
+    subscription_id = get_subscription_id(cmd.cli_ctx)
 
     if sp_password or years:
         raise CLIError("To update the credentials please use the reset-credentials command.")
@@ -111,8 +124,8 @@ def _update_sp(cmd, client, graph_client, aad_sp, ams, account_name, resource_gr
     if role:
         _assign_role(cmd, role, sp_oid, ams.id)
 
-    return _build_sp_result(client.config.subscription_id, ams.location, resource_group_name, account_name,
-                            tenant, app_id, display_name, sp_password, cmd.cli_ctx.cloud.endpoints.management,
+    return _build_sp_result(subscription_id, ams.location, resource_group_name, account_name,
+                            tenant_id, app_id, display_name, sp_password, cmd.cli_ctx.cloud.endpoints.management,
                             cmd.cli_ctx.cloud.endpoints.active_directory,
                             cmd.cli_ctx.cloud.endpoints.resource_manager, role, xml)
 
@@ -145,6 +158,8 @@ def list_role_assignments(cmd, assignee_object_id, scope=None):
 
     assignments = _search_role_assignments(assignments_client, assignee_object_id)
 
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+
     results = todict(assignments) if assignments else []
 
     if not results:
@@ -154,7 +169,7 @@ def list_role_assignments(cmd, assignee_object_id, scope=None):
     # (it's possible that associated roles and principals were deleted, and we just do nothing.)
     # 2. fill in role names
     role_defs = list(definitions_client.list(
-        scope=(scope if scope else '/subscriptions/' + definitions_client.config.subscription_id)))
+        scope=(scope if scope else '/subscriptions/' + subscription_id)))
     role_dics = {i.id: i.role_name for i in role_defs}
     for i in results:
         if role_dics.get(i['roleDefinitionId']):
@@ -171,7 +186,7 @@ def list_role_assignments(cmd, assignee_object_id, scope=None):
                 i['principalName'] = ''
                 if principal_dics.get(i['principalId']):
                     i['principalName'] = principal_dics[i['principalId']]
-        except (CloudError, GraphErrorException) as ex:
+        except (HttpResponseError, GraphErrorException) as ex:
             # failure on resolving principal due to graph permission should not fail the whole thing
             logger.info("Failed to resolve graph object information per error '%s'", ex)
 
@@ -184,7 +199,7 @@ def _create_role_assignment(cli_ctx, role, assignee_object_id, scope):
     assignments_client = factory.role_assignments
     definitions_client = factory.role_definitions
 
-    role_id = _resolve_role_id(role, scope, definitions_client)
+    role_id = _resolve_role_id(cli_ctx, role, scope, definitions_client)
 
     RoleAssignmentCreateParameters = get_sdk(cli_ctx, ResourceType.MGMT_AUTHORIZATION,
                                              'RoleAssignmentCreateParameters', mod='models',
@@ -196,15 +211,16 @@ def _create_role_assignment(cli_ctx, role, assignee_object_id, scope):
                                      parameters=parameters)
 
 
-def _resolve_role_id(role, scope, definitions_client):
+def _resolve_role_id(cli_ctx, role, scope, definitions_client):
     role_id = None
     if re.match(r'/subscriptions/.+/providers/Microsoft.Authorization/roleDefinitions/',
                 role, re.I):
         role_id = role
     else:
         if _is_guid(role):
+            subscription_id = get_subscription_id(cli_ctx)
             role_id = '/subscriptions/{}/providers/Microsoft.Authorization/roleDefinitions/{}'.format(
-                definitions_client.config.subscription_id, role)
+                subscription_id, role)
         if not role_id:  # retrieve role id
             role_defs = list(definitions_client.list(scope, "roleName eq '{}'".format(role)))
 
@@ -262,13 +278,13 @@ def _create_service_principal(
     return aad_sp.object_id
 
 
-def create_application(client, display_name, homepage, years, password, identifier_uris,
+def create_application(client, display_name, homepage, years, password,
                        available_to_other_tenants=False, reply_urls=None):
     password_credential = _build_password_credential(password, years)
 
     app_create_param = ApplicationCreateParameters(available_to_other_tenants=available_to_other_tenants,
                                                    display_name=display_name,
-                                                   identifier_uris=identifier_uris,
+                                                   identifier_uris=[],
                                                    homepage=homepage,
                                                    reply_urls=reply_urls,
                                                    password_credentials=[password_credential])
@@ -374,5 +390,6 @@ def _create_sp_name(account_name, sp_name):
 
 def list_role_definitions(cmd):
     definitions_client = _auth_client_factory(cmd.cli_ctx, None).role_definitions
-    scope = '/subscriptions/' + definitions_client.config.subscription_id
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    scope = '/subscriptions/' + subscription_id
     return list(definitions_client.list(scope))

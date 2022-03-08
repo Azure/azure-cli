@@ -5,7 +5,7 @@
 
 
 def batchai_client_factory(cli_ctx, _=None):
-    from azure.mgmt.batchai import BatchAIManagementClient
+    from azure.mgmt.batchai import BatchAI as BatchAIManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     return get_mgmt_service_client(cli_ctx, BatchAIManagementClient)
 

@@ -11,7 +11,7 @@ from shutil import rmtree
 from msrestazure.azure_exceptions import CloudError
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, LiveScenarioTest, VirtualNetworkPreparer
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 from knack.util import CLIError
 
@@ -119,10 +119,7 @@ class DataLakeStoreFileAccessScenarioTest(ScenarioTest):
 class DataLakeStoreFileScenarioTest(ScenarioTest):
 
     def setUp(self):
-        try:
-            import unittest.mock as mock
-        except ImportError:
-            import mock
+        from unittest import mock
         import uuid
 
         def const_uuid():

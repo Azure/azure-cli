@@ -1,0 +1,355 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account keys list
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n -g --query -o
+      User-Agent:
+      - AZURECLI/2.29.1 azsdk-python-azure-mgmt-storage/19.0.0 Python/3.9.6 (Windows-10-10.0.19043-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure-cli-test-file-handle-rg/providers/Microsoft.Storage/storageAccounts/testfilehandlesa/listKeys?api-version=2021-08-01&$expand=kerb
+  response:
+    body:
+      string: '{"keys":[{"creationTime":"2021-11-02T02:22:24.9147695Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2021-11-02T02:22:24.9147695Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '380'
+      content-type:
+      - application/json
+      date:
+      - Tue, 02 Nov 2021 04:53:38 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11998'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Connection:
+      - keep-alive
+      User-Agent:
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.9.6; Windows 10) AZURECLI/2.29.1
+      x-ms-date:
+      - Tue, 02 Nov 2021 04:53:40 GMT
+      x-ms-recursive:
+      - 'True'
+      x-ms-version:
+      - '2018-11-09'
+    method: GET
+    uri: https://testfilehandlesa.file.core.windows.net/file-share?comp=listhandles
+  response:
+    body:
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><EnumerationResults><Entries><Handle><HandleId>117235056741</HandleId><Path>Book1.csv</Path><FileId>11529285414812647424</FileId><ParentId>0</ParentId><SessionId>9754924630438576513</SessionId><ClientIp>10.0.0.4:48444</ClientIp><OpenTime>Tue,
+        02 Nov 2021 04:52:58 GMT</OpenTime></Handle><Handle><HandleId>117235122275</HandleId><Path>Book1.csv</Path><FileId>11529285414812647424</FileId><ParentId>0</ParentId><SessionId>9349670953530953225</SessionId><ClientIp>10.0.0.4:35508</ClientIp><OpenTime>Tue,
+        02 Nov 2021 04:53:02 GMT</OpenTime></Handle><Handle><HandleId>117235056739</HandleId><Path>dir1/testjson.json</Path><FileId>16140971433240035328</FileId><ParentId>13835128424026341376</ParentId><SessionId>9754924630438576513</SessionId><ClientIp>10.0.0.4:48444</ClientIp><OpenTime>Tue,
+        02 Nov 2021 04:52:58 GMT</OpenTime></Handle><Handle><HandleId>117235122273</HandleId><Path>dir1/testjson.json</Path><FileId>16140971433240035328</FileId><ParentId>13835128424026341376</ParentId><SessionId>9349670953530953225</SessionId><ClientIp>10.0.0.4:35508</ClientIp><OpenTime>Tue,
+        02 Nov 2021 04:53:02 GMT</OpenTime></Handle></Entries><NextMarker /></EnumerationResults>"
+    headers:
+      content-type:
+      - application/xml
+      date:
+      - Tue, 02 Nov 2021 04:53:39 GMT
+      server:
+      - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
+      transfer-encoding:
+      - chunked
+      x-ms-version:
+      - '2018-11-09'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Connection:
+      - keep-alive
+      User-Agent:
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.9.6; Windows 10) AZURECLI/2.29.1
+      x-ms-date:
+      - Tue, 02 Nov 2021 04:53:41 GMT
+      x-ms-recursive:
+      - 'True'
+      x-ms-version:
+      - '2018-11-09'
+    method: GET
+    uri: https://testfilehandlesa.file.core.windows.net/file-share/dir1?comp=listhandles
+  response:
+    body:
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><EnumerationResults><Entries><Handle><HandleId>117235056739</HandleId><Path>dir1/testjson.json</Path><FileId>16140971433240035328</FileId><ParentId>13835128424026341376</ParentId><SessionId>9754924630438576513</SessionId><ClientIp>10.0.0.4:48444</ClientIp><OpenTime>Tue,
+        02 Nov 2021 04:52:58 GMT</OpenTime></Handle><Handle><HandleId>117235122273</HandleId><Path>dir1/testjson.json</Path><FileId>16140971433240035328</FileId><ParentId>13835128424026341376</ParentId><SessionId>9349670953530953225</SessionId><ClientIp>10.0.0.4:35508</ClientIp><OpenTime>Tue,
+        02 Nov 2021 04:53:02 GMT</OpenTime></Handle></Entries><NextMarker /></EnumerationResults>"
+    headers:
+      content-type:
+      - application/xml
+      date:
+      - Tue, 02 Nov 2021 04:53:40 GMT
+      server:
+      - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
+      transfer-encoding:
+      - chunked
+      x-ms-version:
+      - '2018-11-09'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Connection:
+      - keep-alive
+      User-Agent:
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.9.6; Windows 10) AZURECLI/2.29.1
+      x-ms-date:
+      - Tue, 02 Nov 2021 04:53:42 GMT
+      x-ms-version:
+      - '2018-11-09'
+    method: GET
+    uri: https://testfilehandlesa.file.core.windows.net/file-share/Book1.csv?comp=listhandles
+  response:
+    body:
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><EnumerationResults><Entries><Handle><HandleId>117235056741</HandleId><Path>Book1.csv</Path><FileId>11529285414812647424</FileId><ParentId>0</ParentId><SessionId>9754924630438576513</SessionId><ClientIp>10.0.0.4:48444</ClientIp><OpenTime>Tue,
+        02 Nov 2021 04:52:58 GMT</OpenTime></Handle><Handle><HandleId>117235122275</HandleId><Path>Book1.csv</Path><FileId>11529285414812647424</FileId><ParentId>0</ParentId><SessionId>9349670953530953225</SessionId><ClientIp>10.0.0.4:35508</ClientIp><OpenTime>Tue,
+        02 Nov 2021 04:53:02 GMT</OpenTime></Handle></Entries><NextMarker /></EnumerationResults>"
+    headers:
+      content-type:
+      - application/xml
+      date:
+      - Tue, 02 Nov 2021 04:53:41 GMT
+      server:
+      - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
+      transfer-encoding:
+      - chunked
+      x-ms-version:
+      - '2018-11-09'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      User-Agent:
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.9.6; Windows 10) AZURECLI/2.29.1
+      x-ms-date:
+      - Tue, 02 Nov 2021 04:53:43 GMT
+      x-ms-handle-id:
+      - '117235056741'
+      x-ms-version:
+      - '2018-11-09'
+    method: PUT
+    uri: https://testfilehandlesa.file.core.windows.net/file-share/Book1.csv?comp=forceclosehandles
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      date:
+      - Tue, 02 Nov 2021 04:53:42 GMT
+      server:
+      - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-number-of-handles-closed:
+      - '1'
+      x-ms-version:
+      - '2018-11-09'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Connection:
+      - keep-alive
+      User-Agent:
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.9.6; Windows 10) AZURECLI/2.29.1
+      x-ms-date:
+      - Tue, 02 Nov 2021 04:53:45 GMT
+      x-ms-version:
+      - '2018-11-09'
+    method: GET
+    uri: https://testfilehandlesa.file.core.windows.net/file-share/Book1.csv?comp=listhandles
+  response:
+    body:
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><EnumerationResults><Entries><Handle><HandleId>117235122275</HandleId><Path>Book1.csv</Path><FileId>11529285414812647424</FileId><ParentId>0</ParentId><SessionId>9349670953530953225</SessionId><ClientIp>10.0.0.4:35508</ClientIp><OpenTime>Tue,
+        02 Nov 2021 04:53:02 GMT</OpenTime></Handle></Entries><NextMarker /></EnumerationResults>"
+    headers:
+      content-type:
+      - application/xml
+      date:
+      - Tue, 02 Nov 2021 04:53:43 GMT
+      server:
+      - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
+      transfer-encoding:
+      - chunked
+      x-ms-version:
+      - '2018-11-09'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      User-Agent:
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.9.6; Windows 10) AZURECLI/2.29.1
+      x-ms-date:
+      - Tue, 02 Nov 2021 04:53:46 GMT
+      x-ms-handle-id:
+      - '*'
+      x-ms-recursive:
+      - 'True'
+      x-ms-version:
+      - '2018-11-09'
+    method: PUT
+    uri: https://testfilehandlesa.file.core.windows.net/file-share/dir1?comp=forceclosehandles
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      date:
+      - Tue, 02 Nov 2021 04:53:45 GMT
+      server:
+      - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-number-of-handles-closed:
+      - '2'
+      x-ms-version:
+      - '2018-11-09'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Connection:
+      - keep-alive
+      User-Agent:
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.9.6; Windows 10) AZURECLI/2.29.1
+      x-ms-date:
+      - Tue, 02 Nov 2021 04:53:47 GMT
+      x-ms-version:
+      - '2018-11-09'
+    method: GET
+    uri: https://testfilehandlesa.file.core.windows.net/file-share/dir1/testjson.json?comp=listhandles
+  response:
+    body:
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><EnumerationResults><Entries
+        /><NextMarker /></EnumerationResults>"
+    headers:
+      content-type:
+      - application/xml
+      date:
+      - Tue, 02 Nov 2021 04:53:46 GMT
+      server:
+      - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
+      transfer-encoding:
+      - chunked
+      x-ms-version:
+      - '2018-11-09'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      User-Agent:
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.9.6; Windows 10) AZURECLI/2.29.1
+      x-ms-date:
+      - Tue, 02 Nov 2021 04:53:48 GMT
+      x-ms-handle-id:
+      - '*'
+      x-ms-recursive:
+      - 'True'
+      x-ms-version:
+      - '2018-11-09'
+    method: PUT
+    uri: https://testfilehandlesa.file.core.windows.net/file-share?comp=forceclosehandles
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      date:
+      - Tue, 02 Nov 2021 04:53:47 GMT
+      server:
+      - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-number-of-handles-closed:
+      - '1'
+      x-ms-version:
+      - '2018-11-09'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Connection:
+      - keep-alive
+      User-Agent:
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.9.6; Windows 10) AZURECLI/2.29.1
+      x-ms-date:
+      - Tue, 02 Nov 2021 04:53:49 GMT
+      x-ms-recursive:
+      - 'True'
+      x-ms-version:
+      - '2018-11-09'
+    method: GET
+    uri: https://testfilehandlesa.file.core.windows.net/file-share?comp=listhandles
+  response:
+    body:
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><EnumerationResults><Entries
+        /><NextMarker /></EnumerationResults>"
+    headers:
+      content-type:
+      - application/xml
+      date:
+      - Tue, 02 Nov 2021 04:53:49 GMT
+      server:
+      - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
+      transfer-encoding:
+      - chunked
+      x-ms-version:
+      - '2018-11-09'
+    status:
+      code: 200
+      message: OK
+version: 1

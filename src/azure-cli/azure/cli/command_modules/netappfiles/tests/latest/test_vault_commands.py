@@ -8,36 +8,33 @@ VNET_LOCATION = "southcentralus"
 
 
 class AzureNetAppFilesVaultServiceScenarioTest(ScenarioTest):
-    def setup_vnet(self, vnet_name, subnet_name):
-        self.cmd("az network vnet create -n %s -g {rg} -l %s --address-prefix 10.5.0.0/16" %
-                 (vnet_name, VNET_LOCATION))
-        self.cmd("az network vnet subnet create -n %s --vnet-name %s --address-prefixes '10.5.0.0/24' "
-                 "--delegations 'Microsoft.Netapp/volumes' -g {rg}" % (subnet_name, vnet_name))
-
-    def create_volume(self, account_name, pool_name, volume_name, volume_only=False):
-        vnet_name = "cli-vnet-lefr-02"
-        subnet_name = "cli-subnet-lefr-02"
-
+    def create_volume(self, volume_only=False):
         if not volume_only:
             # create vnet, account and pool
-            self.setup_vnet(vnet_name, subnet_name)
-            self.cmd("netappfiles account create -g {rg} -a '%s' -l %s" %
-                     (account_name, LOCATION)).get_output_in_json()
-            self.cmd("netappfiles pool create -g {rg} -a %s -p %s -l %s --service-level 'Premium' --size 4" %
-                     (account_name, pool_name, LOCATION)).get_output_in_json()
+            self.cmd("az network vnet create -n {vnet} -g {rg} -l {vnet_loc} --address-prefix 10.5.0.0/16")
+            self.cmd("az network vnet subnet create -n {subnet} --vnet-name {vnet} --address-prefixes '10.5.0.0/24' "
+                     "--delegations 'Microsoft.Netapp/volumes' -g {rg}")
+            self.cmd("netappfiles account create -g {rg} -a {acc_name} -l {loc}")
+            self.cmd("netappfiles pool create -g {rg} -a {acc_name} -p {pool_name} -l {loc} --service-level 'Premium' "
+                     "--size 4")
 
         # create volume
-        return self.cmd("netappfiles volume create -g {rg} -a %s -p %s -v %s -l %s --vnet %s --subnet %s "
-                        "--file-path %s --usage-threshold 100" %
-                        (account_name, pool_name, volume_name, LOCATION, vnet_name, subnet_name, volume_name)
-                        ).get_output_in_json()
+        return self.cmd("netappfiles volume create -g {rg} -a {acc_name} -p {pool_name} -v {vol_name} -l {loc} "
+                        "--vnet {vnet} --subnet {subnet} --file-path {vol_name} --usage-threshold 100")
 
-    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_vault_')
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_vault_list_', additional_tags={'owner': 'cli_test'})
     def test_list_vault(self):
-        account_name = self.create_random_name(prefix='cli-acc-', length=24)
-        pool_name = self.create_random_name(prefix='cli-pool-', length=24)
-        volume_name = self.create_random_name(prefix='cli-vol-', length=24)
-        self.create_volume(account_name, pool_name, volume_name)
+        self.kwargs.update({
+            'loc': LOCATION,
+            'acc_name': self.create_random_name(prefix='cli-acc-', length=24),
+            'pool_name': self.create_random_name(prefix='cli-pool-', length=24),
+            'vol_name': self.create_random_name(prefix='cli-vol-', length=24),
+            'vnet': self.create_random_name(prefix='cli-vnet-', length=24),
+            'subnet': self.create_random_name(prefix='cli-subnet-', length=24),
+            'vnet_loc': VNET_LOCATION
+        })
+        self.create_volume()
 
-        vault_list = self.cmd("az netappfiles vault list -g {rg} -a %s" % account_name).get_output_in_json()
-        assert len(vault_list) == 1
+        self.cmd("az netappfiles vault list -g {rg} -a {acc_name}", checks=[
+            self.check("length(@)", 1)
+        ])

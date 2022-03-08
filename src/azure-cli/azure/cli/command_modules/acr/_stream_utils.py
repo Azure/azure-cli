@@ -13,17 +13,18 @@ from msrestazure.azure_exceptions import CloudError
 from azure.common import AzureHttpError
 from azure.cli.core.profiles import ResourceType, get_sdk
 from ._azure_utils import get_blob_info
+from ._constants import ACR_RUN_DEFAULT_TIMEOUT_IN_SEC
 
 logger = get_logger(__name__)
 
 DEFAULT_CHUNK_SIZE = 1024 * 4
-DEFAULT_LOG_TIMEOUT_IN_SEC = 60 * 30  # 30 minutes
 
 
 def stream_logs(cmd, client,
                 run_id,
                 registry_name,
                 resource_group_name,
+                timeout=ACR_RUN_DEFAULT_TIMEOUT_IN_SEC,
                 no_format=False,
                 raise_error_on_failure=False):
     log_file_sas = None
@@ -52,9 +53,11 @@ def stream_logs(cmd, client,
         account_name, endpoint_suffix, container_name, blob_name, sas_token = get_blob_info(
             log_file_sas)
         AppendBlobService = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE, 'blob#AppendBlobService')
+        if not timeout:
+            timeout = ACR_RUN_DEFAULT_TIMEOUT_IN_SEC
         _stream_logs(no_format,
                      DEFAULT_CHUNK_SIZE,
-                     DEFAULT_LOG_TIMEOUT_IN_SEC,
+                     timeout,
                      AppendBlobService(
                          account_name=account_name,
                          sas_token=sas_token,

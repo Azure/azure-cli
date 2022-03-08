@@ -12,8 +12,8 @@ import datetime
 import sys
 import zipfile
 import stat
-from six.moves.urllib.parse import urlparse
-from six.moves.urllib.request import urlopen  # pylint: disable=import-error
+from urllib.parse import urlparse
+from urllib.request import urlopen
 from azure.cli.core._profile import Profile
 from knack.log import get_logger
 from knack.util import CLIError
@@ -23,7 +23,7 @@ logger = get_logger(__name__)
 
 STORAGE_RESOURCE_ENDPOINT = "https://storage.azure.com"
 SERVICES = {'blob', 'file'}
-AZCOPY_VERSION = '10.8.0'
+AZCOPY_VERSION = '10.13.0'
 
 
 class AzCopy:
@@ -39,7 +39,7 @@ class AzCopy:
         install_dir = os.path.dirname(install_location)
         if not os.path.exists(install_dir):
             os.makedirs(install_dir)
-        base_url = 'https://azcopyvnext.azureedge.net/release20201211/azcopy_{}_{}_{}.{}'
+        base_url = 'https://azcopyvnext.azureedge.net/release20211027/azcopy_{}_{}_{}.{}'
 
         if self.system == 'Windows':
             if platform.machine().endswith('64'):
@@ -142,7 +142,7 @@ def _unserialize_non_msi_token_payload(token_info):
     import jwt  # pylint: disable=import-error
 
     parsed_authority = urlparse(token_info['_authority'])
-    decode = jwt.decode(token_info['accessToken'], verify=False, algorithms=['RS256'])
+    decode = jwt.decode(token_info['accessToken'], algorithms=['RS256'], options={"verify_signature": False})
     return {
         'access_token': token_info['accessToken'],
         'refresh_token': token_info['refreshToken'],

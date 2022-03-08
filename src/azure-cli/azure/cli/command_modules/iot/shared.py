@@ -60,8 +60,8 @@ class AuthenticationType(Enum):
     """
     Type of the Authentication for the routing endpoint.
     """
-    KeyBased = 'keybased'
-    IdentityBased = 'identitybased'
+    KeyBased = 'keyBased'
+    IdentityBased = 'identityBased'
 
 
 # pylint: disable=too-few-public-methods

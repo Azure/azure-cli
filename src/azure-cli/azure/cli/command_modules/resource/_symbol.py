@@ -19,6 +19,7 @@ class Symbol(Enum):
     MINUS = "-"
     TILDE = "~"
     EXCLAMATION_POINT = "!"
+    CROSS = "x"
 
     def __str__(self):
         return self.value

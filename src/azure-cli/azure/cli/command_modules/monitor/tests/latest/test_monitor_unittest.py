@@ -5,10 +5,7 @@
 
 import unittest
 
-try:
-    import unittest.mock as mock
-except ImportError:
-    import mock
+from unittest import mock
 
 from knack.util import CLIError
 
@@ -101,13 +98,14 @@ class MonitorMetricAlertActionTest(unittest.TestCase):
         from azure.cli.command_modules.monitor.actions import MetricAlertConditionAction
         MetricAlertConditionAction('--condition', 'condition').__call__(None, ns, value.split(), '--condition')
 
-    def check_condition(self, ns, time_aggregation, metric_namespace, metric_name, operator, threshold):
+    def check_condition(self, ns, time_aggregation, metric_namespace, metric_name, operator, threshold, skip_metric_validation):
         prop = ns.condition[0]
         self.assertEqual(prop.time_aggregation, time_aggregation)
         self.assertEqual(prop.metric_name, metric_name)
         self.assertEqual(prop.operator, operator)
         self.assertEqual(prop.threshold, threshold)
         self.assertEqual(prop.metric_namespace, metric_namespace)
+        self.assertEqual(prop.skip_metric_validation, skip_metric_validation)
 
     def check_dimension(self, ns, index, name, operator, values):
         dim = ns.condition[0].dimensions[index]
@@ -121,41 +119,45 @@ class MonitorMetricAlertActionTest(unittest.TestCase):
 
         ns = self._build_namespace()
         self.call_condition(ns, 'avg ns."CPU Percent" > 90')
-        self.check_condition(ns, 'Average', 'ns', 'CPU Percent', 'GreaterThan', '90')
+        self.check_condition(ns, 'Average', 'ns', 'CPU Percent', 'GreaterThan', '90', None)
 
         ns = self._build_namespace()
         self.call_condition(ns, 'avg ns."a.b/c_d" > 90')
-        self.check_condition(ns, 'Average', 'ns', 'a.b/c_d', 'GreaterThan', '90')
+        self.check_condition(ns, 'Average', 'ns', 'a.b/c_d', 'GreaterThan', '90', None)
 
         ns = self._build_namespace()
         self.call_condition(ns, 'avg CPU Percent > 90')
-        self.check_condition(ns, 'Average', None, 'CPU Percent', 'GreaterThan', '90')
+        self.check_condition(ns, 'Average', None, 'CPU Percent', 'GreaterThan', '90', None)
 
         ns = self._build_namespace()
         self.call_condition(ns, 'avg "a.b/c_d" > 90')
-        self.check_condition(ns, 'Average', None, 'a.b/c_d', 'GreaterThan', '90')
+        self.check_condition(ns, 'Average', None, 'a.b/c_d', 'GreaterThan', '90', None)
 
         ns = self._build_namespace()
         self.call_condition(ns, 'avg SuccessE2ELatency > 250 where ApiName includes GetBlob or PutBlob')
-        self.check_condition(ns, 'Average', None, 'SuccessE2ELatency', 'GreaterThan', '250')
+        self.check_condition(ns, 'Average', None, 'SuccessE2ELatency', 'GreaterThan', '250', None)
         self.check_dimension(ns, 0, 'ApiName', 'Include', ['GetBlob', 'PutBlob'])
 
         ns = self._build_namespace()
         self.call_condition(ns, 'avg ns.foo/bar_doo > 90')
-        self.check_condition(ns, 'Average', 'ns', 'foo/bar_doo', 'GreaterThan', '90')
+        self.check_condition(ns, 'Average', 'ns', 'foo/bar_doo', 'GreaterThan', '90', None)
 
         ns = self._build_namespace()
-        with self.assertRaisesRegexp(CLIError, 'usage error: --condition'):
+        with self.assertRaisesRegex(CLIError, 'usage error: --condition'):
             self.call_condition(ns, 'avg blah"what > 90')
 
         ns = self._build_namespace()
-        with self.assertRaisesRegexp(CLIError, 'usage error: --condition'):
+        with self.assertRaisesRegex(CLIError, 'usage error: --condition'):
             self.call_condition(ns, 'avg Wra!!ga * woo')
 
         ns = self._build_namespace()
         self.call_condition(ns, 'avg SuccessE2ELatenc,|y > 250 where ApiName includes Get|,%_Blob or PutB,_lob')
-        self.check_condition(ns, 'Average', None, 'SuccessE2ELatenc,|y', 'GreaterThan', '250')
+        self.check_condition(ns, 'Average', None, 'SuccessE2ELatenc,|y', 'GreaterThan', '250', None)
         self.check_dimension(ns, 0, 'ApiName', 'Include', ['Get|,%_Blob', 'PutB,_lob'])
+
+        ns = self._build_namespace()
+        self.call_condition(ns, 'avg ns.foo/bar_doo > 90 with skipmetricvalidation')
+        self.check_condition(ns, 'Average', 'ns', 'foo/bar_doo', 'GreaterThan', '90', True)
 
 
 class MonitorAutoscaleActionTest(unittest.TestCase):

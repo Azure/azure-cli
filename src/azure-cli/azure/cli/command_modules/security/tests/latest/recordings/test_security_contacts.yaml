@@ -1,5 +1,55 @@
 interactions:
 - request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - security contact list
+      Connection:
+      - keep-alive
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-security/1.0.0 Python/3.9.5 (Windows-10-10.0.19042-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts?api-version=2017-08-01-preview
+  response:
+    body:
+      string: '{"value":[{"properties":{"alertNotifications":"Off","alertsToAdmins":"Off","email":"ahabas@microsoft.com","phone":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts/ahabas-microsoft.com","name":"ahabas-microsoft.com","type":"Microsoft.Security/securityContacts","etag":"\"e8009d7a-0000-0d00-0000-610a507b0000\"","location":"West
+        Europe"},{"properties":{"alertNotifications":"Off","alertsToAdmins":"Off","email":"urielc@microsoft.com","phone":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts/urielc-microsoft.com","name":"urielc-microsoft.com","type":"Microsoft.Security/securityContacts","etag":"\"e8009d7a-0000-0d00-0000-610a507b0000\"","location":"West
+        Europe"}]}'
+    headers:
+      api-supported-versions:
+      - 2017-08-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '781'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 04 Aug 2021 08:51:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '749'
+    status:
+      code: 200
+      message: OK
+- request:
     body: '{"properties": {"email": "john@contoso.com", "phone": "", "alertNotifications":
       "off", "alertsToAdmins": "off"}}'
     headers:
@@ -14,19 +64,16 @@ interactions:
       Content-Length:
       - '112'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -n --email --alert-notifications --alerts-admins
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-security/0.6.0 Azure-SDK-For-Python AZURECLI/2.16.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.25.0 azsdk-python-mgmt-security/1.0.0 Python/3.9.5 (Windows-10-10.0.19042-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts/default1?api-version=2017-08-01-preview
   response:
     body:
-      string: '{"properties":{"alertNotifications":"Off","alertsToAdmins":"Off","email":"john@contoso.com","phone":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContact/default1","name":"default1","type":"Microsoft.Security/securityContact","etag":"\"5d033e8c-0000-0d00-0000-5fd0ca8d0000\"","location":"West
+      string: '{"properties":{"alertNotifications":"Off","alertsToAdmins":"Off","email":"john@contoso.com","phone":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts/default1","name":"default1","type":"Microsoft.Security/securityContacts","etag":"\"ea006e5c-0000-0d00-0000-610a55170000\"","location":"West
         Europe"}'
     headers:
       api-supported-versions:
@@ -34,11 +81,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '354'
+      - '356'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 09 Dec 2020 13:01:01 GMT
+      - Wed, 04 Aug 2021 08:51:34 GMT
       expires:
       - '-1'
       pragma:
@@ -70,15 +117,14 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-security/0.6.0 Azure-SDK-For-Python AZURECLI/2.16.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.25.0 azsdk-python-mgmt-security/1.0.0 Python/3.9.5 (Windows-10-10.0.19042-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts?api-version=2017-08-01-preview
   response:
     body:
-      string: '{"value":[{"properties":{"alertNotifications":"Off","alertsToAdmins":"Off","email":"john@contoso.com","phone":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContact/default1","name":"default1","type":"Microsoft.Security/securityContact","etag":"\"5d033e8c-0000-0d00-0000-5fd0ca8d0000\"","location":"West
+      string: '{"value":[{"properties":{"alertNotifications":"Off","alertsToAdmins":"Off","email":"ahabas@microsoft.com","phone":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts/ahabas-microsoft.com","name":"ahabas-microsoft.com","type":"Microsoft.Security/securityContacts","etag":"\"ea006e5c-0000-0d00-0000-610a55170000\"","location":"West
+        Europe"},{"properties":{"alertNotifications":"Off","alertsToAdmins":"Off","email":"urielc@microsoft.com","phone":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts/urielc-microsoft.com","name":"urielc-microsoft.com","type":"Microsoft.Security/securityContacts","etag":"\"ea006e5c-0000-0d00-0000-610a55170000\"","location":"West
+        Europe"},{"properties":{"alertNotifications":"Off","alertsToAdmins":"Off","email":"john@contoso.com","phone":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts/default1","name":"default1","type":"Microsoft.Security/securityContacts","etag":"\"ea006e5c-0000-0d00-0000-610a55170000\"","location":"West
         Europe"}]}'
     headers:
       api-supported-versions:
@@ -86,11 +132,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '366'
+      - '1138'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 09 Dec 2020 13:01:02 GMT
+      - Wed, 04 Aug 2021 08:51:35 GMT
       expires:
       - '-1'
       pragma:
@@ -124,15 +170,12 @@ interactions:
       ParameterSetName:
       - -n
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-security/0.6.0 Azure-SDK-For-Python AZURECLI/2.16.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.25.0 azsdk-python-mgmt-security/1.0.0 Python/3.9.5 (Windows-10-10.0.19042-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts/default1?api-version=2017-08-01-preview
   response:
     body:
-      string: '{"properties":{"alertNotifications":"Off","alertsToAdmins":"Off","email":"john@contoso.com","phone":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContact/default1","name":"default1","type":"Microsoft.Security/securityContact","etag":"\"5d033e8c-0000-0d00-0000-5fd0ca8d0000\"","location":"West
+      string: '{"properties":{"alertNotifications":"Off","alertsToAdmins":"Off","email":"john@contoso.com","phone":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts/default1","name":"default1","type":"Microsoft.Security/securityContacts","etag":"\"ea006e5c-0000-0d00-0000-610a55170000\"","location":"West
         Europe"}'
     headers:
       api-supported-versions:
@@ -140,11 +183,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '354'
+      - '356'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 09 Dec 2020 13:01:01 GMT
+      - Wed, 04 Aug 2021 08:51:36 GMT
       expires:
       - '-1'
       pragma:
@@ -179,19 +222,16 @@ interactions:
       Content-Length:
       - '112'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -n --email --alert-notifications --alerts-admins
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-security/0.6.0 Azure-SDK-For-Python AZURECLI/2.16.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.25.0 azsdk-python-mgmt-security/1.0.0 Python/3.9.5 (Windows-10-10.0.19042-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts/default1?api-version=2017-08-01-preview
   response:
     body:
-      string: '{"properties":{"alertNotifications":"Off","alertsToAdmins":"Off","email":"lisa@contoso.com","phone":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContact/default1","name":"default1","type":"Microsoft.Security/securityContact","etag":"\"5d03888d-0000-0d00-0000-5fd0ca8f0000\"","location":"West
+      string: '{"properties":{"alertNotifications":"Off","alertsToAdmins":"Off","email":"lisa@contoso.com","phone":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts/default1","name":"default1","type":"Microsoft.Security/securityContacts","etag":"\"ea00335d-0000-0d00-0000-610a55190000\"","location":"West
         Europe"}'
     headers:
       api-supported-versions:
@@ -199,11 +239,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '354'
+      - '356'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 09 Dec 2020 13:01:03 GMT
+      - Wed, 04 Aug 2021 08:51:37 GMT
       expires:
       - '-1'
       pragma:
@@ -237,15 +277,12 @@ interactions:
       ParameterSetName:
       - -n
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-security/0.6.0 Azure-SDK-For-Python AZURECLI/2.16.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.25.0 azsdk-python-mgmt-security/1.0.0 Python/3.9.5 (Windows-10-10.0.19042-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts/default1?api-version=2017-08-01-preview
   response:
     body:
-      string: '{"properties":{"alertNotifications":"Off","alertsToAdmins":"Off","email":"lisa@contoso.com","phone":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContact/default1","name":"default1","type":"Microsoft.Security/securityContact","etag":"\"5d03888d-0000-0d00-0000-5fd0ca8f0000\"","location":"West
+      string: '{"properties":{"alertNotifications":"Off","alertsToAdmins":"Off","email":"lisa@contoso.com","phone":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts/default1","name":"default1","type":"Microsoft.Security/securityContacts","etag":"\"ea00335d-0000-0d00-0000-610a55190000\"","location":"West
         Europe"}'
     headers:
       api-supported-versions:
@@ -253,11 +290,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '354'
+      - '356'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 09 Dec 2020 13:01:04 GMT
+      - Wed, 04 Aug 2021 08:51:37 GMT
       expires:
       - '-1'
       pragma:
@@ -293,10 +330,7 @@ interactions:
       ParameterSetName:
       - -n
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-security/0.6.0 Azure-SDK-For-Python AZURECLI/2.16.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.25.0 azsdk-python-mgmt-security/1.0.0 Python/3.9.5 (Windows-10-10.0.19042-SP0)
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts/default1?api-version=2017-08-01-preview
   response:
@@ -308,7 +342,7 @@ interactions:
       cache-control:
       - no-cache
       date:
-      - Wed, 09 Dec 2020 13:01:04 GMT
+      - Wed, 04 Aug 2021 08:51:39 GMT
       expires:
       - '-1'
       pragma:
@@ -320,7 +354,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14997'
+      - '14999'
     status:
       code: 204
       message: No Content
@@ -336,26 +370,25 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-security/0.6.0 Azure-SDK-For-Python AZURECLI/2.16.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.25.0 azsdk-python-mgmt-security/1.0.0 Python/3.9.5 (Windows-10-10.0.19042-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts?api-version=2017-08-01-preview
   response:
     body:
-      string: '{"value":[]}'
+      string: '{"value":[{"properties":{"alertNotifications":"Off","alertsToAdmins":"Off","email":"ahabas@microsoft.com","phone":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts/ahabas-microsoft.com","name":"ahabas-microsoft.com","type":"Microsoft.Security/securityContacts","etag":"\"ea00d45d-0000-0d00-0000-610a551b0000\"","location":"West
+        Europe"},{"properties":{"alertNotifications":"Off","alertsToAdmins":"Off","email":"urielc@microsoft.com","phone":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts/urielc-microsoft.com","name":"urielc-microsoft.com","type":"Microsoft.Security/securityContacts","etag":"\"ea00d45d-0000-0d00-0000-610a551b0000\"","location":"West
+        Europe"}]}'
     headers:
       api-supported-versions:
       - 2017-08-01-preview
       cache-control:
       - no-cache
       content-length:
-      - '12'
+      - '781'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 09 Dec 2020 13:01:04 GMT
+      - Wed, 04 Aug 2021 08:51:39 GMT
       expires:
       - '-1'
       pragma:

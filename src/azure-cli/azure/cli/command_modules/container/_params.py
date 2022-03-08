@@ -12,7 +12,7 @@ from azure.cli.core.commands.validators import get_default_location_from_resourc
 from azure.mgmt.containerinstance.models import (
     ContainerGroupRestartPolicy, OperatingSystemTypes, ContainerNetworkProtocol)
 from ._validators import (validate_volume_mount_path, validate_secrets, validate_subnet, validate_msi,
-                          validate_gitrepo_directory, validate_network_profile, validate_image)
+                          validate_gitrepo_directory, validate_image)
 
 # pylint: disable=line-too-long
 
@@ -47,11 +47,6 @@ secrets_type = CLIArgumentType(
     nargs='+'
 )
 
-network_profile_type = CLIArgumentType(
-    validator=validate_network_profile,
-    help="The network profile name or id."
-)
-
 
 # pylint: disable=too-many-statements
 def load_arguments(self, _):
@@ -78,6 +73,7 @@ def load_arguments(self, _):
         c.argument('secrets', secrets_type)
         c.argument('secrets_mount_path', validator=validate_volume_mount_path, help="The path within the container where the secrets volume should be mounted. Must not contain colon ':'.")
         c.argument('file', options_list=['--file', '-f'], help="The path to the input file.")
+        c.argument('zone', help="The zone to place the container group.")
 
     with self.argument_context('container create', arg_group='Managed Service Identity') as c:
         c.argument('assign_identity', nargs='*', validator=validate_msi, help="Space-separated list of assigned identities. Assigned identities are either user assigned identities (resource IDs) and / or the system assigned identity ('[system]'). See examples for more info.")
@@ -85,7 +81,6 @@ def load_arguments(self, _):
         c.argument('identity_role', options_list=['--role'], help="Role name or id the system assigned identity will have")
 
     with self.argument_context('container create', arg_group='Network') as c:
-        c.argument('network_profile', network_profile_type)
         c.argument('vnet', help='The name of the VNET when creating a new one or referencing an existing one. Can also reference an existing vnet by ID. This allows using vnets from other resource groups.')
         c.argument('vnet_name', help='The name of the VNET when creating a new one or referencing an existing one.',
                    deprecate_info=c.deprecate(redirect="--vnet", hide="0.3.5"))
@@ -97,6 +92,7 @@ def load_arguments(self, _):
         c.argument('registry_login_server', help='The container image registry login server')
         c.argument('registry_username', help='The username to log in container image registry server')
         c.argument('registry_password', help='The password to log in container image registry server')
+        c.argument('acr_identity', help='The identity with access to the container registry')
 
     with self.argument_context('container create', arg_group='Azure File Volume') as c:
         c.argument('azure_file_volume_share_name', help='The name of the Azure File share to be mounted as a volume')

@@ -13,8 +13,8 @@ interactions:
       ParameterSetName:
       - --namespace
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-authorization/0.61.0 Azure-SDK-For-Python AZURECLI/2.21.0
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-authorization/0.61.0 Azure-SDK-For-Python AZURECLI/2.26.0
       accept-language:
       - en-US
     method: GET
@@ -215,7 +215,10 @@ interactions:
         of bytes received on all network interfaces by the Virtual Machine(s) (Incoming
         Traffic)","unit":"Bytes","aggregationType":"Total"},{"name":"Network Out Total","displayName":"Network
         Out Total","displayDescription":"The number of bytes out on all network interfaces
-        by the Virtual Machine(s) (Outgoing Traffic)","unit":"Bytes","aggregationType":"Total"}]}},"isDataAction":false}]},{"name":"virtualMachines/extensions","displayName":"Virtual
+        by the Virtual Machine(s) (Outgoing Traffic)","unit":"Bytes","aggregationType":"Total"},{"name":"Available
+        Memory Bytes","displayName":"Available Memory Bytes (Preview)","displayDescription":"Amount
+        of physical memory, in bytes, immediately available for allocation to a process
+        or for system use in the Virtual Machine","unit":"Bytes","aggregationType":"Average"}]}},"isDataAction":false}]},{"name":"virtualMachines/extensions","displayName":"Virtual
         Machine Extensions","operations":[{"name":"Microsoft.Compute/virtualMachines/extensions/read","displayName":"Get
         Virtual Machine Extension","description":"Get the properties of a virtual
         machine extension","origin":"user,system","properties":null,"isDataAction":false},{"name":"Microsoft.Compute/virtualMachines/extensions/write","displayName":"Create
@@ -393,7 +396,10 @@ interactions:
         Traffic)","unit":"Bytes","aggregationType":"Total","dimensions":[{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"Network
         Out Total","displayName":"Network Out Total","displayDescription":"The number
         of bytes out on all network interfaces by the Virtual Machine(s) (Outgoing
-        Traffic)","unit":"Bytes","aggregationType":"Total","dimensions":[{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]}]}},"isDataAction":false}]},{"name":"virtualMachineScaleSets/rollingUpgrades","displayName":"Virtual
+        Traffic)","unit":"Bytes","aggregationType":"Total","dimensions":[{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"Available
+        Memory Bytes","displayName":"Available Memory Bytes (Preview)","displayDescription":"Amount
+        of physical memory, in bytes, immediately available for allocation to a process
+        or for system use in the Virtual Machine","unit":"Bytes","aggregationType":"Average","dimensions":[{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]}]}},"isDataAction":false}]},{"name":"virtualMachineScaleSets/rollingUpgrades","displayName":"Virtual
         Machine Scale Sets Rolling Upgrades","operations":[{"name":"Microsoft.Compute/virtualMachineScaleSets/rollingUpgrades/read","displayName":"Gets
         the latest Rolling Upgrade status for a Virtual Machine Scale Set","description":"Get
         latest Rolling Upgrade status for a Virtual Machine Scale Set","origin":"user,system","properties":null,"isDataAction":false}]},{"name":"virtualMachineScaleSets/osUpgradeHistory","displayName":"Virtual
@@ -551,7 +557,10 @@ interactions:
         of bytes received on all network interfaces by the Virtual Machine(s) (Incoming
         Traffic)","unit":"Bytes","aggregationType":"Total"},{"name":"Network Out Total","displayName":"Network
         Out Total","displayDescription":"The number of bytes out on all network interfaces
-        by the Virtual Machine(s) (Outgoing Traffic)","unit":"Bytes","aggregationType":"Total"}]}},"isDataAction":false}]},{"name":"locations/vmSizes","displayName":"Virtual
+        by the Virtual Machine(s) (Outgoing Traffic)","unit":"Bytes","aggregationType":"Total"},{"name":"Available
+        Memory Bytes","displayName":"Available Memory Bytes (Preview)","displayDescription":"Amount
+        of physical memory, in bytes, immediately available for allocation to a process
+        or for system use in the Virtual Machine","unit":"Bytes","aggregationType":"Average"}]}},"isDataAction":false}]},{"name":"locations/vmSizes","displayName":"Virtual
         Machine Sizes","operations":[{"name":"Microsoft.Compute/locations/vmSizes/read","displayName":"List
         Available Virtual Machine Sizes in Location","description":"Lists available
         virtual machine sizes in a location","origin":"user,system","properties":null,"isDataAction":false}]},{"name":"locations/operations","displayName":"Operation","operations":[{"name":"Microsoft.Compute/locations/operations/read","displayName":"Get
@@ -805,7 +814,16 @@ interactions:
         Read Operations/Sec","displayName":"Disk Read Operations/Sec","displayDescription":"Disk
         Read IOPS","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"RoleInstanceId","displayName":"RoleInstanceId","internalName":"RoleInstanceId","toBeExportedForShoebox":true},{"name":"RoleId","displayName":"RoleId","internalName":"RoleId","toBeExportedForShoebox":true}]},{"name":"Disk
         Write Operations/Sec","displayName":"Disk Write Operations/Sec","displayDescription":"Disk
-        Write IOPS","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"RoleInstanceId","displayName":"RoleInstanceId","internalName":"RoleInstanceId","toBeExportedForShoebox":true},{"name":"RoleId","displayName":"RoleId","internalName":"RoleId","toBeExportedForShoebox":true}]}]}},"isDataAction":false}]},{"name":"cloudServices/roles","displayName":"CloudService
+        Write IOPS","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"RoleInstanceId","displayName":"RoleInstanceId","internalName":"RoleInstanceId","toBeExportedForShoebox":true},{"name":"RoleId","displayName":"RoleId","internalName":"RoleId","toBeExportedForShoebox":true}]},{"name":"Available
+        Memory Bytes","displayName":"Available Memory Bytes (Preview)","displayDescription":"Amount
+        of physical memory, in bytes, immediately available for allocation to a process
+        or for system use in the Virtual Machine","unit":"Bytes","aggregationType":"Average","dimensions":[{"name":"RoleInstanceId","displayName":"RoleInstanceId","internalName":"RoleInstanceId","toBeExportedForShoebox":true},{"name":"RoleId","displayName":"RoleId","internalName":"RoleId","toBeExportedForShoebox":true}]},{"name":"Network
+        In Total","displayName":"Network In Total","displayDescription":"The number
+        of bytes received on all network interfaces by the Virtual Machine(s) (Incoming
+        Traffic)","unit":"Bytes","aggregationType":"Total","dimensions":[{"name":"RoleInstanceId","displayName":"RoleInstanceId","internalName":"RoleInstanceId","toBeExportedForShoebox":true},{"name":"RoleId","displayName":"RoleId","internalName":"RoleId","toBeExportedForShoebox":true}]},{"name":"Network
+        Out Total","displayName":"Network Out Total","displayDescription":"The number
+        of bytes out on all network interfaces by the Virtual Machine(s) (Outgoing
+        Traffic)","unit":"Bytes","aggregationType":"Total","dimensions":[{"name":"RoleInstanceId","displayName":"RoleInstanceId","internalName":"RoleInstanceId","toBeExportedForShoebox":true},{"name":"RoleId","displayName":"RoleId","internalName":"RoleId","toBeExportedForShoebox":true}]}]}},"isDataAction":false}]},{"name":"cloudServices/roles","displayName":"CloudService
         Roles","operations":[{"name":"Microsoft.Compute/cloudServices/roles/read","displayName":"Gets
         a role from a CloudService.","description":"Gets a role from a CloudService.","origin":"user,system","properties":null,"isDataAction":false},{"name":"Microsoft.Compute/cloudServices/roles/write","displayName":"Scale
         instances in a Role","description":"Scale instances in a Role","origin":"user,system","properties":null,"isDataAction":false}]},{"name":"cloudServices/roles/providers/Microsoft.Insights/metricDefinitions","displayName":"CloudService
@@ -821,7 +839,16 @@ interactions:
         Read Operations/Sec","displayName":"Disk Read Operations/Sec","displayDescription":"Disk
         Read IOPS","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"RoleInstanceId","displayName":"RoleInstanceId","internalName":"RoleInstanceId","toBeExportedForShoebox":true},{"name":"RoleId","displayName":"RoleId","internalName":"RoleId","toBeExportedForShoebox":true}]},{"name":"Disk
         Write Operations/Sec","displayName":"Disk Write Operations/Sec","displayDescription":"Disk
-        Write IOPS","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"RoleInstanceId","displayName":"RoleInstanceId","internalName":"RoleInstanceId","toBeExportedForShoebox":true},{"name":"RoleId","displayName":"RoleId","internalName":"RoleId","toBeExportedForShoebox":true}]}]}},"isDataAction":false}]},{"name":"cloudServices/providers/Microsoft.Insights/diagnosticSettings","displayName":"CloudServices
+        Write IOPS","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"RoleInstanceId","displayName":"RoleInstanceId","internalName":"RoleInstanceId","toBeExportedForShoebox":true},{"name":"RoleId","displayName":"RoleId","internalName":"RoleId","toBeExportedForShoebox":true}]},{"name":"Available
+        Memory Bytes","displayName":"Available Memory Bytes (Preview)","displayDescription":"Amount
+        of physical memory, in bytes, immediately available for allocation to a process
+        or for system use in the Virtual Machine","unit":"Bytes","aggregationType":"Average","dimensions":[{"name":"RoleInstanceId","displayName":"RoleInstanceId","internalName":"RoleInstanceId","toBeExportedForShoebox":true},{"name":"RoleId","displayName":"RoleId","internalName":"RoleId","toBeExportedForShoebox":true}]},{"name":"Network
+        In Total","displayName":"Network In Total","displayDescription":"The number
+        of bytes received on all network interfaces by the Virtual Machine(s) (Incoming
+        Traffic)","unit":"Bytes","aggregationType":"Total","dimensions":[{"name":"RoleInstanceId","displayName":"RoleInstanceId","internalName":"RoleInstanceId","toBeExportedForShoebox":true},{"name":"RoleId","displayName":"RoleId","internalName":"RoleId","toBeExportedForShoebox":true}]},{"name":"Network
+        Out Total","displayName":"Network Out Total","displayDescription":"The number
+        of bytes out on all network interfaces by the Virtual Machine(s) (Outgoing
+        Traffic)","unit":"Bytes","aggregationType":"Total","dimensions":[{"name":"RoleInstanceId","displayName":"RoleInstanceId","internalName":"RoleInstanceId","toBeExportedForShoebox":true},{"name":"RoleId","displayName":"RoleId","internalName":"RoleId","toBeExportedForShoebox":true}]}]}},"isDataAction":false}]},{"name":"cloudServices/providers/Microsoft.Insights/diagnosticSettings","displayName":"CloudServices
         Diagnostic Settings","operations":[{"name":"Microsoft.Compute/cloudServices/providers/Microsoft.Insights/diagnosticSettings/read","displayName":"Read
         the diagnostic setting","description":"Gets the diagnostic setting for the
         CloudService.","origin":"system","properties":null,"isDataAction":false},{"name":"Microsoft.Compute/cloudServices/providers/Microsoft.Insights/diagnosticSettings/write","displayName":"Write
@@ -889,11 +916,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '118574'
+      - '122337'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 16 Apr 2021 02:02:50 GMT
+      - Wed, 07 Jul 2021 08:32:26 GMT
       expires:
       - '-1'
       pragma:
@@ -925,8 +952,8 @@ interactions:
       ParameterSetName:
       - --namespace
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-authorization/0.61.0 Azure-SDK-For-Python AZURECLI/2.21.0
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-authorization/0.61.0 Azure-SDK-For-Python AZURECLI/2.26.0
       accept-language:
       - en-US
     method: GET
@@ -1127,7 +1154,10 @@ interactions:
         of bytes received on all network interfaces by the Virtual Machine(s) (Incoming
         Traffic)","unit":"Bytes","aggregationType":"Total"},{"name":"Network Out Total","displayName":"Network
         Out Total","displayDescription":"The number of bytes out on all network interfaces
-        by the Virtual Machine(s) (Outgoing Traffic)","unit":"Bytes","aggregationType":"Total"}]}},"isDataAction":false}]},{"name":"virtualMachines/extensions","displayName":"Virtual
+        by the Virtual Machine(s) (Outgoing Traffic)","unit":"Bytes","aggregationType":"Total"},{"name":"Available
+        Memory Bytes","displayName":"Available Memory Bytes (Preview)","displayDescription":"Amount
+        of physical memory, in bytes, immediately available for allocation to a process
+        or for system use in the Virtual Machine","unit":"Bytes","aggregationType":"Average"}]}},"isDataAction":false}]},{"name":"virtualMachines/extensions","displayName":"Virtual
         Machine Extensions","operations":[{"name":"Microsoft.Compute/virtualMachines/extensions/read","displayName":"Get
         Virtual Machine Extension","description":"Get the properties of a virtual
         machine extension","origin":"user,system","properties":null,"isDataAction":false},{"name":"Microsoft.Compute/virtualMachines/extensions/write","displayName":"Create
@@ -1305,7 +1335,10 @@ interactions:
         Traffic)","unit":"Bytes","aggregationType":"Total","dimensions":[{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"Network
         Out Total","displayName":"Network Out Total","displayDescription":"The number
         of bytes out on all network interfaces by the Virtual Machine(s) (Outgoing
-        Traffic)","unit":"Bytes","aggregationType":"Total","dimensions":[{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]}]}},"isDataAction":false}]},{"name":"virtualMachineScaleSets/rollingUpgrades","displayName":"Virtual
+        Traffic)","unit":"Bytes","aggregationType":"Total","dimensions":[{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"Available
+        Memory Bytes","displayName":"Available Memory Bytes (Preview)","displayDescription":"Amount
+        of physical memory, in bytes, immediately available for allocation to a process
+        or for system use in the Virtual Machine","unit":"Bytes","aggregationType":"Average","dimensions":[{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]}]}},"isDataAction":false}]},{"name":"virtualMachineScaleSets/rollingUpgrades","displayName":"Virtual
         Machine Scale Sets Rolling Upgrades","operations":[{"name":"Microsoft.Compute/virtualMachineScaleSets/rollingUpgrades/read","displayName":"Gets
         the latest Rolling Upgrade status for a Virtual Machine Scale Set","description":"Get
         latest Rolling Upgrade status for a Virtual Machine Scale Set","origin":"user,system","properties":null,"isDataAction":false}]},{"name":"virtualMachineScaleSets/osUpgradeHistory","displayName":"Virtual
@@ -1463,7 +1496,10 @@ interactions:
         of bytes received on all network interfaces by the Virtual Machine(s) (Incoming
         Traffic)","unit":"Bytes","aggregationType":"Total"},{"name":"Network Out Total","displayName":"Network
         Out Total","displayDescription":"The number of bytes out on all network interfaces
-        by the Virtual Machine(s) (Outgoing Traffic)","unit":"Bytes","aggregationType":"Total"}]}},"isDataAction":false}]},{"name":"locations/vmSizes","displayName":"Virtual
+        by the Virtual Machine(s) (Outgoing Traffic)","unit":"Bytes","aggregationType":"Total"},{"name":"Available
+        Memory Bytes","displayName":"Available Memory Bytes (Preview)","displayDescription":"Amount
+        of physical memory, in bytes, immediately available for allocation to a process
+        or for system use in the Virtual Machine","unit":"Bytes","aggregationType":"Average"}]}},"isDataAction":false}]},{"name":"locations/vmSizes","displayName":"Virtual
         Machine Sizes","operations":[{"name":"Microsoft.Compute/locations/vmSizes/read","displayName":"List
         Available Virtual Machine Sizes in Location","description":"Lists available
         virtual machine sizes in a location","origin":"user,system","properties":null,"isDataAction":false}]},{"name":"locations/operations","displayName":"Operation","operations":[{"name":"Microsoft.Compute/locations/operations/read","displayName":"Get
@@ -1717,7 +1753,16 @@ interactions:
         Read Operations/Sec","displayName":"Disk Read Operations/Sec","displayDescription":"Disk
         Read IOPS","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"RoleInstanceId","displayName":"RoleInstanceId","internalName":"RoleInstanceId","toBeExportedForShoebox":true},{"name":"RoleId","displayName":"RoleId","internalName":"RoleId","toBeExportedForShoebox":true}]},{"name":"Disk
         Write Operations/Sec","displayName":"Disk Write Operations/Sec","displayDescription":"Disk
-        Write IOPS","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"RoleInstanceId","displayName":"RoleInstanceId","internalName":"RoleInstanceId","toBeExportedForShoebox":true},{"name":"RoleId","displayName":"RoleId","internalName":"RoleId","toBeExportedForShoebox":true}]}]}},"isDataAction":false}]},{"name":"cloudServices/roles","displayName":"CloudService
+        Write IOPS","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"RoleInstanceId","displayName":"RoleInstanceId","internalName":"RoleInstanceId","toBeExportedForShoebox":true},{"name":"RoleId","displayName":"RoleId","internalName":"RoleId","toBeExportedForShoebox":true}]},{"name":"Available
+        Memory Bytes","displayName":"Available Memory Bytes (Preview)","displayDescription":"Amount
+        of physical memory, in bytes, immediately available for allocation to a process
+        or for system use in the Virtual Machine","unit":"Bytes","aggregationType":"Average","dimensions":[{"name":"RoleInstanceId","displayName":"RoleInstanceId","internalName":"RoleInstanceId","toBeExportedForShoebox":true},{"name":"RoleId","displayName":"RoleId","internalName":"RoleId","toBeExportedForShoebox":true}]},{"name":"Network
+        In Total","displayName":"Network In Total","displayDescription":"The number
+        of bytes received on all network interfaces by the Virtual Machine(s) (Incoming
+        Traffic)","unit":"Bytes","aggregationType":"Total","dimensions":[{"name":"RoleInstanceId","displayName":"RoleInstanceId","internalName":"RoleInstanceId","toBeExportedForShoebox":true},{"name":"RoleId","displayName":"RoleId","internalName":"RoleId","toBeExportedForShoebox":true}]},{"name":"Network
+        Out Total","displayName":"Network Out Total","displayDescription":"The number
+        of bytes out on all network interfaces by the Virtual Machine(s) (Outgoing
+        Traffic)","unit":"Bytes","aggregationType":"Total","dimensions":[{"name":"RoleInstanceId","displayName":"RoleInstanceId","internalName":"RoleInstanceId","toBeExportedForShoebox":true},{"name":"RoleId","displayName":"RoleId","internalName":"RoleId","toBeExportedForShoebox":true}]}]}},"isDataAction":false}]},{"name":"cloudServices/roles","displayName":"CloudService
         Roles","operations":[{"name":"Microsoft.Compute/cloudServices/roles/read","displayName":"Gets
         a role from a CloudService.","description":"Gets a role from a CloudService.","origin":"user,system","properties":null,"isDataAction":false},{"name":"Microsoft.Compute/cloudServices/roles/write","displayName":"Scale
         instances in a Role","description":"Scale instances in a Role","origin":"user,system","properties":null,"isDataAction":false}]},{"name":"cloudServices/roles/providers/Microsoft.Insights/metricDefinitions","displayName":"CloudService
@@ -1733,7 +1778,16 @@ interactions:
         Read Operations/Sec","displayName":"Disk Read Operations/Sec","displayDescription":"Disk
         Read IOPS","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"RoleInstanceId","displayName":"RoleInstanceId","internalName":"RoleInstanceId","toBeExportedForShoebox":true},{"name":"RoleId","displayName":"RoleId","internalName":"RoleId","toBeExportedForShoebox":true}]},{"name":"Disk
         Write Operations/Sec","displayName":"Disk Write Operations/Sec","displayDescription":"Disk
-        Write IOPS","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"RoleInstanceId","displayName":"RoleInstanceId","internalName":"RoleInstanceId","toBeExportedForShoebox":true},{"name":"RoleId","displayName":"RoleId","internalName":"RoleId","toBeExportedForShoebox":true}]}]}},"isDataAction":false}]},{"name":"cloudServices/providers/Microsoft.Insights/diagnosticSettings","displayName":"CloudServices
+        Write IOPS","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"RoleInstanceId","displayName":"RoleInstanceId","internalName":"RoleInstanceId","toBeExportedForShoebox":true},{"name":"RoleId","displayName":"RoleId","internalName":"RoleId","toBeExportedForShoebox":true}]},{"name":"Available
+        Memory Bytes","displayName":"Available Memory Bytes (Preview)","displayDescription":"Amount
+        of physical memory, in bytes, immediately available for allocation to a process
+        or for system use in the Virtual Machine","unit":"Bytes","aggregationType":"Average","dimensions":[{"name":"RoleInstanceId","displayName":"RoleInstanceId","internalName":"RoleInstanceId","toBeExportedForShoebox":true},{"name":"RoleId","displayName":"RoleId","internalName":"RoleId","toBeExportedForShoebox":true}]},{"name":"Network
+        In Total","displayName":"Network In Total","displayDescription":"The number
+        of bytes received on all network interfaces by the Virtual Machine(s) (Incoming
+        Traffic)","unit":"Bytes","aggregationType":"Total","dimensions":[{"name":"RoleInstanceId","displayName":"RoleInstanceId","internalName":"RoleInstanceId","toBeExportedForShoebox":true},{"name":"RoleId","displayName":"RoleId","internalName":"RoleId","toBeExportedForShoebox":true}]},{"name":"Network
+        Out Total","displayName":"Network Out Total","displayDescription":"The number
+        of bytes out on all network interfaces by the Virtual Machine(s) (Outgoing
+        Traffic)","unit":"Bytes","aggregationType":"Total","dimensions":[{"name":"RoleInstanceId","displayName":"RoleInstanceId","internalName":"RoleInstanceId","toBeExportedForShoebox":true},{"name":"RoleId","displayName":"RoleId","internalName":"RoleId","toBeExportedForShoebox":true}]}]}},"isDataAction":false}]},{"name":"cloudServices/providers/Microsoft.Insights/diagnosticSettings","displayName":"CloudServices
         Diagnostic Settings","operations":[{"name":"Microsoft.Compute/cloudServices/providers/Microsoft.Insights/diagnosticSettings/read","displayName":"Read
         the diagnostic setting","description":"Gets the diagnostic setting for the
         CloudService.","origin":"system","properties":null,"isDataAction":false},{"name":"Microsoft.Compute/cloudServices/providers/Microsoft.Insights/diagnosticSettings/write","displayName":"Write
@@ -1801,11 +1855,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '118574'
+      - '122337'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 16 Apr 2021 02:02:50 GMT
+      - Wed, 07 Jul 2021 08:32:27 GMT
       expires:
       - '-1'
       pragma:
@@ -1837,8 +1891,8 @@ interactions:
       ParameterSetName:
       - --namespace
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-authorization/0.61.0 Azure-SDK-For-Python AZURECLI/2.21.0
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-authorization/0.61.0 Azure-SDK-For-Python AZURECLI/2.26.0
       accept-language:
       - en-US
     method: GET
@@ -1871,7 +1925,7 @@ interactions:
         blob permissions\",\"description\":\"Modifies permissions of the blob\",\"origin\":null,\"properties\":null,\"isDataAction\":true},{\"name\":\"Microsoft.Storage/storageAccounts/blobServices/containers/blobs/runAsSuperUser/action\",\"displayName\":\"Execute
         the command as super user\",\"description\":\"Returns the result of the blob
         command\",\"origin\":null,\"properties\":null,\"isDataAction\":true}]},{\"name\":\"storageAccounts/blobServices/containers\",\"displayName\":\"Storage
-        Blob Service Containers\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/blobServices/containers/write\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/blobServices/containers/write\",\"displayName\":\"Patch
+        Blob Service Containers\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/blobServices/containers/migrate/action\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/blobServices/containers/write\",\"displayName\":\"Patch
         blob container\",\"description\":\"Returns the result of patch blob container\",\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/blobServices/containers/delete\",\"displayName\":\"Delete
         blob container\",\"description\":\"Returns the result of deleting a container\",\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/blobServices/containers/read\",\"displayName\":\"Get
         blob container\",\"description\":\"Returns a container\",\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/blobServices/containers/read\",\"displayName\":\"List
@@ -2109,7 +2163,7 @@ interactions:
         Share\",\"toBeExportedForShoebox\":true}],\"fillGapWithZero\":false,\"category\":\"Capacity\",\"supportedTimeGrainTypes\":[\"PT1H\"],\"supportedAggregationTypes\":[\"Average\"]},{\"name\":\"FileShareProvisionedIOPS\",\"displayName\":\"File
         Share Provisioned IOPS\",\"displayDescription\":\"The baseline number of provisioned
         IOPS for the premium file share in the premium files storage account. This
-        number is calculated based on the provisioned size (quota) of the share capacity.\",\"unit\":\"Bytes\",\"aggregationType\":\"Average\",\"lockAggregationType\":\"Total\",\"dimensions\":[{\"name\":\"FileShare\",\"displayName\":\"File
+        number is calculated based on the provisioned size (quota) of the share capacity.\",\"unit\":\"CountPerSecond\",\"aggregationType\":\"Average\",\"lockAggregationType\":\"Total\",\"dimensions\":[{\"name\":\"FileShare\",\"displayName\":\"File
         Share\",\"toBeExportedForShoebox\":true}],\"fillGapWithZero\":false,\"category\":\"Capacity\",\"supportedTimeGrainTypes\":[\"PT1H\"],\"supportedAggregationTypes\":[\"Average\"],\"metricFilterPattern\":\"Premium\"},{\"name\":\"Transactions\",\"displayName\":\"Transactions\",\"displayDescription\":\"The
         number of requests made to a storage service or the specified API operation.
         This number includes successful and failed requests, as well as requests which
@@ -2238,8 +2292,11 @@ interactions:
         File Services\",\"description\":\"List file services\",\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/fileServices/write\",\"displayName\":\"Put
         File Service Properties\",\"description\":\"Put file service properties\",\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/fileServices/read\",\"displayName\":\"Get
         file service properties\",\"description\":\"Get file service properties\",\"origin\":null,\"properties\":null,\"isDataAction\":false}]},{\"name\":\"storageAccounts/tableServices\",\"displayName\":\"Storage
-        Table Service\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/tableServices/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/tableServices/read\",\"displayName\":\"Get
-        Table service properties\",\"description\":\"Get Table service properties\",\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/tableServices/write\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false}]},{\"name\":\"storageAccounts/fileServices/fileshares/files\",\"displayName\":\"Storage
+        Table Services\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/tableServices/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/tableServices/read\",\"displayName\":\"Get
+        Table service properties\",\"description\":\"Get Table service properties\",\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/tableServices/write\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/tableServices/read\",\"displayName\":\"Get
+        table service properties or statistics\",\"description\":\"Get table service
+        properties or statistics\",\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/tableServices/write\",\"displayName\":\"Set
+        table service properties\",\"description\":\"Set table service properties\",\"origin\":null,\"properties\":null,\"isDataAction\":false}]},{\"name\":\"storageAccounts/fileServices/fileshares/files\",\"displayName\":\"Storage
         File Service Files\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/fileServices/fileshares/files/read\",\"displayName\":\"Read
         Files\",\"description\":\"Returns a file/folder or a list of files/folders\",\"origin\":null,\"properties\":null,\"isDataAction\":true},{\"name\":\"Microsoft.Storage/storageAccounts/fileServices/fileshares/files/write\",\"displayName\":\"Write
         Files\",\"description\":\"Returns the result of writing a file or creating
@@ -2281,16 +2338,27 @@ interactions:
         Local User Keys\",\"description\":\"List local user keys\",\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/localusers/read\",\"displayName\":\"List
         Local Users\",\"description\":\"List local users\",\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/localusers/read\",\"displayName\":\"Get
         Local User\",\"description\":\"Get local user\",\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/localusers/write\",\"displayName\":\"Put
-        Local User\",\"description\":\"Create or update local user\",\"origin\":null,\"properties\":null,\"isDataAction\":false}]},{\"name\":\"deletedAccounts\",\"displayName\":\"\",\"operations\":[{\"name\":\"Microsoft.Storage/deletedAccounts/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false}]},{\"name\":\"storageAccounts/tableServices/tables\",\"displayName\":\"\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/tableServices/tables/delete\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/tableServices/tables/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/tableServices/tables/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/tableServices/tables/write\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false}]},{\"name\":\"storageAccounts/inventoryPolicies\",\"displayName\":\"\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/inventoryPolicies/delete\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/inventoryPolicies/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/inventoryPolicies/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/inventoryPolicies/write\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false}]},{\"name\":\"storageAccounts/accountLocks\",\"displayName\":\"\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/accountLocks/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/accountLocks/write\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/accountLocks/delete\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false}]},{\"name\":\"storageAccounts/consumerDataSharePolicies\",\"displayName\":\"\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/consumerDataSharePolicies/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/consumerDataSharePolicies/write\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false}]},{\"name\":\"resilienciesProgressions\",\"displayName\":\"\",\"operations\":[{\"name\":\"Microsoft.Storage/resilienciesProgressions/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false}]},{\"name\":\"storageAccounts/blobServices/containers/blobs/worm\",\"displayName\":\"\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/blobServices/containers/blobs/worm/write\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":true}]}],\"id\":\"/providers/Microsoft.Authorization/providerOperations/Microsoft.Storage\",\"type\":\"Microsoft.Authorization/providerOperations\",\"name\":\"Microsoft.Storage\"}"
+        Local User\",\"description\":\"Create or update local user\",\"origin\":null,\"properties\":null,\"isDataAction\":false}]},{\"name\":\"deletedAccounts\",\"displayName\":\"\",\"operations\":[{\"name\":\"Microsoft.Storage/deletedAccounts/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false}]},{\"name\":\"storageAccounts/tableServices/tables\",\"displayName\":\"Storage
+        Tables\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/tableServices/tables/delete\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/tableServices/tables/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/tableServices/tables/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/tableServices/tables/write\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/tableServices/tables/read\",\"displayName\":\"Query
+        tables\",\"description\":\"Query tables\",\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/tableServices/tables/write\",\"displayName\":\"Create
+        tables\",\"description\":\"Create tables\",\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/tableServices/tables/delete\",\"displayName\":\"Delete
+        tables\",\"description\":\"Delete tables\",\"origin\":null,\"properties\":null,\"isDataAction\":false}]},{\"name\":\"storageAccounts/inventoryPolicies\",\"displayName\":\"\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/inventoryPolicies/delete\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/inventoryPolicies/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/inventoryPolicies/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/inventoryPolicies/write\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false}]},{\"name\":\"storageAccounts/accountLocks\",\"displayName\":\"\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/accountLocks/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/accountLocks/write\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/accountLocks/delete\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false}]},{\"name\":\"storageAccounts/consumerDataSharePolicies\",\"displayName\":\"\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/consumerDataSharePolicies/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/consumerDataSharePolicies/write\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false}]},{\"name\":\"resilienciesProgressions\",\"displayName\":\"\",\"operations\":[{\"name\":\"Microsoft.Storage/resilienciesProgressions/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false}]},{\"name\":\"storageAccounts/blobServices/containers/blobs/worm\",\"displayName\":\"\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/blobServices/containers/blobs/worm/write\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":true}]},{\"name\":\"storageAccounts/tableServices/tables/entities\",\"displayName\":\"Storage
+        Table Entities\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/tableServices/tables/entities/read\",\"displayName\":\"Query
+        table entities\",\"description\":\"Query table entities\",\"origin\":null,\"properties\":null,\"isDataAction\":true},{\"name\":\"Microsoft.Storage/storageAccounts/tableServices/tables/entities/write\",\"displayName\":\"Insert,
+        merge, update or replace table entities\",\"description\":\"Insert, merge,
+        or replace table entities\",\"origin\":null,\"properties\":null,\"isDataAction\":true},{\"name\":\"Microsoft.Storage/storageAccounts/tableServices/tables/entities/delete\",\"displayName\":\"Delete
+        table entities\",\"description\":\"Delete table entities\",\"origin\":null,\"properties\":null,\"isDataAction\":true},{\"name\":\"Microsoft.Storage/storageAccounts/tableServices/tables/entities/add/action\",\"displayName\":\"Insert
+        table entities\",\"description\":\"Insert table entities\",\"origin\":null,\"properties\":null,\"isDataAction\":true},{\"name\":\"Microsoft.Storage/storageAccounts/tableServices/tables/entities/update/action\",\"displayName\":\"Merge
+        or update table entities\",\"description\":\"Merge or update table entities\",\"origin\":null,\"properties\":null,\"isDataAction\":true}]}],\"id\":\"/providers/Microsoft.Authorization/providerOperations/Microsoft.Storage\",\"type\":\"Microsoft.Authorization/providerOperations\",\"name\":\"Microsoft.Storage\"}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '70097'
+      - '72356'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 16 Apr 2021 02:02:51 GMT
+      - Wed, 07 Jul 2021 08:32:28 GMT
       expires:
       - '-1'
       pragma:

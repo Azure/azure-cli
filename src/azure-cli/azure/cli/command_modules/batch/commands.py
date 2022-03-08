@@ -43,10 +43,10 @@ def load_command_table(self, _):
         )
 
     def get_mgmt_factory(name):
-        return getattr(factories, "mgmt_{}_client_factory".format(name))
+        return getattr(factories, f"mgmt_{name}_client_factory")
 
     def get_data_factory(name):
-        return getattr(factories, "{}_client_factory".format(name))
+        return getattr(factories, f"{name}_client_factory")
 
     # Mgmt Account Operations
     with self.command_group('batch account', get_mgmt_type('batch_account'), client_factory=get_mgmt_factory('batch_account')) as g:
@@ -60,6 +60,7 @@ def load_command_table(self, _):
         g.command('keys list', 'get_keys', table_transformer=account_keys_list_table_format)
         # g.command('keys renew', 'regenerate_key', table_transformer=account_keys_renew_table_format)
         g.custom_command('keys renew', 'renew_accounts_keys', table_transformer=account_keys_renew_table_format)
+        g.command('outbound-endpoints', 'list_outbound_network_dependencies_endpoints')
 
     with self.command_group('batch application', get_mgmt_type('application'), client_factory=get_mgmt_factory('application')) as g:
         g.command('list', 'list', table_transformer=application_list_table_format)
@@ -78,6 +79,9 @@ def load_command_table(self, _):
 
     with self.command_group('batch location quotas', get_mgmt_type('location')) as g:
         g.show_command('show', 'get_quotas')
+
+    with self.command_group('batch location', get_mgmt_type('location')) as g:
+        g.show_command('list-skus', 'list_supported_virtual_machine_skus')
 
     # Data Plane Commands
     with self.command_group('batch application summary', get_data_type('application')) as g:

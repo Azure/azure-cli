@@ -74,7 +74,8 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
                                        private_link_subnet_id=None,
                                        trusted_client_certificates=None,
                                        ssl_profile=None,
-                                       ssl_profile_id=None):
+                                       ssl_profile_id=None,
+                                       ssl_cert_name=None):
 
     # set the default names
     frontend_public_ip_name = 'appGatewayFrontendIP'
@@ -84,7 +85,9 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
     http_listener_name = 'appGatewayHttpListener'
     http_settings_name = 'appGatewayBackendHttpSettings'
     routing_rule_name = 'rule1'
-    ssl_cert_name = '{}SslCert'.format(name)
+
+    if not ssl_cert_name:
+        ssl_cert_name = '{}SslCert'.format(name)
 
     ssl_cert = None
 

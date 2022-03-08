@@ -51,10 +51,10 @@ def load_arguments(self, _):
                    validator=validate_client_secret(isCreate=True))
 
         c.argument('pod_cidr',
-                   help='CIDR of pod network.',
+                   help='CIDR of pod network. Must be a minimum of /18 or larger.',
                    validator=validate_cidr('pod_cidr'))
         c.argument('service_cidr',
-                   help='CIDR of service network.',
+                   help='CIDR of service network. Must be a minimum of /18 or larger',
                    validator=validate_cidr('service_cidr'))
 
         c.argument('master_vm_size',

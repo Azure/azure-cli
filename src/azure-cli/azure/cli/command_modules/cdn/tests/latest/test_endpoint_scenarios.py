@@ -70,6 +70,75 @@ class CdnEndpointScenarioTest(CdnScenarioMixin, ScenarioTest):
 
         self.endpoint_delete_cmd(resource_group, endpoint_name, profile_name)
 
+    @ResourceGroupPreparer()
+    def test_endpoint_compression(self, resource_group):
+        profile_name = self.create_random_name(prefix='profile', length=24)
+        self.endpoint_list_cmd(resource_group, profile_name, expect_failure=True)
+
+        self.profile_create_cmd(resource_group, profile_name)
+        endpoint_name = self.create_random_name(prefix='endpoint', length=24)
+        origin = 'www.contoso.com'
+        create_options = '--enable-compression --content-types-to-compress text/plain text/html'
+        checks = [JMESPathCheck('name', endpoint_name),
+                  JMESPathCheck('origins[0].hostName', origin),
+                  JMESPathCheck('isHttpAllowed', True),
+                  JMESPathCheck('isHttpsAllowed', True),
+                  JMESPathCheck('isCompressionEnabled', True),
+                  JMESPathCheck('contentTypesToCompress[0]', "text/plain"),
+                  JMESPathCheck('contentTypesToCompress[1]', "text/html"),
+                  JMESPathCheck('queryStringCachingBehavior', 'IgnoreQueryString')]
+        self.endpoint_create_cmd(resource_group,
+                                 endpoint_name,
+                                 profile_name,
+                                 origin,
+                                 checks=checks,
+                                 options=create_options)
+
+        update_checks = [JMESPathCheck('name', endpoint_name),
+                         JMESPathCheck('origins[0].hostName', origin),
+                         JMESPathCheck('isHttpAllowed', True),
+                         JMESPathCheck('isHttpsAllowed', True),
+                         JMESPathCheck('isCompressionEnabled', True),
+                         JMESPathCheck('contentTypesToCompress[0]', "application/json"),
+                         JMESPathCheck('contentTypesToCompress[1]', "application/xml"),
+                         JMESPathCheck('queryStringCachingBehavior', 'IgnoreQueryString')]
+        update_options = '--content-types-to-compress application/json application/xml'
+        self.endpoint_update_cmd(resource_group,
+                                 endpoint_name,
+                                 profile_name,
+                                 options=update_options,
+                                 checks=update_checks)
+
+        update_checks = [JMESPathCheck('name', endpoint_name),
+                         JMESPathCheck('origins[0].hostName', origin),
+                         JMESPathCheck('isHttpAllowed', True),
+                         JMESPathCheck('isHttpsAllowed', True),
+                         JMESPathCheck('isCompressionEnabled', False),
+                         JMESPathCheck('queryStringCachingBehavior', 'IgnoreQueryString')]
+        update_options = '--enable-compression False'
+        self.endpoint_update_cmd(resource_group,
+                                 endpoint_name,
+                                 profile_name,
+                                 options=update_options,
+                                 checks=update_checks)
+
+        update_checks = [JMESPathCheck('name', endpoint_name),
+                         JMESPathCheck('origins[0].hostName', origin),
+                         JMESPathCheck('isHttpAllowed', True),
+                         JMESPathCheck('isHttpsAllowed', True),
+                         JMESPathCheck('isCompressionEnabled', True),
+                         JMESPathCheck('contentTypesToCompress[0]', "text/javascript"),
+                         JMESPathCheck('contentTypesToCompress[1]', "application/x-javascript"),
+                         JMESPathCheck('queryStringCachingBehavior', 'IgnoreQueryString')]
+        update_options = '--enable-compression --content-types-to-compress text/javascript application/x-javascript'
+        self.endpoint_update_cmd(resource_group,
+                                 endpoint_name,
+                                 profile_name,
+                                 options=update_options,
+                                 checks=update_checks)
+
+        self.endpoint_delete_cmd(resource_group, endpoint_name, profile_name)
+
     @record_only()  # This test relies on existing resources in a specific subscription
     @ResourceGroupPreparer()
     def test_private_link(self, resource_group):

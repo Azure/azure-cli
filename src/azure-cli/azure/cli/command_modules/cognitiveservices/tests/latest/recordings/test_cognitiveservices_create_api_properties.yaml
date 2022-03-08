@@ -1,8 +1,7 @@
 interactions:
 - request:
-    body: '{"kind": "QnAMaker", "location": "westus", "properties": {"apiProperties":
-      {"qnaRuntimeEndpoint": "https://cs-cli-test-qnamaker.azurewebsites.net"}}, "sku":
-      {"name": "S0"}}'
+    body: '{"kind": "QnAMaker", "sku": {"name": "S0"}, "location": "westus", "properties":
+      {"apiProperties": {"qnaRuntimeEndpoint": "https://cs-cli-test-qnamaker.azurewebsites.net"}}}'
     headers:
       Accept:
       - application/json
@@ -15,46 +14,41 @@ interactions:
       Content-Length:
       - '172'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -n -g --kind --sku -l --api-properties --yes
       User-Agent:
-      - python/3.7.3 (Darwin-19.5.0-x86_64-i386-64bit) msrest/0.6.13 msrest_azure/0.6.3
-        azure-mgmt-cognitiveservices/2.0.0 Azure-SDK-For-Python AZURECLI/2.5.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-mgmt-cognitiveservices/13.0.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2017-04-18
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2021-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002","name":"cs_cli_test_000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"0f00ab00-0000-0700-0000-5ed75f460000\"","location":"westus","sku":{"name":"S0"},"kind":"QnAMaker","properties":{"endpoint":"https://westus.api.cognitive.microsoft.com/qnamaker/v4.0","internalId":"adb5c76e92bf4638ac5c7ee93d96d4e7","dateCreated":"2020-06-03T08:28:53.9336974Z","apiProperties":{"qnaRuntimeEndpoint":"https://cs-cli-test-qnamaker.azurewebsites.net"},"callRateLimit":{"rules":[{"key":"default","renewalPeriod":60,"count":100,"matchPatterns":[{"path":"*","method":"*"}]}]},"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002","name":"cs_cli_test_000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"f60351aa-0000-0700-0000-61a3327f0000\"","systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2021-11-28T07:40:46.8910398Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-11-28T07:40:46.8910398Z"},"location":"westus","sku":{"name":"S0"},"kind":"QnAMaker","properties":{"endpoint":"https://westus.api.cognitive.microsoft.com/","internalId":"ff855cc865fa40798aa811f6441d1661","dateCreated":"2021-11-28T07:40:47.0356083Z","apiProperties":{"qnaRuntimeEndpoint":"https://cs-cli-test-qnamaker.azurewebsites.net"},"callRateLimit":{"rules":[{"key":"default","renewalPeriod":60,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"*","method":"*"}]}]},"isMigrated":false,"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"VirtualNetworks"}],"endpoints":{"QnAMaker":"https://westus.api.cognitive.microsoft.com/"},"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '878'
+      - '1268'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Jun 2020 08:28:54 GMT
+      - Sun, 28 Nov 2021 07:40:47 GMT
       etag:
-      - '"0f00ab00-0000-0700-0000-5ed75f460000"'
+      - '"f60351aa-0000-0700-0000-61a3327f0000"'
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Microsoft-IIS/10.0
+      - istio-envoy
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-aspnet-version:
-      - 4.0.30319
       x-content-type-options:
       - nosniff
+      x-envoy-upstream-service-time:
+      - '366'
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
-      x-powered-by:
-      - ASP.NET
     status:
       code: 201
       message: Created
@@ -74,12 +68,9 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.7.3 (Darwin-19.5.0-x86_64-i386-64bit) msrest/0.6.13 msrest_azure/0.6.3
-        azure-mgmt-cognitiveservices/2.0.0 Azure-SDK-For-Python AZURECLI/2.5.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-mgmt-cognitiveservices/13.0.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2017-04-18
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2021-10-01
   response:
     body:
       string: ''
@@ -89,30 +80,27 @@ interactions:
       content-length:
       - '0'
       date:
-      - Wed, 03 Jun 2020 08:28:54 GMT
+      - Sun, 28 Nov 2021 07:40:49 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Microsoft-IIS/10.0
+      - istio-envoy
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-aspnet-version:
-      - 4.0.30319
       x-content-type-options:
       - nosniff
+      x-envoy-upstream-service-time:
+      - '82'
       x-ms-ratelimit-remaining-subscription-deletes:
       - '14999'
-      x-powered-by:
-      - ASP.NET
     status:
       code: 200
       message: OK
 - request:
-    body: '{"kind": "QnAMaker", "location": "westus", "properties": {"apiProperties":
-      {"qnaRuntimeEndpoint": "https://cs-cli-test-qnamaker.azurewebsites.net"}}, "sku":
-      {"name": "S0"}}'
+    body: '{"kind": "QnAMaker", "sku": {"name": "S0"}, "location": "westus", "properties":
+      {"apiProperties": {"qnaRuntimeEndpoint": "https://cs-cli-test-qnamaker.azurewebsites.net"}}}'
     headers:
       Accept:
       - application/json
@@ -125,46 +113,41 @@ interactions:
       Content-Length:
       - '172'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -n -g --kind --sku -l --api-properties --yes
       User-Agent:
-      - python/3.7.3 (Darwin-19.5.0-x86_64-i386-64bit) msrest/0.6.13 msrest_azure/0.6.3
-        azure-mgmt-cognitiveservices/2.0.0 Azure-SDK-For-Python AZURECLI/2.5.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-mgmt-cognitiveservices/13.0.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2017-04-18
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000003?api-version=2021-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002","name":"cs_cli_test_000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"0f00b500-0000-0700-0000-5ed75f480000\"","location":"westus","sku":{"name":"S0"},"kind":"QnAMaker","properties":{"endpoint":"https://westus.api.cognitive.microsoft.com/qnamaker/v4.0","internalId":"c5c453efbaf74d23b9c2b63ff9cf7d17","dateCreated":"2020-06-03T08:28:56.4064546Z","apiProperties":{"qnaRuntimeEndpoint":"https://cs-cli-test-qnamaker.azurewebsites.net"},"callRateLimit":{"rules":[{"key":"default","renewalPeriod":60,"count":100,"matchPatterns":[{"path":"*","method":"*"}]}]},"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000003","name":"cs_cli_test_000003","type":"Microsoft.CognitiveServices/accounts","etag":"\"f603a5aa-0000-0700-0000-61a332840000\"","systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2021-11-28T07:40:51.6227186Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-11-28T07:40:51.6227186Z"},"location":"westus","sku":{"name":"S0"},"kind":"QnAMaker","properties":{"endpoint":"https://westus.api.cognitive.microsoft.com/","internalId":"cdaf53002a0047468a2195d86849ecd9","dateCreated":"2021-11-28T07:40:51.8300582Z","apiProperties":{"qnaRuntimeEndpoint":"https://cs-cli-test-qnamaker.azurewebsites.net"},"callRateLimit":{"rules":[{"key":"default","renewalPeriod":60,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"*","method":"*"}]}]},"isMigrated":false,"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"VirtualNetworks"}],"endpoints":{"QnAMaker":"https://westus.api.cognitive.microsoft.com/"},"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '878'
+      - '1268'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Jun 2020 08:28:55 GMT
+      - Sun, 28 Nov 2021 07:40:52 GMT
       etag:
-      - '"0f00b500-0000-0700-0000-5ed75f480000"'
+      - '"f603a5aa-0000-0700-0000-61a332840000"'
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Microsoft-IIS/10.0
+      - istio-envoy
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-aspnet-version:
-      - 4.0.30319
       x-content-type-options:
       - nosniff
+      x-envoy-upstream-service-time:
+      - '377'
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
-      x-powered-by:
-      - ASP.NET
     status:
       code: 201
       message: Created
@@ -184,12 +167,9 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.7.3 (Darwin-19.5.0-x86_64-i386-64bit) msrest/0.6.13 msrest_azure/0.6.3
-        azure-mgmt-cognitiveservices/2.0.0 Azure-SDK-For-Python AZURECLI/2.5.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-mgmt-cognitiveservices/13.0.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2017-04-18
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000003?api-version=2021-10-01
   response:
     body:
       string: ''
@@ -199,23 +179,21 @@ interactions:
       content-length:
       - '0'
       date:
-      - Wed, 03 Jun 2020 08:28:57 GMT
+      - Sun, 28 Nov 2021 07:40:58 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Microsoft-IIS/10.0
+      - istio-envoy
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-aspnet-version:
-      - 4.0.30319
       x-content-type-options:
       - nosniff
+      x-envoy-upstream-service-time:
+      - '73'
       x-ms-ratelimit-remaining-subscription-deletes:
       - '14999'
-      x-powered-by:
-      - ASP.NET
     status:
       code: 200
       message: OK

@@ -9,9 +9,9 @@ import tempfile
 from knack.util import CLIError
 from knack.log import get_logger
 
-from msrestazure.azure_exceptions import CloudError
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.parameters import get_resources_in_subscription
+from azure.core.exceptions import ResourceNotFoundError
 
 from ._constants import (
     REGISTRY_RESOURCE_TYPE,
@@ -198,7 +198,8 @@ def get_validate_platform(cmd, platform):
     """Gets and validates the Platform from both flags
     :param str platform: The name of Platform passed by user in --platform flag
     """
-    OS, Architecture = cmd.get_models('OS', 'Architecture')
+    OS, Architecture = cmd.get_models('OS', 'Architecture', operation_group='runs')
+
     # Defaults
     platform_os = OS.linux.value
     platform_arch = Architecture.amd64.value
@@ -285,10 +286,14 @@ def get_custom_registry_credentials(cmd,
     :param str password: The password for custom registry (plain text or a key vault secret URI)
     :param str identity: The task managed identity used for the credential
     """
+    Credentials, CustomRegistryCredentials, SourceRegistryCredentials, SecretObject, \
+        SecretObjectType = cmd.get_models(
+            'Credentials', 'CustomRegistryCredentials', 'SourceRegistryCredentials', 'SecretObject',
+            'SecretObjectType',
+            operation_group='tasks')
 
     source_registry_credentials = None
     if auth_mode:
-        SourceRegistryCredentials = cmd.get_models('SourceRegistryCredentials')
         source_registry_credentials = SourceRegistryCredentials(
             login_mode=auth_mode)
 
@@ -300,11 +305,6 @@ def get_custom_registry_credentials(cmd,
         is_identity_credential = False
         if not username and not password:
             is_identity_credential = identity is not None
-
-        CustomRegistryCredentials, SecretObject, SecretObjectType = cmd.get_models(
-            'CustomRegistryCredentials',
-            'SecretObject',
-            'SecretObjectType')
 
         if not is_remove:
             if is_identity_credential:
@@ -328,7 +328,6 @@ def get_custom_registry_credentials(cmd,
 
         custom_registries = {login_server: custom_reg_credential}
 
-    Credentials = cmd.get_models('Credentials')
     return Credentials(
         source_registry=source_registry_credentials,
         custom_registries=custom_registries
@@ -336,9 +335,8 @@ def get_custom_registry_credentials(cmd,
 
 
 def build_timers_info(cmd, schedules):
-    TimerTrigger, TriggerStatus = cmd.get_models(
-        'TimerTrigger', 'TriggerStatus')
     timer_triggers = []
+    TriggerStatus, TimerTrigger = cmd.get_models('TriggerStatus', 'TimerTrigger', operation_group='tasks')
 
     # Provide a default name for the timer if no name was provided.
     for index, schedule in enumerate(schedules, start=1):
@@ -507,11 +505,14 @@ def create_default_scope_map(cmd,
             raise CLIError('The default scope map was already configured with different repository permissions.' +
                            '\nPlease use "az acr scope-map update -r {} -n {} --add <REPO> --remove <REPO>" to update.'
                            .format(registry_name, scope_map_name))
-    except CloudError:
+    except ResourceNotFoundError:
         pass
     logger.info('Creating a scope map "%s" for provided permissions.', scope_map_name)
-    poller = scope_map_client.create(resource_group_name, registry_name, scope_map_name,
-                                     actions, scope_map_description)
+    scope_map_request = {
+        'actions': actions,
+        'scope_map_description': scope_map_description
+    }
+    poller = scope_map_client.begin_create(resource_group_name, registry_name, scope_map_name, scope_map_request)
     scope_map = LongRunningOperation(cmd.cli_ctx)(poller)
     return scope_map
 
@@ -560,3 +561,14 @@ def resolve_identity_client_id(cli_ctx, managed_identity_resource_id):
     res = parse_resource_id(managed_identity_resource_id)
     client = get_mgmt_service_client(cli_ctx, ManagedServiceIdentityClient, subscription_id=res['subscription'])
     return client.user_assigned_identities.get(res['resource_group'], res['name']).client_id
+
+
+def get_task_details_by_name(cli_ctx, resource_group_name, registry_name, task_name):
+    """Returns the task details.
+    :param str resource_group_name: The name of resource group
+    :param str registry_name: The name of container registry
+    :param str task_name: The name of task
+    """
+    from ._client_factory import cf_acr_tasks
+    client = cf_acr_tasks(cli_ctx)
+    return client.get_details(resource_group_name, registry_name, task_name)

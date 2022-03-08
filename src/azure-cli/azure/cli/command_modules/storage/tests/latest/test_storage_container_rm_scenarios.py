@@ -4,8 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.profiles import ResourceType
-from azure.cli.testsdk import ScenarioTest, api_version_constraint, ResourceGroupPreparer, StorageAccountPreparer
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk import (ScenarioTest, api_version_constraint,
+                               ResourceGroupPreparer, StorageAccountPreparer, JMESPathCheck)
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 
 @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
@@ -36,7 +37,7 @@ class StorageContainerRmScenarios(ScenarioTest):
 
         # Create container using existing name while setting fail-on-exist true
         from knack.util import CLIError
-        with self.assertRaisesRegexp(CLIError, 'The specified container already exists.'):
+        with self.assertRaisesRegex(CLIError, 'The specified container already exists.'):
             self.cmd(
                 'storage container-rm create --storage-account {sa} -g {rg} -n {container_name} --fail-on-exist').get_output_in_json()
 
@@ -123,9 +124,38 @@ class StorageContainerRmScenarios(ScenarioTest):
         self.assertEqual(self.cmd('storage container-rm list --storage-account {storage_account_id}').get_output_in_json(), [])
 
         # 7. Test show command (the container doesn't exist).
-        with self.assertRaisesRegexp(SystemExit, '3'):
+        with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('storage container-rm show --storage-account {sa} -g {rg} -n {container_name}')
 
         # 8. Test exists command (the container doesn't exist).
         result = self.cmd('storage container-rm exists --storage-account {sa} -g {rg} -n {container_name}').get_output_in_json()
         self.assertEqual(result['exists'], False)
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix="cli", location="eastus")
+    def test_storage_container_squash_scenario(self, resource_group):
+        self.kwargs.update({
+            'sa': self.create_random_name(prefix='account', length=24),
+            'cont': self.create_random_name(prefix='container', length=24),
+            'vnet': self.create_random_name(prefix='vnet', length=10),
+            'subnet': self.create_random_name(prefix='subnet', length=10)
+        })
+        result = self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet}').get_output_in_json()
+        self.kwargs['subnet_id'] = result['newVNet']['subnets'][0]['id']
+        self.cmd(
+            'network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --service-endpoints Microsoft.Storage')
+        self.cmd('storage account create -n {sa} -g {rg} --subnet {subnet_id} '
+                 '--default-action Deny --hns --sku Standard_LRS --enable-nfs-v3 true',
+                 checks=[JMESPathCheck('enableNfsV3', True)])
+
+        self.cmd('storage container-rm create -n {cont} --storage-account {sa} --root-squash RootSquash',
+                 checks=[JMESPathCheck('enableNfsV3AllSquash', False),
+                         JMESPathCheck('enableNfsV3RootSquash', True)])
+
+        self.cmd('storage container-rm update -n {cont} --storage-account {sa} --root-squash AllSquash',
+                 checks=[JMESPathCheck('enableNfsV3AllSquash', True),
+                         JMESPathCheck('enableNfsV3RootSquash', True)])
+
+        self.cmd('storage container-rm update -n {cont} --storage-account {sa} --root-squash NoRootSquash',
+                 checks=[JMESPathCheck('enableNfsV3AllSquash', False),
+                         JMESPathCheck('enableNfsV3RootSquash', False)])

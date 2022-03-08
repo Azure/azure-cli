@@ -28,7 +28,9 @@ from ._format import (
     token_credential_output_format,
     agentpool_output_format,
     connected_registry_output_format,
-    connected_registry_list_output_format
+    connected_registry_list_output_format,
+    list_referrers_output_format,
+    manifest_output_format,
 )
 from ._client_factory import (
     cf_acr_registries,
@@ -46,7 +48,9 @@ from ._client_factory import (
 )
 
 
-def load_command_table(self, _):  # pylint: disable=too-many-statements
+# pylint: disable=too-many-locals
+# pylint: disable=too-many-statements
+def load_command_table(self, _):
 
     acr_custom_util = CliCommandType(
         operations_tmpl='azure.cli.command_modules.acr.custom#{}',
@@ -77,6 +81,10 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
 
     acr_repo_util = CliCommandType(
         operations_tmpl='azure.cli.command_modules.acr.repository#{}'
+    )
+
+    acr_manifest_util = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.acr.manifest#{}'
     )
 
     acr_webhook_util = CliCommandType(
@@ -188,7 +196,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.command('login', 'acr_login')
 
     with self.command_group('acr', acr_import_util) as g:
-        g.command('import', 'acr_import')
+        g.command('import', 'acr_import', supports_no_wait=True)
 
     with self.command_group('acr credential', acr_cred_util) as g:
         g.show_command('show', 'acr_credential_show')
@@ -197,11 +205,23 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
     with self.command_group('acr repository', acr_repo_util) as g:
         g.command('list', 'acr_repository_list')
         g.command('show-tags', 'acr_repository_show_tags')
-        g.command('show-manifests', 'acr_repository_show_manifests')
+        g.command('show-manifests', 'acr_repository_show_manifests',
+                  deprecate_info=self.deprecate(redirect='acr manifest metadata list', hide=True))
         g.show_command('show', 'acr_repository_show')
         g.command('update', 'acr_repository_update')
         g.command('delete', 'acr_repository_delete')
         g.command('untag', 'acr_repository_untag')
+
+    with self.command_group('acr manifest', acr_manifest_util, is_preview=True) as g:
+        g.show_command('show', 'acr_manifest_show')
+        g.command('list', 'acr_manifest_list', table_transformer=manifest_output_format)
+        g.command('delete', 'acr_manifest_delete')
+        g.command('list-referrers', 'acr_manifest_list_referrers', table_transformer=list_referrers_output_format)
+
+    with self.command_group('acr manifest metadata', acr_manifest_util, is_preview=True) as g:
+        g.show_command('show', 'acr_manifest_metadata_show')
+        g.command('list', 'acr_manifest_metadata_list')
+        g.command('update', 'acr_manifest_metadata_update')
 
     with self.command_group('acr webhook', acr_webhook_util) as g:
         g.command('list', 'acr_webhook_list')
@@ -359,10 +379,19 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.show_command('show', 'acr_connected_registry_show')
         g.command('deactivate', 'acr_connected_registry_deactivate')
         g.command('update', 'acr_connected_registry_update')
-        g.command('repo', 'acr_connected_registry_repo')
-        g.command('install info', 'acr_connected_registry_install_info')
-        g.command('install renew-credentials', 'acr_connected_registry_install_renew_credentials')
+        g.command('get-settings', 'acr_connected_registry_get_settings')
+        g.command('permissions update', 'acr_connected_registry_permissions_update')
+        g.show_command('permissions show', 'acr_connected_registry_permissions_show',
+                       table_transformer=scope_map_output_format)
         g.command('list', 'acr_connected_registry_list',
                   table_transformer=connected_registry_list_output_format)
         g.command('list-client-tokens', 'acr_connected_registry_list_client_tokens',
                   table_transformer=token_output_format)
+        g.command('repo', 'acr_connected_registry_permissions_update',
+                  deprecate_info=self.deprecate(redirect='permissions update', hide=True))
+
+    with self.command_group('acr connected-registry install', acr_connected_registry_util,
+                            deprecate_info=self.deprecate(redirect='acr connected-registry get-settings',
+                                                          hide=True)) as g:
+        g.command('info', 'acr_connected_registry_install_info')
+        g.command('renew-credentials', 'acr_connected_registry_install_renew_credentials')

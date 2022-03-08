@@ -30,18 +30,26 @@ class IotHubCertificateTest(ScenarioTest):
     def test_certificate_lifecycle(self, resource_group):
         hub = self._create_test_hub(resource_group)
         cert_name = self.create_random_name(prefix='certificate-', length=48)
+        cert_name_verified = self.create_random_name(prefix='verified-certificate-', length=48)
 
         # Create certificate
         self.cmd('iot hub certificate create --hub-name {0} -g {1} -n {2} -p {3}'.format(hub, resource_group, cert_name, CERT_FILE),
                  checks=[self.check('name', cert_name),
                          self.check('properties.isVerified', False)])
 
+        # Create verified certificate
+        etag_verified = self.cmd('iot hub certificate create --hub-name {0} -g {1} -n {2} -p {3} --verified'.format(hub, resource_group, cert_name_verified, CERT_FILE),
+                                 checks=[self.check('name', cert_name_verified),
+                                         self.check('properties.isVerified', True)]).get_output_in_json()['etag']
+
         # List certificates
         output = self.cmd('iot hub certificate list --hub-name {0} -g {1}'.format(hub, resource_group),
-                          checks=[self.check('length(value)', 1),
+                          checks=[self.check('length(value)', 2),
                                   self.check('value[0].name', cert_name),
-                                  self.check('value[0].properties.isVerified', False)]).get_output_in_json()
-        assert len(output['value']) == 1
+                                  self.check('value[0].properties.isVerified', False),
+                                  self.check('value[1].name', cert_name_verified),
+                                  self.check('value[1].properties.isVerified', True)]).get_output_in_json()
+        assert len(output['value']) == 2
 
         # Get certificate
         etag = self.cmd('iot hub certificate show --hub-name {0} -g {1} -n {2}'.format(hub, resource_group, cert_name),
@@ -64,8 +72,9 @@ class IotHubCertificateTest(ScenarioTest):
                         checks=[self.check('name', cert_name),
                                 self.check('properties.isVerified', True)]).get_output_in_json()['etag']
 
-        # Delete certificate
+        # Delete certificates
         self.cmd('iot hub certificate delete --hub-name {0} -g {1} -n {2} --etag {3}'.format(hub, resource_group, cert_name, etag))
+        self.cmd('iot hub certificate delete --hub-name {0} -g {1} -n {2} --etag {3}'.format(hub, resource_group, cert_name_verified, etag_verified))
 
     def _create_test_hub(self, resource_group):
         hub = self.create_random_name(prefix='iot-hub-for-cert-test', length=48)

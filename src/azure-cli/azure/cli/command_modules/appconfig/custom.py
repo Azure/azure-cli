@@ -33,8 +33,10 @@ def create_configstore(client,
                        name,
                        location,
                        sku="Standard",
+                       tags=None,
                        assign_identity=None,
-                       enable_public_network=None):
+                       enable_public_network=None,
+                       disable_local_auth=None):
     if assign_identity is not None and not assign_identity:
         assign_identity = [SYSTEM_ASSIGNED_IDENTITY]
 
@@ -45,7 +47,9 @@ def create_configstore(client,
     configstore_params = ConfigurationStore(location=location.lower(),
                                             identity=__get_resource_identity(assign_identity) if assign_identity else None,
                                             sku=Sku(name=sku),
-                                            public_network_access=public_network_access)
+                                            tags=tags,
+                                            public_network_access=public_network_access,
+                                            disable_local_auth=disable_local_auth)
 
     return client.begin_create(resource_group_name, name, configstore_params)
 
@@ -79,7 +83,8 @@ def update_configstore(cmd,
                        encryption_key_vault=None,
                        encryption_key_version=None,
                        identity_client_id=None,
-                       enable_public_network=None):
+                       enable_public_network=None,
+                       disable_local_auth=None):
     __validate_cmk(encryption_key_name, encryption_key_vault, encryption_key_version, identity_client_id)
     if resource_group_name is None:
         resource_group_name, _ = resolve_store_metadata(cmd, name)
@@ -87,9 +92,10 @@ def update_configstore(cmd,
     public_network_access = None
     if enable_public_network is not None:
         public_network_access = 'Enabled' if enable_public_network else 'Disabled'
-    update_params = ConfigurationStoreUpdateParameters(tags=tags if tags else None,
+    update_params = ConfigurationStoreUpdateParameters(tags=tags,
                                                        sku=Sku(name=sku) if sku else None,
-                                                       public_network_access=public_network_access)
+                                                       public_network_access=public_network_access,
+                                                       disable_local_auth=disable_local_auth)
 
     if encryption_key_name is not None:
         key_vault_properties = KeyVaultProperties()

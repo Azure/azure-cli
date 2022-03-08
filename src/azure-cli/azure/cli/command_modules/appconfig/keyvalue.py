@@ -3,13 +3,13 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=line-too-long, too-many-locals, too-many-statements
+# pylint: disable=line-too-long, too-many-locals, too-many-statements, too-many-branches
 
 import json
 import time
 import sys
 
-from itertools import chain
+from itertools import chain, filterfalse
 from knack.log import get_logger
 from knack.util import CLIError
 
@@ -22,16 +22,19 @@ from azure.core.exceptions import (HttpResponseError,
                                    ResourceModifiedError)
 
 from ._constants import (FeatureFlagConstants, KeyVaultConstants,
-                         SearchFilterOptions, StatusCodes)
+                         SearchFilterOptions, StatusCodes, ImportExportProfiles)
 from ._models import (convert_configurationsetting_to_keyvalue,
                       convert_keyvalue_to_configurationsetting)
 from ._utils import get_appconfig_data_client, prep_label_filter_for_url_encoding
 
 from ._kv_helpers import (__compare_kvs_for_restore, __read_kv_from_file, __read_features_from_file,
                           __write_kv_and_features_to_file, __read_kv_from_config_store, __is_json_content_type,
-                          __write_kv_and_features_to_config_store, __discard_features_from_retrieved_kv, __read_kv_from_app_service,
-                          __write_kv_to_app_service, __serialize_kv_list_to_comparable_json_object, __serialize_features_from_kv_list_to_comparable_json_object,
-                          __serialize_feature_list_to_comparable_json_object, __print_features_preview, __print_preview, __print_restore_preview)
+                          __write_kv_and_features_to_config_store, __discard_features_from_retrieved_kv,
+                          __read_kv_from_app_service, __write_kv_to_app_service, __print_restore_preview,
+                          __serialize_kv_list_to_comparable_json_object, __print_preview,
+                          __serialize_features_from_kv_list_to_comparable_json_object, __export_kvset_to_file,
+                          __serialize_feature_list_to_comparable_json_object, __print_features_preview,
+                          __import_kvset_from_file, __delete_configuration_setting_from_config_store)
 from .feature import list_feature
 
 logger = get_logger(__name__)
@@ -53,6 +56,8 @@ def import_config(cmd,
                   format_=None,
                   separator=None,
                   depth=None,
+                  profile=ImportExportProfiles.DEFAULT,
+                  strict=False,
                   # from-configstore parameters
                   src_name=None,
                   src_connection_string=None,
@@ -67,12 +72,16 @@ def import_config(cmd,
     dest_features = []
     dest_kvs = []
     source = source.lower()
+    profile = profile.lower()
     format_ = format_.lower() if format_ else None
 
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     # fetch key values from source
     if source == 'file':
+        if profile == ImportExportProfiles.KVSET:
+            __import_kvset_from_file(client=azconfig_client, path=path, strict=strict, yes=yes)
+            return
         if format_ and content_type:
             # JSON content type is only supported with JSON format.
             # Error out if user has provided JSON content type with any other format.
@@ -93,7 +102,7 @@ def import_config(cmd,
                                       depth=depth,
                                       content_type=content_type)
 
-        if not skip_features:
+        if strict or not skip_features:
             # src_features is a list of KeyValue objects
             src_features = __read_features_from_file(file_path=path, format_=format_)
 
@@ -128,32 +137,34 @@ def import_config(cmd,
         src_kvs = __read_kv_from_app_service(
             cmd, appservice_account=appservice_account, prefix_to_add=prefix, content_type=content_type)
 
-    # if customer needs preview & confirmation
-    if not yes:
+    if strict or not yes:
         # fetch key values from user's configstore
         dest_kvs = __read_kv_from_config_store(azconfig_client,
-                                               key=SearchFilterOptions.ANY_KEY,
+                                               key=prefix + SearchFilterOptions.ANY_KEY if prefix else SearchFilterOptions.ANY_KEY,
                                                label=label if label else SearchFilterOptions.EMPTY_LABEL)
+        all_features = __read_kv_from_config_store(azconfig_client,
+                                                   key=FeatureFlagConstants.FEATURE_FLAG_PREFIX + SearchFilterOptions.ANY_KEY,
+                                                   label=label if label else SearchFilterOptions.EMPTY_LABEL)
         __discard_features_from_retrieved_kv(dest_kvs)
 
+    # if customer needs preview & confirmation
+    if not yes:
         # generate preview and wait for user confirmation
         need_kv_change = __print_preview(
             old_json=__serialize_kv_list_to_comparable_json_object(keyvalues=dest_kvs, level=source),
-            new_json=__serialize_kv_list_to_comparable_json_object(keyvalues=src_kvs, level=source))
+            new_json=__serialize_kv_list_to_comparable_json_object(keyvalues=src_kvs, level=source), strict=strict)
 
         need_feature_change = False
-        if src_features and not skip_features:
+        if strict or (src_features and not skip_features):
             # Append all features to dest_features list
-            all_features = __read_kv_from_config_store(azconfig_client,
-                                                       key=FeatureFlagConstants.FEATURE_FLAG_PREFIX + '*',
-                                                       label=label if label else SearchFilterOptions.EMPTY_LABEL)
             for feature in all_features:
                 if feature.content_type == FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE:
                     dest_features.append(feature)
 
             need_feature_change = __print_features_preview(
                 old_json=__serialize_features_from_kv_list_to_comparable_json_object(keyvalues=dest_features),
-                new_json=__serialize_features_from_kv_list_to_comparable_json_object(keyvalues=src_features))
+                new_json=__serialize_features_from_kv_list_to_comparable_json_object(keyvalues=src_features),
+                strict=strict)
 
         if not need_kv_change and not need_feature_change:
             return
@@ -162,6 +173,15 @@ def import_config(cmd,
 
     # append all feature flags to src_kvs list
     src_kvs.extend(src_features)
+
+    # In strict mode, delete kvs with specific label that are missing from the imported file
+    if strict:
+        dest_kvs.extend(all_features)  # append the discarded features back
+
+        kvs_to_delete = list(filterfalse(lambda kv: any(kv_import.key == kv.key and label == kv.label
+                                                        for kv_import in src_kvs), dest_kvs))
+        for kv in kvs_to_delete:
+            __delete_configuration_setting_from_config_store(azconfig_client, kv)
 
     # import into configstore
     __write_kv_and_features_to_config_store(azconfig_client,
@@ -189,6 +209,7 @@ def export_config(cmd,
                   separator=None,
                   naming_convention='pascal',
                   resolve_keyvault=False,
+                  profile=ImportExportProfiles.DEFAULT,
                   # to-config-store parameters
                   dest_name=None,
                   dest_connection_string=None,
@@ -202,11 +223,11 @@ def export_config(cmd,
     dest_features = []
     dest_kvs = []
     destination = destination.lower()
+    profile = profile.lower()
     format_ = format_.lower() if format_ else None
     naming_convention = naming_convention.lower()
 
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
-
     dest_azconfig_client = None
     if destination == 'appconfig':
         if dest_label is not None and preserve_labels:
@@ -228,8 +249,14 @@ def export_config(cmd,
     if skip_keyvault:
         src_kvs = [keyvalue for keyvalue in src_kvs if keyvalue.content_type != KeyVaultConstants.KEYVAULT_CONTENT_TYPE]
 
-    # We need to separate KV from feature flags
-    __discard_features_from_retrieved_kv(src_kvs)
+    # We need to separate KV from feature flags for the default export profile and only need to discard
+    # if skip_features is true for the appconfig/kvset export profile.
+    if profile == ImportExportProfiles.DEFAULT or (profile == ImportExportProfiles.KVSET and skip_features):
+        __discard_features_from_retrieved_kv(src_kvs)
+
+    if profile == ImportExportProfiles.KVSET:
+        __export_kvset_to_file(file_path=path, keyvalues=src_kvs, yes=yes)
+        return
 
     if not skip_features:
         # Get all Feature flags with matching label
@@ -334,7 +361,7 @@ def set_key(cmd,
             raise CLIError("Failed to retrieve key-values from config store. " + str(exception))
 
         if retrieved_kv is None:
-            if content_type and __is_json_content_type(content_type):
+            if __is_json_content_type(content_type):
                 try:
                     # Ensure that provided value is valid JSON. Error out if value is invalid JSON.
                     value = 'null' if value is None else value
@@ -344,13 +371,13 @@ def set_key(cmd,
 
             set_kv = ConfigurationSetting(key=key,
                                           label=label,
-                                          value=value,
-                                          content_type=content_type,
+                                          value="" if value is None else value,
+                                          content_type="" if content_type is None else content_type,
                                           tags=tags)
         else:
             value = retrieved_kv.value if value is None else value
             content_type = retrieved_kv.content_type if content_type is None else content_type
-            if content_type and __is_json_content_type(content_type):
+            if __is_json_content_type(content_type):
                 try:
                     # Ensure that provided/existing value is valid JSON. Error out if value is invalid JSON.
                     json.loads(value)
@@ -735,10 +762,16 @@ def list_revision(cmd,
     label = prep_label_filter_for_url_encoding(label)
 
     try:
+        query_fields = None
+        if fields:
+            query_fields = []
+            for field in fields:
+                query_fields.append(field.name.lower())
+
         revisions_iterable = azconfig_client.list_revisions(key_filter=key,
                                                             label_filter=label,
                                                             accept_datetime=datetime,
-                                                            fields=fields)
+                                                            fields=query_fields)
         retrieved_revisions = []
         count = 0
 

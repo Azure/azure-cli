@@ -4,7 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, live_only
-import mock
+from azure.cli.testsdk.constants import AUX_SUBSCRIPTION
+from unittest import mock
 import unittest
 from msrestazure.tools import resource_id
 
@@ -197,18 +198,19 @@ class MonitorCloneStorageAccountAcrossSubsScenarios(ScenarioTest):
     @unittest.skip('Accross subs are not supported now.')
     # @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_clone')
-    def test_monitor_clone_storage_metric_alerts_across_subs_scenario(self, resource_group):
+    @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_clone',
+                           parameter_name='another_resource_group', subscription=AUX_SUBSCRIPTION)
+    def test_monitor_clone_storage_metric_alerts_across_subs_scenario(self, resource_group, another_resource_group):
         self.kwargs.update({
             'alert': 'alert1',
             'sa': self.create_random_name('sa', 24),
             'sa2': self.create_random_name('sa', 24),
             'ag1': 'ag1',
             'rg': resource_group,
-            'ext_sub': '1c638cf4-608f-4ee6-b680-c329e824c3a8',
-            'ext_rg': self.create_random_name('test_rg', 24),
+            'ext_sub': AUX_SUBSCRIPTION,
+            'ext_rg': another_resource_group,
         })
 
-        self.cmd('group create -l eastus -n {ext_rg} --subscription {ext_sub}')
         sa1_json = self.cmd('storage account create -n {sa} -g {ext_rg} -l eastus --sku Standard_LRS --kind Storage --subscription {ext_sub}').get_output_in_json()
         sa2_json = self.cmd('storage account create -n {sa2} -g {rg} -l eastus --sku Standard_LRS --kind Storage').get_output_in_json()
         self.kwargs.update({

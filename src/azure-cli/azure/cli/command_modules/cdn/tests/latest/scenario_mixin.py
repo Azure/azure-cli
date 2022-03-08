@@ -39,7 +39,7 @@ class CdnScenarioMixin:
         return self.cmd(command, checks)
 
     def endpoint_create_cmd(self, group, name, profile_name, origin, private_link_id=None, private_link_location=None,
-                            private_link_message=None, tags=None, checks=None):
+                            private_link_message=None, tags=None, checks=None, options=None):
         cmd = f'cdn endpoint create -g {group} -n {name} --profile-name {profile_name} --origin {origin} 80 443 '
 
         if private_link_id:
@@ -50,6 +50,9 @@ class CdnScenarioMixin:
             cmd += f' \'{private_link_message}\''
         if tags:
             cmd = add_tags(cmd, tags)
+
+        if options:
+            cmd = cmd + ' ' + options
 
         return self.cmd(cmd, checks)
 
@@ -385,14 +388,17 @@ class CdnScenarioMixin:
                         f'--endpoint-name {endpoint_name} --profile-name {profile_name}',
                         checks)
 
-    def byoc_create_keyvault_cert(self, group_name, key_vault_name, cert_name):
+    def byoc_create_keyvault_cert(self, key_vault_name, cert_name):
         from os import path
 
         # Build the path to the policy json file in the CDN module's test directory.
         test_dir = path.dirname(path.realpath(__file__))
         default_cert_policy = path.join(test_dir, "byoc_cert_policy.json")
 
-        self.cmd(f'keyvault create --location centralus --name {key_vault_name} -g {group_name}')
+        self.cmd(f'keyvault set-policy --name {key_vault_name} '
+                 f'--secret-permissions get list --certificate-permissions list get '
+                 f'--object-id 4dbab725-22a4-44d5-ad44-c267ca38a954')
+
         return self.cmd(f'keyvault certificate create --vault-name {key_vault_name} '
                         f'-n {cert_name} --policy "@{default_cert_policy}"')
 

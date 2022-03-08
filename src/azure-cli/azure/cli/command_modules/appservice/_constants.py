@@ -4,31 +4,18 @@
 # --------------------------------------------------------------------------------------------
 import os
 
-NODE_VERSION_DEFAULT = "10.14"
-NODE_VERSION_NEWER = "12-lts"
-NODE_EXACT_VERSION_DEFAULT = "10.14.1"
-NETCORE_VERSION_DEFAULT = "3.1"
-ASPDOTNET_VERSION_DEFAULT = "4.8"
-DOTNET_VERSION_DEFAULT = "5.0"
-DOTNET_TARGET_FRAMEWORK_STRING = "net5.0"
-PYTHON_VERSION_DEFAULT = "3.7"
+DOTNET_TARGET_FRAMEWORK_REGEX = r"^net\d+\.\d+$"
 NETCORE_RUNTIME_NAME = "dotnetcore"
 ASPDOTNET_RUNTIME_NAME = "aspnet"
 DOTNET_RUNTIME_NAME = "dotnet"
 NODE_RUNTIME_NAME = "node"
 PYTHON_RUNTIME_NAME = "python"
 OS_DEFAULT = "Windows"
+LINUX_OS_NAME = "linux"
+WINDOWS_OS_NAME = "windows"
 STATIC_RUNTIME_NAME = "static"  # not an official supported runtime but used for CLI logic
-NODE_VERSIONS = ['10.6', '10.14']
-PYTHON_VERSIONS = ['3.9', '3.8', '3.7', '3.6']
-NETCORE_VERSIONS = ['2.1', '3.1']
-DOTNET_VERSIONS = ['3.5', '4.8']
 LINUX_SKU_DEFAULT = "P1V2"
-FUNCTIONS_VERSIONS = ['2', '3']
-FUNCTIONS_STACKS_API_JSON_PATHS = {
-    'windows': os.path.abspath(os.path.join(os.path.abspath(__file__), '../resources/WindowsFunctionsStacks.json')),
-    'linux': os.path.abspath(os.path.join(os.path.abspath(__file__), '../resources/LinuxFunctionsStacks.json'))
-}
+FUNCTIONS_VERSIONS = ['2', '3', '4']
 FUNCTIONS_LINUX_RUNTIME_VERSION_REGEX = r"^.*\|(.*)$"
 FUNCTIONS_WINDOWS_RUNTIME_VERSION_REGEX = r"^~(.*)$"
 FUNCTIONS_NO_V2_REGIONS = {
@@ -68,10 +55,23 @@ class FUNCTIONS_STACKS_API_KEYS():
         self.FUNCTIONS_WORKER_RUNTIME = 'FUNCTIONS_WORKER_RUNTIME'
 
 
-RUNTIME_STACKS = os.path.abspath(os.path.join(os.path.abspath(__file__),
-                                              '../resources/WebappRuntimeStacks.json'))
-
 GENERATE_RANDOM_APP_NAMES = os.path.abspath(os.path.join(os.path.abspath(__file__),
                                                          '../resources/GenerateRandomAppNames.json'))
 
 PUBLIC_CLOUD = "AzureCloud"
+
+LINUX_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH = {
+    'node': 'AppService/linux/nodejs-webapp-on-azure.yml',
+    'python': 'AppService/linux/python-webapp-on-azure.yml',
+    'dotnetcore': 'AppService/linux/aspnet-core-webapp-on-azure.yml',
+    'java': 'AppService/linux/java-jar-webapp-on-azure.yml',
+    'tomcat': 'AppService/linux/java-war-webapp-on-azure.yml'
+}
+
+WINDOWS_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH = {
+    'node': 'AppService/windows/nodejs-webapp-on-azure.yml',
+    'python': 'AppService/windows/python-webapp-on-azure.yml',
+    'dotnetcore': 'AppService/windows/aspnet-core-webapp-on-azure.yml',
+    'java': 'AppService/windows/java-jar-webapp-on-azure.yml',
+    'tomcat': 'AppService/windows/java-war-webapp-on-azure.yml'
+}

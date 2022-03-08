@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import uuid
+from azure.mgmt.advisor.models import SuppressionContract
 
 
 def list_recommendations(client, ids=None, resource_group_name=None,
@@ -29,12 +30,13 @@ def disable_recommendations(client, ids=None, recommendation_name=None,
         result = _parse_recommendation_uri(rec.id)
         resource_uri = result['resource_uri']
         recommendation_id = result['recommendation_id']
+        suppression_contract = SuppressionContract(ttl=ttl)
 
         sup = client.suppressions.create(
             resource_uri=resource_uri,
             recommendation_id=recommendation_id,
             name=suppression_name,
-            ttl=ttl
+            suppression_contract=suppression_contract
         )
 
         if rec.suppression_ids:
@@ -85,10 +87,10 @@ def show_configuration(client, resource_group_name=None):
 
 def update_configuration(instance, low_cpu_threshold=None,
                          exclude=None, include=None):
-    instance.properties.low_cpu_threshold = low_cpu_threshold
-    instance.properties.exclude = exclude
+    instance.low_cpu_threshold = low_cpu_threshold
+    instance.exclude = exclude
     if include:
-        instance.properties.exclude = False
+        instance.exclude = False
 
     return instance
 
@@ -147,13 +149,19 @@ def _generate_recommendations(client):
             raise ex
 
 
-def _set_configuration(client, resource_group_name=None, parameters=None):
+def _set_configuration(client, resource_group_name=None, parameters=None, configuration_name=None):
+
+    if not configuration_name:
+        configuration_name = 'default'
+
     if resource_group_name:
         return client.create_in_resource_group(
             config_contract=parameters,
-            resource_group=resource_group_name)
+            resource_group=resource_group_name,
+            configuration_name=configuration_name)
 
-    return client.create_in_subscription(parameters)
+    return client.create_in_subscription(config_contract=parameters,
+                                         configuration_name=configuration_name)
 
 
 def _get_recommendations(client, ids=None, resource_group_name=None, recommendation_name=None):

@@ -6,9 +6,8 @@
 import os
 from contextlib import contextmanager
 
-from azure_devtools.scenario_tests import (create_random_name as create_random_name_base, RecordingProcessor,
-                                           GeneralNameReplacer as _BuggyGeneralNameReplacer)
-from azure_devtools.scenario_tests.utilities import is_text_payload
+from .scenario_tests import (create_random_name as create_random_name_base, RecordingProcessor)
+from .scenario_tests.utilities import is_text_payload
 
 
 def create_random_name(prefix='clitest', length=24):
@@ -22,7 +21,7 @@ def find_recording_dir(test_file):
 
 @contextmanager
 def force_progress_logging():
-    from six import StringIO
+    from io import StringIO
     import logging
     from knack.log import get_logger
     from .reverse_dependency import get_commands_loggers
@@ -182,19 +181,16 @@ class AADGraphUserReplacer:
         return response
 
 
-# Override until this is fixed in azure_devtools
-class GeneralNameReplacer(_BuggyGeneralNameReplacer):
-
+class AADAuthRequestFilter(RecordingProcessor):
+    """Remove oauth authentication requests and responses from recording.
+    This is derived from OAuthRequestResponsesFilter.
+    """
     def process_request(self, request):
-        for old, new in self.names_name:
-            request.uri = request.uri.replace(old, new)
-
-            if is_text_payload(request) and request.body:
-                try:
-                    body = str(request.body, 'utf-8') if isinstance(request.body, bytes) else str(request.body)
-                except TypeError:  # python 2 doesn't allow decoding through str
-                    body = str(request.body)
-                if old in body:
-                    request.body = body.replace(old, new)
-
+        # filter AAD requests like:
+        # Tenant discovery: GET
+        # https://login.microsoftonline.com/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a/v2.0/.well-known/openid-configuration
+        # Get access token: POST
+        # https://login.microsoftonline.com/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a/oauth2/v2.0/token
+        if request.uri.startswith('https://login.microsoftonline.com'):
+            return None
         return request

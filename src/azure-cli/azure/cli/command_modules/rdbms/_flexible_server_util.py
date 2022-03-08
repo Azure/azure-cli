@@ -13,8 +13,10 @@ import secrets
 import string
 import yaml
 from knack.log import get_logger
+from knack.prompting import prompt_y_n, NoTTYException
 from msrestazure.tools import parse_resource_id
 from msrestazure.azure_exceptions import CloudError
+from azure.cli.core.util import CLIError
 from azure.cli.core.azclierror import AuthenticationError
 from azure.core.paging import ItemPaged
 from azure.cli.core.commands.client_factory import get_subscription_id
@@ -47,33 +49,28 @@ def create_random_resource_name(prefix='azure', length=15):
 
 
 def generate_missing_parameters(cmd, location, resource_group_name, server_name, db_engine):
-    # if location is not passed as a parameter or is missing from local context
-    if location is None:
-        if db_engine == 'postgres':
-            location = DEFAULT_LOCATION_PG
-        else:
-            location = DEFAULT_LOCATION_MySQL
-
     # If resource group is there in local context, check for its existence.
-    resource_group_exists = True
     if resource_group_name is not None:
         logger.warning('Checking the existence of the resource group \'%s\'...', resource_group_name)
         resource_group_exists = _check_resource_group_existence(cmd, resource_group_name)
         logger.warning('Resource group \'%s\' exists ? : %s ', resource_group_name, resource_group_exists)
+    else:
+        resource_group_exists = False
 
-    # If resource group is not passed as a param or is not in local context or the rg in the local context has been deleted
-    if not resource_group_exists or resource_group_name is None:
+    # set location to be same as RG's if not specified
+    if not resource_group_exists:
+        if not location:
+            location = DEFAULT_LOCATION_PG if db_engine == 'postgres' else DEFAULT_LOCATION_MySQL
         resource_group_name = _create_resource_group(cmd, location, resource_group_name)
+    else:
+        resource_group_client = resource_client_factory(cmd.cli_ctx).resource_groups
+        resource_group = resource_group_client.get(resource_group_name=resource_group_name)
+        if not location:
+            location = resource_group.location
 
     # If servername is not passed, always create a new server - even if it is stored in the local context
     if server_name is None:
         server_name = create_random_resource_name('server')
-
-    # This is for the case when user does not pass a location but the resource group exists in the local context.
-    #  In that case, the location needs to be set to the location of the rg, not the default one.
-
-    # TODO: Fix this because it changes the default location even when I pass in a location param
-    # location = _update_location(cmd, resource_group_name)
 
     return location, resource_group_name, server_name.lower()
 
@@ -173,22 +170,55 @@ def get_postgres_tiers(sku_info):
 def get_postgres_list_skus_info(cmd, location):
     list_skus_client = cf_postgres_flexible_location_capabilities(cmd.cli_ctx, '_')
     list_skus_result = list_skus_client.execute(location)
-    return _parse_list_skus(list_skus_result, 'postgres')
+    return _postgres_parse_list_skus(list_skus_result, 'postgres')
 
 
 def get_mysql_list_skus_info(cmd, location):
     list_skus_client = cf_mysql_flexible_location_capabilities(cmd.cli_ctx, '_')
     list_skus_result = list_skus_client.list(location)
-    return _parse_list_skus(list_skus_result, 'mysql')
+    return _mysql_parse_list_skus(list_skus_result, 'mysql')
 
 
-def _parse_list_skus(result, database_engine):
+def _postgres_parse_list_skus(result, database_engine):
     result = _get_list_from_paged_response(result)
-    single_az = False
+
     if not result:
         raise InvalidArgumentValueError("No available SKUs in this location")
-    if len(result) == 1:
-        single_az = True
+    single_az = not result[0].zone_redundant_ha_supported
+
+    tiers = result[0].supported_flexible_server_editions
+    tiers_dict = {}
+    for tier_info in tiers:
+        tier_name = tier_info.name
+        tier_dict = {}
+
+        skus = set()
+        versions = set()
+        for version in tier_info.supported_server_versions:
+            versions.add(version.name)
+            for vcores in version.supported_vcores:
+                skus.add(vcores.name)
+        tier_dict["skus"] = skus
+        tier_dict["versions"] = versions
+
+        storage_info = tier_info.supported_storage_editions[0]
+        storage_sizes = set()
+        for size in storage_info.supported_storage_mb:
+            storage_sizes.add(int(size.storage_size_mb // 1024))
+        tier_dict["storage_sizes"] = storage_sizes
+
+        tiers_dict[tier_name] = tier_dict
+
+    return {'sku_info': tiers_dict,
+            'single_az': single_az}
+
+
+def _mysql_parse_list_skus(result, database_engine):
+    result = _get_list_from_paged_response(result)
+    if not result:
+        raise InvalidArgumentValueError("No available SKUs in this location")
+    single_az = 'ZoneRedundant' not in result[0].supported_ha_mode
+    geo_paried_region = result[0].supported_geo_backup_regions
 
     tiers = result[0].supported_flexible_server_editions
     tiers_dict = {}
@@ -202,30 +232,23 @@ def _parse_list_skus(result, database_engine):
         versions = set()
         for version in tier_info.supported_server_versions:
             versions.add(version.name)
-            for vcores in version.supported_vcores:
-                skus.add(vcores.name)
-                if database_engine == 'mysql':
-                    sku_iops_dict[vcores.name] = vcores.supported_iops
+            for supported_sku in version.supported_skus:
+                skus.add(supported_sku.name)
+                sku_iops_dict[supported_sku.name] = supported_sku.supported_iops
         tier_dict["skus"] = skus
         tier_dict["versions"] = versions
 
         storage_info = tier_info.supported_storage_editions[0]
-        if database_engine == 'mysql':
-            tier_dict["backup_retention"] = (storage_info.min_backup_retention_days, storage_info.max_backup_retention_days)
-            tier_dict["storage_sizes"] = (int(storage_info.min_storage_size.storage_size_mb) // 1024,
-                                          int(storage_info.max_storage_size.storage_size_mb) // 1024)
-            iops_dict[tier_name] = sku_iops_dict
-        elif database_engine == 'postgres':
-            storage_sizes = set()
-            for size in storage_info.supported_storage_mb:
-                storage_sizes.add(int(size.storage_size_mb // 1024))
-            tier_dict["storage_sizes"] = storage_sizes
 
+        tier_dict["backup_retention"] = (storage_info.min_backup_retention_days, storage_info.max_backup_retention_days)
+        tier_dict["storage_sizes"] = (int(storage_info.min_storage_size) // 1024, int(storage_info.max_storage_size) // 1024)
+        iops_dict[tier_name] = sku_iops_dict
         tiers_dict[tier_name] = tier_dict
 
-    if database_engine == 'mysql':
-        return tiers_dict, iops_dict, single_az
-    return tiers_dict, single_az
+    return {'sku_info': tiers_dict,
+            'single_az': single_az,
+            'iops_info': iops_dict,
+            'geo_paired_regions': geo_paried_region}
 
 
 def _get_available_values(sku_info, argument, tier=None):
@@ -235,13 +258,6 @@ def _get_available_values(sku_info, argument, tier=None):
 
 def _get_list_from_paged_response(obj_list):
     return list(obj_list) if isinstance(obj_list, ItemPaged) else obj_list
-
-
-def _update_location(cmd, resource_group_name):
-    resource_client = resource_client_factory(cmd.cli_ctx)
-    rg = resource_client.resource_groups.get(resource_group_name)
-    location = rg.location
-    return location
 
 
 def _create_resource_group(cmd, location, resource_group_name):
@@ -425,3 +441,21 @@ def fill_action_template(cmd, database_engine, server, database_name, administra
 def get_git_root_dir():
     process = run_subprocess_get_output("git rev-parse --show-toplevel")
     return process.stdout.read().strip().decode('UTF-8')
+
+
+def get_user_confirmation(message, yes=False):
+    if yes:
+        return True
+    try:
+        if not prompt_y_n(message):
+            return False
+        return True
+    except NoTTYException:
+        raise CLIError(
+            'Unable to prompt for confirmation as no tty available. Use --yes.')
+
+
+def _is_resource_name(resource):
+    if len(resource.split('/')) == 1:
+        return True
+    return False

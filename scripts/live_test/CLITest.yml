@@ -317,7 +317,7 @@ jobs:
       ext-webapp:
         Target: ext-webapp
   pool:
-    vmImage: 'ubuntu-18.04'
+    vmImage: 'ubuntu-20.04'
   steps:
     - bash: |
         if [[ "$(USER_TARGET)" =~ "$(Target)" || ("$(USER_TARGET)" == "" && ! "$(Target)" =~ ^ext-.*) || ("$(USER_TARGET)" == "extensions" && "$(Target)" =~ ^ext-.*) ]]; then
@@ -376,7 +376,7 @@ jobs:
 
         az -v
         # az login --service-principal --username $(APP_ID) --password $(PASSWORD) --tenant $(TENANT_ID)
-        az login -u azureclitest@azuresdkteam.onmicrosoft.com -p $(AZURECLITESTPASSWORD)
+        az login -u azureclilivetest@azuresdkteam.onmicrosoft.com -p $(AZURECLITESTPASSWORD)
         az account set -s 0b1f6471-1bf0-4dda-aec3-cb9272f09590
 
         # Clean resources
@@ -456,7 +456,8 @@ jobs:
         downloadType: 'specific'
         downloadPath: '$(System.ArtifactsDirectory)'
     - bash: |
-        echo $(System.ArtifactsDirectory)
+        set -o errexit
+        echo "ArtifastsDirectory: $(System.ArtifactsDirectory)"
         ls $(System.ArtifactsDirectory)
         pwd
         commit_id=`git ls-remote https://github.com/Azure/azure-cli.git HEAD`
@@ -466,8 +467,11 @@ jobs:
         # pip install certifi
         # Send notification
         az -v
-        az login -u azureclitest@azuresdkteam.onmicrosoft.com -p $(AZURECLITESTPASSWORD)
+        echo "login to user azureclilivetest"
+        az login -u azureclilivetest@azuresdkteam.onmicrosoft.com -p $(AZURECLITESTPASSWORD)
+        echo "set account"
         az account set -s 0b1f6471-1bf0-4dda-aec3-cb9272f09590
+        echo "send email to grid"
         python /home/vsts/work/1/s/scripts/live_test/sendemail.py "$(SENDGRID_KEY)" "$(Build.BuildId)" "$(USER_REPO)" "$(USER_BRANCH)" "$(USER_TARGET)" "$(USER_LIVE)" "$(System.ArtifactsDirectory)" "$(Build.RequestedForEmail)" "$(ACCOUNT_KEY)" "$commit_id" "$(DB_PWD)"
         # python /home/vsts/work/1/s/scripts/live_test/upload.py "$(System.ArtifactsDirectory)" "$(ACCOUNT_KEY)" "$(USER_LIVE)"
         # Clean resources

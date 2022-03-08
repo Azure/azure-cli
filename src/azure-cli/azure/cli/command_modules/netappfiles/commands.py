@@ -90,8 +90,11 @@ def load_command_table(self, _):
 def load_accounts_command_groups(self, netappfiles_accounts_sdk):
     with self.command_group('netappfiles account', netappfiles_accounts_sdk) as g:
         g.show_command('show', 'get')
-        g.command('list', 'list')
         g.command('delete', 'begin_delete')
+        g.custom_command('list', 'list_accounts',
+                         client_factory=accounts_mgmt_client_factory,
+                         doc_string_source='azure.mgmt.netapp.models#NetAppAccount',
+                         exception_handler=netappfiles_exception_handler)
         g.custom_command('create', 'create_account',
                          client_factory=accounts_mgmt_client_factory,
                          doc_string_source='azure.mgmt.netapp.models#NetAppAccount',
@@ -107,6 +110,12 @@ def load_accounts_command_groups(self, netappfiles_accounts_sdk):
         g.generic_update_command('add',
                                  setter_name='begin_update',
                                  custom_func_name='add_active_directory',
+                                 setter_arg_name='body',
+                                 doc_string_source='azure.mgmt.netapp.models#NetAppAccountPatch',
+                                 exception_handler=netappfiles_exception_handler)
+        g.generic_update_command('update',
+                                 setter_name='begin_update',
+                                 custom_func_name='update_active_directory',
                                  setter_arg_name='body',
                                  doc_string_source='azure.mgmt.netapp.models#NetAppAccountPatch',
                                  exception_handler=netappfiles_exception_handler)
@@ -222,6 +231,7 @@ def load_backups_command_groups(self, netappfiles_backups_sdk):
         g.command('list', 'list')
         g.command('delete', 'begin_delete')
         g.command('status', 'get_status')
+        g.command('restore-status', 'get_volume_restore_status')
         g.custom_command('update', 'update_backup',
                          client_factory=backups_mgmt_client_factory,
                          doc_string_source='azure.mgmt.netapp.models#BackupPatch',

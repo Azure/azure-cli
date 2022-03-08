@@ -15,8 +15,8 @@ import yaml
 from knack.util import CLIError
 from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest, KeyVaultPreparer, live_only, LiveScenarioTest)
 from azure.cli.testsdk.checkers import NoneCheck
-from azure.cli.command_modules.appconfig._constants import FeatureFlagConstants, KeyVaultConstants
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.command_modules.appconfig._constants import FeatureFlagConstants, KeyVaultConstants, ImportExportProfiles
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -29,6 +29,10 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
 
         location = 'eastus'
         sku = 'standard'
+        tag_key = "key"
+        tag_value = "value"
+        tag = tag_key + '=' + tag_value
+        structured_tag = {tag_key: tag_value}
         system_assigned_identity = '[system]'
 
         self.kwargs.update({
@@ -36,35 +40,41 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
             'rg_loc': location,
             'rg': resource_group,
             'sku': sku,
+            'tags': tag,
             'identity': system_assigned_identity
         })
 
-        store = self.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku} --assign-identity {identity}',
+        store = self.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku} --tags {tags} --assign-identity {identity}',
                          checks=[self.check('name', '{config_store_name}'),
                                  self.check('location', '{rg_loc}'),
                                  self.check('resourceGroup', resource_group),
                                  self.check('provisioningState', 'Succeeded'),
                                  self.check('sku.name', sku),
+                                 self.check('tags', structured_tag),
                                  self.check('identity.type', 'SystemAssigned')]).get_output_in_json()
+
         self.cmd('appconfig list -g {rg}',
                  checks=[self.check('[0].name', '{config_store_name}'),
                          self.check('[0].location', '{rg_loc}'),
                          self.check('[0].resourceGroup', resource_group),
                          self.check('[0].provisioningState', 'Succeeded'),
                          self.check('[0].sku.name', sku),
+                         self.check('[0].tags', structured_tag),
                          self.check('[0].identity.type', 'SystemAssigned')])
+
         self.cmd('appconfig show -n {config_store_name} -g {rg}',
                  checks=[self.check('name', '{config_store_name}'),
                          self.check('location', '{rg_loc}'),
                          self.check('resourceGroup', resource_group),
                          self.check('provisioningState', 'Succeeded'),
                          self.check('sku.name', sku),
+                         self.check('tags', structured_tag),
                          self.check('identity.type', 'SystemAssigned')])
 
         tag_key = "Env"
         tag_value = "Prod"
         updated_tag = tag_key + '=' + tag_value
-        structered_tag = {tag_key: tag_value}
+        structured_tag = {tag_key: tag_value}
         self.kwargs.update({
             'updated_tag': updated_tag,
             'update_sku': sku   # we currently only can test on standard sku
@@ -74,7 +84,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                  checks=[self.check('name', '{config_store_name}'),
                          self.check('location', '{rg_loc}'),
                          self.check('resourceGroup', resource_group),
-                         self.check('tags', structered_tag),
+                         self.check('tags', structured_tag),
                          self.check('provisioningState', 'Succeeded'),
                          self.check('sku.name', sku)])
 
@@ -97,12 +107,68 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                  checks=[self.check('name', '{config_store_name}'),
                          self.check('location', '{rg_loc}'),
                          self.check('resourceGroup', resource_group),
-                         self.check('tags', structered_tag),
+                         self.check('tags', structured_tag),
                          self.check('provisioningState', 'Succeeded'),
                          self.check('sku.name', sku),
                          self.check('encryption.keyVaultProperties.keyIdentifier', keyvault_uri.strip('/') + "/keys/{}/".format(encryption_key))])
 
+        self.kwargs.update({
+            'updated_tag': '""',
+        })
+
+        self.cmd('appconfig update -n {config_store_name} -g {rg} --tags {updated_tag}',
+            checks=[self.check('name', '{config_store_name}'),
+                    self.check('location', '{rg_loc}'),
+                    self.check('resourceGroup', resource_group),
+                    self.check('tags', {}),
+                    self.check('provisioningState', 'Succeeded'),
+                    self.check('sku.name', sku),
+                    self.check('encryption.keyVaultProperties.keyIdentifier', keyvault_uri.strip('/') + "/keys/{}/".format(encryption_key))])
+
         self.cmd('appconfig delete -n {config_store_name} -g {rg} -y')
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(parameter_name_for_location='location')
+    def test_azconfig_local_auth(self, resource_group, location):
+        config_store_name = self.create_random_name(prefix='DisableLocalAuth', length=24)
+
+        location = 'eastus'
+        sku = 'standard'
+
+        self.kwargs.update({
+            'config_store_name': config_store_name,
+            'rg_loc': location,
+            'rg': resource_group,
+            'sku': sku,
+            'disable_local_auth': 'true'
+        })
+
+        self.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku} --disable-local-auth {disable_local_auth}',
+                 checks=[self.check('name', '{config_store_name}'),
+                         self.check('location', '{rg_loc}'),
+                         self.check('resourceGroup', resource_group),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('sku.name', sku),
+                         self.check('disableLocalAuth', True)])
+
+        self.kwargs.update({
+            'key': 'test',
+            'disable_local_auth': 'false'
+        })
+
+        with self.assertRaisesRegex(CLIError, "Cannot find a read write access key for the App Configuration {}".format(config_store_name)):
+            self.cmd('appconfig kv set --key {key} -n {config_store_name} -y')
+
+        self.cmd('appconfig update -n {config_store_name} -g {rg} --disable-local-auth {disable_local_auth}',
+                 checks=[self.check('name', '{config_store_name}'),
+                         self.check('location', '{rg_loc}'),
+                         self.check('resourceGroup', resource_group),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('sku.name', sku),
+                         self.check('disableLocalAuth', False)])
+
+        self.cmd('appconfig kv set --key {key} -n {config_store_name} -y',
+                 checks=[self.check('key', '{key}')])
 
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_public_network_access(self, resource_group, location):
@@ -242,29 +308,29 @@ class AppConfigKVScenarioTest(ScenarioTest):
         _create_config_store(self, self.kwargs)
 
         entry_key = "Color"
-        entry_value = "Red"
-        entry_content_type = 'text'
         entry_label = 'v1.0.0'
 
         self.kwargs.update({
             'key': entry_key,
-            'value': entry_value,
-            'label': entry_label,
-            'content_type': entry_content_type
+            'label': entry_label
         })
 
         # add a new key-value entry
-        self.cmd('appconfig kv set -n {config_store_name} --key {key} --value {value} --content-type {content_type} --label {label} -y',
-                 checks=[self.check('contentType', entry_content_type),
+        self.cmd('appconfig kv set -n {config_store_name} --key {key} --label {label} -y',
+                 checks=[self.check('contentType', ""),
                          self.check('key', entry_key),
-                         self.check('value', entry_value),
+                         self.check('value', ""),
                          self.check('label', entry_label)])
 
         # edit a key-value entry
         updated_entry_value = "Green"
+        entry_content_type = "text"
+
         self.kwargs.update({
-            'value': updated_entry_value
+            'value': updated_entry_value,
+            'content_type': entry_content_type
         })
+
         self.cmd('appconfig kv set -n {config_store_name} --key {key} --value {value} --content-type {content_type} --label {label} -y',
                  checks=[self.check('contentType', entry_content_type),
                          self.check('key', entry_key),
@@ -311,6 +377,8 @@ class AppConfigKVScenarioTest(ScenarioTest):
 
         # set key-value entry with connection string, but to the original value
         # take a note of the deleted_time
+        entry_value = "Red"
+
         self.kwargs.update({
             'value': entry_value,
             'timestamp': _format_datetime(deleted_time)
@@ -449,6 +517,85 @@ class AppConfigKVScenarioTest(ScenarioTest):
 
         assert len(exported_kvs) == 1
         assert exported_kvs[secret_name] == secret_value
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(parameter_name_for_location='location')
+    def test_azconfig_kv_revision_list(self, resource_group, location):
+        config_store_name = self.create_random_name(prefix='KVRevisionTest', length=24)
+
+        location = 'eastus'
+        sku = 'standard'
+        self.kwargs.update({
+            'config_store_name': config_store_name,
+            'rg_loc': location,
+            'rg': resource_group,
+            'sku': sku
+        })
+        _create_config_store(self, self.kwargs)
+
+        entry_key = "Color"
+        entry_label = 'v1.0.0'
+
+        self.kwargs.update({
+            'key': entry_key,
+            'label': entry_label
+        })
+
+        # add a new key-value entry
+        self.cmd('appconfig kv set -n {config_store_name} --key {key} --label {label} -y',
+                 checks=[self.check('contentType', ""),
+                         self.check('key', entry_key),
+                         self.check('value', ""),
+                         self.check('label', entry_label)])
+
+        # edit a key-value entry
+        updated_entry_value = "Green"
+        entry_content_type = "text"
+
+        self.kwargs.update({
+            'value': updated_entry_value,
+            'content_type': entry_content_type
+        })
+
+        self.cmd(
+            'appconfig kv set -n {config_store_name} --key {key} --value {value} --content-type {content_type} --label {label} -y',
+            checks=[self.check('contentType', entry_content_type),
+                    self.check('key', entry_key),
+                    self.check('value', updated_entry_value),
+                    self.check('label', entry_label)])
+
+        # add a new label
+        updated_label = 'newlabel'
+        self.kwargs.update({
+            'label': updated_label
+        })
+
+        self.cmd(
+            'appconfig kv set -n {config_store_name} --key {key} --value {value} --content-type {content_type} --label {label} -y',
+            checks=[self.check('contentType', entry_content_type),
+                    self.check('key', entry_key),
+                    self.check('value', updated_entry_value),
+                    self.check('label', updated_label)])
+
+        revisions = self.cmd('appconfig revision list -n {config_store_name} --key {key} --label * --top 2 --fields content_type etag label last_modified value').get_output_in_json()
+        assert len(revisions) == 2
+
+        assert revisions[0]['content_type'] == 'text'
+        assert revisions[1]['content_type'] == 'text'
+        assert revisions[0]['label'] == 'newlabel'
+        assert revisions[1]['label'] == 'v1.0.0'
+        assert revisions[0]['value'] == 'Green'
+        assert revisions[1]['value'] == 'Green'
+        assert revisions[0]['last_modified'] is not None
+        assert revisions[1]['last_modified'] is not None
+        assert revisions[1]['etag'] is not None
+        assert revisions[0]['etag'] is not None
+        assert 'key' not in revisions[0]
+        assert 'key' not in revisions[1]
+        assert 'locked' not in revisions[0]
+        assert 'locked' not in revisions[1]
+        assert 'tags' not in revisions[0]
+        assert 'tags' not in revisions[1]
 
 
 class AppConfigImportExportScenarioTest(ScenarioTest):
@@ -614,6 +761,97 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
             exported_kvs = json.load(json_file)
         assert imported_kvs == exported_kvs
 
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(parameter_name_for_location='location')
+    def test_azconfig_import_export_kvset(self, resource_group, location):
+        config_store_name = self.create_random_name(prefix='KVSetImportTest', length=24)
+
+        location = 'eastus'
+        sku = 'standard'
+        self.kwargs.update({
+            'config_store_name': config_store_name,
+            'rg_loc': location,
+            'rg': resource_group,
+            'sku': sku
+        })
+        _create_config_store(self, self.kwargs)
+
+        # File <--> AppConfig tests
+
+        imported_file_path = os.path.join(TEST_DIR, 'kvset_import.json')
+        exported_file_path = os.path.join(TEST_DIR, 'kvset_export.json')
+
+        self.kwargs.update({
+            'import_source': 'file',
+            'imported_format': 'json',
+            'profile': ImportExportProfiles.KVSET,
+            'imported_file_path': imported_file_path,
+            'exported_file_path': exported_file_path
+        })
+        self.cmd(
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --profile {profile} -y')
+        self.cmd(
+            'appconfig kv export -n {config_store_name} -d {import_source} --label * --key * --path "{exported_file_path}" --format {imported_format} --profile {profile} -y')
+        with open(imported_file_path) as json_file:
+            imported_kvs = json.load(json_file)
+        with open(exported_file_path) as json_file:
+            exported_kvs = json.load(json_file)
+        assert imported_kvs == exported_kvs
+
+        # export kvset with --skip-features option
+        no_features_file_path = os.path.join(TEST_DIR, 'kvset_no_features.json')
+
+        self.cmd(
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --profile {profile} -y')
+        self.cmd(
+            'appconfig kv export -n {config_store_name} -d {import_source} --label * --key * --path "{exported_file_path}" --format {imported_format} --profile {profile} --skip-features -y')
+
+        with open(exported_file_path) as json_file:
+            exported_kvs = json.load(json_file)
+        with open(no_features_file_path) as json_file:
+            expected_kvs = json.load(json_file)
+        assert exported_kvs == expected_kvs
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(parameter_name_for_location='location')
+    def test_azconfig_strict_import(self, resource_group, location):
+        config_store_name = self.create_random_name(prefix='StrictImportTest', length=24)
+
+        location = 'eastus'
+        sku = 'standard'
+        self.kwargs.update({
+            'config_store_name': config_store_name,
+            'rg_loc': location,
+            'rg': resource_group,
+            'sku': sku
+        })
+        _create_config_store(self, self.kwargs)
+
+        # File <--> AppConfig tests
+        imported_file_path = os.path.join(TEST_DIR, 'kvset_import.json')
+        exported_file_path = os.path.join(TEST_DIR, 'kvset_export.json')
+        strict_import_file_path = os.path.join(TEST_DIR, 'strict_import.json')
+
+        self.kwargs.update({
+            'import_source': 'file',
+            'imported_format': 'json',
+            'profile': ImportExportProfiles.KVSET,
+            'imported_file_path': imported_file_path,
+            'exported_file_path': exported_file_path,
+            'strict_import_file_path': strict_import_file_path
+        })
+        self.cmd(
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --profile {profile} -y')
+        self.cmd(
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{strict_import_file_path}" --format {imported_format} --profile {profile} --strict -y')
+        self.cmd(
+            'appconfig kv export -n {config_store_name} -d {import_source} --label * --key * --path "{exported_file_path}" --format {imported_format} --profile {profile} -y')
+        with open(strict_import_file_path) as json_file:
+            expected_kvs = json.load(json_file)
+        with open(exported_file_path) as json_file:
+            exported_kvs = json.load(json_file)
+        assert expected_kvs == exported_kvs
+
 
 class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
 
@@ -641,8 +879,13 @@ class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
         # Create AppService plan and webapp
         webapp_name = self.create_random_name(prefix='WebApp', length=24)
         plan = self.create_random_name(prefix='Plan', length=24)
-        self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
+        # Require a standard sku to allow for deployment slots
+        self.cmd('appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan))
         self.cmd('webapp create -g {} -n {} -p {}'.format(resource_group, webapp_name, plan))
+
+        # Create deployment slot
+        slot = self.create_random_name(prefix='Slot', length=24)
+        self.cmd('webapp deployment slot create -g {} -n {} -s {}'.format(resource_group, webapp_name, slot))
 
         # KeyVault reference tests
         keyvault_key = "HostSecrets"
@@ -676,6 +919,14 @@ class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
         self.assertEqual(exported_keys['value'], appsvc_keyvault_value)
         self.assertEqual(exported_keys['slotSetting'], False)
 
+        self.kwargs.update({
+            'slot': slot
+        })
+
+        # Verify that the slot configuration was not updated
+        app_settings = self.cmd('webapp config appsettings list -g {rg} -n {appservice_account} -s {slot}').get_output_in_json()
+        assert not any(True for elem in app_settings if elem['name'] == keyvault_key)
+
         # Import KeyVault ref from AppService
         updated_label = 'ImportedFromAppService'
         self.kwargs.update({
@@ -687,6 +938,59 @@ class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
                  checks=[self.check('[0].contentType', KeyVaultConstants.KEYVAULT_CONTENT_TYPE),
                          self.check('[0].key', keyvault_key),
                          self.check('[0].value', appconfig_keyvault_value),
+                         self.check('[0].label', updated_label)])
+
+        # Get the slot ID
+        slot_list = self.cmd('az webapp deployment slot list -g {rg} -n {appservice_account}').get_output_in_json()
+        assert slot_list and len(slot_list) == 1
+        slot_id = slot_list[0]['id']
+
+        # Update keyvault reference for slot export / import testing
+        slot_keyvault_id = "https://fake.vault.azure.net/secrets/slotsecret"
+        appconfigslot_keyvault_value = "{{\"uri\":\"https://fake.vault.azure.net/secrets/slotsecret\"}}"
+        appsvcslot_keyvault_value = "@Microsoft.KeyVault(SecretUri=https://fake.vault.azure.net/secrets/slotsecret)"
+        label = 'ForExportToAppServiceSlot'
+        self.kwargs.update({
+            'label': label,
+            'secret_identifier': slot_keyvault_id,
+            'slot_id': slot_id
+        })
+
+        # Add new KeyVault ref in AppConfig for the slot
+        self.cmd('appconfig kv set-keyvault --connection-string {connection_string} --key {key} --secret-identifier {secret_identifier} --label {label} -y',
+                 checks=[self.check('contentType', KeyVaultConstants.KEYVAULT_CONTENT_TYPE),
+                         self.check('key', keyvault_key),
+                         self.check('label', label),
+                         self.check('value', appconfigslot_keyvault_value)])
+
+        # Export KeyVault ref to AppService
+        self.cmd('appconfig kv export --connection-string {connection_string} -d {export_dest} --appservice-account {slot_id} --label {label} -y')
+
+        # Verify that the webapp configuration was not updated
+        app_settings = self.cmd('webapp config appsettings list -g {rg} -n {appservice_account}').get_output_in_json()
+        exported_keys = next(x for x in app_settings if x['name'] == keyvault_key)
+        self.assertEqual(exported_keys['name'], keyvault_key)
+        self.assertEqual(exported_keys['value'], appsvc_keyvault_value)
+        self.assertEqual(exported_keys['slotSetting'], False)
+
+        # Verify that the slot configuration was updated
+        app_settings = self.cmd('webapp config appsettings list -g {rg} -n {appservice_account} -s {slot}').get_output_in_json()
+        exported_keys = next(x for x in app_settings if x['name'] == keyvault_key)
+        self.assertEqual(exported_keys['name'], keyvault_key)
+        self.assertEqual(exported_keys['value'], appsvcslot_keyvault_value)
+        self.assertEqual(exported_keys['slotSetting'], False)
+
+        # Import KeyVault ref from AppService slot
+        updated_label = 'ImportedFromAppServiceSlot'
+        self.kwargs.update({
+            'label': updated_label
+        })
+        self.cmd('appconfig kv import --connection-string {connection_string} -s {export_dest} --appservice-account {slot_id} --label {label} -y')
+
+        self.cmd('appconfig kv list --connection-string {connection_string} --label {label}',
+                 checks=[self.check('[0].contentType', KeyVaultConstants.KEYVAULT_CONTENT_TYPE),
+                         self.check('[0].key', keyvault_key),
+                         self.check('[0].value', appconfigslot_keyvault_value),
                          self.check('[0].label', updated_label)])
 
         # Add keyvault ref to appservice in alt format and import to appconfig
@@ -755,14 +1059,14 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
         self.kwargs.update({
             'imported_file_path': import_multiple_feature_sections_path
         })
-        with self.assertRaisesRegexp(CLIError, 'Unable to proceed because file contains multiple sections corresponding to "Feature Management".'):
+        with self.assertRaisesRegex(CLIError, 'Unable to proceed because file contains multiple sections corresponding to "Feature Management".'):
             self.cmd('appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} -y')
 
         # Error if imported file has "enabled for" in wrong format
         self.kwargs.update({
             'imported_file_path': import_wrong_enabledfor_format_path
         })
-        with self.assertRaisesRegexp(CLIError, 'definition or have a true/false value.'):
+        with self.assertRaisesRegex(CLIError, 'definition or have a true/false value.'):
             self.cmd('appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} -y')
 
         # Import/Export yaml file
@@ -882,7 +1186,8 @@ class AppConfigToAppConfigImportExportScenarioTest(ScenarioTest):
         })
         # add a new feature flag entry
         self.cmd('appconfig feature set --connection-string {src_connection_string} --feature {feature} --label {label} -y',
-                 checks=[self.check('key', entry_feature),
+                 checks=[self.check('name', entry_feature),
+                         self.check('key', internal_feature_key),
                          self.check('label', entry_label)])
 
         # add a new label for same feature
@@ -890,7 +1195,8 @@ class AppConfigToAppConfigImportExportScenarioTest(ScenarioTest):
             'label': updated_label
         })
         self.cmd('appconfig feature set --connection-string {src_connection_string} --feature {feature} --label {label} -y',
-                 checks=[self.check('key', entry_feature),
+                 checks=[self.check('name', entry_feature),
+                         self.check('key', internal_feature_key),
                          self.check('label', updated_label)])
 
         # import all kv and features from src config store to dest config store
@@ -953,7 +1259,7 @@ class AppConfigToAppConfigImportExportScenarioTest(ScenarioTest):
         self.kwargs.update({
             'label': dest_label
         })
-        with self.assertRaisesRegexp(CLIError, "Import failed! Please provide only one of these arguments: '--label' or '--preserve-labels'."):
+        with self.assertRaisesRegex(CLIError, "Import failed! Please provide only one of these arguments: '--label' or '--preserve-labels'."):
             self.cmd('appconfig kv import --connection-string {dest_connection_string} -s {import_source} --src-connection-string {src_connection_string} --src-label {src_label} --label {label} --preserve-labels -y')
 
         # Export tests from src config store to dest config store
@@ -1004,7 +1310,7 @@ class AppConfigToAppConfigImportExportScenarioTest(ScenarioTest):
         self.kwargs.update({
             'label': dest_label
         })
-        with self.assertRaisesRegexp(CLIError, "Export failed! Please provide only one of these arguments: '--dest-label' or '--preserve-labels'."):
+        with self.assertRaisesRegex(CLIError, "Export failed! Please provide only one of these arguments: '--dest-label' or '--preserve-labels'."):
             self.cmd('appconfig kv export --connection-string {src_connection_string} -d {import_source} --dest-connection-string {dest_connection_string} --label {src_label} --dest-label {label} --preserve-labels -y')
 
 
@@ -1231,19 +1537,19 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
             'value': entry_value,
             'content_type': json_content_type_01
         })
-        with self.assertRaisesRegexp(CLIError, "is not a valid JSON object, which conflicts with the content type."):
+        with self.assertRaisesRegex(CLIError, "is not a valid JSON object, which conflicts with the content type."):
             self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --value {value} --content-type {content_type} -y')
 
         self.kwargs.update({
             'value': '[abc,def]'
         })
-        with self.assertRaisesRegexp(CLIError, "is not a valid JSON object, which conflicts with the content type."):
+        with self.assertRaisesRegex(CLIError, "is not a valid JSON object, which conflicts with the content type."):
             self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --value {value} --content-type {content_type} -y')
 
         self.kwargs.update({
             'value': 'True'
         })
-        with self.assertRaisesRegexp(CLIError, "is not a valid JSON object, which conflicts with the content type."):
+        with self.assertRaisesRegex(CLIError, "is not a valid JSON object, which conflicts with the content type."):
             self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --value {value} --content-type {content_type} -y')
 
         # Create a non-JSON key-value and update its content type in subsequent command
@@ -1254,7 +1560,7 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
                  checks=[self.check('key', entry_key),
                          self.check('value', entry_value)])
 
-        with self.assertRaisesRegexp(CLIError, "Set the value again in valid JSON format."):
+        with self.assertRaisesRegex(CLIError, "Set the value again in valid JSON format."):
             self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --content-type {content_type} -y')
 
         """
@@ -1274,7 +1580,8 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
 
         # Add a new feature flag
         entry_feature = 'Beta'
-        default_description = None
+        internal_feature_key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + entry_feature
+        default_description = ""
         default_conditions = "{{u\'client_filters\': []}}" if sys.version_info[0] < 3 else "{{\'client_filters\': []}}"
         default_locked = False
         default_state = "off"
@@ -1283,7 +1590,8 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
         })
         self.cmd('appconfig feature set --connection-string {src_connection_string} --feature {feature} -y',
                  checks=[self.check('locked', default_locked),
-                         self.check('key', entry_feature),
+                         self.check('name', entry_feature),
+                         self.check('key', internal_feature_key),
                          self.check('description', default_description),
                          self.check('state', default_state),
                          self.check('conditions', default_conditions)])
@@ -1415,7 +1723,7 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
             'imported_file_path': imported_file_path,
             'exported_file_path': exported_yaml_file_path
         })
-        with self.assertRaisesRegexp(CLIError, "Please provide JSON file format to match your content type."):
+        with self.assertRaisesRegex(CLIError, "Please provide JSON file format to match your content type."):
             self.cmd('appconfig kv import --connection-string {src_connection_string} -s {import_source} --path "{imported_file_path}" --format {imported_format} --separator {separator} --content-type {content_type} -y')
 
         self.cmd(
@@ -1448,8 +1756,9 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         _create_config_store(self, self.kwargs)
 
         entry_feature = 'Beta'
+        internal_feature_key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + entry_feature
         entry_label = 'v1'
-        default_description = None
+        default_description = ""
         default_conditions = "{{u\'client_filters\': []}}" if sys.version_info[0] < 3 else "{{\'client_filters\': []}}"
         default_locked = False
         default_state = "off"
@@ -1463,7 +1772,8 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         # add a brand new feature flag entry
         self.cmd('appconfig feature set -n {config_store_name} --feature {feature} --label {label} -y',
                  checks=[self.check('locked', default_locked),
-                         self.check('key', entry_feature),
+                         self.check('name', entry_feature),
+                         self.check('key', internal_feature_key),
                          self.check('description', default_description),
                          self.check('label', entry_label),
                          self.check('state', default_state),
@@ -1476,7 +1786,8 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         })
         self.cmd('appconfig feature set -n {config_store_name} --feature {feature} --label {label} --description "{description}" -y',
                  checks=[self.check('locked', default_locked),
-                         self.check('key', entry_feature),
+                         self.check('name', entry_feature),
+                         self.check('key', internal_feature_key),
                          self.check('description', updated_entry_description),
                          self.check('label', entry_label),
                          self.check('state', default_state),
@@ -1490,7 +1801,8 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
 
         self.cmd('appconfig feature set -n {config_store_name} --feature {feature} --label {label} -y',
                  checks=[self.check('locked', default_locked),
-                         self.check('key', entry_feature),
+                         self.check('name', entry_feature),
+                         self.check('key', internal_feature_key),
                          self.check('description', default_description),
                          self.check('label', updated_label),
                          self.check('state', default_state),
@@ -1504,26 +1816,28 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         })
         self.cmd('appconfig feature set --connection-string {connection_string} --feature {feature} --label {label} --description "{description}" -y',
                  checks=[self.check('locked', default_locked),
-                         self.check('key', entry_feature),
+                         self.check('name', entry_feature),
+                         self.check('key', internal_feature_key),
                          self.check('description', updated_entry_description),
                          self.check('label', updated_label),
                          self.check('state', default_state),
                          self.check('conditions', default_conditions)])
 
-        # show a feature flag with all 7 fields
+        # show a feature flag with all 8 fields
         response_dict = self.cmd('appconfig feature show -n {config_store_name} --feature {feature} --label {label}',
                                  checks=[self.check('locked', default_locked),
-                                         self.check('key', entry_feature),
+                                         self.check('name', entry_feature),
+                                         self.check('key', internal_feature_key),
                                          self.check('description', updated_entry_description),
                                          self.check('label', updated_label),
                                          self.check('state', default_state),
                                          self.check('conditions', default_conditions)]).get_output_in_json()
-        assert len(response_dict) == 7
+        assert len(response_dict) == 8
 
         # show a feature flag with field filtering
         response_dict = self.cmd('appconfig feature show -n {config_store_name} --feature {feature} --label {label} --fields key label state locked',
                                  checks=[self.check('locked', default_locked),
-                                         self.check('key', entry_feature),
+                                         self.check('key', internal_feature_key),
                                          self.check('label', updated_label),
                                          self.check('state', default_state)]).get_output_in_json()
         assert len(response_dict) == 4
@@ -1543,9 +1857,10 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
             'label': any_label_pattern
         })
 
-        list_features = self.cmd('appconfig feature list -n {config_store_name} --label {label} --fields key label state locked',
+        list_features = self.cmd('appconfig feature list -n {config_store_name} --label {label} --fields key name label state locked',
                                  checks=[self.check('[0].locked', default_locked),
-                                         self.check('[0].key', entry_feature),
+                                         self.check('[0].name', entry_feature),
+                                         self.check('[0].key', internal_feature_key),
                                          self.check('[0].label', entry_label),
                                          self.check('[0].state', default_state)]).get_output_in_json()
         assert len(list_features) == 2
@@ -1556,6 +1871,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
 
         # Add another feature with name starting with Beta, null label
         prefix_feature = 'BetaPrefix'
+        internal_feature_key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + prefix_feature
         null_label = None
 
         self.kwargs.update({
@@ -1564,7 +1880,8 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
 
         self.cmd('appconfig feature set -n {config_store_name} --feature {feature} -y',
                  checks=[self.check('locked', default_locked),
-                         self.check('key', prefix_feature),
+                         self.check('name', prefix_feature),
+                         self.check('key', internal_feature_key),
                          self.check('description', default_description),
                          self.check('label', null_label),
                          self.check('state', default_state),
@@ -1572,6 +1889,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
 
         # Add feature with name ending with Beta, null label
         suffix_feature = 'SuffixBeta'
+        internal_feature_key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + suffix_feature
 
         self.kwargs.update({
             'feature': suffix_feature
@@ -1579,7 +1897,8 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
 
         self.cmd('appconfig feature set -n {config_store_name} --feature {feature} -y',
                  checks=[self.check('locked', default_locked),
-                         self.check('key', suffix_feature),
+                         self.check('name', suffix_feature),
+                         self.check('key', internal_feature_key),
                          self.check('description', default_description),
                          self.check('label', null_label),
                          self.check('state', default_state),
@@ -1587,6 +1906,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
 
         # Add feature where name contains Beta, null label
         contains_feature = 'ThisBetaVersion'
+        internal_feature_key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + contains_feature
 
         self.kwargs.update({
             'feature': contains_feature
@@ -1594,7 +1914,8 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
 
         self.cmd('appconfig feature set -n {config_store_name} --feature {feature} -y',
                  checks=[self.check('locked', default_locked),
-                         self.check('key', contains_feature),
+                         self.check('name', contains_feature),
+                         self.check('key', internal_feature_key),
                          self.check('description', default_description),
                          self.check('label', null_label),
                          self.check('state', default_state),
@@ -1624,7 +1945,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         })
 
         list_features = self.cmd('appconfig feature list -n {config_store_name} --feature {feature} --label "{label}"',
-                                 checks=[self.check('[0].key', prefix_feature),
+                                 checks=[self.check('[0].name', prefix_feature),
                                          self.check('[0].label', null_label)]).get_output_in_json()
         assert len(list_features) == 1
 
@@ -1634,7 +1955,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
             'feature': comma_pattern
         })
 
-        with self.assertRaisesRegexp(CLIError, "Comma separated feature names are not supported"):
+        with self.assertRaisesRegex(CLIError, "Comma separated feature names are not supported"):
             self.cmd('appconfig feature list -n {config_store_name} --feature {feature}')
 
         # Invalid Pattern - contains invalid *
@@ -1643,7 +1964,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
             'feature': invalid_pattern
         })
 
-        with self.assertRaisesRegexp(CLIError, "Bad Request"):
+        with self.assertRaisesRegex(CLIError, "Bad Request"):
             self.cmd('appconfig feature list -n {config_store_name} --feature {feature}')
 
         # Invalid Pattern - starts with *
@@ -1652,7 +1973,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
             'feature': invalid_pattern
         })
 
-        with self.assertRaisesRegexp(CLIError, "Bad Request"):
+        with self.assertRaisesRegex(CLIError, "Bad Request"):
             self.cmd('appconfig feature list -n {config_store_name} --feature {feature}')
 
         # Invalid Pattern - contains multiple **
@@ -1661,7 +1982,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
             'feature': invalid_pattern
         })
 
-        with self.assertRaisesRegexp(CLIError, "Bad Request"):
+        with self.assertRaisesRegex(CLIError, "Bad Request"):
             self.cmd('appconfig feature list -n {config_store_name} --feature {feature}')
 
         # Delete Beta (label v2) feature flag using connection-string
@@ -1673,7 +1994,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         # IN CLI, since we support delete by key/label pattern matching, return is a list of deleted items
         deleted = self.cmd('appconfig feature delete --connection-string {connection_string}  --feature {feature} --label {label} -y',
                            checks=[self.check('[0].locked', default_locked),
-                                   self.check('[0].key', entry_feature),
+                                   self.check('[0].name', entry_feature),
                                    self.check('[0].description', updated_entry_description),
                                    self.check('[0].label', updated_label),
                                    self.check('[0].state', default_state)]).get_output_in_json()
@@ -1687,7 +2008,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
 
         self.cmd('appconfig feature lock -n {config_store_name} --feature {feature} -y',
                  checks=[self.check('locked', updated_lock),
-                         self.check('key', contains_feature),
+                         self.check('name', contains_feature),
                          self.check('description', default_description),
                          self.check('label', null_label),
                          self.check('state', default_state)])
@@ -1695,7 +2016,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         # Unlock feature - ThisBetaVersion
         self.cmd('appconfig feature unlock -n {config_store_name} --feature {feature} -y',
                  checks=[self.check('locked', default_locked),
-                         self.check('key', contains_feature),
+                         self.check('name', contains_feature),
                          self.check('description', default_description),
                          self.check('label', null_label),
                          self.check('state', default_state)])
@@ -1704,7 +2025,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         on_state = 'on'
         self.cmd('appconfig feature enable -n {config_store_name} --feature {feature} -y',
                  checks=[self.check('locked', default_locked),
-                         self.check('key', contains_feature),
+                         self.check('name', contains_feature),
                          self.check('description', default_description),
                          self.check('label', null_label),
                          self.check('state', on_state)])
@@ -1712,7 +2033,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         # Disable feature - ThisBetaVersion
         self.cmd('appconfig feature disable -n {config_store_name} --feature {feature} -y',
                  checks=[self.check('locked', default_locked),
-                         self.check('key', contains_feature),
+                         self.check('name', contains_feature),
                          self.check('description', default_description),
                          self.check('label', null_label),
                          self.check('state', default_state)])
@@ -1725,6 +2046,95 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
 
         list_features = self.cmd('appconfig feature list -n {config_store_name} --feature {feature} --label {label}').get_output_in_json()
         assert len(list_features) == 4
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(parameter_name_for_location='location')
+    def test_azconfig_feature_namespacing(self, resource_group, location):
+        config_store_name = self.create_random_name(prefix='FeatureNamespaceTest', length=24)
+
+        location = 'eastus'
+        sku = 'standard'
+        self.kwargs.update({
+            'config_store_name': config_store_name,
+            'rg_loc': location,
+            'rg': resource_group,
+            'sku': sku
+        })
+        _create_config_store(self, self.kwargs)
+
+        feature_name = 'Beta'
+        feature_prefix = 'MyApp:'
+        feature_key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature_prefix + feature_name
+        entry_label = 'v1'
+        default_description = ""
+        default_conditions = "{{u\'client_filters\': []}}" if sys.version_info[0] < 3 else "{{\'client_filters\': []}}"
+        default_locked = False
+        default_state = "off"
+
+        self.kwargs.update({
+            'feature': feature_name,
+            'key': feature_key,
+            'description': default_description,
+            'label': entry_label
+        })
+
+        # add feature flag with a custom key
+        self.cmd('appconfig feature set -n {config_store_name} --feature {feature} --key {key}  --label {label} -y',
+                 checks=[self.check('locked', default_locked),
+                         self.check('name', feature_name),
+                         self.check('key', feature_key),
+                         self.check('description', default_description),
+                         self.check('label', entry_label),
+                         self.check('state', default_state),
+                         self.check('conditions', default_conditions)])
+
+        # Enable the same feature flag using --key
+        on_state = 'on'
+        self.cmd('appconfig feature enable -n {config_store_name} --key {key} --label {label} -y',
+                 checks=[self.check('locked', default_locked),
+                         self.check('name', feature_name),
+                         self.check('key', feature_key),
+                         self.check('description', default_description),
+                         self.check('label', entry_label),
+                         self.check('state', on_state)])
+
+        # Add new feature flag using --key only
+        feature_name_2 = "MyApp:GlobalFeature"
+        feature_key_2 = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature_name_2
+        self.kwargs.update({
+            'key': feature_key_2,
+        })
+        self.cmd('appconfig feature set -n {config_store_name} --key {key}  --label {label} -y',
+                 checks=[self.check('locked', default_locked),
+                         self.check('name', feature_name_2),
+                         self.check('key', feature_key_2),
+                         self.check('description', default_description),
+                         self.check('label', entry_label),
+                         self.check('state', default_state),
+                         self.check('conditions', default_conditions)])
+
+        # List features using --key filter
+        key_pattern = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature_prefix + "*"
+        any_label_pattern = "*"
+        self.kwargs.update({
+            'key': key_pattern,
+            'label': any_label_pattern
+        })
+        list_features = self.cmd('appconfig feature list -n {config_store_name} --key {key} --label {label}').get_output_in_json()
+        assert len(list_features) == 2
+
+        # Invalid key
+        invalid_key = "InvalidFeatureKey"
+        self.kwargs.update({
+            'key': invalid_key
+        })
+
+        with self.assertRaisesRegex(CLIError, "Feature flag key must start with the reserved prefix"):
+            self.cmd('appconfig feature set -n {config_store_name} --key {key}')
+
+        # Missing key and feature
+        with self.assertRaisesRegex(CLIError, "Please provide either `--key` or `--feature` value."):
+            self.cmd('appconfig feature delete -n {config_store_name}')
 
 
 class AppConfigFeatureFilterScenarioTest(ScenarioTest):
@@ -1745,8 +2155,9 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
         _create_config_store(self, self.kwargs)
 
         entry_feature = 'Color'
+        internal_feature_key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + entry_feature
         entry_label = 'Standard'
-        default_description = None
+        default_description = ""
         default_conditions = "{{u\'client_filters\': []}}" if sys.version_info[0] < 3 else "{{\'client_filters\': []}}"
         default_locked = False
         default_state = "off"
@@ -1760,7 +2171,8 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
         # add a brand new feature flag entry
         self.cmd('appconfig feature set -n {config_store_name} --feature {feature} --label {label} -y',
                  checks=[self.check('locked', default_locked),
-                         self.check('key', entry_feature),
+                         self.check('name', entry_feature),
+                         self.check('key', internal_feature_key),
                          self.check('description', default_description),
                          self.check('label', entry_label),
                          self.check('state', default_state),
@@ -1834,7 +2246,8 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
         # Show feature with all filters
         response_dict = self.cmd('appconfig feature show -n {config_store_name} --feature {feature} --label {label}',
                                  checks=[self.check('locked', default_locked),
-                                         self.check('key', entry_feature),
+                                         self.check('name', entry_feature),
+                                         self.check('key', internal_feature_key),
                                          self.check('description', default_description),
                                          self.check('label', entry_label),
                                          self.check('state', default_state)]).get_output_in_json()
@@ -1847,13 +2260,14 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
         conditional_state = 'conditional'
         self.cmd('appconfig feature enable -n {config_store_name} --feature {feature} --label {label} -y',
                  checks=[self.check('locked', default_locked),
-                         self.check('key', entry_feature),
+                         self.check('name', entry_feature),
+                         self.check('key', internal_feature_key),
                          self.check('description', default_description),
                          self.check('label', entry_label),
                          self.check('state', conditional_state)])
 
         # Delete Filter without index should throw error when duplicates exist
-        with self.assertRaisesRegexp(CLIError, "contains multiple instances of filter"):
+        with self.assertRaisesRegex(CLIError, "contains multiple instances of filter"):
             self.cmd('appconfig feature filter delete -n {config_store_name} --feature {feature} --label {label} --filter-name {filter_name} -y')
 
         # Delete Filter with index succeeds when correct index is provided
@@ -1880,7 +2294,7 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
             'filter_name': invalid_filter_name,
             'filter_parameters': invalid_filter_params
         })
-        with self.assertRaisesRegexp(CLIError, "Filter parameter value must be a JSON escaped string"):
+        with self.assertRaisesRegex(CLIError, "Filter parameter value must be a JSON escaped string"):
             self.cmd('appconfig feature filter add -n {config_store_name} --feature {feature} --label {label} --filter-name {filter_name} --filter-parameters {filter_parameters} -y')
 
         # Error on adding duplicate filter parameters
@@ -1888,7 +2302,7 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
         self.kwargs.update({
             'filter_parameters': invalid_filter_params
         })
-        with self.assertRaisesRegexp(CLIError, 'Filter parameter name "Name1" cannot be duplicated.'):
+        with self.assertRaisesRegex(CLIError, 'Filter parameter name "Name1" cannot be duplicated.'):
             self.cmd('appconfig feature filter add -n {config_store_name} --feature {feature} --label {label} --filter-name {filter_name} --filter-parameters {filter_parameters} -y')
 
         # Error on filter parameter with empty name
@@ -1896,7 +2310,7 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
         self.kwargs.update({
             'filter_parameters': invalid_filter_params
         })
-        with self.assertRaisesRegexp(CLIError, 'Parameter name cannot be empty.'):
+        with self.assertRaisesRegex(CLIError, 'Parameter name cannot be empty.'):
             self.cmd('appconfig feature filter add -n {config_store_name} --feature {feature} --label {label} --filter-name {filter_name} --filter-parameters {filter_parameters} -y')
 
         # Test more inputs for filter param value
@@ -1970,19 +2384,19 @@ class AppConfigKeyValidationScenarioTest(ScenarioTest):
             'key': "Col%%or",
             'value': "Red"
         })
-        with self.assertRaisesRegexp(CLIError, "Key is invalid. Key cannot be a '.' or '..', or contain the '%' character."):
+        with self.assertRaisesRegex(CLIError, "Key is invalid. Key cannot be a '.' or '..', or contain the '%' character."):
             self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --value {value} -y')
 
         self.kwargs.update({
             'key': ""
         })
-        with self.assertRaisesRegexp(CLIError, "Key cannot be empty."):
+        with self.assertRaisesRegex(CLIError, "Key cannot be empty."):
             self.cmd('appconfig kv set --connection-string {connection_string} --key "{key}" --value {value} -y')
 
         self.kwargs.update({
             'key': "."
         })
-        with self.assertRaisesRegexp(CLIError, "Key is invalid. Key cannot be a '.' or '..', or contain the '%' character."):
+        with self.assertRaisesRegex(CLIError, "Key is invalid. Key cannot be a '.' or '..', or contain the '%' character."):
             self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --value {value} -y')
 
         # validate key for KeyVault ref
@@ -1990,20 +2404,20 @@ class AppConfigKeyValidationScenarioTest(ScenarioTest):
             'key': "%KeyVault",
             'secret_identifier': "https://fake.vault.azure.net/secrets/fakesecret"
         })
-        with self.assertRaisesRegexp(CLIError, "Key is invalid. Key cannot be a '.' or '..', or contain the '%' character."):
+        with self.assertRaisesRegex(CLIError, "Key is invalid. Key cannot be a '.' or '..', or contain the '%' character."):
             self.cmd('appconfig kv set-keyvault --connection-string {connection_string} --key {key} --secret-identifier {secret_identifier} -y')
 
         # validate feature name
         self.kwargs.update({
-            'feature': 'Bet@'
+            'feature': 'Beta%'
         })
-        with self.assertRaisesRegexp(CLIError, "Feature name is invalid. Only alphanumeric characters, '.', '-' and '_' are allowed."):
+        with self.assertRaisesRegex(CLIError, "Feature name cannot contain the '%' character."):
             self.cmd('appconfig feature set --connection-string {connection_string} --feature {feature} -y')
 
         self.kwargs.update({
             'feature': ''
         })
-        with self.assertRaisesRegexp(CLIError, "Feature name cannot be empty."):
+        with self.assertRaisesRegex(CLIError, "Feature name cannot be empty."):
             self.cmd('appconfig feature set --connection-string {connection_string} --feature "{feature}" -y')
 
         # validate keys and features during file import
@@ -2065,7 +2479,8 @@ class AppConfigAadAuthLiveScenarioTest(ScenarioTest):
 
         # add a feature flag
         entry_feature = 'Beta'
-        default_description = None
+        internal_feature_key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + entry_feature
+        default_description = ""
         default_conditions = "{{u\'client_filters\': []}}" if sys.version_info[0] < 3 else "{{\'client_filters\': []}}"
         default_locked = False
         default_state = "off"
@@ -2075,7 +2490,8 @@ class AppConfigAadAuthLiveScenarioTest(ScenarioTest):
         })
         self.cmd('appconfig feature set --connection-string {connection_string} --feature {feature} -y',
                  checks=[self.check('locked', default_locked),
-                         self.check('key', entry_feature),
+                         self.check('name', entry_feature),
+                         self.check('key', internal_feature_key),
                          self.check('description', default_description),
                          self.check('state', default_state),
                          self.check('conditions', default_conditions)])
@@ -2107,7 +2523,8 @@ class AppConfigAadAuthLiveScenarioTest(ScenarioTest):
         # Since the logged in account also has "Contributor" role, providing --name instead of --endpoint should succeed
         self.cmd('appconfig feature show --name {config_store_name} --auth-mode login --feature {feature}',
                  checks=[self.check('locked', default_locked),
-                         self.check('key', entry_feature),
+                         self.check('name', entry_feature),
+                         self.check('key', internal_feature_key),
                          self.check('description', default_description),
                          self.check('state', default_state),
                          self.check('conditions', default_conditions)])

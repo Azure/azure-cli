@@ -9,7 +9,7 @@
 import json
 import unittest
 import jmespath
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.core.azclierror import (ResourceNotFoundError, ArgumentUsageError, InvalidArgumentValueError,
                                        MutuallyExclusiveArgumentError)
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, JMESPathCheck)
@@ -256,6 +256,67 @@ class WebAppAccessRestrictionScenarioTest(ScenarioTest):
         ])
 
         self.cmd('webapp config access-restriction remove -g {rg} -n {app_name} --rule-name developers', checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].name', 'Allow all'),
+            JMESPathCheck('[0].action', 'Allow')
+        ])
+
+    @AllowLargeResponse(8192)
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_webapp_access_restriction_mixed_remove(self, resource_group):
+        self.kwargs.update({
+            'app_name': self.create_random_name(prefix='cli-webapp-nwr', length=24),
+            'plan_name': self.create_random_name(prefix='cli-plan-nwr', length=24),
+            'vnet_name': self.create_random_name(prefix='cli-vnet-nwr', length=24),
+            'ip_address': '130.220.0.0/27',
+            'service_tag': 'AzureFrontDoor.Backend'
+        })
+
+        self.cmd('appservice plan create -g {rg} -n {plan_name}')
+        self.cmd('webapp create -g {rg} -n {app_name} --plan {plan_name}', checks=[
+            JMESPathCheck('state', 'Running')
+        ])
+
+        self.cmd('az network vnet create -g {rg} -n {vnet_name} --address-prefixes 10.0.0.0/16 --subnet-name endpoint-subnet --subnet-prefixes 10.0.0.0/24', checks=[
+            JMESPathCheck('subnets[0].serviceEndpoints', None)
+        ])
+
+        self.cmd('webapp config access-restriction add -g {rg} -n {app_name} --rule-name developers --action Allow --ip-address {ip_address} --priority 100', checks=[
+            JMESPathCheck('length(@)', 2),
+            JMESPathCheck('[0].name', 'developers'),
+            JMESPathCheck('[0].action', 'Allow'),
+            JMESPathCheck('[1].name', 'Deny all'),
+            JMESPathCheck('[1].action', 'Deny')
+        ])
+
+        self.cmd('webapp config access-restriction add -g {rg} -n {app_name} --rule-name vnet-integration --action Allow --vnet-name {vnet_name} --subnet endpoint-subnet --priority 150', checks=[
+            JMESPathCheck('length(@)', 3),
+            JMESPathCheck('[1].name', 'vnet-integration'),
+            JMESPathCheck('[1].action', 'Allow'),
+            JMESPathCheck('[2].name', 'Deny all'),
+            JMESPathCheck('[2].action', 'Deny')
+        ])
+
+        self.cmd('webapp config access-restriction add -g {rg} -n {app_name} --rule-name afd --action Allow --service-tag {service_tag} --priority 200 --http-header x-azure-fdid=12345678-abcd-1234-abcd-12345678910a', checks=[
+            JMESPathCheck('length(@)', 4),
+            JMESPathCheck('[2].name', 'afd'),
+            JMESPathCheck('[2].action', 'Allow'),
+            JMESPathCheck('[2].ipAddress', 'AzureFrontDoor.Backend'),
+            JMESPathCheck('[2].tag', 'ServiceTag'),
+            JMESPathCheck('length([2].headers)', 1),
+            JMESPathCheck('[3].name', 'Deny all'),
+            JMESPathCheck('[3].action', 'Deny')
+        ])
+
+        self.cmd('webapp config access-restriction remove -g {rg} -n {app_name} --vnet-name {vnet_name} --subnet endpoint-subnet', checks=[
+            JMESPathCheck('length(@)', 3)
+        ])
+
+        self.cmd('webapp config access-restriction remove -g {rg} -n {app_name} --ip-address {ip_address}', checks=[
+            JMESPathCheck('length(@)', 2)
+        ])
+
+        self.cmd('webapp config access-restriction remove -g {rg} -n {app_name} --service-tag {service_tag}', checks=[
             JMESPathCheck('length(@)', 1),
             JMESPathCheck('[0].name', 'Allow all'),
             JMESPathCheck('[0].action', 'Allow')

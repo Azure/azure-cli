@@ -53,7 +53,7 @@ def get_sql_database_sensitivity_labels_operations(cli_ctx, _):
 
 
 def get_sql_database_threat_detection_policies_operations(cli_ctx, _):
-    return get_sql_management_client(cli_ctx).database_threat_detection_policies
+    return get_sql_management_client(cli_ctx).database_security_alert_policies
 
 
 def get_sql_database_transparent_data_encryption_activities_operations(cli_ctx, _):
@@ -94,6 +94,10 @@ def get_sql_failover_groups_operations(cli_ctx, _):
 
 def get_sql_firewall_rules_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).firewall_rules
+
+
+def get_sql_outbound_firewall_rules_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).outbound_firewall_rules
 
 
 def get_sql_instance_pools_operations(cli_ctx, _):
@@ -176,6 +180,10 @@ def get_sql_managed_databases_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).managed_databases
 
 
+def get_sql_backup_short_term_retention_policies_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).backup_short_term_retention_policies
+
+
 def get_sql_managed_backup_short_term_retention_policies_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).managed_backup_short_term_retention_policies
 
@@ -201,7 +209,7 @@ def get_sql_managed_database_long_term_retention_backups_operations(cli_ctx, _):
 
 
 def get_sql_database_long_term_retention_policies_operations(cli_ctx, _):
-    return get_sql_management_client(cli_ctx).backup_long_term_retention_policies
+    return get_sql_management_client(cli_ctx).long_term_retention_policies
 
 
 def get_sql_database_long_term_retention_backups_operations(cli_ctx, _):
@@ -210,3 +218,7 @@ def get_sql_database_long_term_retention_backups_operations(cli_ctx, _):
 
 def get_sql_managed_database_restore_details_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).managed_database_restore_details
+
+
+def get_sql_database_ledger_digest_uploads_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).ledger_digest_uploads

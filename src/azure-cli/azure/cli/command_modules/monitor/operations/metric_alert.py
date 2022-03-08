@@ -123,7 +123,7 @@ def create_metric_alert_dimension(dimension_name, value_list, operator=None):
 def create_metric_alert_condition(condition_type, aggregation, metric_name, operator, metric_namespace='',
                                   dimension_list=None, threshold=None, alert_sensitivity=None,
                                   number_of_evaluation_periods=None, min_failing_periods_to_alert=None,
-                                  ignore_data_before=None):
+                                  ignore_data_before=None, skip_metric_validation=None):
     if metric_namespace:
         metric_namespace += '.'
     condition = "{} {}'{}' {} ".format(aggregation, metric_namespace, metric_name, operator)
@@ -145,6 +145,9 @@ def create_metric_alert_condition(condition_type, aggregation, metric_name, oper
             dimensions = 'where' + 'and'.join(dimensions)
         condition += dimensions
 
+    if skip_metric_validation:
+        condition += ' with skipmetricvalidation'
+
     return condition.strip()
 
 
@@ -163,7 +166,7 @@ def create_metric_rule(client, resource_group_name, rule_name, target, condition
         RuleEmailAction(send_to_service_owners=email_service_owners, custom_emails=custom_emails)
     ] + (webhooks or [])
     rule = AlertRuleResource(
-        location=location, alert_rule_resource_name=rule_name, is_enabled=not disabled,
+        location=location, name_properties_name=rule_name, is_enabled=not disabled,
         condition=condition, tags=tags, description=description, actions=actions)
     return client.create_or_update(resource_group_name, rule_name, rule)
 

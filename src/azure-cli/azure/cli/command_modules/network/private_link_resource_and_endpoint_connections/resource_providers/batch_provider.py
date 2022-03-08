@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
-from azure.mgmt.batch import BatchManagement
+from azure.mgmt.batch import BatchManagementClient
 from azure.mgmt.batch.models import PrivateLinkServiceConnectionState, PrivateLinkServiceConnectionStatus
 from azure.mgmt.batch.models import PrivateEndpointConnection
 from knack.log import get_logger
@@ -37,7 +37,7 @@ class BatchPrivateEndpointClient(GeneralPrivateEndpointClient):
 
         client = get_mgmt_service_client(
             cmd.cli_ctx,
-            BatchManagement).private_endpoint_connection
+            BatchManagementClient).private_endpoint_connection
         return client.begin_update(
             resource_group_name=resource_group_name,
             account_name=resource_name,

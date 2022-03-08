@@ -25,7 +25,7 @@ The commands to run to install the dependencies for some common distributions ar
   * [6.7](#redhat-rhel-67)
   * [7.2](#redhat-rhel-72)
 * [SUSE](#suse-opensuse-132)
-* [CoreOS](#coreos-stable-899150--beta-101010--alpha-101010)
+* [Flatcar](#flatcar)
 
 ### Ubuntu 12.04 LTS
 Python 2.7.3 should be already on the machine. Install Python 3.6+ if needed.
@@ -93,6 +93,6 @@ Python 2.7.8 should be already on the machine. Install Python 3.6+ if needed.
 sudo zypper refresh && sudo zypper --non-interactive install gcc libffi-devel python-devel openssl-devel
 ```
 
-### CoreOS Stable-899.15.0 / Beta-1010.1.0 / Alpha-1010.1.0
+### Flatcar
 
-Python is not installed by default.
+Python is installed in the Azure-specific distribution of Flatcar, but is installed into the non-standard location `/usr/share/oem/python/bin/python`.

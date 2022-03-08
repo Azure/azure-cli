@@ -74,21 +74,21 @@ def load_command_table(self, _):
     with self.command_group('sf application-type', application_type_mgmt,
                             custom_command_type=application_custom_type) as g:
         g.command('list', 'list')
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
         g.show_command('show', 'get')
         g.custom_command('create', 'create_app_type')
 
     with self.command_group('sf application-type version', application_type_version_mgmt,
                             custom_command_type=application_custom_type) as g:
         g.command('list', 'list')
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
         g.show_command('show', 'get')
         g.custom_command('create', 'create_app_type_version')
 
     with self.command_group('sf application', application_mgmt,
                             custom_command_type=application_custom_type) as g:
         g.command('list', 'list')
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
         g.show_command('show', 'get')
         g.custom_command('create', 'create_app')
         g.custom_command('update', 'update_app')
@@ -96,7 +96,7 @@ def load_command_table(self, _):
     with self.command_group('sf service', service_mgmt,
                             custom_command_type=application_custom_type) as g:
         g.command('list', 'list')
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
         g.show_command('show', 'get')
         g.custom_command('create', 'create_service')
 

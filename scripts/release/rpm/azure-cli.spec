@@ -43,18 +43,35 @@ A great cloud needs great tools; we're excited to introduce Azure CLI,
 # Create a fully instantiated virtual environment, ready to use the CLI.
 %{python_cmd} -m venv %{buildroot}%{cli_lib_dir}
 source %{buildroot}%{cli_lib_dir}/bin/activate
-%{python_cmd} -m pip install --upgrade pip==21.0.1
+%{python_cmd} -m pip install --upgrade pip
 source %{repo_path}/scripts/install_full.sh
+
+# cffi 1.15.0 doesn't work with RPM: https://foss.heptapod.net/pypy/cffi/-/issues/513
+%{python_cmd} -m pip install cffi==1.14.6
 
 deactivate
 
 # Fix up %{buildroot} appearing in some files...
 for d in %{buildroot}%{cli_lib_dir}/bin/*; do perl -p -i -e "s#%{buildroot}##g" $d; done;
 
-# Create executable
+# Create executable (entry script)
+
+# For PYTHONPATH:
+#   - We can't use %{_libdir} (expands to absolute path '/usr/lib64'), because we need to support customized
+#     installation location: https://github.com/Azure/azure-cli/pull/17491
+#   - We also can't use %{_lib}, because %{_lib} expands to different values on difference OSes：
+#     https://github.com/Azure/azure-cli/pull/20061
+#     - Fedora/CentOS/RedHat: relative path 'lib64'
+#     - Mariner: abolute path '/usr/lib'
+# The only solution left is to hard-code 'lib64' as we only release 64-bit RPM packages.
 mkdir -p %{buildroot}%{_bindir}
 python_version=$(ls %{buildroot}%{cli_lib_dir}/lib/ | head -n 1)
-printf "#!/usr/bin/env bash\nbin_dir=\`cd \"\$(dirname \"\$BASH_SOURCE[0]\")\"; pwd\`\nAZ_INSTALLER=RPM PYTHONPATH=\"\$bin_dir\"/../%{_lib}/az/lib/${python_version}/site-packages %{python_cmd} -sm azure.cli \"\$@\"" > %{buildroot}%{_bindir}/az
+printf "#!/usr/bin/env bash
+bin_dir=\`cd \"\$(dirname \"\$BASH_SOURCE[0]\")\"; pwd\`
+python_cmd=%{python_cmd}
+if command -v ${python_version} &>/dev/null; then python_cmd=${python_version}; fi
+AZ_INSTALLER=RPM PYTHONPATH=\"\$bin_dir/../lib64/az/lib/${python_version}/site-packages\" \$python_cmd -sm azure.cli \"\$@\"
+" > %{buildroot}%{_bindir}/az
 rm %{buildroot}%{cli_lib_dir}/bin/python* %{buildroot}%{cli_lib_dir}/bin/pip*
 
 # Remove unused Network SDK API versions

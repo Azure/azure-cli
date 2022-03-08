@@ -1,0 +1,484 @@
+interactions:
+- request:
+    body: '{"location": "eastus", "sku": {"name": "Gateway"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - databoxedge device create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '50'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -l --sku --name -g
+      User-Agent:
+      - AZURECLI/2.26.0 azsdk-python-azure-mgmt-databoxedge/1.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/cli-000004?api-version=2021-02-01-preview
+  response:
+    body:
+      string: "{\r\n  \"location\": \"eastus\",\r\n  \"tags\": {},\r\n  \"sku\": {\r\n
+        \   \"name\": \"Gateway\",\r\n    \"tier\": \"Standard\"\r\n  },\r\n  \"etag\":
+        \"W/\\\"datetime'2021-07-09T08%3A26%3A04.8443805Z'\\\"_W/\\\"datetime'2021-07-09T08%3A26%3A04.8503839Z'\\\"\",\r\n
+        \ \"kind\": \"AzureDataBoxGateway\",\r\n  \"properties\": {\r\n    \"dataBoxEdgeDeviceStatus\":
+        \"ReadyToSetup\",\r\n    \"deviceType\": \"DataBoxEdgeDevice\",\r\n    \"deviceLocalCapacity\":
+        0,\r\n    \"nodeCount\": 0,\r\n    \"resourceMoveDetails\": {\r\n      \"operationInProgress\":
+        \"None\"\r\n    },\r\n    \"edgeProfile\": {\r\n      \"subscription\": {\r\n
+        \       \"state\": \"Registered\"\r\n      }\r\n    }\r\n  },\r\n  \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/cli-000004\",\r\n
+        \ \"name\": \"cli-000004\",\r\n  \"type\": \"Microsoft.DataBoxEdge/dataBoxEdgeDevices\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '906'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 09 Jul 2021 08:26:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"tags": {"key-000002": "val-000003"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - databoxedge device update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '38'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --name -g --tags
+      User-Agent:
+      - AZURECLI/2.26.0 azsdk-python-azure-mgmt-databoxedge/1.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+    method: PATCH
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/cli-000004?api-version=2021-02-01-preview
+  response:
+    body:
+      string: "{\r\n  \"location\": \"eastus\",\r\n  \"tags\": {\r\n    \"key-000002\":
+        \"val-000003\"\r\n  },\r\n  \"sku\": {\r\n    \"name\": \"Gateway\",\r\n    \"tier\":
+        \"Standard\"\r\n  },\r\n  \"etag\": \"W/\\\"datetime'2021-07-09T08%3A26%3A07.7896289Z'\\\"_W/\\\"datetime'2021-07-09T08%3A26%3A07.7946324Z'\\\"\",\r\n
+        \ \"kind\": \"AzureDataBoxGateway\",\r\n  \"properties\": {\r\n    \"dataBoxEdgeDeviceStatus\":
+        \"ReadyToSetup\",\r\n    \"deviceType\": \"DataBoxEdgeDevice\",\r\n    \"deviceLocalCapacity\":
+        0,\r\n    \"nodeCount\": 0,\r\n    \"resourceMoveDetails\": {\r\n      \"operationInProgress\":
+        \"None\"\r\n    },\r\n    \"edgeProfile\": {\r\n      \"subscription\": {\r\n
+        \       \"registrationId\": \"af6b8fde-0002-4013-7071-2c13295b3d5f\",\r\n
+        \       \"state\": \"Registered\",\r\n        \"subscriptionId\": \"b30fa0ef-69e5-436f-6006-6b3f86110300\"\r\n
+        \     }\r\n    }\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/cli-000004\",\r\n
+        \ \"name\": \"cli-000004\",\r\n  \"type\": \"Microsoft.DataBoxEdge/dataBoxEdgeDevices\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1076'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 09 Jul 2021 08:26:09 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - databoxedge device list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g
+      User-Agent:
+      - AZURECLI/2.26.0 azsdk-python-azure-mgmt-databoxedge/1.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices?api-version=2021-02-01-preview
+  response:
+    body:
+      string: "{\r\n  \"value\": [\r\n    {\r\n      \"location\": \"eastus\",\r\n
+        \     \"tags\": {\r\n        \"key-000002\": \"val-000003\"\r\n      },\r\n
+        \     \"sku\": {\r\n        \"name\": \"Gateway\",\r\n        \"tier\": \"Standard\"\r\n
+        \     },\r\n      \"etag\": \"W/\\\"datetime'2021-07-09T08%3A26%3A07.7896289Z'\\\"_W/\\\"datetime'2021-07-09T08%3A26%3A07.7946324Z'\\\"\",\r\n
+        \     \"kind\": \"AzureDataBoxGateway\",\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/cli-000004\",\r\n
+        \     \"name\": \"cli-000004\",\r\n      \"type\": \"Microsoft.DataBoxEdge/dataBoxEdgeDevices\"\r\n
+        \   }\r\n  ]\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '693'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 09 Jul 2021 08:26:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - databoxedge device show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.26.0 azsdk-python-azure-mgmt-databoxedge/1.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/cli-000004?api-version=2021-02-01-preview
+  response:
+    body:
+      string: "{\r\n  \"location\": \"eastus\",\r\n  \"tags\": {\r\n    \"key-000002\":
+        \"val-000003\"\r\n  },\r\n  \"sku\": {\r\n    \"name\": \"Gateway\",\r\n    \"tier\":
+        \"Standard\"\r\n  },\r\n  \"etag\": \"W/\\\"datetime'2021-07-09T08%3A26%3A07.7896289Z'\\\"_W/\\\"datetime'2021-07-09T08%3A26%3A07.7946324Z'\\\"\",\r\n
+        \ \"kind\": \"AzureDataBoxGateway\",\r\n  \"properties\": {\r\n    \"dataBoxEdgeDeviceStatus\":
+        \"ReadyToSetup\",\r\n    \"deviceType\": \"DataBoxEdgeDevice\",\r\n    \"deviceLocalCapacity\":
+        0,\r\n    \"nodeCount\": 0,\r\n    \"edgeProfile\": {\r\n      \"subscription\":
+        {\r\n        \"registrationId\": \"af6b8fde-0002-4013-7071-2c13295b3d5f\",\r\n
+        \       \"state\": \"Registered\",\r\n        \"subscriptionId\": \"b30fa0ef-69e5-436f-6006-6b3f86110300\"\r\n
+        \     }\r\n    }\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/cli-000004\",\r\n
+        \ \"name\": \"cli-000004\",\r\n  \"type\": \"Microsoft.DataBoxEdge/dataBoxEdgeDevices\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1001'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 09 Jul 2021 08:26:12 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - databoxedge device show-update-summary
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.26.0 azsdk-python-azure-mgmt-databoxedge/1.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/cli-000004/updateSummary/default?api-version=2021-02-01-preview
+  response:
+    body:
+      string: "{\r\n  \"properties\": {\r\n    \"lastDownloadJobStatus\": \"Invalid\",\r\n
+        \   \"lastInstallJobStatus\": \"Invalid\",\r\n    \"totalNumberOfUpdatesAvailable\":
+        0,\r\n    \"totalNumberOfUpdatesPendingDownload\": 0,\r\n    \"totalNumberOfUpdatesPendingInstall\":
+        0,\r\n    \"rebootRequiredForInstall\": false,\r\n    \"rebootBehavior\":
+        \"NeverReboots\",\r\n    \"ongoingUpdateOperation\": \"None\",\r\n    \"totalUpdateSizeInBytes\":
+        0.0,\r\n    \"totalTimeInMinutes\": 0\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/cli-000004/updateSummary/default\",\r\n
+        \ \"name\": \"default\",\r\n  \"type\": \"Microsoft.DataBoxEdge/dataBoxEdgeDevices/updateSummary\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '766'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 09 Jul 2021 08:26:12 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - databoxedge alert list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -d -g
+      User-Agent:
+      - AZURECLI/2.26.0 azsdk-python-azure-mgmt-databoxedge/1.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/cli-000004/alerts?api-version=2021-02-01-preview
+  response:
+    body:
+      string: "{\r\n  \"value\": []\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '19'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 09 Jul 2021 08:26:13 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - databoxedge list-node
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -d
+      User-Agent:
+      - AZURECLI/2.26.0 azsdk-python-azure-mgmt-databoxedge/1.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/cli-000004/nodes?api-version=2021-02-01-preview
+  response:
+    body:
+      string: "{\r\n  \"value\": []\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '19'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 09 Jul 2021 08:26:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - databoxedge device delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n -g -y
+      User-Agent:
+      - AZURECLI/2.26.0 azsdk-python-azure-mgmt-databoxedge/1.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/cli-000004?api-version=2021-02-01-preview
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 09 Jul 2021 08:26:17 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/cli-000004/operationResults/17e96d05-91c2-4047-8287-0745a42082be?api-version=2021-02-01-preview
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - databoxedge device delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -y
+      User-Agent:
+      - AZURECLI/2.26.0 azsdk-python-azure-mgmt-databoxedge/1.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/cli-000004/operationResults/17e96d05-91c2-4047-8287-0745a42082be?api-version=2021-02-01-preview
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      date:
+      - Fri, 09 Jul 2021 08:26:48 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 204
+      message: No Content
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - databoxedge device list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g
+      User-Agent:
+      - AZURECLI/2.26.0 azsdk-python-azure-mgmt-databoxedge/1.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices?api-version=2021-02-01-preview
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 09 Jul 2021 08:27:19 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+version: 1

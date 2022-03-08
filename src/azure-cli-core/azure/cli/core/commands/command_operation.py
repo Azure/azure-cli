@@ -381,12 +381,13 @@ class WaitCommandOperation(BaseCommandOperation):
         super(WaitCommandOperation, self).__init__(command_loader, **merged_kwargs)
         self.op_path = op_path
 
-    def handler(self, command_args):    # pylint: disable=too-many-statements
+    def handler(self, command_args):    # pylint: disable=too-many-statements, too-many-locals
         """ Callback function of CLICommand handler """
         from msrest.exceptions import ClientException
         from azure.core.exceptions import HttpResponseError
         from knack.util import CLIError
         from azure.cli.core.commands.arm import EXCLUDED_NON_CLIENT_PARAMS, verify_property
+        from azure.cli.core.commands.progress import IndeterminateProgressBar
 
         import time
 
@@ -416,11 +417,11 @@ class WaitCommandOperation(BaseCommandOperation):
             raise CLIError(
                 "incorrect usage: --created | --updated | --deleted | --exists | --custom JMESPATH")
 
-        progress_indicator = self.cli_ctx.get_progress_controller()
+        progress_indicator = IndeterminateProgressBar(self.cli_ctx, message='Waiting')
         progress_indicator.begin()
         for _ in range(0, timeout, interval):
             try:
-                progress_indicator.add(message='Waiting')
+                progress_indicator.update_progress()
                 instance = getter(**command_args)
                 if wait_for_exists:
                     progress_indicator.end()

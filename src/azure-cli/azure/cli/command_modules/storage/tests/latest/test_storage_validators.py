@@ -4,9 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 import unittest
-import mock
+from unittest import mock
 from argparse import (Namespace, ArgumentError)
-from six import StringIO
+from io import StringIO
 
 from knack import CLI
 
@@ -176,11 +176,11 @@ class TestCmdModuleStorageValidators(unittest.TestCase):
                          'arg': CLICommandArgument(dest='arg', argtype=arg_type)}
 
         validate_container_name = get_not_none_validator('container_name')
-        with self.assertRaisesRegexp(InvalidArgumentValueError, 'Argument --container-name/-c should be specified'):
+        with self.assertRaisesRegex(InvalidArgumentValueError, 'Argument --container-name/-c should be specified'):
             validate_container_name(cmd, Namespace(container_name=''))
 
         validate_arg = get_not_none_validator('arg')
-        with self.assertRaisesRegexp(InvalidArgumentValueError, 'Argument --arg should be specified'):
+        with self.assertRaisesRegex(InvalidArgumentValueError, 'Argument --arg should be specified'):
             validate_arg(cmd, Namespace(arg=None))
 
         validate_arg(cmd, Namespace(arg=0))

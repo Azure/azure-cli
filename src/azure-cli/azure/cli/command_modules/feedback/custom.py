@@ -370,6 +370,13 @@ def _build_issue_info_tup(command_log_file=None):
     format_dict["cli_version"] = _get_az_version_summary()
     format_dict["python_info"] = "Python {}".format(platform.python_version())
     platform_info = "{} (Cloud Shell)".format(platform.platform()) if in_cloud_console() else platform.platform()
+
+    try:
+        import distro
+        platform_info = '{}, {}'.format(platform_info, distro.name(pretty=True))
+    except ImportError:
+        pass
+
     format_dict["platform"] = platform_info
     format_dict["auto_gen_comment"] = _AUTO_GEN_COMMENT
     from azure.cli.core._environment import _ENV_AZ_INSTALLER
@@ -433,34 +440,30 @@ def _get_az_version_summary():
     """
     az_vers_string = get_az_version_string()[0]
 
+    # Remove consecutive spaces
+    import re
+    az_vers_string = re.sub(' +', ' ', az_vers_string)
+
+    # Add each line until 'python location'
     lines = az_vers_string.splitlines()
 
-    new_lines = []
-    ext_line = -1
-    legal_line = -1
+    # First line is azure-cli
+    new_lines = [lines[0], '']
+
+    # Only add lines between 'Extensions:' and 'Python location'
+    extension_line = -1
+    python_line = -1
     for i, line in enumerate(lines):
-        if line.startswith("azure-cli"):
-            line = " ".join(line.split())
-            new_lines.append(line)
-        if line.lower().startswith("extensions:"):
-            ext_line = i
-            continue
-        l_lower = line.lower()
-        if all(["legal" in l_lower, "docs" in l_lower, "info" in l_lower]):
-            legal_line = i
+        if 'extensions:' in line.lower():
+            extension_line = i
+        if 'python location' in line.lower():
+            python_line = i
             break
 
-    new_lines.append("")
+    new_lines.extend(lines[extension_line:python_line])
 
-    if 0 < ext_line < legal_line:
-        for i in range(ext_line, legal_line):
-            l_lower = lines[i].lower()
-            if "python location" in l_lower or "extensions directory" in l_lower:
-                break
-
-            line = " ".join(lines[i].split())
-            new_lines.append(line)
-
+    # Remove last line which is empty
+    new_lines.pop()
     return "\n".join(new_lines)
 
 

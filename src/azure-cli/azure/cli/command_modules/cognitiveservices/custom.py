@@ -9,27 +9,43 @@ from knack.prompting import prompt_y_n
 from knack.util import CLIError
 from knack.log import get_logger
 
-from azure.mgmt.cognitiveservices.models import CognitiveServicesAccount, Sku,\
+from azure.mgmt.cognitiveservices.models import Account as CognitiveServicesAccount, Sku,\
     VirtualNetworkRule, IpRule, NetworkRuleSet, NetworkRuleAction,\
-    CognitiveServicesAccountProperties, CognitiveServicesAccountApiProperties,\
-    Identity, IdentityType
+    AccountProperties as CognitiveServicesAccountProperties, ApiProperties as CognitiveServicesAccountApiProperties,\
+    Identity, ResourceIdentityType as IdentityType,\
+    Deployment, DeploymentModel, DeploymentScaleSettings, DeploymentProperties,\
+    CommitmentPlan, CommitmentPlanProperties, CommitmentPeriod
 from azure.cli.command_modules.cognitiveservices._client_factory import cf_accounts, cf_resource_skus
-
 
 logger = get_logger(__name__)
 
 
 def list_resources(client, resource_group_name=None):
+    """
+    List all Azure Cognitive Services accounts.
+    """
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name)
     return client.list()
+
+
+def recover(client, location, resource_group_name, account_name):
+    """
+    Recover a deleted Azure Cognitive Services account.
+    """
+    properties = CognitiveServicesAccountProperties()
+    properties.restore = True
+    params = CognitiveServicesAccount(properties=properties)
+    params.location = location
+
+    return client.begin_create(resource_group_name, account_name, params)
 
 
 def list_usages(client, resource_group_name, account_name):
     """
     List usages for Azure Cognitive Services account.
     """
-    return client.get_usages(resource_group_name, account_name).value
+    return client.list_usages(resource_group_name, account_name).value
 
 
 def list_kinds(client):
@@ -46,6 +62,9 @@ def list_kinds(client):
 
 
 def list_skus(cmd, kind=None, location=None, resource_group_name=None, account_name=None):
+    """
+    List skus for Azure Cognitive Services account.
+    """
     if resource_group_name is not None or account_name is not None:
         logger.warning(
             'list-skus with an existing account has been deprecated and will be removed in a future release.')
@@ -71,6 +90,9 @@ def list_skus(cmd, kind=None, location=None, resource_group_name=None, account_n
 def create(
         client, resource_group_name, account_name, sku_name, kind, location, custom_domain=None,
         tags=None, api_properties=None, assign_identity=False, storage=None, encryption=None, yes=None):
+    """
+    Create an Azure Cognitive Services account.
+    """
 
     terms = 'Notice\nMicrosoft will use data you send to Bing Search Services'\
         ' to improve Microsoft products and services.'\
@@ -126,14 +148,16 @@ def create(
     if encryption is not None:
         params.properties.encryption = json.loads(encryption)
 
-    return client.create(resource_group_name, account_name, params)
+    return client.begin_create(resource_group_name, account_name, params)
 
 
 def update(client, resource_group_name, account_name, sku_name=None, custom_domain=None,
            tags=None, api_properties=None, storage=None, encryption=None):
-
+    """
+    Update an Azure Cognitive Services account.
+    """
     if sku_name is None:
-        sa = client.get_properties(resource_group_name, account_name)
+        sa = client.get(resource_group_name, account_name)
         sku_name = sa.sku.name
 
     sku = Sku(name=sku_name)
@@ -152,7 +176,7 @@ def update(client, resource_group_name, account_name, sku_name=None, custom_doma
     if encryption is not None:
         params.properties.encryption = json.loads(encryption)
 
-    return client.update(resource_group_name, account_name, params)
+    return client.begin_update(resource_group_name, account_name, params)
 
 
 def default_network_acls():
@@ -164,7 +188,10 @@ def default_network_acls():
 
 
 def list_network_rules(client, resource_group_name, account_name):
-    sa = client.get_properties(resource_group_name, account_name)
+    """
+    List network rules for Azure Cognitive Services account.
+    """
+    sa = client.get(resource_group_name, account_name)
     rules = sa.properties.network_acls
     if rules is None:
         rules = default_network_acls()
@@ -173,7 +200,10 @@ def list_network_rules(client, resource_group_name, account_name):
 
 def add_network_rule(client, resource_group_name, account_name, subnet=None,
                      vnet_name=None, ip_address=None):  # pylint: disable=unused-argument
-    sa = client.get_properties(resource_group_name, account_name)
+    """
+    Add a network rule for Azure Cognitive Services account.
+    """
+    sa = client.get(resource_group_name, account_name)
     rules = sa.properties.network_acls
     if rules is None:
         rules = default_network_acls()
@@ -195,12 +225,15 @@ def add_network_rule(client, resource_group_name, account_name, subnet=None,
     properties.network_acls = rules
     params = CognitiveServicesAccount(properties=properties)
 
-    return client.update(resource_group_name, account_name, params)
+    return client.begin_update(resource_group_name, account_name, params)
 
 
 def remove_network_rule(client, resource_group_name, account_name, ip_address=None, subnet=None,
                         vnet_name=None):  # pylint: disable=unused-argument
-    sa = client.get_properties(resource_group_name, account_name)
+    """
+    Remove a network rule for Azure Cognitive Services account.
+    """
+    sa = client.get(resource_group_name, account_name)
     rules = sa.properties.network_acls
     if rules is None:
         # nothing to update, but return the object
@@ -216,22 +249,75 @@ def remove_network_rule(client, resource_group_name, account_name, ip_address=No
     properties.network_acls = rules
     params = CognitiveServicesAccount(properties=properties)
 
-    return client.update(resource_group_name, account_name, params)
+    return client.begin_update(resource_group_name, account_name, params)
 
 
 def identity_assign(client, resource_group_name, account_name):
+    """
+    Assign the identity for Azure Cognitive Services account.
+    """
     params = CognitiveServicesAccount()
     params.identity = Identity(type=IdentityType.system_assigned)
-    sa = client.update(resource_group_name, account_name, params)
+    sa = client.begin_update(resource_group_name, account_name, params).result()
     return sa.identity if sa.identity else {}
 
 
 def identity_remove(client, resource_group_name, account_name):
+    """
+    Remove the identity for Azure Cognitive Services account.
+    """
     params = CognitiveServicesAccount()
     params.identity = Identity(type=IdentityType.none)
-    client.update(resource_group_name, account_name, params)
+    client.begin_update(resource_group_name, account_name, params)
 
 
 def identity_show(client, resource_group_name, account_name):
-    sa = client.get_properties(resource_group_name, account_name)
+    """
+    Show the identity for Azure Cognitive Services account.
+    """
+    sa = client.get(resource_group_name, account_name)
     return sa.identity if sa.identity else {}
+
+
+def deployment_begin_create_or_update(
+        client, resource_group_name, account_name, deployment_name,
+        model_format, model_name, model_version,
+        scale_settings_scale_type, scale_settings_capacity):
+    """
+    Create a deployment for Azure Cognitive Services account.
+    """
+    dpy = Deployment()
+    dpy.properties = DeploymentProperties()
+    dpy.properties.model = DeploymentModel()
+    dpy.properties.model.format = model_format
+    dpy.properties.model.name = model_name
+    dpy.properties.model.version = model_version
+    dpy.properties.scale_settings = DeploymentScaleSettings()
+    dpy.properties.scale_settings.scale_type = scale_settings_scale_type
+    dpy.properties.scale_settings.capacity = scale_settings_capacity
+
+    return client.begin_create_or_update(resource_group_name, account_name, deployment_name, dpy, polling=False)
+
+
+def commitment_plan_create_or_update(
+        client, resource_group_name, account_name, commitment_plan_name,
+        hosting_model, plan_type, auto_renew,
+        current_tier=None, current_count=None,
+        next_tier=None, next_count=None):
+    """
+    Create a commitment plan for Azure Cognitive Services account.
+    """
+    plan = CommitmentPlan()
+    plan.properties = CommitmentPlanProperties()
+    plan.properties.hosting_model = hosting_model
+    plan.properties.plan_type = plan_type
+    if (current_tier is not None or current_count is not None):
+        plan.properties.current = CommitmentPeriod()
+        plan.properties.current.tier = current_tier
+        plan.properties.current.count = current_count
+    if (next_tier is not None or next_count is not None):
+        plan.properties.next = CommitmentPeriod()
+        plan.properties.next.tier = next_tier
+        plan.properties.next.count = next_count
+    plan.properties.auto_renew = auto_renew
+    return client.create_or_update(resource_group_name, account_name, commitment_plan_name, plan)

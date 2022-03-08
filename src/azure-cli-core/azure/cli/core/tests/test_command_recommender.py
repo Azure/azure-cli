@@ -45,7 +45,7 @@ class TestCommandRecommender(unittest.TestCase):
             self.assertEqual(result_error_type, expected_error_type.value)
 
     def test_get_parameter_mappings(self):
-        import mock
+        from unittest import mock
         from azure.cli.core import AzCommandsLoader
         from azure.cli.core.mock import DummyCli
         from azure.cli.core.command_recommender import get_parameter_mappings

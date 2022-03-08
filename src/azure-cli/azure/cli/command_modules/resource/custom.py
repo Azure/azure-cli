@@ -17,8 +17,8 @@ import sys
 import uuid
 import base64
 
-from six.moves.urllib.request import urlopen  # pylint: disable=import-error
-from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
+from urllib.request import urlopen
+from urllib.parse import urlparse
 
 from msrestazure.tools import is_valid_resource_id, parse_resource_id
 
@@ -28,6 +28,7 @@ from azure.cli.core.azclierror import ArgumentUsageError, InvalidArgumentValueEr
 from azure.cli.core.parser import IncorrectUsageError
 from azure.cli.core.util import get_file_json, read_file_content, shell_safe_json_parse, sdk_no_wait
 from azure.cli.core.commands import LongRunningOperation
+from azure.cli.core.commands.arm import raise_subdivision_deployment_error
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
 from azure.cli.core.profiles import ResourceType, get_sdk, get_api_version, AZURE_API_PROFILES
 
@@ -50,10 +51,14 @@ from ._bicep import (
     run_bicep_command,
     is_bicep_file,
     ensure_bicep_installation,
+    remove_bicep_installation,
     get_bicep_latest_release_tag,
     get_bicep_available_release_tags,
-    validate_bicep_target_scope
+    validate_bicep_target_scope,
+    supports_bicep_publish
 )
+
+from ._utils import _build_preflight_error_message, _build_http_response_error_message
 
 logger = get_logger(__name__)
 
@@ -284,12 +289,15 @@ def _urlretrieve(url):
 
 # pylint: disable=redefined-outer-name
 def _remove_comments_from_json(template, preserve_order=True, file_path=None):
-    from jsmin import jsmin
+    from ._json_handler import json_min
 
     # When commenting at the bottom of all elements in a JSON object, jsmin has a bug that will wrap lines.
-    # It will affect the subsequent multi-line processing logic, so deal with this situation in advance here.
+    # It will affect the subsequent multi-line processing logic, so remove those comments in advance here.
+    # Related issue: https://github.com/Azure/azure-cli/issues/11995, the sample is in the additional context of it.
     template = re.sub(r'(^[\t ]*//[\s\S]*?\n)|(^[\t ]*/\*{1,2}[\s\S]*?\*/)', '', template, flags=re.M)
-    minified = jsmin(template)
+
+    # In order to solve the package conflict introduced by jsmin, the jsmin code is referenced into json_min
+    minified = json_min(template)
     try:
         return shell_safe_json_parse(minified, preserve_order, strict=False)  # use strict=False to allow multiline strings
     except CLIError:
@@ -298,15 +306,6 @@ def _remove_comments_from_json(template, preserve_order=True, file_path=None):
         if file_path:
             raise CLIError("Failed to parse '{}', please check whether it is a valid JSON format".format(file_path))
         raise CLIError("Failed to parse the JSON data, please check whether it is a valid JSON format")
-
-
-def _raise_subdivision_deployment_error(error_message, error_code=None):
-    from azure.cli.core.azclierror import InvalidTemplateError, DeploymentError
-
-    if error_code == 'InvalidTemplateDeployment':
-        raise InvalidTemplateError(error_message)
-
-    raise DeploymentError(error_message)
 
 
 # pylint: disable=too-many-locals, too-many-statements, too-few-public-methods
@@ -372,15 +371,16 @@ def _deploy_arm_template_core_unmodified(cmd, resource_group_name, template_file
     if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
         try:
             validation_poller = deployment_client.begin_validate(resource_group_name, deployment_name, deployment)
-        except HttpResponseError as cx:
-            _raise_subdivision_deployment_error(cx.response.internal_response.text, cx.error.code if cx.error else None)
+        except HttpResponseError as err:
+            err_message = _build_http_response_error_message(err)
+            raise_subdivision_deployment_error(err_message, err.error.code if err.error else None)
         validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
     else:
         validation_result = deployment_client.validate(resource_group_name, deployment_name, deployment)
 
     if validation_result and validation_result.error:
         err_message = _build_preflight_error_message(validation_result.error)
-        _raise_subdivision_deployment_error(err_message)
+        raise_subdivision_deployment_error(err_message)
     if validate_only:
         return validation_result
 
@@ -410,8 +410,15 @@ class JsonCTemplatePolicy(SansIOHTTPPolicy):
 
     def on_request(self, request):
         http_request = request.http_request
-        logger.info(http_request.data)
-        if (getattr(http_request, 'data', {}) or {}).get('properties', {}).get('template'):
+        request_data = getattr(http_request, 'data', {}) or {}
+
+        # In the case of retry, because the first request has been processed and
+        # converted the type of "request.http_request.data" from string to bytes,
+        # so there is no need to process request object again during retry
+        if isinstance(request_data, bytes):
+            return
+
+        if request_data.get('properties', {}).get('template'):
             template = http_request.data["properties"]["template"]
             if not isinstance(template, JsonCTemplate):
                 raise ValueError()
@@ -432,19 +439,28 @@ def deploy_arm_template_at_subscription_scope(cmd,
                                               deployment_name=None, deployment_location=None,
                                               no_wait=False, handle_extended_json_format=None, no_prompt=False,
                                               confirm_with_what_if=None, what_if_result_format=None,
-                                              what_if_exclude_change_types=None, template_spec=None, query_string=None):
-    if confirm_with_what_if:
-        what_if_deploy_arm_template_at_subscription_scope(cmd,
-                                                          template_file=template_file, template_uri=template_uri,
-                                                          parameters=parameters, deployment_name=deployment_name,
-                                                          deployment_location=deployment_location,
-                                                          result_format=what_if_result_format,
-                                                          exclude_change_types=what_if_exclude_change_types,
-                                                          no_prompt=no_prompt, template_spec=template_spec, query_string=query_string)
-        from knack.prompting import prompt_y_n
-
-        if not prompt_y_n("\nAre you sure you want to execute the deployment?"):
+                                              what_if_exclude_change_types=None, template_spec=None, query_string=None,
+                                              what_if=None, proceed_if_no_change=None):
+    if confirm_with_what_if or what_if:
+        what_if_result = _what_if_deploy_arm_template_at_subscription_scope_core(cmd,
+                                                                                 template_file=template_file, template_uri=template_uri,
+                                                                                 parameters=parameters, deployment_name=deployment_name,
+                                                                                 deployment_location=deployment_location,
+                                                                                 result_format=what_if_result_format,
+                                                                                 exclude_change_types=what_if_exclude_change_types,
+                                                                                 no_prompt=no_prompt, template_spec=template_spec, query_string=query_string,
+                                                                                 return_result=True)
+        if what_if:
             return None
+
+        ChangeType = cmd.get_models('ChangeType')
+        has_change = any(change.change_type not in [ChangeType.no_change, ChangeType.ignore] for change in what_if_result.changes)
+
+        if not proceed_if_no_change or has_change:
+            from knack.prompting import prompt_y_n
+
+            if not prompt_y_n("\nAre you sure you want to execute the deployment?"):
+                return None
 
     return _deploy_arm_template_at_subscription_scope(cmd=cmd,
                                                       template_file=template_file, template_uri=template_uri, parameters=parameters,
@@ -484,15 +500,16 @@ def _deploy_arm_template_at_subscription_scope(cmd,
     if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
         try:
             validation_poller = mgmt_client.begin_validate_at_subscription_scope(deployment_name, deployment)
-        except HttpResponseError as cx:
-            _raise_subdivision_deployment_error(cx.response.internal_response.text, cx.error.code if cx.error else None)
+        except HttpResponseError as err:
+            err_message = _build_http_response_error_message(err)
+            raise_subdivision_deployment_error(err_message, err.error.code if err.error else None)
         validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
     else:
         validation_result = mgmt_client.validate_at_subscription_scope(deployment_name, deployment)
 
     if validation_result and validation_result.error:
         err_message = _build_preflight_error_message(validation_result.error)
-        _raise_subdivision_deployment_error(err_message)
+        raise_subdivision_deployment_error(err_message)
     if validate_only:
         return validation_result
 
@@ -507,19 +524,28 @@ def deploy_arm_template_at_resource_group(cmd,
                                           no_wait=False, handle_extended_json_format=None,
                                           aux_subscriptions=None, aux_tenants=None, no_prompt=False,
                                           confirm_with_what_if=None, what_if_result_format=None,
-                                          what_if_exclude_change_types=None, template_spec=None, query_string=None):
-    if confirm_with_what_if:
-        what_if_deploy_arm_template_at_resource_group(cmd,
-                                                      resource_group_name=resource_group_name,
-                                                      template_file=template_file, template_uri=template_uri,
-                                                      parameters=parameters, deployment_name=deployment_name, mode=mode,
-                                                      aux_tenants=aux_tenants, result_format=what_if_result_format,
-                                                      exclude_change_types=what_if_exclude_change_types,
-                                                      no_prompt=no_prompt, template_spec=template_spec, query_string=query_string)
-        from knack.prompting import prompt_y_n
-
-        if not prompt_y_n("\nAre you sure you want to execute the deployment?"):
+                                          what_if_exclude_change_types=None, template_spec=None, query_string=None,
+                                          what_if=None, proceed_if_no_change=None):
+    if confirm_with_what_if or what_if:
+        what_if_result = _what_if_deploy_arm_template_at_resource_group_core(cmd,
+                                                                             resource_group_name=resource_group_name,
+                                                                             template_file=template_file, template_uri=template_uri,
+                                                                             parameters=parameters, deployment_name=deployment_name, mode=mode,
+                                                                             aux_tenants=aux_tenants, result_format=what_if_result_format,
+                                                                             exclude_change_types=what_if_exclude_change_types,
+                                                                             no_prompt=no_prompt, template_spec=template_spec, query_string=query_string,
+                                                                             return_result=True)
+        if what_if:
             return None
+
+        ChangeType = cmd.get_models('ChangeType')
+        has_change = any(change.change_type not in [ChangeType.no_change, ChangeType.ignore] for change in what_if_result.changes)
+
+        if not proceed_if_no_change or has_change:
+            from knack.prompting import prompt_y_n
+
+            if not prompt_y_n("\nAre you sure you want to execute the deployment?"):
+                return None
 
     return _deploy_arm_template_at_resource_group(cmd=cmd,
                                                   resource_group_name=resource_group_name,
@@ -565,15 +591,16 @@ def _deploy_arm_template_at_resource_group(cmd,
     if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
         try:
             validation_poller = mgmt_client.begin_validate(resource_group_name, deployment_name, deployment)
-        except HttpResponseError as cx:
-            _raise_subdivision_deployment_error(cx.response.internal_response.text, cx.error.code if cx.error else None)
+        except HttpResponseError as err:
+            err_message = _build_http_response_error_message(err)
+            raise_subdivision_deployment_error(err_message, err.error.code if err.error else None)
         validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
     else:
         validation_result = mgmt_client.validate(resource_group_name, deployment_name, deployment)
 
     if validation_result and validation_result.error:
         err_message = _build_preflight_error_message(validation_result.error)
-        _raise_subdivision_deployment_error(err_message)
+        raise_subdivision_deployment_error(err_message)
     if validate_only:
         return validation_result
 
@@ -587,20 +614,29 @@ def deploy_arm_template_at_management_group(cmd,
                                             deployment_name=None, deployment_location=None,
                                             no_wait=False, handle_extended_json_format=None, no_prompt=False,
                                             confirm_with_what_if=None, what_if_result_format=None,
-                                            what_if_exclude_change_types=None, template_spec=None, query_string=None):
-    if confirm_with_what_if:
-        what_if_deploy_arm_template_at_management_group(cmd,
-                                                        management_group_id=management_group_id,
-                                                        template_file=template_file, template_uri=template_uri,
-                                                        parameters=parameters, deployment_name=deployment_name,
-                                                        deployment_location=deployment_location,
-                                                        result_format=what_if_result_format,
-                                                        exclude_change_types=what_if_exclude_change_types,
-                                                        no_prompt=no_prompt, template_spec=template_spec, query_string=query_string)
-        from knack.prompting import prompt_y_n
-
-        if not prompt_y_n("\nAre you sure you want to execute the deployment?"):
+                                            what_if_exclude_change_types=None, template_spec=None, query_string=None,
+                                            what_if=None, proceed_if_no_change=None):
+    if confirm_with_what_if or what_if:
+        what_if_result = _what_if_deploy_arm_template_at_management_group_core(cmd,
+                                                                               management_group_id=management_group_id,
+                                                                               template_file=template_file, template_uri=template_uri,
+                                                                               parameters=parameters, deployment_name=deployment_name,
+                                                                               deployment_location=deployment_location,
+                                                                               result_format=what_if_result_format,
+                                                                               exclude_change_types=what_if_exclude_change_types,
+                                                                               no_prompt=no_prompt, template_spec=template_spec, query_string=query_string,
+                                                                               return_result=True)
+        if what_if:
             return None
+
+        ChangeType = cmd.get_models('ChangeType')
+        has_change = any(change.change_type not in [ChangeType.no_change, ChangeType.ignore] for change in what_if_result.changes)
+
+        if not proceed_if_no_change or has_change:
+            from knack.prompting import prompt_y_n
+
+            if not prompt_y_n("\nAre you sure you want to execute the deployment?"):
+                return None
 
     return _deploy_arm_template_at_management_group(cmd=cmd,
                                                     management_group_id=management_group_id,
@@ -644,8 +680,9 @@ def _deploy_arm_template_at_management_group(cmd,
         try:
             validation_poller = mgmt_client.begin_validate_at_management_group_scope(management_group_id,
                                                                                      deployment_name, deployment)
-        except HttpResponseError as cx:
-            _raise_subdivision_deployment_error(cx.response.internal_response.text, cx.error.code if cx.error else None)
+        except HttpResponseError as err:
+            err_message = _build_http_response_error_message(err)
+            raise_subdivision_deployment_error(err_message, err.error.code if err.error else None)
         validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
     else:
         validation_result = mgmt_client.validate_at_management_group_scope(management_group_id, deployment_name,
@@ -653,7 +690,7 @@ def _deploy_arm_template_at_management_group(cmd,
 
     if validation_result and validation_result.error:
         err_message = _build_preflight_error_message(validation_result.error)
-        _raise_subdivision_deployment_error(err_message)
+        raise_subdivision_deployment_error(err_message)
     if validate_only:
         return validation_result
 
@@ -667,19 +704,28 @@ def deploy_arm_template_at_tenant_scope(cmd,
                                         deployment_name=None, deployment_location=None,
                                         no_wait=False, handle_extended_json_format=None, no_prompt=False,
                                         confirm_with_what_if=None, what_if_result_format=None,
-                                        what_if_exclude_change_types=None, template_spec=None, query_string=None):
-    if confirm_with_what_if:
-        what_if_deploy_arm_template_at_tenant_scope(cmd,
-                                                    template_file=template_file, template_uri=template_uri,
-                                                    parameters=parameters, deployment_name=deployment_name,
-                                                    deployment_location=deployment_location,
-                                                    result_format=what_if_result_format,
-                                                    exclude_change_types=what_if_exclude_change_types,
-                                                    no_prompt=no_prompt, template_spec=template_spec, query_string=query_string)
-        from knack.prompting import prompt_y_n
-
-        if not prompt_y_n("\nAre you sure you want to execute the deployment?"):
+                                        what_if_exclude_change_types=None, template_spec=None, query_string=None,
+                                        what_if=None, proceed_if_no_change=None):
+    if confirm_with_what_if or what_if:
+        what_if_result = _what_if_deploy_arm_template_at_tenant_scope_core(cmd,
+                                                                           template_file=template_file, template_uri=template_uri,
+                                                                           parameters=parameters, deployment_name=deployment_name,
+                                                                           deployment_location=deployment_location,
+                                                                           result_format=what_if_result_format,
+                                                                           exclude_change_types=what_if_exclude_change_types,
+                                                                           no_prompt=no_prompt, template_spec=template_spec, query_string=query_string,
+                                                                           return_result=True)
+        if what_if:
             return None
+
+        ChangeType = cmd.get_models('ChangeType')
+        has_change = any(change.change_type not in [ChangeType.no_change, ChangeType.ignore] for change in what_if_result.changes)
+
+        if not proceed_if_no_change or has_change:
+            from knack.prompting import prompt_y_n
+
+            if not prompt_y_n("\nAre you sure you want to execute the deployment?"):
+                return None
 
     return _deploy_arm_template_at_tenant_scope(cmd=cmd,
                                                 template_file=template_file, template_uri=template_uri, parameters=parameters,
@@ -718,8 +764,9 @@ def _deploy_arm_template_at_tenant_scope(cmd,
         try:
             validation_poller = mgmt_client.begin_validate_at_tenant_scope(deployment_name=deployment_name,
                                                                            parameters=deployment)
-        except HttpResponseError as cx:
-            _raise_subdivision_deployment_error(cx.response.internal_response.text, cx.error.code if cx.error else None)
+        except HttpResponseError as err:
+            err_message = _build_http_response_error_message(err)
+            raise_subdivision_deployment_error(err_message, err.error.code if err.error else None)
         validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
     else:
         validation_result = mgmt_client.validate_at_tenant_scope(deployment_name=deployment_name,
@@ -727,7 +774,7 @@ def _deploy_arm_template_at_tenant_scope(cmd,
 
     if validation_result and validation_result.error:
         err_message = _build_preflight_error_message(validation_result.error)
-        _raise_subdivision_deployment_error(err_message)
+        raise_subdivision_deployment_error(err_message)
     if validate_only:
         return validation_result
 
@@ -740,6 +787,21 @@ def what_if_deploy_arm_template_at_resource_group(cmd, resource_group_name,
                                                   aux_tenants=None, result_format=None,
                                                   no_pretty_print=None, no_prompt=False,
                                                   exclude_change_types=None, template_spec=None, query_string=None):
+    return _what_if_deploy_arm_template_at_resource_group_core(cmd, resource_group_name,
+                                                               template_file, template_uri, parameters,
+                                                               deployment_name, DeploymentMode.incremental,
+                                                               aux_tenants, result_format,
+                                                               no_pretty_print, no_prompt,
+                                                               exclude_change_types, template_spec, query_string)
+
+
+def _what_if_deploy_arm_template_at_resource_group_core(cmd, resource_group_name,
+                                                        template_file=None, template_uri=None, parameters=None,
+                                                        deployment_name=None, mode=DeploymentMode.incremental,
+                                                        aux_tenants=None, result_format=None,
+                                                        no_pretty_print=None, no_prompt=False,
+                                                        exclude_change_types=None, template_spec=None, query_string=None,
+                                                        return_result=None):
     what_if_properties = _prepare_deployment_what_if_properties(cmd, 'resourceGroup', template_file, template_uri,
                                                                 parameters, mode, result_format, no_prompt, template_spec, query_string)
     mgmt_client = _get_deployment_management_client(cmd.cli_ctx, aux_tenants=aux_tenants,
@@ -748,8 +810,9 @@ def what_if_deploy_arm_template_at_resource_group(cmd, resource_group_name,
     deployment_what_if = DeploymentWhatIf(properties=what_if_properties)
     what_if_poller = mgmt_client.begin_what_if(resource_group_name, deployment_name,
                                                parameters=deployment_what_if)
+    what_if_result = _what_if_deploy_arm_template_core(cmd.cli_ctx, what_if_poller, no_pretty_print, exclude_change_types)
 
-    return _what_if_deploy_arm_template_core(cmd.cli_ctx, what_if_poller, no_pretty_print, exclude_change_types)
+    return what_if_result if no_pretty_print or return_result else None
 
 
 def what_if_deploy_arm_template_at_subscription_scope(cmd,
@@ -757,6 +820,19 @@ def what_if_deploy_arm_template_at_subscription_scope(cmd,
                                                       deployment_name=None, deployment_location=None,
                                                       result_format=None, no_pretty_print=None, no_prompt=False,
                                                       exclude_change_types=None, template_spec=None, query_string=None):
+    return _what_if_deploy_arm_template_at_subscription_scope_core(cmd,
+                                                                   template_file, template_uri, parameters,
+                                                                   deployment_name, deployment_location,
+                                                                   result_format, no_pretty_print, no_prompt,
+                                                                   exclude_change_types, template_spec, query_string)
+
+
+def _what_if_deploy_arm_template_at_subscription_scope_core(cmd,
+                                                            template_file=None, template_uri=None, parameters=None,
+                                                            deployment_name=None, deployment_location=None,
+                                                            result_format=None, no_pretty_print=None, no_prompt=False,
+                                                            exclude_change_types=None, template_spec=None, query_string=None,
+                                                            return_result=None):
     what_if_properties = _prepare_deployment_what_if_properties(cmd, 'subscription', template_file, template_uri, parameters,
                                                                 DeploymentMode.incremental, result_format, no_prompt, template_spec, query_string)
     mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(template_uri is None and template_spec is None))
@@ -764,8 +840,9 @@ def what_if_deploy_arm_template_at_subscription_scope(cmd,
     scoped_deployment_what_if = ScopedDeploymentWhatIf(location=deployment_location, properties=what_if_properties)
     what_if_poller = mgmt_client.begin_what_if_at_subscription_scope(deployment_name,
                                                                      parameters=scoped_deployment_what_if)
+    what_if_result = _what_if_deploy_arm_template_core(cmd.cli_ctx, what_if_poller, no_pretty_print, exclude_change_types)
 
-    return _what_if_deploy_arm_template_core(cmd.cli_ctx, what_if_poller, no_pretty_print, exclude_change_types)
+    return what_if_result if no_pretty_print or return_result else None
 
 
 def what_if_deploy_arm_template_at_management_group(cmd, management_group_id=None,
@@ -773,6 +850,19 @@ def what_if_deploy_arm_template_at_management_group(cmd, management_group_id=Non
                                                     deployment_name=None, deployment_location=None,
                                                     result_format=None, no_pretty_print=None, no_prompt=False,
                                                     exclude_change_types=None, template_spec=None, query_string=None):
+    return _what_if_deploy_arm_template_at_management_group_core(cmd, management_group_id,
+                                                                 template_file, template_uri, parameters,
+                                                                 deployment_name, deployment_location,
+                                                                 result_format, no_pretty_print, no_prompt,
+                                                                 exclude_change_types, template_spec, query_string)
+
+
+def _what_if_deploy_arm_template_at_management_group_core(cmd, management_group_id=None,
+                                                          template_file=None, template_uri=None, parameters=None,
+                                                          deployment_name=None, deployment_location=None,
+                                                          result_format=None, no_pretty_print=None, no_prompt=False,
+                                                          exclude_change_types=None, template_spec=None, query_string=None,
+                                                          return_result=None):
     what_if_properties = _prepare_deployment_what_if_properties(cmd, 'managementGroup', template_file, template_uri, parameters,
                                                                 DeploymentMode.incremental, result_format, no_prompt, template_spec=template_spec, query_string=query_string)
     mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(template_uri is None and template_spec is None))
@@ -780,8 +870,9 @@ def what_if_deploy_arm_template_at_management_group(cmd, management_group_id=Non
     scoped_deployment_what_if = ScopedDeploymentWhatIf(location=deployment_location, properties=what_if_properties)
     what_if_poller = mgmt_client.begin_what_if_at_management_group_scope(management_group_id, deployment_name,
                                                                          parameters=scoped_deployment_what_if)
+    what_if_result = _what_if_deploy_arm_template_core(cmd.cli_ctx, what_if_poller, no_pretty_print, exclude_change_types)
 
-    return _what_if_deploy_arm_template_core(cmd.cli_ctx, what_if_poller, no_pretty_print, exclude_change_types)
+    return what_if_result if no_pretty_print or return_result else None
 
 
 def what_if_deploy_arm_template_at_tenant_scope(cmd,
@@ -789,14 +880,28 @@ def what_if_deploy_arm_template_at_tenant_scope(cmd,
                                                 deployment_name=None, deployment_location=None,
                                                 result_format=None, no_pretty_print=None, no_prompt=False,
                                                 exclude_change_types=None, template_spec=None, query_string=None):
+    return _what_if_deploy_arm_template_at_tenant_scope_core(cmd,
+                                                             template_file, template_uri, parameters,
+                                                             deployment_name, deployment_location,
+                                                             result_format, no_pretty_print, no_prompt,
+                                                             exclude_change_types, template_spec, query_string)
+
+
+def _what_if_deploy_arm_template_at_tenant_scope_core(cmd,
+                                                      template_file=None, template_uri=None, parameters=None,
+                                                      deployment_name=None, deployment_location=None,
+                                                      result_format=None, no_pretty_print=None, no_prompt=False,
+                                                      exclude_change_types=None, template_spec=None, query_string=None,
+                                                      return_result=None):
     what_if_properties = _prepare_deployment_what_if_properties(cmd, 'tenant', template_file, template_uri, parameters,
                                                                 DeploymentMode.incremental, result_format, no_prompt, template_spec, query_string)
     mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(template_uri is None and template_spec is None))
     ScopedDeploymentWhatIf = cmd.get_models('ScopedDeploymentWhatIf')
     scoped_deployment_what_if = ScopedDeploymentWhatIf(location=deployment_location, properties=what_if_properties)
     what_if_poller = mgmt_client.begin_what_if_at_tenant_scope(deployment_name, parameters=scoped_deployment_what_if)
+    what_if_result = _what_if_deploy_arm_template_core(cmd.cli_ctx, what_if_poller, no_pretty_print, exclude_change_types)
 
-    return _what_if_deploy_arm_template_core(cmd.cli_ctx, what_if_poller, no_pretty_print, exclude_change_types)
+    return what_if_result if no_pretty_print or return_result else None
 
 
 def _what_if_deploy_arm_template_core(cli_ctx, what_if_poller, no_pretty_print, exclude_change_types):
@@ -820,8 +925,8 @@ def _what_if_deploy_arm_template_core(cli_ctx, what_if_poller, no_pretty_print, 
 
     try:
         if cli_ctx.enable_color:
-            # Diabling colorama since it will silently strip out the Xterm 256 color codes the What-If formatter
-            # is using. Unfortuanately, the colors that colorama supports are very limited, which doesn't meet our needs.
+            # Disabling colorama since it will silently strip out the Xterm 256 color codes the What-If formatter
+            # is using. Unfortunately, the colors that colorama supports are very limited, which doesn't meet our needs.
             from colorama import deinit
             deinit()
 
@@ -836,18 +941,11 @@ def _what_if_deploy_arm_template_core(cli_ctx, what_if_poller, no_pretty_print, 
             from colorama import init
             init()
 
-    return None
-
-
-def _build_preflight_error_message(preflight_error):
-    err_messages = [f'{preflight_error.code} - {preflight_error.message}']
-    for detail in preflight_error.details or []:
-        err_messages.append(_build_preflight_error_message(detail))
-    return '\n'.join(err_messages)
+    return what_if_result
 
 
 def _prepare_template_uri_with_query_string(template_uri, input_query_string):
-    from six.moves.urllib.parse import urlencode, parse_qs, urlsplit, urlunsplit  # pylint: disable=import-error
+    from urllib.parse import urlencode, parse_qs, urlsplit, urlunsplit
 
     try:
         scheme, netloc, path, query_string, fragment = urlsplit(template_uri)  # pylint: disable=unused-variable
@@ -1019,17 +1117,18 @@ def _get_auth_provider_latest_api_version(cli_ctx):
     return api_version
 
 
-def _update_provider(cli_ctx, namespace, registering, wait, mg_id=None, accept_terms=None):
+def _update_provider(cmd, namespace, registering, wait, properties=None, mg_id=None, accept_terms=None):
     import time
     target_state = 'Registered' if registering else 'Unregistered'
-    rcf = _resource_client_factory(cli_ctx)
+    rcf = _resource_client_factory(cmd.cli_ctx)
     is_rpaas = namespace.lower() in RPAAS_APIS
     if mg_id is None and registering:
-        if is_rpaas:
-            if not accept_terms:
-                raise RequiredArgumentMissingError("--accept-terms must be specified when registering the {} RP from RPaaS.".format(namespace))
+        if is_rpaas and accept_terms:
             wait = True
-        r = rcf.providers.register(namespace)
+        if cmd.supported_api_version(min_api='2021-04-01'):
+            r = rcf.providers.register(namespace, properties=properties)
+        else:
+            r = rcf.providers.register(namespace)
     elif mg_id and registering:
         r = rcf.providers.register_at_management_group_scope(namespace, mg_id)
         if r is None:
@@ -1046,10 +1145,10 @@ def _update_provider(cli_ctx, namespace, registering, wait, mg_id=None, accept_t
             rp_info = rcf.providers.get(namespace)
             if rp_info.registration_state == target_state:
                 break
-        if is_rpaas and registering and mg_id is None:
+        if is_rpaas and accept_terms and registering and mg_id is None:
             # call accept term API
             from azure.cli.core.util import send_raw_request
-            send_raw_request(cli_ctx, 'put', RPAAS_APIS[namespace.lower()], body=json.dumps({"properties": {"accepted": True}}))
+            send_raw_request(cmd.cli_ctx, 'put', RPAAS_APIS[namespace.lower()], body=json.dumps({"properties": {"accepted": True}}))
     else:
         action = 'Registering' if registering else 'Unregistering'
         msg_template = '%s is still on-going. You can monitor using \'az provider show -n %s\''
@@ -1199,7 +1298,8 @@ def list_resource_groups(cmd, tag=None):  # pylint: disable=no-self-use
     if tag:
         key = list(tag.keys())[0]
         filters.append("tagname eq '{}'".format(key))
-        filters.append("tagvalue eq '{}'".format(tag[key]))
+        if tag[key]:
+            filters.append("tagvalue eq '{}'".format(tag[key]))
 
     filter_text = ' and '.join(filters) if filters else None
 
@@ -1841,9 +1941,9 @@ def create_template_spec(cmd, resource_group_name, name, template_file=None, loc
         exists = False
         if no_prompt is False:
             try:  # Check if child template spec already exists.
-                existing_ts = rcf.template_spec_versions.get(resource_group_name=resource_group_name, template_spec_name=name, template_spec_version=version)
+                rcf.template_spec_versions.get(resource_group_name=resource_group_name, template_spec_name=name, template_spec_version=version)
                 from knack.prompting import prompt_y_n
-                confirmation = prompt_y_n("This will override {}. Proceed?".format(existing_ts))
+                confirmation = prompt_y_n("This will override template spec {} version {}. Proceed?".format(name, version))
                 if not confirmation:
                     return None
                 exists = True
@@ -1852,9 +1952,15 @@ def create_template_spec(cmd, resource_group_name, name, template_file=None, loc
 
         if template_file:
             from azure.cli.command_modules.resource._packing_engine import (pack)
-            packed_template = pack(cmd, template_file)
-            input_template = getattr(packed_template, 'RootTemplate')
-            artifacts = getattr(packed_template, 'Artifacts')
+            if is_bicep_file(template_file):
+                template_content = run_bicep_command(["build", "--stdout", template_file])
+                input_content = _remove_comments_from_json(template_content, file_path=template_file)
+                input_template = json.loads(json.dumps(input_content))
+                artifacts = []
+            else:
+                packed_template = pack(cmd, template_file)
+                input_template = getattr(packed_template, 'RootTemplate')
+                artifacts = getattr(packed_template, 'Artifacts')
 
         if ui_form_definition_file:
             ui_form_definition_content = _remove_comments_from_json(read_file_content(ui_form_definition_file))
@@ -1896,9 +2002,15 @@ def update_template_spec(cmd, resource_group_name=None, name=None, template_spec
     existing_template, artifacts, input_ui_form_definition = None, None, None
     if template_file:
         from azure.cli.command_modules.resource._packing_engine import (pack)
-        packed_template = pack(cmd, template_file)
-        input_template = getattr(packed_template, 'RootTemplate')
-        artifacts = getattr(packed_template, 'Artifacts')
+        if is_bicep_file(template_file):
+            template_content = run_bicep_command(["build", "--stdout", template_file])
+            input_content = _remove_comments_from_json(template_content, file_path=template_file)
+            input_template = json.loads(json.dumps(input_content))
+            artifacts = []
+        else:
+            packed_template = pack(cmd, template_file)
+            input_template = getattr(packed_template, 'RootTemplate')
+            artifacts = getattr(packed_template, 'Artifacts')
 
     if ui_form_definition_file:
         ui_form_definition_content = _remove_comments_from_json(read_file_content(ui_form_definition_file))
@@ -2036,17 +2148,26 @@ def list_resources(cmd, resource_group_name=None,
     return list(resources)
 
 
-def register_provider(cmd, resource_provider_namespace, mg=None, wait=False, accept_terms=None):
-    _update_provider(cmd.cli_ctx, resource_provider_namespace, registering=True, wait=wait, mg_id=mg, accept_terms=accept_terms)
+def register_provider(cmd, resource_provider_namespace, consent_to_permissions=False, mg=None, wait=False, accept_terms=None):
+    properties = None
+    if cmd.supported_api_version(min_api='2021-04-01') and consent_to_permissions:
+        ProviderRegistrationRequest, ProviderConsentDefinition = cmd.get_models('ProviderRegistrationRequest', 'ProviderConsentDefinition')
+        properties = ProviderRegistrationRequest(third_party_provider_consent=ProviderConsentDefinition(consent_to_authorization=consent_to_permissions))
+    _update_provider(cmd, resource_provider_namespace, registering=True, wait=wait, properties=properties, mg_id=mg, accept_terms=accept_terms)
 
 
 def unregister_provider(cmd, resource_provider_namespace, wait=False):
-    _update_provider(cmd.cli_ctx, resource_provider_namespace, registering=False, wait=wait)
+    _update_provider(cmd, resource_provider_namespace, registering=False, wait=wait)
 
 
 def list_provider_operations(cmd):
     auth_client = _authorization_management_client(cmd.cli_ctx)
     return auth_client.provider_operations_metadata.list()
+
+
+def list_provider_permissions(cmd, resource_provider_namespace):
+    rcf = _resource_client_factory(cmd.cli_ctx)
+    return rcf.providers.provider_permissions(resource_provider_namespace)
 
 
 def show_provider_operations(cmd, resource_provider_namespace):
@@ -2105,12 +2226,28 @@ def unregister_feature(client, resource_provider_namespace, feature_name):
     return client.unregister(resource_provider_namespace, feature_name)
 
 
+def list_feature_registrations(client, resource_provider_namespace=None):
+    if resource_provider_namespace:
+        return client.list_by_subscription(provider_namespace=resource_provider_namespace)
+    return client.list_all_by_subscription()
+
+
+def create_feature_registration(client, resource_provider_namespace, feature_name):
+    return client.create_or_update(resource_provider_namespace, feature_name, {})
+
+
+def delete_feature_registration(client, resource_provider_namespace, feature_name):
+    return client.delete(resource_provider_namespace, feature_name)
+
+
 # pylint: disable=inconsistent-return-statements,too-many-locals
 def create_policy_assignment(cmd, policy=None, policy_set_definition=None,
                              name=None, display_name=None, params=None,
                              resource_group_name=None, scope=None, sku=None,
                              not_scopes=None, location=None, assign_identity=None,
-                             identity_scope=None, identity_role='Contributor', enforcement_mode='Default'):
+                             mi_system_assigned=None, mi_user_assigned=None,
+                             identity_scope=None, identity_role='Contributor', enforcement_mode='Default',
+                             description=None):
     """Creates a policy assignment
     :param not_scopes: Space-separated scopes where the policy assignment does not apply.
     """
@@ -2124,27 +2261,32 @@ def create_policy_assignment(cmd, policy=None, policy_set_definition=None,
     params = _load_file_string_or_uri(params, 'params', False)
 
     PolicyAssignment = cmd.get_models('PolicyAssignment')
-    assignment = PolicyAssignment(display_name=display_name, policy_definition_id=policy_id, scope=scope, enforcement_mode=enforcement_mode)
+    assignment = PolicyAssignment(display_name=display_name, policy_definition_id=policy_id, scope=scope, enforcement_mode=enforcement_mode, description=description)
     assignment.parameters = params if params else None
 
     if cmd.supported_api_version(min_api='2017-06-01-preview'):
         if not_scopes:
             kwargs_list = []
             for id_arg in not_scopes.split(' '):
-                if parse_resource_id(id_arg):
+                id_parts = parse_resource_id(id_arg)
+                if id_parts.get('subscription') or _is_management_group_scope(id_arg):
                     kwargs_list.append(id_arg)
                 else:
-                    logger.error('az policy assignment create error: argument --not-scopes: \
-                    invalid notscopes value: \'%s\'', id_arg)
-                    return
+                    raise InvalidArgumentValueError("Invalid resource ID value in --not-scopes: '%s'" % id_arg)
             assignment.not_scopes = kwargs_list
 
+    identities = None
     if cmd.supported_api_version(min_api='2018-05-01'):
         if location:
             assignment.location = location
+        if mi_system_assigned is not None or assign_identity is not None:
+            identities = [MSI_LOCAL_ID]
+        elif mi_user_assigned is not None:
+            identities = [mi_user_assigned]
+
         identity = None
-        if assign_identity is not None:
-            identity = _build_identities_info(cmd, assign_identity)
+        if identities is not None:
+            identity = _build_identities_info(cmd, identities, resource_group_name)
         assignment.identity = identity
 
     if name is None:
@@ -2153,21 +2295,92 @@ def create_policy_assignment(cmd, policy=None, policy_set_definition=None,
     createdAssignment = policy_client.policy_assignments.create(scope, name, assignment)
 
     # Create the identity's role assignment if requested
-    if assign_identity is not None and identity_scope:
+    if identities is not None and identity_scope:
         from azure.cli.core.commands.arm import assign_identity as _assign_identity_helper
         _assign_identity_helper(cmd.cli_ctx, lambda: createdAssignment, lambda resource: createdAssignment, identity_role, identity_scope)
 
     return createdAssignment
 
 
-def _build_identities_info(cmd, identities):
+def _get_resource_id(cli_ctx, val, resource_group, resource_type, resource_namespace):
+    from msrestazure.tools import resource_id
+    if is_valid_resource_id(val):
+        return val
+
+    kwargs = {
+        'name': val,
+        'resource_group': resource_group,
+        'namespace': resource_namespace,
+        'type': resource_type,
+        'subscription': get_subscription_id(cli_ctx)
+    }
+    missing_kwargs = {k: v for k, v in kwargs.items() if not v}
+
+    return resource_id(**kwargs) if not missing_kwargs else None
+
+
+def _build_identities_info(cmd, identities, resourceGroupName):
     identities = identities or []
     ResourceIdentityType = cmd.get_models('ResourceIdentityType')
+    ResourceIdentity = cmd.get_models('Identity')
     identity_type = ResourceIdentityType.none
     if not identities or MSI_LOCAL_ID in identities:
-        identity_type = ResourceIdentityType.system_assigned
-    ResourceIdentity = cmd.get_models('Identity')
+        return ResourceIdentity(type=ResourceIdentityType.system_assigned)
+
+    user_assigned_identities = [x for x in identities if x != MSI_LOCAL_ID]
+    if user_assigned_identities and len(user_assigned_identities) > 0:
+        msiId = _get_resource_id(cmd.cli_ctx, user_assigned_identities[0], resourceGroupName,
+                                 'userAssignedIdentities', 'Microsoft.ManagedIdentity')
+
+        UserAssignedIdentitiesValue = cmd.get_models('UserAssignedIdentitiesValue')
+        userAssignedIdentity = {msiId: UserAssignedIdentitiesValue()}
+        return ResourceIdentity(type=ResourceIdentityType.user_assigned, user_assigned_identities=userAssignedIdentity)
+
     return ResourceIdentity(type=identity_type)
+
+
+def update_policy_assignment(cmd, name=None, display_name=None, params=None,
+                             resource_group_name=None, scope=None, sku=None,
+                             not_scopes=None, enforcement_mode=None, description=None):
+    """Updates a policy assignment
+    :param not_scopes: Space-separated scopes where the policy assignment does not apply.
+    """
+    policy_client = _resource_policy_client_factory(cmd.cli_ctx)
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    scope = _build_policy_scope(subscription_id, resource_group_name, scope)
+    params = _load_file_string_or_uri(params, 'params', False)
+
+    existing_assignment = policy_client.policy_assignments.get(scope, name)
+    PolicyAssignment = cmd.get_models('PolicyAssignment')
+    assignment = PolicyAssignment(
+        display_name=display_name if display_name is not None else existing_assignment.display_name,
+        policy_definition_id=existing_assignment.policy_definition_id,
+        scope=existing_assignment.scope,
+        enforcement_mode=enforcement_mode if enforcement_mode is not None else existing_assignment.enforcement_mode,
+        metadata=existing_assignment.metadata,
+        parameters=params if params is not None else existing_assignment.parameters,
+        description=description if description is not None else existing_assignment.description)
+
+    if cmd.supported_api_version(min_api='2017-06-01-preview'):
+        kwargs_list = existing_assignment.not_scopes
+        if not_scopes:
+            kwargs_list = []
+            for id_arg in not_scopes.split(' '):
+                id_parts = parse_resource_id(id_arg)
+                if id_parts.get('subscription') or _is_management_group_scope(id_arg):
+                    kwargs_list.append(id_arg)
+                else:
+                    raise InvalidArgumentValueError("Invalid resource ID value in --not-scopes: '%s'" % id_arg)
+        assignment.not_scopes = kwargs_list
+
+    if cmd.supported_api_version(min_api='2018-05-01'):
+        assignment.location = existing_assignment.location
+        assignment.identity = existing_assignment.identity
+
+    if cmd.supported_api_version(min_api='2020-09-01'):
+        assignment.non_compliance_messages = existing_assignment.non_compliance_messages
+
+    return policy_client.policy_assignments.create(scope, name, assignment)
 
 
 def delete_policy_assignment(cmd, name, resource_group_name=None, scope=None):
@@ -2218,16 +2431,73 @@ def list_policy_assignment(cmd, disable_scope_strict_match=None, resource_group_
     return result
 
 
-def set_identity(cmd, name, scope=None, resource_group_name=None, identity_role='Contributor', identity_scope=None):
+def list_policy_non_compliance_message(cmd, name, scope=None, resource_group_name=None):
     policy_client = _resource_policy_client_factory(cmd.cli_ctx)
     subscription_id = get_subscription_id(cmd.cli_ctx)
     scope = _build_policy_scope(subscription_id, resource_group_name, scope)
+    return policy_client.policy_assignments.get(scope, name).non_compliance_messages
+
+
+def create_policy_non_compliance_message(cmd, name, message, scope=None, resource_group_name=None,
+                                         policy_definition_reference_id=None):
+    policy_client = _resource_policy_client_factory(cmd.cli_ctx)
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    scope = _build_policy_scope(subscription_id, resource_group_name, scope)
+
+    assignment = policy_client.policy_assignments.get(scope, name)
+
+    NonComplianceMessage = cmd.get_models('NonComplianceMessage')
+    created_message = NonComplianceMessage(message=message, policy_definition_reference_id=policy_definition_reference_id)
+    if not assignment.non_compliance_messages:
+        assignment.non_compliance_messages = []
+    assignment.non_compliance_messages.append(created_message)
+
+    return policy_client.policy_assignments.create(scope, name, assignment).non_compliance_messages
+
+
+def delete_policy_non_compliance_message(cmd, name, message, scope=None, resource_group_name=None,
+                                         policy_definition_reference_id=None):
+    policy_client = _resource_policy_client_factory(cmd.cli_ctx)
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    scope = _build_policy_scope(subscription_id, resource_group_name, scope)
+
+    assignment = policy_client.policy_assignments.get(scope, name)
+
+    NonComplianceMessage = cmd.get_models('NonComplianceMessage')
+    message_to_remove = NonComplianceMessage(message=message, policy_definition_reference_id=policy_definition_reference_id)
+    if assignment.non_compliance_messages:
+        assignment.non_compliance_messages = [existingMessage for existingMessage in assignment.non_compliance_messages if not _is_non_compliance_message_equivalent(existingMessage, message_to_remove)]
+
+    return policy_client.policy_assignments.create(scope, name, assignment).non_compliance_messages
+
+
+def _is_non_compliance_message_equivalent(first, second):
+    first_message = '' if first.message is None else first.message
+    seccond_message = '' if second.message is None else second.message
+    first_reference_id = '' if first.policy_definition_reference_id is None else first.policy_definition_reference_id
+    second_reference_id = '' if second.policy_definition_reference_id is None else second.policy_definition_reference_id
+
+    return first_message.lower() == seccond_message.lower() and first_reference_id.lower() == second_reference_id.lower()
+
+
+def set_identity(cmd, name, scope=None, resource_group_name=None,
+                 mi_system_assigned=None, mi_user_assigned=None,
+                 identity_role='Contributor', identity_scope=None):
+    policy_client = _resource_policy_client_factory(cmd.cli_ctx)
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    scope = _build_policy_scope(subscription_id, resource_group_name, scope)
+    # Backward compatibility that assign system assigned MSI when none specified.
+    identities = None
+    if mi_system_assigned is not None or mi_user_assigned is None:
+        identities = [MSI_LOCAL_ID]
+    else:
+        identities = [mi_user_assigned]
 
     def getter():
         return policy_client.policy_assignments.get(scope, name)
 
     def setter(policyAssignment):
-        policyAssignment.identity = _build_identities_info(cmd, [MSI_LOCAL_ID])
+        policyAssignment.identity = _build_identities_info(cmd, identities, resource_group_name)
         return policy_client.policy_assignments.create(scope, name, policyAssignment)
 
     from azure.cli.core.commands.arm import assign_identity as _assign_identity_helper
@@ -2582,8 +2852,27 @@ def _is_management_group_scope(scope):
     return scope is not None and scope.lower().startswith("/providers/microsoft.management/managementgroups")
 
 
-def cli_managementgroups_group_list(cmd, client):
-    _register_rp(cmd.cli_ctx)
+def cli_managementgroups_get_tenant_backfill_status(
+        cmd,
+        client):
+    return client.tenant_backfill_status()
+
+
+def cli_managementgroups_start_tenant_backfill(
+        cmd,
+        client):
+    return client.start_tenant_backfill()
+
+
+def cli_managementgroups_get_name_availability(cmd, client, group_name):
+    from azure.mgmt.managementgroups.models import CheckNameAvailabilityRequest
+    checkNameAvailabilityRequest = CheckNameAvailabilityRequest(name=group_name)
+    return client.check_name_availability(checkNameAvailabilityRequest)
+
+
+def cli_managementgroups_group_list(cmd, client, no_register=False):
+    if not no_register:
+        _register_rp(cmd.cli_ctx)
     return client.list()
 
 
@@ -2592,8 +2881,10 @@ def cli_managementgroups_group_show(
         client,
         group_name,
         expand=False,
-        recurse=False):
-    _register_rp(cmd.cli_ctx)
+        recurse=False,
+        no_register=False):
+    if not no_register:
+        _register_rp(cmd.cli_ctx)
     if expand:
         return client.get(group_name, "children", recurse)
     return client.get(group_name)
@@ -2604,8 +2895,10 @@ def cli_managementgroups_group_create(
         client,
         group_name,
         display_name=None,
-        parent=None):
-    _register_rp(cmd.cli_ctx)
+        parent=None,
+        no_register=False):
+    if not no_register:
+        _register_rp(cmd.cli_ctx)
     parent_id = _get_parent_id_from_parent(parent)
     from azure.mgmt.managementgroups.models import (
         CreateManagementGroupRequest, CreateManagementGroupDetails, CreateParentGroupInfo)
@@ -2615,22 +2908,22 @@ def cli_managementgroups_group_create(
         name=group_name,
         display_name=display_name,
         details=create_mgmt_grp_details)
-    return client.create_or_update(group_name, create_mgmt_grp_request)
+    return client.begin_create_or_update(group_name, create_mgmt_grp_request)
 
 
 def cli_managementgroups_group_update_custom_func(
         instance,
         display_name=None,
         parent_id=None):
-    parent_id = _get_parent_id_from_parent(parent_id)
+    parent_group_id = _get_parent_id_from_parent(parent_id)
     instance.display_name = display_name
-    instance.parent_id = parent_id
+    instance.parent_group_id = parent_group_id
     return instance
 
 
 def cli_managementgroups_group_update_get():
     from azure.mgmt.managementgroups.models import PatchManagementGroupRequest
-    update_parameters = PatchManagementGroupRequest(display_name=None, parent_id=None)
+    update_parameters = PatchManagementGroupRequest(display_name=None, parent_group_id=None)
     return update_parameters
 
 
@@ -2639,9 +2932,10 @@ def cli_managementgroups_group_update_set(
     return client.update(group_name, parameters)
 
 
-def cli_managementgroups_group_delete(cmd, client, group_name):
-    _register_rp(cmd.cli_ctx)
-    return client.delete(group_name)
+def cli_managementgroups_group_delete(cmd, client, group_name, no_register=False):
+    if not no_register:
+        _register_rp(cmd.cli_ctx)
+    return client.begin_delete(group_name)
 
 
 def cli_managementgroups_subscription_add(
@@ -2651,11 +2945,78 @@ def cli_managementgroups_subscription_add(
     return client.create(group_name, subscription_id)
 
 
+def cli_managementgroups_subscription_show(
+        cmd,
+        client,
+        group_name,
+        subscription):
+    subscription_id = _get_subscription_id_from_subscription(cmd.cli_ctx, subscription)
+    return client.get_subscription(group_name, subscription_id)
+
+
+def cli_managementgroups_subscription_show_sub_under_mg(
+        cmd,
+        client,
+        group_name):
+    return client.get_subscriptions_under_management_group(group_name)
+
+
 def cli_managementgroups_subscription_remove(
         cmd, client, group_name, subscription):
     subscription_id = _get_subscription_id_from_subscription(
         cmd.cli_ctx, subscription)
     return client.delete(group_name, subscription_id)
+
+
+def cli_managementgroups_entities_list(
+        cmd,
+        client):
+    return client.list()
+
+
+def cli_hierarchy_settings_list(
+        cmd,
+        client,
+        group_name):
+    return client.list(group_name)
+
+
+def cli_hierarchy_settings_create(
+        cmd,
+        client,
+        group_name,
+        require_authorization_for_group_creation=None,
+        default_management_group=None):
+    from azure.mgmt.managementgroups.models import CreateOrUpdateSettingsRequest
+    create_or_update_parameters = CreateOrUpdateSettingsRequest(require_authorization_for_group_creation=require_authorization_for_group_creation, default_management_group=default_management_group)
+    return client.create_or_update(group_name, create_or_update_parameters)
+
+
+def cli_hierarchy_settings_delete(
+        cmd,
+        client,
+        group_name):
+    return client.delete(group_name)
+
+
+def cli_hierarchysettings_group_update_custom_func(
+        instance,
+        require_authorization_for_group_creation=None,
+        default_management_group=None):
+    instance.require_authorization_for_group_creation = require_authorization_for_group_creation
+    instance.default_management_group = default_management_group
+    return instance
+
+
+def cli_hierarchysettings_group_update_get():
+    from azure.mgmt.managementgroups.models import CreateOrUpdateSettingsRequest
+    update_parameters = CreateOrUpdateSettingsRequest(require_authorization_for_group_creation=None, default_management_group=None)
+    return update_parameters
+
+
+def cli_hierarchysettings_group_update_set(
+        cmd, client, group_name, parameters=None):
+    return client.update(group_name, parameters)
 
 
 # region Locks
@@ -3153,7 +3514,8 @@ class _ResourceUtils:  # pylint: disable=too-many-instance-attributes
         # to properties will fail due to the lack of properties, so the PATCH type should be used
         need_patch_service = ['Microsoft.RecoveryServices/vaults', 'Microsoft.Resources/resourceGroups',
                               'Microsoft.ContainerRegistry/registries/webhooks',
-                              'Microsoft.ContainerInstance/containerGroups']
+                              'Microsoft.ContainerInstance/containerGroups',
+                              'Microsoft.Network/publicIPAddresses']
 
         if resource is not None and resource.type in need_patch_service:
             parameters = GenericResource(tags=tags)
@@ -3314,14 +3676,18 @@ class _ResourceUtils:  # pylint: disable=too-many-instance-attributes
                                                   latest_include_preview=latest_include_preview)
 
 
-def install_bicep_cli(cmd, version=None):
+def install_bicep_cli(cmd, version=None, target_platform=None):
     # The parameter version is actually a git tag here.
-    ensure_bicep_installation(release_tag=version)
+    ensure_bicep_installation(release_tag=version, target_platform=target_platform)
 
 
-def upgrade_bicep_cli(cmd):
+def uninstall_bicep_cli(cmd):
+    remove_bicep_installation()
+
+
+def upgrade_bicep_cli(cmd, target_platform=None):
     latest_release_tag = get_bicep_latest_release_tag()
-    ensure_bicep_installation(release_tag=latest_release_tag)
+    ensure_bicep_installation(release_tag=latest_release_tag, target_platform=target_platform)
 
 
 def build_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None):
@@ -3332,7 +3698,16 @@ def build_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None):
         args += ["--outfile", outfile]
     if stdout:
         args += ["--stdout"]
+        print(run_bicep_command(args))
+        return
     run_bicep_command(args)
+
+
+def publish_bicep_file(cmd, file, target):
+    if supports_bicep_publish():
+        run_bicep_command(["publish", file, "--target", target])
+    else:
+        logger.error("az bicep publish could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v0.4.1008 or later.")
 
 
 def decompile_bicep_file(cmd, file):

@@ -104,6 +104,13 @@ def validate_bypass(namespace):
         namespace.bypass = ', '.join(namespace.bypass) if isinstance(namespace.bypass, list) else namespace.bypass
 
 
+def validate_hns_migration_type(namespace):
+    if namespace.request_type and namespace.request_type.lower() == 'validation':
+        namespace.request_type = 'HnsOnValidationRequest'
+    if namespace.request_type and namespace.request_type.lower() == 'upgrade':
+        namespace.request_type = 'HnsOnHydrationRequest'
+
+
 def get_config_value(cmd, section, key, default):
     logger.info("Try to get %s %s value from environment variables or config file.", section, key)
     return cmd.cli_ctx.config.get(section, key, default)
@@ -184,7 +191,7 @@ It is recommended to provide --connection-string, --account-key or --sas-token i
         if 'auth_mode' in cmd.arguments:
             message += """
 You also can add `--auth-mode login` in your command to use Azure Active Directory (Azure AD) for authorization if your login account is assigned required RBAC roles.
-For more information about RBAC roles in storage, visit https://docs.microsoft.com/en-us/azure/storage/common/storage-auth-aad-rbac-cli.
+For more information about RBAC roles in storage, visit https://docs.microsoft.com/azure/storage/common/storage-auth-aad-rbac-cli.
 """
         logger.warning('%s\nIn addition, setting the corresponding environment variables can avoid inputting '
                        'credentials in your command. Please use --help to get more information about environment '
@@ -387,8 +394,8 @@ def validate_source_uri(cmd, namespace):  # pylint: disable=too-many-statements
     namespace.copy_source = uri
 
 
-def validate_source_url(cmd, namespace):  # pylint: disable=too-many-statements
-    from .util import create_short_lived_blob_sas, create_short_lived_file_sas
+def validate_source_url(cmd, namespace):  # pylint: disable=too-many-statements, too-many-locals
+    from .util import create_short_lived_blob_sas, create_short_lived_blob_sas_v2, create_short_lived_file_sas
     from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError, \
         MutuallyExclusiveArgumentError
     usage_string = \
@@ -472,7 +479,14 @@ def validate_source_url(cmd, namespace):  # pylint: disable=too-many-statements
             source_sas = create_short_lived_file_sas(cmd, source_account_name, source_account_key, share,
                                                      dir_name, file_name)
         elif valid_blob_source and (ns.get('share_name', None) or not same_account):
-            source_sas = create_short_lived_blob_sas(cmd, source_account_name, source_account_key, container, blob)
+            prefix = cmd.command_kwargs['resource_type'].value[0]
+            # is_storagev2() is used to distinguish if the command is in track2 SDK
+            # If yes, we will use get_login_credentials() as token credential
+            if is_storagev2(prefix):
+                source_sas = create_short_lived_blob_sas_v2(cmd, source_account_name, source_account_key, container,
+                                                            blob)
+            else:
+                source_sas = create_short_lived_blob_sas(cmd, source_account_name, source_account_key, container, blob)
 
     query_params = []
     if source_sas:
@@ -496,7 +510,10 @@ def validate_source_url(cmd, namespace):  # pylint: disable=too-many-statements
 
 def validate_blob_type(namespace):
     if not namespace.blob_type:
-        namespace.blob_type = 'page' if namespace.file_path.endswith('.vhd') else 'block'
+        if namespace.file_path and namespace.file_path.endswith('.vhd'):
+            namespace.blob_type = 'page'
+        else:
+            namespace.blob_type = 'block'
 
 
 def validate_storage_data_plane_list(namespace):
@@ -754,12 +771,30 @@ def validate_metadata(namespace):
 
 
 def get_permission_help_string(permission_class):
-    allowed_values = [x.lower() for x in dir(permission_class) if not x.startswith('__')]
+    allowed_values = get_permission_allowed_values(permission_class)
     return ' '.join(['({}){}'.format(x[0], x[1:]) for x in allowed_values])
 
 
+def get_permission_allowed_values(permission_class):
+    if permission_class:
+        instance = permission_class()
+
+        allowed_values = [x.lower() for x in dir(instance) if not x.startswith('_')]
+        if 'from_string' in allowed_values:
+            allowed_values.remove('from_string')
+        for i, item in enumerate(allowed_values):
+            if item == 'delete_previous_version':
+                allowed_values[i] = 'x' + item
+            if item == 'manage_access_control':
+                allowed_values[i] = 'permissions'
+            if item == 'manage_ownership':
+                allowed_values[i] = 'ownership'
+        return allowed_values
+    return None
+
+
 def get_permission_validator(permission_class):
-    allowed_values = [x.lower() for x in dir(permission_class) if not x.startswith('__')]
+    allowed_values = get_permission_allowed_values(permission_class)
     allowed_string = ''.join(x[0] for x in allowed_values)
 
     def validator(namespace):
@@ -768,7 +803,10 @@ def get_permission_validator(permission_class):
                 help_string = get_permission_help_string(permission_class)
                 raise ValueError(
                     'valid values are {} or a combination thereof.'.format(help_string))
-            namespace.permission = permission_class(_str=namespace.permission)
+            if hasattr(permission_class, 'from_string'):
+                namespace.permission = permission_class.from_string(namespace.permission)
+            else:
+                namespace.permission = permission_class(_str=namespace.permission)
 
     return validator
 
@@ -803,6 +841,20 @@ def validate_container_public_access(cmd, namespace):
             container = ns.get('container_name')
             lease_id = ns.get('lease_id')
             ns['signed_identifiers'] = client.get_container_acl(container, lease_id=lease_id)
+
+
+def validate_container_nfsv3_squash(cmd, namespace):
+    t_root_squash = cmd.get_models('RootSquashType', resource_type=ResourceType.MGMT_STORAGE)
+    if namespace.root_squash and namespace.root_squash == t_root_squash.NO_ROOT_SQUASH:
+        namespace.enable_nfs_v3_root_squash = False
+        namespace.enable_nfs_v3_all_squash = False
+    elif namespace.root_squash and namespace.root_squash == t_root_squash.ROOT_SQUASH:
+        namespace.enable_nfs_v3_root_squash = True
+        namespace.enable_nfs_v3_all_squash = False
+    elif namespace.root_squash and namespace.root_squash == t_root_squash.ALL_SQUASH:
+        namespace.enable_nfs_v3_all_squash = True
+
+    del namespace.root_squash
 
 
 def validate_fs_public_access(cmd, namespace):
@@ -976,8 +1028,9 @@ def process_blob_upload_batch_parameters(cmd, namespace):
             # when all the listed files are vhd files use page
             namespace.blob_type = 'page'
         elif any(vhd_files):
+            from azure.cli.core.azclierror import ArgumentUsageError
             # source files contain vhd files but not all of them
-            raise CLIError("""Fail to guess the required blob type. Type of the files to be
+            raise ArgumentUsageError("""Fail to guess the required blob type. Type of the files to be
             uploaded are not consistent. Default blob type for .vhd files is "page", while
             others are "block". You can solve this problem by either explicitly set the blob
             type or ensure the pattern matches a correct set of files.""")
@@ -986,9 +1039,10 @@ def process_blob_upload_batch_parameters(cmd, namespace):
 
     # 5. call other validators
     validate_metadata(namespace)
-    t_blob_content_settings = cmd.loader.get_sdk('blob.models#ContentSettings')
+    t_blob_content_settings = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_BLOB, '_models#ContentSettings')
     get_content_setting_validator(t_blob_content_settings, update=False)(cmd, namespace)
-    add_progress_callback(cmd, namespace)
+    add_upload_progress_callback(cmd, namespace)
+    blob_tier_validator_track2(cmd, namespace)
 
 
 def process_blob_delete_batch_parameters(cmd, namespace):
@@ -1195,7 +1249,7 @@ def services_type(loader):
 
 def get_char_options_validator(types, property_name):
     def _validator(namespace):
-        service_types = set(getattr(namespace, property_name, list()))
+        service_types = set(getattr(namespace, property_name, []))
 
         if not service_types:
             raise ValueError('Missing options --{}.'.format(property_name.replace('_', '-')))
@@ -1245,6 +1299,53 @@ def block_blob_tier_validator(cmd, namespace):
             get_blob_tier_names(cmd.cli_ctx, 'StandardBlobTier'))))
 
 
+def page_blob_tier_validator_track2(cmd, namespace):
+    if not namespace.tier:
+        return
+
+    if namespace.blob_type != 'page' and namespace.tier:
+        raise ValueError('Blob tier is only applicable to page blobs on premium storage accounts.')
+
+    track2 = False
+    try:
+        if is_storagev2(cmd.command_kwargs['resource_type'].value[0]):
+            track2 = True
+            namespace.premium_page_blob_tier = getattr(cmd.get_models(
+                '_generated.models._azure_blob_storage_enums#PremiumPageBlobAccessTier'), namespace.tier)
+        else:
+            namespace.premium_page_blob_tier = getattr(cmd.get_models('blob.models#PremiumPageBlobTier'),
+                                                       namespace.tier)
+    except AttributeError:
+        from azure.cli.command_modules.storage.sdkutil import get_blob_tier_names_track2
+        tier_names = get_blob_tier_names_track2(cmd.cli_ctx, 'blob.models#PremiumPageBlobTier', track2)
+        if track2:
+            tier_names = get_blob_tier_names_track2(
+                cmd.cli_ctx, '_generated.models._azure_blob_storage_enums#PremiumPageBlobAccessTier', track2)
+        raise ValueError('Unknown premium page blob tier name. Choose among {}'.format(', '.join(tier_names)))
+
+
+def block_blob_tier_validator_track2(cmd, namespace):
+    if not namespace.tier:
+        return
+
+    if namespace.blob_type != 'block' and namespace.tier:
+        raise ValueError('Blob tier is only applicable to block blobs on standard storage accounts.')
+
+    track2 = False
+    try:
+        if is_storagev2(cmd.command_kwargs['resource_type'].value[0]):
+            track2 = True
+            namespace.standard_blob_tier = getattr(cmd.get_models('_models#StandardBlobTier'), namespace.tier)
+        else:
+            namespace.standard_blob_tier = getattr(cmd.get_models('blob.models#StandardBlobTier'), namespace.tier)
+    except AttributeError:
+        from azure.cli.command_modules.storage.sdkutil import get_blob_tier_names_track2
+        tier_names = get_blob_tier_names_track2(cmd.cli_ctx, 'blob.models#StandardBlobTier', track2)
+        if track2:
+            tier_names = get_blob_tier_names_track2(cmd.cli_ctx, '_models#StandardBlobTier', track2)
+        raise ValueError('Unknown block blob tier name. Choose among {}'.format(', '.join(tier_names)))
+
+
 def blob_tier_validator(cmd, namespace):
     if namespace.blob_type == 'page':
         page_blob_tier_validator(cmd, namespace)
@@ -1252,6 +1353,17 @@ def blob_tier_validator(cmd, namespace):
         block_blob_tier_validator(cmd, namespace)
     else:
         raise ValueError('Blob tier is only applicable to block or page blob.')
+
+
+def blob_tier_validator_track2(cmd, namespace):
+    if namespace.tier:
+        if namespace.blob_type == 'page':
+            page_blob_tier_validator_track2(cmd, namespace)
+        elif namespace.blob_type == 'block':
+            block_blob_tier_validator_track2(cmd, namespace)
+        else:
+            raise ValueError('Blob tier is only applicable to block or page blob.')
+    del namespace.tier
 
 
 def blob_download_file_path_validator(namespace):
@@ -1486,7 +1598,8 @@ def validate_client_auth_parameter(cmd, ns):
 def validate_encryption_scope_client_params(ns):
     if ns.encryption_scope:
         # will use track2 client and socket_timeout is unused
-        del ns.socket_timeout
+        if 'socket_timeout' in ns:
+            del ns.socket_timeout
 
 
 def validate_access_control(namespace):
@@ -1507,7 +1620,7 @@ def validate_logging_version(namespace):
     if validate_service_type(namespace.services, 'table') and namespace.version and namespace.version != 1.0:
         raise CLIError(
             'incorrect usage: for table service, the supported version for logging is `1.0`. For more information, '
-            'please refer to https://docs.microsoft.com/en-us/rest/api/storageservices/storage-analytics-log-format.')
+            'please refer to https://docs.microsoft.com/rest/api/storageservices/storage-analytics-log-format.')
 
 
 def validate_match_condition(namespace):
@@ -1753,16 +1866,19 @@ def validate_fs_directory_download_source_url(cmd, namespace):
     if namespace.source_path:
         file_client = client.get_file_client(file_path=namespace.source_path)
         url = file_client.url
-    namespace.source = _add_sas_for_url(cmd, url=url, account_name=namespace.account_name,
-                                        account_key=namespace.account_key, sas_token=namespace.sas_token,
-                                        service='blob', resource_types='co', permissions='rl')
+    if _is_valid_uri(url):
+        namespace.source = url
+    else:
+        namespace.source = _add_sas_for_url(cmd, url=url, account_name=namespace.account_name,
+                                            account_key=namespace.account_key, sas_token=namespace.sas_token,
+                                            service='blob', resource_types='co', permissions='rl')
     del namespace.source_fs
     del namespace.source_path
 
 
 def validate_text_configuration(cmd, ns):
     DelimitedTextDialect = cmd.get_models('_models#DelimitedTextDialect', resource_type=ResourceType.DATA_STORAGE_BLOB)
-    DelimitedJSON = cmd.get_models('_models#DelimitedJSON', resource_type=ResourceType.DATA_STORAGE_BLOB)
+    DelimitedJsonDialect = cmd.get_models('_models#DelimitedJsonDialect', resource_type=ResourceType.DATA_STORAGE_BLOB)
     if ns.input_format == 'csv':
         ns.input_config = DelimitedTextDialect(
             delimiter=ns.in_column_separator,
@@ -1771,7 +1887,7 @@ def validate_text_configuration(cmd, ns):
             escapechar=ns.in_escape_char,
             has_header=ns.in_has_header)
     if ns.input_format == 'json':
-        ns.input_config = DelimitedJSON(delimiter=ns.in_line_separator)
+        ns.input_config = DelimitedJsonDialect(delimiter=ns.in_line_separator)
 
     if ns.output_format == 'csv':
         ns.output_config = DelimitedTextDialect(
@@ -1781,7 +1897,7 @@ def validate_text_configuration(cmd, ns):
             escapechar=ns.out_escape_char,
             has_header=ns.out_has_header)
     if ns.output_format == 'json':
-        ns.output_config = DelimitedJSON(delimiter=ns.out_line_separator)
+        ns.output_config = DelimitedJsonDialect(delimiter=ns.out_line_separator)
     del ns.input_format, ns.in_line_separator, ns.in_column_separator, ns.in_quote_char, ns.in_record_separator, \
         ns.in_escape_char, ns.in_has_header
     del ns.output_format, ns.out_line_separator, ns.out_column_separator, ns.out_quote_char, ns.out_record_separator, \
@@ -1817,3 +1933,77 @@ def validate_policy(namespace):
     if namespace.id is not None:
         logger.warning("\nPlease do not specify --expiry and --permissions if they are already specified in your "
                        "policy.")
+
+
+def validate_immutability_arguments(namespace):
+    from azure.cli.core.azclierror import InvalidArgumentValueError
+    if not namespace.enable_alw:
+        if any([namespace.immutability_period_since_creation_in_days,
+                namespace.immutability_policy_state, namespace.allow_protected_append_writes is not None]):
+            raise InvalidArgumentValueError("Incorrect usage: To enable account level immutability, "
+                                            "need to specify --enable-alw true. "
+                                            "Cannot set --enable_alw to false and specify "
+                                            "--immutability-period --immutability-state "
+                                            "--allow-append")
+
+
+def validate_allow_protected_append_writes_all(namespace):
+    from azure.cli.core.azclierror import InvalidArgumentValueError
+    if namespace.allow_protected_append_writes_all and namespace.allow_protected_append_writes:
+        raise InvalidArgumentValueError("usage error: The 'allow-protected-append-writes' "
+                                        "and 'allow-protected-append-writes-all' "
+                                        "properties are mutually exclusive. 'allow-protected-append-writes-all' allows "
+                                        "new blocks to be written to both Append and Block Blobs, while "
+                                        "'allow-protected-append-writes' allows new blocks to be written to "
+                                        "Append Blobs only.")
+
+
+def validate_blob_name_for_upload(namespace):
+    if not namespace.blob_name:
+        namespace.blob_name = os.path.basename(namespace.file_path)
+
+
+def validate_share_close_handle(namespace):
+    from azure.cli.core.azclierror import InvalidArgumentValueError
+    if namespace.close_all and namespace.handle_id:
+        raise InvalidArgumentValueError("usage error: Please only specify either --handle-id or --close-all, not both.")
+    if not namespace.close_all and not namespace.handle_id:
+        raise InvalidArgumentValueError("usage error: Please specify either --handle-id or --close-all.")
+
+
+def validate_upload_blob(namespace):
+    from azure.cli.core.azclierror import InvalidArgumentValueError
+    if namespace.file_path and namespace.data:
+        raise InvalidArgumentValueError("usage error: please only specify one of --file and --data to upload.")
+    if not namespace.file_path and not namespace.data:
+        raise InvalidArgumentValueError("usage error: please specify one of --file and --data to upload.")
+
+
+def add_upload_progress_callback(cmd, namespace):
+    def _update_progress(response):
+        if response.http_response.status_code not in [200, 201]:
+            return
+
+        message = getattr(_update_progress, 'message', 'Alive')
+        reuse = getattr(_update_progress, 'reuse', False)
+        current = response.context['upload_stream_current']
+        total = response.context['data_stream_total']
+
+        if total:
+            hook.add(message=message, value=current, total_val=total)
+            if total == current and not reuse:
+                hook.end()
+
+    hook = cmd.cli_ctx.get_progress_controller(det=True)
+    _update_progress.hook = hook
+
+    if not namespace.no_progress:
+        namespace.progress_callback = _update_progress
+    del namespace.no_progress
+
+
+def validate_blob_arguments(namespace):
+    from azure.cli.core.azclierror import RequiredArgumentMissingError
+    if not namespace.blob_url and not all([namespace.blob_name, namespace.container_name]):
+        raise RequiredArgumentMissingError(
+            "Please specify --blob-url or combination of blob name, container name and storage account arguments.")

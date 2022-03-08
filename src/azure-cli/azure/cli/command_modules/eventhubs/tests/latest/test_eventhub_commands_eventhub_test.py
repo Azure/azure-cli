@@ -45,7 +45,7 @@ class EHEventhubCURDScenarioTest(ScenarioTest):
 
         # updated teh Storageaccount ID
         subid = self.cmd('account show --query id -otsv').output.replace('\n', '')
-        storageaccountid = '/subscriptions/' + subid + '/resourcegroups/v-ajnavtestcli/providers/Microsoft.Storage/storageAccounts/testing1sdkeventhub'
+        storageaccountid = '/subscriptions/' + subid + '/resourcegroups/v-ajnavtest/providers/Microsoft.Storage/storageAccounts/testingsdkeventhubnew'
         self.kwargs.update({'storageaccount': storageaccountid})
 
         # Create Namespace

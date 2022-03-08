@@ -9,7 +9,7 @@ import unittest
 from datetime import datetime, timedelta
 from dateutil import tz
 
-from azure.cli.testsdk import ResourceGroupPreparer, ScenarioTest, LiveScenarioTest
+from azure.cli.testsdk import ResourceGroupPreparer, KeyVaultPreparer, ScenarioTest, LiveScenarioTest
 
 from knack.util import CLIError
 
@@ -131,15 +131,14 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
 class KeyVaultKeyScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_key')
+    @KeyVaultPreparer(name_prefix='cli-test-kv-key-')
     def test_keyvault_key(self, resource_group):
         self.kwargs.update({
-            'kv': self.create_random_name('cli-test-kv-key-', 24),
             'loc': 'westus',
             'key': 'key1'
         })
 
-        keyvault = _create_keyvault(self, self.kwargs, additional_args='--enable-soft-delete false').\
-            get_output_in_json()
+        keyvault = self.cmd('keyvault show -n {kv} -g {rg}').get_output_in_json()
         self.kwargs['obj_id'] = keyvault['properties']['accessPolicies'][0]['objectId']
         key_perms = keyvault['properties']['accessPolicies'][0]['permissions']['keys']
         key_perms.append('purge')
@@ -195,9 +194,9 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
         self.kwargs['key_file'] = key_file
         self.cmd('keyvault key backup --vault-name {kv} -n {key} --file {key_file}')
         self.cmd('keyvault key delete --vault-name {kv} -n {key}')
-        time.sleep(10)
+        time.sleep(200)
         self.cmd('keyvault key purge --vault-name {kv} -n {key}')
-        time.sleep(10)
+        time.sleep(200)
         self.cmd('keyvault key list --vault-name {kv}',
                  checks=self.is_empty())
 
@@ -259,16 +258,15 @@ class KeyVaultSecretScenarioTest(ScenarioTest):
             _test_set_and_download(encoding)
 
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_secret')
+    @KeyVaultPreparer(name_prefix='cli-test-kv-se-')
     def test_keyvault_secret(self, resource_group):
 
         self.kwargs.update({
-            'kv': self.create_random_name('cli-test-kv-se-', 24),
             'loc': 'westus',
             'sec': 'secret1'
         })
 
-        keyvault = _create_keyvault(self, self.kwargs, additional_args='--enable-soft-delete false').\
-            get_output_in_json()
+        keyvault = self.cmd("keyvault show -n {kv} -g {rg}").get_output_in_json()
         self.kwargs['obj_id'] = keyvault['properties']['accessPolicies'][0]['objectId']
         secret_perms = keyvault['properties']['accessPolicies'][0]['permissions']['secrets']
         secret_perms.append('purge')
@@ -323,9 +321,9 @@ class KeyVaultSecretScenarioTest(ScenarioTest):
         self.kwargs['bak_file'] = bak_file
         self.cmd('keyvault secret backup --vault-name {kv} -n {sec} --file {bak_file}')
         self.cmd('keyvault secret delete --vault-name {kv} -n {sec}')
-        time.sleep(10)
+        time.sleep(200)
         self.cmd('keyvault secret purge --vault-name {kv} -n {sec}')
-        time.sleep(10)
+        time.sleep(200)
         self.cmd('keyvault secret list --vault-name {kv}', checks=self.is_empty())
 
         # restore secret from backup
@@ -346,14 +344,12 @@ class KeyVaultSecretScenarioTest(ScenarioTest):
 class KeyVaultCertificateContactsScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_kv_cert_contacts')
+    @KeyVaultPreparer(name_prefix='cli-test-kv-ct-co-')
     def test_keyvault_certificate_contacts(self, resource_group):
 
         self.kwargs.update({
-            'kv': self.create_random_name('cli-test-kv-ct-co-', 24),
             'loc': 'westus'
         })
-
-        _create_keyvault(self, self.kwargs)
 
         self.cmd('keyvault certificate contact add --vault-name {kv} --email admin@contoso.com --name "John Doe" --phone 123-456-7890')
         self.cmd('keyvault certificate contact add --vault-name {kv} --email other@contoso.com ')
@@ -369,14 +365,12 @@ class KeyVaultCertificateContactsScenarioTest(ScenarioTest):
 class KeyVaultCertificateIssuerScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_kv_cert_issuer')
+    @KeyVaultPreparer(name_prefix='cli-test-kv-ct-is-')
     def test_keyvault_certificate_issuers(self, resource_group):
 
         self.kwargs.update({
-            'kv': self.create_random_name('cli-test-kv-ct-is-', 24),
             'loc': 'westus'
         })
-
-        _create_keyvault(self, self.kwargs)
 
         self.cmd('keyvault certificate issuer create --vault-name {kv} --issuer-name issuer1 --provider Test', checks=[
             self.check('provider', 'Test'),
@@ -429,15 +423,13 @@ class KeyVaultCertificateIssuerScenarioTest(ScenarioTest):
 class KeyVaultPendingCertificateScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_kv_cert_pending')
+    @KeyVaultPreparer(name_prefix='cli-test-kv-ct-pe-')
     def test_keyvault_pending_certificate(self, resource_group):
 
         self.kwargs.update({
-            'kv': self.create_random_name('cli-test-kv-ct-pe-', 24),
             'loc': 'westus',
             'policy_path': os.path.join(TEST_DIR, 'policy_pending.json')
         })
-
-        _create_keyvault(self, self.kwargs)
 
         self.kwargs['fake_cert_path'] = os.path.join(TEST_DIR, 'import_pem_plain.pem')
         self.cmd('keyvault certificate create --vault-name {kv} -n pending-cert -p @"{policy_path}"', checks=[
@@ -463,15 +455,13 @@ class KeyVaultPendingCertificateScenarioTest(ScenarioTest):
 class KeyVaultCertificateDownloadScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_kv_cert_download')
+    @KeyVaultPreparer(name_prefix='cli-test-kv-ct-dl-', location='eastus2')
     def test_keyvault_certificate_download(self, resource_group):
         import OpenSSL.crypto
 
         self.kwargs.update({
-            'kv': self.create_random_name('cli-test-kv-ct-dl-', 24),
             'loc': 'eastus2'
         })
-
-        _create_keyvault(self, self.kwargs)
 
         pem_file = os.path.join(TEST_DIR, 'import_pem_plain.pem')
         pem_policy_path = os.path.join(TEST_DIR, 'policy_import_pem.json')
@@ -535,14 +525,12 @@ class KeyVaultCertificateDefaultPolicyScenarioTest(ScenarioTest):
 class KeyVaultCertificateScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_cert')
+    @KeyVaultPreparer(name_prefix='cli-test-kv-ct-')
     def test_keyvault_certificate_crud(self, resource_group):
 
         self.kwargs.update({
-            'kv': self.create_random_name('cli-test-kv-ct-', 24),
             'loc': 'westus'
         })
-
-        _create_keyvault(self, self.kwargs)
 
         policy_path = os.path.join(TEST_DIR, 'policy.json')
         policy2_path = os.path.join(TEST_DIR, 'policy2.json')
@@ -652,14 +640,12 @@ def _generate_certificate(path, keyfile=None, password=None):
 class KeyVaultCertificateImportScenario(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_sd')
+    @KeyVaultPreparer(name_prefix='cli-test-kv-ct-im-', location='eastus2')
     def test_keyvault_certificate_import(self, resource_group):
 
         self.kwargs.update({
-            'kv': self.create_random_name('cli-test-kv-ct-im-', 24),
             'loc': 'eastus2'
         })
-
-        _create_keyvault(self, self.kwargs)
 
         # test certificate import
         self.kwargs.update({
@@ -737,8 +723,7 @@ class KeyVaultSoftDeleteScenarioTest(ScenarioTest):
         self.cmd('keyvault certificate delete --vault-name {kv} -n cert1')
         self.cmd('keyvault certificate delete --vault-name {kv} -n cert2')
 
-        if self.is_live:
-            time.sleep(20)
+        time.sleep(200)
 
         # recover secrets keys and certificates
         self.cmd('keyvault secret recover --vault-name {kv} -n secret1')

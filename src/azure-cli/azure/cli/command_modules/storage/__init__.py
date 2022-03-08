@@ -8,6 +8,7 @@ from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands import AzCommandGroup, AzArgumentContext
 
 import azure.cli.command_modules.storage._help  # pylint: disable=unused-import
+from knack.util import CLIError
 
 
 class StorageCommandsLoader(AzCommandsLoader):
@@ -183,6 +184,15 @@ class StorageArgumentContext(AzArgumentContext):
         self.extra('container_name', required=True, validator=get_not_none_validator('container_name'))
         self.extra('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
 
+    def register_blob_arguments_track2(self):
+        from ._validators import validate_blob_arguments
+        self.extra('blob_name')
+        self.extra('container_name')
+        self.extra('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
+        self.extra('blob_url', help='The full endpoint URL to the Blob, including SAS token and snapshot if used. '
+                                    'This could be either the primary endpoint, or the secondary endpoint depending on '
+                                    'the current `location_mode`.', validator=validate_blob_arguments)
+
     def register_container_arguments(self):
         from ._validators import get_not_none_validator
         self.extra('container_name', required=True, validator=get_not_none_validator('container_name'))
@@ -190,7 +200,7 @@ class StorageArgumentContext(AzArgumentContext):
 
     def register_fs_directory_arguments(self):
         self.extra('file_system_name', required=True, options_list=['-f', '--file-system'],
-                   help='File system name.')
+                   help='File system name (i.e. container name).')
         self.extra('directory_path', required=True, options_list=['-p', '--path'],
                    help='The path to a file or directory in the specified file system.')
         self.extra('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
@@ -210,9 +220,11 @@ class StorageCommandGroup(AzCommandGroup):
         self._register_data_plane_account_arguments(command_name)
         if oauth:
             self._register_data_plane_oauth_arguments(command_name)
+        _merge_new_exception_handler(kwargs, self.account_key_exception_handler())
 
     def storage_command_oauth(self, *args, **kwargs):
         _merge_new_exception_handler(kwargs, self.get_handler_suppress_some_400())
+        _merge_new_exception_handler(kwargs, self.account_key_exception_handler())
         self.storage_command(*args, oauth=True, **kwargs)
 
     def storage_custom_command(self, name, method_name, oauth=False, **kwargs):
@@ -220,9 +232,11 @@ class StorageCommandGroup(AzCommandGroup):
         self._register_data_plane_account_arguments(command_name)
         if oauth:
             self._register_data_plane_oauth_arguments(command_name)
+        _merge_new_exception_handler(kwargs, self.account_key_exception_handler())
 
     def storage_custom_command_oauth(self, *args, **kwargs):
         _merge_new_exception_handler(kwargs, self.get_handler_suppress_some_400())
+        _merge_new_exception_handler(kwargs, self.account_key_exception_handler())
         self.storage_custom_command(*args, oauth=True, **kwargs)
 
     @classmethod
@@ -256,6 +270,19 @@ Authentication failure. This may be caused by either invalid account key, connec
             if hasattr(ex, 'status_code') and ex.status_code == 409\
                     and hasattr(ex, 'error_code') and ex.error_code == 'NoPendingCopyOperation':
                 pass
+
+        return handler
+
+    @classmethod
+    def account_key_exception_handler(cls):
+        def handler(ex):
+            from azure.common import AzureException
+            from azure.core.exceptions import ClientAuthenticationError
+
+            if isinstance(ex, AzureException) and 'incorrect padding' in ex.args[0].lower():
+                raise CLIError('incorrect usage: the given account key may be not valid.')
+            if isinstance(ex, ClientAuthenticationError) and 'incorrect padding' in ex.args[0].lower():
+                raise CLIError('incorrect usage: the given account key may be not valid.')
 
         return handler
 

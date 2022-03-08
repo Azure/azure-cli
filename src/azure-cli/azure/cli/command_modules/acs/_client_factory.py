@@ -45,6 +45,15 @@ def cf_container_registry_service(cli_ctx, subscription_id=None):
                                    subscription_id=subscription_id)
 
 
+def cf_snapshots_client(cli_ctx, subscription_id=None):
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_CONTAINERSERVICE,
+                                   subscription_id=subscription_id).snapshots
+
+
+def cf_snapshots(cli_ctx, *_):
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_CONTAINERSERVICE).snapshots
+
+
 def get_auth_management_client(cli_ctx, scope=None, **_):
     import re
 
@@ -59,9 +68,7 @@ def get_auth_management_client(cli_ctx, scope=None, **_):
 
 
 def get_container_service_client(cli_ctx, **_):
-    from azure.mgmt.containerservice import ContainerServiceClient
-
-    return get_mgmt_service_client(cli_ctx, ContainerServiceClient)
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_CONTAINERSERVICE)
 
 
 def get_osa_container_service_client(cli_ctx, **_):

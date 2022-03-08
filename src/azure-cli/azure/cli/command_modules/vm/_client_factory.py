@@ -93,6 +93,10 @@ def cf_run_commands(cli_ctx, _):
     return _compute_client_factory(cli_ctx).virtual_machine_run_commands
 
 
+def cf_vmss_run_commands(cli_ctx, _):
+    return _compute_client_factory(cli_ctx).virtual_machine_scale_set_vm_run_commands
+
+
 def cf_rolling_upgrade_commands(cli_ctx, _):
     return _compute_client_factory(cli_ctx).virtual_machine_scale_set_rolling_upgrades
 
@@ -107,6 +111,14 @@ def cf_gallery_images(cli_ctx, _):
 
 def cf_gallery_image_versions(cli_ctx, _):
     return _compute_client_factory(cli_ctx).gallery_image_versions
+
+
+def cf_gallery_application(cli_ctx, *_):
+    return _compute_client_factory(cli_ctx).gallery_applications
+
+
+def cf_gallery_application_version(cli_ctx, *_):
+    return _compute_client_factory(cli_ctx).gallery_application_versions
 
 
 def cf_proximity_placement_groups(cli_ctx, _):
@@ -155,3 +167,42 @@ def _dev_test_labs_client_factory(cli_ctx, subscription_id, *_):
     from azure.mgmt.devtestlabs import DevTestLabsClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     return get_mgmt_service_client(cli_ctx, DevTestLabsClient, subscription_id=subscription_id)
+
+
+def cf_vm_cl(cli_ctx, *_):
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from azure.mgmt.compute import ComputeManagementClient
+    return get_mgmt_service_client(cli_ctx,
+                                   ComputeManagementClient)
+
+
+def cf_shared_galleries(cli_ctx, *_):
+    return cf_vm_cl(cli_ctx).shared_galleries
+
+
+def cf_gallery_sharing_profile(cli_ctx, *_):
+    return cf_vm_cl(cli_ctx).gallery_sharing_profile
+
+
+def cf_shared_gallery_image(cli_ctx, *_):
+    return cf_vm_cl(cli_ctx).shared_gallery_images
+
+
+def cf_shared_gallery_image_version(cli_ctx, *_):
+    return cf_vm_cl(cli_ctx).shared_gallery_image_versions
+
+
+def cf_capacity_reservation_groups(cli_ctx, *_):
+    return cf_vm_cl(cli_ctx).capacity_reservation_groups
+
+
+def cf_capacity_reservations(cli_ctx, *_):
+    return cf_vm_cl(cli_ctx).capacity_reservations
+
+
+def cf_restore_point(cli_ctx, *_):
+    return cf_vm_cl(cli_ctx).restore_points
+
+
+def cf_restore_point_collection(cli_ctx, *_):
+    return cf_vm_cl(cli_ctx).restore_point_collections

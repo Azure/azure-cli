@@ -269,7 +269,7 @@ class StorageAccountTests(ScenarioTest):
 Note:
 
 1. Like `ResourceGroupPreparer`, you can use `StorageAccountPreparer` to prepare a disposable storage account for the test. The account is deleted along with the resource group during test teardown.
-2. Creation of a storage account requires a resource group. Therefore `ResourceGroupPrepare` must be placed above `StorageAccountPreparer`, since preparers are designed to be executed from top to bottom. (The core preparer implementation is in the [AbstractPreparer](https://github.com/Azure/azure-python-devtools/blob/master/src/azure_devtools/scenario_tests/preparers.py) class in the [azure-devtools](https://pypi.python.org/pypi/azure-devtools) package.)
+2. Creation of a storage account requires a resource group. Therefore `ResourceGroupPrepare` must be placed above `StorageAccountPreparer`, since preparers are designed to be executed from top to bottom. (The core preparer implementation is in the `azure.cli.testsdk.scenario_tests.preparers.AbstractPreparer`.)
 3. The preparers communicate among themselves by adding values to the `kwargs` of the decorated methods. Therefore the `StorageAccountPreparer` uses the resource group created in the preceding `ResourceGroupPreparer`.
 4. The `StorageAccountPreparer` can be further customized to modify the parameters of the created storage account:
 

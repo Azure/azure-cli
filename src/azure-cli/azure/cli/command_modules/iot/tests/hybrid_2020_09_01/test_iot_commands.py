@@ -5,7 +5,7 @@
 # pylint: disable=too-many-statements
 
 from azure.cli.testsdk import ResourceGroupPreparer, ScenarioTest, StorageAccountPreparer
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from .recording_processors import KeyReplacer
 import unittest
 

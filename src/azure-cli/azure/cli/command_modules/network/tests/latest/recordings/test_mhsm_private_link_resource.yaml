@@ -20,22 +20,74 @@ interactions:
       ParameterSetName:
       - --hsm-name -g -l --administrators
       User-Agent:
-      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-keyvault/9.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-keyvault/9.1.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002?api-version=2021-04-01-preview
   response:
     body:
-      string: '{"sku":{"family":"B","name":"Standard_B1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002","name":"cli-test-hsm-plr-000002","type":"Microsoft.KeyVault/managedHSMs","location":"centraluseuap","tags":{},"properties":{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","hsmUri":"https://cli-test-hsm-plr-000002.managedhsm.azure.net","initialAdminObjectIds":["3707fb2f-ac10-4591-a04f-8b0d786ea37d"],"enableSoftDelete":true,"softDeleteRetentionInDays":90,"enablePurgeProtection":false,"provisioningState":"Provisioning","statusMessage":"Resource
-        creation in progress. Allocating hardware..."}}'
+      string: '{"error":{"code":"GatewayTimeout","message":"The gateway did not receive
+        a response from ''Microsoft.KeyVault'' within the specified time period."}}'
+    headers:
+      cache-control:
+      - no-cache
+      connection:
+      - close
+      content-length:
+      - '146'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Oct 2021 13:42:08 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - service
+    status:
+      code: 504
+      message: Gateway Timeout
+- request:
+    body: '{"location": "centraluseuap", "sku": {"family": "B", "name": "Standard_B1"},
+      "properties": {"tenantId": "54826b22-38d6-4fb2-bad9-b7b93a3e9c5a", "initialAdminObjectIds":
+      ["3707fb2f-ac10-4591-a04f-8b0d786ea37d"], "enableSoftDelete": true, "softDeleteRetentionInDays":
+      90, "networkAcls": {"bypass": "AzureServices", "defaultAction": "Allow"}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - keyvault create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '340'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --hsm-name -g -l --administrators
+      User-Agent:
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-keyvault/9.1.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002?api-version=2021-04-01-preview
+  response:
+    body:
+      string: '{"sku":{"family":"B","name":"Standard_B1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002","name":"cli-test-hsm-plr-000002","type":"Microsoft.KeyVault/managedHSMs","location":"centraluseuap","tags":{},"systemData":{"createdBy":"v-kaisun@microsoft.com","createdByType":"User","createdAt":"2021-10-11T13:41:49.516Z","lastModifiedBy":"v-kaisun@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-10-11T13:42:11.232Z"},"properties":{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","hsmUri":"https://cli-test-hsm-plr-000002.managedhsm.azure.net/","initialAdminObjectIds":["3707fb2f-ac10-4591-a04f-8b0d786ea37d"],"enableSoftDelete":true,"softDeleteRetentionInDays":90,"enablePurgeProtection":false,"provisioningState":"Provisioning","statusMessage":"Resource
+        creation in progress. Allocating hardware...","networkAcls":{"bypass":"AzureServices","defaultAction":"Allow","ipRules":[],"virtualNetworkRules":[]},"publicNetworkAccess":"Enabled"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '757'
+      - '1121'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 28 May 2021 10:01:02 GMT
+      - Mon, 11 Oct 2021 13:42:15 GMT
       expires:
       - '-1'
       pragma:
@@ -53,9 +105,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.1.338.0
+      - 1.5.155.0
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1193'
       x-powered-by:
       - ASP.NET
     status:
@@ -75,22 +127,22 @@ interactions:
       ParameterSetName:
       - --hsm-name -g -l --administrators
       User-Agent:
-      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-keyvault/9.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-keyvault/9.1.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002?api-version=2021-04-01-preview
   response:
     body:
-      string: '{"sku":{"family":"B","name":"Standard_B1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002","name":"cli-test-hsm-plr-000002","type":"Microsoft.KeyVault/managedHSMs","location":"centraluseuap","tags":{},"properties":{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","hsmUri":"https://cli-test-hsm-plr-000002.managedhsm.azure.net/","initialAdminObjectIds":["3707fb2f-ac10-4591-a04f-8b0d786ea37d"],"enableSoftDelete":true,"softDeleteRetentionInDays":90,"enablePurgeProtection":false,"provisioningState":"Provisioning","statusMessage":"Resource
-        creation in progress. Allocating hardware..."}}'
+      string: '{"sku":{"family":"B","name":"Standard_B1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002","name":"cli-test-hsm-plr-000002","type":"Microsoft.KeyVault/managedHSMs","location":"centraluseuap","tags":{},"systemData":{"createdBy":"v-kaisun@microsoft.com","createdByType":"User","createdAt":"2021-10-11T13:41:49.516Z","lastModifiedBy":"v-kaisun@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-10-11T13:42:11.232Z"},"properties":{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","hsmUri":"https://cli-test-hsm-plr-000002.managedhsm.azure.net/","initialAdminObjectIds":["3707fb2f-ac10-4591-a04f-8b0d786ea37d"],"enableSoftDelete":true,"softDeleteRetentionInDays":90,"enablePurgeProtection":false,"provisioningState":"Provisioning","statusMessage":"Resource
+        creation in progress. Allocating hardware...","networkAcls":{"bypass":"AzureServices","defaultAction":"Allow","ipRules":[],"virtualNetworkRules":[]},"publicNetworkAccess":"Enabled"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '758'
+      - '1121'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 28 May 2021 10:01:33 GMT
+      - Mon, 11 Oct 2021 13:42:46 GMT
       expires:
       - '-1'
       pragma:
@@ -108,7 +160,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.1.338.0
+      - 1.5.155.0
       x-powered-by:
       - ASP.NET
     status:
@@ -128,22 +180,22 @@ interactions:
       ParameterSetName:
       - --hsm-name -g -l --administrators
       User-Agent:
-      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-keyvault/9.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-keyvault/9.1.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002?api-version=2021-04-01-preview
   response:
     body:
-      string: '{"sku":{"family":"B","name":"Standard_B1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002","name":"cli-test-hsm-plr-000002","type":"Microsoft.KeyVault/managedHSMs","location":"centraluseuap","tags":{},"properties":{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","hsmUri":"https://cli-test-hsm-plr-000002.managedhsm.azure.net/","initialAdminObjectIds":["3707fb2f-ac10-4591-a04f-8b0d786ea37d"],"enableSoftDelete":true,"softDeleteRetentionInDays":90,"enablePurgeProtection":false,"provisioningState":"Provisioning","statusMessage":"Resource
-        creation in progress. Allocating hardware..."}}'
+      string: '{"sku":{"family":"B","name":"Standard_B1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002","name":"cli-test-hsm-plr-000002","type":"Microsoft.KeyVault/managedHSMs","location":"centraluseuap","tags":{},"systemData":{"createdBy":"v-kaisun@microsoft.com","createdByType":"User","createdAt":"2021-10-11T13:41:49.516Z","lastModifiedBy":"v-kaisun@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-10-11T13:42:11.232Z"},"properties":{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","hsmUri":"https://cli-test-hsm-plr-000002.managedhsm.azure.net/","initialAdminObjectIds":["3707fb2f-ac10-4591-a04f-8b0d786ea37d"],"enableSoftDelete":true,"softDeleteRetentionInDays":90,"enablePurgeProtection":false,"provisioningState":"Provisioning","statusMessage":"Resource
+        creation in progress. Allocating hardware...","networkAcls":{"bypass":"AzureServices","defaultAction":"Allow","ipRules":[],"virtualNetworkRules":[]},"publicNetworkAccess":"Enabled"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '758'
+      - '1121'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 28 May 2021 10:02:03 GMT
+      - Mon, 11 Oct 2021 13:43:17 GMT
       expires:
       - '-1'
       pragma:
@@ -161,7 +213,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.1.338.0
+      - 1.5.155.0
       x-powered-by:
       - ASP.NET
     status:
@@ -181,22 +233,22 @@ interactions:
       ParameterSetName:
       - --hsm-name -g -l --administrators
       User-Agent:
-      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-keyvault/9.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-keyvault/9.1.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002?api-version=2021-04-01-preview
   response:
     body:
-      string: '{"sku":{"family":"B","name":"Standard_B1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002","name":"cli-test-hsm-plr-000002","type":"Microsoft.KeyVault/managedHSMs","location":"centraluseuap","tags":{},"properties":{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","hsmUri":"https://cli-test-hsm-plr-000002.managedhsm.azure.net/","initialAdminObjectIds":["3707fb2f-ac10-4591-a04f-8b0d786ea37d"],"enableSoftDelete":true,"softDeleteRetentionInDays":90,"enablePurgeProtection":false,"provisioningState":"Provisioning","statusMessage":"Resource
-        creation in progress. Starting service..."}}'
+      string: '{"sku":{"family":"B","name":"Standard_B1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002","name":"cli-test-hsm-plr-000002","type":"Microsoft.KeyVault/managedHSMs","location":"centraluseuap","tags":{},"systemData":{"createdBy":"v-kaisun@microsoft.com","createdByType":"User","createdAt":"2021-10-11T13:41:49.516Z","lastModifiedBy":"v-kaisun@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-10-11T13:42:11.232Z"},"properties":{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","hsmUri":"https://cli-test-hsm-plr-000002.managedhsm.azure.net/","initialAdminObjectIds":["3707fb2f-ac10-4591-a04f-8b0d786ea37d"],"enableSoftDelete":true,"softDeleteRetentionInDays":90,"enablePurgeProtection":false,"provisioningState":"Provisioning","statusMessage":"Resource
+        creation in progress. Allocating hardware...","networkAcls":{"bypass":"AzureServices","defaultAction":"Allow","ipRules":[],"virtualNetworkRules":[]},"publicNetworkAccess":"Enabled"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '755'
+      - '1121'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 28 May 2021 10:02:33 GMT
+      - Mon, 11 Oct 2021 13:43:48 GMT
       expires:
       - '-1'
       pragma:
@@ -214,7 +266,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.1.338.0
+      - 1.5.155.0
       x-powered-by:
       - ASP.NET
     status:
@@ -234,22 +286,22 @@ interactions:
       ParameterSetName:
       - --hsm-name -g -l --administrators
       User-Agent:
-      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-keyvault/9.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-keyvault/9.1.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002?api-version=2021-04-01-preview
   response:
     body:
-      string: '{"sku":{"family":"B","name":"Standard_B1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002","name":"cli-test-hsm-plr-000002","type":"Microsoft.KeyVault/managedHSMs","location":"centraluseuap","tags":{},"properties":{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","hsmUri":"https://cli-test-hsm-plr-000002.managedhsm.azure.net/","initialAdminObjectIds":["3707fb2f-ac10-4591-a04f-8b0d786ea37d"],"enableSoftDelete":true,"softDeleteRetentionInDays":90,"enablePurgeProtection":false,"provisioningState":"Provisioning","statusMessage":"Resource
-        creation in progress. Starting service..."}}'
+      string: '{"sku":{"family":"B","name":"Standard_B1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002","name":"cli-test-hsm-plr-000002","type":"Microsoft.KeyVault/managedHSMs","location":"centraluseuap","tags":{},"systemData":{"createdBy":"v-kaisun@microsoft.com","createdByType":"User","createdAt":"2021-10-11T13:41:49.516Z","lastModifiedBy":"v-kaisun@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-10-11T13:42:11.232Z"},"properties":{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","hsmUri":"https://cli-test-hsm-plr-000002.managedhsm.azure.net/","initialAdminObjectIds":["3707fb2f-ac10-4591-a04f-8b0d786ea37d"],"enableSoftDelete":true,"softDeleteRetentionInDays":90,"enablePurgeProtection":false,"provisioningState":"Provisioning","statusMessage":"Resource
+        creation in progress. Allocating hardware...","networkAcls":{"bypass":"AzureServices","defaultAction":"Allow","ipRules":[],"virtualNetworkRules":[]},"publicNetworkAccess":"Enabled"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '755'
+      - '1121'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 28 May 2021 10:03:05 GMT
+      - Mon, 11 Oct 2021 13:44:19 GMT
       expires:
       - '-1'
       pragma:
@@ -267,7 +319,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.1.338.0
+      - 1.5.155.0
       x-powered-by:
       - ASP.NET
     status:
@@ -287,22 +339,22 @@ interactions:
       ParameterSetName:
       - --hsm-name -g -l --administrators
       User-Agent:
-      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-keyvault/9.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-keyvault/9.1.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002?api-version=2021-04-01-preview
   response:
     body:
-      string: '{"sku":{"family":"B","name":"Standard_B1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002","name":"cli-test-hsm-plr-000002","type":"Microsoft.KeyVault/managedHSMs","location":"centraluseuap","tags":{},"properties":{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","hsmUri":"https://cli-test-hsm-plr-000002.managedhsm.azure.net/","initialAdminObjectIds":["3707fb2f-ac10-4591-a04f-8b0d786ea37d"],"enableSoftDelete":true,"softDeleteRetentionInDays":90,"enablePurgeProtection":false,"provisioningState":"Provisioning","statusMessage":"Resource
-        creation in progress. Starting service..."}}'
+      string: '{"sku":{"family":"B","name":"Standard_B1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002","name":"cli-test-hsm-plr-000002","type":"Microsoft.KeyVault/managedHSMs","location":"centraluseuap","tags":{},"systemData":{"createdBy":"v-kaisun@microsoft.com","createdByType":"User","createdAt":"2021-10-11T13:41:49.516Z","lastModifiedBy":"v-kaisun@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-10-11T13:42:11.232Z"},"properties":{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","hsmUri":"https://cli-test-hsm-plr-000002.managedhsm.azure.net/","initialAdminObjectIds":["3707fb2f-ac10-4591-a04f-8b0d786ea37d"],"enableSoftDelete":true,"softDeleteRetentionInDays":90,"enablePurgeProtection":false,"provisioningState":"Provisioning","statusMessage":"Resource
+        creation in progress. Allocating hardware...","networkAcls":{"bypass":"AzureServices","defaultAction":"Allow","ipRules":[],"virtualNetworkRules":[]},"publicNetworkAccess":"Enabled"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '755'
+      - '1121'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 28 May 2021 10:03:35 GMT
+      - Mon, 11 Oct 2021 13:44:49 GMT
       expires:
       - '-1'
       pragma:
@@ -320,7 +372,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.1.338.0
+      - 1.5.155.0
       x-powered-by:
       - ASP.NET
     status:
@@ -340,22 +392,22 @@ interactions:
       ParameterSetName:
       - --hsm-name -g -l --administrators
       User-Agent:
-      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-keyvault/9.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-keyvault/9.1.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002?api-version=2021-04-01-preview
   response:
     body:
-      string: '{"sku":{"family":"B","name":"Standard_B1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002","name":"cli-test-hsm-plr-000002","type":"Microsoft.KeyVault/managedHSMs","location":"centraluseuap","tags":{},"properties":{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","hsmUri":"https://cli-test-hsm-plr-000002.managedhsm.azure.net/","initialAdminObjectIds":["3707fb2f-ac10-4591-a04f-8b0d786ea37d"],"enableSoftDelete":true,"softDeleteRetentionInDays":90,"enablePurgeProtection":false,"provisioningState":"Provisioning","statusMessage":"Resource
-        creation in progress. Starting service..."}}'
+      string: '{"sku":{"family":"B","name":"Standard_B1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002","name":"cli-test-hsm-plr-000002","type":"Microsoft.KeyVault/managedHSMs","location":"centraluseuap","tags":{},"systemData":{"createdBy":"v-kaisun@microsoft.com","createdByType":"User","createdAt":"2021-10-11T13:41:49.516Z","lastModifiedBy":"v-kaisun@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-10-11T13:42:11.232Z"},"properties":{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","hsmUri":"https://cli-test-hsm-plr-000002.managedhsm.azure.net/","initialAdminObjectIds":["3707fb2f-ac10-4591-a04f-8b0d786ea37d"],"enableSoftDelete":true,"softDeleteRetentionInDays":90,"enablePurgeProtection":false,"provisioningState":"Provisioning","statusMessage":"Resource
+        creation in progress. Allocating hardware...","networkAcls":{"bypass":"AzureServices","defaultAction":"Allow","ipRules":[],"virtualNetworkRules":[]},"publicNetworkAccess":"Enabled"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '755'
+      - '1121'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 28 May 2021 10:04:05 GMT
+      - Mon, 11 Oct 2021 13:45:20 GMT
       expires:
       - '-1'
       pragma:
@@ -373,7 +425,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.1.338.0
+      - 1.5.155.0
       x-powered-by:
       - ASP.NET
     status:
@@ -393,22 +445,22 @@ interactions:
       ParameterSetName:
       - --hsm-name -g -l --administrators
       User-Agent:
-      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-keyvault/9.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-keyvault/9.1.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002?api-version=2021-04-01-preview
   response:
     body:
-      string: '{"sku":{"family":"B","name":"Standard_B1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002","name":"cli-test-hsm-plr-000002","type":"Microsoft.KeyVault/managedHSMs","location":"centraluseuap","tags":{},"properties":{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","hsmUri":"https://cli-test-hsm-plr-000002.managedhsm.azure.net/","initialAdminObjectIds":["3707fb2f-ac10-4591-a04f-8b0d786ea37d"],"enableSoftDelete":true,"softDeleteRetentionInDays":90,"enablePurgeProtection":false,"provisioningState":"Provisioning","statusMessage":"Resource
-        creation in progress. Starting service..."}}'
+      string: '{"sku":{"family":"B","name":"Standard_B1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002","name":"cli-test-hsm-plr-000002","type":"Microsoft.KeyVault/managedHSMs","location":"centraluseuap","tags":{},"systemData":{"createdBy":"v-kaisun@microsoft.com","createdByType":"User","createdAt":"2021-10-11T13:41:49.516Z","lastModifiedBy":"v-kaisun@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-10-11T13:42:11.232Z"},"properties":{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","hsmUri":"https://cli-test-hsm-plr-000002.managedhsm.azure.net/","initialAdminObjectIds":["3707fb2f-ac10-4591-a04f-8b0d786ea37d"],"enableSoftDelete":true,"softDeleteRetentionInDays":90,"enablePurgeProtection":false,"provisioningState":"Provisioning","statusMessage":"Resource
+        creation in progress. Allocating hardware...","networkAcls":{"bypass":"AzureServices","defaultAction":"Allow","ipRules":[],"virtualNetworkRules":[]},"publicNetworkAccess":"Enabled"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '755'
+      - '1121'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 28 May 2021 10:04:36 GMT
+      - Mon, 11 Oct 2021 13:45:51 GMT
       expires:
       - '-1'
       pragma:
@@ -426,7 +478,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.1.338.0
+      - 1.5.155.0
       x-powered-by:
       - ASP.NET
     status:
@@ -446,22 +498,22 @@ interactions:
       ParameterSetName:
       - --hsm-name -g -l --administrators
       User-Agent:
-      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-keyvault/9.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-keyvault/9.1.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002?api-version=2021-04-01-preview
   response:
     body:
-      string: '{"sku":{"family":"B","name":"Standard_B1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002","name":"cli-test-hsm-plr-000002","type":"Microsoft.KeyVault/managedHSMs","location":"centraluseuap","tags":{},"properties":{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","hsmUri":"https://cli-test-hsm-plr-000002.managedhsm.azure.net/","initialAdminObjectIds":["3707fb2f-ac10-4591-a04f-8b0d786ea37d"],"enableSoftDelete":true,"softDeleteRetentionInDays":90,"enablePurgeProtection":false,"provisioningState":"Provisioning","statusMessage":"Resource
-        creation in progress. Starting service..."}}'
+      string: '{"sku":{"family":"B","name":"Standard_B1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002","name":"cli-test-hsm-plr-000002","type":"Microsoft.KeyVault/managedHSMs","location":"centraluseuap","tags":{},"systemData":{"createdBy":"v-kaisun@microsoft.com","createdByType":"User","createdAt":"2021-10-11T13:41:49.516Z","lastModifiedBy":"v-kaisun@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-10-11T13:42:11.232Z"},"properties":{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","hsmUri":"https://cli-test-hsm-plr-000002.managedhsm.azure.net/","initialAdminObjectIds":["3707fb2f-ac10-4591-a04f-8b0d786ea37d"],"enableSoftDelete":true,"softDeleteRetentionInDays":90,"enablePurgeProtection":false,"provisioningState":"Provisioning","statusMessage":"Resource
+        creation in progress. Allocating hardware...","networkAcls":{"bypass":"AzureServices","defaultAction":"Allow","ipRules":[],"virtualNetworkRules":[]},"publicNetworkAccess":"Enabled"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '755'
+      - '1121'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 28 May 2021 10:05:06 GMT
+      - Mon, 11 Oct 2021 13:46:22 GMT
       expires:
       - '-1'
       pragma:
@@ -479,7 +531,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.1.338.0
+      - 1.5.155.0
       x-powered-by:
       - ASP.NET
     status:
@@ -499,22 +551,22 @@ interactions:
       ParameterSetName:
       - --hsm-name -g -l --administrators
       User-Agent:
-      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-keyvault/9.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-keyvault/9.1.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002?api-version=2021-04-01-preview
   response:
     body:
-      string: '{"sku":{"family":"B","name":"Standard_B1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002","name":"cli-test-hsm-plr-000002","type":"Microsoft.KeyVault/managedHSMs","location":"centraluseuap","tags":{},"properties":{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","hsmUri":"https://cli-test-hsm-plr-000002.managedhsm.azure.net/","initialAdminObjectIds":["3707fb2f-ac10-4591-a04f-8b0d786ea37d"],"enableSoftDelete":true,"softDeleteRetentionInDays":90,"enablePurgeProtection":false,"provisioningState":"Provisioning","statusMessage":"Resource
-        creation in progress. Starting service..."}}'
+      string: '{"sku":{"family":"B","name":"Standard_B1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002","name":"cli-test-hsm-plr-000002","type":"Microsoft.KeyVault/managedHSMs","location":"centraluseuap","tags":{},"systemData":{"createdBy":"v-kaisun@microsoft.com","createdByType":"User","createdAt":"2021-10-11T13:41:49.516Z","lastModifiedBy":"v-kaisun@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-10-11T13:42:11.232Z"},"properties":{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","hsmUri":"https://cli-test-hsm-plr-000002.managedhsm.azure.net/","initialAdminObjectIds":["3707fb2f-ac10-4591-a04f-8b0d786ea37d"],"enableSoftDelete":true,"softDeleteRetentionInDays":90,"enablePurgeProtection":false,"provisioningState":"Provisioning","statusMessage":"Resource
+        creation in progress. Allocating hardware...","networkAcls":{"bypass":"AzureServices","defaultAction":"Allow","ipRules":[],"virtualNetworkRules":[]},"publicNetworkAccess":"Enabled"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '755'
+      - '1121'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 28 May 2021 10:05:36 GMT
+      - Mon, 11 Oct 2021 13:46:52 GMT
       expires:
       - '-1'
       pragma:
@@ -532,7 +584,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.1.338.0
+      - 1.5.155.0
       x-powered-by:
       - ASP.NET
     status:
@@ -552,22 +604,22 @@ interactions:
       ParameterSetName:
       - --hsm-name -g -l --administrators
       User-Agent:
-      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-keyvault/9.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-keyvault/9.1.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002?api-version=2021-04-01-preview
   response:
     body:
-      string: '{"sku":{"family":"B","name":"Standard_B1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002","name":"cli-test-hsm-plr-000002","type":"Microsoft.KeyVault/managedHSMs","location":"centraluseuap","tags":{},"properties":{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","hsmUri":"https://cli-test-hsm-plr-000002.managedhsm.azure.net/","initialAdminObjectIds":["3707fb2f-ac10-4591-a04f-8b0d786ea37d"],"enableSoftDelete":true,"softDeleteRetentionInDays":90,"enablePurgeProtection":false,"provisioningState":"Succeeded","statusMessage":"Resource
-        creation in progress. Starting service..."}}'
+      string: '{"sku":{"family":"B","name":"Standard_B1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002","name":"cli-test-hsm-plr-000002","type":"Microsoft.KeyVault/managedHSMs","location":"centraluseuap","tags":{},"systemData":{"createdBy":"v-kaisun@microsoft.com","createdByType":"User","createdAt":"2021-10-11T13:41:49.516Z","lastModifiedBy":"v-kaisun@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-10-11T13:42:11.232Z"},"properties":{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","hsmUri":"https://cli-test-hsm-plr-000002.managedhsm.azure.net/","initialAdminObjectIds":["3707fb2f-ac10-4591-a04f-8b0d786ea37d"],"enableSoftDelete":true,"softDeleteRetentionInDays":90,"enablePurgeProtection":false,"provisioningState":"Provisioning","statusMessage":"Resource
+        creation in progress. Allocating hardware...","networkAcls":{"bypass":"AzureServices","defaultAction":"Allow","ipRules":[],"virtualNetworkRules":[]},"publicNetworkAccess":"Enabled"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '752'
+      - '1121'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 28 May 2021 10:06:08 GMT
+      - Mon, 11 Oct 2021 13:47:24 GMT
       expires:
       - '-1'
       pragma:
@@ -585,7 +637,431 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.1.338.0
+      - 1.5.155.0
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - keyvault create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --hsm-name -g -l --administrators
+      User-Agent:
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-keyvault/9.1.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002?api-version=2021-04-01-preview
+  response:
+    body:
+      string: '{"sku":{"family":"B","name":"Standard_B1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002","name":"cli-test-hsm-plr-000002","type":"Microsoft.KeyVault/managedHSMs","location":"centraluseuap","tags":{},"systemData":{"createdBy":"v-kaisun@microsoft.com","createdByType":"User","createdAt":"2021-10-11T13:41:49.516Z","lastModifiedBy":"v-kaisun@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-10-11T13:42:11.232Z"},"properties":{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","hsmUri":"https://cli-test-hsm-plr-000002.managedhsm.azure.net/","initialAdminObjectIds":["3707fb2f-ac10-4591-a04f-8b0d786ea37d"],"enableSoftDelete":true,"softDeleteRetentionInDays":90,"enablePurgeProtection":false,"provisioningState":"Provisioning","statusMessage":"Resource
+        creation in progress. Starting service...","networkAcls":{"bypass":"AzureServices","defaultAction":"Allow","ipRules":[],"virtualNetworkRules":[]},"publicNetworkAccess":"Enabled"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1118'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Oct 2021 13:47:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-service-version:
+      - 1.5.155.0
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - keyvault create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --hsm-name -g -l --administrators
+      User-Agent:
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-keyvault/9.1.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002?api-version=2021-04-01-preview
+  response:
+    body:
+      string: '{"sku":{"family":"B","name":"Standard_B1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002","name":"cli-test-hsm-plr-000002","type":"Microsoft.KeyVault/managedHSMs","location":"centraluseuap","tags":{},"systemData":{"createdBy":"v-kaisun@microsoft.com","createdByType":"User","createdAt":"2021-10-11T13:41:49.516Z","lastModifiedBy":"v-kaisun@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-10-11T13:42:11.232Z"},"properties":{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","hsmUri":"https://cli-test-hsm-plr-000002.managedhsm.azure.net/","initialAdminObjectIds":["3707fb2f-ac10-4591-a04f-8b0d786ea37d"],"enableSoftDelete":true,"softDeleteRetentionInDays":90,"enablePurgeProtection":false,"provisioningState":"Provisioning","statusMessage":"Resource
+        creation in progress. Starting service...","networkAcls":{"bypass":"AzureServices","defaultAction":"Allow","ipRules":[],"virtualNetworkRules":[]},"publicNetworkAccess":"Enabled"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1118'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Oct 2021 13:48:26 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-service-version:
+      - 1.5.155.0
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - keyvault create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --hsm-name -g -l --administrators
+      User-Agent:
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-keyvault/9.1.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002?api-version=2021-04-01-preview
+  response:
+    body:
+      string: '{"sku":{"family":"B","name":"Standard_B1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002","name":"cli-test-hsm-plr-000002","type":"Microsoft.KeyVault/managedHSMs","location":"centraluseuap","tags":{},"systemData":{"createdBy":"v-kaisun@microsoft.com","createdByType":"User","createdAt":"2021-10-11T13:41:49.516Z","lastModifiedBy":"v-kaisun@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-10-11T13:42:11.232Z"},"properties":{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","hsmUri":"https://cli-test-hsm-plr-000002.managedhsm.azure.net/","initialAdminObjectIds":["3707fb2f-ac10-4591-a04f-8b0d786ea37d"],"enableSoftDelete":true,"softDeleteRetentionInDays":90,"enablePurgeProtection":false,"provisioningState":"Provisioning","statusMessage":"Resource
+        creation in progress. Starting service...","networkAcls":{"bypass":"AzureServices","defaultAction":"Allow","ipRules":[],"virtualNetworkRules":[]},"publicNetworkAccess":"Enabled"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1118'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Oct 2021 13:48:57 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-service-version:
+      - 1.5.155.0
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - keyvault create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --hsm-name -g -l --administrators
+      User-Agent:
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-keyvault/9.1.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002?api-version=2021-04-01-preview
+  response:
+    body:
+      string: '{"sku":{"family":"B","name":"Standard_B1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002","name":"cli-test-hsm-plr-000002","type":"Microsoft.KeyVault/managedHSMs","location":"centraluseuap","tags":{},"systemData":{"createdBy":"v-kaisun@microsoft.com","createdByType":"User","createdAt":"2021-10-11T13:41:49.516Z","lastModifiedBy":"v-kaisun@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-10-11T13:42:11.232Z"},"properties":{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","hsmUri":"https://cli-test-hsm-plr-000002.managedhsm.azure.net/","initialAdminObjectIds":["3707fb2f-ac10-4591-a04f-8b0d786ea37d"],"enableSoftDelete":true,"softDeleteRetentionInDays":90,"enablePurgeProtection":false,"provisioningState":"Provisioning","statusMessage":"Resource
+        creation in progress. Starting service...","networkAcls":{"bypass":"AzureServices","defaultAction":"Allow","ipRules":[],"virtualNetworkRules":[]},"publicNetworkAccess":"Enabled"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1118'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Oct 2021 13:49:28 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-service-version:
+      - 1.5.155.0
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - keyvault create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --hsm-name -g -l --administrators
+      User-Agent:
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-keyvault/9.1.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002?api-version=2021-04-01-preview
+  response:
+    body:
+      string: '{"sku":{"family":"B","name":"Standard_B1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002","name":"cli-test-hsm-plr-000002","type":"Microsoft.KeyVault/managedHSMs","location":"centraluseuap","tags":{},"systemData":{"createdBy":"v-kaisun@microsoft.com","createdByType":"User","createdAt":"2021-10-11T13:41:49.516Z","lastModifiedBy":"v-kaisun@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-10-11T13:42:11.232Z"},"properties":{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","hsmUri":"https://cli-test-hsm-plr-000002.managedhsm.azure.net/","initialAdminObjectIds":["3707fb2f-ac10-4591-a04f-8b0d786ea37d"],"enableSoftDelete":true,"softDeleteRetentionInDays":90,"enablePurgeProtection":false,"provisioningState":"Provisioning","statusMessage":"Resource
+        creation in progress. Starting service...","networkAcls":{"bypass":"AzureServices","defaultAction":"Allow","ipRules":[],"virtualNetworkRules":[]},"publicNetworkAccess":"Enabled"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1118'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Oct 2021 13:49:59 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-service-version:
+      - 1.5.155.0
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - keyvault create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --hsm-name -g -l --administrators
+      User-Agent:
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-keyvault/9.1.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002?api-version=2021-04-01-preview
+  response:
+    body:
+      string: '{"sku":{"family":"B","name":"Standard_B1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002","name":"cli-test-hsm-plr-000002","type":"Microsoft.KeyVault/managedHSMs","location":"centraluseuap","tags":{},"systemData":{"createdBy":"v-kaisun@microsoft.com","createdByType":"User","createdAt":"2021-10-11T13:41:49.516Z","lastModifiedBy":"v-kaisun@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-10-11T13:42:11.232Z"},"properties":{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","hsmUri":"https://cli-test-hsm-plr-000002.managedhsm.azure.net/","initialAdminObjectIds":["3707fb2f-ac10-4591-a04f-8b0d786ea37d"],"enableSoftDelete":true,"softDeleteRetentionInDays":90,"enablePurgeProtection":false,"provisioningState":"Provisioning","statusMessage":"Resource
+        creation in progress. Starting service...","networkAcls":{"bypass":"AzureServices","defaultAction":"Allow","ipRules":[],"virtualNetworkRules":[]},"publicNetworkAccess":"Enabled"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1118'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Oct 2021 13:50:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-service-version:
+      - 1.5.155.0
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - keyvault create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --hsm-name -g -l --administrators
+      User-Agent:
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-keyvault/9.1.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002?api-version=2021-04-01-preview
+  response:
+    body:
+      string: '{"sku":{"family":"B","name":"Standard_B1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002","name":"cli-test-hsm-plr-000002","type":"Microsoft.KeyVault/managedHSMs","location":"centraluseuap","tags":{},"systemData":{"createdBy":"v-kaisun@microsoft.com","createdByType":"User","createdAt":"2021-10-11T13:41:49.516Z","lastModifiedBy":"v-kaisun@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-10-11T13:42:11.232Z"},"properties":{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","hsmUri":"https://cli-test-hsm-plr-000002.managedhsm.azure.net/","initialAdminObjectIds":["3707fb2f-ac10-4591-a04f-8b0d786ea37d"],"enableSoftDelete":true,"softDeleteRetentionInDays":90,"enablePurgeProtection":false,"provisioningState":"Provisioning","statusMessage":"Resource
+        creation in progress. Starting service...","networkAcls":{"bypass":"AzureServices","defaultAction":"Allow","ipRules":[],"virtualNetworkRules":[]},"publicNetworkAccess":"Enabled"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1118'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Oct 2021 13:51:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-service-version:
+      - 1.5.155.0
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - keyvault create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --hsm-name -g -l --administrators
+      User-Agent:
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-keyvault/9.1.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002?api-version=2021-04-01-preview
+  response:
+    body:
+      string: '{"sku":{"family":"B","name":"Standard_B1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002","name":"cli-test-hsm-plr-000002","type":"Microsoft.KeyVault/managedHSMs","location":"centraluseuap","tags":{},"systemData":{"createdBy":"v-kaisun@microsoft.com","createdByType":"User","createdAt":"2021-10-11T13:41:49.516Z","lastModifiedBy":"v-kaisun@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-10-11T13:42:11.232Z"},"properties":{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","hsmUri":"https://cli-test-hsm-plr-000002.managedhsm.azure.net/","initialAdminObjectIds":["3707fb2f-ac10-4591-a04f-8b0d786ea37d"],"enableSoftDelete":true,"softDeleteRetentionInDays":90,"enablePurgeProtection":false,"provisioningState":"Succeeded","statusMessage":"Resource
+        creation in progress. Starting service...","networkAcls":{"bypass":"AzureServices","defaultAction":"Allow","ipRules":[],"virtualNetworkRules":[]},"publicNetworkAccess":"Enabled"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1115'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Oct 2021 13:51:31 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-service-version:
+      - 1.5.155.0
       x-powered-by:
       - ASP.NET
     status:
@@ -605,7 +1081,7 @@ interactions:
       ParameterSetName:
       - --name -g --type
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) AZURECLI/2.24.0
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) AZURECLI/2.29.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002/privateLinkResources?api-version=2021-04-01-preview
   response:
@@ -619,7 +1095,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 28 May 2021 10:06:09 GMT
+      - Mon, 11 Oct 2021 13:51:35 GMT
       expires:
       - '-1'
       pragma:
@@ -637,7 +1113,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.1.338.0
+      - 1.5.155.0
       x-powered-by:
       - ASP.NET
     status:
@@ -659,7 +1135,7 @@ interactions:
       ParameterSetName:
       - --hsm-name -g
       User-Agent:
-      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-keyvault/9.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-keyvault/9.1.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002?api-version=2021-04-01-preview
   response:
@@ -671,7 +1147,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 28 May 2021 10:06:12 GMT
+      - Mon, 11 Oct 2021 13:51:38 GMT
       expires:
       - '-1'
       location:
@@ -687,9 +1163,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.1.338.0
+      - 1.5.155.0
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
+      - '14998'
       x-powered-by:
       - ASP.NET
     status:
@@ -709,7 +1185,52 @@ interactions:
       ParameterSetName:
       - --hsm-name -g
       User-Agent:
-      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-keyvault/9.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-keyvault/9.1.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedhsms/cli-test-hsm-plr-000002?api-version=2021-04-01-preview&kv-operation=eyJjb2RlIjoiU29mdERlbGV0ZU1hbmFnZWRIc21Bc3luYyJ9
+  response:
+    body:
+      string: '{"error":{"code":"GatewayTimeout","message":"The gateway did not receive
+        a response from ''Microsoft.KeyVault'' within the specified time period."}}'
+    headers:
+      cache-control:
+      - no-cache
+      connection:
+      - close
+      content-length:
+      - '146'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Oct 2021 13:52:28 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - service
+    status:
+      code: 504
+      message: Gateway Timeout
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - keyvault delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --hsm-name -g
+      User-Agent:
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-keyvault/9.1.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedhsms/cli-test-hsm-plr-000002?api-version=2021-04-01-preview&kv-operation=eyJjb2RlIjoiU29mdERlbGV0ZU1hbmFnZWRIc21Bc3luYyJ9
   response:
@@ -721,7 +1242,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 28 May 2021 10:06:42 GMT
+      - Mon, 11 Oct 2021 13:52:30 GMT
       expires:
       - '-1'
       location:
@@ -737,7 +1258,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.1.338.0
+      - 1.5.155.0
       x-powered-by:
       - ASP.NET
     status:
@@ -757,36 +1278,36 @@ interactions:
       ParameterSetName:
       - --hsm-name -g
       User-Agent:
-      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-keyvault/9.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-keyvault/9.1.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedhsms/cli-test-hsm-plr-000002?api-version=2021-04-01-preview&kv-operation=eyJjb2RlIjoiU29mdERlbGV0ZU1hbmFnZWRIc21Bc3luYyJ9
   response:
     body:
-      string: ''
+      string: '{"error":{"code":"ResourceNotFound","message":"The Resource ''Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002''
+        under resource group ''cli_test_hsm_plr_rg000001'' was not found. For more
+        details please go to https://aka.ms/ARMResourceNotFoundFix"}}'
     headers:
       cache-control:
       - no-cache
+      content-length:
+      - '302'
+      content-type:
+      - application/json; charset=utf-8
       date:
-      - Fri, 28 May 2021 10:07:12 GMT
+      - Mon, 11 Oct 2021 13:53:02 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-aspnet-version:
-      - 4.0.30319
       x-content-type-options:
       - nosniff
-      x-ms-keyvault-service-version:
-      - 1.1.338.0
-      x-powered-by:
-      - ASP.NET
+      x-ms-failure-cause:
+      - gateway
     status:
-      code: 204
-      message: No Content
+      code: 404
+      message: Not Found
 - request:
     body: null
     headers:
@@ -801,12 +1322,12 @@ interactions:
       ParameterSetName:
       - --hsm-name -l
       User-Agent:
-      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-keyvault/9.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-keyvault/9.1.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.KeyVault/locations/centraluseuap/deletedManagedHSMs/cli-test-hsm-plr-000002?api-version=2021-04-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.KeyVault/locations/centraluseuap/deletedManagedHSMs/cli-test-hsm-plr-000002","name":"cli-test-hsm-plr-000002","type":"Microsoft.Keyvault/deletedManagedHSMs","properties":{"mhsmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002","location":"centraluseuap","deletionDate":"2021-05-28T10:06:12Z","scheduledPurgeDate":"2021-08-26T10:06:12Z","purgeProtectionEnabled":false,"tags":{}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.KeyVault/locations/centraluseuap/deletedManagedHSMs/cli-test-hsm-plr-000002","name":"cli-test-hsm-plr-000002","type":"Microsoft.Keyvault/deletedManagedHSMs","properties":{"mhsmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002","location":"centraluseuap","deletionDate":"2021-10-11T13:51:38Z","scheduledPurgeDate":"2022-01-09T13:51:38Z","purgeProtectionEnabled":false,"tags":{}}}'
     headers:
       cache-control:
       - no-cache
@@ -815,7 +1336,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 28 May 2021 10:07:15 GMT
+      - Mon, 11 Oct 2021 13:53:05 GMT
       expires:
       - '-1'
       pragma:
@@ -833,7 +1354,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.1.338.0
+      - 1.5.155.0
       x-powered-by:
       - ASP.NET
     status:
@@ -855,7 +1376,7 @@ interactions:
       ParameterSetName:
       - --hsm-name -l
       User-Agent:
-      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-keyvault/9.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-keyvault/9.1.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.KeyVault/locations/centraluseuap/deletedManagedHSMs/cli-test-hsm-plr-000002/purge?api-version=2021-04-01-preview
   response:
@@ -867,7 +1388,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 28 May 2021 10:07:17 GMT
+      - Mon, 11 Oct 2021 13:53:10 GMT
       expires:
       - '-1'
       location:
@@ -883,7 +1404,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.1.338.0
+      - 1.5.155.0
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
       x-powered-by:
@@ -905,7 +1426,7 @@ interactions:
       ParameterSetName:
       - --hsm-name -l
       User-Agent:
-      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-keyvault/9.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-keyvault/9.1.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.KeyVault/locations/centraluseuap/deletedManagedHSMs/cli-test-hsm-plr-000002?api-version=2021-04-01-preview&kv-operation=eyJjb2RlIjoiUHVyZ2VNYW5hZ2VkSHNtQXN5bmMifQ
   response:
@@ -917,7 +1438,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 28 May 2021 10:07:48 GMT
+      - Mon, 11 Oct 2021 13:53:41 GMT
       expires:
       - '-1'
       location:
@@ -933,7 +1454,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.1.338.0
+      - 1.5.155.0
       x-powered-by:
       - ASP.NET
     status:
@@ -953,7 +1474,7 @@ interactions:
       ParameterSetName:
       - --hsm-name -l
       User-Agent:
-      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-keyvault/9.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-keyvault/9.1.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.KeyVault/locations/centraluseuap/deletedManagedHSMs/cli-test-hsm-plr-000002?api-version=2021-04-01-preview&kv-operation=eyJjb2RlIjoiUHVyZ2VNYW5hZ2VkSHNtQXN5bmMifQ
   response:
@@ -965,7 +1486,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 28 May 2021 10:08:18 GMT
+      - Mon, 11 Oct 2021 13:54:12 GMT
       expires:
       - '-1'
       location:
@@ -981,7 +1502,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.1.338.0
+      - 1.5.155.0
       x-powered-by:
       - ASP.NET
     status:
@@ -1001,7 +1522,7 @@ interactions:
       ParameterSetName:
       - --hsm-name -l
       User-Agent:
-      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-keyvault/9.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-keyvault/9.1.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.KeyVault/locations/centraluseuap/deletedManagedHSMs/cli-test-hsm-plr-000002?api-version=2021-04-01-preview&kv-operation=eyJjb2RlIjoiUHVyZ2VNYW5hZ2VkSHNtQXN5bmMifQ
   response:
@@ -1013,7 +1534,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 28 May 2021 10:08:49 GMT
+      - Mon, 11 Oct 2021 13:54:43 GMT
       expires:
       - '-1'
       location:
@@ -1029,7 +1550,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.1.338.0
+      - 1.5.155.0
       x-powered-by:
       - ASP.NET
     status:
@@ -1049,7 +1570,7 @@ interactions:
       ParameterSetName:
       - --hsm-name -l
       User-Agent:
-      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-keyvault/9.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-keyvault/9.1.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.KeyVault/locations/centraluseuap/deletedManagedHSMs/cli-test-hsm-plr-000002?api-version=2021-04-01-preview&kv-operation=eyJjb2RlIjoiUHVyZ2VNYW5hZ2VkSHNtQXN5bmMifQ
   response:
@@ -1061,7 +1582,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 28 May 2021 10:09:19 GMT
+      - Mon, 11 Oct 2021 13:55:13 GMT
       expires:
       - '-1'
       location:
@@ -1077,7 +1598,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.1.338.0
+      - 1.5.155.0
       x-powered-by:
       - ASP.NET
     status:
@@ -1097,7 +1618,7 @@ interactions:
       ParameterSetName:
       - --hsm-name -l
       User-Agent:
-      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-keyvault/9.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-keyvault/9.1.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.KeyVault/locations/centraluseuap/deletedManagedHSMs/cli-test-hsm-plr-000002?api-version=2021-04-01-preview&kv-operation=eyJjb2RlIjoiUHVyZ2VNYW5hZ2VkSHNtQXN5bmMifQ
   response:
@@ -1109,7 +1630,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 28 May 2021 10:09:49 GMT
+      - Mon, 11 Oct 2021 13:55:44 GMT
       expires:
       - '-1'
       location:
@@ -1125,7 +1646,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.1.338.0
+      - 1.5.155.0
       x-powered-by:
       - ASP.NET
     status:
@@ -1145,7 +1666,7 @@ interactions:
       ParameterSetName:
       - --hsm-name -l
       User-Agent:
-      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-keyvault/9.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-keyvault/9.1.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.KeyVault/locations/centraluseuap/deletedManagedHSMs/cli-test-hsm-plr-000002?api-version=2021-04-01-preview&kv-operation=eyJjb2RlIjoiUHVyZ2VNYW5hZ2VkSHNtQXN5bmMifQ
   response:
@@ -1157,7 +1678,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 28 May 2021 10:10:20 GMT
+      - Mon, 11 Oct 2021 13:56:16 GMT
       expires:
       - '-1'
       location:
@@ -1173,7 +1694,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.1.338.0
+      - 1.5.155.0
       x-powered-by:
       - ASP.NET
     status:
@@ -1193,7 +1714,7 @@ interactions:
       ParameterSetName:
       - --hsm-name -l
       User-Agent:
-      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-keyvault/9.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-keyvault/9.1.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.KeyVault/locations/centraluseuap/deletedManagedHSMs/cli-test-hsm-plr-000002?api-version=2021-04-01-preview&kv-operation=eyJjb2RlIjoiUHVyZ2VNYW5hZ2VkSHNtQXN5bmMifQ
   response:
@@ -1205,7 +1726,103 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 28 May 2021 10:10:50 GMT
+      - Mon, 11 Oct 2021 13:56:46 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.KeyVault/locations/centraluseuap/deletedManagedHSMs/cli-test-hsm-plr-000002?api-version=2021-04-01-preview&kv-operation=eyJjb2RlIjoiUHVyZ2VNYW5hZ2VkSHNtQXN5bmMifQ
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-service-version:
+      - 1.5.155.0
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - keyvault purge
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --hsm-name -l
+      User-Agent:
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-keyvault/9.1.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.KeyVault/locations/centraluseuap/deletedManagedHSMs/cli-test-hsm-plr-000002?api-version=2021-04-01-preview&kv-operation=eyJjb2RlIjoiUHVyZ2VNYW5hZ2VkSHNtQXN5bmMifQ
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Mon, 11 Oct 2021 13:57:18 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.KeyVault/locations/centraluseuap/deletedManagedHSMs/cli-test-hsm-plr-000002?api-version=2021-04-01-preview&kv-operation=eyJjb2RlIjoiUHVyZ2VNYW5hZ2VkSHNtQXN5bmMifQ
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-service-version:
+      - 1.5.155.0
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - keyvault purge
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --hsm-name -l
+      User-Agent:
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-keyvault/9.1.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.KeyVault/locations/centraluseuap/deletedManagedHSMs/cli-test-hsm-plr-000002?api-version=2021-04-01-preview&kv-operation=eyJjb2RlIjoiUHVyZ2VNYW5hZ2VkSHNtQXN5bmMifQ
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Mon, 11 Oct 2021 13:57:48 GMT
       expires:
       - '-1'
       pragma:
@@ -1219,7 +1836,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.1.338.0
+      - 1.5.155.0
       x-powered-by:
       - ASP.NET
     status:

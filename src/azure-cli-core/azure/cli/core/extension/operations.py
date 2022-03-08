@@ -18,7 +18,7 @@ from urllib.parse import urlparse
 from packaging.version import parse
 
 from azure.cli.core import CommandIndex
-from azure.cli.core.util import CLIError, reload_module
+from azure.cli.core.util import CLIError, reload_module, rmtree_with_retry
 from azure.cli.core.extension import (extension_exists, build_extension_path, get_extensions, get_extension_modname,
                                       get_extension, ext_compat_with_cli,
                                       EXT_METADATA_ISPREVIEW, EXT_METADATA_ISEXPERIMENTAL,
@@ -81,7 +81,7 @@ def _validate_whl_extension(ext_file):
     zip_ref.extractall(tmp_dir)
     zip_ref.close()
     azext_metadata = WheelExtension.get_azext_metadata(tmp_dir)
-    shutil.rmtree(tmp_dir)
+    rmtree_with_retry(tmp_dir)
     check_version_compatibility(azext_metadata)
 
 
@@ -169,7 +169,7 @@ def _add_whl_ext(cli_ctx, source, ext_sha256=None, pip_extra_index_urls=None, pi
         pip_status_code = _run_pip(pip_args, extension_path)
     if pip_status_code > 0:
         logger.debug('Pip failed so deleting anything we might have installed at %s', extension_path)
-        shutil.rmtree(extension_path, ignore_errors=True)
+        rmtree_with_retry(extension_path)
         raise CLIError('An error occurred. Pip failed with status code {}. '
                        'Use --debug for more information.'.format(pip_status_code))
     # Save the whl we used to install the extension in the extension dir.
@@ -213,9 +213,6 @@ def _install_deps_for_psycopg2():  # pylint: disable=too-many-statements
         distname, _ = get_linux_distro()
         distname = distname.lower().strip()
         if installer == 'DEB' or any(x in distname for x in ['ubuntu', 'debian']):
-            from azure.cli.core.util import in_cloud_console
-            if in_cloud_console():
-                raise CLIError("This extension is not supported in Cloud Shell as you do not have permission to install extra dependencies.")
             exit_code = subprocess.call(['dpkg', '-s', 'gcc', 'libpq-dev', 'python3-dev'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             if exit_code != 0:
                 logger.warning('This extension depends on gcc, libpq-dev, python3-dev and they will be installed first.')
@@ -351,10 +348,6 @@ def add_extension(cmd=None, source=None, extension_name=None, index_url=None, ye
 
 
 def remove_extension(extension_name):
-    def log_err(func, path, exc_info):
-        logger.warning("Error occurred attempting to delete item from the extension '%s'.", extension_name)
-        logger.warning("%s: %s - %s", func, path, exc_info)
-
     try:
         # Get the extension and it will raise an error if it doesn't exist
         ext = get_extension(extension_name)
@@ -364,7 +357,7 @@ def remove_extension(extension_name):
                 "`azdev extension remove {name}`".format(name=extension_name))
         # We call this just before we remove the extension so we can get the metadata before it is gone
         _augment_telemetry_with_ext_info(extension_name, ext)
-        shutil.rmtree(ext.path, onerror=log_err)
+        rmtree_with_retry(ext.path)
         CommandIndex().invalidate()
     except ExtensionNotInstalledException as e:
         raise CLIError(e)
@@ -408,13 +401,13 @@ def update_extension(cmd=None, extension_name=None, index_url=None, pip_extra_in
         logger.debug('Backing up the current extension: %s to %s', extension_path, backup_dir)
         shutil.copytree(extension_path, backup_dir)
         # Remove current version of the extension
-        shutil.rmtree(extension_path)
+        rmtree_with_retry(extension_path)
         # Install newer version
         try:
             _add_whl_ext(cli_ctx=cmd_cli_ctx, source=download_url, ext_sha256=ext_sha256,
                          pip_extra_index_urls=pip_extra_index_urls, pip_proxy=pip_proxy)
             logger.debug('Deleting backup of old extension at %s', backup_dir)
-            shutil.rmtree(backup_dir)
+            rmtree_with_retry(backup_dir)
         except Exception as err:
             logger.error('An error occurred whilst updating.')
             logger.error(err)

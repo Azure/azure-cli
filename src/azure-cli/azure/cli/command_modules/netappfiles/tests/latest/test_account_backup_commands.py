@@ -5,10 +5,16 @@
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 import time
+import unittest
 LOCATION = "southcentralusstage"
 VNET_LOCATION = "southcentralus"
 
+# No tidy up of tests required. The resource group is automatically removed
 
+# As a refactoring consideration for the future, consider use of authoring patterns described here
+# https://github.com/Azure/azure-cli/blob/dev/doc/authoring_tests.md#sample-5-get-more-from-resourcegrouppreparer
+
+@unittest.skip("showing class skipping")
 class AzureNetAppFilesAccountBackupServiceScenarioTest(ScenarioTest):
     def setup_vnet(self, vnet_name, subnet_name):
         self.cmd("az network vnet create -n %s -g {rg} -l %s --address-prefix 10.5.0.0/16" %
@@ -76,7 +82,7 @@ class AzureNetAppFilesAccountBackupServiceScenarioTest(ScenarioTest):
             if self.is_live or self.in_recording:
                 time.sleep(60)
 
-    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_backup_')
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_backup_', additional_tags={'owner': 'cli_test'})
     def test_list_account_backups(self):
         # create backup
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
@@ -93,7 +99,7 @@ class AzureNetAppFilesAccountBackupServiceScenarioTest(ScenarioTest):
         self.wait_for_backup_created(account_name, pool_name, volume_name, backup_name)
         self.delete_backup(account_name, pool_name, volume_name)
 
-    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_backup_')
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_backup_', additional_tags={'owner': 'cli_test'})
     def test_get_account_backup(self):
         # create backup
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
@@ -111,7 +117,7 @@ class AzureNetAppFilesAccountBackupServiceScenarioTest(ScenarioTest):
         self.wait_for_backup_created(account_name, pool_name, volume_name, backup_name)
         self.delete_backup(account_name, pool_name, volume_name)
 
-    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_backup_')
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_backup_', additional_tags={'owner': 'cli_test'})
     def test_delete_account_backup(self):
         # create backup
         account_name = self.create_random_name(prefix='cli-acc-', length=24)

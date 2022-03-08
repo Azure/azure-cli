@@ -1,7 +1,8 @@
 interactions:
 - request:
-    body: '{"location": "centralus", "properties": {"storageAccounts": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002",
-      "type": "Primary"}]}, "identity": {"type": "SystemAssigned"}}'
+    body: '{"location": "centralus", "identity": {"type": "SystemAssigned"}, "properties":
+      {"storageAccounts": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002",
+      "type": "Primary"}]}}'
     headers:
       Accept:
       - application/json
@@ -14,34 +15,33 @@ interactions:
       Content-Length:
       - '344'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -n -g --storage-account -l --mi-system-assigned
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-media/3.0.0 Azure-SDK-For-Python AZURECLI/2.22.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.29.0 azsdk-python-mgmt-media/7.0.0 Python/3.9.6 (Windows-10-10.0.19043-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000004?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000004?api-version=2021-05-01
   response:
     body:
       string: "{\r\n  \"name\":\"ams000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000004\",\"type\":\"Microsoft.Media/mediaservices\",\"location\":\"Central
-        US\",\"properties\":{\r\n    \"mediaServiceId\":\"35a2bc9a-4716-45d3-8549-d42dc9d7589b\",\"storageAccounts\":[\r\n
+        US\",\"properties\":{\r\n    \"mediaServiceId\":\"ecd25f4d-18fe-4775-95db-248e76ab45b8\",\"storageAccounts\":[\r\n
         \     {\r\n        \"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002\",\"type\":\"Primary\"\r\n
         \     }\r\n    ],\"storageAuthentication\":\"System\",\"encryption\":{\r\n
-        \     \"type\":\"SystemKey\"\r\n    }\r\n  },\"systemData\":{\r\n    \"createdBy\":\"honc@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2021-04-21T02:06:22.6365598Z\",\"lastModifiedBy\":\"honc@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2021-04-21T02:06:22.6365598Z\"\r\n
-        \ },\"identity\":{\r\n    \"type\":\"SystemAssigned\",\"principalId\":\"21b3f5ad-9f6b-4da0-9542-66cf92d05a06\",\"tenantId\":\"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a\"\r\n
+        \     \"type\":\"SystemKey\"\r\n    },\"keyDelivery\":{\r\n      \"accessControl\":{\r\n
+        \       \"defaultAction\":\"Allow\",\"ipAllowList\":[\r\n          \r\n        ]\r\n
+        \     }\r\n    }\r\n  },\"systemData\":{\r\n    \"createdBy\":\"zhiyihuang@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2021-10-21T06:17:59.0955902Z\",\"lastModifiedBy\":\"zhiyihuang@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2021-10-21T06:17:59.0955902Z\"\r\n
+        \ },\"identity\":{\r\n    \"type\":\"SystemAssigned\",\"principalId\":\"6dd6b59c-ef7d-4cc0-9274-f62ad3b17e74\",\"tenantId\":\"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1135'
+      - '1276'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Wed, 21 Apr 2021 02:06:32 GMT
+      - Thu, 21 Oct 2021 06:18:05 GMT
       expires:
       - '-1'
       odata-version:
@@ -55,7 +55,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -66,203 +66,29 @@ interactions:
       - application/json
       Accept-Encoding:
       - gzip, deflate
-      CommandName:
-      - keyvault create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --name -g --enable-soft-delete --enable-purge-protection
-      User-Agent:
-      - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-resource/12.1.0 Azure-SDK-For-Python AZURECLI/2.22.0
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2020-10-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"centralus","tags":{"product":"azurecli","cause":"automation","date":"2021-04-21T02:04:48Z"},"properties":{"provisioningState":"Succeeded"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '431'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 21 Apr 2021 02:06:33 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      User-Agent:
-      - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-graphrbac/0.60.0 Azure-SDK-For-Python
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/me?api-version=1.6
-  response:
-    body:
-      string: '{"odata.metadata":"https://graph.windows.net/00000000-0000-0000-0000-000000000000/$metadata#directoryObjects/@Element","odata.type":"Microsoft.DirectoryServices.User","objectType":"User","objectId":"f3ea48f6-a16e-4b37-8260-f69cf2200525","deletionTimestamp":null,"accountEnabled":true,"ageGroup":null,"assignedLicenses":[],"assignedPlans":[],"city":null,"companyName":null,"consentProvidedForMinor":null,"country":null,"createdDateTime":"2020-04-07T09:37:40Z","creationType":"Invitation","department":null,"dirSyncEnabled":null,"displayName":"Houk
-        Chen","employeeId":null,"facsimileTelephoneNumber":null,"givenName":null,"immutableId":null,"isCompromised":null,"jobTitle":null,"lastDirSyncTime":null,"legalAgeGroupClassification":null,"mail":"honc@microsoft.com","mailNickname":"honc_microsoft.com#EXT#","mobile":null,"onPremisesDistinguishedName":null,"onPremisesSecurityIdentifier":null,"otherMails":["honc@microsoft.com"],"passwordPolicies":null,"passwordProfile":null,"physicalDeliveryOfficeName":null,"postalCode":null,"preferredLanguage":null,"provisionedPlans":[],"provisioningErrors":[],"proxyAddresses":["SMTP:honc@microsoft.com"],"refreshTokensValidFromDateTime":"2020-04-07T09:37:40Z","showInAddressList":false,"signInNames":[],"sipProxyAddress":null,"state":null,"streetAddress":null,"surname":null,"telephoneNumber":null,"thumbnailPhoto@odata.mediaEditLink":"directoryObjects/f3ea48f6-a16e-4b37-8260-f69cf2200525/Microsoft.DirectoryServices.User/thumbnailPhoto","usageLocation":null,"userIdentities":[],"userPrincipalName":"honc_microsoft.com#EXT#@AzureSDKTeam.onmicrosoft.com","userState":"Accepted","userStateChangedOn":"2020-04-10T09:25:17Z","userType":"Guest"}'
-    headers:
-      access-control-allow-origin:
-      - '*'
-      cache-control:
-      - no-cache
-      content-length:
-      - '1676'
-      content-type:
-      - application/json; odata=minimalmetadata; streaming=true; charset=utf-8
-      dataserviceversion:
-      - 3.0;
-      date:
-      - Wed, 21 Apr 2021 02:06:34 GMT
-      duration:
-      - '2483465'
-      expires:
-      - '-1'
-      ocp-aad-diagnostics-server-name:
-      - Vt1OY/khFu+Xc8F8MbzyLABYRW+8wBgHoogojOdVWsA=
-      ocp-aad-session-key:
-      - R3TcchUEDOOoDGrHWu-ihFXssplTlwq-MbNT3uuC_mvFpI4tVoGAJp0LQo6GXGAKF2rGENQeE-QWh3KsdUSaI8yt3k1m7CMx7kOrEPsQSRxa_TeMh-2qC-jkWNY1YTUA.vVgu8b5fDIzQo1gmzyYdfrFGt8giMKsWa2faGOhv4fk
-      pragma:
-      - no-cache
-      request-id:
-      - 68e4337e-2214-48d7-b495-e51d336cd356
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-aspnet-version:
-      - 4.0.30319
-      x-ms-dirapi-data-contract-version:
-      - '1.6'
-      x-ms-resource-unit:
-      - '1'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"location": "centralus", "properties": {"tenantId": "54826b22-38d6-4fb2-bad9-b7b93a3e9c5a",
-      "sku": {"family": "A", "name": "standard"}, "accessPolicies": [{"tenantId":
-      "54826b22-38d6-4fb2-bad9-b7b93a3e9c5a", "objectId": "f3ea48f6-a16e-4b37-8260-f69cf2200525",
-      "permissions": {"keys": ["get", "create", "delete", "list", "update", "import",
-      "backup", "restore", "recover"], "secrets": ["get", "list", "set", "delete",
-      "backup", "restore", "recover"], "certificates": ["get", "list", "delete", "create",
-      "import", "update", "managecontacts", "getissuers", "listissuers", "setissuers",
-      "deleteissuers", "manageissuers", "recover"], "storage": ["get", "list", "delete",
-      "set", "update", "regeneratekey", "setsas", "listsas", "getsas", "deletesas"]}}],
-      "enableSoftDelete": true, "softDeleteRetentionInDays": 90, "enablePurgeProtection":
-      true, "networkAcls": {"bypass": "AzureServices", "defaultAction": "Allow"}}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - keyvault create
       Connection:
       - keep-alive
       Content-Length:
-      - '909'
+      - '0'
       Content-Type:
       - application/json
-      ParameterSetName:
-      - --name -g --enable-soft-delete --enable-purge-protection
       User-Agent:
-      - AZURECLI/2.22.0 azsdk-python-azure-mgmt-keyvault/9.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/clitest000003?api-version=2021-04-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/clitest000003","name":"clitest000003","type":"Microsoft.KeyVault/vaults","location":"centralus","tags":{},"systemData":{"createdBy":"honc@microsoft.com","createdByType":"User","createdAt":"1970-01-19T17:42:50.732Z","lastModifiedBy":"honc@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"1970-01-19T17:42:50.795Z"},"properties":{"sku":{"family":"A","name":"standard"},"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","accessPolicies":[{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"f3ea48f6-a16e-4b37-8260-f69cf2200525","permissions":{"keys":["get","create","delete","list","update","import","backup","restore","recover"],"secrets":["get","list","set","delete","backup","restore","recover"],"certificates":["get","list","delete","create","import","update","managecontacts","getissuers","listissuers","setissuers","deleteissuers","manageissuers","recover"],"storage":["get","list","delete","set","update","regeneratekey","setsas","listsas","getsas","deletesas"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":90,"enablePurgeProtection":true,"vaultUri":"https://clitest000003.vault.azure.net/","provisioningState":"Succeeded"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1409'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 21 Apr 2021 02:06:36 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-aspnet-version:
-      - 4.0.30319
-      x-content-type-options:
-      - nosniff
-      x-ms-keyvault-service-version:
-      - 1.1.292.0
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: ''
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      Content-Length:
-      - 0
-      Content-Type:
-      - application/json; charset=utf-8
-      User-Agent:
-      - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-keyvault/7.0 Azure-SDK-For-Python
-      accept-language:
-      - en-US
+      - azsdk-python-keyvault-keys/4.5.0b4 Python/3.9.6 (Windows-10-10.0.19043-SP0)
     method: POST
-    uri: https://clitest000003.vault.azure.net/keys/ams000005/create?api-version=7.0
+    uri: https://clitest000003.vault.azure.net/keys/ams000005/create?api-version=7.3-preview
   response:
     body:
-      string: '{"error":{"code":"Unauthorized","message":"Request is missing a Bearer
-        or PoP token."}}'
+      string: '{"error":{"code":"Unauthorized","message":"AKV10000: Request is missing
+        a Bearer or PoP token."}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '87'
+      - '97'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 21 Apr 2021 02:06:37 GMT
+      - Thu, 21 Oct 2021 06:18:07 GMT
       expires:
       - '-1'
       pragma:
@@ -275,11 +101,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-network-info:
-      - conn_type=Ipv4;addr=167.220.255.22;act_addr_fam=InterNetwork;
+      - conn_type=Ipv4;addr=167.220.255.42;act_addr_fam=InterNetwork;
       x-ms-keyvault-region:
       - centralus
       x-ms-keyvault-service-version:
-      - 1.2.236.0
+      - 1.9.150.1
       x-powered-by:
       - ASP.NET
     status:
@@ -297,26 +123,23 @@ interactions:
       Content-Length:
       - '47'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-keyvault/7.0 Azure-SDK-For-Python
-      accept-language:
-      - en-US
+      - azsdk-python-keyvault-keys/4.5.0b4 Python/3.9.6 (Windows-10-10.0.19043-SP0)
     method: POST
-    uri: https://clitest000003.vault.azure.net/keys/ams000005/create?api-version=7.0
+    uri: https://clitest000003.vault.azure.net/keys/ams000005/create?api-version=7.3-preview
   response:
     body:
-      string: '{"key":{"kid":"https://clitest000003.vault.azure.net/keys/ams000005/6efbc6ecc61249a4a286251fb0e7db63","kty":"RSA","key_ops":["encrypt","decrypt","sign","verify","wrapKey","unwrapKey"],"n":"pHihCQHG0UGAItMKFChmna_0WSHolkqxfFkYF1iXm2OmZBXekImuqPDNnILivQ1QDJJDRxfbYLcN12Zy4ntRQu9zbS7Hu_eJZx0ZAbteFlsCCyVY1OmCoAEqbP_yYh8iZgV70sXWO21mP7DveYtpvqoTzjz6225ckVB6mgyD10Ymv-TqO6u8CAxY4TsU_H29y-u5SgqDfjt713nAb6aKEtT1ZEVV0p1XGNv1sZ86Z3JDzF1CiufZlmzrS8xLiyg5onofbGq5NN31rwPpKK7BgufAjtmJS9Jym8rndrCmbCJ3cGp-LBIy0vbSh9z4zfxv0QdI2UM6jp9M9utd2mbl8Q","e":"AQAB"},"attributes":{"enabled":true,"created":1618970799,"updated":1618970799,"recoveryLevel":"Recoverable"}}'
+      string: '{"key":{"kid":"https://clitest000003.vault.azure.net/keys/ams000005/872e0ac097f74dd6b79572d066bc7db9","kty":"RSA","key_ops":["encrypt","decrypt","sign","verify","wrapKey","unwrapKey"],"n":"n8b9b9bfNtg--2S4m_j1l-fLs0xn0QjPW0rJSJt__-HKWasTVnjYsRRbYyZ25OH7zsRCYYp0xpWptnBXXUkJbubiP8QEeVw9sKzmhh7ZTtr3O1GcMH7aajKcFzjC8yaGOz5dALYzsRtyf7WaZk99s9Q0dogTmbXXqxd-RU0ywnfdcktY8WYeP5ERbMWYaW43lWvVTIcsZMvGtH7rvwlSl6JaamxpyHBH9xGUEuvtGL_rJ7dxGX3aNyMrJ9ZWzYMstxCXmD6PtIy7W8we5jKX26ByN9jUcFZ0a3wTC26dDFjBiNQY-6uOw7qjl1vcjPrWcROQnbdWNZyRyW4VadbNjQ","e":"AQAB"},"attributes":{"enabled":true,"created":1634797088,"updated":1634797088,"recoveryLevel":"CustomizedRecoverable","recoverableDays":7}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '661'
+      - '691'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 21 Apr 2021 02:06:40 GMT
+      - Thu, 21 Oct 2021 06:18:08 GMT
       expires:
       - '-1'
       pragma:
@@ -326,11 +149,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-network-info:
-      - conn_type=Ipv4;addr=167.220.255.22;act_addr_fam=InterNetwork;
+      - conn_type=Ipv4;addr=167.220.255.42;act_addr_fam=InterNetwork;
       x-ms-keyvault-region:
       - centralus
       x-ms-keyvault-service-version:
-      - 1.2.236.0
+      - 1.9.150.1
       x-powered-by:
       - ASP.NET
     status:
@@ -350,21 +173,21 @@ interactions:
       ParameterSetName:
       - --object-id --name --key-permissions
       User-Agent:
-      - AZURECLI/2.22.0 azsdk-python-azure-mgmt-keyvault/9.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-keyvault/9.1.0 Python/3.9.6 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceType%20eq%20%27Microsoft.KeyVault%2Fvaults%27&api-version=2015-11-01
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azps-test-group/providers/Microsoft.KeyVault/vaults/azps-test-kv2","name":"azps-test-kv2","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azps-test-group/providers/Microsoft.KeyVault/vaults/azps-test-kv4","name":"azps-test-kv4","type":"Microsoft.KeyVault/vaults","location":"southcentralus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest-mhsm-rg/providers/Microsoft.KeyVault/vaults/clitest-1102","name":"clitest-1102","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgaryrfnfrvu3hwikxt3tl7psjsxseqwnhwmxwdb3fyuz2h2jtmjq37gnfjlokxpgzr/providers/Microsoft.KeyVault/vaults/clitestmodzduv42o3oohi3g","name":"clitestmodzduv42o3oohi3g","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rghkiywphawnmooyrxgs3vyuuwcshk4ay2we6ngvkflcenn2vfmbyehbt44nesmq6wh/providers/Microsoft.KeyVault/vaults/cmk-test-keyvaultyhbiwmz","name":"cmk-test-keyvaultyhbiwmz","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/clitest000003","name":"clitest000003","type":"Microsoft.KeyVault/vaults","location":"centralus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgqs4z46r3nwjogtg3tbmubrfnlfembj6zgiq7i3twa3kl44ybscywcsafaf7ttjxwt/providers/Microsoft.KeyVault/vaults/sfrp-cli-kv-wwvqsei4kinc","name":"sfrp-cli-kv-wwvqsei4kinc","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgtiv6pttznvimsoxrhst3lvyj3r4iua2ewptyktfnrw4amvinra54b2xogxsu4dwlq/providers/Microsoft.KeyVault/vaults/kv-ssl-testeavnuhswq","name":"kv-ssl-testeavnuhswq","type":"Microsoft.KeyVault/vaults","location":"japanwest","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fytest/providers/Microsoft.KeyVault/vaults/vault1569","name":"vault1569","type":"Microsoft.KeyVault/vaults","location":"centraluseuap","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jiasli-cli-dev/providers/Microsoft.KeyVault/vaults/cli-sni-kv","name":"cli-sni-kv","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ljin-test/providers/Microsoft.KeyVault/vaults/kv-ljin-sni","name":"kv-ljin-sni","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yishitest/providers/Microsoft.KeyVault/vaults/ase-testdevice-020dc7b13","name":"ase-testdevice-020dc7b13","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{"dbe-resource":"testdevice"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yishitest/providers/Microsoft.KeyVault/vaults/ase-ysgatewayd-e2960da93","name":"ase-ysgatewayd-e2960da93","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{"dbe-resource":"ysgatewaydevice"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yishitest/providers/Microsoft.KeyVault/vaults/ysvault","name":"ysvault","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg5jz76tdq5i3ic42pit5quvvxrqfidx6gmzshfqsgmroaugx2ca256fuccsm4ihkp3/providers/Microsoft.KeyVault/vaults/clitestfi7ja47dny6zr77cy","name":"clitestfi7ja47dny6zr77cy","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgkviirvjvg3tbz4e347ho5gn6jjavznpa3igmb32zb7koyamjzthuxgwa4mr3sqxq2/providers/Microsoft.KeyVault/vaults/cmk-test-keyvaultj7r4xi5","name":"cmk-test-keyvaultj7r4xi5","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgoa3ilekippdgqwpxpxauj5xtg4kh525cixueabnmdtpp7fo4ryq3h4izysa6d4kdw/providers/Microsoft.KeyVault/vaults/clitesttsxbgma4vntlz7kak","name":"clitesttsxbgma4vntlz7kak","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/clitest000003","name":"clitest000003","type":"Microsoft.KeyVault/vaults","location":"centralus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/python-sdk-test/providers/Microsoft.KeyVault/vaults/python-devops-key","name":"python-devops-key","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/python-sdk-test/providers/Microsoft.KeyVault/vaults/SDKAutoPipelineSecrets","name":"SDKAutoPipelineSecrets","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yishitest/providers/Microsoft.KeyVault/vaults/ystestkv","name":"ystestkv","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '3691'
+      - '1962'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 21 Apr 2021 02:06:40 GMT
+      - Thu, 21 Oct 2021 06:18:09 GMT
       expires:
       - '-1'
       pragma:
@@ -392,21 +215,21 @@ interactions:
       ParameterSetName:
       - --object-id --name --key-permissions
       User-Agent:
-      - AZURECLI/2.22.0 azsdk-python-azure-mgmt-keyvault/9.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-keyvault/9.1.0 Python/3.9.6 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/clitest000003?api-version=2021-04-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/clitest000003?api-version=2021-06-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/clitest000003","name":"clitest000003","type":"Microsoft.KeyVault/vaults","location":"centralus","tags":{},"systemData":{"createdBy":"honc@microsoft.com","createdByType":"User","createdAt":"1970-01-19T17:42:50.732Z","lastModifiedBy":"honc@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"1970-01-19T17:42:50.795Z"},"properties":{"sku":{"family":"A","name":"standard"},"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","accessPolicies":[{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"f3ea48f6-a16e-4b37-8260-f69cf2200525","permissions":{"keys":["get","create","delete","list","update","import","backup","restore","recover"],"secrets":["get","list","set","delete","backup","restore","recover"],"certificates":["get","list","delete","create","import","update","managecontacts","getissuers","listissuers","setissuers","deleteissuers","manageissuers","recover"],"storage":["get","list","delete","set","update","regeneratekey","setsas","listsas","getsas","deletesas"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":90,"enablePurgeProtection":true,"vaultUri":"https://clitest000003.vault.azure.net/","provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/clitest000003","name":"clitest000003","type":"Microsoft.KeyVault/vaults","location":"centralus","tags":{},"systemData":{"createdBy":"zhiyihuang@microsoft.com","createdByType":"User","createdAt":"2021-10-21T06:17:11.195Z","lastModifiedBy":"zhiyihuang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-10-21T06:17:11.195Z"},"properties":{"sku":{"family":"A","name":"standard"},"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","accessPolicies":[{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e","permissions":{"keys":["get","create","delete","list","update","import","backup","restore","recover"],"secrets":["get","list","set","delete","backup","restore","recover"],"certificates":["get","list","delete","create","import","update","managecontacts","getissuers","listissuers","setissuers","deleteissuers","manageissuers","recover"],"storage":["get","list","delete","set","update","regeneratekey","setsas","listsas","getsas","deletesas"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":7,"enablePurgeProtection":true,"vaultUri":"https://clitest000003.vault.azure.net/","provisioningState":"Succeeded","publicNetworkAccess":"Enabled"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1409'
+      - '1452'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 21 Apr 2021 02:06:41 GMT
+      - Thu, 21 Oct 2021 06:18:12 GMT
       expires:
       - '-1'
       pragma:
@@ -424,7 +247,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.1.292.0
+      - 1.5.166.0
       x-powered-by:
       - ASP.NET
     status:
@@ -433,17 +256,18 @@ interactions:
 - request:
     body: '{"location": "centralus", "tags": {}, "properties": {"tenantId": "54826b22-38d6-4fb2-bad9-b7b93a3e9c5a",
       "sku": {"family": "A", "name": "standard"}, "accessPolicies": [{"tenantId":
-      "54826b22-38d6-4fb2-bad9-b7b93a3e9c5a", "objectId": "f3ea48f6-a16e-4b37-8260-f69cf2200525",
+      "54826b22-38d6-4fb2-bad9-b7b93a3e9c5a", "objectId": "a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e",
       "permissions": {"keys": ["get", "create", "delete", "list", "update", "import",
       "backup", "restore", "recover"], "secrets": ["get", "list", "set", "delete",
       "backup", "restore", "recover"], "certificates": ["get", "list", "delete", "create",
       "import", "update", "managecontacts", "getissuers", "listissuers", "setissuers",
       "deleteissuers", "manageissuers", "recover"], "storage": ["get", "list", "delete",
       "set", "update", "regeneratekey", "setsas", "listsas", "getsas", "deletesas"]}},
-      {"tenantId": "54826b22-38d6-4fb2-bad9-b7b93a3e9c5a", "objectId": "21b3f5ad-9f6b-4da0-9542-66cf92d05a06",
-      "permissions": {"keys": ["get", "wrapKey", "unwrapKey"]}}], "vaultUri": "https://clitest000003.vault.azure.net/",
+      {"tenantId": "54826b22-38d6-4fb2-bad9-b7b93a3e9c5a", "objectId": "6dd6b59c-ef7d-4cc0-9274-f62ad3b17e74",
+      "permissions": {"keys": ["get", "unwrapKey", "wrapKey"]}}], "vaultUri": "https://clitest000003.vault.azure.net/",
       "enabledForDeployment": false, "enableSoftDelete": true, "softDeleteRetentionInDays":
-      90, "enablePurgeProtection": true, "provisioningState": "Succeeded"}}'
+      7, "enablePurgeProtection": true, "provisioningState": "Succeeded", "publicNetworkAccess":
+      "Enabled"}}'
     headers:
       Accept:
       - application/json
@@ -454,27 +278,27 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '1145'
+      - '1178'
       Content-Type:
       - application/json
       ParameterSetName:
       - --object-id --name --key-permissions
       User-Agent:
-      - AZURECLI/2.22.0 azsdk-python-azure-mgmt-keyvault/9.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-keyvault/9.1.0 Python/3.9.6 (Windows-10-10.0.19043-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/clitest000003?api-version=2021-04-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/clitest000003?api-version=2021-06-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/clitest000003","name":"clitest000003","type":"Microsoft.KeyVault/vaults","location":"centralus","tags":{},"systemData":{"createdBy":"honc@microsoft.com","createdByType":"User","createdAt":"1970-01-19T17:42:50.732Z","lastModifiedBy":"honc@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"1970-01-19T17:42:50.803Z"},"properties":{"sku":{"family":"A","name":"standard"},"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","accessPolicies":[{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"f3ea48f6-a16e-4b37-8260-f69cf2200525","permissions":{"keys":["get","create","delete","list","update","import","backup","restore","recover"],"secrets":["get","list","set","delete","backup","restore","recover"],"certificates":["get","list","delete","create","import","update","managecontacts","getissuers","listissuers","setissuers","deleteissuers","manageissuers","recover"],"storage":["get","list","delete","set","update","regeneratekey","setsas","listsas","getsas","deletesas"]}},{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"21b3f5ad-9f6b-4da0-9542-66cf92d05a06","permissions":{"keys":["get","wrapKey","unwrapKey"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":90,"enablePurgeProtection":true,"vaultUri":"https://clitest000003.vault.azure.net/","provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/clitest000003","name":"clitest000003","type":"Microsoft.KeyVault/vaults","location":"centralus","tags":{},"systemData":{"createdBy":"zhiyihuang@microsoft.com","createdByType":"User","createdAt":"2021-10-21T06:17:11.195Z","lastModifiedBy":"zhiyihuang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-10-21T06:18:13.06Z"},"properties":{"sku":{"family":"A","name":"standard"},"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","accessPolicies":[{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e","permissions":{"keys":["get","create","delete","list","update","import","backup","restore","recover"],"secrets":["get","list","set","delete","backup","restore","recover"],"certificates":["get","list","delete","create","import","update","managecontacts","getissuers","listissuers","setissuers","deleteissuers","manageissuers","recover"],"storage":["get","list","delete","set","update","regeneratekey","setsas","listsas","getsas","deletesas"]}},{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"6dd6b59c-ef7d-4cc0-9274-f62ad3b17e74","permissions":{"keys":["get","unwrapKey","wrapKey"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":7,"enablePurgeProtection":true,"vaultUri":"https://clitest000003.vault.azure.net/","provisioningState":"Succeeded","publicNetworkAccess":"Enabled"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1564'
+      - '1606'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 21 Apr 2021 02:06:42 GMT
+      - Thu, 21 Oct 2021 06:18:14 GMT
       expires:
       - '-1'
       pragma:
@@ -492,7 +316,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.1.292.0
+      - 1.5.166.0
       x-ms-ratelimit-remaining-subscription-writes:
       - '1198'
       x-powered-by:
@@ -514,30 +338,29 @@ interactions:
       ParameterSetName:
       - -a -g --key-type --key-identifier
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-media/3.0.0 Azure-SDK-For-Python AZURECLI/2.22.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.29.0 azsdk-python-mgmt-media/7.0.0 Python/3.9.6 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000004?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000004?api-version=2021-05-01
   response:
     body:
       string: "{\r\n  \"name\":\"ams000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000004\",\"type\":\"Microsoft.Media/mediaservices\",\"location\":\"Central
-        US\",\"properties\":{\r\n    \"mediaServiceId\":\"35a2bc9a-4716-45d3-8549-d42dc9d7589b\",\"storageAccounts\":[\r\n
+        US\",\"properties\":{\r\n    \"mediaServiceId\":\"ecd25f4d-18fe-4775-95db-248e76ab45b8\",\"storageAccounts\":[\r\n
         \     {\r\n        \"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002\",\"type\":\"Primary\"\r\n
         \     }\r\n    ],\"storageAuthentication\":\"System\",\"encryption\":{\r\n
-        \     \"type\":\"SystemKey\"\r\n    }\r\n  },\"systemData\":{\r\n    \"createdBy\":\"honc@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2021-04-21T02:06:22.6365598Z\",\"lastModifiedBy\":\"honc@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2021-04-21T02:06:22.6365598Z\"\r\n
-        \ },\"identity\":{\r\n    \"type\":\"SystemAssigned\",\"principalId\":\"21b3f5ad-9f6b-4da0-9542-66cf92d05a06\",\"tenantId\":\"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a\"\r\n
+        \     \"type\":\"SystemKey\"\r\n    },\"keyDelivery\":{\r\n      \"accessControl\":{\r\n
+        \       \"defaultAction\":\"Allow\",\"ipAllowList\":[\r\n          \r\n        ]\r\n
+        \     }\r\n    }\r\n  },\"systemData\":{\r\n    \"createdBy\":\"zhiyihuang@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2021-10-21T06:17:59.0955902Z\",\"lastModifiedBy\":\"zhiyihuang@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2021-10-21T06:17:59.0955902Z\"\r\n
+        \ },\"identity\":{\r\n    \"type\":\"SystemAssigned\",\"principalId\":\"6dd6b59c-ef7d-4cc0-9274-f62ad3b17e74\",\"tenantId\":\"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1135'
+      - '1276'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Wed, 21 Apr 2021 02:06:44 GMT
+      - Thu, 21 Oct 2021 06:18:16 GMT
       expires:
       - '-1'
       odata-version:
@@ -558,10 +381,10 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "Central US", "properties": {"storageAccounts": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002",
+    body: '{"location": "Central US", "identity": {"type": "SystemAssigned"}, "properties":
+      {"storageAccounts": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002",
       "type": "Primary"}], "encryption": {"type": "CustomerKey", "keyVaultProperties":
-      {"keyIdentifier": "https://clitest000003.vault.azure.net/keys/ams000005/6efbc6ecc61249a4a286251fb0e7db63"}}},
-      "identity": {"type": "SystemAssigned"}}'
+      {"keyIdentifier": "https://clitest000003.vault.azure.net/keys/ams000005/872e0ac097f74dd6b79572d066bc7db9"}}}}'
     headers:
       Accept:
       - application/json
@@ -574,35 +397,33 @@ interactions:
       Content-Length:
       - '528'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -a -g --key-type --key-identifier
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-media/3.0.0 Azure-SDK-For-Python AZURECLI/2.22.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.29.0 azsdk-python-mgmt-media/7.0.0 Python/3.9.6 (Windows-10-10.0.19043-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000004?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000004?api-version=2021-05-01
   response:
     body:
       string: "{\r\n  \"name\":\"ams000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000004\",\"type\":\"Microsoft.Media/mediaservices\",\"location\":\"Central
-        US\",\"properties\":{\r\n    \"mediaServiceId\":\"35a2bc9a-4716-45d3-8549-d42dc9d7589b\",\"storageAccounts\":[\r\n
+        US\",\"properties\":{\r\n    \"mediaServiceId\":\"ecd25f4d-18fe-4775-95db-248e76ab45b8\",\"storageAccounts\":[\r\n
         \     {\r\n        \"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002\",\"type\":\"Primary\"\r\n
         \     }\r\n    ],\"storageAuthentication\":\"System\",\"encryption\":{\r\n
-        \     \"type\":\"CustomerKey\",\"keyVaultProperties\":{\r\n        \"keyIdentifier\":\"https://clitest000003.vault.azure.net/keys/ams000005/6efbc6ecc61249a4a286251fb0e7db63\",\"currentKeyIdentifier\":\"https://clitest000003.vault.azure.net/keys/ams000005/6efbc6ecc61249a4a286251fb0e7db63\"\r\n
-        \     }\r\n    }\r\n  },\"systemData\":{\r\n    \"createdBy\":\"honc@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2021-04-21T02:06:22.6365598Z\",\"lastModifiedBy\":\"honc@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2021-04-21T02:06:46.6284313Z\"\r\n
-        \ },\"identity\":{\r\n    \"type\":\"SystemAssigned\",\"principalId\":\"21b3f5ad-9f6b-4da0-9542-66cf92d05a06\",\"tenantId\":\"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a\"\r\n
+        \     \"type\":\"CustomerKey\",\"keyVaultProperties\":{\r\n        \"keyIdentifier\":\"https://clitest000003.vault.azure.net/keys/ams000005/872e0ac097f74dd6b79572d066bc7db9\",\"currentKeyIdentifier\":\"https://clitest000003.vault.azure.net/keys/ams000005/872e0ac097f74dd6b79572d066bc7db9\"\r\n
+        \     }\r\n    },\"keyDelivery\":{\r\n      \"accessControl\":{\r\n        \"defaultAction\":\"Allow\",\"ipAllowList\":[\r\n
+        \         \r\n        ]\r\n      }\r\n    }\r\n  },\"systemData\":{\r\n    \"createdBy\":\"zhiyihuang@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2021-10-21T06:17:59.0955902Z\",\"lastModifiedBy\":\"zhiyihuang@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2021-10-21T06:18:18.8701756Z\"\r\n
+        \ },\"identity\":{\r\n    \"type\":\"SystemAssigned\",\"principalId\":\"6dd6b59c-ef7d-4cc0-9274-f62ad3b17e74\",\"tenantId\":\"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1421'
+      - '1562'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Wed, 21 Apr 2021 02:06:53 GMT
+      - Thu, 21 Oct 2021 06:18:25 GMT
       expires:
       - '-1'
       odata-version:
@@ -620,7 +441,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1195'
     status:
       code: 200
       message: OK
@@ -638,31 +459,29 @@ interactions:
       ParameterSetName:
       - -a -g
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-media/3.0.0 Azure-SDK-For-Python AZURECLI/2.22.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.29.0 azsdk-python-mgmt-media/7.0.0 Python/3.9.6 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000004?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000004?api-version=2021-05-01
   response:
     body:
       string: "{\r\n  \"name\":\"ams000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000004\",\"type\":\"Microsoft.Media/mediaservices\",\"location\":\"Central
-        US\",\"properties\":{\r\n    \"mediaServiceId\":\"35a2bc9a-4716-45d3-8549-d42dc9d7589b\",\"storageAccounts\":[\r\n
+        US\",\"properties\":{\r\n    \"mediaServiceId\":\"ecd25f4d-18fe-4775-95db-248e76ab45b8\",\"storageAccounts\":[\r\n
         \     {\r\n        \"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002\",\"type\":\"Primary\"\r\n
         \     }\r\n    ],\"storageAuthentication\":\"System\",\"encryption\":{\r\n
-        \     \"type\":\"CustomerKey\",\"keyVaultProperties\":{\r\n        \"keyIdentifier\":\"https://clitest000003.vault.azure.net/keys/ams000005/6efbc6ecc61249a4a286251fb0e7db63\",\"currentKeyIdentifier\":\"https://clitest000003.vault.azure.net/keys/ams000005/6efbc6ecc61249a4a286251fb0e7db63\"\r\n
-        \     }\r\n    }\r\n  },\"systemData\":{\r\n    \"createdBy\":\"honc@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2021-04-21T02:06:22.6365598Z\",\"lastModifiedBy\":\"honc@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2021-04-21T02:06:46.6284313Z\"\r\n
-        \ },\"identity\":{\r\n    \"type\":\"SystemAssigned\",\"principalId\":\"21b3f5ad-9f6b-4da0-9542-66cf92d05a06\",\"tenantId\":\"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a\"\r\n
+        \     \"type\":\"CustomerKey\",\"keyVaultProperties\":{\r\n        \"keyIdentifier\":\"https://clitest000003.vault.azure.net/keys/ams000005/872e0ac097f74dd6b79572d066bc7db9\",\"currentKeyIdentifier\":\"https://clitest000003.vault.azure.net/keys/ams000005/872e0ac097f74dd6b79572d066bc7db9\"\r\n
+        \     }\r\n    },\"keyDelivery\":{\r\n      \"accessControl\":{\r\n        \"defaultAction\":\"Allow\",\"ipAllowList\":[\r\n
+        \         \r\n        ]\r\n      }\r\n    }\r\n  },\"systemData\":{\r\n    \"createdBy\":\"zhiyihuang@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2021-10-21T06:17:59.0955902Z\",\"lastModifiedBy\":\"zhiyihuang@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2021-10-21T06:18:18.8701756Z\"\r\n
+        \ },\"identity\":{\r\n    \"type\":\"SystemAssigned\",\"principalId\":\"6dd6b59c-ef7d-4cc0-9274-f62ad3b17e74\",\"tenantId\":\"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1421'
+      - '1562'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Wed, 21 Apr 2021 02:06:55 GMT
+      - Thu, 21 Oct 2021 06:18:27 GMT
       expires:
       - '-1'
       odata-version:
@@ -698,12 +517,9 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-media/3.0.0 Azure-SDK-For-Python AZURECLI/2.22.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.29.0 azsdk-python-mgmt-media/7.0.0 Python/3.9.6 (Windows-10-10.0.19043-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000004?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000004?api-version=2021-05-01
   response:
     body:
       string: ''
@@ -713,7 +529,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Wed, 21 Apr 2021 02:07:03 GMT
+      - Thu, 21 Oct 2021 06:18:37 GMT
       expires:
       - '-1'
       pragma:
@@ -726,56 +542,6 @@ interactions:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
       - '14999'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - keyvault delete
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      ParameterSetName:
-      - -n -g
-      User-Agent:
-      - AZURECLI/2.22.0 azsdk-python-azure-mgmt-keyvault/9.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
-    method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/clitest000003?api-version=2021-04-01-preview
-  response:
-    body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      date:
-      - Wed, 21 Apr 2021 02:07:12 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-aspnet-version:
-      - 4.0.30319
-      x-content-type-options:
-      - nosniff
-      x-ms-keyvault-service-version:
-      - 1.1.292.0
-      x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
-      x-powered-by:
-      - ASP.NET
     status:
       code: 200
       message: OK

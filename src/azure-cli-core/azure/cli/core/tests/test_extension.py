@@ -8,7 +8,7 @@ import unittest
 import shutil
 import zipfile
 
-import mock
+from unittest import mock
 
 from azure.cli.core.extension import (get_extensions, build_extension_path, extension_exists,
                                       get_extension, get_extension_names, get_extension_modname, ext_compat_with_cli,

@@ -7,36 +7,34 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - backup container list
+      - backup container register
       Connection:
       - keep-alive
       ParameterSetName:
-      - -v -g --backup-management-type
+      - -v -g --backup-management-type --workload-type --resource-id
       User-Agent:
-      - python/3.8.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.22.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupProtectionContainers?api-version=2020-10-01&$filter=backupManagementType%20eq%20%27AzureWorkload%27%20and%20status%20eq%20%27Registered%27
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectableContainers?api-version=2021-10-01&$filter=backupManagementType%20eq%20%27AzureWorkload%27
   response:
     body:
-      string: '{"value":[{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;bksql;sqlvm","name":"VMAppContainer;Compute;bksql;sqlvm","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.Compute/virtualMachines/sqlvm","lastUpdatedTime":"2021-04-29T10:02:02.4682499Z","extendedInfo":{"hostServerName":"sqlvm","inquiryInfo":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"inquiryDetails":[{"type":"SQL","itemCount":8,"inquiryValidation":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"additionalDetail":""}}]}},"friendlyName":"sqlvm","backupManagementType":"AzureWorkload","registrationStatus":"Registered","healthStatus":"Healthy","containerType":"VMAppContainer","protectableObjectType":"VMAppContainer"}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectableContainers/VMAppContainer;Compute;akneema;akneema-hana-vm","name":"VMAppContainer;Compute;akneema;akneema-hana-vm","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"akneema-hana-vm","backupManagementType":"AzureWorkload","protectableContainerType":"VMAppContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.Compute/virtualMachines/akneema-hana-vm"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectableContainers/VMAppContainer;Compute;DinosRGUR1;sdsadsad","name":"VMAppContainer;Compute;DinosRGUR1;sdsadsad","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"sdsadsad","backupManagementType":"AzureWorkload","protectableContainerType":"VMAppContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/DinosRGUR1/providers/Microsoft.Compute/virtualMachines/sdsadsad"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectableContainers/VMAppContainer;Compute;Nilay-RG;nilsha-test","name":"VMAppContainer;Compute;Nilay-RG;nilsha-test","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"nilsha-test","backupManagementType":"AzureWorkload","protectableContainerType":"VMAppContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Nilay-RG/providers/Microsoft.Compute/virtualMachines/nilsha-test"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectableContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8","name":"VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"pstestwlvm1bca8","backupManagementType":"AzureWorkload","protectableContainerType":"VMAppContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.Compute/virtualMachines/pstestwlvm1bca8"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectableContainers/VMAppContainer;Compute;sarath-rg;dikextest","name":"VMAppContainer;Compute;sarath-rg;dikextest","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"dikextest","backupManagementType":"AzureWorkload","protectableContainerType":"VMAppContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.Compute/virtualMachines/dikextest"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectableContainers/VMAppContainer;Compute;sarath-rg;v2pstestvm","name":"VMAppContainer;Compute;sarath-rg;v2pstestvm","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"v2pstestvm","backupManagementType":"AzureWorkload","protectableContainerType":"VMAppContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.Compute/virtualMachines/v2pstestvm"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectableContainers/VMAppContainer;Compute;shswain-rg-donotuse;dfdfdgf","name":"VMAppContainer;Compute;shswain-rg-donotuse;dfdfdgf","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"dfdfdgf","backupManagementType":"AzureWorkload","protectableContainerType":"VMAppContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/shswain-rg-donotuse/providers/Microsoft.Compute/virtualMachines/dfdfdgf"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectableContainers/VMAppContainer;Compute;shswain-rg-donotuse;dsfdsghjghfg","name":"VMAppContainer;Compute;shswain-rg-donotuse;dsfdsghjghfg","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"dsfdsghjghfg","backupManagementType":"AzureWorkload","protectableContainerType":"VMAppContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/shswain-rg-donotuse/providers/Microsoft.Compute/virtualMachines/dsfdsghjghfg"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectableContainers/VMAppContainer;Compute;shswain-rg-donotuse;fdfdfdsfd","name":"VMAppContainer;Compute;shswain-rg-donotuse;fdfdfdsfd","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"fdfdfdsfd","backupManagementType":"AzureWorkload","protectableContainerType":"VMAppContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/shswain-rg-donotuse/providers/Microsoft.Compute/virtualMachines/fdfdfdsfd"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectableContainers/VMAppContainer;Compute;shswain-rg-donotuse;fgdjghffgh","name":"VMAppContainer;Compute;shswain-rg-donotuse;fgdjghffgh","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"fgdjghffgh","backupManagementType":"AzureWorkload","protectableContainerType":"VMAppContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/shswain-rg-donotuse/providers/Microsoft.Compute/virtualMachines/fgdjghffgh"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectableContainers/VMAppContainer;Compute;shswain-rg-donotuse;iumjjkuui","name":"VMAppContainer;Compute;shswain-rg-donotuse;iumjjkuui","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"iumjjkuui","backupManagementType":"AzureWorkload","protectableContainerType":"VMAppContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/shswain-rg-donotuse/providers/Microsoft.Compute/virtualMachines/iumjjkuui"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectableContainers/VMAppContainer;Compute;shswain-rg-donotuse;iuyiujuuyty","name":"VMAppContainer;Compute;shswain-rg-donotuse;iuyiujuuyty","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"iuyiujuuyty","backupManagementType":"AzureWorkload","protectableContainerType":"VMAppContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/shswain-rg-donotuse/providers/Microsoft.Compute/virtualMachines/iuyiujuuyty"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectableContainers/VMAppContainer;Compute;shswain-rg-donotuse;iyuybhjg","name":"VMAppContainer;Compute;shswain-rg-donotuse;iyuybhjg","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"iyuybhjg","backupManagementType":"AzureWorkload","protectableContainerType":"VMAppContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/shswain-rg-donotuse/providers/Microsoft.Compute/virtualMachines/iyuybhjg"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectableContainers/VMAppContainer;Compute;shswain-rg-donotuse;lutfdrgj","name":"VMAppContainer;Compute;shswain-rg-donotuse;lutfdrgj","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"lutfdrgj","backupManagementType":"AzureWorkload","protectableContainerType":"VMAppContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/shswain-rg-donotuse/providers/Microsoft.Compute/virtualMachines/lutfdrgj"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectableContainers/VMAppContainer;Compute;shswain-rg-donotuse;mjhjhjhjgh","name":"VMAppContainer;Compute;shswain-rg-donotuse;mjhjhjhjgh","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"mjhjhjhjgh","backupManagementType":"AzureWorkload","protectableContainerType":"VMAppContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/shswain-rg-donotuse/providers/Microsoft.Compute/virtualMachines/mjhjhjhjgh"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectableContainers/VMAppContainer;Compute;shswain-rg-donotuse;opouukujghjg","name":"VMAppContainer;Compute;shswain-rg-donotuse;opouukujghjg","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"opouukujghjg","backupManagementType":"AzureWorkload","protectableContainerType":"VMAppContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/shswain-rg-donotuse/providers/Microsoft.Compute/virtualMachines/opouukujghjg"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectableContainers/VMAppContainer;Compute;shswain-rg-donotuse;reresdsad","name":"VMAppContainer;Compute;shswain-rg-donotuse;reresdsad","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"reresdsad","backupManagementType":"AzureWorkload","protectableContainerType":"VMAppContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/shswain-rg-donotuse/providers/Microsoft.Compute/virtualMachines/reresdsad"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectableContainers/VMAppContainer;Compute;shswain-rg-donotuse;sdfdfdsfdf","name":"VMAppContainer;Compute;shswain-rg-donotuse;sdfdfdsfdf","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"sdfdfdsfdf","backupManagementType":"AzureWorkload","protectableContainerType":"VMAppContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/shswain-rg-donotuse/providers/Microsoft.Compute/virtualMachines/sdfdfdsfdf"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectableContainers/VMAppContainer;Compute;shswain-rg-donotuse;sdfdsf","name":"VMAppContainer;Compute;shswain-rg-donotuse;sdfdsf","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"sdfdsf","backupManagementType":"AzureWorkload","protectableContainerType":"VMAppContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/shswain-rg-donotuse/providers/Microsoft.Compute/virtualMachines/sdfdsf"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectableContainers/VMAppContainer;Compute;shswain-rg-donotuse;sfdsfdff","name":"VMAppContainer;Compute;shswain-rg-donotuse;sfdsfdff","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"sfdsfdff","backupManagementType":"AzureWorkload","protectableContainerType":"VMAppContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/shswain-rg-donotuse/providers/Microsoft.Compute/virtualMachines/sfdsfdff"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectableContainers/VMAppContainer;Compute;shswain-rg-donotuse;shswain-lin-man-pssd","name":"VMAppContainer;Compute;shswain-rg-donotuse;shswain-lin-man-pssd","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"shswain-lin-man-pssd","backupManagementType":"AzureWorkload","protectableContainerType":"VMAppContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/shswain-rg-donotuse/providers/Microsoft.Compute/virtualMachines/shswain-lin-man-pssd"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectableContainers/VMAppContainer;Compute;shswain-rg-donotuse;shswain-lin-unman-shdd","name":"VMAppContainer;Compute;shswain-rg-donotuse;shswain-lin-unman-shdd","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"shswain-lin-unman-shdd","backupManagementType":"AzureWorkload","protectableContainerType":"VMAppContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/shswain-rg-donotuse/providers/Microsoft.Compute/virtualMachines/shswain-lin-unman-shdd"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectableContainers/VMAppContainer;Compute;shswain-rg-donotuse;testvmdelete","name":"VMAppContainer;Compute;shswain-rg-donotuse;testvmdelete","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"testvmdelete","backupManagementType":"AzureWorkload","protectableContainerType":"VMAppContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/shswain-rg-donotuse/providers/Microsoft.Compute/virtualMachines/testvmdelete"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectableContainers/VMAppContainer;Compute;shswain-rg-restoredata;dsadsa","name":"VMAppContainer;Compute;shswain-rg-restoredata;dsadsa","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"dsadsa","backupManagementType":"AzureWorkload","protectableContainerType":"VMAppContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/shswain-rg-restoredata/providers/Microsoft.Compute/virtualMachines/dsadsa"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectableContainers/VMAppContainer;Compute;shswain-rg-restoredata;sddsds","name":"VMAppContainer;Compute;shswain-rg-restoredata;sddsds","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"sddsds","backupManagementType":"AzureWorkload","protectableContainerType":"VMAppContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/shswain-rg-restoredata/providers/Microsoft.Compute/virtualMachines/sddsds"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectableContainers/VMAppContainer;Compute;vishakrg;vishakvm1","name":"VMAppContainer;Compute;vishakrg;vishakvm1","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"vishakvm1","backupManagementType":"AzureWorkload","protectableContainerType":"VMAppContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/vishakrg/providers/Microsoft.Compute/virtualMachines/vishakvm1"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectableContainers/VMAppContainer;Compute;vishakrg;vishakvm3","name":"VMAppContainer;Compute;vishakrg;vishakvm3","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"vishakvm3","backupManagementType":"AzureWorkload","protectableContainerType":"VMAppContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/vishakrg/providers/Microsoft.Compute/virtualMachines/vishakvm3"}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1073'
+      - '18739'
       content-type:
-      - application/json
+      - application/json; charset=utf-8
       date:
-      - Mon, 10 May 2021 09:11:41 GMT
+      - Tue, 21 Dec 2021 10:43:18 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Microsoft-IIS/10.0
+      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -47,6 +45,1252 @@ interactions:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
       - '149'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"backupManagementType": "AzureWorkload", "containerType":
+      "VMAppContainer", "sourceResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.Compute/virtualMachines/pstestwlvm1bca8",
+      "workloadType": "SQLDataBase"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container register
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '289'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -v -g --backup-management-type --workload-type --resource-id
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BpstestwlRG1bca8%3Bpstestwlvm1bca8?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationsStatus/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Dec 2021 10:43:41 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationResults/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container register
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g --backup-management-type --workload-type --resource-id
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BpstestwlRG1bca8%3Bpstestwlvm1bca8/operationResults/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationsStatus/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Dec 2021 10:44:03 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationResults/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '149'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container register
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g --backup-management-type --workload-type --resource-id
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BpstestwlRG1bca8%3Bpstestwlvm1bca8/operationResults/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationsStatus/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Dec 2021 10:44:08 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationResults/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '148'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container register
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g --backup-management-type --workload-type --resource-id
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BpstestwlRG1bca8%3Bpstestwlvm1bca8/operationResults/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationsStatus/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Dec 2021 10:44:13 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationResults/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '147'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container register
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g --backup-management-type --workload-type --resource-id
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BpstestwlRG1bca8%3Bpstestwlvm1bca8/operationResults/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationsStatus/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Dec 2021 10:44:18 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationResults/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '146'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container register
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g --backup-management-type --workload-type --resource-id
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BpstestwlRG1bca8%3Bpstestwlvm1bca8/operationResults/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationsStatus/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Dec 2021 10:44:23 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationResults/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '145'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container register
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g --backup-management-type --workload-type --resource-id
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BpstestwlRG1bca8%3Bpstestwlvm1bca8/operationResults/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationsStatus/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Dec 2021 10:44:29 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationResults/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '144'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container register
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g --backup-management-type --workload-type --resource-id
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BpstestwlRG1bca8%3Bpstestwlvm1bca8/operationResults/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationsStatus/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Dec 2021 10:44:33 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationResults/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '143'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container register
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g --backup-management-type --workload-type --resource-id
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BpstestwlRG1bca8%3Bpstestwlvm1bca8/operationResults/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationsStatus/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Dec 2021 10:44:39 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationResults/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '142'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container register
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g --backup-management-type --workload-type --resource-id
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BpstestwlRG1bca8%3Bpstestwlvm1bca8/operationResults/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationsStatus/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Dec 2021 10:44:45 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationResults/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '141'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container register
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g --backup-management-type --workload-type --resource-id
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BpstestwlRG1bca8%3Bpstestwlvm1bca8/operationResults/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationsStatus/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Dec 2021 10:44:49 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationResults/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '140'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container register
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g --backup-management-type --workload-type --resource-id
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BpstestwlRG1bca8%3Bpstestwlvm1bca8/operationResults/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationsStatus/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Dec 2021 10:44:55 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationResults/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '139'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container register
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g --backup-management-type --workload-type --resource-id
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BpstestwlRG1bca8%3Bpstestwlvm1bca8/operationResults/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationsStatus/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Dec 2021 10:45:00 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationResults/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '138'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container register
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g --backup-management-type --workload-type --resource-id
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BpstestwlRG1bca8%3Bpstestwlvm1bca8/operationResults/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationsStatus/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Dec 2021 10:45:05 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationResults/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '137'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container register
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g --backup-management-type --workload-type --resource-id
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BpstestwlRG1bca8%3Bpstestwlvm1bca8/operationResults/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationsStatus/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Dec 2021 10:45:11 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationResults/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '136'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container register
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g --backup-management-type --workload-type --resource-id
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BpstestwlRG1bca8%3Bpstestwlvm1bca8/operationResults/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationsStatus/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Dec 2021 10:45:15 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationResults/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '135'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container register
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g --backup-management-type --workload-type --resource-id
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BpstestwlRG1bca8%3Bpstestwlvm1bca8/operationResults/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationsStatus/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Dec 2021 10:45:20 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationResults/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '134'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container register
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g --backup-management-type --workload-type --resource-id
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BpstestwlRG1bca8%3Bpstestwlvm1bca8/operationResults/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationsStatus/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Dec 2021 10:45:26 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationResults/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '133'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container register
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g --backup-management-type --workload-type --resource-id
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BpstestwlRG1bca8%3Bpstestwlvm1bca8/operationResults/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationsStatus/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Dec 2021 10:45:32 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationResults/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '132'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container register
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g --backup-management-type --workload-type --resource-id
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BpstestwlRG1bca8%3Bpstestwlvm1bca8/operationResults/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationsStatus/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Dec 2021 10:45:37 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationResults/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '131'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container register
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g --backup-management-type --workload-type --resource-id
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BpstestwlRG1bca8%3Bpstestwlvm1bca8/operationResults/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationsStatus/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Dec 2021 10:45:42 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationResults/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '130'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container register
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g --backup-management-type --workload-type --resource-id
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BpstestwlRG1bca8%3Bpstestwlvm1bca8/operationResults/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationsStatus/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Dec 2021 10:45:47 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationResults/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '129'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container register
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g --backup-management-type --workload-type --resource-id
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BpstestwlRG1bca8%3Bpstestwlvm1bca8/operationResults/d0651eab-344a-42a3-95be-b0fbbbbe2110?api-version=2021-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8","name":"VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.Compute/virtualMachines/pstestwlvm1bca8","lastUpdatedTime":"2021-12-21T10:43:46.8804332Z","extendedInfo":{"hostServerName":"pstestwlvm1bca8","inquiryInfo":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"inquiryDetails":[{"type":"SQL","itemCount":6,"inquiryValidation":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"additionalDetail":""}}]}},"friendlyName":"pstestwlvm1bca8","backupManagementType":"AzureWorkload","registrationStatus":"Registered","healthStatus":"Healthy","containerType":"VMAppContainer","protectableObjectType":"VMAppContainer"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1081'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Dec 2021 10:45:52 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '128'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g --backup-management-type
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupProtectionContainers?api-version=2021-10-01&$filter=backupManagementType%20eq%20%27AzureWorkload%27%20and%20status%20eq%20%27Registered%27
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestvm8895","name":"VMAppContainer;Compute;pstestwlRG1bca8;pstestvm8895","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.Compute/virtualMachines/pstestvm8895","lastUpdatedTime":"2019-10-30T12:06:54.5910168Z","extendedInfo":{"hostServerName":"pstestvm8895","inquiryInfo":{"status":"Success","errorDetail":{"code":"UserErrorOpeningSQLConnection","message":"Azure
+        Backup service is not able to connect to the SQL instance.","recommendations":["Please
+        refer to the general troubleshooting information about SQL connection failures.
+        For troubleshooting instructions, see https://aka.ms/AB-usererroropeningsqlconnection"]},"inquiryDetails":[{"type":"SQL","itemCount":0,"inquiryValidation":{"status":"Failed","errorDetail":{"code":"UserErrorOpeningSQLConnection","message":"Azure
+        Backup service is not able to connect to the SQL instance.","recommendations":["Please
+        refer to the general troubleshooting information about SQL connection failures.
+        For troubleshooting instructions, see https://aka.ms/AB-usererroropeningsqlconnection"]},"additionalDetail":"SQLPlugin:
+        Exception while Opening SQL Connection:Data Source=.;Integrated Security=True;Pooling=True;Application
+        Name=AzureWorkloadBackup Exception:Login failed for user ''NT AUTHORITY\\SYSTEM''."}}]}},"friendlyName":"pstestvm8895","backupManagementType":"AzureWorkload","registrationStatus":"Registered","healthStatus":"Deleted","containerType":"VMAppContainer","protectableObjectType":"VMAppContainer"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestvm8896","name":"VMAppContainer;Compute;pstestwlRG1bca8;pstestvm8896","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.Compute/virtualMachines/pstestvm8896","lastUpdatedTime":"2019-10-31T05:49:36.6718285Z","extendedInfo":{"hostServerName":"pstestvm8896","inquiryInfo":{"status":"Success","errorDetail":{"code":"UserErrorOpeningSQLConnection","message":"Azure
+        Backup service is not able to connect to the SQL instance.","recommendations":["Please
+        refer to the general troubleshooting information about SQL connection failures.
+        For troubleshooting instructions, see https://aka.ms/AB-usererroropeningsqlconnection"]},"inquiryDetails":[{"type":"SQL","itemCount":0,"inquiryValidation":{"status":"Failed","errorDetail":{"code":"UserErrorOpeningSQLConnection","message":"Azure
+        Backup service is not able to connect to the SQL instance.","recommendations":["Please
+        refer to the general troubleshooting information about SQL connection failures.
+        For troubleshooting instructions, see https://aka.ms/AB-usererroropeningsqlconnection"]},"additionalDetail":"SQLPlugin:
+        Exception while Opening SQL Connection:Data Source=.;Integrated Security=True;Pooling=True;Application
+        Name=AzureWorkloadBackup Exception:Login failed for user ''NT AUTHORITY\\SYSTEM''."}}]}},"friendlyName":"pstestvm8896","backupManagementType":"AzureWorkload","registrationStatus":"Registered","healthStatus":"Deleted","containerType":"VMAppContainer","protectableObjectType":"VMAppContainer"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8","name":"VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.Compute/virtualMachines/pstestwlvm1bca8","lastUpdatedTime":"2021-12-21T10:43:46.8804332Z","extendedInfo":{"hostServerName":"pstestwlvm1bca8","inquiryInfo":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"inquiryDetails":[{"type":"SQL","itemCount":6,"inquiryValidation":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"additionalDetail":""}}]}},"friendlyName":"pstestwlvm1bca8","backupManagementType":"AzureWorkload","registrationStatus":"Registered","healthStatus":"Healthy","containerType":"VMAppContainer","protectableObjectType":"VMAppContainer"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '4879'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Dec 2021 10:45:53 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '148'
       x-powered-by:
       - ASP.NET
     status:
@@ -66,30 +1310,44 @@ interactions:
       ParameterSetName:
       - -n -v -g --query --backup-management-type
       User-Agent:
-      - python/3.8.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.22.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bbksql%3Bsqlvm?api-version=2020-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupProtectionContainers?api-version=2021-10-01&$filter=backupManagementType%20eq%20%27AzureWorkload%27%20and%20status%20eq%20%27Registered%27
   response:
     body:
-      string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;bksql;sqlvm","name":"VMAppContainer;Compute;bksql;sqlvm","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.Compute/virtualMachines/sqlvm","lastUpdatedTime":"2021-04-29T10:02:02.4682499Z","extendedInfo":{"hostServerName":"sqlvm","inquiryInfo":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"inquiryDetails":[{"type":"SQL","itemCount":8,"inquiryValidation":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"additionalDetail":""}}]}},"friendlyName":"sqlvm","backupManagementType":"AzureWorkload","registrationStatus":"Registered","healthStatus":"Healthy","containerType":"VMAppContainer","protectableObjectType":"VMAppContainer"}}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestvm8895","name":"VMAppContainer;Compute;pstestwlRG1bca8;pstestvm8895","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.Compute/virtualMachines/pstestvm8895","lastUpdatedTime":"2019-10-30T12:06:54.5910168Z","extendedInfo":{"hostServerName":"pstestvm8895","inquiryInfo":{"status":"Success","errorDetail":{"code":"UserErrorOpeningSQLConnection","message":"Azure
+        Backup service is not able to connect to the SQL instance.","recommendations":["Please
+        refer to the general troubleshooting information about SQL connection failures.
+        For troubleshooting instructions, see https://aka.ms/AB-usererroropeningsqlconnection"]},"inquiryDetails":[{"type":"SQL","itemCount":0,"inquiryValidation":{"status":"Failed","errorDetail":{"code":"UserErrorOpeningSQLConnection","message":"Azure
+        Backup service is not able to connect to the SQL instance.","recommendations":["Please
+        refer to the general troubleshooting information about SQL connection failures.
+        For troubleshooting instructions, see https://aka.ms/AB-usererroropeningsqlconnection"]},"additionalDetail":"SQLPlugin:
+        Exception while Opening SQL Connection:Data Source=.;Integrated Security=True;Pooling=True;Application
+        Name=AzureWorkloadBackup Exception:Login failed for user ''NT AUTHORITY\\SYSTEM''."}}]}},"friendlyName":"pstestvm8895","backupManagementType":"AzureWorkload","registrationStatus":"Registered","healthStatus":"Deleted","containerType":"VMAppContainer","protectableObjectType":"VMAppContainer"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestvm8896","name":"VMAppContainer;Compute;pstestwlRG1bca8;pstestvm8896","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.Compute/virtualMachines/pstestvm8896","lastUpdatedTime":"2019-10-31T05:49:36.6718285Z","extendedInfo":{"hostServerName":"pstestvm8896","inquiryInfo":{"status":"Success","errorDetail":{"code":"UserErrorOpeningSQLConnection","message":"Azure
+        Backup service is not able to connect to the SQL instance.","recommendations":["Please
+        refer to the general troubleshooting information about SQL connection failures.
+        For troubleshooting instructions, see https://aka.ms/AB-usererroropeningsqlconnection"]},"inquiryDetails":[{"type":"SQL","itemCount":0,"inquiryValidation":{"status":"Failed","errorDetail":{"code":"UserErrorOpeningSQLConnection","message":"Azure
+        Backup service is not able to connect to the SQL instance.","recommendations":["Please
+        refer to the general troubleshooting information about SQL connection failures.
+        For troubleshooting instructions, see https://aka.ms/AB-usererroropeningsqlconnection"]},"additionalDetail":"SQLPlugin:
+        Exception while Opening SQL Connection:Data Source=.;Integrated Security=True;Pooling=True;Application
+        Name=AzureWorkloadBackup Exception:Login failed for user ''NT AUTHORITY\\SYSTEM''."}}]}},"friendlyName":"pstestvm8896","backupManagementType":"AzureWorkload","registrationStatus":"Registered","healthStatus":"Deleted","containerType":"VMAppContainer","protectableObjectType":"VMAppContainer"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8","name":"VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.Compute/virtualMachines/pstestwlvm1bca8","lastUpdatedTime":"2021-12-21T10:43:46.8804332Z","extendedInfo":{"hostServerName":"pstestwlvm1bca8","inquiryInfo":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"inquiryDetails":[{"type":"SQL","itemCount":6,"inquiryValidation":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"additionalDetail":""}}]}},"friendlyName":"pstestwlvm1bca8","backupManagementType":"AzureWorkload","registrationStatus":"Registered","healthStatus":"Healthy","containerType":"VMAppContainer","protectableObjectType":"VMAppContainer"}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1061'
+      - '4879'
       content-type:
-      - application/json
+      - application/json; charset=utf-8
       date:
-      - Mon, 10 May 2021 09:11:42 GMT
+      - Tue, 21 Dec 2021 10:45:53 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Microsoft-IIS/10.0
+      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -119,30 +1377,240 @@ interactions:
       ParameterSetName:
       - -g --vault-name --workload-type
       User-Agent:
-      - python/3.8.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.22.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupProtectableItems?api-version=2020-10-01&$filter=backupManagementType%20eq%20%27AzureWorkload%27%20and%20workloadType%20eq%20%27SQLDataBase%27
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupProtectableItems?api-version=2021-10-01&$filter=backupManagementType%20eq%20%27AzureWorkload%27%20and%20workloadType%20eq%20%27SQLDataBase%27
   response:
     body:
-      string: '{"value":[{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;bksql;sqlvm/protectableItems/sqlinstance;mssqlserver","name":"sqlinstance;mssqlserver","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"MSSQLSERVER","serverName":"sqlvm","isAutoProtectable":true,"isAutoProtected":false,"subinquireditemcount":8,"subprotectableitemcount":8,"prebackupvalidation":{"status":"Success","code":"Success"},"IsProtectable":false,"backupManagementType":"AzureWorkload","workloadType":"SQL","protectableItemType":"SQLInstance","friendlyName":"MSSQLSERVER","protectionState":"NotProtected"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;bksql;sqlvm/protectableItems/sqldatabase;mssqlserver;msdb_restored_5_10_2021_1527","name":"sqldatabase;mssqlserver;msdb_restored_5_10_2021_1527","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"MSSQLSERVER","serverName":"sqlvm","isAutoProtectable":false,"isAutoProtected":false,"subinquireditemcount":0,"subprotectableitemcount":0,"IsProtectable":true,"backupManagementType":"AzureWorkload","workloadType":"SQL","protectableItemType":"SQLDataBase","friendlyName":"msdb_restored_5_10_2021_1527","protectionState":"NotProtected"}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;pstestwlrg1bca8;pstestvm8895/protectableItems/sqlinstance;mssqlserver","name":"sqlinstance;mssqlserver","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"MSSQLSERVER","serverName":"pstestvm8895","isAutoProtectable":true,"isAutoProtected":false,"subinquireditemcount":0,"subprotectableitemcount":0,"prebackupvalidation":{"status":"Failed","code":"UserErrorOpeningSQLConnection","message":"SQLPlugin:
+        Exception while Opening SQL Connection:Data Source=.;Integrated Security=True;Pooling=True;Application
+        Name=AzureWorkloadBackup Exception:Login failed for user ''NT AUTHORITY\\SYSTEM''."},"IsProtectable":false,"backupManagementType":"AzureWorkload","workloadType":"SQL","protectableItemType":"SQLInstance","friendlyName":"MSSQLSERVER","protectionState":"NotProtected"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;pstestwlrg1bca8;pstestvm8896/protectableItems/sqlinstance;mssqlserver","name":"sqlinstance;mssqlserver","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"MSSQLSERVER","serverName":"pstestvm8896","isAutoProtectable":true,"isAutoProtected":false,"subinquireditemcount":0,"subprotectableitemcount":0,"prebackupvalidation":{"status":"Failed","code":"UserErrorOpeningSQLConnection","message":"SQLPlugin:
+        Exception while Opening SQL Connection:Data Source=.;Integrated Security=True;Pooling=True;Application
+        Name=AzureWorkloadBackup Exception:Login failed for user ''NT AUTHORITY\\SYSTEM''."},"IsProtectable":false,"backupManagementType":"AzureWorkload","workloadType":"SQL","protectableItemType":"SQLInstance","friendlyName":"MSSQLSERVER","protectionState":"NotProtected"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;pstestwlrg1bca8;pstestwlvm1bca8/protectableItems/sqlinstance;mssqlserver","name":"sqlinstance;mssqlserver","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"MSSQLSERVER","serverName":"pstestwlvm1bca8","isAutoProtectable":true,"isAutoProtected":false,"subinquireditemcount":6,"subprotectableitemcount":0,"prebackupvalidation":{"status":"Success","code":"Success"},"IsProtectable":false,"backupManagementType":"AzureWorkload","workloadType":"SQL","protectableItemType":"SQLInstance","friendlyName":"MSSQLSERVER","protectionState":"NotProtected"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;pstestwlrg1bca8;pstestwlvm1bca8/protectableItems/sqldatabase;mssqlserver;master","name":"sqldatabase;mssqlserver;master","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"MSSQLSERVER","serverName":"pstestwlvm1bca8","isAutoProtectable":false,"isAutoProtected":false,"subinquireditemcount":0,"subprotectableitemcount":0,"IsProtectable":true,"backupManagementType":"AzureWorkload","workloadType":"SQL","protectableItemType":"SQLDataBase","friendlyName":"master","protectionState":"NotProtected"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;pstestwlrg1bca8;pstestwlvm1bca8/protectableItems/sqldatabase;mssqlserver;model","name":"sqldatabase;mssqlserver;model","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"MSSQLSERVER","serverName":"pstestwlvm1bca8","isAutoProtectable":false,"isAutoProtected":false,"subinquireditemcount":0,"subprotectableitemcount":0,"IsProtectable":true,"backupManagementType":"AzureWorkload","workloadType":"SQL","protectableItemType":"SQLDataBase","friendlyName":"model","protectionState":"NotProtected"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;pstestwlrg1bca8;pstestwlvm1bca8/protectableItems/sqldatabase;mssqlserver;msdb","name":"sqldatabase;mssqlserver;msdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"MSSQLSERVER","serverName":"pstestwlvm1bca8","isAutoProtectable":false,"isAutoProtected":false,"subinquireditemcount":0,"subprotectableitemcount":0,"IsProtectable":true,"backupManagementType":"AzureWorkload","workloadType":"SQL","protectableItemType":"SQLDataBase","friendlyName":"msdb","protectionState":"NotProtected"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;pstestwlrg1bca8;pstestwlvm1bca8/protectableItems/sqldatabase;mssqlserver;testdb","name":"sqldatabase;mssqlserver;testdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"MSSQLSERVER","serverName":"pstestwlvm1bca8","isAutoProtectable":false,"isAutoProtected":false,"subinquireditemcount":0,"subprotectableitemcount":0,"IsProtectable":true,"backupManagementType":"AzureWorkload","workloadType":"SQL","protectableItemType":"SQLDataBase","friendlyName":"testdb","protectionState":"NotProtected"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;pstestwlrg1bca8;pstestwlvm1bca8/protectableItems/sqldatabase;mssqlserver;testdb_restored","name":"sqldatabase;mssqlserver;testdb_restored","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"MSSQLSERVER","serverName":"pstestwlvm1bca8","isAutoProtectable":false,"isAutoProtected":false,"subinquireditemcount":0,"subprotectableitemcount":0,"IsProtectable":true,"backupManagementType":"AzureWorkload","workloadType":"SQL","protectableItemType":"SQLDataBase","friendlyName":"testdb_restored","protectionState":"NotProtected"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;pstestwlrg1bca8;pstestwlvm1bca8/protectableItems/sqldatabase;mssqlserver;testdb_restored_9_21_2021_112","name":"sqldatabase;mssqlserver;testdb_restored_9_21_2021_112","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"MSSQLSERVER","serverName":"pstestwlvm1bca8","isAutoProtectable":false,"isAutoProtected":false,"subinquireditemcount":0,"subprotectableitemcount":0,"IsProtectable":true,"backupManagementType":"AzureWorkload","workloadType":"SQL","protectableItemType":"SQLDataBase","friendlyName":"testdb_restored_9_21_2021_112","protectionState":"NotProtected"}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1596'
+      - '7733'
       content-type:
-      - application/json
+      - application/json; charset=utf-8
       date:
-      - Mon, 10 May 2021 09:11:44 GMT
+      - Tue, 21 Dec 2021 10:45:54 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Microsoft-IIS/10.0
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '149'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protectable-item list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --vault-name --workload-type
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupProtectionIntents?api-version=2021-10-01&$filter=backupManagementType%20eq%20%27AzureWorkload%27%20and%20itemName%20eq%20%27MSSQLSERVER%27%20and%20itemType%20eq%20%27SQLInstance%27%20and%20parentName%20eq%20%27vmappcontainer%3Bcompute%3Bpstestwlrg1bca8%3Bpstestvm8895%27
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Dec 2021 10:45:55 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '149'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protectable-item list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --vault-name --workload-type
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupProtectionIntents?api-version=2021-10-01&$filter=backupManagementType%20eq%20%27AzureWorkload%27%20and%20itemName%20eq%20%27MSSQLSERVER%27%20and%20itemType%20eq%20%27SQLInstance%27%20and%20parentName%20eq%20%27vmappcontainer%3Bcompute%3Bpstestwlrg1bca8%3Bpstestvm8896%27
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Dec 2021 10:45:55 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '148'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protectable-item list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --vault-name --workload-type
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupProtectionIntents?api-version=2021-10-01&$filter=backupManagementType%20eq%20%27AzureWorkload%27%20and%20itemName%20eq%20%27MSSQLSERVER%27%20and%20itemType%20eq%20%27SQLInstance%27%20and%20parentName%20eq%20%27vmappcontainer%3Bcompute%3Bpstestwlrg1bca8%3Bpstestwlvm1bca8%27
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Dec 2021 10:45:55 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '147'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protectable-item show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --vault-name --name --workload-type --protectable-item-type --server-name
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupProtectableItems?api-version=2021-10-01&$filter=backupManagementType%20eq%20%27AzureWorkload%27%20and%20workloadType%20eq%20%27SQLDataBase%27
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;pstestwlrg1bca8;pstestvm8895/protectableItems/sqlinstance;mssqlserver","name":"sqlinstance;mssqlserver","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"MSSQLSERVER","serverName":"pstestvm8895","isAutoProtectable":true,"isAutoProtected":false,"subinquireditemcount":0,"subprotectableitemcount":0,"prebackupvalidation":{"status":"Failed","code":"UserErrorOpeningSQLConnection","message":"SQLPlugin:
+        Exception while Opening SQL Connection:Data Source=.;Integrated Security=True;Pooling=True;Application
+        Name=AzureWorkloadBackup Exception:Login failed for user ''NT AUTHORITY\\SYSTEM''."},"IsProtectable":false,"backupManagementType":"AzureWorkload","workloadType":"SQL","protectableItemType":"SQLInstance","friendlyName":"MSSQLSERVER","protectionState":"NotProtected"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;pstestwlrg1bca8;pstestvm8896/protectableItems/sqlinstance;mssqlserver","name":"sqlinstance;mssqlserver","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"MSSQLSERVER","serverName":"pstestvm8896","isAutoProtectable":true,"isAutoProtected":false,"subinquireditemcount":0,"subprotectableitemcount":0,"prebackupvalidation":{"status":"Failed","code":"UserErrorOpeningSQLConnection","message":"SQLPlugin:
+        Exception while Opening SQL Connection:Data Source=.;Integrated Security=True;Pooling=True;Application
+        Name=AzureWorkloadBackup Exception:Login failed for user ''NT AUTHORITY\\SYSTEM''."},"IsProtectable":false,"backupManagementType":"AzureWorkload","workloadType":"SQL","protectableItemType":"SQLInstance","friendlyName":"MSSQLSERVER","protectionState":"NotProtected"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;pstestwlrg1bca8;pstestwlvm1bca8/protectableItems/sqlinstance;mssqlserver","name":"sqlinstance;mssqlserver","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"MSSQLSERVER","serverName":"pstestwlvm1bca8","isAutoProtectable":true,"isAutoProtected":false,"subinquireditemcount":6,"subprotectableitemcount":0,"prebackupvalidation":{"status":"Success","code":"Success"},"IsProtectable":false,"backupManagementType":"AzureWorkload","workloadType":"SQL","protectableItemType":"SQLInstance","friendlyName":"MSSQLSERVER","protectionState":"NotProtected"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;pstestwlrg1bca8;pstestwlvm1bca8/protectableItems/sqldatabase;mssqlserver;master","name":"sqldatabase;mssqlserver;master","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"MSSQLSERVER","serverName":"pstestwlvm1bca8","isAutoProtectable":false,"isAutoProtected":false,"subinquireditemcount":0,"subprotectableitemcount":0,"IsProtectable":true,"backupManagementType":"AzureWorkload","workloadType":"SQL","protectableItemType":"SQLDataBase","friendlyName":"master","protectionState":"NotProtected"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;pstestwlrg1bca8;pstestwlvm1bca8/protectableItems/sqldatabase;mssqlserver;model","name":"sqldatabase;mssqlserver;model","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"MSSQLSERVER","serverName":"pstestwlvm1bca8","isAutoProtectable":false,"isAutoProtected":false,"subinquireditemcount":0,"subprotectableitemcount":0,"IsProtectable":true,"backupManagementType":"AzureWorkload","workloadType":"SQL","protectableItemType":"SQLDataBase","friendlyName":"model","protectionState":"NotProtected"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;pstestwlrg1bca8;pstestwlvm1bca8/protectableItems/sqldatabase;mssqlserver;msdb","name":"sqldatabase;mssqlserver;msdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"MSSQLSERVER","serverName":"pstestwlvm1bca8","isAutoProtectable":false,"isAutoProtected":false,"subinquireditemcount":0,"subprotectableitemcount":0,"IsProtectable":true,"backupManagementType":"AzureWorkload","workloadType":"SQL","protectableItemType":"SQLDataBase","friendlyName":"msdb","protectionState":"NotProtected"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;pstestwlrg1bca8;pstestwlvm1bca8/protectableItems/sqldatabase;mssqlserver;testdb","name":"sqldatabase;mssqlserver;testdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"MSSQLSERVER","serverName":"pstestwlvm1bca8","isAutoProtectable":false,"isAutoProtected":false,"subinquireditemcount":0,"subprotectableitemcount":0,"IsProtectable":true,"backupManagementType":"AzureWorkload","workloadType":"SQL","protectableItemType":"SQLDataBase","friendlyName":"testdb","protectionState":"NotProtected"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;pstestwlrg1bca8;pstestwlvm1bca8/protectableItems/sqldatabase;mssqlserver;testdb_restored","name":"sqldatabase;mssqlserver;testdb_restored","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"MSSQLSERVER","serverName":"pstestwlvm1bca8","isAutoProtectable":false,"isAutoProtected":false,"subinquireditemcount":0,"subprotectableitemcount":0,"IsProtectable":true,"backupManagementType":"AzureWorkload","workloadType":"SQL","protectableItemType":"SQLDataBase","friendlyName":"testdb_restored","protectionState":"NotProtected"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;pstestwlrg1bca8;pstestwlvm1bca8/protectableItems/sqldatabase;mssqlserver;testdb_restored_9_21_2021_112","name":"sqldatabase;mssqlserver;testdb_restored_9_21_2021_112","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"MSSQLSERVER","serverName":"pstestwlvm1bca8","isAutoProtectable":false,"isAutoProtected":false,"subinquireditemcount":0,"subprotectableitemcount":0,"IsProtectable":true,"backupManagementType":"AzureWorkload","workloadType":"SQL","protectableItemType":"SQLDataBase","friendlyName":"testdb_restored_9_21_2021_112","protectionState":"NotProtected"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '7733'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Dec 2021 10:45:55 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -172,30 +1640,79 @@ interactions:
       ParameterSetName:
       - -g --vault-name --name --workload-type --protectable-item-type --server-name
       User-Agent:
-      - python/3.8.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.22.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupProtectableItems?api-version=2020-10-01&$filter=backupManagementType%20eq%20%27AzureWorkload%27%20and%20workloadType%20eq%20%27SQLDataBase%27
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupProtectionIntents?api-version=2021-10-01&$filter=backupManagementType%20eq%20%27AzureWorkload%27%20and%20itemName%20eq%20%27MSSQLSERVER%27%20and%20itemType%20eq%20%27SQLInstance%27%20and%20parentName%20eq%20%27vmappcontainer%3Bcompute%3Bpstestwlrg1bca8%3Bpstestvm8895%27
   response:
     body:
-      string: '{"value":[{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;bksql;sqlvm/protectableItems/sqlinstance;mssqlserver","name":"sqlinstance;mssqlserver","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"MSSQLSERVER","serverName":"sqlvm","isAutoProtectable":true,"isAutoProtected":false,"subinquireditemcount":8,"subprotectableitemcount":8,"prebackupvalidation":{"status":"Success","code":"Success"},"IsProtectable":false,"backupManagementType":"AzureWorkload","workloadType":"SQL","protectableItemType":"SQLInstance","friendlyName":"MSSQLSERVER","protectionState":"NotProtected"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;bksql;sqlvm/protectableItems/sqldatabase;mssqlserver;msdb_restored_5_10_2021_1527","name":"sqldatabase;mssqlserver;msdb_restored_5_10_2021_1527","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"MSSQLSERVER","serverName":"sqlvm","isAutoProtectable":false,"isAutoProtected":false,"subinquireditemcount":0,"subprotectableitemcount":0,"IsProtectable":true,"backupManagementType":"AzureWorkload","workloadType":"SQL","protectableItemType":"SQLDataBase","friendlyName":"msdb_restored_5_10_2021_1527","protectionState":"NotProtected"}}]}'
+      string: '{"value":[]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1596'
+      - '12'
       content-type:
-      - application/json
+      - application/json; charset=utf-8
       date:
-      - Mon, 10 May 2021 09:11:44 GMT
+      - Tue, 21 Dec 2021 10:45:56 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Microsoft-IIS/10.0
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '149'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protectable-item show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --vault-name --name --workload-type --protectable-item-type --server-name
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupProtectionIntents?api-version=2021-10-01&$filter=backupManagementType%20eq%20%27AzureWorkload%27%20and%20itemName%20eq%20%27MSSQLSERVER%27%20and%20itemType%20eq%20%27SQLInstance%27%20and%20parentName%20eq%20%27vmappcontainer%3Bcompute%3Bpstestwlrg1bca8%3Bpstestvm8896%27
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Dec 2021 10:45:56 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -206,6 +1723,1456 @@ interactions:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
       - '148'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protectable-item show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --vault-name --name --workload-type --protectable-item-type --server-name
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupProtectionIntents?api-version=2021-10-01&$filter=backupManagementType%20eq%20%27AzureWorkload%27%20and%20itemName%20eq%20%27MSSQLSERVER%27%20and%20itemType%20eq%20%27SQLInstance%27%20and%20parentName%20eq%20%27vmappcontainer%3Bcompute%3Bpstestwlrg1bca8%3Bpstestwlvm1bca8%27
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Dec 2021 10:45:56 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '147'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container unregister
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -c -y
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupProtectionContainers?api-version=2021-10-01&$filter=backupManagementType%20eq%20%27AzureWorkload%27%20and%20status%20eq%20%27Registered%27
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestvm8895","name":"VMAppContainer;Compute;pstestwlRG1bca8;pstestvm8895","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.Compute/virtualMachines/pstestvm8895","lastUpdatedTime":"2019-10-30T12:06:54.5910168Z","extendedInfo":{"hostServerName":"pstestvm8895","inquiryInfo":{"status":"Success","errorDetail":{"code":"UserErrorOpeningSQLConnection","message":"Azure
+        Backup service is not able to connect to the SQL instance.","recommendations":["Please
+        refer to the general troubleshooting information about SQL connection failures.
+        For troubleshooting instructions, see https://aka.ms/AB-usererroropeningsqlconnection"]},"inquiryDetails":[{"type":"SQL","itemCount":0,"inquiryValidation":{"status":"Failed","errorDetail":{"code":"UserErrorOpeningSQLConnection","message":"Azure
+        Backup service is not able to connect to the SQL instance.","recommendations":["Please
+        refer to the general troubleshooting information about SQL connection failures.
+        For troubleshooting instructions, see https://aka.ms/AB-usererroropeningsqlconnection"]},"additionalDetail":"SQLPlugin:
+        Exception while Opening SQL Connection:Data Source=.;Integrated Security=True;Pooling=True;Application
+        Name=AzureWorkloadBackup Exception:Login failed for user ''NT AUTHORITY\\SYSTEM''."}}]}},"friendlyName":"pstestvm8895","backupManagementType":"AzureWorkload","registrationStatus":"Registered","healthStatus":"Deleted","containerType":"VMAppContainer","protectableObjectType":"VMAppContainer"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestvm8896","name":"VMAppContainer;Compute;pstestwlRG1bca8;pstestvm8896","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.Compute/virtualMachines/pstestvm8896","lastUpdatedTime":"2019-10-31T05:49:36.6718285Z","extendedInfo":{"hostServerName":"pstestvm8896","inquiryInfo":{"status":"Success","errorDetail":{"code":"UserErrorOpeningSQLConnection","message":"Azure
+        Backup service is not able to connect to the SQL instance.","recommendations":["Please
+        refer to the general troubleshooting information about SQL connection failures.
+        For troubleshooting instructions, see https://aka.ms/AB-usererroropeningsqlconnection"]},"inquiryDetails":[{"type":"SQL","itemCount":0,"inquiryValidation":{"status":"Failed","errorDetail":{"code":"UserErrorOpeningSQLConnection","message":"Azure
+        Backup service is not able to connect to the SQL instance.","recommendations":["Please
+        refer to the general troubleshooting information about SQL connection failures.
+        For troubleshooting instructions, see https://aka.ms/AB-usererroropeningsqlconnection"]},"additionalDetail":"SQLPlugin:
+        Exception while Opening SQL Connection:Data Source=.;Integrated Security=True;Pooling=True;Application
+        Name=AzureWorkloadBackup Exception:Login failed for user ''NT AUTHORITY\\SYSTEM''."}}]}},"friendlyName":"pstestvm8896","backupManagementType":"AzureWorkload","registrationStatus":"Registered","healthStatus":"Deleted","containerType":"VMAppContainer","protectableObjectType":"VMAppContainer"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8","name":"VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.Compute/virtualMachines/pstestwlvm1bca8","lastUpdatedTime":"2021-12-21T10:43:46.8804332Z","extendedInfo":{"hostServerName":"pstestwlvm1bca8","inquiryInfo":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"inquiryDetails":[{"type":"SQL","itemCount":6,"inquiryValidation":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"additionalDetail":""}}]}},"friendlyName":"pstestwlvm1bca8","backupManagementType":"AzureWorkload","registrationStatus":"Registered","healthStatus":"Healthy","containerType":"VMAppContainer","protectableObjectType":"VMAppContainer"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '4879'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Dec 2021 10:45:57 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '149'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container unregister
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -v -g -c -y
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BpstestwlRG1bca8%3Bpstestwlvm1bca8?api-version=2021-10-01
+  response:
+    body:
+      string: ''
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/operationsStatus/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Tue, 21 Dec 2021 10:45:58 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupOperationResults/45af1426-7593-4dc5-b078-3ec73a4d8318?fabricName=Azure?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container unregister
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -c -y
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BpstestwlRG1bca8%3Bpstestwlvm1bca8/operationResults/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationsStatus/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Dec 2021 10:45:59 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationResults/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '149'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container unregister
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -c -y
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BpstestwlRG1bca8%3Bpstestwlvm1bca8/operationResults/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationsStatus/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Dec 2021 10:46:04 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationResults/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '148'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container unregister
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -c -y
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BpstestwlRG1bca8%3Bpstestwlvm1bca8/operationResults/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationsStatus/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Dec 2021 10:46:09 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationResults/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '147'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container unregister
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -c -y
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BpstestwlRG1bca8%3Bpstestwlvm1bca8/operationResults/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationsStatus/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Dec 2021 10:46:14 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationResults/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '146'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container unregister
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -c -y
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BpstestwlRG1bca8%3Bpstestwlvm1bca8/operationResults/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationsStatus/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Dec 2021 10:46:19 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationResults/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '145'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container unregister
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -c -y
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BpstestwlRG1bca8%3Bpstestwlvm1bca8/operationResults/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationsStatus/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Dec 2021 10:46:24 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationResults/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '144'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container unregister
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -c -y
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BpstestwlRG1bca8%3Bpstestwlvm1bca8/operationResults/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationsStatus/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Dec 2021 10:46:29 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationResults/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '143'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container unregister
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -c -y
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BpstestwlRG1bca8%3Bpstestwlvm1bca8/operationResults/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationsStatus/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Dec 2021 10:46:34 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationResults/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '142'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container unregister
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -c -y
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BpstestwlRG1bca8%3Bpstestwlvm1bca8/operationResults/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationsStatus/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Dec 2021 10:46:40 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationResults/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '141'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container unregister
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -c -y
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BpstestwlRG1bca8%3Bpstestwlvm1bca8/operationResults/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationsStatus/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Dec 2021 10:46:45 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationResults/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '140'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container unregister
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -c -y
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BpstestwlRG1bca8%3Bpstestwlvm1bca8/operationResults/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationsStatus/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Dec 2021 10:46:51 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationResults/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '139'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container unregister
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -c -y
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BpstestwlRG1bca8%3Bpstestwlvm1bca8/operationResults/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationsStatus/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Dec 2021 10:46:56 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationResults/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '138'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container unregister
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -c -y
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BpstestwlRG1bca8%3Bpstestwlvm1bca8/operationResults/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationsStatus/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Dec 2021 10:47:01 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationResults/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '137'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container unregister
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -c -y
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BpstestwlRG1bca8%3Bpstestwlvm1bca8/operationResults/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationsStatus/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Dec 2021 10:47:06 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationResults/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '136'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container unregister
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -c -y
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BpstestwlRG1bca8%3Bpstestwlvm1bca8/operationResults/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationsStatus/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Dec 2021 10:47:11 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationResults/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '135'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container unregister
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -c -y
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BpstestwlRG1bca8%3Bpstestwlvm1bca8/operationResults/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationsStatus/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Dec 2021 10:47:16 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationResults/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '134'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container unregister
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -c -y
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BpstestwlRG1bca8%3Bpstestwlvm1bca8/operationResults/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationsStatus/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Dec 2021 10:47:21 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationResults/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '133'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container unregister
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -c -y
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BpstestwlRG1bca8%3Bpstestwlvm1bca8/operationResults/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationsStatus/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Dec 2021 10:47:27 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationResults/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '132'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container unregister
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -c -y
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BpstestwlRG1bca8%3Bpstestwlvm1bca8/operationResults/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationsStatus/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Dec 2021 10:47:32 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationResults/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '131'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container unregister
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -c -y
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BpstestwlRG1bca8%3Bpstestwlvm1bca8/operationResults/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationsStatus/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Dec 2021 10:47:37 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationResults/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '130'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container unregister
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -c -y
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BpstestwlRG1bca8%3Bpstestwlvm1bca8/operationResults/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationsStatus/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Dec 2021 10:47:42 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationResults/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '129'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container unregister
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -c -y
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BpstestwlRG1bca8%3Bpstestwlvm1bca8/operationResults/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationsStatus/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Dec 2021 10:47:47 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationResults/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '128'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container unregister
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -c -y
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BpstestwlRG1bca8%3Bpstestwlvm1bca8/operationResults/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2021-10-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationsStatus/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2019-05-13-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Dec 2021 10:47:53 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8/operationResults/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2021-10-01
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '127'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container unregister
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -c -y
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BpstestwlRG1bca8%3Bpstestwlvm1bca8/operationResults/45af1426-7593-4dc5-b078-3ec73a4d8318?api-version=2021-10-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      date:
+      - Tue, 21 Dec 2021 10:47:58 GMT
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '126'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 204
+      message: No Content
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g --backup-management-type
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupProtectionContainers?api-version=2021-10-01&$filter=backupManagementType%20eq%20%27AzureWorkload%27%20and%20status%20eq%20%27Registered%27
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestvm8895","name":"VMAppContainer;Compute;pstestwlRG1bca8;pstestvm8895","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.Compute/virtualMachines/pstestvm8895","lastUpdatedTime":"2019-10-30T12:06:54.5910168Z","extendedInfo":{"hostServerName":"pstestvm8895","inquiryInfo":{"status":"Success","errorDetail":{"code":"UserErrorOpeningSQLConnection","message":"Azure
+        Backup service is not able to connect to the SQL instance.","recommendations":["Please
+        refer to the general troubleshooting information about SQL connection failures.
+        For troubleshooting instructions, see https://aka.ms/AB-usererroropeningsqlconnection"]},"inquiryDetails":[{"type":"SQL","itemCount":0,"inquiryValidation":{"status":"Failed","errorDetail":{"code":"UserErrorOpeningSQLConnection","message":"Azure
+        Backup service is not able to connect to the SQL instance.","recommendations":["Please
+        refer to the general troubleshooting information about SQL connection failures.
+        For troubleshooting instructions, see https://aka.ms/AB-usererroropeningsqlconnection"]},"additionalDetail":"SQLPlugin:
+        Exception while Opening SQL Connection:Data Source=.;Integrated Security=True;Pooling=True;Application
+        Name=AzureWorkloadBackup Exception:Login failed for user ''NT AUTHORITY\\SYSTEM''."}}]}},"friendlyName":"pstestvm8895","backupManagementType":"AzureWorkload","registrationStatus":"Registered","healthStatus":"Deleted","containerType":"VMAppContainer","protectableObjectType":"VMAppContainer"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestvm8896","name":"VMAppContainer;Compute;pstestwlRG1bca8;pstestvm8896","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.Compute/virtualMachines/pstestvm8896","lastUpdatedTime":"2019-10-31T05:49:36.6718285Z","extendedInfo":{"hostServerName":"pstestvm8896","inquiryInfo":{"status":"Success","errorDetail":{"code":"UserErrorOpeningSQLConnection","message":"Azure
+        Backup service is not able to connect to the SQL instance.","recommendations":["Please
+        refer to the general troubleshooting information about SQL connection failures.
+        For troubleshooting instructions, see https://aka.ms/AB-usererroropeningsqlconnection"]},"inquiryDetails":[{"type":"SQL","itemCount":0,"inquiryValidation":{"status":"Failed","errorDetail":{"code":"UserErrorOpeningSQLConnection","message":"Azure
+        Backup service is not able to connect to the SQL instance.","recommendations":["Please
+        refer to the general troubleshooting information about SQL connection failures.
+        For troubleshooting instructions, see https://aka.ms/AB-usererroropeningsqlconnection"]},"additionalDetail":"SQLPlugin:
+        Exception while Opening SQL Connection:Data Source=.;Integrated Security=True;Pooling=True;Application
+        Name=AzureWorkloadBackup Exception:Login failed for user ''NT AUTHORITY\\SYSTEM''."}}]}},"friendlyName":"pstestvm8896","backupManagementType":"AzureWorkload","registrationStatus":"Registered","healthStatus":"Deleted","containerType":"VMAppContainer","protectableObjectType":"VMAppContainer"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3719'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Dec 2021 10:47:59 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '149'
       x-powered-by:
       - ASP.NET
     status:

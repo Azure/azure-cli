@@ -58,7 +58,11 @@ def add_webapp_access_restriction(
         subnet_id = _validate_subnet(cmd.cli_ctx, subnet, vnet_name, vnet_rg)
         if not ignore_missing_vnet_service_endpoint:
             _ensure_subnet_service_endpoint(cmd.cli_ctx, subnet_id)
-
+        # check for duplicates
+        for rule in list(access_rules):
+            if rule.vnet_subnet_resource_id and rule.vnet_subnet_resource_id.lower() == subnet_id.lower():
+                raise ArgumentUsageError('Service endpoint rule for: ' + subnet_id + ' already exists. '
+                                         'Cannot add duplicate service endpoint rules.')
         rule_instance = IpSecurityRestriction(
             name=rule_name, vnet_subnet_resource_id=subnet_id,
             priority=priority, action=action, tag='Default', description=description)
@@ -113,7 +117,8 @@ def remove_webapp_access_restriction(cmd, resource_group_name, name, rule_name=N
                 break
         elif subnet:
             subnet_id = _validate_subnet(cmd.cli_ctx, subnet, vnet_name, resource_group_name)
-            if rule.vnet_subnet_resource_id == subnet_id and rule.action == action:
+            if (rule.vnet_subnet_resource_id and
+                    rule.vnet_subnet_resource_id.lower() == subnet_id.lower() and rule.action == action):
                 if rule_name and (not rule.name or (rule.name and rule.name.lower() != rule_name.lower())):
                     continue
                 rule_instance = rule

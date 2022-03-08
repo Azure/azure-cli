@@ -9,6 +9,7 @@ import stat
 import platform
 import subprocess
 import json
+import certifi
 
 from json.decoder import JSONDecodeError
 from contextlib import suppress
@@ -17,7 +18,7 @@ from datetime import datetime, timedelta
 import requests
 import semver
 
-from six.moves.urllib.request import urlopen
+from urllib.request import urlopen
 from knack.log import get_logger
 from azure.cli.core.api import get_config_dir
 from azure.cli.core.azclierror import (
@@ -31,8 +32,10 @@ from azure.cli.core.azclierror import (
 # See: https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
 _semver_pattern = r"(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*)(?:-(?P<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?P<buildmetadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?"  # pylint: disable=line-too-long
 
-# See: https://docs.microsoft.com/en-us/azure/azure-resource-manager/templates/template-syntax#template-format
+# See: https://docs.microsoft.com/azure/azure-resource-manager/templates/template-syntax#template-format
 _template_schema_pattern = r"https?://schema\.management\.azure\.com/schemas/[0-9a-zA-Z-]+/(?P<templateType>[a-zA-Z]+)Template\.json#?"  # pylint: disable=line-too-long
+
+_bicep_diagnostic_warning_pattern = r"^([^\s].*)\((\d+)(?:,\d+|,\d+,\d+)?\)\s+:\s+(Warning)\s+([a-zA-Z-\d]+):\s*(.*?)\s+\[(.*?)\]$"  # pylint: disable=line-too-long
 
 _config_dir = get_config_dir()
 _bicep_installation_dir = os.path.join(_config_dir, "bin")
@@ -82,7 +85,7 @@ def run_bicep_command(args, auto_install=True, check_version=True):
     return _run_command(installation_path, args)
 
 
-def ensure_bicep_installation(release_tag=None, stdout=True):
+def ensure_bicep_installation(release_tag=None, target_platform=None, stdout=True):
     system = platform.system()
     installation_path = _get_bicep_installation_path(system)
 
@@ -106,8 +109,8 @@ def ensure_bicep_installation(release_tag=None, stdout=True):
                 print(f"Installing Bicep CLI {release_tag}...")
             else:
                 print("Installing Bicep CLI...")
-
-        request = urlopen(_get_bicep_download_url(system, release_tag))
+        ca_file = certifi.where()
+        request = urlopen(_get_bicep_download_url(system, release_tag, target_platform=target_platform), cafile=ca_file)
         with open(installation_path, "wb") as f:
             f.write(request.read())
 
@@ -124,13 +127,24 @@ def ensure_bicep_installation(release_tag=None, stdout=True):
         raise ClientRequestError(f"Error while attempting to download Bicep CLI: {err}")
 
 
+def remove_bicep_installation():
+    system = platform.system()
+    installation_path = _get_bicep_installation_path(system)
+
+    if os.path.exists(installation_path):
+        os.remove(installation_path)
+    if os.path.exists(_bicep_version_check_file_path):
+        os.remove(_bicep_version_check_file_path)
+
+
 def is_bicep_file(file_path):
     return file_path.lower().endswith(".bicep")
 
 
 def get_bicep_available_release_tags():
     try:
-        response = requests.get("https://api.github.com/repos/Azure/bicep/releases")
+        ca_file = certifi.where()
+        response = requests.get("https://aka.ms/BicepReleases", verify=ca_file)
         return [release["tag_name"] for release in response.json()]
     except IOError as err:
         raise ClientRequestError(f"Error while attempting to retrieve available Bicep versions: {err}.")
@@ -138,11 +152,19 @@ def get_bicep_available_release_tags():
 
 def get_bicep_latest_release_tag():
     try:
-        response = requests.get("https://api.github.com/repos/Azure/bicep/releases/latest")
+        ca_file = certifi.where()
+        response = requests.get("https://aka.ms/BicepLatestRelease", verify=ca_file)
         response.raise_for_status()
         return response.json()["tag_name"]
     except IOError as err:
         raise ClientRequestError(f"Error while attempting to retrieve the latest Bicep version: {err}.")
+
+
+def supports_bicep_publish():
+    system = platform.system()
+    installation_path = _get_bicep_installation_path(system)
+    installed_version = _get_bicep_installed_version(installation_path)
+    return semver.compare(installed_version, "0.4.1008") >= 0
 
 
 def _load_bicep_version_check_result_from_cache():
@@ -172,8 +194,12 @@ def _get_bicep_installed_version(bicep_executable_path):
     return _extract_semver(installed_version_output)
 
 
-def _get_bicep_download_url(system, release_tag):
+def _get_bicep_download_url(system, release_tag, target_platform=None):
     download_url = f"https://github.com/Azure/bicep/releases/download/{release_tag}/{{}}"
+
+    if target_platform:
+        executable_name = "bicep-win-x64.exe" if target_platform == "win-x64" else f"bicep-{target_platform}"
+        return download_url.format(executable_name)
 
     if system == "Windows":
         return download_url.format("bicep-win-x64.exe")
@@ -184,7 +210,7 @@ def _get_bicep_download_url(system, release_tag):
     if system == "Darwin":
         return download_url.format("bicep-osx-x64")
 
-    raise ValidationError(f'The platform "{format(system)}" is not supported.')
+    raise ValidationError(f'The platform "{system}" is not supported.')
 
 
 def _get_bicep_installation_path(system):
@@ -193,7 +219,7 @@ def _get_bicep_installation_path(system):
     if system in ("Linux", "Darwin"):
         return os.path.join(_bicep_installation_dir, "bicep")
 
-    raise ValidationError(f'The platform "{format(system)}" is not supported.')
+    raise ValidationError(f'The platform "{system}" is not supported.')
 
 
 def _extract_semver(text):
@@ -211,7 +237,17 @@ def _run_command(bicep_installation_path, args):
             _logger.warning(command_warnings)
         return process.stdout.decode("utf-8")
     except subprocess.CalledProcessError:
-        raise UnclassifiedUserFault(process.stderr.decode("utf-8"))
+        stderr_output = process.stderr.decode("utf-8")
+        errors = []
+
+        for line in stderr_output.splitlines():
+            if re.match(_bicep_diagnostic_warning_pattern, line):
+                _logger.warning(line)
+            else:
+                errors.append(line)
+
+        error_msg = os.linesep.join(errors)
+        raise UnclassifiedUserFault(error_msg)
 
 
 def _template_schema_to_target_scope(template_schema):

@@ -11,13 +11,13 @@ start_time = timeit.default_timer()
 import sys
 import uuid
 
-import azure.cli.core.telemetry as telemetry
+from azure.cli.core import telemetry
 from azure.cli.core import get_default_cli
 from knack.completion import ARGCOMPLETE_ENV_NAME
 from knack.log import get_logger
 
 __author__ = "Microsoft Corporation <python@microsoft.com>"
-__version__ = "2.24.0"
+__version__ = "2.34.1"
 
 
 # A workaround for https://bugs.python.org/issue32502 (https://github.com/Azure/azure-cli/issues/5184)

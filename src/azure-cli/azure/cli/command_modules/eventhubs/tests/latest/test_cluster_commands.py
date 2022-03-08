@@ -15,12 +15,13 @@ from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer)
 
 
 class EHNamespaceCURDScenarioTest(ScenarioTest):
-    from azure_devtools.scenario_tests import AllowLargeResponse
+    from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
     @AllowLargeResponse()
     def test_eh_cluster(self):
         self.kwargs.update({
-            'loc': 'southcentralus',
+            'loc1': 'southcentralus',
+            'loc': 'eastus',
             'rg': 'rgehcluster-cli-test',
             'clustername': self.create_random_name(prefix='eventhubs-clus1-', length=20),
             'namespacename': self.create_random_name(prefix='eventhubs-nscli', length=20),
@@ -32,7 +33,7 @@ class EHNamespaceCURDScenarioTest(ScenarioTest):
         })
 
         # create Resource group
-        self.cmd('az group create --resource-group {rg} --location {loc}')
+        self.cmd('az group create --resource-group {rg} --location {loc1}')
 
         # Create Cluster
         self.cmd('eventhubs cluster create --resource-group {rg} --name {clustername} --location {loc} --tags tag1=value1',
