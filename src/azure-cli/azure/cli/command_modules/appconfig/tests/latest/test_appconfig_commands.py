@@ -24,7 +24,7 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 class AppConfigMgmtScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(parameter_name_for_location='location')
-    @AllowLargeResponse
+    @AllowLargeResponse()
     def test_azconfig_mgmt(self, resource_group, location):
         config_store_name = self.create_random_name(prefix='MgmtTest', length=24)
 
