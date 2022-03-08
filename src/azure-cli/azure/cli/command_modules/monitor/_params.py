@@ -16,8 +16,8 @@ from azure.cli.command_modules.monitor.actions import (
 from azure.cli.command_modules.monitor.util import get_operator_map, get_aggregation_map
 from azure.cli.command_modules.monitor.validators import (
     process_webhook_prop, validate_autoscale_recurrence, validate_autoscale_timegrain, get_action_group_validator,
-    get_action_group_id_validator, validate_metric_dimension, validate_storagitge_accounts_name_or_id,
-    process_subscription_id, process_workspace_data_export_destination, validate_storage_accounts_name_or_id)
+    get_action_group_id_validator, validate_metric_dimension, validate_storage_accounts_name_or_id,
+    process_subscription_id, process_workspace_data_export_destination)
 
 from knack.arguments import CLIArgumentType
 
