@@ -3,8 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 # pylint: disable=unused-argument, line-too-long
-from azure.cli.core.util import sdk_no_wait
-from .._client_factory import cf_synapse_client_workspace_factory
+from azure.cli.core.util import sdk_no_wait, read_file_content, CLIError
+from .._client_factory import cf_synapse_client_workspace_factory, cf_kusto_script, cf_kusto_scripts
+from azure.synapse.artifacts.models import KqlScriptResource, KqlScript, KqlScriptContent, KqlScriptContentMetadata, KqlScriptContentCurrentConnection
+import os
 
 
 # Synapse kustopool
@@ -147,3 +149,76 @@ def synapse_kusto_pool_detach_follower_database(client,
                        kusto_pool_name=kusto_pool_name,
                        resource_group_name=resource_group_name,
                        follower_database_to_remove=follower_database_to_remove)
+
+
+def synapse_kusto_script_show(cmd, client,
+                              workspace_name,
+                              script_name):
+    client = cf_kusto_script(cmd.cli_ctx, workspace_name)
+    return client.get_by_name(kql_script_name=script_name)
+
+
+def synapse_kusto_script_create(cmd, client,
+                                resource_group_name,
+                                workspace_name,
+                                script_name,
+                                definition_file,
+                                kusto_pool_name=None,
+                                kusto_database_name=None,
+                                no_wait=False):
+
+    client = cf_kusto_script(cmd.cli_ctx, workspace_name)
+    query = read_file_content(definition_file)
+    metadata = KqlScriptContentMetadata(language="kql")
+    current_connection = KqlScriptContentCurrentConnection(pool_name=kusto_pool_name,
+                                                           database_name=kusto_database_name)
+    script_content = KqlScriptContent(query=query, metadata=metadata, current_connection=current_connection)
+    properties = KqlScript(content=script_content)
+    kql_script = KqlScriptResource(name=script_name, properties=properties)
+    return sdk_no_wait(no_wait,
+                       client.begin_create_or_update,
+                       kql_script_name=script_name,
+                       kql_script=kql_script
+                       )
+
+
+def synapse_kusto_script_delete(cmd, client,
+                                workspace_name,
+                                script_name,
+                                no_wait=False):
+    client = cf_kusto_script(cmd.cli_ctx, workspace_name)
+
+    return sdk_no_wait(no_wait,
+                       client.begin_delete_by_name,
+                       kql_script_name=script_name)
+
+
+def synapse_kusto_script_list(cmd, client,
+                              workspace_name):
+    client = cf_kusto_scripts(cmd.cli_ctx, workspace_name)
+    return client.get_all()
+
+
+def synapse_kusto_script_export(cmd, workspace_name, output_folder, script_name=None):
+    if script_name is not None:
+        kusto_script_client = cf_kusto_script(cmd.cli_ctx, workspace_name)
+        kql_script = kusto_script_client.get_by_name(script_name)
+        path = os.path.join(output_folder, script_name + '.kql')
+        write_to_file(kql_script, path)
+    else:
+        kusto_script_client = cf_kusto_scripts(cmd.cli_ctx, workspace_name)
+        kql_scripts = kusto_script_client.get_all()
+        for kql_script in kql_scripts:
+            path = os.path.join(output_folder, kql_script.name + '.kql')
+            write_to_file(kql_script, path)
+
+
+def write_to_file(kql_script, path):
+    try:
+        query = ''
+        if hasattr(kql_script.properties.content, 'query'):
+            query = kql_script.properties.content.query
+        with open(path, 'w') as f:
+            f.write(query)
+    except IOError:
+        raise CLIError('Unable to export to file: {}'.format(path))

@@ -2206,7 +2206,7 @@ def cli_cosmosdb_managed_cassandra_cluster_create(client,
 
     """Creates an Azure Managed Cassandra Cluster"""
 
-    if initial_cassandra_admin_password is None and external_gossip_certificates is None:
+    if authentication_method != 'None' and initial_cassandra_admin_password is None and external_gossip_certificates is None:
         raise CLIError('At least one out of the Initial Cassandra Admin Password or External Gossip Certificates is required.')
 
     if initial_cassandra_admin_password is not None and external_gossip_certificates is not None:
@@ -2258,7 +2258,7 @@ def cli_cosmosdb_managed_cassandra_cluster_update(client,
     if client_certificates is None:
         client_certificates = cluster_resource.properties.client_certificates
 
-    if external_gossip_certificates is not None:
+    if external_gossip_certificates is None:
         external_gossip_certificates = cluster_resource.properties.external_gossip_certificates
 
     if external_seed_nodes is None:
@@ -2297,7 +2297,7 @@ def cli_cosmosdb_managed_cassandra_cluster_update(client,
         client_certificates=client_certificates,
         external_gossip_certificates=external_gossip_certificates,
         gossip_certificates=cluster_resource.properties.gossip_certificates,
-        external_seed_nodes=cluster_resource.properties.external_seed_nodes,
+        external_seed_nodes=external_seed_nodes,
         seed_nodes=cluster_resource.properties.seed_nodes
     )
 
@@ -2385,7 +2385,7 @@ def cli_cosmosdb_managed_cassandra_datacenter_create(client,
                                                      disk_capacity=None,
                                                      availability_zone=None):
 
-    """Creates an Azure Managed Cassandra Datacenter"""
+    """Creates an Azure Managed Cassandra DataCenter"""
 
     data_center_properties = DataCenterResourceProperties(
         data_center_location=data_center_location,
@@ -2416,7 +2416,7 @@ def cli_cosmosdb_managed_cassandra_datacenter_update(client,
                                                      managed_disk_customer_key_uri=None,
                                                      backup_storage_customer_key_uri=None):
 
-    """Updates an Azure Managed Cassandra Datacenter"""
+    """Updates an Azure Managed Cassandra DataCenter"""
 
     data_center_resource = client.get(resource_group_name, cluster_name, data_center_name)
 

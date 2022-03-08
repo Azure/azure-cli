@@ -14,7 +14,8 @@ from knack.log import get_logger
 
 from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id
 
-from azure.mgmt.recoveryservicesbackup.models import OperationStatusValues, JobStatus, CrrJobRequest
+from azure.mgmt.recoveryservicesbackup.activestamp.models import OperationStatusValues, JobStatus
+from azure.mgmt.recoveryservicesbackup.passivestamp.models import CrrJobRequest
 
 from azure.cli.core.util import CLIError
 from azure.cli.core.commands import _is_paged
@@ -413,10 +414,16 @@ def validate_and_extract_container_type(container_name, backup_management_type):
 
     container_type = container_name.split(";")[0].lower()
     container_type_mappings = {"iaasvmcontainer": "AzureIaasVM", "storagecontainer": "AzureStorage",
-                               "vmappcontainer": "AzureWorkload", "windows": "MAB"}
+                               "vmappcontainer": "AzureWorkload", "windows": "MAB",
+                               "sqlagworkloadcontainer": "AzureWorkload"}
 
     if container_type in container_type_mappings:
         return container_type_mappings[container_type]
+    logger.warning(
+        """
+        Could not extract the backup management type. If the command fails check if the container name specified is
+        complete or try using container friendly name instead.
+        """)
     return None
 
 

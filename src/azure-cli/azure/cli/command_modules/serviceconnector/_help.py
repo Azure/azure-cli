@@ -47,7 +47,7 @@ def get_auth_info_params(auth_type):
         AUTH_TYPE.Secret: '--secret name=XX secret=XX',
         AUTH_TYPE.SecretAuto: '--secret',
         AUTH_TYPE.SystemIdentity: '--system-identity',
-        AUTH_TYPE.ServicePrincipalSecret: '--service-principal client-id=XX object-id=XX secret=XX',
+        AUTH_TYPE.ServicePrincipalSecret: '--service-principal client-id=XX secret=XX',
         AUTH_TYPE.UserIdentity: '--user-identity client-id=XX subs-id=XX'
     }
 
@@ -225,10 +225,10 @@ for source in SOURCE_RESOURCES:
             - name: --service-principal
               short-summary: The service principal auth info
               long-summary: |
-                Usage: --service-principal client-id=XX object-id=XX secret=XX
+                Usage: --service-principal client-id=XX secret=XX
 
                 client-id      : Required. Client id of the service principal.
-                object-id      : Required. Object id of the service principal.
+                object-id      : Optional. Object id of the service principal (Enterprise Application).
                 secret         : Required. Secret of the service principal.
         ''' if AUTH_TYPE.ServicePrincipalSecret in auth_types else ''
 

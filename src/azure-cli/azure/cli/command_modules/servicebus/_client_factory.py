@@ -6,8 +6,8 @@
 
 def cf_servicebus(cli_ctx, **_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.mgmt.servicebus import ServiceBusManagementClient
-    return get_mgmt_service_client(cli_ctx, ServiceBusManagementClient)
+    from azure.cli.core.profiles import ResourceType
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_SERVICEBUS)
 
 
 def namespaces_mgmt_client_factory(cli_ctx, _):

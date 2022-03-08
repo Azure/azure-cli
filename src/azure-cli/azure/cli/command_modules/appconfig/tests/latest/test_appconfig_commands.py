@@ -518,6 +518,85 @@ class AppConfigKVScenarioTest(ScenarioTest):
         assert len(exported_kvs) == 1
         assert exported_kvs[secret_name] == secret_value
 
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(parameter_name_for_location='location')
+    def test_azconfig_kv_revision_list(self, resource_group, location):
+        config_store_name = self.create_random_name(prefix='KVRevisionTest', length=24)
+
+        location = 'eastus'
+        sku = 'standard'
+        self.kwargs.update({
+            'config_store_name': config_store_name,
+            'rg_loc': location,
+            'rg': resource_group,
+            'sku': sku
+        })
+        _create_config_store(self, self.kwargs)
+
+        entry_key = "Color"
+        entry_label = 'v1.0.0'
+
+        self.kwargs.update({
+            'key': entry_key,
+            'label': entry_label
+        })
+
+        # add a new key-value entry
+        self.cmd('appconfig kv set -n {config_store_name} --key {key} --label {label} -y',
+                 checks=[self.check('contentType', ""),
+                         self.check('key', entry_key),
+                         self.check('value', ""),
+                         self.check('label', entry_label)])
+
+        # edit a key-value entry
+        updated_entry_value = "Green"
+        entry_content_type = "text"
+
+        self.kwargs.update({
+            'value': updated_entry_value,
+            'content_type': entry_content_type
+        })
+
+        self.cmd(
+            'appconfig kv set -n {config_store_name} --key {key} --value {value} --content-type {content_type} --label {label} -y',
+            checks=[self.check('contentType', entry_content_type),
+                    self.check('key', entry_key),
+                    self.check('value', updated_entry_value),
+                    self.check('label', entry_label)])
+
+        # add a new label
+        updated_label = 'newlabel'
+        self.kwargs.update({
+            'label': updated_label
+        })
+
+        self.cmd(
+            'appconfig kv set -n {config_store_name} --key {key} --value {value} --content-type {content_type} --label {label} -y',
+            checks=[self.check('contentType', entry_content_type),
+                    self.check('key', entry_key),
+                    self.check('value', updated_entry_value),
+                    self.check('label', updated_label)])
+
+        revisions = self.cmd('appconfig revision list -n {config_store_name} --key {key} --label * --top 2 --fields content_type etag label last_modified value').get_output_in_json()
+        assert len(revisions) == 2
+
+        assert revisions[0]['content_type'] == 'text'
+        assert revisions[1]['content_type'] == 'text'
+        assert revisions[0]['label'] == 'newlabel'
+        assert revisions[1]['label'] == 'v1.0.0'
+        assert revisions[0]['value'] == 'Green'
+        assert revisions[1]['value'] == 'Green'
+        assert revisions[0]['last_modified'] is not None
+        assert revisions[1]['last_modified'] is not None
+        assert revisions[1]['etag'] is not None
+        assert revisions[0]['etag'] is not None
+        assert 'key' not in revisions[0]
+        assert 'key' not in revisions[1]
+        assert 'locked' not in revisions[0]
+        assert 'locked' not in revisions[1]
+        assert 'tags' not in revisions[0]
+        assert 'tags' not in revisions[1]
+
 
 class AppConfigImportExportScenarioTest(ScenarioTest):
 
@@ -733,6 +812,46 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
             expected_kvs = json.load(json_file)
         assert exported_kvs == expected_kvs
 
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(parameter_name_for_location='location')
+    def test_azconfig_strict_import(self, resource_group, location):
+        config_store_name = self.create_random_name(prefix='StrictImportTest', length=24)
+
+        location = 'eastus'
+        sku = 'standard'
+        self.kwargs.update({
+            'config_store_name': config_store_name,
+            'rg_loc': location,
+            'rg': resource_group,
+            'sku': sku
+        })
+        _create_config_store(self, self.kwargs)
+
+        # File <--> AppConfig tests
+        imported_file_path = os.path.join(TEST_DIR, 'kvset_import.json')
+        exported_file_path = os.path.join(TEST_DIR, 'kvset_export.json')
+        strict_import_file_path = os.path.join(TEST_DIR, 'strict_import.json')
+
+        self.kwargs.update({
+            'import_source': 'file',
+            'imported_format': 'json',
+            'profile': ImportExportProfiles.KVSET,
+            'imported_file_path': imported_file_path,
+            'exported_file_path': exported_file_path,
+            'strict_import_file_path': strict_import_file_path
+        })
+        self.cmd(
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --profile {profile} -y')
+        self.cmd(
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{strict_import_file_path}" --format {imported_format} --profile {profile} --strict -y')
+        self.cmd(
+            'appconfig kv export -n {config_store_name} -d {import_source} --label * --key * --path "{exported_file_path}" --format {imported_format} --profile {profile} -y')
+        with open(strict_import_file_path) as json_file:
+            expected_kvs = json.load(json_file)
+        with open(exported_file_path) as json_file:
+            exported_kvs = json.load(json_file)
+        assert expected_kvs == exported_kvs
+
 
 class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
 
@@ -760,8 +879,13 @@ class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
         # Create AppService plan and webapp
         webapp_name = self.create_random_name(prefix='WebApp', length=24)
         plan = self.create_random_name(prefix='Plan', length=24)
-        self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
+        # Require a standard sku to allow for deployment slots
+        self.cmd('appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan))
         self.cmd('webapp create -g {} -n {} -p {}'.format(resource_group, webapp_name, plan))
+
+        # Create deployment slot
+        slot = self.create_random_name(prefix='Slot', length=24)
+        self.cmd('webapp deployment slot create -g {} -n {} -s {}'.format(resource_group, webapp_name, slot))
 
         # KeyVault reference tests
         keyvault_key = "HostSecrets"
@@ -795,6 +919,14 @@ class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
         self.assertEqual(exported_keys['value'], appsvc_keyvault_value)
         self.assertEqual(exported_keys['slotSetting'], False)
 
+        self.kwargs.update({
+            'slot': slot
+        })
+
+        # Verify that the slot configuration was not updated
+        app_settings = self.cmd('webapp config appsettings list -g {rg} -n {appservice_account} -s {slot}').get_output_in_json()
+        assert not any(True for elem in app_settings if elem['name'] == keyvault_key)
+
         # Import KeyVault ref from AppService
         updated_label = 'ImportedFromAppService'
         self.kwargs.update({
@@ -806,6 +938,59 @@ class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
                  checks=[self.check('[0].contentType', KeyVaultConstants.KEYVAULT_CONTENT_TYPE),
                          self.check('[0].key', keyvault_key),
                          self.check('[0].value', appconfig_keyvault_value),
+                         self.check('[0].label', updated_label)])
+
+        # Get the slot ID
+        slot_list = self.cmd('az webapp deployment slot list -g {rg} -n {appservice_account}').get_output_in_json()
+        assert slot_list and len(slot_list) == 1
+        slot_id = slot_list[0]['id']
+
+        # Update keyvault reference for slot export / import testing
+        slot_keyvault_id = "https://fake.vault.azure.net/secrets/slotsecret"
+        appconfigslot_keyvault_value = "{{\"uri\":\"https://fake.vault.azure.net/secrets/slotsecret\"}}"
+        appsvcslot_keyvault_value = "@Microsoft.KeyVault(SecretUri=https://fake.vault.azure.net/secrets/slotsecret)"
+        label = 'ForExportToAppServiceSlot'
+        self.kwargs.update({
+            'label': label,
+            'secret_identifier': slot_keyvault_id,
+            'slot_id': slot_id
+        })
+
+        # Add new KeyVault ref in AppConfig for the slot
+        self.cmd('appconfig kv set-keyvault --connection-string {connection_string} --key {key} --secret-identifier {secret_identifier} --label {label} -y',
+                 checks=[self.check('contentType', KeyVaultConstants.KEYVAULT_CONTENT_TYPE),
+                         self.check('key', keyvault_key),
+                         self.check('label', label),
+                         self.check('value', appconfigslot_keyvault_value)])
+
+        # Export KeyVault ref to AppService
+        self.cmd('appconfig kv export --connection-string {connection_string} -d {export_dest} --appservice-account {slot_id} --label {label} -y')
+
+        # Verify that the webapp configuration was not updated
+        app_settings = self.cmd('webapp config appsettings list -g {rg} -n {appservice_account}').get_output_in_json()
+        exported_keys = next(x for x in app_settings if x['name'] == keyvault_key)
+        self.assertEqual(exported_keys['name'], keyvault_key)
+        self.assertEqual(exported_keys['value'], appsvc_keyvault_value)
+        self.assertEqual(exported_keys['slotSetting'], False)
+
+        # Verify that the slot configuration was updated
+        app_settings = self.cmd('webapp config appsettings list -g {rg} -n {appservice_account} -s {slot}').get_output_in_json()
+        exported_keys = next(x for x in app_settings if x['name'] == keyvault_key)
+        self.assertEqual(exported_keys['name'], keyvault_key)
+        self.assertEqual(exported_keys['value'], appsvcslot_keyvault_value)
+        self.assertEqual(exported_keys['slotSetting'], False)
+
+        # Import KeyVault ref from AppService slot
+        updated_label = 'ImportedFromAppServiceSlot'
+        self.kwargs.update({
+            'label': updated_label
+        })
+        self.cmd('appconfig kv import --connection-string {connection_string} -s {export_dest} --appservice-account {slot_id} --label {label} -y')
+
+        self.cmd('appconfig kv list --connection-string {connection_string} --label {label}',
+                 checks=[self.check('[0].contentType', KeyVaultConstants.KEYVAULT_CONTENT_TYPE),
+                         self.check('[0].key', keyvault_key),
+                         self.check('[0].value', appconfigslot_keyvault_value),
                          self.check('[0].label', updated_label)])
 
         # Add keyvault ref to appservice in alt format and import to appconfig

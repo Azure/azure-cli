@@ -301,7 +301,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
         encryption_at_host=None, dedicated_host_group=None, enable_auto_update=None, patch_mode=None,
         enable_hotpatching=None, platform_fault_domain=None, security_type=None, enable_secure_boot=None,
         enable_vtpm=None, count=None, edge_zone=None, os_disk_delete_option=None, user_data=None,
-        capacity_reservation_group=None, enable_hibernation=None):
+        capacity_reservation_group=None, enable_hibernation=None, v_cpus_available=None, v_cpus_per_core=None):
 
     os_caching = disk_info['os'].get('caching')
 
@@ -500,6 +500,16 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
 
     vm_properties = {'hardwareProfile': {'vmSize': size}, 'networkProfile': {'networkInterfaces': nics},
                      'storageProfile': _build_storage_profile()}
+
+    vm_size_properties = {}
+    if v_cpus_available is not None:
+        vm_size_properties['vCPUsAvailable'] = v_cpus_available
+
+    if v_cpus_per_core is not None:
+        vm_size_properties['vCPUsPerCore'] = v_cpus_per_core
+
+    if vm_size_properties:
+        vm_properties['hardwareProfile']['vmSizeProperties'] = vm_size_properties
 
     if availability_set_id:
         vm_properties['availabilitySet'] = {'id': availability_set_id}
@@ -837,7 +847,9 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                         enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None, edge_zone=None,
                         orchestration_mode=None, user_data=None, network_api_version=None,
                         enable_spot_restore=None, spot_restore_timeout=None, capacity_reservation_group=None,
-                        enable_auto_update=None, patch_mode=None, enable_agent=None):
+                        enable_auto_update=None, patch_mode=None, enable_agent=None, security_type=None,
+                        enable_secure_boot=None, enable_vtpm=None, automatic_repairs_action=None, v_cpus_available=None,
+                        v_cpus_per_core=None):
 
     # Build IP configuration
     ip_configuration = {}
@@ -1068,6 +1080,20 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
     if storage_properties:
         virtual_machine_profile['storageProfile'] = storage_properties
 
+    hardware_profile = {}
+    vm_size_properties = {}
+    if v_cpus_available is not None:
+        vm_size_properties['vCPUsAvailable'] = v_cpus_available
+
+    if v_cpus_per_core is not None:
+        vm_size_properties['vCPUsPerCore'] = v_cpus_per_core
+
+    if vm_size_properties:
+        hardware_profile['vmSizeProperties'] = vm_size_properties
+
+    if hardware_profile:
+        virtual_machine_profile['hardwareProfile'] = hardware_profile
+
     if not specialized and os_profile:
         virtual_machine_profile['osProfile'] = os_profile
 
@@ -1156,18 +1182,32 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
         }
         virtual_machine_profile['scheduledEventsProfile'] = scheduled_events_profile
 
-    if automatic_repairs_grace_period is not None:
+    if automatic_repairs_grace_period is not None or automatic_repairs_action is not None:
         automatic_repairs_policy = {
             'enabled': 'true',
-            'gracePeriod': automatic_repairs_grace_period
+            'gracePeriod': automatic_repairs_grace_period or 'PT10M',
+            'repairAction': automatic_repairs_action or 'Replace'
         }
         vmss_properties['automaticRepairsPolicy'] = automatic_repairs_policy
 
     if scale_in_policy:
         vmss_properties['scaleInPolicy'] = {'rules': scale_in_policy}
 
+    security_profile = {}
     if encryption_at_host:
-        virtual_machine_profile['securityProfile'] = {'encryptionAtHost': encryption_at_host}
+        security_profile['encryptionAtHost'] = encryption_at_host
+
+    if security_type is not None:
+        security_profile['securityType'] = security_type
+
+    if enable_secure_boot is not None or enable_vtpm is not None:
+        security_profile['uefiSettings'] = {
+            'secureBootEnabled': enable_secure_boot,
+            'vTpmEnabled': enable_vtpm
+        }
+
+    if security_profile:
+        virtual_machine_profile['securityProfile'] = security_profile
 
     if user_data:
         virtual_machine_profile['userData'] = b64encode(user_data)

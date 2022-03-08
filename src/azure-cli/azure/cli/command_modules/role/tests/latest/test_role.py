@@ -628,7 +628,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
 
                 else:
                     # figure out the right time stamps from the recording file
-                    r = next(r for r in self.cassette.requests if r.method == 'GET' and 'providers/microsoft.insights/eventtypes/management/' in r.uri)
+                    r = next(r for r in self.cassette.requests if r.method == 'GET' and 'providers/Microsoft.Insights/eventtypes/management/' in r.uri)
                     from urllib.parse import parse_qs, urlparse
                     query_parts = parse_qs(urlparse(r.uri).query)['$filter'][0].split()
                     start_index, end_index = [i + 2 for (i, j) in enumerate(query_parts) if j == 'eventTimestamp']

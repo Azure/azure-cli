@@ -510,7 +510,10 @@ def validate_source_url(cmd, namespace):  # pylint: disable=too-many-statements,
 
 def validate_blob_type(namespace):
     if not namespace.blob_type:
-        namespace.blob_type = 'page' if namespace.file_path.endswith('.vhd') else 'block'
+        if namespace.file_path and namespace.file_path.endswith('.vhd'):
+            namespace.blob_type = 'page'
+        else:
+            namespace.blob_type = 'block'
 
 
 def validate_storage_data_plane_list(namespace):
@@ -1025,8 +1028,9 @@ def process_blob_upload_batch_parameters(cmd, namespace):
             # when all the listed files are vhd files use page
             namespace.blob_type = 'page'
         elif any(vhd_files):
+            from azure.cli.core.azclierror import ArgumentUsageError
             # source files contain vhd files but not all of them
-            raise CLIError("""Fail to guess the required blob type. Type of the files to be
+            raise ArgumentUsageError("""Fail to guess the required blob type. Type of the files to be
             uploaded are not consistent. Default blob type for .vhd files is "page", while
             others are "block". You can solve this problem by either explicitly set the blob
             type or ensure the pattern matches a correct set of files.""")
@@ -1035,9 +1039,10 @@ def process_blob_upload_batch_parameters(cmd, namespace):
 
     # 5. call other validators
     validate_metadata(namespace)
-    t_blob_content_settings = cmd.loader.get_sdk('blob.models#ContentSettings')
+    t_blob_content_settings = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_BLOB, '_models#ContentSettings')
     get_content_setting_validator(t_blob_content_settings, update=False)(cmd, namespace)
-    add_progress_callback(cmd, namespace)
+    add_upload_progress_callback(cmd, namespace)
+    blob_tier_validator_track2(cmd, namespace)
 
 
 def process_blob_delete_batch_parameters(cmd, namespace):
@@ -1294,6 +1299,53 @@ def block_blob_tier_validator(cmd, namespace):
             get_blob_tier_names(cmd.cli_ctx, 'StandardBlobTier'))))
 
 
+def page_blob_tier_validator_track2(cmd, namespace):
+    if not namespace.tier:
+        return
+
+    if namespace.blob_type != 'page' and namespace.tier:
+        raise ValueError('Blob tier is only applicable to page blobs on premium storage accounts.')
+
+    track2 = False
+    try:
+        if is_storagev2(cmd.command_kwargs['resource_type'].value[0]):
+            track2 = True
+            namespace.premium_page_blob_tier = getattr(cmd.get_models(
+                '_generated.models._azure_blob_storage_enums#PremiumPageBlobAccessTier'), namespace.tier)
+        else:
+            namespace.premium_page_blob_tier = getattr(cmd.get_models('blob.models#PremiumPageBlobTier'),
+                                                       namespace.tier)
+    except AttributeError:
+        from azure.cli.command_modules.storage.sdkutil import get_blob_tier_names_track2
+        tier_names = get_blob_tier_names_track2(cmd.cli_ctx, 'blob.models#PremiumPageBlobTier', track2)
+        if track2:
+            tier_names = get_blob_tier_names_track2(
+                cmd.cli_ctx, '_generated.models._azure_blob_storage_enums#PremiumPageBlobAccessTier', track2)
+        raise ValueError('Unknown premium page blob tier name. Choose among {}'.format(', '.join(tier_names)))
+
+
+def block_blob_tier_validator_track2(cmd, namespace):
+    if not namespace.tier:
+        return
+
+    if namespace.blob_type != 'block' and namespace.tier:
+        raise ValueError('Blob tier is only applicable to block blobs on standard storage accounts.')
+
+    track2 = False
+    try:
+        if is_storagev2(cmd.command_kwargs['resource_type'].value[0]):
+            track2 = True
+            namespace.standard_blob_tier = getattr(cmd.get_models('_models#StandardBlobTier'), namespace.tier)
+        else:
+            namespace.standard_blob_tier = getattr(cmd.get_models('blob.models#StandardBlobTier'), namespace.tier)
+    except AttributeError:
+        from azure.cli.command_modules.storage.sdkutil import get_blob_tier_names_track2
+        tier_names = get_blob_tier_names_track2(cmd.cli_ctx, 'blob.models#StandardBlobTier', track2)
+        if track2:
+            tier_names = get_blob_tier_names_track2(cmd.cli_ctx, '_models#StandardBlobTier', track2)
+        raise ValueError('Unknown block blob tier name. Choose among {}'.format(', '.join(tier_names)))
+
+
 def blob_tier_validator(cmd, namespace):
     if namespace.blob_type == 'page':
         page_blob_tier_validator(cmd, namespace)
@@ -1301,6 +1353,17 @@ def blob_tier_validator(cmd, namespace):
         block_blob_tier_validator(cmd, namespace)
     else:
         raise ValueError('Blob tier is only applicable to block or page blob.')
+
+
+def blob_tier_validator_track2(cmd, namespace):
+    if namespace.tier:
+        if namespace.blob_type == 'page':
+            page_blob_tier_validator_track2(cmd, namespace)
+        elif namespace.blob_type == 'block':
+            block_blob_tier_validator_track2(cmd, namespace)
+        else:
+            raise ValueError('Blob tier is only applicable to block or page blob.')
+    del namespace.tier
 
 
 def blob_download_file_path_validator(namespace):
@@ -1535,7 +1598,8 @@ def validate_client_auth_parameter(cmd, ns):
 def validate_encryption_scope_client_params(ns):
     if ns.encryption_scope:
         # will use track2 client and socket_timeout is unused
-        del ns.socket_timeout
+        if 'socket_timeout' in ns:
+            del ns.socket_timeout
 
 
 def validate_access_control(namespace):
@@ -1905,3 +1969,41 @@ def validate_share_close_handle(namespace):
         raise InvalidArgumentValueError("usage error: Please only specify either --handle-id or --close-all, not both.")
     if not namespace.close_all and not namespace.handle_id:
         raise InvalidArgumentValueError("usage error: Please specify either --handle-id or --close-all.")
+
+
+def validate_upload_blob(namespace):
+    from azure.cli.core.azclierror import InvalidArgumentValueError
+    if namespace.file_path and namespace.data:
+        raise InvalidArgumentValueError("usage error: please only specify one of --file and --data to upload.")
+    if not namespace.file_path and not namespace.data:
+        raise InvalidArgumentValueError("usage error: please specify one of --file and --data to upload.")
+
+
+def add_upload_progress_callback(cmd, namespace):
+    def _update_progress(response):
+        if response.http_response.status_code not in [200, 201]:
+            return
+
+        message = getattr(_update_progress, 'message', 'Alive')
+        reuse = getattr(_update_progress, 'reuse', False)
+        current = response.context['upload_stream_current']
+        total = response.context['data_stream_total']
+
+        if total:
+            hook.add(message=message, value=current, total_val=total)
+            if total == current and not reuse:
+                hook.end()
+
+    hook = cmd.cli_ctx.get_progress_controller(det=True)
+    _update_progress.hook = hook
+
+    if not namespace.no_progress:
+        namespace.progress_callback = _update_progress
+    del namespace.no_progress
+
+
+def validate_blob_arguments(namespace):
+    from azure.cli.core.azclierror import RequiredArgumentMissingError
+    if not namespace.blob_url and not all([namespace.blob_name, namespace.container_name]):
+        raise RequiredArgumentMissingError(
+            "Please specify --blob-url or combination of blob name, container name and storage account arguments.")

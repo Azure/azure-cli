@@ -4,22 +4,19 @@
 # --------------------------------------------------------------------------------------------
 
 from __future__ import unicode_literals
+
 import os
 import os.path
 import re
-from math import isnan, isclose
 from ipaddress import ip_network
+from math import isclose, isnan
 
-# pylint: disable=no-name-in-module,import-error
-from knack.log import get_logger
-
-from azure.cli.core.profiles import ResourceType
-
+from azure.cli.core import keys
+from azure.cli.core.azclierror import InvalidArgumentValueError
 from azure.cli.core.commands.validators import validate_tag
 from azure.cli.core.util import CLIError
-from azure.cli.core.azclierror import InvalidArgumentValueError
-from azure.cli.core import keys
-
+# pylint: disable=no-name-in-module,import-error
+from knack.log import get_logger
 
 logger = get_logger(__name__)
 
@@ -106,39 +103,6 @@ def validate_k8s_version(namespace):
         else:
             raise CLIError('--kubernetes-version should be the full version number, '
                            'such as "1.11.8" or "1.12.6"')
-
-
-def validate_cluster_autoscaler_profile(cmd, namespace):
-    """ Validates that cluster autoscaler profile is acceptable by:
-        1. Extracting the key[=value] format to map
-        2. Validating that the key isn't empty and that the key is valid
-        Empty strings pass validation
-    """
-    _extract_cluster_autoscaler_params(namespace)
-    if namespace.cluster_autoscaler_profile is not None:
-        for key in namespace.cluster_autoscaler_profile.keys():
-            _validate_cluster_autoscaler_key(cmd, key)
-
-
-def _validate_cluster_autoscaler_key(cmd, key):
-    if not key:
-        raise CLIError('Empty key specified for cluster-autoscaler-profile')
-    ManagedClusterPropertiesAutoScalerProfile = cmd.get_models('ManagedClusterPropertiesAutoScalerProfile',
-                                                               resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                                               operation_group='managed_clusters')
-    valid_keys = list(k.replace("_", "-") for k, v in ManagedClusterPropertiesAutoScalerProfile._attribute_map.items())  # pylint: disable=protected-access
-    if key not in valid_keys:
-        raise CLIError("'{0}' is an invalid key for cluster-autoscaler-profile. "
-                       "Valid keys are {1}.".format(key, ', '.join(valid_keys)))
-
-
-def _extract_cluster_autoscaler_params(namespace):
-    """ Extracts multiple space-separated cluster autoscaler parameters in key[=value] format """
-    if isinstance(namespace.cluster_autoscaler_profile, list):
-        params_dict = {}
-        for item in namespace.cluster_autoscaler_profile:
-            params_dict.update(validate_tag(item))
-        namespace.cluster_autoscaler_profile = params_dict
 
 
 def validate_nodepool_name(namespace):
@@ -432,20 +396,35 @@ def validate_assign_kubelet_identity(namespace):
             raise InvalidArgumentValueError("--assign-kubelet-identity is not a valid Azure resource ID.")
 
 
+def validate_nodepool_id(namespace):
+    from msrestazure.tools import is_valid_resource_id
+    if not is_valid_resource_id(namespace.nodepool_id):
+        raise InvalidArgumentValueError("--nodepool-id is not a valid Azure resource ID.")
+
+
+def validate_snapshot_id(namespace):
+    if namespace.snapshot_id:
+        from msrestazure.tools import is_valid_resource_id
+        if not is_valid_resource_id(namespace.snapshot_id):
+            raise InvalidArgumentValueError("--snapshot-id is not a valid Azure resource ID.")
+
+
 def extract_comma_separated_string(
     raw_string,
     enable_strip=False,
     extract_kv=False,
-    key_only=False,
+    allow_empty_value=False,
     keep_none=False,
     default_value=None,
 ):
     """Extract comma-separated string.
 
     If enable_strip is specified, will remove leading and trailing whitespace before each operation on the string.
-    If extract_kv is specified, will extract key value pair from the string, otherwise keep the entire string.
-    Option key_only is valid since extract_kv is specified, when the number of string segments split by "=" is not 2,
-    only the first segment is retained as the key.
+    If extract_kv is specified, will extract key value pairs from the string with "=" as the delimiter and this would
+    return a dictionary, otherwise keep the entire string.
+    Option allow_empty_value is valid since extract_kv is specified. When the number of string segments split by "="
+    is 1, the first segment is retained as the key and empty string would be set as its corresponding value without
+    raising an exception.
     If keep_none is specified, will return None when input is None. Otherwise will return default_value if input is
     None or empty string.
     """
@@ -463,25 +442,36 @@ def extract_comma_separated_string(
         if enable_strip:
             item = item.strip()
         if extract_kv:
-            kv = item.split("=")
-            if key_only:
-                if enable_strip:
-                    result[kv[0].strip()] = ""
-                else:
-                    result[kv[0]] = ""
-            else:
-                if len(kv) == 2:
-                    if enable_strip:
-                        result[kv[0].strip()] = kv[1].strip()
-                    else:
-                        result[kv[0]] = kv[1]
-                else:
+            kv_list = item.split("=")
+            if len(kv_list) in [1, 2]:
+                key = kv_list[0]
+                value = ""
+                if len(kv_list) == 2:
+                    value = kv_list[1]
+                if not allow_empty_value and (value == "" or value.isspace()):
                     raise InvalidArgumentValueError(
-                        "The format of '{}' in '{}' is incorrect, correct format should be "
-                        "'Key1=Value1,Key2=Value2'.".format(
-                            item, raw_string
+                        "Empty value not allowed. The value '{}' of key '{}' in '{}' is empty. Raw input '{}'.".format(
+                            value, key, item, raw_string
                         )
                     )
+                if enable_strip:
+                    key = key.strip()
+                    value = value.strip()
+                result[key] = value
+            else:
+                raise InvalidArgumentValueError(
+                    "The format of '{}' in '{}' is incorrect, correct format should be "
+                    "'Key1=Value1,Key2=Value2'.".format(
+                        item, raw_string
+                    )
+                )
         else:
             result.append(item)
     return result
+
+
+def validate_credential_format(namespace):
+    if namespace.credential_format and \
+        namespace.credential_format.lower() != "azure" and \
+            namespace.credential_format.lower() != "exec":
+        raise InvalidArgumentValueError("--format can only be azure or exec.")

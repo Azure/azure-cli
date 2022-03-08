@@ -146,7 +146,7 @@ def load_arguments(self, _):
         c.argument('use_secondary_region', action='store_true', help='Use this flag to list containers in secondary region.')
 
     with self.argument_context('backup container unregister') as c:
-        c.argument('backup_management_type', backup_management_type)
+        c.argument('backup_management_type', extended_backup_management_type)
         c.argument('container_name', container_name_type, id_part='child_name_2')
 
     with self.argument_context('backup container re-register') as c:
@@ -319,7 +319,7 @@ def load_arguments(self, _):
 
     with self.argument_context('backup protectable-item show') as c:
         c.argument('vault_name', vault_name_type, id_part='name')
-        c.argument('name', options_list=['--name'], help='Name of the protectable item.', id_part='child_name_3')
+        c.argument('name', options_list=['--name', '-n'], help='Name of the protectable item.', id_part='child_name_3')
         c.argument('server_name', options_list=['--server-name'], help='Parent Server name of the item.')
         c.argument('protectable_item_type', protectable_item_type)
 

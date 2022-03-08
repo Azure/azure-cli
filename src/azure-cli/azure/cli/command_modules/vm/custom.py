@@ -778,7 +778,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               encryption_at_host=None, enable_auto_update=None, patch_mode=None, ssh_key_name=None,
               enable_hotpatching=None, platform_fault_domain=None, security_type=None, enable_secure_boot=None,
               enable_vtpm=None, count=None, edge_zone=None, nic_delete_option=None, os_disk_delete_option=None,
-              data_disk_delete_option=None, user_data=None, capacity_reservation_group=None, enable_hibernation=None):
+              data_disk_delete_option=None, user_data=None, capacity_reservation_group=None, enable_hibernation=None,
+              v_cpus_available=None, v_cpus_per_core=None):
 
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
@@ -997,7 +998,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         platform_fault_domain=platform_fault_domain, security_type=security_type, enable_secure_boot=enable_secure_boot,
         enable_vtpm=enable_vtpm, count=count, edge_zone=edge_zone, os_disk_delete_option=os_disk_delete_option,
         user_data=user_data, capacity_reservation_group=capacity_reservation_group,
-        enable_hibernation=enable_hibernation)
+        enable_hibernation=enable_hibernation, v_cpus_available=v_cpus_available, v_cpus_per_core=v_cpus_per_core)
 
     vm_resource['dependsOn'] = vm_dependencies
 
@@ -1418,7 +1419,7 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
               priority=None, max_price=None, proximity_placement_group=None, workspace=None, enable_secure_boot=None,
               enable_vtpm=None, user_data=None, capacity_reservation_group=None,
               dedicated_host=None, dedicated_host_group=None, size=None, ephemeral_os_disk_placement=None,
-              enable_hibernation=None, **kwargs):
+              enable_hibernation=None, v_cpus_available=None, v_cpus_per_core=None, **kwargs):
     from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id
     from ._vm_utils import update_write_accelerator_settings, update_disk_caching
     vm = kwargs['parameters']
@@ -1526,6 +1527,12 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
             logger.warning("VM size is already %s", size)
         else:
             vm.hardware_profile.vm_size = size
+
+    if v_cpus_available is not None:
+        vm.hardware_profile.vm_size_properties.v_cpus_available = v_cpus_available
+
+    if v_cpus_per_core is not None:
+        vm.hardware_profile.vm_size_properties.v_cpus_per_core = v_cpus_per_core
 
     if ephemeral_os_disk_placement is not None:
         if vm.storage_profile.os_disk.diff_disk_settings is not None:
@@ -2808,7 +2815,10 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 max_unhealthy_upgraded_instance_percent=None, pause_time_between_batches=None,
                 enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None, edge_zone=None,
                 user_data=None, network_api_version=None, enable_spot_restore=None, spot_restore_timeout=None,
-                capacity_reservation_group=None, enable_auto_update=None, patch_mode=None, enable_agent=None):
+                capacity_reservation_group=None, enable_auto_update=None, patch_mode=None, enable_agent=None,
+                security_type=None, enable_secure_boot=None, enable_vtpm=None, automatic_repairs_action=None,
+                v_cpus_available=None, v_cpus_per_core=None):
+
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -3070,7 +3080,10 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             orchestration_mode=orchestration_mode, network_api_version=network_api_version,
             enable_spot_restore=enable_spot_restore, spot_restore_timeout=spot_restore_timeout,
             capacity_reservation_group=capacity_reservation_group, enable_auto_update=enable_auto_update,
-            patch_mode=patch_mode, enable_agent=enable_agent)
+            patch_mode=patch_mode, enable_agent=enable_agent, security_type=security_type,
+            enable_secure_boot=enable_secure_boot, enable_vtpm=enable_vtpm,
+            automatic_repairs_action=automatic_repairs_action, v_cpus_available=v_cpus_available,
+            v_cpus_per_core=v_cpus_per_core)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
@@ -3360,7 +3373,9 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 max_unhealthy_instance_percent=None, max_unhealthy_upgraded_instance_percent=None,
                 pause_time_between_batches=None, enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None,
                 user_data=None, enable_spot_restore=None, spot_restore_timeout=None, capacity_reservation_group=None,
-                vm_sku=None, ephemeral_os_disk_placement=None, **kwargs):
+                vm_sku=None, ephemeral_os_disk_placement=None, force_deletion=None, enable_secure_boot=None,
+                enable_vtpm=None, automatic_repairs_action=None, v_cpus_available=None, v_cpus_per_core=None,
+                **kwargs):
     vmss = kwargs['parameters']
     aux_subscriptions = None
     # pylint: disable=too-many-boolean-expressions
@@ -3402,6 +3417,13 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
     if user_data is not None:
         vmss.virtual_machine_profile.user_data = b64encode(user_data)
 
+    if v_cpus_available is not None or v_cpus_per_core is not None:
+        HardwareProfile = cmd.get_models('HardwareProfile')
+        VMSizeProperties = cmd.get_models('VMSizeProperties')
+        hardware_profile = HardwareProfile(vm_size_properties=VMSizeProperties(v_cpus_available=v_cpus_available,
+                                                                               v_cpus_per_core=v_cpus_per_core))
+        vmss.virtual_machine_profile.hardware_profile = hardware_profile
+
     if capacity_reservation_group is not None:
         CapacityReservationProfile = cmd.get_models('CapacityReservationProfile')
         SubResource = cmd.get_models('SubResource')
@@ -3420,10 +3442,13 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
             TerminateNotificationProfile(not_before_timeout=terminate_notification_time,
                                          enable=enable_terminate_notification)
 
-    if enable_automatic_repairs is not None or automatic_repairs_grace_period is not None:
+    if enable_automatic_repairs is not None or \
+            automatic_repairs_grace_period is not None or automatic_repairs_action is not None:
         AutomaticRepairsPolicy = cmd.get_models('AutomaticRepairsPolicy')
         vmss.automatic_repairs_policy = \
-            AutomaticRepairsPolicy(enabled="true", grace_period=automatic_repairs_grace_period)
+            AutomaticRepairsPolicy(enabled=enable_automatic_repairs,
+                                   grace_period=automatic_repairs_grace_period,
+                                   repair_action=automatic_repairs_action)
 
     if ultra_ssd_enabled is not None:
         if cmd.supported_api_version(min_api='2019-03-01', operation_group='virtual_machine_scale_sets'):
@@ -3440,9 +3465,9 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
             else:
                 vmss.virtual_machine_profile.additional_capabilities.ultra_ssd_enabled = ultra_ssd_enabled
 
-    if scale_in_policy is not None:
+    if scale_in_policy is not None or force_deletion is not None:
         ScaleInPolicy = cmd.get_models('ScaleInPolicy')
-        vmss.scale_in_policy = ScaleInPolicy(rules=scale_in_policy)
+        vmss.scale_in_policy = ScaleInPolicy(rules=scale_in_policy, force_deletion=force_deletion)
 
     if enable_spot_restore is not None:
         vmss.spot_restore_policy.enabled = enable_spot_restore
@@ -3459,6 +3484,12 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
             vmss.virtual_machine_profile.billing_profile = BillingProfile(max_price=max_price)
         else:
             vmss.virtual_machine_profile.billing_profile.max_price = max_price
+
+    if enable_secure_boot is not None or enable_vtpm is not None:
+        vmss.virtual_machine_profile.security_profile = {'uefiSettings': {
+            'secureBootEnabled': enable_secure_boot,
+            'vTpmEnabled': enable_vtpm
+        }}
 
     if proximity_placement_group is not None:
         vmss.proximity_placement_group = {'id': proximity_placement_group}
@@ -4395,20 +4426,21 @@ def _set_log_analytics_workspace_extension(cmd, resource_group_name, vm, vm_name
 
 # disk encryption set
 def create_disk_encryption_set(
-        cmd, client, resource_group_name, disk_encryption_set_name, key_url, source_vault, encryption_type=None,
+        cmd, client, resource_group_name, disk_encryption_set_name, key_url, source_vault=None, encryption_type=None,
         location=None, tags=None, no_wait=False, enable_auto_key_rotation=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
-    DiskEncryptionSet, EncryptionSetIdentity, KeyVaultAndKeyReference, SourceVault = cmd.get_models(
-        'DiskEncryptionSet', 'EncryptionSetIdentity', 'KeyVaultAndKeyReference', 'SourceVault')
+    DiskEncryptionSet, EncryptionSetIdentity, KeyForDiskEncryptionSet, SourceVault = cmd.get_models(
+        'DiskEncryptionSet', 'EncryptionSetIdentity', 'KeyForDiskEncryptionSet', 'SourceVault')
     encryption_set_identity = EncryptionSetIdentity(type='SystemAssigned')
-    if not is_valid_resource_id(source_vault):
-        source_vault = resource_id(subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
-                                   namespace='Microsoft.KeyVault', type='vaults', name=source_vault)
-    source_vault = SourceVault(id=source_vault)
-    key_vault_and_key_reference = KeyVaultAndKeyReference(source_vault=source_vault, key_url=key_url)
+    if source_vault is not None:
+        if not is_valid_resource_id(source_vault):
+            source_vault = resource_id(subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
+                                       namespace='Microsoft.KeyVault', type='vaults', name=source_vault)
+        source_vault = SourceVault(id=source_vault)
+    key_for_disk_emcryption_set = KeyForDiskEncryptionSet(source_vault=source_vault, key_url=key_url)
     disk_encryption_set = DiskEncryptionSet(location=location, tags=tags, identity=encryption_set_identity,
-                                            active_key=key_vault_and_key_reference, encryption_type=encryption_type,
+                                            active_key=key_for_disk_emcryption_set, encryption_type=encryption_type,
                                             rotation_to_latest_key_version_enabled=enable_auto_key_rotation)
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, disk_encryption_set_name,
                        disk_encryption_set)
@@ -4424,15 +4456,19 @@ def update_disk_encryption_set(cmd, instance, client, resource_group_name, key_u
                                enable_auto_key_rotation=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
-    if not is_valid_resource_id(source_vault):
-        source_vault = resource_id(subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
-                                   namespace='Microsoft.KeyVault', type='vaults', name=source_vault)
     if key_url:
         instance.active_key.key_url = key_url
+
     if source_vault:
-        instance.active_key.source_vault.id = source_vault
+        if not is_valid_resource_id(source_vault):
+            source_vault = resource_id(subscription=get_subscription_id(cmd.cli_ctx),
+                                       resource_group=resource_group_name,
+                                       namespace='Microsoft.KeyVault', type='vaults', name=source_vault)
+        instance.active_key.source_vault = {'id': source_vault}
+
     if enable_auto_key_rotation is not None:
         instance.rotation_to_latest_key_version_enabled = enable_auto_key_rotation
+
     return instance
 
 # endregion
@@ -4479,8 +4515,44 @@ def sig_shared_gallery_list(client, location, shared_to=None):
     # Keep it here as it will add subscription in the future and we need to set it to None to make it work
     if shared_to == 'subscription':
         shared_to = None
-    return client.list(location=location,
-                       shared_to=shared_to)
+    return client.list(location=location, shared_to=shared_to)
+
+
+def get_page_result(generator, marker, show_next_marker=None):
+    pages = generator.by_page(continuation_token=marker)  # ContainerPropertiesPaged
+    result = list_generator(pages=pages)
+
+    if show_next_marker:
+        next_marker = {"nextMarker": pages.continuation_token}
+        result.append(next_marker)
+    else:
+        if pages.continuation_token:
+            logger.warning('Next Marker:')
+            logger.warning(pages.continuation_token)
+
+    return result
+
+
+def list_generator(pages, num_results=50):
+    result = []
+
+    # get first page items
+    page = list(next(pages))
+    result += page
+
+    while True:
+        if not pages.continuation_token:
+            break
+
+        # handle num results
+        if num_results is not None:
+            if num_results == len(result):
+                break
+
+        page = list(next(pages))
+        result += page
+
+    return result
 
 
 def sig_share_update(cmd, client, resource_group_name, gallery_name, subscription_ids=None, tenant_ids=None,
@@ -4509,21 +4581,23 @@ def sig_share_reset(cmd, client, resource_group_name, gallery_name):
                                sharing_update=sharing_update)
 
 
-def sig_shared_image_definition_list(client, location, gallery_unique_name, shared_to=None):
+def sig_shared_image_definition_list(client, location, gallery_unique_name,
+                                     shared_to=None, marker=None, show_next_marker=None):
     # Keep it here as it will add subscription in the future and we need to set it to None to make it work
     if shared_to == 'subscription':
         shared_to = None
-    return client.list(location=location,
-                       gallery_unique_name=gallery_unique_name,
-                       shared_to=shared_to)
+    generator = client.list(location=location, gallery_unique_name=gallery_unique_name, shared_to=shared_to)
+    return get_page_result(generator, marker, show_next_marker)
 
 
-def sig_shared_image_version_list(client, location, gallery_unique_name, gallery_image_name, shared_to=None):
+def sig_shared_image_version_list(client, location, gallery_unique_name, gallery_image_name,
+                                  shared_to=None, marker=None, show_next_marker=None):
     # Keep it here as it will add subscription in the future and we need to set it to None to make it work
     if shared_to == 'subscription':
         shared_to = None
-    return client.list(location=location, gallery_unique_name=gallery_unique_name,
-                       gallery_image_name=gallery_image_name, shared_to=shared_to)
+    generator = client.list(location=location, gallery_unique_name=gallery_unique_name,
+                            gallery_image_name=gallery_image_name, shared_to=shared_to)
+    return get_page_result(generator, marker, show_next_marker)
 
 
 def gallery_application_create(client,
@@ -4823,3 +4897,66 @@ def list_vmss_applications(cmd, vmss_name, resource_group_name):
     except ResourceNotFoundError:
         raise ResourceNotFoundError('Could not find vmss {}.'.format(vmss_name))
     return vmss.virtual_machine_profile.application_profile
+
+
+# region Restore point collection
+def restore_point_create(client,
+                         resource_group_name,
+                         restore_point_collection_name,
+                         restore_point_name,
+                         exclude_disks=None,
+                         no_wait=False):
+    parameters = {}
+    if exclude_disks is not None:
+        parameters['exclude_disks'] = []
+        for disk in exclude_disks:
+            parameters['exclude_disks'].append({'id': disk})
+    return sdk_no_wait(no_wait,
+                       client.begin_create,
+                       resource_group_name=resource_group_name,
+                       restore_point_collection_name=restore_point_collection_name,
+                       restore_point_name=restore_point_name,
+                       parameters=parameters)
+
+# endRegion
+
+
+# region Restore point collection
+def restore_point_collection_show(client,
+                                  resource_group_name,
+                                  restore_point_collection_name):
+    return client.get(resource_group_name=resource_group_name,
+                      restore_point_collection_name=restore_point_collection_name,
+                      expand="restorePoints")
+
+
+def restore_point_collection_create(client,
+                                    resource_group_name,
+                                    restore_point_collection_name,
+                                    location,
+                                    source_id,
+                                    tags=None):
+    parameters = {}
+    properties = {}
+    parameters['location'] = location
+    if tags is not None:
+        parameters['tags'] = tags
+    properties['source'] = {'id': source_id}
+    parameters['properties'] = properties
+    return client.create_or_update(resource_group_name=resource_group_name,
+                                   restore_point_collection_name=restore_point_collection_name,
+                                   parameters=parameters)
+
+
+def restore_point_collection_update(client,
+                                    resource_group_name,
+                                    restore_point_collection_name,
+                                    tags=None):
+    parameters = {}
+    if tags is not None:
+        parameters['tags'] = tags
+    return client.update(resource_group_name=resource_group_name,
+                         restore_point_collection_name=restore_point_collection_name,
+                         parameters=parameters)
+
+# endRegion
