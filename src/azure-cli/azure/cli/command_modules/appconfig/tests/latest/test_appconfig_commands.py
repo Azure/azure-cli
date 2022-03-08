@@ -137,7 +137,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                     self.check('location', '{rg_loc}'),
                     self.check('purgeProtectionEnabled', '{enable_purge_protection}')])
 
-        deleted_stores = self.cmd('appconfig list-deleted')
+        deleted_stores = self.cmd('appconfig list-deleted').get_output_in_json()
 
         found = False
         for deleted_store in deleted_stores:
