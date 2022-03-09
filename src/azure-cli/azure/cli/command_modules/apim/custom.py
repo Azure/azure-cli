@@ -189,7 +189,7 @@ def apim_apply_network_configuration_updates(client, resource_group_name, name, 
 #Schema operations
 def apim_api_schema_create(client, resource_group_name, service_name, api_id, schema_id, schema_type , schema_name=None, schema_path=None, schema_content=None, value=None,  type=None, definitions=None, components=None, no_wait=False):
     """creates or updates an API Schema. """
-    
+    print("inside graphql function---------------->")
     if schema_path is not None and schema_content is None:
         api_file = open(schema_path, 'r')
         content_value = api_file.read()
@@ -204,7 +204,7 @@ def apim_api_schema_create(client, resource_group_name, service_name, api_id, sc
             "Please either specify schema_path or schema_content.")
     
     parameters = SchemaContract(
-        schema_id=schema_id,
+        id=schema_id,
         name=schema_name,
         type=type,
         content_type=schema_type,
@@ -212,10 +212,15 @@ def apim_api_schema_create(client, resource_group_name, service_name, api_id, sc
         definitions=definitions,
         components=components
     )
+    print(parameters.id)
+    print(parameters.name)
+    print(parameters.type)
     
-    return sdk_no_wait(no_wait, client.api_schema.begin_create_or_update,
+    response = sdk_no_wait(no_wait, client.api_schema.begin_create_or_update,
                        resource_group_name=resource_group_name,
                        service_name=service_name, api_id=api_id, schema_id=schema_id, parameters=parameters)
+    print("response after creating graphlq", response)
+    return response
 
 
 def apim_api_schema_delete(client, resource_group_name, service_name, api_id, schema_id, if_match=None, no_wait=False):
