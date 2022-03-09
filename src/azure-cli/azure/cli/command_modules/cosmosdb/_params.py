@@ -107,7 +107,7 @@ def load_arguments(self, _):
 
     with self.argument_context('cosmosdb failover-priority-change') as c:
         c.argument('failover_parameters', options_list=['--failover-policies'], validator=validate_failover_policies,
-                   help="space-separated failover policies in 'regionName=failoverPriority' format. E.g eastus=0 westus=1", nargs='+')
+                   help="space-separated failover policies in 'regionName=failoverPriority' format. Number of policies must match the number of regions the account is currently replicated. All regionName values must match those of the regions the account is currently replicated. All failoverPriority values must be unique. There must be one failoverPriority value zero (0) specified. All remaining failoverPriority values can be any positive integer and they don't have to be contiguos, neither written in any specific order. E.g eastus=0 westus=1", nargs='+')
 
     with self.argument_context('cosmosdb network-rule list') as c:
         c.argument('account_name', id_part=None)
