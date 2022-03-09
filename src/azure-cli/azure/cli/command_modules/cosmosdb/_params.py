@@ -64,7 +64,7 @@ def load_arguments(self, _):
         c.argument('database_id', options_list=['--db-name', '-d'], help='Database Name')
 
     with self.argument_context('cosmosdb create') as c:
-        c.argument('account_name', completer=None)        
+        c.argument('account_name', completer=None)
         c.argument('enable_free_tier', arg_type=get_three_state_flag(), help="If enabled the account is free-tier.", is_preview=True)
         c.argument('assign_identity', nargs='*', help="Assign system or user assigned identities separated by spaces. Use '[system]' to refer system assigned identity.", is_preview=True)
         c.argument('is_restore_request', options_list=['--is-restore-request', '-r'], arg_type=get_three_state_flag(), help="Restore from an existing/deleted account.", is_preview=True, arg_group='Restore')
