@@ -172,6 +172,11 @@ jobs:
        build_scripts/windows/scripts/build.cmd
     displayName: 'Build Windows MSI'
 
+  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+    displayName: 'SBOM'
+    inputs:
+      BuildDropPath: 'build_scripts/windows/out/'
+
   - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: MSI'
     inputs:
@@ -257,6 +262,11 @@ jobs:
       targetType: 'filePath'
       filePath: scripts/release/docker/pipeline.sh
 
+  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+    displayName: 'SBOM'
+    inputs:
+      BuildDropPath: $(Build.ArtifactStagingDirectory)
+      DockerImagesToScan: 'clibuild$BUILD_BUILDNUMBER:latest'
 
   - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: docker image'
@@ -322,6 +332,10 @@ jobs:
       scripts/release/pypi/build.sh $branch
     displayName: 'Run Wheel Build Script'
 
+  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+    displayName: 'SBOM'
+    inputs:
+      BuildDropPath: $(Build.ArtifactStagingDirectory)
 
   - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: pypi'
@@ -607,6 +621,11 @@ jobs:
        docker rm --force azurecli
     displayName: 'Build homebrew formula'
 
+  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+    displayName: 'SBOM'
+    inputs:
+      BuildDropPath: $(Build.ArtifactStagingDirectory)
+
   - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: homebrew'
     inputs:
@@ -691,6 +710,12 @@ jobs:
     inputs:
       targetType: 'filePath'
       filePath: scripts/release/rpm/pipeline_mariner.sh
+
+  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+    displayName: 'SBOM'
+    inputs:
+      BuildDropPath: $(Build.ArtifactStagingDirectory)
+
   - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: yum-mariner'
     inputs:
@@ -708,6 +733,12 @@ jobs:
     inputs:
       targetType: 'filePath'
       filePath: scripts/release/rpm/pipeline.sh
+
+  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+    displayName: 'SBOM'
+    inputs:
+      BuildDropPath: $(Build.ArtifactStagingDirectory)
+
   - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: yum'
     inputs:
@@ -761,31 +792,35 @@ jobs:
     vmImage: 'ubuntu-20.04'
   strategy:
     matrix:
+      # https://wiki.ubuntu.com/Releases
       Xenial:
+        # 16.04
         deb_system: ubuntu
         distro: xenial
-      Trusty:
-        deb_system: ubuntu
-        distro: trusty
       Bionic:
+        # 18.04
         deb_system: ubuntu
         distro: bionic
       Focal:
+        # 20.04
         deb_system: ubuntu
         distro: focal
-      Hirsute:
+      Impish:
+        # 21.10
         deb_system: ubuntu
-        distro: hirsute
-      Jessie:
-        deb_system: debian
-        distro: jessie
+        distro: impish
+
+      # https://wiki.debian.org/DebianReleases
       Stretch:
+        # 9
         deb_system: debian
         distro: stretch
       Buster:
+        # 10
         deb_system: debian
         distro: buster
       Bullseye:
+        # 11
         deb_system: debian
         distro: bullseye
   steps:
@@ -803,6 +838,11 @@ jobs:
     env:
       DISTRO: $(distro)
       DISTRO_BASE_IMAGE: $(deb_system):$(distro)
+
+  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+    displayName: 'SBOM'
+    inputs:
+      BuildDropPath: $(Build.ArtifactStagingDirectory)
 
   - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: debian'

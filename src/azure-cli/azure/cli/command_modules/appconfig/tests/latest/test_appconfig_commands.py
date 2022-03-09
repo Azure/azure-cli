@@ -518,6 +518,85 @@ class AppConfigKVScenarioTest(ScenarioTest):
         assert len(exported_kvs) == 1
         assert exported_kvs[secret_name] == secret_value
 
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(parameter_name_for_location='location')
+    def test_azconfig_kv_revision_list(self, resource_group, location):
+        config_store_name = self.create_random_name(prefix='KVRevisionTest', length=24)
+
+        location = 'eastus'
+        sku = 'standard'
+        self.kwargs.update({
+            'config_store_name': config_store_name,
+            'rg_loc': location,
+            'rg': resource_group,
+            'sku': sku
+        })
+        _create_config_store(self, self.kwargs)
+
+        entry_key = "Color"
+        entry_label = 'v1.0.0'
+
+        self.kwargs.update({
+            'key': entry_key,
+            'label': entry_label
+        })
+
+        # add a new key-value entry
+        self.cmd('appconfig kv set -n {config_store_name} --key {key} --label {label} -y',
+                 checks=[self.check('contentType', ""),
+                         self.check('key', entry_key),
+                         self.check('value', ""),
+                         self.check('label', entry_label)])
+
+        # edit a key-value entry
+        updated_entry_value = "Green"
+        entry_content_type = "text"
+
+        self.kwargs.update({
+            'value': updated_entry_value,
+            'content_type': entry_content_type
+        })
+
+        self.cmd(
+            'appconfig kv set -n {config_store_name} --key {key} --value {value} --content-type {content_type} --label {label} -y',
+            checks=[self.check('contentType', entry_content_type),
+                    self.check('key', entry_key),
+                    self.check('value', updated_entry_value),
+                    self.check('label', entry_label)])
+
+        # add a new label
+        updated_label = 'newlabel'
+        self.kwargs.update({
+            'label': updated_label
+        })
+
+        self.cmd(
+            'appconfig kv set -n {config_store_name} --key {key} --value {value} --content-type {content_type} --label {label} -y',
+            checks=[self.check('contentType', entry_content_type),
+                    self.check('key', entry_key),
+                    self.check('value', updated_entry_value),
+                    self.check('label', updated_label)])
+
+        revisions = self.cmd('appconfig revision list -n {config_store_name} --key {key} --label * --top 2 --fields content_type etag label last_modified value').get_output_in_json()
+        assert len(revisions) == 2
+
+        assert revisions[0]['content_type'] == 'text'
+        assert revisions[1]['content_type'] == 'text'
+        assert revisions[0]['label'] == 'newlabel'
+        assert revisions[1]['label'] == 'v1.0.0'
+        assert revisions[0]['value'] == 'Green'
+        assert revisions[1]['value'] == 'Green'
+        assert revisions[0]['last_modified'] is not None
+        assert revisions[1]['last_modified'] is not None
+        assert revisions[1]['etag'] is not None
+        assert revisions[0]['etag'] is not None
+        assert 'key' not in revisions[0]
+        assert 'key' not in revisions[1]
+        assert 'locked' not in revisions[0]
+        assert 'locked' not in revisions[1]
+        assert 'tags' not in revisions[0]
+        assert 'tags' not in revisions[1]
+
 
 class AppConfigImportExportScenarioTest(ScenarioTest):
 

@@ -91,12 +91,12 @@ class SpringCloudConnectionWithoutIdScenarioTest(ScenarioTest):
         })
 
         # create connection
-        self.cmd('spring-cloud connection create appconfig --connection {name} -g {source_resource_group} --service {spring} --app {app} '
+        self.cmd('spring-cloud connection create appconfig --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment} '
                  '--tg {target_resource_group} --app-config {config_store} --system-identity --client-type java')
 
         # list connection
         connections = self.cmd(
-            'spring-cloud connection list -g {source_resource_group} --service {spring} --app {app} ',
+            'spring-cloud connection list -g {source_resource_group} --service {spring} --app {app} --deployment {deployment} ',
             checks = [
                 # self.check('length(@)', 1),
                 self.check('[0].authInfo.authType', 'systemAssignedIdentity'),
@@ -106,16 +106,16 @@ class SpringCloudConnectionWithoutIdScenarioTest(ScenarioTest):
         connection_id = connections[0].get('id')
 
         # list configuration
-        self.cmd('spring-cloud connection list-configuration --connection {name} -g {source_resource_group} --service {spring} --app {app}')
+        self.cmd('spring-cloud connection list-configuration --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}')
 
         # validate connection
-        self.cmd('spring-cloud connection validate --connection {name} -g {source_resource_group} --service {spring} --app {app}')
+        self.cmd('spring-cloud connection validate --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}')
 
         # show connection
-        self.cmd('spring-cloud connection show --connection {name} -g {source_resource_group} --service {spring} --app {app}')
+        self.cmd('spring-cloud connection show --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}')
 
         # delete connection
-        self.cmd('spring-cloud connection delete --connection {name} -g {source_resource_group} --service {spring} --app {app} --yes')
+        self.cmd('spring-cloud connection delete --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment} --yes')
 
 
     # @record_only
@@ -134,12 +134,12 @@ class SpringCloudConnectionWithoutIdScenarioTest(ScenarioTest):
 
 
         # create connection
-        self.cmd('spring-cloud connection create cosmos-cassandra --connection {name} -g {source_resource_group} --service {spring} --app {app} '
+        self.cmd('spring-cloud connection create cosmos-cassandra --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment} '
                  '--tg {target_resource_group} --account {account} --key-space {key_space} --system-identity --client-type java')
 
         # list connection
         connections = self.cmd(
-            'spring-cloud connection list -g {source_resource_group} --service {spring} --app {app}',
+            'spring-cloud connection list -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}',
             checks = [
                 # self.check('length(@)', 1),
                 self.check('[0].authInfo.authType', 'systemAssignedIdentity'),
@@ -149,16 +149,16 @@ class SpringCloudConnectionWithoutIdScenarioTest(ScenarioTest):
         connection_id = connections[0].get('id')
 
         # list configuration
-        self.cmd('spring-cloud connection list-configuration --connection {name} -g {source_resource_group} --service {spring} --app {app}')
+        self.cmd('spring-cloud connection list-configuration --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}')
 
         # validate connection
-        self.cmd('spring-cloud connection validate --connection {name} -g {source_resource_group} --service {spring} --app {app}')
+        self.cmd('spring-cloud connection validate --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}')
 
         # show connection
-        self.cmd('spring-cloud connection show --connection {name} -g {source_resource_group} --service {spring} --app {app}')
+        self.cmd('spring-cloud connection show --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}')
 
         # delete connection
-        self.cmd('spring-cloud connection delete --connection {name} -g {source_resource_group} --service {spring} --app {app} --yes')
+        self.cmd('spring-cloud connection delete --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment} --yes')
 
 
     # @record_only
@@ -178,12 +178,12 @@ class SpringCloudConnectionWithoutIdScenarioTest(ScenarioTest):
 
 
         # create connection
-        self.cmd('spring-cloud connection create cosmos-gremlin --connection {name} -g {source_resource_group} --service {spring} --app {app} '
+        self.cmd('spring-cloud connection create cosmos-gremlin --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment} '
                  '--tg {target_resource_group} --account {account} --database {database} --graph {graph} --system-identity --client-type java')
 
         # list connection
         connections = self.cmd(
-            'spring-cloud connection list -g {source_resource_group} --service {spring} --app {app}',
+            'spring-cloud connection list -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}',
             checks = [
                 # self.check('length(@)', 1),
                 self.check('[0].authInfo.authType', 'systemAssignedIdentity'),
@@ -193,16 +193,16 @@ class SpringCloudConnectionWithoutIdScenarioTest(ScenarioTest):
         connection_id = connections[0].get('id')
 
         # list configuration
-        self.cmd('spring-cloud connection list-configuration --connection {name} -g {source_resource_group} --service {spring} --app {app}')
+        self.cmd('spring-cloud connection list-configuration --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}')
 
         # validate connection
-        self.cmd('spring-cloud connection validate --connection {name} -g {source_resource_group} --service {spring} --app {app}')
+        self.cmd('spring-cloud connection validate --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}')
 
         # show connection
-        self.cmd('spring-cloud connection show --connection {name} -g {source_resource_group} --service {spring} --app {app}')
+        self.cmd('spring-cloud connection show --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}')
 
         # delete connection
-        self.cmd('spring-cloud connection delete --connection {name} -g {source_resource_group} --service {spring} --app {app} --yes')
+        self.cmd('spring-cloud connection delete --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment} --yes')
 
 
     # @record_only
@@ -221,12 +221,12 @@ class SpringCloudConnectionWithoutIdScenarioTest(ScenarioTest):
 
 
         # create connection
-        self.cmd('spring-cloud connection create cosmos-mongo --connection {name} -g {source_resource_group} --service {spring} --app {app} '
+        self.cmd('spring-cloud connection create cosmos-mongo --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment} '
                  '--tg {target_resource_group} --account {account} --database {database} --system-identity --client-type java')
 
         # list connection
         connections = self.cmd(
-            'spring-cloud connection list -g {source_resource_group} --service {spring} --app {app}',
+            'spring-cloud connection list -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}',
             checks = [
                 # self.check('length(@)', 1),
                 self.check('[0].authInfo.authType', 'systemAssignedIdentity'),
@@ -236,16 +236,16 @@ class SpringCloudConnectionWithoutIdScenarioTest(ScenarioTest):
         connection_id = connections[0].get('id')
 
         # list configuration
-        self.cmd('spring-cloud connection list-configuration --connection {name} -g {source_resource_group} --service {spring} --app {app}')
+        self.cmd('spring-cloud connection list-configuration --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}')
 
         # validate connection
-        self.cmd('spring-cloud connection validate --connection {name} -g {source_resource_group} --service {spring} --app {app}')
+        self.cmd('spring-cloud connection validate --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}')
 
         # show connection
-        self.cmd('spring-cloud connection show --connection {name} -g {source_resource_group} --service {spring} --app {app}')
+        self.cmd('spring-cloud connection show --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}')
 
         # delete connection
-        self.cmd('spring-cloud connection delete --connection {name} -g {source_resource_group} --service {spring} --app {app} --yes')
+        self.cmd('spring-cloud connection delete --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment} --yes')
 
 
     # @record_only
@@ -264,12 +264,12 @@ class SpringCloudConnectionWithoutIdScenarioTest(ScenarioTest):
 
 
         # create connection
-        self.cmd('spring-cloud connection create cosmos-sql --connection {name} -g {source_resource_group} --service {spring} --app {app} '
+        self.cmd('spring-cloud connection create cosmos-sql --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment} '
                  '--tg {target_resource_group} --account {account} --database {database} --system-identity --client-type java')
 
         # list connection
         connections = self.cmd(
-            'spring-cloud connection list -g {source_resource_group} --service {spring} --app {app}',
+            'spring-cloud connection list -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}',
             checks = [
                 # self.check('length(@)', 1),
                 self.check('[0].authInfo.authType', 'systemAssignedIdentity'),
@@ -279,16 +279,16 @@ class SpringCloudConnectionWithoutIdScenarioTest(ScenarioTest):
         connection_id = connections[0].get('id')
 
         # list configuration
-        self.cmd('spring-cloud connection list-configuration --connection {name} -g {source_resource_group} --service {spring} --app {app}')
+        self.cmd('spring-cloud connection list-configuration --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}')
 
         # validate connection
-        self.cmd('spring-cloud connection validate --connection {name} -g {source_resource_group} --service {spring} --app {app}')
+        self.cmd('spring-cloud connection validate --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}')
 
         # show connection
-        self.cmd('spring-cloud connection show --connection {name} -g {source_resource_group} --service {spring} --app {app}')
+        self.cmd('spring-cloud connection show --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}')
 
         # delete connection
-        self.cmd('spring-cloud connection delete --connection {name} -g {source_resource_group} --service {spring} --app {app} --yes')
+        self.cmd('spring-cloud connection delete --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment} --yes')
 
 
     # @record_only
@@ -307,12 +307,12 @@ class SpringCloudConnectionWithoutIdScenarioTest(ScenarioTest):
 
 
         # create connection
-        self.cmd('spring-cloud connection create cosmos-table --connection {name} -g {source_resource_group} --service {spring} --app {app} '
+        self.cmd('spring-cloud connection create cosmos-table --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment} '
                  '--tg {target_resource_group} --account {account} --table {table} --system-identity --client-type java')
 
         # list connection
         connections = self.cmd(
-            'spring-cloud connection list -g {source_resource_group} --service {spring} --app {app}',
+            'spring-cloud connection list -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}',
             checks = [
                 # self.check('length(@)', 1),
                 self.check('[0].authInfo.authType', 'systemAssignedIdentity'),
@@ -322,16 +322,16 @@ class SpringCloudConnectionWithoutIdScenarioTest(ScenarioTest):
         connection_id = connections[0].get('id')
 
         # list configuration
-        self.cmd('spring-cloud connection list-configuration --connection {name} -g {source_resource_group} --service {spring} --app {app}')
+        self.cmd('spring-cloud connection list-configuration --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}')
 
         # validate connection
-        self.cmd('spring-cloud connection validate --connection {name} -g {source_resource_group} --service {spring} --app {app}')
+        self.cmd('spring-cloud connection validate --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}')
 
         # show connection
-        self.cmd('spring-cloud connection show --connection {name} -g {source_resource_group} --service {spring} --app {app}')
+        self.cmd('spring-cloud connection show --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}')
 
         # delete connection
-        self.cmd('spring-cloud connection delete --connection {name} -g {source_resource_group} --service {spring} --app {app} --yes')
+        self.cmd('spring-cloud connection delete --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment} --yes')
 
 
     # @record_only
@@ -349,12 +349,12 @@ class SpringCloudConnectionWithoutIdScenarioTest(ScenarioTest):
 
 
         # create connection
-        self.cmd('spring-cloud connection create eventhub --connection {name} -g {source_resource_group} --service {spring} --app {app} '
+        self.cmd('spring-cloud connection create eventhub --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment} '
                  '--tg {target_resource_group} --namespace {namespace} --system-identity --client-type java')
 
         # list connection
         connections = self.cmd(
-            'spring-cloud connection list -g {source_resource_group} --service {spring} --app {app}',
+            'spring-cloud connection list -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}',
             checks = [
                 # self.check('length(@)', 1),
                 self.check('[0].authInfo.authType', 'systemAssignedIdentity'),
@@ -364,16 +364,16 @@ class SpringCloudConnectionWithoutIdScenarioTest(ScenarioTest):
         connection_id = connections[0].get('id')
 
         # list configuration
-        self.cmd('spring-cloud connection list-configuration --connection {name} -g {source_resource_group} --service {spring} --app {app}')
+        self.cmd('spring-cloud connection list-configuration --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}')
 
         # validate connection
-        self.cmd('spring-cloud connection validate --connection {name} -g {source_resource_group} --service {spring} --app {app}')
+        self.cmd('spring-cloud connection validate --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}')
 
         # show connection
-        self.cmd('spring-cloud connection show --connection {name} -g {source_resource_group} --service {spring} --app {app}')
+        self.cmd('spring-cloud connection show --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}')
 
         # delete connection
-        self.cmd('spring-cloud connection delete --connection {name} -g {source_resource_group} --service {spring} --app {app} --yes')
+        self.cmd('spring-cloud connection delete --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment} --yes')
 
 
     # @record_only
@@ -399,12 +399,12 @@ class SpringCloudConnectionWithoutIdScenarioTest(ScenarioTest):
 
 
         # create connection
-        self.cmd('spring-cloud connection create postgres-flexible --connection {name} -g {source_resource_group} --service {spring} --app {app} '
+        self.cmd('spring-cloud connection create postgres-flexible --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment} '
                  '--tg {target_resource_group} --server {server} --database {database} --secret name={user} secret={password} --client-type java')
 
         # list connection
         connections = self.cmd(
-            'spring-cloud connection list -g {source_resource_group} --service {spring} --app {app}',
+            'spring-cloud connection list -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}',
             checks = [
                 # self.check('length(@)', 1),
                 self.check('[0].authInfo.authType', 'secret'),
@@ -414,16 +414,16 @@ class SpringCloudConnectionWithoutIdScenarioTest(ScenarioTest):
         connection_id = connections[0].get('id')
 
         # list configuration
-        self.cmd('spring-cloud connection list-configuration --connection {name} -g {source_resource_group} --service {spring} --app {app}')
+        self.cmd('spring-cloud connection list-configuration --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}')
 
         # validate connection
-        self.cmd('spring-cloud connection validate --connection {name} -g {source_resource_group} --service {spring} --app {app}')
+        self.cmd('spring-cloud connection validate --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}')
 
         # show connection
-        self.cmd('spring-cloud connection show --connection {name} -g {source_resource_group} --service {spring} --app {app}')
+        self.cmd('spring-cloud connection show --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}')
 
         # delete connection
-        self.cmd('spring-cloud connection delete --connection {name} -g {source_resource_group} --service {spring} --app {app} --yes')
+        self.cmd('spring-cloud connection delete --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment} --yes')
 
 
     # @record_only
@@ -441,12 +441,12 @@ class SpringCloudConnectionWithoutIdScenarioTest(ScenarioTest):
 
 
         # create connection
-        self.cmd('spring-cloud connection create keyvault --connection {name} -g {source_resource_group} --service {spring} --app {app} '
+        self.cmd('spring-cloud connection create keyvault --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment} '
                  '--tg {target_resource_group} --vault {vault} --system-identity --client-type java')
 
         # list connection
         connections = self.cmd(
-            'spring-cloud connection list -g {source_resource_group} --service {spring} --app {app}',
+            'spring-cloud connection list -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}',
             checks = [
                 # self.check('length(@)', 1),
                 self.check('[0].authInfo.authType', 'systemAssignedIdentity'),
@@ -456,16 +456,16 @@ class SpringCloudConnectionWithoutIdScenarioTest(ScenarioTest):
         connection_id = connections[0].get('id')
 
         # list configuration
-        self.cmd('spring-cloud connection list-configuration --connection {name} -g {source_resource_group} --service {spring} --app {app}')
+        self.cmd('spring-cloud connection list-configuration --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}')
 
         # validate connection
-        self.cmd('spring-cloud connection validate --connection {name} -g {source_resource_group} --service {spring} --app {app}')
+        self.cmd('spring-cloud connection validate --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}')
 
         # show connection
-        self.cmd('spring-cloud connection show --connection {name} -g {source_resource_group} --service {spring} --app {app}')
+        self.cmd('spring-cloud connection show --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}')
 
         # delete connection
-        self.cmd('spring-cloud connection delete --connection {name} -g {source_resource_group} --service {spring} --app {app} --yes')
+        self.cmd('spring-cloud connection delete --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment} --yes')
 
 
     # @record_only
@@ -490,12 +490,12 @@ class SpringCloudConnectionWithoutIdScenarioTest(ScenarioTest):
 
 
         # create connection
-        self.cmd('spring-cloud connection create mysql --connection {name} -g {source_resource_group} --service {spring} --app {app} '
+        self.cmd('spring-cloud connection create mysql --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment} '
                  '--tg {target_resource_group} --server {server} --database {database} --secret name={user} secret={password} --client-type java')
 
         # list connection
         connections = self.cmd(
-            'spring-cloud connection list -g {source_resource_group} --service {spring} --app {app}',
+            'spring-cloud connection list -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}',
             checks = [
                 # self.check('length(@)', 1),
                 self.check('[0].authInfo.authType', 'secret'),
@@ -505,16 +505,16 @@ class SpringCloudConnectionWithoutIdScenarioTest(ScenarioTest):
         connection_id = connections[0].get('id')
 
         # list configuration
-        self.cmd('spring-cloud connection list-configuration --connection {name} -g {source_resource_group} --service {spring} --app {app}')
+        self.cmd('spring-cloud connection list-configuration --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}')
 
         # validate connection
-        self.cmd('spring-cloud connection validate --connection {name} -g {source_resource_group} --service {spring} --app {app}')
+        self.cmd('spring-cloud connection validate --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}')
 
         # show connection
-        self.cmd('spring-cloud connection show --connection {name} -g {source_resource_group} --service {spring} --app {app}')
+        self.cmd('spring-cloud connection show --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}')
 
         # delete connection
-        self.cmd('spring-cloud connection delete --connection {name} -g {source_resource_group} --service {spring} --app {app} --yes')
+        self.cmd('spring-cloud connection delete --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment} --yes')
 
 
     # @record_only
@@ -542,12 +542,12 @@ class SpringCloudConnectionWithoutIdScenarioTest(ScenarioTest):
 
 
         # create connection
-        self.cmd('spring-cloud connection create mysql-flexible --connection {name} -g {source_resource_group} --service {spring} --app {app} '
+        self.cmd('spring-cloud connection create mysql-flexible --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment} '
                  '--tg {target_resource_group} --server {server} --database {database} --secret name={user} secret={password} --client-type java')
 
         # list connection
         connections = self.cmd(
-            'spring-cloud connection list -g {source_resource_group} --service {spring} --app {app}',
+            'spring-cloud connection list -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}',
             checks = [
                 # self.check('length(@)', 1),
                 self.check('[0].authInfo.authType', 'secret'),
@@ -557,16 +557,16 @@ class SpringCloudConnectionWithoutIdScenarioTest(ScenarioTest):
         connection_id = connections[0].get('id')
 
         # list configuration
-        self.cmd('spring-cloud connection list-configuration --connection {name} -g {source_resource_group} --service {spring} --app {app}')
+        self.cmd('spring-cloud connection list-configuration --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}')
 
         # validate connection
-        self.cmd('spring-cloud connection validate --connection {name} -g {source_resource_group} --service {spring} --app {app}')
+        self.cmd('spring-cloud connection validate --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}')
 
         # show connection
-        self.cmd('spring-cloud connection show --connection {name} -g {source_resource_group} --service {spring} --app {app}')
+        self.cmd('spring-cloud connection show --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}')
 
         # delete connection
-        self.cmd('spring-cloud connection delete --connection {name} -g {source_resource_group} --service {spring} --app {app} --yes')
+        self.cmd('spring-cloud connection delete --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment} --yes')
 
 
     # @record_only
@@ -594,12 +594,12 @@ class SpringCloudConnectionWithoutIdScenarioTest(ScenarioTest):
 
 
         # create connection
-        self.cmd('spring-cloud connection create postgres --connection {name} -g {source_resource_group} --service {spring} --app {app} '
+        self.cmd('spring-cloud connection create postgres --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment} '
                  '--tg {target_resource_group} --server {server} --database {database} --secret name={user} secret={password} --client-type java')
 
         # list connection
         connections = self.cmd(
-            'spring-cloud connection list -g {source_resource_group} --service {spring} --app {app}',
+            'spring-cloud connection list -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}',
             checks = [
                 # self.check('length(@)', 1),
                 self.check('[0].authInfo.authType', 'secret'),
@@ -609,19 +609,20 @@ class SpringCloudConnectionWithoutIdScenarioTest(ScenarioTest):
         connection_id = connections[0].get('id')
 
         # list configuration
-        self.cmd('spring-cloud connection list-configuration --connection {name} -g {source_resource_group} --service {spring} --app {app}')
+        self.cmd('spring-cloud connection list-configuration --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}')
 
         # validate connection
-        self.cmd('spring-cloud connection validate --connection {name} -g {source_resource_group} --service {spring} --app {app}')
+        self.cmd('spring-cloud connection validate --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}')
 
         # show connection
-        self.cmd('spring-cloud connection show --connection {name} -g {source_resource_group} --service {spring} --app {app}')
+        self.cmd('spring-cloud connection show --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}')
 
         # delete connection
-        self.cmd('spring-cloud connection delete --connection {name} -g {source_resource_group} --service {spring} --app {app} --yes')
+        self.cmd('spring-cloud connection delete --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment} --yes')
 
 
     # @record_only
+    @unittest.skip('')
     def test_springcloud_sql_e2e(self):
         self.kwargs.update({
             'name' : 'testconn3',
@@ -645,12 +646,12 @@ class SpringCloudConnectionWithoutIdScenarioTest(ScenarioTest):
         })
 
         # create connection
-        self.cmd('spring-cloud connection create sql --connection {name} -g {source_resource_group} --service {spring} --app {app} '
+        self.cmd('spring-cloud connection create sql --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment} '
                  '--tg {target_resource_group} --server {server} --database {database} --secret name={user} secret={password} --client-type java')
 
         # list connection
         connections = self.cmd(
-            'spring-cloud connection list -g {source_resource_group} --service {spring} --app {app}',
+            'spring-cloud connection list -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}',
             checks = [
                 # self.check('length(@)', 1),
                 self.check('[0].authInfo.authType', 'secret'),
@@ -660,16 +661,16 @@ class SpringCloudConnectionWithoutIdScenarioTest(ScenarioTest):
         connection_id = connections[0].get('id')
 
         # list configuration
-        self.cmd('spring-cloud connection list-configuration --connection {name} -g {source_resource_group} --service {spring} --app {app}')
+        self.cmd('spring-cloud connection list-configuration --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}')
 
         # validate connection
-        self.cmd('spring-cloud connection validate --connection {name} -g {source_resource_group} --service {spring} --app {app}')
+        self.cmd('spring-cloud connection validate --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}')
 
         # show connection
-        self.cmd('spring-cloud connection show --connection {name} -g {source_resource_group} --service {spring} --app {app}')
+        self.cmd('spring-cloud connection show --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}')
 
         # delete connection
-        self.cmd('spring-cloud connection delete --connection {name} -g {source_resource_group} --service {spring} --app {app} --yes')
+        self.cmd('spring-cloud connection delete --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment} --yes')
 
 
     # @record_only
@@ -686,12 +687,12 @@ class SpringCloudConnectionWithoutIdScenarioTest(ScenarioTest):
         })
 
         # create connection
-        self.cmd('spring-cloud connection create storage-blob --connection {name} -g {source_resource_group} --service {spring} --app {app} '
+        self.cmd('spring-cloud connection create storage-blob --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment} '
                  '--tg {target_resource_group} --account {account} --system-identity --client-type java')
 
         # list connection
         connections = self.cmd(
-            'spring-cloud connection list -g {source_resource_group} --service {spring} --app {app}',
+            'spring-cloud connection list -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}',
             checks = [
                 # self.check('length(@)', 1),
                 self.check('[0].authInfo.authType', 'systemAssignedIdentity'),
@@ -701,16 +702,16 @@ class SpringCloudConnectionWithoutIdScenarioTest(ScenarioTest):
         connection_id = connections[0].get('id')
 
         # list configuration
-        self.cmd('spring-cloud connection list-configuration --connection {name} -g {source_resource_group} --service {spring} --app {app}')
+        self.cmd('spring-cloud connection list-configuration --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}')
 
         # validate connection
-        self.cmd('spring-cloud connection validate --connection {name} -g {source_resource_group} --service {spring} --app {app}')
+        self.cmd('spring-cloud connection validate --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}')
 
         # show connection
-        self.cmd('spring-cloud connection show --connection {name} -g {source_resource_group} --service {spring} --app {app}')
+        self.cmd('spring-cloud connection show --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}')
 
         # delete connection
-        self.cmd('spring-cloud connection delete --connection {name} -g {source_resource_group} --service {spring} --app {app} --yes')
+        self.cmd('spring-cloud connection delete --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment} --yes')
 
 
     # @record_only
@@ -727,12 +728,12 @@ class SpringCloudConnectionWithoutIdScenarioTest(ScenarioTest):
         })
 
         # create connection
-        self.cmd('spring-cloud connection create storage-queue --connection {name} -g {source_resource_group} --service {spring} --app {app} '
+        self.cmd('spring-cloud connection create storage-queue --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment} '
                  '--tg {target_resource_group} --account {account} --secret --client-type java')
 
         # list connection
         connections = self.cmd(
-            'spring-cloud connection list -g {source_resource_group} --service {spring} --app {app}',
+            'spring-cloud connection list -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}',
             checks = [
                 # self.check('length(@)', 1),
                 self.check('[0].authInfo.authType', 'secret'),
@@ -742,16 +743,16 @@ class SpringCloudConnectionWithoutIdScenarioTest(ScenarioTest):
         connection_id = connections[0].get('id')
 
         # list configuration
-        self.cmd('spring-cloud connection list-configuration --connection {name} -g {source_resource_group} --service {spring} --app {app}')
+        self.cmd('spring-cloud connection list-configuration --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}')
 
         # validate connection
-        self.cmd('spring-cloud connection validate --connection {name} -g {source_resource_group} --service {spring} --app {app}')
+        self.cmd('spring-cloud connection validate --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}')
 
         # show connection
-        self.cmd('spring-cloud connection show --connection {name} -g {source_resource_group} --service {spring} --app {app}')
+        self.cmd('spring-cloud connection show --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}')
 
         # delete connection
-        self.cmd('spring-cloud connection delete --connection {name} -g {source_resource_group} --service {spring} --app {app} --yes')
+        self.cmd('spring-cloud connection delete --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment} --yes')
 
 
     # @record_only
@@ -768,12 +769,12 @@ class SpringCloudConnectionWithoutIdScenarioTest(ScenarioTest):
         })
 
         # create connection
-        self.cmd('spring-cloud connection create storage-file --connection {name} -g {source_resource_group} --service {spring} --app {app} '
+        self.cmd('spring-cloud connection create storage-file --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment} '
                  '--tg {target_resource_group} --account {account} --secret --client-type java')
 
         # list connection
         connections = self.cmd(
-            'spring-cloud connection list -g {source_resource_group} --service {spring} --app {app}',
+            'spring-cloud connection list -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}',
             checks = [
                 # self.check('length(@)', 1),
                 self.check('[0].authInfo.authType', 'secret'),
@@ -783,16 +784,16 @@ class SpringCloudConnectionWithoutIdScenarioTest(ScenarioTest):
         connection_id = connections[0].get('id')
 
         # list configuration
-        self.cmd('spring-cloud connection list-configuration --connection {name} -g {source_resource_group} --service {spring} --app {app}')
+        self.cmd('spring-cloud connection list-configuration --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}')
 
         # validate connection
-        self.cmd('spring-cloud connection validate --connection {name} -g {source_resource_group} --service {spring} --app {app}')
+        self.cmd('spring-cloud connection validate --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}')
 
         # show connection
-        self.cmd('spring-cloud connection show --connection {name} -g {source_resource_group} --service {spring} --app {app}')
+        self.cmd('spring-cloud connection show --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}')
 
         # delete connection
-        self.cmd('spring-cloud connection delete --connection {name} -g {source_resource_group} --service {spring} --app {app} --yes')
+        self.cmd('spring-cloud connection delete --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment} --yes')
 
 
     # @record_only
@@ -810,12 +811,12 @@ class SpringCloudConnectionWithoutIdScenarioTest(ScenarioTest):
 
 
         # create connection
-        self.cmd('spring-cloud connection create storage-table --connection {name} -g {source_resource_group} --service {spring} --app {app} '
+        self.cmd('spring-cloud connection create storage-table --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment} '
                  '--tg {target_resource_group} --account {account} --secret --client-type java')
 
         # list connection
         connections = self.cmd(
-            'spring-cloud connection list -g {source_resource_group} --service {spring} --app {app}',
+            'spring-cloud connection list -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}',
             checks = [
                 # self.check('length(@)', 1),
                 self.check('[0].authInfo.authType', 'secret'),
@@ -825,13 +826,13 @@ class SpringCloudConnectionWithoutIdScenarioTest(ScenarioTest):
         connection_id = connections[0].get('id')
 
         # list configuration
-        self.cmd('spring-cloud connection list-configuration --connection {name} -g {source_resource_group} --service {spring} --app {app}')
+        self.cmd('spring-cloud connection list-configuration --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}')
 
         # validate connection
-        self.cmd('spring-cloud connection validate --connection {name} -g {source_resource_group} --service {spring} --app {app}')
+        self.cmd('spring-cloud connection validate --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}')
 
         # show connection
-        self.cmd('spring-cloud connection show --connection {name} -g {source_resource_group} --service {spring} --app {app}')
+        self.cmd('spring-cloud connection show --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment}')
 
         # delete connection
-        self.cmd('spring-cloud connection delete --connection {name} -g {source_resource_group} --service {spring} --app {app} --yes')
+        self.cmd('spring-cloud connection delete --connection {name} -g {source_resource_group} --service {spring} --app {app} --deployment {deployment} --yes')

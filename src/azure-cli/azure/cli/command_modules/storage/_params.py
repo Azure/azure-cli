@@ -5,8 +5,8 @@
 
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
-from azure.cli.core.commands.parameters import (tags_type, file_type, get_location_type, get_enum_type,
-                                                get_three_state_flag, edge_zone_type)
+from azure.cli.core.commands.parameters import (tags_type, file_type, get_location_type,
+                                                get_enum_type, get_three_state_flag, edge_zone_type)
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction, ALL
 
 from ._validators import (get_datetime_type, validate_metadata, get_permission_validator, get_permission_help_string,
@@ -22,7 +22,8 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           validate_file_delete_retention_days, validator_change_feed_retention_days,
                           validate_fs_public_access, validate_logging_version, validate_or_policy, validate_policy,
                           get_api_version_type, blob_download_file_path_validator, blob_tier_validator, validate_subnet,
-                          validate_immutability_arguments, validate_blob_name_for_upload, validate_share_close_handle)
+                          validate_immutability_arguments, validate_blob_name_for_upload, validate_share_close_handle,
+                          add_upload_progress_callback, blob_tier_validator_track2)
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines, too-many-branches, line-too-long
@@ -72,8 +73,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                       completer=get_storage_name_completion_list(t_queue_service, 'list_queues'))
     progress_type = CLIArgumentType(help='Include this flag to disable progress reporting for the command.',
                                     action='store_true', validator=add_progress_callback)
-    socket_timeout_type = CLIArgumentType(help='The socket timeout(secs), used by the service to regulate data flow.',
-                                          type=int)
     large_file_share_type = CLIArgumentType(
         action='store_true', min_api='2019-04-01',
         help='Enable the capability to support large file shares with more than 5 TiB capacity for storage account.'
@@ -105,6 +104,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     azure_storage_sid_type = CLIArgumentType(min_api='2019-04-01', arg_group="Azure Active Directory Properties",
                                              help="Specify the security identifier (SID) for Azure Storage. "
                                                   "Required when --enable-files-adds is set to True")
+    sam_account_name_type = CLIArgumentType(min_api='2021-08-01', arg_group="Azure Active Directory Properties",
+                                            help="Specify the Active Directory SAMAccountName for Azure Storage.")
+    t_account_type = self.get_models('ActiveDirectoryPropertiesAccountType', resource_type=ResourceType.MGMT_STORAGE)
+    account_type_type = CLIArgumentType(min_api='2021-08-01', arg_group="Azure Active Directory Properties",
+                                        arg_type=get_enum_type(t_account_type),
+                                        help="Specify the Active Directory account type for Azure Storage.")
     exclude_pattern_type = CLIArgumentType(arg_group='Additional Flags', help='Exclude these files where the name '
                                            'matches the pattern list. For example: *.jpg;*.pdf;exactName. This '
                                            'option supports wildcard characters (*)')
@@ -314,6 +319,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('domain_guid', domain_guid_type)
         c.argument('domain_sid', domain_sid_type)
         c.argument('azure_storage_sid', azure_storage_sid_type)
+        c.argument('sam_account_name', sam_account_name_type)
+        c.argument('account_type', account_type_type)
         c.argument('enable_hierarchical_namespace', arg_type=get_three_state_flag(),
                    options_list=['--enable-hierarchical-namespace', '--hns',
                                  c.deprecate(target='--hierarchical-namespace', redirect='--hns', hide=True)],
@@ -425,6 +432,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('domain_guid', domain_guid_type)
         c.argument('domain_sid', domain_sid_type)
         c.argument('azure_storage_sid', azure_storage_sid_type)
+        c.argument('sam_account_name', sam_account_name_type)
+        c.argument('account_type', account_type_type)
         c.argument('routing_choice', routing_choice_type)
         c.argument('publish_microsoft_endpoints', publish_microsoft_endpoints_type)
         c.argument('publish_internet_endpoints', publish_internet_endpoints_type)
@@ -759,6 +768,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage blob') as c:
         c.argument('blob_name', options_list=('--name', '-n'), arg_type=blob_name_type)
         c.argument('destination_path', help='The destination path that will be prepended to the blob name.')
+        c.argument('socket_timeout', deprecate_info=c.deprecate(hide=True),
+                   help='The socket timeout(secs), used by the service to regulate data flow.')
 
     with self.argument_context('storage blob list') as c:
         from ._validators import get_include_help_string
@@ -905,35 +916,55 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                  'specifies the blob snapshot to retrieve.')
         c.argument('lease_id', help='Required if the blob has an active lease.')
 
-    with self.argument_context('storage blob upload') as c:
-        from ._validators import page_blob_tier_validator, validate_encryption_scope_client_params
-        from .sdkutil import get_blob_types, get_blob_tier_names
+    # pylint: disable=line-too-long
+    with self.argument_context('storage blob upload', resource_type=ResourceType.DATA_STORAGE_BLOB) as c:
+        from ._validators import validate_encryption_scope_client_params, validate_upload_blob
 
-        t_blob_content_settings = self.get_sdk('blob.models#ContentSettings')
-        c.register_content_settings_argument(t_blob_content_settings, update=False)
-        c.register_blob_arguments()
-        c.extra('blob_name', validator=validate_blob_name_for_upload)
-
-        c.argument('file_path', options_list=('--file', '-f'), type=file_type, completer=FilesCompleter())
-        c.argument('max_connections', type=int)
-        c.argument('blob_type', options_list=('--type', '-t'), validator=validate_blob_type,
-                   arg_type=get_enum_type(get_blob_types()))
-        c.argument('validate_content', action='store_true', min_api='2016-05-31')
-        c.extra('no_progress', progress_type)
-        c.extra('socket_timeout', socket_timeout_type)
-        # TODO: Remove once #807 is complete. Smart Create Generation requires this parameter.
-        # register_extra_cli_argument('storage blob upload', '_subscription_id', options_list=('--subscription',),
-        #                              help=argparse.SUPPRESS)
-        c.argument('tier', validator=page_blob_tier_validator,
-                   arg_type=get_enum_type(get_blob_tier_names(self.cli_ctx, 'PremiumPageBlobTier')),
-                   min_api='2017-04-17')
-        c.argument('encryption_scope', validator=validate_encryption_scope_client_params,
-                   help='A predefined encryption scope used to encrypt the data on the service.')
-
-    with self.argument_context('storage blob upload-batch') as c:
         from .sdkutil import get_blob_types
 
-        t_blob_content_settings = self.get_sdk('blob.models#ContentSettings')
+        t_blob_content_settings = self.get_sdk('_models#ContentSettings', resource_type=ResourceType.DATA_STORAGE_BLOB)
+
+        c.register_blob_arguments_track2()
+        c.register_precondition_options()
+        c.register_content_settings_argument(t_blob_content_settings, update=False, arg_group="Content Control")
+        c.extra('blob_name', validator=validate_blob_name_for_upload)
+
+        c.argument('file_path', options_list=('--file', '-f'), type=file_type, completer=FilesCompleter(),
+                   help='Path of the file to upload as the blob content.', validator=validate_upload_blob)
+        c.argument('data', help='The blob data to upload.', required=False, is_preview=True, min_api='2019-02-02')
+        c.argument('length', type=int, help='Number of bytes to read from the stream. This is optional, but should be '
+                                            'supplied for optimal performance. Cooperate with --data.', is_preview=True,
+                   min_api='2019-02-02')
+        c.argument('overwrite', arg_type=get_three_state_flag(), arg_group="Additional Flags", is_preview=True,
+                   help='Whether the blob to be uploaded should overwrite the current data. If True, blob upload '
+                        'operation will overwrite the existing data. If set to False, the operation will fail with '
+                        'ResourceExistsError. The exception to the above is with Append blob types: if set to False and the '
+                        'data already exists, an error will not be raised and the data will be appended to the existing '
+                        'blob. If set overwrite=True, then the existing append blob will be deleted, and a new one created. '
+                        'Defaults to False.')
+        c.argument('max_connections', type=int, arg_group="Additional Flags",
+                   help='Maximum number of parallel connections to use when the blob size exceeds 64MB.')
+        c.extra('maxsize_condition', type=int, arg_group="Content Control",
+                help='The max length in bytes permitted for the append blob.')
+        c.argument('blob_type', options_list=('--type', '-t'), validator=validate_blob_type,
+                   arg_type=get_enum_type(get_blob_types()), arg_group="Additional Flags")
+        c.argument('validate_content', action='store_true', min_api='2016-05-31', arg_group="Content Control")
+        c.extra('no_progress', progress_type, validator=add_upload_progress_callback, arg_group="Additional Flags")
+        c.extra('tier', tier_type, validator=blob_tier_validator_track2, arg_group="Additional Flags")
+        c.argument('encryption_scope', validator=validate_encryption_scope_client_params,
+                   help='A predefined encryption scope used to encrypt the data on the service.',
+                   arg_group="Additional Flags")
+        c.argument('lease_id', help='Required if the blob has an active lease.')
+        c.extra('tags', arg_type=tags_type, arg_group="Additional Flags")
+        c.argument('metadata', arg_group="Additional Flags")
+        c.argument('timeout', arg_group="Additional Flags")
+
+    # pylint: disable=line-too-long
+    with self.argument_context('storage blob upload-batch', resource_type=ResourceType.DATA_STORAGE_BLOB) as c:
+        from .sdkutil import get_blob_types
+
+        t_blob_content_settings = self.get_sdk('_models#ContentSettings', resource_type=ResourceType.DATA_STORAGE_BLOB)
+        c.register_precondition_options()
         c.register_content_settings_argument(t_blob_content_settings, update=False, arg_group='Content Control')
         c.ignore('source_files', 'destination_container_name')
 
@@ -944,8 +975,15 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('maxsize_condition', arg_group='Content Control')
         c.argument('validate_content', action='store_true', min_api='2016-05-31', arg_group='Content Control')
         c.argument('blob_type', options_list=('--type', '-t'), arg_type=get_enum_type(get_blob_types()))
-        c.extra('no_progress', progress_type)
-        c.extra('socket_timeout', socket_timeout_type)
+        c.extra('no_progress', progress_type, validator=add_upload_progress_callback)
+        c.extra('tier', tier_type, is_preview=True, validator=blob_tier_validator_track2)
+        c.extra('overwrite', arg_type=get_three_state_flag(), is_preview=True,
+                help='Whether the blob to be uploaded should overwrite the current data. If True, blob upload '
+                     'operation will overwrite the existing data. If set to False, the operation will fail with '
+                     'ResourceExistsError. The exception to the above is with Append blob types: if set to False and the '
+                     'data already exists, an error will not be raised and the data will be appended to the existing '
+                     'blob. If set overwrite=True, then the existing append blob will be deleted, and a new one created. '
+                     'Defaults to False.')
 
     with self.argument_context('storage blob download') as c:
         c.argument('file_path', options_list=('--file', '-f'), type=file_type,
@@ -955,14 +993,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('end_range', type=int)
         c.argument('validate_content', action='store_true', min_api='2016-05-31')
         c.extra('no_progress', progress_type)
-        c.extra('socket_timeout', socket_timeout_type)
 
     with self.argument_context('storage blob download-batch') as c:
         c.ignore('source_container_name')
         c.argument('destination', options_list=('--destination', '-d'))
         c.argument('source', options_list=('--source', '-s'))
         c.extra('no_progress', progress_type)
-        c.extra('socket_timeout', socket_timeout_type)
         c.argument('max_connections', type=int,
                    help='Maximum number of parallel connections to use when the blob size exceeds 64MB.')
 
