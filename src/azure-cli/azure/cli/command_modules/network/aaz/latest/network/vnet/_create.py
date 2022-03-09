@@ -165,7 +165,11 @@ class Create(AAZCommand):
 
         @property
         def content(self):
-            _content_value, _builder = self.new_content(typ=AAZObjectType, arg=self.ctx.args)
+
+            _content_value, _builder = self.new_content_builder(
+                self.ctx.args,
+                typ=AAZObjectType,
+            )
 
             _builder.set_prop('id', AAZStrType, '.id')
             _builder.set_prop('location', AAZStrType, '.location')
@@ -185,7 +189,8 @@ class Create(AAZCommand):
 
             properties = _builder.get('.properties')
             if properties is not None:
-                properties.set_prop('addressSpace', AAZObjectType, '.address_space')
+                properties.set_prop(
+                    'addressSpace', AAZObjectType, '.address_space')
                 properties.set_prop('addressPrefixes', AAZListType, '.address_prefixes')
 
             address_prefixes = _builder.get('.properties.addressPrefixes')
@@ -211,6 +216,9 @@ class Create(AAZCommand):
                 address_prefixes.set_elements(AAZStrType, '.')
 
             return self.serialize_content(_content_value)
+
+        # @staticmethod
+        # def
 
 
 __all__ = ["Create"]

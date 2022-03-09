@@ -65,7 +65,9 @@ class Show(AAZCommand):
         @property
         def url_parameters(self):
             parameters = {
-                **self.serialize_url_param('subscriptionId', self.ctx.subscription_id),
+                **self.serialize_url_param(
+                    'subscriptionId', self.ctx.subscription_id,
+                ),
                 **self.serialize_url_param('resourceGroupName', self.ctx.args.resource_group_name),
                 **self.serialize_url_param('virtualNetworkName', self.ctx.args.virtual_network_name),
             }
@@ -81,7 +83,7 @@ class Show(AAZCommand):
         @property
         def header_parameters(self):
             parameters = {
-                **self.serialize_query_param('Accept', "application/json"),
+                **self.serialize_header_param('Accept', "application/json"),
             }
             return parameters
 
@@ -89,8 +91,8 @@ class Show(AAZCommand):
             data = self.deserialize_http_content(session)
             self.ctx.set_var('instance', data, schema_builder=self._build_instance_schema)
 
-        @staticmethod
-        def _build_instance_schema(**kwargs):
+        @classmethod
+        def _build_instance_schema(cls):
             _schema = AAZObjectType()
             _schema.id = AAZStrType()
             _schema.name = AAZStrType(flags={'read_only': True})

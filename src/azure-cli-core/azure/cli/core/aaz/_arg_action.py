@@ -327,3 +327,13 @@ class AAZListArgAction(AAZCompoundTypeArgAction):
             return result
         else:
             raise AAZInvalidValueError(f"list type value expected, got '{data}'({type(data)})")
+
+
+class AAZGenericUpdateAction(Action):
+
+    DEST = '_generic_update_args'
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        if not getattr(namespace, self.DEST, None):
+            setattr(namespace, self.DEST, [])
+        getattr(namespace, self.DEST).append((option_string, values))

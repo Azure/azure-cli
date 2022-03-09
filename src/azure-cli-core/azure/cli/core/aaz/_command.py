@@ -9,8 +9,9 @@ from knack.deprecation import Deprecated
 from knack.experimental import ExperimentalItem
 from knack.preview import PreviewItem
 
-from ._arg import AAZArgumentsSchema
-from ._arg_action import AAZArgActionOperations
+from ._arg import AAZArgumentsSchema, AAZGenericUpdateAddArg, AAZGenericUpdateSetArg, AAZGenericUpdateRemoveArg, \
+    AAZGenericUpdateForceString
+from ._arg_action import AAZArgActionOperations, AAZGenericUpdateAction
 from ._base import AAZUndefined, AAZBaseValue
 from ._field_type import AAZObjectType
 from ._field_value import AAZObject
@@ -62,6 +63,7 @@ class AAZCommandCtx:
         self._clients = {}
         self._vars_schema = AAZObjectType()
         self.vars = AAZObject(schema=self._vars_schema, data={})
+        self.generic_update_args = command_args.get(AAZGenericUpdateAction.DEST, None)
 
     def format_args(self):
         # TODO: apply format for argument values
@@ -124,6 +126,7 @@ class AAZCommand(CLICommand):
     AZ_NAME = None
     AZ_HELP = None
     AZ_SUPPORT_NO_WAIT = False
+    AZ_SUPPORT_GENERIC_UPDATE = False
 
     AZ_PREVIEW_INFO = None
     AZ_EXPERIMENTAL_INFO = None
@@ -137,7 +140,13 @@ class AAZCommand(CLICommand):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        return AAZArgumentsSchema(*args, **kwargs)
+        schema = AAZArgumentsSchema(*args, **kwargs)
+        if cls.AZ_SUPPORT_GENERIC_UPDATE:
+            schema.generic_update_add = AAZGenericUpdateAddArg()
+            schema.generic_update_set = AAZGenericUpdateSetArg()
+            schema.generic_update_remove = AAZGenericUpdateRemoveArg()
+            schema.generic_update_force_string = AAZGenericUpdateForceString()
+        return schema
 
     def __init__(self, loader):
         self.loader = loader

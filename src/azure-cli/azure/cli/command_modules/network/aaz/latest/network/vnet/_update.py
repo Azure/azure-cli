@@ -39,69 +39,65 @@ class Update(AAZCommand):
         ERROR_FORMAT = "MgmtErrorFormat"
         # ignore implement here
 
-    class InstanceUpdateByJson(AAZInstanceUpdateOperation):
+    class InstanceUpdateByJson(AAZJsonInstanceUpdateOperation):
 
         def __call__(self, *args, **kwargs):
-            self.ctx.vars['instance'] = self._update_object(self.ctx.vars['instance'])
+            self.ctx.vars.instance = self._update_object(self.ctx.vars.instance)
 
         def _update_object(self, instance):
-            _value, _updater = self.new_updater(instance, self.ctx.args)
+            _value, _builder = self.new_content_builder(instance, self.ctx.args)
 
-            _updater.set_prop('id', AAZStrType, '.id')
-            _updater.set_prop('location', AAZStrType, '.location')
-            _updater.set_prop('subnets', AAZListType, '.subnets')
-            _updater.set_prop('tags', AAZDictType, '.tags')
-            _updater.set_prop('extendedLocation', AAZObjectType, '.extended_location')
-            _updater.set_prop('properties', AAZObjectType, '.')
+            _builder.set_prop('id', AAZStrType, '.id')
+            _builder.set_prop('location', AAZStrType, '.location')
+            _builder.set_prop('subnets', AAZListType, '.subnets')
+            _builder.set_prop('tags', AAZDictType, '.tags')
+            _builder.set_prop('extendedLocation', AAZObjectType, '.extended_location')
+            _builder.set_prop('properties', AAZObjectType, '.')
 
-            tags = _updater.get('.tags')
+            tags = _builder.get('.tags')
             if tags is not None:
                 tags.set_elements(AAZStrType, '.')
 
-            extended_location = _updater.get('.extendedLocation')
+            extended_location = _builder.get('.extendedLocation')
             if extended_location is not None:
                 extended_location.set_prop('name', AAZStrType, '.name')
                 extended_location.set_prop('type', AAZStrType, '.type')
 
-            properties = _updater.get('.properties')
+            properties = _builder.get('.properties')
             if properties is not None:
                 properties.set_prop('addressSpace', AAZObjectType, '.address_space')
                 properties.set_prop('addressPrefixes', AAZListType, '.address_prefixes')
 
-            address_prefixes = _updater.get('.properties.addressPrefixes')
+            address_prefixes = _builder.get('.properties.addressPrefixes')
             if address_prefixes is not None:
                 address_prefixes.set_elements(AAZStrType, '.')
 
-            subnets = _updater.get('.subnets')
+            subnets = _builder.get('.subnets')
             if subnets is not None:
                 subnets.set_elements(AAZObjectType, '.')
 
-            elements = _updater.get('.subnets[]')
+            elements = _builder.get('.subnets[]')
             if elements is not None:
                 elements.set_prop('id', AAZStrType, '.id')
                 elements.set_prop('properties', AAZObjectType, '.')
 
-            properties = _updater.get('.subnets[].properties')
+            properties = _builder.get('.subnets[].properties')
             if properties is not None:
                 properties.set_prop('addressPrefix', AAZStrType, '.address_prefix')
                 properties.set_prop('addressPrefixes', AAZListType, '.address_prefixes')
 
-            address_prefixes = _updater.get('.subnets[].properties.addressPrefixes')
+            address_prefixes = _builder.get('.subnets[].properties.addressPrefixes')
             if address_prefixes is not None:
                 address_prefixes.set_elements(AAZStrType, '.')
 
             return _value
 
-    class InstanceUpdateByGeneric(AAZInstanceUpdateOperation):
+    class InstanceUpdateByGeneric(AAZGenericInstanceUpdateOperation):
 
         def __call__(self, *args, **kwargs):
-            self.ctx.vars['instance'] = self._update_by_generic(
-                self.ctx.vars['instance'],
-                self.ctx.args.add,
-                self.ctx.args.set,
-                self.ctx.args.remove,
-                self.ctx.args.force_string,
-                client_flatten=True,
+            self.ctx.vars.instance = self._update_instance_by_generic(
+                self.ctx.vars.instance,
+                self.ctx.args
             )
 
     class VirtualNetworksCreateOrUpdate(AAZHttpOperation):
@@ -111,7 +107,11 @@ class Update(AAZCommand):
 
         @property
         def content(self):
-            return self.serialize_content(self.ctx.vars.instance)
+            _content_value, _builder = self.new_content_builder(
+                self.ctx.args,
+                value=self.ctx.vars.instance,
+            )
+            return self.serialize_content(_content_value)
 
 
 __all__ = ["Update"]

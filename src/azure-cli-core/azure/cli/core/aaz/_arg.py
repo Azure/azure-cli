@@ -1,7 +1,8 @@
 from azure.cli.core import azclierror
 from knack.arguments import CLICommandArgument, CaseInsensitiveList
 
-from ._arg_action import AAZSimpleTypeArgAction, AAZObjectArgAction, AAZDictArgAction, AAZListArgAction
+from ._arg_action import AAZSimpleTypeArgAction, AAZObjectArgAction, AAZDictArgAction, AAZListArgAction, \
+    AAZGenericUpdateAction
 from ._base import AAZBaseType, AAZUndefined
 from ._field_type import AAZObjectType, AAZStrType, AAZIntType, AAZBoolType, AAZFloatType, AAZListType, AAZDictType, \
     AAZSimpleType
@@ -288,6 +289,102 @@ class AAZSubscriptionIdArg(AAZStrArg):
         arg.completer = get_subscription_id_list
 
         return arg
+
+
+class AAZGenericUpdateForceString(AAZBoolArg):
+
+    def __init__(
+            self, options=('--force-string',), arg_group='Generic Update',
+            help="When using 'set' or 'add', preserve string literals instead of attempting to convert to JSON.",
+            **kwargs):
+        super().__init__(
+            options=options,
+            help=help,
+            arg_group=arg_group,
+            **kwargs,
+        )
+
+
+class AAZGenericUpdateArg(AAZBaseArg, AAZListType):
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.Element = AAZStrType()
+
+
+class AAZGenericUpdateSetArg(AAZGenericUpdateArg):
+    _example = '--set property1.property2=<value>'
+
+    def __init__(
+            self, options=('--set',), arg_group='Generic Update',
+            help='Update an object by specifying a property path and value to set.'
+                 '  Example: {}'.format(_example),
+            **kwargs):
+        super().__init__(
+            options=options,
+            help=help,
+            arg_group=arg_group,
+            **kwargs,
+        )
+
+    def to_cmd_arg(self, name):
+        arg = super().to_cmd_arg(name)
+        arg.nargs = '+'
+        arg.metavar = 'KEY=VALUE'
+        return arg
+
+    def _build_cmd_action(self):
+        return AAZGenericUpdateAction
+
+
+class AAZGenericUpdateAddArg(AAZGenericUpdateArg):
+    _example = '--add property.listProperty <key=value, string or JSON string>'
+
+    def __init__(
+            self, options=('--add',), arg_group='Generic Update',
+            help='Add an object to a list of objects by specifying a path and key value pairs.'
+                 '  Example: {}'.format(_example),
+            **kwargs):
+        super().__init__(
+            options=options,
+            help=help,
+            arg_group=arg_group,
+            **kwargs,
+        )
+
+    def to_cmd_arg(self, name):
+        arg = super().to_cmd_arg(name)
+        arg.nargs = '+'
+        arg.metavar = 'LIST KEY=VALUE'
+        return arg
+
+    def _build_cmd_action(self):
+        return AAZGenericUpdateAction
+
+
+class AAZGenericUpdateRemoveArg(AAZGenericUpdateArg):
+    _example = '--remove property.list <indexToRemove> OR --remove propertyToRemove'
+
+    def __init__(
+            self, options=('--remove', ), arg_group='Generic Update',
+            help='Remove a property or an element from a list.'
+                 '  Example: {}'.format(_example),
+            **kwargs):
+        super().__init__(
+            options=options,
+            help=help,
+            arg_group=arg_group,
+            **kwargs,
+        )
+
+    def to_cmd_arg(self, name):
+        arg = super().to_cmd_arg(name)
+        arg.nargs = '+'
+        arg.metavar = 'LIST INDEX'
+        return arg
+
+    def _build_cmd_action(self):
+        return AAZGenericUpdateAction
 
 
 class AAZResourceIdArg(AAZStrArg):

@@ -4,4 +4,4 @@ from ._arg import has_value, AAZArgumentsSchema, AAZArgEnum, AAZStrArg, AAZIntAr
     AAZResourceIdArg, AAZSubscriptionIdArg
 from ._command import AAZCommand, AAZCommandGroup, register_command, register_command_group, load_aaz_command_table
 from ._field_type import AAZIntType, AAZFloatType, AAZStrType, AAZBoolType, AAZDictType, AAZListType, AAZObjectType
-from ._operation import AAZHttpOperation, AAZInstanceUpdateOperation
+from ._operation import AAZHttpOperation, AAZJsonInstanceUpdateOperation, AAZGenericInstanceUpdateOperation

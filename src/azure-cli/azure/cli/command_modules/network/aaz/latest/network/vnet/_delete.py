@@ -25,6 +25,7 @@ class Delete(AAZCommand):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         _schema = super()._build_arguments_schema(*args, **kwargs)
+        _schema.subscription_id = AAZSubscriptionIdArg()
         _schema.resource_group_name = AAZResourceGroupNameArg()
         _schema.virtual_network_name = AAZStrArg(
             options=["--virtual-network-name", "--name", "-n"], required=True,
@@ -68,7 +69,7 @@ class Delete(AAZCommand):
         @property
         def url_parameters(self):
             parameters = {
-                **self.serialize_url_param('subscriptionId', self.ctx.subscription_id),
+                **self.serialize_url_param('subscriptionId', self.ctx.args.subscription_id),
                 **self.serialize_url_param('resourceGroupName', self.ctx.args.resource_group_name),
                 **self.serialize_url_param('virtualNetworkName', self.ctx.args.virtual_network_name),
             }

@@ -243,7 +243,7 @@ class AAZHttpOperation(AAZOperation):
         raise HttpResponseError(response=response, error_format=self.error_format)
 
 
-class AAZInstanceUpdateOperation(AAZOperation):
+class AAZJsonInstanceUpdateOperation(AAZOperation):
 
     def __call__(self, *args, **kwargs):
         raise NotImplementedError()
@@ -274,8 +274,13 @@ class AAZInstanceUpdateOperation(AAZOperation):
         )
         return value, builder
 
-    @staticmethod
-    def _update_by_generic(instance, add_arg, set_arg, remove_arg, force_string_arg, client_flatten=True):
-        # TODO: implement generic instance update
 
+class AAZGenericInstanceUpdateOperation(AAZOperation):
+
+    def __call__(self, *args, **kwargs):
+        raise NotImplementedError()
+
+    @staticmethod
+    def _update_instance_by_generic(instance, args):
+        # TODO: implement generic instance update
         return instance
