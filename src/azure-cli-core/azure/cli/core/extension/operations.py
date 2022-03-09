@@ -180,7 +180,12 @@ def _add_whl_ext(cli_ctx, source, ext_sha256=None, pip_extra_index_urls=None, pi
     return extension_name
 
 
-def _install_deps_for_psycopg2():  # pylint: disable=too-many-statements
+def _install_deps_for_psycopg2():  # pylint: disable=too-many-statements  
+    # If we are in Cloud Shell, dependencies should have already been installed.
+    from azure.cli.core.util import in_cloud_console
+    if in_cloud_console():
+        return
+
     # Below system dependencies are required to install the psycopg2 dependency for Linux and macOS
     import platform
     import subprocess
@@ -213,9 +218,6 @@ def _install_deps_for_psycopg2():  # pylint: disable=too-many-statements
         distname, _ = get_linux_distro()
         distname = distname.lower().strip()
         if installer == 'DEB' or any(x in distname for x in ['ubuntu', 'debian']):
-            from azure.cli.core.util import in_cloud_console
-            if in_cloud_console():
-                return
             exit_code = subprocess.call(['dpkg', '-s', 'gcc', 'libpq-dev', 'python3-dev'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             if exit_code != 0:
                 logger.warning('This extension depends on gcc, libpq-dev, python3-dev and they will be installed first.')
