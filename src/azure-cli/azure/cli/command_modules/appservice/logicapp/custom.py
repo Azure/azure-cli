@@ -25,8 +25,8 @@ from azure.cli.command_modules.appservice.custom import (
     _validate_and_get_connection_string,
     update_container_settings_functionapp,
     try_create_application_insights,
-    _set_remote_or_local_git,
-    _show_app, create_app_service_plan)
+    _set_remote_or_local_git, show_app,
+    create_app_service_plan)
 
 from ._constants import (DEFAULT_LOGICAPP_FUNCTION_VERSION,
                          DEFAULT_LOGICAPP_RUNTIME,
@@ -224,10 +224,6 @@ def list_logicapp(cmd, resource_group_name=None):
                        _list_app(cmd.cli_ctx, resource_group_name)))
 
 
-def show_logicapp(cmd, resource_group_name, name, slot=None):
-    return _show_app(cmd, resource_group_name, name, "logicapp", slot)
-
-
 def _get_linux_fx_functionapp(functions_version, runtime, runtime_version):
     if runtime_version is None:
         runtime_version = FUNCTIONS_VERSION_TO_DEFAULT_RUNTIME_VERSION[functions_version][runtime]
@@ -244,3 +240,7 @@ def _get_java_version_functionapp(functions_version, runtime_version):
     if runtime_version == '8':
         return '1.8'
     return runtime_version
+
+
+def show_logicapp(cmd, resource_group_name, name):
+    return show_app(cmd, resource_group_name=resource_group_name, name=name)

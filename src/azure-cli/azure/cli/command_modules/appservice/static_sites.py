@@ -13,7 +13,7 @@ from knack.log import get_logger
 from msrestazure.tools import parse_resource_id
 
 from .utils import normalize_sku_for_staticapp, raise_missing_token_suggestion
-from .custom import show_functionapp, _build_identities_info
+from .custom import show_app, _build_identities_info
 
 
 logger = get_logger(__name__)
@@ -140,9 +140,10 @@ def show_identity(cmd, resource_group_name, name):
 
 
 def assign_identity(cmd, resource_group_name, name, assign_identities=None, role='Contributor', scope=None):
+    #  TODO : A lot of this code is duplicated, we should reuse the existing code
     ManagedServiceIdentity, ResourceIdentityType = cmd.get_models('ManagedServiceIdentity',
                                                                   'ManagedServiceIdentityType')
-    UserAssignedIdentitiesValue = cmd.get_models('Components1Jq1T4ISchemasManagedserviceidentityPropertiesUserassignedidentitiesAdditionalproperties')  # pylint: disable=line-too-long
+    UserAssignedIdentitiesValue = cmd.get_models('UserAssignedIdentity')
     _, _, external_identities, enable_local_identity = _build_identities_info(assign_identities)
 
     def getter():
@@ -534,9 +535,9 @@ def link_user_function(cmd, name, resource_group_name, function_resource_id, for
     parsed_rid = parse_resource_id(function_resource_id)
     function_name = parsed_rid["name"]
     function_group = parsed_rid["resource_group"]
-    function_location = show_functionapp(cmd, resource_group_name=function_group, name=function_name).location
+    function_location = show_app(cmd, resource_group_name=function_group, name=function_name).location
 
-    client = _get_staticsites_client_factory(cmd.cli_ctx, api_version="2020-12-01")
+    client = _get_staticsites_client_factory(cmd.cli_ctx)
     function = StaticSiteUserProvidedFunctionAppARMResource(function_app_resource_id=function_resource_id,
                                                             function_app_region=function_location)
 
@@ -550,7 +551,7 @@ def link_user_function(cmd, name, resource_group_name, function_resource_id, for
 
 def unlink_user_function(cmd, name, resource_group_name):
     function_name = list(get_user_function(cmd, name, resource_group_name))[0].name
-    client = _get_staticsites_client_factory(cmd.cli_ctx, api_version="2020-12-01")
+    client = _get_staticsites_client_factory(cmd.cli_ctx)
     return client.detach_user_provided_function_app_from_static_site(
         name=name,
         resource_group_name=resource_group_name,
@@ -558,5 +559,5 @@ def unlink_user_function(cmd, name, resource_group_name):
 
 
 def get_user_function(cmd, name, resource_group_name):
-    client = _get_staticsites_client_factory(cmd.cli_ctx, api_version="2020-12-01")
+    client = _get_staticsites_client_factory(cmd.cli_ctx)
     return client.get_user_provided_function_apps_for_static_site(name=name, resource_group_name=resource_group_name)

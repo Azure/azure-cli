@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.34.0"
+VERSION = "2.34.1"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -121,7 +121,7 @@ DEPENDENCIES = [
     'azure-mgmt-security~=2.0.0b1',
     'azure-mgmt-servicebus~=7.1.0',
     'azure-mgmt-servicefabricmanagedclusters~=1.0.0',
-    'azure-mgmt-servicelinker==1.0.0b1',
+    'azure-mgmt-servicelinker==1.0.0b2',
     'azure-mgmt-servicefabric~=1.0.0',
     'azure-mgmt-signalr~=1.0.0b2',
     'azure-mgmt-sqlvirtualmachine~=1.0.0b1',
@@ -129,7 +129,7 @@ DEPENDENCIES = [
     'azure-mgmt-storage~=19.1.0',
     'azure-mgmt-synapse~=2.1.0b2',
     'azure-mgmt-trafficmanager~=1.0.0',
-    'azure-mgmt-web~=4.0.0',
+    'azure-mgmt-web~=6.1.0',
     'azure-multiapi-storage~=0.7.0',
     'azure-storage-common~=1.4',
     'azure-synapse-accesscontrol~=0.5.0',
@@ -149,7 +149,7 @@ DEPENDENCIES = [
     'six>=1.10.0',  # six is still used by countless extensions
     'sshtunnel~=0.1.4',
     'urllib3[secure]',
-    'websocket-client~=0.56.0',
+    'websocket-client~=1.3.1',
     'xmltodict~=0.12'
 ]
 

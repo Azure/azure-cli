@@ -3,6 +3,21 @@
 Release History
 ===============
 
+2.34.1
+++++++
+
+**App Service**
+
+* Hotfix: Fix #20489: `az webapp log tail`: Fix the AttributeError that 'NoneType' object has no attribute 'host_name_ssl_states' (#21398)
+* Hotfix: Fix #20747: `az webapp create-remote-connection`: Fix the EOFError that ran out of input (#21398)
+* Hotfix: Fix #20544: `az webapp config snapshot restore`: Fix the AttributeError that 'WebAppsOperations' object has no attribute 'restore_snapshot' (#21398)
+* Hotfix: Fix #20011: `az webapp config ssl bind`: Fix the AttributeError that 'str' object has no attribute 'value' (#21398)
+* Hotfix: Fix #19492: `az webapp config backup restore`: Fix the AttributeError that 'WebAppsOperations' object has no attribute 'restore' (#21398)
+
+**Storage**
+
+* [BREAKING CHANGE] `az storage blob upload/upload-batch`: Fix `--overwrite` that it no longer overwrite by default (#21485)
+
 2.34.0
 ++++++
 
@@ -176,7 +191,7 @@ Release History
 
 * `az bot create`: Add location as specified by user to bot creation for regionality/EUDB (#20716)
 
-**Compute **
+**Compute**
 
 * `az image builder create`: Add new parameter `--proxy-vm-size` to support proxy VM size customization (#20904)
 * `az image builder create`: Add new parameter `--build-vm-identities` to support user assigned identities customization (#20904)
@@ -258,7 +273,7 @@ Release History
 * `az backup protectable-item list/show`: Add auto-protection policy and node-list field in the response for SQLInstance SQLAG (#20821)
 * `az backup protection auto-enable-for-azurewl/auto-disable-for-azurewl`: Add support for SQLAG (#20821)
 
-**Compute **
+**Compute**
 
 * `az vm/vmss create/update`: Expand validate license types for `--license-type` parameter (#20724)
 * `az sig image-definition list-shared`: Add new parameters `--marker` and `--show-next-marker` to support paging (#20618)
@@ -366,7 +381,7 @@ Release History
 * `az cognitiveservices account commitment-plan`: Add new commands `show`, `list`, `create`, `delete` (#20551)
 * `az cognitiveservices commitment-tier`: Add new command `list` (#20551)
 
-**Compute **
+**Compute**
 
 * Fix #20182: `az snapshot create`: Fix auto-detection bug for `--copy-start` (#20190)
 * Fix #20133: `az vm create`: Fix `--data-disk-delete-option` not working when no `--attach-data-disks` are provided (#20165)
@@ -469,7 +484,7 @@ Release History
 
 * `az aro create`: Remove Identifier URIs (#20095)
 
-**Compute **
+**Compute**
 
 * `az disk update`: Fix the problem that updating network access policy to `AllowPrivate` failed (#19862)
 * `az vm update`: Add `--host` argument and `--host-group` argument to support assign an existing VM to a specific ADH (#19819)
@@ -603,7 +618,7 @@ Hotfix: Fix #19897,#19903: Fix static webapp commands that are broken due to the
 * `az backup`: Add CRR functionality for Azure Workload (#19664)
 * `az backup`: Add support for MAB backup management type in some sub commands (#19710)
 
-**Compute **
+**Compute**
 
 * `az sig create/update`: Add new parameter `--soft-delete` to support soft delete (#19569)
 * `az sig image-version`: Add new parameter `--replication-mode` to support setting replication mode (#19580)
@@ -906,7 +921,7 @@ Upgrade batch management-plane to [azure-batch-mgmt 16.0.0](https://pypi.org/pro
 
 * `az cdn endpoint rule`: Add OriginGroupOverride action support (#18711)
 
-**Compute **
+**Compute**
 
 * `az sig image-version create`: Support mixing disks, snapshots, and vhd (#18741)
 * `az vmss update`: Upgrade package version to fix securityProfile issue (#18788)
@@ -1082,7 +1097,7 @@ Workload container registration fix, SDK upgraded to 0.12.0, Fixed and Re-ran te
 
 * `az cognitiveservices account`: Add list-deleted, show-deleted, recover, purge commands (#18464)
 
-**Compute **
+**Compute**
 
 * `az sig create/update`: Add --permissions to specify the permission of sharing gallery. (#18503)
 * `az sig share`: Manage gallery sharing profile. (#18503)

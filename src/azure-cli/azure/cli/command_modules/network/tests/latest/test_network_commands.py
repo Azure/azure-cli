@@ -3359,6 +3359,43 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
         self.cmd('network lb rule list -g {rg} --lb-name {lb}',
                  checks=self.check('length(@)', 0))
 
+    @ResourceGroupPreparer(name_prefix="cli_test_network_lb_port_mapping_")
+    def test_network_lb_port_mapping(self):
+        self.kwargs.update({
+            "lb": "test-lb",
+            "rule": "test-nat",
+            "pool": "test-pool",
+            "start": 3389,
+            "end": 4000,
+            "vnet": "test-vnet",
+            "subnet": "test-subnet",
+            "ip": "10.0.0.1",
+            "address": "test-address",
+        })
+
+        # prepare backend address pool
+        self.cmd("network lb create -n {lb} -g {rg} --sku standard")
+        self.cmd("network lb address-pool create -n {pool} -g {rg} --lb-name {lb}")
+        self.cmd("network vnet create -n {vnet} -g {rg} --subnet-name {subnet}")
+        self.cmd(
+            "network lb address-pool address add -n {address} -g {rg} --lb-name {lb} --pool-name {pool} "
+            "--vnet {vnet} --ip-address {ip}"
+        )
+        self.cmd(
+            "network lb inbound-nat-rule create -n {rule} -g {rg} --lb-name {lb} --backend-pool-name {pool} "
+            "--backend-port {start} --frontend-port-range-start {start} --frontend-port-range-end {end} --protocol tcp"
+        )
+
+        self.cmd(
+            "network lb list-mapping -n {lb} -g {rg} --backend-pool-name {pool} --request ip={ip}",
+            checks=[
+                self.check("inboundNatRulePortMappings[0].inboundNatRuleName", "{rule}"),
+                self.check("inboundNatRulePortMappings[0].backendPort", self.kwargs["start"]),
+                self.check("inboundNatRulePortMappings[0].frontendPort", self.kwargs["start"]),
+                self.check("inboundNatRulePortMappings[0].protocol", "Tcp"),
+            ]
+        )
+
 
 class NetworkLocalGatewayScenarioTest(ScenarioTest):
 
