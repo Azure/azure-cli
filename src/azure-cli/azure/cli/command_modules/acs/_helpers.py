@@ -21,7 +21,7 @@ from azure.core.exceptions import AzureError, HttpResponseError, ServiceRequestE
 
 
 def map_azure_error_to_cli_error(azure_error):
-    error_message = getattr(azure_error.message, str(azure_error))
+    error_message = getattr(azure_error, "message", str(azure_error))
     if isinstance(azure_error, HttpResponseError):
         status_code = getattr(azure_error, "status_code", None)
         if status_code:
