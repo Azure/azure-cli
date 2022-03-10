@@ -96,7 +96,6 @@ class StorageArgumentContext(AzArgumentContext):
                        'properties listed below is set, then that property will be cleared.',
                        arg_type=get_three_state_flag())
 
-
     def register_path_argument(self, default_file_param=None, options_list=None):
         from ._validators import get_file_path_validator
         from .completers import file_path_completer

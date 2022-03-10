@@ -528,6 +528,7 @@ def get_content_setting_validator(settings_class, update, guess_from_file=None, 
     def _class_name(class_type):
         return class_type.__module__ + "." + class_type.__class__.__name__
 
+    # pylint: disable=too-many-locals
     def validator(cmd, namespace):
         t_base_blob_service, t_file_service, t_blob_content_settings, t_file_content_settings = cmd.get_models(
             'blob.baseblobservice#BaseBlobService',
