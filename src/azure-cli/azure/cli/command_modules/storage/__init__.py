@@ -71,13 +71,14 @@ class StorageArgumentContext(AzArgumentContext):
                       help='Only permit requests made with the HTTPS protocol. If omitted, requests from both the HTTP '
                            'and HTTPS protocol are permitted.')
 
-    def register_content_settings_argument(self, settings_class, update, arg_group=None, guess_from_file=None):
+    # pylint: disable=line-too-long
+    def register_content_settings_argument(self, settings_class, update, arg_group=None, guess_from_file=None, process_md5=False):
         from azure.cli.command_modules.storage._validators import get_content_setting_validator
         from azure.cli.core.commands.parameters import get_three_state_flag
 
         self.ignore('content_settings')
         self.extra('content_type', default=None, help='The content MIME type.', arg_group=arg_group,
-                   validator=get_content_setting_validator(settings_class, update, guess_from_file=guess_from_file))
+                   validator=get_content_setting_validator(settings_class, update, guess_from_file=guess_from_file, process_md5=process_md5))
         self.extra('content_encoding', default=None, help='The content encoding type.', arg_group=arg_group)
         self.extra('content_language', default=None, help='The content language.', arg_group=arg_group)
         self.extra('content_disposition', default=None, arg_group=arg_group,
@@ -95,28 +96,6 @@ class StorageArgumentContext(AzArgumentContext):
                        'properties listed below is set, then that property will be cleared.',
                        arg_type=get_three_state_flag())
 
-    def register_content_settings_argument_track2(self, settings_class, update, arg_group=None, guess_from_file=None):
-        from ._validators import get_content_setting_validator_track2
-        from azure.cli.core.commands.parameters import get_three_state_flag
-
-        self.ignore('content_settings')
-        self.extra('content_type', default=None, help='The content MIME type.', arg_group=arg_group,
-                   validator=get_content_setting_validator_track2(settings_class, update,
-                                                                  guess_from_file=guess_from_file, process_md5=True))
-        self.extra('content_encoding', default=None, help='The content encoding type.', arg_group=arg_group)
-        self.extra('content_language', default=None, help='The content language.', arg_group=arg_group)
-        self.extra('content_disposition', default=None, arg_group=arg_group,
-                   help='Conveys additional information about how to process the response payload, and can also be '
-                        'used to attach additional metadata.')
-        self.extra('content_cache_control', default=None, help='The cache control string.', arg_group=arg_group)
-        self.extra('content_md5', default=None, help='The content\'s MD5 hash.', arg_group=arg_group)
-        if update:
-            self.extra('clear_content_settings', help='If this flag is set, then if any one or more of the '
-                       'following properties (--content-cache-control, --content-disposition, --content-encoding, '
-                       '--content-language, --content-md5, --content-type) is set, then all of these properties are '
-                       'set together. If a value is not provided for a given property when at least one of the '
-                       'properties listed below is set, then that property will be cleared.',
-                       arg_type=get_three_state_flag())
 
     def register_path_argument(self, default_file_param=None, options_list=None):
         from ._validators import get_file_path_validator
