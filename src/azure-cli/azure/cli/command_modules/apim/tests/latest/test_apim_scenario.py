@@ -9,8 +9,8 @@ from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer)
 
 
-
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
+
 
 class ApimScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_apim-', parameter_name_for_location='resource_group_location')
@@ -98,19 +98,14 @@ class ApimScenarioTest(ScenarioTest):
         # TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
         self.kwargs.update({
             'api_id': self.create_random_name('az-cli', 10),
-            'schema_id': self.create_random_name('az-cli', 10),
-            'api_id3': self.create_random_name('az-cli', 10),
             'api_type': 'http',
             'api_version': 'v1',
             'description': 'Contoso API Description',
             'display_name': 'Contoso API',
-            'display_name2': 'GraphQl API',
             'path': 'test',
             'path2': 'test2',
-            'path3': 'test3',
             'protocol': 'https',
             'service_url': 'https://contoso.com',
-            'service_url2': 'https://api.spacex.land/graphql/',
             'subscription_key_header_name': 'header',
             'subscription_key_query_param_name': 'query',
             'api_id2': '48242ec7f53745de9cbb800757a4204a',
@@ -136,8 +131,7 @@ class ApimScenarioTest(ScenarioTest):
             'vs_id': 'MyVSId',
             'new_vs_name': 'MyNewVersionSet',
             'api_revision': '2',
-            'api_revision_description': "New API Revision",
-            'api_type2': 'graphql'
+            'api_revision_description': "New API Revision"
         })
 
         # api operations
@@ -170,7 +164,7 @@ class ApimScenarioTest(ScenarioTest):
                     self.check('protocols[0]', '{protocol}'),
                     self.check('subscriptionKeyParameterNames.header', '{subscription_key_header_name}'),
                     self.check('subscriptionKeyParameterNames.query', '{subscription_key_query_param_name}')])
-            
+
         # wait
         self.cmd('apim api wait -g "{rg}" -n "{service_name}" --api-id "{api_id}" --created', checks=[self.is_empty()])
 
@@ -238,58 +232,7 @@ class ApimScenarioTest(ScenarioTest):
                     self.check('subscriptionsLimit', '{new_subscription_limit}'),
                     self.check('displayName', '{product_name2}'),
                     self.check('state', '{new_state}')])
-        
-        
-        pythonfile = 'gql_schema.gql'
-        schemapath = os.path.join(TEST_DIR, pythonfile)
-        api_file = open(schemapath, 'r')
-        content_value = api_file.read()
-        value = content_value
-        self.kwargs.update({
-            'schema_path': schemapath,
-            'schema_type': 'application/vnd.ms-azure-apim.graphql.schema',
-            'schema_type2': 'Microsoft.ApiManagement/service/apis/schemas',
-            'schema_file_value': value
-        })
-        
-        # create api
-        self.cmd(
-            'apim api create -g "{rg}" --service-name "{service_name}" --display-name "{display_name2}" --path "{path3}" --api-id "{api_id3}" --protocols "{protocol}" --service-url "{service_url2}" --api-type "{api_type2}"',
-            checks=[self.check('displayName', '{display_name2}'),
-                    self.check('path', '{path3}'),
-                    self.check('serviceUrl', '{service_url2}'),
-                    self.check('protocols[0]', '{protocol}')])
-        
-        
-        #create schema
-        self.cmd(
-            'apim api schema create -g "{rg}" --service-name "{service_name}" --api-id "{api_id3}" --schema-id "{schema_id}" --schema-type "{schema_type}" --schema-path "{schema_path}"',
-            checks=[self.check('contentType', '{schema_type}'),
-                    self.check('type', '{schema_type2}'),
-                    self.check('value', '{schema_file_value}')])
-        
-        #get schema
-        self.cmd(
-            'apim api schema show -g "{rg}" --service-name "{service_name}" --api-id "{api_id3}" --schema-id "{schema_id}"',
-            checks=[self.check('contentType', '{schema_type}'),
-                    self.check('type', '{schema_type2}'),
-               
-                    self.check('value', '{schema_file_value}')])
-        
-        #list api schemas
-        api_count = len(self.cmd('apim api schema list -g "{rg}" -n "{service_name}" --api-id "{api_id3}"').get_output_in_json())
-        self.assertEqual(api_count, 1)
-        
-        
-        #entity
-        entity = self.cmd(
-            'apim api schema entity -g "{rg}" --service-name "{service_name}" --api-id "{api_id3}" --schema-id "{schema_id}"')
-        self.assertEqual(entity, True)
-        
-        #delete schema
-        self.cmd(
-            'apim api schema delete -g "{rg}" --service-name "{service_name}" --api-id "{api_id3}" --schema-id "{schema_id}"')
-        
+
         self.kwargs.update({
             'operation_id': 'testOperation',
             'url_template': "/session/{id}/oid/{oname}",
@@ -423,7 +366,65 @@ class ApimScenarioTest(ScenarioTest):
         self.assertEqual(api_count, 1)
 
         count = len(self.cmd('apim list').get_output_in_json())
-
+        pythonfile = 'gql_schema.gql'
+        schemapath = os.path.join(TEST_DIR, pythonfile)
+        api_file = open(schemapath, 'r')
+        content_value = api_file.read()
+        value = content_value
+        
+        self.kwargs.update({
+            'graphql_api_id': self.create_random_name('gr-api', 10),
+            'graphql_sch_id': 'graphql',
+            'graphql_schema_path': schemapath,
+            'graphql_schema_type': 'application/vnd.ms-azure-apim.graphql.schema',
+            'graphql_schema_type2': 'Microsoft.ApiManagement/service/apis/schemas',
+            'schema_file_value': value,
+            'graphql_display_name': 'graphQl API',
+            'graphql_protocol': 'https',
+            'graphql_api_type': 'graphql',
+            'graphql_path': 'graphqltestpath',
+            'graphql_service_url': 'https://api.spacex.land/graphql/'
+        })
+        
+        self.cmd(
+            'apim api create -g "{rg}" --service-name "{service_name}" --display-name "{graphql_display_name}" --path "{graphql_path}" --api-id "{graphql_api_id}" --protocols "{graphql_protocol}" --service-url "{graphql_service_url}" --api-type "{graphql_api_type}"',
+            checks=[self.check('displayName', '{graphql_display_name}'),
+                    self.check('path', '{graphql_path}'),
+                    self.check('serviceUrl', '{graphql_service_url}'),
+                    self.check('protocols[0]', '{graphql_protocol}')])
+ 
+        #create schema
+        self.cmd(
+            'apim api schema create -g "{rg}" --service-name "{service_name}" --api-id "{graphql_api_id}" --schema-id "{graphql_sch_id}" --schema-type "{graphql_schema_type}" --schema-path "{graphql_schema_path}"',
+            checks=[self.check('contentType', '{graphql_schema_type}'),
+                    self.check('name', '{graphql_sch_id}'),
+                    self.check('value', '{schema_file_value}')])
+        
+        #get schema
+        self.cmd(
+            'apim api schema show -g "{rg}" --service-name "{service_name}" --api-id "{graphql_api_id}" --schema-id "{graphql_sch_id}"',
+            checks=[self.check('contentType', '{graphql_schema_type}'),
+                    self.check('name', '{graphql_sch_id}'),
+                    self.check('value', '{schema_file_value}')])
+        
+        
+        #list api schemas
+        schema_count = len(self.cmd('apim api schema list -g "{rg}" -n "{service_name}" --api-id "{graphql_api_id}"').get_output_in_json())
+        self.assertEqual(schema_count, 1)
+        
+        
+        #entity
+        entity = self.cmd(
+            'apim api schema entity -g "{rg}" --service-name "{service_name}" --api-id "{graphql_api_id}" --schema-id "{graphql_sch_id}"')
+        self.assertTrue(entity)
+        
+        #delete schema
+        self.cmd(
+            'apim api schema delete -g "{rg}" --service-name "{service_name}" --api-id "{graphql_api_id}" --schema-id "{graphql_sch_id}"')
+        
+        schema_count = len(self.cmd('apim api schema list -g "{rg}" -n "{service_name}" --api-id "{graphql_api_id}"').get_output_in_json())
+        self.assertEqual(schema_count, 0)
+        
         # named value operations
         self.kwargs.update({
             'display_name': self.create_random_name('nv-name', 14),
@@ -478,6 +479,8 @@ class ApimScenarioTest(ScenarioTest):
 
         final_count = len(self.cmd('apim list').get_output_in_json())
         self.assertEqual(final_count, count - 1)
+        
+        
 
 
 KNOWN_LOCS = {'eastasia': 'East Asia',
