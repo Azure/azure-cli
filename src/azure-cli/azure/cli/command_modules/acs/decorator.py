@@ -39,8 +39,8 @@ from azure.cli.command_modules.acs.custom import (
     _get_user_assigned_identity,
     _put_managed_cluster_ensuring_permission,
     subnet_role_assignment_exists,
-    _get_snapshot,
 )
+from azure.cli.command_modules.acs._helpers import get_snapshot_by_snapshot_id
 
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core._profile import Profile
@@ -896,9 +896,9 @@ class AKSContext:
 
         This fuction will store an intermediate "snapshot" to avoid sending the same request multiple times.
 
-        Function "_get_snapshot" will be called to retrieve the Snapshot object corresponding to a snapshot id, which
-        internally used the snapshot client (snapshots operations belonging to container service client) to send
-        the request.
+        Function "get_snapshot_by_snapshot_id" will be called to retrieve the Snapshot object corresponding to a
+        snapshot id, which internally used the snapshot client (snapshots operations belonging to container service
+        client) to send the request.
 
         :return: Snapshot or None
         """
@@ -909,7 +909,7 @@ class AKSContext:
 
         snapshot_id = self.get_snapshot_id()
         if snapshot_id:
-            snapshot = _get_snapshot(self.cmd.cli_ctx, snapshot_id)
+            snapshot = get_snapshot_by_snapshot_id(self.cmd.cli_ctx, snapshot_id)
             self.set_intermediate("snapshot", snapshot, overwrite_exists=True)
         return snapshot
 

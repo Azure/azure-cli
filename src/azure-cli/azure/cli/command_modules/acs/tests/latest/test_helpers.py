@@ -74,13 +74,13 @@ class ErrorMappingTestCase(unittest.TestCase):
 class GetSnapShotTestCase(unittest.TestCase):
     def test_get_snapshot_by_snapshot_id(self):
         with self.assertRaises(InvalidArgumentValueError):
-            helpers.get_snapshot_from_snapshot_id("mock_cli_ctx", "")
+            helpers.get_snapshot_by_snapshot_id("mock_cli_ctx", "")
 
         mock_snapshot = Mock()
         with patch(
             "azure.cli.command_modules.acs._helpers.get_snapshot", return_value=mock_snapshot
         ) as mock_get_snapshot:
-            snapshot = helpers.get_snapshot_from_snapshot_id(
+            snapshot = helpers.get_snapshot_by_snapshot_id(
                 "mock_cli_ctx",
                 "/subscriptions/test_sub/resourcegroups/test_rg/providers/microsoft.containerservice/snapshots/test_snapshot",
             )

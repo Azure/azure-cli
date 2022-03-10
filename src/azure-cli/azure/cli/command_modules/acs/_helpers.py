@@ -47,7 +47,7 @@ def map_azure_error_to_cli_error(azure_error):
         return ServiceError(error_message)
 
 
-def get_snapshot_from_snapshot_id(cli_ctx, snapshot_id):
+def get_snapshot_by_snapshot_id(cli_ctx, snapshot_id):
     _re_snapshot_resource_id = re.compile(
         r"/subscriptions/(.*?)/resourcegroups/(.*?)/providers/microsoft.containerservice/snapshots/(.*)",
         flags=re.IGNORECASE,

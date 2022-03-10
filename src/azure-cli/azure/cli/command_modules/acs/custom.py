@@ -45,6 +45,7 @@ import requests
 # pylint: disable=no-name-in-module,import-error
 from azure.cli.command_modules.acs import acs_client, proxy
 from azure.cli.command_modules.acs._params import regions_in_preview, regions_in_prod
+from azure.cli.command_modules.acs._helpers import get_snapshot_by_snapshot_id
 from azure.cli.core.api import get_config_dir
 from azure.cli.core.azclierror import (ResourceNotFoundError,
                                        ClientRequestError,
@@ -79,7 +80,6 @@ from ._client_factory import cf_resources
 from ._client_factory import get_resource_by_name
 from ._client_factory import cf_container_registry_service
 from ._client_factory import cf_agent_pools
-from ._client_factory import cf_snapshots
 from ._client_factory import get_msi_client
 
 from ._consts import CONST_SCALE_SET_PRIORITY_REGULAR, CONST_SCALE_SET_PRIORITY_SPOT, CONST_SPOT_EVICTION_POLICY_DELETE
@@ -850,30 +850,6 @@ def _get_user_assigned_identity_client_id(cli_ctx, resource_id):
 
 def _get_user_assigned_identity_object_id(cli_ctx, resource_id):
     return _get_user_assigned_identity(cli_ctx, resource_id).principal_id
-
-
-_re_snapshot_resource_id = re.compile(
-    r'/subscriptions/(.*?)/resourcegroups/(.*?)/providers/microsoft.containerservice/snapshots/(.*)',
-    flags=re.IGNORECASE)
-
-
-def _get_snapshot(cli_ctx, snapshot_id):
-    snapshot_id = snapshot_id.lower()
-    match = _re_snapshot_resource_id.search(snapshot_id)
-    if match:
-        subscription_id = match.group(1)
-        resource_group_name = match.group(2)
-        snapshot_name = match.group(3)
-        snapshot_client = cf_snapshots(cli_ctx, subscription_id=subscription_id)
-        try:
-            snapshot = snapshot_client.get(resource_group_name, snapshot_name)
-        except CloudError as ex:
-            if 'was not found' in ex.message:
-                raise ResourceNotFoundError("Snapshot {} not found.".format(snapshot_id))
-            raise CLIError(ex.message)
-        return snapshot
-    raise InvalidArgumentValueError(
-        "Cannot parse snapshot name from provided resource id {}.".format(snapshot_id))
 
 
 # pylint: disable=too-many-locals
@@ -3181,7 +3157,7 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
     from azure.cli.command_modules.acs.decorator import AKSModels
     CreationData = AKSModels(cmd, ResourceType.MGMT_CONTAINERSERVICE).CreationData
     if snapshot_id:
-        snapshot = _get_snapshot(cmd.cli_ctx, snapshot_id)
+        snapshot = get_snapshot_by_snapshot_id(cmd.cli_ctx, snapshot_id)
         if not kubernetes_version:
             kubernetes_version = snapshot.kubernetes_version
         if not os_type:
@@ -3337,7 +3313,7 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
 
     creationData = None
     if snapshot_id:
-        snapshot = _get_snapshot(cmd.cli_ctx, snapshot_id)
+        snapshot = get_snapshot_by_snapshot_id(cmd.cli_ctx, snapshot_id)
         if not kubernetes_version and not node_image_only:
             kubernetes_version = snapshot.kubernetes_version
 
