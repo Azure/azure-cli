@@ -79,7 +79,7 @@ from ._client_factory import cf_resources
 from ._client_factory import get_resource_by_name
 from ._client_factory import cf_container_registry_service
 from ._client_factory import cf_agent_pools
-from ._client_factory import cf_snapshots_client
+from ._client_factory import cf_snapshots
 from ._client_factory import get_msi_client
 
 from ._consts import CONST_SCALE_SET_PRIORITY_REGULAR, CONST_SCALE_SET_PRIORITY_SPOT, CONST_SPOT_EVICTION_POLICY_DELETE
@@ -864,7 +864,7 @@ def _get_snapshot(cli_ctx, snapshot_id):
         subscription_id = match.group(1)
         resource_group_name = match.group(2)
         snapshot_name = match.group(3)
-        snapshot_client = cf_snapshots_client(cli_ctx, subscription_id=subscription_id)
+        snapshot_client = cf_snapshots(cli_ctx, subscription_id=subscription_id)
         try:
             snapshot = snapshot_client.get(resource_group_name, snapshot_name)
         except CloudError as ex:
