@@ -166,22 +166,6 @@ class WheelExtension(Extension):
 
                 if self.name == ext_whl_metadata.name:
                     metadata.update(vars(ext_whl_metadata))
-                # Parse out the extras for readability - Q: would we want this?
-                # if metadata.get("requires_dist"):
-                #     extras = {}
-                #     required = []
-                #     for ext in metadata["requires_dist"]:
-                #         print(ext)
-                #         if "; extra == " in ext:
-                #             props = ext[:ext.find("; extra")]
-                #             key = ext[ext.find("'") + 1: ext.rfind("'")]
-                #             extras[key] = props
-                #             print(key, props)
-                #         else:
-                #             required.append(ext)
-                #     if len(extras) > 0:
-                #         metadata["extras_dist"] = extras
-                #         metadata["requires_dist"] = required
             except ValueError:
                 logger.warning('extension %s contains invalid metadata for Python Package', self.name)
 
