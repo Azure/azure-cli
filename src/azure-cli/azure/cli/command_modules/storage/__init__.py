@@ -71,13 +71,14 @@ class StorageArgumentContext(AzArgumentContext):
                       help='Only permit requests made with the HTTPS protocol. If omitted, requests from both the HTTP '
                            'and HTTPS protocol are permitted.')
 
-    def register_content_settings_argument(self, settings_class, update, arg_group=None, guess_from_file=None):
+    # pylint: disable=line-too-long
+    def register_content_settings_argument(self, settings_class, update, arg_group=None, guess_from_file=None, process_md5=False):
         from azure.cli.command_modules.storage._validators import get_content_setting_validator
         from azure.cli.core.commands.parameters import get_three_state_flag
 
         self.ignore('content_settings')
         self.extra('content_type', default=None, help='The content MIME type.', arg_group=arg_group,
-                   validator=get_content_setting_validator(settings_class, update, guess_from_file=guess_from_file))
+                   validator=get_content_setting_validator(settings_class, update, guess_from_file=guess_from_file, process_md5=process_md5))
         self.extra('content_encoding', default=None, help='The content encoding type.', arg_group=arg_group)
         self.extra('content_language', default=None, help='The content language.', arg_group=arg_group)
         self.extra('content_disposition', default=None, arg_group=arg_group,
