@@ -99,7 +99,7 @@ def load_command_table(self, _):
         g.custom_command('delete', 'apim_api_schema_delete', supports_no_wait=True)
         g.custom_show_command('show', 'apim_api_schema_get')
         g.custom_command('list', 'apim_api_schema_list')
-        g.custom_command('entity', 'apim_api_schema_entity')
+        g.custom_command('get-etag', 'apim_api_schema_entity')
         g.wait_command('wait')
 
     with self.command_group('apim product', product_sdk) as g:
