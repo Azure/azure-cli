@@ -22,6 +22,7 @@ from azure.core.exceptions import AzureError, HttpResponseError, ServiceRequestE
 from msrestazure.azure_exceptions import CloudError
 
 
+# pylint: disable=too-many-return-statements
 def map_azure_error_to_cli_error(azure_error):
     error_message = getattr(azure_error, "message", str(azure_error))
     if isinstance(azure_error, HttpResponseError):
@@ -36,17 +37,17 @@ def map_azure_error_to_cli_error(azure_error):
                 return ForbiddenError(error_message)
             elif status_code == 404:
                 return ResourceNotFoundError(error_message)
-            elif status_code >= 400 and status_code < 500:
+            elif 400 <= status_code < 500:
                 return UnclassifiedUserFault(error_message)
-            elif status_code >= 500 and status_code < 600:
+            elif 500 <= status_code < 600:
                 return AzureInternalError(error_message)
+            return ServiceError(error_message)
         return ServiceError(error_message)
     elif isinstance(azure_error, ServiceRequestError):
         return ClientRequestError(error_message)
     elif isinstance(azure_error, ServiceResponseError):
         return AzureResponseError(error_message)
-    else:
-        return ServiceError(error_message)
+    return ServiceError(error_message)
 
 
 def get_snapshot_by_snapshot_id(cli_ctx, snapshot_id):
