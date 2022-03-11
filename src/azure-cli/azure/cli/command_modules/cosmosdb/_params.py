@@ -450,7 +450,7 @@ def load_arguments(self, _):
             c.argument('cassandra_version', help="The version of Cassandra chosen.")
             c.argument('authentication_method', arg_type=get_enum_type(['None', 'Cassandra']), help="Authentication mode can be None or Cassandra. If None, no authentication will be required to connect to the Cassandra API. If Cassandra, then passwords will be used.")
             c.argument('hours_between_backups', help="The number of hours between backup attempts.")
-            c.argument('repair_enabled', help="Enables automatic repair.")
+            c.argument('repair_enabled', arg_type=get_three_state_flag(), help="Enables automatic repair.")
             c.argument('client_certificates', nargs='*', validator=validate_client_certificates, help="If specified, enables client certificate authentication to the Cassandra API.")
             c.argument('gossip_certificates', help="A list of certificates that should be accepted by on-premise data centers.")
             c.argument('external_seed_nodes', nargs='*', validator=validate_seednodes, help="A list of ip addresses of the seed nodes of on-premise data centers.")
