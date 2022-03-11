@@ -9,6 +9,7 @@ from azure.cli.command_modules.acs._client_factory import cf_agent_pools
 from azure.cli.command_modules.acs._consts import DecoratorMode
 from azure.cli.command_modules.acs._validators import extract_comma_separated_string
 from azure.cli.command_modules.acs.base_decorator import BaseAKSContext, BaseAKSModels, BaseAKSParamDict
+from azure.cli.core import AzCommandsLoader
 from azure.cli.core.azclierror import CLIInternalError, InvalidArgumentValueError, RequiredArgumentMissingError
 from azure.cli.core.commands import AzCliCommand
 from azure.cli.core.profiles import ResourceType
@@ -29,6 +30,13 @@ class AKSAgentPoolModels(BaseAKSModels):
     The api version of the class corresponding to a model is determined by resource_type.
     """
 
+    def __init__(
+        self,
+        cmd: AzCommandsLoader,
+        resource_type: ResourceType,
+    ):
+        super().__init__(cmd, resource_type)
+
 
 # pylint: disable=too-few-public-methods
 class AKSAgentPoolParamDict(BaseAKSParamDict):
@@ -36,6 +44,8 @@ class AKSAgentPoolParamDict(BaseAKSParamDict):
 
     Only expose the "get" method externally to obtain parameter values, while recording usage.
     """
+    def __init__(self, param_dict: Dict):
+        super().__init__(param_dict)
 
 
 # pylint: disable=too-many-public-methods

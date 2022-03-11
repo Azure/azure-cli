@@ -45,6 +45,7 @@ class BaseAKSModels:
         self.resource_type = resource_type
         self.set_up_models()
 
+
     @property
     def raw_models(self):
         if self.__raw_models is None:
@@ -53,6 +54,7 @@ class BaseAKSModels:
                 operation_group="managed_clusters",
             ).models
         return self.__raw_models
+
 
     def set_up_models(self):
         for model_name, model_class in vars(self.raw_models).items():
