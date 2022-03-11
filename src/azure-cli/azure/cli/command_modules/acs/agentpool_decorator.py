@@ -3,22 +3,17 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from typing import Dict, TypeVar
+from typing import Dict, Tuple, TypeVar, Union
 
 from azure.cli.command_modules.acs._client_factory import cf_agent_pools
 from azure.cli.command_modules.acs._consts import DecoratorMode
+from azure.cli.command_modules.acs._validators import extract_comma_separated_string
 from azure.cli.command_modules.acs.decorator import validate_decorator_mode
 from azure.cli.core import AzCommandsLoader
-from azure.cli.core.azclierror import (
-    CLIInternalError,
-    InvalidArgumentValueError,
-)
-from azure.cli.command_modules.acs._validators import (
-    extract_comma_separated_string,
-)
-from azure.cli.core.util import sdk_no_wait
+from azure.cli.core.azclierror import CLIInternalError, InvalidArgumentValueError, RequiredArgumentMissingError
 from azure.cli.core.commands import AzCliCommand
 from azure.cli.core.profiles import ResourceType
+from azure.cli.core.util import sdk_no_wait
 from knack.log import get_logger
 
 logger = get_logger(__name__)
@@ -83,6 +78,53 @@ class AKSAgentPoolContext:
         self.decorator_mode = decorator_mode
         self.intermediates = dict()
         self.agentpool = None
+
+    # pylint: disable=no-self-use
+    def __validate_counts_in_autoscaler(
+        self,
+        node_count,
+        enable_cluster_autoscaler,
+        min_count,
+        max_count,
+        decorator_mode,
+    ) -> None:
+        """Helper function to check the validity of serveral count-related parameters in autoscaler.
+
+        On the premise that enable_cluster_autoscaler (in update mode, this could be update_cluster_autoscaler) is
+        enabled, it will check whether both min_count and max_count are assigned, if not, raise the
+        RequiredArgumentMissingError. If min_count is less than max_count, raise the InvalidArgumentValueError. Only in
+        create mode it will check whether the value of node_count is between min_count and max_count, if not, raise the
+        InvalidArgumentValueError. If enable_cluster_autoscaler (in update mode, this could be
+        update_cluster_autoscaler) is not enabled, it will check whether any of min_count or max_count is assigned,
+        if so, raise the RequiredArgumentMissingError.
+
+        :return: None
+        """
+        # validation
+        if enable_cluster_autoscaler:
+            if min_count is None or max_count is None:
+                raise RequiredArgumentMissingError(
+                    "Please specify both min-count and max-count when --enable-cluster-autoscaler enabled"
+                )
+            if min_count > max_count:
+                raise InvalidArgumentValueError(
+                    "Value of min-count should be less than or equal to value of max-count"
+                )
+            if decorator_mode == DecoratorMode.CREATE:
+                if node_count < min_count or node_count > max_count:
+                    raise InvalidArgumentValueError(
+                        "node-count is not in the range of min-count and max-count"
+                    )
+        else:
+            if min_count is not None or max_count is not None:
+                option_name = "--enable-cluster-autoscaler"
+                if decorator_mode == DecoratorMode.UPDATE:
+                    option_name += " or --update-cluster-autoscaler"
+                raise RequiredArgumentMissingError(
+                    "min-count and max-count are required for {}, please use the flag".format(
+                        option_name
+                    )
+                )
 
     def attach_agentpool(self, agentpool: AgentPool) -> None:
         """Attach the AgentPool object to the context.
@@ -200,6 +242,94 @@ class AKSAgentPoolContext:
         # this parameter does not need validation
         return max_surge
 
+    # pylint: disable=too-many-branches
+    def get_node_count_and_enable_cluster_autoscaler_min_max_count(
+        self,
+    ) -> Tuple[int, bool, Union[int, None], Union[int, None]]:
+        """Obtain the value of node_count, enable_cluster_autoscaler, min_count and max_count.
+
+        This function will verify the parameters through function "__validate_counts_in_autoscaler" by default.
+
+        :return: a tuple containing four elements: node_count of int type, enable_cluster_autoscaler of bool type,
+        min_count of int type or None and max_count of int type or None
+        """
+        # node_count
+        # read the original value passed by the command
+        node_count = self.raw_param.get("node_count")
+        # try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.agentpool and self.agentpool.count is not None:
+            node_count = self.agentpool.count
+
+        # enable_cluster_autoscaler
+        # read the original value passed by the command
+        enable_cluster_autoscaler = self.raw_param.get("enable_cluster_autoscaler")
+        # try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.agentpool and self.agentpool.enable_auto_scaling is not None:
+            enable_cluster_autoscaler = self.agentpool.enable_auto_scaling
+
+        # min_count
+        # read the original value passed by the command
+        min_count = self.raw_param.get("min_count")
+        # try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.agentpool and self.agentpool.min_count is not None:
+            min_count = self.agentpool.min_count
+
+        # max_count
+        # read the original value passed by the command
+        max_count = self.raw_param.get("max_count")
+        # try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.agentpool and self.agentpool.max_count is not None:
+            max_count = self.agentpool.max_count
+
+        # these parameters do not need dynamic completion
+
+        # validation
+        self.__validate_counts_in_autoscaler(
+            node_count,
+            enable_cluster_autoscaler,
+            min_count,
+            max_count,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        return node_count, enable_cluster_autoscaler, min_count, max_count
+    
+    def get_node_osdisk_size(self) -> Union[int, None]:
+        """Obtain the value of node_osdisk_size.
+
+        Note: SDK performs the following validation {'maximum': 2048, 'minimum': 0}.
+
+        This function will normalize the parameter by default. The parameter will be converted to int.
+
+        :return: int or None
+        """
+        # read the original value passed by the command
+        node_osdisk_size = self.raw_param.get("node_osdisk_size")
+        # try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.agentpool and self.agentpool.os_disk_size_gb is not None:
+            node_osdisk_size = self.agentpool.os_disk_size_gb
+
+        # normalize
+        if node_osdisk_size:
+            node_osdisk_size = int(node_osdisk_size)
+
+        # this parameter does not need validation
+        return node_osdisk_size
+
+    def get_node_osdisk_type(self) -> Union[str, None]:
+        """Obtain the value of node_osdisk_type.
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        node_osdisk_type = self.raw_param.get("node_osdisk_type")
+        # try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.agentpool and self.agentpool.os_disk_type is not None:
+            node_osdisk_type = self.agentpool.os_disk_type
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return node_osdisk_type
+
     def get_aks_custom_headers(self) -> Dict[str, str]:
         """Obtain the value of aks_custom_headers.
 
@@ -312,6 +442,38 @@ class AKSAgentPoolAddDecorator:
         agentpool.upgrade_settings = upgrade_settings
         return agentpool
 
+    def set_up_osdisk_properties(self, agentpool: AgentPool) -> AgentPool:
+        """Set up os disk related properties for the AgentPool object.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        agentpool.os_disk_size_gb = self.context.get_node_osdisk_size()
+        agentpool.os_disk_type = self.context.get_node_osdisk_type()
+        return agentpool
+
+    def set_up_auto_scaler_properties(self, agentpool: AgentPool) -> AgentPool:
+        """Set up auto scaler related properties for the AgentPool object.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        (
+            node_count,
+            enable_auto_scaling,
+            min_count,
+            max_count,
+        ) = (
+            self.context.get_node_count_and_enable_cluster_autoscaler_min_max_count()
+        )
+        agentpool.count = node_count
+        agentpool.enable_auto_scaling = enable_auto_scaling
+        agentpool.min_count = min_count
+        agentpool.max_count = max_count
+        return agentpool
+
     def construct_default_agentpool_profile(self) -> AgentPool:
         """The overall controller used to construct the default AgentPool profile.
 
@@ -324,6 +486,10 @@ class AKSAgentPoolAddDecorator:
         agentpool = self.init_agentpool()
         # set up upgrade settings
         agentpool = self.set_up_upgrade_settings(agentpool)
+        # set up osdisk properties
+        agentpool = self.set_up_osdisk_properties(agentpool)
+        # set up auto scaler properties
+        agentpool = self.set_up_auto_scaler_properties(agentpool)
         return agentpool
 
     # pylint: disable=protected-access
