@@ -958,7 +958,7 @@ class LinuxWebappScenarioTest(ScenarioTest):
             '.scm.azurewebsites.net/docker/hook'))
 
         result = self.cmd('webapp config container set -g {} -n {} --docker-custom-image-name {} --docker-registry-server-password {} --docker-registry-server-user {} --docker-registry-server-url {} --enable-app-service-storage {}'.format(
-            resource_group, webapp, 'foo-image', 'foo-password', 'foo-user', 'foo-url', 'true')).get_output_in_json()
+            resource_group, webapp, 'foo-image', 'foo-password', 'foo-user', 'foo-url', 'false')).get_output_in_json()
         self.assertEqual(set(x['value'] for x in result if x['name'] ==
                              'DOCKER_REGISTRY_SERVER_PASSWORD'), set([None]))  # we mask the password
 
@@ -975,7 +975,22 @@ class LinuxWebappScenarioTest(ScenarioTest):
         sample = next(
             (x for x in result if x['name'] == 'WEBSITES_ENABLE_APP_SERVICE_STORAGE'))
         self.assertEqual(sample, {
+                         'name': 'WEBSITES_ENABLE_APP_SERVICE_STORAGE', 'slotSetting': False, 'value': 'false'})
+
+        result = self.cmd('webapp config container set -g {} -n {} --docker-custom-image-name {} --docker-registry-server-password {} --docker-registry-server-user {} --docker-registry-server-url {} --enable-app-service-storage {}'.format(
+            resource_group, webapp, 'foo-image', 'foo-password', 'foo-user', 'foo-url', 'true')).get_output_in_json()
+        self.assertEqual(set(x['value'] for x in result if x['name'] ==
+                             'DOCKER_REGISTRY_SERVER_PASSWORD'), set([None]))  # we mask the password
+        sample = next(
+            (x for x in result if x['name'] == 'WEBSITES_ENABLE_APP_SERVICE_STORAGE'))
+        self.assertEqual(sample, {
                          'name': 'WEBSITES_ENABLE_APP_SERVICE_STORAGE', 'slotSetting': False, 'value': 'true'})
+
+        result = self.cmd('webapp config container show -g {} -n {} '.format(
+            resource_group, webapp)).get_output_in_json()
+        self.assertEqual(set(x['name'] for x in result), set(['DOCKER_REGISTRY_SERVER_URL', 'DOCKER_REGISTRY_SERVER_USERNAME',
+                                                              'DOCKER_CUSTOM_IMAGE_NAME', 'DOCKER_REGISTRY_SERVER_PASSWORD', 'WEBSITES_ENABLE_APP_SERVICE_STORAGE']))
+
         self.cmd(
             'webapp config container delete -g {} -n {}'.format(resource_group, webapp))
         result2 = self.cmd('webapp config container show -g {} -n {} '.format(
