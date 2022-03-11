@@ -161,16 +161,20 @@ class ApimScenarioTest(ScenarioTest):
             checks=[self.check('displayName', '{display_name}'),
                     self.check('path', '{path}'),
                     self.check('serviceUrl', '{service_url}'),
-                    self.check('protocols[0]', '{protocol}')])
+                    self.check('protocols[0]', '{protocol}'),
+                    self.check('subscriptionKeyParameterNames.header', '{subscription_key_header_name}'),
+                    self.check('subscriptionKeyParameterNames.query', '{subscription_key_query_param_name}')])
 
         # wait
         self.cmd('apim api wait -g "{rg}" -n "{service_name}" --api-id "{api_id}" --created', checks=[self.is_empty()])
 
         # import api
         self.cmd(
-            'apim api import -g "{rg}" --service-name "{service_name}" --path "{path2}" --api-id "{api_id2}" --specification-url "{specification_url}" --specification-format "{specification_format}" --api-version-set-id {vs_id} --api-version {api_version}',
+            'apim api import -g "{rg}" --service-name "{service_name}" --path "{path2}" --api-id "{api_id2}" --specification-url "{specification_url}" --specification-format "{specification_format}" --api-version-set-id {vs_id} --api-version {api_version} --subscription-key-header-name "{subscription_key_header_name}" --subscription-key-query-param-name "{subscription_key_query_param_name}"',
             checks=[self.check('displayName', 'Swagger Petstore'),
-                    self.check('path', '{path2}')])
+                    self.check('path', '{path2}'),
+                    self.check('subscriptionKeyParameterNames.header', '{subscription_key_header_name}'),
+                    self.check('subscriptionKeyParameterNames.query', '{subscription_key_query_param_name}')])
 
         # get api
         self.cmd('apim api show -g {rg} --service-name {service_name} --api-id {api_id}', checks=[
@@ -180,9 +184,11 @@ class ApimScenarioTest(ScenarioTest):
 
         # update api
         self.cmd(
-            'apim api update -g "{rg}" --service-name "{service_name}" --api-id "{api_id}" --description "{description}" --protocols {protocol}',
+            'apim api update -g "{rg}" --service-name "{service_name}" --api-id "{api_id}" --description "{description}" --protocols {protocol} --subscription-key-header-name "{subscription_key_header_name}" --subscription-key-query-param-name "{subscription_key_query_param_name}"',
             checks=[self.check('description', '{description}'),
-                    self.check('protocols[0]', '{protocol}')])
+                    self.check('protocols[0]', '{protocol}'),
+                    self.check('subscriptionKeyParameterNames.header', '{subscription_key_header_name}'),
+                    self.check('subscriptionKeyParameterNames.query', '{subscription_key_query_param_name}')])
 
         # list apis
         api_count = len(self.cmd('apim api list -g "{rg}" -n "{service_name}"').get_output_in_json())
@@ -302,6 +308,10 @@ class ApimScenarioTest(ScenarioTest):
             'apim api release create -g "{rg}" -n "{service_name}" --api-id "{api_id}" --release-id "{release_id}" --api-revision "{api_revision}" --notes "{release_notes}"',
             checks=[self.check('name', '{release_id}'),
                     self.check('notes', '{release_notes}')])
+
+        # check the revision is being updated
+        self.cmd('apim api show -g {rg} --service-name {service_name} --api-id {api_id}',
+                 checks=[self.check('apiRevision', '{api_revision}')])
 
         # show API release
         self.cmd('apim api release show -g "{rg}" -n "{service_name}" --api-id "{api_id}" --release-id "{release_id}"')

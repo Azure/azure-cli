@@ -8,7 +8,7 @@
 from codecs import open
 from setuptools import setup, find_packages
 
-VERSION = "2.33.0"
+VERSION = "2.34.1"
 
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
@@ -52,7 +52,7 @@ DEPENDENCIES = [
     'jmespath',
     'knack~=0.9.0',
     'msal-extensions>=0.3.1,<0.4',
-    'msal>=1.16.0,<2.0.0',
+    'msal>=1.17.0,<2.0.0',
     'msrestazure~=0.6.4',
     'packaging>=20.9,<22.0',
     'paramiko>=2.0.8,<3.0.0',

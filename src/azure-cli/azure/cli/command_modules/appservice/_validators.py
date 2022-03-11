@@ -116,32 +116,15 @@ def validate_functionapp_asp_create(namespace):
     if namespace.max_burst is not None:
         if tier.lower() != "elasticpremium":
             raise ArgumentUsageError("--max-burst is only supported for Elastic Premium (EP) plans")
-        namespace.max_burst = validate_range_of_int_flag('--max-burst', namespace.max_burst, min_val=0, max_val=20)
-    if namespace.number_of_workers is not None:
-        namespace.number_of_workers = validate_range_of_int_flag('--number-of-workers / --min-elastic-worker-count',
-                                                                 namespace.number_of_workers, min_val=0, max_val=20)
 
 
-def validate_app_or_slot_exists_in_rg(cmd, namespace):
-    """Validate that the App/slot exists in the RG provided"""
-    client = web_client_factory(cmd.cli_ctx)
-    webapp = namespace.name
+def validate_app_exists(cmd, namespace):
+    app = namespace.name
     resource_group_name = namespace.resource_group_name
-    if isinstance(namespace.slot, str):
-        app = client.web_apps.get_slot(resource_group_name, webapp, namespace.slot, raw=True)
-    else:
-        app = client.web_apps.get(resource_group_name, webapp, None, raw=True)
-    if app.response.status_code != 200:
-        raise ResourceNotFoundError(app.response.text)
-
-
-def validate_app_exists_in_rg(cmd, namespace):
-    client = web_client_factory(cmd.cli_ctx)
-    webapp = namespace.name
-    resource_group_name = namespace.resource_group_name
-    app = client.web_apps.get(resource_group_name, webapp, None, raw=True)
-    if app.response.status_code != 200:
-        raise ResourceNotFoundError(app.response.text)
+    slot = namespace.slot
+    app = _generic_site_operation(cmd.cli_ctx, resource_group_name, app, 'get', slot)
+    if not app:
+        raise ResourceNotFoundError("'{}' app not found in ResourceGroup '{}'".format(app, resource_group_name))
 
 
 def validate_add_vnet(cmd, namespace):

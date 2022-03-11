@@ -130,6 +130,8 @@ If you encounter any bugs with the tool please file an issue in the [Issues](htt
 
 To provide feedback from the command line, try the `az feedback` command.
 
+\[Microsoft internal] You may contact the developer team via azpycli@microsoft.com.
+
 ## Developer installation
 
 ### Docker

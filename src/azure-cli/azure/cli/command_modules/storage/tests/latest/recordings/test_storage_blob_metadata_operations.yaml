@@ -15,21 +15,21 @@ interactions:
       ParameterSetName:
       - -n -g --query -o
       User-Agent:
-      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-storage/19.0.0 Python/3.9.6 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.33.1 azsdk-python-azure-mgmt-storage/19.1.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2021-06-01&$expand=kerb
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2021-08-01&$expand=kerb
   response:
     body:
-      string: '{"keys":[{"creationTime":"2021-10-19T10:57:44.6628807Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2021-10-19T10:57:44.6628807Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+      string: '{"keys":[{"creationTime":"2022-02-23T03:37:04.7418756Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2022-02-23T03:37:04.7418756Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '380'
+      - '260'
       content-type:
       - application/json
       date:
-      - Tue, 19 Oct 2021 10:58:05 GMT
+      - Wed, 23 Feb 2022 03:37:25 GMT
       expires:
       - '-1'
       pragma:
@@ -45,7 +45,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11999'
+      - '11997'
     status:
       code: 200
       message: OK
@@ -57,9 +57,9 @@ interactions:
       Content-Length:
       - '0'
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.9.6; Windows 10) AZURECLI/2.29.0
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.9; Windows 10) AZURECLI/2.33.1
       x-ms-date:
-      - Tue, 19 Oct 2021 10:58:06 GMT
+      - Wed, 23 Feb 2022 03:37:26 GMT
       x-ms-version:
       - '2018-11-09'
     method: PUT
@@ -71,11 +71,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 19 Oct 2021 10:58:08 GMT
+      - Wed, 23 Feb 2022 03:37:26 GMT
       etag:
-      - '"0x8D992EF55D41027"'
+      - '"0x8D9F67DD039285E"'
       last-modified:
-      - Tue, 19 Oct 2021 10:58:08 GMT
+      - Wed, 23 Feb 2022 03:37:27 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
@@ -192,9 +192,9 @@ interactions:
       \   def test_storage_blob_download_directory(self, resource_group, storage_account):\r\n
       \       local_dir = self.create_temp_dir()\r\n        account_info = self.get_account_info(resource_group,
       storage_account)\r\n        from azure.cli.core.azclierror import FileOperationError\r\n
-      \       with self.assertRaisesRegexp(FileOperationError, 'File is expected,
-      not a directory'):\r\n            self.storage_cmd('storage blob download -c
-      mycontainer -n myblob -f \"{}\"', account_info, local_dir)\r\n\r\n    @ResourceGroupPreparer()\r\n
+      \       with self.assertRaisesRegex(FileOperationError, 'File is expected, not
+      a directory'):\r\n            self.storage_cmd('storage blob download -c mycontainer
+      -n myblob -f \"{}\"', account_info, local_dir)\r\n\r\n    @ResourceGroupPreparer()\r\n
       \   @StorageAccountPreparer()\r\n    def test_storage_blob_socket_timeout(self,
       resource_group, storage_account):\r\n        local_dir = self.create_temp_dir()\r\n
       \       local_file = self.create_temp_file(1)\r\n        blob_name = self.create_random_name(prefix='blob',
@@ -399,7 +399,7 @@ interactions:
       = self.create_random_name('blob', 24)\r\n        local_file = self.create_temp_file(1)\r\n
       \       copy_id = 'abcdabcd-abcd-abcd-abcd-abcdabcdabcd'\r\n\r\n        self.storage_cmd('storage
       blob upload -c {} -n {} -f \"{}\"', account_info, c, b, local_file)\r\n        from
-      azure.common import AzureException\r\n        with self.assertRaisesRegexp(AzureException,
+      azure.common import AzureException\r\n        with self.assertRaisesRegex(AzureException,
       \"NoPendingCopyOperation\"):\r\n            self.storage_cmd('storage blob copy
       cancel -c {} -b {} --copy-id {}', account_info, c, b, copy_id)\r\n\r\n    @ResourceGroupPreparer()\r\n
       \   @StorageAccountPreparer()\r\n    def test_storage_blob_generate_sas_full_uri(self,
@@ -415,7 +415,7 @@ interactions:
       \       account_info = self.get_account_info(resource_group, storage_account)\r\n
       \       c = self.create_container(account_info)\r\n        b = self.create_random_name('blob',
       24)\r\n\r\n        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')\r\n\r\n
-      \       with self.assertRaisesRegexp(CLIError, \"incorrect usage: specify --as-user
+      \       with self.assertRaisesRegex(CLIError, \"incorrect usage: specify --as-user
       when --auth-mode login\"):\r\n            self.cmd('storage blob generate-sas
       --account-name {} -n {} -c {} --expiry {} --permissions r --https-only '\r\n
       \                    '--auth-mode login'.format(storage_account, b, c, expiry))\r\n\r\n
@@ -441,7 +441,7 @@ interactions:
       \           self.storage_cmd('storage blob show -c foo -n bar.txt', account_info)\r\n
       \       self.assertEqual(ex.exception.code, 3)\r\n\r\n        # test 403\r\n
       \       from azure.core.exceptions import ClientAuthenticationError\r\n        with
-      self.assertRaisesRegexp(ClientAuthenticationError, \"Authentication failure\"):\r\n
+      self.assertRaisesRegex(ClientAuthenticationError, \"Authentication failure\"):\r\n
       \           self.cmd('storage blob show --account-name {} --account-key=\"YQ==\"
       -c foo -n bar.txt '.format(storage_account))\r\n\r\n\r\n@api_version_constraint(ResourceType.DATA_STORAGE_BLOB,
       min_api='2019-02-02')\r\nclass StorageBlobSetTierTests(StorageScenarioMixin,
@@ -495,10 +495,36 @@ interactions:
       container_name, blob_name2) \\\r\n            .assert_with_checks(JMESPathCheck('properties.blobTier',
       'Archive'),\r\n                                JMESPathCheck('properties.rehydrationStatus',
       'rehydrate-pending-to-hot'))\r\n\r\n\r\n@api_version_constraint(ResourceType.DATA_STORAGE_BLOB,
-      min_api='2019-02-02')\r\nclass StorageBlobCommonTests(StorageScenarioMixin,
-      ScenarioTest):\r\n    @ResourceGroupPreparer(name_prefix='clitest')\r\n    @StorageAccountPreparer(name_prefix='storage',
-      kind='StorageV2', location='eastus2', sku='Standard_RAGZRS')\r\n    def test_storage_blob_list_scenarios(self,
-      resource_group, storage_account):\r\n        account_info = self.get_account_info(resource_group,
+      min_api='2020-10-02')\r\nclass StorageBlobImmutabilityTests(StorageScenarioMixin,
+      ScenarioTest):\r\n    @ResourceGroupPreparer(name_prefix='clitest')\r\n    @StorageAccountPreparer(name_prefix='version',
+      kind='StorageV2', location='centraluseuap')\r\n    def test_storage_blob_vlm(self,
+      resource_group, storage_account_info):\r\n        container = self.create_random_name(prefix='container',
+      length=18)\r\n        blob = self.create_random_name(prefix='blob', length=18)\r\n
+      \       self.kwargs.update({\r\n            'container': container,\r\n            'blob':
+      blob\r\n        })\r\n        # Enable blob versioning\r\n        self.cmd('storage
+      account blob-service-properties update -n {sa} -g {rg} --enable-versioning')\r\n
+      \       # Enable vlm on container creation\r\n        self.cmd('storage container-rm
+      create -n {container} --storage-account {sa} -g {rg} --enable-vlw')\r\n        #
+      Prepare blob resource\r\n        file = self.create_temp_file(10)\r\n        self.storage_cmd('storage
+      blob upload -c {} -f \"{}\" -n {} ', storage_account_info, container, file,
+      blob)\r\n\r\n        # Test set immutability policy\r\n        from datetime
+      import datetime, timedelta\r\n        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')\r\n
+      \       result = self.storage_cmd('storage blob immutability-policy set -n {}
+      -c {} '\r\n                                  '--expiry-time {} --policy-mode
+      Unlocked',\r\n                                  storage_account_info, blob,
+      container, expiry).get_output_in_json()\r\n        self.assertEqual(result.get('immutability_policy_mode'),
+      'unlocked')\r\n        self.assertIsNotNone(result.get('immutability_policy_until_date'))\r\n
+      \       # Test delete immutability policy\r\n        self.storage_cmd('storage
+      blob immutability-policy delete -n {} -c {}', storage_account_info, blob, container)\r\n
+      \       # Test set legal hold\r\n        self.storage_cmd('storage blob set-legal-hold
+      --legal-hold -n {} -c {}', storage_account_info, blob, container)\\\r\n            .assert_with_checks(JMESPathCheck('legal_hold',
+      True))\r\n        self.storage_cmd('storage blob set-legal-hold --legal-hold
+      false -n {} -c {}', storage_account_info, blob, container) \\\r\n            .assert_with_checks(JMESPathCheck('legal_hold',
+      False))\r\n\r\n\r\n@api_version_constraint(ResourceType.DATA_STORAGE_BLOB, min_api='2019-02-02')\r\nclass
+      StorageBlobCommonTests(StorageScenarioMixin, ScenarioTest):\r\n    @ResourceGroupPreparer(name_prefix='clitest')\r\n
+      \   @StorageAccountPreparer(name_prefix='storage', kind='StorageV2', location='eastus2',
+      sku='Standard_RAGZRS')\r\n    def test_storage_blob_list_scenarios(self, resource_group,
+      storage_account):\r\n        account_info = self.get_account_info(resource_group,
       storage_account)\r\n        container = self.create_container(account_info,
       prefix=\"con\")\r\n\r\n        local_file = self.create_temp_file(128)\r\n        blob_name1
       = \"/\".join([\"dir\", self.create_random_name(prefix='blob', length=24)])\r\n
@@ -703,15 +729,15 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '53404'
+      - '55692'
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.9.6; Windows 10) AZURECLI/2.29.0
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.9; Windows 10) AZURECLI/2.33.1
       x-ms-blob-content-type:
       - text/x-python
       x-ms-blob-type:
       - BlockBlob
       x-ms-date:
-      - Tue, 19 Oct 2021 10:58:09 GMT
+      - Wed, 23 Feb 2022 03:37:27 GMT
       x-ms-version:
       - '2018-11-09'
     method: PUT
@@ -723,13 +749,13 @@ interactions:
       content-length:
       - '0'
       content-md5:
-      - 3ic4Sc5wmqtG7uZqB+s/5Q==
+      - 0IoFOECiPwO00YdTy5fcmA==
       date:
-      - Tue, 19 Oct 2021 10:58:09 GMT
+      - Wed, 23 Feb 2022 03:37:28 GMT
       etag:
-      - '"0x8D992EF56E56E63"'
+      - '"0x8D9F67DD150C690"'
       last-modified:
-      - Tue, 19 Oct 2021 10:58:10 GMT
+      - Wed, 23 Feb 2022 03:37:29 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-request-server-encrypted:
@@ -747,9 +773,9 @@ interactions:
       Content-Length:
       - '0'
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.9.6; Windows 10) AZURECLI/2.29.0
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.9; Windows 10) AZURECLI/2.33.1
       x-ms-date:
-      - Tue, 19 Oct 2021 10:58:10 GMT
+      - Wed, 23 Feb 2022 03:37:29 GMT
       x-ms-meta-a:
       - b
       x-ms-meta-c:
@@ -765,11 +791,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 19 Oct 2021 10:58:10 GMT
+      - Wed, 23 Feb 2022 03:37:29 GMT
       etag:
-      - '"0x8D992EF5792ACD9"'
+      - '"0x8D9F67DD2083C32"'
       last-modified:
-      - Tue, 19 Oct 2021 10:58:11 GMT
+      - Wed, 23 Feb 2022 03:37:30 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-request-server-encrypted:
@@ -785,9 +811,9 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.9.6; Windows 10) AZURECLI/2.29.0
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.9; Windows 10) AZURECLI/2.33.1
       x-ms-date:
-      - Tue, 19 Oct 2021 10:58:11 GMT
+      - Wed, 23 Feb 2022 03:37:30 GMT
       x-ms-version:
       - '2018-11-09'
     method: GET
@@ -799,11 +825,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 19 Oct 2021 10:58:11 GMT
+      - Wed, 23 Feb 2022 03:37:31 GMT
       etag:
-      - '"0x8D992EF5792ACD9"'
+      - '"0x8D9F67DD2083C32"'
       last-modified:
-      - Tue, 19 Oct 2021 10:58:11 GMT
+      - Wed, 23 Feb 2022 03:37:30 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-meta-a:
@@ -823,9 +849,9 @@ interactions:
       Content-Length:
       - '0'
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.9.6; Windows 10) AZURECLI/2.29.0
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.9; Windows 10) AZURECLI/2.33.1
       x-ms-date:
-      - Tue, 19 Oct 2021 10:58:12 GMT
+      - Wed, 23 Feb 2022 03:37:31 GMT
       x-ms-version:
       - '2018-11-09'
     method: PUT
@@ -837,11 +863,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 19 Oct 2021 10:58:13 GMT
+      - Wed, 23 Feb 2022 03:37:32 GMT
       etag:
-      - '"0x8D992EF58F05D96"'
+      - '"0x8D9F67DD3710DE1"'
       last-modified:
-      - Tue, 19 Oct 2021 10:58:13 GMT
+      - Wed, 23 Feb 2022 03:37:32 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-request-server-encrypted:
@@ -857,9 +883,9 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.9.6; Windows 10) AZURECLI/2.29.0
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.9; Windows 10) AZURECLI/2.33.1
       x-ms-date:
-      - Tue, 19 Oct 2021 10:58:14 GMT
+      - Wed, 23 Feb 2022 03:37:32 GMT
       x-ms-version:
       - '2018-11-09'
     method: GET
@@ -871,11 +897,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 19 Oct 2021 10:58:14 GMT
+      - Wed, 23 Feb 2022 03:37:33 GMT
       etag:
-      - '"0x8D992EF58F05D96"'
+      - '"0x8D9F67DD3710DE1"'
       last-modified:
-      - Tue, 19 Oct 2021 10:58:13 GMT
+      - Wed, 23 Feb 2022 03:37:32 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:

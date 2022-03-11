@@ -409,8 +409,7 @@ parameters:
   - name: --scopes
     short-summary: >
         Space-separated list of scopes the service principal's role assignment applies to.
-        Defaults to the root of the current subscription. e.g., /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333,
-        /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333/resourceGroups/myGroup, or
+        e.g., /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333/resourceGroups/myGroup,
         /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333/resourceGroups/myGroup/providers/Microsoft.Compute/virtualMachines/myVM
   - name: --role
     short-summary: Role of the service principal.
