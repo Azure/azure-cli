@@ -1354,34 +1354,34 @@ def load_command_table(self, _):
 
     # endregion
 
-    # # region VirtualNetworks
-    # with self.command_group('network vnet', network_vnet_sdk) as g:
-    #     g.command('delete', 'begin_delete')
-    #     g.custom_command('list', 'list_vnet', table_transformer=transform_vnet_table_output)
-    #     g.show_command('show', 'get')
-    #     g.command('check-ip-address', 'check_ip_address_availability', min_api='2016-09-01')
-    #     g.custom_command('create', 'create_vnet', transform=transform_vnet_create_output, validator=process_vnet_create_namespace, supports_local_cache=True)
-    #     g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_vnet', supports_local_cache=True)
-    #     g.command('list-endpoint-services', 'list', command_type=network_endpoint_service_sdk)
-    #     g.custom_command('list-available-ips', 'list_available_ips', min_api='2016-09-01', is_preview=True)
-    #
-    # with self.command_group('network vnet peering', network_vnet_peering_sdk, min_api='2016-09-01') as g:
-    #     g.custom_command('create', 'create_vnet_peering')
-    #     g.custom_command('sync', 'sync_vnet_peering')
-    #     g.show_command('show', 'get')
-    #     g.command('list', 'list')
-    #     g.command('delete', 'begin_delete')
-    #     g.generic_update_command('update', setter_name='update_vnet_peering', setter_type=network_custom)
-    #
-    # with self.command_group('network vnet subnet', network_subnet_sdk) as g:
-    #     g.custom_command('create', 'create_subnet', supports_local_cache=True)
-    #     g.command('delete', 'begin_delete')
-    #     g.show_command('show', 'get')
-    #     g.command('list', 'list')
-    #     g.generic_update_command('update', setter_name='begin_create_or_update', setter_arg_name='subnet_parameters',
-    #                              custom_func_name='update_subnet')
-    #     g.custom_command('list-available-delegations', 'list_avail_subnet_delegations', min_api='2018-08-01', validator=process_list_delegations_namespace)
-    # # endregion
+    # region VirtualNetworks
+    with self.command_group('network vnet', network_vnet_sdk) as g:
+        g.command('delete', 'begin_delete')
+        g.custom_command('list', 'list_vnet', table_transformer=transform_vnet_table_output)
+        g.show_command('show', 'get')
+        g.command('check-ip-address', 'check_ip_address_availability', min_api='2016-09-01')
+        g.custom_command('create', 'create_vnet', transform=transform_vnet_create_output, validator=process_vnet_create_namespace, supports_local_cache=True)
+        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_vnet', supports_local_cache=True)
+        g.command('list-endpoint-services', 'list', command_type=network_endpoint_service_sdk)
+        g.custom_command('list-available-ips', 'list_available_ips', min_api='2016-09-01', is_preview=True)
+
+    with self.command_group('network vnet peering', network_vnet_peering_sdk, min_api='2016-09-01') as g:
+        g.custom_command('create', 'create_vnet_peering')
+        g.custom_command('sync', 'sync_vnet_peering')
+        g.show_command('show', 'get')
+        g.command('list', 'list')
+        g.command('delete', 'begin_delete')
+        g.generic_update_command('update', setter_name='update_vnet_peering', setter_type=network_custom)
+
+    with self.command_group('network vnet subnet', network_subnet_sdk) as g:
+        g.custom_command('create', 'create_subnet', supports_local_cache=True)
+        g.command('delete', 'begin_delete')
+        g.show_command('show', 'get')
+        g.command('list', 'list')
+        g.generic_update_command('update', setter_name='begin_create_or_update', setter_arg_name='subnet_parameters',
+                                 custom_func_name='update_subnet')
+        g.custom_command('list-available-delegations', 'list_avail_subnet_delegations', min_api='2018-08-01', validator=process_list_delegations_namespace)
+    # endregion
 
     # region VirtualNetworkGateways
     with self.command_group('network vnet-gateway', network_vgw_sdk, min_api='2016-09-01') as g:
