@@ -31,21 +31,20 @@ def map_azure_error_to_cli_error(azure_error):
             status_code = int(status_code)
             if status_code == 400:
                 return BadRequestError(error_message)
-            elif status_code == 401:
+            if status_code == 401:
                 return UnauthorizedError(error_message)
-            elif status_code == 403:
+            if status_code == 403:
                 return ForbiddenError(error_message)
-            elif status_code == 404:
+            if status_code == 404:
                 return ResourceNotFoundError(error_message)
-            elif 400 <= status_code < 500:
+            if 400 <= status_code < 500:
                 return UnclassifiedUserFault(error_message)
-            elif 500 <= status_code < 600:
+            if 500 <= status_code < 600:
                 return AzureInternalError(error_message)
-            return ServiceError(error_message)
         return ServiceError(error_message)
-    elif isinstance(azure_error, ServiceRequestError):
+    if isinstance(azure_error, ServiceRequestError):
         return ClientRequestError(error_message)
-    elif isinstance(azure_error, ServiceResponseError):
+    if isinstance(azure_error, ServiceResponseError):
         return AzureResponseError(error_message)
     return ServiceError(error_message)
 
