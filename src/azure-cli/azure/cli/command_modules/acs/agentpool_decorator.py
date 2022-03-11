@@ -292,7 +292,7 @@ class AKSAgentPoolContext:
             decorator_mode=DecoratorMode.CREATE,
         )
         return node_count, enable_cluster_autoscaler, min_count, max_count
-    
+
     def get_node_osdisk_size(self) -> Union[int, None]:
         """Obtain the value of node_osdisk_size.
 
