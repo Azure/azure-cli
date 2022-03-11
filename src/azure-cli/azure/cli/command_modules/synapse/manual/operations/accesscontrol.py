@@ -10,6 +10,7 @@ from azure.graphrbac.models import GraphErrorException
 from msrestazure.azure_exceptions import CloudError
 from .._client_factory import cf_synapse_role_assignments, cf_synapse_role_definitions, cf_graph_client_factory
 from ..constant import ITEM_NAME_MAPPING
+import azure.cli.command_modules.synapse.custom_help as cust_help
 
 
 # List Synapse Role Assignment
@@ -33,8 +34,16 @@ def _list_role_assignments(cmd, workspace_name, role=None, assignee=None, scope=
     role_id = _resolve_role_id(cmd, role, workspace_name)
     object_id = _resolve_object_id(cmd, assignee, fallback_to_object_id=True) if resolve_assignee else assignee
     client = cf_synapse_role_assignments(cmd.cli_ctx, workspace_name)
-    role_assignments = client.list_role_assignments(role_id, object_id, scope).value
-    return role_assignments
+    token = ""
+    result = []
+    while True:
+        request = client.list_role_assignments(role_id, object_id, scope, continuation_token_parameter=token,
+                                               cls=cust_help.get_deserialized_and_headers)
+        token = request[1]['x-ms-continuation']
+        result += request[0].value
+        if (token == "") or token is None:
+            break
+    return result
 
 
 # Show Synapse Role Assignment By Id
