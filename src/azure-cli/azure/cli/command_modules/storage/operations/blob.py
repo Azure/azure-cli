@@ -837,3 +837,12 @@ def copy_blob(client, source_url, metadata=None, **kwargs):
     if not kwargs['requires_sync']:
         kwargs.pop('requires_sync')
     return client.start_copy_from_url(source_url=source_url, metadata=metadata, incremental_copy=False, **kwargs)
+
+
+def download_blob(client, file_path, open_mode='wb', progress_callback=None, socket_timeout=None, **kwargs):
+    if progress_callback:
+        kwargs['raw_response_hook'] = progress_callback
+    download_stream = client.download_blob(**kwargs)
+    with open(file_path, open_mode) as stream:
+        download_stream.readinto(stream)
+    return client.get_blob_properties()

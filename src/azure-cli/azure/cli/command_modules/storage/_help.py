@@ -825,6 +825,11 @@ examples:
         az storage blob delete-batch -s mycontainer --pattern cli-201[!89]-??-??.txt
 """
 
+helps['storage blob download'] = """
+type: command
+short-summary: Download a blob to a file path, with automatic chunking and progress notifications.
+"""
+
 helps['storage blob download-batch'] = """
 type: command
 short-summary: Download blobs from a blob container recursively.

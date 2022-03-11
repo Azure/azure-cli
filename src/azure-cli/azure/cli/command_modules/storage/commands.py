@@ -337,6 +337,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_custom_command_oauth('upload-batch', 'storage_blob_upload_batch', client_factory=cf_blob_service,
                                        validator=process_blob_upload_batch_parameters,
                                        exception_handler=file_related_exception_handler)
+        g.storage_custom_command_oauth('download', 'download_blob', transform=transform_blob_json_output)
 
     blob_lease_client_sdk = CliCommandType(
         operations_tmpl='azure.multiapi.storagev2.blob._lease#BlobLeaseClient.{}',
@@ -361,9 +362,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                     create_boolean_result_output_transformer)
         from ._validators import (process_blob_download_batch_parameters, process_blob_delete_batch_parameters)
         from ._exception_handler import file_related_exception_handler
-        g.storage_command_oauth(
-            'download', 'get_blob_to_path', table_transformer=transform_blob_output,
-            exception_handler=file_related_exception_handler)
         g.storage_custom_command_oauth('generate-sas', 'generate_sas_blob_uri')
         g.storage_custom_command_oauth(
             'url', 'create_blob_url', transform=transform_url)
