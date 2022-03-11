@@ -493,8 +493,10 @@ class CreateForRbacScenarioTest(ScenarioTest):
     def test_create_for_rbac_with_role_assignment(self):
         self.kwargs['display_name'] = self.create_random_name(prefix='cli-graph', length=14)
 
+        subscription_id = self.get_subscription_id()
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
-            result = self.cmd('ad sp create-for-rbac -n {display_name} --role Reader').get_output_in_json()
+            result = self.cmd('ad sp create-for-rbac -n {display_name} --role Reader '
+                              f'--scopes /subscriptions/{subscription_id}').get_output_in_json()
             self.kwargs['app_id'] = result['appId']
 
             result = self.cmd('ad sp list --spn {app_id}', checks=self.check('length([*])', 1)).get_output_in_json()
