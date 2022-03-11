@@ -35,6 +35,7 @@ from azure.cli.core.util import get_file_json, shell_safe_json_parse, is_guid
 from ._client_factory import _auth_client_factory, _graph_client_factory
 from ._multi_api_adaptor import MultiAPIAdaptor
 from ._graph_client import GraphClient
+from ._graph_objects import application_property_map, set_object_properties
 
 # ARM RBAC's principalType
 USER = 'User'
@@ -868,7 +869,7 @@ def create_application(cmd, client, display_name, identifier_uris=None,
                        is_fallback_public_client=None, sign_in_audience=None,
                        # keyCredentials
                        key_value=None, key_type=None, key_usage=None, start_date=None, end_date=None,
-                       credential_description=None,
+                       key_display_name=None,
                        # web
                        web_home_page_url=None, web_redirect_uris=None,
                        enable_id_token_issuance=None, enable_access_token_issuance=None,
@@ -896,11 +897,11 @@ def create_application(cmd, client, display_name, identifier_uris=None,
                 # keyCredentials
                 key_value=key_value, key_type=key_type, key_usage=key_usage,
                 start_date=start_date, end_date=end_date,
-                credential_description=credential_description,
+                key_display_name=key_display_name,
                 # web
                 web_home_page_url=web_home_page_url, web_redirect_uris=web_redirect_uris,
                 enable_id_token_issuance=enable_id_token_issuance,
-                enable_access_token_token_issuance=enable_access_token_issuance,
+                enable_access_token_issuance=enable_access_token_issuance,
                 # publicClient
                 public_client_redirect_uris=public_client_redirect_uris,
                 # JSON properties
@@ -912,26 +913,22 @@ def create_application(cmd, client, display_name, identifier_uris=None,
             # no need to resolve identifierUris or appId. Just use id.
             return client.application_get(existing_apps[0][ID])
 
-    if not identifier_uris:
-        identifier_uris = []
-
+    # identifierUris is no longer required, compared to AD Graph
     key_credentials = _build_key_credentials(
-        key_value, key_type, key_usage, start_date, end_date, credential_description)
+        key_value=key_value, key_type=key_type, key_usage=key_usage,
+        start_date=start_date, end_date=end_date, display_name=key_display_name)
 
-    body = {
-        "displayName": display_name,
-        "identifierUris": identifier_uris,
-    }
+    body = {}
 
     _set_application_properties(
-        body,
+        body, display_name=display_name, identifier_uris=identifier_uris,
         is_fallback_public_client=is_fallback_public_client, sign_in_audience=sign_in_audience,
         # keyCredentials
         key_credentials=key_credentials,
         # web
         web_home_page_url=web_home_page_url, web_redirect_uris=web_redirect_uris,
         enable_id_token_issuance=enable_id_token_issuance,
-        enable_access_token_token_issuance=enable_access_token_issuance,
+        enable_access_token_issuance=enable_access_token_issuance,
         # publicClient
         public_client_redirect_uris=public_client_redirect_uris,
         # JSON properties
@@ -953,10 +950,10 @@ def update_application(instance, display_name=None, identifier_uris=None,
                        is_fallback_public_client=None, sign_in_audience=None,
                        # keyCredentials
                        key_value=None, key_type=None, key_usage=None, start_date=None, end_date=None,
-                       credential_description=None,
+                       key_display_name=None,
                        # web
                        web_home_page_url=None, web_redirect_uris=None,
-                       enable_id_token_issuance=None, enable_access_token_token_issuance=None,
+                       enable_id_token_issuance=None, enable_access_token_issuance=None,
                        # publicClient
                        public_client_redirect_uris=None,
                        # JSON properties
@@ -966,22 +963,18 @@ def update_application(instance, display_name=None, identifier_uris=None,
     key_credentials = None
     if key_value:
         key_credentials = _build_key_credentials(
-            key_value, key_type, key_usage, start_date, end_date, credential_description)
-
-    if identifier_uris is not None:
-        body['identifierUris'] = identifier_uris
-    if display_name is not None:
-        body['displayName'] = display_name
+            key_value=key_value, key_type=key_type, key_usage=key_usage,
+            start_date=start_date, end_date=end_date, display_name=key_display_name)
 
     _set_application_properties(
-        body,
+        body, display_name=display_name, identifier_uris=identifier_uris,
         is_fallback_public_client=is_fallback_public_client, sign_in_audience=sign_in_audience,
         # keyCredentials
         key_credentials=key_credentials,
         # web
         web_home_page_url=web_home_page_url, web_redirect_uris=web_redirect_uris,
         enable_id_token_issuance=enable_id_token_issuance,
-        enable_access_token_token_issuance=enable_access_token_token_issuance,
+        enable_access_token_issuance=enable_access_token_issuance,
         # publicClient
         public_client_redirect_uris=public_client_redirect_uris,
         # JSON properties
@@ -1010,17 +1003,18 @@ def delete_application(client, identifier):
 
 def _resolve_application(client, identifier):
     """Resolve an application and return its id."""
-    result = client.application_list(filter="identifierUris/any(s:s eq '{}')".format(identifier))
-    if not result:
-        if is_guid(identifier):
-            # it is either app id or object id, let us verify
-            result = client.application_list(filter="appId eq '{}'".format(identifier))
-        else:
-            error = CLIError("Application '{}' doesn't exist".format(identifier))
+    if is_guid(identifier):
+        # it is either app id or object id, let us verify
+        result = client.application_list(filter="appId eq '{}'".format(identifier))
+        # If not found, this looks like an object id
+        return result[0][ID] if result else identifier
+    else:
+        result = client.application_list(filter="identifierUris/any(s:s eq '{}')".format(identifier))
+        if not result:
+            error = CLIError("Application with identifier URI '{}' doesn't exist".format(identifier))
             error.status_code = 404  # Make sure CLI returns 3
             raise error
-
-    return result[0][ID] if result else identifier
+        return result[0][ID]
 
 
 def reset_application_credential(cmd, client, identifier, create_cert=False, cert=None, years=None,
@@ -1698,12 +1692,6 @@ def _get_public(x509):
     return stripped
 
 
-def _encode_custom_key_description(key_description):
-    # utf16 is used by AAD portal. Do not change it to other random encoding
-    # unless you know what you are doing.
-    return key_description.encode('utf-16')
-
-
 def _get_principal_type_from_object_id(cli_ctx, assignee_object_id):
     client = _graph_client_factory(cli_ctx)
     try:
@@ -1805,50 +1793,17 @@ def _application_add_password(client, app, start_datetime, end_datetime, display
     return result
 
 
-def _set_application_properties(
-        body, is_fallback_public_client=None, sign_in_audience=None,
-        # keyCredentials
-        key_credentials=None,
-        # web
-        web_home_page_url=None, web_redirect_uris=None,
-        enable_id_token_issuance=None, enable_access_token_token_issuance=None,
-        # publicClient
-        public_client_redirect_uris=None,
-        # JSON properties
-        app_roles=None, optional_claims=None, required_resource_accesses=None):
+def _set_application_properties(body, **kwargs):
 
-    if key_credentials:
-        body['keyCredentials'] = key_credentials
+    # Preprocess JSON properties
+    if kwargs.get('app_roles'):
+        kwargs['app_roles'] = _build_app_roles(kwargs['app_roles'])
+    if kwargs.get('optional_claims'):
+        kwargs['optional_claims'] = _build_optional_claims(kwargs['optional_claims'])
+    if kwargs.get('required_resource_accesses'):
+        kwargs['required_resource_accesses'] = _build_required_resource_accesses(kwargs['required_resource_accesses'])
 
-    if sign_in_audience is not None:
-        body['signInAudience'] = sign_in_audience
-
-    if is_fallback_public_client is not None:
-        body['isFallbackPublicClient'] = is_fallback_public_client
-
-    if enable_id_token_issuance is not None:
-        body.setdefault('web', {}).setdefault('implicitGrantSettings', {})['enableIdTokenIssuance'] = \
-            enable_id_token_issuance
-
-    if enable_access_token_token_issuance is not None:
-        body.setdefault('web', {}).setdefault('implicitGrantSettings', {})['enableAccessTokenIssuance'] = \
-            enable_access_token_token_issuance
-
-    # list properties
-    if web_redirect_uris is not None:
-        body.setdefault('web', {})['redirectUris'] = web_redirect_uris
-    if public_client_redirect_uris is not None:
-        body.setdefault('publicClient', {})['redirectUris'] = public_client_redirect_uris
-    if web_home_page_url is not None:
-        body.setdefault('web', {})['homePageUrl'] = web_home_page_url
-
-    # JSON properties
-    if app_roles:
-        body['appRoles'] = _build_app_roles(app_roles)
-    if optional_claims:
-        body['optionalClaims'] = _build_optional_claims(optional_claims)
-    if required_resource_accesses:
-        body['requiredResourceAccess'] = _build_required_resource_accesses(required_resource_accesses)
+    set_object_properties(application_property_map, body, **kwargs)
 
 
 def _datetime_to_utc(dt):
@@ -1897,9 +1852,7 @@ def _build_add_password_credential_body(display_name, start_datetime, end_dateti
 
 
 def _build_key_credentials(key_value=None, key_type=None, key_usage=None,
-                           start_date=None, end_date=None, display_name=None, key_description=None):
-    # TODO: display name
-    # https://docs.microsoft.com/en-us/graph/api/resources/keycredential
+                           start_date=None, end_date=None, display_name=None):
     if not key_value:
         # No key credential should be set
         return []
@@ -1914,17 +1867,12 @@ def _build_key_credentials(key_value=None, key_type=None, key_usage=None,
     elif isinstance(end_date, str):
         end_date = dateutil.parser.parse(end_date)
 
-    custom_key_id = None
-    if key_description:
-        custom_key_id = _encode_custom_key_description(key_description)
-
     key_type = key_type or 'AsymmetricX509Cert'
     key_usage = key_usage or 'Verify'
 
     # https://docs.microsoft.com/en-us/graph/api/resources/keycredential
     key_credential = {
         "@odata.type": "#microsoft.graph.keyCredential",
-        "customKeyIdentifier": custom_key_id,
         "displayName": display_name,
         "endDateTime": _datetime_to_utc(end_date),
         "key": key_value,
@@ -1939,13 +1887,22 @@ def _build_key_credentials(key_value=None, key_type=None, key_usage=None,
 def _reset_credentials(cmd, graph_object, add_password_func, remove_password_func, patch_func,
                        create_cert=False, cert=None, years=None,
                        end_date=None, keyvault=None, append=False, display_name=None):
-    """Application and service principal share the same interface for operating credentials.
+    """Reset passwordCredentials and keyCredentials properties for application or service principal.
+    Application and service principal share the same interface for operating credentials.
 
     :param graph_object: The application or service principal object (dict).
     :param add_password_func: Add password API function.
     :param remove_password_func: Remove password API function.
     :param patch_func: Patch API function. Used to update keyCredentials.
     """
+
+    # https://docs.microsoft.com/en-us/graph/api/resources/passwordcredential
+    # https://docs.microsoft.com/en-us/graph/api/resources/keycredential
+    # Only displayName should be set.
+    # For passwordCredential, customKeyIdentifier is not applicable.
+    # For keyCredential, customKeyIdentifier is automatically computed by Graph service as certificate thumbprint.
+    # https://github.com/Azure/azure-cli/issues/20561
+
     app_start_date = datetime.datetime.now(datetime.timezone.utc)
     if years is not None and end_date is not None:
         raise CLIError('usage error: --years | --end-date')
@@ -1989,7 +1946,7 @@ def _reset_credentials(cmd, graph_object, add_password_func, remove_password_fun
             key_creds = graph_object['keyCredentials']
 
         new_key_creds = _build_key_credentials(
-            public_cert_string, start_date=app_start_date, end_date=app_end_date, display_name=display_name)
+            key_value=public_cert_string, start_date=app_start_date, end_date=app_end_date, display_name=display_name)
 
         key_id = new_key_creds[0]['keyId']
         key_creds.extend(new_key_creds)
@@ -2001,7 +1958,7 @@ def _reset_credentials(cmd, graph_object, add_password_func, remove_password_fun
 
     result = {
         'appId': graph_object['appId'],
-        'keyId': key_id,
+        # 'keyId': key_id,
         'password': password
     }
     if cert_file:
