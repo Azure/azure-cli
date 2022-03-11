@@ -20,6 +20,8 @@ from knack.log import get_logger
 from knack.util import CLIError
 from .._transformers import transform_response_with_bytearray
 from ..util import get_datetime_from_string
+from azure.cli.core.azclierror import AzureResponseError
+from azure.core.exceptions import ResourceExistsError, ResourceModifiedError
 
 logger = get_logger(__name__)
 
@@ -453,17 +455,21 @@ def storage_blob_upload_batch(cmd, client, source, destination, pattern=None,  #
                     index + 1, len(source_files), normalize_blob_file_path(destination_path, dst))
             blob_client = client.get_blob_client(container=destination_container_name,
                                                  blob=normalize_blob_file_path(destination_path, dst))
-            include, result = _upload_blob(cmd, blob_client, file_path=src,
-                                           blob_type=blob_type, content_settings=guessed_content_settings,
-                                           metadata=metadata, validate_content=validate_content,
-                                           maxsize_condition=maxsize_condition, max_connections=max_connections,
-                                           lease_id=lease_id, progress_callback=progress_callback,
-                                           if_modified_since=if_modified_since,
-                                           if_unmodified_since=if_unmodified_since, if_match=if_match,
-                                           if_none_match=if_none_match, timeout=timeout, **kwargs)
-            if include:
-                results.append(_create_return_result(blob_content_settings=guessed_content_settings,
-                                                     upload_result=result))
+            try:
+                include, result = _upload_blob(cmd, blob_client, file_path=src,
+                                               blob_type=blob_type, content_settings=guessed_content_settings,
+                                               metadata=metadata, validate_content=validate_content,
+                                               maxsize_condition=maxsize_condition, max_connections=max_connections,
+                                               lease_id=lease_id, progress_callback=progress_callback,
+                                               if_modified_since=if_modified_since,
+                                               if_unmodified_since=if_unmodified_since, if_match=if_match,
+                                               if_none_match=if_none_match, timeout=timeout, **kwargs)
+                if include:
+                    results.append(_create_return_result(blob_content_settings=guessed_content_settings,
+                                                         upload_result=result))
+            except (ResourceModifiedError, AzureResponseError) as ex:
+                logger.error(ex)
+
         # end progress hook
         if progress_callback:
             progress_callback.hook.end()
@@ -507,7 +513,6 @@ def upload_blob(cmd, client, file_path=None, container_name=None, blob_name=None
                 timeout=None, progress_callback=None, encryption_scope=None, overwrite=None, data=None,
                 length=None, **kwargs):
     """Upload a blob to a container."""
-    from azure.core.exceptions import ResourceExistsError
     upload_args = {
         'blob_type': transform_blob_type(cmd, blob_type),
         'lease': lease_id,
@@ -536,6 +541,11 @@ def upload_blob(cmd, client, file_path=None, container_name=None, blob_name=None
     if blob_type == 'append':
         if client.exists(timeout=timeout):
             client.get_blob_properties(lease=lease_id, timeout=timeout, **check_blob_args)
+    else:
+        upload_args['if_modified_since'] = if_modified_since
+        upload_args['if_unmodified_since'] = if_unmodified_since
+        upload_args['if_match'] = if_match
+        upload_args['if_none_match'] = if_none_match
 
     # Because the contents of the uploaded file may be too large, it should be passed into the a stream object,
     # upload_blob() read file data in batches to avoid OOM problems
@@ -553,7 +563,6 @@ def upload_blob(cmd, client, file_path=None, container_name=None, blob_name=None
                                           encryption_scope=encryption_scope,
                                           **upload_args, **kwargs)
     except ResourceExistsError as ex:
-        from azure.cli.core.azclierror import AzureResponseError
         raise AzureResponseError(
             "{}\nIf you want to overwrite the existing one, please add --overwrite in your command.".format(ex.message))
 
