@@ -20,6 +20,7 @@ from azure.cli.core.azclierror import (
     UnclassifiedUserFault,
 )
 from azure.core.exceptions import AzureError, HttpResponseError, ServiceRequestError, ServiceResponseError
+from msrestazure.azure_exceptions import CloudError
 
 
 class ErrorMappingTestCase(unittest.TestCase):
@@ -108,6 +109,59 @@ class GetSnapShotTestCase(unittest.TestCase):
             "azure.cli.command_modules.acs._helpers.cf_snapshots", return_value=mock_snapshot_operations_3
         ), self.assertRaises(BadRequestError):
             helpers.get_snapshot("mock_cli_ctx", "mock_rg", "mock_snapshot_name")
+
+
+class GetUserAssignedIdentityTestCase(unittest.TestCase):
+    def test_get_user_assigned_identity_by_resource_id(self):
+        with self.assertRaises(InvalidArgumentValueError):
+            helpers.get_user_assigned_identity_by_resource_id("mock_cli_ctx", "")
+
+        mock_user_assigned_identity = Mock()
+        with patch(
+            "azure.cli.command_modules.acs._helpers.get_user_assigned_identity",
+            return_value=mock_user_assigned_identity,
+        ) as mock_get_user_assigned_identity:
+            user_assigned_identity = helpers.get_user_assigned_identity_by_resource_id(
+                "mock_cli_ctx",
+                "/subscriptions/test_sub/resourcegroups/test_rg/providers/microsoft.managedidentity/userassignedidentities/test_user_assigned_identity",
+            )
+            self.assertEqual(user_assigned_identity, mock_user_assigned_identity)
+            mock_get_user_assigned_identity.assert_called_once_with(
+                "mock_cli_ctx", "test_sub", "test_rg", "test_user_assigned_identity"
+            )
+
+    def test_get_user_assigned_identity(self):
+        mock_user_assigned_identity = Mock()
+        mock_user_assigned_identity_operations = Mock(
+            user_assigned_identities=Mock(get=Mock(return_value=mock_user_assigned_identity))
+        )
+        with patch(
+            "azure.cli.command_modules.acs._helpers.get_msi_client", return_value=mock_user_assigned_identity_operations
+        ):
+            user_assigned_identity = helpers.get_user_assigned_identity(
+                "mock_cli_ctx", "mock_sub_id", "mock_rg", "mock_identity_name"
+            )
+            self.assertEqual(user_assigned_identity, mock_user_assigned_identity)
+
+        cloud_error_2 = CloudError(Mock(status_code="xxx"), "mock user assigned identity was not found")
+        mock_user_assigned_identity_operations_2 = Mock(
+            user_assigned_identities=Mock(get=Mock(side_effect=cloud_error_2))
+        )
+        with patch(
+            "azure.cli.command_modules.acs._helpers.get_msi_client",
+            return_value=mock_user_assigned_identity_operations_2,
+        ), self.assertRaises(ResourceNotFoundError):
+            helpers.get_user_assigned_identity("mock_cli_ctx", "mock_sub_id", "mock_rg", "mock_identity_name")
+
+        cloud_error_3 = CloudError(Mock(status_code="xxx"), "test_error_msg")
+        mock_user_assigned_identity_operations_3 = Mock(
+            user_assigned_identities=Mock(get=Mock(side_effect=cloud_error_3))
+        )
+        with patch(
+            "azure.cli.command_modules.acs._helpers.get_msi_client",
+            return_value=mock_user_assigned_identity_operations_3,
+        ), self.assertRaises(ServiceError):
+            helpers.get_user_assigned_identity("mock_cli_ctx", "mock_sub_id", "mock_rg", "mock_identity_name")
 
 
 if __name__ == "__main__":

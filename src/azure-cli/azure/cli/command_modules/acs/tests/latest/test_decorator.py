@@ -1799,7 +1799,7 @@ class AKSContextTestCase(unittest.TestCase):
             user_assigned_identities=Mock(get=Mock(return_value=identity_obj))
         )
         with patch(
-            "azure.cli.command_modules.acs.custom.get_msi_client",
+            "azure.cli.command_modules.acs._helpers.get_msi_client",
             return_value=msi_client,
         ) as get_msi_client:
             identity = ctx_1.get_identity_by_msi_client(

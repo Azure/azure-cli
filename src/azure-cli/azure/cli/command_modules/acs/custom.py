@@ -817,41 +817,6 @@ def _generate_properties(api_version, orchestrator_type, orchestrator_version, m
     return properties
 
 
-def _get_user_assigned_identity_resource_id_regular_expression():
-    return re.compile(
-        r'/subscriptions/(.*?)/resourcegroups/(.*?)/providers/microsoft.managedidentity/userassignedidentities/(.*)',
-        flags=re.IGNORECASE)
-
-
-def _get_user_assigned_identity(cli_ctx, resource_id):
-    resource_id = resource_id.lower()
-    _re_user_assigned_identity_resource_id = _get_user_assigned_identity_resource_id_regular_expression()
-    match = _re_user_assigned_identity_resource_id.search(resource_id)
-    if match:
-        subscription_id = match.group(1)
-        resource_group_name = match.group(2)
-        identity_name = match.group(3)
-        msi_client = get_msi_client(cli_ctx, subscription_id)
-        try:
-            identity = msi_client.user_assigned_identities.get(resource_group_name=resource_group_name,
-                                                               resource_name=identity_name)
-        except CloudError as ex:
-            if 'was not found' in ex.message:
-                raise ResourceNotFoundError("Identity {} not found.".format(resource_id))
-            raise ClientRequestError(ex.message)
-        return identity
-    raise InvalidArgumentValueError(
-        "Cannot parse identity name from provided resource id {}.".format(resource_id))
-
-
-def _get_user_assigned_identity_client_id(cli_ctx, resource_id):
-    return _get_user_assigned_identity(cli_ctx, resource_id).client_id
-
-
-def _get_user_assigned_identity_object_id(cli_ctx, resource_id):
-    return _get_user_assigned_identity(cli_ctx, resource_id).principal_id
-
-
 # pylint: disable=too-many-locals
 def acs_create(cmd, client, resource_group_name, deployment_name, name, ssh_key_value, dns_name_prefix=None,
                location=None, admin_username="azureuser", api_version=None, master_profile=None,
