@@ -1108,9 +1108,9 @@ def _update_provider(cmd, namespace, registering, wait, properties=None, mg_id=N
         if is_rpaas and accept_terms:
             wait = True
         if cmd.supported_api_version(min_api='2021-04-01'):
-            r = rcf.providers.register_command(namespace, properties=properties)
+            r = rcf.providers.register(namespace, properties=properties)
         else:
-            r = rcf.providers.register_command(namespace)
+            r = rcf.providers.register(namespace)
     elif mg_id and registering:
         r = rcf.providers.register_at_management_group_scope(namespace, mg_id)
         if r is None:
@@ -2199,7 +2199,7 @@ def list_features(client, resource_provider_namespace=None):
 def register_feature(client, resource_provider_namespace, feature_name):
     logger.warning("Once the feature '%s' is registered, invoking 'az provider register -n %s' is required "
                    "to get the change propagated", feature_name, resource_provider_namespace)
-    return client.register_command(resource_provider_namespace, feature_name)
+    return client.register(resource_provider_namespace, feature_name)
 
 
 def unregister_feature(client, resource_provider_namespace, feature_name):
@@ -2806,7 +2806,7 @@ def _register_rp(cli_ctx, subscription_id=None):
         cli_ctx,
         ResourceType.MGMT_RESOURCE_RESOURCES,
         subscription_id)
-    rcf.providers.register_command(rp)
+    rcf.providers.register(rp)
     while True:
         time.sleep(10)
         rp_info = rcf.providers.get(rp)

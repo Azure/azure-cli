@@ -131,5 +131,5 @@ hide_nulls = args.hide_nulls
 PRIMITIVES = (str, int, bool, float)
 IGNORE_ARGS = ['help', 'help_file', 'base_type', 'arguments_loader']
 
-APPLICATION.register_command(Application.COMMAND_PARSER_LOADED, _dump_command_table)
+APPLICATION.register(Application.COMMAND_PARSER_LOADED, _dump_command_table)
 APPLICATION.execute([])
