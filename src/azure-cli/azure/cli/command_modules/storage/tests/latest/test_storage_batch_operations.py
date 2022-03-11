@@ -88,6 +88,12 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
         self.storage_cmd('storage blob list -c {}', storage_account_info, container).assert_with_checks(
             JMESPathCheck('length(@)', 41))
 
+        self.storage_cmd('storage blob upload-batch -s "{}" -d {} --content-md 123 --max-connections 3 --overwrite', storage_account_info,
+                         test_dir, container)
+        self.storage_cmd('storage blob list -c {}', storage_account_info, container).assert_with_checks(
+            JMESPathCheck('length(@)', 41))
+
+
         # upload files with pattern apple/*
         container = self.create_container(storage_account_info)
         src_url = self.storage_cmd('storage blob url -c {} -n \'\' -otsv', storage_account_info,
