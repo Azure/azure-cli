@@ -1703,6 +1703,7 @@ class VMMonitorTestDefault(ScenarioTest):
             replay_processors=[TimeSpanProcessor(TIMESPANTEMPLATE)]
         )
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vm_create_with_monitor', location='eastus')
     def test_vm_create_with_monitor(self, resource_group):
 
@@ -3174,6 +3175,7 @@ class VMSSUpdateTests(ScenarioTest):
             self.check('sku.name', '{vm_sku}'),
         ])
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_ephemeral_os_disk_placement_', location='westus2')
     def test_vmss_update_ephemeral_os_disk_placement(self, resource_group, resource_group_location):
         self.kwargs.update({
@@ -3359,6 +3361,7 @@ class VMSSCreateLinuxSecretsScenarioTest(ScenarioTest):
 
 class VMSSCreateExistingOptions(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_existing_options')
     def test_vmss_create_existing_options(self):
 
@@ -4561,6 +4564,8 @@ class VMGenericUpdate(ScenarioTest):
 
 
 class VMGalleryImage(ScenarioTest):
+    
+    @AllowLargeResponse()
     @ResourceGroupPreparer(location='eastus')
     def test_shared_gallery(self, resource_group, resource_group_location):
         self.kwargs.update({
@@ -4575,7 +4580,7 @@ class VMGalleryImage(ScenarioTest):
             'sharedSubId': '34a4ab42-0d72-47d9-bd1a-aed207386dac'
         })
 
-        self.cmd('sig create -g {rg} --gallery-name {gallery} --permissions private')
+        self.cmd('sig create -g {rg} --gallery-name {gallery} --permissions groups')
         self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} '
                  '--os-type linux -p publisher1 -f offer1 -s sku1')
         self.cmd('sig image-definition show -g {rg} --gallery-name {gallery} --gallery-image-definition {image}')
@@ -4592,14 +4597,14 @@ class VMGalleryImage(ScenarioTest):
                  '--gallery-image-version {version} --managed-image {captured} --replica-count 1')
 
         # Test shared gallery
-        self.cmd('sig update --gallery-name {gallery} --resource-group {rg} --permissions groups')
+        # service team has temporarily disable the feature of updating permissions and will enable it in a few months
+        # self.cmd('sig update --gallery-name {gallery} --resource-group {rg} --permissions groups')
         res = self.cmd('sig show --gallery-name {gallery} --resource-group {rg} --select Permissions', checks=[
             self.check('sharingProfile.permissions', 'Groups')
         ]).get_output_in_json()
 
         self.kwargs['unique_name'] = res['identifier']['uniqueName']
 
-        self.cmd('sig update --gallery-name {gallery} --resource-group {rg} --permissions groups --permissions groups')
         self.cmd('sig share add --gallery-name {gallery} -g {rg} --subscription-ids {subId} {sharedSubId} --tenant-ids {tenantId}')
         self.cmd('sig show --gallery-name {gallery} --resource-group {rg} --select Permissions', checks=[
             self.check('sharingProfile.groups[0].ids[0]', self.kwargs['subId']),

@@ -408,7 +408,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    help='repository permissions. Use the format "--repository REPO [ACTION1 ACTION2 ...]" per flag. ' + repo_valid_actions)
         c.argument('gateway_actions_list', options_list=['--gateway'], nargs='+', action='append',
                    help='gateway permissions. Use the format "--gateway GATEWAY [ACTION1 ACTION2 ...]" per flag. ' + gateway_valid_actions)
-        c.argument('no_passwords', arg_type=get_three_state_flag(), help='Do not generate passwords, instead use "az acr token credential generate"')
+        c.argument('no_passwords', arg_type=get_three_state_flag(), help='Do not generate passwords during token creation. You can generate the passwords after the token is created by using `az acr token credentials generate` command.')
         c.argument('expiration_in_days', help='Number of days for which the credentials will be valid. If not specified, the expiration will default to the max value "9999-12-31T23:59:59.999999+00:00"', type=int, required=False)
 
     with self.argument_context('acr token update') as c:
