@@ -58,7 +58,7 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
                  '--protocol Tcp '
                  '--tcp-port 2048 ')
 
-    @ResourceGroupPreparer(name_prefix='cli_test_nw_connection_monitor', location='westcentralus')
+    @ResourceGroupPreparer(name_prefix='cli_test_nw_connection_monitor', location='eastus')
     @AllowLargeResponse()
     def test_nw_connection_monitor_v1(self, resource_group, resource_group_location):
         """
