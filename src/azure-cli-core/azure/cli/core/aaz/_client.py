@@ -81,7 +81,7 @@ class AAZMgmtClient(PipelineClient):
 
     def build_lro_polling(self, no_wait, initial_session, deserialization_callback, lro_options=None,
                           path_format_arguments=None):
-
+        # TODO: handle error
         from azure.mgmt.core.polling.arm_polling import AzureAsyncOperationPolling, BodyContentPolling
         if no_wait == True:
             polling = AAZNoPolling()
@@ -96,8 +96,9 @@ class AAZMgmtClient(PipelineClient):
                 ],
                 path_format_arguments=path_format_arguments,
             )
+
         polling.initialize(
-            client=self,
+            self,
             initial_response=initial_session,
             deserialization_callback=deserialization_callback
         )
