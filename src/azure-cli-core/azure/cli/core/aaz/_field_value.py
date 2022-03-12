@@ -65,6 +65,9 @@ class AAZObject(AAZBaseValue):
         assert not key.startswith('_')
         attr_schema = self._schema[key]
         name = self._schema.get_attr_name(key)
+        if name is None:
+            # ignore undefined key
+            return
         self._data[name] = attr_schema.process_data(data, key=name)
 
     def __delitem__(self, key):

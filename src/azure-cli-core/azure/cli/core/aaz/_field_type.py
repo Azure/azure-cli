@@ -139,6 +139,9 @@ class AAZObjectType(AAZBaseType):
 
         for key, sub_data in data.items():
             name = self.get_attr_name(key)
+            if name is None:
+                # ignore undefined key
+                continue
             value[name] = sub_data
         return result
 
