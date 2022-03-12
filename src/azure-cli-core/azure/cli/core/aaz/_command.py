@@ -10,7 +10,7 @@ from knack.experimental import ExperimentalItem
 from knack.preview import PreviewItem
 
 from ._arg import AAZArgumentsSchema, AAZGenericUpdateAddArg, AAZGenericUpdateSetArg, AAZGenericUpdateRemoveArg, \
-    AAZGenericUpdateForceString
+    AAZGenericUpdateForceString, AAZBoolArg
 from ._arg_action import AAZArgActionOperations, AAZGenericUpdateAction
 from ._base import AAZUndefined, AAZBaseValue
 from ._field_type import AAZObjectType
@@ -141,6 +141,11 @@ class AAZCommand(CLICommand):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         schema = AAZArgumentsSchema(*args, **kwargs)
+        if cls.AZ_SUPPORT_NO_WAIT:
+            schema.no_wait = AAZBoolArg(
+                options=['--no-wait'],
+                help='Do not wait for the long-running operation to finish.'
+            )
         if cls.AZ_SUPPORT_GENERIC_UPDATE:
             schema.generic_update_add = AAZGenericUpdateAddArg()
             schema.generic_update_set = AAZGenericUpdateSetArg()
