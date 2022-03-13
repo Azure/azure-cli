@@ -133,16 +133,20 @@ class AAZObjectType(AAZBaseType):
         result = {}
         value = AAZObject(schema=self, data=result)
         if isinstance(data, AAZObject):
-            data = data._data
+            for key in data._data.keys():
+                name = self.get_attr_name(key)
+                if name is None:
+                    # ignore undefined key
+                    continue
+                value[name] = data[key]
         else:
             assert isinstance(data, (dict,))
-
-        for key, sub_data in data.items():
-            name = self.get_attr_name(key)
-            if name is None:
-                # ignore undefined key
-                continue
-            value[name] = sub_data
+            for key, sub_data in data.items():
+                name = self.get_attr_name(key)
+                if name is None:
+                    # ignore undefined key
+                    continue
+                value[name] = sub_data
         return result
 
 
@@ -184,12 +188,12 @@ class AAZDictType(AAZBaseType):
         result = {}
         value = AAZDict(schema=self, data=result)
         if isinstance(data, AAZDict):
-            data = data._data
+            for key in data._data.keys():
+                value[key] = data[key]
         else:
             assert isinstance(data, (dict,))
-
-        for key, sub_data in data.items():
-            value[key] = sub_data
+            for key, sub_data in data.items():
+                value[key] = sub_data
         return result
 
 
@@ -232,9 +236,8 @@ class AAZListType(AAZBaseType):
         value = AAZList(schema=self, data=result)
 
         if isinstance(data, AAZList):
-            data = data._data
-            for idx, sub_data in data.items():
-                value[idx] = sub_data
+            for idx in data._data.keys():
+                value[idx] = data[idx]
         else:
             assert isinstance(data, list)
             for idx, sub_data in enumerate(data):

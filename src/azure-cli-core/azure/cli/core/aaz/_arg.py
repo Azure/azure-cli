@@ -15,8 +15,6 @@ class AAZArgumentsSchema(AAZObjectType):
         super().__init__(*args, **kwargs)
 
     def __call__(self, data=None):
-        if data is None:
-            data = {}
         return AAZObject(
             schema=self,
             data=self.process_data(data=data)

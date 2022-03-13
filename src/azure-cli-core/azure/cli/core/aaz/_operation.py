@@ -173,7 +173,7 @@ class AAZHttpOperation(AAZOperation):
                     data=schema.process_data(None)
                 )
         else:
-            assert issubclass(value, AAZBaseValue)
+            assert isinstance(value, AAZBaseValue)
 
         builder = AAZContentBuilder(
             values=[value],
@@ -266,7 +266,7 @@ class AAZJsonInstanceUpdateOperation(AAZOperation):
                     data=schema.process_data(None)
                 )
         else:
-            assert issubclass(value, AAZBaseValue)
+            assert isinstance(value, AAZBaseValue)
 
         builder = AAZContentBuilder(
             values=[value],

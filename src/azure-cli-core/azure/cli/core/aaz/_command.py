@@ -53,7 +53,8 @@ class AAZCommandCtx:
         self._cli_ctx = cli_ctx
         self._profile = Profile(cli_ctx=cli_ctx)
         self._subscription_id = None
-        self.args = schema(data={})
+        self.args = schema()
+        assert self.args._is_patch  # make sure self.ctx.args is patch
         for dest, cmd_arg in command_args.items():
             if hasattr(schema, dest):
                 if isinstance(cmd_arg, AAZArgActionOperations):
