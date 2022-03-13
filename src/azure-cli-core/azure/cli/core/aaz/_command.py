@@ -315,43 +315,55 @@ def register_command(name, is_preview=False, is_experimental=False, hide=False, 
 
 def load_aaz_command_table(loader, aaz_pkg_name, args):
     profile_pkg = _get_profile_pkg(aaz_pkg_name, loader.cli_ctx.cloud)
-    pkgs = [profile_pkg]
     command_table = {}
     command_group_table = {}
     arg_str = ' '.join(args)
-    idx = 0
-    while idx < len(pkgs):
-        pkg = pkgs[idx]
-        cut = False  # if cut, its sub commands and sub pkgs will not be added
-        for key, value in pkg.__dict__.items():
-            if isinstance(value, type):
-                if issubclass(value, AAZCommandGroup):
-                    if not arg_str.startswith(f'{value.AZ_NAME} '):
-                        cut = True
-                    # add command group into command group table
-                    command_group_table[value.AZ_NAME] = value(
-                        cli_ctx=loader.cli_ctx)  # add command group even it's cut
-                elif issubclass(value, AAZCommand):
-                    if value.AZ_NAME:
-                        command_table[value.AZ_NAME] = value(loader=loader)
-        if not cut:
-            # continue load sub pkgs
-            pkg_path = os.path.dirname(pkg.__file__)
-            for sub_path in os.listdir(pkg_path):
-                if sub_path.startswith('_') or not os.path.isdir(os.path.join(pkg_path, sub_path)):
-                    continue
-                try:
-                    sub_pkg = importlib.import_module(f'.{sub_path}', pkg.__name__)
-                    pkgs.append(sub_pkg)
-                except ModuleNotFoundError:
-                    continue
-        idx += 1
+
+    _load_aaz_pkg(loader, profile_pkg, command_table, command_group_table, arg_str)
 
     for group_name, command_group in command_group_table.items():
         loader.command_group_table[group_name] = command_group
     for command_name, command in command_table.items():
         loader.command_table[command_name] = command
     return command_table, command_group_table
+
+
+def _load_aaz_pkg(loader, pkg, parent_command_table, command_group_table, arg_str):
+    cut = False  # if cut, its sub commands and sub pkgs will not be added
+    command_table = {}  # the command available for this pkg and its sub pkgs
+    for key, value in pkg.__dict__.items():
+        if cut and command_table:
+            # when cut and command_table is not empty, stop loading more commands.
+            # the command_table should not be empty.
+            # Because if it's empty, the command group will be ignored in help if parent command group.
+            break
+        if isinstance(value, type):
+            if issubclass(value, AAZCommandGroup):
+                if not arg_str.startswith(f'{value.AZ_NAME} '):
+                    # when args not contain command group prefix, then cut more loading.
+                    cut = True
+                # add command group into command group table
+                command_group_table[value.AZ_NAME] = value(
+                    cli_ctx=loader.cli_ctx)  # add command group even it's cut
+            elif issubclass(value, AAZCommand):
+                if value.AZ_NAME:
+                    command_table[value.AZ_NAME] = value(loader=loader)
+
+    # continue load sub pkgs
+    pkg_path = os.path.dirname(pkg.__file__)
+    for sub_path in os.listdir(pkg_path):
+        if cut and command_table:
+            # when cut and command_table is not empty, stop loading more sub pkgs.
+            break
+        if sub_path.startswith('_') or not os.path.isdir(os.path.join(pkg_path, sub_path)):
+            continue
+        try:
+            sub_pkg = importlib.import_module(f'.{sub_path}', pkg.__name__)
+        except ModuleNotFoundError:
+            continue
+        _load_aaz_pkg(loader, sub_pkg, command_table, command_group_table, arg_str)
+
+    parent_command_table.update(command_table)  # update the parent pkg's command table.
 
 
 def parse_cls_doc(cls):
