@@ -129,6 +129,7 @@ class AAZCommand(CLICommand):
     AZ_SUPPORT_NO_WAIT = False
     AZ_SUPPORT_GENERIC_UPDATE = False
 
+    AZ_CONFIRMATION = None
     AZ_PREVIEW_INFO = None
     AZ_EXPERIMENTAL_INFO = None
     AZ_DEPRECATE_INFO = None
@@ -159,6 +160,7 @@ class AAZCommand(CLICommand):
         super().__init__(
             cli_ctx=loader.cli_ctx,
             name=self.AZ_NAME,
+            confirmation=self.AZ_CONFIRMATION,
             arguments_loader=self._cli_arguments_loader,
             handler=True,
             # knack use cmd.handler to check whether it is group or command, however this property will not be used in AAZCommand. So use True value for it. https://github.com/microsoft/knack/blob/e496c9590792572e680cb3ec959db175d9ba85dd/knack/parser.py#L227-L233
@@ -197,7 +199,7 @@ class AAZCommand(CLICommand):
         args = {}
         for name, field in schema._fields.items():
             args[name] = field.to_cmd_arg(name)
-        return args
+        return list(args.items())
 
     def update_argument(self, param_name, argtype):
         # not support to overwrite arguments defined in schema
@@ -277,7 +279,7 @@ def register_command_group(name, is_preview=False, is_experimental=False, hide=F
     return decorator
 
 
-def register_command(name, is_preview=False, is_experimental=False, hide=False, redirect=None, expiration=None):
+def register_command(name, is_preview=False, is_experimental=False, confirmation=None, hide=False, redirect=None, expiration=None):
     """register AAZCommand"""
     if is_preview and is_experimental:
         raise CLIInternalError(
@@ -302,6 +304,8 @@ def register_command(name, is_preview=False, is_experimental=False, hide=False, 
             "examples": examples
         }
 
+        if confirmation:
+            cls.AZ_CONFIRMATION = confirmation
         if is_preview:
             cls.AZ_PREVIEW_INFO = partial(PreviewItem, target=f'az {name}', object_type='command')
         if is_experimental:
