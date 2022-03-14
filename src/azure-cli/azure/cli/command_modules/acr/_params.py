@@ -188,14 +188,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     with self.argument_context('acr manifest update-metadata') as c:
         c.positional('manifest_id', arg_type=manifest_id_type)
 
-    with self.argument_context('acr manifest show-metadata') as c:
-        c.argument('manifest_id', arg_type=manifest_id_type)
+    with self.argument_context('acr manifest metadata show') as c:
+        c.positional('manifest_id', arg_type=manifest_id_type)
 
-    with self.argument_context('acr manifest list-metadata') as c:
-        c.argument('repo_id', arg_type=repo_id_type)
+    with self.argument_context('acr manifest metadata list') as c:
+        c.positional('repo_id', arg_type=repo_id_type)
 
-    with self.argument_context('acr manifest update-metadata') as c:
-        c.argument('manifest_id', arg_type=manifest_id_type)
+    with self.argument_context('acr manifest metadata update') as c:
+        c.positional('manifest_id', arg_type=manifest_id_type)
 
     with self.argument_context('acr repository untag') as c:
         c.argument('image', options_list=['--image', '-t'], help="The name of the image. May include a tag in the format 'name:tag'.")
