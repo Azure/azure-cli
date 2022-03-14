@@ -25,10 +25,12 @@ from ._validators import (
     validate_load_balancer_outbound_ip_prefixes, validate_taints, validate_ip_ranges, validate_acr, validate_nodepool_tags,
     validate_load_balancer_outbound_ports, validate_load_balancer_idle_timeout, validate_vnet_subnet_id, validate_pod_subnet_id,
     validate_nodepool_labels, validate_ppg, validate_assign_identity, validate_max_surge, validate_assign_kubelet_identity,
-    validate_credential_format)
+    validate_credential_format, validate_nat_gateway_managed_outbound_ip_count, validate_nat_gateway_idle_timeout)
 from ._consts import (
     CONST_OUTBOUND_TYPE_LOAD_BALANCER,
     CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
+    CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY,
+    CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY,
     CONST_SCALE_SET_PRIORITY_REGULAR,
     CONST_SCALE_SET_PRIORITY_SPOT,
     CONST_SPOT_EVICTION_POLICY_DELETE,
@@ -87,7 +89,7 @@ node_eviction_policies = [CONST_SPOT_EVICTION_POLICY_DELETE, CONST_SPOT_EVICTION
 node_os_disk_types = [CONST_OS_DISK_TYPE_MANAGED, CONST_OS_DISK_TYPE_EPHEMERAL]
 
 network_plugins = ['azure', 'kubenet']
-outbound_types = [CONST_OUTBOUND_TYPE_LOAD_BALANCER, CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING]
+outbound_types = [CONST_OUTBOUND_TYPE_LOAD_BALANCER, CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING, CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY, CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY]
 
 auto_upgrade_channels = [
     CONST_RAPID_UPGRADE_CHANNEL,
@@ -234,6 +236,10 @@ def load_arguments(self, _):
                    validator=validate_load_balancer_outbound_ports)
         c.argument('load_balancer_idle_timeout', type=int,
                    validator=validate_load_balancer_idle_timeout)
+        c.argument('nat_gateway_managed_outbound_ip_count', type=int,
+                   validator=validate_nat_gateway_managed_outbound_ip_count)
+        c.argument('nat_gateway_idle_timeout', type=int,
+                   validator=validate_nat_gateway_idle_timeout)
         c.argument('outbound_type', arg_type=get_enum_type(outbound_types))
         c.argument('auto_upgrade_channel', arg_type=get_enum_type(auto_upgrade_channels))
         c.argument('enable_cluster_autoscaler', action='store_true')
@@ -342,6 +348,10 @@ def load_arguments(self, _):
                    validator=validate_load_balancer_outbound_ports)
         c.argument('load_balancer_idle_timeout', type=int,
                    validator=validate_load_balancer_idle_timeout)
+        c.argument('nat_gateway_managed_outbound_ip_count', type=int,
+                   validator=validate_nat_gateway_managed_outbound_ip_count)
+        c.argument('nat_gateway_idle_timeout', type=int,
+                   validator=validate_nat_gateway_idle_timeout)
         c.argument('auto_upgrade_channel', arg_type=get_enum_type(auto_upgrade_channels))
         c.argument('api_server_authorized_ip_ranges',
                    type=str, validator=validate_ip_ranges)
