@@ -584,6 +584,21 @@ examples:
     text: az acr manifest update-metadata -r MyRegistry -n hello-world@sha256:abc123 --write-enabled false
 """
 
+helps['acr manifest metadata show'] = """
+type: command
+short-summary: Get the metadata of an artifact in an Azure Container Registry.
+"""
+
+helps['acr manifest metadata list'] = """
+type: command
+short-summary: List the metadata of the manifests in a repository in an Azure Container Registry.
+"""
+
+helps['acr manifest metadata update'] = """
+type: command
+short-summary: Update the manifest metadata of an artifact in an Azure Container Registry.
+"""
+
 helps['acr run'] = """
 type: command
 short-summary: Queues a quick run providing streamed logs for an Azure Container Registry.
