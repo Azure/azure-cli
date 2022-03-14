@@ -531,7 +531,7 @@ parameters:
     type: string
     short-summary: unique name of the api for which schema needs to be created
     long-summary: |
-        API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number. 
+        API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   - name: --schema-id
     type: string
     short-summary: unique name of the api schema to be created

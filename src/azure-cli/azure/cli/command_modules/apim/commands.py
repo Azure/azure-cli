@@ -9,7 +9,8 @@
 from azure.cli.core.commands import CliCommandType
 from azure.cli.command_modules.apim._format import (service_output_format)
 from azure.cli.command_modules.apim._client_factory import (cf_service, cf_api, cf_product, cf_nv, cf_apiops,
-                                                            cf_apirelease, cf_apirevision, cf_apiversionset, cf_apischema)
+                                                            cf_apirelease, cf_apirevision, cf_apiversionset,
+                                                            cf_apischema)
 
 
 def load_command_table(self, _):
@@ -93,7 +94,7 @@ def load_command_table(self, _):
         g.custom_command('check', 'apim_product_api_check_association')
         g.custom_command('add', 'apim_product_api_add')
         g.custom_command('delete', 'apim_product_api_delete')
-    
+
     with self.command_group('apim api schema', api_schema) as g:
         g.custom_command('create', 'apim_api_schema_create', supports_no_wait=True)
         g.custom_command('delete', 'apim_api_schema_delete', supports_no_wait=True)
