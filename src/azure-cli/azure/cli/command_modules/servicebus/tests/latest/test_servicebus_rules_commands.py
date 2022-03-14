@@ -34,6 +34,7 @@ class SBRulesCRUDScenarioTest(ScenarioTest):
             'topicauthoname': self.create_random_name(prefix='cliTopicAutho', length=25),
             'subscriptionname': self.create_random_name(prefix='sb-subscli', length=25),
             'rulename': self.create_random_name(prefix='sb-rulecli', length=25),
+            'rulename2': self.create_random_name(prefix='sb-rulecli2', length=20),
             'sqlexpression': 'test=test',
             'sqlexpression1': 'test1=test1'
         })
@@ -66,9 +67,32 @@ class SBRulesCRUDScenarioTest(ScenarioTest):
             checks=[self.check('name', '{subscriptionname}')])
 
         # Create Rules
-        self.cmd(
+        rule = self.cmd(
             'servicebus topic subscription rule create --resource-group {rg} --namespace-name {namespacename} --topic-name {topicname} --subscription-name {subscriptionname} --name {rulename} --filter-sql-expression {sqlexpression}',
-            checks=[self.check('name', '{rulename}')])
+            checks=[self.check('name', '{rulename}')]).get_output_in_json()
+        self.assertEqual(rule['filterType'], 'SqlFilter')
+        self.assertEqual(rule['sqlFilter']['sqlExpression'], self.kwargs['sqlexpression'])
+
+        # Create Rules
+        rule = self.cmd(
+            'servicebus topic subscription rule create --resource-group {rg} --namespace-name {namespacename} --topic-name {topicname} --subscription-name {subscriptionname} --name {rulename2} --filter-type SqlFilter --filter-sql-expression {sqlexpression} --enable-sql-preprocessing',
+            checks=[self.check('name', '{rulename2}')]).get_output_in_json()
+        self.assertEqual(rule['filterType'], 'SqlFilter')
+        self.assertEqual(rule['sqlFilter']['sqlExpression'], self.kwargs['sqlexpression'])
+
+        # Create Rules
+        rule = self.cmd(
+            'servicebus topic subscription rule create --resource-group {rg} --namespace-name {namespacename} --topic-name {topicname} --subscription-name {subscriptionname} --name {rulename} --filter-type CorrelationFilter --correlation-id r00012d --label myvalue --message-id mid --reply-to reply --session-id ids --reply-to-session-id hi --content-type hi --to hi',
+            checks=[self.check('name', '{rulename}')]).get_output_in_json()
+        self.assertEqual(rule['filterType'], 'CorrelationFilter')
+        self.assertEqual(rule['correlationFilter']['contentType'], 'hi')
+        self.assertEqual(rule['correlationFilter']['correlationId'], 'r00012d')
+        self.assertEqual(rule['correlationFilter']['label'], 'myvalue')
+        self.assertEqual(rule['correlationFilter']['messageId'], 'mid')
+        self.assertEqual(rule['correlationFilter']['replyTo'], 'reply')
+        self.assertEqual(rule['correlationFilter']['replyToSessionId'], 'hi')
+        self.assertEqual(rule['correlationFilter']['sessionId'], 'ids')
+        self.assertEqual(rule['correlationFilter']['to'], 'hi')
 
         # Get Created Rules
         self.cmd(
@@ -77,8 +101,8 @@ class SBRulesCRUDScenarioTest(ScenarioTest):
 
         # Update Rules
         self.cmd(
-            'servicebus topic subscription rule update --resource-group {rg} --namespace-name {namespacename} --topic-name {topicname} --subscription-name {subscriptionname} --name {rulename} --filter-sql-expression {sqlexpression1}',
-            checks=[self.check('name', '{rulename}')])
+            'servicebus topic subscription rule update --resource-group {rg} --namespace-name {namespacename} --topic-name {topicname} --subscription-name {subscriptionname} --name {rulename2} --filter-sql-expression {sqlexpression1}',
+            checks=[self.check('name', '{rulename2}')])
 
         # Get Rules List By Subscription
         self.cmd(
