@@ -2685,9 +2685,7 @@ class KeyVaultNetworkRuleScenarioTest(ScenarioTest):
             self.check('length(properties.networkAcls.ipRules)', 0)])
 
         # remove network-rule for ip-address without CIDR
-        self.cmd('keyvault network-rule add --ip-address {ip} --name {kv} --resource-group {rg}', checks=[
-            self.check('length(properties.networkAcls.ipRules)', 1),
-            self.check('properties.networkAcls.ipRules[0].value', '{ip}')])
+        self.cmd('keyvault network-rule add --ip-address {ip} --name {kv} --resource-group {rg}')
         self.cmd('keyvault network-rule remove --ip-address {ip5} --name {kv} --resource-group {rg}', checks=[
             self.check('length(properties.networkAcls.ipRules)', 0)])
 
