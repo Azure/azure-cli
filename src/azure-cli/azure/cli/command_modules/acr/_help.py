@@ -550,38 +550,38 @@ type: group
 short-summary: Manage artifact manifest metadata in Azure Container Registries.
 """
 
-helps['acr manifest metadata show'] = """
+helps['acr manifest show-metadata'] = """
 type: command
 short-summary: Get the metadata of an artifact in an Azure Container Registry.
 examples:
   - name: Get the metadata of the tag 'hello-world:latest'.
-    text: az acr manifest metadata show -r MyRegistry -n hello-world:latest
+    text: az acr manifest show-metadata -r MyRegistry -n hello-world:latest
   - name: Get the metadata of the tag 'hello-world:latest'.
-    text: az acr manifest metadata show MyRegistry.azurecr.io/hello-world:latest
+    text: az acr manifest show-metadata MyRegistry.azurecr.io/hello-world:latest
   - name: Get the metadata of the manifest referenced by digest 'hello-world@sha256:abc123'.
-    text: az acr manifest metadata show -r MyRegistry -n hello-world@sha256:abc123
+    text: az acr manifest show-metadata -r MyRegistry -n hello-world@sha256:abc123
 """
 
-helps['acr manifest metadata list'] = """
+helps['acr manifest list-metadata'] = """
 type: command
 short-summary: List the metadata of the manifests in a repository in an Azure Container Registry.
 examples:
   - name: List the metadata of the manifests in the repository 'hello-world'.
-    text: az acr manifest metadata list -r MyRegistry -n hello-world
+    text: az acr manifest list-metadata -r MyRegistry -n hello-world
   - name: List the metadata of the manifests in the repository 'hello-world'.
-    text: az acr manifest metadata list MyRegistry.azurecr.io/hello-world
+    text: az acr manifest list-metadata MyRegistry.azurecr.io/hello-world
 """
 
-helps['acr manifest metadata update'] = """
+helps['acr manifest update-metadata'] = """
 type: command
 short-summary: Update the manifest metadata of an artifact in an Azure Container Registry.
 examples:
   - name: Update the metadata of the tag 'hello-world:latest'.
-    text: az acr manifest metadata update -r MyRegistry -n hello-world:latest --write-enabled false
+    text: az acr manifest update-metadata -r MyRegistry -n hello-world:latest --write-enabled false
   - name: Update the metadata of the tag 'hello-world:latest'.
-    text: az acr manifest metadata update MyRegistry.azurecr.io/hello-world:latest --write-enabled false
+    text: az acr manifest update-metadata MyRegistry.azurecr.io/hello-world:latest --write-enabled false
   - name: Update the metadata of the artifact referenced by digest 'hello-world@sha256:abc123'.
-    text: az acr manifest metadata update -r MyRegistry -n hello-world@sha256:abc123 --write-enabled false
+    text: az acr manifest update-metadata -r MyRegistry -n hello-world@sha256:abc123 --write-enabled false
 """
 
 helps['acr run'] = """

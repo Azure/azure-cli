@@ -179,13 +179,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('artifact_type', help='Filter referrers based on artifact type.')
         c.argument('recursive', help='Recursively include referrer artifacts.', action='store_true')
 
-    with self.argument_context('acr manifest metadata show') as c:
+    with self.argument_context('acr manifest show-metadata') as c:
         c.positional('manifest_id', arg_type=manifest_id_type)
 
-    with self.argument_context('acr manifest metadata list') as c:
+    with self.argument_context('acr manifest list-metadata') as c:
         c.positional('repo_id', arg_type=repo_id_type)
 
-    with self.argument_context('acr manifest metadata update') as c:
+    with self.argument_context('acr manifest update-metadata') as c:
         c.positional('manifest_id', arg_type=manifest_id_type)
 
     with self.argument_context('acr repository untag') as c:
