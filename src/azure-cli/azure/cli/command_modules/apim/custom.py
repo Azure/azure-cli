@@ -191,8 +191,8 @@ def apim_apply_network_configuration_updates(client, resource_group_name, name, 
 
 
 def apim_api_schema_create(client, resource_group_name, service_name, api_id, schema_id, schema_type,
-                           schema_name=None, schema_path=None, schema_content=None, value=None,
-                           resource_type=None, definitions=None, components=None, no_wait=False):
+                           schema_name=None, schema_path=None, schema_content=None,
+                           resource_type=None, no_wait=False):
     """creates or updates an API Schema. """
 
     if schema_path is not None and schema_content is None:
@@ -213,9 +213,7 @@ def apim_api_schema_create(client, resource_group_name, service_name, api_id, sc
         name=schema_name,
         type=resource_type,
         content_type=schema_type,
-        value=value,
-        definitions=definitions,
-        components=components
+        value=value
     )
 
     return sdk_no_wait(no_wait, client.api_schema.begin_create_or_update,

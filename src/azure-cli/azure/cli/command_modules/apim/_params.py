@@ -129,6 +129,9 @@ def load_arguments(self, _):
             'schema_type', arg_group='Schema',
             help='Schema content type. Must be a valid a media type used in a Content-Type header as defined in the RFC 2616. Media type of the schema document (e.g. application/json, application/xml).',
             required=True)
+        c.argument(
+            'resource_type', arg_group='Schema',
+            help='The type of the resource. E.g. "Microsoft.Compute/virtualMachines" or "Microsoft.Storage/storageAccounts".')
         c.argument('if_match', help='ETag of the Entity.')
 
     with self.argument_context('apim api schema delete') as c:
@@ -142,6 +145,7 @@ def load_arguments(self, _):
             'schema_id', arg_group='Schema',
             help='Schema identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.',
             required=True)
+        c.argument('if_match', help='ETag of the Entity.')
 
     with self.argument_context('apim api schema show') as c:
         c.argument('service_name', options_list=['--service-name', '-n'],
