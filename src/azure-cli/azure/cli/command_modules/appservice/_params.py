@@ -18,7 +18,7 @@ from ._completers import get_hostname_completion_list
 from ._constants import (FUNCTIONS_VERSIONS, WINDOWS_OS_NAME, LINUX_OS_NAME)
 
 from ._validators import (validate_timeout_value, validate_site_create, validate_asp_create,
-                          validate_add_vnet, validate_front_end_scale_factor, validate_ase_create, validate_ip_address,
+                          validate_front_end_scale_factor, validate_ase_create, validate_ip_address,
                           validate_service_tag, validate_public_cloud)
 
 AUTH_TYPES = {
