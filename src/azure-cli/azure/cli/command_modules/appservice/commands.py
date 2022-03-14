@@ -9,7 +9,8 @@ from azure.cli.core.util import empty_on_404
 
 from ._client_factory import cf_web_client, cf_plans, cf_webapps
 from ._validators import (validate_onedeploy_params, validate_staticsite_link_function, validate_staticsite_sku,
-                          validate_vnet_integration, validate_asp_create, validate_functionapp_asp_create)
+                          validate_vnet_integration, validate_asp_create, validate_functionapp_asp_create,
+                          validate_app_exists)
 
 
 def output_slots_in_table(slots):
@@ -122,15 +123,14 @@ def load_command_table(self, _):
         g.custom_command('up', 'webapp_up', exception_handler=ex_handler_factory())
         g.custom_command('ssh', 'ssh_webapp', exception_handler=ex_handler_factory(), is_preview=True)
         g.custom_command('list', 'list_webapp', table_transformer=transform_web_list_output)
-        g.custom_show_command('show', 'show_webapp', table_transformer=transform_web_output)
+        g.custom_show_command('show', 'show_app', table_transformer=transform_web_output)
         g.custom_command('delete', 'delete_webapp')
         g.custom_command('stop', 'stop_webapp')
         g.custom_command('start', 'start_webapp')
         g.custom_command('restart', 'restart_webapp')
         g.custom_command('browse', 'view_in_browser')
         g.custom_command('list-instances', 'list_instances')
-        # TO DO: Move back to using list_runtimes function once Available Stacks API is updated (it's updated with Antares deployments)
-        g.custom_command('list-runtimes', 'list_runtimes_hardcoded')
+        g.custom_command('list-runtimes', 'list_runtimes')
         g.custom_command('identity assign', 'assign_identity')
         g.custom_show_command('identity show', 'show_identity')
         g.custom_command('identity remove', 'remove_identity')
@@ -215,7 +215,7 @@ def load_command_table(self, _):
 
     with self.command_group('webapp deployment source') as g:
         g.custom_command('config-local-git', 'enable_local_git')
-        g.custom_command('config-zip', 'enable_zip_deploy_webapp')
+        g.custom_command('config-zip', 'enable_zip_deploy_webapp', exception_handler=ex_handler_factory())
         g.custom_command('config', 'config_source_control', exception_handler=ex_handler_factory())
         g.custom_command('sync', 'sync_site_repo', exception_handler=ex_handler_factory())
         g.custom_show_command('show', 'show_source_control')
@@ -223,16 +223,16 @@ def load_command_table(self, _):
         g.custom_command('update-token', 'update_git_token', exception_handler=ex_handler_factory())
 
     with self.command_group('webapp log') as g:
-        g.custom_command('tail', 'get_streaming_log')
+        g.custom_command('tail', 'get_streaming_log', validator=validate_app_exists)
         g.custom_command('download', 'download_historical_logs')
         g.custom_command('config', 'config_diagnostics')
         g.custom_show_command('show', 'show_diagnostic_settings')
 
-    with self.command_group('webapp log deployment', is_preview=True) as g:
+    with self.command_group('webapp log deployment') as g:
         g.custom_show_command('show', 'show_deployment_log')
         g.custom_command('list', 'list_deployment_logs')
 
-    with self.command_group('functionapp log deployment', is_preview=True) as g:
+    with self.command_group('functionapp log deployment') as g:
         g.custom_show_command('show', 'show_deployment_log')
         g.custom_command('list', 'list_deployment_logs')
 
@@ -255,7 +255,7 @@ def load_command_table(self, _):
         g.custom_command('config', 'enable_cd')
         g.custom_command('show-cd-url', 'show_container_cd_url')
 
-    with self.command_group('webapp deployment github-actions', is_preview=True) as g:
+    with self.command_group('webapp deployment github-actions') as g:
         g.custom_command('add', 'add_github_actions')
         g.custom_command('remove', 'remove_github_actions')
 
@@ -309,8 +309,9 @@ def load_command_table(self, _):
     with self.command_group('functionapp') as g:
         g.custom_command('create', 'create_functionapp', exception_handler=ex_handler_factory(),
                          validator=validate_vnet_integration)
+        g.custom_command('list-runtimes', 'list_function_app_runtimes')
         g.custom_command('list', 'list_function_app', table_transformer=transform_web_list_output)
-        g.custom_show_command('show', 'show_functionapp', table_transformer=transform_web_output)
+        g.custom_show_command('show', 'show_app', table_transformer=transform_web_output)
         g.custom_command('delete', 'delete_function_app')
         g.custom_command('stop', 'stop_webapp')
         g.custom_command('start', 'start_webapp')

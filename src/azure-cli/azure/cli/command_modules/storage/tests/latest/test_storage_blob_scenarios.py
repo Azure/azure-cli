@@ -173,38 +173,6 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
-    def test_storage_blob_socket_timeout(self, resource_group, storage_account):
-        local_dir = self.create_temp_dir()
-        local_file = self.create_temp_file(1)
-        blob_name = self.create_random_name(prefix='blob', length=24)
-        account_info = self.get_account_info(resource_group, storage_account)
-
-        container = self.create_container(account_info)
-
-        from azure.common import AzureException
-        with self.assertRaises(AzureException):
-            self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --type block --socket-timeout -11',
-                             account_info, container, local_file, blob_name)
-
-        self.storage_cmd('storage blob exists -n {} -c {}', account_info, blob_name, container) \
-            .assert_with_checks(JMESPathCheck('exists', False))
-
-        self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --type block --socket-timeout 10',
-                         account_info, container, local_file, blob_name)
-        self.storage_cmd('storage blob exists -n {} -c {}', account_info, blob_name, container) \
-            .assert_with_checks(JMESPathCheck('exists', True))
-
-        self.storage_cmd('storage blob show -n {} -c {}', account_info, blob_name, container) \
-            .assert_with_checks(JMESPathCheck('name', blob_name))
-
-        downloaded = os.path.join(local_dir, 'test.file')
-
-        self.storage_cmd('storage blob download -n {} -c {} --file "{}" --socket-timeout 10',
-                         account_info, blob_name, container, downloaded)
-        self.assertTrue(os.path.isfile(downloaded), 'The file is not downloaded.')
-
-    @ResourceGroupPreparer()
-    @StorageAccountPreparer()
     def test_storage_blob_lease_operations(self, resource_group, storage_account):
         account_info = self.get_account_info(resource_group, storage_account)
         local_file = self.create_temp_file(128)
@@ -526,6 +494,71 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         from azure.core.exceptions import ClientAuthenticationError
         with self.assertRaisesRegex(ClientAuthenticationError, "Authentication failure"):
             self.cmd('storage blob show --account-name {} --account-key="YQ==" -c foo -n bar.txt '.format(storage_account))
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(kind='StorageV2', location='centraluseuap')
+    def test_storage_blob_upload_tiers_scenarios(self, resource_group, storage_account_info):
+        account_info = storage_account_info
+        container = self.create_container(account_info, prefix="con")
+
+        local_file = self.create_temp_file(128)
+
+        # test with file
+        block_blob_tiers = ['Hot','Cool','Archive']
+        for tier in block_blob_tiers:
+            blob_name = self.create_random_name(prefix='blob', length=24)
+            self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --type {} --tier {} ', account_info,
+                             container, local_file, blob_name, 'block', tier)
+            self.storage_cmd('storage blob show -c {} -n {} ', account_info, container, blob_name) \
+                .assert_with_checks(JMESPathCheck('name', blob_name),
+                                    JMESPathCheck('properties.blobType', 'BlockBlob'),
+                                    JMESPathCheck('properties.contentLength', 128 * 1024),
+                                    JMESPathCheck('properties.blobTier', tier))
+
+        # page_blob_tiers = ["P4","P6","P10","P15","P20","P30","P40","P50","P60","P70","P80"]
+        # for tier in page_blob_tiers:
+        #     blob_name = self.create_random_name(prefix='blob', length=24)
+        #     self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --type {} --tier {} --debug', account_info,
+        #                      container, local_file, blob_name, 'page', tier)
+        #     self.storage_cmd('storage blob show -c {} -n {} ', account_info, container, blob_name) \
+        #         .assert_with_checks(JMESPathCheck('name', blob_name),
+        #                             JMESPathCheck('properties.blobType', 'PageBlob'),
+        #                             JMESPathCheck('properties.contentLength', 128 * 1024),
+        #                             JMESPathCheck('properties.blobTier', tier))
+
+        # test with data
+        blob_name = self.create_random_name(prefix='blob', length=24)
+        test_string = "testupload"
+        length = len(test_string)
+
+        self.storage_cmd('storage blob upload -c {} --data "{}" --length {} -n {} --overwrite', account_info,
+                         container, test_string, length, blob_name)
+        self.storage_cmd('storage blob show -c {} -n {} ', account_info, container, blob_name) \
+            .assert_with_checks(JMESPathCheck('name', blob_name),
+                                JMESPathCheck('properties.blobType', 'BlockBlob'),
+                                JMESPathCheck('properties.contentLength', length))
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer()
+    def test_storage_blob_upload_content_md5_scenarios(self, resource_group, storage_account_info):
+        import hashlib
+        import base64
+        account_info = storage_account_info
+        container = self.create_container(account_info, prefix="con")
+
+        local_file = self.create_temp_file(128)
+
+        def md5(fname):
+            hash_md5 = hashlib.md5()
+            with open(fname, "rb") as f:
+                for chunk in iter(lambda: f.read(4096), b""):
+                    hash_md5.update(chunk)
+            return hash_md5.digest()
+        md5_digest = md5(local_file)
+        md5_base64_encode = base64.b64encode(md5_digest).decode("utf-8")
+        blob_name = self.create_random_name(prefix='blob', length=24)
+        self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --content-md5 {}', account_info,
+                         container, local_file, blob_name, md5_base64_encode)
 
 
 @api_version_constraint(ResourceType.DATA_STORAGE_BLOB, min_api='2019-02-02')

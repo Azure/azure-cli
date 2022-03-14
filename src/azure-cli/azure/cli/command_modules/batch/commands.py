@@ -43,10 +43,10 @@ def load_command_table(self, _):
         )
 
     def get_mgmt_factory(name):
-        return getattr(factories, "mgmt_{}_client_factory".format(name))
+        return getattr(factories, f"mgmt_{name}_client_factory")
 
     def get_data_factory(name):
-        return getattr(factories, "{}_client_factory".format(name))
+        return getattr(factories, f"{name}_client_factory")
 
     # Mgmt Account Operations
     with self.command_group('batch account', get_mgmt_type('batch_account'), client_factory=get_mgmt_factory('batch_account')) as g:

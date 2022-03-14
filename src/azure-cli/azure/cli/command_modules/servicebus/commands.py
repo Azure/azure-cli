@@ -7,6 +7,7 @@
 # pylint: disable=too-many-statements
 
 from azure.cli.core.commands import CliCommandType
+from azure.cli.core.profiles import ResourceType
 
 
 def load_command_table(self, _):
@@ -54,7 +55,7 @@ def load_command_table(self, _):
 # Namespace Region
     custom_tmpl = 'azure.cli.command_modules.servicebus.custom#{}'
     servicebus_custom = CliCommandType(operations_tmpl=custom_tmpl)
-    with self.command_group('servicebus namespace', sb_namespace_util, client_factory=namespaces_mgmt_client_factory) as g:
+    with self.command_group('servicebus namespace', sb_namespace_util, client_factory=namespaces_mgmt_client_factory, min_api='2021-06-01-preview') as g:
         g.custom_command('create', 'cli_namespace_create')
         g.show_command('show', 'get')
         g.custom_command('list', 'cli_namespace_list')
@@ -149,3 +150,13 @@ def load_command_table(self, _):
         g.custom_command('add', 'cli_networkrule_createupdate', validator=validate_subnet)
         g.command('list', 'get_network_rule_set')
         g.custom_command('remove', 'cli_networkrule_delete', validator=validate_subnet)
+
+# Identity Region
+    with self.command_group('servicebus namespace identity', sb_namespace_util, min_api='2021-06-01-preview', resource_type=ResourceType.MGMT_SERVICEBUS, client_factory=namespaces_mgmt_client_factory) as g:
+        g.custom_command('assign', 'cli_add_identity')
+        g.custom_command('remove', 'cli_remove_identity')
+
+# Encryption Region
+    with self.command_group('servicebus namespace encryption', sb_namespace_util, min_api='2021-06-01-preview', resource_type=ResourceType.MGMT_SERVICEBUS, client_factory=namespaces_mgmt_client_factory) as g:
+        g.custom_command('add', 'cli_add_encryption')
+        g.custom_command('remove', 'cli_remove_encryption')

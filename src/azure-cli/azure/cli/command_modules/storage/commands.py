@@ -314,8 +314,10 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                             min_api='2019-02-02',
                             custom_command_type=get_custom_sdk('blob', client_factory=cf_blob_client,
                                                                resource_type=ResourceType.DATA_STORAGE_BLOB)) as g:
-        from ._transformers import transform_blob_list_output, transform_blob_json_output
+        from ._transformers import transform_blob_list_output, transform_blob_json_output, transform_blob_upload_output
         from ._format import transform_blob_output
+        from ._exception_handler import file_related_exception_handler
+        from ._validators import process_blob_upload_batch_parameters
         g.storage_custom_command_oauth('copy start', 'copy_blob')
         g.storage_custom_command_oauth('show', 'show_blob_v2', transform=transform_blob_json_output,
                                        table_transformer=transform_blob_output,
@@ -330,6 +332,11 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command_oauth('set-legal-hold', 'set_legal_hold', min_api='2020-10-02')
         g.storage_custom_command_oauth('immutability-policy set', 'set_immutability_policy', min_api='2020-10-02')
         g.storage_command_oauth('immutability-policy delete', 'delete_immutability_policy', min_api='2020-10-02')
+        g.storage_custom_command_oauth('upload', 'upload_blob', transform=transform_blob_upload_output,
+                                       exception_handler=file_related_exception_handler)
+        g.storage_custom_command_oauth('upload-batch', 'storage_blob_upload_batch', client_factory=cf_blob_service,
+                                       validator=process_blob_upload_batch_parameters,
+                                       exception_handler=file_related_exception_handler)
 
     blob_lease_client_sdk = CliCommandType(
         operations_tmpl='azure.multiapi.storagev2.blob._lease#BlobLeaseClient.{}',
@@ -352,8 +359,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         from ._format import transform_boolean_for_table, transform_blob_output
         from ._transformers import (transform_storage_list_output, transform_url,
                                     create_boolean_result_output_transformer)
-        from ._validators import (process_blob_download_batch_parameters, process_blob_delete_batch_parameters,
-                                  process_blob_upload_batch_parameters)
+        from ._validators import (process_blob_download_batch_parameters, process_blob_delete_batch_parameters)
         from ._exception_handler import file_related_exception_handler
         g.storage_command_oauth(
             'download', 'get_blob_to_path', table_transformer=transform_blob_output,
@@ -370,12 +376,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                 transform=create_boolean_result_output_transformer(
                                     'undeleted'),
                                 table_transformer=transform_boolean_for_table, min_api='2017-07-29')
-        g.storage_custom_command_oauth('upload', 'upload_blob',
-                                       doc_string_source='blob#BlockBlobService.create_blob_from_path',
-                                       exception_handler=file_related_exception_handler)
-        g.storage_custom_command_oauth('upload-batch', 'storage_blob_upload_batch',
-                                       validator=process_blob_upload_batch_parameters,
-                                       exception_handler=file_related_exception_handler)
         g.storage_custom_command_oauth('download-batch', 'storage_blob_download_batch',
                                        validator=process_blob_download_batch_parameters,
                                        exception_handler=file_related_exception_handler)
