@@ -56,14 +56,25 @@ def show_policy(client, resource_group_name, vault_name, name):
     return client.get(vault_name, resource_group_name, name)
 
 
-def list_policies(client, resource_group_name, vault_name, workload_type=None, backup_management_type=None):
+def list_policies(client, resource_group_name, vault_name, workload_type=None, backup_management_type=None,
+                  policy_sub_type=None):
     workload_type = _check_map(workload_type, workload_type_map)
     filter_string = custom_help.get_filter_string({
         'backupManagementType': backup_management_type,
         'workloadType': workload_type})
 
     policies = client.list(vault_name, resource_group_name, filter_string)
-    return custom_help.get_list_from_paged_response(policies)
+    paged_policies = custom_help.get_list_from_paged_response(policies)
+
+    if policy_sub_type:
+        if policy_sub_type == 'Enhanced':
+            paged_policies = [policy for policy in paged_policies if (hasattr(policy.properties, 'policy_type') and
+                                                                      policy.properties.policy_type == 'V2')]
+        else:
+            paged_policies = [policy for policy in paged_policies if (not hasattr(policy.properties, 'policy_type') or
+                                                                      policy.properties.policy_type is None or
+                                                                      policy.properties.policy_type == 'V1')]
+    return paged_policies
 
 
 def show_item(cmd, client, resource_group_name, vault_name, container_name, name, backup_management_type=None,

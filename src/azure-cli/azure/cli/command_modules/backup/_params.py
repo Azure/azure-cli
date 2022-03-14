@@ -211,6 +211,7 @@ def load_arguments(self, _):
         c.argument('vault_name', vault_name_type, id_part=None)
         c.argument('backup_management_type', backup_management_type)
         c.argument('workload_type', workload_type)
+        c.argument('policy_sub_type', arg_type=get_enum_type(['Standard', 'Enhanced']), help='Sub type of policies to be retrieved. To list standard backup policies, specify ‘Standard’ as the value of this parameter. To list enhanced backup policies for Azure VMs, specify ‘Enhanced’ as the value of this parameter.')
 
     with self.argument_context('backup policy get-default-for-vm') as c:
         c.argument('vault_name', vault_name_type, id_part=None)

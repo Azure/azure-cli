@@ -201,6 +201,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'policy2': policy2,
             'policy3': self.create_random_name('clitest-policy', 24),
             'default': 'DefaultPolicy',
+            'enhanced': 'EnhancedPolicy',
             'vault': vault_name,
             'vm1': vm1,
             'vm2': vm2,
@@ -214,8 +215,14 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         self.cmd('backup policy list -g {rg} -v {vault}', checks=[
             self.check("length([?name == '{default}'])", 1),
+            self.check("length([?name == '{enhanced}'])", 1),
             self.check("length([?name == '{policy1}'])", 1),
             self.check("length([?name == '{policy2}'])", 1)
+        ])
+
+        self.cmd('backup policy list -g {rg} -v {vault} --policy-sub-type Enhanced', checks=[
+            self.check("length(@)", 1),
+            self.check("length([?name == '{enhanced}'])", 1)
         ])
 
         self.cmd('backup policy list-associated-items -g {rg} -v {vault} -n {default}', checks=[

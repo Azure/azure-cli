@@ -33,8 +33,10 @@ def show_policy(client, resource_group_name, vault_name, name):
     return common.show_policy(client, resource_group_name, vault_name, name)
 
 
-def list_policies(client, resource_group_name, vault_name, workload_type=None, backup_management_type=None):
-    return common.list_policies(client, resource_group_name, vault_name, workload_type, backup_management_type)
+def list_policies(client, resource_group_name, vault_name, workload_type=None, backup_management_type=None,
+                  policy_sub_type=None):
+    return common.list_policies(client, resource_group_name, vault_name, workload_type, backup_management_type,
+                                policy_sub_type)
 
 
 def create_policy(client, resource_group_name, vault_name, name, policy, backup_management_type, workload_type=None):

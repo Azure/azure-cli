@@ -443,6 +443,12 @@ def set_policy(client, resource_group_name, vault_name, policy, policy_name):
     retention_range_in_days = policy_object.properties.instant_rp_retention_range_in_days
     schedule_run_frequency = policy_object.properties.schedule_policy.schedule_run_frequency
 
+    if schedule_run_frequency == 'Hourly':
+        raise InvalidArgumentValueError(
+            """
+            Hourly IaasVM backups are not allowed from CLI currently. Please try using portal experience for the same.
+            """)
+
     # Validating range of days input
     if schedule_run_frequency == 'Weekly' and retention_range_in_days != 5:
         raise CLIError(
@@ -483,6 +489,11 @@ def set_policy(client, resource_group_name, vault_name, policy, policy_name):
 
 def create_policy(client, resource_group_name, vault_name, name, policy):
     policy_object = cust_help.get_policy_from_json(client, policy)
+    if policy_object.properties.schedule_policy.schedule_run_frequency == 'Hourly':
+        raise InvalidArgumentValueError(
+            """
+            Hourly IaasVM backups are not allowed from CLI currently. Please try using portal experience for the same.
+            """)
     policy_object.name = name
     policy_object.properties.backup_management_type = "AzureIaasVM"
 
@@ -544,6 +555,16 @@ def enable_protection_for_vm(cmd, client, resource_group_name, vault_name, vm, p
             The policy type should match with the workload being protected.
             Use the relevant get-default policy command and use it to protect the workload.
             """)
+
+    if (hasattr(vm, 'security_profile') and hasattr(vm.security_profile, 'security_type') and
+            vm.security_profile.security_type is not None and
+            vm.security_profile.security_type.lower() == 'trustedlaunch'):
+        if policy.properties.policy_type != 'V2':
+            raise InvalidArgumentValueError(
+                """
+                Trusted VM can only be protected using Enhanced Policy. Please provide a valid IaasVM Enhanced Policy
+                in --policy-name argument.
+                """)
 
     # Get protectable item.
     protectable_item = _get_protectable_item_for_vm(cmd.cli_ctx, vault_name, resource_group_name, vm_name, vm_rg)
