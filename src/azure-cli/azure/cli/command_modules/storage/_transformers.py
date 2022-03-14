@@ -5,7 +5,7 @@
 
 import base64
 from knack.log import get_logger
-from knack.util import todict
+from knack.util import todict, to_camel_case
 from .track2_util import _encode_bytes
 from .url_quote_util import encode_url_path
 
@@ -50,6 +50,15 @@ def transform_cors_list_output(result):
     return new_result
 
 
+def transform_table_stats_output(result):
+    if not isinstance(result, dict):
+        return result
+    output = {}
+    for key, value in result.items():
+        output[to_camel_case(key)] = transform_table_stats_output(value)
+    return output
+
+
 def transform_entity_query_output(result):
     from collections import OrderedDict
     new_results = []
@@ -66,7 +75,7 @@ def transform_entity_query_output(result):
 
 
 def transform_entities_result(result):
-    for entity in result.items:
+    for entity in result['items']:
         transform_entity_result(entity)
     return result
 
@@ -74,8 +83,11 @@ def transform_entities_result(result):
 def transform_entity_result(entity):
     for key in entity.keys():
         entity_property = entity[key]
-        if hasattr(entity_property, 'value') and isinstance(entity_property.value, bytes):
-            entity_property.value = base64.b64encode(entity_property.value).decode()
+        if isinstance(entity_property, bytes):
+            entity[key] = base64.b64encode(entity_property).decode()
+    if hasattr(entity, 'metadata'):
+        entity['Timestamp'] = entity.metadata['timestamp']
+        entity['etag'] = entity.metadata['etag']
     return entity
 
 

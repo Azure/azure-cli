@@ -57,12 +57,65 @@ def generate_sas(client, table_name, permission=None, expiry=None, start=None, i
                               start_pk=start_pk, start_rk=start_rk, end_pk=end_pk, end_rk=end_rk)
 
 
-def insert_table_entity(client, table_name, entity, if_exists='fail', timeout=None):
+def insert_table_entity(client, entity, if_exists='fail'):
     if if_exists == 'fail':
-        return client.insert_entity(table_name, entity, timeout)
-    if if_exists == 'merge':
-        return client.insert_or_merge_entity(table_name, entity, timeout)
-    if if_exists == 'replace':
-        return client.insert_or_replace_entity(table_name, entity, timeout)
+        return client.upsert_entity(entity, mode='merge')
+    if if_exists == 'merge' or if_exists == 'replace':
+        return client.upsert_entity(entity, mode=if_exists)
     from knack.util import CLIError
     raise CLIError("Unrecognized value '{}' for --if-exists".format(if_exists))
+
+
+def _update_table_entity(client, entity, mode, if_match='*'):
+    if not if_match or if_match == '*':
+        return client.update_entity(entity, mode)
+    else:
+        from azure.core import MatchConditions
+        return client.update_entity(entity, mode, etag=if_match, match_condition=MatchConditions.IfNotModified)
+
+
+def replace_table_entity(client, entity, if_match='*'):
+    return _update_table_entity(client, entity, mode='replace', if_match=if_match)
+
+
+def merge_table_entity(client, entity, if_match='*'):
+    return _update_table_entity(client, entity, mode='merge', if_match=if_match)
+
+
+def delete_table_entity(client, partition_key, row_key, if_match='*'):
+    if not if_match or if_match == '*':
+        return client.delete_entity(partition_key=partition_key, row_key=row_key)
+    else:
+        from azure.core import MatchConditions
+        return client.delete_entity(partition_key=partition_key, row_key=row_key, etag=if_match, match_condition=MatchConditions.IfNotModified)
+
+
+def query_table_entity(client, filter=None, select=None, num_results=None, marker=None):
+    def _convert_marker_to_ct(marker):
+        if not marker:
+            return None
+        ct = {
+            'PartitionKey': marker.get('nextpartitionkey'),
+            'RowKey': marker.get('nextrowkey')
+        }
+        return ct
+
+    def _convert_ct_to_next_marker(ct):
+        if not ct:
+            return {}
+        marker = {
+            'nextpartitionkey': ct.get('PartitionKey'),
+            'nextrowkey': ct.get('RowKey')
+        }
+        return marker
+
+    from ..track2_util import list_generator
+    generator = client.query_entities(query_filter=filter, results_per_page=num_results, select=select)
+    pages = generator.by_page(continuation_token=_convert_marker_to_ct(marker))
+    items = list_generator(pages=pages, num_results=num_results)
+
+    result = {
+        'items': items,
+        'nextMarker': _convert_ct_to_next_marker(pages.continuation_token)
+    }
+    return result

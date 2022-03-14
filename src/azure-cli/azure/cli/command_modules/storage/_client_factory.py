@@ -361,3 +361,7 @@ def cf_table_service(cli_ctx, kwargs):
         credential = token_credential
 
     return TableServiceClient(endpoint=account_url, credential=credential, **client_kwargs)
+
+
+def cf_table_client(cli_ctx, kwargs):
+    return cf_table_service(cli_ctx, kwargs).get_table_client(table_name=kwargs.pop('table_name'))

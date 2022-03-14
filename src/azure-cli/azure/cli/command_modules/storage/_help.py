@@ -1614,6 +1614,16 @@ examples:
     crafted: true
 """
 
+helps['storage entity merge'] = """
+type: command
+short-summary: Update an existing entity by merging the entity's properties.
+"""
+
+helps['storage entity replace'] = """
+type: command
+short-summary: Update an existing entity in a table.
+"""
+
 helps['storage entity query'] = """
 type: command
 short-summary: List entities which satisfy a query.
@@ -1627,6 +1637,11 @@ examples:
     text: |
         az storage entity query --table-name MyTable
     crafted: true
+"""
+
+helps['storage entity delete'] = """
+type: command
+short-summary: Delete an existing entity in a table.
 """
 
 helps['storage file'] = """
@@ -2646,6 +2661,26 @@ examples:
 helps['storage table'] = """
 type: group
 short-summary: Manage NoSQL key-value storage.
+"""
+
+helps['storage table create'] = """
+type: command
+short-summary: Create a new table in the storage account.
+"""
+
+helps['storage table delete'] = """
+type: command
+short-summary: Delete the specified table and any data it contains.
+"""
+
+helps['storage table exists'] = """
+type: command
+short-summary: Return a boolean indicating whether the table exists.
+"""
+
+helps['storage table generate-sas'] = """
+type: command
+short-summary: Generate a shared access signature for the table.
 """
 
 helps['storage table list'] = """
