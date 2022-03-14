@@ -323,7 +323,8 @@ def load_aaz_command_table(loader, aaz_pkg_name, args):
     command_group_table = {}
     arg_str = ' '.join(args)
 
-    _load_aaz_pkg(loader, profile_pkg, command_table, command_group_table, arg_str)
+    if profile_pkg is not None:
+        _load_aaz_pkg(loader, profile_pkg, command_table, command_group_table, arg_str)
 
     for group_name, command_group in command_group_table.items():
         loader.command_group_table[group_name] = command_group
