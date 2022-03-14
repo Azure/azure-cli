@@ -1843,6 +1843,16 @@ def list_extensions(cmd, resource_group_name, vm_name):
     return result
 
 
+def show_extensions(cmd, resource_group_name, vm_name, vm_extension_name, instance_view=False, expand=None):
+    if instance_view:
+        expand = 'instanceView'
+    client = _compute_client_factory(cmd.cli_ctx).virtual_machine_extensions
+    return client.get(resource_group_name=resource_group_name,
+                      vm_name=vm_name,
+                      vm_extension_name=vm_extension_name,
+                      expand=expand)
+
+
 def set_extension(cmd, resource_group_name, vm_name, vm_extension_name, publisher, version=None, settings=None,
                   protected_settings=None, no_auto_upgrade=False, force_update=False, no_wait=False,
                   extension_instance_name=None, enable_auto_upgrade=None):
