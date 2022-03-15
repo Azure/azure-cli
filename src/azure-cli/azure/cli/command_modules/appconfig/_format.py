@@ -72,7 +72,7 @@ def _deleted_configstore_format_group(item):
         ('DELETION DATE', _format_datetime(_get_value(item, 'deletionDate'))),
         ('LOCATION', _get_value(item, 'location')),
         ('NAME', _get_value(item, 'name')),
-        ('PURGE PROTECTION ENABLED', _get_value(item, 'purgeProtectionEnabled')),
+        ('PURGE PROTECTION', 'ENABLED' if _get_value(item, 'purgeProtectionEnabled').lower() == 'true' else 'DISABLED'),
         ('SCHEDULED PURGE DATE', _format_datetime(_get_value(item, 'scheduledPurgeDate')))
     ])
 

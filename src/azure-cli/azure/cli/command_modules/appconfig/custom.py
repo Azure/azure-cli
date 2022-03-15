@@ -14,9 +14,6 @@ from azure.mgmt.appconfiguration.models import (ConfigurationStoreUpdateParamete
                                                 EncryptionProperties,
                                                 KeyVaultProperties,
                                                 RegenerateKeyParameters, CreateMode)
-from azure.core.exceptions import HttpResponseError
-from azure.cosmos.http_constants import StatusCodes
-from azure.cli.core.azclierror import AzureResponseError
 from azure.cli.core.util import user_confirmation
 
 from ._utils import resolve_store_metadata, resolve_deleted_store_metadata
@@ -51,8 +48,6 @@ def create_configstore(client,
         logger.warning("Options '--enable-purge-protection' and '--retention-days' will be ignored when creating a free store.")
         retention_days = None
         enable_purge_protection = None
-    elif sku.lower() == 'standard' and not retention_days:
-        retention_days = 7
 
     configstore_params = ConfigurationStore(location=location.lower(),
                                             identity=__get_resource_identity(assign_identity) if assign_identity else None,
@@ -159,6 +154,7 @@ def update_configstore(cmd,
     return client.begin_update(resource_group_name=resource_group_name,
                                config_store_name=name,
                                config_store_update_parameters=update_params)
+
 
 def assign_managed_identity(cmd, client, name, resource_group_name=None, identities=None):
     if resource_group_name is None:
