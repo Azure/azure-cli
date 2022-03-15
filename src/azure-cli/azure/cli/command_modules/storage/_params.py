@@ -13,7 +13,7 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           resource_type_type, services_type, validate_entity, validate_select, validate_blob_type,
                           validate_included_datasets_validator, validate_custom_domain, validate_hns_migration_type,
                           validate_container_public_access,
-                          validate_table_payload_format, add_progress_callback, process_resource_group,
+                          add_progress_callback, process_resource_group,
                           storage_account_key_options, process_file_download_namespace, process_metric_update_namespace,
                           get_char_options_validator, validate_bypass, validate_encryption_source, validate_marker,
                           validate_storage_data_plane_list, validate_azcopy_upload_destination_url,
@@ -1867,6 +1867,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage entity') as c:
         c.argument('entity', options_list=('--entity', '-e'), validator=validate_entity, nargs='+',
                    help='Space-separated list of key=value pairs. Must contain a PartitionKey and a RowKey.')
+        c.argument('partition_key', help='The PartitionKey of the entity.')
+        c.argument('row_key', help='The RowKey of the entity.')
 
     for scope in ['insert', 'show', 'query', 'replace', 'merge', 'delete']:
         with self.argument_context('storage entity {}'.format(scope)) as c:
