@@ -4317,6 +4317,7 @@ def managed_instance_update(
         maintenance_configuration_id=None,
         primary_user_assigned_identity_id=None,
         key_id=None,
+        requested_backup_storage_redundancy=None,
         identity_type=None,
         user_assigned_identity_id=None,
         virtual_network_subnet_id=None):
@@ -4354,6 +4355,8 @@ def managed_instance_update(
         cmd.cli_ctx,
         instance.location,
         instance.sku)
+    instance.requested_backup_storage_redundancy = (
+        requested_backup_storage_redundancy or instance.requested_backup_storage_redundancy)
 
     if public_data_endpoint_enabled is not None:
         instance.public_data_endpoint_enabled = public_data_endpoint_enabled

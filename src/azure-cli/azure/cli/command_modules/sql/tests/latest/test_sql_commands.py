@@ -4233,6 +4233,40 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
         # test list sql managed_instance in the subscription should be at least 1
         self.cmd('sql mi list', checks=[JMESPathCheckGreaterThan('length(@)', 0)])
 
+class SqlManagedInstanceBackupStorageRedundancyTest(ScenarioTest):
+    bsr_geo = "Geo"
+
+    @AllowLargeResponse()
+    @ManagedInstancePreparer(
+        otherParams=f"--bsr {bsr_geo}")
+    def test_sql_managed_instance_mgmt(self, mi, rg):
+        managed_instance_name_1 = mi
+        resource_group_1 = rg
+
+        # test show sql managed instance 1
+        self.cmd('sql mi show -g {} -n {}'
+            .format(resource_group_1, managed_instance_name_1),
+            checks=[
+                JMESPathCheck('name', managed_instance_name_1),
+                JMESPathCheck('resourceGroup', resource_group_1),
+                JMESPathCheck('backupStorageRedundancy', self.bsr_geo)]).get_output_in_json()
+
+        bsr_local = "Local"
+        # Test update bsr to Local
+        self.cmd('sql mi update -g {} -n {} --bsr {}'
+            .format(resource_group_1, managed_instance_name_1, bsr_local),
+            checks=[
+                JMESPathCheck('name', managed_instance_name_1),
+                JMESPathCheck('resourceGroup', resource_group_1),
+                JMESPathCheck('backupStorageRedundancy', bsr_local)])
+
+        # Test update bsr to Geo
+        self.cmd('sql mi update -g {} -n {} --bsr {}'
+            .format(resource_group_1, managed_instance_name_1, self.bsr_geo),
+            checks=[
+                JMESPathCheck('name', managed_instance_name_1),
+                JMESPathCheck('resourceGroup', resource_group_1),
+                JMESPathCheck('backupStorageRedundancy', self.bsr_geo)])
 
 class SqlManagedInstanceMgmtScenarioIdentityTest(ScenarioTest):
     test_umi = '/subscriptions/e64f3e8e-ab91-4a65-8cdd-5cd2f47d00b4/resourcegroups/viparek/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi'

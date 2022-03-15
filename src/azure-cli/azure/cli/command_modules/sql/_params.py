@@ -1962,6 +1962,9 @@ def load_arguments(self, _):
                    options_list=['--maint-config-id', '-m'],
                    help='Change maintenance configuration for this managed instance.')
 
+        c.argument('requested_backup_storage_redundancy',
+                   arg_type=backup_storage_redundancy_param_type_mi)
+
         # Create args that will be used to build up the Managed Instance's Sku object
         create_args_for_complex_type(
             c, 'sku', Sku, [
