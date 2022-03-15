@@ -2917,6 +2917,7 @@ class AKSContext:
             CONST_INGRESS_APPGW_WATCH_NAMESPACE,
             CONST_KUBE_DASHBOARD_ADDON_NAME, CONST_MONITORING_ADDON_NAME,
             CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID,
+            CONST_MONITORING_USING_AAD_MSI_AUTH,
             CONST_OPEN_SERVICE_MESH_ADDON_NAME, CONST_ROTATION_POLL_INTERVAL,
             CONST_SECRET_ROTATION_ENABLED, CONST_VIRTUAL_NODE_ADDON_NAME,
             CONST_VIRTUAL_NODE_SUBNET_NAME)
@@ -2979,6 +2980,9 @@ class AKSContext:
             "CONST_ROTATION_POLL_INTERVAL"
         ] = CONST_ROTATION_POLL_INTERVAL
 
+        addon_consts[
+            "CONST_MONITORING_USING_AAD_MSI_AUTH"
+        ] = CONST_MONITORING_USING_AAD_MSI_AUTH
         return addon_consts
 
     def _get_enable_addons(self, enable_validation: bool = False) -> List[str]:
@@ -3217,6 +3221,38 @@ class AKSContext:
         # this parameter does not need dynamic completion
         # this parameter does not need validation
         return appgw_name
+
+    def get_enable_msi_auth_for_monitoring(self) -> Union[bool, None]:
+        """Obtain the value of enable_msi_auth_for_monitoring.
+
+        Note: The arg type of this parameter supports three states (True, False or None), but the corresponding default
+        value in entry function is not None.
+
+        :return: bool or None
+        """
+        # determine the value of constants
+        addon_consts = self.get_addon_consts()
+        CONST_MONITORING_ADDON_NAME = addon_consts.get("CONST_MONITORING_ADDON_NAME")
+        CONST_MONITORING_USING_AAD_MSI_AUTH = addon_consts.get("CONST_MONITORING_USING_AAD_MSI_AUTH")
+
+        # read the original value passed by the command
+        enable_msi_auth_for_monitoring = self.raw_param.get("enable_msi_auth_for_monitoring")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if (
+            self.mc and
+            self.mc.addon_profiles and
+            CONST_MONITORING_ADDON_NAME in self.mc.addon_profiles and
+            self.mc.addon_profiles.get(
+                CONST_MONITORING_ADDON_NAME
+            ).config.get(CONST_MONITORING_USING_AAD_MSI_AUTH) is not None
+        ):
+            enable_msi_auth_for_monitoring = self.mc.addon_profiles.get(
+                CONST_MONITORING_ADDON_NAME
+            ).config.get(CONST_MONITORING_USING_AAD_MSI_AUTH)
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return enable_msi_auth_for_monitoring
 
     def get_appgw_subnet_cidr(self) -> Union[str, None]:
         """Obtain the value of appgw_subnet_cidr.
@@ -5166,12 +5202,16 @@ class AKSCreateDecorator:
         CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID = addon_consts.get(
             "CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID"
         )
+        CONST_MONITORING_USING_AAD_MSI_AUTH = addon_consts.get(
+            "CONST_MONITORING_USING_AAD_MSI_AUTH"
+        )
 
         # TODO: can we help the user find a workspace resource ID?
         monitoring_addon_profile = self.models.ManagedClusterAddonProfile(
             enabled=True,
             config={
-                CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: self.context.get_workspace_resource_id()
+                CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: self.context.get_workspace_resource_id(),
+                CONST_MONITORING_USING_AAD_MSI_AUTH: self.context.get_enable_msi_auth_for_monitoring(),
             },
         )
         # post-process, create a deployment
@@ -5181,7 +5221,10 @@ class AKSCreateDecorator:
             self.context.get_resource_group_name(),
             self.context.get_name(),
             self.context.get_location(),
-            aad_route=False,
+            remove_monitoring=False,
+            aad_route=self.context.get_enable_msi_auth_for_monitoring(),
+            create_dcr=True,
+            create_dcra=False,
         )
         # set intermediate
         self.context.set_intermediate("monitoring", True, overwrite_exists=True)
@@ -5683,6 +5726,22 @@ class AKSCreateDecorator:
                     self.context.get_attach_acr(),
                     self.context.get_aks_custom_headers(),
                     self.context.get_no_wait())
+                if self.context.get_intermediate("monitoring") and self.context.get_enable_msi_auth_for_monitoring():
+                    # Create the DCR Association here
+                    addon_consts = self.context.get_addon_consts()
+                    CONST_MONITORING_ADDON_NAME = addon_consts.get("CONST_MONITORING_ADDON_NAME")
+                    ensure_container_insights_for_monitoring(
+                        self.cmd,
+                        mc.addon_profiles[CONST_MONITORING_ADDON_NAME],
+                        self.context.get_subscription_id(),
+                        self.context.get_resource_group_name(),
+                        self.context.get_name(),
+                        self.context.get_location(),
+                        remove_monitoring=False,
+                        aad_route=self.context.get_enable_msi_auth_for_monitoring(),
+                        create_dcr=False,
+                        create_dcra=True,
+                    )
                 return created_cluster
             # CloudError was raised before, but since the adoption of track 2 SDK,
             # HttpResponseError would be raised instead

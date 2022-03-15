@@ -396,6 +396,9 @@ parameters:
   - name: --workspace-resource-id
     type: string
     short-summary: The resource ID of an existing Log Analytics Workspace to use for storing monitoring data. If not specified, uses the default Log Analytics Workspace if it exists, otherwise creates one.
+  - name: --enable-msi-auth-for-monitoring
+    type: bool
+    short-summary: Send monitoring data to Log Analytics using the cluster's assigned identity (instead of the Log Analytics Workspace's shared key).
   - name: --uptime-sla
     type: bool
     short-summary: Enable a paid managed cluster service with a financially backed SLA.

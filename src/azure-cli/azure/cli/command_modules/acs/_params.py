@@ -10,7 +10,7 @@ import platform
 
 from argcomplete.completers import FilesCompleter
 from azure.cli.core.commands.parameters import (
-    file_type, get_enum_type, get_resource_name_completion_list, name_type, tags_type, zones_type, edge_zone_type)
+    file_type, get_enum_type, get_resource_name_completion_list, get_three_state_flag, name_type, tags_type, zones_type, edge_zone_type)
 from azure.cli.core.commands.validators import validate_file_or_dict
 from azure.cli.core.profiles import ResourceType
 from knack.arguments import CLIArgumentType
@@ -258,6 +258,7 @@ def load_arguments(self, _):
         c.argument('vnet_subnet_id', type=str,
                    validator=validate_vnet_subnet_id)
         c.argument('workspace_resource_id')
+        c.argument('enable_msi_auth_for_monitoring', arg_type=get_three_state_flag(), is_preview=True)
         c.argument('skip_subnet_role_assignment', action='store_true')
         c.argument('api_server_authorized_ip_ranges',
                    type=str, validator=validate_ip_ranges)
