@@ -75,7 +75,8 @@ def transform_entity_query_output(result):
 
 
 def transform_entities_result(result):
-    for entity in result['items']:
+    items = result['items'] if isinstance(result, dict) else result.items
+    for entity in items:
         transform_entity_result(entity)
     return result
 
@@ -83,6 +84,8 @@ def transform_entities_result(result):
 def transform_entity_result(entity):
     for key in entity.keys():
         entity_property = entity[key]
+        if hasattr(entity_property, 'value') and isinstance(entity_property.value, bytes):
+            entity_property.value = base64.b64encode(entity_property.value).decode()
         if isinstance(entity_property, bytes):
             entity[key] = base64.b64encode(entity_property).decode()
     if hasattr(entity, 'metadata'):

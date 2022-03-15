@@ -8,6 +8,17 @@ from knack.log import get_logger
 logger = get_logger(__name__)
 
 
+def insert_table_entity(client, table_name, entity, if_exists='fail', timeout=None):
+    if if_exists == 'fail':
+        return client.insert_entity(table_name, entity, timeout)
+    if if_exists == 'merge':
+        return client.insert_or_merge_entity(table_name, entity, timeout)
+    if if_exists == 'replace':
+        return client.insert_or_replace_entity(table_name, entity, timeout)
+    from knack.util import CLIError
+    raise CLIError("Unrecognized value '{}' for --if-exists".format(if_exists))
+
+
 def create_table(client, table_name, fail_on_exist=False):
     if fail_on_exist:
         client.create_table(table_name)
@@ -57,7 +68,7 @@ def generate_sas(client, table_name, permission=None, expiry=None, start=None, i
                               start_pk=start_pk, start_rk=start_rk, end_pk=end_pk, end_rk=end_rk)
 
 
-def insert_table_entity(client, entity, if_exists='fail'):
+def insert_entity(client, entity, if_exists='fail'):
     if if_exists == 'fail':
         return client.upsert_entity(entity, mode='merge')
     if if_exists == 'merge' or if_exists == 'replace':
@@ -66,7 +77,7 @@ def insert_table_entity(client, entity, if_exists='fail'):
     raise CLIError("Unrecognized value '{}' for --if-exists".format(if_exists))
 
 
-def _update_table_entity(client, entity, mode, if_match='*'):
+def _update_entity(client, entity, mode, if_match='*'):
     if not if_match or if_match == '*':
         return client.update_entity(entity, mode)
     else:
@@ -74,15 +85,15 @@ def _update_table_entity(client, entity, mode, if_match='*'):
         return client.update_entity(entity, mode, etag=if_match, match_condition=MatchConditions.IfNotModified)
 
 
-def replace_table_entity(client, entity, if_match='*'):
-    return _update_table_entity(client, entity, mode='replace', if_match=if_match)
+def replace_entity(client, entity, if_match='*'):
+    return _update_entity(client, entity, mode='replace', if_match=if_match)
 
 
-def merge_table_entity(client, entity, if_match='*'):
-    return _update_table_entity(client, entity, mode='merge', if_match=if_match)
+def merge_entity(client, entity, if_match='*'):
+    return _update_entity(client, entity, mode='merge', if_match=if_match)
 
 
-def delete_table_entity(client, partition_key, row_key, if_match='*'):
+def delete_entity(client, partition_key, row_key, if_match='*'):
     if not if_match or if_match == '*':
         return client.delete_entity(partition_key=partition_key, row_key=row_key)
     else:
@@ -90,7 +101,7 @@ def delete_table_entity(client, partition_key, row_key, if_match='*'):
         return client.delete_entity(partition_key=partition_key, row_key=row_key, etag=if_match, match_condition=MatchConditions.IfNotModified)
 
 
-def query_table_entity(client, filter=None, select=None, num_results=None, marker=None):
+def query_entity(client, filter=None, select=None, num_results=None, marker=None):
     def _convert_marker_to_ct(marker):
         if not marker:
             return None
