@@ -295,7 +295,7 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                         gallery_image_reference=None, gallery_image_reference_lun=None,
                         network_access_policy=None, disk_access=None, logical_sector_size=None,
                         tier=None, enable_bursting=None, edge_zone=None, security_type=None, support_hibernation=None,
-                        public_network_access=None, accelerated_network=None):
+                        public_network_access=None, accelerated_network=None, architecture=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -407,12 +407,14 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         disk.supports_hibernation = support_hibernation
     if public_network_access is not None:
         disk.public_network_access = public_network_access
-    if accelerated_network is not None:
+    if accelerated_network is not None or architecture is not None:
         if disk.supported_capabilities is None:
-            supportedCapabilities = cmd.get_models('SupportedCapabilities')(accelerated_network=accelerated_network)
+            supportedCapabilities = cmd.get_models('SupportedCapabilities')(accelerated_network=accelerated_network,
+                                                                            architecture=architecture)
             disk.supported_capabilities = supportedCapabilities
         else:
             disk.supported_capabilities.accelerated_network = accelerated_network
+            disk.supported_capabilities.architecture = architecture
 
     client = _compute_client_factory(cmd.cli_ctx)
     return sdk_no_wait(no_wait, client.disks.begin_create_or_update, resource_group_name, disk_name, disk)
@@ -434,7 +436,7 @@ def update_managed_disk(cmd, resource_group_name, instance, size_gb=None, sku=No
                         disk_mbps_read_write=None, encryption_type=None, disk_encryption_set=None,
                         network_access_policy=None, disk_access=None, max_shares=None, disk_iops_read_only=None,
                         disk_mbps_read_only=None, enable_bursting=None, public_network_access=None,
-                        accelerated_network=None):
+                        accelerated_network=None, architecture=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -475,12 +477,15 @@ def update_managed_disk(cmd, resource_group_name, instance, size_gb=None, sku=No
         instance.bursting_enabled = enable_bursting
     if public_network_access is not None:
         instance.public_network_access = public_network_access
-    if accelerated_network is not None:
+    if accelerated_network is not None or architecture is not None:
         if instance.supported_capabilities is None:
-            supportedCapabilities = cmd.get_models('SupportedCapabilities')(accelerated_network=accelerated_network)
+            supportedCapabilities = cmd.get_models('SupportedCapabilities')(accelerated_network=accelerated_network,
+                                                                            architecture=architecture)
             instance.supported_capabilities = supportedCapabilities
         else:
             instance.supported_capabilities.accelerated_network = accelerated_network
+            instance.supported_capabilities.architecture = architecture
+
     return instance
 # endregion
 
@@ -563,7 +568,7 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
                     source_blob_uri=None, source_disk=None, source_snapshot=None, source_storage_account_id=None,
                     hyper_v_generation=None, tags=None, no_wait=False, disk_encryption_set=None,
                     encryption_type=None, network_access_policy=None, disk_access=None, edge_zone=None,
-                    public_network_access=None, accelerated_network=None):
+                    public_network_access=None, accelerated_network=None, architecture=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -620,12 +625,14 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
         snapshot.extended_location = edge_zone
     if public_network_access is not None:
         snapshot.public_network_access = public_network_access
-    if accelerated_network is not None:
+    if accelerated_network is not None or architecture is not None:
         if snapshot.supported_capabilities is None:
-            supportedCapabilities = cmd.get_models('SupportedCapabilities')(accelerated_network=accelerated_network)
+            supportedCapabilities = cmd.get_models('SupportedCapabilities')(accelerated_network=accelerated_network,
+                                                                            architecture=architecture)
             snapshot.supported_capabilities = supportedCapabilities
         else:
             snapshot.supported_capabilities.accelerated_network = accelerated_network
+            snapshot.supported_capabilities.architecture = architecture
 
     client = _compute_client_factory(cmd.cli_ctx)
     return sdk_no_wait(no_wait, client.snapshots.begin_create_or_update, resource_group_name, snapshot_name, snapshot)
@@ -645,7 +652,7 @@ def list_snapshots(cmd, resource_group_name=None):
 
 def update_snapshot(cmd, resource_group_name, instance, sku=None, disk_encryption_set=None,
                     encryption_type=None, network_access_policy=None, disk_access=None, public_network_access=None,
-                    accelerated_network=None):
+                    accelerated_network=None, architecture=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -671,12 +678,14 @@ def update_snapshot(cmd, resource_group_name, instance, sku=None, disk_encryptio
         instance.disk_access_id = disk_access
     if public_network_access is not None:
         instance.public_network_access = public_network_access
-    if accelerated_network is not None:
+    if accelerated_network is not None or architecture is not None:
         if instance.supported_capabilities is None:
-            supportedCapabilities = cmd.get_models('SupportedCapabilities')(accelerated_network=accelerated_network)
+            supportedCapabilities = cmd.get_models('SupportedCapabilities')(accelerated_network=accelerated_network,
+                                                                            architecture=architecture)
             instance.supported_capabilities = supportedCapabilities
         else:
             instance.supported_capabilities.accelerated_network = accelerated_network
+            instance.supported_capabilities.architecture = architecture
     return instance
 # endregion
 
@@ -4035,7 +4044,7 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
                          release_note_uri=None, eula=None, description=None, location=None,
                          minimum_cpu_core=None, maximum_cpu_core=None, minimum_memory=None, maximum_memory=None,
                          disallowed_disk_types=None, plan_name=None, plan_publisher=None, plan_product=None, tags=None,
-                         hyper_v_generation='V1', features=None):
+                         hyper_v_generation='V1', features=None, architecture=None):
     # pylint: disable=line-too-long
     GalleryImage, GalleryImageIdentifier, RecommendedMachineConfiguration, ResourceRange, Disallowed, ImagePurchasePlan, GalleryImageFeature = cmd.get_models(
         'GalleryImage', 'GalleryImageIdentifier', 'RecommendedMachineConfiguration', 'ResourceRange', 'Disallowed', 'ImagePurchasePlan', 'GalleryImageFeature')
@@ -4069,7 +4078,7 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
                          os_type=os_type, os_state=os_state, end_of_life_date=end_of_life_date,
                          recommended=recommendation, disallowed=Disallowed(disk_types=disallowed_disk_types),
                          purchase_plan=purchase_plan, location=location, eula=eula, tags=(tags or {}),
-                         hyper_v_generation=hyper_v_generation, features=feature_list)
+                         hyper_v_generation=hyper_v_generation, features=feature_list, architecture=architecture)
     return client.gallery_images.begin_create_or_update(resource_group_name, gallery_name, gallery_image_name, image)
 
 

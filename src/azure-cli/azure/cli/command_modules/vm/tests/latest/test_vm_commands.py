@@ -7575,5 +7575,37 @@ class RestorePointScenarioTest(ScenarioTest):
         self.cmd('restore-point collection delete -g {rg} --collection-name {collection_name} -y')
 
 
+class ArchitectureScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(location='westus')
+    def test_architecture(self, resource_group):
+        self.kwargs.update({
+            'sig_name': self.create_random_name('sig_', 10),
+            'img_def_name': self.create_random_name('def_', 10),
+            'pub_name': self.create_random_name('pub_', 10),
+            'of_name': self.create_random_name('of_', 10),
+            'sku_name': self.create_random_name('sku_', 10),
+            'disk_name': self.create_random_name('disk_', 10),
+            'snap_name': self.create_random_name('snap_', 10)
+        })
+        self.cmd('sig create -g {rg} -r {sig_name}')
+        self.cmd('sig image-definition create -g {rg} --gallery-name {sig_name} --architecture x64 --gallery-image-definition {img_def_name} --os-type linux -p {pub_name} -f {of_name} -s {sku_name}', checks=[
+            self.check('architecture', 'x64')
+        ])
+
+        self.cmd('disk create -g {rg} -n {disk_name} --architecture x64 --size-gb 20', checks=[
+            self.check('supportedCapabilities.architecture', 'x64')
+        ])
+        self.cmd('disk update -g {rg} -n {disk_name} --architecture Arm64', checks=[
+            self.check('supportedCapabilities.architecture', 'Arm64')
+        ])
+
+        self.cmd('snapshot create -n {snap_name} -g {rg} --size-gb 1 --architecture x64', checks=[
+            self.check('supportedCapabilities.architecture', 'x64')
+        ])
+        self.cmd('snapshot update -n {snap_name} -g {rg} --architecture Arm64', checks=[
+            self.check('supportedCapabilities.architecture', 'Arm64')
+        ])
+
+
 if __name__ == '__main__':
     unittest.main()
