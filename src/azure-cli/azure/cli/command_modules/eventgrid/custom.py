@@ -70,6 +70,9 @@ SKU_PREMIUM = "Premium"
 IDENTITY_NO_IDENTITY = "NoIdentity"
 IDENTITY_NONE = "None"
 IDENTITY_SYSTEM_ASSIGNED = "SystemAssigned"
+IDENTITY_USER_ASSIGNED = "UserAssigned"
+IDENTITY_MIXED_MODE = "MixedMode"
+IDENTITY_MIXED_MODE_VALUE = "SystemAssigned, UserAssigned"
 
 WEBHOOK_DESTINATION = "webhook"
 EVENTHUB_DESTINATION = "eventhub"
@@ -1626,6 +1629,10 @@ def _get_identity_type(identity_type_name=IDENTITY_NONE):
         result = IDENTITY_NONE
     elif identity_type_name.lower() == IDENTITY_SYSTEM_ASSIGNED.lower():
         result = IDENTITY_SYSTEM_ASSIGNED
+    elif identity_type_name.lower() == IDENTITY_USER_ASSIGNED.lower():
+        result = IDENTITY_USER_ASSIGNED
+    elif identity_type_name.lower() == IDENTITY_MIXED_MODE.lower():
+        result = IDENTITY_MIXED_MODE_VALUE
 
     return result
 
@@ -1634,6 +1641,10 @@ def _get_event_subscription_identity_type(identity_type_name):
     result = None
     if identity_type_name.lower() == IDENTITY_SYSTEM_ASSIGNED.lower():
         result = IDENTITY_SYSTEM_ASSIGNED
+    elif identity_type_name.lower() == IDENTITY_USER_ASSIGNED.lower():
+        result = IDENTITY_USER_ASSIGNED
+    elif identity_type_name.lower() == IDENTITY_MIXED_MODE.lower():
+        result = IDENTITY_MIXED_MODE_VALUE
 
     return result
 
