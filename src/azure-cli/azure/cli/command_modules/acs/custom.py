@@ -2142,7 +2142,8 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
         result = LongRunningOperation(cmd.cli_ctx)(
             client.begin_create_or_update(resource_group_name, name, instance))
 
-        if enable_monitoring:
+        # For monitoring addon, Metrics role assignement doesnt require in case of MSI auth
+        if enable_monitoring and not enable_msi_auth_for_monitoring:
             cloud_name = cmd.cli_ctx.cloud.name
             # mdm metrics supported only in Azure Public cloud so add the role assignment only in this cloud
             if cloud_name.lower() == 'azurecloud':
@@ -4079,10 +4080,11 @@ def _put_managed_cluster_ensuring_permission(
         enable_managed_identity,
         attach_acr,
         headers,
-        no_wait
+        no_wait,
+        enable_msi_auth_for_monitoring=False
 ):
     # some addons require post cluster creation role assigment
-    need_post_creation_role_assignment = (monitoring_addon_enabled or
+    need_post_creation_role_assignment = ((monitoring_addon_enabled and not enable_msi_auth_for_monitoring) or
                                           ingress_appgw_addon_enabled or
                                           (enable_managed_identity and attach_acr) or
                                           virtual_node_addon_enabled or

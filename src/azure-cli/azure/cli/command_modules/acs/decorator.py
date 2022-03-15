@@ -5725,7 +5725,8 @@ class AKSCreateDecorator:
                     self.context.get_enable_managed_identity(),
                     self.context.get_attach_acr(),
                     self.context.get_aks_custom_headers(),
-                    self.context.get_no_wait())
+                    self.context.get_no_wait(),
+                    self.context.get_enable_msi_auth_for_monitoring())
                 if self.context.get_intermediate("monitoring") and self.context.get_enable_msi_auth_for_monitoring():
                     # Create the DCR Association here
                     addon_consts = self.context.get_addon_consts()
@@ -6347,5 +6348,6 @@ class AKSUpdateDecorator:
             check_is_msi_cluster(mc),
             self.context.get_attach_acr(),
             self.context.get_aks_custom_headers(),
-            self.context.get_no_wait()
+            self.context.get_no_wait(),
+            self.context.get_enable_msi_auth_for_monitoring()
         )

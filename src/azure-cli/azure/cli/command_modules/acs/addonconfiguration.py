@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import json
+from urllib import response
 
 from azure.cli.core.azclierror import (
     AzCLIError,
@@ -286,7 +287,6 @@ def ensure_container_insights_for_monitoring(
     try:
         subscription_id = workspace_resource_id.split("/")[2]
         resource_group = workspace_resource_id.split("/")[4]
-        workspace_name = workspace_resource_id.split("/")[8]
     except IndexError:
         raise AzCLIError(
             "Could not locate resource group in workspace-resource-id URL."
@@ -308,7 +308,7 @@ def ensure_container_insights_for_monitoring(
             f"/subscriptions/{cluster_subscription}/resourceGroups/{cluster_resource_group_name}/"
             f"providers/Microsoft.ContainerService/managedClusters/{cluster_name}"
         )
-        dataCollectionRuleName = f"MSCI-{workspace_name}"
+        dataCollectionRuleName = f"MSCI-{cluster_name}-{cluster_region}"
         dcr_resource_id = (
             f"/subscriptions/{subscription_id}/resourceGroups/{resource_group}/"
             f"providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}"
@@ -374,6 +374,25 @@ def ensure_container_insights_for_monitoring(
                     raise ClientRequestError(
                         f"Data Collection Rule Associations are not supported for cluster region {location}"
                     )
+            dcr_url = f"https://management.azure.com/{dcr_resource_id}?api-version=2019-11-01-preview"
+            # dont create DCR if already exists one with same destination
+            try:
+                resp = send_raw_request(
+                    cmd.cli_ctx, "GET", dcr_url
+                )
+                if resp.ok:
+                    json_response = json.loads(resp.text)
+                    destinations = json_response["properties"]["destinations"]
+                    if not destinations and not destinations["logAnalytics"] and len(destinations["logAnalytics"]) > 0:
+                      destinationLogAnalyticsResourceId = destinations["logAnalytics"][0]
+                      if destinationLogAnalyticsResourceId.tolower() == workspace_resource_id.tolower():
+                          logger.info(
+                               "Found an existing Data Collection Rule which has the provided log analytics workspace as destination so skipping creation of the DCR")
+                          return
+            except Exception as e:
+                error = e
+                logger.warning(
+                    "Continue on creation of the DCR since checking  the existence of Data Collection Rule failed with an error: {error}")
 
             # create the DCR
             dcr_creation_body = json.dumps(
@@ -434,7 +453,6 @@ def ensure_container_insights_for_monitoring(
                     },
                 }
             )
-            dcr_url = f"https://management.azure.com/{dcr_resource_id}?api-version=2019-11-01-preview"
             for _ in range(3):
                 try:
                     send_raw_request(
@@ -460,7 +478,7 @@ def ensure_container_insights_for_monitoring(
             )
             association_url = (
                 f"https://management.azure.com/{cluster_resource_id}/providers/Microsoft.Insights/"
-                f"dataCollectionRuleAssociations/send-to-{workspace_name}?api-version=2019-11-01-preview"
+                f"dataCollectionRuleAssociations/ContainerInsightsExtension?api-version=2019-11-01-preview"
             )
             for _ in range(3):
                 try:

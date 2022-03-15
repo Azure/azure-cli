@@ -6558,7 +6558,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         workspace_resource_group = workspace_resource_id.split("/")[4]
 
         # check that the DCR was created
-        dataCollectionRuleName = f"MSCI-{workspace_name}"
+        dataCollectionRuleName = f"MSCI-{aks_name}-{resource_group_location}"
         dcr_resource_id = f"/subscriptions/{subscription}/resourceGroups/{workspace_resource_group}/providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}"
         get_cmd = f'rest --method get --url https://management.azure.com{dcr_resource_id}?api-version=2019-11-01-preview'
         self.cmd(get_cmd, checks=[
@@ -6566,7 +6566,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
         # check that the DCR-A was created
-        dcra_resource_id = f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/send-to-{workspace_name}"
+        dcra_resource_id = f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/ContainerInsightsExtension"
         get_cmd = f'rest --method get --url https://management.azure.com{dcra_resource_id}?api-version=2019-11-01-preview'
         self.cmd(get_cmd, checks=[
             self.check('properties.dataCollectionRuleId', f'{dcr_resource_id}')
@@ -6632,7 +6632,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         workspace_resource_group = workspace_resource_id.split("/")[4]
 
         # check that the DCR was created
-        dataCollectionRuleName = f"MSCI-{workspace_name}"
+        dataCollectionRuleName = f"MSCI-{aks_name}-{resource_group_location}"
         dcr_resource_id = f"/subscriptions/{subscription}/resourceGroups/{workspace_resource_group}/providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}"
         get_cmd = f'rest --method get --url https://management.azure.com{dcr_resource_id}?api-version=2019-11-01-preview'
         self.cmd(get_cmd, checks=[
@@ -6640,7 +6640,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
         # check that the DCR-A was created
-        dcra_resource_id = f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/send-to-{workspace_name}"
+        dcra_resource_id = f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/ContainerInsightsExtension"
         get_cmd = f'rest --method get --url https://management.azure.com{dcra_resource_id}?api-version=2019-11-01-preview'
         self.cmd(get_cmd, checks=[
             self.check('properties.dataCollectionRuleId', f'{dcr_resource_id}')
@@ -6686,7 +6686,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         try:
             # check that the DCR was created
-            dataCollectionRuleName = f"MSCI-{workspace_name}"
+            dataCollectionRuleName = f"MSCI-{aks_name}-{resource_group_location}"
             dcr_resource_id = f"/subscriptions/{subscription}/resourceGroups/{workspace_resource_group}/providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}"
             get_cmd = f'rest --method get --url https://management.azure.com{dcr_resource_id}?api-version=2019-11-01-preview'
             self.cmd(get_cmd, checks=[
