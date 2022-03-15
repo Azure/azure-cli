@@ -4818,6 +4818,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             os_type="Linux",
             os_sku=None,
             vnet_subnet_id=None,
+            pod_subnet_id=None,
             proximity_placement_group_id=None,
             availability_zones=None,
             enable_node_public_ip=False,

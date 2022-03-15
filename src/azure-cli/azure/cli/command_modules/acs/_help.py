@@ -384,6 +384,9 @@ parameters:
   - name: --vnet-subnet-id
     type: string
     short-summary: The ID of a subnet in an existing VNet into which to deploy the cluster.
+  - name: --pod-subnet-id
+    type: string
+    short-summary: The ID of a subnet in an existing VNet into which to assign pods in the cluster (requires azure network-plugin)
   - name: --ppg
     type: string
     short-summary: The ID of a PPG.

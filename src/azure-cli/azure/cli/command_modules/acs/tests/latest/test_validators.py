@@ -133,6 +133,36 @@ class VnetSubnetIdNamespace:
     def __init__(self, vnet_subnet_id):
         self.vnet_subnet_id = vnet_subnet_id
 
+class TestPodSubnetId(unittest.TestCase):
+    def test_invalid_pod_subnet_id(self):
+        invalid_pod_subnet_id = "dummy subnet id"
+        namespace = PodSubnetIdNamespace(invalid_pod_subnet_id)
+        err = ("--pod-subnet-id is not a valid Azure resource ID.")
+
+        with self.assertRaises(CLIError) as cm:
+            validators.validate_pod_subnet_id(namespace)
+        self.assertEqual(str(cm.exception), err)
+
+    def test_valid_pod_subnet_id(self):
+        invalid_pod_subnet_id = "/subscriptions/testid/resourceGroups/MockedResourceGroup/providers/Microsoft.Network/virtualNetworks/MockedNetworkId/subnets/MockedSubNetId"
+        namespace = PodSubnetIdNamespace(invalid_pod_subnet_id)
+        validators.validate_pod_subnet_id(namespace)
+
+    def test_none_pod_subnet_id(self):
+        invalid_pod_subnet_id = None
+        namespace = PodSubnetIdNamespace(invalid_pod_subnet_id)
+        validators.validate_pod_subnet_id(namespace)
+
+    def test_empty_pod_subnet_id(self):
+        invalid_pod_subnet_id = ""
+        namespace = PodSubnetIdNamespace(invalid_pod_subnet_id)
+        validators.validate_pod_subnet_id(namespace)
+
+
+class PodSubnetIdNamespace:
+    def __init__(self, pod_subnet_id):
+        self.pod_subnet_id = pod_subnet_id
+
 
 class MaxSurgeNamespace:
     def __init__(self, max_surge):
