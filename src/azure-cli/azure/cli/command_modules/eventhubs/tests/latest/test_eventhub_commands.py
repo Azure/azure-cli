@@ -15,7 +15,7 @@ from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer)
 
 
 class EHNamespaceCURDScenarioTest(ScenarioTest):
-    from azure_devtools.scenario_tests import AllowLargeResponse
+    from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_eh_namespace')
@@ -64,12 +64,8 @@ class EHNamespaceCURDScenarioTest(ScenarioTest):
             checks=[self.check('sku.name', self.kwargs['sku'])])
 
         # Get Created Namespace list by subscription
-        listnamespaceresult = self.cmd('eventhubs namespace list').output
+        listnamespaceresult = self.cmd('eventhubs namespace list --resource-group {rg}').output
         self.assertGreater(len(listnamespaceresult), 0)
-
-        # Get Created Namespace list by ResourceGroup
-        listnamespacebyresourcegroupresult = self.cmd('eventhubs namespace list --resource-group {rg}').output
-        self.assertGreater(len(listnamespacebyresourcegroupresult), 0)
 
         # Create Authoriazation Rule
         self.cmd('eventhubs namespace authorization-rule create --resource-group {rg} --namespace-name {namespacename} --name {authoname} --rights {accessrights}',

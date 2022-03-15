@@ -44,7 +44,7 @@ def generate_sas(client, services, resource_types, permission, expiry, start=Non
                                                    start=start, ip=ip, protocol=protocol)
 
 
-# pylint: disable=too-many-locals, too-many-statements, too-many-branches
+# pylint: disable=too-many-locals, too-many-statements, too-many-branches, unused-argument
 def create_storage_account(cmd, resource_group_name, account_name, sku=None, location=None, kind=None,
                            tags=None, custom_domain=None, encryption_services=None, encryption_key_source=None,
                            encryption_key_name=None, encryption_key_vault=None, encryption_key_version=None,
@@ -52,6 +52,7 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
                            enable_files_aadds=None, bypass=None, default_action=None, assign_identity=False,
                            enable_large_file_share=None, enable_files_adds=None, domain_name=None,
                            net_bios_domain_name=None, forest_name=None, domain_guid=None, domain_sid=None,
+                           sam_account_name=None, account_type=None,
                            azure_storage_sid=None, enable_hierarchical_namespace=None,
                            encryption_key_type_for_table=None, encryption_key_type_for_queue=None,
                            routing_choice=None, publish_microsoft_endpoints=None, publish_internet_endpoints=None,
@@ -60,7 +61,9 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
                            identity_type=None, user_identity_id=None, key_vault_user_identity_id=None,
                            sas_expiration_period=None, key_expiration_period_in_days=None,
                            allow_cross_tenant_replication=None, default_share_permission=None,
-                           enable_nfs_v3=None, subnet=None, vnet_name=None, action='Allow'):  # pylint: disable=unused-argument
+                           enable_nfs_v3=None, subnet=None, vnet_name=None, action='Allow', enable_alw=None,
+                           immutability_period_since_creation_in_days=None, immutability_policy_state=None,
+                           allow_protected_append_writes=None, public_network_access=None):
     StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountCreateParameters', 'Kind', 'Sku', 'CustomDomain', 'AccessTier', 'Identity',
                        'Encryption', 'NetworkRuleSet')
@@ -126,7 +129,9 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
                                                                     net_bios_domain_name=net_bios_domain_name,
                                                                     forest_name=forest_name, domain_guid=domain_guid,
                                                                     domain_sid=domain_sid,
-                                                                    azure_storage_sid=azure_storage_sid)
+                                                                    azure_storage_sid=azure_storage_sid,
+                                                                    sam_account_name=sam_account_name,
+                                                                    account_type=account_type)
             # TODO: Enabling AD will automatically disable AADDS. Maybe we should throw error message
 
             params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
@@ -217,6 +222,25 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
     if enable_nfs_v3 is not None:
         params.enable_nfs_v3 = enable_nfs_v3
 
+    if enable_alw is not None:
+        ImmutableStorageAccount = cmd.get_models('ImmutableStorageAccount')
+        AccountImmutabilityPolicyProperties = cmd.get_models('AccountImmutabilityPolicyProperties')
+        immutability_policy = None
+
+        if any([immutability_period_since_creation_in_days, immutability_policy_state,
+                allow_protected_append_writes is not None]):
+            immutability_policy = AccountImmutabilityPolicyProperties(
+                immutability_period_since_creation_in_days=immutability_period_since_creation_in_days,
+                state=immutability_policy_state,
+                allow_protected_append_writes=allow_protected_append_writes
+            )
+
+        params.immutable_storage_with_versioning = ImmutableStorageAccount(enabled=enable_alw,
+                                                                           immutability_policy=immutability_policy)
+
+    if public_network_access is not None:
+        params.public_network_access = public_network_access
+
     return scf.storage_accounts.begin_create(resource_group_name, account_name, params)
 
 
@@ -283,19 +307,21 @@ def get_storage_account_properties(cli_ctx, account_id):
     return scf.storage_accounts.get_properties(result['resource_group'], result['name'])
 
 
-# pylint: disable=too-many-locals, too-many-statements, too-many-branches, too-many-boolean-expressions
+# pylint: disable=too-many-locals, too-many-statements, too-many-branches, too-many-boolean-expressions, line-too-long
 def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=None, use_subdomain=None,
                            encryption_services=None, encryption_key_source=None, encryption_key_version=None,
                            encryption_key_name=None, encryption_key_vault=None,
                            access_tier=None, https_only=None, enable_files_aadds=None, assign_identity=False,
                            bypass=None, default_action=None, enable_large_file_share=None, enable_files_adds=None,
                            domain_name=None, net_bios_domain_name=None, forest_name=None, domain_guid=None,
-                           domain_sid=None, azure_storage_sid=None, routing_choice=None,
-                           publish_microsoft_endpoints=None, publish_internet_endpoints=None,
+                           domain_sid=None, azure_storage_sid=None, sam_account_name=None, account_type=None,
+                           routing_choice=None, publish_microsoft_endpoints=None, publish_internet_endpoints=None,
                            allow_blob_public_access=None, min_tls_version=None, allow_shared_key_access=None,
                            identity_type=None, user_identity_id=None, key_vault_user_identity_id=None,
                            sas_expiration_period=None, key_expiration_period_in_days=None,
-                           allow_cross_tenant_replication=None, default_share_permission=None):
+                           allow_cross_tenant_replication=None, default_share_permission=None,
+                           immutability_period_since_creation_in_days=None, immutability_policy_state=None,
+                           allow_protected_append_writes=None, public_network_access=None):
     StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountUpdateParameters', 'Sku', 'CustomDomain', 'AccessTier', 'Identity', 'Encryption',
                        'NetworkRuleSet')
@@ -345,7 +371,7 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
 
     if identity_type and 'UserAssigned' in identity_type and user_identity_id:
         user_assigned_identities = {user_identity_id: {}}
-        if instance.identity.user_assigned_identities:
+        if instance.identity and instance.identity.user_assigned_identities:
             for item in instance.identity.user_assigned_identities:
                 if item != user_identity_id:
                     user_assigned_identities[item] = None
@@ -399,7 +425,9 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                                                                     net_bios_domain_name=net_bios_domain_name,
                                                                     forest_name=forest_name, domain_guid=domain_guid,
                                                                     domain_sid=domain_sid,
-                                                                    azure_storage_sid=azure_storage_sid)
+                                                                    azure_storage_sid=azure_storage_sid,
+                                                                    sam_account_name=sam_account_name,
+                                                                    account_type=account_type)
             # TODO: Enabling AD will automatically disable AADDS. Maybe we should throw error message
 
             params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
@@ -475,6 +503,23 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
 
     if allow_cross_tenant_replication is not None:
         params.allow_cross_tenant_replication = allow_cross_tenant_replication
+
+    if any([immutability_period_since_creation_in_days, immutability_policy_state, allow_protected_append_writes is not None]):
+        ImmutableStorageAccount = cmd.get_models('ImmutableStorageAccount')
+        AccountImmutabilityPolicyProperties = cmd.get_models('AccountImmutabilityPolicyProperties')
+        immutability_policy = None
+
+        immutability_policy = AccountImmutabilityPolicyProperties(
+            immutability_period_since_creation_in_days=immutability_period_since_creation_in_days,
+            state=immutability_policy_state,
+            allow_protected_append_writes=allow_protected_append_writes
+        )
+
+        params.immutable_storage_with_versioning = ImmutableStorageAccount(enabled=None,
+                                                                           immutability_policy=immutability_policy)
+
+    if public_network_access is not None:
+        params.public_network_access = public_network_access
 
     return params
 

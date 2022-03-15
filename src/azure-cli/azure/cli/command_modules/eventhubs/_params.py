@@ -18,6 +18,7 @@ def load_arguments_eh(self, _):
     from knack.arguments import CLIArgumentType
     from azure.cli.core.profiles import ResourceType
     (KeyType, AccessRights, SkuName, KeySource) = self.get_models('KeyType', 'AccessRights', 'SkuName', 'KeySource', resource_type=ResourceType.MGMT_EVENTHUB)
+    from azure.cli.command_modules.eventhubs.action import AlertAddEncryption
 
     rights_arg_type = CLIArgumentType(options_list=['--rights'], nargs='+', arg_type=get_enum_type(AccessRights), validator=validate_rights, help='Space-separated list of Authorization rule rights')
     key_arg_type = CLIArgumentType(options_list=['--key'], arg_type=get_enum_type(KeyType), help='specifies Primary or Secondary key needs to be reset')
@@ -30,9 +31,9 @@ def load_arguments_eh(self, _):
         c.argument('namespace_name', id_part='name', help='name of Namespace')
 
     with self.argument_context('eventhubs namespace exists') as c:
-        c.argument('namespace_name', arg_type=name_type, help='Namespace name. Name can contain only letters, numbers, and hyphens. The namespace must start with a letter, and it must end with a letter or number.')
+        c.argument('name', arg_type=name_type, help='Namespace name. Name can contain only letters, numbers, and hyphens. The namespace must start with a letter, and it must end with a letter or number.')
 
-    with self.argument_context('eventhubs namespace') as c:
+    with self.argument_context('eventhubs namespace', min_api='2021-06-01-preview') as c:
         c.argument('namespace_name', arg_type=name_type, id_part='name', completer=get_resource_name_completion_list('Microsoft.ServiceBus/namespaces'), help='Name of Namespace')
         c.argument('is_kafka_enabled', options_list=['--enable-kafka'], arg_type=get_three_state_flag(),
                    help='A boolean value that indicates whether Kafka is enabled for eventhub namespace.')
@@ -50,17 +51,27 @@ def load_arguments_eh(self, _):
                    help='Enabling this property creates a Standard EventHubs Namespace in regions supported availability zones')
         c.argument('identity', arg_group='Managed Identity', options_list=['--assign-identity'], is_preview=True, arg_type=get_three_state_flag(),
                    help='A boolean value that indicates whether Managed Identity is enabled.')
+        c.argument('disable_local_auth', options_list=['--disable-local-auth'], is_preview=True, arg_type=get_three_state_flag(),
+                   help='A boolean value that indicates whether SAS authentication is enabled/disabled for the Event Hubs')
+        c.argument('mi_system_assigned', arg_group='Managed Identity',
+                   arg_type=get_three_state_flag(),
+                   help='Enable System Assigned Identity')
+        c.argument('mi_user_assigned', arg_group='Managed Identity', nargs='+', help='List of User Assigned Identity ids.')
+        c.argument('encryption_config', action=AlertAddEncryption, nargs='+', help='List of KeyVaultProperties objects.')
 
-    with self.argument_context('eventhubs namespace create', min_api='2018-01-01-preview') as c:
-        c.argument('cluster_arm_id', options_list=['--cluster-arm-id'], is_preview=True, help='luster ARM ID of the Namespace')
+    with self.argument_context('eventhubs namespace create', min_api='2021-06-01-preview') as c:
+        c.argument('cluster_arm_id', options_list=['--cluster-arm-id'], is_preview=True, help='Cluster ARM ID of the Namespace')
 
-    with self.argument_context('eventhubs namespace update', arg_group='Managed Identity', min_api='2018-01-01-preview') as c:
+    with self.argument_context('eventhubs namespace update', arg_group='Managed Identity', min_api='2021-06-01-preview') as c:
         c.argument('key_source', options_list=['--key-source'], is_preview=True, arg_type=get_enum_type(KeySource),
                    help='Encryption key source. Possible values include: \'Microsoft.KeyVault\'.')
         c.argument('key_name', is_preview=True, help='The name of the KeyVault key.', )
         c.argument('key_vault_uri', is_preview=True, help='The Uri of the KeyVault.')
         c.argument('key_version', is_preview=True,
                    help='The version of the KeyVault key to use.')
+        c.argument('require_infrastructure_encryption', options_list=['--infra-encryption'], is_preview=True,
+                   arg_type=get_three_state_flag(),
+                   help='A boolean value that indicates whether Infrastructure Encryption (Double Encryption) is enabled/disabled')
 
 # Cluster region
     for scope in ['eventhubs cluster', 'eventhubs cluster namespace list']:
@@ -86,13 +97,15 @@ def load_arguments_eh(self, _):
     for scope in ['eventhubs namespace authorization-rule', 'eventhubs namespace authorization-rule keys renew']:
         with self.argument_context(scope) as c:
             c.argument('authorization_rule_name', arg_type=name_type, id_part='child_name_1', help='Name of Namespace AuthorizationRule')
-            c.argument('namespace_name', arg_type=namespace_name_arg_type)
+            c.argument('namespace_name', arg_type=namespace_name_arg_type, help='Name of Namespace')
 
     for scope in ['eventhubs namespace authorization-rule create', 'eventhubs namespace authorization-rule update', 'eventhubs eventhub authorization-rule create', 'eventhubs eventhub authorization-rule update']:
         with self.argument_context(scope) as c:
+            c.argument('name', arg_type=name_type, help='Name of Authorization Rule')
             c.argument('rights', arg_type=rights_arg_type)
 
     with self.argument_context('eventhubs namespace authorization-rule keys renew') as c:
+        c.argument('name', arg_type=name_type, help='Name of Authorization Rule')
         c.argument('key_type', arg_type=key_arg_type)
         c.argument('key', arg_type=keyvalue_arg_type)
 
@@ -118,16 +131,13 @@ def load_arguments_eh(self, _):
         c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
 
     # region EventHub Authorizationrule
-    for scope in ['eventhubs eventhub authorization-rule', 'eventhubs eventhub authorization-rule keys renew']:
+    for scope in ['eventhubs eventhub authorization-rule']:
         with self.argument_context(scope) as c:
             c.argument('authorization_rule_name', arg_type=name_type, id_part='child_name_2', help='Name of EventHub AuthorizationRule')
-            c.argument('event_hub_name', id_part='child_name_1', arg_type=event_hub_name_arg_type)
-
-    for scope in ['eventhubs eventhub authorization-rule create', 'eventhubs eventhub authorization-rule update']:
-        with self.argument_context(scope) as c:
-            c.argument('rights', arg_type=rights_arg_type)
+            c.argument('event_hub_name', id_part='child_name_1', arg_type=event_hub_name_arg_type, help='Name of EventHub')
 
     with self.argument_context('eventhubs eventhub authorization-rule keys renew') as c:
+        c.argument('name', arg_type=name_type, help='Name of Authorization Rule')
         c.argument('key_type', arg_type=key_arg_type)
         c.argument('key', arg_type=keyvalue_arg_type)
 
@@ -143,15 +153,16 @@ def load_arguments_eh(self, _):
 
 # - ConsumerGroup Region
     with self.argument_context('eventhubs eventhub consumer-group') as c:
-        c.argument('event_hub_name', arg_type=event_hub_name_arg_type)
+        c.argument('event_hub_name', arg_type=event_hub_name_arg_type, help='Name of EventHub')
         c.argument('consumer_group_name', arg_type=name_type, id_part='child_name_2', completer=get_consumergroup_command_completion_list, help='Name of ConsumerGroup')
 
     for scope in ['eventhubs eventhub consumer-group create', 'eventhubs eventhub consumer-group update']:
         with self.argument_context(scope) as c:
+            c.argument('name', arg_type=name_type, help='Name of ConsumerGroup')
             c.argument('user_metadata', help='Usermetadata is a placeholder to store user-defined string data with maximum length 1024. e.g. it can be used to store descriptive data, such as list of teams and their contact information also user-defined configuration settings can be stored.')
 
     with self.argument_context('eventhubs eventhub consumer-group list') as c:
-        c.argument('event_hub_name', arg_type=event_hub_name_arg_type, id_part=None)
+        c.argument('event_hub_name', arg_type=event_hub_name_arg_type, id_part=None, help='Name of EventHub')
         c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
 
 #   : Region Geo DR Configuration
@@ -196,3 +207,46 @@ def load_arguments_eh(self, _):
     with self.argument_context('eventhubs namespace network-rule add', resource_type=ResourceType.MGMT_EVENTHUB, min_api='2017-04-01') as c:
         c.argument('ignore_missing_vnet_service_endpoint', arg_group='Virtual Network Rule', options_list=['--ignore-missing-endpoint'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether to ignore missing vnet Service Endpoint')
         c.argument('action', arg_group='IP Address Rule', options_list=['--action'], arg_type=get_enum_type(['Allow']), help='Action of the IP rule')
+
+# Private end point connection
+    with self.argument_context('eventhubs namespace private-endpoint-connection',
+                               resource_type=ResourceType.MGMT_EVENTHUB) as c:
+        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of the Namespace')
+        c.argument('private_endpoint_connection_name', options_list=['--name', '-n'],
+                   help='The name of the private endpoint connection associated with the EventHubs Namespace.')
+    for item in ['approve', 'reject', 'show', 'delete']:
+        with self.argument_context('eventhubs namespace private-endpoint-connection {}'.format(item),
+                                   resource_type=ResourceType.MGMT_EVENTHUB) as c:
+            c.argument('private_endpoint_connection_name', options_list=['--name', '-n'], required=False,
+                       help='The name of the private endpoint connection associated with the EventHubs Namespace.')
+            c.extra('connection_id', options_list=['--id'],
+                    help='The ID of the private endpoint connection associated with the EventHubs Namespace. You can get '
+                         'it using `az eventhubs namespace show`.')
+            c.argument('namespace_name', help='The eventhubs namesapce name.', required=False)
+            c.argument('resource_group_name', help='The resource group name of specified eventhubs namespace.',
+                       required=False)
+            c.argument('description', help='Comments for {} operation.'.format(item))
+
+# Private end point connection
+    with self.argument_context('eventhubs namespace private-link-resource',
+                               resource_type=ResourceType.MGMT_EVENTHUB) as c:
+        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of the Namespace')
+
+# Identity
+    with self.argument_context('eventhubs namespace identity',
+                               resource_type=ResourceType.MGMT_EVENTHUB) as c:
+        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of the Namespace')
+
+    for scope in ['eventhubs namespace identity assign', 'eventhubs namespace identity remove']:
+        with self.argument_context(scope, resource_type=ResourceType.MGMT_EVENTHUB) as c:
+            c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of the Namespace')
+            c.argument('system_assigned', arg_type=get_three_state_flag(), help='System Assigned Identity')
+            c.argument('user_assigned', nargs='+', help='User Assigned Identity')
+
+# Encryption
+    with self.argument_context('eventhubs namespace encryption', resource_type=ResourceType.MGMT_EVENTHUB) as c:
+        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of the Namespace')
+
+    for scope in ['eventhubs namespace encryption add', 'eventhubs namespace identity remove']:
+        with self.argument_context(scope, resource_type=ResourceType.MGMT_EVENTHUB) as c:
+            c.argument('encryption_config', action=AlertAddEncryption, nargs='+', help='List of KeyVaultProperties objects.')

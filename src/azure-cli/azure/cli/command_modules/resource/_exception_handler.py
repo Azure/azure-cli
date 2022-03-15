@@ -7,11 +7,9 @@ from azure.cli.core.util import CLIError
 
 
 def managementgroups_exception_handler(ex):
-    from azure.mgmt.managementgroups.models import ErrorResponseException
-    if isinstance(ex, ErrorResponseException):
+    from azure.core.exceptions import HttpResponseError
+    if isinstance(ex, HttpResponseError):
         if ex.error.error:
             raise CLIError(ex.error.error)
         raise CLIError(ex.error)
-    import sys
-    from six import reraise
-    reraise(*sys.exc_info())
+    raise ex

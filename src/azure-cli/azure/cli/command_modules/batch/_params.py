@@ -102,7 +102,7 @@ def load_arguments(self, _):
         c.argument('allow_updates', options_list=('--allow-updates',), action="store_true", help="Specify to indicate whether packages within the application may be overwritten using the same version string. True if flag present.")
 
     for command in ['create', 'activate']:
-        with self.argument_context('batch application package {}'.format(command)) as c:
+        with self.argument_context(f'batch application package {command}') as c:
             c.argument('package_file', type=file_type, help='The path of the application package in zip format', completer=FilesCompleter())
             c.argument('application_name', options_list=('--application-name',), help="The name of the application.")
             c.argument('version_name', options_list=('--version-name',), help="The version name of the application.")
@@ -115,7 +115,7 @@ def load_arguments(self, _):
         c.argument('location_name', get_location_type(self.cli_ctx), help='The region for which to display the available Batch VM SKUs.')
 
     for command in ['list', 'show', 'create', 'set', 'delete', 'package']:
-        with self.argument_context('batch application {}'.format(command)) as c:
+        with self.argument_context(f'batch application {command}') as c:
             c.argument('account_name', batch_name_type, options_list=('--name', '-n'), validator=application_enabled)
 
     # TODO: Refactor so the help text can be extracted automatically
@@ -151,7 +151,7 @@ def load_arguments(self, _):
         c.argument('job_schedule_id', help='The ID of the job schedule from which you want to get a list of jobs. If omitted, lists all jobs in the account.')
 
     for command in ['job create', 'job set', 'job reset', 'job-schedule create', 'job-schedule set', 'job-schedule reset']:
-        with self.argument_context('batch {}'.format(command)) as c:
+        with self.argument_context(f'batch {command}') as c:
             c.argument('pool_id', options_list=('--pool-id',), help='The id of an existing pool. All the tasks of the job will run on the specified pool.')
 
     with self.argument_context('batch pool create') as c:

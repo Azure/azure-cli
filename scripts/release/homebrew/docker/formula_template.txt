@@ -17,7 +17,7 @@ class AzureCli < Formula
 {{ bottle_hash }}
 
   depends_on "openssl@1.1"
-  depends_on "python@3.9"
+  depends_on "python@3.10"
 
   uses_from_macos "libffi"
 
@@ -28,7 +28,7 @@ class AzureCli < Formula
 {{ resources }}
 
   def install
-    venv = virtualenv_create(libexec, "python3")
+    venv = virtualenv_create(libexec, "python3", system_site_packages: false)
     venv.pip_install resources
 
     # Get the CLI components we'll install

@@ -122,3 +122,16 @@ class UtcDatetimeAction(argparse.Action):
 
         iso_string = dt_val.isoformat()
         setattr(namespace, self.dest, iso_string)
+
+
+# pylint: disable=protected-access
+class InvokeCommandArgumentsAddAction(argparse._AppendAction):
+    def __call__(self, parser, namespace, values, option_string=None):
+        kwargs = {}
+        for item in values:
+            try:
+                key, value = item.split('=', 1)
+                kwargs[key] = value
+            except ValueError:
+                raise CLIError('usage error: {} KEY=VALUE [KEY=VALUE ...]'.format(option_string))
+        namespace.arguments = kwargs

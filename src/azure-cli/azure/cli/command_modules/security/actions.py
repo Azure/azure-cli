@@ -50,7 +50,7 @@ class _AppendToDictionaryAction(argparse.Action):
         if key in items:
             items[key].append(value)
         else:
-            items[key] = list()
+            items[key] = []
             items[key].append(value)
         setattr(namespace, self.dest, items)
 

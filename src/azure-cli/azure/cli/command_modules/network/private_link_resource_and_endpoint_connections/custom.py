@@ -17,10 +17,13 @@ TYPE_CLIENT_MAPPING = {
 
 def register_providers():
     _register_one_provider("Microsoft.Automation/automationAccounts", "2020-01-13-preview", True)
+    _register_one_provider('Microsoft.Authorization/resourceManagementPrivateLinks', '2020-05-01', False)
     _register_one_provider('Microsoft.AppConfiguration/configurationStores', '2020-06-01', True)
     _register_one_provider("Microsoft.Batch/batchAccounts", "2020-03-01", True)
+    _register_one_provider("Microsoft.BotService/botServices", "2021-03-01", True)
+    _register_one_provider("Microsoft.Cache/Redis", "2021-06-01", True)
     # "Microsoft.Cache/redisEnterprise", "2021-03-01", True
-    _register_one_provider('Microsoft.CognitiveServices/accounts', '2021-04-30', True)
+    _register_one_provider('Microsoft.CognitiveServices/accounts', '2021-10-01', True)
     _register_one_provider('Microsoft.Compute/diskAccesses', '2020-09-30', True)
     _register_one_provider('Microsoft.ContainerRegistry/registries', '2019-12-01-preview', True)
     _register_one_provider('Microsoft.DBforMySQL/servers', '2018-06-01', False, '2017-12-01-preview')
@@ -31,12 +34,16 @@ def register_providers():
     _register_one_provider('Microsoft.DigitalTwins/digitalTwinsInstances', '2020-12-01', True)
     _register_one_provider('Microsoft.EventGrid/topics', '2020-04-01-preview', True)
     _register_one_provider('Microsoft.EventGrid/domains', '2020-04-01-preview', True)
-    _register_one_provider("Microsoft.EventHub/namespaces", "2018-01-01-preview", True)
+    _register_one_provider("Microsoft.EventHub/namespaces", "2021-06-01-preview", True)
+    _register_one_provider("Microsoft.HDInsight/clusters", '2018-06-01-preview', True)
+    _register_one_provider("Microsoft.HybridCompute/privateLinkScopes", '2021-05-20', True)
     _register_one_provider("Microsoft.HealthcareApis/services", "2020-03-30", True)
     _register_one_provider('microsoft.insights/privateLinkScopes', '2019-10-17-preview', True)
     _register_one_provider('Microsoft.KeyVault/managedHSMs', '2021-04-01-preview', True)
     _register_one_provider('Microsoft.Keyvault/vaults', '2019-09-01', False)
-    _register_one_provider("Microsoft.Media/mediaservices", "2020-05-01", True)
+    _register_one_provider('Microsoft.MachineLearningServices/workspaces', '2021-01-01', True)
+    _register_one_provider("Microsoft.Media/mediaservices", "2021-06-01", True)
+    # _register_one_provider("Microsoft.Media/videoanalyzers", "2021-11-01-preview", True)
     # "Microsoft.Migrate/assessmentProjects", "2020-05-01-preview", False
     # "Microsoft.Migrate/migrateProjects", "2020-06-01-preview", False
     _register_one_provider('Microsoft.Network/applicationGateways', '2020-05-01', True)
@@ -44,7 +51,7 @@ def register_providers():
     _register_one_provider("Microsoft.Purview/accounts", "2021-07-01", True)
     _register_one_provider('Microsoft.PowerBI/privateLinkServicesForPowerBI', '2020-06-01', False)
     _register_one_provider('Microsoft.Search/searchServices', '2020-08-01', True)
-    _register_one_provider("Microsoft.ServiceBus/namespaces", "2018-01-01-preview", True)
+    _register_one_provider("Microsoft.ServiceBus/namespaces", "2021-06-01-preview", True)
     _register_one_provider('Microsoft.SignalRService/signalr', '2020-05-01', False)
     _register_one_provider('Microsoft.Sql/servers', '2018-06-01-preview', True)
     _register_one_provider('Microsoft.Storage/storageAccounts', '2019-06-01', True)
@@ -52,6 +59,10 @@ def register_providers():
     _register_one_provider("Microsoft.Synapse/workspaces", "2019-06-01-preview", True)
     _register_one_provider('Microsoft.Web/sites', '2019-08-01', False)
     _register_one_provider("Microsoft.Web/hostingEnvironments", "2020-10-01", True)
+    _register_one_provider('Microsoft.SignalRService/WebPubSub', '2021-09-01-preview', False)
+    _register_one_provider('Microsoft.DataFactory/factories', '2018-06-01', True)
+    _register_one_provider('Microsoft.Databricks/workspaces', '2021-04-01-preview', True)
+    _register_one_provider('Microsoft.RecoveryServices/vaults', '2021-07-01', True)
 
 
 def _register_one_provider(provider, api_version, support_list_or_not, resource_get_api_version=None, support_connection_operation=True):  # pylint: disable=line-too-long

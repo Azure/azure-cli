@@ -173,7 +173,7 @@ def validate_client_parameters(cmd, namespace):
                        '--account-key or --sas-token as credentials, or use `--auth-mode login` if you '
                        'have required RBAC roles in your command. For more information about RBAC roles '
                        'in storage, visit '
-                       'https://docs.microsoft.com/en-us/azure/storage/common/storage-auth-aad-rbac-cli. \n'
+                       'https://docs.microsoft.com/azure/storage/common/storage-auth-aad-rbac-cli. \n'
                        'Setting the corresponding environment variables can avoid inputting credentials in '
                        'your command. Please use --help to get more information.')
         n.account_key = _query_account_key(cmd.cli_ctx, n.account_name)
@@ -1030,7 +1030,7 @@ def services_type(loader):
 
 def get_char_options_validator(types, property_name):
     def _validator(namespace):
-        service_types = set(getattr(namespace, property_name, list()))
+        service_types = set(getattr(namespace, property_name, []))
 
         if not service_types:
             raise ValueError('Missing options --{}.'.format(property_name.replace('_', '-')))
@@ -1292,4 +1292,4 @@ def validate_logging_version(namespace):
     if validate_service_type(namespace.services, 'table') and namespace.version != 1.0:
         raise CLIError(
             'incorrect usage: for table service, the supported version for logging is `1.0`. For more information, '
-            'please refer to https://docs.microsoft.com/en-us/rest/api/storageservices/storage-analytics-log-format.')
+            'please refer to https://docs.microsoft.com/rest/api/storageservices/storage-analytics-log-format.')

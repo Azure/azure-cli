@@ -492,6 +492,98 @@ examples:
     text: az acr repository update -n MyRegistry --image hello-world@sha256:abc123 --write-enabled false
 """
 
+helps['acr manifest'] = """
+type: group
+short-summary: Manage artifact manifests in Azure Container Registries.
+"""
+
+helps['acr manifest show'] = """
+type: command
+short-summary: Get a manifest in an Azure Container Registry.
+examples:
+  - name: Get the manifest of the artifact 'hello-world:latest'.
+    text: az acr manifest show -r MyRegistry -n hello-world:latest
+  - name: Get the manifest of the artifact 'hello-world:latest'.
+    text: az acr manifest show MyRegistry.azurecr.io/hello-world:latest
+  - name: Get the manifest of the artifact referenced by digest 'hello-world@sha256:abc123'.
+    text: az acr manifest show -r MyRegistry -n hello-world@sha256:abc123
+  - name: Get the raw, unformatted manifest of the artifact 'hello-world:latest'.
+    text: az acr manifest show -r MyRegistry -n hello-world:latest --raw
+"""
+
+helps['acr manifest list'] = """
+type: command
+short-summary: List the manifests in a repository in an Azure Container Registry.
+examples:
+  - name: List the manifests of the repository 'hello-world'.
+    text: az acr manifest list -r MyRegistry -n hello-world
+  - name: List the manifests of the repository 'hello-world'.
+    text: az acr manifest list MyRegistry.azurecr.io/hello-world
+"""
+
+helps['acr manifest delete'] = """
+type: command
+short-summary: Delete a manifest in an Azure Container Registry.
+examples:
+  - name: Delete the manifest of the artifact 'hello-world:latest'.
+    text: az acr manifest delete -r MyRegistry -n hello-world:latest
+  - name: Delete the manifest of the artifact 'hello-world:latest'.
+    text: az acr manifest delete MyRegistry.azurecr.io/hello-world:latest
+  - name: Delete the manifest of the artifact referenced by digest 'hello-world@sha256:abc123'.
+    text: az acr manifest delete -r MyRegistry -n hello-world@sha256:abc123
+"""
+
+helps['acr manifest list-referrers'] = """
+type: command
+short-summary: List the ORAS referrers to a manifest in an Azure Container Registry.
+examples:
+  - name: List the referrers to the manifest of the artifact 'hello-world:latest'.
+    text: az acr manifest list-referrers -r MyRegistry -n hello-world:latest
+  - name: List the referrers to the manifest of the artifact 'hello-world:latest'.
+    text: az acr manifest list-referrers MyRegistry.azurecr.io/hello-world:latest
+  - name: List the referrers to the manifest of the artifact referenced by digest 'hello-world@sha256:abc123'.
+    text: az acr manifest list-referrers -r MyRegistry -n hello-world@sha256:abc123
+"""
+
+helps['acr manifest metadata'] = """
+type: group
+short-summary: Manage artifact manifest metadata in Azure Container Registries.
+"""
+
+helps['acr manifest metadata show'] = """
+type: command
+short-summary: Get the metadata of an artifact in an Azure Container Registry.
+examples:
+  - name: Get the metadata of the tag 'hello-world:latest'.
+    text: az acr manifest metadata show -r MyRegistry -n hello-world:latest
+  - name: Get the metadata of the tag 'hello-world:latest'.
+    text: az acr manifest metadata show MyRegistry.azurecr.io/hello-world:latest
+  - name: Get the metadata of the manifest referenced by digest 'hello-world@sha256:abc123'.
+    text: az acr manifest metadata show -r MyRegistry -n hello-world@sha256:abc123
+"""
+
+helps['acr manifest metadata list'] = """
+type: command
+short-summary: List the metadata of the manifests in a repository in an Azure Container Registry.
+examples:
+  - name: List the metadata of the manifests in the repository 'hello-world'.
+    text: az acr manifest metadata list -r MyRegistry -n hello-world
+  - name: List the metadata of the manifests in the repository 'hello-world'.
+    text: az acr manifest metadata list MyRegistry.azurecr.io/hello-world
+"""
+
+helps['acr manifest metadata update'] = """
+type: command
+short-summary: Update the manifest metadata of an artifact in an Azure Container Registry.
+examples:
+  - name: Update the metadata of the tag 'hello-world:latest'.
+    text: az acr manifest metadata update -r MyRegistry -n hello-world:latest --write-enabled false
+  - name: Update the metadata of the tag 'hello-world:latest'.
+    text: az acr manifest metadata update MyRegistry.azurecr.io/hello-world:latest --write-enabled false
+  - name: Update the metadata of the artifact referenced by digest 'hello-world@sha256:abc123'.
+    text: az acr manifest metadata update -r MyRegistry -n hello-world@sha256:abc123 --write-enabled false
+"""
+
 helps['acr run'] = """
 type: command
 short-summary: Queues a quick run providing streamed logs for an Azure Container Registry.
@@ -1228,14 +1320,14 @@ examples:
     text: |
         az acr connected-registry create --registry mycloudregistry --name myconnectedregistry \\
             --repository "app/hello-world" "service/mycomponent"
-  - name: Create a mirror connected registry with only read permissions and pass the sync token
+  - name: Create a read only connected registry with only read permissions and pass the sync token
     text: |
-        az acr connected-registry create --registry mycloudregistry  --name mymirroracr \\
-            --mode mirror --parent myconnectedregistry --sync-token mySyncTokenName
-  - name: Create a mirror connected registry with client tokens, that syncs every day at midninght and sync window of 4 hours.
+        az acr connected-registry create --registry mycloudregistry  --name myreadonlyacr \\
+            --mode readonly --parent myconnectedregistry --sync-token mySyncTokenName
+  - name: Create a read only connected registry with client tokens, that syncs every day at midninght and sync window of 4 hours.
     text: |
-        az acr connected-registry create -r mycloudregistry -n mymirroracr -p myconnectedregistry \\
-            --repository "app/mycomponent" -m mirror -s "0 12 * * *" -w PT4H \\
+        az acr connected-registry create -r mycloudregistry -n myreadonlyacr -p myconnectedregistry \\
+            --repository "app/mycomponent" -m ReadOnly -s "0 12 * * *" -w PT4H \\
             --client-tokens myTokenName1 myTokenName2
 """
 
@@ -1243,10 +1335,10 @@ helps['acr connected-registry delete'] = """
 type: command
 short-summary: Delete a connected registry from Azure Container Registry.
 examples:
-  - name: Delete a mirror connected registry 'myconnectedregistry' from parent registry 'mycloudregistry'.
+  - name: Delete a read only connected registry 'myconnectedregistry' from parent registry 'mycloudregistry'.
     text: >
         az acr connected-registry delete --registry mycloudregistry --name myconnectedregistry
-  - name: Delete a mirror connected registry 'myconnectedregistry' and it's sync token and scope-map from parent registry 'mycloudregistry'.
+  - name: Delete a read only connected registry 'myconnectedregistry' and it's sync token and scope-map from parent registry 'mycloudregistry'.
     text: >
         az acr connected-registry delete -r mycloudregistry -n myconnectedregistry --cleanup
 """
@@ -1262,35 +1354,35 @@ examples:
 
 helps['acr connected-registry list'] = """
 type: command
-short-summary: Lists all the connected registries under the current parent registry.
+short-summary: List all the connected registries under the current parent registry.
 examples:
-  - name: Lists all the connected registries of 'mycloudregistry' in table format.
+  - name: List all the connected registries of 'mycloudregistry' in table format.
     text: >
         az acr connected-registry list --registry mycloudregistry --output table
-  - name: Lists only the inmediate children of 'mycloudregistry' in expanded form in a table.
+  - name: List only the inmediate children of 'mycloudregistry' in expanded form in a table.
     text: >
         az acr connected-registry list --registry mycloudregistry --no-children --output table
-  - name: Lists all the offspring of 'myconnectedregistry' in expanded form inside a table.
+  - name: List all the offspring of 'myconnectedregistry' in expanded form inside a table.
     text: >
         az acr connected-registry list -r mycloudregistry -p myconnectedregistry --output table
 """
 
 helps['acr connected-registry list-client-tokens'] = """
 type: command
-short-summary: Lists all the client tokens associated to a specific connected registries.
+short-summary: List all the client tokens associated to a specific connected registries.
 examples:
-  - name: Lists all client tokens of 'mymirroracr'.
+  - name: List all client tokens of 'myreadonlyacr'.
     text: >
-        az acr connected-registry list-client-tokens -r mycloudregistry -n mymirroracr -o table
+        az acr connected-registry list-client-tokens -r mycloudregistry -n myreadonlyacr -o table
 """
 
 helps['acr connected-registry show'] = """
 type: command
 short-summary: Show connected registry details.
 examples:
-  - name: Show all the details of the 'mymirroracr' registry in table form.
+  - name: Show all the details of the 'myreadonlyacr' registry in table form.
     text: >
-        az acr connected-registry show --registry mycloudregistry --name mymirroracr --output table
+        az acr connected-registry show --registry mycloudregistry --name myreadonlyacr --output table
 """
 
 helps['acr connected-registry update'] = """
@@ -1304,18 +1396,60 @@ examples:
 
   - name: Update the sync and window time of a connected registry.
     text: |
-        az acr connected-registry update --registry mycloudregistry --name mymirroracr \\
+        az acr connected-registry update --registry mycloudregistry --name myreadonlyacr \\
             --sync-schedule "0 12 * * *" --sync-window PT4H
 """
 
+helps['acr connected-registry get-settings'] = """
+type: command
+short-summary: Retrieve information required to activate a connected registry, and creates or rotates the sync token credentials.
+examples:
+  - name: Get the settings information required to install a connected registry without the password.
+    text: >
+        az acr connected-registry get-settings -r mycloudregistry -n myconnectedregistry --parent-protocol http
+  - name: Generate a new sync token password 1 or rotates the password if it already exists, and gets the settings information required to install a connected registry.
+    text: >
+        az acr connected-registry get-settings -r mycloudregistry -n myconnectedregistry --generate-password 1 --parent-protocol https
+"""
+
+helps['acr connected-registry permissions'] = """
+type: group
+short-summary: Manage the repository permissions accross multiple connected registries. Please see https://aka.ms/acr/connected-registry for more information.
+"""
+
+helps['acr connected-registry permissions update'] = """
+type: command
+short-summary: Add and remove repository permissions accross all the necessary connected registry sync scope maps.
+examples:
+  - name: Add permissions to synchronize images from 'repo1' and 'repo2' to the connected registry 'myconnectedregistry' and its ancestors.
+    text: >
+        az acr connected-registry permissions update -r mycloudregistry -n myconnectedregistry --add repo1 repo2
+  - name: Remove permissions to synchronize images from 'repo1' and 'repo2' to the connected registry 'myconnectedregistry' and its descendants.
+    text: >
+        az acr connected-registry permissions update -r mycloudregistry -n myconnectedregistry --remove repo1 repo2
+  - name: Remove permissions to synchronize 'repo1' images and adds permissions for 'repo2' images.
+    text: >
+        az acr connected-registry permissions update -r mycloudregistry -n myconnectedregistry --remove repo1 --add repo2
+"""
+
+helps['acr connected-registry permissions show'] = """
+type: command
+short-summary: Show the connected registry sync scope map information.
+examples:
+  - name: Show details and attributes of a sync scope map for a connected registry.
+    text: >
+        az acr connected-registry permissions show -r mycloudregistry -n myconnectedregistry
+"""
+
+# To be deprecated
 helps['acr connected-registry install'] = """
 type: group
-short-summary: Helps to access the necessary information for installing a connected registry. Please see https://aka.ms/acr/connected-registry for more information.
+short-summary: Help to access the necessary information for installing a connected registry. Please see https://aka.ms/acr/connected-registry for more information.
 """
 
 helps['acr connected-registry install info'] = """
 type: command
-short-summary: Retrieves information required to activate a connected registry.
+short-summary: Retrieve information required to activate a connected registry.
 examples:
   - name: Set http as the parent protocol, and prints the values required to activate a connected registry in json format
     text: >
@@ -1324,7 +1458,7 @@ examples:
 
 helps['acr connected-registry install renew-credentials'] = """
 type: command
-short-summary: Retrieves information required to activate a connected registry, and renews the sync token credentials.
+short-summary: Retrieve information required to activate a connected registry, and renews the sync token credentials.
 examples:
   - name: Set http as the parent protocol, and prints the values in json format required to activate a connected registry and the newly generated sync token credentials.
     text: >
@@ -1333,15 +1467,15 @@ examples:
 
 helps['acr connected-registry repo'] = """
 type: command
-short-summary: Updates all the necessary connected registry sync scope maps repository permissions.
+short-summary: Update all the necessary connected registry sync scope maps repository permissions.
 examples:
-  - name: Adds permissions to synchronize images from 'repo1' and 'repo2' to the connected registry 'myconnectedregistry' and its ancestors.
+  - name: Add permissions to synchronize images from 'repo1' and 'repo2' to the connected registry 'myconnectedregistry' and its ancestors.
     text: >
         az acr connected-registry repo -r mycloudregistry -n myconnectedregistry --add repo1 repo2
-  - name: Removes permissions to synchronize images from 'repo1' and 'repo2' to the connected registry 'myconnectedregistry' and its descendants.
+  - name: Remove permissions to synchronize images from 'repo1' and 'repo2' to the connected registry 'myconnectedregistry' and its descendants.
     text: >
         az acr connected-registry repo -r mycloudregistry -n myconnectedregistry --remove repo1 repo2
-  - name: Removes permissions to synchronize 'repo1' images and adds permissions for 'repo2' images.
+  - name: Remove permissions to synchronize 'repo1' images and adds permissions for 'repo2' images.
     text: >
         az acr connected-registry repo -r mycloudregistry -n myconnectedregistry --remove repo1 --add repo2
 """

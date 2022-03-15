@@ -29,8 +29,8 @@ import webbrowser
 import zipfile
 from distutils.version import StrictVersion
 from math import isnan
-from six.moves.urllib.request import urlopen  # pylint: disable=import-error
-from six.moves.urllib.error import URLError  # pylint: disable=import-error
+from urllib.request import urlopen
+from urllib.error import URLError
 
 # pylint: disable=import-error
 import yaml
@@ -38,16 +38,16 @@ import dateutil.parser
 from dateutil.relativedelta import relativedelta
 from knack.log import get_logger
 from knack.util import CLIError
-from knack.prompting import prompt_pass, NoTTYException, prompt_y_n
+from knack.prompting import NoTTYException, prompt_y_n
 from msrestazure.azure_exceptions import CloudError
 import requests
 
 # pylint: disable=no-name-in-module,import-error
 from azure.cli.command_modules.acs import acs_client, proxy
 from azure.cli.command_modules.acs._params import regions_in_preview, regions_in_prod
+from azure.cli.command_modules.acs._helpers import get_snapshot_by_snapshot_id
 from azure.cli.core.api import get_config_dir
 from azure.cli.core.azclierror import (ResourceNotFoundError,
-                                       ClientRequestError,
                                        ArgumentUsageError,
                                        InvalidArgumentValueError,
                                        MutuallyExclusiveArgumentError,
@@ -79,15 +79,9 @@ from ._client_factory import cf_resources
 from ._client_factory import get_resource_by_name
 from ._client_factory import cf_container_registry_service
 from ._client_factory import cf_agent_pools
-from ._client_factory import get_msi_client
-
-from ._helpers import (_populate_api_server_access_profile, _set_vm_set_type, _set_outbound_type,
-                       _parse_comma_separated_list)
-
-from ._loadbalancer import (set_load_balancer_sku, is_load_balancer_profile_provided,
-                            update_load_balancer_profile, create_load_balancer_profile)
 
 from ._consts import CONST_SCALE_SET_PRIORITY_REGULAR, CONST_SCALE_SET_PRIORITY_SPOT, CONST_SPOT_EVICTION_POLICY_DELETE
+from ._consts import CONST_SCALE_DOWN_MODE_DELETE
 from ._consts import CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME
 from ._consts import CONST_MONITORING_ADDON_NAME
 from ._consts import CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID
@@ -100,10 +94,23 @@ from ._consts import CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID, CONST_INGRESS_A
 from ._consts import CONST_INGRESS_APPGW_SUBNET_CIDR, CONST_INGRESS_APPGW_SUBNET_ID
 from ._consts import CONST_INGRESS_APPGW_WATCH_NAMESPACE
 from ._consts import CONST_CONFCOM_ADDON_NAME, CONST_ACC_SGX_QUOTE_HELPER_ENABLED
+from ._consts import CONST_OPEN_SERVICE_MESH_ADDON_NAME
+from ._consts import (CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME,
+                      CONST_SECRET_ROTATION_ENABLED,
+                      CONST_ROTATION_POLL_INTERVAL)
 from ._consts import ADDONS
 from ._consts import CONST_CANIPULL_IMAGE
-from ._consts import CONST_PRIVATE_DNS_ZONE_SYSTEM, CONST_PRIVATE_DNS_ZONE_NONE
 from ._consts import CONST_MANAGED_IDENTITY_OPERATOR_ROLE, CONST_MANAGED_IDENTITY_OPERATOR_ROLE_ID
+from ._consts import DecoratorEarlyExitException
+from .addonconfiguration import (
+    add_monitoring_role_assignment,
+    add_ingress_appgw_addon_role_assignment,
+    add_virtual_node_role_assignment,
+    ensure_default_log_analytics_workspace_for_monitoring,
+    ensure_container_insights_for_monitoring,
+)
+from ._resourcegroup import get_rg_location
+from ._validators import extract_comma_separated_string
 
 logger = get_logger(__name__)
 
@@ -547,8 +554,10 @@ def _add_role_assignment(cmd, role, service_principal_msi_id, is_service_princip
             if ex.message == 'The role assignment already exists.':
                 break
             logger.info(ex.message)
-        except:  # pylint: disable=bare-except
-            pass
+        except CLIError as ex:
+            logger.warning(str(ex))
+        except Exception as ex:  # pylint: disable=broad-except
+            logger.error(str(ex))
         time.sleep(delay + delay * x)
     else:
         return False
@@ -558,7 +567,7 @@ def _add_role_assignment(cmd, role, service_principal_msi_id, is_service_princip
 
 
 def delete_role_assignments(cli_ctx, ids=None, assignee=None, role=None, resource_group_name=None,
-                            scope=None, include_inherited=False, yes=None):
+                            scope=None, include_inherited=False, yes=None, is_service_principal=True):
     factory = get_auth_management_client(cli_ctx, scope)
     assignments_client = factory.role_assignments
     definitions_client = factory.role_definitions
@@ -579,14 +588,14 @@ def delete_role_assignments(cli_ctx, ids=None, assignee=None, role=None, resourc
                               assignments_client.config.subscription_id)
     assignments = _search_role_assignments(cli_ctx, assignments_client, definitions_client,
                                            scope, assignee, role, include_inherited,
-                                           include_groups=False)
+                                           include_groups=False, is_service_principal=is_service_principal)
 
     if assignments:
         for a in assignments:
             assignments_client.delete_by_id(a.id)
 
 
-def _delete_role_assignments(cli_ctx, role, service_principal, delay=2, scope=None):
+def _delete_role_assignments(cli_ctx, role, service_principal, delay=2, scope=None, is_service_principal=True):
     # AAD can have delays in propagating data, so sleep and retry
     hook = cli_ctx.get_progress_controller(True)
     hook.add(message='Waiting for AAD role to delete', value=0, total_val=1.0)
@@ -598,7 +607,8 @@ def _delete_role_assignments(cli_ctx, role, service_principal, delay=2, scope=No
             delete_role_assignments(cli_ctx,
                                     role=role,
                                     assignee=service_principal,
-                                    scope=scope)
+                                    scope=scope,
+                                    is_service_principal=is_service_principal)
             break
         except CLIError as ex:
             raise ex
@@ -613,10 +623,14 @@ def _delete_role_assignments(cli_ctx, role, service_principal, delay=2, scope=No
 
 
 def _search_role_assignments(cli_ctx, assignments_client, definitions_client,
-                             scope, assignee, role, include_inherited, include_groups):
+                             scope, assignee, role, include_inherited, include_groups,
+                             is_service_principal=True):
     assignee_object_id = None
     if assignee:
-        assignee_object_id = _resolve_object_id(cli_ctx, assignee)
+        if is_service_principal:
+            assignee_object_id = _resolve_object_id(cli_ctx, assignee)
+        else:
+            assignee_object_id = assignee
 
     # always use "scope" if provided, so we can get assignments beyond subscription e.g. management groups
     if scope:
@@ -801,41 +815,6 @@ def _generate_properties(api_version, orchestrator_type, orchestrator_version, m
     return properties
 
 
-def _get_user_assigned_identity_resource_id_regular_expression():
-    return re.compile(
-        r'/subscriptions/(.*?)/resourcegroups/(.*?)/providers/microsoft.managedidentity/userassignedidentities/(.*)',
-        flags=re.IGNORECASE)
-
-
-def _get_user_assigned_identity(cli_ctx, resource_id):
-    resource_id = resource_id.lower()
-    _re_user_assigned_identity_resource_id = _get_user_assigned_identity_resource_id_regular_expression()
-    match = _re_user_assigned_identity_resource_id.search(resource_id)
-    if match:
-        subscription_id = match.group(1)
-        resource_group_name = match.group(2)
-        identity_name = match.group(3)
-        msi_client = get_msi_client(cli_ctx, subscription_id)
-        try:
-            identity = msi_client.user_assigned_identities.get(resource_group_name=resource_group_name,
-                                                               resource_name=identity_name)
-        except CloudError as ex:
-            if 'was not found' in ex.message:
-                raise ResourceNotFoundError("Identity {} not found.".format(resource_id))
-            raise ClientRequestError(ex.message)
-        return identity
-    raise InvalidArgumentValueError(
-        "Cannot parse identity name from provided resource id {}.".format(resource_id))
-
-
-def _get_user_assigned_identity_client_id(cli_ctx, resource_id):
-    return _get_user_assigned_identity(cli_ctx, resource_id).client_id
-
-
-def _get_user_assigned_identity_object_id(cli_ctx, resource_id):
-    return _get_user_assigned_identity(cli_ctx, resource_id).principal_id
-
-
 # pylint: disable=too-many-locals
 def acs_create(cmd, client, resource_group_name, deployment_name, name, ssh_key_value, dns_name_prefix=None,
                location=None, admin_username="azureuser", api_version=None, master_profile=None,
@@ -927,7 +906,7 @@ def acs_create(cmd, client, resource_group_name, deployment_name, name, ssh_key_
         dns_name_prefix = _get_default_dns_prefix(
             name, resource_group_name, subscription_id)
 
-    rg_location = _get_rg_location(cmd.cli_ctx, resource_group_name)
+    rg_location = get_rg_location(cmd.cli_ctx, resource_group_name)
     if location is None:
         location = rg_location
 
@@ -1465,8 +1444,30 @@ def _create_role_assignment(cmd, role, assignee,
 
     # If the cluster has service principal resolve the service principal client id to get the object id,
     # if not use MSI object id.
-    object_id = _resolve_object_id(
-        cmd.cli_ctx, assignee) if resolve_assignee else assignee
+    object_id = assignee
+    if resolve_assignee:
+        from azure.graphrbac.models import GraphErrorException
+        error_msg = "Failed to resolve service principal object ID: "
+        try:
+            object_id = _resolve_object_id(cmd.cli_ctx, assignee)
+        except GraphErrorException as ex:
+            if ex.response is not None:
+                error_code = getattr(ex.response, "status_code", None)
+                error_reason = getattr(ex.response, "reason", None)
+                internal_error = ""
+                if error_code:
+                    internal_error += str(error_code)
+                if error_reason:
+                    if internal_error:
+                        internal_error += " - "
+                    internal_error += str(error_reason)
+                if internal_error:
+                    error_msg += "({}) ".format(internal_error)
+            error_msg += ex.message
+            # this should be UserFault or ServiceError, but it is meaningless to distinguish them here
+            raise CLIError(error_msg)
+        except Exception as ex:  # pylint: disable=bare-except
+            raise CLIError(error_msg + str(ex))
 
     assignment_name = uuid.uuid4()
     custom_headers = None
@@ -1568,98 +1569,111 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr):
     if not which("kubectl"):
         raise ValidationError("Can not find kubectl executable in PATH")
 
-    _, browse_path = tempfile.mkstemp()
-    aks_get_credentials(
-        cmd, client, resource_group_name, name, admin=False, path=browse_path
-    )
-
-    # Get kubectl minor version
-    kubectl_minor_version = -1
+    return_msg = None
+    fd, browse_path = tempfile.mkstemp()
     try:
-        cmd = f"kubectl version -o json --kubeconfig {browse_path}"
-        output = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
-        jsonS, _ = output.communicate()
-        kubectl_version = json.loads(jsonS)
-        # Remove any non-numeric characters like + from minor version
-        kubectl_minor_version = int(re.sub(r"\D", "", kubectl_version["clientVersion"]["minor"]))
-        kubectl_server_minor_version = int(
-            kubectl_version["serverVersion"]["minor"])
-        kubectl_server_patch = int(
-            kubectl_version["serverVersion"]["gitVersion"].split(".")[-1])
-        if kubectl_server_minor_version < 17 or (kubectl_server_minor_version == 17 and kubectl_server_patch < 14):
-            logger.warning('There is a known issue for Kubernetes versions < 1.17.14 when connecting to '
-                           'ACR using MSI. See https://github.com/kubernetes/kubernetes/pull/96355 for'
-                           'more information.')
-    except subprocess.CalledProcessError as err:
-        raise ValidationError(
-            "Could not find kubectl minor version: {}".format(err))
-    if kubectl_minor_version == -1:
-        raise ValidationError("Failed to get kubectl version")
-
-    podName = "canipull-" + str(uuid.uuid4())
-    overrides = {
-        "spec": {
-            "restartPolicy": "Never",
-            "hostNetwork": True,
-            "containers": [
-                {
-                    "securityContext": {"runAsUser": 0},
-                    "name": podName,
-                    "image": CONST_CANIPULL_IMAGE,
-                    "args": ["-v6", acr],
-                    "stdin": True,
-                    "stdinOnce": True,
-                    "tty": True,
-                    "volumeMounts": [
-                        {"name": "azurejson", "mountPath": "/etc/kubernetes"},
-                        {"name": "sslcerts", "mountPath": "/etc/ssl/certs"},
-                    ],
-                }
-            ],
-            "tolerations": [
-                {"key": "CriticalAddonsOnly", "operator": "Exists"},
-                {"effect": "NoExecute", "operator": "Exists"},
-            ],
-            "volumes": [
-                {"name": "azurejson", "hostPath": {"path": "/etc/kubernetes"}},
-                {"name": "sslcerts", "hostPath": {"path": "/etc/ssl/certs"}},
-            ],
-            "nodeSelector": {"kubernetes.io/os": "linux"},
-        }
-    }
-
-    try:
-        cmd = [
-            "kubectl",
-            "run",
-            "--kubeconfig",
-            browse_path,
-            "--rm",
-            "--quiet",
-            "--image",
-            CONST_CANIPULL_IMAGE,
-            "--overrides",
-            json.dumps(overrides),
-            "-it",
-            podName,
-            "--namespace=default",
-        ]
-
-        # Support kubectl versons < 1.18
-        if kubectl_minor_version < 18:
-            cmd += ["--generator=run-pod/v1"]
-
-        output = subprocess.check_output(
-            cmd,
-            universal_newlines=True,
-            stderr=subprocess.STDOUT,
+        aks_get_credentials(
+            cmd, client, resource_group_name, name, admin=False, path=browse_path
         )
-    except subprocess.CalledProcessError as err:
-        raise AzureInternalError("Failed to check the ACR: {} Command output: {}".format(err, err.output))
-    if output:
-        print(output)
-    else:
-        raise AzureInternalError("Failed to check the ACR.")
+
+        # Get kubectl minor version
+        kubectl_minor_version = -1
+        try:
+            cmd = f"kubectl version -o json --kubeconfig {browse_path}"
+            output = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
+            jsonS, _ = output.communicate()
+            kubectl_version = json.loads(jsonS)
+            # Remove any non-numeric characters like + from minor version
+            kubectl_minor_version = int(re.sub(r"\D", "", kubectl_version["clientVersion"]["minor"]))
+            kubectl_server_minor_version = int(
+                kubectl_version["serverVersion"]["minor"])
+            kubectl_server_patch = int(
+                kubectl_version["serverVersion"]["gitVersion"].split(".")[-1])
+            if kubectl_server_minor_version < 17 or (kubectl_server_minor_version == 17 and kubectl_server_patch < 14):
+                logger.warning(
+                    "There is a known issue for Kubernetes versions < 1.17.14 when connecting to "
+                    "ACR using MSI. See https://github.com/kubernetes/kubernetes/pull/96355 for"
+                    "more information."
+                )
+        except subprocess.CalledProcessError as err:
+            raise ValidationError(
+                "Could not find kubectl minor version: {}".format(err))
+        if kubectl_minor_version == -1:
+            raise ValidationError("Failed to get kubectl version")
+
+        podName = "canipull-" + str(uuid.uuid4())
+        overrides = {
+            "spec": {
+                "restartPolicy": "Never",
+                "hostNetwork": True,
+                "containers": [
+                    {
+                        "securityContext": {"runAsUser": 0},
+                        "name": podName,
+                        "image": CONST_CANIPULL_IMAGE,
+                        "args": ["-v6", acr],
+                        "stdin": True,
+                        "stdinOnce": True,
+                        "tty": True,
+                        "volumeMounts": [
+                            {"name": "azurejson", "mountPath": "/etc/kubernetes"},
+                            {"name": "sslcerts", "mountPath": "/etc/ssl/certs"},
+                        ],
+                    }
+                ],
+                "tolerations": [
+                    {"key": "CriticalAddonsOnly", "operator": "Exists"},
+                    {"effect": "NoExecute", "operator": "Exists"},
+                ],
+                "volumes": [
+                    {"name": "azurejson", "hostPath": {"path": "/etc/kubernetes"}},
+                    {"name": "sslcerts", "hostPath": {"path": "/etc/ssl/certs"}},
+                ],
+                "nodeSelector": {"kubernetes.io/os": "linux"},
+            }
+        }
+
+        try:
+            cmd = [
+                "kubectl",
+                "run",
+                "--kubeconfig",
+                browse_path,
+                "--rm",
+                "--quiet",
+                "--image",
+                CONST_CANIPULL_IMAGE,
+                "--overrides",
+                json.dumps(overrides),
+                "-it",
+                podName,
+                "--namespace=default",
+            ]
+
+            # Support kubectl versons < 1.18
+            if kubectl_minor_version < 18:
+                cmd += ["--generator=run-pod/v1"]
+
+            output = subprocess.check_output(
+                cmd,
+                universal_newlines=True,
+                stderr=subprocess.STDOUT,
+            )
+        except subprocess.CalledProcessError as err:
+            raise AzureInternalError("Failed to check the ACR: {} Command output: {}".format(err, err.output))
+        if output:
+            print(output)
+            # only return the output in test case "test_aks_create_attach_acr"
+            test_hook_data = get_cmd_test_hook_data("test_aks_create_attach_acr.hook")
+            if test_hook_data:
+                test_configs = test_hook_data.get("configs", None)
+                if test_configs and test_configs.get("returnOutput", False):
+                    return_msg = output
+        else:
+            raise AzureInternalError("Failed to check the ACR.")
+    finally:
+        os.close(fd)
+    return return_msg
 
 
 # pylint: disable=too-many-statements,too-many-branches
@@ -1710,121 +1724,155 @@ def _aks_browse(
     if not which('kubectl'):
         raise FileOperationError('Can not find kubectl executable in PATH')
 
-    _, browse_path = tempfile.mkstemp()
-    aks_get_credentials(cmd, client, resource_group_name,
-                        name, admin=False, path=browse_path)
-
-    # find the dashboard pod's name
+    fd, browse_path = tempfile.mkstemp()
     try:
-        dashboard_pod = subprocess.check_output(
-            ["kubectl", "get", "pods", "--kubeconfig", browse_path, "--namespace", "kube-system",
-             "--output", "name", "--selector", "k8s-app=kubernetes-dashboard"],
-            universal_newlines=True,
-            stderr=subprocess.STDOUT,
-        )
-    except subprocess.CalledProcessError as err:
-        raise ResourceNotFoundError('Could not find dashboard pod: {} Command output: {}'.format(err, err.output))
-    if dashboard_pod:
-        # remove any "pods/" or "pod/" prefix from the name
-        dashboard_pod = str(dashboard_pod).split('/')[-1].strip()
-    else:
-        raise ResourceNotFoundError("Couldn't find the Kubernetes dashboard pod.")
+        aks_get_credentials(cmd, client, resource_group_name,
+                            name, admin=False, path=browse_path)
 
-    # find the port
-    try:
-        dashboard_port = subprocess.check_output(
-            ["kubectl", "get", "pods", "--kubeconfig", browse_path, "--namespace", "kube-system",
-             "--selector", "k8s-app=kubernetes-dashboard",
-             "--output", "jsonpath='{.items[0].spec.containers[0].ports[0].containerPort}'"],
-            universal_newlines=True,
-            stderr=subprocess.STDOUT,
-        )
-        # output format: "'{port}'"
-        dashboard_port = int((dashboard_port.replace("'", "")))
-    except subprocess.CalledProcessError as err:
-        raise ResourceNotFoundError('Could not find dashboard port: {} Command output: {}'.format(err, err.output))
-
-    # use https if dashboard container is using https
-    if dashboard_port == 8443:
-        protocol = 'https'
-    else:
-        protocol = 'http'
-
-    proxy_url = 'http://{0}:{1}/'.format(listen_address, listen_port)
-    dashboardURL = '{0}/api/v1/namespaces/kube-system/services/{1}:kubernetes-dashboard:/proxy/'.format(proxy_url,
-                                                                                                        protocol)
-    # launch kubectl port-forward locally to access the remote dashboard
-    if in_cloud_console():
-        # TODO: better error handling here.
-        response = requests.post(
-            'http://localhost:8888/openport/{0}'.format(listen_port))
-        result = json.loads(response.text)
-        dashboardURL = '{0}api/v1/namespaces/kube-system/services/{1}:kubernetes-dashboard:/proxy/'.format(
-            result['url'], protocol)
-        term_id = os.environ.get('ACC_TERM_ID')
-        if term_id:
-            response = requests.post('http://localhost:8888/openLink/{0}'.format(term_id),
-                                     json={"url": dashboardURL})
-        logger.warning(
-            'To view the console, please open %s in a new tab', dashboardURL)
-    else:
-        logger.warning('Proxy running on %s', proxy_url)
-
-    timeout = None
-    test_hook_data = get_cmd_test_hook_data("test_aks_browse_legacy.hook")
-    if test_hook_data:
-        test_configs = test_hook_data.get("configs", None)
-        if test_configs and test_configs.get("enableTimeout", None):
-            timeout = test_configs.get("timeoutInterval", 10)
-    logger.warning('Press CTRL+C to close the tunnel...')
-    if not disable_browser:
-        wait_then_open_async(dashboardURL)
-    try:
+        # find the dashboard pod's name
         try:
-            subprocess.check_output(
-                ["kubectl", "--kubeconfig", browse_path, "proxy", "--address",
-                 listen_address, "--port", listen_port],
+            dashboard_pod = subprocess.check_output(
+                [
+                    "kubectl",
+                    "get",
+                    "pods",
+                    "--kubeconfig",
+                    browse_path,
+                    "--namespace",
+                    "kube-system",
+                    "--output",
+                    "name",
+                    "--selector",
+                    "k8s-app=kubernetes-dashboard",
+                ],
                 universal_newlines=True,
                 stderr=subprocess.STDOUT,
-                timeout=timeout,
             )
         except subprocess.CalledProcessError as err:
-            if err.output.find('unknown flag: --address'):
-                return_msg = "Test Invalid Address! "
-                if listen_address != '127.0.0.1':
-                    logger.warning(
-                        '"--address" is only supported in kubectl v1.13 and later.')
-                    logger.warning(
-                        'The "--listen-address" argument will be ignored.')
-                try:
-                    subprocess.call(["kubectl", "--kubeconfig",
-                                    browse_path, "proxy", "--port", listen_port], timeout=timeout)
-                except subprocess.TimeoutExpired:
-                    logger.warning("Currently in a test environment, the proxy is closed due to a preset timeout!")
-                    return_msg = return_msg if return_msg else ""
-                    return_msg += "Test Passed!"
-                except subprocess.CalledProcessError as new_err:
+            raise ResourceNotFoundError('Could not find dashboard pod: {} Command output: {}'.format(err, err.output))
+        if dashboard_pod:
+            # remove any "pods/" or "pod/" prefix from the name
+            dashboard_pod = str(dashboard_pod).split('/')[-1].strip()
+        else:
+            raise ResourceNotFoundError("Couldn't find the Kubernetes dashboard pod.")
+
+        # find the port
+        try:
+            dashboard_port = subprocess.check_output(
+                [
+                    "kubectl",
+                    "get",
+                    "pods",
+                    "--kubeconfig",
+                    browse_path,
+                    "--namespace",
+                    "kube-system",
+                    "--selector",
+                    "k8s-app=kubernetes-dashboard",
+                    "--output",
+                    "jsonpath='{.items[0].spec.containers[0].ports[0].containerPort}'",
+                ],
+                universal_newlines=True,
+                stderr=subprocess.STDOUT,
+            )
+            # output format: "'{port}'"
+            dashboard_port = int((dashboard_port.replace("'", "")))
+        except subprocess.CalledProcessError as err:
+            raise ResourceNotFoundError('Could not find dashboard port: {} Command output: {}'.format(err, err.output))
+
+        # use https if dashboard container is using https
+        if dashboard_port == 8443:
+            protocol = 'https'
+        else:
+            protocol = 'http'
+
+        proxy_url = 'http://{0}:{1}/'.format(listen_address, listen_port)
+        dashboardURL = '{0}/api/v1/namespaces/kube-system/services/{1}:kubernetes-dashboard:/proxy/'.format(proxy_url,
+                                                                                                            protocol)
+        # launch kubectl port-forward locally to access the remote dashboard
+        if in_cloud_console():
+            # TODO: better error handling here.
+            response = requests.post(
+                'http://localhost:8888/openport/{0}'.format(listen_port))
+            result = json.loads(response.text)
+            dashboardURL = '{0}api/v1/namespaces/kube-system/services/{1}:kubernetes-dashboard:/proxy/'.format(
+                result['url'], protocol)
+            term_id = os.environ.get('ACC_TERM_ID')
+            if term_id:
+                response = requests.post(
+                    "http://localhost:8888/openLink/{0}".format(term_id),
+                    json={"url": dashboardURL},
+                )
+            logger.warning(
+                'To view the console, please open %s in a new tab', dashboardURL)
+        else:
+            logger.warning('Proxy running on %s', proxy_url)
+
+        timeout = None
+        test_hook_data = get_cmd_test_hook_data("test_aks_browse_legacy.hook")
+        if test_hook_data:
+            test_configs = test_hook_data.get("configs", None)
+            if test_configs and test_configs.get("enableTimeout", False):
+                timeout = test_configs.get("timeoutInterval", None)
+        logger.warning('Press CTRL+C to close the tunnel...')
+        if not disable_browser:
+            wait_then_open_async(dashboardURL)
+        try:
+            try:
+                subprocess.check_output(
+                    [
+                        "kubectl",
+                        "--kubeconfig",
+                        browse_path,
+                        "proxy",
+                        "--address",
+                        listen_address,
+                        "--port",
+                        listen_port,
+                    ],
+                    universal_newlines=True,
+                    stderr=subprocess.STDOUT,
+                    timeout=timeout,
+                )
+            except subprocess.CalledProcessError as err:
+                if err.output.find('unknown flag: --address'):
+                    return_msg = "Test Invalid Address! "
+                    if listen_address != '127.0.0.1':
+                        logger.warning(
+                            '"--address" is only supported in kubectl v1.13 and later.')
+                        logger.warning(
+                            'The "--listen-address" argument will be ignored.')
+                    try:
+                        subprocess.call(["kubectl", "--kubeconfig",
+                                        browse_path, "proxy", "--port", listen_port], timeout=timeout)
+                    except subprocess.TimeoutExpired:
+                        logger.warning("Currently in a test environment, the proxy is closed due to a preset timeout!")
+                        return_msg = return_msg if return_msg else ""
+                        return_msg += "Test Passed!"
+                    except subprocess.CalledProcessError as new_err:
+                        raise AzureInternalError(
+                            "Could not open proxy: {} Command output: {}".format(
+                                new_err, new_err.output
+                            )
+                        )
+                else:
                     raise AzureInternalError(
                         "Could not open proxy: {} Command output: {}".format(
-                            new_err, new_err.output
+                            err, err.output
                         )
                     )
-            else:
-                raise AzureInternalError(
-                    "Could not open proxy: {} Command output: {}".format(
-                        err, err.output
-                    )
-                )
-        except subprocess.TimeoutExpired:
-            logger.warning("Currently in a test environment, the proxy is closed due to a preset timeout!")
-            return_msg = return_msg if return_msg else ""
-            return_msg += "Test Passed!"
-    except KeyboardInterrupt:
-        # Let command processing finish gracefully after the user presses [Ctrl+C]
-        pass
+            except subprocess.TimeoutExpired:
+                logger.warning("Currently in a test environment, the proxy is closed due to a preset timeout!")
+                return_msg = return_msg if return_msg else ""
+                return_msg += "Test Passed!"
+        except KeyboardInterrupt:
+            # Let command processing finish gracefully after the user presses [Ctrl+C]
+            pass
+        finally:
+            if in_cloud_console():
+                requests.post('http://localhost:8888/closeport/8001')
     finally:
-        if in_cloud_console():
-            requests.post('http://localhost:8888/closeport/8001')
+        os.close(fd)
     return return_msg
 
 
@@ -1868,136 +1916,6 @@ def _validate_ssh_key(no_ssh_key, ssh_key_value):
                 'Provided ssh key ({}) is invalid or non-existent'.format(shortened_key))
 
 
-def _add_monitoring_role_assignment(result, cluster_resource_id, cmd):
-    service_principal_msi_id = None
-    # Check if service principal exists, if it does, assign permissions to service principal
-    # Else, provide permissions to MSI
-    if (
-            hasattr(result, 'service_principal_profile') and
-            hasattr(result.service_principal_profile, 'client_id') and
-            result.service_principal_profile.client_id.lower() != 'msi'
-    ):
-        logger.info('valid service principal exists, using it')
-        service_principal_msi_id = result.service_principal_profile.client_id
-        is_service_principal = True
-    elif (
-            (hasattr(result, 'addon_profiles')) and
-            (CONST_MONITORING_ADDON_NAME in result.addon_profiles) and
-            (hasattr(result.addon_profiles[CONST_MONITORING_ADDON_NAME], 'identity')) and
-            (hasattr(
-                result.addon_profiles[CONST_MONITORING_ADDON_NAME].identity, 'object_id'))
-    ):
-        logger.info('omsagent MSI exists, using it')
-        service_principal_msi_id = result.addon_profiles[CONST_MONITORING_ADDON_NAME].identity.object_id
-        is_service_principal = False
-
-    if service_principal_msi_id is not None:
-        if not _add_role_assignment(cmd, 'Monitoring Metrics Publisher',
-                                    service_principal_msi_id, is_service_principal, scope=cluster_resource_id):
-            logger.warning('Could not create a role assignment for Monitoring addon. '
-                           'Are you an Owner on this subscription?')
-    else:
-        logger.warning('Could not find service principal or user assigned MSI for role'
-                       'assignment')
-
-
-def _add_ingress_appgw_addon_role_assignment(result, cmd):
-    service_principal_msi_id = None
-    # Check if service principal exists, if it does, assign permissions to service principal
-    # Else, provide permissions to MSI
-    if (
-            hasattr(result, 'service_principal_profile') and
-            hasattr(result.service_principal_profile, 'client_id') and
-            result.service_principal_profile.client_id != 'msi'
-    ):
-        service_principal_msi_id = result.service_principal_profile.client_id
-        is_service_principal = True
-    elif (
-            (hasattr(result, 'addon_profiles')) and
-            (CONST_INGRESS_APPGW_ADDON_NAME in result.addon_profiles) and
-            (hasattr(result.addon_profiles[CONST_INGRESS_APPGW_ADDON_NAME], 'identity')) and
-            (hasattr(
-                result.addon_profiles[CONST_INGRESS_APPGW_ADDON_NAME].identity, 'object_id'))
-    ):
-        service_principal_msi_id = result.addon_profiles[
-            CONST_INGRESS_APPGW_ADDON_NAME].identity.object_id
-        is_service_principal = False
-
-    if service_principal_msi_id is not None:
-        config = result.addon_profiles[CONST_INGRESS_APPGW_ADDON_NAME].config
-        from msrestazure.tools import parse_resource_id, resource_id
-        if CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID in config:
-            appgw_id = config[CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID]
-            parsed_appgw_id = parse_resource_id(appgw_id)
-            appgw_group_id = resource_id(subscription=parsed_appgw_id["subscription"],
-                                         resource_group=parsed_appgw_id["resource_group"])
-            if not _add_role_assignment(cmd, 'Contributor',
-                                        service_principal_msi_id, is_service_principal, scope=appgw_group_id):
-                logger.warning('Could not create a role assignment for application gateway: %s '
-                               'specified in %s addon. '
-                               'Are you an Owner on this subscription?', appgw_id, CONST_INGRESS_APPGW_ADDON_NAME)
-        if CONST_INGRESS_APPGW_SUBNET_ID in config:
-            subnet_id = config[CONST_INGRESS_APPGW_SUBNET_ID]
-            if not _add_role_assignment(cmd, 'Network Contributor',
-                                        service_principal_msi_id, is_service_principal, scope=subnet_id):
-                logger.warning('Could not create a role assignment for subnet: %s '
-                               'specified in %s addon. '
-                               'Are you an Owner on this subscription?', subnet_id, CONST_INGRESS_APPGW_ADDON_NAME)
-        if CONST_INGRESS_APPGW_SUBNET_CIDR in config:
-            if result.agent_pool_profiles[0].vnet_subnet_id is not None:
-                parsed_subnet_vnet_id = parse_resource_id(
-                    result.agent_pool_profiles[0].vnet_subnet_id)
-                vnet_id = resource_id(subscription=parsed_subnet_vnet_id["subscription"],
-                                      resource_group=parsed_subnet_vnet_id["resource_group"],
-                                      namespace="Microsoft.Network",
-                                      type="virtualNetworks",
-                                      name=parsed_subnet_vnet_id["name"])
-                if not _add_role_assignment(cmd, 'Contributor',
-                                            service_principal_msi_id, is_service_principal, scope=vnet_id):
-                    logger.warning('Could not create a role assignment for virtual network: %s '
-                                   'specified in %s addon. '
-                                   'Are you an Owner on this subscription?', vnet_id, CONST_INGRESS_APPGW_ADDON_NAME)
-
-
-def _add_virtual_node_role_assignment(cmd, result, vnet_subnet_id):
-    # Remove trailing "/subnets/<SUBNET_NAME>" to get the vnet id
-    vnet_id = vnet_subnet_id.rpartition('/')[0]
-    vnet_id = vnet_id.rpartition('/')[0]
-
-    service_principal_msi_id = None
-    is_service_principal = False
-    os_type = 'Linux'
-    addon_name = CONST_VIRTUAL_NODE_ADDON_NAME + os_type
-    # Check if service principal exists, if it does, assign permissions to service principal
-    # Else, provide permissions to MSI
-    if (
-            hasattr(result, 'service_principal_profile') and
-            hasattr(result.service_principal_profile, 'client_id') and
-            result.service_principal_profile.client_id.lower() != 'msi'
-    ):
-        logger.info('valid service principal exists, using it')
-        service_principal_msi_id = result.service_principal_profile.client_id
-        is_service_principal = True
-    elif (
-            (hasattr(result, 'addon_profiles')) and
-            (addon_name in result.addon_profiles) and
-            (hasattr(result.addon_profiles[addon_name], 'identity')) and
-            (hasattr(result.addon_profiles[addon_name].identity, 'object_id'))
-    ):
-        logger.info('virtual node MSI exists, using it')
-        service_principal_msi_id = result.addon_profiles[addon_name].identity.object_id
-        is_service_principal = False
-
-    if service_principal_msi_id is not None:
-        if not _add_role_assignment(cmd, 'Contributor',
-                                    service_principal_msi_id, is_service_principal, scope=vnet_id):
-            logger.warning('Could not create a role assignment for virtual node addon. '
-                           'Are you an Owner on this subscription?')
-    else:
-        logger.warning('Could not find service principal or user assigned MSI for role'
-                       'assignment')
-
-
 # pylint: disable=too-many-statements,too-many-branches
 def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint: disable=too-many-locals
                dns_name_prefix=None,
@@ -2007,7 +1925,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                windows_admin_password=None,
                enable_ahub=False,
                kubernetes_version='',
-               node_vm_size="Standard_DS2_v2",
+               node_vm_size=None,
                node_osdisk_type=None,
                node_osdisk_size=0,
                node_osdisk_diskencryptionset_id=None,
@@ -2073,475 +1991,41 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                appgw_watch_namespace=None,
                enable_sgxquotehelper=False,
                enable_encryption_at_host=False,
+               enable_secret_rotation=False,
+               rotation_poll_interval=None,
                assign_kubelet_identity=None,
                enable_ultra_ssd=False,
                edge_zone=None,
+               disable_local_accounts=False,
+               enable_fips_image=False,
                no_wait=False,
                yes=False,
-               enable_azure_rbac=False):
-    auto_upgrade_profile = None
-    ManagedClusterWindowsProfile = cmd.get_models('ManagedClusterWindowsProfile',
-                                                  resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                                  operation_group='managed_clusters')
-    ManagedClusterSKU = cmd.get_models('ManagedClusterSKU',
-                                       resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                       operation_group='managed_clusters')
-    ContainerServiceNetworkProfile = cmd.get_models('ContainerServiceNetworkProfile',
-                                                    resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                                    operation_group='managed_clusters')
-    ContainerServiceLinuxProfile = cmd.get_models('ContainerServiceLinuxProfile',
-                                                  resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                                  operation_group='managed_clusters')
-    ManagedClusterServicePrincipalProfile = cmd.get_models('ManagedClusterServicePrincipalProfile',
-                                                           resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                                           operation_group='managed_clusters')
-    ContainerServiceSshConfiguration = cmd.get_models('ContainerServiceSshConfiguration',
-                                                      resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                                      operation_group='managed_clusters')
-    ContainerServiceSshPublicKey = cmd.get_models('ContainerServiceSshPublicKey',
-                                                  resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                                  operation_group='managed_clusters')
-    ManagedClusterAADProfile = cmd.get_models('ManagedClusterAADProfile',
-                                              resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                              operation_group='managed_clusters')
-    ManagedClusterAutoUpgradeProfile = cmd.get_models('ManagedClusterAutoUpgradeProfile',
-                                                      resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                                      operation_group='managed_clusters')
-    ManagedClusterAgentPoolProfile = cmd.get_models('ManagedClusterAgentPoolProfile',
-                                                    resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                                    operation_group='managed_clusters')
-    ManagedClusterIdentity = cmd.get_models('ManagedClusterIdentity',
-                                            resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                            operation_group='managed_clusters')
-    UserAssignedIdentity = cmd.get_models(
-        'UserAssignedIdentity',
+               enable_azure_rbac=False,
+               aks_custom_headers=None,
+               enable_windows_gmsa=False,
+               gmsa_dns_server=None,
+               gmsa_root_domain_name=None,
+               snapshot_id=None,
+               ):
+    # DO NOT MOVE: get all the original parameters and save them as a dictionary
+    raw_parameters = locals()
+
+    # decorator pattern
+    from .decorator import AKSCreateDecorator
+    aks_create_decorator = AKSCreateDecorator(
+        cmd=cmd,
+        client=client,
+        raw_parameters=raw_parameters,
         resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-        operation_group='managed_clusters')
-    ManagedCluster = cmd.get_models('ManagedCluster',
-                                    resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                    operation_group='managed_clusters')
-    ManagedServiceIdentityUserAssignedIdentitiesValue = cmd.get_models(
-        'ManagedServiceIdentityUserAssignedIdentitiesValue',
-        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-        operation_group='managed_clusters')
-
-    _validate_ssh_key(no_ssh_key, ssh_key_value)
-    subscription_id = get_subscription_id(cmd.cli_ctx)
-    if dns_name_prefix and fqdn_subdomain:
-        raise MutuallyExclusiveArgumentError(
-            '--dns-name-prefix and --fqdn-subdomain cannot be used at same time')
-    if not dns_name_prefix and not fqdn_subdomain:
-        dns_name_prefix = _get_default_dns_prefix(
-            name, resource_group_name, subscription_id)
-
-    rg_location = _get_rg_location(cmd.cli_ctx, resource_group_name)
-    if location is None:
-        location = rg_location
-
-    vm_set_type = _set_vm_set_type(vm_set_type, kubernetes_version)
-    load_balancer_sku = set_load_balancer_sku(
-        load_balancer_sku, kubernetes_version)
-
-    if api_server_authorized_ip_ranges and load_balancer_sku == "basic":
-        raise CLIError(
-            '--api-server-authorized-ip-ranges can only be used with standard load balancer')
-
-    agent_pool_profile = ManagedClusterAgentPoolProfile(
-        # Must be 12 chars or less before ACS RP adds to it
-        name=_trim_nodepoolname(nodepool_name),
-        tags=nodepool_tags,
-        node_labels=nodepool_labels,
-        count=int(node_count),
-        vm_size=node_vm_size,
-        os_type="Linux",
-        os_sku=os_sku,
-        vnet_subnet_id=vnet_subnet_id,
-        proximity_placement_group_id=ppg,
-        availability_zones=zones,
-        enable_node_public_ip=enable_node_public_ip,
-        node_public_ip_prefix_id=node_public_ip_prefix_id,
-        enable_encryption_at_host=enable_encryption_at_host,
-        enable_ultra_ssd=enable_ultra_ssd,
-        max_pods=int(max_pods) if max_pods else None,
-        type=vm_set_type,
-        mode="System"
     )
-    if node_osdisk_size:
-        agent_pool_profile.os_disk_size_gb = int(node_osdisk_size)
-
-    if node_osdisk_type:
-        agent_pool_profile.os_disk_type = node_osdisk_type
-
-    _check_cluster_autoscaler_flag(
-        enable_cluster_autoscaler, min_count, max_count, node_count, agent_pool_profile)
-
-    linux_profile = None
-    # LinuxProfile is just used for SSH access to VMs, so omit it if --no-ssh-key was specified.
-    if not no_ssh_key:
-        ssh_config = ContainerServiceSshConfiguration(
-            public_keys=[ContainerServiceSshPublicKey(key_data=ssh_key_value)])
-        linux_profile = ContainerServiceLinuxProfile(
-            admin_username=admin_username, ssh=ssh_config)
-
-    windows_profile = None
-    if windows_admin_username or windows_admin_password:
-        # To avoid that windows_admin_password is set but windows_admin_username is not
-        if windows_admin_username is None:
-            try:
-                from knack.prompting import prompt
-                windows_admin_username = prompt('windows_admin_username: ')
-                # The validation for admin_username in ManagedClusterWindowsProfile will fail even if
-                # users still set windows_admin_username to empty here
-            except NoTTYException:
-                raise CLIError(
-                    'Please specify username for Windows in non-interactive mode.')
-
-        if windows_admin_password is None:
-            try:
-                windows_admin_password = prompt_pass(
-                    msg='windows-admin-password: ', confirm=True)
-            except NoTTYException:
-                raise CLIError(
-                    'Please specify both username and password in non-interactive mode.')
-
-        windows_license_type = None
-        if enable_ahub:
-            windows_license_type = 'Windows_Server'
-
-        windows_profile = ManagedClusterWindowsProfile(
-            admin_username=windows_admin_username,
-            admin_password=windows_admin_password,
-            license_type=windows_license_type)
-
-    # If customer explicitly provide a service principal, disable managed identity.
-    if service_principal and client_secret:
-        enable_managed_identity = False
-    # Skip create service principal profile for the cluster if the cluster
-    # enables managed identity and customer doesn't explicitly provide a service principal.
-    service_principal_profile = None
-    principal_obj = None
-    if not(enable_managed_identity and not service_principal and not client_secret):
-        principal_obj = _ensure_aks_service_principal(cmd.cli_ctx,
-                                                      service_principal=service_principal, client_secret=client_secret,
-                                                      subscription_id=subscription_id, dns_name_prefix=dns_name_prefix,
-                                                      fqdn_subdomain=fqdn_subdomain, location=location, name=name)
-        service_principal_profile = ManagedClusterServicePrincipalProfile(
-            client_id=principal_obj.get("service_principal"),
-            secret=principal_obj.get("client_secret"),
-            key_vault_secret_ref=None)
-
-    need_post_creation_vnet_permission_granting = False
-    if (vnet_subnet_id and not skip_subnet_role_assignment and
-            not subnet_role_assignment_exists(cmd, vnet_subnet_id)):
-        # if service_principal_profile is None, then this cluster is an MSI cluster,
-        # and the service principal does not exist. Two cases:
-        # 1. For system assigned identity, we just tell user to grant the
-        # permission after the cluster is created to keep consistent with portal experience.
-        # 2. For user assigned identity, we can grant needed permission to
-        # user provided user assigned identity before creating managed cluster.
-        if service_principal_profile is None and not assign_identity:
-            msg = ('It is highly recommended to use USER assigned identity '
-                   '(option --assign-identity) when you want to bring your own'
-                   'subnet, which will have no latency for the role assignment to '
-                   'take effect. When using SYSTEM assigned identity, '
-                   'azure-cli will grant Network Contributor role to the '
-                   'system assigned identity after the cluster is created, and '
-                   'the role assignment will take some time to take effect, see '
-                   'https://docs.microsoft.com/en-us/azure/aks/use-managed-identity, '
-                   'proceed to create cluster with system assigned identity?')
-            if not yes and not prompt_y_n(msg, default="n"):
-                return None
-            need_post_creation_vnet_permission_granting = True
-        else:
-            scope = vnet_subnet_id
-            identity_client_id = ""
-            if assign_identity:
-                identity_client_id = _get_user_assigned_identity_client_id(
-                    cmd.cli_ctx, assign_identity)
-            else:
-                identity_client_id = service_principal_profile.client_id
-            if not _add_role_assignment(cmd, 'Network Contributor',
-                                        identity_client_id, scope=scope):
-                logger.warning('Could not create a role assignment for subnet. '
-                               'Are you an Owner on this subscription?')
-
-    load_balancer_profile = create_load_balancer_profile(
-        cmd,
-        load_balancer_managed_outbound_ip_count,
-        load_balancer_outbound_ips,
-        load_balancer_outbound_ip_prefixes,
-        load_balancer_outbound_ports,
-        load_balancer_idle_timeout)
-
-    if attach_acr:
-        if enable_managed_identity:
-            if no_wait:
-                raise CLIError('When --attach-acr and --enable-managed-identity are both specified, '
-                               '--no-wait is not allowed, please wait until the whole operation succeeds.')
-            # Attach acr operation will be handled after the cluster is created
-        else:
-            _ensure_aks_acr(cmd,
-                            client_id=service_principal_profile.client_id,
-                            acr_name_or_id=attach_acr,
-                            subscription_id=subscription_id)
-
-    outbound_type = _set_outbound_type(
-        outbound_type, vnet_subnet_id, load_balancer_sku, load_balancer_profile)
-
-    network_profile = None
-    if any([network_plugin, pod_cidr, service_cidr, dns_service_ip,
-            docker_bridge_address, network_policy]):
-        if not network_plugin:
-            raise CLIError('Please explicitly specify the network plugin type')
-        if pod_cidr and network_plugin == "azure":
-            raise CLIError(
-                'Please use kubenet as the network plugin type when pod_cidr is specified')
-        network_profile = ContainerServiceNetworkProfile(
-            network_plugin=network_plugin,
-            pod_cidr=pod_cidr,
-            service_cidr=service_cidr,
-            dns_service_ip=dns_service_ip,
-            docker_bridge_cidr=docker_bridge_address,
-            network_policy=network_policy,
-            load_balancer_sku=load_balancer_sku.lower(),
-            load_balancer_profile=load_balancer_profile,
-            outbound_type=outbound_type
-        )
-    else:
-        if load_balancer_sku.lower() == "standard" or load_balancer_profile:
-            network_profile = ContainerServiceNetworkProfile(
-                network_plugin="kubenet",
-                load_balancer_sku=load_balancer_sku.lower(),
-                load_balancer_profile=load_balancer_profile,
-                outbound_type=outbound_type,
-            )
-        if load_balancer_sku.lower() == "basic":
-            network_profile = ContainerServiceNetworkProfile(
-                load_balancer_sku=load_balancer_sku.lower(),
-            )
-
-    addon_profiles = _handle_addons_args(
-        cmd,
-        enable_addons,
-        subscription_id,
-        resource_group_name,
-        {},
-        workspace_resource_id,
-        aci_subnet_name,
-        vnet_subnet_id,
-        appgw_name,
-        appgw_subnet_cidr,
-        appgw_id,
-        appgw_subnet_id,
-        appgw_watch_namespace,
-        enable_sgxquotehelper
-    )
-    monitoring = False
-    if CONST_MONITORING_ADDON_NAME in addon_profiles:
-        monitoring = True
-        _ensure_container_insights_for_monitoring(
-            cmd, addon_profiles[CONST_MONITORING_ADDON_NAME])
-
-    # addon is in the list and is enabled
-    ingress_appgw_addon_enabled = CONST_INGRESS_APPGW_ADDON_NAME in addon_profiles and \
-        addon_profiles[CONST_INGRESS_APPGW_ADDON_NAME].enabled
-
-    os_type = 'Linux'
-    enable_virtual_node = False
-    if CONST_VIRTUAL_NODE_ADDON_NAME + os_type in addon_profiles:
-        enable_virtual_node = True
-
-    aad_profile = None
-    if enable_aad:
-        if any([aad_client_app_id, aad_server_app_id, aad_server_app_secret]):
-            raise CLIError('"--enable-aad" cannot be used together with '
-                           '"--aad-client-app-id/--aad-server-app-id/--aad-server-app-secret"')
-        if disable_rbac and enable_azure_rbac:
-            raise ArgumentUsageError(
-                '"--enable-azure-rbac" can not be used together with "--disable-rbac"')
-        aad_profile = ManagedClusterAADProfile(
-            managed=True,
-            enable_azure_rbac=enable_azure_rbac,
-            # ids -> i_ds due to track 2 naming issue
-            admin_group_object_i_ds=_parse_comma_separated_list(
-                aad_admin_group_object_ids),
-            tenant_id=aad_tenant_id
-        )
-    else:
-        if enable_azure_rbac is True:
-            raise ArgumentUsageError(
-                '"--enable-azure-rbac" can only be used together with "--enable-aad"')
-
-        if any([aad_client_app_id, aad_server_app_id, aad_server_app_secret, aad_tenant_id]):
-            if aad_tenant_id is None:
-                profile = Profile(cli_ctx=cmd.cli_ctx)
-                _, _, aad_tenant_id = profile.get_login_credentials()
-
-            aad_profile = ManagedClusterAADProfile(
-                client_app_id=aad_client_app_id,
-                server_app_id=aad_server_app_id,
-                server_app_secret=aad_server_app_secret,
-                tenant_id=aad_tenant_id
-            )
-
-    api_server_access_profile = None
-    if enable_private_cluster and load_balancer_sku.lower() != "standard":
-        raise CLIError("Please use standard load balancer for private cluster")
-    if api_server_authorized_ip_ranges or enable_private_cluster:
-        api_server_access_profile = _populate_api_server_access_profile(
-            cmd,
-            api_server_authorized_ip_ranges,
-            enable_private_cluster=enable_private_cluster
-        )
-
-    # Check that both --disable-rbac and --enable-rbac weren't provided
-    if all([disable_rbac, enable_rbac]):
-        raise CLIError(
-            'specify either "--disable-rbac" or "--enable-rbac", not both.')
-
-    identity = None
-    if not enable_managed_identity and assign_identity:
-        raise ArgumentUsageError(
-            '--assign-identity can only be specified when --enable-managed-identity is specified')
-    if enable_managed_identity and not assign_identity:
-        identity = ManagedClusterIdentity(
-            type="SystemAssigned"
-        )
-    elif enable_managed_identity and assign_identity:
-        user_assigned_identity = {
-            # pylint: disable=line-too-long
-            assign_identity: ManagedServiceIdentityUserAssignedIdentitiesValue()
-        }
-        identity = ManagedClusterIdentity(
-            type="UserAssigned",
-            user_assigned_identities=user_assigned_identity
-        )
-
-    identity_profile = None
-    if assign_kubelet_identity:
-        if not assign_identity:
-            # pylint: disable=line-too-long
-            raise ArgumentUsageError('--assign-kubelet-identity can only be specified when --assign-identity is specified')
-        kubelet_identity = _get_user_assigned_identity(cmd.cli_ctx, assign_kubelet_identity)
-        identity_profile = {
-            # pylint: disable=line-too-long
-            'kubeletidentity': UserAssignedIdentity(
-                resource_id=assign_kubelet_identity,
-                client_id=kubelet_identity.client_id,
-                object_id=kubelet_identity.principal_id
-            )
-        }
-        cluster_identity_object_id = _get_user_assigned_identity_object_id(cmd.cli_ctx, assign_identity)
-        # ensure the cluster identity has "Managed Identity Operator" role at the scope of kubelet identity
-        _ensure_cluster_identity_permission_on_kubelet_identity(
-            cmd,
-            cluster_identity_object_id,
-            assign_kubelet_identity)
-
-    if auto_upgrade_channel is not None:
-        auto_upgrade_profile = ManagedClusterAutoUpgradeProfile(upgrade_channel=auto_upgrade_channel)
-
-    mc = ManagedCluster(
-        location=location,
-        tags=tags,
-        dns_prefix=dns_name_prefix,
-        kubernetes_version=kubernetes_version,
-        enable_rbac=not disable_rbac,
-        agent_pool_profiles=[agent_pool_profile],
-        linux_profile=linux_profile,
-        windows_profile=windows_profile,
-        service_principal_profile=service_principal_profile,
-        network_profile=network_profile,
-        addon_profiles=addon_profiles,
-        aad_profile=aad_profile,
-        auto_scaler_profile=cluster_autoscaler_profile,
-        api_server_access_profile=api_server_access_profile,
-        identity=identity,
-        disk_encryption_set_id=node_osdisk_diskencryptionset_id,
-        identity_profile=identity_profile,
-        auto_upgrade_profile=auto_upgrade_profile
-    )
-
-    if disable_public_fqdn:
-        if not enable_private_cluster:
-            raise ArgumentUsageError("--disable-public-fqdn should only be used with --enable-private-cluster")
-        mc.api_server_access_profile.enable_private_cluster_public_fqdn = False
-
-    use_custom_private_dns_zone = False
-    if private_dns_zone:
-        if not enable_private_cluster:
-            raise InvalidArgumentValueError("Invalid private dns zone for public cluster. "
-                                            "It should always be empty for public cluster")
-        mc.api_server_access_profile.private_dns_zone = private_dns_zone
-        from msrestazure.tools import is_valid_resource_id
-        if private_dns_zone.lower() != CONST_PRIVATE_DNS_ZONE_SYSTEM:
-            if is_valid_resource_id(private_dns_zone):
-                use_custom_private_dns_zone = True
-            else:
-                raise InvalidArgumentValueError(
-                    private_dns_zone + " is not a valid Azure resource ID.")
-    if fqdn_subdomain:
-        if not use_custom_private_dns_zone:
-            raise ArgumentUsageError("--fqdn-subdomain should only be used for "
-                                     "private cluster with custom private dns zone")
-        mc.fqdn_subdomain = fqdn_subdomain
-
-    if uptime_sla:
-        mc.sku = ManagedClusterSKU(
-            name="Basic",
-            tier="Paid"
-        )
-
-    if edge_zone:
-        ExtendedLocation = cmd.get_models('ExtendedLocation',
-                                          resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                          operation_group='managed_clusters')
-        ExtendedLocationTypes = cmd.get_models('ExtendedLocationTypes',
-                                               resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                               operation_group='managed_clusters')
-        mc.extended_location = ExtendedLocation(
-            name=edge_zone,
-            type=ExtendedLocationTypes.EDGE_ZONE
-        )
-
-    # Add AAD session key to header.
-    # If principal_obj is None, we will not add this header, this can happen
-    # when the cluster enables managed identity. In this case, the header is useless
-    # and that's OK to not add this header
-    custom_headers = None
-    if principal_obj:
-        custom_headers = {
-            'Ocp-Aad-Session-Key': principal_obj.get("aad_session_key")}
-
-    # Due to SPN replication latency, we do a few retries here
-    max_retry = 30
-    retry_exception = Exception(None)
-    for _ in range(0, max_retry):
-        try:
-            created_cluster = _put_managed_cluster_ensuring_permission(
-                cmd,
-                client,
-                subscription_id,
-                resource_group_name,
-                name,
-                mc,
-                monitoring,
-                ingress_appgw_addon_enabled,
-                enable_virtual_node,
-                need_post_creation_vnet_permission_granting,
-                vnet_subnet_id,
-                enable_managed_identity,
-                attach_acr,
-                custom_headers,
-                no_wait)
-            return created_cluster
-        except CloudError as ex:
-            retry_exception = ex
-            if 'not found in Active Directory tenant' in ex.message:
-                time.sleep(3)
-            else:
-                raise ex
-    raise retry_exception
+    try:
+        # construct mc profile
+        mc = aks_create_decorator.construct_default_mc_profile()
+    except DecoratorEarlyExitException:
+        # exit gracefully
+        return None
+    # send request to create a real managed cluster
+    return aks_create_decorator.create_mc(mc)
 
 
 def aks_disable_addons(cmd, client, resource_group_name, name, addons, no_wait=False):
@@ -2572,6 +2056,8 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                       appgw_subnet_id=None,
                       appgw_watch_namespace=None,
                       enable_sgxquotehelper=False,
+                      enable_secret_rotation=False,
+                      rotation_poll_interval=None,
                       no_wait=False):
     instance = client.get(resource_group_name, name)
     subscription_id = get_subscription_id(cmd.cli_ctx)
@@ -2585,6 +2071,8 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                               appgw_subnet_id=appgw_subnet_id,
                               appgw_watch_namespace=appgw_watch_namespace,
                               enable_sgxquotehelper=enable_sgxquotehelper,
+                              enable_secret_rotation=enable_secret_rotation,
+                              rotation_poll_interval=rotation_poll_interval,
                               no_wait=no_wait)
 
     enable_monitoring = CONST_MONITORING_ADDON_NAME in instance.addon_profiles \
@@ -2601,8 +2089,15 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
 
     if need_pull_for_result:
         if enable_monitoring:
-            _ensure_container_insights_for_monitoring(
-                cmd, instance.addon_profiles[CONST_MONITORING_ADDON_NAME])
+            ensure_container_insights_for_monitoring(
+                cmd,
+                instance.addon_profiles[CONST_MONITORING_ADDON_NAME],
+                subscription_id,
+                resource_group_name,
+                name,
+                instance.location,
+                aad_route=False,
+            )
 
         # adding a wait here since we rely on the result for role assignment
         result = LongRunningOperation(cmd.cli_ctx)(
@@ -2619,18 +2114,18 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                     namespace='Microsoft.ContainerService', type='managedClusters',
                     name=name
                 )
-                _add_monitoring_role_assignment(
+                add_monitoring_role_assignment(
                     result, cluster_resource_id, cmd)
 
         if ingress_appgw_addon_enabled:
-            _add_ingress_appgw_addon_role_assignment(result, cmd)
+            add_ingress_appgw_addon_role_assignment(result, cmd)
 
         if enable_virtual_node:
             # All agent pool will reside in the same vnet, we will grant vnet level Contributor role
             # in later function, so using a random agent pool here is OK
             random_agent_pool = result.agent_pool_profiles[0]
             if random_agent_pool.vnet_subnet_id != "":
-                _add_virtual_node_role_assignment(
+                add_virtual_node_role_assignment(
                     cmd, result, random_agent_pool.vnet_subnet_id)
             # Else, the cluster is not using custom VNet, the permission is already granted in AKS RP,
             # we don't need to handle it in client side in this case.
@@ -2647,31 +2142,37 @@ def aks_get_versions(cmd, client, location):
 def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
                         path=os.path.join(os.path.expanduser(
                             '~'), '.kube', 'config'),
-                        overwrite_existing=False, context_name=None, public_fqdn=False):
+                        overwrite_existing=False, context_name=None, public_fqdn=False,
+                        credential_format=None):
     credentialResults = None
     serverType = None
     if public_fqdn:
         serverType = 'public'
+    if credential_format:
+        credential_format = credential_format.lower()
+        if admin:
+            raise InvalidArgumentValueError("--format can only be specified when requesting clusterUser credential.")
     if admin:
-        if serverType is None:
-            credentialResults = client.list_cluster_admin_credentials(
-                resource_group_name, name)
-        else:
+        if cmd.cli_ctx.cloud.profile == "latest":
             credentialResults = client.list_cluster_admin_credentials(
                 resource_group_name, name, serverType)
+        else:
+            credentialResults = client.list_cluster_admin_credentials(
+                resource_group_name, name)
     else:
-        if serverType is None:
+        if cmd.cli_ctx.cloud.profile == "latest":
             credentialResults = client.list_cluster_user_credentials(
-                resource_group_name, name)
+                resource_group_name, name, serverType, credential_format)
         else:
             credentialResults = client.list_cluster_user_credentials(
-                resource_group_name, name, serverType)
+                resource_group_name, name)
 
     # Check if KUBECONFIG environmental variable is set
     # If path is different than default then that means -f/--file is passed
     # in which case we ignore the KUBECONFIG variable
+    # KUBECONFIG can be colon separated. If we find that condition, use the first entry
     if "KUBECONFIG" in os.environ and path == os.path.join(os.path.expanduser('~'), '.kube', 'config'):
-        path = os.environ["KUBECONFIG"]
+        path = os.environ["KUBECONFIG"].split(":")[0]
 
     if not credentialResults:
         raise CLIError("No Kubernetes credentials found.")
@@ -2786,320 +2287,42 @@ def aks_update(cmd, client, resource_group_name, name,
                auto_upgrade_channel=None,
                enable_managed_identity=False,
                assign_identity=None,
+               disable_local_accounts=False,
+               enable_local_accounts=False,
                yes=False,
                no_wait=False,
                enable_public_fqdn=False,
                disable_public_fqdn=False,
                enable_azure_rbac=False,
-               disable_azure_rbac=False):
-    ManagedClusterSKU = cmd.get_models('ManagedClusterSKU',
-                                       resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                       operation_group='managed_clusters')
-    ManagedClusterAADProfile = cmd.get_models('ManagedClusterAADProfile',
-                                              resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                              operation_group='managed_clusters')
-    ManagedClusterAutoUpgradeProfile = cmd.get_models('ManagedClusterAutoUpgradeProfile',
-                                                      resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                                      operation_group='managed_clusters')
-    ManagedClusterIdentity = cmd.get_models('ManagedClusterIdentity',
-                                            resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                            operation_group='managed_clusters')
-    ManagedServiceIdentityUserAssignedIdentitiesValue = cmd.get_models(
-        'ManagedServiceIdentityUserAssignedIdentitiesValue',
+               disable_azure_rbac=False,
+               enable_secret_rotation=False,
+               disable_secret_rotation=False,
+               rotation_poll_interval=None,
+               tags=None,
+               nodepool_labels=None,
+               enable_windows_gmsa=False,
+               gmsa_dns_server=None,
+               gmsa_root_domain_name=None,
+               aks_custom_headers=None):
+    # DO NOT MOVE: get all the original parameters and save them as a dictionary
+    raw_parameters = locals()
+
+    # decorator pattern
+    from .decorator import AKSUpdateDecorator
+    aks_update_decorator = AKSUpdateDecorator(
+        cmd=cmd,
+        client=client,
+        raw_parameters=raw_parameters,
         resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-        operation_group='managed_clusters')
-    update_autoscaler = enable_cluster_autoscaler + \
-        disable_cluster_autoscaler + update_cluster_autoscaler
-    update_lb_profile = is_load_balancer_profile_provided(load_balancer_managed_outbound_ip_count,
-                                                          load_balancer_outbound_ips,
-                                                          load_balancer_outbound_ip_prefixes,
-                                                          load_balancer_outbound_ports,
-                                                          load_balancer_idle_timeout)
-    update_aad_profile = not (
-        aad_tenant_id is None and aad_admin_group_object_ids is None and
-        not enable_azure_rbac and not disable_azure_rbac)
-    # pylint: disable=too-many-boolean-expressions
-    if (update_autoscaler != 1 and cluster_autoscaler_profile is None and
-            not update_lb_profile and
-            not attach_acr and
-            not detach_acr and
-            not uptime_sla and
-            not no_uptime_sla and
-            api_server_authorized_ip_ranges is None and
-            not enable_aad and
-            not update_aad_profile and
-            not enable_ahub and
-            not disable_ahub and
-            not auto_upgrade_channel and
-            not windows_admin_password and
-            not enable_managed_identity and
-            not assign_identity and
-            not enable_public_fqdn and
-            not disable_public_fqdn):
-        raise CLIError('Please specify one or more of "--enable-cluster-autoscaler" or '
-                       '"--disable-cluster-autoscaler" or '
-                       '"--update-cluster-autoscaler" or '
-                       '"--cluster-autoscaler-profile" or '
-                       '"--load-balancer-managed-outbound-ip-count" or'
-                       '"--load-balancer-outbound-ips" or '
-                       '"--load-balancer-outbound-ip-prefixes" or'
-                       '"--load-balancer-outbound-ports" or'
-                       '"--load-balancer-idle-timeout" or'
-                       '"--auto-upgrade-channel" or '
-                       '"--attach-acr" or "--detach-acr" or'
-                       '"--uptime-sla" or'
-                       '"--no-uptime-sla" or '
-                       '"--api-server-authorized-ip-ranges" or '
-                       '"--enable-aad" or '
-                       '"--aad-tenant-id" or '
-                       '"--aad-admin-group-object-ids" or '
-                       '"--enable-ahub" or '
-                       '"--disable-ahub" or '
-                       '"--windows-admin-password" or '
-                       '"--enable-managed-identity" or '
-                       '"--assign-identity" or '
-                       '"--enable-azure-rbac" or '
-                       '"--disable-azure-rbac" or '
-                       '"--enable-public-fqdn" or '
-                       '"--disable-public-fqdn"')
-
-    if not enable_managed_identity and assign_identity:
-        raise CLIError(
-            '--assign-identity can only be specified when --enable-managed-identity is specified')
-
-    instance = client.get(resource_group_name, name)
-    # For multi-agent pool, use the az aks nodepool command
-    if update_autoscaler > 0 and len(instance.agent_pool_profiles) > 1:
-        raise CLIError('There are more than one node pool in the cluster. Please use "az aks nodepool" command '
-                       'to update per node pool auto scaler settings')
-
-    _validate_autoscaler_update_counts(min_count, max_count, enable_cluster_autoscaler or
-                                       update_cluster_autoscaler)
-
-    if enable_cluster_autoscaler:
-        if instance.agent_pool_profiles[0].enable_auto_scaling:
-            logger.warning('Cluster autoscaler is already enabled for this node pool.\n'
-                           'Please run "az aks --update-cluster-autoscaler" '
-                           'if you want to update min-count or max-count.')
-            return None
-        instance.agent_pool_profiles[0].min_count = int(min_count)
-        instance.agent_pool_profiles[0].max_count = int(max_count)
-        instance.agent_pool_profiles[0].enable_auto_scaling = True
-
-    if update_cluster_autoscaler:
-        if not instance.agent_pool_profiles[0].enable_auto_scaling:
-            raise CLIError('Cluster autoscaler is not enabled for this node pool.\n'
-                           'Run "az aks nodepool update --enable-cluster-autoscaler" '
-                           'to enable cluster with min-count and max-count.')
-        instance.agent_pool_profiles[0].min_count = int(min_count)
-        instance.agent_pool_profiles[0].max_count = int(max_count)
-
-    if disable_cluster_autoscaler:
-        if not instance.agent_pool_profiles[0].enable_auto_scaling:
-            logger.warning(
-                'Cluster autoscaler is already disabled for this node pool.')
-            return None
-        instance.agent_pool_profiles[0].enable_auto_scaling = False
-        instance.agent_pool_profiles[0].min_count = None
-        instance.agent_pool_profiles[0].max_count = None
-
-    # if intention is to clear autoscaler profile
-    if cluster_autoscaler_profile == {}:
-        instance.auto_scaler_profile = {}
-    # else profile is provided, update instance profile if it exists
-    elif cluster_autoscaler_profile:
-        instance.auto_scaler_profile = _update_dict(instance.auto_scaler_profile.__dict__,
-                                                    dict((key.replace("-", "_"), value)
-                                                         for (key, value) in cluster_autoscaler_profile.items())) \
-            if instance.auto_scaler_profile else cluster_autoscaler_profile
-
-    subscription_id = get_subscription_id(cmd.cli_ctx)
-
-    client_id = ""
-    if _is_msi_cluster(instance):
-        if instance.identity_profile is None or instance.identity_profile["kubeletidentity"] is None:
-            raise CLIError('Unexpected error getting kubelet\'s identity for the cluster. '
-                           'Please do not set --attach-acr or --detach-acr. '
-                           'You can manually grant or revoke permission to the identity named '
-                           '<ClUSTER_NAME>-agentpool in MC_ resource group to access ACR.')
-        client_id = instance.identity_profile["kubeletidentity"].client_id
-    else:
-        client_id = instance.service_principal_profile.client_id
-    if not client_id:
-        raise CLIError('Cannot get the AKS cluster\'s service principal.')
-
-    if attach_acr:
-        _ensure_aks_acr(cmd,
-                        client_id=client_id,
-                        acr_name_or_id=attach_acr,
-                        subscription_id=subscription_id)
-
-    if detach_acr:
-        _ensure_aks_acr(cmd,
-                        client_id=client_id,
-                        acr_name_or_id=detach_acr,
-                        subscription_id=subscription_id,
-                        detach=True)
-
-    if uptime_sla and no_uptime_sla:
-        raise CLIError(
-            'Cannot specify "--uptime-sla" and "--no-uptime-sla" at the same time.')
-
-    if uptime_sla:
-        instance.sku = ManagedClusterSKU(
-            name="Basic",
-            tier="Paid"
-        )
-
-    if no_uptime_sla:
-        instance.sku = ManagedClusterSKU(
-            name="Basic",
-            tier="Free"
-        )
-
-    if update_lb_profile:
-        instance.network_profile.load_balancer_profile = update_load_balancer_profile(
-            cmd,
-            load_balancer_managed_outbound_ip_count,
-            load_balancer_outbound_ips,
-            load_balancer_outbound_ip_prefixes,
-            load_balancer_outbound_ports,
-            load_balancer_idle_timeout,
-            instance.network_profile.load_balancer_profile)
-
-    # empty string is valid as it disables ip whitelisting
-    if api_server_authorized_ip_ranges is not None:
-        instance.api_server_access_profile = \
-            _populate_api_server_access_profile(
-                cmd,
-                api_server_authorized_ip_ranges, instance=instance)
-
-    if enable_aad:
-        if instance.aad_profile is not None and instance.aad_profile.managed:
-            raise CLIError(
-                'Cannot specify "--enable-aad" if managed AAD is already enabled')
-        instance.aad_profile = ManagedClusterAADProfile(
-            managed=True
-        )
-    if update_aad_profile:
-        if instance.aad_profile is None or not instance.aad_profile.managed:
-            raise CLIError('Cannot specify "--aad-tenant-id/--aad-admin-group-object-ids/"'
-                           '"--enable-azure-rbac/--disable-azure-rbac"'
-                           ' if managed AAD is not enabled')
-        if aad_tenant_id is not None:
-            instance.aad_profile.tenant_id = aad_tenant_id
-        if aad_admin_group_object_ids is not None:
-            # ids -> i_ds due to track 2 naming issue
-            instance.aad_profile.admin_group_object_i_ds = _parse_comma_separated_list(
-                aad_admin_group_object_ids)
-        if enable_azure_rbac and disable_azure_rbac:
-            raise MutuallyExclusiveArgumentError(
-                'Cannot specify "--enable-azure-rbac" and "--disable-azure-rbac" at the same time')
-        if enable_azure_rbac:
-            instance.aad_profile.enable_azure_rbac = True
-        if disable_azure_rbac:
-            instance.aad_profile.enable_azure_rbac = False
-
-    if enable_ahub and disable_ahub:
-        raise CLIError(
-            'Cannot specify "--enable-ahub" and "--disable-ahub" at the same time')
-
-    if enable_ahub:
-        instance.windows_profile.license_type = 'Windows_Server'
-    if disable_ahub:
-        instance.windows_profile.license_type = 'None'
-
-    if auto_upgrade_channel is not None:
-        if instance.auto_upgrade_profile is None:
-            instance.auto_upgrade_profile = ManagedClusterAutoUpgradeProfile()
-        instance.auto_upgrade_profile.upgrade_channel = auto_upgrade_channel
-
-    if enable_public_fqdn and disable_public_fqdn:
-        raise MutuallyExclusiveArgumentError(
-            'Cannot specify "--enable-public-fqdn" and "--disable-public-fqdn" at the same time')
-    is_private_cluster = instance.api_server_access_profile is not None and instance.api_server_access_profile.enable_private_cluster  # pylint: disable=line-too-long
-    if enable_public_fqdn:
-        if not is_private_cluster:
-            raise ArgumentUsageError('--enable-public-fqdn can only be used for private cluster')
-        instance.api_server_access_profile.enable_private_cluster_public_fqdn = True
-    if disable_public_fqdn:
-        if not is_private_cluster:
-            raise ArgumentUsageError('--disable-public-fqdn can only be used for private cluster')
-        if instance.api_server_access_profile.private_dns_zone.lower() == CONST_PRIVATE_DNS_ZONE_NONE:
-            raise ArgumentUsageError('--disable-public-fqdn cannot be applied for none mode private dns zone cluster')
-        instance.api_server_access_profile.enable_private_cluster_public_fqdn = False
-
-    if windows_admin_password:
-        instance.windows_profile.admin_password = windows_admin_password
-
-    current_identity_type = "spn"
-    if instance.identity is not None:
-        current_identity_type = instance.identity.type.casefold()
-
-    goal_identity_type = current_identity_type
-    if enable_managed_identity:
-        if not assign_identity:
-            goal_identity_type = "systemassigned"
-        else:
-            goal_identity_type = "userassigned"
-
-    if current_identity_type != goal_identity_type:
-        msg = ""
-        if current_identity_type == "spn":
-            msg = ('Your cluster is using service principal, and you are going to update '
-                   'the cluster to use {} managed identity.\n After updating, your '
-                   'cluster\'s control plane and addon pods will switch to use managed '
-                   'identity, but kubelet will KEEP USING SERVICE PRINCIPAL '
-                   'until you upgrade your agentpool.\n '
-                   'Are you sure you want to perform this operation?').format(goal_identity_type)
-        else:
-            msg = ('Your cluster is already using {} managed identity, and you are going to '
-                   'update the cluster to use {} managed identity. \nAre you sure you want to '
-                   'perform this operation?').format(current_identity_type, goal_identity_type)
-        if not yes and not prompt_y_n(msg, default="n"):
-            return None
-        if goal_identity_type == "systemassigned":
-            instance.identity = ManagedClusterIdentity(
-                type="SystemAssigned"
-            )
-        elif goal_identity_type == "userassigned":
-            # pylint: disable=line-too-long
-            user_assigned_identity = {
-                assign_identity: ManagedServiceIdentityUserAssignedIdentitiesValue()
-            }
-            instance.identity = ManagedClusterIdentity(
-                type="UserAssigned",
-                user_assigned_identities=user_assigned_identity
-            )
-
-    monitoring_addon_enabled = False
-    ingress_appgw_addon_enabled = False
-    virtual_node_addon_enabled = False
-    if instance.addon_profiles is not None:
-        monitoring_addon_enabled = CONST_MONITORING_ADDON_NAME in instance.addon_profiles and \
-            instance.addon_profiles[CONST_MONITORING_ADDON_NAME].enabled
-        ingress_appgw_addon_enabled = CONST_INGRESS_APPGW_ADDON_NAME in instance.addon_profiles and \
-            instance.addon_profiles[CONST_INGRESS_APPGW_ADDON_NAME].enabled
-        virtual_node_addon_enabled = CONST_VIRTUAL_NODE_ADDON_NAME + 'Linux' in instance.addon_profiles and \
-            instance.addon_profiles[CONST_VIRTUAL_NODE_ADDON_NAME +
-                                    'Linux'].enabled
-
-    return _put_managed_cluster_ensuring_permission(
-        cmd,
-        client,
-        subscription_id,
-        resource_group_name,
-        name,
-        instance,
-        monitoring_addon_enabled,
-        ingress_appgw_addon_enabled,
-        virtual_node_addon_enabled,
-        False,
-        instance.agent_pool_profiles[0].vnet_subnet_id,
-        _is_msi_cluster(instance),
-        attach_acr,
-        None,
-        no_wait)
+    )
+    try:
+        # update mc profile
+        mc = aks_update_decorator.update_default_mc_profile()
+    except DecoratorEarlyExitException:
+        # exit gracefully
+        return None
+    # send request to update the real managed cluster
+    return aks_update_decorator.update_mc(mc)
 
 
 # pylint: disable=unused-argument,inconsistent-return-statements,too-many-return-statements
@@ -3181,6 +2404,7 @@ def aks_upgrade(cmd,
     if upgrade_all:
         for agent_profile in instance.agent_pool_profiles:
             agent_profile.orchestrator_version = kubernetes_version
+            agent_profile.creation_data = None
 
     # null out the SP and AAD profile because otherwise validation complains
     instance.service_principal_profile = None
@@ -3189,14 +2413,19 @@ def aks_upgrade(cmd,
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, name, instance)
 
 
-def _upgrade_single_nodepool_image_version(no_wait, client, resource_group_name, cluster_name, nodepool_name):
+def _upgrade_single_nodepool_image_version(no_wait, client, resource_group_name, cluster_name, nodepool_name,
+                                           snapshot_id=None):
+    headers = {}
+    if snapshot_id:
+        headers["AKSSnapshotId"] = snapshot_id
+
     return sdk_no_wait(
         no_wait,
         client.begin_upgrade_node_image_version,
         resource_group_name,
         cluster_name,
         nodepool_name,
-    )
+        headers=headers)
 
 
 def aks_runcommand(cmd, client, resource_group_name, name, command_string="", command_files=None):
@@ -3306,17 +2535,7 @@ def _get_command_context(command_files):
 
 def _get_dataplane_aad_token(cli_ctx, serverAppId):
     # this function is mostly copied from keyvault cli
-    import adal
-    try:
-        return Profile(cli_ctx=cli_ctx).get_raw_token(resource=serverAppId)[0][2].get('accessToken')
-    except adal.AdalError as err:
-        # pylint: disable=no-member
-        if (hasattr(err, 'error_response') and
-                ('error_description' in err.error_response) and
-                ('AADSTS70008:' in err.error_response['error_description'])):
-            raise CLIError(
-                "Credentials have expired due to inactivity. Please run 'az login'")
-        raise CLIError(err)
+    return Profile(cli_ctx=cli_ctx).get_raw_token(resource=serverAppId)[0][2].get('accessToken')
 
 
 DEV_SPACES_EXTENSION_NAME = 'dev-spaces'
@@ -3394,6 +2613,9 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, name, ad
                    appgw_subnet_id=None,
                    appgw_watch_namespace=None,
                    enable_sgxquotehelper=False,
+                   enable_secret_rotation=False,
+                   disable_secret_rotation=False,
+                   rotation_poll_interval=None,
                    no_wait=False):
     ManagedClusterAddonProfile = cmd.get_models('ManagedClusterAddonProfile',
                                                 resource_type=ResourceType.MGMT_CONTAINERSERVICE,
@@ -3430,7 +2652,7 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, name, ad
                                    'To change monitoring configuration, run "az aks disable-addons -a monitoring"'
                                    'before enabling it again.')
                 if not workspace_resource_id:
-                    workspace_resource_id = _ensure_default_log_analytics_workspace_for_monitoring(
+                    workspace_resource_id = ensure_default_log_analytics_workspace_for_monitoring(
                         cmd,
                         subscription_id,
                         resource_group_name)
@@ -3480,6 +2702,31 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, name, ad
                     enabled=True, config={CONST_ACC_SGX_QUOTE_HELPER_ENABLED: "false"})
                 if enable_sgxquotehelper:
                     addon_profile.config[CONST_ACC_SGX_QUOTE_HELPER_ENABLED] = "true"
+            elif addon == CONST_OPEN_SERVICE_MESH_ADDON_NAME:
+                if addon_profile.enabled:
+                    raise AzureInternalError(
+                        'The open-service-mesh addon is already enabled for this managed '
+                        'cluster.\n To change open-service-mesh configuration, run '
+                        '"az aks disable-addons -a open-service-mesh -n {} -g {}" '
+                        'before enabling it again.'
+                        .format(name, resource_group_name))
+                addon_profile = ManagedClusterAddonProfile(enabled=True, config={})
+            elif addon == CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME:
+                if addon_profile.enabled:
+                    raise ArgumentUsageError(
+                        'The azure-keyvault-secrets-provider addon is already enabled for this managed cluster.\n'
+                        'To change azure-keyvault-secrets-provider configuration, run '
+                        f'"az aks disable-addons -a azure-keyvault-secrets-provider -n {name} -g {resource_group_name}" '  # pylint: disable=line-too-long
+                        'before enabling it again.')
+                addon_profile = ManagedClusterAddonProfile(
+                    enabled=True, config={CONST_SECRET_ROTATION_ENABLED: "false", CONST_ROTATION_POLL_INTERVAL: "2m"})
+                if enable_secret_rotation:
+                    addon_profile.config[CONST_SECRET_ROTATION_ENABLED] = "true"
+                if disable_secret_rotation:
+                    addon_profile.config[CONST_SECRET_ROTATION_ENABLED] = "false"
+                if rotation_poll_interval is not None:
+                    addon_profile.config[CONST_ROTATION_POLL_INTERVAL] = rotation_poll_interval
+                addon_profiles[CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME] = addon_profile
             addon_profiles[addon] = addon_profile
         else:
             if addon not in addon_profiles:
@@ -3523,7 +2770,9 @@ def _handle_addons_args(cmd, addons_str, subscription_id, resource_group_name, a
                         appgw_id=None,
                         appgw_subnet_id=None,
                         appgw_watch_namespace=None,
-                        enable_sgxquotehelper=False):
+                        enable_sgxquotehelper=False,
+                        enable_secret_rotation=False,
+                        rotation_poll_interval=None,):
     ManagedClusterAddonProfile = cmd.get_models('ManagedClusterAddonProfile',
                                                 resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                                 operation_group='managed_clusters')
@@ -3542,7 +2791,7 @@ def _handle_addons_args(cmd, addons_str, subscription_id, resource_group_name, a
     if 'monitoring' in addons:
         if not workspace_resource_id:
             # use default workspace if exists else create default workspace
-            workspace_resource_id = _ensure_default_log_analytics_workspace_for_monitoring(
+            workspace_resource_id = ensure_default_log_analytics_workspace_for_monitoring(
                 cmd, subscription_id, resource_group_name)
 
         workspace_resource_id = workspace_resource_id.strip()
@@ -3593,6 +2842,20 @@ def _handle_addons_args(cmd, addons_str, subscription_id, resource_group_name, a
             addon_profile.config[CONST_ACC_SGX_QUOTE_HELPER_ENABLED] = "true"
         addon_profiles[CONST_CONFCOM_ADDON_NAME] = addon_profile
         addons.remove('confcom')
+    if 'open-service-mesh' in addons:
+        addon_profile = ManagedClusterAddonProfile(enabled=True, config={})
+        addon_profiles[CONST_OPEN_SERVICE_MESH_ADDON_NAME] = addon_profile
+        addons.remove('open-service-mesh')
+    if 'azure-keyvault-secrets-provider' in addons:
+        addon_profile = ManagedClusterAddonProfile(
+            enabled=True, config={CONST_SECRET_ROTATION_ENABLED: "false", CONST_ROTATION_POLL_INTERVAL: "2m"}
+        )
+        if enable_secret_rotation:
+            addon_profile.config[CONST_SECRET_ROTATION_ENABLED] = "true"
+        if rotation_poll_interval is not None:
+            addon_profile.config[CONST_ROTATION_POLL_INTERVAL] = rotation_poll_interval
+        addon_profiles[CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME] = addon_profile
+        addons.remove('azure-keyvault-secrets-provider')
     # error out if any (unrecognized) addons remain
     if addons:
         raise CLIError('"{}" {} not recognized by the --enable-addons argument.'.format(
@@ -3638,197 +2901,6 @@ def _get_or_add_extension(cmd, extension_name, extension_module, update=False):
     except ExtensionNotInstalledException:
         return _install_dev_spaces_extension(cmd, extension_name)
     return True
-
-
-def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id, resource_group_name):
-    # mapping for azure public cloud
-    # log analytics workspaces cannot be created in WCUS region due to capacity limits
-    # so mapped to EUS per discussion with log analytics team
-    AzureCloudLocationToOmsRegionCodeMap = {
-        "australiasoutheast": "ASE",
-        "australiaeast": "EAU",
-        "australiacentral": "CAU",
-        "canadacentral": "CCA",
-        "centralindia": "CIN",
-        "centralus": "CUS",
-        "eastasia": "EA",
-        "eastus": "EUS",
-        "eastus2": "EUS2",
-        "eastus2euap": "EAP",
-        "francecentral": "PAR",
-        "japaneast": "EJP",
-        "koreacentral": "SE",
-        "northeurope": "NEU",
-        "southcentralus": "SCUS",
-        "southeastasia": "SEA",
-        "uksouth": "SUK",
-        "usgovvirginia": "USGV",
-        "westcentralus": "EUS",
-        "westeurope": "WEU",
-        "westus": "WUS",
-        "westus2": "WUS2",
-        "brazilsouth": "CQ",
-        "brazilsoutheast": "BRSE",
-        "norwayeast": "NOE",
-        "southafricanorth": "JNB",
-        "northcentralus": "NCUS",
-        "uaenorth": "DXB",
-        "germanywestcentral": "DEWC",
-        "ukwest": "WUK",
-        "switzerlandnorth": "CHN",
-        "switzerlandwest": "CHW",
-        "uaecentral": "AUH"
-    }
-    AzureCloudRegionToOmsRegionMap = {
-        "australiacentral": "australiacentral",
-        "australiacentral2": "australiacentral",
-        "australiaeast": "australiaeast",
-        "australiasoutheast": "australiasoutheast",
-        "brazilsouth": "brazilsouth",
-        "canadacentral": "canadacentral",
-        "canadaeast": "canadacentral",
-        "centralus": "centralus",
-        "centralindia": "centralindia",
-        "eastasia": "eastasia",
-        "eastus": "eastus",
-        "eastus2": "eastus2",
-        "francecentral": "francecentral",
-        "francesouth": "francecentral",
-        "japaneast": "japaneast",
-        "japanwest": "japaneast",
-        "koreacentral": "koreacentral",
-        "koreasouth": "koreacentral",
-        "northcentralus": "northcentralus",
-        "northeurope": "northeurope",
-        "southafricanorth": "southafricanorth",
-        "southafricawest": "southafricanorth",
-        "southcentralus": "southcentralus",
-        "southeastasia": "southeastasia",
-        "southindia": "centralindia",
-        "uksouth": "uksouth",
-        "ukwest": "ukwest",
-        "westcentralus": "eastus",
-        "westeurope": "westeurope",
-        "westindia": "centralindia",
-        "westus": "westus",
-        "westus2": "westus2",
-        "norwayeast": "norwayeast",
-        "norwaywest": "norwayeast",
-        "switzerlandnorth": "switzerlandnorth",
-        "switzerlandwest": "switzerlandwest",
-        "uaenorth": "uaenorth",
-        "germanywestcentral": "germanywestcentral",
-        "germanynorth": "germanywestcentral",
-        "uaecentral": "uaecentral",
-        "eastus2euap": "eastus2euap",
-        "brazilsoutheast": "brazilsoutheast"
-    }
-
-    # mapping for azure china cloud
-    # currently log analytics supported only China East 2 region
-    AzureChinaLocationToOmsRegionCodeMap = {
-        "chinaeast": "EAST2",
-        "chinaeast2": "EAST2",
-        "chinanorth": "EAST2",
-        "chinanorth2": "EAST2"
-    }
-    AzureChinaRegionToOmsRegionMap = {
-        "chinaeast": "chinaeast2",
-        "chinaeast2": "chinaeast2",
-        "chinanorth": "chinaeast2",
-        "chinanorth2": "chinaeast2"
-    }
-
-    # mapping for azure us governmner cloud
-    AzureFairfaxLocationToOmsRegionCodeMap = {
-        "usgovvirginia": "USGV",
-        "usgovarizona": "PHX"
-    }
-    AzureFairfaxRegionToOmsRegionMap = {
-        "usgovvirginia": "usgovvirginia",
-        "usgovtexas": "usgovvirginia",
-        "usgovarizona": "usgovarizona"
-    }
-
-    rg_location = _get_rg_location(cmd.cli_ctx, resource_group_name)
-    cloud_name = cmd.cli_ctx.cloud.name
-
-    workspace_region = "eastus"
-    workspace_region_code = "EUS"
-
-    # sanity check that locations and clouds match.
-    if ((cloud_name.lower() == 'azurecloud' and AzureChinaRegionToOmsRegionMap.get(rg_location, False)) or
-            (cloud_name.lower() == 'azurecloud' and AzureFairfaxRegionToOmsRegionMap.get(rg_location, False))):
-        raise CLIError('Wrong cloud (azurecloud) setting for region {}, please use "az cloud set ..."'
-                       .format(rg_location))
-
-    if ((cloud_name.lower() == 'azurechinacloud' and AzureCloudRegionToOmsRegionMap.get(rg_location, False)) or
-            (cloud_name.lower() == 'azurechinacloud' and AzureFairfaxRegionToOmsRegionMap.get(rg_location, False))):
-        raise CLIError('Wrong cloud (azurechinacloud) setting for region {}, please use "az cloud set ..."'
-                       .format(rg_location))
-
-    if ((cloud_name.lower() == 'azureusgovernment' and AzureCloudRegionToOmsRegionMap.get(rg_location, False)) or
-            (cloud_name.lower() == 'azureusgovernment' and AzureChinaRegionToOmsRegionMap.get(rg_location, False))):
-        raise CLIError('Wrong cloud (azureusgovernment) setting for region {}, please use "az cloud set ..."'
-                       .format(rg_location))
-
-    if cloud_name.lower() == 'azurecloud':
-        workspace_region = AzureCloudRegionToOmsRegionMap.get(
-            rg_location, "eastus")
-        workspace_region_code = AzureCloudLocationToOmsRegionCodeMap.get(
-            workspace_region, "EUS")
-    elif cloud_name.lower() == 'azurechinacloud':
-        workspace_region = AzureChinaRegionToOmsRegionMap.get(
-            rg_location, "chinaeast2")
-        workspace_region_code = AzureChinaLocationToOmsRegionCodeMap.get(
-            workspace_region, "EAST2")
-    elif cloud_name.lower() == 'azureusgovernment':
-        workspace_region = AzureFairfaxRegionToOmsRegionMap.get(
-            rg_location, "usgovvirginia")
-        workspace_region_code = AzureFairfaxLocationToOmsRegionCodeMap.get(
-            workspace_region, "USGV")
-    else:
-        workspace_region = rg_location
-        workspace_region_code = rg_location.upper()
-
-    default_workspace_resource_group = 'DefaultResourceGroup-' + workspace_region_code
-    default_workspace_name = 'DefaultWorkspace-{0}-{1}'.format(
-        subscription_id, workspace_region_code)
-    default_workspace_resource_id = '/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.OperationalInsights' \
-        '/workspaces/{2}'.format(subscription_id,
-                                 default_workspace_resource_group, default_workspace_name)
-    resource_groups = cf_resource_groups(cmd.cli_ctx, subscription_id)
-    resources = cf_resources(cmd.cli_ctx, subscription_id)
-
-    # check if default RG exists
-    if resource_groups.check_existence(default_workspace_resource_group):
-        try:
-            resource = resources.get_by_id(
-                default_workspace_resource_id, '2015-11-01-preview')
-            return resource.id
-        except CloudError as ex:
-            if ex.status_code != 404:
-                raise ex
-    else:
-        # TODO: track2/replace create_or_update with begin_create_or_update, depends on 'azure.mgmt.resource.resources'
-        resource_groups.create_or_update(default_workspace_resource_group, {
-                                         'location': workspace_region})
-    GenericResource = cmd.get_models(
-        'GenericResource', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
-    generic_resource = GenericResource(location=workspace_region, properties={
-        'sku': {'name': 'standalone'}})
-
-    async_poller = resources.begin_create_or_update_by_id(default_workspace_resource_id, '2015-11-01-preview',
-                                                          generic_resource)
-
-    ws_resource_id = ''
-    while True:
-        result = async_poller.result(15)
-        if async_poller.done():
-            ws_resource_id = result.id
-            break
-
-    return ws_resource_id
 
 
 def _ensure_container_insights_for_monitoring(cmd, addon):
@@ -3953,10 +3025,11 @@ def _ensure_container_insights_for_monitoring(cmd, addon):
 
 
 def _ensure_aks_acr(cmd,
-                    client_id,
+                    assignee,
                     acr_name_or_id,
                     subscription_id,
-                    detach=False):
+                    detach=False,
+                    is_service_principal=True):
     from msrestazure.tools import is_valid_resource_id, parse_resource_id
     # Check if the ACR exists by resource ID.
     if is_valid_resource_id(acr_name_or_id):
@@ -3969,7 +3042,7 @@ def _ensure_aks_acr(cmd,
         except CloudError as ex:
             raise CLIError(ex.message)
         _ensure_aks_acr_role_assignment(
-            cmd, client_id, registry.id, detach)
+            cmd, assignee, registry.id, detach, is_service_principal)
         return
 
     # Check if the ACR exists by name accross all resource groups.
@@ -3983,7 +3056,7 @@ def _ensure_aks_acr(cmd,
             raise CLIError(
                 "ACR {} not found. Have you provided the right ACR name?".format(registry_name))
         raise CLIError(ex.message)
-    _ensure_aks_acr_role_assignment(cmd, client_id, registry.id, detach)
+    _ensure_aks_acr_role_assignment(cmd, assignee, registry.id, detach, is_service_principal)
     return
 
 
@@ -4008,11 +3081,12 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
                       vnet_subnet_id=None,
                       ppg=None,
                       max_pods=0,
-                      os_type="Linux",
+                      os_type=None,
                       os_sku=None,
                       min_count=None,
                       max_count=None,
                       enable_cluster_autoscaler=False,
+                      scale_down_mode=CONST_SCALE_DOWN_MODE_DELETE,
                       node_taints=None,
                       priority=CONST_SCALE_SET_PRIORITY_REGULAR,
                       eviction_policy=CONST_SPOT_EVICTION_POLICY_DELETE,
@@ -4023,7 +3097,10 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
                       mode="User",
                       enable_encryption_at_host=False,
                       enable_ultra_ssd=False,
-                      no_wait=False):
+                      enable_fips_image=False,
+                      snapshot_id=None,
+                      no_wait=False,
+                      aks_custom_headers=None):
     AgentPool = cmd.get_models('AgentPool',
                                resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                operation_group='agent_pools')
@@ -4038,6 +3115,27 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
 
     upgradeSettings = AgentPoolUpgradeSettings()
     taints_array = []
+    creationData = None
+    # load model CreationData
+    from azure.cli.command_modules.acs.decorator import AKSModels
+    CreationData = AKSModels(cmd, ResourceType.MGMT_CONTAINERSERVICE).CreationData
+    if snapshot_id:
+        snapshot = get_snapshot_by_snapshot_id(cmd.cli_ctx, snapshot_id)
+        if not kubernetes_version:
+            kubernetes_version = snapshot.kubernetes_version
+        if not os_type:
+            os_type = snapshot.os_type
+        if not os_sku:
+            os_sku = snapshot.os_sku
+        if not node_vm_size:
+            node_vm_size = snapshot.vm_size
+
+        creationData = CreationData(
+            source_resource_id=snapshot_id
+        )
+
+    if not os_type:
+        os_type = "Linux"
 
     if node_taints is not None:
         for taint in node_taints.split(','):
@@ -4072,13 +3170,16 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
         orchestrator_version=kubernetes_version,
         availability_zones=zones,
         scale_set_priority=priority,
+        scale_down_mode=scale_down_mode,
         enable_node_public_ip=enable_node_public_ip,
         node_public_ip_prefix_id=node_public_ip_prefix_id,
         node_taints=taints_array,
         upgrade_settings=upgradeSettings,
         enable_encryption_at_host=enable_encryption_at_host,
         enable_ultra_ssd=enable_ultra_ssd,
-        mode=mode
+        mode=mode,
+        enable_fips=enable_fips_image,
+        creation_data=creationData
     )
 
     if priority == CONST_SCALE_SET_PRIORITY_SPOT:
@@ -4096,6 +3197,14 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
     if node_osdisk_type:
         agent_pool.os_disk_type = node_osdisk_type
 
+    # custom headers
+    aks_custom_headers = extract_comma_separated_string(
+        aks_custom_headers,
+        enable_strip=True,
+        extract_kv=True,
+        default_value={},
+    )
+
     return sdk_no_wait(
         no_wait,
         client.begin_create_or_update,
@@ -4103,6 +3212,7 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
         cluster_name,
         nodepool_name,
         agent_pool,
+        headers=aks_custom_headers,
     )
 
 
@@ -4133,7 +3243,9 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
                           kubernetes_version='',
                           node_image_only=False,
                           max_surge=None,
-                          no_wait=False):
+                          no_wait=False,
+                          aks_custom_headers=None,
+                          snapshot_id=None):
     AgentPoolUpgradeSettings = cmd.get_models('AgentPoolUpgradeSettings', operation_group='agent_pools')
     if kubernetes_version != '' and node_image_only:
         raise CLIError(
@@ -4155,16 +3267,40 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
                                                       client,
                                                       resource_group_name,
                                                       cluster_name,
-                                                      nodepool_name)
+                                                      nodepool_name,
+                                                      snapshot_id)
+
+    # load model CreationData
+    from azure.cli.command_modules.acs.decorator import AKSModels
+    CreationData = AKSModels(cmd, ResourceType.MGMT_CONTAINERSERVICE).CreationData
+
+    creationData = None
+    if snapshot_id:
+        snapshot = get_snapshot_by_snapshot_id(cmd.cli_ctx, snapshot_id)
+        if not kubernetes_version and not node_image_only:
+            kubernetes_version = snapshot.kubernetes_version
+
+        creationData = CreationData(
+            source_resource_id=snapshot_id
+        )
 
     instance = client.get(resource_group_name, cluster_name, nodepool_name)
     instance.orchestrator_version = kubernetes_version
+    instance.creation_data = creationData
 
     if not instance.upgrade_settings:
         instance.upgrade_settings = AgentPoolUpgradeSettings()
 
     if max_surge:
         instance.upgrade_settings.max_surge = max_surge
+
+    # custom headers
+    aks_custom_headers = extract_comma_separated_string(
+        aks_custom_headers,
+        enable_strip=True,
+        extract_kv=True,
+        default_value={},
+    )
 
     return sdk_no_wait(
         no_wait,
@@ -4173,18 +3309,24 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
         cluster_name,
         nodepool_name,
         instance,
+        headers=aks_custom_headers,
     )
 
 
+# pylint: disable=too-many-boolean-expressions
 def aks_agentpool_update(cmd, client, resource_group_name, cluster_name, nodepool_name,
                          enable_cluster_autoscaler=False,
                          disable_cluster_autoscaler=False,
                          update_cluster_autoscaler=False,
+                         scale_down_mode=None,
                          min_count=None, max_count=None,
                          tags=None,
                          max_surge=None,
                          mode=None,
-                         no_wait=False):
+                         labels=None,
+                         node_taints=None,
+                         no_wait=False,
+                         aks_custom_headers=None):
     AgentPoolUpgradeSettings = cmd.get_models('AgentPoolUpgradeSettings',
                                               resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                               operation_group='agent_pools')
@@ -4196,11 +3338,13 @@ def aks_agentpool_update(cmd, client, resource_group_name, cluster_name, nodepoo
                        '"--disable-cluster-autoscaler" or '
                        '"--update-cluster-autoscaler"')
 
-    if (update_autoscaler == 0 and not tags and not mode and not max_surge):
+    if (update_autoscaler == 0 and not tags and not scale_down_mode and not mode and not max_surge and
+            labels is None and node_taints is None):
         raise CLIError('Please specify one or more of "--enable-cluster-autoscaler" or '
                        '"--disable-cluster-autoscaler" or '
                        '"--update-cluster-autoscaler" or '
-                       '"--tags" or "--mode" or "--max-surge"')
+                       '"--tags" or "--mode" or "--max-surge" or "--scale-down-mode or '
+                       '"--labels"or "--node-taints"')
 
     instance = client.get(resource_group_name, cluster_name, nodepool_name)
 
@@ -4242,8 +3386,34 @@ def aks_agentpool_update(cmd, client, resource_group_name, cluster_name, nodepoo
 
     instance.tags = tags
 
+    if scale_down_mode is not None:
+        instance.scale_down_mode = scale_down_mode
+
     if mode is not None:
         instance.mode = mode
+
+    if labels is not None:
+        instance.node_labels = labels
+
+    if node_taints is not None:
+        taints_array = []
+        if node_taints != '':
+            for taint in node_taints.split(','):
+                try:
+                    taint = taint.strip()
+                    taints_array.append(taint)
+                except ValueError:
+                    raise InvalidArgumentValueError(
+                        'Taint does not match allowed values. Expect value such as "special=true:NoSchedule".')
+        instance.node_taints = taints_array
+
+    # custom headers
+    aks_custom_headers = extract_comma_separated_string(
+        aks_custom_headers,
+        enable_strip=True,
+        extract_kv=True,
+        default_value={},
+    )
 
     return sdk_no_wait(
         no_wait,
@@ -4252,6 +3422,7 @@ def aks_agentpool_update(cmd, client, resource_group_name, cluster_name, nodepoo
         cluster_name,
         nodepool_name,
         instance,
+        headers=aks_custom_headers,
     )
 
 
@@ -4277,22 +3448,25 @@ def aks_agentpool_get_upgrade_profile(cmd, client, resource_group_name, cluster_
 
 
 def _ensure_aks_acr_role_assignment(cmd,
-                                    client_id,
+                                    assignee,
                                     registry_id,
-                                    detach=False):
+                                    detach=False,
+                                    is_service_principal=True):
     if detach:
         if not _delete_role_assignments(cmd.cli_ctx,
                                         'acrpull',
-                                        client_id,
-                                        scope=registry_id):
+                                        assignee,
+                                        scope=registry_id,
+                                        is_service_principal=is_service_principal):
             raise CLIError('Could not delete role assignments for ACR. '
                            'Are you an Owner on this subscription?')
         return
 
     if not _add_role_assignment(cmd,
                                 'acrpull',
-                                client_id,
-                                scope=registry_id):
+                                assignee,
+                                scope=registry_id,
+                                is_service_principal=is_service_principal):
         raise CLIError('Could not create a role assignment for ACR. '
                        'Are you an Owner on this subscription?')
     return
@@ -4675,7 +3849,7 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
     logger.warning('Support for the creation of ARO 3.11 clusters ends 30 Nov 2020. Please see aka.ms/aro/4 for information on switching to ARO 4.')  # pylint: disable=line-too-long
 
     if location is None:
-        location = _get_rg_location(cmd.cli_ctx, resource_group_name)
+        location = get_rg_location(cmd.cli_ctx, resource_group_name)
     agent_pool_profiles = []
     agent_node_pool_profile = OpenShiftManagedClusterAgentPoolProfile(
         name='compute',  # Must be 12 chars or less before ACS RP adds to it
@@ -4871,12 +4045,24 @@ def _put_managed_cluster_ensuring_permission(
                                           virtual_node_addon_enabled or
                                           need_grant_vnet_permission_to_cluster_identity)
     if need_post_creation_role_assignment:
-        # adding a wait here since we rely on the result for role assignment
-        cluster = LongRunningOperation(cmd.cli_ctx)(client.begin_create_or_update(
+        poller = client.begin_create_or_update(
             resource_group_name=resource_group_name,
             resource_name=name,
             parameters=managed_cluster,
-            headers=headers))
+            headers=headers)
+        # Grant vnet permission to system assigned identity RIGHT AFTER
+        # the cluster is put, this operation can reduce latency for the
+        # role assignment take effect
+        if need_grant_vnet_permission_to_cluster_identity:
+            instant_cluster = client.get(resource_group_name, name)
+            if not _add_role_assignment(cmd, 'Network Contributor',
+                                        instant_cluster.identity.principal_id, scope=vnet_subnet_id,
+                                        is_service_principal=False):
+                logger.warning('Could not create a role assignment for subnet. '
+                               'Are you an Owner on this subscription?')
+
+        # adding a wait here since we rely on the result for role assignment
+        cluster = LongRunningOperation(cmd.cli_ctx)(poller)
         cloud_name = cmd.cli_ctx.cloud.name
         # add cluster spn/msi Monitoring Metrics Publisher role assignment to publish metrics to MDM
         # mdm metrics is supported only in azure public cloud, so add the role assignment only in this cloud
@@ -4888,17 +4074,11 @@ def _put_managed_cluster_ensuring_permission(
                 namespace='Microsoft.ContainerService', type='managedClusters',
                 name=name
             )
-            _add_monitoring_role_assignment(cluster, cluster_resource_id, cmd)
+            add_monitoring_role_assignment(cluster, cluster_resource_id, cmd)
         if ingress_appgw_addon_enabled:
-            _add_ingress_appgw_addon_role_assignment(cluster, cmd)
+            add_ingress_appgw_addon_role_assignment(cluster, cmd)
         if virtual_node_addon_enabled:
-            _add_virtual_node_role_assignment(cmd, cluster, vnet_subnet_id)
-        if need_grant_vnet_permission_to_cluster_identity:
-            if not _create_role_assignment(cmd, 'Network Contributor',
-                                           cluster.identity.principal_id, scope=vnet_subnet_id,
-                                           resolve_assignee=False):
-                logger.warning('Could not create a role assignment for subnet. '
-                               'Are you an Owner on this subscription?')
+            add_virtual_node_role_assignment(cmd, cluster, vnet_subnet_id)
 
         if enable_managed_identity and attach_acr:
             # Attach ACR to cluster enabled managed identity
@@ -4909,11 +4089,12 @@ def _put_managed_cluster_ensuring_permission(
                                'named <ClUSTER_NAME>-agentpool in MC_ resource group to give '
                                'it permission to pull from ACR.')
             else:
-                kubelet_identity_client_id = cluster.identity_profile["kubeletidentity"].client_id
+                kubelet_identity_object_id = cluster.identity_profile["kubeletidentity"].object_id
                 _ensure_aks_acr(cmd,
-                                client_id=kubelet_identity_client_id,
+                                assignee=kubelet_identity_object_id,
                                 acr_name_or_id=attach_acr,
-                                subscription_id=subscription_id)
+                                subscription_id=subscription_id,
+                                is_service_principal=False)
     else:
         cluster = sdk_no_wait(no_wait, client.begin_create_or_update,
                               resource_group_name=resource_group_name,
@@ -4942,3 +4123,69 @@ def _ensure_cluster_identity_permission_on_kubelet_identity(cmd, cluster_identit
                                 is_service_principal=False, scope=scope):
         raise UnauthorizedError('Could not grant Managed Identity Operator '
                                 'permission to cluster identity at scope {}'.format(scope))
+
+
+def aks_snapshot_create(cmd,    # pylint: disable=too-many-locals,too-many-statements,too-many-branches
+                        client,
+                        resource_group_name,
+                        name,
+                        nodepool_id,
+                        location=None,
+                        tags=None,
+                        aks_custom_headers=None,
+                        no_wait=False):
+
+    rg_location = get_rg_location(cmd.cli_ctx, resource_group_name)
+    if location is None:
+        location = rg_location
+
+    # load model CreationData, Snapshot
+    from azure.cli.command_modules.acs.decorator import AKSModels
+    CreationData = AKSModels(cmd, ResourceType.MGMT_CONTAINERSERVICE).CreationData
+    Snapshot = AKSModels(cmd, ResourceType.MGMT_CONTAINERSERVICE).Snapshot
+
+    creationData = CreationData(
+        source_resource_id=nodepool_id
+    )
+
+    snapshot = Snapshot(
+        name=name,
+        tags=tags,
+        location=location,
+        creation_data=creationData
+    )
+
+    # custom headers
+    aks_custom_headers = extract_comma_separated_string(
+        aks_custom_headers,
+        enable_strip=True,
+        extract_kv=True,
+        default_value={},
+    )
+    return client.create_or_update(resource_group_name, name, snapshot, headers=aks_custom_headers)
+
+
+def aks_snapshot_show(cmd, client, resource_group_name, name):   # pylint: disable=unused-argument
+    snapshot = client.get(resource_group_name, name)
+    return snapshot
+
+
+def aks_snapshot_delete(cmd,    # pylint: disable=unused-argument
+                        client,
+                        resource_group_name,
+                        name,
+                        no_wait=False,
+                        yes=False):
+
+    msg = 'This will delete the snapshot "{}" in resource group "{}", Are you sure?'.format(name, resource_group_name)
+    if not yes and not prompt_y_n(msg, default="n"):
+        return None
+
+    return client.delete(resource_group_name, name)
+
+
+def aks_snapshot_list(cmd, client, resource_group_name=None):  # pylint: disable=unused-argument
+    if resource_group_name is None or resource_group_name == '':
+        return client.list()
+
+    return client.list_by_resource_group(resource_group_name)

@@ -49,27 +49,24 @@ def create_random_resource_name(prefix='azure', length=15):
 
 
 def generate_missing_parameters(cmd, location, resource_group_name, server_name, db_engine):
-    # if location is not passed as a parameter or is missing from local context
-    if location is None and resource_group_name is None:
-        if db_engine == 'postgres':
-            location = DEFAULT_LOCATION_PG
-        else:
-            location = DEFAULT_LOCATION_MySQL
-    elif location is None and resource_group_name is not None:
-        resource_group_client = resource_client_factory(cmd.cli_ctx).resource_groups
-        resource_group = resource_group_client.get(resource_group_name=resource_group_name)
-        location = resource_group.location
-
     # If resource group is there in local context, check for its existence.
-    resource_group_exists = True
     if resource_group_name is not None:
         logger.warning('Checking the existence of the resource group \'%s\'...', resource_group_name)
         resource_group_exists = _check_resource_group_existence(cmd, resource_group_name)
         logger.warning('Resource group \'%s\' exists ? : %s ', resource_group_name, resource_group_exists)
+    else:
+        resource_group_exists = False
 
-    # If resource group is not passed as a param or is not in local context or the rg in the local context has been deleted
-    if not resource_group_exists or resource_group_name is None:
+    # set location to be same as RG's if not specified
+    if not resource_group_exists:
+        if not location:
+            location = DEFAULT_LOCATION_PG if db_engine == 'postgres' else DEFAULT_LOCATION_MySQL
         resource_group_name = _create_resource_group(cmd, location, resource_group_name)
+    else:
+        resource_group_client = resource_client_factory(cmd.cli_ctx).resource_groups
+        resource_group = resource_group_client.get(resource_group_name=resource_group_name)
+        if not location:
+            location = resource_group.location
 
     # If servername is not passed, always create a new server - even if it is stored in the local context
     if server_name is None:
@@ -184,11 +181,10 @@ def get_mysql_list_skus_info(cmd, location):
 
 def _postgres_parse_list_skus(result, database_engine):
     result = _get_list_from_paged_response(result)
-    single_az = False
+
     if not result:
         raise InvalidArgumentValueError("No available SKUs in this location")
-    if len(result) == 1:
-        single_az = True
+    single_az = not result[0].zone_redundant_ha_supported
 
     tiers = result[0].supported_flexible_server_editions
     tiers_dict = {}
@@ -213,16 +209,16 @@ def _postgres_parse_list_skus(result, database_engine):
 
         tiers_dict[tier_name] = tier_dict
 
-    return tiers_dict, single_az
+    return {'sku_info': tiers_dict,
+            'single_az': single_az}
 
 
 def _mysql_parse_list_skus(result, database_engine):
     result = _get_list_from_paged_response(result)
-    single_az = False
     if not result:
         raise InvalidArgumentValueError("No available SKUs in this location")
-    if len(result) == 1:
-        single_az = True
+    single_az = 'ZoneRedundant' not in result[0].supported_ha_mode
+    geo_paried_region = result[0].supported_geo_backup_regions
 
     tiers = result[0].supported_flexible_server_editions
     tiers_dict = {}
@@ -249,7 +245,10 @@ def _mysql_parse_list_skus(result, database_engine):
         iops_dict[tier_name] = sku_iops_dict
         tiers_dict[tier_name] = tier_dict
 
-    return tiers_dict, single_az, iops_dict
+    return {'sku_info': tiers_dict,
+            'single_az': single_az,
+            'iops_info': iops_dict,
+            'geo_paired_regions': geo_paried_region}
 
 
 def _get_available_values(sku_info, argument, tier=None):

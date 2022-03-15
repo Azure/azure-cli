@@ -3,9 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from azure.cli.core.auth.util import decode_access_token
 from azure.cli.core.azclierror import AuthenticationError
 from azure.cli.testsdk import LiveScenarioTest
-from azure.cli.core.auth.util import decode_access_token
 
 ARM_URL = "https://eastus2euap.management.azure.com/"  # ARM canary
 ARM_MAX_RETRY = 30
@@ -25,18 +25,17 @@ class ConditionalAccessScenarioTest(LiveScenarioTest):
           - doesn't require MFA for ARM
           - requires MFA for data-plane resource
 
-        The result ATs are checked per https://docs.microsoft.com/en-us/azure/active-directory/develop/access-tokens
+        The result ATs are checked per
+          Microsoft identity platform access tokens
+          https://docs.microsoft.com/en-us/azure/active-directory/develop/access-tokens
 
         Following claims are checked:
           - aud (Audience): https://tools.ietf.org/html/rfc7519#section-4.1.3
           - amr (Authentication Method Reference): https://tools.ietf.org/html/rfc8176
         """
 
-        resource = 'https://pas.windows.net/CheckMyAccess/Linux'
-        scope = resource + '/.default'
-
+        scope = 'https://pas.windows.net/CheckMyAccess/Linux/.default'
         self.kwargs['scope'] = scope
-        self.kwargs['resource'] = resource
 
         # region non-MFA session
 
@@ -52,7 +51,7 @@ class ConditionalAccessScenarioTest(LiveScenarioTest):
 
         # Getting data-plane AT with ARM RT (step-up) fails
         with self.assertRaises(AuthenticationError) as cm:
-            self.cmd('az account get-access-token --resource {resource}')
+            self.cmd('az account get-access-token --scope {scope}')
 
         # Check re-login recommendation
         re_login_command = 'az login --scope {scope}'.format(**self.kwargs)
@@ -74,9 +73,10 @@ class ConditionalAccessScenarioTest(LiveScenarioTest):
         assert decoded['amr'] == ['pwd']
 
         # Getting data-plane AT and check claims
-        result = self.cmd('az account get-access-token --resource {resource}').get_output_in_json()
+        result = self.cmd('az account get-access-token --scope {scope}').get_output_in_json()
         decoded = decode_access_token(result['accessToken'])
         assert decoded['aud'] in scope
         assert decoded['amr'] == ['pwd', 'mfa']
 
+        self.cmd('logout')
         # endregion

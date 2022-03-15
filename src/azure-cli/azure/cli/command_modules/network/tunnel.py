@@ -74,14 +74,13 @@ class TunnelServer:
 
     def _get_auth_token(self):
         profile = Profile(cli_ctx=self.cli_ctx)
-        user = profile.get_current_account_user()
         # Generate an Azure token with the VSTS resource app id
-        auth_token = profile.get_access_token_for_resource(user, None, None)
+        auth_token, _, _ = profile.get_raw_token()
         content = {
             'resourceId': self.remote_host,
             'protocol': 'tcptunnel',
             'workloadHostPort': self.remote_port,
-            'aztoken': auth_token,
+            'aztoken': auth_token[1],
             'token': self.last_token,
         }
         if self.node_id:
@@ -117,9 +116,10 @@ class TunnelServer:
 
             auth_token = self._get_auth_token()
             host = 'wss://{}/webtunnel/{}?X-Node-Id={}'.format(self.bastion.dns_name, auth_token, self.node_id)
+            verify_mode = ssl.CERT_NONE if should_disable_connection_verify() else ssl.CERT_REQUIRED
             self.ws = create_connection(host,
                                         sockopt=((socket.IPPROTO_TCP, socket.TCP_NODELAY, 1),),
-                                        sslopt={'cert_reqs': ssl.CERT_NONE},
+                                        sslopt={'cert_reqs': verify_mode},
                                         enable_multithread=True)
             logger.info('Websocket, connected status: %s', self.ws.connected)
             index = index + 1
@@ -132,6 +132,7 @@ class TunnelServer:
             logger.info('Successfully connected to local server..')
             debugger_thread.join()
             web_socket_thread.join()
+            self.cleanup()
             logger.info('Both debugger and websocket threads stopped...')
             logger.info('Stopped local server..')
 
@@ -194,13 +195,16 @@ class TunnelServer:
             web_address = 'https://{}/api/tokens/{}'.format(self.bastion.dns_name, self.last_token)
             response = requests.delete(web_address, headers=custom_header,
                                        verify=(not should_disable_connection_verify()))
-
-            if response.status_code not in [200, 204]:
+            if response.status_code == 404:
+                logger.info('Session already deleted')
+            elif response.status_code not in [200, 204]:
                 exp = CloudError(response)
                 raise exp
 
             self.last_token = None
             self.node_id = None
+        else:
+            logger.debug('Nothing to clean up')
 
     def get_port(self):
         return self.local_port

@@ -93,6 +93,10 @@ def cf_run_commands(cli_ctx, _):
     return _compute_client_factory(cli_ctx).virtual_machine_run_commands
 
 
+def cf_vmss_run_commands(cli_ctx, _):
+    return _compute_client_factory(cli_ctx).virtual_machine_scale_set_vm_run_commands
+
+
 def cf_rolling_upgrade_commands(cli_ctx, _):
     return _compute_client_factory(cli_ctx).virtual_machine_scale_set_rolling_upgrades
 
@@ -107,6 +111,14 @@ def cf_gallery_images(cli_ctx, _):
 
 def cf_gallery_image_versions(cli_ctx, _):
     return _compute_client_factory(cli_ctx).gallery_image_versions
+
+
+def cf_gallery_application(cli_ctx, *_):
+    return _compute_client_factory(cli_ctx).gallery_applications
+
+
+def cf_gallery_application_version(cli_ctx, *_):
+    return _compute_client_factory(cli_ctx).gallery_application_versions
 
 
 def cf_proximity_placement_groups(cli_ctx, _):
@@ -186,3 +198,11 @@ def cf_capacity_reservation_groups(cli_ctx, *_):
 
 def cf_capacity_reservations(cli_ctx, *_):
     return cf_vm_cl(cli_ctx).capacity_reservations
+
+
+def cf_restore_point(cli_ctx, *_):
+    return cf_vm_cl(cli_ctx).restore_points
+
+
+def cf_restore_point_collection(cli_ctx, *_):
+    return cf_vm_cl(cli_ctx).restore_point_collections

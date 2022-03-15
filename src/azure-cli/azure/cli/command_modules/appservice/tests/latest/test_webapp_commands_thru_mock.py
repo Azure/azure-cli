@@ -8,7 +8,6 @@ from unittest import mock
 from msrestazure.azure_exceptions import CloudError
 
 from azure.mgmt.web import WebSiteManagementClient
-from azure.cli.core.adal_authentication import AdalAuthentication
 from knack.util import CLIError
 from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          update_git_token, add_hostname,
@@ -19,7 +18,7 @@ from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          _match_host_names_from_cert,
                                                          bind_ssl_cert,
                                                          list_publish_profiles,
-                                                         show_webapp,
+                                                         show_app,
                                                          get_streaming_log,
                                                          download_historical_logs,
                                                          validate_container_app_create_options,
@@ -46,7 +45,7 @@ def _get_test_cmd():
 
 class TestWebappMocked(unittest.TestCase):
     def setUp(self):
-        self.client = WebSiteManagementClient(AdalAuthentication(lambda: ('bearer', 'secretToken')), '123455678')
+        self.client = WebSiteManagementClient(mock.MagicMock(), '123455678')
 
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     def test_set_deployment_user_creds(self, client_factory_mock):
@@ -228,7 +227,7 @@ class TestWebappMocked(unittest.TestCase):
         faked_web = mock.MagicMock()
         site_op_mock.return_value = faked_web
         # action
-        result = show_webapp(mock.MagicMock(), 'myRG', 'myweb', slot=None, app_instance=None)
+        result = show_app(mock.MagicMock(), 'myRG', 'myweb', slot=None)
         # assert (we invoke the site op)
         self.assertEqual(faked_web, result)
         self.assertTrue(rename_mock.called)
@@ -325,8 +324,8 @@ class TestWebappMocked(unittest.TestCase):
         restore_snapshot(cmd_mock, 'rg', 'web1', '2018-12-07T02:01:31.4708832Z', restore_content_only=False)
 
         # assert
-        client.web_apps.restore_snapshot_slot.assert_called_with('rg', 'web1', request, 'slot1')
-        client.web_apps.restore_snapshot.assert_called_with('rg', 'web1', overwrite_request)
+        client.web_apps.begin_restore_snapshot_slot.assert_called_with('rg', 'web1', request, 'slot1')
+        client.web_apps.begin_restore_snapshot.assert_called_with('rg', 'web1', overwrite_request)
 
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url', autospec=True)

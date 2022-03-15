@@ -15,7 +15,7 @@ from knack.util import CLIError
 
 
 class SBNetworkrulesetCRUDScenarioTest(ScenarioTest):
-    from azure_devtools.scenario_tests import AllowLargeResponse
+    from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_sb_network')

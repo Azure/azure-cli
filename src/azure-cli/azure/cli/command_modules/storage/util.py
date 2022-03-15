@@ -239,9 +239,9 @@ def check_precondition_success(func):
             return True, func(*args, **kwargs)
         except AzureHttpError as ex:
             # Precondition failed error
-            # https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/412
+            # https://developer.mozilla.org/docs/Web/HTTP/Status/412
             # Not modified error
-            # https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/304
+            # https://developer.mozilla.org/docs/Web/HTTP/Status/304
             if ex.status_code not in [304, 412]:
                 raise
             return False, None

@@ -8,7 +8,9 @@ from azure.cli.core.commands import CliCommandType
 from azure.cli.core.util import empty_on_404
 
 from ._client_factory import cf_web_client, cf_plans, cf_webapps
-from ._validators import validate_onedeploy_params
+from ._validators import (validate_onedeploy_params, validate_staticsite_link_function, validate_staticsite_sku,
+                          validate_vnet_integration, validate_asp_create, validate_functionapp_asp_create,
+                          validate_app_exists)
 
 
 def output_slots_in_table(slots):
@@ -66,19 +68,23 @@ def _polish_bad_errors(ex, creating_plan):
     import json
     from knack.util import CLIError
     try:
-        if 'text/plain' in ex.response.headers['Content-Type']:  # HTML Response
-            detail = ex.response.text
+        if hasattr(ex, "response"):
+            if 'text/plain' in ex.response.headers['Content-Type']:  # HTML Response
+                detail = ex.response.text
+            else:
+                detail = json.loads(ex.response.text())['Message']
+                if creating_plan:
+                    if 'Requested features are not supported in region' in detail:
+                        detail = ("Plan with requested features is not supported in current region. \n"
+                                  "If creating an App Service Plan with --zone-redundant/-z, "
+                                  "please see supported regions here: "
+                                  "https://docs.microsoft.com/en-us/azure/app-service/how-to-zone-redundancy#requirements")
+                    elif 'Not enough available reserved instance servers to satisfy' in detail:
+                        detail = ("Plan with Linux worker can only be created in a group " +
+                                  "which has never contained a Windows worker, and vice versa. " +
+                                  "Please use a new resource group. Original error:" + detail)
         else:
-            detail = json.loads(ex.response.text)['Message']
-            if creating_plan:
-                if 'Requested features are not supported in region' in detail:
-                    detail = ("Plan with linux worker is not supported in current region. For " +
-                              "supported regions, please refer to https://docs.microsoft.com/"
-                              "azure/app-service-web/app-service-linux-intro")
-                elif 'Not enough available reserved instance servers to satisfy' in detail:
-                    detail = ("Plan with Linux worker can only be created in a group " +
-                              "which has never contained a Windows worker, and vice versa. " +
-                              "Please use a new resource group. Original error:" + detail)
+            detail = json.loads(ex.error_msg.response.text())['Message']
         ex = CLIError(detail)
     except Exception:  # pylint: disable=broad-except
         pass
@@ -110,26 +116,28 @@ def load_command_table(self, _):
 
     appservice_domains = CliCommandType(operations_tmpl='azure.cli.command_modules.appservice.appservice_domains#{}')
 
+    logicapp_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.appservice.logicapp.custom#{}')
+
     with self.command_group('webapp', webapp_sdk) as g:
-        g.custom_command('create', 'create_webapp', exception_handler=ex_handler_factory())
+        g.custom_command('create', 'create_webapp', exception_handler=ex_handler_factory(), validator=validate_vnet_integration)
         g.custom_command('up', 'webapp_up', exception_handler=ex_handler_factory())
         g.custom_command('ssh', 'ssh_webapp', exception_handler=ex_handler_factory(), is_preview=True)
         g.custom_command('list', 'list_webapp', table_transformer=transform_web_list_output)
-        g.custom_show_command('show', 'show_webapp', table_transformer=transform_web_output)
+        g.custom_show_command('show', 'show_app', table_transformer=transform_web_output)
         g.custom_command('delete', 'delete_webapp')
         g.custom_command('stop', 'stop_webapp')
         g.custom_command('start', 'start_webapp')
         g.custom_command('restart', 'restart_webapp')
         g.custom_command('browse', 'view_in_browser')
         g.custom_command('list-instances', 'list_instances')
-        # TO DO: Move back to using list_runtimes function once Available Stacks API is updated (it's updated with Antares deployments)
-        g.custom_command('list-runtimes', 'list_runtimes_hardcoded')
+        g.custom_command('list-runtimes', 'list_runtimes')
         g.custom_command('identity assign', 'assign_identity')
         g.custom_show_command('identity show', 'show_identity')
         g.custom_command('identity remove', 'remove_identity')
         g.custom_command('create-remote-connection', 'create_tunnel', exception_handler=ex_handler_factory())
         g.custom_command('deploy', 'perform_onedeploy', validator=validate_onedeploy_params, is_preview=True)
-        g.generic_update_command('update', getter_name='get_webapp', setter_name='set_webapp', custom_func_name='update_webapp', command_type=appservice_custom)
+        g.generic_update_command('update', getter_name='get_webapp', setter_name='set_webapp',
+                                 custom_func_name='update_webapp', command_type=appservice_custom)
 
     with self.command_group('webapp traffic-routing') as g:
         g.custom_command('set', 'set_traffic_routing')
@@ -207,7 +215,7 @@ def load_command_table(self, _):
 
     with self.command_group('webapp deployment source') as g:
         g.custom_command('config-local-git', 'enable_local_git')
-        g.custom_command('config-zip', 'enable_zip_deploy_webapp')
+        g.custom_command('config-zip', 'enable_zip_deploy_webapp', exception_handler=ex_handler_factory())
         g.custom_command('config', 'config_source_control', exception_handler=ex_handler_factory())
         g.custom_command('sync', 'sync_site_repo', exception_handler=ex_handler_factory())
         g.custom_show_command('show', 'show_source_control')
@@ -215,16 +223,16 @@ def load_command_table(self, _):
         g.custom_command('update-token', 'update_git_token', exception_handler=ex_handler_factory())
 
     with self.command_group('webapp log') as g:
-        g.custom_command('tail', 'get_streaming_log')
+        g.custom_command('tail', 'get_streaming_log', validator=validate_app_exists)
         g.custom_command('download', 'download_historical_logs')
         g.custom_command('config', 'config_diagnostics')
         g.custom_show_command('show', 'show_diagnostic_settings')
 
-    with self.command_group('webapp log deployment', is_preview=True) as g:
+    with self.command_group('webapp log deployment') as g:
         g.custom_show_command('show', 'show_deployment_log')
         g.custom_command('list', 'list_deployment_logs')
 
-    with self.command_group('functionapp log deployment', is_preview=True) as g:
+    with self.command_group('functionapp log deployment') as g:
         g.custom_show_command('show', 'show_deployment_log')
         g.custom_command('list', 'list_deployment_logs')
 
@@ -247,7 +255,7 @@ def load_command_table(self, _):
         g.custom_command('config', 'enable_cd')
         g.custom_command('show-cd-url', 'show_container_cd_url')
 
-    with self.command_group('webapp deployment github-actions', is_preview=True) as g:
+    with self.command_group('webapp deployment github-actions') as g:
         g.custom_command('add', 'add_github_actions')
         g.custom_command('remove', 'remove_github_actions')
 
@@ -273,18 +281,18 @@ def load_command_table(self, _):
         g.custom_command('set-key', 'set_hc_key')
 
     with self.command_group('webapp vnet-integration') as g:
-        g.custom_command('add', 'add_vnet_integration')
+        g.custom_command('add', 'add_webapp_vnet_integration')
         g.custom_command('list', 'list_vnet_integration')
         g.custom_command('remove', 'remove_vnet_integration')
 
     with self.command_group('functionapp vnet-integration') as g:
-        g.custom_command('add', 'add_vnet_integration')
+        g.custom_command('add', 'add_functionapp_vnet_integration')
         g.custom_command('list', 'list_vnet_integration')
         g.custom_command('remove', 'remove_vnet_integration')
 
     with self.command_group('appservice plan', appservice_plan_sdk) as g:
         g.custom_command('create', 'create_app_service_plan', supports_no_wait=True,
-                         exception_handler=ex_handler_factory(creating_plan=True))
+                         exception_handler=ex_handler_factory(creating_plan=True), validator=validate_asp_create)
         g.command('delete', 'delete', confirmation=True)
         g.custom_command('list', 'list_app_service_plans')
         g.custom_show_command('show', 'show_plan')
@@ -299,9 +307,11 @@ def load_command_table(self, _):
         g.custom_command('list', 'appservice_list_vnet')
 
     with self.command_group('functionapp') as g:
-        g.custom_command('create', 'create_function', exception_handler=ex_handler_factory())
+        g.custom_command('create', 'create_functionapp', exception_handler=ex_handler_factory(),
+                         validator=validate_vnet_integration)
+        g.custom_command('list-runtimes', 'list_function_app_runtimes')
         g.custom_command('list', 'list_function_app', table_transformer=transform_web_list_output)
-        g.custom_show_command('show', 'show_webapp', table_transformer=transform_web_output)
+        g.custom_show_command('show', 'show_app', table_transformer=transform_web_output)
         g.custom_command('delete', 'delete_function_app')
         g.custom_command('stop', 'stop_webapp')
         g.custom_command('start', 'start_webapp')
@@ -362,7 +372,9 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'show_cors')
 
     with self.command_group('functionapp plan', appservice_plan_sdk) as g:
-        g.custom_command('create', 'create_functionapp_app_service_plan', exception_handler=ex_handler_factory())
+        g.custom_command('create', 'create_functionapp_app_service_plan',
+                         exception_handler=ex_handler_factory(creating_plan=True),
+                         validator=validate_functionapp_asp_create)
         g.generic_update_command('update', setter_name='begin_create_or_update',
                                  custom_func_name='update_functionapp_app_service_plan',
                                  setter_arg_name='app_service_plan', exception_handler=ex_handler_factory())
@@ -378,9 +390,6 @@ def load_command_table(self, _):
         g.custom_command('set', 'update_container_settings_functionapp')
         g.custom_command('delete', 'delete_container_settings')
         g.custom_show_command('show', 'show_container_settings_functionapp')
-
-    with self.command_group('functionapp devops-pipeline') as g:
-        g.custom_command('create', 'create_devops_pipeline')
 
     with self.command_group('functionapp deployment slot') as g:
         g.custom_command('list', 'list_slots', table_transformer=output_slots_in_table)
@@ -442,16 +451,23 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_staticsite_environments')
         g.custom_show_command('show', 'show_staticsite_environment')
         g.custom_command('functions', 'list_staticsite_functions')
+        g.custom_command('delete', 'delete_staticsite_environment', confirmation=True)
 
     with self.command_group('staticwebapp hostname', custom_command_type=staticsite_sdk) as g:
         g.custom_command('list', 'list_staticsite_domains')
         g.custom_command('set', 'set_staticsite_domain', supports_no_wait=True)
         g.custom_command('delete', 'delete_staticsite_domain', supports_no_wait=True, confirmation=True)
+        g.custom_show_command('show', 'get_staticsite_domain')
+
+    with self.command_group('staticwebapp identity', custom_command_type=staticsite_sdk) as g:
+        g.custom_command('assign', 'assign_identity')
+        g.custom_command('remove', 'remove_identity', confirmation=True)
+        g.custom_show_command('show', 'show_identity')
 
     with self.command_group('staticwebapp appsettings', custom_command_type=staticsite_sdk) as g:
-        g.custom_command('list', 'list_staticsite_function_app_settings')
-        g.custom_command('set', 'set_staticsite_function_app_settings')
-        g.custom_command('delete', 'delete_staticsite_function_app_settings')
+        g.custom_command('list', 'list_staticsite_app_settings')
+        g.custom_command('set', 'set_staticsite_app_settings')
+        g.custom_command('delete', 'delete_staticsite_app_settings')
 
     with self.command_group('staticwebapp users', custom_command_type=staticsite_sdk) as g:
         g.custom_command('list', 'list_staticsite_users')
@@ -461,3 +477,19 @@ def load_command_table(self, _):
     with self.command_group('staticwebapp secrets', custom_command_type=staticsite_sdk) as g:
         g.custom_command('list', 'list_staticsite_secrets')
         g.custom_command('reset-api-key', 'reset_staticsite_api_key', supports_no_wait=True)
+
+    with self.command_group('staticwebapp functions', custom_command_type=staticsite_sdk) as g:
+        g.custom_command('link', 'link_user_function', validator=validate_staticsite_link_function)
+        g.custom_command('unlink', 'unlink_user_function', validator=validate_staticsite_sku)
+        g.custom_show_command('show', 'get_user_function', validator=validate_staticsite_sku)
+
+    with self.command_group('logicapp') as g:
+        g.custom_command('delete', 'delete_function_app', confirmation=True)
+        g.custom_command('stop', 'stop_webapp')
+        g.custom_command('start', 'start_webapp')
+        g.custom_command('restart', 'restart_webapp')
+
+    with self.command_group('logicapp', custom_command_type=logicapp_custom) as g:
+        g.custom_command('create', 'create_logicapp', exception_handler=ex_handler_factory())
+        g.custom_command('list', 'list_logicapp', table_transformer=transform_web_list_output)
+        g.custom_show_command('show', 'show_logicapp', table_transformer=transform_web_output)

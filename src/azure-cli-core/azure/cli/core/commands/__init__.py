@@ -26,7 +26,7 @@ from azure.cli.core.extension import get_extension
 from azure.cli.core.util import (
     get_command_type_kwarg, read_file_content, get_arg_list, poller_classes)
 from azure.cli.core.local_context import LocalContextAction
-import azure.cli.core.telemetry as telemetry
+from azure.cli.core import telemetry
 from azure.cli.core.commands.progress import IndeterminateProgressBar
 
 from knack.arguments import CLICommandArgument
@@ -35,7 +35,7 @@ from knack.deprecation import ImplicitDeprecated, resolve_deprecate_info
 from knack.invocation import CommandInvoker
 from knack.preview import ImplicitPreviewItem, PreviewItem, resolve_preview_info
 from knack.experimental import ImplicitExperimentalItem, ExperimentalItem, resolve_experimental_info
-from knack.log import get_logger
+from knack.log import get_logger, CLILogging
 from knack.util import CLIError, CommandResultItem, todict
 from knack.events import EVENT_INVOKER_TRANSFORM_RESULT
 from knack.validators import DefaultStr
@@ -562,7 +562,8 @@ class AzCliCommandInvoker(CommandInvoker):
         self.cli_ctx.raise_event(EVENT_INVOKER_CMD_TBL_LOADED, cmd_tbl=self.commands_loader.command_table,
                                  parser=self.parser)
 
-        arg_check = [a for a in args if a not in ['--debug', '--verbose']]
+        arg_check = [a for a in args if a not in
+                     (CLILogging.DEBUG_FLAG, CLILogging.VERBOSE_FLAG, CLILogging.ONLY_SHOW_ERRORS_FLAG)]
         if not arg_check:
             self.parser.enable_autocomplete()
             subparser = self.parser.subparsers[tuple()]
@@ -875,7 +876,11 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
         self.poller_done_interval_ms = poller_done_interval_ms
         self.deploy_dict = {}
         self.last_progress_report = datetime.datetime.now()
-        self.progress_bar = progress_bar if progress_bar is not None else IndeterminateProgressBar(cli_ctx)
+
+        self.progress_bar = None
+        disable_progress_bar = self.cli_ctx.config.getboolean('core', 'disable_progress_bar', False)
+        if not disable_progress_bar and not cli_ctx.only_show_errors:
+            self.progress_bar = progress_bar if progress_bar is not None else IndeterminateProgressBar(cli_ctx)
 
     def _delay(self):
         time.sleep(self.poller_done_interval_ms / 1000.0)
@@ -943,12 +948,13 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
                             if update:
                                 logger.info(result)
 
-    def __call__(self, poller):
+    def __call__(self, poller):  # pylint: disable=too-many-statements
         from msrest.exceptions import ClientException
         from azure.core.exceptions import HttpResponseError
 
         correlation_message = ''
-        self.progress_bar.begin()
+        if self.progress_bar:
+            self.progress_bar.begin()
         correlation_id = None
 
         cli_logger = get_logger()  # get CLI logger which has the level set through command lines
@@ -976,10 +982,12 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
                 except Exception as ex:  # pylint: disable=broad-except
                     logger.warning('%s during progress reporting: %s', getattr(type(ex), '__name__', type(ex)), ex)
             try:
-                self.progress_bar.update_progress()
+                if self.progress_bar:
+                    self.progress_bar.update_progress()
                 self._delay()
             except KeyboardInterrupt:
-                self.progress_bar.stop()
+                if self.progress_bar:
+                    self.progress_bar.stop()
                 logger.error('Long-running operation wait cancelled.  %s', correlation_message)
                 raise
 
@@ -987,7 +995,8 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
             result = poller.result()
         except (ClientException, HttpResponseError) as exception:
             from azure.cli.core.commands.arm import handle_long_running_operation_exception
-            self.progress_bar.stop()
+            if self.progress_bar:
+                self.progress_bar.stop()
             if getattr(exception, 'status_code', None) == 404 and \
                ('delete' in self.cli_ctx.data['command'] or 'purge' in self.cli_ctx.data['command']):
                 logger.debug('Service returned 404 on the long-running delete or purge operation. CLI treats it as '
@@ -998,7 +1007,8 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
             else:
                 raise exception
         finally:
-            self.progress_bar.end()
+            if self.progress_bar:
+                self.progress_bar.end()
             if poll_flag:
                 telemetry.poll_end()
 

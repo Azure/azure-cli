@@ -22,7 +22,7 @@ from azure.cli.core.util import (hash_string, DISALLOWED_USER_NAMES, get_default
 from azure.cli.command_modules.vm._vm_utils import (
     check_existence, get_target_network_api, get_storage_blob_uri, list_sku_info)
 from azure.cli.command_modules.vm._template_builder import StorageProfile
-import azure.cli.core.keys as keys
+from azure.cli.core import keys
 from azure.core.exceptions import ResourceNotFoundError
 
 from ._client_factory import _compute_client_factory
@@ -365,6 +365,8 @@ def _validate_location(cmd, namespace, zone_info, size_info):
 def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
     from msrestazure.tools import parse_resource_id
 
+    _validate_vm_vmss_create_ephemeral_placement(namespace)
+
     # specialized is only for image
     if getattr(namespace, 'specialized', None) is not None and namespace.image is None:
         raise CLIError('usage error: --specialized is only configurable when --image is specified.')
@@ -540,6 +542,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
     # attach_data_disks are not exposed yet for VMSS, so use 'getattr' to avoid crash
     vm_size = (getattr(namespace, 'size', None) or getattr(namespace, 'vm_sku', None))
 
+    # pylint: disable=line-too-long
     namespace.disk_info = normalize_disk_info(size=vm_size,
                                               image_data_disks=image_data_disks,
                                               data_disk_sizes_gb=namespace.data_disk_sizes_gb,
@@ -548,6 +551,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
                                               os_disk_caching=namespace.os_caching,
                                               data_disk_cachings=namespace.data_caching,
                                               ephemeral_os_disk=getattr(namespace, 'ephemeral_os_disk', None),
+                                              ephemeral_os_disk_placement=getattr(namespace, 'ephemeral_os_disk_placement', None),
                                               data_disk_delete_option=getattr(
                                                   namespace, 'data_disk_delete_option', None))
 
@@ -1012,6 +1016,19 @@ def _validate_vm_create_nics(cmd, namespace):
     logger.debug('existing NIC(s) will be used')
 
 
+def _validate_vm_nic_delete_option(namespace):
+    if not namespace.nics and namespace.nic_delete_option:
+        if len(namespace.nic_delete_option) == 1 and len(namespace.nic_delete_option[0].split('=')) == 1:  # pylint: disable=line-too-long
+            namespace.nic_delete_option = namespace.nic_delete_option[0]
+        elif len(namespace.nic_delete_option) > 1 or any((len(delete_option.split('=')) > 1 for delete_option in namespace.nic_delete_option)):  # pylint: disable=line-too-long
+            from azure.cli.core.parser import InvalidArgumentValueError
+            raise InvalidArgumentValueError("incorrect usage: Cannot specify individual delete option when no nic is "
+                                            "specified. Either specify a list of nics and their delete option like: "
+                                            "--nics nic1 nic2 --nic-delete-option nic1=Delete nic2=Detach or specify "
+                                            "delete option for all: --nics nic1 nic2 --nic-delete-option Delete or "
+                                            "specify delete option for the new nic created: --nic-delete-option Delete")
+
+
 def _validate_vm_vmss_create_auth(namespace, cmd=None):
     if namespace.storage_profile in [StorageProfile.ManagedSpecializedOSDisk,
                                      StorageProfile.SASpecializedOSDisk]:
@@ -1196,20 +1213,38 @@ def _validate_vm_vmss_msi(cmd, namespace, from_set_command=False):
                 identities[i] = _get_resource_id(cmd.cli_ctx, identities[i], namespace.resource_group_name,
                                                  'userAssignedIdentities', 'Microsoft.ManagedIdentity')
         if not namespace.identity_scope and getattr(namespace.identity_role, 'is_default', None) is None:
-            raise CLIError("usage error: '--role {}' is not applicable as the '--scope' is not provided".format(
-                namespace.identity_role))
+            raise ArgumentUsageError("usage error: '--role {}' is not applicable as the '--scope' is not provided".
+                                     format(namespace.identity_role))
         user_assigned_identities = [x for x in identities if x != MSI_LOCAL_ID]
         if user_assigned_identities and not cmd.supported_api_version(min_api='2017-12-01'):
-            raise CLIError('usage error: user assigned identity is only available under profile '
-                           'with minimum Compute API version of 2017-12-01')
+            raise ArgumentUsageError('usage error: user assigned identity is only available under profile '
+                                     'with minimum Compute API version of 2017-12-01')
         if namespace.identity_scope:
             if identities and MSI_LOCAL_ID not in identities:
-                raise CLIError("usage error: '--scope'/'--role' is only applicable when assign system identity")
+                raise ArgumentUsageError("usage error: '--scope'/'--role' is only applicable when "
+                                         "assign system identity")
             # keep 'identity_role' for output as logical name is more readable
             setattr(namespace, 'identity_role_id', _resolve_role_id(cmd.cli_ctx, namespace.identity_role,
                                                                     namespace.identity_scope))
     elif namespace.identity_scope or getattr(namespace.identity_role, 'is_default', None) is None:
-        raise CLIError('usage error: --assign-identity [--scope SCOPE] [--role ROLE]')
+        raise ArgumentUsageError('usage error: --assign-identity [--scope SCOPE] [--role ROLE]')
+
+    # For the creation of VM and VMSS, the default value "Contributor" of "--role" will be removed in the future.
+    # Therefore, the first step is to prompt users that parameters "--role" and "--scope"  should be passed in
+    # at the same time to reduce the impact of breaking change
+    if not from_set_command and namespace.identity_scope and getattr(namespace.identity_role, 'is_default', None):
+        logger.warning(
+            "Please note that the default value of parameter '--role' will be removed in the future version 2.35.0. "
+            "So specify '--role' and '--scope' at the same time when assigning a role to the managed identity "
+            "to avoid breaking your automation script when the default value of '--role' is removed."
+        )
+
+
+def _validate_vm_vmss_set_applications(cmd, namespace):  # pylint: disable=unused-argument
+    if namespace.application_configuration_overrides and \
+       len(namespace.application_version_ids) != len(namespace.application_configuration_overrides):
+        raise ArgumentUsageError('usage error: --app-config-overrides should have the same number of items as'
+                                 ' --application-version-ids')
 
 
 def _resolve_role_id(cli_ctx, role, scope):
@@ -1273,12 +1308,15 @@ def process_vm_create_namespace(cmd, namespace):
         namespace.boot_diagnostics_storage = get_storage_blob_uri(cmd.cli_ctx, namespace.boot_diagnostics_storage)
 
     _validate_capacity_reservation_group(cmd, namespace)
+    _validate_vm_nic_delete_option(namespace)
 
 # endregion
 
 
 def process_vm_update_namespace(cmd, namespace):
+    _validate_vm_create_dedicated_host(cmd, namespace)
     _validate_capacity_reservation_group(cmd, namespace)
+    _validate_vm_vmss_update_ephemeral_placement(cmd, namespace)
 
 
 # region VMSS Create Validators
@@ -1442,78 +1480,44 @@ def process_vmss_create_namespace(cmd, namespace):
 
         namespace.load_balancer_sku = 'Standard'  # lb sku MUST be standard
         # namespace.public_ip_per_vm = True  # default to true for VMSS Flex
-        # namespace.disable_overprovision = True  # overprovisioning must be false for vmss flex preview
-        # namespace.single_placement_group = False  # SPG must be false for VMSS flex
+
+        if namespace.single_placement_group:
+            raise ArgumentUsageError('usage error: --single-placement-group can only be set to False for Flex mode')
+        namespace.single_placement_group = False
+
         namespace.upgrade_policy_mode = None
         namespace.use_unmanaged_disk = None
 
-        banned_params = [
-            # namespace.accelerated_networking,
-            # namespace.admin_password,
-            # namespace.admin_username,
-            # namespace.application_gateway,
-            # namespace.app_gateway_capacity,
-            # namespace.app_gateway_sku,
-            # namespace.app_gateway_subnet_address_prefix,
-            # namespace.application_security_groups,
-            # namespace.assign_identity,
-            # namespace.authentication_type,
-            # namespace.backend_pool_name,
-            # namespace.backend_port,
-            # namespace.computer_name_prefix,
-            # namespace.custom_data,
-            # namespace.data_caching,
-            # namespace.data_disk_sizes_gb,
-            # namespace.disable_overprovision,
-            # namespace.dns_servers,
-            # namespace.ephemeral_os_disk,
-            # namespace.eviction_policy,
-            # namespace.generate_ssh_keys,
-            namespace.health_probe,
-            namespace.host_group,
-            # namespace.image,
-            # namespace.instance_count,
-            # namespace.load_balancer,
-            namespace.nat_pool_name,
-            # namespace.load_balancer_sku,
-            # namespace.license_type,
-            # namespace.max_price,
-            # namespace.nsg,
-            # namespace.os_caching,
-            # namespace.os_disk_name,
-            # namespace.os_type,
-            # namespace.plan_name,
-            # namespace.plan_product,
-            # namespace.plan_promotion_code,
-            # namespace.plan_publisher,
-            # namespace.priority,
-            # namespace.public_ip_address,
-            # namespace.public_ip_address_allocation,
-            # namespace.public_ip_address_dns_name,
-            # namespace.public_ip_per_vm,
-            # namespace.identity_role,
-            # namespace.identity_scope,
-            namespace.scale_in_policy,
-            # namespace.secrets,
-            # namespace.ssh_dest_key_path,
-            # namespace.ssh_key_value,
-            # namespace.storage_container_name,
-            # namespace.storage_sku,
-            # namespace.subnet,
-            # namespace.subnet_address_prefix,
-            # namespace.terminate_notification_time,
-            # namespace.ultra_ssd_enabled,
-            # namespace.upgrade_policy_mode,
-            # namespace.use_unmanaged_disk,
-            # namespace.vm_domain_name,
-            # namespace.vm_sku,
-            # namespace.vnet_address_prefix,
-            # namespace.vnet_name,
-            namespace.user_data
-        ]
-        if any(param is not None for param in banned_params):
-            raise CLIError('usage error: In VM mode, only name, resource-group, location, '
-                           'tags, zones, platform-fault-domain-count, single-placement-group and ppg are allowed')
+        banned_params = {
+            '--disable-overprovision': namespace.disable_overprovision,
+            '--health-probe': namespace.health_probe,
+            '--host-group': namespace.host_group,
+            '--nat-pool-name': namespace.nat_pool_name,
+            '--scale-in-policy': namespace.scale_in_policy,
+            '--user-data': namespace.user_data
+        }
+
+        for param, value in banned_params.items():
+            if value is not None:
+                raise ArgumentUsageError(f'usage error: {param} is not supported for Flex mode')
+
+        if namespace.image:
+
+            if namespace.vm_sku is None:
+                from azure.cli.core.cloud import AZURE_US_GOV_CLOUD
+                if cmd.cli_ctx.cloud.name != AZURE_US_GOV_CLOUD.name:
+                    namespace.vm_sku = 'Standard_DS1_v2'
+                else:
+                    namespace.vm_sku = 'Standard_D1_v2'
+
+            if namespace.network_api_version is None:
+                namespace.network_api_version = '2020-11-01'
+
+            if namespace.platform_fault_domain_count is None:
+                namespace.platform_fault_domain_count = 1
+
+            if namespace.computer_name_prefix is None:
+                namespace.computer_name_prefix = namespace.vmss_name[:8]
 
         # if namespace.platform_fault_domain_count is None:
         #     raise CLIError("usage error: --platform-fault-domain-count is required in Flexible mode")
@@ -1524,15 +1528,20 @@ def process_vmss_create_namespace(cmd, namespace):
         # validate_edge_zone(cmd, namespace)
         if namespace.application_security_groups is not None:
             validate_asg_names_or_ids(cmd, namespace)
+
         if getattr(namespace, 'attach_os_disk', None) or namespace.image is not None:
             _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=True)
-        if namespace.vnet_name or namespace.subnet:
-            _validate_vm_vmss_create_vnet(cmd, namespace, for_scale_set=True)
 
-        if namespace.load_balancer is not None or namespace.application_gateway is not None:
+        if namespace.vnet_name or namespace.subnet or namespace.image:
+            _validate_vm_vmss_create_vnet(cmd, namespace, for_scale_set=True)
+            _validate_vmss_create_subnet(namespace)
+
+        if namespace.load_balancer or namespace.application_gateway or namespace.image:
             _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace)
-        if namespace.public_ip_address is not None:
+
+        if namespace.public_ip_address or namespace.image:
             _validate_vmss_create_public_ip(cmd, namespace)
+
         if namespace.nsg is not None:
             _validate_vmss_create_nsg(cmd, namespace)
         if namespace.accelerated_networking is not None:
@@ -1555,6 +1564,7 @@ def process_vmss_create_namespace(cmd, namespace):
 
         if namespace.eviction_policy and not namespace.priority:
             raise ArgumentUsageError('usage error: --priority PRIORITY [--eviction-policy POLICY]')
+
         return
 
     # Uniform mode
@@ -1590,10 +1600,10 @@ def process_vmss_create_namespace(cmd, namespace):
         _validate_secrets(namespace.secrets, namespace.os_type)
 
     if not namespace.public_ip_per_vm and namespace.vm_domain_name:
-        raise CLIError('usage error: --vm-domain-name can only be used when --public-ip-per-vm is enabled')
+        raise ArgumentUsageError('usage error: --vm-domain-name can only be used when --public-ip-per-vm is enabled')
 
     if namespace.eviction_policy and not namespace.priority:
-        raise CLIError('usage error: --priority PRIORITY [--eviction-policy POLICY]')
+        raise ArgumentUsageError('usage error: --priority PRIORITY [--eviction-policy POLICY]')
 
     _validate_capacity_reservation_group(cmd, namespace)
 
@@ -1606,6 +1616,7 @@ def validate_vmss_update_namespace(cmd, namespace):  # pylint: disable=unused-ar
     _validate_vmss_update_terminate_notification_related(cmd, namespace)
     _validate_vmss_update_automatic_repairs(cmd, namespace)
     _validate_capacity_reservation_group(cmd, namespace)
+    _validate_vm_vmss_update_ephemeral_placement(cmd, namespace)
 # endregion
 
 
@@ -1632,10 +1643,30 @@ def process_disk_or_snapshot_create_namespace(cmd, namespace):
     if namespace.source:
         usage_error = 'usage error: --source {SNAPSHOT | DISK} | --source VHD_BLOB_URI [--source-storage-account-id ID]'
         try:
-            namespace.source_blob_uri, namespace.source_disk, namespace.source_snapshot = _figure_out_storage_source(
-                cmd.cli_ctx, namespace.resource_group_name, namespace.source)
+            namespace.source_blob_uri, namespace.source_disk, namespace.source_snapshot, source_info = \
+                _figure_out_storage_source(cmd.cli_ctx, namespace.resource_group_name, namespace.source)
             if not namespace.source_blob_uri and namespace.source_storage_account_id:
                 raise CLIError(usage_error)
+            # autodetect copy_start for `az snapshot create`
+            if 'snapshot create' in cmd.name and hasattr(namespace, 'copy_start') and namespace.copy_start is None:
+                if not source_info:
+                    from azure.cli.core.util import parse_proxy_resource_id
+                    result = parse_proxy_resource_id(namespace.source_disk or namespace.source_snapshot)
+                    try:
+                        source_info, _ = _get_disk_or_snapshot_info(cmd.cli_ctx,
+                                                                    result['resource_group'],
+                                                                    result['name'])
+                    except Exception:  # pylint: disable=broad-except
+                        # There's a chance that the source doesn't exist, eg, vmss os disk.
+                        # You can get the id of vmss os disk by
+                        #   `az vmss show -g {} -n {} --instance-id {} --query storageProfile.osDisk.managedDisk.id`
+                        # But `az disk show --ids {}` will return ResourceNotFound error
+                        # We don't autodetect copy_start in this situation
+                        return
+                if not namespace.location:
+                    get_default_location_from_resource_group(cmd, namespace)
+                # if the source location differs from target location, then it's copy_start scenario
+                namespace.copy_start = source_info.location != namespace.location
         except CloudError:
             raise CLIError(usage_error)
 
@@ -1665,13 +1696,13 @@ def process_image_create_namespace(cmd, namespace):
             raise CLIError("'--data-disk-sources' is not allowed when capturing "
                            "images from virtual machines")
     else:
-        namespace.os_blob_uri, namespace.os_disk, namespace.os_snapshot = _figure_out_storage_source(cmd.cli_ctx, namespace.resource_group_name, namespace.source)  # pylint: disable=line-too-long
+        namespace.os_blob_uri, namespace.os_disk, namespace.os_snapshot, _ = _figure_out_storage_source(cmd.cli_ctx, namespace.resource_group_name, namespace.source)  # pylint: disable=line-too-long
         namespace.data_blob_uris = []
         namespace.data_disks = []
         namespace.data_snapshots = []
         if namespace.data_disk_sources:
             for data_disk_source in namespace.data_disk_sources:
-                source_blob_uri, source_disk, source_snapshot = _figure_out_storage_source(
+                source_blob_uri, source_disk, source_snapshot, _ = _figure_out_storage_source(
                     cmd.cli_ctx, namespace.resource_group_name, data_disk_source)
                 if source_blob_uri:
                     namespace.data_blob_uris.append(source_blob_uri)
@@ -1688,6 +1719,7 @@ def _figure_out_storage_source(cli_ctx, resource_group_name, source):
     source_blob_uri = None
     source_disk = None
     source_snapshot = None
+    source_info = None
     if urlparse(source).scheme:  # a uri?
         source_blob_uri = source
     elif '/disks/' in source.lower():
@@ -1695,16 +1727,26 @@ def _figure_out_storage_source(cli_ctx, resource_group_name, source):
     elif '/snapshots/' in source.lower():
         source_snapshot = source
     else:
-        compute_client = _compute_client_factory(cli_ctx)
-        # pylint: disable=no-member
-        try:
-            info = compute_client.snapshots.get(resource_group_name, source)
-            source_snapshot = info.id
-        except ResourceNotFoundError:
-            info = compute_client.disks.get(resource_group_name, source)
-            source_disk = info.id
+        source_info, is_snapshot = _get_disk_or_snapshot_info(cli_ctx, resource_group_name, source)
+        if is_snapshot:
+            source_snapshot = source_info.id
+        else:
+            source_disk = source_info.id
 
-    return (source_blob_uri, source_disk, source_snapshot)
+    return (source_blob_uri, source_disk, source_snapshot, source_info)
+
+
+def _get_disk_or_snapshot_info(cli_ctx, resource_group_name, source):
+    compute_client = _compute_client_factory(cli_ctx)
+    is_snapshot = True
+
+    try:
+        info = compute_client.snapshots.get(resource_group_name, source)
+    except ResourceNotFoundError:
+        is_snapshot = False
+        info = compute_client.disks.get(resource_group_name, source)
+
+    return info, is_snapshot
 
 
 def process_disk_encryption_namespace(cmd, namespace):
@@ -1734,6 +1776,10 @@ def process_remove_identity_namespace(cmd, namespace):
                                                            namespace.resource_group_name,
                                                            'userAssignedIdentities',
                                                            'Microsoft.ManagedIdentity')
+
+
+def process_set_applications_namespace(cmd, namespace):  # pylint: disable=unused-argument
+    _validate_vm_vmss_set_applications(cmd, namespace)
 
 
 def process_gallery_image_version_namespace(cmd, namespace):
@@ -1864,18 +1910,21 @@ def _validate_vmss_terminate_notification(cmd, namespace):  # pylint: disable=un
 
 
 def _validate_vmss_create_automatic_repairs(cmd, namespace):  # pylint: disable=unused-argument
-    if namespace.automatic_repairs_grace_period is not None:
+    if namespace.automatic_repairs_grace_period is not None or namespace.automatic_repairs_action is not None:
         if namespace.load_balancer is None or namespace.health_probe is None:
-            raise CLIError("usage error: --load-balancer and --health-probe are required "
-                           "when creating vmss with automatic repairs")
+            raise ArgumentUsageError("usage error: --load-balancer and --health-probe are required "
+                                     "when creating vmss with automatic repairs")
     _validate_vmss_automatic_repairs(cmd, namespace)
 
 
 def _validate_vmss_update_automatic_repairs(cmd, namespace):  # pylint: disable=unused-argument
-    if namespace.enable_automatic_repairs is False and namespace.automatic_repairs_grace_period is not None:
-        raise CLIError("usage error: please enable --enable-automatic-repairs")
-    if namespace.enable_automatic_repairs is True and namespace.automatic_repairs_grace_period is None:
-        raise CLIError("usage error: please set --automatic-repairs-grace-period")
+    if namespace.enable_automatic_repairs is False and \
+            (namespace.automatic_repairs_grace_period is not None or namespace.automatic_repairs_action is not None):
+        raise ArgumentUsageError("usage error: please enable --enable-automatic-repairs")
+    if namespace.enable_automatic_repairs is True and namespace.automatic_repairs_grace_period is None\
+            and namespace.automatic_repairs_action is None:
+        raise ArgumentUsageError("usage error: please set --automatic-repairs-grace-period or"
+                                 " --automatic-repairs-action")
     _validate_vmss_automatic_repairs(cmd, namespace)
 
 
@@ -1950,10 +1999,7 @@ def validate_edge_zone(cmd, namespace):  # pylint: disable=unused-argument
 
 def _validate_capacity_reservation_group(cmd, namespace):
 
-    if namespace.capacity_reservation_group == 'None':
-        namespace.capacity_reservation_group = ''
-
-    elif namespace.capacity_reservation_group:
+    if namespace.capacity_reservation_group and namespace.capacity_reservation_group != 'None':
 
         from msrestazure.tools import is_valid_resource_id, resource_id
         from azure.cli.core.commands.client_factory import get_subscription_id
@@ -1965,3 +2011,25 @@ def _validate_capacity_reservation_group(cmd, namespace):
                 type='CapacityReservationGroups',
                 name=namespace.capacity_reservation_group
             )
+
+
+def _validate_vm_vmss_create_ephemeral_placement(namespace):
+    ephemeral_os_disk = getattr(namespace, 'ephemeral_os_disk', None)
+    ephemeral_os_disk_placement = getattr(namespace, 'ephemeral_os_disk_placement', None)
+    if ephemeral_os_disk_placement and not ephemeral_os_disk:
+        raise ArgumentUsageError('usage error: --ephemeral-os-disk-placement is only configurable when '
+                                 '--ephemeral-os-disk is specified.')
+
+
+def _validate_vm_vmss_update_ephemeral_placement(cmd, namespace):  # pylint: disable=unused-argument
+    size = getattr(namespace, 'size', None)
+    vm_sku = getattr(namespace, 'vm_sku', None)
+    ephemeral_os_disk_placement = getattr(namespace, 'ephemeral_os_disk_placement', None)
+    source = getattr(namespace, 'command').split()[0]
+    if ephemeral_os_disk_placement:
+        if source == 'vm' and not size:
+            raise ArgumentUsageError('usage error: --ephemeral-os-disk-placement is only configurable when '
+                                     '--size is specified.')
+        if source == 'vmss' and not vm_sku:
+            raise ArgumentUsageError('usage error: --ephemeral-os-disk-placement is only configurable when '
+                                     '--vm-sku is specified.')

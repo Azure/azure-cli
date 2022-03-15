@@ -9,10 +9,9 @@ from collections import OrderedDict
 from azure.cli.core.profiles import PROFILE_TYPE
 from azure.cli.core.commands import CliCommandType
 
-from ._client_factory import (_auth_client_factory, _graph_client_factory,
-                              _msi_user_identities_operations, _msi_operations_operations)
+from ._client_factory import _auth_client_factory, _graph_client_factory
 
-from ._validators import process_msi_namespace, process_assignment_namespace, validate_change_password
+from ._validators import process_assignment_namespace, validate_change_password
 
 
 def transform_definition_list(result):
@@ -111,11 +110,6 @@ def load_command_table(self, _):
         client_factory=get_graph_client_signed_in_users
     )
 
-    identity_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.msi.operations#UserAssignedIdentitiesOperations.{}',
-        client_factory=_msi_user_identities_operations
-    )
-
     sp_sdk = CliCommandType(
         operations_tmpl='azure.graphrbac.operations.service_principals_operations#ServicePrincipalsOperations.{}',
         client_factory=get_graph_client_service_principals
@@ -209,10 +203,3 @@ def load_command_table(self, _):
         g.command('add', 'add_member')
         g.command('remove', 'remove_member')
         g.custom_command('check', 'check_group_membership', client_factory=get_graph_client_groups)
-
-    with self.command_group('identity', identity_sdk, min_api='2017-12-01') as g:
-        g.command('create', 'create_or_update', validator=process_msi_namespace)
-        g.show_command('show', 'get')
-        g.command('delete', 'delete')
-        g.custom_command('list', 'list_user_assigned_identities')
-        g.command('list-operations', 'list', operations_tmpl='azure.mgmt.msi.operations.operations#Operations.{}', client_factory=_msi_operations_operations)

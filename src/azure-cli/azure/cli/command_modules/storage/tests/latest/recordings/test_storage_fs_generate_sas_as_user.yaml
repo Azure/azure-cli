@@ -15,21 +15,21 @@ interactions:
       ParameterSetName:
       - -n -g --query -o
       User-Agent:
-      - AZURECLI/2.26.0 azsdk-python-azure-mgmt-storage/18.0.0 Python/3.7.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.33.1 azsdk-python-azure-mgmt-storage/19.1.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2021-04-01&$expand=kerb
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2021-08-01&$expand=kerb
   response:
     body:
-      string: '{"keys":[{"creationTime":"2021-07-08T07:19:50.9227020Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2021-07-08T07:19:50.9227020Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+      string: '{"keys":[{"creationTime":"2022-02-23T03:31:35.1940722Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2022-02-23T03:31:35.1940722Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '380'
+      - '260'
       content-type:
       - application/json
       date:
-      - Thu, 08 Jul 2021 07:20:13 GMT
+      - Wed, 23 Feb 2022 03:31:56 GMT
       expires:
       - '-1'
       pragma:
@@ -38,14 +38,10 @@ interactions:
       - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11999'
+      - '11997'
     status:
       code: 200
       message: OK
@@ -65,9 +61,9 @@ interactions:
       ParameterSetName:
       - -n --account-name --account-key
       User-Agent:
-      - AZURECLI/2.26.0 azsdk-python-storage-dfs/12.3.0 Python/3.7.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.33.1 azsdk-python-storage-dfs/12.3.1 Python/3.7.9 (Windows-10-10.0.22000-SP0)
       x-ms-date:
-      - Thu, 08 Jul 2021 07:20:13 GMT
+      - Wed, 23 Feb 2022 03:31:56 GMT
       x-ms-version:
       - '2020-02-10'
     method: PUT
@@ -79,11 +75,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Thu, 08 Jul 2021 07:20:16 GMT
+      - Wed, 23 Feb 2022 03:31:57 GMT
       etag:
-      - '"0x8D941E0D5FBB7F6"'
+      - '"0x8D9F67D0C05D57E"'
       last-modified:
-      - Thu, 08 Jul 2021 07:20:16 GMT
+      - Wed, 23 Feb 2022 03:31:58 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
@@ -94,7 +90,7 @@ interactions:
 - request:
     body: '<?xml version=''1.0'' encoding=''utf-8''?>
 
-      <KeyInfo><Start>2021-07-08T07:20:16Z</Start><Expiry>2021-07-08T08:20:00Z</Expiry></KeyInfo>'
+      <KeyInfo><Start>2022-02-23T03:31:58Z</Start><Expiry>2022-02-23T04:31:00Z</Expiry></KeyInfo>'
     headers:
       Accept:
       - application/xml
@@ -111,21 +107,21 @@ interactions:
       ParameterSetName:
       - --account-name -n --expiry --permissions --https-only --as-user --auth-mode
       User-Agent:
-      - AZURECLI/2.26.0 azsdk-python-storage-blob/12.6.0b1 Python/3.7.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.33.1 azsdk-python-storage-blob/12.6.0b1 Python/3.7.9 (Windows-10-10.0.22000-SP0)
       x-ms-date:
-      - Thu, 08 Jul 2021 07:20:16 GMT
+      - Wed, 23 Feb 2022 03:31:58 GMT
       x-ms-version:
       - '2020-02-10'
     method: POST
     uri: https://clitest000002.blob.core.windows.net/?restype=service&comp=userdelegationkey
   response:
     body:
-      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><UserDelegationKey><SignedOid>21cd756e-e290-4a26-9547-93e8cc1a8923</SignedOid><SignedTid>54826b22-38d6-4fb2-bad9-b7b93a3e9c5a</SignedTid><SignedStart>2021-07-08T07:20:16Z</SignedStart><SignedExpiry>2021-07-08T08:20:00Z</SignedExpiry><SignedService>b</SignedService><SignedVersion>2020-02-10</SignedVersion><Value>3yDjMdkQugm3vhjT+wbdf5G2JFLJd2K2TRXK4eqh7wc=</Value></UserDelegationKey>"
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><UserDelegationKey><SignedOid>3707fb2f-ac10-4591-a04f-8b0d786ea37d</SignedOid><SignedTid>54826b22-38d6-4fb2-bad9-b7b93a3e9c5a</SignedTid><SignedStart>2022-02-23T03:31:58Z</SignedStart><SignedExpiry>2022-02-23T04:31:00Z</SignedExpiry><SignedService>b</SignedService><SignedVersion>2020-02-10</SignedVersion><Value>deD8BQ3+Ljdgi+q6TVsk8wDLu6eNB94fWYRnURvuETQ=</Value></UserDelegationKey>"
     headers:
       content-type:
       - application/xml
       date:
-      - Thu, 08 Jul 2021 07:20:19 GMT
+      - Wed, 23 Feb 2022 03:32:01 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:

@@ -126,6 +126,11 @@ class MetricAlertConditionValidator(MetricAlertConditionListener):
         dvalues = ctx.getText().strip().split(' ')
         self.parameters['dimensions'][self._dimension_index]['values'] = [x for x in dvalues if x not in ['', 'or']]
 
+    # Exit a parse tree produced by MetricAlertConditionParser#option.
+    def exitOption(self, ctx):
+        if ctx.getText().strip().lower() == 'skipmetricvalidation':
+            self.parameters['skip_metric_validation'] = True
+
     def result(self):
         from azure.mgmt.monitor.models import MetricCriteria, MetricDimension, DynamicMetricCriteria, \
             DynamicThresholdFailingPeriods

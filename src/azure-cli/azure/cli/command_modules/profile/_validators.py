@@ -12,7 +12,7 @@ logger = get_logger(__name__)
 def validate_tenant(cmd, namespace):
     """
     Make sure tenant is a GUID. If domain name is provided, resolve to GUID.
-    https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-protocols-oidc#fetch-the-openid-connect-metadata-document
+    https://docs.microsoft.com/azure/active-directory/develop/v2-protocols-oidc#fetch-the-openid-connect-metadata-document
     """
     from azure.cli.core.util import is_guid
     if namespace.tenant is not None and not is_guid(namespace.tenant):

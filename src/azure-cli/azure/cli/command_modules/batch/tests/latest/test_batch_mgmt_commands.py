@@ -7,8 +7,8 @@ import tempfile
 import time
 
 from azure.cli.testsdk import (
-    ScenarioTest, ResourceGroupPreparer, LiveScenarioTest)
-from azure_devtools.scenario_tests import AllowLargeResponse
+    ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, LiveScenarioTest)
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.core.profiles import ResourceType, get_sdk
 
 from .recording_processors import BatchAccountKeyReplacer, StorageSASReplacer
@@ -24,13 +24,13 @@ class BatchMgmtScenarioTests(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location='eastus')
-    def test_batch_general_arm_cmd(self, resource_group):
-        storage_name = self.create_random_name(prefix='clibatchteststor', length=24)
+    @StorageAccountPreparer(location='eastus', name_prefix='clibatchteststor')
+    def test_batch_general_arm_cmd(self, resource_group, storage_account):
         account_name = self.create_random_name(prefix='clibatchtestacct', length=24)
 
         self.kwargs.update({
             'rg': resource_group,
-            'str_n': storage_name,
+            'str_n': storage_account,
             'loc': 'eastus',
             'acc': account_name,
             'ip': resource_group + 'ip',
@@ -38,11 +38,7 @@ class BatchMgmtScenarioTests(ScenarioTest):
         })
 
         # test create storage account with default set
-        result = self.cmd('storage account create -g {rg} -n {str_n} -l {loc} --sku Standard_LRS').assert_with_checks([
-            self.check('name', '{str_n}'),
-            self.check('location', '{loc}'),
-            self.check('resourceGroup', '{rg}')])
-        storage_id = result.get_output_in_json()['id']
+        storage_id = f"/subscriptions/{self.get_subscription_id()}/resourceGroups/{resource_group}/providers/Microsoft.Storage/storageAccounts/{storage_account}"
 
         # test create account with default set
         self.cmd('batch account create -g {rg} -n {acc} -l {loc}').assert_with_checks([
@@ -116,15 +112,15 @@ class BatchMgmtApplicationScenarioTests(ScenarioTest):
         ])
 
     @ResourceGroupPreparer(location='eastus')
-    def test_batch_application_cmd(self, resource_group):
-        storage_name = self.create_random_name(prefix='clibatchteststor', length=24)
+    @StorageAccountPreparer(location='eastus', name_prefix='clibatchteststor')
+    def test_batch_application_cmd(self, resource_group, storage_account):
         account_name = self.create_random_name(prefix='clibatchtestacct', length=24)
 
         _, package_file_name = tempfile.mkstemp()
 
         self.kwargs.update({
             'rg': resource_group,
-            'str_n': storage_name,
+            'str_n': storage_account,
             'loc': 'eastus',
             'acc': account_name,
             'app': 'testapp',
@@ -133,11 +129,6 @@ class BatchMgmtApplicationScenarioTests(ScenarioTest):
         })
 
         # test create account with default set
-        self.cmd('storage account create -g {rg} -n {str_n} -l {loc} --sku Standard_LRS').assert_with_checks([
-            self.check('name', '{str_n}'),
-            self.check('location', '{loc}'),
-            self.check('resourceGroup', '{rg}')])
-
         self.cmd('batch account create -g {rg} -n {acc} -l {loc} --storage-account {str_n}').assert_with_checks([
             self.check('name', '{acc}'),
             self.check('location', '{loc}'),
@@ -181,7 +172,6 @@ class BatchMgmtApplicationScenarioTests(ScenarioTest):
                  '--version {app_p} --yes')
         self.cmd('batch application delete -g {rg} -n {acc} --application-name {app} --yes')
         self.cmd('batch application list -g {rg} -n {acc}').assert_with_checks(self.is_empty())
-        self.cmd('storage account delete -g {rg} -n {str_n} --yes')
 
 
 # These tests have requirements which cannot be met by CLI team so reserved for live testing.

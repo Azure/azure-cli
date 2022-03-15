@@ -6,6 +6,7 @@
 from base64 import b64encode
 from knack.util import CLIError
 from knack.log import get_logger
+from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
 
 logger = get_logger(__name__)
 
@@ -77,20 +78,7 @@ def validate_subnet(ns):
     if not is_valid_resource_id(ns.subnet) and ((ns.vnet and not ns.subnet) or (ns.subnet and not ns.vnet)):
         raise CLIError('usage error: --vnet NAME --subnet NAME | --vnet ID --subnet NAME | --subnet ID')
 
-
-def validate_network_profile(cmd, ns):
-    from azure.cli.core.commands.client_factory import get_subscription_id
-    from msrestazure.tools import is_valid_resource_id, resource_id
-
-    if ns.network_profile and ns.ip_address:
-        raise CLIError('Can not use "--network-profile" with IP address type "Public".')
-    if ns.network_profile and ns.dns_name_label:
-        raise CLIError('Can not use "--network-profile" with "--dns-name-label".')
-    if ns.network_profile:
-        if not is_valid_resource_id(ns.network_profile):
-            ns.network_profile = resource_id(
-                subscription=get_subscription_id(cmd.cli_ctx),
-                resource_group=ns.resource_group_name,
-                namespace='Microsoft.Network', type='networkProfiles',
-                name=ns.network_profile
-            )
+    if (ns.subnet or ns.vnet) and ns.ip_address == "Public":
+        raise MutuallyExclusiveArgumentError('Can not use "--subnet" or "--vnet" with IP address type "Public".')
+    if (ns.subnet or ns.vnet) and ns.dns_name_label:
+        raise MutuallyExclusiveArgumentError('Can not use "--subnet" or "--vnet" with "--dns-name-label".')

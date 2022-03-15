@@ -5,9 +5,9 @@
 import os
 import tempfile
 import unittest
-from unittest.mock import MagicMock
 
-from azure.cli.testsdk import ScenarioTest, LocalContextScenarioTest
+from azure.cli.testsdk import ScenarioTest
+
 from knack.util import CLIError
 
 
@@ -32,6 +32,8 @@ class ConfigTest(ScenarioTest):
         local_test_args = {"source": os.path.join(tempdir, '.azure', 'config'), "flag": " --local"}
 
         for args in (global_test_args, local_test_args):
+            print("Testing for {}".format(args))
+
             test_option1_expected = {'name': 'test_option1', 'source': args["source"], 'value': 'test_value1'}
             test_option21_expected = {'name': 'test_option21', 'source': args["source"], 'value': 'test_value21'}
             test_option22_expected = {'name': 'test_option22', 'source': args["source"], 'value': 'test_value22'}

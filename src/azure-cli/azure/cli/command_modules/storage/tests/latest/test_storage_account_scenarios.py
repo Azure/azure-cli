@@ -8,13 +8,13 @@ import unittest
 
 from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, JMESPathCheck, ResourceGroupPreparer,
                                StorageAccountPreparer, api_version_constraint, live_only, LiveScenarioTest,
-                               record_only)
+                               record_only, KeyVaultPreparer)
 from azure.cli.testsdk.decorators import serial_test
 from azure.cli.core.profiles import ResourceType
 from ..storage_test_util import StorageScenarioMixin
 from knack.util import CLIError
 from datetime import datetime, timedelta
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 
 @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2016-12-01')
@@ -154,6 +154,38 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.assertIn('identity', result)
         self.assertTrue(result['identity']['principalId'])
         self.assertTrue(result['identity']['tenantId'])
+
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2021-06-01')
+    @ResourceGroupPreparer(location='eastus2euap')
+    def test_create_storage_account_with_public_network_access(self, resource_group):
+        name = self.create_random_name(prefix='cli', length=24)
+        cmd = 'az storage account create -n {} -g {}'.format(name, resource_group)
+        result = self.cmd(cmd).get_output_in_json()
+
+        self.assertIn('publicNetworkAccess', result)
+        self.assertTrue(result['publicNetworkAccess'] is None)
+
+        name = self.create_random_name(prefix='cli', length=24)
+        cmd = 'az storage account create -n {} -g {} --public-network-access Disabled'.format(name, resource_group)
+        result = self.cmd(cmd).get_output_in_json()
+
+        self.assertIn('publicNetworkAccess', result)
+        self.assertTrue(result['publicNetworkAccess'] == 'Disabled')
+
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2021-06-01')
+    @ResourceGroupPreparer(location='eastus2euap')
+    def test_update_storage_account_with_public_network_access(self, resource_group):
+        name = self.create_random_name(prefix='cli', length=24)
+        create_cmd = 'az storage account create -n {} -g {} --public-network-access Enabled'.format(name, resource_group)
+        result = self.cmd(create_cmd).get_output_in_json()
+        self.assertIn('publicNetworkAccess', result)
+        self.assertTrue(result['publicNetworkAccess'] == 'Enabled')
+
+        update_cmd = 'az storage account update -n {} -g {} --public-network-access Disabled'.format(name, resource_group)
+        result = self.cmd(update_cmd).get_output_in_json()
+
+        self.assertIn('publicNetworkAccess', result)
+        self.assertTrue(result['publicNetworkAccess'] == 'Disabled')
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
@@ -330,7 +362,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         name3 = self.create_random_name(prefix='cli', length=24)
         name4 = self.create_random_name(prefix='cli', length=24)
         self.cmd('az storage account create -n {} -g {}'.format(name1, resource_group),
-                 checks=[JMESPathCheck('minimumTlsVersion', None)])
+                 checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_0')])
 
         self.cmd('az storage account create -n {} -g {} --min-tls-version TLS1_0'.format(name2, resource_group),
                  checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_0')])
@@ -346,16 +378,16 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
     @StorageAccountPreparer(name_prefix='tls')
     def test_storage_update_with_min_tls(self, storage_account, resource_group):
         self.cmd('az storage account show -n {} -g {}'.format(storage_account, resource_group),
-                 checks=[JMESPathCheck('minimumTlsVersion', None)])
-
-        self.cmd('az storage account update -n {} -g {} --min-tls-version TLS1_0'.format(
-            storage_account, resource_group), checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_0')])
+                 checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_0')])
 
         self.cmd('az storage account update -n {} -g {} --min-tls-version TLS1_1'.format(
             storage_account, resource_group), checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_1')])
 
         self.cmd('az storage account update -n {} -g {} --min-tls-version TLS1_2'.format(
             storage_account, resource_group), checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_2')])
+
+        self.cmd('az storage account update -n {} -g {} --min-tls-version TLS1_0'.format(
+            storage_account, resource_group), checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_0')])
 
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
     @ResourceGroupPreparer(location='eastus', name_prefix='cli_storage_account_routing')
@@ -505,6 +537,79 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
                  '--subnet {subnet} --default-action Deny --hns --sku Standard_LRS ',
                  checks=[JMESPathCheck('enableNfsV3', True)])
 
+    @AllowLargeResponse()
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2021-06-01')
+    @ResourceGroupPreparer(location='centraluseuap', name_prefix='cli_storage_account')
+    def test_storage_account_with_alw(self, resource_group):
+        self.kwargs = {
+            'name1': self.create_random_name(prefix='sa1', length=24),
+            'name2': self.create_random_name(prefix='sa2', length=24),
+            'rg': resource_group
+        }
+
+        # test success case during create
+        result = self.cmd('storage account create -n {name1} -g {rg} --enable-alw --immutability-period 10 '
+                 '--immutability-state Disabled --allow-append').get_output_in_json()
+        self.assertIn('immutableStorageWithVersioning', result)
+        self.assertEqual(result['immutableStorageWithVersioning']['enabled'], True)
+        self.assertEqual(result['immutableStorageWithVersioning']['immutabilityPolicy']['allowProtectedAppendWrites'], True)
+        self.assertEqual(result['immutableStorageWithVersioning']['immutabilityPolicy']['immutabilityPeriodSinceCreationInDays'], 10)
+        self.assertEqual(result['immutableStorageWithVersioning']['immutabilityPolicy']['state'], 'Disabled')
+
+        # test failure cases during create
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        from azure.core.exceptions import HttpResponseError
+        with self.assertRaises(InvalidArgumentValueError):
+            self.cmd('storage account create -n {name2} -g {rg} --enable-alw false --immutability-period 10 '
+                              '--immutability-state Disabled --allow-append')
+
+        # missing required parameter --immutability-state
+        with self.assertRaises(HttpResponseError):
+            self.cmd('storage account create -n {name2} -g {rg} --enable-alw --immutability-period 10  --allow-append')
+
+        # cannot have create policy with Locked state
+        with self.assertRaises(HttpResponseError):
+            self.cmd('storage account create -n {name2} -g {rg} --enable-alw --immutability-period 10 '
+                              '--immutability-state Locked --allow-append')
+
+        # test success case during update
+        result = self.cmd('storage account update -n {name1} --immutability-period 15 '
+                          '--immutability-state Unlocked --allow-append false').get_output_in_json()
+        self.assertEqual(result['immutableStorageWithVersioning']['immutabilityPolicy']['allowProtectedAppendWrites'],
+                         False)
+        self.assertEqual(
+            result['immutableStorageWithVersioning']['immutabilityPolicy']['immutabilityPeriodSinceCreationInDays'], 15)
+        self.assertEqual(result['immutableStorageWithVersioning']['immutabilityPolicy']['state'], 'Unlocked')
+
+        # test failure cases during update
+        self.cmd('storage account create -n {name2} -g {rg} --enable-alw false')
+
+        # cannot add policy when alw is disabled
+        with self.assertRaises(HttpResponseError):
+            self.cmd('storage account update -n {name2} --immutability-period 10 '
+                     '--immutability-state Disabled --allow-append')
+
+        self.cmd('storage account update -n {name1} --immutability-state Disabled')
+
+        # cannot directly change the state to Locked from Disabled
+        with self.assertRaises(HttpResponseError):
+            self.cmd('storage account update -n {name1} --immutability-state Locked')
+
+        self.cmd('storage account update -n {name1} --immutability-state UnLocked')
+        self.cmd('storage account update -n {name1} --immutability-state Locked')
+
+        # cannot reduce immutability-period when locked
+        with self.assertRaises(HttpResponseError):
+            self.cmd('storage account update -n {name1} --immutability-period 10')
+
+        # cannot unlock a locked policy
+        with self.assertRaises(HttpResponseError):
+            self.cmd('storage account update -n {name1} --immutability-state UnLocked')
+
+        # cannot changed allowProtectedAppendWrites for locked policy
+        with self.assertRaises(HttpResponseError):
+            self.cmd('storage account update -n {name1} --allow-append')
+
     def test_show_usage(self):
         self.cmd('storage account show-usage -l westus', checks=JMESPathCheck('name.value', 'StorageAccounts'))
 
@@ -553,14 +658,14 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         ])
 
         # Table service
-        with self.assertRaisesRegexp(CLIError, "incorrect usage: for table service, the supported version for logging is `1.0`"):
+        with self.assertRaisesRegex(CLIError, "incorrect usage: for table service, the supported version for logging is `1.0`"):
             self.cmd('storage logging update --services t --log r --retention 1 '
                      '--version 2.0 --connection-string {}'.format(connection_string))
 
         # Set version to 1.0
         self.cmd('storage logging update --services t --log r --retention 1 --version 1.0 --connection-string {} '
                  .format(connection_string))
-        time.sleep(10)
+        time.sleep(60)
         self.cmd('storage logging show --connection-string {}'.format(connection_string), checks=[
             JMESPathCheck('table.version', '1.0'),
             JMESPathCheck('table.delete', False),
@@ -593,7 +698,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
 
         blob_connection_string = self.cmd(
             'storage account show-connection-string -g {} -n {} -otsv'.format(resource_group, blob_storage)).output
-        with self.assertRaisesRegexp(CLIError, "Your storage account doesn't support logging"):
+        with self.assertRaisesRegex(CLIError, "Your storage account doesn't support logging"):
             self.cmd('storage logging show --services q --connection-string {}'.format(blob_connection_string))
 
         # PremiumStorage doesn't support logging for some services
@@ -603,7 +708,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
 
         premium_connection_string = self.cmd(
             'storage account show-connection-string -g {} -n {} -otsv'.format(resource_group, premium_storage)).output
-        with self.assertRaisesRegexp(CLIError, "Your storage account doesn't support logging"):
+        with self.assertRaisesRegex(CLIError, "Your storage account doesn't support logging"):
             self.cmd('storage logging show --services q --connection-string {}'.format(premium_connection_string))
 
     @ResourceGroupPreparer()
@@ -674,7 +779,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
-    def test_create_account_sas(self, storage_account_info):
+    def test_create_account_sas(self, resource_group, storage_account_info):
         from azure.cli.core.azclierror import RequiredArgumentMissingError
         with self.assertRaises(RequiredArgumentMissingError):
             self.cmd('storage account generate-sas --resource-types o --services b --expiry 2000-01-01 '
@@ -697,13 +802,14 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
 
     @ResourceGroupPreparer(location='southcentralus')
     @StorageAccountPreparer(location='southcentralus')
-    def test_customer_managed_key(self, resource_group, storage_account):
-        self.kwargs = {'rg': resource_group, 'sa': storage_account, 'vt': self.create_random_name('clitest', 24)}
+    @KeyVaultPreparer(location='southcentralus')
+    def test_customer_managed_key(self, resource_group, storage_account, key_vault):
+        self.kwargs = {'rg': resource_group, 'sa': storage_account, 'vt': key_vault}
 
-        self.kwargs['vid'] = self.cmd('az keyvault create -n {vt} -g {rg} '
-                                      '-otsv --query id').output.rstrip('\n')
-        self.kwargs['vtn'] = self.cmd('az keyvault show -n {vt} -g {rg} '
-                                      '-otsv --query properties.vaultUri').output.strip('\n')
+        keyvault_result = self.cmd('az keyvault show -n {vt} -g {rg}').get_output_in_json()
+        self.kwargs['vid'] = keyvault_result['id']
+        self.kwargs['vtn'] = keyvault_result['properties']['vaultUri']
+
         self.kwargs['ver'] = self.cmd("az keyvault key create -n testkey -p software --vault-name {vt} "
                                       "-otsv --query 'key.kid'").output.rsplit('/', 1)[1].rstrip('\n')
         self.kwargs['oid'] = self.cmd("az storage account update -n {sa} -g {rg} --assign-identity "
@@ -765,14 +871,15 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.assertEqual(result['encryption']['keySource'], "Microsoft.Storage")
 
     @ResourceGroupPreparer(location='eastus2euap')
-    def test_user_assigned_identity(self, resource_group):
+    @KeyVaultPreparer(location='eastus2euap')
+    def test_user_assigned_identity(self, resource_group, key_vault):
         self.kwargs = {
             'rg': resource_group,
             'sa1': self.create_random_name(prefix='sa1', length=24),
             'sa2': self.create_random_name(prefix='sa2', length=24),
             'sa3': self.create_random_name(prefix='sa3', length=24),
             'identity': self.create_random_name(prefix='id', length=24),
-            'vt': self.create_random_name('clitest', 24)
+            'vt': key_vault
         }
         # Prepare managed identity
         identity = self.cmd('az identity create -n {identity} -g {rg}').get_output_in_json()
@@ -780,7 +887,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.kwargs['oid'] = identity['principalId']
 
         # Prepare key vault
-        keyvault = self.cmd('az keyvault create -n {vt} -g {rg} ').get_output_in_json()
+        keyvault = self.cmd('az keyvault show -n {vt} -g {rg} ').get_output_in_json()
         self.kwargs['vid'] = keyvault['id']
         self.kwargs['vtn'] = keyvault['properties']['vaultUri']
 
@@ -1351,6 +1458,60 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.assertEqual(activeDirectoryProperties['forestName'], self.kwargs['forest_name'])
         self.assertEqual(activeDirectoryProperties['netBiosDomainName'], self.kwargs['net_bios_domain_name'])
 
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2021-08-01')
+    @ResourceGroupPreparer()
+    def test_storage_account_with_files_adds_sam_account_name(self, resource_group):
+        name = self.create_random_name(prefix='cli', length=24)
+        self.kwargs.update({
+            'rg': resource_group,
+            'sc': name,
+            'domain_name': 'mydomain.com',
+            'net_bios_domain_name': 'mydomain.com',
+            'forest_name': 'mydomain.com',
+            'domain_guid': '12345678-1234-1234-1234-123456789012',
+            'domain_sid': 'S-1-5-21-1234567890-1234567890-1234567890',
+            'azure_storage_sid': 'S-1-5-21-1234567890-1234567890-1234567890-1234',
+            'sam_account_name': self.create_random_name(prefix='samaccount', length=48)
+        })
+        create_cmd = """storage account create -n {sc} -g {rg} -l eastus2euap --enable-files-adds --domain-name
+        {domain_name} --net-bios-domain-name {net_bios_domain_name} --forest-name {forest_name} --domain-guid
+        {domain_guid} --domain-sid {domain_sid} --azure-storage-sid {azure_storage_sid} 
+        --sam-account-name {sam_account_name} --account-type User"""
+        result = self.cmd(create_cmd).get_output_in_json()
+
+        self.assertIn('azureFilesIdentityBasedAuthentication', result)
+        self.assertEqual(result['azureFilesIdentityBasedAuthentication']['directoryServiceOptions'], 'AD')
+        activeDirectoryProperties = result['azureFilesIdentityBasedAuthentication']['activeDirectoryProperties']
+        self.assertEqual(activeDirectoryProperties['samAccountName'], self.kwargs['sam_account_name'])
+        self.assertEqual(activeDirectoryProperties['accountType'], "User")
+        self.assertEqual(activeDirectoryProperties['azureStorageSid'], self.kwargs['azure_storage_sid'])
+        self.assertEqual(activeDirectoryProperties['domainGuid'], self.kwargs['domain_guid'])
+        self.assertEqual(activeDirectoryProperties['domainName'], self.kwargs['domain_name'])
+        self.assertEqual(activeDirectoryProperties['domainSid'], self.kwargs['domain_sid'])
+        self.assertEqual(activeDirectoryProperties['forestName'], self.kwargs['forest_name'])
+        self.assertEqual(activeDirectoryProperties['netBiosDomainName'], self.kwargs['net_bios_domain_name'])
+
+        self.kwargs.update({
+            'sam_account_name': self.create_random_name(prefix='newsamaccount', length=48)
+        })
+        update_cmd = """storage account update -n {sc} -g {rg} --enable-files-adds --domain-name {domain_name}
+        --net-bios-domain-name {net_bios_domain_name} --forest-name {forest_name} --domain-guid {domain_guid}
+        --domain-sid {domain_sid} --azure-storage-sid {azure_storage_sid} 
+        --sam-account-name {sam_account_name} --account-type Computer"""
+        result = self.cmd(update_cmd).get_output_in_json()
+
+        self.assertIn('azureFilesIdentityBasedAuthentication', result)
+        self.assertEqual(result['azureFilesIdentityBasedAuthentication']['directoryServiceOptions'], 'AD')
+        activeDirectoryProperties = result['azureFilesIdentityBasedAuthentication']['activeDirectoryProperties']
+        self.assertEqual(activeDirectoryProperties['samAccountName'], self.kwargs['sam_account_name'])
+        self.assertEqual(activeDirectoryProperties['accountType'], "Computer")
+        self.assertEqual(activeDirectoryProperties['azureStorageSid'], self.kwargs['azure_storage_sid'])
+        self.assertEqual(activeDirectoryProperties['domainGuid'], self.kwargs['domain_guid'])
+        self.assertEqual(activeDirectoryProperties['domainName'], self.kwargs['domain_name'])
+        self.assertEqual(activeDirectoryProperties['domainSid'], self.kwargs['domain_sid'])
+        self.assertEqual(activeDirectoryProperties['forestName'], self.kwargs['forest_name'])
+        self.assertEqual(activeDirectoryProperties['netBiosDomainName'], self.kwargs['net_bios_domain_name'])
+
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2020-08-01-preview')
     @ResourceGroupPreparer(location='westus', name_prefix='cliedgezone')
     def test_storage_account_extended_location(self, resource_group):
@@ -1582,7 +1743,7 @@ class BlobServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
         self.cmd('storage account blob-service-properties show -n {sa} -g {rg}', checks=[
             self.check('defaultServiceVersion', None)])
 
-        with self.assertRaisesRegexp(InvalidArgumentValueError, 'Valid example: 2008-10-27'):
+        with self.assertRaisesRegex(InvalidArgumentValueError, 'Valid example: 2008-10-27'):
             self.cmd('storage account blob-service-properties update --default-service-version 2018 -n {sa} -g {rg}')
 
         self.cmd('storage account blob-service-properties update --default-service-version 2018-11-09 -n {sa} -g {rg}',
@@ -1650,7 +1811,7 @@ class FileServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
         with self.assertRaises(ValidationError):
             self.cmd('{cmd} update --enable-delete-retention true -n {sa} -g {rg}')
 
-        with self.assertRaisesRegexp(ValidationError, "Delete Retention Policy hasn't been enabled,"):
+        with self.assertRaisesRegex(ValidationError, "Delete Retention Policy hasn't been enabled,"):
             self.cmd('{cmd} update --delete-retention-days 1 -n {sa} -g {rg} -n {sa} -g {rg}')
 
         with self.assertRaises(ValidationError):
@@ -1680,7 +1841,7 @@ class FileServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
             'cmd': 'storage account file-service-properties'
         })
 
-        with self.assertRaisesRegexp(ResourceExistsError, "SMB Multichannel is not supported for the account."):
+        with self.assertRaisesRegex(ResourceExistsError, "SMB Multichannel is not supported for the account."):
             self.cmd('{cmd} update --mc -n {sa2} -g {rg}')
 
         self.cmd('{cmd} show -n {sa} -g {rg}').assert_with_checks(
@@ -1803,13 +1964,13 @@ class StorageAccountPrivateEndpointScenarioTest(ScenarioTest):
 
         self.cmd('storage account private-endpoint-connection show --account-name {sa} -g {rg} --name {sa_pec_name}',
                  checks=self.check('id', '{sa_pec_id}'))
-        with self.assertRaisesRegexp(CLIError, 'Your connection is already approved. No need to approve again.'):
+        with self.assertRaisesRegex(CLIError, 'Your connection is already approved. No need to approve again.'):
             self.cmd('storage account private-endpoint-connection approve --account-name {sa} -g {rg} --name {sa_pec_name}')
 
         self.cmd('storage account private-endpoint-connection reject --account-name {sa} -g {rg} --name {sa_pec_name}',
                  checks=[self.check('privateLinkServiceConnectionState.status', 'Rejected')])
 
-        with self.assertRaisesRegexp(CLIError, 'You cannot approve the connection request after rejection.'):
+        with self.assertRaisesRegex(CLIError, 'You cannot approve the connection request after rejection.'):
             self.cmd('storage account private-endpoint-connection approve --account-name {sa} -g {rg} --name {sa_pec_name}')
 
         self.cmd('storage account private-endpoint-connection delete --id {sa_pec_id} -y')
@@ -2053,6 +2214,7 @@ class StorageAccountORScenarioTest(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('allowCrossTenantReplication', True)])
 
     @record_only()
+    @AllowLargeResponse()
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2021-04-01')
     @ResourceGroupPreparer(name_prefix='cli_test_storage_account_ors', location='eastus2')
     @StorageAccountPreparer(parameter_name='destination_account', location='eastus2euap', kind='StorageV2')
@@ -2176,3 +2338,30 @@ class StorageAccountBlobInventoryScenarioTest(StorageScenarioMixin, ScenarioTest
 
         self.cmd('storage account blob-inventory-policy delete --account-name {sa} -g {rg} -y')
         self.cmd('storage account blob-inventory-policy show --account-name {sa} -g {rg}', expect_failure=True)
+
+
+class StorageAccountHNSMigrationScenarioTest(StorageScenarioMixin, ScenarioTest):
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2021-06-01')
+    @ResourceGroupPreparer(name_prefix='cli_test_hns_migrate', location='eastus2')
+    @StorageAccountPreparer(location='eastus2', kind='StorageV2', key='sa1', parameter_name='storage_account1')
+    @StorageAccountPreparer(location='eastus2', kind='StorageV2', key='sa2', parameter_name='storage_account2')
+    def test_storage_account_start_hns_migration(self, resource_group, storage_account1, storage_account2):
+        # test migration validation
+        self.cmd('storage account hns-migration start --request-type validation -n {sa1} -g {rg}')
+        # test migration
+        self.cmd('storage account hns-migration start --request-type upgrade -n {sa1} -g {rg}')
+        # test aborting migration
+        self.cmd('storage account hns-migration start --request-type validation -n {sa2} -g {rg}')
+        self.cmd('storage account hns-migration start --request-type upgrade -n {sa2} -g {rg} --no-wait')
+        retry = 0
+        while True:
+            from azure.core.exceptions import HttpResponseError
+            try:
+                self.cmd('storage account hns-migration stop -n {sa2} -g {rg}')
+                break
+            except HttpResponseError as ex:
+                if retry > 5:
+                    raise ex
+                if ex.reason == 'Hns migration for the account: {} is not found.'.format(storage_account2):
+                    retry += 1
+                    time.sleep(30)

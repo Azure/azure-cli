@@ -679,15 +679,27 @@ def load_command_table(self, _):
         g.custom_command('remove', 'remove_waf_managed_rule_exclusion')
         g.custom_command('list', 'list_waf_managed_rule_exclusion')
 
+    with self.command_group('network application-gateway waf-policy managed-rule exclusion rule-set', network_ag_waf_sdk,
+                            client_factory=cf_app_gateway_waf_policy,
+                            min_api='2021-05-01') as g:
+        g.custom_command('add', 'add_waf_exclusion_rule_set')
+        g.custom_command('remove', 'remove_waf_exclusion_rule_set')
+        g.custom_command('list', 'list_waf_exclusion_rule_set')
+
     with self.command_group('network application-gateway client-cert', network_ag_sdk, min_api='2020-06-01', is_preview=True) as g:
         g.custom_command('add', 'add_trusted_client_certificate')
         g.custom_command('remove', 'remove_trusted_client_certificate')
         g.custom_command('list', 'list_trusted_client_certificate')
+        g.custom_show_command('show', 'show_trusted_client_certificate')
+        g.custom_command('update', 'update_trusted_client_certificate')
 
     with self.command_group('network application-gateway ssl-profile', network_ag_sdk, min_api='2020-06-01', is_preview=True) as g:
         g.custom_command('add', 'add_ssl_profile')
         g.custom_command('remove', 'remove_ssl_profile')
         g.custom_command('list', 'list_ssl_profile')
+        g.custom_show_command('show', 'show_ssl_profile')
+        g.custom_command('update', 'update_ssl_profile')
+
     # endregion
 
     # region ApplicationSecurityGroups
@@ -803,6 +815,10 @@ def load_command_table(self, _):
         g.show_command('show')
         g.command('list', 'list')
 
+    with self.command_group('network express-route peering connection ipv6-config', network_erconn_sdk) as g:
+        g.custom_command('set', 'set_express_route_peering_connection_config')
+        g.custom_command('remove', 'remove_express_route_peering_connection_config')
+
     with self.command_group('network express-route peering peer-connection', network_perconn_sdk, is_preview=True) as g:
         g.show_command('show', is_preview=True)
         g.show_command('list', 'list', is_preview=True)
@@ -860,6 +876,16 @@ def load_command_table(self, _):
         g.command('delete', 'begin_delete')
         g.show_command('show')
         g.command('list', 'list')
+
+    with self.command_group('network private-endpoint ip-config', network_private_endpoint_sdk, min_api='2021-05-01') as g:
+        g.custom_command('add', 'add_private_endpoint_ip_config')
+        g.custom_command('remove', 'remove_private_endpoint_ip_config')
+        g.custom_command('list', 'list_private_endpoint_ip_config')
+
+    with self.command_group('network private-endpoint asg', network_private_endpoint_sdk, min_api='2021-05-01') as g:
+        g.custom_command('add', 'add_private_endpoint_asg')
+        g.custom_command('remove', 'remove_private_endpoint_asg')
+        g.custom_command('list', 'list_private_endpoint_asg')
     # endregion
 
     # region PrivateLinkServices
@@ -891,6 +917,7 @@ def load_command_table(self, _):
         g.generic_update_command('update', getter_name='lb_get', getter_type=network_load_balancers_custom,
                                  setter_name='begin_create_or_update')
         g.custom_command('list-nic', 'list_load_balancer_nic', min_api='2017-06-01')
+        g.custom_command('list-mapping', 'list_load_balancer_mapping', min_api='2021-05-01')
 
     property_map = {
         'frontend_ip_configurations': 'frontend-ip',
@@ -933,6 +960,8 @@ def load_command_table(self, _):
 
     with self.command_group('network lb address-pool', network_lb_backend_pool_sdk) as g:
         g.custom_command('create', 'create_lb_backend_address_pool')
+        g.generic_update_command('update', setter_name='begin_create_or_update',
+                                 custom_func_name='set_lb_backend_address_pool')
         g.show_command('show', 'get')
         g.command('list', 'list')
         g.custom_command('delete', 'delete_lb_backend_address_pool')
@@ -1220,6 +1249,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_custom_ip_prefixes')
         g.show_command('show')
         g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_custom_ip_prefix', supports_no_wait=True)
+        g.wait_command('wait')
     # endRegion
 
     # region PublicIPAddresses
@@ -1305,7 +1335,7 @@ def load_command_table(self, _):
 
     # region TrafficManagers
     with self.command_group('network traffic-manager profile', network_tmp_sdk) as g:
-        g.command('check-dns', 'check_traffic_manager_relative_dns_name_availability')
+        g.custom_command('check-dns', 'check_traffic_manager_name', client_factory=cf_traffic_manager_mgmt_profiles)
         g.show_command('show', 'get')
         g.command('delete', 'delete')
         g.custom_command('list', 'list_traffic_manager_profiles')
@@ -1319,7 +1349,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_traffic_manager_endpoints')
         g.generic_update_command('update', custom_func_name='update_traffic_manager_endpoint')
 
-        tm_geographic_path = 'azure.mgmt.trafficmanager.operations.geographic_hierarchies_operations#GeographicHierarchiesOperations.{}'
+        tm_geographic_path = 'azure.mgmt.trafficmanager.operations#GeographicHierarchiesOperations.{}'
         g.command('show-geographic-hierarchy', 'get_default', client_factory=cf_tm_geographic, operations_tmpl=tm_geographic_path, table_transformer=transform_geographic_hierachy_table_output)
 
     # endregion
@@ -1337,6 +1367,7 @@ def load_command_table(self, _):
 
     with self.command_group('network vnet peering', network_vnet_peering_sdk, min_api='2016-09-01') as g:
         g.custom_command('create', 'create_vnet_peering')
+        g.custom_command('sync', 'sync_vnet_peering')
         g.show_command('show', 'get')
         g.command('list', 'list')
         g.command('delete', 'begin_delete')
@@ -1370,6 +1401,7 @@ def load_command_table(self, _):
     with self.command_group('network vnet-gateway packet-capture', network_vgw_sdk, client_factory=cf_virtual_network_gateways, is_preview=True, min_api='2019-07-01') as g:
         g.custom_command('start', 'start_vnet_gateway_package_capture', supports_no_wait=True)
         g.custom_command('stop', 'stop_vnet_gateway_package_capture', supports_no_wait=True)
+        g.wait_command('wait')
 
     with self.command_group('network vnet-gateway vpn-client', network_vgw_sdk, client_factory=cf_virtual_network_gateways) as g:
         g.custom_command('generate', 'generate_vpn_client')
@@ -1379,6 +1411,7 @@ def load_command_table(self, _):
     with self.command_group('network vnet-gateway vpn-client ipsec-policy', network_vgw_sdk, client_factory=cf_virtual_network_gateways, is_preview=True, min_api='2018-02-01') as g:
         g.custom_command('set', 'set_vpn_client_ipsec_policy', supports_no_wait=True)
         g.show_command('show', 'begin_get_vpnclient_ipsec_parameters')
+        g.wait_command('wait')
 
     # with self.command_group
 
@@ -1404,6 +1437,7 @@ def load_command_table(self, _):
         g.custom_command('add', 'add_vnet_gateway_nat_rule', supports_no_wait=True)
         g.custom_show_command('list', 'show_vnet_gateway_nat_rule')
         g.custom_command('remove', 'remove_vnet_gateway_nat_rule', supports_no_wait=True)
+        g.wait_command('wait')
     # endregion
 
     # region VirtualNetworkGatewayConnections
@@ -1432,6 +1466,7 @@ def load_command_table(self, _):
     with self.command_group('network vpn-connection packet-capture', network_vpn_sdk, client_factory=cf_virtual_network_gateway_connections, is_preview=True, min_api='2019-07-01') as g:
         g.custom_command('start', 'start_vpn_conn_package_capture', supports_no_wait=True)
         g.custom_command('stop', 'stop_vpn_conn_package_capture', supports_no_wait=True)
+        g.wait_command('wait')
 
     # endregion
 

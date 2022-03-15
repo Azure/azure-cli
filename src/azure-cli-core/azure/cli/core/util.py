@@ -60,7 +60,7 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
     from azure.common import AzureException
     from azure.core.exceptions import AzureError
     from requests.exceptions import SSLError, HTTPError
-    import azure.cli.core.azclierror as azclierror
+    from azure.cli.core import azclierror
     import traceback
 
     logger.debug("azure.cli.core.util.handle_exception is called with an exception:")
@@ -185,8 +185,8 @@ def extract_http_operation_error(ex):
 
 
 def get_error_type_by_azure_error(ex):
-    import azure.core.exceptions as exceptions
-    import azure.cli.core.azclierror as azclierror
+    from azure.core import exceptions
+    from azure.cli.core import azclierror
 
     if isinstance(ex, exceptions.HttpResponseError):
         status_code = str(ex.status_code)
@@ -205,7 +205,7 @@ def get_error_type_by_azure_error(ex):
 
 # pylint: disable=too-many-return-statements
 def get_error_type_by_status_code(status_code):
-    import azure.cli.core.azclierror as azclierror
+    from azure.cli.core import azclierror
 
     if status_code == '400':
         return azclierror.BadRequestError
@@ -380,6 +380,13 @@ def get_az_version_string(use_cache=False):  # pylint: disable=too-many-statemen
             else:
                 _print(ext.name.ljust(20) + (ext.version or 'Unknown').rjust(20))
         _print()
+
+    _print('Dependencies:')
+    dependencies_versions = get_dependency_versions()
+    for k, v in dependencies_versions.items():
+        _print(k.ljust(20) + v.rjust(20))
+    _print()
+
     _print("Python location '{}'".format(os.path.abspath(sys.executable)))
     _print("Extensions directory '{}'".format(EXTENSIONS_DIR))
     if os.path.isdir(EXTENSIONS_SYS_DIR) and os.listdir(EXTENSIONS_SYS_DIR):
@@ -412,6 +419,31 @@ def get_az_version_json():
     if extensions:
         for ext in extensions:
             versions['extensions'][ext.name] = ext.version or 'Unknown'
+    return versions
+
+
+def get_dependency_versions():
+    versions = {}
+    # Add msal version
+    try:
+        from msal import __version__ as msal_version
+    except ImportError:
+        msal_version = "N/A"
+    versions['msal'] = msal_version
+
+    # Add azure-mgmt-resource version
+    try:
+        # Track 2 >=15.0.0
+        # pylint: disable=protected-access
+        from azure.mgmt.resource._version import VERSION as azure_mgmt_resource_version
+    except ImportError:
+        try:
+            # Track 1 <=13.0.0
+            from azure.mgmt.resource.version import VERSION as azure_mgmt_resource_version
+        except ImportError:
+            azure_mgmt_resource_version = "N/A"
+    versions['azure-mgmt-resource'] = azure_mgmt_resource_version
+
     return versions
 
 
@@ -519,7 +551,7 @@ def shell_safe_json_parse(json_or_dict_string, preserve_order=False, strict=True
             # Recommendation for all shells
             from azure.cli.core.azclierror import InvalidArgumentValueError
             recommendation = "The JSON may have been parsed by the shell. See " \
-                             "https://docs.microsoft.com/cli/azure/use-cli-effectively#quoting-issues"
+                             "https://docs.microsoft.com/cli/azure/use-cli-effectively#use-quotation-marks-in-arguments"
 
             # Recommendation especially for PowerShell
             parent_proc = get_parent_proc_name()
@@ -673,10 +705,7 @@ def open_page_in_browser(url):
 
 def _get_platform_info():
     uname = platform.uname()
-    # python 2, `platform.uname()` returns: tuple(system, node, release, version, machine, processor)
-    platform_name = getattr(uname, 'system', None) or uname[0]
-    release = getattr(uname, 'release', None) or uname[2]
-    return platform_name.lower(), release.lower()
+    return uname.system.lower(), uname.release.lower()
 
 
 def is_wsl():
@@ -696,25 +725,27 @@ def is_windows():
 def can_launch_browser():
     import webbrowser
     platform_name, _ = _get_platform_info()
-    if is_wsl() or platform_name != 'linux':
-        return True
-    # per https://unix.stackexchange.com/questions/46305/is-there-a-way-to-retrieve-the-name-of-the-desktop-environment
-    # and https://unix.stackexchange.com/questions/193827/what-is-display-0
-    # we can check a few env vars
-    gui_env_vars = ['DESKTOP_SESSION', 'XDG_CURRENT_DESKTOP', 'DISPLAY']
-    result = True
-    if platform_name == 'linux':
-        if any(os.getenv(v) for v in gui_env_vars):
-            try:
-                default_browser = webbrowser.get()
-                if getattr(default_browser, 'name', None) == 'www-browser':  # text browser won't work
-                    result = False
-            except webbrowser.Error:
-                result = False
-        else:
-            result = False
 
-    return result
+    if platform_name != 'linux':
+        # Only Linux may have no browser
+        return True
+
+    # Using webbrowser to launch a browser is the preferred way.
+    try:
+        webbrowser.get()
+        return True
+    except webbrowser.Error:
+        # Don't worry. We may still try powershell.exe.
+        pass
+
+    if is_wsl():
+        # Docker container running on WSL 2 also shows WSL, but it can't launch a browser.
+        # If powershell.exe is on PATH, it can be called to launch a browser.
+        import shutil
+        if shutil.which("powershell.exe"):
+            return True
+
+    return False
 
 
 def get_command_type_kwarg(custom_command=False):
@@ -1189,43 +1220,6 @@ def handle_version_update():
             refresh_known_clouds()
     except Exception as ex:  # pylint: disable=broad-except
         logger.warning(ex)
-
-
-def resource_to_scopes(resource):
-    """Convert the ADAL resource ID to MSAL scopes by appending the /.default suffix and return a list.
-    For example:
-       'https://management.core.windows.net/' -> ['https://management.core.windows.net//.default']
-       'https://managedhsm.azure.com' -> ['https://managedhsm.azure.com/.default']
-
-    :param resource: The ADAL resource ID
-    :return: A list of scopes
-    """
-    # https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-permissions-and-consent#trailing-slash-and-default
-    # We should not trim the trailing slash, like in https://management.azure.com/
-    # In other word, the trailing slash should be preserved and scope should be https://management.azure.com//.default
-    scope = resource + '/.default'
-    return [scope]
-
-
-def scopes_to_resource(scopes):
-    """Convert MSAL scopes to ADAL resource by stripping the /.default suffix and return a str.
-    For example:
-       ['https://management.core.windows.net//.default'] -> 'https://management.core.windows.net/'
-       ['https://managedhsm.azure.com/.default'] -> 'https://managedhsm.azure.com'
-
-    :param scopes: The MSAL scopes. It can be a list or tuple of string
-    :return: The ADAL resource
-    :rtype: str
-    """
-    scope = scopes[0]
-
-    suffixes = ['/.default', '/user_impersonation']
-
-    for s in suffixes:
-        if scope.endswith(s):
-            return scope[:-len(s)]
-
-    return scope
 
 
 def _get_parent_proc_name():

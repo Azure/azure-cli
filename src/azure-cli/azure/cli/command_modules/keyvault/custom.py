@@ -14,6 +14,7 @@ import struct
 import sys
 import time
 import uuid
+from ipaddress import ip_network
 
 from azure.cli.command_modules.keyvault._client_factory import get_client_factory, Clients, is_azure_stack_profile
 from azure.cli.command_modules.keyvault._validators import _construct_vnet, secret_text_encoding_values
@@ -212,6 +213,8 @@ def delete_vault_or_hsm(cmd, client, resource_group_name=None, vault_name=None, 
 
     assert hsm_name
     hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
+    logger.warning('This command will soft delete the resource, and you will still be billed until it is purged. '
+                   'For more information, go to https://aka.ms/doc/KeyVaultMHSMSoftDelete')
     return sdk_no_wait(
         no_wait, hsm_client.begin_delete,
         resource_group_name=resource_group_name,
@@ -251,7 +254,11 @@ def list_deleted_vault_or_hsm(cmd, client, resource_type=None):
         return client.list_deleted()
 
     if resource_type is None:
-        return client.list_deleted()
+        hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
+        resources = []
+        resources.extend(client.list_deleted())
+        resources.extend(hsm_client.list_deleted())
+        return resources
 
     if resource_type == 'hsm':
         hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
@@ -529,7 +536,9 @@ def create_vault_or_hsm(cmd, client,  # pylint: disable=too-many-locals
                         default_action=None,
                         no_self_perms=None,
                         tags=None,
-                        no_wait=False):
+                        no_wait=False,
+                        public_network_access=None,
+                        ):
     if is_azure_stack_profile(cmd) or vault_name:
         return create_vault(cmd=cmd,
                             client=client,
@@ -551,7 +560,8 @@ def create_vault_or_hsm(cmd, client,  # pylint: disable=too-many-locals
                             default_action=default_action,
                             no_self_perms=no_self_perms,
                             tags=tags,
-                            no_wait=no_wait)
+                            no_wait=no_wait,
+                            public_network_access=public_network_access)
 
     if hsm_name:
         hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
@@ -627,7 +637,7 @@ def wait_hsm(client, hsm_name, resource_group_name):
     return client.get(resource_group_name=resource_group_name, name=hsm_name)
 
 
-def create_vault(cmd, client,  # pylint: disable=too-many-locals
+def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-statements
                  resource_group_name, vault_name, location=None, sku=None,
                  enabled_for_deployment=None,
                  enabled_for_disk_encryption=None,
@@ -643,7 +653,8 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals
                  default_action=None,
                  no_self_perms=None,
                  tags=None,
-                 no_wait=False):
+                 no_wait=False,
+                 public_network_access=None):
     from azure.core.exceptions import HttpResponseError
     try:
         vault = client.get(resource_group_name=resource_group_name, vault_name=vault_name)
@@ -689,48 +700,55 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals
     if no_self_perms or enable_rbac_authorization:
         access_policies = []
     else:
-        permissions = Permissions(keys=[KeyPermissions.get,
-                                        KeyPermissions.create,
-                                        KeyPermissions.delete,
-                                        KeyPermissions.list,
-                                        KeyPermissions.update,
-                                        KeyPermissions.import_enum,
-                                        KeyPermissions.backup,
-                                        KeyPermissions.restore,
-                                        KeyPermissions.recover],
-                                  secrets=[
-                                      SecretPermissions.get,
-                                      SecretPermissions.list,
-                                      SecretPermissions.set,
-                                      SecretPermissions.delete,
-                                      SecretPermissions.backup,
-                                      SecretPermissions.restore,
-                                      SecretPermissions.recover],
-                                  certificates=[
-                                      CertificatePermissions.get,
-                                      CertificatePermissions.list,
-                                      CertificatePermissions.delete,
-                                      CertificatePermissions.create,
-                                      CertificatePermissions.import_enum,
-                                      CertificatePermissions.update,
-                                      CertificatePermissions.managecontacts,
-                                      CertificatePermissions.getissuers,
-                                      CertificatePermissions.listissuers,
-                                      CertificatePermissions.setissuers,
-                                      CertificatePermissions.deleteissuers,
-                                      CertificatePermissions.manageissuers,
-                                      CertificatePermissions.recover],
-                                  storage=[
-                                      StoragePermissions.get,
-                                      StoragePermissions.list,
-                                      StoragePermissions.delete,
-                                      StoragePermissions.set,
-                                      StoragePermissions.update,
-                                      StoragePermissions.regeneratekey,
-                                      StoragePermissions.setsas,
-                                      StoragePermissions.listsas,
-                                      StoragePermissions.getsas,
-                                      StoragePermissions.deletesas])
+        if cmd.supported_api_version(resource_type=ResourceType.MGMT_KEYVAULT, min_api='2019-09-01'):
+            permissions = Permissions(keys=[KeyPermissions.all],
+                                      secrets=[SecretPermissions.all],
+                                      certificates=[CertificatePermissions.all],
+                                      storage=[StoragePermissions.all])
+        else:
+            permissions = Permissions(keys=[KeyPermissions.get,
+                                            KeyPermissions.create,
+                                            KeyPermissions.delete,
+                                            KeyPermissions.list,
+                                            KeyPermissions.update,
+                                            KeyPermissions.import_enum,
+                                            KeyPermissions.backup,
+                                            KeyPermissions.restore,
+                                            KeyPermissions.recover],
+                                      secrets=[
+                                          SecretPermissions.get,
+                                          SecretPermissions.list,
+                                          SecretPermissions.set,
+                                          SecretPermissions.delete,
+                                          SecretPermissions.backup,
+                                          SecretPermissions.restore,
+                                          SecretPermissions.recover],
+                                      certificates=[
+                                          CertificatePermissions.get,
+                                          CertificatePermissions.list,
+                                          CertificatePermissions.delete,
+                                          CertificatePermissions.create,
+                                          CertificatePermissions.import_enum,
+                                          CertificatePermissions.update,
+                                          CertificatePermissions.managecontacts,
+                                          CertificatePermissions.getissuers,
+                                          CertificatePermissions.listissuers,
+                                          CertificatePermissions.setissuers,
+                                          CertificatePermissions.deleteissuers,
+                                          CertificatePermissions.manageissuers,
+                                          CertificatePermissions.recover],
+                                      storage=[
+                                          StoragePermissions.get,
+                                          StoragePermissions.list,
+                                          StoragePermissions.delete,
+                                          StoragePermissions.set,
+                                          StoragePermissions.update,
+                                          StoragePermissions.regeneratekey,
+                                          StoragePermissions.setsas,
+                                          StoragePermissions.listsas,
+                                          StoragePermissions.getsas,
+                                          StoragePermissions.deletesas])
+
         try:
             object_id = _get_current_user_object_id(graph_client)
         except GraphErrorException:
@@ -761,7 +779,8 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals
                                  enable_rbac_authorization=enable_rbac_authorization,
                                  enable_soft_delete=enable_soft_delete,
                                  enable_purge_protection=enable_purge_protection,
-                                 soft_delete_retention_in_days=int(retention_days))
+                                 soft_delete_retention_in_days=int(retention_days),
+                                 public_network_access=public_network_access)
     if hasattr(properties, 'network_acls'):
         properties.network_acls = network_acls
     parameters = VaultCreateOrUpdateParameters(location=location,
@@ -787,6 +806,7 @@ def update_vault_setter(cmd, client, parameters, resource_group_name, vault_name
                                 vault_name=vault_name,
                                 parameters=VaultCreateOrUpdateParameters(
                                     location=parameters.location,
+                                    tags=parameters.tags,
                                     properties=parameters.properties),
                                 no_wait=no_wait)
 
@@ -812,7 +832,8 @@ def update_vault(cmd, instance,
                  enable_purge_protection=None,
                  retention_days=None,
                  bypass=None,
-                 default_action=None):
+                 default_action=None,
+                 public_network_access=None):
     if enabled_for_deployment is not None:
         instance.properties.enabled_for_deployment = enabled_for_deployment
 
@@ -846,6 +867,10 @@ def update_vault(cmd, instance,
                 instance.properties.network_acls.bypass = bypass
             if default_action:
                 instance.properties.network_acls.default_action = default_action
+
+    if public_network_access is not None:
+        instance.properties.public_network_access = public_network_access
+
     return instance
 
 
@@ -970,6 +995,10 @@ def add_network_rule(cmd, client, resource_group_name, vault_name, ip_address=No
     vault.properties.network_acls = vault.properties.network_acls or _create_network_rule_set(cmd)
     rules = vault.properties.network_acls
 
+    if not subnet and not ip_address:
+        logger.warning('No subnet or ip address supplied.')
+
+    to_update = False
     if subnet:
         rules.virtual_network_rules = rules.virtual_network_rules or []
 
@@ -981,17 +1010,28 @@ def add_network_rule(cmd, client, resource_group_name, vault_name, ip_address=No
                 break
         if to_modify:
             rules.virtual_network_rules.append(VirtualNetworkRule(id=subnet))
+            to_update = True
 
     if ip_address:
         rules.ip_rules = rules.ip_rules or []
         # if the rule already exists, don't add again
-        to_modify = True
-        for x in rules.ip_rules:
-            if x.value == ip_address:
-                to_modify = False
-                break
-        if to_modify:
-            rules.ip_rules.append(IPRule(value=ip_address))
+        for ip in ip_address:
+            to_modify = True
+            for x in rules.ip_rules:
+                existing_ip_network = ip_network(x.value)
+                new_ip_network = ip_network(ip)
+                if new_ip_network.overlaps(existing_ip_network):
+                    logger.warning("IP/CIDR %s overlaps with %s, which exists already. Not adding duplicates.",
+                                   ip, x.value)
+                    to_modify = False
+                    break
+            if to_modify:
+                rules.ip_rules.append(IPRule(value=ip))
+                to_update = True
+
+    # if we didn't modify the network rules just return the vault as is
+    if not to_update:
+        return vault
 
     return _azure_stack_wrapper(cmd, client, 'create_or_update',
                                 resource_type=ResourceType.MGMT_KEYVAULT,
@@ -1095,21 +1135,43 @@ def delete_policy(cmd, client, resource_group_name, vault_name,
 
 
 # region KeyVault Key
-def create_key(cmd, client, key_name=None, vault_base_url=None,
-               hsm_name=None, protection=None, identifier=None,  # pylint: disable=unused-argument
+def create_key(client, name=None, protection=None,  # pylint: disable=unused-argument
                key_size=None, key_ops=None, disabled=False, expires=None,
-               not_before=None, tags=None, kty=None, curve=None):
-    KeyAttributes = cmd.get_models('KeyAttributes', resource_type=ResourceType.DATA_KEYVAULT)
-    key_attrs = KeyAttributes(enabled=not disabled, not_before=not_before, expires=expires)
+               not_before=None, tags=None, kty=None, curve=None, exportable=None, release_policy=None):
 
-    return client.create_key(vault_base_url=vault_base_url,
-                             key_name=key_name,
-                             kty=kty,
-                             key_size=key_size,
-                             key_ops=key_ops,
-                             key_attributes=key_attrs,
+    return client.create_key(name=name,
+                             key_type=kty,
+                             size=key_size,
+                             key_operations=key_ops,
+                             enabled=not disabled,
+                             not_before=not_before,
+                             expires_on=expires,
                              tags=tags,
-                             curve=curve)
+                             curve=curve,
+                             exportable=exportable,
+                             release_policy=release_policy)
+
+
+def encrypt_key(cmd, client, algorithm, value, iv=None, aad=None, name=None, version=None):
+    EncryptionAlgorithm = cmd.loader.get_sdk('EncryptionAlgorithm', mod='crypto._enums',
+                                             resource_type=ResourceType.DATA_KEYVAULT_KEYS)
+    import binascii
+    crypto_client = client.get_cryptography_client(name, key_version=version)
+    return crypto_client.encrypt(EncryptionAlgorithm(algorithm), value,
+                                 iv=binascii.unhexlify(iv) if iv else None,
+                                 additional_authenticated_data=binascii.unhexlify(aad) if aad else None)
+
+
+def decrypt_key(cmd, client, algorithm, value, iv=None, tag=None, aad=None,
+                name=None, version=None, data_type='base64'):  # pylint: disable=unused-argument
+    EncryptionAlgorithm = cmd.loader.get_sdk('EncryptionAlgorithm', mod='crypto._enums',
+                                             resource_type=ResourceType.DATA_KEYVAULT_KEYS)
+    import binascii
+    crypto_client = client.get_cryptography_client(name, key_version=version)
+    return crypto_client.decrypt(EncryptionAlgorithm(algorithm), value,
+                                 iv=binascii.unhexlify(iv) if iv else None,
+                                 authentication_tag=binascii.unhexlify(tag) if tag else None,
+                                 additional_authenticated_data=binascii.unhexlify(aad) if aad else None)
 
 
 def backup_key(client, file_path, vault_base_url=None,
@@ -1215,17 +1277,13 @@ def _private_ec_key_to_jwk(ec_key, jwk):
     jwk.d = _int_to_bytes(ec_key.private_numbers().private_value)
 
 
-def import_key(cmd, client, key_name=None, vault_base_url=None,  # pylint: disable=too-many-locals
-               hsm_name=None, identifier=None,  # pylint: disable=unused-argument
+def import_key(cmd, client, name=None,  # pylint: disable=too-many-locals
                protection=None, key_ops=None, disabled=False, expires=None,
                not_before=None, tags=None, pem_file=None, pem_string=None, pem_password=None, byok_file=None,
-               byok_string=None, kty='RSA', curve=None):
+               byok_string=None, kty='RSA', curve=None, exportable=None, release_policy=None):
     """ Import a private key. Supports importing base64 encoded private keys from PEM files or strings.
         Supports importing BYOK keys into HSM for premium key vaults. """
-    KeyAttributes = cmd.get_models('KeyAttributes', resource_type=ResourceType.DATA_KEYVAULT)
-    JsonWebKey = cmd.get_models('JsonWebKey', resource_type=ResourceType.DATA_KEYVAULT)
-
-    key_attrs = KeyAttributes(enabled=not disabled, not_before=not_before, expires=expires)
+    JsonWebKey = cmd.loader.get_sdk('JsonWebKey', resource_type=ResourceType.DATA_KEYVAULT_KEYS, mod='_models')
 
     key_obj = JsonWebKey(key_ops=key_ops)
     if pem_file or pem_string:
@@ -1266,7 +1324,11 @@ def import_key(cmd, client, key_name=None, vault_base_url=None,  # pylint: disab
         key_obj.t = byok_data
         key_obj.crv = curve
 
-    return client.import_key(vault_base_url, key_name, key_obj, protection == 'hsm', key_attrs, tags)
+    return client.import_key(name=name, key=key_obj,
+                             hardware_protected=(protection == 'hsm'),
+                             enabled=not disabled, tags=tags,
+                             not_before=not_before, expires_on=expires,
+                             exportable=exportable, release_policy=release_policy)
 
 
 def _bytes_to_int(b):
@@ -1399,17 +1461,48 @@ def download_key(client, file_path, hsm_name=None, identifier=None,  # pylint: d
 
 def get_policy_template():
     policy = {
-        'version': '0.2',
+        'version': '1.0.0',
         'anyOf': [{
             'authority': '<issuer>',
             'allOf': [{
                 'claim': '<claim name>',
-                'condition': 'equals',
-                'value': '<value to match>'
+                'equals': '<value to match>'
             }]
         }]
     }
     return policy
+
+
+def update_key_rotation_policy(cmd, client, value, name=None):
+    from azure.cli.core.util import read_file_content, get_json_object
+    if os.path.exists(value):
+        value = read_file_content(value)
+
+    policy = get_json_object(value)
+    if not policy:
+        raise InvalidArgumentValueError("Please specify a valid policy")
+
+    KeyRotationLifetimeAction = cmd.loader.get_sdk('KeyRotationLifetimeAction', mod='_models',
+                                                   resource_type=ResourceType.DATA_KEYVAULT_KEYS)
+    lifetime_actions = []
+    if policy.get('lifetime_actions', None):
+        for action in policy['lifetime_actions']:
+            try:
+                action_type = action['action'].get('type', None) if action.get('action', None) else None
+            except AttributeError:
+                action_type = action.get('action', None)
+            time_after_create = action['trigger'].get('time_after_create', None) \
+                if action.get('trigger', None) else action.get('time_after_create', None)
+            time_before_expiry = action['trigger'].get('time_before_expiry', None) \
+                if action.get('trigger', None) else action.get('time_before_expiry', None)
+            lifetime_action = KeyRotationLifetimeAction(action_type,
+                                                        time_after_create=time_after_create,
+                                                        time_before_expiry=time_before_expiry)
+            lifetime_actions.append(lifetime_action)
+    expires_in = policy.get('expires_in', None) or policy.get('expiry_time', None)
+    if policy.get('attributes', None):
+        expires_in = policy['attributes'].get('expires_in', None) or policy['attributes'].get('expiry_time', None)
+    return client.update_key_rotation_policy(name=name, lifetime_actions=lifetime_actions, expires_in=expires_in)
 # endregion
 
 

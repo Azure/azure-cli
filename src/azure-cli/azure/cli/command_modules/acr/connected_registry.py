@@ -4,9 +4,11 @@
 # --------------------------------------------------------------------------------------------
 
 from enum import Enum
+import re
 from msrest.exceptions import ValidationError
 from knack.log import get_logger
 from knack.util import CLIError
+from azure.cli.core.azclierror import ArgumentUsageError, InvalidArgumentValueError
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import user_confirmation
@@ -23,23 +25,19 @@ from ._utils import (
 
 
 class ConnectedRegistryModes(Enum):
-    MIRROR = 'Mirror'
-    REGISTRY = 'Registry'
-
-
-class ConnectedRegistryActivationStatus(Enum):
-    ACTIVE = 'Active'
-    INACTIVE = 'Inactive'
+    READONLY = 'readonly'
+    READWRITE = 'readwrite'
 
 
 DEFAULT_GATEWAY_SCOPE = ['config/read', 'config/write', 'message/read', 'message/write']
 REPO_SCOPES_BY_MODE = {
-    ConnectedRegistryModes.MIRROR.value: ['content/read', 'metadata/read'],
-    ConnectedRegistryModes.REGISTRY.value: ['content/read', 'content/write', 'content/delete',
-                                            'metadata/read', 'metadata/write']
+    ConnectedRegistryModes.READONLY.value: ['content/read', 'metadata/read'],
+    ConnectedRegistryModes.READWRITE.value: ['content/read', 'content/write', 'content/delete',
+                                             'metadata/read', 'metadata/write'],
+    # Remove next release
+    "mirror": ['content/read', 'metadata/read'],
+    "registry": ['content/read', 'content/write', 'content/delete', 'metadata/read', 'metadata/write'],
 }
-SYNC_SCOPE_MAP_NAME = "{}-sync-scope-map"
-SYNC_TOKEN_NAME = "{}-sync-token"
 REPOSITORY = "repositories/"
 GATEWAY = "gateway/"
 
@@ -60,13 +58,16 @@ def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-m
                                   sync_message_ttl=None,
                                   sync_window=None,
                                   log_level=None,
-                                  sync_audit_logs_enabled=False):
+                                  sync_audit_logs_enabled=False,
+                                  notifications=None):
 
     if bool(sync_token_name) == bool(repositories):
         raise CLIError("usage error: you must provide either --sync-token-name or --repository, but not both.")
     # Check needed since the sync token gateway actions must be at least 5 characters long.
     if len(connected_registry_name) < 5:
-        raise CLIError("argument error: Connected registry name must be at least 5 characters long")
+        raise InvalidArgumentValueError("argument error: Connected registry name must be at least 5 characters long.")
+    if re.match(r'\w*[A-Z]\w*', connected_registry_name):
+        raise InvalidArgumentValueError("argument error: Connected registry name must use only lowercase.")
     registry, resource_group_name = get_registry_by_name(cmd.cli_ctx, registry_name, resource_group_name)
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
@@ -78,7 +79,7 @@ def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-m
 
     from azure.core.exceptions import HttpResponseError as ErrorResponseException
     parent = None
-    mode = mode.capitalize()
+    mode = mode.lower()
     if parent_name:
         try:
             parent = acr_connected_registry_show(cmd, client, parent_name, registry_name, resource_group_name)
@@ -88,7 +89,8 @@ def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-m
             if ex.response.status_code == 404:
                 raise CLIError("The parent connected registry '{}' could not be found.".format(parent_name))
             raise CLIError(ex)
-        if parent.mode != ConnectedRegistryModes.REGISTRY.value and parent.mode != mode:
+
+        if parent.mode.lower() not in (ConnectedRegistryModes.READWRITE.value, mode):
             raise CLIError("Can't create the registry '{}' with mode '{}' ".format(connected_registry_name, mode) +
                            "when the connected registry parent '{}' mode is '{}'. ".format(parent_name, parent.mode) +
                            "For more information on connected registries " +
@@ -106,6 +108,9 @@ def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-m
         for i, client_token_name in enumerate(client_token_list):
             client_token_list[i] = build_token_id(
                 subscription_id, resource_group_name, registry_name, client_token_name)
+
+    notifications_set = set(list(notifications)) \
+        if notifications else set()
 
     ConnectedRegistry, LoggingProperties, SyncProperties, ParentProperties = cmd.get_models(
         'ConnectedRegistry', 'LoggingProperties', 'SyncProperties', 'ParentProperties')
@@ -125,7 +130,8 @@ def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-m
         logging=LoggingProperties(
             log_level=log_level,
             audit_log_status='Enabled' if sync_audit_logs_enabled else 'Disabled'
-        )
+        ),
+        notifications_list=list(notifications_set) if notifications_set else None
     )
 
     try:
@@ -148,7 +154,9 @@ def acr_connected_registry_update(cmd,  # pylint: disable=too-many-locals, too-m
                                   sync_window=None,
                                   log_level=None,
                                   sync_message_ttl=None,
-                                  sync_audit_logs_enabled=None):
+                                  sync_audit_logs_enabled=None,
+                                  add_notifications=None,
+                                  remove_notifications=None):
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name)
     subscription_id = get_subscription_id(cmd.cli_ctx)
@@ -184,11 +192,30 @@ def acr_connected_registry_update(cmd,  # pylint: disable=too-many-locals, too-m
 
     client_token_list = list(client_token_set) if client_token_set != current_client_token_set else None
 
+    # Add or remove from the current notifications list
+    add_notifications_set = set(list(add_notifications)) \
+        if add_notifications else set()
+
+    remove_notifications_set = set(list(remove_notifications)) \
+        if remove_notifications else set()
+
+    duplicate_notifications = set.intersection(add_notifications_set, remove_notifications_set)
+    if duplicate_notifications:
+        errors = sorted(duplicate_notifications)
+        raise ArgumentUsageError(
+            'Update ambiguity. Duplicate notifications list were provided with ' +
+            '--add-notifications and --remove-notifications arguments.\n{}'.format(errors))
+
+    current_notifications_set = set(current_connected_registry.notifications_list) \
+        if current_connected_registry.notifications_list else set()
+    notifications_set = current_notifications_set.union(add_notifications_set).difference(remove_notifications_set)
+
+    notifications_list = list(notifications_set) if notifications_set != current_notifications_set else None
+
     ConnectedRegistryUpdateParameters, SyncUpdateProperties, LoggingProperties = cmd.get_models(
         'ConnectedRegistryUpdateParameters', 'SyncUpdateProperties', 'LoggingProperties')
     connected_registry_update_parameters = ConnectedRegistryUpdateParameters(
         sync_properties=SyncUpdateProperties(
-            token_id=current_connected_registry.parent.sync_properties.token_id,
             schedule=sync_schedule,
             message_ttl=sync_message_ttl,
             sync_window=sync_window
@@ -197,7 +224,8 @@ def acr_connected_registry_update(cmd,  # pylint: disable=too-many-locals, too-m
             log_level=log_level,
             audit_log_status=sync_audit_logs_enabled
         ),
-        client_token_ids=client_token_list
+        client_token_ids=client_token_list,
+        notifications_list=notifications_list
     )
 
     try:
@@ -218,8 +246,11 @@ def acr_connected_registry_delete(cmd,
                                   resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name)
-    user_confirmation("Are you sure you want to delete the connected registry '{}' in '{}'?".format(
-        connected_registry_name, registry_name), yes)
+    extraMsg = ""
+    if not cleanup:
+        extraMsg = " without cleanup flag enabled"
+    user_confirmation("Are you sure you want to delete the connected registry '{}' in '{}'{}?".format(
+        connected_registry_name, registry_name, extraMsg), yes)
     try:
         connected_registry = acr_connected_registry_show(
             cmd, client, connected_registry_name, registry_name, resource_group_name)
@@ -247,7 +278,7 @@ def acr_connected_registry_delete(cmd,
                 "az acr token delete -n {} -r {} --yes\n\t".format(sync_token_name, registry_name) + \
                 "az acr scope-map delete -n {} -r {} --yes\n".format(sync_scope_map_name, registry_name) + \
                 "Run the following command on all ascendency to remove the deleted registry gateway access: \n\t" + \
-                "az acr scope-map update -n <scope-map-name> -r {} --remove-gateway {} --yes".format(
+                "az acr scope-map update -n <scope-map-name> -r {} --remove-gateway {}".format(
                     registry_name, " ".join([connected_registry_name] + DEFAULT_GATEWAY_SCOPE))
             logger.warning(msg)
         return result
@@ -335,21 +366,20 @@ def _create_sync_token(cmd,
                        mode):
     token_client = cf_acr_tokens(cmd.cli_ctx)
 
-    mode = mode.capitalize()
     if not any(option for option in ConnectedRegistryModes if option.value == mode):
-        raise CLIError("usage error: --mode supports only 'registry' and 'mirror' values.")
+        raise CLIError("usage error: --mode supports only 'ReadWrite' and 'ReadOnly' values.")
     repository_actions_list = [[repo] + REPO_SCOPES_BY_MODE[mode] for repo in repositories]
     gateway_actions_list = [[connected_registry_name.lower()] + DEFAULT_GATEWAY_SCOPE]
     try:
         message = "Created by connected registry sync token: {}"
-        sync_scope_map_name = SYNC_SCOPE_MAP_NAME.format(connected_registry_name)
+        sync_scope_map_name = connected_registry_name
         logger.warning("If sync scope map '%s' already exists, its actions will be overwritten", sync_scope_map_name)
         sync_scope_map = create_default_scope_map(cmd, resource_group_name, registry_name, sync_scope_map_name,
                                                   repository_actions_list, gateway_actions_list,
                                                   scope_map_description=message.format(connected_registry_name),
                                                   force=True)
 
-        sync_token_name = SYNC_TOKEN_NAME.format(connected_registry_name)
+        sync_token_name = connected_registry_name
         logger.warning("If sync token '%s' already exists, it properties will be overwritten", sync_token_name)
         Token = cmd.get_models('Token')
         poller = token_client.begin_create(
@@ -406,8 +436,8 @@ def acr_connected_registry_install_info(cmd,
                                         registry_name,
                                         parent_protocol,
                                         resource_group_name=None):
-    return _get_install_info(cmd, client, connected_registry_name, registry_name, False, parent_protocol,
-                             resource_group_name)
+    return acr_connected_registry_get_settings(cmd, client, connected_registry_name, registry_name, parent_protocol,
+                                               None, False, resource_group_name)
 
 
 def acr_connected_registry_install_renew_credentials(cmd,
@@ -415,22 +445,53 @@ def acr_connected_registry_install_renew_credentials(cmd,
                                                      connected_registry_name,
                                                      registry_name,
                                                      parent_protocol,
+                                                     yes=False,
                                                      resource_group_name=None):
-    return _get_install_info(cmd, client, connected_registry_name, registry_name, True, parent_protocol,
-                             resource_group_name)
+    return acr_connected_registry_get_settings(cmd, client, connected_registry_name, registry_name, parent_protocol,
+                                               '1', yes, resource_group_name)
 
 
-def _get_install_info(cmd,
-                      client,
-                      connected_registry_name,
-                      registry_name,
-                      regenerate_credentials,
-                      parent_protocol,
-                      resource_group_name=None):
+def acr_connected_registry_get_settings(cmd,
+                                        client,
+                                        connected_registry_name,
+                                        registry_name,
+                                        parent_protocol,
+                                        generate_password=None,
+                                        yes=False,
+                                        resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name)
     connected_registry = acr_connected_registry_show(
         cmd, client, connected_registry_name, registry_name, resource_group_name)
+
+    sync_token_name = connected_registry.parent.sync_properties.token_id.split('/tokens/')[1]
+    if generate_password:
+        user_confirmation("Are you sure you want to generate a new sync token '{}' password{}?".format(
+                          sync_token_name, generate_password), yes)
+        from ._client_factory import cf_acr_token_credentials
+        from .token import acr_token_credential_generate
+        cred_client = cf_acr_token_credentials(cmd.cli_ctx)
+        if generate_password == '1':
+            password1 = True
+            password2 = False
+        else:
+            password1 = False
+            password2 = True
+
+        poller = acr_token_credential_generate(
+            cmd, cred_client, registry_name, sync_token_name,
+            password1=password1, password2=password2, resource_group_name=resource_group_name)
+        credentials = LongRunningOperation(cmd.cli_ctx)(poller)
+        sync_username = credentials.username
+        if credentials.passwords[0].name.endswith(generate_password):
+            sync_password = credentials.passwords[0].value
+        else:
+            sync_password = credentials.passwords[1].value
+        logger.warning('Please store your generated credentials safely.')
+    else:
+        sync_username = sync_token_name
+        sync_password = "<use --generate-password to generate a new password>"
+
     parent_gateway_endpoint = connected_registry.parent.sync_properties.gateway_endpoint
     if parent_gateway_endpoint is None or parent_gateway_endpoint == '':
         parent_gateway_endpoint = "<parent gateway endpoint>"
@@ -443,30 +504,16 @@ def _get_install_info(cmd,
         if parent_protocol != "https":
             logger.warning("Parent endpoint protocol must be 'https' when parent is a cloud registry.")
         parent_endpoint_protocol = "https"
-    sync_token_name = connected_registry.parent.sync_properties.token_id.split('/tokens/')[1]
-
     connected_registry_login_server = "<Optional: connected registry login server. " + \
         "More info at https://aka.ms/acr/connected-registry>"
-
-    if regenerate_credentials:
-        from ._client_factory import cf_acr_token_credentials
-        from .token import acr_token_credential_generate
-        cred_client = cf_acr_token_credentials(cmd.cli_ctx)
-        poller = acr_token_credential_generate(
-            cmd, cred_client, registry_name, sync_token_name,
-            password1=True, password2=False, resource_group_name=resource_group_name)
-        credentials = LongRunningOperation(cmd.cli_ctx)(poller)
-        sync_username = credentials.username
-        sync_password = credentials.passwords[0].value
-        logger.warning('Please store your generated credentials safely.')
-    else:
-        sync_username = sync_token_name
-        sync_password = "<sync token password>"
-
     connection_string = "ConnectedRegistryName=%s;" % connected_registry_name + \
         "SyncTokenName=%s;SyncTokenPassword=%s;" % (sync_username, sync_password) + \
         "ParentGatewayEndpoint=%s;ParentEndpointProtocol=%s" % (parent_gateway_endpoint, parent_endpoint_protocol)
     return {
+        "SYNC_TOKEN_USER": sync_username,
+        "SYNC_TOKEN_PASSWORD": sync_password,
+        "ACR_REGISTRY_CERTIFICATE_VOLUME": "/var/acr/certs",
+        "ACR_REGISTRY_DATA_VOLUME": "/var/acr/data",
         "ACR_REGISTRY_CONNECTION_STRING": connection_string,
         "ACR_REGISTRY_LOGIN_SERVER": connected_registry_login_server
     }
@@ -483,6 +530,7 @@ def _update_ancestor_permissions(cmd,
                                  mode=None,
                                  remove_access=False):
     gateway_actions_list = [[gateway.lower()] + DEFAULT_GATEWAY_SCOPE]
+    repo_msg = ""
     if repositories is not None:
         repository_actions_list = [[repo] + REPO_SCOPES_BY_MODE[mode] for repo in repositories]
         repo_msg = ", ".join(repositories)
@@ -531,12 +579,13 @@ def _update_repo_permissions(cmd,
         actions=current_actions
     )
 
-    return scope_map_client.begin_update(
+    poller = scope_map_client.begin_update(
         resource_group_name,
         registry_name,
         sync_scope_map_name,
         scope_map_update_parameters
     )
+    return LongRunningOperation(cmd.cli_ctx)(poller)
 
 
 def _get_scope_map_actions_set(repos, actions):
@@ -545,13 +594,26 @@ def _get_scope_map_actions_set(repos, actions):
     return set(parse_scope_map_actions(repos))
 
 
-def acr_connected_registry_repo(cmd,
-                                client,
-                                connected_registry_name,
-                                registry_name,
-                                add_repos=None,
-                                remove_repos=None,
-                                resource_group_name=None):
+def acr_connected_registry_permissions_show(cmd,
+                                            client,
+                                            connected_registry_name,
+                                            registry_name,
+                                            resource_group_name=None):
+    _, resource_group_name = validate_managed_registry(
+        cmd, registry_name, resource_group_name)
+    connected_registry = acr_connected_registry_show(
+        cmd, client, connected_registry_name, registry_name, resource_group_name)
+    sync_token = get_token_from_id(cmd, connected_registry.parent.sync_properties.token_id)
+    return get_scope_map_from_id(cmd, sync_token.scope_map_id)
+
+
+def acr_connected_registry_permissions_update(cmd,
+                                              client,
+                                              connected_registry_name,
+                                              registry_name,
+                                              add_repos=None,
+                                              remove_repos=None,
+                                              resource_group_name=None):
     if not (add_repos or remove_repos):
         raise CLIError('No repository permissions to update.')
     _, resource_group_name = validate_managed_registry(
@@ -572,27 +634,27 @@ def acr_connected_registry_repo(cmd,
         raise CLIError("Connected registry '{}' doesn't exist.".format(connected_registry_name))
 
     # remove repo permissions from connected registry descendants.
-    remove_actions = REPO_SCOPES_BY_MODE[ConnectedRegistryModes.REGISTRY.value]
+    remove_actions = REPO_SCOPES_BY_MODE[ConnectedRegistryModes.READWRITE.value]
     if remove_repos is not None:
         remove_repos_txt = ", ".join(remove_repos)
         remove_repos_set = _get_scope_map_actions_set(remove_repos, remove_actions)
         descendants = _get_descendants(family_tree, target_connected_registry.id)
         for connected_registry in descendants:
-            msg = "Removing '{}' permissions from {}".format(remove_repos_txt, connected_registry.name)
+            msg = "Removing '{}' repository permissions from {}".format(remove_repos_txt, connected_registry.name)
             _update_repo_permissions(cmd, resource_group_name, registry_name,
                                      connected_registry, set(), remove_repos_set, msg=msg)
     else:
         remove_repos_set = set()
 
     # add repo permissions to ancestors.
-    add_actions = REPO_SCOPES_BY_MODE[target_connected_registry.mode]
+    add_actions = REPO_SCOPES_BY_MODE[target_connected_registry.mode.lower()]
     if add_repos is not None:
         add_repos_txt = ", ".join(add_repos)
         add_repos_set = _get_scope_map_actions_set(add_repos, add_actions)
         parent_id = target_connected_registry.parent.id
         while parent_id and not parent_id.isspace():
             connected_registry = family_tree[parent_id]["connectedRegistry"]
-            msg = "Adding '{}' permissions to {}".format(add_repos_txt, connected_registry.name)
+            msg = "Adding '{}' repository permissions to {}".format(add_repos_txt, connected_registry.name)
             _update_repo_permissions(cmd, resource_group_name, registry_name,
                                      connected_registry, add_repos_set, set(), msg=msg)
             parent_id = connected_registry.parent.id
@@ -601,12 +663,12 @@ def acr_connected_registry_repo(cmd,
 
     # update target connected registry repo permissions.
     if add_repos and remove_repos:
-        msg = "Adding '{}' and removing '{}' permissions in {}".format(
+        msg = "Adding '{}' and removing '{}' repository permissions in {}".format(
             add_repos_txt, remove_repos_txt, target_connected_registry.name)
     elif add_repos:
-        msg = "Adding '{}' permissions to {}".format(add_repos_txt, target_connected_registry.name)
+        msg = "Adding '{}' repository permissions to {}".format(add_repos_txt, target_connected_registry.name)
     else:
-        msg = "Removing '{}' permissions from {}".format(remove_repos_txt, target_connected_registry.name)
+        msg = "Removing '{}' repository permissions from {}".format(remove_repos_txt, target_connected_registry.name)
     _update_repo_permissions(cmd, resource_group_name, registry_name,
                              target_connected_registry, add_repos_set, remove_repos_set, msg=msg)
 # endregion

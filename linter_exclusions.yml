@@ -28,6 +28,41 @@ acr helm show:
     chart:
       rule_exclusions:
       - no_positional_parameters
+acr manifest delete:
+  parameters:
+    manifest_id:
+      rule_exclusions:
+      - no_positional_parameters
+acr manifest list:
+  parameters:
+    repo_id:
+      rule_exclusions:
+      - no_positional_parameters
+acr manifest list-referrers:
+  parameters:
+    manifest_id:
+      rule_exclusions:
+      - no_positional_parameters
+acr manifest metadata list:
+  parameters:
+    repo_id:
+      rule_exclusions:
+      - no_positional_parameters
+acr manifest metadata show:
+  parameters:
+    manifest_id:
+      rule_exclusions:
+      - no_positional_parameters
+acr manifest metadata update:
+  parameters:
+    manifest_id:
+      rule_exclusions:
+      - no_positional_parameters
+acr manifest show:
+  parameters:
+    manifest_id:
+      rule_exclusions:
+      - no_positional_parameters
 acr pack build:
   parameters:
     source_location:
@@ -261,7 +296,7 @@ aks create:
       - option_length_too_long
     enable_encryption_at_host:
       rule_exclusions:
-      - option_length_too_long  
+      - option_length_too_long
     assign_kubelet_identity:
       rule_exclusions:
       - option_length_too_long
@@ -2009,6 +2044,9 @@ iot dps linked-hub create:
     apply_allocation_policy:
       rule_exclusions:
       - option_length_too_long
+    hub_resource_group:
+      rule_exclusions:
+      - parameter_should_not_end_in_resource_group
 iot dps linked-hub update:
   parameters:
     apply_allocation_policy:
@@ -2029,6 +2067,11 @@ iot hub policy list:
 iot hub route list:
   rule_exclusions:
   - no_ids_for_list_commands
+iot hub routing-endpoint create:
+  parameters:
+    endpoint_resource_group:
+      rule_exclusions:
+      - parameter_should_not_end_in_resource_group
 iot hub routing-endpoint list:
   rule_exclusions:
   - no_ids_for_list_commands
@@ -2395,6 +2438,11 @@ network lb address-pool create:
     backend_addresses_config_file:
       rule_exclusions:
       - option_length_too_long
+network lb address-pool update:
+  parameters:
+    backend_addresses_config_file:
+      rule_exclusions:
+      - option_length_too_long
 network lb create:
   parameters:
     private_ip_address_version:
@@ -2420,6 +2468,22 @@ network lb inbound-nat-pool create:
       rule_exclusions:
       - option_length_too_long
 network lb inbound-nat-pool update:
+  parameters:
+    frontend_port_range_end:
+      rule_exclusions:
+      - option_length_too_long
+    frontend_port_range_start:
+      rule_exclusions:
+      - option_length_too_long
+network lb inbound-nat-rule create:
+  parameters:
+    frontend_port_range_end:
+      rule_exclusions:
+      - option_length_too_long
+    frontend_port_range_start:
+      rule_exclusions:
+      - option_length_too_long
+network lb inbound-nat-rule update:
   parameters:
     frontend_port_range_end:
       rule_exclusions:
@@ -3603,6 +3667,9 @@ vmss create:
     automatic_repairs_grace_period:
       rule_exclusions:
       - option_length_too_long
+    automatic_repairs_action:
+      rule_exclusions:
+      - option_length_too_long
     data_disk_encryption_sets:
       rule_exclusions:
       - option_length_too_long
@@ -3658,6 +3725,9 @@ vmss update:
       rule_exclusions:
       - option_length_too_long
     enable_automatic_repairs:
+      rule_exclusions:
+      - option_length_too_long
+    automatic_repairs_action:
       rule_exclusions:
       - option_length_too_long
     enable_terminate_notification:

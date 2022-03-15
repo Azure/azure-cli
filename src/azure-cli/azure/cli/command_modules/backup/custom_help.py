@@ -8,20 +8,22 @@ import json
 import re
 import os
 from datetime import datetime, timedelta
-from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
+from urllib.parse import urlparse
 
 from knack.log import get_logger
 
-from msrest.paging import Paged
-from msrestazure.tools import parse_resource_id, is_valid_resource_id
+from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id
 
-from azure.mgmt.recoveryservicesbackup.models import OperationStatusValues, JobStatus
+from azure.mgmt.recoveryservicesbackup.activestamp.models import OperationStatusValues, JobStatus
+from azure.mgmt.recoveryservicesbackup.passivestamp.models import CrrJobRequest
 
 from azure.cli.core.util import CLIError
+from azure.cli.core.commands import _is_paged
 from azure.cli.command_modules.backup._client_factory import (
     job_details_cf, protection_container_refresh_operation_results_cf,
-    backup_operation_statuses_cf, protection_container_operation_results_cf)
-from azure.cli.core.azclierror import ResourceNotFoundError, ValidationError
+    backup_operation_statuses_cf, protection_container_operation_results_cf,
+    backup_crr_job_details_cf, crr_operation_status_cf)
+from azure.cli.core.azclierror import ResourceNotFoundError, ValidationError, InvalidArgumentValueError
 
 
 logger = get_logger(__name__)
@@ -33,7 +35,7 @@ password_offset = 33
 password_length = 15
 
 backup_management_type_map = {"AzureVM": "AzureIaasVM", "AzureWorkload": "AzureWorkLoad",
-                              "AzureStorage": "AzureStorage"}
+                              "AzureStorage": "AzureStorage", "MAB": "MAB"}
 
 # Client Utilities
 
@@ -89,8 +91,10 @@ def get_containers(client, container_type, status, resource_group_name, vault_na
 def get_resource_name_and_rg(resource_group_name, name_or_id):
     if is_valid_resource_id(name_or_id):
         id_parts = parse_resource_id(name_or_id)
-        name = id_parts['name']
-        resource_group = id_parts['resource_group']
+        name = id_parts.get('name')
+        resource_group = id_parts.get('resource_group')
+        if name is None or resource_group is None:
+            raise InvalidArgumentValueError("Please provide a valid resource id.")
     else:
         name = name_or_id
         resource_group = resource_group_name
@@ -122,12 +126,17 @@ def validate_object(obj, error_message):
         raise ResourceNotFoundError(error_message)
 
 
+def get_pipeline_response(pipeline_response, _0, _1):
+    return pipeline_response
+
+
 def get_target_path(resource_type, path, logical_name, data_directory_paths):
     for filepath in data_directory_paths:
         if filepath.type == resource_type:
             data_directory_path = filepath
-    file_type = path.split('\\')[-1].split('.')[1]
-    file_name = logical_name + '_' + str(int(time.time())) + '.' + file_type
+    # Extracts the file extension type if it exists otherwise returns empty string
+    file_type = '.' + path.split('\\')[-1].split('.')[1] if len(path.split('\\')[-1].split('.')) > 1 else ""
+    file_name = logical_name + '_' + str(int(time.time())) + file_type
     return data_directory_path.path + file_name
 
 
@@ -144,66 +153,90 @@ def track_backup_ilr(cli_ctx, result, vault_name, resource_group):
 # pylint: disable=inconsistent-return-statements
 def track_backup_job(cli_ctx, result, vault_name, resource_group):
     job_details_client = job_details_cf(cli_ctx)
-
     operation_status = track_backup_operation(cli_ctx, resource_group, result, vault_name)
-
     if operation_status.properties:
         job_id = operation_status.properties.job_id
         job_details = job_details_client.get(vault_name, resource_group, job_id)
         return job_details
+    return operation_status
 
 
 def track_backup_operation(cli_ctx, resource_group, result, vault_name):
     backup_operation_statuses_client = backup_operation_statuses_cf(cli_ctx)
 
-    operation_id = get_operation_id_from_header(result.response.headers['Azure-AsyncOperation'])
+    operation_id = get_operation_id_from_header(result.http_response.headers['Azure-AsyncOperation'])
     operation_status = backup_operation_statuses_client.get(vault_name, resource_group, operation_id)
     while operation_status.status == OperationStatusValues.in_progress.value:
-        time.sleep(1)
+        time.sleep(5)
         operation_status = backup_operation_statuses_client.get(vault_name, resource_group, operation_id)
+    return operation_status
+
+
+def track_backup_crr_job(cli_ctx, result, azure_region, resource_id):
+    crr_job_details_client = backup_crr_job_details_cf(cli_ctx)
+    operation_status = track_backup_crr_operation(cli_ctx, result, azure_region)
+    if operation_status.properties:
+        time.sleep(10)
+        job_id = operation_status.properties.job_id
+        job_details = crr_job_details_client.get(azure_region, CrrJobRequest(resource_id=resource_id,
+                                                                             job_name=job_id))
+        return job_details
+
+
+def track_backup_crr_operation(cli_ctx, result, azure_region):
+    crr_operation_statuses_client = crr_operation_status_cf(cli_ctx)
+
+    operation_id = get_operation_id_from_header(result.http_response.headers['Azure-AsyncOperation'])
+    operation_status = crr_operation_statuses_client.get(azure_region, operation_id)
+    # print("tracking started", operation_status.__dict__)
+    while operation_status.status == OperationStatusValues.in_progress.value:
+        time.sleep(5)
+        operation_status = crr_operation_statuses_client.get(azure_region, operation_id)
+        # print("tracking continues", operation_status.__dict__)
+    # print("tracking completed", operation_status.__dict__)
     return operation_status
 
 
 def track_refresh_operation(cli_ctx, result, vault_name, resource_group):
     protection_container_refresh_operation_results_client = protection_container_refresh_operation_results_cf(cli_ctx)
 
-    operation_id = get_operation_id_from_header(result.response.headers['Location'])
+    operation_id = get_operation_id_from_header(result.http_response.headers['Location'])
     result = protection_container_refresh_operation_results_client.get(vault_name, resource_group,
                                                                        fabric_name, operation_id,
-                                                                       raw=True)
-    while result.response.status_code == 202:
-        time.sleep(1)
+                                                                       cls=get_pipeline_response)
+    while result.http_response.status_code == 202:
+        time.sleep(5)
         result = protection_container_refresh_operation_results_client.get(vault_name, resource_group,
                                                                            fabric_name, operation_id,
-                                                                           raw=True)
+                                                                           cls=get_pipeline_response)
 
 
 def track_register_operation(cli_ctx, result, vault_name, resource_group, container_name):
     protection_container_operation_results_client = protection_container_operation_results_cf(cli_ctx)
 
-    operation_id = get_operation_id_from_header(result.response.headers['Location'])
+    operation_id = get_operation_id_from_header(result.http_response.headers['Location'])
     result = protection_container_operation_results_client.get(vault_name, resource_group,
                                                                fabric_name, container_name,
-                                                               operation_id, raw=True)
-    while result.response.status_code == 202:
-        time.sleep(1)
+                                                               operation_id, cls=get_pipeline_response)
+    while result.http_response.status_code == 202:
+        time.sleep(5)
         result = protection_container_operation_results_client.get(vault_name, resource_group,
                                                                    fabric_name, container_name,
-                                                                   operation_id, raw=True)
+                                                                   operation_id, cls=get_pipeline_response)
 
 
 def track_inquiry_operation(cli_ctx, result, vault_name, resource_group, container_name):
     protection_container_operation_results_client = protection_container_operation_results_cf(cli_ctx)
 
-    operation_id = get_operation_id_from_header(result.response.headers['Location'])
+    operation_id = get_operation_id_from_header(result.http_response.headers['Location'])
     result = protection_container_operation_results_client.get(vault_name, resource_group,
                                                                fabric_name, container_name,
-                                                               operation_id, raw=True)
-    while result.response.status_code == 202:
-        time.sleep(1)
+                                                               operation_id, cls=get_pipeline_response)
+    while result.http_response.status_code == 202:
+        time.sleep(5)
         result = protection_container_operation_results_client.get(vault_name, resource_group,
                                                                    fabric_name, container_name,
-                                                                   operation_id, raw=True)
+                                                                   operation_id, cls=get_pipeline_response)
 
 
 def job_in_progress(job_status):
@@ -213,7 +246,7 @@ def job_in_progress(job_status):
 
 
 def get_list_from_paged_response(obj_list):
-    return list(obj_list) if isinstance(obj_list, Paged) else obj_list
+    return list(obj_list) if _is_paged(obj_list) else obj_list
 
 
 def get_none_one_or_many(obj_list):
@@ -372,19 +405,25 @@ def get_vault_from_arm_id(arm_id):
 
 def validate_and_extract_container_type(container_name, backup_management_type):
     if not is_native_name(container_name) and backup_management_type is None:
-        raise CLIError("""backup management type required""")
+        raise CLIError("""--backup-management-type is required when providing container's friendly name.""")
 
     if not is_native_name(container_name) and backup_management_type is not None:
         if backup_management_type in backup_management_type_map.values():
             return backup_management_type
         return backup_management_type_map[backup_management_type]
 
-    container_type = container_name.split(";")[0]
-    container_type_mappings = {"IaasVMContainer": "AzureIaasVM", "StorageContainer": "AzureStorage",
-                               "VMAppContainer": "AzureWorkload"}
+    container_type = container_name.split(";")[0].lower()
+    container_type_mappings = {"iaasvmcontainer": "AzureIaasVM", "storagecontainer": "AzureStorage",
+                               "vmappcontainer": "AzureWorkload", "windows": "MAB",
+                               "sqlagworkloadcontainer": "AzureWorkload"}
 
     if container_type in container_type_mappings:
         return container_type_mappings[container_type]
+    logger.warning(
+        """
+        Could not extract the backup management type. If the command fails check if the container name specified is
+        complete or try using container friendly name instead.
+        """)
     return None
 
 

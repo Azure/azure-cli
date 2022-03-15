@@ -35,6 +35,7 @@ def load_arguments(self, _):
         c.argument('backup_operators', arg_type=tags_type)
         c.argument('security_operators', arg_type=tags_type)
         c.argument('allow_local_ldap_users', arg_type=tags_type)
+        c.argument('encrypt_dc_conn', options_list=['--encrypt-dc-conn'], arg_type=get_three_state_flag())
 
     with self.argument_context('netappfiles account ad list') as c:
         c.argument('account_name', help='The name of the ANF account', id_part=None)
@@ -45,7 +46,6 @@ def load_arguments(self, _):
         c.argument('daily_backups', options_list=['--daily-backups', '-d'], help='Daily backups count to keep')
         c.argument('weekly_backups', options_list=['--weekly-backups', '-w'], help='Weekly backups count to keep')
         c.argument('monthly_backups', options_list=['--monthly-backups', '-m'], help='Monthly backups count to keep')
-        c.argument('yearly_backups', options_list=['--yearly-backups', '-y'], help='Yearly backups count to keep')
 
     with self.argument_context('netappfiles account backup-policy list') as c:
         c.argument('account_name', account_name_type, id_part=None)
@@ -85,6 +85,7 @@ def load_volumeArguments(self, account_name_type, pool_name_type, volume_name_ty
         c.argument('cifs', arg_type=get_three_state_flag())
         c.argument('ldap_enabled', arg_type=get_three_state_flag())
         c.argument('cool_access', arg_type=get_three_state_flag())
+        c.argument('is_def_quota_enabled', arg_type=get_three_state_flag())
 
     with self.argument_context('netappfiles volume list') as c:
         c.argument('account_name', account_name_type, id_part=None)
