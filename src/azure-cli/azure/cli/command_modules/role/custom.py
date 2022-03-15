@@ -1615,7 +1615,7 @@ def _create_self_signed_cert_with_keyvault(cli_ctx, years, keyvault, keyvault_ce
                 'keyCertSign'
             ],
             'subject': 'CN=KeyVault Generated',
-            'validity_in_months': int((years * 12) + 1)
+            'validity_in_months': int(years * 12)
         }
     }
     vault_base_url = 'https://{}{}/'.format(keyvault, cli_ctx.cloud.suffixes.keyvault_dns)
