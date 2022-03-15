@@ -559,6 +559,7 @@ class VMAttachDisksOnCreate(ScenarioTest):
 
 class VMOSDiskSize(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_os_disk_size')
     def test_vm_set_os_disk_size(self, resource_group):
         # test unmanaged disk
