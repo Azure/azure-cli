@@ -210,7 +210,7 @@ interactions:
       User-Agent:
       - python-requests/2.26.0
     method: GET
-    uri: https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json
+    uri: https://raw.githubusercontent.com/Azure/azure-rest-api-specs/main/arm-compute/quickstart-templates/aliases.json
   response:
     body:
       string: "{\n  \"$schema\": \"http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json\",\n
@@ -224,16 +224,19 @@ interactions:
         \         },\n          \"Flatcar\": {\n            \"publisher\": \"kinvolk\",\n
         \           \"offer\": \"flatcar-container-linux-free\",\n            \"sku\":
         \"stable\",\n            \"version\": \"latest\"\n          },\n          \"openSUSE-Leap\":
-        {\n            \"publisher\": \"SUSE\",\n            \"offer\": \"openSUSE-Leap\",\n
-        \           \"sku\": \"42.3\",\n            \"version\": \"latest\"\n          },\n
+        {\n            \"publisher\": \"SUSE\",\n            \"offer\": \"opensuse-leap-15-3\",\n
+        \           \"sku\": \"gen2\",\n            \"version\": \"latest\"\n          },\n
         \         \"RHEL\": {\n            \"publisher\": \"RedHat\",\n            \"offer\":
         \"RHEL\",\n            \"sku\": \"7-LVM\",\n            \"version\": \"latest\"\n
         \         },\n          \"SLES\": {\n            \"publisher\": \"SUSE\",\n
-        \           \"offer\": \"SLES\",\n            \"sku\": \"15\",\n            \"version\":
-        \"latest\"\n          },\n          \"UbuntuLTS\": {\n            \"publisher\":
-        \"Canonical\",\n            \"offer\": \"UbuntuServer\",\n            \"sku\":
-        \"18.04-LTS\",\n            \"version\": \"latest\"\n          }\n        },\n
-        \       \"Windows\": {\n          \"Win2019Datacenter\": {\n            \"publisher\":
+        \           \"offer\": \"sles-15-sp3\",\n            \"sku\": \"gen2\",\n
+        \           \"version\": \"latest\"\n          },\n          \"UbuntuLTS\":
+        {\n            \"publisher\": \"Canonical\",\n            \"offer\": \"UbuntuServer\",\n
+        \           \"sku\": \"18.04-LTS\",\n            \"version\": \"latest\"\n
+        \         }\n        },\n        \"Windows\": {\n          \"Win2022Datacenter\":
+        {\n            \"publisher\": \"MicrosoftWindowsServer\",\n            \"offer\":
+        \"WindowsServer\",\n            \"sku\": \"2022-Datacenter\",\n            \"version\":
+        \"latest\"\n          },\n          \"Win2019Datacenter\": {\n            \"publisher\":
         \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\",\n            \"sku\":
         \"2019-Datacenter\",\n            \"version\": \"latest\"\n          },\n
         \         \"Win2016Datacenter\": {\n            \"publisher\": \"MicrosoftWindowsServer\",\n
@@ -258,7 +261,7 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '2525'
+      - '2744'
       content-security-policy:
       - default-src 'none'; style-src 'unsafe-inline'; sandbox
       content-type:
@@ -266,7 +269,7 @@ interactions:
       date:
       - Fri, 18 Feb 2022 11:15:59 GMT
       etag:
-      - W/"54bceef15b892f2aa7f4c2145a49f1b5e33608722acdbb47933d7b6cbebbd7f4"
+      - W/"d5acead0b38a79d988c245a7a15ec01f999da9244c97bbdc1fa2ec70d9e433f5"
       expires:
       - Fri, 18 Feb 2022 11:20:59 GMT
       source-age:
@@ -580,7 +583,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '3394'
+      - '3395'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -1103,7 +1106,7 @@ interactions:
       x-ms-ratelimit-remaining-resource:
       - Microsoft.Compute/PutVM3Min;233,Microsoft.Compute/PutVM30Min;1193
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1197'
     status:
       code: 200
       message: OK
@@ -1181,6 +1184,57 @@ interactions:
       string: "{\r\n  \"startTime\": \"2022-02-18T11:18:00.9061049+00:00\",\r\n  \"endTime\":
         \"2022-02-18T11:18:06.5154586+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
         \ \"name\": \"1e8310af-6b39-4f5f-ae55-e98e41be273f\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '134'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 22 Feb 2022 10:16:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetOperation3Min;14987,Microsoft.Compute/GetOperation30Min;29966
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm disk attach
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --vm-name --name --new --size-gb
+      User-Agent:
+      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/southeastasia/operations/3ceef074-d733-47b4-b860-fb797e247648?p=0958ee4b-1a81-40fe-8876-5f7800c8adc0&api-version=2021-11-01
+  response:
+    body:
+      string: "{\r\n  \"startTime\": \"2022-02-22T10:16:32.6981997+00:00\",\r\n  \"endTime\":
+        \"2022-02-22T10:16:39.5883433+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
+        \ \"name\": \"3ceef074-d733-47b4-b860-fb797e247648\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -3411,7 +3465,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '188'
+      - '186'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -4198,7 +4252,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1038'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -4306,7 +4360,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1038'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -4414,7 +4468,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1038'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -4468,7 +4522,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1038'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -4522,7 +4576,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1038'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -4576,7 +4630,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1038'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -4846,7 +4900,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1038'
+      - '1037'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -5116,7 +5170,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1037'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -5170,7 +5224,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1037'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -5278,7 +5332,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1038'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -5332,7 +5386,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1037'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -5440,7 +5494,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1038'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -5602,7 +5656,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1037'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -5710,7 +5764,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1038'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -5764,7 +5818,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1038'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -5818,7 +5872,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1038'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -5872,7 +5926,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1038'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -5980,7 +6034,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1038'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -6034,7 +6088,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1038'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -6088,7 +6142,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1038'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -6142,7 +6196,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1038'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -6196,7 +6250,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1038'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -6358,7 +6412,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1037'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -6466,7 +6520,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1037'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -6520,7 +6574,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1037'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -6574,7 +6628,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1037'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -6628,7 +6682,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1038'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -6736,7 +6790,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1038'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -6790,7 +6844,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1038'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -6898,7 +6952,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1037'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -7006,7 +7060,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1038'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -7060,7 +7114,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1038'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -7168,7 +7222,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1038'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -7276,7 +7330,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1037'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -7384,7 +7438,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1038'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -7600,7 +7654,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1038'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -7924,7 +7978,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1037'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -8032,7 +8086,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1038'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -8410,7 +8464,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1036'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -8518,7 +8572,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1038'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -8626,7 +8680,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1038'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -8680,7 +8734,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1038'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -8788,7 +8842,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1038'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -8896,7 +8950,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1038'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -9004,7 +9058,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1038'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -9112,7 +9166,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1036'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -9166,7 +9220,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1038'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -9274,7 +9328,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1037'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -9328,7 +9382,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1038'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -10316,7 +10370,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1109'
+      - '1110'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -10425,7 +10479,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1201'
+      - '1202'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -11211,7 +11265,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1109'
+      - '1110'
       content-type:
       - application/json; charset=utf-8
       date:

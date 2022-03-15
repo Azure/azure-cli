@@ -18,6 +18,7 @@ def load_arguments_eh(self, _):
     from knack.arguments import CLIArgumentType
     from azure.cli.core.profiles import ResourceType
     (KeyType, AccessRights, SkuName, KeySource) = self.get_models('KeyType', 'AccessRights', 'SkuName', 'KeySource', resource_type=ResourceType.MGMT_EVENTHUB)
+    from azure.cli.command_modules.eventhubs.action import AlertAddEncryption
 
     rights_arg_type = CLIArgumentType(options_list=['--rights'], nargs='+', arg_type=get_enum_type(AccessRights), validator=validate_rights, help='Space-separated list of Authorization rule rights')
     key_arg_type = CLIArgumentType(options_list=['--key'], arg_type=get_enum_type(KeyType), help='specifies Primary or Secondary key needs to be reset')
@@ -52,9 +53,14 @@ def load_arguments_eh(self, _):
                    help='A boolean value that indicates whether Managed Identity is enabled.')
         c.argument('disable_local_auth', options_list=['--disable-local-auth'], is_preview=True, arg_type=get_three_state_flag(),
                    help='A boolean value that indicates whether SAS authentication is enabled/disabled for the Event Hubs')
+        c.argument('mi_system_assigned', arg_group='Managed Identity',
+                   arg_type=get_three_state_flag(),
+                   help='Enable System Assigned Identity')
+        c.argument('mi_user_assigned', arg_group='Managed Identity', nargs='+', help='List of User Assigned Identity ids.')
+        c.argument('encryption_config', action=AlertAddEncryption, nargs='+', help='List of KeyVaultProperties objects.')
 
     with self.argument_context('eventhubs namespace create', min_api='2021-06-01-preview') as c:
-        c.argument('cluster_arm_id', options_list=['--cluster-arm-id'], is_preview=True, help='luster ARM ID of the Namespace')
+        c.argument('cluster_arm_id', options_list=['--cluster-arm-id'], is_preview=True, help='Cluster ARM ID of the Namespace')
 
     with self.argument_context('eventhubs namespace update', arg_group='Managed Identity', min_api='2021-06-01-preview') as c:
         c.argument('key_source', options_list=['--key-source'], is_preview=True, arg_type=get_enum_type(KeySource),
@@ -225,3 +231,22 @@ def load_arguments_eh(self, _):
     with self.argument_context('eventhubs namespace private-link-resource',
                                resource_type=ResourceType.MGMT_EVENTHUB) as c:
         c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of the Namespace')
+
+# Identity
+    with self.argument_context('eventhubs namespace identity',
+                               resource_type=ResourceType.MGMT_EVENTHUB) as c:
+        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of the Namespace')
+
+    for scope in ['eventhubs namespace identity assign', 'eventhubs namespace identity remove']:
+        with self.argument_context(scope, resource_type=ResourceType.MGMT_EVENTHUB) as c:
+            c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of the Namespace')
+            c.argument('system_assigned', arg_type=get_three_state_flag(), help='System Assigned Identity')
+            c.argument('user_assigned', nargs='+', help='User Assigned Identity')
+
+# Encryption
+    with self.argument_context('eventhubs namespace encryption', resource_type=ResourceType.MGMT_EVENTHUB) as c:
+        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of the Namespace')
+
+    for scope in ['eventhubs namespace encryption add', 'eventhubs namespace identity remove']:
+        with self.argument_context(scope, resource_type=ResourceType.MGMT_EVENTHUB) as c:
+            c.argument('encryption_config', action=AlertAddEncryption, nargs='+', help='List of KeyVaultProperties objects.')

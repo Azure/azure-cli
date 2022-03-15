@@ -2,72 +2,104 @@ interactions:
 - request:
     body: null
     headers:
-      Accept: ['*/*']
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      User-Agent: [python-requests/2.19.1]
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.26.0
     method: GET
-    uri: https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json
+    uri: https://raw.githubusercontent.com/Azure/azure-rest-api-specs/main/arm-compute/quickstart-templates/aliases.json
   response:
-    body: {string: "{\n  \"$schema\":\"http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json\"\
-        ,\n  \"contentVersion\":\"1.0.0.0\",\n  \"parameters\":{},\n  \"variables\"\
-        :{},\n  \"resources\":[],\n\n  \"outputs\":{\n    \"aliases\":{\n      \"\
-        type\":\"object\",\n      \"value\":{\n\n        \"Linux\":{\n          \"\
-        CentOS\":{\n            \"publisher\":\"OpenLogic\",\n            \"offer\"\
-        :\"CentOS\",\n            \"sku\":\"7.3\",\n            \"version\":\"latest\"\
-        \n          },\n          \"CoreOS\":{\n            \"publisher\":\"CoreOS\"\
-        ,\n            \"offer\":\"CoreOS\",\n            \"sku\":\"Stable\",\n  \
-        \          \"version\":\"latest\"\n          },\n          \"Debian\":{\n\
-        \            \"publisher\":\"credativ\",\n            \"offer\":\"Debian\"\
-        ,\n            \"sku\":\"8\",\n            \"version\":\"latest\"\n      \
-        \    },\n          \"openSUSE-Leap\": {\n            \"publisher\":\"SUSE\"\
-        ,\n            \"offer\":\"openSUSE-Leap\",\n            \"sku\":\"42.3\"\
-        ,\n            \"version\": \"latest\"\n          },\n          \"RHEL\":{\n\
-        \            \"publisher\":\"RedHat\",\n            \"offer\":\"RHEL\",\n\
-        \            \"sku\":\"7.3\",\n            \"version\":\"latest\"\n      \
-        \    },\n          \"SLES\":{\n            \"publisher\":\"SUSE\",\n     \
-        \       \"offer\":\"SLES\",\n            \"sku\":\"12-SP2\",\n           \
-        \ \"version\":\"latest\"\n          },\n          \"UbuntuLTS\":{\n      \
-        \      \"publisher\":\"Canonical\",\n            \"offer\":\"UbuntuServer\"\
-        ,\n            \"sku\":\"16.04-LTS\",\n            \"version\":\"latest\"\n\
-        \          }\n        },\n\n        \"Windows\":{\n          \"Win2016Datacenter\"\
-        :{\n            \"publisher\":\"MicrosoftWindowsServer\",\n            \"\
-        offer\":\"WindowsServer\",\n            \"sku\":\"2016-Datacenter\",\n   \
-        \         \"version\":\"latest\"\n          },\n          \"Win2012R2Datacenter\"\
-        :{\n            \"publisher\":\"MicrosoftWindowsServer\",\n            \"\
-        offer\":\"WindowsServer\",\n            \"sku\":\"2012-R2-Datacenter\",\n\
-        \            \"version\":\"latest\"\n          },\n          \"Win2012Datacenter\"\
-        :{\n            \"publisher\":\"MicrosoftWindowsServer\",\n            \"\
-        offer\":\"WindowsServer\",\n            \"sku\":\"2012-Datacenter\",\n   \
-        \         \"version\":\"latest\"\n          },\n          \"Win2008R2SP1\"\
-        :{\n            \"publisher\":\"MicrosoftWindowsServer\",\n            \"\
-        offer\":\"WindowsServer\",\n            \"sku\":\"2008-R2-SP1\",\n       \
-        \     \"version\":\"latest\"\n          }\n        }\n      }\n    }\n  }\n\
-        }\n"}
+    body:
+      string: "{\n  \"$schema\": \"http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json\",\n
+        \ \"contentVersion\": \"1.0.0.0\",\n  \"parameters\": {},\n  \"variables\":
+        {},\n  \"resources\": [],\n  \"outputs\": {\n    \"aliases\": {\n      \"type\":
+        \"object\",\n      \"value\": {\n        \"Linux\": {\n          \"CentOS\":
+        {\n            \"publisher\": \"OpenLogic\",\n            \"offer\": \"CentOS\",\n
+        \           \"sku\": \"7.5\",\n            \"version\": \"latest\"\n          },\n
+        \         \"Debian\": {\n            \"publisher\": \"Debian\",\n            \"offer\":
+        \"debian-10\",\n            \"sku\": \"10\",\n            \"version\": \"latest\"\n
+        \         },\n          \"Flatcar\": {\n            \"publisher\": \"kinvolk\",\n
+        \           \"offer\": \"flatcar-container-linux-free\",\n            \"sku\":
+        \"stable\",\n            \"version\": \"latest\"\n          },\n          \"openSUSE-Leap\":
+        {\n            \"publisher\": \"SUSE\",\n            \"offer\": \"opensuse-leap-15-3\",\n
+        \           \"sku\": \"gen2\",\n            \"version\": \"latest\"\n          },\n
+        \         \"RHEL\": {\n            \"publisher\": \"RedHat\",\n            \"offer\":
+        \"RHEL\",\n            \"sku\": \"7-LVM\",\n            \"version\": \"latest\"\n
+        \         },\n          \"SLES\": {\n            \"publisher\": \"SUSE\",\n
+        \           \"offer\": \"sles-15-sp3\",\n            \"sku\": \"gen2\",\n
+        \           \"version\": \"latest\"\n          },\n          \"UbuntuLTS\":
+        {\n            \"publisher\": \"Canonical\",\n            \"offer\": \"UbuntuServer\",\n
+        \           \"sku\": \"18.04-LTS\",\n            \"version\": \"latest\"\n
+        \         }\n        },\n        \"Windows\": {\n          \"Win2022Datacenter\":
+        {\n            \"publisher\": \"MicrosoftWindowsServer\",\n            \"offer\":
+        \"WindowsServer\",\n            \"sku\": \"2022-Datacenter\",\n            \"version\":
+        \"latest\"\n          },\n          \"Win2019Datacenter\": {\n            \"publisher\":
+        \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\",\n            \"sku\":
+        \"2019-Datacenter\",\n            \"version\": \"latest\"\n          },\n
+        \         \"Win2016Datacenter\": {\n            \"publisher\": \"MicrosoftWindowsServer\",\n
+        \           \"offer\": \"WindowsServer\",\n            \"sku\": \"2016-Datacenter\",\n
+        \           \"version\": \"latest\"\n          },\n          \"Win2012R2Datacenter\":
+        {\n            \"publisher\": \"MicrosoftWindowsServer\",\n            \"offer\":
+        \"WindowsServer\",\n            \"sku\": \"2012-R2-Datacenter\",\n            \"version\":
+        \"latest\"\n          },\n          \"Win2012Datacenter\": {\n            \"publisher\":
+        \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\",\n            \"sku\":
+        \"2012-Datacenter\",\n            \"version\": \"latest\"\n          },\n
+        \         \"Win2008R2SP1\": {\n            \"publisher\": \"MicrosoftWindowsServer\",\n
+        \           \"offer\": \"WindowsServer\",\n            \"sku\": \"2008-R2-SP1\",\n
+        \           \"version\": \"latest\"\n          }\n        }\n      }\n    }\n
+        \ }\n}\n"
     headers:
-      accept-ranges: [bytes]
-      access-control-allow-origin: ['*']
-      cache-control: [max-age=300]
-      connection: [keep-alive]
-      content-length: ['2235']
-      content-security-policy: [default-src 'none'; style-src 'unsafe-inline'; sandbox]
-      content-type: [text/plain; charset=utf-8]
-      date: ['Sat, 21 Jul 2018 02:56:31 GMT']
-      etag: ['"60d07919b4224266adafb81340896eea100dc887"']
-      expires: ['Sat, 21 Jul 2018 03:01:31 GMT']
-      source-age: ['0']
-      strict-transport-security: [max-age=31536000]
-      vary: ['Authorization,Accept-Encoding']
-      via: [1.1 varnish]
-      x-cache: [MISS]
-      x-cache-hits: ['0']
-      x-content-type-options: [nosniff]
-      x-fastly-request-id: [03e9badfd1fc445d14795b6472ef5878da836330]
-      x-frame-options: [deny]
-      x-geo-block-list: ['']
-      x-github-request-id: ['5000:5C5E:5EF38E7:63C8222:5B52A0DF']
-      x-served-by: [cache-sea1034-SEA]
-      x-timer: ['S1532141792.867541,VS0,VE98']
-      x-xss-protection: [1; mode=block]
-    status: {code: 200, message: OK}
+      accept-ranges:
+      - bytes
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - max-age=300
+      connection:
+      - keep-alive
+      content-length:
+      - '2744'
+      content-security-policy:
+      - default-src 'none'; style-src 'unsafe-inline'; sandbox
+      content-type:
+      - text/plain; charset=utf-8
+      date:
+      - Tue, 01 Mar 2022 03:25:26 GMT
+      etag:
+      - W/"d5acead0b38a79d988c245a7a15ec01f999da9244c97bbdc1fa2ec70d9e433f5"
+      expires:
+      - Tue, 01 Mar 2022 03:30:26 GMT
+      source-age:
+      - '0'
+      strict-transport-security:
+      - max-age=31536000
+      vary:
+      - Authorization,Accept-Encoding,Origin
+      via:
+      - 1.1 varnish
+      x-cache:
+      - MISS
+      x-cache-hits:
+      - '0'
+      x-content-type-options:
+      - nosniff
+      x-fastly-request-id:
+      - 39abb71d9979b9952a1c72bfc7784a52576fb5ee
+      x-frame-options:
+      - deny
+      x-github-request-id:
+      - 47A6:1AAA:18866B:36AD46:621D9226
+      x-served-by:
+      - cache-qpg1251-QPG
+      x-timer:
+      - S1646105126.270828,VS0,VE304
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
 version: 1

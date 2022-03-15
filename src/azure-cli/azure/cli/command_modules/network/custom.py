@@ -3317,7 +3317,8 @@ def update_express_route_port_link(cmd, instance, parent, express_route_port_nam
 def create_private_endpoint(cmd, resource_group_name, private_endpoint_name, subnet,
                             private_connection_resource_id, connection_name, group_ids=None,
                             virtual_network_name=None, tags=None, location=None,
-                            request_message=None, manual_request=None, edge_zone=None, custom_interface_name=None):
+                            request_message=None, manual_request=None, edge_zone=None,
+                            ip_configurations=None, application_security_groups=None, custom_interface_name=None):
     client = network_client_factory(cmd.cli_ctx).private_endpoints
     PrivateEndpoint, Subnet, PrivateLinkServiceConnection = cmd.get_models('PrivateEndpoint',
                                                                            'Subnet',
@@ -3340,8 +3341,30 @@ def create_private_endpoint(cmd, resource_group_name, private_endpoint_name, sub
     if edge_zone:
         private_endpoint.extended_location = _edge_zone_model(cmd, edge_zone)
 
-    if cmd.supported_api_version(min_api='2021-05-01') and custom_interface_name:
-        private_endpoint.custom_network_interface_name = custom_interface_name
+    if cmd.supported_api_version(min_api='2021-05-01'):
+        if ip_configurations:
+            PrivateEndpointIPConfiguration = cmd.get_models("PrivateEndpointIPConfiguration")
+            for prop in ip_configurations:
+                ip_config = PrivateEndpointIPConfiguration(
+                    name=prop['name'],
+                    group_id=prop['group_id'],
+                    member_name=prop['member_name'],
+                    private_ip_address=prop['private_ip_address']
+                )
+                try:
+                    private_endpoint.ip_configurations.append(ip_config)
+                except AttributeError:
+                    private_endpoint.ip_configurations = [ip_config]
+        if application_security_groups:
+            ApplicationSecurityGroup = cmd.get_models("ApplicationSecurityGroup")
+            for prop in application_security_groups:
+                asg = ApplicationSecurityGroup(id=prop["id"])
+                try:
+                    private_endpoint.application_security_groups.append(asg)
+                except AttributeError:
+                    private_endpoint.application_security_groups = [asg]
+        if custom_interface_name:
+            private_endpoint.custom_network_interface_name = custom_interface_name
 
     return client.begin_create_or_update(resource_group_name, private_endpoint_name, private_endpoint)
 
@@ -3702,6 +3725,16 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
 def list_load_balancer_nic(cmd, resource_group_name, load_balancer_name):
     client = network_client_factory(cmd.cli_ctx).load_balancer_network_interfaces
     return client.list(resource_group_name, load_balancer_name)
+
+
+def list_load_balancer_mapping(cmd, resource_group_name, load_balancer_name, backend_pool_name, request):
+    client = network_client_factory(cmd.cli_ctx).load_balancers
+    return client.begin_list_inbound_nat_rule_port_mappings(
+        resource_group_name,
+        load_balancer_name,
+        backend_pool_name,
+        request
+    )
 
 
 def create_lb_inbound_nat_rule(

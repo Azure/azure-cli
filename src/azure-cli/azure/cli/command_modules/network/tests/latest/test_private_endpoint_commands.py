@@ -959,7 +959,7 @@ class NetworkPrivateLinkCosmosDBScenarioTest(ScenarioTest):
 
 
 class NetworkPrivateLinkWebappScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(location='westus2')
+    @ResourceGroupPreparer(location='westus')
     def test_private_link_resource_webapp(self, resource_group):
         self.kwargs.update({
             'plan_name': self.create_random_name('webapp-privatelink-asp', 40),
@@ -974,8 +974,8 @@ class NetworkPrivateLinkWebappScenarioTest(ScenarioTest):
             self.check('length(@)', 1),
         ])
 
-    @unittest.skip('Service Unavailable')
-    @ResourceGroupPreparer(location='westus2')
+
+    @ResourceGroupPreparer(location='westus')
     def test_private_endpoint_connection_webapp(self, resource_group):
         self.kwargs.update({
             'resource_group': resource_group,
@@ -1014,7 +1014,7 @@ class NetworkPrivateLinkWebappScenarioTest(ScenarioTest):
         self.kwargs['endpoint_request'] = result[0]['name']
 
         self.cmd('network private-endpoint-connection approve -g {resource_group} --resource-name {webapp_name} -n {endpoint_request} --type Microsoft.Web/sites',
-                 checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Approving')])
+                 checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Approved')])
 
         # Create second endpoint
         result = self.cmd('network private-endpoint create -g {resource_group} -n {second_endpoint_name} --vnet-name {vnet_name} --subnet {subnet_name} '
@@ -2176,6 +2176,7 @@ class NetworkPrivateLinkScenarioTest(ScenarioTest):
 
         _test_private_endpoint(self, approve=False, rejected=False)
 
+    @unittest.skip("ASE V3 create takes 2-2.5 hrs to complete, this is a not good test, make this a mock test instead")
     @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_web")
     def test_private_endpoint_connection_web(self, resource_group):
 
@@ -2904,6 +2905,79 @@ class NetworkPrivateLinkDatabricksScenarioTest(ScenarioTest):
         self.cmd('az network private-endpoint-connection list --id {private-endpoint-connection-id}', checks=[
             self.check('length(@)', '0'),
         ])
+
+
+class NetworkPrivateLinkRecoveryServicesScenarioTest(ScenarioTest):
+    @live_only()
+    @ResourceGroupPreparer(name_prefix='cli_recoveryservices_pe', random_name_length=40, location="centraluseuap")
+    def test_recoveryservices_private_endpoint(self, resource_group):
+        self.kwargs.update({
+            'vault': self.create_random_name('cli-recoveryservices-vault-', 40),
+            'vnet': self.create_random_name('cli-recoveryservices-vnet-', 40),
+            'subnet': self.create_random_name('cli-recoveryservices-subnet-', 40),
+            'private_endpoint': self.create_random_name('cli-recoveryservices-pe-', 40),
+            'private_endpoint_connection': self.create_random_name('cli-recoveryservices-pec-', 40),
+            'location': 'centraluseuap',
+            'approve_description_msg': 'Approved!',
+            'reject_description_msg': 'Rejected!'
+        })
+
+        # Create recovery services vault
+        self.kwargs['vault_id']= self.cmd(
+            'backup vault create --name {vault} --resource-group {rg} --location {location} --query id').output
+
+        # Enable System assigned msi
+        self.kwargs['system_msi'] = self.cmd(
+            'backup vault identity assign --system-assigned -g {rg} -n {vault} --query identity.principalId').output
+
+        # Give rg contributor access to system msi
+        self.cmd('role assignment create --role Contributor --assignee-object-id {system_msi} -g {rg}')
+
+        # Create virtual net and sub net
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet}')
+
+        # Update sub net
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} --name {subnet} '
+                 '--disable-private-endpoint-network-policies true',
+                 checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
+
+        # Test list private link resources
+        vault_private_link_resources = self.cmd(
+            'network private-link-resource list --id {vault_id} ').get_output_in_json()
+        self.kwargs['group_id'] = vault_private_link_resources[0]['properties']['groupId']
+
+        # Create private endpoint
+        private_endpoint = self.cmd(
+            'network private-endpoint create -g {rg} -n {private_endpoint} --vnet-name {vnet} --subnet {subnet} '
+            '--private-connection-resource-id {vault_id} --connection-name {private_endpoint_connection} '
+            '--group-id {group_id}').get_output_in_json()
+        self.assertTrue(self.kwargs['private_endpoint'].lower() in private_endpoint['name'].lower())
+
+        # Test get private endpoint connection
+        private_endpoint_connections = self.cmd('network private-endpoint-connection list --id {vault_id}',
+                                                checks=[
+                                                    self.check(
+                                                        '@[0].properties.privateLinkServiceConnectionState.status',
+                                                        'Approved'),
+                                                ]).get_output_in_json()
+
+        self.kwargs['private-endpoint-connection-id'] = private_endpoint_connections[0]['id']
+
+        # Test reject private endpoint connection
+        self.cmd(
+            'network private-endpoint-connection reject --id {private-endpoint-connection-id}'
+            ' --description {reject_description_msg}', checks=[
+                  self.check('properties.privateLinkServiceConnectionState.status', 'Rejected')
+            ])
+
+        # Test delete
+        self.cmd('az network private-endpoint-connection delete --id {private-endpoint-connection-id} -y')
+        time.sleep(30)
+        self.cmd('az network private-endpoint-connection list --id {private-endpoint-connection-id}', checks=[
+            self.check('length(@)', '0'),
+        ])
+
+        self.cmd('vault delete --name {vault} --resource-group {rg}')
 
 
 if __name__ == '__main__':

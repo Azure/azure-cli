@@ -149,7 +149,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1196'
       x-powered-by:
       - ASP.NET
     status:
@@ -210,7 +210,7 @@ interactions:
       User-Agent:
       - python-requests/2.26.0
     method: GET
-    uri: https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json
+    uri: https://raw.githubusercontent.com/Azure/azure-rest-api-specs/main/arm-compute/quickstart-templates/aliases.json
   response:
     body:
       string: "{\n  \"$schema\": \"http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json\",\n
@@ -224,16 +224,19 @@ interactions:
         \         },\n          \"Flatcar\": {\n            \"publisher\": \"kinvolk\",\n
         \           \"offer\": \"flatcar-container-linux-free\",\n            \"sku\":
         \"stable\",\n            \"version\": \"latest\"\n          },\n          \"openSUSE-Leap\":
-        {\n            \"publisher\": \"SUSE\",\n            \"offer\": \"openSUSE-Leap\",\n
-        \           \"sku\": \"42.3\",\n            \"version\": \"latest\"\n          },\n
+        {\n            \"publisher\": \"SUSE\",\n            \"offer\": \"opensuse-leap-15-3\",\n
+        \           \"sku\": \"gen2\",\n            \"version\": \"latest\"\n          },\n
         \         \"RHEL\": {\n            \"publisher\": \"RedHat\",\n            \"offer\":
         \"RHEL\",\n            \"sku\": \"7-LVM\",\n            \"version\": \"latest\"\n
         \         },\n          \"SLES\": {\n            \"publisher\": \"SUSE\",\n
-        \           \"offer\": \"SLES\",\n            \"sku\": \"15\",\n            \"version\":
-        \"latest\"\n          },\n          \"UbuntuLTS\": {\n            \"publisher\":
-        \"Canonical\",\n            \"offer\": \"UbuntuServer\",\n            \"sku\":
-        \"18.04-LTS\",\n            \"version\": \"latest\"\n          }\n        },\n
-        \       \"Windows\": {\n          \"Win2019Datacenter\": {\n            \"publisher\":
+        \           \"offer\": \"sles-15-sp3\",\n            \"sku\": \"gen2\",\n
+        \           \"version\": \"latest\"\n          },\n          \"UbuntuLTS\":
+        {\n            \"publisher\": \"Canonical\",\n            \"offer\": \"UbuntuServer\",\n
+        \           \"sku\": \"18.04-LTS\",\n            \"version\": \"latest\"\n
+        \         }\n        },\n        \"Windows\": {\n          \"Win2022Datacenter\":
+        {\n            \"publisher\": \"MicrosoftWindowsServer\",\n            \"offer\":
+        \"WindowsServer\",\n            \"sku\": \"2022-Datacenter\",\n            \"version\":
+        \"latest\"\n          },\n          \"Win2019Datacenter\": {\n            \"publisher\":
         \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\",\n            \"sku\":
         \"2019-Datacenter\",\n            \"version\": \"latest\"\n          },\n
         \         \"Win2016Datacenter\": {\n            \"publisher\": \"MicrosoftWindowsServer\",\n
@@ -258,7 +261,7 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '2525'
+      - '2744'
       content-security-policy:
       - default-src 'none'; style-src 'unsafe-inline'; sandbox
       content-type:
@@ -266,7 +269,7 @@ interactions:
       date:
       - Fri, 18 Feb 2022 11:15:59 GMT
       etag:
-      - W/"54bceef15b892f2aa7f4c2145a49f1b5e33608722acdbb47933d7b6cbebbd7f4"
+      - W/"d5acead0b38a79d988c245a7a15ec01f999da9244c97bbdc1fa2ec70d9e433f5"
       expires:
       - Fri, 18 Feb 2022 11:20:59 GMT
       source-age:
@@ -664,7 +667,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '3392'
+      - '3383'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -753,10 +756,6 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
@@ -815,10 +814,6 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
@@ -875,7 +870,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '2173'
+      - '2167'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -889,10 +884,6 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
@@ -1792,7 +1783,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '188'
+      - '304'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -1843,7 +1834,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '188'
+      - '848'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -1877,11 +1868,11 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - backup protection enable-for-vm
+      - backup protection backup-now
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -v --vm -p
+      - --backup-management-type --workload-type -g -v -c -i --retain-until --query
       User-Agent:
       - AZURECLI/2.33.1 (MSI) azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.8.5
         (Windows-10-10.0.22000-SP0)
@@ -1894,7 +1885,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '188'
+      - '1518'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -1905,6 +1896,105 @@ interactions:
       - no-cache
       server:
       - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '149'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"objectType": "IaasVMBackupRequest", "recoveryPointExpiryTimeInUTC":
+      "2022-03-24T00:00:00.000Z"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection backup-now
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '113'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --backup-management-type --workload-type -g -v -c -i --retain-until --query
+      User-Agent:
+      - AZURECLI/2.33.0 azsdk-python-mgmt-recoveryservicesbackup/4.0.0 Python/3.10.0
+        (Windows-10-10.0.19043-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer%3Biaasvmcontainerv2%3Bclitest.rg000001%3Bclitest-vm000003/protectedItems/VM%3Biaasvmcontainerv2%3Bclitest.rg000001%3Bclitest-vm000003/backup?api-version=2021-10-01
+  response:
+    body:
+      string: ''
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003/protectedItems/VM;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003/operationsStatus/ffeee8d0-1f7a-4392-aec0-2e8ce29ef58e?api-version=2021-10-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Tue, 22 Feb 2022 10:17:23 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003/protectedItems/VM;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003/operationResults/ffeee8d0-1f7a-4392-aec0-2e8ce29ef58e?api-version=2021-10-01
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection backup-now
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --backup-management-type --workload-type -g -v -c -i --retain-until --query
+      User-Agent:
+      - AZURECLI/2.33.0 azsdk-python-mgmt-recoveryservicesbackup/4.0.0 Python/3.10.0
+        (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/ffeee8d0-1f7a-4392-aec0-2e8ce29ef58e?api-version=2021-10-01
+  response:
+    body:
+      string: '{"id":"ffeee8d0-1f7a-4392-aec0-2e8ce29ef58e","name":"ffeee8d0-1f7a-4392-aec0-2e8ce29ef58e","status":"Succeeded","startTime":"2022-02-22T10:17:23.9069221Z","endTime":"2022-02-22T10:17:23.9069221Z","properties":{"objectType":"OperationStatusJobExtendedInfo","jobId":"9dbde46d-ed70-4b82-b686-5bf6de75319f"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '304'
+      content-type:
+      - application/json
+      date:
+      - Tue, 22 Feb 2022 10:17:24 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -1928,11 +2018,11 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - backup protection enable-for-vm
+      - backup protection backup-now
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -v --vm -p
+      - --backup-management-type --workload-type -g -v -c -i --retain-until --query
       User-Agent:
       - AZURECLI/2.33.1 (MSI) azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.8.5
         (Windows-10-10.0.22000-SP0)
@@ -1945,7 +2035,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '188'
+      - '1035'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -1979,11 +2069,11 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - backup protection enable-for-vm
+      - backup job wait
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -v --vm -p
+      - -g -v -n
       User-Agent:
       - AZURECLI/2.33.1 (MSI) azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.8.5
         (Windows-10-10.0.22000-SP0)
@@ -1996,7 +2086,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '188'
+      - '1036'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -2030,11 +2120,11 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - backup protection enable-for-vm
+      - backup job wait
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -v --vm -p
+      - -g -v -n
       User-Agent:
       - AZURECLI/2.33.1 (MSI) azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.8.5
         (Windows-10-10.0.22000-SP0)
@@ -2046,10 +2136,38 @@ interactions:
     headers:
       cache-control:
       - no-cache
+      connection:
+      - close
       content-length:
-      - '188'
+      - '154'
       content-type:
       - application/json; charset=utf-8
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup job wait
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -n
+      User-Agent:
+      - AZURECLI/2.33.0 azsdk-python-mgmt-recoveryservicesbackup/4.0.0 Python/3.10.0
+        (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/9dbde46d-ed70-4b82-b686-5bf6de75319f?api-version=2021-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/9dbde46d-ed70-4b82-b686-5bf6de75319f","name":"9dbde46d-ed70-4b82-b686-5bf6de75319f","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureIaaSVMJob","actionsInfo":[1],"containerName":"iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","duration":"PT1M3.7018951S","virtualMachineVersion":"Compute","extendedInfo":{"tasksList":[{"taskId":"Take
+        Snapshot","duration":"PT0S","status":"InProgress"},{"taskId":"Transfer data
+        to vault","duration":"PT0S","status":"NotStarted"}],"propertyBag":{"VM Name":"clitest-vm000003","Recovery
+        Point Expiry Time in UTC":"3/24/2022 12:00:00 AM"},"internalPropertyBag":{"IsInstantRpJob":"True"}},"entityFriendlyName":"clitest-vm000003","backupManagementType":"AzureIaasVM","operation":"Backup","status":"InProgress","startTime":"2022-02-22T10:17:23.9069221Z","activityId":"9f9e7664-93c8-11ec-8300-507b9d233ebe"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1038'
+      content-type:
+      - application/json
       date:
       - Fri, 18 Feb 2022 11:19:06 GMT
       expires:
@@ -2081,11 +2199,11 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - backup protection enable-for-vm
+      - backup job wait
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -v --vm -p
+      - -g -v -n
       User-Agent:
       - AZURECLI/2.33.1 (MSI) azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.8.5
         (Windows-10-10.0.22000-SP0)
@@ -2132,11 +2250,11 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - backup protection enable-for-vm
+      - backup job wait
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -v --vm -p
+      - -g -v -n
       User-Agent:
       - AZURECLI/2.33.1 (MSI) azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.8.5
         (Windows-10-10.0.22000-SP0)
@@ -2160,6 +2278,7 @@ interactions:
       pragma:
       - no-cache
       server:
+      - Microsoft-IIS/10.0
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
@@ -2340,11 +2459,11 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - backup protection backup-now
+      - backup job wait
       Connection:
       - keep-alive
       ParameterSetName:
-      - --backup-management-type --workload-type -g -v -c -i --retain-until --query
+      - -g -v -n
       User-Agent:
       - AZURECLI/2.33.1 (MSI) azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.8.5
         (Windows-10-10.0.22000-SP0)
@@ -2391,11 +2510,11 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - backup protection backup-now
+      - backup job wait
       Connection:
       - keep-alive
       ParameterSetName:
-      - --backup-management-type --workload-type -g -v -c -i --retain-until --query
+      - -g -v -n
       User-Agent:
       - AZURECLI/2.33.1 (MSI) azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.8.5
         (Windows-10-10.0.22000-SP0)
@@ -2475,6 +2594,7 @@ interactions:
       pragma:
       - no-cache
       server:
+      - Microsoft-IIS/10.0
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
@@ -2573,7 +2693,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1036'
+      - '1039'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -2735,7 +2855,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1038'
+      - '1037'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -2789,7 +2909,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1038'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -3491,7 +3611,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1038'
+      - '1039'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -3545,7 +3665,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1038'
+      - '1039'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -4139,7 +4259,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1038'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -4355,7 +4475,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1038'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -4841,7 +4961,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1038'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -5435,7 +5555,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1038'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -5759,7 +5879,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1038'
+      - '1039'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -5813,7 +5933,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1038'
+      - '1039'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -6295,6 +6415,61 @@ interactions:
         Snapshot","duration":"PT0S","status":"Completed"},{"taskId":"Transfer data
         to vault","duration":"PT0S","status":"InProgress"}],"propertyBag":{"VM Name":"clitest-vm000003","Recovery
         Point Expiry Time in UTC":"3/20/2022 12:00:00 AM"},"internalPropertyBag":{"IsInstantRpJob":"True"}},"entityFriendlyName":"clitest-vm000003","backupManagementType":"AzureIaasVM","operation":"Backup","status":"InProgress","startTime":"2022-02-18T11:19:13.5606585Z","activityId":"99863f8c-90ac-11ec-b425-c8f750f92764"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1037'
+      content-type:
+      - application/json
+      date:
+      - Tue, 22 Feb 2022 11:03:04 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '132'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup job wait
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -n
+      User-Agent:
+      - AZURECLI/2.33.0 azsdk-python-mgmt-recoveryservicesbackup/4.0.0 Python/3.10.0
+        (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/9dbde46d-ed70-4b82-b686-5bf6de75319f?api-version=2021-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/9dbde46d-ed70-4b82-b686-5bf6de75319f","name":"9dbde46d-ed70-4b82-b686-5bf6de75319f","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureIaaSVMJob","actionsInfo":[1],"containerName":"iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","duration":"PT46M11.0536868S","virtualMachineVersion":"Compute","extendedInfo":{"tasksList":[{"taskId":"Take
+        Snapshot","duration":"PT0S","status":"Completed"},{"taskId":"Transfer data
+        to vault","duration":"PT0S","status":"InProgress"}],"propertyBag":{"VM Name":"clitest-vm000003","Recovery
+        Point Expiry Time in UTC":"3/24/2022 12:00:00 AM"},"internalPropertyBag":{"IsInstantRpJob":"True"}},"entityFriendlyName":"clitest-vm000003","backupManagementType":"AzureIaasVM","operation":"Backup","status":"InProgress","startTime":"2022-02-22T10:17:23.9069221Z","activityId":"9f9e7664-93c8-11ec-8300-507b9d233ebe"}}'
     headers:
       cache-control:
       - no-cache
@@ -7001,7 +7176,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1037'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -7055,7 +7230,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1038'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -7163,7 +7338,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1038'
+      - '1039'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -7379,7 +7554,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1038'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -7649,7 +7824,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1038'
+      - '1039'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -7703,7 +7878,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1038'
+      - '1039'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -7757,7 +7932,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1038'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -7811,7 +7986,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1038'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -7919,7 +8094,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1040'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -8027,7 +8202,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1040'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -8135,7 +8310,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1040'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -8189,7 +8364,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1040'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -8243,7 +8418,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1040'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -8297,7 +8472,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1040'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -8351,7 +8526,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1040'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -8405,7 +8580,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1040'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -8459,7 +8634,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1040'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -8567,7 +8742,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1038'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -8729,7 +8904,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1040'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -8837,7 +9012,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1040'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -8891,7 +9066,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1040'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -8999,7 +9174,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1038'
+      - '1040'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -9275,10 +9450,6 @@ interactions:
       - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -9626,10 +9797,6 @@ interactions:
       - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
     status:
@@ -9927,7 +10094,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '722'
+      - '721'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -11486,7 +11653,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '304'
+      - '188'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -11539,7 +11706,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '853'
+      - '188'
       content-type:
       - application/json; charset=utf-8
       date:

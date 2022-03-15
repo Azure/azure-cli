@@ -86,10 +86,6 @@ interactions:
       - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -142,10 +138,6 @@ interactions:
       - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
@@ -191,8 +183,6 @@ interactions:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
     status:
@@ -210,7 +200,7 @@ interactions:
       User-Agent:
       - python-requests/2.26.0
     method: GET
-    uri: https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json
+    uri: https://raw.githubusercontent.com/Azure/azure-rest-api-specs/main/arm-compute/quickstart-templates/aliases.json
   response:
     body:
       string: "{\n  \"$schema\": \"http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json\",\n
@@ -224,16 +214,19 @@ interactions:
         \         },\n          \"Flatcar\": {\n            \"publisher\": \"kinvolk\",\n
         \           \"offer\": \"flatcar-container-linux-free\",\n            \"sku\":
         \"stable\",\n            \"version\": \"latest\"\n          },\n          \"openSUSE-Leap\":
-        {\n            \"publisher\": \"SUSE\",\n            \"offer\": \"openSUSE-Leap\",\n
-        \           \"sku\": \"42.3\",\n            \"version\": \"latest\"\n          },\n
+        {\n            \"publisher\": \"SUSE\",\n            \"offer\": \"opensuse-leap-15-3\",\n
+        \           \"sku\": \"gen2\",\n            \"version\": \"latest\"\n          },\n
         \         \"RHEL\": {\n            \"publisher\": \"RedHat\",\n            \"offer\":
         \"RHEL\",\n            \"sku\": \"7-LVM\",\n            \"version\": \"latest\"\n
         \         },\n          \"SLES\": {\n            \"publisher\": \"SUSE\",\n
-        \           \"offer\": \"SLES\",\n            \"sku\": \"15\",\n            \"version\":
-        \"latest\"\n          },\n          \"UbuntuLTS\": {\n            \"publisher\":
-        \"Canonical\",\n            \"offer\": \"UbuntuServer\",\n            \"sku\":
-        \"18.04-LTS\",\n            \"version\": \"latest\"\n          }\n        },\n
-        \       \"Windows\": {\n          \"Win2019Datacenter\": {\n            \"publisher\":
+        \           \"offer\": \"sles-15-sp3\",\n            \"sku\": \"gen2\",\n
+        \           \"version\": \"latest\"\n          },\n          \"UbuntuLTS\":
+        {\n            \"publisher\": \"Canonical\",\n            \"offer\": \"UbuntuServer\",\n
+        \           \"sku\": \"18.04-LTS\",\n            \"version\": \"latest\"\n
+        \         }\n        },\n        \"Windows\": {\n          \"Win2022Datacenter\":
+        {\n            \"publisher\": \"MicrosoftWindowsServer\",\n            \"offer\":
+        \"WindowsServer\",\n            \"sku\": \"2022-Datacenter\",\n            \"version\":
+        \"latest\"\n          },\n          \"Win2019Datacenter\": {\n            \"publisher\":
         \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\",\n            \"sku\":
         \"2019-Datacenter\",\n            \"version\": \"latest\"\n          },\n
         \         \"Win2016Datacenter\": {\n            \"publisher\": \"MicrosoftWindowsServer\",\n
@@ -258,7 +251,7 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '2525'
+      - '2744'
       content-security-policy:
       - default-src 'none'; style-src 'unsafe-inline'; sandbox
       content-type:
@@ -266,7 +259,7 @@ interactions:
       date:
       - Fri, 18 Feb 2022 17:12:49 GMT
       etag:
-      - W/"54bceef15b892f2aa7f4c2145a49f1b5e33608722acdbb47933d7b6cbebbd7f4"
+      - W/"d5acead0b38a79d988c245a7a15ec01f999da9244c97bbdc1fa2ec70d9e433f5"
       expires:
       - Fri, 18 Feb 2022 17:17:49 GMT
       source-age:
@@ -278,9 +271,9 @@ interactions:
       via:
       - 1.1 varnish
       x-cache:
-      - HIT
+      - MISS
       x-cache-hits:
-      - '1'
+      - '0'
       x-content-type-options:
       - nosniff
       x-fastly-request-id:
@@ -846,10 +839,6 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
@@ -1523,7 +1512,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '188'
+      - '304'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -1574,7 +1563,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '188'
+      - '847'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -1608,11 +1597,11 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - backup protection enable-for-vm
+      - backup protection backup-now
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -v --vm -p
+      - --backup-management-type --workload-type -g -v -c -i --retain-until --query
       User-Agent:
       - AZURECLI/2.33.1 (MSI) azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.8.5
         (Windows-10-10.0.22000-SP0)
@@ -1625,7 +1614,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '188'
+      - '1513'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -1652,162 +1641,8 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - backup protection enable-for-vm
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -v --vm -p
-      User-Agent:
-      - AZURECLI/2.33.1 (MSI) azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.8.5
-        (Windows-10-10.0.22000-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/43985b04-3ccd-41cd-9245-699da99f71d8?api-version=2021-12-01
-  response:
-    body:
-      string: '{"id":"43985b04-3ccd-41cd-9245-699da99f71d8","name":"43985b04-3ccd-41cd-9245-699da99f71d8","status":"Succeeded","startTime":"2022-02-18T17:14:28.1527434Z","endTime":"2022-02-18T17:14:28.1527434Z","properties":{"objectType":"OperationStatusJobExtendedInfo","jobId":"32dcfa1c-e037-45a4-8e42-06250a8d3192"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '304'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 18 Feb 2022 17:14:59 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Kestrel
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '293'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - backup protection enable-for-vm
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -v --vm -p
-      User-Agent:
-      - AZURECLI/2.33.1 (MSI) azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.8.5
-        (Windows-10-10.0.22000-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/32dcfa1c-e037-45a4-8e42-06250a8d3192?api-version=2021-12-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/32dcfa1c-e037-45a4-8e42-06250a8d3192","name":"32dcfa1c-e037-45a4-8e42-06250a8d3192","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureIaaSVMJob","containerName":"iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","duration":"PT31.6158284S","virtualMachineVersion":"Compute","extendedInfo":{"tasksList":[],"propertyBag":{"VM
-        Name":"clitest-vm000003","Policy Name":"DefaultPolicy"}},"entityFriendlyName":"clitest-vm000003","backupManagementType":"AzureIaasVM","operation":"ConfigureBackup","status":"Completed","startTime":"2022-02-18T17:14:28.1527434Z","endTime":"2022-02-18T17:14:59.7685718Z","activityId":"259e13a9-90de-11ec-9e43-c8f750f92764"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '848'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 18 Feb 2022 17:15:00 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '299'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - backup protection backup-now
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --backup-management-type --workload-type -g -v -c -i --retain-until --query
-      User-Agent:
-      - AZURECLI/2.33.1 (MSI) azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.8.5
-        (Windows-10-10.0.22000-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectedItems?api-version=2021-12-01&%24filter=backupManagementType+eq+%27AzureIaasVM%27+and+itemType+eq+%27VM%27
-  response:
-    body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003/protectedItems/VM;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","name":"VM;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{},"friendlyName":"clitest-vm000003","virtualMachineId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000003","protectionStatus":"Healthy","protectionState":"IRPending","healthStatus":"Passed","lastBackupStatus":"","lastBackupTime":"2001-01-01T00:00:00Z","protectedItemDataId":"17593829944722","protectedItemType":"Microsoft.Compute/virtualMachines","backupManagementType":"AzureIaasVM","workloadType":"VM","containerName":"iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000003","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupPolicies/DefaultPolicy","policyName":"DefaultPolicy","isArchiveEnabled":false}}]}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1513'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 18 Feb 2022 17:15:00 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Kestrel
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '299'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
     body: '{"properties": {"objectType": "IaasVMBackupRequest", "recoveryPointExpiryTimeInUTC":
-      "2022-03-20T00:00:00.000Z"}}'
+      "2022-03-26T00:00:00.000Z"}}'
     headers:
       Accept:
       - application/json
@@ -1824,30 +1659,28 @@ interactions:
       ParameterSetName:
       - --backup-management-type --workload-type -g -v -c -i --retain-until --query
       User-Agent:
-      - AZURECLI/2.33.1 (MSI) azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.8.5
-        (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.33.1 azsdk-python-mgmt-recoveryservicesbackup/4.0.0 Python/3.10.0
+        (Windows-10-10.0.19043-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer%3Biaasvmcontainerv2%3Bclitest.rg000001%3Bclitest-vm000003/protectedItems/VM%3Biaasvmcontainerv2%3Bclitest.rg000001%3Bclitest-vm000003/backup?api-version=2021-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer%3Biaasvmcontainerv2%3Bclitest.rg000001%3Bclitest-vm000003/protectedItems/VM%3Biaasvmcontainerv2%3Bclitest.rg000001%3Bclitest-vm000003/backup?api-version=2021-10-01
   response:
     body:
       string: ''
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003/protectedItems/VM;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003/operationsStatus/58fa9616-28fb-4cc3-a745-415594a8e8f2?api-version=2021-12-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003/protectedItems/VM;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003/operationsStatus/1e3b8823-b793-480b-b2a0-60ec3397d1ed?api-version=2021-10-01
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Fri, 18 Feb 2022 17:15:01 GMT
+      - Thu, 24 Feb 2022 09:38:23 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003/protectedItems/VM;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003/operationResults/58fa9616-28fb-4cc3-a745-415594a8e8f2?api-version=2021-12-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003/protectedItems/VM;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003/operationResults/1e3b8823-b793-480b-b2a0-60ec3397d1ed?api-version=2021-10-01
       pragma:
       - no-cache
-      server:
-      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
@@ -1876,6 +1709,203 @@ interactions:
       - AZURECLI/2.33.1 (MSI) azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.8.5
         (Windows-10-10.0.22000-SP0)
     method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/43985b04-3ccd-41cd-9245-699da99f71d8?api-version=2021-12-01
+  response:
+    body:
+      string: '{"id":"43985b04-3ccd-41cd-9245-699da99f71d8","name":"43985b04-3ccd-41cd-9245-699da99f71d8","status":"Succeeded","startTime":"2022-02-18T17:14:28.1527434Z","endTime":"2022-02-18T17:14:28.1527434Z","properties":{"objectType":"OperationStatusJobExtendedInfo","jobId":"32dcfa1c-e037-45a4-8e42-06250a8d3192"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '304'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Feb 2022 17:14:59 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '293'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup job wait
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -n
+      User-Agent:
+      - AZURECLI/2.33.1 (MSI) azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/32dcfa1c-e037-45a4-8e42-06250a8d3192?api-version=2021-12-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/32dcfa1c-e037-45a4-8e42-06250a8d3192","name":"32dcfa1c-e037-45a4-8e42-06250a8d3192","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureIaaSVMJob","containerName":"iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","duration":"PT31.6158284S","virtualMachineVersion":"Compute","extendedInfo":{"tasksList":[],"propertyBag":{"VM
+        Name":"clitest-vm000003","Policy Name":"DefaultPolicy"}},"entityFriendlyName":"clitest-vm000003","backupManagementType":"AzureIaasVM","operation":"ConfigureBackup","status":"Completed","startTime":"2022-02-18T17:14:28.1527434Z","endTime":"2022-02-18T17:14:59.7685718Z","activityId":"259e13a9-90de-11ec-9e43-c8f750f92764"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '848'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Feb 2022 17:15:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '299'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup job wait
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -n
+      User-Agent:
+      - AZURECLI/2.33.1 (MSI) azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectedItems?api-version=2021-12-01&%24filter=backupManagementType+eq+%27AzureIaasVM%27+and+itemType+eq+%27VM%27
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003/protectedItems/VM;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","name":"VM;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{},"friendlyName":"clitest-vm000003","virtualMachineId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000003","protectionStatus":"Healthy","protectionState":"IRPending","healthStatus":"Passed","lastBackupStatus":"","lastBackupTime":"2001-01-01T00:00:00Z","protectedItemDataId":"17593829944722","protectedItemType":"Microsoft.Compute/virtualMachines","backupManagementType":"AzureIaasVM","workloadType":"VM","containerName":"iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000003","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupPolicies/DefaultPolicy","policyName":"DefaultPolicy","isArchiveEnabled":false}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1513'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Feb 2022 17:15:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '299'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"objectType": "IaasVMBackupRequest", "recoveryPointExpiryTimeInUTC":
+      "2022-03-20T00:00:00.000Z"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup job wait
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -n
+      User-Agent:
+      - AZURECLI/2.33.1 (MSI) azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer%3Biaasvmcontainerv2%3Bclitest.rg000001%3Bclitest-vm000003/protectedItems/VM%3Biaasvmcontainerv2%3Bclitest.rg000001%3Bclitest-vm000003/backup?api-version=2021-12-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/bc2790af-f002-452e-82d5-8d0d5393b524","name":"bc2790af-f002-452e-82d5-8d0d5393b524","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureIaaSVMJob","actionsInfo":[1],"containerName":"iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","duration":"PT1M7.4732467S","virtualMachineVersion":"Compute","extendedInfo":{"tasksList":[{"taskId":"Take
+        Snapshot","duration":"PT0S","status":"InProgress"},{"taskId":"Transfer data
+        to vault","duration":"PT0S","status":"NotStarted"}],"propertyBag":{"VM Name":"clitest-vm000003","Recovery
+        Point Expiry Time in UTC":"3/26/2022 12:00:00 AM"},"internalPropertyBag":{"IsInstantRpJob":"True"}},"entityFriendlyName":"clitest-vm000003","backupManagementType":"AzureIaasVM","operation":"Backup","status":"InProgress","startTime":"2022-02-24T09:38:23.5823828Z","activityId":"7b831a97-9555-11ec-aff2-507b9d233ebe"}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003/protectedItems/VM;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003/operationsStatus/58fa9616-28fb-4cc3-a745-415594a8e8f2?api-version=2021-12-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1038'
+      content-type:
+      - application/json
+      date:
+      - Fri, 18 Feb 2022 17:15:01 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003/protectedItems/VM;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003/operationResults/58fa9616-28fb-4cc3-a745-415594a8e8f2?api-version=2021-12-01
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '146'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup job wait
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -n
+      User-Agent:
+      - AZURECLI/2.33.1 (MSI) azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
+    method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/58fa9616-28fb-4cc3-a745-415594a8e8f2?api-version=2021-12-01
   response:
     body:
@@ -1897,10 +1927,6 @@ interactions:
       - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -1918,11 +1944,11 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - backup protection backup-now
+      - backup job wait
       Connection:
       - keep-alive
       ParameterSetName:
-      - --backup-management-type --workload-type -g -v -c -i --retain-until --query
+      - -g -v -n
       User-Agent:
       - AZURECLI/2.33.1 (MSI) azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.8.5
         (Windows-10-10.0.22000-SP0)
@@ -1948,10 +1974,6 @@ interactions:
       - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -1989,7 +2011,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1036'
+      - '1039'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -2002,10 +2024,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -2043,7 +2061,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1036'
+      - '1039'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -2056,10 +2074,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -2110,10 +2124,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -2164,10 +2174,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -2218,10 +2224,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -2259,7 +2261,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1038'
+      - '1039'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -2272,10 +2274,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -2326,10 +2324,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -2380,10 +2374,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -2434,10 +2424,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -2488,10 +2474,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -2542,10 +2524,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -2583,7 +2561,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1038'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -2596,10 +2574,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -2637,7 +2611,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1038'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -2650,10 +2624,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -2704,10 +2674,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -2758,10 +2724,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -2812,10 +2774,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -2866,10 +2824,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -2920,10 +2874,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -2974,10 +2924,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -3028,10 +2974,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -3082,10 +3024,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -3136,10 +3074,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -3177,7 +3111,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1038'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -3190,10 +3124,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -3244,10 +3174,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -3298,10 +3224,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -3352,10 +3274,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -3406,10 +3324,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -3447,7 +3361,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1037'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -3460,10 +3374,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -3514,10 +3424,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -3555,7 +3461,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1038'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -3568,10 +3474,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -3622,10 +3524,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -3676,10 +3574,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -3717,7 +3611,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1038'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -3730,10 +3624,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -3784,10 +3674,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -3825,7 +3711,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1038'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -3838,10 +3724,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -3892,10 +3774,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -3946,10 +3824,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -4000,10 +3874,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -4041,7 +3911,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1037'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -4054,10 +3924,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -4108,10 +3974,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -4162,10 +4024,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -4216,10 +4074,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -4270,10 +4124,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -4324,10 +4174,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -4378,10 +4224,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -4419,7 +4261,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1038'
+      - '1039'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -4432,10 +4274,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -4486,10 +4324,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -4527,7 +4361,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1038'
+      - '1039'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -4540,10 +4374,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -4594,10 +4424,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -4648,10 +4474,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -4689,7 +4511,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1038'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -4702,10 +4524,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -4756,10 +4574,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -4810,10 +4624,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -4864,10 +4674,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -4918,10 +4724,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -4959,7 +4761,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1038'
+      - '1039'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -4972,10 +4774,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -5026,10 +4824,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -5067,7 +4861,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1038'
+      - '1039'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -5080,10 +4874,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -5134,10 +4924,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -5175,7 +4961,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1038'
+      - '1039'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -5188,10 +4974,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -5242,10 +5024,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -5296,10 +5074,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -5337,7 +5111,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1037'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -5350,10 +5124,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -5404,10 +5174,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -5445,7 +5211,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1038'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -5458,10 +5224,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -5512,10 +5274,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -5566,10 +5324,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -5620,10 +5374,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -5674,10 +5424,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -5715,7 +5461,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1038'
+      - '1039'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -5728,10 +5474,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -5782,10 +5524,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -5836,10 +5574,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -5890,10 +5624,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -5944,10 +5674,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -5985,7 +5711,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1037'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -5998,10 +5724,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -6052,10 +5774,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -6106,10 +5824,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -6147,7 +5861,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1038'
+      - '1039'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -6160,10 +5874,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -6214,10 +5924,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -6268,10 +5974,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -6322,10 +6024,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -6376,10 +6074,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -6417,7 +6111,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1038'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -6430,10 +6124,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -6484,10 +6174,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -6536,10 +6222,6 @@ interactions:
       - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -6590,10 +6272,6 @@ interactions:
       - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -6642,10 +6320,6 @@ interactions:
       - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -6696,10 +6370,6 @@ interactions:
       - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -6747,10 +6417,6 @@ interactions:
       - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -6799,10 +6465,6 @@ interactions:
       - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -7241,8 +6903,7 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - --backup-management-type --workload-type -g -v -c -i --delete-backup-data
-        --yes
+      - --backup-management-type --workload-type -g -v -c -i -n
       User-Agent:
       - AZURECLI/2.33.1 (MSI) azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.8.5
         (Windows-10-10.0.22000-SP0)
@@ -7289,12 +6950,11 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - backup protection disable
+      - backup recoverypoint show
       Connection:
       - keep-alive
       ParameterSetName:
-      - --backup-management-type --workload-type -g -v -c -i --delete-backup-data
-        --yes
+      - --backup-management-type --workload-type -g -v -c -i -n
       User-Agent:
       - AZURECLI/2.33.1 (MSI) azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.8.5
         (Windows-10-10.0.22000-SP0)
@@ -7307,7 +6967,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '188'
+      - '1888'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -7341,12 +7001,11 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - backup protection disable
+      - backup recoverypoint show
       Connection:
       - keep-alive
       ParameterSetName:
-      - --backup-management-type --workload-type -g -v -c -i --delete-backup-data
-        --yes
+      - --backup-management-type --workload-type -g -v -c -i -n
       User-Agent:
       - AZURECLI/2.33.1 (MSI) azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.8.5
         (Windows-10-10.0.22000-SP0)
@@ -7359,7 +7018,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '188'
+      - '1273'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -7393,12 +7052,11 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - backup protection disable
+      - backup container list
       Connection:
       - keep-alive
       ParameterSetName:
-      - --backup-management-type --workload-type -g -v -c -i --delete-backup-data
-        --yes
+      - --backup-management-type -v -g --query
       User-Agent:
       - AZURECLI/2.33.1 (MSI) azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.8.5
         (Windows-10-10.0.22000-SP0)
@@ -7411,7 +7069,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '188'
+      - '924'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -7445,12 +7103,11 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - backup protection disable
+      - backup item list
       Connection:
       - keep-alive
       ParameterSetName:
-      - --backup-management-type --workload-type -g -v -c -i --delete-backup-data
-        --yes
+      - --backup-management-type --workload-type -g -v -c --query
       User-Agent:
       - AZURECLI/2.33.1 (MSI) azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.8.5
         (Windows-10-10.0.22000-SP0)
@@ -7463,7 +7120,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '188'
+      - '1888'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -7515,7 +7172,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '188'
+      - '1888'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -7552,6 +7209,56 @@ interactions:
       - backup protection disable
       Connection:
       - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --backup-management-type --workload-type -g -v -c -i --delete-backup-data
+        --yes
+      User-Agent:
+      - AZURECLI/2.33.1 azsdk-python-mgmt-recoveryservicesbackup/4.0.0 Python/3.10.0
+        (Windows-10-10.0.19043-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer%3Biaasvmcontainerv2%3Bclitest.rg000001%3Bclitest-vm000003/protectedItems/VM%3Biaasvmcontainerv2%3Bclitest.rg000001%3Bclitest-vm000003?api-version=2021-10-01
+  response:
+    body:
+      string: ''
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/3b29b576-fdeb-4abf-bfa5-591e3f2754bb?api-version=2021-10-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Thu, 24 Feb 2022 11:22:46 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperationResults/3b29b576-fdeb-4abf-bfa5-591e3f2754bb?api-version=2021-10-01
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection disable
+      Connection:
+      - keep-alive
       ParameterSetName:
       - --backup-management-type --workload-type -g -v -c -i --delete-backup-data
         --yes
@@ -7567,7 +7274,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '188'
+      - '187'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -7619,7 +7326,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '188'
+      - '187'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -7671,7 +7378,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '188'
+      - '187'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -7723,7 +7430,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '188'
+      - '187'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -7775,7 +7482,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '188'
+      - '187'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -7827,7 +7534,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '188'
+      - '187'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -7879,7 +7586,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '188'
+      - '187'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -7931,7 +7638,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '188'
+      - '187'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -7983,7 +7690,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '188'
+      - '187'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -8035,7 +7742,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '188'
+      - '187'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -8087,7 +7794,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '304'
+      - '302'
       content-type:
       - application/json; charset=utf-8
       date:
