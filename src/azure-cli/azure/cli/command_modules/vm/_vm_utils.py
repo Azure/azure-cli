@@ -186,8 +186,8 @@ def normalize_disk_info(image_data_disks=None,
             'managedDisk': {'storageAccountType': None},
             'createOption': 'empty',
             'diskSizeGB': sizes_copy.pop(0),
-            'deleteOption': data_disk_delete_option if isinstance(data_disk_delete_option, str) else None
         }
+        if isinstance(data_disk_delete_option, str): info[i]['deleteOption'] = data_disk_delete_option
 
     # update storage skus for managed data disks
     if storage_sku is not None:
