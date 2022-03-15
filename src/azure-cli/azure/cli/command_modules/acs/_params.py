@@ -23,7 +23,7 @@ from ._validators import (
     validate_nodepool_name, validate_vm_set_type, validate_load_balancer_sku, validate_nodepool_id, validate_snapshot_id,
     validate_load_balancer_outbound_ips, validate_priority, validate_eviction_policy, validate_spot_max_price,
     validate_load_balancer_outbound_ip_prefixes, validate_taints, validate_ip_ranges, validate_acr, validate_nodepool_tags,
-    validate_load_balancer_outbound_ports, validate_load_balancer_idle_timeout, validate_vnet_subnet_id, validate_pod_subnet_id, 
+    validate_load_balancer_outbound_ports, validate_load_balancer_idle_timeout, validate_vnet_subnet_id, validate_pod_subnet_id,
     validate_nodepool_labels, validate_ppg, validate_assign_identity, validate_max_surge, validate_assign_kubelet_identity,
     validate_credential_format)
 from ._consts import (
