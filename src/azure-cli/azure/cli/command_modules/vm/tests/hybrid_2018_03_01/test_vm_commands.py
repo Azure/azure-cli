@@ -499,6 +499,7 @@ class VMAttachDisksOnCreate(ScenarioTest):
 
 class VMOSDiskSize(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_os_disk_size')
     def test_set_os_disk_size(self, resource_group):
         # test unmanaged disk
@@ -1718,7 +1719,7 @@ class VMSSVMsScenarioTest(ScenarioTest):
             self.check('instanceId', '{id}')
         ])
         result = self.cmd('vmss list-instance-connection-info --resource-group {rg} --name {vmss}').get_output_in_json()
-        self.assertTrue(result['instance 0'].split('.')[1], '5000')
+        self.assertEqual(result['instance 0'].split(':')[1], '50000')
         self.cmd('vmss restart --resource-group {rg} --name {vmss} --instance-ids *')
         self._check_vms_power_state('PowerState/running', 'PowerState/starting')
         self.cmd('vmss stop --resource-group {rg} --name {vmss} --instance-ids *')
