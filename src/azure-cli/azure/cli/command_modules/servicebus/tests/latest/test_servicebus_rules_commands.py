@@ -35,6 +35,7 @@ class SBRulesCRUDScenarioTest(ScenarioTest):
             'subscriptionname': self.create_random_name(prefix='sb-subscli', length=25),
             'rulename': self.create_random_name(prefix='sb-rulecli', length=25),
             'rulename2': self.create_random_name(prefix='sb-rulecli2', length=20),
+            'rulename3': self.create_random_name(prefix='sb-rulecli3', length=20),
             'sqlexpression': 'test=test',
             'sqlexpression1': 'test1=test1'
         })
@@ -68,8 +69,8 @@ class SBRulesCRUDScenarioTest(ScenarioTest):
 
         # Create Rules
         rule = self.cmd(
-            'servicebus topic subscription rule create --resource-group {rg} --namespace-name {namespacename} --topic-name {topicname} --subscription-name {subscriptionname} --name {rulename} --filter-sql-expression {sqlexpression}',
-            checks=[self.check('name', '{rulename}')]).get_output_in_json()
+            'servicebus topic subscription rule create --resource-group {rg} --namespace-name {namespacename} --topic-name {topicname} --subscription-name {subscriptionname} --name {rulename3} --filter-sql-expression {sqlexpression}',
+            checks=[self.check('name', '{rulename3}')]).get_output_in_json()
         self.assertEqual(rule['filterType'], 'SqlFilter')
         self.assertEqual(rule['sqlFilter']['sqlExpression'], self.kwargs['sqlexpression'])
 
@@ -100,9 +101,12 @@ class SBRulesCRUDScenarioTest(ScenarioTest):
             checks=[self.check('name', '{rulename}')])
 
         # Update Rules
-        self.cmd(
-            'servicebus topic subscription rule update --resource-group {rg} --namespace-name {namespacename} --topic-name {topicname} --subscription-name {subscriptionname} --name {rulename2} --filter-sql-expression {sqlexpression1}',
-            checks=[self.check('name', '{rulename2}')])
+        rule = self.cmd(
+            'servicebus topic subscription rule update --resource-group {rg} --namespace-name {namespacename} --topic-name {topicname} --subscription-name {subscriptionname} --name {rulename3} --filter-sql-expression {sqlexpression1}',
+            checks=[self.check('name', '{rulename3}')]).get_output_in_json()
+        self.assertEqual(rule['filterType'], 'SqlFilter')
+        self.assertEqual(rule['sqlFilter']['sqlExpression'], self.kwargs['sqlexpression1'])
+
 
         # Get Rules List By Subscription
         self.cmd(

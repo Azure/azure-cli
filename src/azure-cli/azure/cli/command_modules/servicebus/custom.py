@@ -402,13 +402,12 @@ def cli_rules_create(cmd, client, resource_group_name, namespace_name, topic_nam
     Action = cmd.get_models('Action', resource_type=ResourceType.MGMT_SERVICEBUS)
     SqlFilter = cmd.get_models('SqlFilter', resource_type=ResourceType.MGMT_SERVICEBUS)
     CorrelationFilter = cmd.get_models('CorrelationFilter', resource_type=ResourceType.MGMT_SERVICEBUS)
-    FilterType = cmd.get_models('FilterType', resource_type=ResourceType.MGMT_SERVICEBUS)
     parameters = Rule()
 
     if filter_type:
         parameters.filter_type = filter_type
 
-    if filter_type == 'SqlFilter' or filter_type == None:
+    if filter_type == 'SqlFilter' or filter_type is None:
         parameters.sql_filter = SqlFilter(
             sql_expression=filter_sql_expression,
             requires_preprocessing=filter_requires_preprocessing
