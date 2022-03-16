@@ -17,12 +17,12 @@ from azure.cli.command_modules.storage.util import (create_blob_service_from_sto
                                                     filter_none, collect_blobs, collect_blob_objects, collect_files,
                                                     mkdir_p, guess_content_type, normalize_blob_file_path,
                                                     check_precondition_success)
+from azure.core.exceptions import ResourceExistsError, ResourceModifiedError
+
 from knack.log import get_logger
 from knack.util import CLIError
 from .._transformers import transform_response_with_bytearray
 from ..util import get_datetime_from_string
-
-from azure.core.exceptions import ResourceExistsError, ResourceModifiedError
 
 logger = get_logger(__name__)
 
