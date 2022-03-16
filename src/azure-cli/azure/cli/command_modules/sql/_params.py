@@ -1857,6 +1857,9 @@ def load_arguments(self, _):
                    help='Type of Identity to be used. Possible values are SystemAsssigned,'
                    'UserAssigned, SystemAssignedUserAssigned and None.')
 
+        c.argument('requested_backup_storage_redundancy',
+                   arg_type=backup_storage_redundancy_param_type_mi)
+
     with self.argument_context('sql mi create') as c:
         c.argument('location',
                    arg_type=get_location_type_with_default_from_resource_group(self.cli_ctx))
@@ -1917,9 +1920,6 @@ def load_arguments(self, _):
                    help='Generate and assign an Azure Active Directory Identity for this managed instance '
                    'for use with key management services like Azure KeyVault.')
 
-        c.argument('requested_backup_storage_redundancy',
-                   arg_type=backup_storage_redundancy_param_type_mi)
-
         c.argument('yes',
                    options_list=['--yes', '-y'],
                    help='Do not prompt for confirmation.', action='store_true')
@@ -1950,7 +1950,9 @@ def load_arguments(self, _):
         create_args_for_complex_type(
             c, 'parameters', ManagedInstance, [
                 'administrator_login_password',
+                'requested_backup_storage_redundancy',
                 'tags',
+                'yes',
             ])
 
         c.argument('administrator_login_password',
@@ -1962,12 +1964,13 @@ def load_arguments(self, _):
                    'for use with key management services like Azure KeyVault. '
                    'If identity is already assigned - do nothing.')
 
+        c.argument('yes',
+                   options_list=['--yes', '-y'],
+                   help='Do not prompt for confirmation.', action='store_true')
+
         c.argument('maintenance_configuration_id',
                    options_list=['--maint-config-id', '-m'],
                    help='Change maintenance configuration for this managed instance.')
-
-        c.argument('requested_backup_storage_redundancy',
-                   arg_type=backup_storage_redundancy_param_type_mi)
 
         # Create args that will be used to build up the Managed Instance's Sku object
         create_args_for_complex_type(
