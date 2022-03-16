@@ -1234,7 +1234,7 @@ def _validate_vm_vmss_msi(cmd, namespace, from_set_command=False):
     # at the same time to reduce the impact of breaking change
     if not from_set_command and namespace.identity_scope and getattr(namespace.identity_role, 'is_default', None):
         logger.warning(
-            "Please note that the default value of parameter '--role' will be removed in the future. "
+            "Please note that the default value of parameter '--role' will be removed in the future version 2.35.0. "
             "So specify '--role' and '--scope' at the same time when assigning a role to the managed identity "
             "to avoid breaking your automation script when the default value of '--role' is removed."
         )
@@ -1910,18 +1910,21 @@ def _validate_vmss_terminate_notification(cmd, namespace):  # pylint: disable=un
 
 
 def _validate_vmss_create_automatic_repairs(cmd, namespace):  # pylint: disable=unused-argument
-    if namespace.automatic_repairs_grace_period is not None:
+    if namespace.automatic_repairs_grace_period is not None or namespace.automatic_repairs_action is not None:
         if namespace.load_balancer is None or namespace.health_probe is None:
-            raise CLIError("usage error: --load-balancer and --health-probe are required "
-                           "when creating vmss with automatic repairs")
+            raise ArgumentUsageError("usage error: --load-balancer and --health-probe are required "
+                                     "when creating vmss with automatic repairs")
     _validate_vmss_automatic_repairs(cmd, namespace)
 
 
 def _validate_vmss_update_automatic_repairs(cmd, namespace):  # pylint: disable=unused-argument
-    if namespace.enable_automatic_repairs is False and namespace.automatic_repairs_grace_period is not None:
-        raise CLIError("usage error: please enable --enable-automatic-repairs")
-    if namespace.enable_automatic_repairs is True and namespace.automatic_repairs_grace_period is None:
-        raise CLIError("usage error: please set --automatic-repairs-grace-period")
+    if namespace.enable_automatic_repairs is False and \
+            (namespace.automatic_repairs_grace_period is not None or namespace.automatic_repairs_action is not None):
+        raise ArgumentUsageError("usage error: please enable --enable-automatic-repairs")
+    if namespace.enable_automatic_repairs is True and namespace.automatic_repairs_grace_period is None\
+            and namespace.automatic_repairs_action is None:
+        raise ArgumentUsageError("usage error: please set --automatic-repairs-grace-period or"
+                                 " --automatic-repairs-action")
     _validate_vmss_automatic_repairs(cmd, namespace)
 
 

@@ -170,33 +170,38 @@ class NetworkPrivateEndpoints(ScenarioTest):
         pl_resources = self.cmd("storage account private-link-resource list --account-name {sa} -g {rg}").get_output_in_json()
         self.kwargs["group_id"] = pl_resources[0]["groupId"]
         self.kwargs["sa_id"] = self.cmd('storage account show -n {sa} -g {rg}').get_output_in_json()["id"]
-        self.cmd("network private-endpoint create -n {pe} -g {rg} --vnet-name {vnet} --subnet {subnet} --connection-name {connection} --group-id {group_id} --private-connection-resource-id {sa_id}")
+        self.cmd(
+            "network private-endpoint create -n {pe} -g {rg} --vnet-name {vnet} --subnet {subnet} --connection-name {connection} --group-id {group_id} --private-connection-resource-id {sa_id} "
+            "--ip-config name={ipconfig1} group-id={group_id} member-name=blob private-ip-address=10.0.0.4 "
+            "--ip-config name={ipconfig2} group-id={group_id} member-name=blob2 private-ip-address=10.0.0.6",
+            checks=[
+                self.check("length(ipConfigurations)", 2),
+                self.check("ipConfigurations[0].name", self.kwargs["ipconfig1"]),
+                self.check("ipConfigurations[1].name", self.kwargs["ipconfig2"]),
+            ]
+        )
 
         # check ip configuration operations
         self.cmd(
-            "network private-endpoint ip-config add -n {ipconfig1} -g {rg} --endpoint-name {pe} --group-id {group_id} --member-name blob --private-ip-address 10.0.0.4",
+            "network private-endpoint ip-config remove -n {ipconfig2} -g {rg} --endpoint-name {pe}",
             checks=[
-                self.check("ipConfigurations[0].name", self.kwargs["ipconfig1"]),
                 self.check("length(ipConfigurations)", 1),
+                self.check("ipConfigurations[0].name", self.kwargs["ipconfig1"]),
             ]
         )
         self.cmd(
             "network private-endpoint ip-config add -n {ipconfig2} -g {rg} --endpoint-name {pe} --group-id {group_id} --member-name blob2 --private-ip-address 10.0.0.6",
             checks=[
-                self.check("ipConfigurations[1].name", self.kwargs["ipconfig2"]),
                 self.check("length(ipConfigurations)", 2),
-            ]
-        )
-        self.cmd(
-            "network private-endpoint ip-config remove -n {ipconfig2} -g {rg} --endpoint-name {pe}",
-            checks=[
-                self.check("ipConfigurations[0].name", self.kwargs["ipconfig1"]),
+                self.check("ipConfigurations[1].name", self.kwargs["ipconfig2"]),
             ]
         )
         self.cmd(
             "network private-endpoint ip-config list -g {rg} --endpoint-name {pe}",
             checks=[
-                self.check("length(@)", 1),
+                self.check("length(@)", 2),
+                self.check("@[0].name", self.kwargs["ipconfig1"]),
+                self.check("@[1].name", self.kwargs["ipconfig2"]),
             ]
         )
 
@@ -210,7 +215,8 @@ class NetworkPrivateEndpoints(ScenarioTest):
             "subnet": self.create_random_name("subnet-", 24),
             "pe": self.create_random_name("pe-", 24),
             "connection": self.create_random_name("connection-", 24),
-            "asg": "asg1",
+            "asg1": "asg1",
+            "asg2": "asg2",
         })
 
         # prepare network
@@ -221,20 +227,42 @@ class NetworkPrivateEndpoints(ScenarioTest):
         pl_resources = self.cmd("storage account private-link-resource list --account-name {sa} -g {rg}").get_output_in_json()
         self.kwargs["group_id"] = pl_resources[0]["groupId"]
         self.kwargs["sa_id"] = self.cmd('storage account show -n {sa} -g {rg}').get_output_in_json()["id"]
-        self.cmd("network private-endpoint create -n {pe} -g {rg} --vnet-name {vnet} --subnet {subnet} --connection-name {connection} --group-id {group_id} --private-connection-resource-id {sa_id}")
-
-        # check application security group operations
-        self.kwargs["asg_id"] = self.cmd("network asg create -n {asg} -g {rg}").get_output_in_json()["id"]
+        self.kwargs["id1"] = self.cmd("network asg create -n {asg1} -g {rg}").get_output_in_json()["id"]
+        self.kwargs["id2"] = self.cmd("network asg create -n {asg2} -g {rg}").get_output_in_json()["id"]
         self.cmd(
-            "network private-endpoint asg add -g {rg} --endpoint-name {pe} --asg-id {asg_id}",
+            "network private-endpoint create -n {pe} -g {rg} --vnet-name {vnet} --subnet {subnet} --connection-name {connection} --group-id {group_id} --private-connection-resource-id {sa_id} "
+            "--asg id={id1} "
+            "--asg id={id2}",
             checks=[
-                self.check("applicationSecurityGroups[0].id", self.kwargs["asg_id"]),
-                self.check("length(applicationSecurityGroups)", 1),
+                self.check("length(applicationSecurityGroups)", 2),
+                self.check("applicationSecurityGroups[0].id", self.kwargs["id1"]),
+                self.check("applicationSecurityGroups[1].id", self.kwargs["id2"]),
             ]
         )
-        self.cmd("network private-endpoint asg list -g {rg} --endpoint-name {pe}", checks=self.check("length(@)", 1))
-        self.cmd("network private-endpoint asg remove -g {rg} --endpoint-name {pe} --asg-id {asg_id}")
-        self.cmd("network private-endpoint asg list -g {rg} --endpoint-name {pe}", checks=self.is_empty())
+
+        # check application security group operations
+        self.cmd(
+            "network private-endpoint asg remove -g {rg} --endpoint-name {pe} --asg-id {id2}",
+            checks=[
+                self.check("length(applicationSecurityGroups)", 1),
+                self.check("applicationSecurityGroups[0].id", self.kwargs["id1"]),
+            ]
+        )
+        self.cmd(
+            "network private-endpoint asg add -g {rg} --endpoint-name {pe} --asg-id {id2}",
+            checks=[
+                self.check("length(applicationSecurityGroups)", 2),
+                self.check("applicationSecurityGroups[1].id", self.kwargs["id2"]),
+            ]
+        )
+        self.cmd(
+            "network private-endpoint asg list -g {rg} --endpoint-name {pe}",
+            checks=[
+                self.check("length(@)", 2),
+                self.check("@[0].id", self.kwargs["id1"]),
+                self.check("@[1].id", self.kwargs["id2"]),
+            ]
+        )
 
     @ResourceGroupPreparer(name_prefix='fanqiu_cli_test_network_private_endpoints', location='CentralUSEuap')
     @StorageAccountPreparer(name_prefix='saplr', kind='StorageV2')
@@ -3330,6 +3358,43 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
         self.cmd('network lb rule delete -g {rg} --lb-name {lb} -n rule2')
         self.cmd('network lb rule list -g {rg} --lb-name {lb}',
                  checks=self.check('length(@)', 0))
+
+    @ResourceGroupPreparer(name_prefix="cli_test_network_lb_port_mapping_")
+    def test_network_lb_port_mapping(self):
+        self.kwargs.update({
+            "lb": "test-lb",
+            "rule": "test-nat",
+            "pool": "test-pool",
+            "start": 3389,
+            "end": 4000,
+            "vnet": "test-vnet",
+            "subnet": "test-subnet",
+            "ip": "10.0.0.1",
+            "address": "test-address",
+        })
+
+        # prepare backend address pool
+        self.cmd("network lb create -n {lb} -g {rg} --sku standard")
+        self.cmd("network lb address-pool create -n {pool} -g {rg} --lb-name {lb}")
+        self.cmd("network vnet create -n {vnet} -g {rg} --subnet-name {subnet}")
+        self.cmd(
+            "network lb address-pool address add -n {address} -g {rg} --lb-name {lb} --pool-name {pool} "
+            "--vnet {vnet} --ip-address {ip}"
+        )
+        self.cmd(
+            "network lb inbound-nat-rule create -n {rule} -g {rg} --lb-name {lb} --backend-pool-name {pool} "
+            "--backend-port {start} --frontend-port-range-start {start} --frontend-port-range-end {end} --protocol tcp"
+        )
+
+        self.cmd(
+            "network lb list-mapping -n {lb} -g {rg} --backend-pool-name {pool} --request ip={ip}",
+            checks=[
+                self.check("inboundNatRulePortMappings[0].inboundNatRuleName", "{rule}"),
+                self.check("inboundNatRulePortMappings[0].backendPort", self.kwargs["start"]),
+                self.check("inboundNatRulePortMappings[0].frontendPort", self.kwargs["start"]),
+                self.check("inboundNatRulePortMappings[0].protocol", "Tcp"),
+            ]
+        )
 
 
 class NetworkLocalGatewayScenarioTest(ScenarioTest):

@@ -762,10 +762,16 @@ def list_revision(cmd,
     label = prep_label_filter_for_url_encoding(label)
 
     try:
+        query_fields = None
+        if fields:
+            query_fields = []
+            for field in fields:
+                query_fields.append(field.name.lower())
+
         revisions_iterable = azconfig_client.list_revisions(key_filter=key,
                                                             label_filter=label,
                                                             accept_datetime=datetime,
-                                                            fields=fields)
+                                                            fields=query_fields)
         retrieved_revisions = []
         count = 0
 

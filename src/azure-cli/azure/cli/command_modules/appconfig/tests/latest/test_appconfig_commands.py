@@ -24,6 +24,7 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 class AppConfigMgmtScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(parameter_name_for_location='location')
+    @AllowLargeResponse()
     def test_azconfig_mgmt(self, resource_group, location):
         config_store_name = self.create_random_name(prefix='MgmtTest', length=24)
 
@@ -41,17 +42,21 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
             'rg': resource_group,
             'sku': sku,
             'tags': tag,
-            'identity': system_assigned_identity
+            'identity': system_assigned_identity,
+            'retention_days': 1,
+            'enable_purge_protection': False
         })
 
-        store = self.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku} --tags {tags} --assign-identity {identity}',
+        store = self.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku} --tags {tags} --assign-identity {identity} --retention-days {retention_days} --enable-purge-protection {enable_purge_protection}',
                          checks=[self.check('name', '{config_store_name}'),
                                  self.check('location', '{rg_loc}'),
                                  self.check('resourceGroup', resource_group),
                                  self.check('provisioningState', 'Succeeded'),
                                  self.check('sku.name', sku),
                                  self.check('tags', structured_tag),
-                                 self.check('identity.type', 'SystemAssigned')]).get_output_in_json()
+                                 self.check('identity.type', 'SystemAssigned'),
+                                 self.check('softDeleteRetentionInDays', '{retention_days}'),
+                                 self.check('enablePurgeProtection', '{enable_purge_protection}')]).get_output_in_json()
 
         self.cmd('appconfig list -g {rg}',
                  checks=[self.check('[0].name', '{config_store_name}'),
@@ -127,6 +132,43 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
 
         self.cmd('appconfig delete -n {config_store_name} -g {rg} -y')
 
+        config_store_name = self.create_random_name(prefix='MgmtTestdel', length=24)
+
+        self.kwargs.update({
+            'config_store_name': config_store_name
+        })
+
+        self.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku} --tags {tags} --assign-identity {identity} --retention-days {retention_days} --enable-purge-protection {enable_purge_protection}')
+        self.cmd('appconfig delete -n {config_store_name} -g {rg} -y')
+
+        self.cmd('appconfig show-deleted -n {config_store_name}',
+            checks=[self.check('name', '{config_store_name}'),
+                    self.check('location', '{rg_loc}'),
+                    self.check('purgeProtectionEnabled', '{enable_purge_protection}')])
+
+        deleted_stores = self.cmd('appconfig list-deleted').get_output_in_json()
+
+        found = False
+        for deleted_store in deleted_stores:
+            if deleted_store['name'] == config_store_name:
+                assert deleted_store['location'] == location
+                found = True
+                break
+        assert found
+
+        self.cmd('appconfig recover -n {config_store_name} -y')
+
+        self.cmd('appconfig show -n {config_store_name}',
+            checks=[self.check('name', '{config_store_name}'),
+                    self.check('location', '{rg_loc}')])
+
+        self.cmd('appconfig delete -n {config_store_name} -g {rg} -y')
+
+        self.cmd('appconfig purge -n {config_store_name} -y')
+
+        with self.assertRaisesRegex(CLIError, f'Failed to find the deleted App Configuration store \'{config_store_name}\'.'):
+            self.cmd('appconfig show-deleted -n {config_store_name}')
+
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_local_auth(self, resource_group, location):
@@ -140,10 +182,11 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
             'rg_loc': location,
             'rg': resource_group,
             'sku': sku,
-            'disable_local_auth': 'true'
+            'disable_local_auth': 'true',
+            'retention_days': 1
         })
 
-        self.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku} --disable-local-auth {disable_local_auth}',
+        self.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku} --disable-local-auth {disable_local_auth} --retention-days {retention_days}',
                  checks=[self.check('name', '{config_store_name}'),
                          self.check('location', '{rg_loc}'),
                          self.check('resourceGroup', resource_group),
@@ -182,10 +225,11 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
             'rg_loc': location,
             'rg': resource_group,
             'sku': sku,
-            'enable_public_network': 'true'
+            'enable_public_network': 'true',
+            'retention_days': 1
         })
 
-        self.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku} --enable-public-network {enable_public_network}',
+        self.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku} --enable-public-network {enable_public_network} --retention-days {retention_days}',
                  checks=[self.check('name', '{config_store_name}'),
                          self.check('location', '{rg_loc}'),
                          self.check('resourceGroup', resource_group),
@@ -199,7 +243,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
             'config_store_name': config_store_name
         })
 
-        self.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku}',
+        self.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku} --retention-days {retention_days}',
                  checks=[self.check('name', '{config_store_name}'),
                          self.check('location', '{rg_loc}'),
                          self.check('resourceGroup', resource_group),
@@ -517,6 +561,85 @@ class AppConfigKVScenarioTest(ScenarioTest):
 
         assert len(exported_kvs) == 1
         assert exported_kvs[secret_name] == secret_value
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(parameter_name_for_location='location')
+    def test_azconfig_kv_revision_list(self, resource_group, location):
+        config_store_name = self.create_random_name(prefix='KVRevisionTest', length=24)
+
+        location = 'eastus'
+        sku = 'standard'
+        self.kwargs.update({
+            'config_store_name': config_store_name,
+            'rg_loc': location,
+            'rg': resource_group,
+            'sku': sku
+        })
+        _create_config_store(self, self.kwargs)
+
+        entry_key = "Color"
+        entry_label = 'v1.0.0'
+
+        self.kwargs.update({
+            'key': entry_key,
+            'label': entry_label
+        })
+
+        # add a new key-value entry
+        self.cmd('appconfig kv set -n {config_store_name} --key {key} --label {label} -y',
+                 checks=[self.check('contentType', ""),
+                         self.check('key', entry_key),
+                         self.check('value', ""),
+                         self.check('label', entry_label)])
+
+        # edit a key-value entry
+        updated_entry_value = "Green"
+        entry_content_type = "text"
+
+        self.kwargs.update({
+            'value': updated_entry_value,
+            'content_type': entry_content_type
+        })
+
+        self.cmd(
+            'appconfig kv set -n {config_store_name} --key {key} --value {value} --content-type {content_type} --label {label} -y',
+            checks=[self.check('contentType', entry_content_type),
+                    self.check('key', entry_key),
+                    self.check('value', updated_entry_value),
+                    self.check('label', entry_label)])
+
+        # add a new label
+        updated_label = 'newlabel'
+        self.kwargs.update({
+            'label': updated_label
+        })
+
+        self.cmd(
+            'appconfig kv set -n {config_store_name} --key {key} --value {value} --content-type {content_type} --label {label} -y',
+            checks=[self.check('contentType', entry_content_type),
+                    self.check('key', entry_key),
+                    self.check('value', updated_entry_value),
+                    self.check('label', updated_label)])
+
+        revisions = self.cmd('appconfig revision list -n {config_store_name} --key {key} --label * --top 2 --fields content_type etag label last_modified value').get_output_in_json()
+        assert len(revisions) == 2
+
+        assert revisions[0]['content_type'] == 'text'
+        assert revisions[1]['content_type'] == 'text'
+        assert revisions[0]['label'] == 'newlabel'
+        assert revisions[1]['label'] == 'v1.0.0'
+        assert revisions[0]['value'] == 'Green'
+        assert revisions[1]['value'] == 'Green'
+        assert revisions[0]['last_modified'] is not None
+        assert revisions[1]['last_modified'] is not None
+        assert revisions[1]['etag'] is not None
+        assert revisions[0]['etag'] is not None
+        assert 'key' not in revisions[0]
+        assert 'key' not in revisions[1]
+        assert 'locked' not in revisions[0]
+        assert 'locked' not in revisions[1]
+        assert 'tags' not in revisions[0]
+        assert 'tags' not in revisions[1]
 
 
 class AppConfigImportExportScenarioTest(ScenarioTest):
@@ -2519,7 +2642,11 @@ class AppConfigAadAuthLiveScenarioTest(ScenarioTest):
 
 
 def _create_config_store(test, kwargs):
-    test.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku}')
+    if 'retention_days' not in kwargs:
+        kwargs.update({
+            'retention_days': 1
+        })
+    test.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku} --retention-days {retention_days}')
 
 
 def _create_user_assigned_identity(test, kwargs):

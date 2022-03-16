@@ -468,3 +468,10 @@ def extract_comma_separated_string(
         else:
             result.append(item)
     return result
+
+
+def validate_credential_format(namespace):
+    if namespace.credential_format and \
+        namespace.credential_format.lower() != "azure" and \
+            namespace.credential_format.lower() != "exec":
+        raise InvalidArgumentValueError("--format can only be azure or exec.")

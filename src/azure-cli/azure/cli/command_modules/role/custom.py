@@ -39,9 +39,6 @@ CREDENTIAL_WARNING = (
 
 logger = get_logger(__name__)
 
-SCOPE_WARNING = "In a future release, --scopes argument will become required for creating a role assignment. " \
-                "Please explicitly specify --scopes."
-
 # pylint: disable=too-many-lines
 
 
@@ -1404,12 +1401,11 @@ def create_service_principal_for_rbac(
         show_auth_for_sdk=None, skip_assignment=False, keyvault=None):
     import time
 
-    graph_client = _graph_client_factory(cmd.cli_ctx)
-    role_client = _auth_client_factory(cmd.cli_ctx).role_assignments
+    if role and not scopes or not role and scopes:
+        from azure.cli.core.azclierror import ArgumentUsageError
+        raise ArgumentUsageError("Usage error: To create role assignments, specify both --role and --scopes.")
 
-    if role and not scopes:
-        logger.warning(SCOPE_WARNING)
-        scopes = ['/subscriptions/' + role_client.config.subscription_id]
+    graph_client = _graph_client_factory(cmd.cli_ctx)
 
     years = years or 1
     _RETRY_TIMES = 36
@@ -1619,7 +1615,7 @@ def _create_self_signed_cert_with_keyvault(cli_ctx, years, keyvault, keyvault_ce
                 'keyCertSign'
             ],
             'subject': 'CN=KeyVault Generated',
-            'validity_in_months': int((years * 12) + 1)
+            'validity_in_months': int(years * 12)
         }
     }
     vault_base_url = 'https://{}{}/'.format(keyvault, cli_ctx.cloud.suffixes.keyvault_dns)
