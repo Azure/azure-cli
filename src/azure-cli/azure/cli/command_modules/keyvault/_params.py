@@ -453,7 +453,7 @@ def load_arguments(self, _):
 
     with self.argument_context('keyvault key create') as c:
         c.argument('kty', arg_type=get_enum_type(JsonWebKeyType), validator=validate_key_type,
-                   help='The type of key to create. For valid values, see: https://docs.microsoft.com/en-us/rest/api/keyvault/keys/create-key/create-key#jsonwebkeytype')
+                   help='The type of key to create. For valid values, see: https://docs.microsoft.com/rest/api/keyvault/keys/create-key/create-key#jsonwebkeytype')
         c.argument('curve', arg_type=get_enum_type(KeyCurveName),
                    help='Elliptic curve name. For valid values, see: https://docs.microsoft.com/en-us/rest/api/keyvault/keys/create-key/create-key#jsonwebkeycurvename')
 
