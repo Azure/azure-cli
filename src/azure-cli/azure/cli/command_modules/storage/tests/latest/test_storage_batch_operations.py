@@ -124,6 +124,24 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
         self.storage_cmd('storage blob list -c {} --prefix some_dir',
                          storage_account_info, container).assert_with_checks(JMESPathCheck('length(@)', 4))
 
+        self.storage_cmd('storage blob upload-batch -d {} -s "{}"',
+                                  storage_account_info, container, test_dir)
+        import time
+        from datetime import datetime
+        time.sleep(1)
+        current = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
+        time.sleep(1)
+        result = self.storage_cmd('storage blob upload-batch -d {} -s "{}" --if-modified-since {}',
+                                  storage_account_info, container, test_dir, current).get_output_in_json()
+        self.assertEqual(len(result), 0)
+        result = self.storage_cmd('storage blob upload-batch -d {} -s "{}" --if-modified-since {} --overwrite',
+                                  storage_account_info, container, test_dir, current).get_output_in_json()
+        self.assertEqual(len(result), 0)
+        result = self.storage_cmd('storage blob upload-batch -d {} -s "{}" --if-unmodified-since {}',
+                                  storage_account_info,
+                                  container, test_dir, current).get_output_in_json()
+        self.assertEqual(len(result), 41)
+
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
     @StorageTestFilesPreparer()

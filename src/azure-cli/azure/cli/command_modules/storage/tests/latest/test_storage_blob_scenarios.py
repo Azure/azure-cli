@@ -562,12 +562,11 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
-    @StorageTestFilesPreparer()
-    def test_storage_blob_upload_precondition_scenarios(self, resource_group, test_dir, storage_account_info):
+    def test_storage_blob_upload_precondition_scenarios(self, resource_group, storage_account_info):
         from datetime import datetime
         import time
         account_info = storage_account_info
-        container = self.create_container(account_info, prefix="con")
+        container = self.create_container(account_info)
 
         local_file = self.create_temp_file(128)
 
@@ -590,20 +589,6 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --if-unmodified-since {}', account_info,
                          container, local_file, blob_name, current)
 
-        self.storage_cmd('storage blob upload-batch -d {} -s "{}"', storage_account_info,
-                         container, test_dir)
-        time.sleep(1)
-        current = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
-        time.sleep(1)
-        result = self.storage_cmd('storage blob upload-batch -d {} -s "{}" --if-modified-since {}',
-                                  storage_account_info, container, test_dir, current).get_output_in_json()
-        self.assertEqual(len(result), 0)
-        result = self.storage_cmd('storage blob upload-batch -d {} -s "{}" --if-modified-since {} --overwrite',
-                         storage_account_info, container, test_dir, current).get_output_in_json()
-        self.assertEqual(len(result), 0)
-        result = self.storage_cmd('storage blob upload-batch -d {} -s "{}" --if-unmodified-since {}', storage_account_info,
-                         container, test_dir, current).get_output_in_json()
-        self.assertEqual(len(result), 41)
 
 @api_version_constraint(ResourceType.DATA_STORAGE_BLOB, min_api='2019-02-02')
 class StorageBlobSetTierTests(StorageScenarioMixin, ScenarioTest):
