@@ -3,10 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import json
-from urllib import response
 
 from azure.cli.core.azclierror import (
     AzCLIError,
+    CLIError,
     ClientRequestError,
 )
 from azure.cli.core.commands import LongRunningOperation
@@ -239,7 +239,31 @@ def sanitize_loganalytics_ws_resource_id(workspace_resource_id):
     return workspace_resource_id
 
 
-# pylint: disable=too-many-locals,too-many-branches,too-many-statements
+def is_container_insights_extension_dcr_exists(cmd, dcr_url, workspace_resource_id):
+    containerinsights_extension_dcr_exists = False
+    _MAX_RETRY_TIMES = 3
+    logger.info("is_container_insights_extension_dcr_exists GET API call")
+    for retry_count in range(0, _MAX_RETRY_TIMES):
+        try:
+            resp = send_raw_request(
+                cmd.cli_ctx, "GET", dcr_url
+            )
+            json_response = json.loads(resp.text)
+            destinations = json_response["properties"]["destinations"]
+            if not destinations and not destinations["logAnalytics"] and len(destinations["logAnalytics"]) > 0:
+                destinationLogAnalyticsResourceId = destinations["logAnalytics"][0]
+                if destinationLogAnalyticsResourceId.tolower() == workspace_resource_id.tolower():
+                    containerinsights_extension_dcr_exists = True
+            break
+        except CLIError as e:
+            if "ResourceNotFound" in str(e):
+                break
+            if retry_count >= (_MAX_RETRY_TIMES - 1):
+                raise e
+    return containerinsights_extension_dcr_exists
+
+
+# pylint: disable=too-many-locals,too-many-branches,too-many-statements,line-too-long
 def ensure_container_insights_for_monitoring(
     cmd,
     addon,
@@ -376,23 +400,9 @@ def ensure_container_insights_for_monitoring(
                     )
             dcr_url = f"https://management.azure.com/{dcr_resource_id}?api-version=2019-11-01-preview"
             # dont create DCR if already exists one with same destination
-            try:
-                resp = send_raw_request(
-                    cmd.cli_ctx, "GET", dcr_url
-                )
-                if resp.ok:
-                    json_response = json.loads(resp.text)
-                    destinations = json_response["properties"]["destinations"]
-                    if not destinations and not destinations["logAnalytics"] and len(destinations["logAnalytics"]) > 0:
-                      destinationLogAnalyticsResourceId = destinations["logAnalytics"][0]
-                      if destinationLogAnalyticsResourceId.tolower() == workspace_resource_id.tolower():
-                          logger.info(
-                               "Found an existing Data Collection Rule which has the provided log analytics workspace as destination so skipping creation of the DCR")
-                          return
-            except Exception as e:
-                error = e
-                logger.warning(
-                    "Continue on creation of the DCR since checking  the existence of Data Collection Rule failed with an error: {error}")
+            if is_container_insights_extension_dcr_exists(cmd, dcr_url, workspace_resource_id):
+                logger.info("Found Existing ContainerInsights Data Collection Rule(DCR) hence skipping the creation of the DCR Resource")
+                return
 
             # create the DCR
             dcr_creation_body = json.dumps(
