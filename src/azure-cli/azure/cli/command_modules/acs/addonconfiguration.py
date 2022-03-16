@@ -242,7 +242,6 @@ def sanitize_loganalytics_ws_resource_id(workspace_resource_id):
 def is_container_insights_extension_dcr_exists(cmd, dcr_url, workspace_resource_id):
     containerinsights_extension_dcr_exists = False
     _MAX_RETRY_TIMES = 3
-    logger.info("is_container_insights_extension_dcr_exists GET API call")
     for retry_count in range(0, _MAX_RETRY_TIMES):
         try:
             resp = send_raw_request(
@@ -344,12 +343,9 @@ def ensure_container_insights_for_monitoring(
             # retry the request up to two times
             for _ in range(3):
                 try:
-                    location_list_url = (
-                        f"https://management.azure.com/subscriptions/{subscription_id}/"
-                        "locations?api-version=2019-11-01"
-                    )
+                    location_list_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
+                        f"subscriptions/{subscription_id}/locations?api-version=2019-11-01"
                     r = send_raw_request(cmd.cli_ctx, "GET", location_list_url)
-
                     # this is required to fool the static analyzer. The else statement will only run if an exception
                     # is thrown, but flake8 will complain that e is undefined if we don't also define it here.
                     error = None
@@ -368,10 +364,8 @@ def ensure_container_insights_for_monitoring(
             # check if region supports DCRs and DCR-A
             for _ in range(3):
                 try:
-                    feature_check_url = (
-                        f"https://management.azure.com/subscriptions/{subscription_id}/"
-                        "providers/Microsoft.Insights?api-version=2020-10-01"
-                    )
+                    feature_check_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
+                        f"subscriptions/{subscription_id}/providers/Microsoft.Insights?api-version=2020-10-01"
                     r = send_raw_request(cmd.cli_ctx, "GET", feature_check_url)
                     error = None
                     break
@@ -398,21 +392,39 @@ def ensure_container_insights_for_monitoring(
                     raise ClientRequestError(
                         f"Data Collection Rule Associations are not supported for cluster region {location}"
                     )
-            dcr_url = f"https://management.azure.com/{dcr_resource_id}?api-version=2019-11-01-preview"
-            # dont create DCR if already exists one with same destination
-            if is_container_insights_extension_dcr_exists(cmd, dcr_url, workspace_resource_id):
-                logger.info("Found Existing ContainerInsights Data Collection Rule(DCR) hence skipping the creation of the DCR Resource")
-                return
-
-            # create the DCR
-            dcr_creation_body = json.dumps(
-                {
-                    "location": location,
-                    "properties": {
-                        "dataSources": {
-                            "extensions": [
+            dcr_url = cmd.cli_ctx.cloud.endpoints.resource_manager + f"{dcr_resource_id}?api-version=2019-11-01-preview"
+            # Create DCR if doesnt exists already with same destination
+            if not is_container_insights_extension_dcr_exists(cmd, dcr_url, workspace_resource_id):
+                # create the DCR
+                dcr_creation_body = json.dumps(
+                    {
+                        "location": location,
+                        "properties": {
+                            "dataSources": {
+                                "extensions": [
+                                    {
+                                        "name": "ContainerInsightsExtension",
+                                        "streams": [
+                                            "Microsoft-Perf",
+                                            "Microsoft-ContainerInventory",
+                                            "Microsoft-ContainerLog",
+                                            "Microsoft-ContainerLogV2",
+                                            "Microsoft-ContainerNodeInventory",
+                                            "Microsoft-KubeEvents",
+                                            "Microsoft-KubeHealth",
+                                            "Microsoft-KubeMonAgentEvents",
+                                            "Microsoft-KubeNodeInventory",
+                                            "Microsoft-KubePodInventory",
+                                            "Microsoft-KubePVInventory",
+                                            "Microsoft-KubeServices",
+                                            "Microsoft-InsightsMetrics",
+                                        ],
+                                        "extensionName": "ContainerInsights",
+                                    }
+                                ]
+                            },
+                            "dataFlows": [
                                 {
-                                    "name": "ContainerInsightsExtension",
                                     "streams": [
                                         "Microsoft-Perf",
                                         "Microsoft-ContainerInventory",
@@ -428,52 +440,31 @@ def ensure_container_insights_for_monitoring(
                                         "Microsoft-KubeServices",
                                         "Microsoft-InsightsMetrics",
                                     ],
-                                    "extensionName": "ContainerInsights",
+                                    "destinations": ["la-workspace"],
                                 }
-                            ]
+                            ],
+                            "destinations": {
+                                "logAnalytics": [
+                                    {
+                                        "workspaceResourceId": workspace_resource_id,
+                                        "name": "la-workspace",
+                                    }
+                                ]
+                            },
                         },
-                        "dataFlows": [
-                            {
-                                "streams": [
-                                    "Microsoft-Perf",
-                                    "Microsoft-ContainerInventory",
-                                    "Microsoft-ContainerLog",
-                                    "Microsoft-ContainerLogV2",
-                                    "Microsoft-ContainerNodeInventory",
-                                    "Microsoft-KubeEvents",
-                                    "Microsoft-KubeHealth",
-                                    "Microsoft-KubeMonAgentEvents",
-                                    "Microsoft-KubeNodeInventory",
-                                    "Microsoft-KubePodInventory",
-                                    "Microsoft-KubePVInventory",
-                                    "Microsoft-KubeServices",
-                                    "Microsoft-InsightsMetrics",
-                                ],
-                                "destinations": ["la-workspace"],
-                            }
-                        ],
-                        "destinations": {
-                            "logAnalytics": [
-                                {
-                                    "workspaceResourceId": workspace_resource_id,
-                                    "name": "la-workspace",
-                                }
-                            ]
-                        },
-                    },
-                }
-            )
-            for _ in range(3):
-                try:
-                    send_raw_request(
-                        cmd.cli_ctx, "PUT", dcr_url, body=dcr_creation_body
-                    )
-                    error = None
-                    break
-                except AzCLIError as e:
-                    error = e
-            else:
-                raise error
+                    }
+                )
+                for _ in range(3):
+                    try:
+                        send_raw_request(
+                            cmd.cli_ctx, "PUT", dcr_url, body=dcr_creation_body
+                        )
+                        error = None
+                        break
+                    except AzCLIError as e:
+                        error = e
+                else:
+                    raise error
 
         if create_dcra:
             # only create or delete the association between the DCR and cluster
@@ -486,10 +477,8 @@ def ensure_container_insights_for_monitoring(
                     },
                 }
             )
-            association_url = (
-                f"https://management.azure.com/{cluster_resource_id}/providers/Microsoft.Insights/"
-                f"dataCollectionRuleAssociations/ContainerInsightsExtension?api-version=2019-11-01-preview"
-            )
+            association_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
+                f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/ContainerInsightsExtension?api-version=2019-11-01-preview"
             for _ in range(3):
                 try:
                     send_raw_request(
