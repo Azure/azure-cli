@@ -119,6 +119,7 @@ def ensure_default_log_analytics_workspace_for_monitoring(
         "germanynorth": "germanywestcentral",
         "uaecentral": "uaecentral",
         "eastus2euap": "eastus2euap",
+        "centraluseuap": "eastus2euap",
         "brazilsoutheast": "brazilsoutheast",
     }
 
