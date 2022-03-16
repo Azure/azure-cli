@@ -6584,16 +6584,16 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_enable_monitoring_with_aad_auth_msi(self, resource_group, resource_group_location,):
         aks_name = self.create_random_name('cliakstest', 16)
-        self.enable_monitoring_existing_cluster_aad_atuh(resource_group, resource_group_location, aks_name, user_assigned_identity=False)
+        self.enable_monitoring_existing_cluster_aad_auth(resource_group, resource_group_location, aks_name, user_assigned_identity=False)
 
     @live_only()
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_enable_monitoring_with_aad_auth_uai(self, resource_group, resource_group_location):
         aks_name = self.create_random_name('cliakstest', 16)
-        self.enable_monitoring_existing_cluster_aad_atuh(resource_group, resource_group_location, aks_name, user_assigned_identity=True)
+        self.enable_monitoring_existing_cluster_aad_auth(resource_group, resource_group_location, aks_name, user_assigned_identity=True)
 
-    def enable_monitoring_existing_cluster_aad_atuh(self, resource_group, resource_group_location, aks_name, user_assigned_identity=False):
+    def enable_monitoring_existing_cluster_aad_auth(self, resource_group, resource_group_location, aks_name, user_assigned_identity=False):
         self.kwargs.update({
             'resource_group': resource_group,
             'name': aks_name,

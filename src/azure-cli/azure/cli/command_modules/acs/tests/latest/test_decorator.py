@@ -31,6 +31,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_SECRET_ROTATION_ENABLED,
     CONST_VIRTUAL_NODE_ADDON_NAME,
     CONST_VIRTUAL_NODE_SUBNET_NAME,
+    CONST_MONITORING_USING_AAD_MSI_AUTH,
     DecoratorEarlyExitException,
     DecoratorMode,
 )
@@ -2595,6 +2596,7 @@ class AKSContextTestCase(unittest.TestCase):
             "CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME": CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME,
             "CONST_SECRET_ROTATION_ENABLED": CONST_SECRET_ROTATION_ENABLED,
             "CONST_ROTATION_POLL_INTERVAL": CONST_ROTATION_POLL_INTERVAL,
+            "CONST_MONITORING_USING_AAD_MSI_AUTH": CONST_MONITORING_USING_AAD_MSI_AUTH
         }
         self.assertEqual(addon_consts, ground_truth_addon_consts)
 
