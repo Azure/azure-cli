@@ -36,6 +36,8 @@ def load_arguments(self, _):
         c.argument('security_operators', arg_type=tags_type)
         c.argument('allow_local_ldap_users', arg_type=tags_type)
         c.argument('encrypt_dc_conn', options_list=['--encrypt-dc-conn'], arg_type=get_three_state_flag())
+        c.argument('ldap_signing', arg_type=get_three_state_flag())
+        c.argument('aes_encryption', arg_type=get_three_state_flag())
 
     with self.argument_context('netappfiles account ad list') as c:
         c.argument('account_name', help='The name of the ANF account', id_part=None)
