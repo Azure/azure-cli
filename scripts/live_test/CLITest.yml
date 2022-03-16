@@ -26,296 +26,150 @@ jobs:
   strategy:
     maxParallel: 5
     matrix:
-      acr:
-        Target: acr
-      acs:
-        Target: acs
-      advisor:
-        Target: advisor
-      ams:
-        Target: ams
-      apim:
-        Target: apim
-      appconfig:
-        Target: appconfig
-      appservice:
-        Target: appservice
-      aro:
-        Target: aro
+      storage:
+        Target: storage
       backup:
         Target: backup
-      batch:
-        Target: batch
-      batchai:
-        Target: batchai
-      billing:
-        Target: billing
-      botservice:
-        Target: botservice
-      cdn:
-        Target: cdn
-      cloud:
-        Target: cloud
-      cognitiveservices:
-        Target: cognitiveservices
-      config:
-        Target: config
-      configure:
-        Target: configure
-      consumption:
-        Target: consumption
-      container:
-        Target: container
+      apim:
+        Target: apim
+      vm:
+        Target: vm
       cosmosdb:
         Target: cosmosdb
-      databoxedge:
-        Target: databoxedge
-      deploymentmanager:
-        Target: deploymentmanager
-      dla:
-        Target: dla
-      dls:
-        Target: dls
-      dms:
-        Target: dms
-      eventgrid:
-        Target: eventgrid
-      eventhubs:
-        Target: eventhubs
-      extension:
-        Target: extension
-      feedback:
-        Target: feedback
-      find:
-        Target: find
-      hdinsight:
-        Target: hdinsight
-      iot:
-        Target: iot
-      keyvault:
-        Target: keyvault
       kusto:
         Target: kusto
-      lab:
-        Target: lab
-      managedservices:
-        Target: managedservices
-      maps:
-        Target: maps
+      hdinsight:
+        Target: hdinsight
+      sqlvm:
+        Target: sqlvm
+      servicebus:
+        Target: servicebus
+      eventhubs:
+        Target: eventhubs
+      iot:
+        Target: iot
+      appconfig:
+        Target: appconfig
       monitor:
         Target: monitor
-      natgateway:
-        Target: natgateway
+      cognitiveservices:
+        Target: cognitiveservices
+      batch:
+        Target: batch
+      profile:
+        Target: profile
+      signalr:
+        Target: signalr
+      databoxedge:
+        Target: databoxedge
       netappfiles:
         Target: netappfiles
-      network:
-        Target: network
-#      policyinsights:
-#        Target: policyinsights
-#      privatedns:
-#        Target: privatedns
-#      profile:
-#        Target: profile
-#      rdbms:
-#        Target: rdbms
-#      redis:
-#        Target: redis
-#      relay:
-#        Target: relay
-#      reservations:
-#        Target: reservations
-#      resource:
-#        Target: resource
-#      role:
-#        Target: role
-#      search:
-#        Target: search
-#      security:
-#        Target: security
-#      servicebus:
-#        Target: servicebus
-#      servicefabric:
-#        Target: servicefabric
-#      signalr:
-#        Target: signalr
-#      sql:
-#        Target: sql
-#      sqlvm:
-#        Target: sqlvm
-#      storage:
-#        Target: storage
-#      synapse:
-#        Target: synapse
-#      util:
-#        Target: util
-#      vm:
-#        Target: vm
-#      ext-account:
-#        Target: ext-account
-#      ext-aem:
-#        Target: ext-aem
-#      ext-ai-examples:
-#        Target: ext-ai-examples
-#      ext-aks-preview:
-#        Target: ext-aks-preview
-#      ext-alertsmanagement:
-#        Target: ext-alertsmanagement
-#      ext-alias:
-#        Target: ext-alias
-#      ext-application-insights:
-#        Target: ext-application-insights
-#      ext-attestation:
-#        Target: ext-attestation
-#      ext-azure-batch-cli-extensions:
-#        Target: ext-azure-batch-cli-extensions
-#      ext-azure-cli-iot-ext:
-#        Target: ext-azure-cli-iot-ext
-#      ext-azure-cli-ml:
-#        Target: ext-azure-cli-ml
-#      ext-azure-devops:
-#        Target: ext-azure-devops
-#      ext-azure-firewall:
-#        Target: ext-azure-firewall
-#      ext-azure-iot:
-#        Target: ext-azure-iot
-#      ext-blockchain:
-#        Target: ext-blockchain
-#      ext-blueprint:
-#        Target: ext-blueprint
-#      ext-codespaces:
-#        Target: ext-codespaces
-#      ext-connectedk8s:
-#        Target: ext-connectedk8s
-#      ext-connectedmachine:
-#        Target: ext-connectedmachine
-#      ext-costmanagement:
-#        Target: ext-costmanagement
-#      ext-csvmware:
-#        Target: ext-csvmware
-#      ext-custom-providers:
-#        Target: ext-custom-providers
-#      ext-databox:
-#        Target: ext-databox
-#      ext-databricks:
-#        Target: ext-databricks
-#      ext-datafactory:
-#        Target: ext-datafactory
-#      ext-datashare:
-#        Target: ext-datashare
-#      ext-db-up:
-#        Target: ext-db-up
-#      ext-deploy-to-azure:
-#        Target: ext-deploy-to-azure
-#      ext-desktopvirtualization:
-#        Target: ext-desktopvirtualization
-#      ext-dev-spaces:
-#        Target: ext-dev-spaces
-#      ext-dms-preview:
-#        Target: ext-dms-preview
-#      ext-eventgrid:
-#        Target: ext-eventgrid
-#      ext-express-route:
-#        Target: ext-express-route
-#      ext-express-route-cross-connection:
-#        Target: ext-express-route-cross-connection
-#      ext-footprint:
-#        Target: ext-footprint
-#      ext-front-door:
-#        Target: ext-front-door
-#      ext-fzf:
-#        Target: ext-fzf
-#      ext-guestconfig:
-#        Target: ext-guestconfig
-#      ext-hack:
-#        Target: ext-hack
-#      ext-hardware-security-modules:
-#        Target: ext-hardware-security-modules
-#      ext-healthcareapis:
-#        Target: ext-healthcareapis
-#      ext-hpc-cache:
-#        Target: ext-hpc-cache
-#      ext-image-copy-extension:
-#        Target: ext-image-copy-extension
-#      ext-import-export:
-#        Target: ext-import-export
-#      ext-interactive:
-#        Target: ext-interactive
-#      ext-internet-analyzer:
-#        Target: ext-internet-analyzer
-#      ext-ip-group:
-#        Target: ext-ip-group
-#      ext-k8sconfiguration:
-#        Target: ext-k8sconfiguration
-#      ext-keyvault-preview:
-#        Target: ext-keyvault-preview
-#      ext-kusto:
-#        Target: ext-kusto
-#      ext-log-analytics:
-#        Target: ext-log-analytics
-#      ext-log-analytics-solution:
-#        Target: ext-log-analytics-solution
-#      ext-logic:
-#        Target: ext-logic
-#      ext-maintenance:
-#        Target: ext-maintenance
-#      ext-managementpartner:
-#        Target: ext-managementpartner
-#      ext-mesh:
-#        Target: ext-mesh
-#      ext-mixed-reality:
-#        Target: ext-mixed-reality
-#      ext-netappfiles-preview:
-#        Target: ext-netappfiles-preview
-#      ext-notification-hub:
-#        Target: ext-notification-hub
-#      ext-peering:
-#        Target: ext-peering
-#      ext-portal:
-#        Target: ext-portal
-#      ext-powerbidedicated:
-#        Target: ext-powerbidedicated
-#      ext-privatedns:
-#        Target: ext-privatedns
-#      ext-resource-graph:
-#        Target: ext-resource-graph
-#      ext-sap-hana:
-#        Target: ext-sap-hana
-#      ext-scheduled-query:
-#        Target: ext-scheduled-query
-#      ext-spring-cloud:
-#        Target: ext-spring-cloud
-#      ext-ssh:
-#        Target: ext-ssh
-#      ext-stack-hci:
-#        Target: ext-stack-hci
-#      ext-storage-blob-preview:
-#        Target: ext-storage-blob-preview
-#      ext-storage-or-preview:
-#        Target: ext-storage-or-preview
-#      ext-storage-preview:
-#        Target: ext-storage-preview
-#      ext-storagesync:
-#        Target: ext-storagesync
-#      ext-stream-analytics:
-#        Target: ext-stream-analytics
-#      ext-subscription:
-#        Target: ext-subscription
-#      ext-support:
-#        Target: ext-support
-#      ext-synapse:
-#        Target: ext-synapse
-#      ext-timeseriesinsights:
-#        Target: ext-timeseriesinsights
-#      ext-virtual-network-tap:
-#        Target: ext-virtual-network-tap
-#      ext-virtual-wan:
-#        Target: ext-virtual-wan
-#      ext-vm-repair:
-#        Target: ext-vm-repair
-#      ext-vmware:
-#        Target: ext-vmware
-#      ext-webapp:
-#        Target: ext-webapp
+      dla:
+        Target: dla
+      security:
+        Target: security
+      dls:
+        Target: dls
+      batchai:
+        Target: batchai
+      natgateway:
+        Target: natgateway
+      extension:
+        Target: extension
+      managedservices:
+        Target: managedservices
+      configure:
+        Target: configure
+      comsumption:
+        Target: comsumption
+      config:
+        Target: config
+      reservations:
+        Target: reservations
+      lab:
+        Target: lab
+      ext-codespaces:
+        Target: ext-codespaces
+      ext-ai-examples:
+        Target: ext-ai-examples
+      ext-storagesync:
+        Target: ext-storagesync
+      ext-portal:
+        Target: ext-portal
+      ext-support:
+        Target: ext-support
+      ext-databox:
+        Target: ext-databox
+      ext-vm-repair:
+        Target: ext-vm-repair
+      ext-ip-group:
+        Target: ext-ip-group
+      ext-k8sconfiguration:
+        Target: ext-k8sconfiguration
+      ext-eventgrid:
+        Target: ext-eventgrid
+      ext-log-analytics-solution:
+        Target: ext-log-analytics-solution
+      ext-timeseriesinsights:
+        Target: ext-timeseriesinsights
+      ext-dms-preview:
+        Target: ext-dms-preview
+      ext-fzf:
+        Target: ext-fzf
+      ext-notification-hub:
+        Target: ext-notification-hub
+      ext-connectedk8s:
+        Target: ext-connectedk8s
+      ext-guestconfig:
+        Target: ext-guestconfig
+      ext-stack-hci:
+        Target: ext-stack-hci
+      ext-webapp:
+        Target: ext-webapp
+      ext-healthcareapis:
+        Target: ext-healthcareapis
+      ext-account:
+        Target: ext-account
+      ext-hpc-cache:
+        Target: ext-hpc-cache
+      ext-maintenance:
+        Target: ext-maintenance
+      ext-azure-iot:
+        Target: ext-azure-iot
+      ext-desktopvirtualization:
+        Target: ext-desktopvirtualization
+      ext-scheduled-query:
+        Target: ext-scheduled-query
+      ext-attestation:
+        Target: ext-attestation
+      ext-azure-cli-iot-ext:
+        Target: ext-azure-cli-iot-ext
+      ext-azure-devops:
+        Target: ext-azure-devops
+      ext-hack:
+        Target: ext-hack
+      ext-kusto:
+        Target: ext-kusto
+      ext-csvmware:
+        Target: ext-csvmware
+      ext-log-analytics:
+        Target: ext-log-analytics
+      ext-storage-blob-preview:
+        Target: ext-storage-blob-preview
+      ext-virtual-network-tap:
+        Target: ext-virtual-network-tap
+      ext-interactive:
+        Target: ext-interactive
+      ext-peering:
+        Target: ext-peering
+      ext-resource-graph:
+        Target: ext-resource-graph
+      ext-datashare:
+        Target: ext-datashare
+      ext-deploy-to-azure:
+        Target: ext-deploy-to-azure
+      ext-synapse:
+        Target: ext-synapse
   pool:
     vmImage: 'ubuntu-20.04'
   steps:
@@ -445,296 +299,152 @@ jobs:
   strategy:
     maxParallel: 5
     matrix:
-#      acr:
-#        Target: acr
-#      acs:
-#        Target: acs
-#      advisor:
-#        Target: advisor
-#      ams:
-#        Target: ams
-#      apim:
-#        Target: apim
-#      appconfig:
-#        Target: appconfig
-#      appservice:
-#        Target: appservice
-#      aro:
-#        Target: aro
-#      backup:
-#        Target: backup
-#      batch:
-#        Target: batch
-#      batchai:
-#        Target: batchai
-#      billing:
-#        Target: billing
-#      botservice:
-#        Target: botservice
-#      cdn:
-#        Target: cdn
-#      cloud:
-#        Target: cloud
-#      cognitiveservices:
-#        Target: cognitiveservices
-#      config:
-#        Target: config
-#      configure:
-#        Target: configure
-#      consumption:
-#        Target: consumption
-#      container:
-#        Target: container
-#      cosmosdb:
-#        Target: cosmosdb
-#      databoxedge:
-#        Target: databoxedge
-#      deploymentmanager:
-#        Target: deploymentmanager
-#      dla:
-#        Target: dla
-#      dls:
-#        Target: dls
-#      dms:
-#        Target: dms
-#      eventgrid:
-#        Target: eventgrid
-#      eventhubs:
-#        Target: eventhubs
-#      extension:
-#        Target: extension
-#      feedback:
-#        Target: feedback
-#      find:
-#        Target: find
-#      hdinsight:
-#        Target: hdinsight
-#      iot:
-#        Target: iot
-#      keyvault:
-#        Target: keyvault
-#      kusto:
-#        Target: kusto
-#      lab:
-#        Target: lab
-#      managedservices:
-#        Target: managedservices
-#      maps:
-#        Target: maps
-#      monitor:
-#        Target: monitor
-#      natgateway:
-#        Target: natgateway
-#      netappfiles:
-#        Target: netappfiles
-#      network:
-#        Target: network
-      policyinsights:
-        Target: policyinsights
-      privatedns:
-        Target: privatedns
-      profile:
-        Target: profile
+      network:
+        Target: network
+      servicefabric:
+        Target: servicefabric
+      acs:
+        Target: acs
       rdbms:
         Target: rdbms
       redis:
         Target: redis
-      relay:
-        Target: relay
-      reservations:
-        Target: reservations
-      resource:
-        Target: resource
-      role:
-        Target: role
       search:
         Target: search
-      security:
-        Target: security
-      servicebus:
-        Target: servicebus
-      servicefabric:
-        Target: servicefabric
-      signalr:
-        Target: signalr
-      sql:
-        Target: sql
-      sqlvm:
-        Target: sqlvm
-      storage:
-        Target: storage
       synapse:
         Target: synapse
+      appservice:
+        Target: appservice
+      aro:
+        Target: aro
+      sql:
+        Target: sql
+      acr:
+        Target: acr
+      ams:
+        Target: ams
+      keyvault:
+        Target: keyvault
+      resource:
+        Target: resource
+      cdn:
+        Target: cdn
+      privatedns:
+        Target: privatedns
+      policyinsights:
+        Target: policyinsights
+      eventgrid:
+        Target: eventgrid
+      role:
+        Target: role
+      relay:
+        Target: relay
+      container:
+        Target: container
       util:
         Target: util
-      vm:
-        Target: vm
-      ext-account:
-        Target: ext-account
+      deploymentmanager:
+        Target: deploymentmanager
+      botservice:
+        Target: botservice
+      maps:
+        Target: maps
+      cloud:
+        Target: cloud
+      dms:
+        Target: dms
+      feedback:
+        Target: feedback
+      advisor:
+        Target: advisor
+      billing:
+        Target: billing
+      find:
+        Target: find
       ext-aem:
         Target: ext-aem
-      ext-ai-examples:
-        Target: ext-ai-examples
-      ext-aks-preview:
-        Target: ext-aks-preview
-      ext-alertsmanagement:
-        Target: ext-alertsmanagement
-      ext-alias:
-        Target: ext-alias
-      ext-application-insights:
-        Target: ext-application-insights
-      ext-attestation:
-        Target: ext-attestation
-      ext-azure-batch-cli-extensions:
-        Target: ext-azure-batch-cli-extensions
-      ext-azure-cli-iot-ext:
-        Target: ext-azure-cli-iot-ext
-      ext-azure-cli-ml:
-        Target: ext-azure-cli-ml
-      ext-azure-devops:
-        Target: ext-azure-devops
-      ext-azure-firewall:
-        Target: ext-azure-firewall
-      ext-azure-iot:
-        Target: ext-azure-iot
-      ext-blockchain:
-        Target: ext-blockchain
-      ext-blueprint:
-        Target: ext-blueprint
-      ext-codespaces:
-        Target: ext-codespaces
-      ext-connectedk8s:
-        Target: ext-connectedk8s
-      ext-connectedmachine:
-        Target: ext-connectedmachine
-      ext-costmanagement:
-        Target: ext-costmanagement
-      ext-csvmware:
-        Target: ext-csvmware
-      ext-custom-providers:
-        Target: ext-custom-providers
-      ext-databox:
-        Target: ext-databox
-      ext-databricks:
-        Target: ext-databricks
-      ext-datafactory:
-        Target: ext-datafactory
-      ext-datashare:
-        Target: ext-datashare
-      ext-db-up:
-        Target: ext-db-up
-      ext-deploy-to-azure:
-        Target: ext-deploy-to-azure
-      ext-desktopvirtualization:
-        Target: ext-desktopvirtualization
-      ext-dev-spaces:
-        Target: ext-dev-spaces
-      ext-dms-preview:
-        Target: ext-dms-preview
-      ext-eventgrid:
-        Target: ext-eventgrid
-      ext-express-route:
-        Target: ext-express-route
-      ext-express-route-cross-connection:
-        Target: ext-express-route-cross-connection
-      ext-footprint:
-        Target: ext-footprint
-      ext-front-door:
-        Target: ext-front-door
-      ext-fzf:
-        Target: ext-fzf
-      ext-guestconfig:
-        Target: ext-guestconfig
-      ext-hack:
-        Target: ext-hack
-      ext-hardware-security-modules:
-        Target: ext-hardware-security-modules
-      ext-healthcareapis:
-        Target: ext-healthcareapis
-      ext-hpc-cache:
-        Target: ext-hpc-cache
-      ext-image-copy-extension:
-        Target: ext-image-copy-extension
-      ext-import-export:
-        Target: ext-import-export
-      ext-interactive:
-        Target: ext-interactive
-      ext-internet-analyzer:
-        Target: ext-internet-analyzer
-      ext-ip-group:
-        Target: ext-ip-group
-      ext-k8sconfiguration:
-        Target: ext-k8sconfiguration
-      ext-keyvault-preview:
-        Target: ext-keyvault-preview
-      ext-kusto:
-        Target: ext-kusto
-      ext-log-analytics:
-        Target: ext-log-analytics
-      ext-log-analytics-solution:
-        Target: ext-log-analytics-solution
-      ext-logic:
-        Target: ext-logic
-      ext-maintenance:
-        Target: ext-maintenance
-      ext-managementpartner:
-        Target: ext-managementpartner
-      ext-mesh:
-        Target: ext-mesh
-      ext-mixed-reality:
-        Target: ext-mixed-reality
-      ext-netappfiles-preview:
-        Target: ext-netappfiles-preview
-      ext-notification-hub:
-        Target: ext-notification-hub
-      ext-peering:
-        Target: ext-peering
-      ext-portal:
-        Target: ext-portal
-      ext-powerbidedicated:
-        Target: ext-powerbidedicated
-      ext-privatedns:
-        Target: ext-privatedns
-      ext-resource-graph:
-        Target: ext-resource-graph
-      ext-sap-hana:
-        Target: ext-sap-hana
-      ext-scheduled-query:
-        Target: ext-scheduled-query
-      ext-spring-cloud:
-        Target: ext-spring-cloud
-      ext-ssh:
-        Target: ext-ssh
-      ext-stack-hci:
-        Target: ext-stack-hci
-      ext-storage-blob-preview:
-        Target: ext-storage-blob-preview
-      ext-storage-or-preview:
-        Target: ext-storage-or-preview
       ext-storage-preview:
         Target: ext-storage-preview
-      ext-storagesync:
-        Target: ext-storagesync
-      ext-stream-analytics:
-        Target: ext-stream-analytics
-      ext-subscription:
-        Target: ext-subscription
-      ext-support:
-        Target: ext-support
-      ext-synapse:
-        Target: ext-synapse
-      ext-timeseriesinsights:
-        Target: ext-timeseriesinsights
-      ext-virtual-network-tap:
-        Target: ext-virtual-network-tap
+      ext-datafactory:
+        Target: ext-datafactory
+      ext-connectedmachine:
+        Target: ext-connectedmachine
+      ext-alertsmanagement:
+        Target: ext-alertsmanagement
       ext-virtual-wan:
         Target: ext-virtual-wan
-      ext-vm-repair:
-        Target: ext-vm-repair
+      ext-db-up:
+        Target: ext-db-up
+      ext-import-export:
+        Target: ext-import-export
+      ext-aks-preview:
+        Target: ext-aks-preview
+      ext-mixed-reality:
+        Target: ext-mixed-reality
+      ext-image-copy-extension:
+        Target: ext-image-copy-extension
+      ext-logic:
+        Target: ext-logic
+      ext-application-insights:
+        Target: ext-application-insights
+      ext-footprint:
+        Target: ext-footprint
+      ext-hardware-security-modules:
+        Target: ext-hardware-security-modules
+      ext-azure-batch-cli-extensions:
+        Target: ext-azure-batch-cli-extensions
+      ext-express-route-cross-connection:
+        Target: ext-express-route-cross-connection
+      ext-spring-cloud:
+        Target: ext-spring-cloud
       ext-vmware:
         Target: ext-vmware
-      ext-webapp:
-        Target: ext-webapp
+      ext-dev-spaces:
+        Target: ext-dev-spaces
+      ext-powerbidedicated:
+        Target: ext-powerbidedicated
+      ext-alias:
+        Target: ext-alias
+      ext-databricks:
+        Target: ext-databricks
+      ext-sap-hana:
+        Target: ext-sap-hana
+      ext-express-route:
+        Target: ext-express-route
+      ext-blockchain:
+        Target: ext-blockchain
+      ext-internet-analyzer:
+        Target: ext-internet-analyzer
+      ext-azure-cli-ml:
+        Target: ext-azure-cli-ml
+      ext-blueprint:
+        Target: ext-blueprint
+      ext-keyvault-preview:
+        Target: ext-keyvault-preview
+      ext-stream-analytics:
+        Target: ext-stream-analytics
+      ext-front-door:
+        Target: ext-front-door
+      ext-mesh:
+        Target: ext-mesh
+      ext-storage-or-preview:
+        Target: ext-storage-or-preview
+      ext-costmanagement:
+        Target: ext-costmanagement
+      ext-custom-providers:
+        Target: ext-custom-providers
+      ext-managementpartner:
+        Target: ext-managementpartner
+      ext-privatedns:
+        Target: ext-privatedns
+      ext-ssh:
+        Target: ext-ssh
+      ext-subscription:
+        Target: ext-subscription
+      ext-azure-firewall:
+        Target: ext-azure-firewall
+      ext-netappfiles-preview:
+        Target: ext-netappfiles-preview
   pool:
     vmImage: 'ubuntu-20.04'
   steps:
