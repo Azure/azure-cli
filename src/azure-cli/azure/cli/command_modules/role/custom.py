@@ -35,7 +35,7 @@ from azure.cli.core.util import get_file_json, shell_safe_json_parse, is_guid
 from ._client_factory import _auth_client_factory, _graph_client_factory
 from ._multi_api_adaptor import MultiAPIAdaptor
 from ._graph_client import GraphClient
-from ._graph_objects import application_property_map, set_object_properties
+from ._graph_objects import application_property_map, group_property_map, set_object_properties
 
 # ARM RBAC's principalType
 USER = 'User'
@@ -766,17 +766,13 @@ def create_group(client, display_name, mail_nickname, force=None, description=No
                 raise CLIError(err.format(', '.join([x.object_id for x in matches])))
             logger.warning('A group with the same display name and mail nickname already exists, returning.')
             return matches[0]
-    body = {
-        "displayName": display_name,
-        "mailNickname": mail_nickname,
-        "mailEnabled": False,
-        "securityEnabled": True
-    }
-    if description is not None:
-        body["description"] = description
-    group = client.group_create(body=body)
 
-    return group
+    body = {}
+    set_object_properties(group_property_map, body, display_name=display_name,
+                          mail_nickname=mail_nickname, description=description,
+                          mail_enabled=False, security_enabled=True)
+
+    return client.group_create(body=body)
 
 
 def list_groups(client, display_name=None, query_filter=None):
@@ -814,7 +810,7 @@ def list_group_owners(client, group_id):
 def add_group_owner(client, owner_object_id, group_id):
     group_object_id = _resolve_group(client, group_id)
     owners = client.group_owner_list(group_object_id)
-    if not next((x for x in owners if x.object_id == owner_object_id), None):
+    if not next((x for x in owners if x['id'] == owner_object_id), None):
         owner_url = client.base_url + '/users/{id}'.format(id=owner_object_id)
         body = {
             "@odata.id": owner_url

@@ -24,6 +24,15 @@ application_property_map = {
     'required_resource_accesses': 'requiredResourceAccess',
 }
 
+# https://docs.microsoft.com/en-us/graph/api/resources/group?view=graph-rest-1.0#properties
+group_property_map = {
+    'display_name': 'displayName',
+    'mail_nickname': 'mailNickname',
+    'mail_enabled': 'mailEnabled',
+    'security_enabled': 'securityEnabled',
+    'description': 'description'
+}
+
 
 def set_object_properties(property_map, graph_object, **kwargs):
     """Set properties of the graph object according to property_map.
