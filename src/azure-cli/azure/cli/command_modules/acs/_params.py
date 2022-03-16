@@ -255,6 +255,8 @@ def load_arguments(self, _):
         c.argument('pod_cidr')
         c.argument('service_cidr')
         c.argument('ppg', type=str, validator=validate_ppg)
+        c.argument('node_osdisk_type', arg_type=get_enum_type(node_os_disk_types))
+        c.argument('node_osdisk_size', type=int)
         c.argument('vnet_subnet_id', type=str,
                    validator=validate_vnet_subnet_id)
         c.argument('workspace_resource_id')
@@ -462,7 +464,8 @@ def load_arguments(self, _):
             c.argument('node_public_ip_prefix_id', type=str)
             c.argument('ppg', type=str, validator=validate_ppg)
             c.argument('max_surge', type=str, validator=validate_max_surge)
-            c.argument('node_os_disk_type', arg_type=get_enum_type(node_os_disk_types))
+            c.argument('node_osdisk_type', arg_type=get_enum_type(node_os_disk_types))
+            c.argument('node_osdisk_size', type=int)
             c.argument('enable_encryption_at_host', options_list=[
                        '--enable-encryption-at-host'], action='store_true')
             c.argument('enable_ultra_ssd', options_list=[
