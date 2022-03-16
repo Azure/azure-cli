@@ -84,7 +84,7 @@ def storage_fs_directory_copy(cmd, source, destination, recursive=None, **kwargs
 def storage_blob_sync(cmd, client, source, destination, exclude_pattern=None, include_pattern=None,
                       exclude_path=None):
     azcopy = _azcopy_blob_client(cmd, client)
-    flags = ['--delete-destination=true']
+    flags = ['--delete-destination=false']
     if include_pattern is not None:
         flags.append('--include-pattern=' + include_pattern)
     if exclude_pattern is not None:
