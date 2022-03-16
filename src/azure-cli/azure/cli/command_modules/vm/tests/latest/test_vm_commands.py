@@ -1333,6 +1333,10 @@ class VMExtensionScenarioTest(ScenarioTest):
             self.check('enableAutomaticUpgrade', False)
         ]).get_output_in_json()
         uuid.UUID(result['forceUpdateTag'])
+        self.cmd('vm extension show --resource-group {rg} --vm-name {vm} --name {ext} --instance-view', checks=[
+            self.check('instanceView.name', 'VMAccessForLinux'),
+            self.check('instanceView.statuses[0].displayStatus', 'Provisioning succeeded'),
+        ])
         self.cmd('vm extension delete --resource-group {rg} --vm-name {vm} --name {ext}')
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_extension_2')
@@ -1703,6 +1707,7 @@ class VMMonitorTestDefault(ScenarioTest):
             replay_processors=[TimeSpanProcessor(TIMESPANTEMPLATE)]
         )
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vm_create_with_monitor', location='eastus')
     def test_vm_create_with_monitor(self, resource_group):
 
@@ -3174,6 +3179,7 @@ class VMSSUpdateTests(ScenarioTest):
             self.check('sku.name', '{vm_sku}'),
         ])
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_ephemeral_os_disk_placement_', location='westus2')
     def test_vmss_update_ephemeral_os_disk_placement(self, resource_group, resource_group_location):
         self.kwargs.update({
@@ -3359,6 +3365,7 @@ class VMSSCreateLinuxSecretsScenarioTest(ScenarioTest):
 
 class VMSSCreateExistingOptions(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_existing_options')
     def test_vmss_create_existing_options(self):
 
@@ -3466,7 +3473,7 @@ class VMSSVMsScenarioTest(ScenarioTest):
             self.check('instanceId', '{id}')
         ])
         result = self.cmd('vmss list-instance-connection-info --resource-group {rg} --name {vmss}').get_output_in_json()
-        self.assertTrue(result['instance 0'].split('.')[1], '5000')
+        self.assertEqual(result['instance 0'].split(':')[1], '50000')
         self.cmd('vmss restart --resource-group {rg} --name {vmss} --instance-ids *')
         self._check_vms_power_state('PowerState/running', 'PowerState/starting')
         self.cmd('vmss stop --resource-group {rg} --name {vmss} --instance-ids *')
@@ -4561,6 +4568,8 @@ class VMGenericUpdate(ScenarioTest):
 
 
 class VMGalleryImage(ScenarioTest):
+    
+    @AllowLargeResponse()
     @ResourceGroupPreparer(location='eastus')
     def test_shared_gallery(self, resource_group, resource_group_location):
         self.kwargs.update({
@@ -4575,7 +4584,7 @@ class VMGalleryImage(ScenarioTest):
             'sharedSubId': '34a4ab42-0d72-47d9-bd1a-aed207386dac'
         })
 
-        self.cmd('sig create -g {rg} --gallery-name {gallery} --permissions private')
+        self.cmd('sig create -g {rg} --gallery-name {gallery} --permissions groups')
         self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} '
                  '--os-type linux -p publisher1 -f offer1 -s sku1')
         self.cmd('sig image-definition show -g {rg} --gallery-name {gallery} --gallery-image-definition {image}')
@@ -4592,14 +4601,14 @@ class VMGalleryImage(ScenarioTest):
                  '--gallery-image-version {version} --managed-image {captured} --replica-count 1')
 
         # Test shared gallery
-        self.cmd('sig update --gallery-name {gallery} --resource-group {rg} --permissions groups')
+        # service team has temporarily disable the feature of updating permissions and will enable it in a few months
+        # self.cmd('sig update --gallery-name {gallery} --resource-group {rg} --permissions groups')
         res = self.cmd('sig show --gallery-name {gallery} --resource-group {rg} --select Permissions', checks=[
             self.check('sharingProfile.permissions', 'Groups')
         ]).get_output_in_json()
 
         self.kwargs['unique_name'] = res['identifier']['uniqueName']
 
-        self.cmd('sig update --gallery-name {gallery} --resource-group {rg} --permissions groups --permissions groups')
         self.cmd('sig share add --gallery-name {gallery} -g {rg} --subscription-ids {subId} {sharedSubId} --tenant-ids {tenantId}')
         self.cmd('sig show --gallery-name {gallery} --resource-group {rg} --select Permissions', checks=[
             self.check('sharingProfile.groups[0].ids[0]', self.kwargs['subId']),
@@ -4828,7 +4837,7 @@ class VMGalleryImage(ScenarioTest):
             'vmss2': 'vmss2'
         })
         self.cmd('sig create -g {rg} --gallery-name {gallery}')
-        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type linux --os-state specialized -p publisher1 -f offer1 -s sku1', checks=[
+        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type linux --os-state specialized -p publisher1 -f offer1 -s sku1 --features "IsAcceleratedNetworkSupported=true"', checks=[
             self.check('osState', 'Specialized')
         ])
         self.cmd('vm create -g {rg} -n {vm1} --image ubuntults --nsg-rule NONE --admin-username azureuser --admin-password testPassword0 --authentication-type password')

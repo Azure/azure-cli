@@ -959,7 +959,7 @@ class NetworkPrivateLinkCosmosDBScenarioTest(ScenarioTest):
 
 
 class NetworkPrivateLinkWebappScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(location='westus2')
+    @ResourceGroupPreparer(location='westus')
     def test_private_link_resource_webapp(self, resource_group):
         self.kwargs.update({
             'plan_name': self.create_random_name('webapp-privatelink-asp', 40),
@@ -974,8 +974,8 @@ class NetworkPrivateLinkWebappScenarioTest(ScenarioTest):
             self.check('length(@)', 1),
         ])
 
-    @unittest.skip('Service Unavailable')
-    @ResourceGroupPreparer(location='westus2')
+
+    @ResourceGroupPreparer(location='westus')
     def test_private_endpoint_connection_webapp(self, resource_group):
         self.kwargs.update({
             'resource_group': resource_group,
@@ -1014,7 +1014,7 @@ class NetworkPrivateLinkWebappScenarioTest(ScenarioTest):
         self.kwargs['endpoint_request'] = result[0]['name']
 
         self.cmd('network private-endpoint-connection approve -g {resource_group} --resource-name {webapp_name} -n {endpoint_request} --type Microsoft.Web/sites',
-                 checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Approving')])
+                 checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Approved')])
 
         # Create second endpoint
         result = self.cmd('network private-endpoint create -g {resource_group} -n {second_endpoint_name} --vnet-name {vnet_name} --subnet {subnet_name} '
@@ -2176,6 +2176,7 @@ class NetworkPrivateLinkScenarioTest(ScenarioTest):
 
         _test_private_endpoint(self, approve=False, rejected=False)
 
+    @unittest.skip("ASE V3 create takes 2-2.5 hrs to complete, this is a not good test, make this a mock test instead")
     @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_web")
     def test_private_endpoint_connection_web(self, resource_group):
 

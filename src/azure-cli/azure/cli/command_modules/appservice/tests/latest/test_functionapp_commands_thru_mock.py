@@ -32,7 +32,7 @@ def _get_test_cmd():
     return cmd
 
 
-def _get_zip_deploy_headers(username, password):
+def _get_zip_deploy_headers(username, password, cmd_mock_client):
     from urllib3.util import make_headers
     from azure.cli.core.util import get_az_user_agent
 
@@ -40,6 +40,7 @@ def _get_zip_deploy_headers(username, password):
     headers['Content-Type'] = 'application/octet-stream'
     headers['Cache-Control'] = 'no-cache'
     headers['User-Agent'] = get_az_user_agent()
+    headers['x-ms-client-request-id'] = cmd_mock_client.data['headers']['x-ms-client-request-id']
     return headers
 
 
@@ -185,7 +186,7 @@ class TestFunctionappMocked(unittest.TestCase):
         response.status_code = 202
         requests_post_mock.return_value = response
 
-        expected_zip_deploy_headers = _get_zip_deploy_headers('usr', 'pwd')
+        expected_zip_deploy_headers = _get_zip_deploy_headers('usr', 'pwd', cmd_mock.cli_ctx)
 
         # action
         with mock.patch('builtins.open', new_callable=mock.mock_open, read_data='zip-content'):
@@ -214,7 +215,7 @@ class TestFunctionappMocked(unittest.TestCase):
         response.status_code = 409
         requests_post_mock.return_value = response
 
-        expected_zip_deploy_headers = _get_zip_deploy_headers('usr', 'pwd')
+        expected_zip_deploy_headers = _get_zip_deploy_headers('usr', 'pwd', cmd_mock.cli_ctx)
 
         # action
         with mock.patch('builtins.open', new_callable=mock.mock_open, read_data='zip-content'):
@@ -241,7 +242,7 @@ class TestFunctionappMocked(unittest.TestCase):
         response.status_code = 503
         requests_post_mock.return_value = response
 
-        expected_zip_deploy_headers = _get_zip_deploy_headers('usr', 'pwd')
+        expected_zip_deploy_headers = _get_zip_deploy_headers('usr', 'pwd', cmd_mock.cli_ctx)
 
         # action
         with mock.patch('builtins.open', new_callable=mock.mock_open, read_data='zip-content'):

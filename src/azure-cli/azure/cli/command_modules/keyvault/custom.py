@@ -254,7 +254,11 @@ def list_deleted_vault_or_hsm(cmd, client, resource_type=None):
         return client.list_deleted()
 
     if resource_type is None:
-        return client.list_deleted()
+        hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
+        resources = []
+        resources.extend(client.list_deleted())
+        resources.extend(hsm_client.list_deleted())
+        return resources
 
     if resource_type == 'hsm':
         hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)

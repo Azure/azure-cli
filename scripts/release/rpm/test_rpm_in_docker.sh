@@ -5,7 +5,7 @@ set -exv
 
 export USERNAME=azureuser
 
-yum --nogpgcheck localinstall /mnt/yum/$YUM_NAME -y
+yum --nogpgcheck localinstall /mnt/rpm/$RPM_NAME -y
 
 yum install git gcc python3-devel -y
 
