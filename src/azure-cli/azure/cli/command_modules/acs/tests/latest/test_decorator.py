@@ -5852,8 +5852,8 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
                 "appgw_watch_namespace": "test_appgw_watch_namespace",
                 "enable_sgxquotehelper": True,
                 "enable_secret_rotation": True,
-                "rotation_poll_interval": "30m",
-                "useAADAuth": None
+                "rotation_poll_interval": "30m" ,
+                "enable-msi-auth-for-monitoring": False
             },
             ResourceType.MGMT_CONTAINERSERVICE,
         )
@@ -5878,7 +5878,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
                 enabled=True,
                 config={
                     CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: "/test_workspace_resource_id",
-                    CONST_MONITORING_USING_AAD_MSI_AUTH: True
+                    CONST_MONITORING_USING_AAD_MSI_AUTH: None
                 },
             ),
             CONST_VIRTUAL_NODE_ADDON_NAME
@@ -8324,7 +8324,7 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
             None,
             {},
             False,
-            False
+            None
         )
 
 
