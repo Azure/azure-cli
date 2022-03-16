@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import importlib
+from tkinter import FALSE
 import unittest
 from unittest.mock import Mock, call, patch
 
@@ -64,6 +65,7 @@ from azure.cli.core.azclierror import (
     UnknownError,
 )
 from azure.cli.core.profiles import ResourceType
+from azure.cli.testsdk.checkers import NoneCheck
 from azure.core.exceptions import HttpResponseError
 from knack.prompting import NoTTYException
 from knack.util import CLIError
@@ -5530,6 +5532,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
                 "location": "test_location",
                 "enable_addons": "monitoring",
                 "workspace_resource_id": "test_workspace_resource_id",
+                "enable-msi-auth-for-monitoring": False
             },
             ResourceType.MGMT_CONTAINERSERVICE,
         )
@@ -5549,7 +5552,8 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             ground_truth_monitoring_addon_profile = self.models.ManagedClusterAddonProfile(
                 enabled=True,
                 config={
-                    CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: "/test_workspace_resource_id"
+                    CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: "/test_workspace_resource_id",
+                    CONST_MONITORING_USING_AAD_MSI_AUTH: None
                 },
             )
             self.assertEqual(
@@ -5809,6 +5813,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
                 "enable_sgxquotehelper": False,
                 "enable_secret_rotation": False,
                 "rotation_poll_interval": None,
+                "enable-msi-auth-for-monitoring": None
             },
             ResourceType.MGMT_CONTAINERSERVICE,
         )
@@ -5848,6 +5853,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
                 "enable_sgxquotehelper": True,
                 "enable_secret_rotation": True,
                 "rotation_poll_interval": "30m",
+                "useAADAuth": None
             },
             ResourceType.MGMT_CONTAINERSERVICE,
         )
@@ -5871,7 +5877,8 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             CONST_MONITORING_ADDON_NAME: self.models.ManagedClusterAddonProfile(
                 enabled=True,
                 config={
-                    CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: "/test_workspace_resource_id"
+                    CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: "/test_workspace_resource_id",
+                    CONST_MONITORING_USING_AAD_MSI_AUTH: True
                 },
             ),
             CONST_VIRTUAL_NODE_ADDON_NAME
@@ -5937,6 +5944,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
                 "appgw_subnet_id": None,
                 "appgw_watch_namespace": None,
                 "enable_sgxquotehelper": False,
+                "useAADAuth": None
             },
             ResourceType.MGMT_CONTAINERSERVICE,
         )
@@ -6659,6 +6667,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             None,
             {},
             False,
+            None
         )
 
         # raise exception
@@ -8315,6 +8324,7 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
             None,
             {},
             False,
+            False
         )
 
 
