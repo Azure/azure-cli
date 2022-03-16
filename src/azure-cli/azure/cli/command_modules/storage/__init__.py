@@ -253,6 +253,8 @@ Depending on your operation, you may need to be assigned one of the following ro
     "Storage Blob Data Reader"
     "Storage Queue Data Contributor"
     "Storage Queue Data Reader"
+    "Storage Table Data Contributor"
+    "Storage Table Data Reader"
 
 If you want to use the old authentication method and allow querying for the right account key, please use the "--auth-mode" parameter and "key" value.
                     """
@@ -350,6 +352,8 @@ Depending on your operation, you may need to be assigned one of the following ro
     "Storage Blob Data Reader"
     "Storage Queue Data Contributor"
     "Storage Queue Data Reader"
+    "Storage Table Data Contributor"
+    "Storage Table Data Reader"
 
 If you want to use the old authentication method and allow querying for the right account key, please use the "--auth-mode" parameter and "key" value.
                     """
