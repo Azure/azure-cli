@@ -1498,6 +1498,15 @@ def process_nw_flow_log_create_namespace(cmd, namespace):
         if namespace.traffic_analytics_workspace and not is_valid_resource_id(namespace.traffic_analytics_workspace):
             err_body = '--workspace ID / --workspace NAME --resource-group WORKSPACE_RESOURCE_GROUP'
 
+        if namespace.vnet and not is_valid_resource_id(namespace.vnet):
+            err_body = '--vnet ID / --vnet NAME --resource-group VNET_RESOURCE_GROUP'
+
+        if namespace.subnet and not is_valid_resource_id(namespace.subnet):
+            err_body = '--subnet ID / --subnet NAME --resource-group SUBNET_RESOURCE_GROUP'
+
+        if namespace.nic and not is_valid_resource_id(namespace.nic):
+            err_body = '--nic ID / --nic NAME --resource-group NIC_RESOURCE_GROUP'
+
         if err_body is not None:
             raise CLIError(err_tpl.format(err_body))
 
@@ -1533,6 +1542,33 @@ def process_nw_flow_log_create_namespace(cmd, namespace):
             'name': namespace.traffic_analytics_workspace
         }
         namespace.traffic_analytics_workspace = resource_id(**kwargs)
+    
+    if namespace.vnet and not is_valid_resource_id(namespace.vnet):
+        kwargs = {
+            'subscription': get_subscription_id(cmd.cli_ctx),
+            'resource_group': namespace.resource_group_name,
+            'namespace': 'Microsoft.Network',
+            'type': 'virtualNetworks',
+            'name': namespace.vnet
+        }
+    
+    if namespace.subnet and not is_valid_resource_id(namespace.subnet):
+        kwargs = {
+            'subscription': get_subscription_id(cmd.cli_ctx),
+            'resource_group': namespace.resource_group_name,
+            'namespace': 'Microsoft.Network',
+            'type': 'virtualNetworks',
+            'name': namespace.subnet
+        }
+
+    if namespace.nic and not is_valid_resource_id(namespace.nic):
+        kwargs = {
+            'subscription': get_subscription_id(cmd.cli_ctx),
+            'resource_group': namespace.resource_group_name,
+            'namespace': 'Microsoft.Network',
+            'type': 'networkInterfaces',
+            'name': namespace.nic
+        }
 
     get_network_watcher_from_location(remove=False)(cmd, namespace)
 
@@ -1541,6 +1577,30 @@ def process_nw_flow_log_create_namespace(cmd, namespace):
 
 def process_nw_flow_log_set_namespace(cmd, namespace):
     from msrestazure.tools import is_valid_resource_id, resource_id
+    if namespace.vnet and not is_valid_resource_id(namespace.vnet):
+        namespace.vnet = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx),
+            resource_group=namespace.resource_group_name,
+            namespace='Microsoft.Network',
+            type='virtualNetworks',
+            name=namespace.vnet)
+
+    if namespace.subnet and not is_valid_resource_id(namespace.subnet):
+        namespace.subnet = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx),
+            resource_group=namespace.resource_group_name,
+            namespace='Microsoft.Network',
+            type='virtualNetworks',
+            name=namespace.subnet)
+
+    if namespace.nic and not is_valid_resource_id(namespace.nic):
+        namespace.nic = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx),
+            resource_group=namespace.resource_group_name,
+            namespace='Microsoft.Network',
+            type='networkInterfaces',
+            name=namespace.nic)
+
     if namespace.storage_account and not is_valid_resource_id(namespace.storage_account):
         namespace.storage_account = resource_id(
             subscription=get_subscription_id(cmd.cli_ctx),

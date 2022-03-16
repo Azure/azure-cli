@@ -1213,7 +1213,7 @@ def load_command_table(self, _):
 
     with self.command_group('network watcher flow-log', client_factory=cf_network_watcher, min_api='2016-09-01') as g:
         g.custom_command('configure',
-                         'set_nsg_flow_logging',
+                         'set_nw_flow_logging',
                          validator=process_nw_flow_log_set_namespace,
                          deprecate_info=self.deprecate(redirect='network watcher flow-log create', hide=False))
         g.custom_show_command('show', 'show_nsg_flow_logging', validator=process_nw_flow_log_show_namespace)
