@@ -1098,3 +1098,17 @@ def load_arguments(self, _):
         c.argument('workspace_name', arg_type=workspace_name_arg_type, help='The name of the workspace')
         c.argument('output_folder', type=str, help='The name of the output folder')
         c.argument('script_name', arg_type=name_type, help='The name of the KQL script.')
+
+    with self.argument_context('synapse link-connection list') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+
+    for scope in ['create', 'update']:
+        with self.argument_context('synapse link-connection ' + scope) as c:
+            c.argument('workspace_name', arg_type=workspace_name_arg_type)
+            c.argument('link_connection_name', arg_type=name_type, help='The link connection name.')
+            c.argument('definition_file', options_list=('--file', '-f'), type=file_type, completer=FilesCompleter(), help='The definition file path')
+
+    for scope in ['show', 'delete', 'get-status', 'start', 'stop']:
+        with self.argument_context('synapse link-connection '+ scope) as c:
+            c.argument('workspace_name', arg_type=workspace_name_arg_type)
+            c.argument('link_connection_name', arg_type=name_type, help='The link connection name.')

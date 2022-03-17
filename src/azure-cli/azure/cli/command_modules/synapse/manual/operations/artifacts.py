@@ -10,13 +10,14 @@ from azure.synapse.artifacts.models import (LinkedService, Dataset, PipelineReso
                                             Trigger, DataFlow, BigDataPoolReference, NotebookSessionProperties,
                                             NotebookResource, SparkJobDefinition, SqlScriptResource, SqlScriptFolder,
                                             SqlScriptContent, SqlScriptMetadata, SqlScript, SqlConnection,
-                                            NotebookFolder)
+                                            NotebookFolder,LinkConnectionResource)
 from azure.cli.core.util import sdk_no_wait, CLIError
 from azure.core.exceptions import ResourceNotFoundError
 from .._client_factory import (cf_synapse_linked_service, cf_synapse_dataset, cf_synapse_pipeline,
                                cf_synapse_pipeline_run, cf_synapse_trigger, cf_synapse_trigger_run,
                                cf_synapse_data_flow, cf_synapse_notebook, cf_synapse_spark_pool,
-                               cf_synapse_spark_job_definition, cf_synapse_library, cf_synapse_sql_script)
+                               cf_synapse_spark_job_definition, cf_synapse_library, cf_synapse_sql_script,
+                               cf_synapse_link_connection)
 from ..constant import EXECUTOR_SIZE, SPARK_SERVICE_ENDPOINT_API_VERSION
 
 
@@ -552,3 +553,39 @@ def export_sql_script(cmd, workspace_name, output_folder, sql_script_name=None):
                 from azure.cli.core.azclierror import InvalidArgumentValueError
                 err_msg = 'Unable to export to file: {}'.format(path)
                 raise InvalidArgumentValueError(err_msg)
+
+
+def list_link_connection(cmd, workspace_name):
+    client = cf_synapse_link_connection(cmd.cli_ctx, workspace_name)
+    return client.get_link_connections_by_workspace()
+
+
+def get_link_connection(cmd, workspace_name, link_connection_name):
+    client = cf_synapse_link_connection(cmd.cli_ctx, workspace_name)
+    return client.get_link_connection(link_connection_name)
+
+
+def create_or_update_link_connection(cmd, workspace_name, link_connection_name, definition_file):
+    client = cf_synapse_link_connection(cmd.cli_ctx, workspace_name)
+    properties = LinkConnectionResource.from_dict(definition_file['properties'])
+    return client.create_or_update_link_connection(link_connection_name, properties, polling=True)
+
+
+def delete_link_connection(cmd, workspace_name, link_connection_name):
+    client = cf_synapse_link_connection(cmd.cli_ctx, workspace_name)
+    return client.delete_link_connection(link_connection_name, polling=True)
+
+
+def get_link_connection_status(cmd, workspace_name, link_connection_name):
+    client = cf_synapse_link_connection(cmd.cli_ctx, workspace_name)
+    return client.get_detailed_status(link_connection_name)
+
+
+def start_link_connection(cmd, workspace_name, link_connection_name):
+    client = cf_synapse_link_connection(cmd.cli_ctx, workspace_name)
+    return client.start(link_connection_name)
+
+
+def stop_link_connection(cmd, workspace_name, link_connection_name):
+    client = cf_synapse_link_connection(cmd.cli_ctx, workspace_name)
+    return client.stop(link_connection_name)

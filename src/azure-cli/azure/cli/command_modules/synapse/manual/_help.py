@@ -2272,3 +2272,79 @@ examples:
           --name testsqlscriptname \\
           --file 'path/test.sql'
 """
+
+helps['synapse link-connection'] = """
+type: group
+short-summary: Manage Synapse's link connection.
+"""
+
+helps['synapse link-connnection list'] = """
+type: command
+short-summary: List link connections in a synapse workspace.
+examples:
+  - name: List link connections.
+    text: |-
+        az synapse link-connnection list --workspace-name testsynapseworkspace
+"""
+
+helps['synapse link-connnection show'] = """
+type: command
+short-summary: Get a link connnection.
+examples:
+  - name: Get a link-connnection.
+    text: |-
+        az synapse link-connnection show --workspace-name testsynapseworkspace \\
+          --name testlinkconnectionname
+"""
+
+helps['synapse link-connnection delete'] = """
+type: command
+short-summary: Delete a link connnection.
+examples:
+  - name: Delete a link connnection.
+    text: |-
+        az synapse link-connnection delete --workspace-name testsynapseworkspace \\
+          --name testlinkconnectionname
+"""
+
+helps['synapse link-connnection create'] = """
+type: command
+short-summary: Create a link connnection.
+examples:
+  - name: Create a link connnection.
+    text: |-
+        az synapse link-connnection create --workspace-name testsynapseworkspace \\
+          --name testlinkconnectionname \\
+          --file 'path/definition.json'
+"""
+
+helps['synapse link-connnection update'] = """
+type: command
+short-summary: Update a link connnection.
+examples:
+  - name: Update a link connnection.
+    text: |-
+        az synapse link-connnection update --workspace-name testsynapseworkspace \\
+          --name testlinkconnectionname \\
+          --file 'path/definition.json'
+"""
+
+helps['synapse link-connnection start'] = """
+type: command
+short-summary: Start a link connnection.
+examples:
+  - name: Start a link connnection.
+    text: |-
+        az synapse link-connnection start --workspace-name testsynapseworkspace \\
+          --name testlinkconnectionname
+"""
+
+helps['synapse link-connnection stop'] = """
+type: command
+short-summary: Stop a link connnection.
+examples:
+  - name: Stop a link connnection.
+    text: |-
+        az synapse link-connnection stop --workspace-name testsynapseworkspace \\
+          --name testlinkconnectionname
+"""
