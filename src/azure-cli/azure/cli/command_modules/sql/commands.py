@@ -35,7 +35,6 @@ from ._util import (
     get_sql_database_sensitivity_labels_operations,
     get_sql_database_operations_operations,
     get_sql_database_threat_detection_policies_operations,
-    get_sql_database_transparent_data_encryption_activities_operations,
     get_sql_database_transparent_data_encryptions_operations,
     get_sql_database_usages_operations,
     get_sql_elastic_pools_operations,
@@ -215,15 +214,6 @@ def load_command_table(self, _):
         g.custom_command('set', 'transparent_data_encryptions_set')
         g.custom_show_command('show', 'transparent_data_encryptions_get')
 
-    transparent_data_encryption_activities_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.sql.operations#TransparentDataEncryptionActivitiesOperations.{}',
-        client_factory=get_sql_database_transparent_data_encryption_activities_operations)
-
-    with self.command_group('sql db tde',
-                            transparent_data_encryption_activities_operations,
-                            client_factory=get_sql_database_transparent_data_encryption_activities_operations) as g:
-
-        g.custom_command('list-activity', 'tde_list_by_configuration')
 
     replication_links_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#ReplicationLinksOperations.{}',

@@ -5518,21 +5518,6 @@ def transparent_data_encryptions_get(
         tde_name=TransparentDataEncryptionName.CURRENT)
 
 
-def tde_list_by_configuration(
-        client,
-        resource_group_name,
-        server_name,
-        database_name):
-    '''
-    Lists Transparent Data Encryption
-    '''
-
-    return client.list_by_configuration(
-        resource_group_name=resource_group_name,
-        server_name=server_name,
-        database_name=database_name,
-        tde_name=TransparentDataEncryptionName.CURRENT)
-
 ###############################################
 #              sql server vnet-rule           #
 ###############################################
