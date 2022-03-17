@@ -927,7 +927,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.register_blob_arguments_track2()
         c.register_precondition_options()
         c.register_content_settings_argument(t_blob_content_settings, update=False, arg_group="Content Control",
-                                             process_md5=True)
+                                             process_md5=True, guess_from_file="file_path")
         c.extra('blob_name', validator=validate_blob_name_for_upload)
 
         c.argument('file_path', options_list=('--file', '-f'), type=file_type, completer=FilesCompleter(),
