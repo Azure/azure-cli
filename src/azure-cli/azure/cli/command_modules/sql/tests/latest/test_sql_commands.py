@@ -4642,6 +4642,8 @@ class SqlManagedInstanceMgmtScenarioIdentityTest(ScenarioTest):
 
 
 class SqlManagedInstancePoolScenarioTest(ScenarioTest):
+    # Instance pool test should be deprecated and also it takes more then 5 hours to record.
+    @live_only()
     @ManagedInstancePreparer()
     def test_sql_instance_pool(self, mi, rg):
         print("Starting instance pool tests")
