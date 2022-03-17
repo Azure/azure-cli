@@ -18,7 +18,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2019-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-03-14T12:42:23Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-03-17T04:56:51Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -27,7 +27,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Mar 2022 12:42:27 GMT
+      - Thu, 17 Mar 2022 04:56:53 GMT
       expires:
       - '-1'
       pragma:
@@ -110,13 +110,13 @@ interactions:
       content-type:
       - text/plain; charset=utf-8
       date:
-      - Mon, 14 Mar 2022 12:42:28 GMT
+      - Thu, 17 Mar 2022 04:56:54 GMT
       etag:
       - W/"d5acead0b38a79d988c245a7a15ec01f999da9244c97bbdc1fa2ec70d9e433f5"
       expires:
-      - Mon, 14 Mar 2022 12:47:28 GMT
+      - Thu, 17 Mar 2022 05:01:54 GMT
       source-age:
-      - '0'
+      - '137'
       strict-transport-security:
       - max-age=31536000
       vary:
@@ -130,17 +130,124 @@ interactions:
       x-content-type-options:
       - nosniff
       x-fastly-request-id:
-      - 2ca7e1829d171572e91b69b5707a8c17c1aad9cb
+      - b0466d39e4c190b3d0fd421b1c6a647827348d3a
       x-frame-options:
       - deny
       x-github-request-id:
-      - 27CE:0A5F:198C24:2877FB:622F3049
+      - 2570:063C:1995B2:2734C1:62329D55
       x-served-by:
-      - cache-qpg1272-QPG
+      - cache-qpg1237-QPG
       x-timer:
-      - S1647261748.386888,VS0,VE1
+      - S1647493014.027270,VS0,VE1
       x-xss-protection:
       - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --admin-username --admin-password --authentication-type --data-disk-sizes-gb
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/OpenLogic/artifacttypes/vmimage/offers/CentOS/skus/7.5/versions?$top=1&$orderby=name%20desc&api-version=2020-06-01
+  response:
+    body:
+      string: "[\r\n  {\r\n    \"location\": \"westus\",\r\n    \"name\": \"7.5.201808150\",\r\n
+        \   \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/OpenLogic/ArtifactTypes/VMImage/Offers/CentOS/Skus/7.5/Versions/7.5.201808150\"\r\n
+        \ }\r\n]"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '270'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Mar 2022 04:56:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/ListVMImagesVersionsFromLocation3Min;15995,Microsoft.Compute/ListVMImagesVersionsFromLocation30Min;43995
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --admin-username --admin-password --authentication-type --data-disk-sizes-gb
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/OpenLogic/artifacttypes/vmimage/offers/CentOS/skus/7.5/versions/7.5.201808150?api-version=2020-06-01
+  response:
+    body:
+      string: "{\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n    \"architecture\":
+        \"x64\",\r\n    \"replicaType\": \"Unmanaged\",\r\n    \"disallowed\": {\r\n
+        \     \"vmDiskType\": \"None\"\r\n    },\r\n    \"automaticOSUpgradeProperties\":
+        {\r\n      \"automaticOSUpgradeSupported\": true\r\n    },\r\n    \"imageDeprecationStatus\":
+        {\r\n      \"imageState\": \"Active\"\r\n    },\r\n    \"osDiskImage\": {\r\n
+        \     \"operatingSystem\": \"Linux\",\r\n      \"sizeInGb\": 30,\r\n      \"sizeInBytes\":
+        32212255232\r\n    },\r\n    \"dataDiskImages\": []\r\n  },\r\n  \"location\":
+        \"westus\",\r\n  \"name\": \"7.5.201808150\",\r\n  \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/OpenLogic/ArtifactTypes/VMImage/Offers/CentOS/Skus/7.5/Versions/7.5.201808150\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '737'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Mar 2022 04:56:56 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetVMImageFromLocation3Min;12998,Microsoft.Compute/GetVMImageFromLocation30Min;73998
     status:
       code: 200
       message: OK
@@ -172,7 +279,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Mar 2022 12:42:28 GMT
+      - Thu, 17 Mar 2022 04:56:55 GMT
       expires:
       - '-1'
       pragma:
@@ -217,9 +324,9 @@ interactions:
       null}}, "imageReference": {"publisher": "OpenLogic", "offer": "CentOS", "sku":
       "7.5", "version": "latest"}, "dataDisks": [{"lun": 0, "managedDisk": {"storageAccountType":
       null}, "createOption": "empty", "diskSizeGB": 2}]}, "osProfile": {"computerName":
-      "vm1", "adminUsername": "centosadmin", "adminPassword": "[parameters(''adminPassword'')]"},
-      "additionalCapabilities": {}}}], "outputs": {}}, "parameters": {"adminPassword":
-      {"value": "testPassword0"}}, "mode": "incremental"}}'
+      "vm1", "adminUsername": "centosadmin", "adminPassword": "[parameters(''adminPassword'')]"}}}],
+      "outputs": {}}, "parameters": {"adminPassword": {"value": "testPassword0"}},
+      "mode": "incremental"}}'
     headers:
       Accept:
       - application/json
@@ -230,7 +337,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '3249'
+      - '3219'
       Content-Type:
       - application/json
       ParameterSetName:
@@ -241,18 +348,18 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2019-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/vm_deploy_IMb4VolEdqFGSG0mWB0a9i91QVmXAnOL","name":"vm_deploy_IMb4VolEdqFGSG0mWB0a9i91QVmXAnOL","type":"Microsoft.Resources/deployments","properties":{"templateHash":"1269089018797324678","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2022-03-14T12:42:33.356106Z","duration":"PT0.0005635S","correlationId":"49b07a0e-1271-4c26-ba43-a90599b68ae2","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"networkSecurityGroups","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"networkInterfaces","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/vm1VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vm1VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkSecurityGroups/vm1NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"vm1NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/publicIPAddresses/vm1PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vm1PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/vm1VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm1VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/vm1VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm1VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/vm1","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"vm1"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/vm_deploy_49kaM8SjZOq4NmCXqBN7m8XMwtVLvZyj","name":"vm_deploy_49kaM8SjZOq4NmCXqBN7m8XMwtVLvZyj","type":"Microsoft.Resources/deployments","properties":{"templateHash":"15771932625010337570","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2022-03-17T04:57:00.4540924Z","duration":"PT0.0007095S","correlationId":"feb33436-e672-4716-ba95-e78ebd73f4b7","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"networkSecurityGroups","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"networkInterfaces","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/vm1VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vm1VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkSecurityGroups/vm1NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"vm1NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/publicIPAddresses/vm1PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vm1PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/vm1VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm1VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/vm1VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm1VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/vm1","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"vm1"}]}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/vm_deploy_IMb4VolEdqFGSG0mWB0a9i91QVmXAnOL/operationStatuses/08585543451335592652?api-version=2019-10-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/vm_deploy_49kaM8SjZOq4NmCXqBN7m8XMwtVLvZyj/operationStatuses/08585541138673457628?api-version=2019-10-01
       cache-control:
       - no-cache
       content-length:
-      - '2367'
+      - '2369'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Mar 2022 12:42:33 GMT
+      - Thu, 17 Mar 2022 04:57:01 GMT
       expires:
       - '-1'
       pragma:
@@ -282,7 +389,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.34.1 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585543451335592652?api-version=2019-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585541138673457628?api-version=2019-10-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -294,7 +401,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Mar 2022 12:43:03 GMT
+      - Thu, 17 Mar 2022 04:57:31 GMT
       expires:
       - '-1'
       pragma:
@@ -324,7 +431,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.34.1 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585543451335592652?api-version=2019-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585541138673457628?api-version=2019-10-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -336,7 +443,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Mar 2022 12:43:35 GMT
+      - Thu, 17 Mar 2022 04:58:02 GMT
       expires:
       - '-1'
       pragma:
@@ -366,7 +473,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.34.1 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585543451335592652?api-version=2019-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585541138673457628?api-version=2019-10-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -378,7 +485,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Mar 2022 12:44:05 GMT
+      - Thu, 17 Mar 2022 04:58:32 GMT
       expires:
       - '-1'
       pragma:
@@ -408,7 +515,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.34.1 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585543451335592652?api-version=2019-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585541138673457628?api-version=2019-10-01
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -420,7 +527,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Mar 2022 12:44:35 GMT
+      - Thu, 17 Mar 2022 04:59:03 GMT
       expires:
       - '-1'
       pragma:
@@ -453,16 +560,16 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2019-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/vm_deploy_IMb4VolEdqFGSG0mWB0a9i91QVmXAnOL","name":"vm_deploy_IMb4VolEdqFGSG0mWB0a9i91QVmXAnOL","type":"Microsoft.Resources/deployments","properties":{"templateHash":"1269089018797324678","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2022-03-14T12:44:09.3824298Z","duration":"PT1M36.0268873S","correlationId":"49b07a0e-1271-4c26-ba43-a90599b68ae2","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"networkSecurityGroups","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"networkInterfaces","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/vm1VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vm1VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkSecurityGroups/vm1NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"vm1NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/publicIPAddresses/vm1PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vm1PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/vm1VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm1VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/vm1VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm1VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/vm1","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"vm1"}],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/vm1"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/vm1VMNic"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkSecurityGroups/vm1NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/publicIPAddresses/vm1PublicIP"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/vm1VNET"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/vm_deploy_49kaM8SjZOq4NmCXqBN7m8XMwtVLvZyj","name":"vm_deploy_49kaM8SjZOq4NmCXqBN7m8XMwtVLvZyj","type":"Microsoft.Resources/deployments","properties":{"templateHash":"15771932625010337570","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2022-03-17T04:58:33.8989423Z","duration":"PT1M33.4455594S","correlationId":"feb33436-e672-4716-ba95-e78ebd73f4b7","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"networkSecurityGroups","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"networkInterfaces","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/vm1VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vm1VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkSecurityGroups/vm1NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"vm1NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/publicIPAddresses/vm1PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vm1PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/vm1VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm1VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/vm1VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm1VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/vm1","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"vm1"}],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/vm1"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/vm1VMNic"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkSecurityGroups/vm1NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/publicIPAddresses/vm1PublicIP"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/vm1VNET"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '3140'
+      - '3141'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Mar 2022 12:44:36 GMT
+      - Thu, 17 Mar 2022 04:59:03 GMT
       expires:
       - '-1'
       pragma:
@@ -497,21 +604,21 @@ interactions:
     body:
       string: "{\r\n  \"name\": \"vm1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/vm1\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"2177b646-d847-4a4e-930f-a612784ef001\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"96566501-8f6e-44a2-992f-cc8fa3260196\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"OpenLogic\",\r\n        \"offer\": \"CentOS\",\r\n        \"sku\": \"7.5\",\r\n
         \       \"version\": \"latest\",\r\n        \"exactVersion\": \"7.5.201808150\"\r\n
         \     },\r\n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"name\":
-        \"vm1_OsDisk_1_6174d9449df1475190936171680541fe\",\r\n        \"createOption\":
+        \"vm1_OsDisk_1_33bfb97e227d47aab3407c85d07e659d\",\r\n        \"createOption\":
         \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n        \"managedDisk\":
         {\r\n          \"storageAccountType\": \"Premium_LRS\",\r\n          \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/vm1_OsDisk_1_6174d9449df1475190936171680541fe\"\r\n
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/vm1_OsDisk_1_33bfb97e227d47aab3407c85d07e659d\"\r\n
         \       },\r\n        \"diskSizeGB\": 30\r\n      },\r\n      \"dataDisks\":
-        [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"vm1_disk2_f3d09068ed594d0ca53ee00f6172a70e\",\r\n
+        [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"vm1_disk2_a532637f25b34c3192752285966bf299\",\r\n
         \         \"createOption\": \"Empty\",\r\n          \"caching\": \"None\",\r\n
         \         \"managedDisk\": {\r\n            \"storageAccountType\": \"Premium_LRS\",\r\n
-        \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/vm1_disk2_f3d09068ed594d0ca53ee00f6172a70e\"\r\n
+        \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/vm1_disk2_a532637f25b34c3192752285966bf299\"\r\n
         \         },\r\n          \"diskSizeGB\": 2,\r\n          \"toBeDetached\":
         false\r\n        }\r\n      ]\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\":
         \"vm1\",\r\n      \"adminUsername\": \"centosadmin\",\r\n      \"linuxConfiguration\":
@@ -526,20 +633,20 @@ interactions:
         [\r\n          {\r\n            \"code\": \"ProvisioningState/succeeded\",\r\n
         \           \"level\": \"Info\",\r\n            \"displayStatus\": \"Ready\",\r\n
         \           \"message\": \"Guest Agent is running\",\r\n            \"time\":
-        \"2022-03-14T12:44:09+00:00\"\r\n          }\r\n        ],\r\n        \"extensionHandlers\":
-        []\r\n      },\r\n      \"disks\": [\r\n        {\r\n          \"name\": \"vm1_OsDisk_1_6174d9449df1475190936171680541fe\",\r\n
+        \"2022-03-17T04:58:32+00:00\"\r\n          }\r\n        ],\r\n        \"extensionHandlers\":
+        []\r\n      },\r\n      \"disks\": [\r\n        {\r\n          \"name\": \"vm1_OsDisk_1_33bfb97e227d47aab3407c85d07e659d\",\r\n
         \         \"statuses\": [\r\n            {\r\n              \"code\": \"ProvisioningState/succeeded\",\r\n
         \             \"level\": \"Info\",\r\n              \"displayStatus\": \"Provisioning
-        succeeded\",\r\n              \"time\": \"2022-03-14T12:42:58.7657231+00:00\"\r\n
+        succeeded\",\r\n              \"time\": \"2022-03-17T04:57:21.6272309+00:00\"\r\n
         \           }\r\n          ]\r\n        },\r\n        {\r\n          \"name\":
-        \"vm1_disk2_f3d09068ed594d0ca53ee00f6172a70e\",\r\n          \"statuses\":
+        \"vm1_disk2_a532637f25b34c3192752285966bf299\",\r\n          \"statuses\":
         [\r\n            {\r\n              \"code\": \"ProvisioningState/succeeded\",\r\n
         \             \"level\": \"Info\",\r\n              \"displayStatus\": \"Provisioning
-        succeeded\",\r\n              \"time\": \"2022-03-14T12:42:58.7657231+00:00\"\r\n
+        succeeded\",\r\n              \"time\": \"2022-03-17T04:57:21.6428357+00:00\"\r\n
         \           }\r\n          ]\r\n        }\r\n      ],\r\n      \"hyperVGeneration\":
         \"V1\",\r\n      \"statuses\": [\r\n        {\r\n          \"code\": \"ProvisioningState/succeeded\",\r\n
         \         \"level\": \"Info\",\r\n          \"displayStatus\": \"Provisioning
-        succeeded\",\r\n          \"time\": \"2022-03-14T12:44:07.0161218+00:00\"\r\n
+        succeeded\",\r\n          \"time\": \"2022-03-17T04:58:30.7210376+00:00\"\r\n
         \       },\r\n        {\r\n          \"code\": \"PowerState/running\",\r\n
         \         \"level\": \"Info\",\r\n          \"displayStatus\": \"VM running\"\r\n
         \       }\r\n      ]\r\n    }\r\n  }\r\n}"
@@ -551,7 +658,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Mar 2022 12:44:36 GMT
+      - Thu, 17 Mar 2022 04:59:04 GMT
       expires:
       - '-1'
       pragma:
@@ -568,7 +675,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3982,Microsoft.Compute/LowCostGet30Min;31908
+      - Microsoft.Compute/LowCostGet3Min;3913,Microsoft.Compute/LowCostGet30Min;31284
     status:
       code: 200
       message: OK
@@ -592,12 +699,12 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"vm1VMNic\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/vm1VMNic\",\r\n
-        \ \"etag\": \"W/\\\"0fb91b2f-6280-4631-83d2-eb22ad2293ba\\\"\",\r\n  \"location\":
+        \ \"etag\": \"W/\\\"30040751-ee67-4b0c-bfd4-3f47dfaf9a56\\\"\",\r\n  \"location\":
         \"westus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"resourceGuid\": \"3c45db81-8f39-41a6-a4d0-455aa6ea4b76\",\r\n
+        \"Succeeded\",\r\n    \"resourceGuid\": \"e10be52d-d584-4b91-941d-d3accfae6e10\",\r\n
         \   \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfigvm1\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/vm1VMNic/ipConfigurations/ipconfigvm1\",\r\n
-        \       \"etag\": \"W/\\\"0fb91b2f-6280-4631-83d2-eb22ad2293ba\\\"\",\r\n
+        \       \"etag\": \"W/\\\"30040751-ee67-4b0c-bfd4-3f47dfaf9a56\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
@@ -606,8 +713,8 @@ interactions:
         \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
         \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
         [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
-        \"qpvbibvda3vepezjmtqc1flkee.dx.internal.cloudapp.net\"\r\n    },\r\n    \"macAddress\":
-        \"00-0D-3A-3A-DD-10\",\r\n    \"enableAcceleratedNetworking\": false,\r\n
+        \"yhmw0zzybbceldkflykffkoe5a.dx.internal.cloudapp.net\"\r\n    },\r\n    \"macAddress\":
+        \"00-0D-3A-35-B7-D7\",\r\n    \"enableAcceleratedNetworking\": false,\r\n
         \   \"enableIPForwarding\": false,\r\n    \"networkSecurityGroup\": {\r\n
         \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkSecurityGroups/vm1NSG\"\r\n
         \   },\r\n    \"primary\": true,\r\n    \"virtualMachine\": {\r\n      \"id\":
@@ -622,9 +729,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Mar 2022 12:44:37 GMT
+      - Thu, 17 Mar 2022 04:59:05 GMT
       etag:
-      - W/"0fb91b2f-6280-4631-83d2-eb22ad2293ba"
+      - W/"30040751-ee67-4b0c-bfd4-3f47dfaf9a56"
       expires:
       - '-1'
       pragma:
@@ -641,7 +748,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - ec6ba898-d24e-437b-be84-69bb1f7f8afc
+      - fd6a3bd5-97bd-4954-8565-0e8297c0648c
     status:
       code: 200
       message: OK
@@ -665,10 +772,10 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"vm1PublicIP\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/publicIPAddresses/vm1PublicIP\",\r\n
-        \ \"etag\": \"W/\\\"ed6ecc92-dff7-467b-bf56-0d66122f86bc\\\"\",\r\n  \"location\":
+        \ \"etag\": \"W/\\\"5f7f0e72-b91e-413d-9263-4310c9223d84\\\"\",\r\n  \"location\":
         \"westus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"resourceGuid\": \"d1b2030f-d6c4-44af-9a43-9e05d77fc06f\",\r\n
-        \   \"ipAddress\": \"23.99.70.120\",\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n
+        \"Succeeded\",\r\n    \"resourceGuid\": \"42fe3e29-813a-4b4d-a779-43a340b0262c\",\r\n
+        \   \"ipAddress\": \"13.64.184.10\",\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n
         \   \"publicIPAllocationMethod\": \"Dynamic\",\r\n    \"idleTimeoutInMinutes\":
         4,\r\n    \"ipTags\": [],\r\n    \"ipConfiguration\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/vm1VMNic/ipConfigurations/ipconfigvm1\"\r\n
         \   }\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n
@@ -681,9 +788,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Mar 2022 12:44:38 GMT
+      - Thu, 17 Mar 2022 04:59:05 GMT
       etag:
-      - W/"ed6ecc92-dff7-467b-bf56-0d66122f86bc"
+      - W/"5f7f0e72-b91e-413d-9263-4310c9223d84"
       expires:
       - '-1'
       pragma:
@@ -700,7 +807,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 64b7dcd1-4324-4567-934e-0b4e51636298
+      - e877648d-589b-4975-9efd-59931aefd59b
     status:
       code: 200
       message: OK
@@ -725,21 +832,21 @@ interactions:
     body:
       string: "{\r\n  \"name\": \"vm1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/vm1\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"2177b646-d847-4a4e-930f-a612784ef001\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"96566501-8f6e-44a2-992f-cc8fa3260196\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"OpenLogic\",\r\n        \"offer\": \"CentOS\",\r\n        \"sku\": \"7.5\",\r\n
         \       \"version\": \"latest\",\r\n        \"exactVersion\": \"7.5.201808150\"\r\n
         \     },\r\n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"name\":
-        \"vm1_OsDisk_1_6174d9449df1475190936171680541fe\",\r\n        \"createOption\":
+        \"vm1_OsDisk_1_33bfb97e227d47aab3407c85d07e659d\",\r\n        \"createOption\":
         \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n        \"managedDisk\":
         {\r\n          \"storageAccountType\": \"Premium_LRS\",\r\n          \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/vm1_OsDisk_1_6174d9449df1475190936171680541fe\"\r\n
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/vm1_OsDisk_1_33bfb97e227d47aab3407c85d07e659d\"\r\n
         \       },\r\n        \"diskSizeGB\": 30\r\n      },\r\n      \"dataDisks\":
-        [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"vm1_disk2_f3d09068ed594d0ca53ee00f6172a70e\",\r\n
+        [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"vm1_disk2_a532637f25b34c3192752285966bf299\",\r\n
         \         \"createOption\": \"Empty\",\r\n          \"caching\": \"None\",\r\n
         \         \"managedDisk\": {\r\n            \"storageAccountType\": \"Premium_LRS\",\r\n
-        \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/vm1_disk2_f3d09068ed594d0ca53ee00f6172a70e\"\r\n
+        \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/vm1_disk2_a532637f25b34c3192752285966bf299\"\r\n
         \         },\r\n          \"diskSizeGB\": 2,\r\n          \"toBeDetached\":
         false\r\n        }\r\n      ]\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\":
         \"vm1\",\r\n      \"adminUsername\": \"centosadmin\",\r\n      \"linuxConfiguration\":
@@ -757,7 +864,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Mar 2022 12:44:39 GMT
+      - Thu, 17 Mar 2022 04:59:05 GMT
       expires:
       - '-1'
       pragma:
@@ -774,7 +881,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3981,Microsoft.Compute/LowCostGet30Min;31907
+      - Microsoft.Compute/LowCostGet3Min;3911,Microsoft.Compute/LowCostGet30Min;31282
     status:
       code: 200
       message: OK
@@ -794,10 +901,10 @@ interactions:
       User-Agent:
       - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/snapshots/vm1_OsDisk_1_6174d9449df1475190936171680541fe?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/snapshots/vm1_OsDisk_1_33bfb97e227d47aab3407c85d07e659d?api-version=2019-07-01
   response:
     body:
-      string: '{"error":{"code":"ResourceNotFound","message":"The Resource ''Microsoft.Compute/snapshots/vm1_OsDisk_1_6174d9449df1475190936171680541fe''
+      string: '{"error":{"code":"ResourceNotFound","message":"The Resource ''Microsoft.Compute/snapshots/vm1_OsDisk_1_33bfb97e227d47aab3407c85d07e659d''
         under resource group ''clitest.rg000001'' was not found. For more details
         please go to https://aka.ms/ARMResourceNotFoundFix"}}'
     headers:
@@ -808,7 +915,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Mar 2022 12:44:39 GMT
+      - Thu, 17 Mar 2022 04:59:07 GMT
       expires:
       - '-1'
       pragma:
@@ -838,11 +945,11 @@ interactions:
       User-Agent:
       - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/vm1_OsDisk_1_6174d9449df1475190936171680541fe?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/vm1_OsDisk_1_33bfb97e227d47aab3407c85d07e659d?api-version=2019-07-01
   response:
     body:
-      string: "{\r\n  \"name\": \"vm1_OsDisk_1_6174d9449df1475190936171680541fe\",\r\n
-        \ \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/vm1_OsDisk_1_6174d9449df1475190936171680541fe\",\r\n
+      string: "{\r\n  \"name\": \"vm1_OsDisk_1_33bfb97e227d47aab3407c85d07e659d\",\r\n
+        \ \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/vm1_OsDisk_1_33bfb97e227d47aab3407c85d07e659d\",\r\n
         \ \"type\": \"Microsoft.Compute/disks\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {},\r\n  \"managedBy\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/vm1\",\r\n
         \ \"sku\": {\r\n    \"name\": \"Premium_LRS\",\r\n    \"tier\": \"Premium\"\r\n
@@ -851,9 +958,9 @@ interactions:
         \     \"imageReference\": {\r\n        \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/OpenLogic/ArtifactTypes/VMImage/Offers/CentOS/Skus/7.5/Versions/7.5.201808150\"\r\n
         \     }\r\n    },\r\n    \"diskSizeGB\": 30,\r\n    \"diskIOPSReadWrite\":
         120,\r\n    \"diskMBpsReadWrite\": 25,\r\n    \"encryption\": {\r\n      \"type\":
-        \"EncryptionAtRestWithPlatformKey\"\r\n    },\r\n    \"timeCreated\": \"2022-03-14T12:42:57.7274117+00:00\",\r\n
+        \"EncryptionAtRestWithPlatformKey\"\r\n    },\r\n    \"timeCreated\": \"2022-03-17T04:57:17.5152014+00:00\",\r\n
         \   \"provisioningState\": \"Succeeded\",\r\n    \"diskState\": \"Attached\",\r\n
-        \   \"diskSizeBytes\": 32212254720,\r\n    \"uniqueId\": \"6174d944-9df1-4751-9093-6171680541fe\"\r\n
+        \   \"diskSizeBytes\": 32212254720,\r\n    \"uniqueId\": \"33bfb97e-227d-47aa-b340-7c85d07e659d\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
@@ -863,7 +970,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Mar 2022 12:44:40 GMT
+      - Thu, 17 Mar 2022 04:59:07 GMT
       expires:
       - '-1'
       pragma:
@@ -880,7 +987,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;4989,Microsoft.Compute/LowCostGet30Min;39911
+      - Microsoft.Compute/LowCostGet3Min;4929,Microsoft.Compute/LowCostGet30Min;39320
     status:
       code: 200
       message: OK
@@ -903,7 +1010,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2019-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-03-14T12:42:23Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-03-17T04:56:51Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -912,7 +1019,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Mar 2022 12:44:41 GMT
+      - Thu, 17 Mar 2022 04:59:07 GMT
       expires:
       - '-1'
       pragma:
@@ -929,7 +1036,7 @@ interactions:
 - request:
     body: '{"location": "westus", "tags": {}, "sku": {"name": "Standard_LRS"}, "properties":
       {"hyperVGeneration": "V1", "creationData": {"createOption": "Copy", "sourceResourceId":
-      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/vm1_OsDisk_1_6174d9449df1475190936171680541fe"}}}'
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/vm1_OsDisk_1_33bfb97e227d47aab3407c85d07e659d"}}}'
     headers:
       Accept:
       - application/json
@@ -954,13 +1061,13 @@ interactions:
       string: "{\r\n  \"location\": \"westus\",\r\n  \"tags\": {},\r\n  \"sku\": {\r\n
         \   \"name\": \"Standard_LRS\"\r\n  },\r\n  \"properties\": {\r\n    \"osType\":
         \"Linux\",\r\n    \"hyperVGeneration\": \"V1\",\r\n    \"creationData\": {\r\n
-        \     \"createOption\": \"Copy\",\r\n      \"sourceResourceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/vm1_OsDisk_1_6174d9449df1475190936171680541fe\",\r\n
-        \     \"sourceUniqueId\": \"6174d944-9df1-4751-9093-6171680541fe\"\r\n    },\r\n
+        \     \"createOption\": \"Copy\",\r\n      \"sourceResourceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/vm1_OsDisk_1_33bfb97e227d47aab3407c85d07e659d\",\r\n
+        \     \"sourceUniqueId\": \"33bfb97e-227d-47aa-b340-7c85d07e659d\"\r\n    },\r\n
         \   \"provisioningState\": \"Updating\",\r\n    \"isArmResource\": true,\r\n
         \   \"osState\": \"Generalized\"\r\n  }\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/DiskOperations/fd27a44a-7837-4760-80cd-56621be2b8f4?p=42128af7-4c72-4222-9761-fb0d8e6cebdc&api-version=2019-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/DiskOperations/516635c7-5099-43dd-b648-d97391dba8dc?p=42128af7-4c72-4222-9761-fb0d8e6cebdc&api-version=2019-07-01
       cache-control:
       - no-cache
       content-length:
@@ -968,11 +1075,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Mar 2022 12:44:47 GMT
+      - Thu, 17 Mar 2022 04:59:14 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/DiskOperations/fd27a44a-7837-4760-80cd-56621be2b8f4?p=42128af7-4c72-4222-9761-fb0d8e6cebdc&monitor=true&api-version=2019-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/DiskOperations/516635c7-5099-43dd-b648-d97391dba8dc?p=42128af7-4c72-4222-9761-fb0d8e6cebdc&monitor=true&api-version=2019-07-01
       pragma:
       - no-cache
       server:
@@ -1005,20 +1112,33 @@ interactions:
       User-Agent:
       - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/DiskOperations/fd27a44a-7837-4760-80cd-56621be2b8f4?p=42128af7-4c72-4222-9761-fb0d8e6cebdc&api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/DiskOperations/516635c7-5099-43dd-b648-d97391dba8dc?p=42128af7-4c72-4222-9761-fb0d8e6cebdc&api-version=2019-07-01
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2022-03-14T12:44:47.3417008+00:00\",\r\n  \"status\":
-        \"InProgress\",\r\n  \"name\": \"fd27a44a-7837-4760-80cd-56621be2b8f4\"\r\n}"
+      string: "{\r\n  \"startTime\": \"2022-03-17T04:59:15.0677053+00:00\",\r\n  \"endTime\":
+        \"2022-03-17T04:59:15.6771078+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
+        \ \"properties\": {\r\n    \"output\": {\r\n  \"name\": \"oSnapshot\",\r\n
+        \ \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/snapshots/oSnapshot\",\r\n
+        \ \"type\": \"Microsoft.Compute/snapshots\",\r\n  \"location\": \"westus\",\r\n
+        \ \"tags\": {},\r\n  \"sku\": {\r\n    \"name\": \"Standard_LRS\",\r\n    \"tier\":
+        \"Standard\"\r\n  },\r\n  \"properties\": {\r\n    \"osType\": \"Linux\",\r\n
+        \   \"hyperVGeneration\": \"V1\",\r\n    \"creationData\": {\r\n      \"createOption\":
+        \"Copy\",\r\n      \"sourceResourceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/vm1_OsDisk_1_33bfb97e227d47aab3407c85d07e659d\",\r\n
+        \     \"sourceUniqueId\": \"33bfb97e-227d-47aa-b340-7c85d07e659d\"\r\n    },\r\n
+        \   \"diskSizeGB\": 30,\r\n    \"encryption\": {\r\n      \"type\": \"EncryptionAtRestWithPlatformKey\"\r\n
+        \   },\r\n    \"incremental\": false,\r\n    \"timeCreated\": \"2022-03-17T04:59:15.0677053+00:00\",\r\n
+        \   \"provisioningState\": \"Succeeded\",\r\n    \"diskState\": \"Unattached\",\r\n
+        \   \"diskSizeBytes\": 32212254720,\r\n    \"uniqueId\": \"362c0ad1-e32d-4fd2-b841-6329f7156ede\"\r\n
+        \ }\r\n}\r\n  },\r\n  \"name\": \"516635c7-5099-43dd-b648-d97391dba8dc\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '134'
+      - '1296'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Mar 2022 12:44:49 GMT
+      - Thu, 17 Mar 2022 04:59:16 GMT
       expires:
       - '-1'
       pragma:
@@ -1035,59 +1155,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperation3Min;49999,Microsoft.Compute/GetOperation30Min;399986
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - snapshot create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --source
-      User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/DiskOperations/fd27a44a-7837-4760-80cd-56621be2b8f4?p=42128af7-4c72-4222-9761-fb0d8e6cebdc&api-version=2019-07-01
-  response:
-    body:
-      string: "{\r\n  \"startTime\": \"2022-03-14T12:44:47.3417008+00:00\",\r\n  \"endTime\":
-        \"2022-03-14T12:44:51.7794094+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
-        \ \"properties\": {\r\n    \"output\": {\"name\":\"oSnapshot\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/snapshots/oSnapshot\",\"type\":\"Microsoft.Compute/snapshots\",\"location\":\"westus\",\"tags\":{},\"sku\":{\"name\":\"Standard_LRS\",\"tier\":\"Standard\"},\"properties\":{\"osType\":\"Linux\",\"hyperVGeneration\":\"V1\",\"creationData\":{\"createOption\":\"Copy\",\"sourceResourceId\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/vm1_OsDisk_1_6174d9449df1475190936171680541fe\",\"sourceUniqueId\":\"6174d944-9df1-4751-9093-6171680541fe\"},\"diskSizeGB\":30,\"encryption\":{\"type\":\"EncryptionAtRestWithPlatformKey\"},\"incremental\":false,\"timeCreated\":\"2022-03-14T12:44:47.3417008+00:00\",\"provisioningState\":\"Succeeded\",\"diskState\":\"Unattached\",\"diskSizeBytes\":32212254720,\"uniqueId\":\"47dd682e-5113-4030-9c61-63fb68599dcb\"}}\r\n
-        \ },\r\n  \"name\": \"fd27a44a-7837-4760-80cd-56621be2b8f4\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1112'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 14 Mar 2022 12:44:59 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperation3Min;49997,Microsoft.Compute/GetOperation30Min;399986
+      - Microsoft.Compute/GetOperation3Min;49990,Microsoft.Compute/GetOperation30Min;399960
     status:
       code: 200
       message: OK
@@ -1115,12 +1183,12 @@ interactions:
         \ \"tags\": {},\r\n  \"sku\": {\r\n    \"name\": \"Standard_LRS\",\r\n    \"tier\":
         \"Standard\"\r\n  },\r\n  \"properties\": {\r\n    \"osType\": \"Linux\",\r\n
         \   \"hyperVGeneration\": \"V1\",\r\n    \"creationData\": {\r\n      \"createOption\":
-        \"Copy\",\r\n      \"sourceResourceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/vm1_OsDisk_1_6174d9449df1475190936171680541fe\",\r\n
-        \     \"sourceUniqueId\": \"6174d944-9df1-4751-9093-6171680541fe\"\r\n    },\r\n
+        \"Copy\",\r\n      \"sourceResourceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/vm1_OsDisk_1_33bfb97e227d47aab3407c85d07e659d\",\r\n
+        \     \"sourceUniqueId\": \"33bfb97e-227d-47aa-b340-7c85d07e659d\"\r\n    },\r\n
         \   \"diskSizeGB\": 30,\r\n    \"encryption\": {\r\n      \"type\": \"EncryptionAtRestWithPlatformKey\"\r\n
-        \   },\r\n    \"incremental\": false,\r\n    \"timeCreated\": \"2022-03-14T12:44:47.3417008+00:00\",\r\n
+        \   },\r\n    \"incremental\": false,\r\n    \"timeCreated\": \"2022-03-17T04:59:15.0677053+00:00\",\r\n
         \   \"provisioningState\": \"Succeeded\",\r\n    \"diskState\": \"Unattached\",\r\n
-        \   \"diskSizeBytes\": 32212254720,\r\n    \"uniqueId\": \"47dd682e-5113-4030-9c61-63fb68599dcb\"\r\n
+        \   \"diskSizeBytes\": 32212254720,\r\n    \"uniqueId\": \"362c0ad1-e32d-4fd2-b841-6329f7156ede\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
@@ -1130,7 +1198,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Mar 2022 12:44:59 GMT
+      - Thu, 17 Mar 2022 04:59:16 GMT
       expires:
       - '-1'
       pragma:
@@ -1147,7 +1215,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;4990,Microsoft.Compute/LowCostGet30Min;39916
+      - Microsoft.Compute/LowCostGet3Min;4926,Microsoft.Compute/LowCostGet30Min;39317
     status:
       code: 200
       message: OK
@@ -1175,12 +1243,12 @@ interactions:
         \ \"tags\": {},\r\n  \"sku\": {\r\n    \"name\": \"Standard_LRS\",\r\n    \"tier\":
         \"Standard\"\r\n  },\r\n  \"properties\": {\r\n    \"osType\": \"Linux\",\r\n
         \   \"hyperVGeneration\": \"V1\",\r\n    \"creationData\": {\r\n      \"createOption\":
-        \"Copy\",\r\n      \"sourceResourceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/vm1_OsDisk_1_6174d9449df1475190936171680541fe\",\r\n
-        \     \"sourceUniqueId\": \"6174d944-9df1-4751-9093-6171680541fe\"\r\n    },\r\n
+        \"Copy\",\r\n      \"sourceResourceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/vm1_OsDisk_1_33bfb97e227d47aab3407c85d07e659d\",\r\n
+        \     \"sourceUniqueId\": \"33bfb97e-227d-47aa-b340-7c85d07e659d\"\r\n    },\r\n
         \   \"diskSizeGB\": 30,\r\n    \"encryption\": {\r\n      \"type\": \"EncryptionAtRestWithPlatformKey\"\r\n
-        \   },\r\n    \"incremental\": false,\r\n    \"timeCreated\": \"2022-03-14T12:44:47.3417008+00:00\",\r\n
+        \   },\r\n    \"incremental\": false,\r\n    \"timeCreated\": \"2022-03-17T04:59:15.0677053+00:00\",\r\n
         \   \"provisioningState\": \"Succeeded\",\r\n    \"diskState\": \"Unattached\",\r\n
-        \   \"diskSizeBytes\": 32212254720,\r\n    \"uniqueId\": \"47dd682e-5113-4030-9c61-63fb68599dcb\"\r\n
+        \   \"diskSizeBytes\": 32212254720,\r\n    \"uniqueId\": \"362c0ad1-e32d-4fd2-b841-6329f7156ede\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
@@ -1190,7 +1258,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Mar 2022 12:45:01 GMT
+      - Thu, 17 Mar 2022 04:59:18 GMT
       expires:
       - '-1'
       pragma:
@@ -1207,7 +1275,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;4989,Microsoft.Compute/LowCostGet30Min;39915
+      - Microsoft.Compute/LowCostGet3Min;4925,Microsoft.Compute/LowCostGet30Min;39316
     status:
       code: 200
       message: OK
@@ -1230,7 +1298,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2019-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-03-14T12:42:23Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-03-17T04:56:51Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -1239,7 +1307,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Mar 2022 12:45:01 GMT
+      - Thu, 17 Mar 2022 04:59:18 GMT
       expires:
       - '-1'
       pragma:
@@ -1282,12 +1350,12 @@ interactions:
         {},\r\n  \"sku\": {\r\n    \"name\": \"Premium_LRS\"\r\n  },\r\n  \"properties\":
         {\r\n    \"osType\": \"Linux\",\r\n    \"hyperVGeneration\": \"V1\",\r\n    \"creationData\":
         {\r\n      \"createOption\": \"Copy\",\r\n      \"sourceResourceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/snapshots/oSnapshot\",\r\n
-        \     \"sourceUniqueId\": \"47dd682e-5113-4030-9c61-63fb68599dcb\"\r\n    },\r\n
+        \     \"sourceUniqueId\": \"362c0ad1-e32d-4fd2-b841-6329f7156ede\"\r\n    },\r\n
         \   \"provisioningState\": \"Updating\",\r\n    \"isArmResource\": true,\r\n
         \   \"osState\": \"Generalized\"\r\n  }\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/DiskOperations/7abfb122-b9c1-474d-8dbf-42a50b0e01cd?p=42128af7-4c72-4222-9761-fb0d8e6cebdc&api-version=2019-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/DiskOperations/99893fba-3b79-4057-a7c8-1fe313a77b97?p=42128af7-4c72-4222-9761-fb0d8e6cebdc&api-version=2019-07-01
       cache-control:
       - no-cache
       content-length:
@@ -1295,11 +1363,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Mar 2022 12:45:06 GMT
+      - Thu, 17 Mar 2022 04:59:21 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/DiskOperations/7abfb122-b9c1-474d-8dbf-42a50b0e01cd?p=42128af7-4c72-4222-9761-fb0d8e6cebdc&monitor=true&api-version=2019-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/DiskOperations/99893fba-3b79-4057-a7c8-1fe313a77b97?p=42128af7-4c72-4222-9761-fb0d8e6cebdc&monitor=true&api-version=2019-07-01
       pragma:
       - no-cache
       server:
@@ -1310,9 +1378,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/CreateUpdateDisks3Min;999,Microsoft.Compute/CreateUpdateDisks30Min;7999
+      - Microsoft.Compute/CreateUpdateDisks3Min;999,Microsoft.Compute/CreateUpdateDisks30Min;7997
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
     status:
       code: 202
       message: Accepted
@@ -1332,11 +1400,11 @@ interactions:
       User-Agent:
       - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/DiskOperations/7abfb122-b9c1-474d-8dbf-42a50b0e01cd?p=42128af7-4c72-4222-9761-fb0d8e6cebdc&api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/DiskOperations/99893fba-3b79-4057-a7c8-1fe313a77b97?p=42128af7-4c72-4222-9761-fb0d8e6cebdc&api-version=2019-07-01
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2022-03-14T12:45:07.4520051+00:00\",\r\n  \"endTime\":
-        \"2022-03-14T12:45:08.0457756+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
+      string: "{\r\n  \"startTime\": \"2022-03-17T04:59:22.5836589+00:00\",\r\n  \"endTime\":
+        \"2022-03-17T04:59:23.1618304+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
         \ \"properties\": {\r\n    \"output\": {\r\n  \"name\": \"sDisk\",\r\n  \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/sDisk\",\r\n
         \ \"type\": \"Microsoft.Compute/disks\",\r\n  \"location\": \"westus\",\r\n
@@ -1344,13 +1412,13 @@ interactions:
         \"Premium\"\r\n  },\r\n  \"properties\": {\r\n    \"osType\": \"Linux\",\r\n
         \   \"hyperVGeneration\": \"V1\",\r\n    \"creationData\": {\r\n      \"createOption\":
         \"Copy\",\r\n      \"sourceResourceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/snapshots/oSnapshot\",\r\n
-        \     \"sourceUniqueId\": \"47dd682e-5113-4030-9c61-63fb68599dcb\"\r\n    },\r\n
+        \     \"sourceUniqueId\": \"362c0ad1-e32d-4fd2-b841-6329f7156ede\"\r\n    },\r\n
         \   \"diskSizeGB\": 30,\r\n    \"diskIOPSReadWrite\": 120,\r\n    \"diskMBpsReadWrite\":
         25,\r\n    \"encryption\": {\r\n      \"type\": \"EncryptionAtRestWithPlatformKey\"\r\n
-        \   },\r\n    \"timeCreated\": \"2022-03-14T12:45:07.4676152+00:00\",\r\n
+        \   },\r\n    \"timeCreated\": \"2022-03-17T04:59:22.5836589+00:00\",\r\n
         \   \"provisioningState\": \"Succeeded\",\r\n    \"diskState\": \"Unattached\",\r\n
-        \   \"diskSizeBytes\": 32212254720,\r\n    \"uniqueId\": \"24f9714e-279c-47eb-a977-0df6b5023444\"\r\n
-        \ }\r\n}\r\n  },\r\n  \"name\": \"7abfb122-b9c1-474d-8dbf-42a50b0e01cd\"\r\n}"
+        \   \"diskSizeBytes\": 32212254720,\r\n    \"uniqueId\": \"154c832b-1769-4829-b92e-7d65c46757b3\"\r\n
+        \ }\r\n}\r\n  },\r\n  \"name\": \"99893fba-3b79-4057-a7c8-1fe313a77b97\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -1359,7 +1427,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Mar 2022 12:45:09 GMT
+      - Thu, 17 Mar 2022 04:59:24 GMT
       expires:
       - '-1'
       pragma:
@@ -1376,7 +1444,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperation3Min;49996,Microsoft.Compute/GetOperation30Min;399985
+      - Microsoft.Compute/GetOperation3Min;49989,Microsoft.Compute/GetOperation30Min;399959
     status:
       code: 200
       message: OK
@@ -1405,12 +1473,12 @@ interactions:
         \"Premium\"\r\n  },\r\n  \"properties\": {\r\n    \"osType\": \"Linux\",\r\n
         \   \"hyperVGeneration\": \"V1\",\r\n    \"creationData\": {\r\n      \"createOption\":
         \"Copy\",\r\n      \"sourceResourceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/snapshots/oSnapshot\",\r\n
-        \     \"sourceUniqueId\": \"47dd682e-5113-4030-9c61-63fb68599dcb\"\r\n    },\r\n
+        \     \"sourceUniqueId\": \"362c0ad1-e32d-4fd2-b841-6329f7156ede\"\r\n    },\r\n
         \   \"diskSizeGB\": 30,\r\n    \"diskIOPSReadWrite\": 120,\r\n    \"diskMBpsReadWrite\":
         25,\r\n    \"encryption\": {\r\n      \"type\": \"EncryptionAtRestWithPlatformKey\"\r\n
-        \   },\r\n    \"timeCreated\": \"2022-03-14T12:45:07.4676152+00:00\",\r\n
+        \   },\r\n    \"timeCreated\": \"2022-03-17T04:59:22.5836589+00:00\",\r\n
         \   \"provisioningState\": \"Succeeded\",\r\n    \"diskState\": \"Unattached\",\r\n
-        \   \"diskSizeBytes\": 32212254720,\r\n    \"uniqueId\": \"24f9714e-279c-47eb-a977-0df6b5023444\"\r\n
+        \   \"diskSizeBytes\": 32212254720,\r\n    \"uniqueId\": \"154c832b-1769-4829-b92e-7d65c46757b3\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
@@ -1420,7 +1488,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Mar 2022 12:45:09 GMT
+      - Thu, 17 Mar 2022 04:59:24 GMT
       expires:
       - '-1'
       pragma:
@@ -1437,7 +1505,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;4987,Microsoft.Compute/LowCostGet30Min;39913
+      - Microsoft.Compute/LowCostGet3Min;4922,Microsoft.Compute/LowCostGet30Min;39313
     status:
       code: 200
       message: OK
@@ -1457,10 +1525,10 @@ interactions:
       User-Agent:
       - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/snapshots/vm1_disk2_f3d09068ed594d0ca53ee00f6172a70e?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/snapshots/vm1_disk2_a532637f25b34c3192752285966bf299?api-version=2019-07-01
   response:
     body:
-      string: '{"error":{"code":"ResourceNotFound","message":"The Resource ''Microsoft.Compute/snapshots/vm1_disk2_f3d09068ed594d0ca53ee00f6172a70e''
+      string: '{"error":{"code":"ResourceNotFound","message":"The Resource ''Microsoft.Compute/snapshots/vm1_disk2_a532637f25b34c3192752285966bf299''
         under resource group ''clitest.rg000001'' was not found. For more details
         please go to https://aka.ms/ARMResourceNotFoundFix"}}'
     headers:
@@ -1471,7 +1539,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Mar 2022 12:45:11 GMT
+      - Thu, 17 Mar 2022 04:59:25 GMT
       expires:
       - '-1'
       pragma:
@@ -1501,20 +1569,20 @@ interactions:
       User-Agent:
       - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/vm1_disk2_f3d09068ed594d0ca53ee00f6172a70e?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/vm1_disk2_a532637f25b34c3192752285966bf299?api-version=2019-07-01
   response:
     body:
-      string: "{\r\n  \"name\": \"vm1_disk2_f3d09068ed594d0ca53ee00f6172a70e\",\r\n
-        \ \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/vm1_disk2_f3d09068ed594d0ca53ee00f6172a70e\",\r\n
+      string: "{\r\n  \"name\": \"vm1_disk2_a532637f25b34c3192752285966bf299\",\r\n
+        \ \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/vm1_disk2_a532637f25b34c3192752285966bf299\",\r\n
         \ \"type\": \"Microsoft.Compute/disks\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {},\r\n  \"managedBy\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/vm1\",\r\n
         \ \"sku\": {\r\n    \"name\": \"Premium_LRS\",\r\n    \"tier\": \"Premium\"\r\n
         \ },\r\n  \"properties\": {\r\n    \"creationData\": {\r\n      \"createOption\":
         \"Empty\"\r\n    },\r\n    \"diskSizeGB\": 2,\r\n    \"diskIOPSReadWrite\":
         120,\r\n    \"diskMBpsReadWrite\": 25,\r\n    \"encryption\": {\r\n      \"type\":
-        \"EncryptionAtRestWithPlatformKey\"\r\n    },\r\n    \"timeCreated\": \"2022-03-14T12:42:57.7274117+00:00\",\r\n
+        \"EncryptionAtRestWithPlatformKey\"\r\n    },\r\n    \"timeCreated\": \"2022-03-17T04:57:17.5152014+00:00\",\r\n
         \   \"provisioningState\": \"Succeeded\",\r\n    \"diskState\": \"Attached\",\r\n
-        \   \"diskSizeBytes\": 2147483648,\r\n    \"uniqueId\": \"f3d09068-ed59-4d0c-a53e-e00f6172a70e\"\r\n
+        \   \"diskSizeBytes\": 2147483648,\r\n    \"uniqueId\": \"a532637f-25b3-4c31-9275-2285966bf299\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
@@ -1524,7 +1592,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Mar 2022 12:45:11 GMT
+      - Thu, 17 Mar 2022 04:59:25 GMT
       expires:
       - '-1'
       pragma:
@@ -1541,7 +1609,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;4986,Microsoft.Compute/LowCostGet30Min;39912
+      - Microsoft.Compute/LowCostGet3Min;4921,Microsoft.Compute/LowCostGet30Min;39312
     status:
       code: 200
       message: OK
@@ -1564,7 +1632,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2019-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-03-14T12:42:23Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-03-17T04:56:51Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -1573,7 +1641,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Mar 2022 12:45:11 GMT
+      - Thu, 17 Mar 2022 04:59:26 GMT
       expires:
       - '-1'
       pragma:
@@ -1590,7 +1658,7 @@ interactions:
 - request:
     body: '{"location": "westus", "tags": {}, "sku": {"name": "Standard_LRS"}, "properties":
       {"hyperVGeneration": "V1", "creationData": {"createOption": "Copy", "sourceResourceId":
-      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/vm1_disk2_f3d09068ed594d0ca53ee00f6172a70e"}}}'
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/vm1_disk2_a532637f25b34c3192752285966bf299"}}}'
     headers:
       Accept:
       - application/json
@@ -1615,13 +1683,13 @@ interactions:
       string: "{\r\n  \"location\": \"westus\",\r\n  \"tags\": {},\r\n  \"sku\": {\r\n
         \   \"name\": \"Standard_LRS\"\r\n  },\r\n  \"properties\": {\r\n    \"hyperVGeneration\":
         \"V1\",\r\n    \"creationData\": {\r\n      \"createOption\": \"Copy\",\r\n
-        \     \"sourceResourceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/vm1_disk2_f3d09068ed594d0ca53ee00f6172a70e\",\r\n
-        \     \"sourceUniqueId\": \"f3d09068-ed59-4d0c-a53e-e00f6172a70e\"\r\n    },\r\n
+        \     \"sourceResourceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/vm1_disk2_a532637f25b34c3192752285966bf299\",\r\n
+        \     \"sourceUniqueId\": \"a532637f-25b3-4c31-9275-2285966bf299\"\r\n    },\r\n
         \   \"provisioningState\": \"Updating\",\r\n    \"isArmResource\": true\r\n
         \ }\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/DiskOperations/1905fcc6-6885-44f0-9f10-51b284ee6a47?p=42128af7-4c72-4222-9761-fb0d8e6cebdc&api-version=2019-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/DiskOperations/e11cfa44-af92-47e3-98b8-a3253160a2a6?p=42128af7-4c72-4222-9761-fb0d8e6cebdc&api-version=2019-07-01
       cache-control:
       - no-cache
       content-length:
@@ -1629,11 +1697,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Mar 2022 12:45:17 GMT
+      - Thu, 17 Mar 2022 04:59:29 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/DiskOperations/1905fcc6-6885-44f0-9f10-51b284ee6a47?p=42128af7-4c72-4222-9761-fb0d8e6cebdc&monitor=true&api-version=2019-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/DiskOperations/e11cfa44-af92-47e3-98b8-a3253160a2a6?p=42128af7-4c72-4222-9761-fb0d8e6cebdc&monitor=true&api-version=2019-07-01
       pragma:
       - no-cache
       server:
@@ -1646,7 +1714,7 @@ interactions:
       x-ms-ratelimit-remaining-resource:
       - Microsoft.Compute/HighCostSnapshotCreateHydrate3Min;998,Microsoft.Compute/HighCostSnapshotCreateHydrate30Min;7998
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1196'
     status:
       code: 202
       message: Accepted
@@ -1666,24 +1734,24 @@ interactions:
       User-Agent:
       - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/DiskOperations/1905fcc6-6885-44f0-9f10-51b284ee6a47?p=42128af7-4c72-4222-9761-fb0d8e6cebdc&api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/DiskOperations/e11cfa44-af92-47e3-98b8-a3253160a2a6?p=42128af7-4c72-4222-9761-fb0d8e6cebdc&api-version=2019-07-01
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2022-03-14T12:45:17.5051145+00:00\",\r\n  \"endTime\":
-        \"2022-03-14T12:45:18.1145414+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
+      string: "{\r\n  \"startTime\": \"2022-03-17T04:59:29.8809585+00:00\",\r\n  \"endTime\":
+        \"2022-03-17T04:59:30.5527835+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
         \ \"properties\": {\r\n    \"output\": {\r\n  \"name\": \"dSnapshot\",\r\n
         \ \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/snapshots/dSnapshot\",\r\n
         \ \"type\": \"Microsoft.Compute/snapshots\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {},\r\n  \"sku\": {\r\n    \"name\": \"Standard_LRS\",\r\n    \"tier\":
         \"Standard\"\r\n  },\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n
         \   \"creationData\": {\r\n      \"createOption\": \"Copy\",\r\n      \"sourceResourceId\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/vm1_disk2_f3d09068ed594d0ca53ee00f6172a70e\",\r\n
-        \     \"sourceUniqueId\": \"f3d09068-ed59-4d0c-a53e-e00f6172a70e\"\r\n    },\r\n
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/vm1_disk2_a532637f25b34c3192752285966bf299\",\r\n
+        \     \"sourceUniqueId\": \"a532637f-25b3-4c31-9275-2285966bf299\"\r\n    },\r\n
         \   \"diskSizeGB\": 2,\r\n    \"encryption\": {\r\n      \"type\": \"EncryptionAtRestWithPlatformKey\"\r\n
-        \   },\r\n    \"incremental\": false,\r\n    \"timeCreated\": \"2022-03-14T12:45:17.5051145+00:00\",\r\n
+        \   },\r\n    \"incremental\": false,\r\n    \"timeCreated\": \"2022-03-17T04:59:29.8809585+00:00\",\r\n
         \   \"provisioningState\": \"Succeeded\",\r\n    \"diskState\": \"Unattached\",\r\n
-        \   \"diskSizeBytes\": 2147483648,\r\n    \"uniqueId\": \"c6baffd6-00a2-441f-8b79-2dbc4a4c478e\"\r\n
-        \ }\r\n}\r\n  },\r\n  \"name\": \"1905fcc6-6885-44f0-9f10-51b284ee6a47\"\r\n}"
+        \   \"diskSizeBytes\": 2147483648,\r\n    \"uniqueId\": \"eecd1769-91a4-4d9f-8dab-6959665520af\"\r\n
+        \ }\r\n}\r\n  },\r\n  \"name\": \"e11cfa44-af92-47e3-98b8-a3253160a2a6\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -1692,7 +1760,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Mar 2022 12:45:19 GMT
+      - Thu, 17 Mar 2022 04:59:31 GMT
       expires:
       - '-1'
       pragma:
@@ -1709,7 +1777,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperation3Min;49994,Microsoft.Compute/GetOperation30Min;399983
+      - Microsoft.Compute/GetOperation3Min;49987,Microsoft.Compute/GetOperation30Min;399956
     status:
       code: 200
       message: OK
@@ -1737,12 +1805,12 @@ interactions:
         \ \"tags\": {},\r\n  \"sku\": {\r\n    \"name\": \"Standard_LRS\",\r\n    \"tier\":
         \"Standard\"\r\n  },\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n
         \   \"creationData\": {\r\n      \"createOption\": \"Copy\",\r\n      \"sourceResourceId\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/vm1_disk2_f3d09068ed594d0ca53ee00f6172a70e\",\r\n
-        \     \"sourceUniqueId\": \"f3d09068-ed59-4d0c-a53e-e00f6172a70e\"\r\n    },\r\n
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/vm1_disk2_a532637f25b34c3192752285966bf299\",\r\n
+        \     \"sourceUniqueId\": \"a532637f-25b3-4c31-9275-2285966bf299\"\r\n    },\r\n
         \   \"diskSizeGB\": 2,\r\n    \"encryption\": {\r\n      \"type\": \"EncryptionAtRestWithPlatformKey\"\r\n
-        \   },\r\n    \"incremental\": false,\r\n    \"timeCreated\": \"2022-03-14T12:45:17.5051145+00:00\",\r\n
+        \   },\r\n    \"incremental\": false,\r\n    \"timeCreated\": \"2022-03-17T04:59:29.8809585+00:00\",\r\n
         \   \"provisioningState\": \"Succeeded\",\r\n    \"diskState\": \"Unattached\",\r\n
-        \   \"diskSizeBytes\": 2147483648,\r\n    \"uniqueId\": \"c6baffd6-00a2-441f-8b79-2dbc4a4c478e\"\r\n
+        \   \"diskSizeBytes\": 2147483648,\r\n    \"uniqueId\": \"eecd1769-91a4-4d9f-8dab-6959665520af\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
@@ -1752,7 +1820,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Mar 2022 12:45:19 GMT
+      - Thu, 17 Mar 2022 04:59:32 GMT
       expires:
       - '-1'
       pragma:
@@ -1769,7 +1837,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;4981,Microsoft.Compute/LowCostGet30Min;39907
+      - Microsoft.Compute/LowCostGet3Min;4925,Microsoft.Compute/LowCostGet30Min;39306
     status:
       code: 200
       message: OK
@@ -1797,12 +1865,12 @@ interactions:
         \ \"tags\": {},\r\n  \"sku\": {\r\n    \"name\": \"Standard_LRS\",\r\n    \"tier\":
         \"Standard\"\r\n  },\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n
         \   \"creationData\": {\r\n      \"createOption\": \"Copy\",\r\n      \"sourceResourceId\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/vm1_disk2_f3d09068ed594d0ca53ee00f6172a70e\",\r\n
-        \     \"sourceUniqueId\": \"f3d09068-ed59-4d0c-a53e-e00f6172a70e\"\r\n    },\r\n
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/vm1_disk2_a532637f25b34c3192752285966bf299\",\r\n
+        \     \"sourceUniqueId\": \"a532637f-25b3-4c31-9275-2285966bf299\"\r\n    },\r\n
         \   \"diskSizeGB\": 2,\r\n    \"encryption\": {\r\n      \"type\": \"EncryptionAtRestWithPlatformKey\"\r\n
-        \   },\r\n    \"incremental\": false,\r\n    \"timeCreated\": \"2022-03-14T12:45:17.5051145+00:00\",\r\n
+        \   },\r\n    \"incremental\": false,\r\n    \"timeCreated\": \"2022-03-17T04:59:29.8809585+00:00\",\r\n
         \   \"provisioningState\": \"Succeeded\",\r\n    \"diskState\": \"Unattached\",\r\n
-        \   \"diskSizeBytes\": 2147483648,\r\n    \"uniqueId\": \"c6baffd6-00a2-441f-8b79-2dbc4a4c478e\"\r\n
+        \   \"diskSizeBytes\": 2147483648,\r\n    \"uniqueId\": \"eecd1769-91a4-4d9f-8dab-6959665520af\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
@@ -1812,7 +1880,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Mar 2022 12:45:20 GMT
+      - Thu, 17 Mar 2022 04:59:34 GMT
       expires:
       - '-1'
       pragma:
@@ -1829,7 +1897,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;4979,Microsoft.Compute/LowCostGet30Min;39905
+      - Microsoft.Compute/LowCostGet3Min;4924,Microsoft.Compute/LowCostGet30Min;39305
     status:
       code: 200
       message: OK
@@ -1852,7 +1920,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2019-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-03-14T12:42:23Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-03-17T04:56:51Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -1861,7 +1929,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Mar 2022 12:45:22 GMT
+      - Thu, 17 Mar 2022 04:59:34 GMT
       expires:
       - '-1'
       pragma:
@@ -1904,12 +1972,12 @@ interactions:
         {},\r\n  \"sku\": {\r\n    \"name\": \"Premium_LRS\"\r\n  },\r\n  \"properties\":
         {\r\n    \"hyperVGeneration\": \"V1\",\r\n    \"creationData\": {\r\n      \"createOption\":
         \"Copy\",\r\n      \"sourceResourceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/snapshots/dSnapshot\",\r\n
-        \     \"sourceUniqueId\": \"c6baffd6-00a2-441f-8b79-2dbc4a4c478e\"\r\n    },\r\n
+        \     \"sourceUniqueId\": \"eecd1769-91a4-4d9f-8dab-6959665520af\"\r\n    },\r\n
         \   \"provisioningState\": \"Updating\",\r\n    \"isArmResource\": true\r\n
         \ }\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/DiskOperations/51a73de0-609c-46d7-a996-7f0bbf8424a3?p=42128af7-4c72-4222-9761-fb0d8e6cebdc&api-version=2019-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/DiskOperations/ce5436af-e5f1-4f98-9b8b-6e14bdc73f6e?p=42128af7-4c72-4222-9761-fb0d8e6cebdc&api-version=2019-07-01
       cache-control:
       - no-cache
       content-length:
@@ -1917,11 +1985,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Mar 2022 12:45:27 GMT
+      - Thu, 17 Mar 2022 04:59:39 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/DiskOperations/51a73de0-609c-46d7-a996-7f0bbf8424a3?p=42128af7-4c72-4222-9761-fb0d8e6cebdc&monitor=true&api-version=2019-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/DiskOperations/ce5436af-e5f1-4f98-9b8b-6e14bdc73f6e?p=42128af7-4c72-4222-9761-fb0d8e6cebdc&monitor=true&api-version=2019-07-01
       pragma:
       - no-cache
       server:
@@ -1932,9 +2000,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/CreateUpdateDisks3Min;998,Microsoft.Compute/CreateUpdateDisks30Min;7998
+      - Microsoft.Compute/CreateUpdateDisks3Min;998,Microsoft.Compute/CreateUpdateDisks30Min;7996
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
     status:
       code: 202
       message: Accepted
@@ -1954,11 +2022,11 @@ interactions:
       User-Agent:
       - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/DiskOperations/51a73de0-609c-46d7-a996-7f0bbf8424a3?p=42128af7-4c72-4222-9761-fb0d8e6cebdc&api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/DiskOperations/ce5436af-e5f1-4f98-9b8b-6e14bdc73f6e?p=42128af7-4c72-4222-9761-fb0d8e6cebdc&api-version=2019-07-01
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2022-03-14T12:45:27.8962088+00:00\",\r\n  \"endTime\":
-        \"2022-03-14T12:45:28.4743912+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
+      string: "{\r\n  \"startTime\": \"2022-03-17T04:59:39.0847361+00:00\",\r\n  \"endTime\":
+        \"2022-03-17T04:59:39.6628764+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
         \ \"properties\": {\r\n    \"output\": {\r\n  \"name\": \"dDisk\",\r\n  \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/dDisk\",\r\n
         \ \"type\": \"Microsoft.Compute/disks\",\r\n  \"location\": \"westus\",\r\n
@@ -1966,13 +2034,13 @@ interactions:
         \"Premium\"\r\n  },\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n
         \   \"creationData\": {\r\n      \"createOption\": \"Copy\",\r\n      \"sourceResourceId\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/snapshots/dSnapshot\",\r\n
-        \     \"sourceUniqueId\": \"c6baffd6-00a2-441f-8b79-2dbc4a4c478e\"\r\n    },\r\n
+        \     \"sourceUniqueId\": \"eecd1769-91a4-4d9f-8dab-6959665520af\"\r\n    },\r\n
         \   \"diskSizeGB\": 2,\r\n    \"diskIOPSReadWrite\": 120,\r\n    \"diskMBpsReadWrite\":
         25,\r\n    \"encryption\": {\r\n      \"type\": \"EncryptionAtRestWithPlatformKey\"\r\n
-        \   },\r\n    \"timeCreated\": \"2022-03-14T12:45:27.8962088+00:00\",\r\n
+        \   },\r\n    \"timeCreated\": \"2022-03-17T04:59:39.1003391+00:00\",\r\n
         \   \"provisioningState\": \"Succeeded\",\r\n    \"diskState\": \"Unattached\",\r\n
-        \   \"diskSizeBytes\": 2147483648,\r\n    \"uniqueId\": \"2b5fd855-3dac-46d2-a8cb-6c17c0af9e4c\"\r\n
-        \ }\r\n}\r\n  },\r\n  \"name\": \"51a73de0-609c-46d7-a996-7f0bbf8424a3\"\r\n}"
+        \   \"diskSizeBytes\": 2147483648,\r\n    \"uniqueId\": \"42907d17-2889-431e-ae41-449d9b907d27\"\r\n
+        \ }\r\n}\r\n  },\r\n  \"name\": \"ce5436af-e5f1-4f98-9b8b-6e14bdc73f6e\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -1981,7 +2049,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Mar 2022 12:45:30 GMT
+      - Thu, 17 Mar 2022 04:59:41 GMT
       expires:
       - '-1'
       pragma:
@@ -1998,7 +2066,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperation3Min;49992,Microsoft.Compute/GetOperation30Min;399981
+      - Microsoft.Compute/GetOperation3Min;49985,Microsoft.Compute/GetOperation30Min;399954
     status:
       code: 200
       message: OK
@@ -2027,12 +2095,12 @@ interactions:
         \"Premium\"\r\n  },\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n
         \   \"creationData\": {\r\n      \"createOption\": \"Copy\",\r\n      \"sourceResourceId\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/snapshots/dSnapshot\",\r\n
-        \     \"sourceUniqueId\": \"c6baffd6-00a2-441f-8b79-2dbc4a4c478e\"\r\n    },\r\n
+        \     \"sourceUniqueId\": \"eecd1769-91a4-4d9f-8dab-6959665520af\"\r\n    },\r\n
         \   \"diskSizeGB\": 2,\r\n    \"diskIOPSReadWrite\": 120,\r\n    \"diskMBpsReadWrite\":
         25,\r\n    \"encryption\": {\r\n      \"type\": \"EncryptionAtRestWithPlatformKey\"\r\n
-        \   },\r\n    \"timeCreated\": \"2022-03-14T12:45:27.8962088+00:00\",\r\n
+        \   },\r\n    \"timeCreated\": \"2022-03-17T04:59:39.1003391+00:00\",\r\n
         \   \"provisioningState\": \"Succeeded\",\r\n    \"diskState\": \"Unattached\",\r\n
-        \   \"diskSizeBytes\": 2147483648,\r\n    \"uniqueId\": \"2b5fd855-3dac-46d2-a8cb-6c17c0af9e4c\"\r\n
+        \   \"diskSizeBytes\": 2147483648,\r\n    \"uniqueId\": \"42907d17-2889-431e-ae41-449d9b907d27\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
@@ -2042,7 +2110,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Mar 2022 12:45:30 GMT
+      - Thu, 17 Mar 2022 04:59:41 GMT
       expires:
       - '-1'
       pragma:
@@ -2059,7 +2127,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;4981,Microsoft.Compute/LowCostGet30Min;39902
+      - Microsoft.Compute/LowCostGet3Min;4919,Microsoft.Compute/LowCostGet30Min;39300
     status:
       code: 200
       message: OK
@@ -2083,7 +2151,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2019-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-03-14T12:42:23Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-03-17T04:56:51Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -2092,7 +2160,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Mar 2022 12:45:31 GMT
+      - Thu, 17 Mar 2022 04:59:42 GMT
       expires:
       - '-1'
       pragma:
@@ -2128,14 +2196,14 @@ interactions:
     body:
       string: "{\r\n  \"value\": [\r\n    {\r\n      \"name\": \"vm1VNET\",\r\n      \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/vm1VNET\",\r\n
-        \     \"etag\": \"W/\\\"8a489238-31ec-40c0-ad5b-5f47463222df\\\"\",\r\n      \"type\":
+        \     \"etag\": \"W/\\\"9018b33b-e63c-422a-8638-132982f0603d\\\"\",\r\n      \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n      \"location\": \"westus\",\r\n
         \     \"tags\": {},\r\n      \"properties\": {\r\n        \"provisioningState\":
-        \"Succeeded\",\r\n        \"resourceGuid\": \"0614ea83-07a3-476a-9329-64e02d956a24\",\r\n
+        \"Succeeded\",\r\n        \"resourceGuid\": \"676dd9c1-0838-4544-8d45-5e1452a9c4f8\",\r\n
         \       \"addressSpace\": {\r\n          \"addressPrefixes\": [\r\n            \"10.0.0.0/16\"\r\n
         \         ]\r\n        },\r\n        \"subnets\": [\r\n          {\r\n            \"name\":
         \"vm1Subnet\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/vm1VNET/subnets/vm1Subnet\",\r\n
-        \           \"etag\": \"W/\\\"8a489238-31ec-40c0-ad5b-5f47463222df\\\"\",\r\n
+        \           \"etag\": \"W/\\\"9018b33b-e63c-422a-8638-132982f0603d\\\"\",\r\n
         \           \"properties\": {\r\n              \"provisioningState\": \"Succeeded\",\r\n
         \             \"addressPrefix\": \"10.0.0.0/24\",\r\n              \"ipConfigurations\":
         [\r\n                {\r\n                  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/vm1VMNic/ipConfigurations/ipconfigvm1\"\r\n
@@ -2151,7 +2219,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Mar 2022 12:45:31 GMT
+      - Thu, 17 Mar 2022 04:59:42 GMT
       expires:
       - '-1'
       pragma:
@@ -2168,7 +2236,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 9b9a2f4d-32e7-4867-a3e5-2f1a290838c5
+      - 3feb48d7-c069-41fb-b8eb-11dca374ed5e
     status:
       code: 200
       message: OK
@@ -2197,8 +2265,8 @@ interactions:
       "attach", "osType": "linux", "managedDisk": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/sDisk"},
       "diskSizeGb": 100}, "dataDisks": [{"lun": 0, "managedDisk": {"storageAccountType":
       null}, "createOption": "empty", "diskSizeGB": 3}, {"lun": 1, "createOption":
-      "attach", "name": "dDisk", "managedDisk": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/dDisk"}}]},
-      "additionalCapabilities": {}}}], "outputs": {}}, "parameters": {}, "mode": "incremental"}}'
+      "attach", "name": "dDisk", "managedDisk": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/dDisk"}}]}}}],
+      "outputs": {}}, "parameters": {}, "mode": "incremental"}}'
     headers:
       Accept:
       - application/json
@@ -2209,7 +2277,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '2855'
+      - '2825'
       Content-Type:
       - application/json
       ParameterSetName:
@@ -2221,18 +2289,18 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2019-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/vm_deploy_IcOgIIfrwrqvj6s792cA3hcJ3pZayaKV","name":"vm_deploy_IcOgIIfrwrqvj6s792cA3hcJ3pZayaKV","type":"Microsoft.Resources/deployments","properties":{"templateHash":"13899761145606472282","parameters":{},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2022-03-14T12:45:38.9335412Z","duration":"PT0.0005597S","correlationId":"24433c0e-a627-4341-9e61-7667f9566eec","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"networkSecurityGroups","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"networkInterfaces","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkSecurityGroups/vm2NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"vm2NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/publicIPAddresses/vm2PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vm2PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/vm2VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm2VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/vm2VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm2VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/vm2","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"vm2"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/vm_deploy_u2QBDhorxto304GYOqu3kQcWDn2sUrzW","name":"vm_deploy_u2QBDhorxto304GYOqu3kQcWDn2sUrzW","type":"Microsoft.Resources/deployments","properties":{"templateHash":"18219679443309733531","parameters":{},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2022-03-17T04:59:47.8657379Z","duration":"PT0.000715S","correlationId":"63e8cac1-4bfe-4c0d-90f5-233038867ddd","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"networkSecurityGroups","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"networkInterfaces","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkSecurityGroups/vm2NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"vm2NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/publicIPAddresses/vm2PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vm2PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/vm2VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm2VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/vm2VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm2VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/vm2","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"vm2"}]}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/vm_deploy_IcOgIIfrwrqvj6s792cA3hcJ3pZayaKV/operationStatuses/08585543449495224969?api-version=2019-10-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/vm_deploy_u2QBDhorxto304GYOqu3kQcWDn2sUrzW/operationStatuses/08585541137001444634?api-version=2019-10-01
       cache-control:
       - no-cache
       content-length:
-      - '2051'
+      - '2050'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Mar 2022 12:45:40 GMT
+      - Thu, 17 Mar 2022 04:59:48 GMT
       expires:
       - '-1'
       pragma:
@@ -2263,7 +2331,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.34.1 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585543449495224969?api-version=2019-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585541137001444634?api-version=2019-10-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -2275,7 +2343,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Mar 2022 12:46:10 GMT
+      - Thu, 17 Mar 2022 05:00:20 GMT
       expires:
       - '-1'
       pragma:
@@ -2306,7 +2374,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.34.1 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585543449495224969?api-version=2019-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585541137001444634?api-version=2019-10-01
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -2318,7 +2386,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Mar 2022 12:46:41 GMT
+      - Thu, 17 Mar 2022 05:00:50 GMT
       expires:
       - '-1'
       pragma:
@@ -2352,7 +2420,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2019-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/vm_deploy_IcOgIIfrwrqvj6s792cA3hcJ3pZayaKV","name":"vm_deploy_IcOgIIfrwrqvj6s792cA3hcJ3pZayaKV","type":"Microsoft.Resources/deployments","properties":{"templateHash":"13899761145606472282","parameters":{},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2022-03-14T12:46:27.8012266Z","duration":"PT48.8682451S","correlationId":"24433c0e-a627-4341-9e61-7667f9566eec","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"networkSecurityGroups","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"networkInterfaces","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkSecurityGroups/vm2NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"vm2NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/publicIPAddresses/vm2PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vm2PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/vm2VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm2VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/vm2VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm2VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/vm2","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"vm2"}],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/vm2"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/vm2VMNic"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkSecurityGroups/vm2NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/publicIPAddresses/vm2PublicIP"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/vm_deploy_u2QBDhorxto304GYOqu3kQcWDn2sUrzW","name":"vm_deploy_u2QBDhorxto304GYOqu3kQcWDn2sUrzW","type":"Microsoft.Resources/deployments","properties":{"templateHash":"18219679443309733531","parameters":{},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2022-03-17T05:00:21.6476474Z","duration":"PT33.7826245S","correlationId":"63e8cac1-4bfe-4c0d-90f5-233038867ddd","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"networkSecurityGroups","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"networkInterfaces","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkSecurityGroups/vm2NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"vm2NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/publicIPAddresses/vm2PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vm2PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/vm2VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm2VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/vm2VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm2VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/vm2","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"vm2"}],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/vm2"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/vm2VMNic"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkSecurityGroups/vm2NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/publicIPAddresses/vm2PublicIP"}]}}'
     headers:
       cache-control:
       - no-cache
@@ -2361,7 +2429,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Mar 2022 12:46:41 GMT
+      - Thu, 17 Mar 2022 05:00:50 GMT
       expires:
       - '-1'
       pragma:
@@ -2397,17 +2465,17 @@ interactions:
     body:
       string: "{\r\n  \"name\": \"vm2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/vm2\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"28308138-2ce9-49e6-9572-4c44cf40d10d\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"ccc62858-34a9-4a75-ad1c-32ea9afde3e5\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n
         \       \"name\": \"sDisk\",\r\n        \"createOption\": \"Attach\",\r\n
         \       \"caching\": \"ReadWrite\",\r\n        \"managedDisk\": {\r\n          \"storageAccountType\":
         \"Premium_LRS\",\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/sDisk\"\r\n
         \       },\r\n        \"diskSizeGB\": 100\r\n      },\r\n      \"dataDisks\":
-        [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"vm2_disk2_1269d2d085d94eddad8ddf0d9d78c94a\",\r\n
+        [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"vm2_disk2_c7252ef5021b4c6f8f41f8b6f39a9816\",\r\n
         \         \"createOption\": \"Empty\",\r\n          \"caching\": \"None\",\r\n
         \         \"managedDisk\": {\r\n            \"storageAccountType\": \"Premium_LRS\",\r\n
-        \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/vm2_disk2_1269d2d085d94eddad8ddf0d9d78c94a\"\r\n
+        \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/vm2_disk2_c7252ef5021b4c6f8f41f8b6f39a9816\"\r\n
         \         },\r\n          \"diskSizeGB\": 3,\r\n          \"toBeDetached\":
         false\r\n        },\r\n        {\r\n          \"lun\": 1,\r\n          \"name\":
         \"dDisk\",\r\n          \"createOption\": \"Attach\",\r\n          \"caching\":
@@ -2420,25 +2488,25 @@ interactions:
         \         {\r\n            \"code\": \"ProvisioningState/Unavailable\",\r\n
         \           \"level\": \"Warning\",\r\n            \"displayStatus\": \"Not
         Ready\",\r\n            \"message\": \"VM status blob is found but not yet
-        populated.\",\r\n            \"time\": \"2022-03-14T12:46:43+00:00\"\r\n          }\r\n
+        populated.\",\r\n            \"time\": \"2022-03-17T05:00:51+00:00\"\r\n          }\r\n
         \       ]\r\n      },\r\n      \"disks\": [\r\n        {\r\n          \"name\":
         \"sDisk\",\r\n          \"statuses\": [\r\n            {\r\n              \"code\":
         \"ProvisioningState/succeeded\",\r\n              \"level\": \"Info\",\r\n
         \             \"displayStatus\": \"Provisioning succeeded\",\r\n              \"time\":
-        \"2022-03-14T12:46:04.3604166+00:00\"\r\n            }\r\n          ]\r\n
-        \       },\r\n        {\r\n          \"name\": \"vm2_disk2_1269d2d085d94eddad8ddf0d9d78c94a\",\r\n
+        \"2022-03-17T05:00:06.7836384+00:00\"\r\n            }\r\n          ]\r\n
+        \       },\r\n        {\r\n          \"name\": \"vm2_disk2_c7252ef5021b4c6f8f41f8b6f39a9816\",\r\n
         \         \"statuses\": [\r\n            {\r\n              \"code\": \"ProvisioningState/succeeded\",\r\n
         \             \"level\": \"Info\",\r\n              \"displayStatus\": \"Provisioning
-        succeeded\",\r\n              \"time\": \"2022-03-14T12:46:04.3604166+00:00\"\r\n
+        succeeded\",\r\n              \"time\": \"2022-03-17T05:00:06.7836384+00:00\"\r\n
         \           }\r\n          ]\r\n        },\r\n        {\r\n          \"name\":
         \"dDisk\",\r\n          \"statuses\": [\r\n            {\r\n              \"code\":
         \"ProvisioningState/succeeded\",\r\n              \"level\": \"Info\",\r\n
         \             \"displayStatus\": \"Provisioning succeeded\",\r\n              \"time\":
-        \"2022-03-14T12:46:04.3604166+00:00\"\r\n            }\r\n          ]\r\n
+        \"2022-03-17T05:00:06.7836384+00:00\"\r\n            }\r\n          ]\r\n
         \       }\r\n      ],\r\n      \"hyperVGeneration\": \"V1\",\r\n      \"statuses\":
         [\r\n        {\r\n          \"code\": \"ProvisioningState/succeeded\",\r\n
         \         \"level\": \"Info\",\r\n          \"displayStatus\": \"Provisioning
-        succeeded\",\r\n          \"time\": \"2022-03-14T12:46:25.2511384+00:00\"\r\n
+        succeeded\",\r\n          \"time\": \"2022-03-17T05:00:19.3617866+00:00\"\r\n
         \       },\r\n        {\r\n          \"code\": \"PowerState/running\",\r\n
         \         \"level\": \"Info\",\r\n          \"displayStatus\": \"VM running\"\r\n
         \       }\r\n      ]\r\n    }\r\n  }\r\n}"
@@ -2450,7 +2518,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Mar 2022 12:46:42 GMT
+      - Thu, 17 Mar 2022 05:00:51 GMT
       expires:
       - '-1'
       pragma:
@@ -2467,7 +2535,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3980,Microsoft.Compute/LowCostGet30Min;31907
+      - Microsoft.Compute/LowCostGet3Min;3898,Microsoft.Compute/LowCostGet30Min;31329
     status:
       code: 200
       message: OK
@@ -2492,12 +2560,12 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"vm2VMNic\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/vm2VMNic\",\r\n
-        \ \"etag\": \"W/\\\"d5bced89-2b09-414f-9ad4-2d95bac0ca65\\\"\",\r\n  \"location\":
+        \ \"etag\": \"W/\\\"c1ea03b6-514a-47a3-b6f9-6580a091a0e2\\\"\",\r\n  \"location\":
         \"westus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"resourceGuid\": \"74758a4a-666c-4ca7-bc62-542811655b61\",\r\n
+        \"Succeeded\",\r\n    \"resourceGuid\": \"b9f07818-d6e5-4a00-a491-005d623b0e54\",\r\n
         \   \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfigvm2\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/vm2VMNic/ipConfigurations/ipconfigvm2\",\r\n
-        \       \"etag\": \"W/\\\"d5bced89-2b09-414f-9ad4-2d95bac0ca65\\\"\",\r\n
+        \       \"etag\": \"W/\\\"c1ea03b6-514a-47a3-b6f9-6580a091a0e2\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateIPAddress\": \"10.0.0.5\",\r\n          \"privateIPAllocationMethod\":
@@ -2506,8 +2574,8 @@ interactions:
         \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
         \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
         [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
-        \"qpvbibvda3vepezjmtqc1flkee.dx.internal.cloudapp.net\"\r\n    },\r\n    \"macAddress\":
-        \"00-0D-3A-37-79-2C\",\r\n    \"enableAcceleratedNetworking\": false,\r\n
+        \"yhmw0zzybbceldkflykffkoe5a.dx.internal.cloudapp.net\"\r\n    },\r\n    \"macAddress\":
+        \"00-0D-3A-36-0E-16\",\r\n    \"enableAcceleratedNetworking\": false,\r\n
         \   \"enableIPForwarding\": false,\r\n    \"networkSecurityGroup\": {\r\n
         \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkSecurityGroups/vm2NSG\"\r\n
         \   },\r\n    \"primary\": true,\r\n    \"virtualMachine\": {\r\n      \"id\":
@@ -2522,9 +2590,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Mar 2022 12:46:43 GMT
+      - Thu, 17 Mar 2022 05:00:52 GMT
       etag:
-      - W/"d5bced89-2b09-414f-9ad4-2d95bac0ca65"
+      - W/"c1ea03b6-514a-47a3-b6f9-6580a091a0e2"
       expires:
       - '-1'
       pragma:
@@ -2541,7 +2609,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 8fb3f1c5-e56e-4b16-bd47-1875121456f9
+      - 679940a1-cd07-4cdd-b1f7-b7275d27eaeb
     status:
       code: 200
       message: OK
@@ -2566,11 +2634,11 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"vm2PublicIP\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/publicIPAddresses/vm2PublicIP\",\r\n
-        \ \"etag\": \"W/\\\"49c9a607-b289-49ee-96de-1cc291a3cb2b\\\"\",\r\n  \"location\":
+        \ \"etag\": \"W/\\\"fbd5622b-259a-441f-a242-50c088ead8ee\\\"\",\r\n  \"location\":
         \"westus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"resourceGuid\": \"cf2570b6-6f9b-4798-a7a8-72baf8d1721e\",\r\n
-        \   \"ipAddress\": \"137.117.21.255\",\r\n    \"publicIPAddressVersion\":
-        \"IPv4\",\r\n    \"publicIPAllocationMethod\": \"Dynamic\",\r\n    \"idleTimeoutInMinutes\":
+        \"Succeeded\",\r\n    \"resourceGuid\": \"4c7e6762-061f-4458-b2ad-4e4bc4c566c4\",\r\n
+        \   \"ipAddress\": \"13.88.100.133\",\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n
+        \   \"publicIPAllocationMethod\": \"Dynamic\",\r\n    \"idleTimeoutInMinutes\":
         4,\r\n    \"ipTags\": [],\r\n    \"ipConfiguration\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/vm2VMNic/ipConfigurations/ipconfigvm2\"\r\n
         \   }\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n
         \ \"sku\": {\r\n    \"name\": \"Basic\"\r\n  }\r\n}"
@@ -2578,13 +2646,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '880'
+      - '879'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Mar 2022 12:46:43 GMT
+      - Thu, 17 Mar 2022 05:00:52 GMT
       etag:
-      - W/"49c9a607-b289-49ee-96de-1cc291a3cb2b"
+      - W/"fbd5622b-259a-441f-a242-50c088ead8ee"
       expires:
       - '-1'
       pragma:
@@ -2601,7 +2669,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - e5a4abed-1173-4c9b-99bc-ec2d3ed91f11
+      - 804af3b4-21bf-4f72-8574-4bf38358ac9b
     status:
       code: 200
       message: OK
@@ -2626,17 +2694,17 @@ interactions:
     body:
       string: "{\r\n  \"name\": \"vm2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/vm2\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"28308138-2ce9-49e6-9572-4c44cf40d10d\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"ccc62858-34a9-4a75-ad1c-32ea9afde3e5\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n
         \       \"name\": \"sDisk\",\r\n        \"createOption\": \"Attach\",\r\n
         \       \"caching\": \"ReadWrite\",\r\n        \"managedDisk\": {\r\n          \"storageAccountType\":
         \"Premium_LRS\",\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/sDisk\"\r\n
         \       },\r\n        \"diskSizeGB\": 100\r\n      },\r\n      \"dataDisks\":
-        [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"vm2_disk2_1269d2d085d94eddad8ddf0d9d78c94a\",\r\n
+        [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"vm2_disk2_c7252ef5021b4c6f8f41f8b6f39a9816\",\r\n
         \         \"createOption\": \"Empty\",\r\n          \"caching\": \"None\",\r\n
         \         \"managedDisk\": {\r\n            \"storageAccountType\": \"Premium_LRS\",\r\n
-        \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/vm2_disk2_1269d2d085d94eddad8ddf0d9d78c94a\"\r\n
+        \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/vm2_disk2_c7252ef5021b4c6f8f41f8b6f39a9816\"\r\n
         \         },\r\n          \"diskSizeGB\": 3,\r\n          \"toBeDetached\":
         false\r\n        },\r\n        {\r\n          \"lun\": 1,\r\n          \"name\":
         \"dDisk\",\r\n          \"createOption\": \"Attach\",\r\n          \"caching\":
@@ -2653,7 +2721,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Mar 2022 12:46:44 GMT
+      - Thu, 17 Mar 2022 05:00:53 GMT
       expires:
       - '-1'
       pragma:
@@ -2670,7 +2738,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3979,Microsoft.Compute/LowCostGet30Min;31906
+      - Microsoft.Compute/LowCostGet3Min;3897,Microsoft.Compute/LowCostGet30Min;31328
     status:
       code: 200
       message: OK
