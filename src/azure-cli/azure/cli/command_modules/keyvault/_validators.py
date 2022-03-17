@@ -210,10 +210,87 @@ def validate_key_type(ns):
 
 
 def process_key_release_policy(cmd, ns):
-    immutable = ns.immutable
-    del ns.immutable
+    default_cvm_policy = None
+    if hasattr(ns, 'default_cvm_policy'):
+        default_cvm_policy = ns.default_cvm_policy
+        del ns.default_cvm_policy
 
-    if not ns.release_policy:
+    immutable = None
+    if hasattr(ns, 'immutable'):
+        immutable = ns.immutable
+        del ns.immutable
+
+    if not ns.release_policy and not default_cvm_policy:
+        if immutable:
+            raise InvalidArgumentValueError('Please provide policy when setting `--immutable`')
+        return
+
+    if ns.release_policy and default_cvm_policy:
+        raise InvalidArgumentValueError('Can not specify both `--policy` and `--default-cvm-policy`')
+
+    import json
+    KeyReleasePolicy = cmd.loader.get_sdk('KeyReleasePolicy', mod='_models',
+                                          resource_type=ResourceType.DATA_KEYVAULT_KEYS)
+    if default_cvm_policy:
+        policy = {
+            'version': '1.0.0',
+            'anyOf': [
+                {
+                    'authority': 'https://sharedeus.eus.attest.azure.net/',
+                    'allOf': [
+                        {
+                            'claim': 'x-ms-attestation-type',
+                            'equals': 'sevsnpvm'
+                        },
+                        {
+                            'claim': 'x-ms-compliance-status',
+                            'equals': 'azure-compliant-cvm'
+                        }
+                    ]
+                },
+                {
+                    'authority': 'https://sharedwus.wus.attest.azure.net/',
+                    'allOf': [
+                        {
+                            'claim': 'x-ms-attestation-type',
+                            'equals': 'sevsnpvm'
+                        },
+                        {
+                            'claim': 'x-ms-compliance-status',
+                            'equals': 'azure-compliant-cvm'
+                        }
+                    ]
+                },
+                {
+                    'authority': 'https://sharedneu.neu.attest.azure.net/',
+                    'allOf': [
+                        {
+                            'claim': 'x-ms-attestation-type',
+                            'equals': 'sevsnpvm'
+                        },
+                        {
+                            'claim': 'x-ms-compliance-status',
+                            'equals': 'azure-compliant-cvm'
+                        }
+                    ]
+                },
+                {
+                    'authority': 'https://sharedweu.weu.attest.azure.net/',
+                    'allOf': [
+                        {
+                            'claim': 'x-ms-attestation-type',
+                            'equals': 'sevsnpvm'
+                        },
+                        {
+                            'claim': 'x-ms-compliance-status',
+                            'equals': 'azure-compliant-cvm'
+                        }
+                    ]
+                }
+            ]
+        }
+        ns.release_policy = KeyReleasePolicy(encoded_policy=json.dumps(policy).encode('utf-8'),
+                                             immutable=immutable)
         return
 
     import os
@@ -222,9 +299,6 @@ def process_key_release_policy(cmd, ns):
     else:
         data = shell_safe_json_parse(ns.release_policy)
 
-    import json
-    KeyReleasePolicy = cmd.loader.get_sdk('KeyReleasePolicy', mod='_models',
-                                          resource_type=ResourceType.DATA_KEYVAULT_KEYS)
     ns.release_policy = KeyReleasePolicy(encoded_policy=json.dumps(data).encode('utf-8'),
                                          immutable=immutable)
 
