@@ -588,12 +588,14 @@ class GraphUserScenarioTest(ScenarioTest):
 
 class GraphGroupScenarioTest(ScenarioTest):
 
-    def clean_resource(self, resource, is_user=False):
+    def clean_resource(self, resource, type='group'):
         try:
-            if is_user:
+            if type == 'user':
                 self.cmd('ad user delete --id {}'.format(resource))
-            else:
+            elif type == 'group':
                 self.cmd('ad group delete -g {}'.format(resource))
+            elif type == 'app':
+                self.cmd('ad app delete --id {}'.format(resource))
         except Exception:
             pass
 
@@ -611,8 +613,10 @@ class GraphGroupScenarioTest(ScenarioTest):
             'user1': self.create_random_name(prefix='testgroupuser1', length=24),
             'user2': self.create_random_name(prefix='testgroupuser2', length=24),
             'pass': 'Test1234!!',
-            'domain': domain
+            'domain': domain,
+            'app_name': self.create_random_name(prefix='testgroupapp', length=24)
         }
+
         self.recording_processors.append(AADGraphUserReplacer('@' + domain, '@example.com'))
         try:
             # create group
@@ -670,12 +674,50 @@ class GraphGroupScenarioTest(ScenarioTest):
             self.cmd('ad group member check -g {child_group_id} --member-id {leaf_group_id}',
                      checks=self.check('value', False))
 
+            # create user to add group member
+            user_result = self.cmd('ad user create --display-name {user1} --password {pass} --user-principal-name {user1}@{domain}').get_output_in_json()
+            self.kwargs['user1_id'] = user_result['id']
+
+            # add user as group member
+            self.cmd('ad group member add -g {leaf_group_id} --member-id {user1_id}')
+
+            # check user as group member
+            self.cmd('ad group member check -g {leaf_group_id} --member-id {user1_id}',
+                     checks=self.check('value', True))
+            # list member(user is expected)
+            self.cmd('ad group member list -g {leaf_group_id}', checks=self.check('length([])', 1))
+
+            # remove user as member
+            self.cmd('ad group member remove -g {leaf_group_id} --member-id {user1_id}')
+            self.cmd('ad group member check -g {leaf_group_id} --member-id {user1_id}',
+                     checks=self.check('value', False))
+
+            # Create service principal to add group member
+            app = self.cmd('ad app create --display-name {app_name} --identifier-uris api://{app_name}').get_output_in_json()
+            self.kwargs['app_id'] = app['appId']
+            sp = self.cmd('ad sp create --id {app_id}').get_output_in_json()
+            self.kwargs['sp_id'] = sp['id']
+
+            # add service principal as group member
+            self.cmd('ad group member add -g {leaf_group_id} --member-id {sp_id}')
+
+            # check service principal as group member
+            self.cmd('ad group member check -g {leaf_group_id} --member-id {sp_id}',
+                     checks=self.check('value', True))
+
+            # TODO: check list sp as member after staged roll-out of service principals on MS Graph
+            # list member(service principal is expected)
+            # self.cmd('ad group member list -g {leaf_group_id}', checks=self.check('length([])', 1))
+
+            # remove service principal as member
+            self.cmd('ad group member remove -g {leaf_group_id} --member-id {sp_id}')
+            self.cmd('ad group member check -g {leaf_group_id} --member-id {sp_id}',
+                     checks=self.check('value', False))
+
             # list owners
             self.cmd('ad group owner list -g {group_id}', checks=self.check('length([])', 0))
 
-            # create users to add group owners
-            user_result = self.cmd('ad user create --display-name {user1} --password {pass} --user-principal-name {user1}@{domain}').get_output_in_json()
-            self.kwargs['user1_id'] = user_result['id']
+            # create user to add group owner
             user_result = self.cmd('ad user create --display-name {user2} --password {pass} --user-principal-name {user2}@{domain}').get_output_in_json()
             self.kwargs['user2_id'] = user_result['id']
             # add owner
@@ -694,8 +736,10 @@ class GraphGroupScenarioTest(ScenarioTest):
             self.clean_resource(self.kwargs['group'])
             self.clean_resource(self.kwargs['child_group'])
             self.clean_resource(self.kwargs['leaf_group'])
-            self.clean_resource('{}@{}'.format(self.kwargs['user1'], self.kwargs['domain']), is_user=True)
-            self.clean_resource('{}@{}'.format(self.kwargs['user2'], self.kwargs['domain']), is_user=True)
+            self.clean_resource('{}@{}'.format(self.kwargs['user1'], self.kwargs['domain']), type='user')
+            self.clean_resource('{}@{}'.format(self.kwargs['user2'], self.kwargs['domain']), type='user')
+            if self.kwargs.get('app_id'):
+                self.clean_resource(self.kwargs['app_id'], type='app')
 
 
 def get_signed_in_user(test_case):
