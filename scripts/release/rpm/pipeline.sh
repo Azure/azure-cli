@@ -6,7 +6,7 @@ set -exv
 
 : "${BUILD_STAGINGDIRECTORY:?BUILD_STAGINGDIRECTORY environment variable not set.}"
 
-# IMAGE should be one of 'centos7', 'centos_stream8'
+# IMAGE should be one of 'centos7', 'ubi8'
 : "${IMAGE:?IMAGE environment variable not set.}"
 
 CLI_VERSION=`cat src/azure-cli/azure/cli/__main__.py | grep __version__ | sed s/' '//g | sed s/'__version__='// |  sed s/\"//g`
