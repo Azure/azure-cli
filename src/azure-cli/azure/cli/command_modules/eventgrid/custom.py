@@ -1341,8 +1341,10 @@ def _update_event_subscription_internal(  # pylint: disable=too-many-locals,too-
     current_event_delivery_schema = instance.event_delivery_schema
     current_retry_policy = instance.retry_policy
     current_destination_with_resource_identity = None
+    current_destination2 = None
 
     if instance.delivery_with_resource_identity is not None:
+        current_destination2 = instance.delivery_with_resource_identity
         current_destination_with_resource_identity = instance.delivery_with_resource_identity.destination
 
     tenant_id = _get_tenant_id(current_destination, current_destination_with_resource_identity)
@@ -1375,10 +1377,10 @@ def _update_event_subscription_internal(  # pylint: disable=too-many-locals,too-
         elif current_destination_with_resource_identity is not None:
             _validate_and_update_destination(
                 current_destination_with_resource_identity.endpoint_type,
-                current_destination_with_resource_identity.destination,
+                current_destination_with_resource_identity,
                 storage_queue_msg_ttl,
                 delivery_attribute_mapping)
-            updated_delivery_with_resource_identity = current_destination_with_resource_identity
+            updated_delivery_with_resource_identity = current_destination2
     elif endpoint is not None:
         _validate_destination_attribute(
             endpoint_type,
