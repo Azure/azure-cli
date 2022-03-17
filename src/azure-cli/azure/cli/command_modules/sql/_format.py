@@ -396,9 +396,3 @@ def outbound_firewall_rule_table_format(result):
         ])
 
     return _apply_format(result, _outbound_firewall_rule_table_format)
-
-
-###############################################
-#                sql mi             #
-###############################################
-

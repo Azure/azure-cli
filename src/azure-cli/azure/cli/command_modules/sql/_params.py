@@ -113,7 +113,6 @@ def get_internal_backup_storage_redundancy(self):
     }.get(self.lower(), 'Invalid')
 
 
-
 #####
 #        Reusable param type definitions
 #####

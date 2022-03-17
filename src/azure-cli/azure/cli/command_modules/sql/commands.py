@@ -214,7 +214,6 @@ def load_command_table(self, _):
         g.custom_command('set', 'transparent_data_encryptions_set')
         g.custom_show_command('show', 'transparent_data_encryptions_get')
 
-
     replication_links_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#ReplicationLinksOperations.{}',
         client_factory=get_sql_replication_links_operations)
