@@ -693,26 +693,27 @@ class GraphGroupScenarioTest(ScenarioTest):
                      checks=self.check('value', False))
 
             # Create service principal to add group member
-            app = self.cmd('ad app create --display-name {app_name} --identifier-uris api://{app_name}').get_output_in_json()
-            self.kwargs['app_id'] = app['appId']
-            sp = self.cmd('ad sp create --id {app_id}').get_output_in_json()
-            self.kwargs['sp_id'] = sp['id']
+            with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+                result = self.cmd('ad sp create-for-rbac -n {app_name}').get_output_in_json()
+                self.kwargs['app_id'] = result['appId']
+                sp = self.cmd('ad sp show --id {app_id}').get_output_in_json()
+                self.kwargs['sp_id'] = sp['id']
 
-            # add service principal as group member
-            self.cmd('ad group member add -g {leaf_group_id} --member-id {sp_id}')
+                # add service principal as group member
+                self.cmd('ad group member add -g {leaf_group_id} --member-id {sp_id}')
 
-            # check service principal as group member
-            self.cmd('ad group member check -g {leaf_group_id} --member-id {sp_id}',
-                     checks=self.check('value', True))
+                # check service principal as group member
+                self.cmd('ad group member check -g {leaf_group_id} --member-id {sp_id}',
+                         checks=self.check('value', True))
 
-            # TODO: check list sp as member after staged roll-out of service principals on MS Graph
-            # list member(service principal is expected)
-            # self.cmd('ad group member list -g {leaf_group_id}', checks=self.check('length([])', 1))
+                # TODO: check list sp as member after staged roll-out of service principals on MS Graph
+                # list member(service principal is expected)
+                # self.cmd('ad group member list -g {leaf_group_id}', checks=self.check('length([])', 1))
 
-            # remove service principal as member
-            self.cmd('ad group member remove -g {leaf_group_id} --member-id {sp_id}')
-            self.cmd('ad group member check -g {leaf_group_id} --member-id {sp_id}',
-                     checks=self.check('value', False))
+                # remove service principal as member
+                self.cmd('ad group member remove -g {leaf_group_id} --member-id {sp_id}')
+                self.cmd('ad group member check -g {leaf_group_id} --member-id {sp_id}',
+                         checks=self.check('value', False))
 
             # list owners
             self.cmd('ad group owner list -g {group_id}', checks=self.check('length([])', 0))
