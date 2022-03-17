@@ -35,7 +35,7 @@ from azure.cli.core.util import get_file_json, shell_safe_json_parse, is_guid
 from ._client_factory import _auth_client_factory, _graph_client_factory
 from ._multi_api_adaptor import MultiAPIAdaptor
 from ._graph_client import GraphClient
-from ._graph_objects import application_property_map, set_object_properties
+from ._graph_objects import application_property_map, user_property_map, set_object_properties
 
 # ARM RBAC's principalType
 USER = 'User'
@@ -694,26 +694,8 @@ def list_users(client, upn=None, display_name=None, query_filter=None):
     return client.user_list(filter=' and '.join(sub_filters) if sub_filters else None)
 
 
-def _set_user_properties(body, user_principal_name=None, display_name=None, password=None,
-                mail_nickname=None, immutable_id=None, force_change_password_next_login=None, account_enabled=None):
-    if user_principal_name is not None:
-        body["userPrincipalName"] = user_principal_name
-    if display_name is not None:
-        body["displayName"] =  display_name
-    if password is not None:
-        body["passwordProfile"] = {
-            "password": password
-        }
-        if force_change_password_next_login is not None:
-            body["passwordProfile"]["forceChangePasswordNextSignIn"] = force_change_password_next_login
-    if mail_nickname is not None:
-        body["mailNickname"] = mail_nickname
-    if immutable_id is not None:
-        body["onPremisesImmutableId"] = immutable_id
-    if account_enabled is not None:
-        body["accountEnabled"] = account_enabled
-
-
+def _set_user_properties(body, **kwargs):
+    set_object_properties(user_property_map, body, **kwargs)
 
 def create_user(client, user_principal_name, display_name, password,
                 mail_nickname=None, immutable_id=None, force_change_password_next_login=False):

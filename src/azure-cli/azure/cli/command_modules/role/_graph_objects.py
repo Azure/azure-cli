@@ -24,6 +24,17 @@ application_property_map = {
     'required_resource_accesses': 'requiredResourceAccess',
 }
 
+# https://docs.microsoft.com/en-us/graph/api/resources/user?view=graph-rest-1.0#properties
+user_property_map = {
+    # base properties
+    'account_enabled': 'accountEnabled',
+    'display_name': 'displayName',
+    'mail_nickname': 'mailNickname',
+    'user_principal_name': 'userPrincipalName',
+    'immutable_id': 'onPremisesImmutableId',
+    'password': ['passwordProfile', 'password'],
+    'force_change_password_next_login': ['passwordProfile', 'forceChangePasswordNextSignIn']
+}
 
 def set_object_properties(property_map, graph_object, **kwargs):
     """Set properties of the graph object according to property_map.

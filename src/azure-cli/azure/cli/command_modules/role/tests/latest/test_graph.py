@@ -559,25 +559,59 @@ class GraphUserScenarioTest(ScenarioTest):
     def test_graph_user_scenario(self):
         self.kwargs = {
             'user1': self.create_random_name(prefix='graphusertest', length=20),
+            'user2': self.create_random_name(prefix='graphusertest', length=20),
             'domain': 'AzureSDKTeam.onmicrosoft.com',
-            'new_mail_nick_name': 'graphusertest',
+            'mail_nickname': 'graphusertest',
+            'new_mail_nick_name': 'graphusertestupdate',
             'group': 'graphusertest_g',
-            'pass': 'Test1234!!'
+            'password': 'Test1234!!',
+            'force_change_password_next_login': True,
         }
         # create
         user1_result = self.cmd(
-            'ad user create --display-name {user1} --password {pass} --user-principal-name {user1}@{domain}',
-            checks=[self.check("displayName","{user1}")]
+            'ad user create --display-name {user1} '
+            '--mail-nickname {mail_nickname} '
+            '--password {password} '
+            '--force-change-password-next-login {force_change_password_next_login} '
+            '--user-principal-name {user1}@{domain} ',
+            checks=[
+                self.check("displayName","{user1}"),
+                self.check("userPrincipalName", "{user1}@{domain}")
+            ]
         ).get_output_in_json()
         self.kwargs['user1_id'] = user1_result['id']
+        self.kwargs['user1_newName'] = self.create_random_name(prefix='graphusertest', length=20)
 
         # update
         self.cmd(
-            'ad user update --display-name {user1}_new --account-enabled false --id {user1}@{domain} --mail-nickname {new_mail_nick_name}')
+            'ad user update --display-name {user1_newName} '
+            '--account-enabled false '
+            '--id {user1_id} '
+            '--mail-nickname {new_mail_nick_name}',
+        )
+
         # show
-        user1_update_result = self.cmd('ad user show --id {user1}@{domain}',
-                                       checks=[self.check("displayName", '{user1}_new')]
-                                       ).get_output_in_json()
+        self.cmd('ad user show --upn-or-object-id {user1}@{domain}',
+                 checks=[
+                     self.check("displayName", '{user1_newName}')
+                 ])
+        self.cmd('ad user update --id {user1}@{domain} --password {password}')
+        self.cmd('ad user update --id {user1_id} --password {password} --force-change-password-next-login true')
+        with self.assertRaises(CLIError):
+            self.cmd('ad user update --id {user1_id} --force-change-password-next-login false')
+        self.cmd('ad user update --id {user1_id} --password {password}')
+
+        # create group
+        group_result = self.cmd(
+            'ad group create --display-name {group} --mail-nickname {group} --description {group}').get_output_in_json()
+        self.kwargs['group_id'] = group_result['id']
+        # add user1 into group
+        self.cmd('ad group member add -g {group} --member-id {user1_id}',
+                 checks=self.is_empty())
+
+        # show user's group memberships
+        self.cmd('ad user get-member-groups --upn-or-object-id {user1_id}',
+                 checks=self.check('[0].displayName', self.kwargs['group']))
 
         # list
         self.cmd('ad user list')
