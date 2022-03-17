@@ -83,7 +83,10 @@ def check_pull_request(title, body):
         error_flag = regex_line(title)
         for line in body:
             if line.startswith('['):
-                error_flag = regex_line(line) or error_flag
+                # If edit history notes, ignore title check result
+                ref = re.findall(r'[\[](.*?)[\]]', line)
+                if ref and ref[0] not in ['Component Name 1', 'Component Name 2']:
+                    error_flag = regex_line(line)
     elif title.startswith('{'):
         error_flag = False
     else:
