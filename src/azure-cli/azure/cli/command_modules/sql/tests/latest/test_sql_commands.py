@@ -996,6 +996,7 @@ class SqlServerDbShortTermRetentionScenarioTest(ScenarioTest):
 
 
 class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
+    @live_only()
     def test_sql_db_long_term_retention(
             self):
         self.kwargs.update({
@@ -3397,29 +3398,21 @@ class SqlTransparentDataEncryptionScenarioTest(ScenarioTest):
                  .format(resource_group, sn, db_name),
                  checks=[JMESPathCheck('state', 'Enabled')])
 
-        if self.is_live:
-            sleep(100)
-
         # disable encryption
         self.cmd('sql db tde set -g {} -s {} -d {} --status Disabled'
-                 .format(resource_group, sn, db_name),
-                 checks=[JMESPathCheck('state', 'Disabled')])
+                 .format(resource_group, sn, db_name))
 
-        if self.is_live:
-            sleep(100)
+        sleep(5)
 
-        # validate encryption is disabled
         self.cmd('sql db tde show -g {} -s {} -d {}'
                  .format(resource_group, sn, db_name),
                  checks=[JMESPathCheck('state', 'Disabled')])
 
         # enable encryption
         self.cmd('sql db tde set -g {} -s {} -d {} --status Enabled'
-                 .format(resource_group, sn, db_name),
-                 checks=[JMESPathCheck('state', 'Enabled')])
+                 .format(resource_group, sn, db_name))
 
-        if self.is_live:
-            sleep(100)
+        sleep(5)
 
         # validate encryption is enabled
         self.cmd('sql db tde show -g {} -s {} -d {}'
@@ -4360,7 +4353,7 @@ class SqlServerTrustGroupsScenarioTest(ScenarioTest):
 
 
 class SqlManagedInstanceCustomMaintenanceWindow(ScenarioTest):
-    MMI1 = "SQL_NorthEurope_MI_1"
+    MMI1 = "SQL_WestCentralUS_MI_1"
 
     def _get_full_maintenance_id(self, name):
         return "/subscriptions/{}/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/{}".format(
@@ -4368,9 +4361,9 @@ class SqlManagedInstanceCustomMaintenanceWindow(ScenarioTest):
 
     def test_sql_managed_instance_cmw(self):
         # Values of existing resources in order to test this feature
-        loc = 'northeurope'
-        resource_group = 'northeutest'
-        subnet = '/subscriptions/a295933f-f7f5-4994-a109-8fa51241a5d6/resourceGroups/northeutest/providers/Microsoft.Network/virtualNetworks/vnet-ivkulezi/subnets/ManagedInstance'
+        loc = 'westcentralus'
+        resource_group = ManagedInstancePreparer.group
+        subnet = ManagedInstancePreparer.subnet
         ####
 
         self.kwargs.update({
@@ -4483,7 +4476,8 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
 
         # Managed instance becomes ready before the operation is completed. For that reason, we should wait
         # for the operation to complete in order to proceed with testing.
-        sleep(120)
+        if self.is_live:
+            sleep(120)
 
         # test update sql managed_instance 1
         self.cmd('sql mi update -g {} -n {} --admin-password {} -i'
