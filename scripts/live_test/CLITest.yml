@@ -26,148 +26,74 @@ jobs:
   strategy:
     maxParallel: 5
     matrix:
-      storage:
-        Target: storage
-      backup:
-        Target: backup
-      apim:
-        Target: apim
+      rdbms:
+        Target: rdbms
       vm:
         Target: vm
-      cosmosdb:
-        Target: cosmosdb
-      kusto:
-        Target: kusto
-      hdinsight:
-        Target: hdinsight
-      sqlvm:
-        Target: sqlvm
-      servicebus:
-        Target: servicebus
+      synapse:
+        Target: synapse
       eventhubs:
         Target: eventhubs
-      iot:
-        Target: iot
       appconfig:
         Target: appconfig
       monitor:
         Target: monitor
-      cognitiveservices:
-        Target: cognitiveservices
       batch:
         Target: batch
-      profile:
-        Target: profile
-      signalr:
-        Target: signalr
-      databoxedge:
-        Target: databoxedge
+      privatedns:
+        Target: privatedns
       netappfiles:
         Target: netappfiles
-      dla:
-        Target: dla
-      security:
-        Target: security
-      dls:
-        Target: dls
+      container:
+        Target: container
       batchai:
         Target: batchai
-      natgateway:
-        Target: natgateway
-      extension:
-        Target: extension
-      managedservices:
-        Target: managedservices
+      maps:
+        Target: maps
       configure:
         Target: configure
-      comsumption:
-        Target: comsumption
-      config:
-        Target: config
+      advisor:
+        Target: advisor
       reservations:
         Target: reservations
-      lab:
-        Target: lab
-      ext-codespaces:
-        Target: ext-codespaces
-      ext-ai-examples:
-        Target: ext-ai-examples
       ext-storagesync:
         Target: ext-storagesync
-      ext-portal:
-        Target: ext-portal
       ext-support:
         Target: ext-support
-      ext-databox:
-        Target: ext-databox
-      ext-vm-repair:
-        Target: ext-vm-repair
-      ext-ip-group:
-        Target: ext-ip-group
-      ext-k8sconfiguration:
-        Target: ext-k8sconfiguration
-      ext-eventgrid:
-        Target: ext-eventgrid
-      ext-log-analytics-solution:
-        Target: ext-log-analytics-solution
-      ext-timeseriesinsights:
-        Target: ext-timeseriesinsights
-      ext-dms-preview:
-        Target: ext-dms-preview
-      ext-fzf:
-        Target: ext-fzf
-      ext-notification-hub:
-        Target: ext-notification-hub
-      ext-connectedk8s:
-        Target: ext-connectedk8s
-      ext-guestconfig:
-        Target: ext-guestconfig
-      ext-stack-hci:
-        Target: ext-stack-hci
-      ext-webapp:
-        Target: ext-webapp
-      ext-healthcareapis:
-        Target: ext-healthcareapis
-      ext-account:
-        Target: ext-account
-      ext-hpc-cache:
-        Target: ext-hpc-cache
+      ext-db-up:
+        Target: ext-db-up
+      ext-aks-preview:
+        Target: ext-aks-preview
+      ext-image-copy-extension:
+        Target: ext-image-copy-extension
+      ext-application-insights:
+        Target: ext-application-insights
+      ext-hardware-security-modules:
+        Target: ext-hardware-security-modules
+      ext-express-route-cross-connection:
+        Target: ext-express-route-cross-connection
+      ext-vmware:
+        Target: ext-vmware
+      ext-powerbidedicated:
+        Target: ext-powerbidedicated
       ext-maintenance:
         Target: ext-maintenance
-      ext-azure-iot:
-        Target: ext-azure-iot
-      ext-desktopvirtualization:
-        Target: ext-desktopvirtualization
-      ext-scheduled-query:
-        Target: ext-scheduled-query
+      ext-express-route:
+        Target: ext-express-route
       ext-attestation:
         Target: ext-attestation
-      ext-azure-cli-iot-ext:
-        Target: ext-azure-cli-iot-ext
       ext-azure-devops:
         Target: ext-azure-devops
-      ext-hack:
-        Target: ext-hack
       ext-kusto:
         Target: ext-kusto
-      ext-csvmware:
-        Target: ext-csvmware
       ext-log-analytics:
         Target: ext-log-analytics
-      ext-storage-blob-preview:
-        Target: ext-storage-blob-preview
       ext-virtual-network-tap:
         Target: ext-virtual-network-tap
-      ext-interactive:
-        Target: ext-interactive
       ext-peering:
         Target: ext-peering
-      ext-resource-graph:
-        Target: ext-resource-graph
       ext-datashare:
         Target: ext-datashare
-      ext-deploy-to-azure:
-        Target: ext-deploy-to-azure
       ext-synapse:
         Target: ext-synapse
   pool:
@@ -299,152 +225,484 @@ jobs:
   strategy:
     maxParallel: 5
     matrix:
-      network:
-        Target: network
-      servicefabric:
-        Target: servicefabric
-      acs:
-        Target: acs
-      rdbms:
-        Target: rdbms
-      redis:
-        Target: redis
+      storage:
+        Target: storage
+      apim:
+        Target: apim
       search:
         Target: search
-      synapse:
-        Target: synapse
-      appservice:
-        Target: appservice
+      hdinsight:
+        Target: hdinsight
       aro:
         Target: aro
-      sql:
-        Target: sql
-      acr:
-        Target: acr
-      ams:
-        Target: ams
+      iot:
+        Target: iot
       keyvault:
         Target: keyvault
-      resource:
-        Target: resource
-      cdn:
-        Target: cdn
-      privatedns:
-        Target: privatedns
-      policyinsights:
-        Target: policyinsights
+      profile:
+        Target: profile
       eventgrid:
         Target: eventgrid
-      role:
-        Target: role
-      relay:
-        Target: relay
-      container:
-        Target: container
-      util:
-        Target: util
-      deploymentmanager:
-        Target: deploymentmanager
-      botservice:
-        Target: botservice
-      maps:
-        Target: maps
-      cloud:
-        Target: cloud
-      dms:
-        Target: dms
-      feedback:
-        Target: feedback
-      advisor:
-        Target: advisor
-      billing:
-        Target: billing
-      find:
-        Target: find
+      databoxedge:
+        Target: databoxedge
+      dla:
+        Target: dla
+      dls:
+        Target: dls
+      natgateway:
+        Target: natgateway
+      managedservices:
+        Target: managedservices
+      config:
+        Target: config
       ext-aem:
         Target: ext-aem
+      ext-codespaces:
+        Target: ext-codespaces
       ext-storage-preview:
         Target: ext-storage-preview
-      ext-datafactory:
-        Target: ext-datafactory
       ext-connectedmachine:
         Target: ext-connectedmachine
-      ext-alertsmanagement:
-        Target: ext-alertsmanagement
       ext-virtual-wan:
         Target: ext-virtual-wan
-      ext-db-up:
-        Target: ext-db-up
       ext-import-export:
         Target: ext-import-export
-      ext-aks-preview:
-        Target: ext-aks-preview
       ext-mixed-reality:
         Target: ext-mixed-reality
-      ext-image-copy-extension:
-        Target: ext-image-copy-extension
       ext-logic:
         Target: ext-logic
-      ext-application-insights:
-        Target: ext-application-insights
       ext-footprint:
         Target: ext-footprint
-      ext-hardware-security-modules:
-        Target: ext-hardware-security-modules
       ext-azure-batch-cli-extensions:
         Target: ext-azure-batch-cli-extensions
-      ext-express-route-cross-connection:
-        Target: ext-express-route-cross-connection
       ext-spring-cloud:
         Target: ext-spring-cloud
-      ext-vmware:
-        Target: ext-vmware
       ext-dev-spaces:
         Target: ext-dev-spaces
-      ext-powerbidedicated:
-        Target: ext-powerbidedicated
-      ext-alias:
-        Target: ext-alias
-      ext-databricks:
-        Target: ext-databricks
+      ext-hpc-cache:
+        Target: ext-hpc-cache
       ext-sap-hana:
         Target: ext-sap-hana
-      ext-express-route:
-        Target: ext-express-route
-      ext-blockchain:
-        Target: ext-blockchain
-      ext-internet-analyzer:
-        Target: ext-internet-analyzer
-      ext-azure-cli-ml:
-        Target: ext-azure-cli-ml
-      ext-blueprint:
-        Target: ext-blueprint
-      ext-keyvault-preview:
-        Target: ext-keyvault-preview
-      ext-stream-analytics:
-        Target: ext-stream-analytics
-      ext-front-door:
-        Target: ext-front-door
-      ext-mesh:
-        Target: ext-mesh
-      ext-storage-or-preview:
-        Target: ext-storage-or-preview
-      ext-costmanagement:
-        Target: ext-costmanagement
+      ext-scheduled-query:
+        Target: ext-scheduled-query
+      ext-azure-cli-iot-ext:
+        Target: ext-azure-cli-iot-ext
+      ext-hack:
+        Target: ext-hack
+      ext-csvmware:
+        Target: ext-csvmware
+      ext-storage-blob-preview:
+        Target: ext-storage-blob-preview
       ext-custom-providers:
         Target: ext-custom-providers
-      ext-managementpartner:
-        Target: ext-managementpartner
       ext-privatedns:
         Target: ext-privatedns
-      ext-ssh:
-        Target: ext-ssh
-      ext-subscription:
-        Target: ext-subscription
-      ext-azure-firewall:
-        Target: ext-azure-firewall
+      ext-deploy-to-azure:
+        Target: ext-deploy-to-azure
       ext-netappfiles-preview:
         Target: ext-netappfiles-preview
+  pool:
+    vmImage: 'ubuntu-20.04'
+  steps:
+    - bash: |
+        if [[ "$(USER_TARGET)" =~ "$(Target)" || ("$(USER_TARGET)" == "" && ! "$(Target)" =~ ^ext-.*) || ("$(USER_TARGET)" == "extensions" && "$(Target)" =~ ^ext-.*) ]]; then
+          echo "Match!"
+          echo "##vso[task.setvariable variable=Match]1"
+        else
+          echo "Not match!"
+          echo "##vso[task.setvariable variable=Match]0"
+        fi
+    - task: UsePythonVersion@0
+      condition: and(succeededOrFailed(), eq(variables.Match, '1'))
+      inputs:
+        versionSpec: '3.8'
+        addToPath: true
+        architecture: 'x64'
+    - bash: |
+        cd ..
+        pwd
+        ls
+        # ssh-keygen -f ~/.ssh/id_rsa -t rsa -N ''
+        git config --global user.email "AzurePipelines"
+        git config --global user.name "AzurePipelines"
+
+        # Whether commit changes
+        if [[ "$(USER_USERNAME)" != "" && "$(USER_TOKEN)" != "" ]]; then
+          REPO="$(USER_REPO)"
+          # Pass username and token so that we can commit changes
+          git clone -b $(USER_BRANCH) ${REPO:0:8}$(USER_USERNAME):$(USER_TOKEN)@${REPO:8}
+          git clone https://github.com/Azure/azure-cli-extensions.git
+        else
+          git clone -b $(USER_BRANCH) $(USER_REPO)
+          git clone https://github.com/Azure/azure-cli-extensions.git
+        fi
+
+        python -m venv env
+        source env/bin/activate
+        pip install azdev
+        # git clone https://github.com/Azure/azure-cli-dev-tools.git
+        # git clone -b fix https://github.com/qwordy/azure-cli-dev-tools.git
+        # pip install -e azure-cli-dev-tools
+        pip install pytest-json-report
+        pip install pytest-html
+        pip install pytest-rerunfailures
+
+        azdev setup -c azure-cli -r azure-cli-extensions
+
+        # Remove ext- prefix
+        FinalTarget="$(Target)"
+        if [[ "${FinalTarget}" =~ ^ext-.* ]]; then
+          echo "It is an extention"
+          echo $(Target)
+          FinalTarget=${FinalTarget:4}
+          azdev extension add ${FinalTarget}
+        fi
+        echo ${FinalTarget}
+
+        az -v
+        # az login --service-principal --username $(APP_ID) --password $(PASSWORD) --tenant $(TENANT_ID)
+        az login -u azureclilivetest@azuresdkteam.onmicrosoft.com -p $(AZURECLITESTPASSWORD)
+        az account set -s 0b1f6471-1bf0-4dda-aec3-cb9272f09590
+
+        # Clean resources
+        python /home/vsts/work/1/s/scripts/live_test/clean_policy.py
+
+        # Whether commit changes
+        if [[ "$(USER_USERNAME)" != "" && "$(USER_TOKEN)" != "" ]]; then
+          echo "Commit mode"
+          azdev test ${FinalTarget} --no-exitfirst -a "-n $(USER_PARALLELISM)"
+          azdev test ${FinalTarget} --live --lf --xml-path test_results.parallel.xml --no-exitfirst -a "-n $(USER_PARALLELISM) --json-report --json-report-summary --json-report-file=$(Target).report.parallel.json --html=$(Target).report.parallel.html --self-contained-html --reruns 3 --capture=sys"
+        else
+          echo "Normal mode"
+          # Sequential
+          azdev test ${FinalTarget} $(USER_LIVE) --mark serial --xml-path test_results.sequential.xml --no-exitfirst -a "-n 1 --json-report --json-report-summary --json-report-file=$(Target).report.sequential.json --html=$(Target).report.sequential.html --self-contained-html --reruns 3 --capture=sys"
+          # Parallel
+          azdev test ${FinalTarget} $(USER_LIVE) --mark "not serial" --xml-path test_results.parallel.xml --no-exitfirst -a "-n $(USER_PARALLELISM) --json-report --json-report-summary --json-report-file=$(Target).report.parallel.json --html=$(Target).report.parallel.html --self-contained-html --reruns 3 --capture=sys"
+        fi
+
+        pwd
+        ls
+        # Whether commit changes
+        if [[ "$(USER_USERNAME)" != "" && "$(USER_TOKEN)" != "" ]]; then
+          cd azure-cli
+          git status
+          git add .
+          git commit -m "Upload recording files"
+          git push origin $(USER_BRANCH)
+        fi
+
+      condition: and(succeededOrFailed(), eq(variables.Match, '1'))
+    - task: PublishTestResults@2
+      condition: and(succeededOrFailed(), eq(variables.Match, '1'))
+      inputs:
+        testResultsFiles: '/home/vsts/work/1/test_results.*.xml'
+        testRunTitle: 'Azure CLI live test results of $(Target)'
+        mergeTestResults: true
+        # testResultsFormat: 'JUnit'
+    - task: PublishBuildArtifacts@1
+      condition: and(succeededOrFailed(), eq(variables.Match, '1'))
+      inputs:
+        PathtoPublish: '/home/vsts/work/1/$(Target).report.sequential.json'
+        ArtifactName: '$(Target).report.sequential.json'
+        publishLocation: 'Container'
+    - task: PublishBuildArtifacts@1
+      condition: and(succeededOrFailed(), eq(variables.Match, '1'))
+      inputs:
+        PathtoPublish: '/home/vsts/work/1/$(Target).report.sequential.html'
+        ArtifactName: '$(Target).report.sequential.html'
+        publishLocation: 'Container'
+    - task: PublishBuildArtifacts@1
+      condition: and(succeededOrFailed(), eq(variables.Match, '1'))
+      inputs:
+        PathtoPublish: '/home/vsts/work/1/$(Target).report.parallel.json'
+        ArtifactName: '$(Target).report.parallel.json'
+        publishLocation: 'Container'
+    - task: PublishBuildArtifacts@1
+      condition: and(succeededOrFailed(), eq(variables.Match, '1'))
+      inputs:
+        PathtoPublish: '/home/vsts/work/1/$(Target).report.parallel.html'
+        ArtifactName: '$(Target).report.parallel.html'
+        publishLocation: 'Container'
+
+- job: LiveTestPython38part3
+  displayName: Live Test Python 3.8
+  timeoutInMinutes: 9999
+  strategy:
+    maxParallel: 5
+    matrix:
+      network:
+        Target: network
+      acs:
+        Target: acs
+      redis:
+        Target: redis
+      kusto:
+        Target: kusto
+      servicebus:
+        Target: servicebus
+      acr:
+        Target: acr
+      cognitiveservices:
+        Target: cognitiveservices
+      resource:
+        Target: resource
+      policyinsights:
+        Target: policyinsights
+      role:
+        Target: role
+      security:
+        Target: security
+      deploymentmanager:
+        Target: deploymentmanager
+      extension:
+        Target: extension
+      dms:
+        Target: dms
+      comsumption:
+        Target: comsumption
+      find:
+        Target: find
+      ext-datafactory:
+        Target: ext-datafactory
+      ext-alertsmanagement:
+        Target: ext-alertsmanagement
+      ext-vm-repair:
+        Target: ext-vm-repair
+      ext-k8sconfiguration:
+        Target: ext-k8sconfiguration
+      ext-log-analytics-solution:
+        Target: ext-log-analytics-solution
+      ext-dms-preview:
+        Target: ext-dms-preview
+      ext-notification-hub:
+        Target: ext-notification-hub
+      ext-guestconfig:
+        Target: ext-guestconfig
+      ext-webapp:
+        Target: ext-webapp
+      ext-account:
+        Target: ext-account
+      ext-databricks:
+        Target: ext-databricks
+      ext-desktopvirtualization:
+        Target: ext-desktopvirtualization
+      ext-internet-analyzer:
+        Target: ext-internet-analyzer
+      ext-blueprint:
+        Target: ext-blueprint
+      ext-stream-analytics:
+        Target: ext-stream-analytics
+      ext-mesh:
+        Target: ext-mesh
+      ext-costmanagement:
+        Target: ext-costmanagement
+      ext-managementpartner:
+        Target: ext-managementpartner
+      ext-ssh:
+        Target: ext-ssh
+      ext-azure-firewall:
+        Target: ext-azure-firewall
+  pool:
+    vmImage: 'ubuntu-20.04'
+  steps:
+    - bash: |
+        if [[ "$(USER_TARGET)" =~ "$(Target)" || ("$(USER_TARGET)" == "" && ! "$(Target)" =~ ^ext-.*) || ("$(USER_TARGET)" == "extensions" && "$(Target)" =~ ^ext-.*) ]]; then
+          echo "Match!"
+          echo "##vso[task.setvariable variable=Match]1"
+        else
+          echo "Not match!"
+          echo "##vso[task.setvariable variable=Match]0"
+        fi
+    - task: UsePythonVersion@0
+      condition: and(succeededOrFailed(), eq(variables.Match, '1'))
+      inputs:
+        versionSpec: '3.8'
+        addToPath: true
+        architecture: 'x64'
+    - bash: |
+        cd ..
+        pwd
+        ls
+        # ssh-keygen -f ~/.ssh/id_rsa -t rsa -N ''
+        git config --global user.email "AzurePipelines"
+        git config --global user.name "AzurePipelines"
+
+        # Whether commit changes
+        if [[ "$(USER_USERNAME)" != "" && "$(USER_TOKEN)" != "" ]]; then
+          REPO="$(USER_REPO)"
+          # Pass username and token so that we can commit changes
+          git clone -b $(USER_BRANCH) ${REPO:0:8}$(USER_USERNAME):$(USER_TOKEN)@${REPO:8}
+          git clone https://github.com/Azure/azure-cli-extensions.git
+        else
+          git clone -b $(USER_BRANCH) $(USER_REPO)
+          git clone https://github.com/Azure/azure-cli-extensions.git
+        fi
+
+        python -m venv env
+        source env/bin/activate
+        pip install azdev
+        # git clone https://github.com/Azure/azure-cli-dev-tools.git
+        # git clone -b fix https://github.com/qwordy/azure-cli-dev-tools.git
+        # pip install -e azure-cli-dev-tools
+        pip install pytest-json-report
+        pip install pytest-html
+        pip install pytest-rerunfailures
+
+        azdev setup -c azure-cli -r azure-cli-extensions
+
+        # Remove ext- prefix
+        FinalTarget="$(Target)"
+        if [[ "${FinalTarget}" =~ ^ext-.* ]]; then
+          echo "It is an extention"
+          echo $(Target)
+          FinalTarget=${FinalTarget:4}
+          azdev extension add ${FinalTarget}
+        fi
+        echo ${FinalTarget}
+
+        az -v
+        # az login --service-principal --username $(APP_ID) --password $(PASSWORD) --tenant $(TENANT_ID)
+        az login -u azureclilivetest@azuresdkteam.onmicrosoft.com -p $(AZURECLITESTPASSWORD)
+        az account set -s 0b1f6471-1bf0-4dda-aec3-cb9272f09590
+
+        # Clean resources
+        python /home/vsts/work/1/s/scripts/live_test/clean_policy.py
+
+        # Whether commit changes
+        if [[ "$(USER_USERNAME)" != "" && "$(USER_TOKEN)" != "" ]]; then
+          echo "Commit mode"
+          azdev test ${FinalTarget} --no-exitfirst -a "-n $(USER_PARALLELISM)"
+          azdev test ${FinalTarget} --live --lf --xml-path test_results.parallel.xml --no-exitfirst -a "-n $(USER_PARALLELISM) --json-report --json-report-summary --json-report-file=$(Target).report.parallel.json --html=$(Target).report.parallel.html --self-contained-html --reruns 3 --capture=sys"
+        else
+          echo "Normal mode"
+          # Sequential
+          azdev test ${FinalTarget} $(USER_LIVE) --mark serial --xml-path test_results.sequential.xml --no-exitfirst -a "-n 1 --json-report --json-report-summary --json-report-file=$(Target).report.sequential.json --html=$(Target).report.sequential.html --self-contained-html --reruns 3 --capture=sys"
+          # Parallel
+          azdev test ${FinalTarget} $(USER_LIVE) --mark "not serial" --xml-path test_results.parallel.xml --no-exitfirst -a "-n $(USER_PARALLELISM) --json-report --json-report-summary --json-report-file=$(Target).report.parallel.json --html=$(Target).report.parallel.html --self-contained-html --reruns 3 --capture=sys"
+        fi
+
+        pwd
+        ls
+        # Whether commit changes
+        if [[ "$(USER_USERNAME)" != "" && "$(USER_TOKEN)" != "" ]]; then
+          cd azure-cli
+          git status
+          git add .
+          git commit -m "Upload recording files"
+          git push origin $(USER_BRANCH)
+        fi
+
+      condition: and(succeededOrFailed(), eq(variables.Match, '1'))
+    - task: PublishTestResults@2
+      condition: and(succeededOrFailed(), eq(variables.Match, '1'))
+      inputs:
+        testResultsFiles: '/home/vsts/work/1/test_results.*.xml'
+        testRunTitle: 'Azure CLI live test results of $(Target)'
+        mergeTestResults: true
+        # testResultsFormat: 'JUnit'
+    - task: PublishBuildArtifacts@1
+      condition: and(succeededOrFailed(), eq(variables.Match, '1'))
+      inputs:
+        PathtoPublish: '/home/vsts/work/1/$(Target).report.sequential.json'
+        ArtifactName: '$(Target).report.sequential.json'
+        publishLocation: 'Container'
+    - task: PublishBuildArtifacts@1
+      condition: and(succeededOrFailed(), eq(variables.Match, '1'))
+      inputs:
+        PathtoPublish: '/home/vsts/work/1/$(Target).report.sequential.html'
+        ArtifactName: '$(Target).report.sequential.html'
+        publishLocation: 'Container'
+    - task: PublishBuildArtifacts@1
+      condition: and(succeededOrFailed(), eq(variables.Match, '1'))
+      inputs:
+        PathtoPublish: '/home/vsts/work/1/$(Target).report.parallel.json'
+        ArtifactName: '$(Target).report.parallel.json'
+        publishLocation: 'Container'
+    - task: PublishBuildArtifacts@1
+      condition: and(succeededOrFailed(), eq(variables.Match, '1'))
+      inputs:
+        PathtoPublish: '/home/vsts/work/1/$(Target).report.parallel.html'
+        ArtifactName: '$(Target).report.parallel.html'
+        publishLocation: 'Container'
+
+- job: LiveTestPython38part4
+  displayName: Live Test Python 3.8
+  timeoutInMinutes: 9999
+  strategy:
+    maxParallel: 5
+    matrix:
+      servicefabric:
+        Target: servicefabric
+      backup:
+        Target: backup
+      cosmosdb:
+        Target: cosmosdb
+      appservice:
+        Target: appservice
+      sqlvm:
+        Target: sqlvm
+      sql:
+        Target: sql
+      ams:
+        Target: ams
+      cdn:
+        Target: cdn
+      signalr:
+        Target: signalr
+      relay:
+        Target: relay
+      util:
+        Target: util
+      botservice:
+        Target: botservice
+      cloud:
+        Target: cloud
+      feedback:
+        Target: feedback
+      billing:
+        Target: billing
+      lab:
+        Target: lab
+      ext-ai-examples:
+        Target: ext-ai-examples
+      ext-portal:
+        Target: ext-portal
+      ext-databox:
+        Target: ext-databox
+      ext-ip-group:
+        Target: ext-ip-group
+      ext-eventgrid:
+        Target: ext-eventgrid
+      ext-timeseriesinsights:
+        Target: ext-timeseriesinsights
+      ext-fzf:
+        Target: ext-fzf
+      ext-connectedk8s:
+        Target: ext-connectedk8s
+      ext-stack-hci:
+        Target: ext-stack-hci
+      ext-healthcareapis:
+        Target: ext-healthcareapis
+      ext-alias:
+        Target: ext-alias
+      ext-azure-iot:
+        Target: ext-azure-iot
+      ext-blockchain:
+        Target: ext-blockchain
+      ext-azure-cli-ml:
+        Target: ext-azure-cli-ml
+      ext-keyvault-preview:
+        Target: ext-keyvault-preview
+      ext-front-door:
+        Target: ext-front-door
+      ext-storage-or-preview:
+        Target: ext-storage-or-preview
+      ext-interactive:
+        Target: ext-interactive
+      ext-resource-graph:
+        Target: ext-resource-graph
+      ext-subscription:
+        Target: ext-subscription
   pool:
     vmImage: 'ubuntu-20.04'
   steps:
@@ -571,7 +829,11 @@ jobs:
 - job: SendEmail
   displayName: Send email
   timeoutInMinutes: 180
-  dependsOn: LiveTestPython38
+  dependsOn:
+  - LiveTestPython38
+  - LiveTestPython38part2
+  - LiveTestPython38part3
+  - LiveTestPython38part4
   condition: succeededOrFailed()
   steps:
     - task: UsePythonVersion@0
