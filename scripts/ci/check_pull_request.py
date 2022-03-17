@@ -81,12 +81,15 @@ def main():
 def check_pull_request(title, body):
     if title.startswith('['):
         error_flag = regex_line(title)
+        history_note_error_flag = False
         for line in body:
             if line.startswith('['):
-                # If edit history notes, ignore title check result
+                # get component name in []
                 ref = re.findall(r'[\[](.*?)[\]]', line)
                 if ref and ref[0] not in ['Component Name 1', 'Component Name 2']:
-                    error_flag = regex_line(line)
+                    history_note_error_flag = regex_line(line) or history_note_error_flag
+		# If edit history notes, ignore title check result
+        error_flag = error_flag if not history_note_error_flag else history_note_error_flag
     elif title.startswith('{'):
         error_flag = False
     else:
