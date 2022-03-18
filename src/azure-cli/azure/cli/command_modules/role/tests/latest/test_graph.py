@@ -587,7 +587,9 @@ class GraphUserScenarioTest(ScenarioTest):
             'ad user update --display-name {user1_newName} '
             '--account-enabled false '
             '--id {user1_id} '
-            '--mail-nickname {new_mail_nick_name}',
+            '--mail-nickname {new_mail_nick_name} '
+            '--password {password} '
+            '--force-change-password-next-login true '
         )
 
         # show
@@ -595,11 +597,10 @@ class GraphUserScenarioTest(ScenarioTest):
                  checks=[
                      self.check("displayName", '{user1_newName}')
                  ])
-        self.cmd('ad user update --id {user1}@{domain} --password {password}')
-        self.cmd('ad user update --id {user1_id} --password {password} --force-change-password-next-login true')
+
+        # specifying --force-change-password-next-login without --password would raise an error
         with self.assertRaises(CLIError):
             self.cmd('ad user update --id {user1_id} --force-change-password-next-login false')
-        self.cmd('ad user update --id {user1_id} --password {password}')
 
         # create group
         group_result = self.cmd(
