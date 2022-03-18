@@ -2608,7 +2608,7 @@ helps['webapp deploy'] = """
     short-summary: Deploys a provided artifact to Azure Web Apps.
     examples:
     - name: Deploy a war file asynchronously.
-      text: az webapp deploy --resource-group ResouceGroup --name AppName --src-path SourcePath --type war --async IsAsync
+      text: az webapp deploy --resource-group ResouceGroup --name AppName --src-path SourcePath --type war --async true
     - name: Deploy a static text file to wwwroot/staticfiles/test.txt
       text: az webapp deploy --resource-group ResouceGroup --name AppName --src-path SourcePath --type static --target-path staticfiles/test.txt
 """
