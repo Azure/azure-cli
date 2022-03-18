@@ -975,6 +975,7 @@ def load_arguments(self, _):
         c.argument('hostname', options_list=['--hostname', '-n'], help='Name of the custom domain')
 
     with self.argument_context('staticwebapp', validator=validate_public_cloud) as c:
+        c.ignore('format_output')
         c.argument('name', options_list=['--name', '-n'], metavar='NAME', help="Name of the static site")
         c.argument('source', options_list=['--source', '-s'], help="URL for the repository of the static site.")
         c.argument('token', options_list=['--token', '-t'],
