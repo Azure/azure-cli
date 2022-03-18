@@ -1,9 +1,8 @@
-# CentOS Stream 8 docker image is distributed as quay.io/centos/centos:stream8 at
-# https://quay.io/repository/centos/centos?tab=tags. See https://wiki.centos.org/FAQ/CentOSStream
+# Red Hat Universal Base Image 8: https://catalog.redhat.com/software/containers/ubi8/ubi/5c359854d70cc534b3a3784e
 
-ARG tag=stream8
+ARG tag=8.4
 
-FROM quay.io/centos/centos:${tag} AS build-env
+FROM registry.access.redhat.com/ubi8/ubi:${tag} AS build-env
 ARG cli_version=dev
 
 RUN yum update -y
@@ -17,7 +16,7 @@ RUN dos2unix ./scripts/release/rpm/azure-cli.spec && \
     REPO_PATH=$(pwd) CLI_VERSION=$cli_version rpmbuild -v -bb --clean scripts/release/rpm/azure-cli.spec && \
     cp /root/rpmbuild/RPMS/x86_64/azure-cli-${cli_version}-1.*.x86_64.rpm /azure-cli-dev.rpm
 
-FROM quay.io/centos/centos:${tag} AS execution-env
+FROM registry.access.redhat.com/ubi8/ubi:${tag} AS execution-env
 
 RUN yum update -y
 RUN yum install -y python3 python3-virtualenv

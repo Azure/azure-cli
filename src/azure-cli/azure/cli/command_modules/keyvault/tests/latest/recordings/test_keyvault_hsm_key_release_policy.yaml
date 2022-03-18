@@ -1,0 +1,416 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - azsdk-python-keyvault-keys/4.5.0b6 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+    method: POST
+    uri: https://ystesthsm.managedhsm.azure.net/keys/skr1-000001/create?api-version=7.3-preview
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      content-security-policy:
+      - default-src 'self'
+      content-type:
+      - application/json; charset=utf-8
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      www-authenticate:
+      - Bearer authorization="https://login.microsoftonline.com/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a",
+        resource="https://managedhsm.azure.net"
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-ms-server-latency:
+      - '0'
+    status:
+      code: 401
+      message: Unauthorized
+- request:
+    body: '{"kty": "EC-HSM", "attributes": {"enabled": true, "exportable": true},
+      "release_policy": {"data": "eyJhbnlPZiI6IFt7ImF1dGhvcml0eSI6ICJodHRwczovL3NoYXJlZGV1cy5ldXMuYXR0ZXN0LmF6dXJlLm5ldC8iLCAiYWxsT2YiOiBbeyJjbGFpbSI6ICJ4LW1zLXNneC1pcy1kZWJ1Z2dhYmxlIiwgImVxdWFscyI6ICJmYWxzZSJ9XX1dLCAidmVyc2lvbiI6ICIxLjAuMCJ9"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '310'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - azsdk-python-keyvault-keys/4.5.0b6 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+    method: POST
+    uri: https://ystesthsm.managedhsm.azure.net/keys/skr1-000001/create?api-version=7.3-preview
+  response:
+    body:
+      string: '{"attributes":{"created":1646382640,"enabled":true,"exportable":true,"recoverableDays":90,"recoveryLevel":"Recoverable+Purgeable","updated":1646382640},"key":{"crv":"P-256","key_ops":["verify","sign"],"kid":"https://ystesthsm.managedhsm.azure.net/keys/skr1-000001/367522566ac746a02eabe5222225585f","kty":"EC-HSM","x":"miHpduGVmZtSDK9Hk5lruNBgv95fH1v5A0CaLgzK08s","y":"C3ZQVbgsj3nxju_4p2gb2ASobm8n899D_X6iJZqU91Y"},"release_policy":{"contentType":"application/json;
+        charset=utf-8","data":"eyJhbnlPZiI6W3siYWxsT2YiOlt7ImNsYWltIjoieC1tcy1zZ3gtaXMtZGVidWdnYWJsZSIsImVxdWFscyI6ImZhbHNlIn1dLCJhdXRob3JpdHkiOiJodHRwczovL3NoYXJlZGV1cy5ldXMuYXR0ZXN0LmF6dXJlLm5ldC8ifV0sInZlcnNpb24iOiIxLjAuMCJ9","immutable":false}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '705'
+      content-security-policy:
+      - default-src 'self'
+      content-type:
+      - application/json; charset=utf-8
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-ms-keyvault-network-info:
+      - conn_type=Ipv4;addr=167.220.233.234;act_addr_fam=Ipv4;
+      x-ms-keyvault-region:
+      - eastus
+      x-ms-server-latency:
+      - '318'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"kty": "EC-HSM", "attributes": {"enabled": true, "exportable": true},
+      "release_policy": {"data": "eyJ2ZXJzaW9uIjogIjEuMC4wIiwgImFueU9mIjogW3siYXV0aG9yaXR5IjogImh0dHBzOi8vc2hhcmVkZXVzLmV1cy5hdHRlc3QuYXp1cmUubmV0LyIsICJhbGxPZiI6IFt7ImNsYWltIjogIngtbXMtYXR0ZXN0YXRpb24tdHlwZSIsICJlcXVhbHMiOiAic2V2c25wdm0ifSwgeyJjbGFpbSI6ICJ4LW1zLWNvbXBsaWFuY2Utc3RhdHVzIiwgImVxdWFscyI6ICJhenVyZS1jb21wbGlhbnQtY3ZtIn1dfSwgeyJhdXRob3JpdHkiOiAiaHR0cHM6Ly9zaGFyZWR3dXMud3VzLmF0dGVzdC5henVyZS5uZXQvIiwgImFsbE9mIjogW3siY2xhaW0iOiAieC1tcy1hdHRlc3RhdGlvbi10eXBlIiwgImVxdWFscyI6ICJzZXZzbnB2bSJ9LCB7ImNsYWltIjogIngtbXMtY29tcGxpYW5jZS1zdGF0dXMiLCAiZXF1YWxzIjogImF6dXJlLWNvbXBsaWFudC1jdm0ifV19LCB7ImF1dGhvcml0eSI6ICJodHRwczovL3NoYXJlZG5ldS5uZXUuYXR0ZXN0LmF6dXJlLm5ldC8iLCAiYWxsT2YiOiBbeyJjbGFpbSI6ICJ4LW1zLWF0dGVzdGF0aW9uLXR5cGUiLCAiZXF1YWxzIjogInNldnNucHZtIn0sIHsiY2xhaW0iOiAieC1tcy1jb21wbGlhbmNlLXN0YXR1cyIsICJlcXVhbHMiOiAiYXp1cmUtY29tcGxpYW50LWN2bSJ9XX0sIHsiYXV0aG9yaXR5IjogImh0dHBzOi8vc2hhcmVkd2V1LndldS5hdHRlc3QuYXp1cmUubmV0LyIsICJhbGxPZiI6IFt7ImNsYWltIjogIngtbXMtYXR0ZXN0YXRpb24tdHlwZSIsICJlcXVhbHMiOiAic2V2c25wdm0ifSwgeyJjbGFpbSI6ICJ4LW1zLWNvbXBsaWFuY2Utc3RhdHVzIiwgImVxdWFscyI6ICJhenVyZS1jb21wbGlhbnQtY3ZtIn1dfV19"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1194'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - azsdk-python-keyvault-keys/4.5.0b6 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+    method: POST
+    uri: https://ystesthsm.managedhsm.azure.net/keys/skr2-000002/create?api-version=7.3-preview
+  response:
+    body:
+      string: '{"attributes":{"created":1646382642,"enabled":true,"exportable":true,"recoverableDays":90,"recoveryLevel":"Recoverable+Purgeable","updated":1646382642},"key":{"crv":"P-256","key_ops":["verify","sign"],"kid":"https://ystesthsm.managedhsm.azure.net/keys/skr2-000002/e75194b7405d494e80e19926fb4efe0b","kty":"EC-HSM","x":"Fuphc62f_-Gt_8yFFFX76Zi2pXeYZRY-6yh1LZVJ2vo","y":"Jkic17viMOFOJAtXUvJh4FK4gjHsUf4LvY9AxMKdXRs"},"release_policy":{"contentType":"application/json;
+        charset=utf-8","data":"eyJhbnlPZiI6W3siYWxsT2YiOlt7ImNsYWltIjoieC1tcy1hdHRlc3RhdGlvbi10eXBlIiwiZXF1YWxzIjoic2V2c25wdm0ifSx7ImNsYWltIjoieC1tcy1jb21wbGlhbmNlLXN0YXR1cyIsImVxdWFscyI6ImF6dXJlLWNvbXBsaWFudC1jdm0ifV0sImF1dGhvcml0eSI6Imh0dHBzOi8vc2hhcmVkZXVzLmV1cy5hdHRlc3QuYXp1cmUubmV0LyJ9LHsiYWxsT2YiOlt7ImNsYWltIjoieC1tcy1hdHRlc3RhdGlvbi10eXBlIiwiZXF1YWxzIjoic2V2c25wdm0ifSx7ImNsYWltIjoieC1tcy1jb21wbGlhbmNlLXN0YXR1cyIsImVxdWFscyI6ImF6dXJlLWNvbXBsaWFudC1jdm0ifV0sImF1dGhvcml0eSI6Imh0dHBzOi8vc2hhcmVkd3VzLnd1cy5hdHRlc3QuYXp1cmUubmV0LyJ9LHsiYWxsT2YiOlt7ImNsYWltIjoieC1tcy1hdHRlc3RhdGlvbi10eXBlIiwiZXF1YWxzIjoic2V2c25wdm0ifSx7ImNsYWltIjoieC1tcy1jb21wbGlhbmNlLXN0YXR1cyIsImVxdWFscyI6ImF6dXJlLWNvbXBsaWFudC1jdm0ifV0sImF1dGhvcml0eSI6Imh0dHBzOi8vc2hhcmVkbmV1Lm5ldS5hdHRlc3QuYXp1cmUubmV0LyJ9LHsiYWxsT2YiOlt7ImNsYWltIjoieC1tcy1hdHRlc3RhdGlvbi10eXBlIiwiZXF1YWxzIjoic2V2c25wdm0ifSx7ImNsYWltIjoieC1tcy1jb21wbGlhbmNlLXN0YXR1cyIsImVxdWFscyI6ImF6dXJlLWNvbXBsaWFudC1jdm0ifV0sImF1dGhvcml0eSI6Imh0dHBzOi8vc2hhcmVkd2V1LndldS5hdHRlc3QuYXp1cmUubmV0LyJ9XSwidmVyc2lvbiI6IjEuMC4wIn0","immutable":false}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1540'
+      content-security-policy:
+      - default-src 'self'
+      content-type:
+      - application/json; charset=utf-8
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-ms-keyvault-network-info:
+      - conn_type=Ipv4;addr=167.220.233.234;act_addr_fam=Ipv4;
+      x-ms-keyvault-region:
+      - eastus
+      x-ms-server-latency:
+      - '3155'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"release_policy": {"immutable": true, "data": "eyJhbnlPZiI6IFt7ImF1dGhvcml0eSI6ICJodHRwczovL3NoYXJlZGV1cy5ldXMuYXR0ZXN0LmF6dXJlLm5ldC8iLCAiYWxsT2YiOiBbeyJjbGFpbSI6ICJ4LW1zLXNneC1pcy1kZWJ1Z2dhYmxlIiwgImVxdWFscyI6ICJmYWxzZSJ9XX1dLCAidmVyc2lvbiI6ICIxLjAuMCJ9"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '259'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - azsdk-python-keyvault-keys/4.5.0b6 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+    method: PATCH
+    uri: https://ystesthsm.managedhsm.azure.net/keys/skr2-000002/?api-version=7.3-preview
+  response:
+    body:
+      string: '{"attributes":{"created":1646382642,"enabled":true,"exportable":true,"recoverableDays":90,"recoveryLevel":"Recoverable+Purgeable","updated":1646382647},"key":{"crv":"P-256","key_ops":["verify","sign"],"kid":"https://ystesthsm.managedhsm.azure.net/keys/skr2-000002/e75194b7405d494e80e19926fb4efe0b","kty":"EC-HSM","x":"Fuphc62f_-Gt_8yFFFX76Zi2pXeYZRY-6yh1LZVJ2vo","y":"Jkic17viMOFOJAtXUvJh4FK4gjHsUf4LvY9AxMKdXRs"},"release_policy":{"contentType":"application/json;
+        charset=utf-8","data":"eyJhbnlPZiI6W3siYWxsT2YiOlt7ImNsYWltIjoieC1tcy1zZ3gtaXMtZGVidWdnYWJsZSIsImVxdWFscyI6ImZhbHNlIn1dLCJhdXRob3JpdHkiOiJodHRwczovL3NoYXJlZGV1cy5ldXMuYXR0ZXN0LmF6dXJlLm5ldC8ifV0sInZlcnNpb24iOiIxLjAuMCJ9","immutable":true}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '704'
+      content-security-policy:
+      - default-src 'self'
+      content-type:
+      - application/json; charset=utf-8
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-ms-keyvault-network-info:
+      - conn_type=Ipv4;addr=167.220.233.234;act_addr_fam=Ipv4;
+      x-ms-keyvault-region:
+      - eastus
+      x-ms-server-latency:
+      - '201'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - 0
+      Content-Type:
+      - application/json; charset=utf-8
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.22000-SP0) msrest/0.6.21 msrest_azure/0.6.4
+        azure-keyvault/7.0 Azure-SDK-For-Python
+      accept-language:
+      - en-US
+    method: DELETE
+    uri: https://ystesthsm.managedhsm.azure.net/keys/skr1-000001?api-version=7.0
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      content-security-policy:
+      - default-src 'self'
+      content-type:
+      - application/json; charset=utf-8
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      www-authenticate:
+      - Bearer authorization="https://login.microsoftonline.com/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a",
+        resource="https://managedhsm.azure.net"
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-ms-server-latency:
+      - '0'
+    status:
+      code: 401
+      message: Unauthorized
+- request:
+    body: ''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - 0
+      Content-Type:
+      - application/json; charset=utf-8
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.22000-SP0) msrest/0.6.21 msrest_azure/0.6.4
+        azure-keyvault/7.0 Azure-SDK-For-Python
+      accept-language:
+      - en-US
+    method: DELETE
+    uri: https://ystesthsm.managedhsm.azure.net/keys/skr1-000001?api-version=7.0
+  response:
+    body:
+      string: '{"attributes":{"created":1646382640,"enabled":true,"exportable":true,"recoverableDays":90,"recoveryLevel":"Recoverable+Purgeable","updated":1646382640},"deletedDate":1646382649,"key":{"crv":"P-256","key_ops":["verify","sign"],"kid":"https://ystesthsm.managedhsm.azure.net/keys/skr1-000001/367522566ac746a02eabe5222225585f","kty":"EC-HSM","x":"miHpduGVmZtSDK9Hk5lruNBgv95fH1v5A0CaLgzK08s","y":"C3ZQVbgsj3nxju_4p2gb2ASobm8n899D_X6iJZqU91Y"},"recoveryId":"https://ystesthsm.managedhsm.azure.net/deletedkeys/skr1-000001","release_policy":{"anyOf":[{"allOf":[{"claim":"x-ms-sgx-is-debuggable","condition":"equals","value":"false"}],"authority":"https://sharedeus.eus.attest.azure.net/"}],"version":"0.2"},"scheduledPurgeDate":1654158649}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '732'
+      content-security-policy:
+      - default-src 'self'
+      content-type:
+      - application/json; charset=utf-8
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-ms-keyvault-network-info:
+      - conn_type=Ipv4;addr=167.220.233.234;act_addr_fam=Ipv4;
+      x-ms-keyvault-region:
+      - eastus
+      x-ms-server-latency:
+      - '185'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      Content-Type:
+      - application/json; charset=utf-8
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.22000-SP0) msrest/0.6.21 msrest_azure/0.6.4
+        azure-keyvault/7.0 Azure-SDK-For-Python
+      accept-language:
+      - en-US
+    method: DELETE
+    uri: https://ystesthsm.managedhsm.azure.net/deletedkeys/skr1-000001?api-version=7.0
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      content-security-policy:
+      - default-src 'self'
+      content-type:
+      - application/json; charset=utf-8
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-ms-keyvault-network-info:
+      - conn_type=Ipv4;addr=167.220.233.234;act_addr_fam=Ipv4;
+      x-ms-keyvault-region:
+      - eastus
+      x-ms-server-latency:
+      - '110'
+    status:
+      code: 204
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      Content-Type:
+      - application/json; charset=utf-8
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.22000-SP0) msrest/0.6.21 msrest_azure/0.6.4
+        azure-keyvault/7.0 Azure-SDK-For-Python
+      accept-language:
+      - en-US
+    method: DELETE
+    uri: https://ystesthsm.managedhsm.azure.net/keys/skr2-000002?api-version=7.0
+  response:
+    body:
+      string: '{"attributes":{"created":1646382642,"enabled":true,"exportable":true,"recoverableDays":90,"recoveryLevel":"Recoverable+Purgeable","updated":1646382647},"deletedDate":1646382652,"key":{"crv":"P-256","key_ops":["verify","sign"],"kid":"https://ystesthsm.managedhsm.azure.net/keys/skr2-000002/e75194b7405d494e80e19926fb4efe0b","kty":"EC-HSM","x":"Fuphc62f_-Gt_8yFFFX76Zi2pXeYZRY-6yh1LZVJ2vo","y":"Jkic17viMOFOJAtXUvJh4FK4gjHsUf4LvY9AxMKdXRs"},"recoveryId":"https://ystesthsm.managedhsm.azure.net/deletedkeys/skr2-000002","release_policy":{"anyOf":[{"allOf":[{"claim":"x-ms-sgx-is-debuggable","condition":"equals","value":"false"}],"authority":"https://sharedeus.eus.attest.azure.net/"}],"version":"0.2"},"scheduledPurgeDate":1654158652}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '732'
+      content-security-policy:
+      - default-src 'self'
+      content-type:
+      - application/json; charset=utf-8
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-ms-keyvault-network-info:
+      - conn_type=Ipv4;addr=167.220.233.234;act_addr_fam=Ipv4;
+      x-ms-keyvault-region:
+      - eastus
+      x-ms-server-latency:
+      - '157'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      Content-Type:
+      - application/json; charset=utf-8
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.22000-SP0) msrest/0.6.21 msrest_azure/0.6.4
+        azure-keyvault/7.0 Azure-SDK-For-Python
+      accept-language:
+      - en-US
+    method: DELETE
+    uri: https://ystesthsm.managedhsm.azure.net/deletedkeys/skr2-000002?api-version=7.0
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      content-security-policy:
+      - default-src 'self'
+      content-type:
+      - application/json; charset=utf-8
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-ms-keyvault-network-info:
+      - conn_type=Ipv4;addr=167.220.233.234;act_addr_fam=Ipv4;
+      x-ms-keyvault-region:
+      - eastus
+      x-ms-server-latency:
+      - '98'
+    status:
+      code: 204
+      message: ''
+version: 1
