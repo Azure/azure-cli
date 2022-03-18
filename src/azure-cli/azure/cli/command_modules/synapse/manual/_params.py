@@ -1106,7 +1106,7 @@ def load_arguments(self, _):
         with self.argument_context('synapse link-connection ' + scope) as c:
             c.argument('workspace_name', arg_type=workspace_name_arg_type)
             c.argument('link_connection_name', arg_type=name_type, help='The link connection name.')
-            c.argument('definition_file', options_list=('--file', '-f'), type=file_type, completer=FilesCompleter(), help='The definition file path')
+            c.argument('definition_file', arg_type=definition_file_arg_type)
 
     for scope in ['show', 'delete', 'get-status', 'start', 'stop']:
         with self.argument_context('synapse link-connection '+ scope) as c:
