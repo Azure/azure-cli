@@ -623,6 +623,17 @@ class GraphUserScenarioTest(ScenarioTest):
 
 class GraphGroupScenarioTest(ScenarioTest):
 
+    def clean_resource(self, resource, type='group'):
+        try:
+            if type == 'user':
+                self.cmd('ad user delete --id {}'.format(resource))
+            elif type == 'group':
+                self.cmd('ad group delete -g {}'.format(resource))
+            elif type == 'app':
+                self.cmd('ad app delete --id {}'.format(resource))
+        except Exception:
+            pass
+
     def test_graph_group_scenario(self):
         username = get_signed_in_user(self)
         if not username:
@@ -630,132 +641,141 @@ class GraphGroupScenarioTest(ScenarioTest):
 
         domain = 'AzureSDKTeam.onmicrosoft.com'
         self.kwargs = {
-            'user1': self.create_random_name(prefix='deleteme1', length=15),
-            'user2': self.create_random_name(prefix='deleteme2', length=15),
+            'group': self.create_random_name(prefix='testgroup', length=24),
+            'mail_nick_name': 'deleteme11',
+            'child_group': self.create_random_name(prefix='testchildgroup', length=24),
+            'leaf_group': self.create_random_name(prefix='testleafgroup', length=24),
+            'user1': self.create_random_name(prefix='testgroupuser1', length=24),
+            'user2': self.create_random_name(prefix='testgroupuser2', length=24),
+            'pass': 'Test1234!!',
             'domain': domain,
-            'new_mail_nick_name': 'deleteme11',
-            'group': 'deleteme_g',
-            'pass': 'Test1234!!'
+            'app_name': self.create_random_name(prefix='testgroupapp', length=24)
         }
+
         self.recording_processors.append(AADGraphUserReplacer('@' + domain, '@example.com'))
         try:
-            # create user1
-            user1_result = self.cmd('ad user create --display-name {user1} --password {pass} --user-principal-name {user1}@{domain}').get_output_in_json()
-            self.kwargs['user1_id'] = user1_result['id']
-
-            # update user1
-            self.cmd('ad user update --display-name {user1}_new --account-enabled false --id {user1}@{domain} --mail-nickname {new_mail_nick_name}')
-            user1_update_result = self.cmd('ad user show --upn-or-object-id {user1}@{domain}', checks=[self.check("displayName", '{user1}_new')]).get_output_in_json()
-            self.cmd('ad user update --id {user1}@{domain} --password {pass}')
-            self.cmd('ad user update --id {user1}@{domain} --password {pass} --force-change-password-next-login true')
-            with self.assertRaises(CLIError):
-                self.cmd('ad user update --id {user1}@{domain} --force-change-password-next-login false')
-            self.kwargs['user1_id'] = user1_update_result['id']
-
-            # create user2
-            user2_result = self.cmd('ad user create --display-name {user2} --password {pass} --user-principal-name {user2}@{domain}').get_output_in_json()
-            self.kwargs['user2_id'] = user2_result['id']
             # create group
-            group_result = self.cmd('ad group create --display-name {group} --mail-nickname {group} --description {group}').get_output_in_json()
+            group_result = self.cmd(
+                'ad group create --display-name {group} --mail-nickname {mail_nick_name} --description {group}',
+                checks=[self.check('displayName', '{group}'),
+                        self.check('mailNickname', '{mail_nick_name}'),
+                        self.check('description', '{group}')]
+            ).get_output_in_json()
             self.kwargs['group_id'] = group_result['id']
-            # add user1 into group
-            self.cmd('ad group member add -g {group} --member-id {user1_id}',
-                     checks=self.is_empty())
-            # add user2 into group
-            self.cmd('ad group member add -g {group} --member-id {user2_id}',
-                     checks=self.is_empty())
 
-            # show user's group memberships
-            self.cmd('ad user get-member-groups --upn-or-object-id {user1_id}',
-                     checks=self.check('[0].displayName', self.kwargs['group']))
+            # create again to test idempotency
+            self.cmd('ad group create --display-name {group} --mail-nickname {mail_nick_name}')
+            # list groups
+            self.cmd('ad group list --display-name {group}', checks=self.check('length([])', 1))
             # show group
             self.cmd('ad group show -g {group}', checks=[
                 self.check('id', '{group_id}'),
                 self.check('displayName', '{group}'),
+                self.check('mailNickname', '{mail_nick_name}'),
                 self.check('description', '{group}')
             ])
-            self.cmd('ad group show -g {group}',
-                     checks=self.check('displayName', '{group}'))
-            # list group
-            self.cmd('ad group list --display-name {group}',
-                     checks=self.check('[0].displayName', '{group}'))
-            # show member groups
-            self.cmd('ad group get-member-groups -g {group}',
-                     checks=self.check('length([])', 0))
-            # check user1 memebership
-            self.cmd('ad group member check -g {group} --member-id {user1_id}',
+
+            # create other groups to test membership transitivity
+            group_result = self.cmd('ad group create --display-name {child_group} --mail-nickname {mail_nick_name}').get_output_in_json()
+            self.kwargs['child_group_id'] = group_result['id']
+            group_result = self.cmd('ad group create --display-name {leaf_group} --mail-nickname {mail_nick_name}').get_output_in_json()
+            self.kwargs['leaf_group_id'] = group_result['id']
+
+            # add child_group as member of group
+            self.cmd('ad group member add -g {group_id} --member-id {child_group_id}')
+            # add leaf_group as member of child_group
+            self.cmd('ad group member add -g {child_group_id} --member-id {leaf_group_id}')
+
+            # check member transitivity
+            self.cmd('ad group member check -g {group_id} --member-id {child_group_id}',
+                     checks=self.check('value', True))
+            self.cmd('ad group member check -g {child_group_id} --member-id {leaf_group_id}',
+                     checks=self.check('value', True))
+            self.cmd('ad group member check -g {group_id} --member-id {leaf_group_id}',
                      checks=self.check('value', True))
 
-            # check user2 memebership
-            self.cmd('ad group member check -g {group} --member-id {user2_id}',
-                     checks=self.check('value', True))
+            # list members (intransitive)
+            self.cmd('ad group member list -g {group_id}', checks=self.check('length([])', 1))
+            self.cmd('ad group member list -g {child_group_id}', checks=self.check('length([])', 1))
+            self.cmd('ad group member list -g {leaf_group_id}', checks=self.check('length([])', 0))
 
-            self.cmd('ad group member list -g {group}', checks=[
-                self.check("length([?displayName=='{user1}_new'])", 1),
-                self.check("length([?displayName=='{user2}'])", 1),
-                self.check("length([?displayName=='{user1}'])", 0),
-                self.check("length([])", 2),
-            ])
-            # remove user1
-            self.cmd('ad group member remove -g {group} --member-id {user1_id}')
-            # check user1 memebership
-            self.cmd('ad group member check -g {group} --member-id {user1_id}',
+            # get-member-groups transitivity
+            self.cmd('ad group get-member-groups -g {group_id}', checks=self.check('length([])', 0))
+            self.cmd('ad group get-member-groups -g {child_group_id}', checks=self.check('length([])', 1))
+            self.cmd('ad group get-member-groups -g {leaf_group_id}', checks=self.check('length([])', 2))
+
+            # remove member
+            self.cmd('ad group member remove -g {child_group_id} --member-id {leaf_group_id}')
+            self.cmd('ad group member check -g {child_group_id} --member-id {leaf_group_id}',
                      checks=self.check('value', False))
-            # delete the group
+
+            # create user to add group member
+            user_result = self.cmd('ad user create --display-name {user1} --password {pass} --user-principal-name {user1}@{domain}').get_output_in_json()
+            self.kwargs['user1_id'] = user_result['id']
+
+            # add user as group member
+            self.cmd('ad group member add -g {leaf_group_id} --member-id {user1_id}')
+
+            # check user as group member
+            self.cmd('ad group member check -g {leaf_group_id} --member-id {user1_id}',
+                     checks=self.check('value', True))
+            # list member(user is expected)
+            self.cmd('ad group member list -g {leaf_group_id}', checks=self.check('length([])', 1))
+
+            # remove user as member
+            self.cmd('ad group member remove -g {leaf_group_id} --member-id {user1_id}')
+            self.cmd('ad group member check -g {leaf_group_id} --member-id {user1_id}',
+                     checks=self.check('value', False))
+
+            # Create service principal to add group member
+            with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+                result = self.cmd('ad sp create-for-rbac -n {app_name}').get_output_in_json()
+                self.kwargs['app_id'] = result['appId']
+                sp = self.cmd('ad sp show --id {app_id}').get_output_in_json()
+                self.kwargs['sp_id'] = sp['id']
+
+                # add service principal as group member
+                self.cmd('ad group member add -g {leaf_group_id} --member-id {sp_id}')
+
+                # check service principal as group member
+                self.cmd('ad group member check -g {leaf_group_id} --member-id {sp_id}',
+                         checks=self.check('value', True))
+
+                # TODO: check list sp as member after staged roll-out of service principals on MS Graph
+                # list member(service principal is expected)
+                # self.cmd('ad group member list -g {leaf_group_id}', checks=self.check('length([])', 1))
+
+                # remove service principal as member
+                self.cmd('ad group member remove -g {leaf_group_id} --member-id {sp_id}')
+                self.cmd('ad group member check -g {leaf_group_id} --member-id {sp_id}',
+                         checks=self.check('value', False))
+
+            # list owners
+            self.cmd('ad group owner list -g {group_id}', checks=self.check('length([])', 0))
+
+            # create user to add group owner
+            user_result = self.cmd('ad user create --display-name {user2} --password {pass} --user-principal-name {user2}@{domain}').get_output_in_json()
+            self.kwargs['user2_id'] = user_result['id']
+            # add owner
+            self.cmd('ad group owner add -g {group_id} --owner-object-id {user1_id}')
+            self.cmd('ad group owner add -g {group_id} --owner-object-id {user2_id}')
+            self.cmd('ad group owner list -g {group_id}', checks=self.check('length([])', 2))
+
+            # remove owner
+            self.cmd('ad group owner remove -g {group_id} --owner-object-id {user1_id}')
+            self.cmd('ad group owner list -g {group_id}', checks=self.check('length([])', 1))
+
+            # delete group
             self.cmd('ad group delete -g {group}')
-            self.cmd('ad group list',
-                     checks=self.check("length([?displayName=='{group}'])", 0))
+            self.cmd('ad group show -g {group_id}', expect_failure=True)
         finally:
-            try:
-                self.cmd('ad user delete --upn-or-object-id {user1_id}')
-                self.cmd('ad user delete --upn-or-object-id {user2_id}')
-                self.cmd('ad group delete -g {group}')
-            except Exception:
-                pass
-
-    def test_graph_group_idempotent(self):
-        account_info = self.cmd('account show').get_output_in_json()
-        if account_info['user']['type'] == 'servicePrincipal':
-            return  # this test delete users which are beyond a SP's capacity, so quit...
-
-        self.kwargs = {
-            'group': 'deleteme_g2',
-        }
-        try:
-            self.cmd('ad group create --display-name {group} --mail-nickname {group}')
-            self.cmd('ad group create --display-name {group} --mail-nickname {group}')
-            self.cmd('ad group list',
-                     checks=self.check("length([?displayName=='{group}'])", 1))
-        finally:
-            try:
-                self.cmd('ad group delete -g {group}')
-            except:
-                pass
-
-    def test_graph_group_show(self):
-        account_info = self.cmd('account show').get_output_in_json()
-        if account_info['user']['type'] == 'servicePrincipal':
-            return  # this test delete users which are beyond a SP's capacity, so quit...
-
-        self.kwargs = {
-            'group1': 'show_group_1',
-            'group11': 'show_group_11',
-            'prefix': 'show_prefix',
-            'prefix_group': 'show_prefix_group'
-        }
-
-        self.cmd('ad group create --display-name {group1} --mail-nickname {group1}')
-        self.cmd('ad group create --display-name {group11} --mail-nickname {group11}')
-        self.cmd('ad group create --display-name {prefix_group} --mail-nickname {prefix_group}')
-        self.cmd('ad group show --group {group1}',
-                 checks=self.check('displayName', '{group1}'))
-        self.cmd('ad group show --group {group11}',
-                 checks=self.check('displayName', '{group11}'))
-        self.cmd('ad group show --group {prefix}',
-                 checks=self.check('displayName', '{prefix_group}'))
-        self.cmd('ad group delete -g {group1}')
-        self.cmd('ad group delete -g {group11}')
-        self.cmd('ad group delete -g {prefix}')
+            self.clean_resource(self.kwargs['group'])
+            self.clean_resource(self.kwargs['child_group'])
+            self.clean_resource(self.kwargs['leaf_group'])
+            self.clean_resource('{}@{}'.format(self.kwargs['user1'], self.kwargs['domain']), type='user')
+            self.clean_resource('{}@{}'.format(self.kwargs['user2'], self.kwargs['domain']), type='user')
+            if self.kwargs.get('app_id'):
+                self.clean_resource(self.kwargs['app_id'], type='app')
 
 
 def get_signed_in_user(test_case):
@@ -794,26 +814,6 @@ class GraphOwnerScenarioTest(ScenarioTest):
                 self.cmd('ad sp delete --id {app_id}')
             except:
                 pass
-
-    def test_graph_group_ownership(self):
-        owner = get_signed_in_user(self)
-        if not owner:
-            return  # this test delete users which are beyond a SP's capacity, so quit...
-
-        self.kwargs = {
-            'owner': owner,
-            'group': self.create_random_name('cli-grp', 15),
-        }
-        self.recording_processors.append(AADGraphUserReplacer(owner, 'example@example.com'))
-        try:
-            self.kwargs['owner_object_id'] = self.cmd('ad user show --upn-or-object-id {owner}').get_output_in_json()['objectId']
-            self.kwargs['group_object_id'] = self.cmd('ad group create --display-name {group} --mail-nickname {group}').get_output_in_json()['objectId']
-            self.cmd('ad group owner add -g {group_object_id} --owner-object-id {owner_object_id}')
-            self.cmd('ad group owner add -g {group_object_id} --owner-object-id {owner_object_id}')
-            self.cmd('ad group owner list -g {group_object_id}', checks=self.check('length([*])', 1))
-        finally:
-            if self.kwargs['group_object_id']:
-                self.cmd('ad group delete -g ' + self.kwargs['group_object_id'])
 
 
 class GraphAppCredsScenarioTest(ScenarioTest):
