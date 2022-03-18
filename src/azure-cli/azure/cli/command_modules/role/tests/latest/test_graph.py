@@ -598,10 +598,6 @@ class GraphUserScenarioTest(ScenarioTest):
                      self.check("displayName", '{user1_newName}')
                  ])
 
-        # specifying --force-change-password-next-login without --password would raise an error
-        with self.assertRaises(CLIError):
-            self.cmd('ad user update --id {user1_id} --force-change-password-next-login false')
-
         # create group
         group_result = self.cmd(
             'ad group create --display-name {group} --mail-nickname {group} --description {group}').get_output_in_json()
