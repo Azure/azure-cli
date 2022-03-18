@@ -35,68 +35,68 @@ jobs:
         profile: 'latest'
         fullTest: true
 
-- job: AutomationTest20200901
-  displayName: Automation Test (Profile 2020-09-01)
-  timeoutInMinutes: 120
-  pool:
-    vmImage: 'ubuntu-20.04'
-  strategy:
-    matrix:
-      Python36:
-        python.version: '3.6'
-      Python38:
-        python.version: '3.8'
-      Python39:
-        python.version: '3.9'
-      Python310:
-        python.version: '3.10'
-  steps:
-    - template: .azure-pipelines/templates/automation_test_new.yml
-      parameters:
-        pythonVersion: '$(python.version)'
-        profile: '2020-09-01-hybrid'
-        fullTest: true
-
-- job: AutomationTest20190301
-  displayName: Automation Test (Profile 2019-03-01)
-  timeoutInMinutes: 120
-  pool:
-    vmImage: 'ubuntu-20.04'
-  strategy:
-    matrix:
-      Python36:
-        python.version: '3.6'
-      Python38:
-        python.version: '3.8'
-      Python39:
-        python.version: '3.9'
-      Python310:
-        python.version: '3.10'
-  steps:
-    - template: .azure-pipelines/templates/automation_test_new.yml
-      parameters:
-        pythonVersion: '$(python.version)'
-        profile: '2019-03-01-hybrid'
-        fullTest: true
-
-- job: AutomationTest20180301
-  displayName: Automation Test (Profile 2018-03-01)
-  timeoutInMinutes: 120
-  pool:
-    vmImage: 'ubuntu-20.04'
-  strategy:
-    matrix:
-      Python36:
-        python.version: '3.6'
-      Python38:
-        python.version: '3.8'
-      Python39:
-        python.version: '3.9'
-      Python310:
-        python.version: '3.10'
-  steps:
-    - template: .azure-pipelines/templates/automation_test_new.yml
-      parameters:
-        pythonVersion: '$(python.version)'
-        profile: '2018-03-01-hybrid'
-        fullTest: true
+#- job: AutomationTest20200901
+#  displayName: Automation Test (Profile 2020-09-01)
+#  timeoutInMinutes: 120
+#  pool:
+#    vmImage: 'ubuntu-20.04'
+#  strategy:
+#    matrix:
+#      Python36:
+#        python.version: '3.6'
+#      Python38:
+#        python.version: '3.8'
+#      Python39:
+#        python.version: '3.9'
+#      Python310:
+#        python.version: '3.10'
+#  steps:
+#    - template: .azure-pipelines/templates/automation_test_new.yml
+#      parameters:
+#        pythonVersion: '$(python.version)'
+#        profile: '2020-09-01-hybrid'
+#        fullTest: true
+#
+#- job: AutomationTest20190301
+#  displayName: Automation Test (Profile 2019-03-01)
+#  timeoutInMinutes: 120
+#  pool:
+#    vmImage: 'ubuntu-20.04'
+#  strategy:
+#    matrix:
+#      Python36:
+#        python.version: '3.6'
+#      Python38:
+#        python.version: '3.8'
+#      Python39:
+#        python.version: '3.9'
+#      Python310:
+#        python.version: '3.10'
+#  steps:
+#    - template: .azure-pipelines/templates/automation_test_new.yml
+#      parameters:
+#        pythonVersion: '$(python.version)'
+#        profile: '2019-03-01-hybrid'
+#        fullTest: true
+#
+#- job: AutomationTest20180301
+#  displayName: Automation Test (Profile 2018-03-01)
+#  timeoutInMinutes: 120
+#  pool:
+#    vmImage: 'ubuntu-20.04'
+#  strategy:
+#    matrix:
+#      Python36:
+#        python.version: '3.6'
+#      Python38:
+#        python.version: '3.8'
+#      Python39:
+#        python.version: '3.9'
+#      Python310:
+#        python.version: '3.10'
+#  steps:
+#    - template: .azure-pipelines/templates/automation_test_new.yml
+#      parameters:
+#        pythonVersion: '$(python.version)'
+#        profile: '2018-03-01-hybrid'
+#        fullTest: true
