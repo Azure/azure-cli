@@ -21,7 +21,7 @@ steps:
     inputs:
       versionSpec: ${{ parameters.pythonVersion }}
       displayName: "Use Python ${{ parameters.pythonVersion }}"
-  - template: ./azdev_setup.yml
+  - template: ./azdev_setup_new.yml
   - bash: |
       set -ev
 
@@ -46,7 +46,7 @@ steps:
         azdev test --no-exitfirst --repo=./ --src=HEAD --tgt=origin/$(System.PullRequest.TargetBranch) --cli-ci --profile ${{ parameters.profile }} --verbose --series
       else
         echo "Running full test"
-        azdev test --no-exitfirst --profile ${{ parameters.profile }} --verbose --series
+        azdev test --no-exitfirst --profile ${{ parameters.profile }} --verbose --series -a "-n 8 --durations=0"
       fi
     displayName: "azdev test"
     env:
