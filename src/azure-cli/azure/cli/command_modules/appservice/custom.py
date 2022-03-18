@@ -4524,18 +4524,6 @@ def perform_onedeploy(cmd,
                       ignore_stack=None,
                       timeout=None,
                       slot=None):
-    # client = web_client_factory(cmd.cli_ctx)
-    # url = f"{cmd.cli_ctx.cloud.endpoints.resource_manager}/subscriptions/{get_subscription_id(cmd.cli_ctx)}/resourceGroups/{resource_group_name}/providers/Microsoft.Web/sites/{name}/extensions/onedeploy?api-version={client.DEFAULT_API_VERSION}"
-    # body = {"properties": {
-    #     "type": "static",
-    #     "packageUri": src_url,
-    #     "path": target_path,
-    # }}
-    # send_raw_request(cmd.cli_ctx, "PUT", url, body=json.dumps(body))
-    # return
-
-    # return client.web_apps.create_one_deploy_operation(resource_group_name, name, data=json.dumps(body))
-
     params = OneDeployParams()
 
     params.cmd = cmd
@@ -4696,12 +4684,13 @@ def _make_onedeploy_request(params):
     deployment_status_url = _get_onedeploy_status_url(params)
 
     logger.info("Deployment API: %s", deploy_url)
-    if not params.src_url:
+    if not params.src_url:  # use SCM API
         response = requests.post(deploy_url, data=body, headers=headers, verify=not should_disable_connection_verify())
         # For debugging purposes only, you can change the async deployment into a sync deployment by polling the API status
         # For that, set poll_async_deployment_for_debugging=True
         poll_async_deployment_for_debugging = True
-    else:
+    else:  # use ARM proxy
+        poll_async_deployment_for_debugging = False
         response = send_raw_request(params.cmd.cli_ctx, "PUT", deploy_url, body=body)
 
     # check the status of async deployment
@@ -4709,10 +4698,15 @@ def _make_onedeploy_request(params):
         response_body = None
         if poll_async_deployment_for_debugging:
             logger.info('Polling the status of async deployment')
-            # TODO fix for new One Deploy API
             response_body = _check_zip_deployment_status(params.cmd, params.resource_group_name, params.webapp_name,
                                                         deployment_status_url, headers, params.timeout)
             logger.info('Async deployment complete. Server response: %s', response_body)
+        else:
+            # TODO add status polling for One Deploy API when it's available
+            if 'application/json' in response.headers.get('content-type', ""):
+                state = response.json().get("properties", {}).get("provisioningState")
+                if state:
+                    logger.warning("Deployment status is: \"%s\"", state)
         return response_body
 
     # API not available yet!
