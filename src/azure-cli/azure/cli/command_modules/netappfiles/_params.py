@@ -16,7 +16,7 @@ def load_arguments(self, _):
     with self.argument_context('netappfiles') as c:
         c.argument('resource_group', resource_group_name_type)
         c.argument('tags', arg_type=tags_type)
-        c.argument('protocol_types', arg_type=tags_type)
+        c.argument('protocol_types', nargs="+")
         c.argument('account_name', account_name_type)
         c.argument('pool_name', pool_name_type)
         c.argument('volume_name', volume_name_type)
@@ -32,9 +32,10 @@ def load_arguments(self, _):
         c.argument('account_name', help='The name of the ANF account', id_part=None)
 
     with self.argument_context('netappfiles account ad') as c:
-        c.argument('backup_operators', arg_type=tags_type)
-        c.argument('security_operators', arg_type=tags_type)
-        c.argument('allow_local_ldap_users', arg_type=tags_type)
+        c.argument('backup_operators', nargs="+")
+        c.argument('security_operators', nargs="+")
+        c.argument('administrators', nargs="+")
+        c.argument('allow_local_ldap_users', arg_type=get_three_state_flag())
         c.argument('encrypt_dc_conn', options_list=['--encrypt-dc-conn'], arg_type=get_three_state_flag())
         c.argument('ldap_signing', arg_type=get_three_state_flag())
         c.argument('aes_encryption', arg_type=get_three_state_flag())
@@ -56,13 +57,14 @@ def load_arguments(self, _):
     with self.argument_context('netappfiles account backup') as c:
         c.argument('account_name', account_name_type, id_part=None)
 
-    load_poolArguments(self, account_name_type, pool_name_type)
-    load_volumeArguments(self, account_name_type, pool_name_type, volume_name_type)
-    load_snapshotArguments(self, account_name_type, pool_name_type, volume_name_type)
-    load_vaultArguments(self, account_name_type)
+    load_pool_arguments(self, account_name_type, pool_name_type)
+    load_volume_arguments(self, account_name_type, pool_name_type, volume_name_type)
+    load_snapshot_arguments(self, account_name_type, pool_name_type, volume_name_type)
+    load_vault_arguments(self, account_name_type)
+    load_subvolume_arguments(self, account_name_type, pool_name_type, volume_name_type)
 
 
-def load_poolArguments(self, account_name_type, pool_name_type):
+def load_pool_arguments(self, account_name_type, pool_name_type):
     with self.argument_context('netappfiles pool') as c:
         c.argument('account_name', id_part='name')
         c.argument('pool_name', pool_name_type, options_list=['--pool-name', '-p', '--name', '-n'])
@@ -72,7 +74,7 @@ def load_poolArguments(self, account_name_type, pool_name_type):
         c.argument('account_name', account_name_type, id_part=None)
 
 
-def load_volumeArguments(self, account_name_type, pool_name_type, volume_name_type):
+def load_volume_arguments(self, account_name_type, pool_name_type, volume_name_type):
     with self.argument_context('netappfiles volume') as c:
         c.argument('account_name', id_part='name')
         c.argument('pool_name', pool_name_type)
@@ -88,6 +90,9 @@ def load_volumeArguments(self, account_name_type, pool_name_type, volume_name_ty
         c.argument('ldap_enabled', arg_type=get_three_state_flag())
         c.argument('cool_access', arg_type=get_three_state_flag())
         c.argument('is_def_quota_enabled', arg_type=get_three_state_flag())
+
+    with self.argument_context('netappfiles volume delete') as c:
+        c.argument('force_delete', options_list=['--force', '--force-delete', '-f'], arg_type=get_three_state_flag())
 
     with self.argument_context('netappfiles volume list') as c:
         c.argument('account_name', account_name_type, id_part=None)
@@ -133,12 +138,13 @@ def load_volumeArguments(self, account_name_type, pool_name_type, volume_name_ty
         c.argument('backup_name', options_list=['--backup-name', '-b'], id_part=None)
 
 
-def load_snapshotArguments(self, account_name_type, pool_name_type, volume_name_type):
+def load_snapshot_arguments(self, account_name_type, pool_name_type, volume_name_type):
     with self.argument_context('netappfiles snapshot') as c:
         c.argument('account_name', account_name_type)
         c.argument('pool_name', pool_name_type)
         c.argument('volume_name', volume_name_type)
         c.argument('snapshot_name', id_part='child_name_3', options_list=['--name', '--snapshot-name', '-n', '-s'], help='The name of the ANF snapshot')
+        c.argument('file_paths', nargs="+")
 
     with self.argument_context('netappfiles snapshot list') as c:
         c.argument('account_name', account_name_type, id_part=None)
@@ -157,6 +163,14 @@ def load_snapshotArguments(self, account_name_type, pool_name_type, volume_name_
         c.argument('snapshot_policy_name', options_list=['--snapshot-policy-name', '--name', '-n'], help='The name of the snapshot policy')
 
 
-def load_vaultArguments(self, account_name_type):
+def load_vault_arguments(self, account_name_type):
     with self.argument_context('netappfiles vault list') as c:
         c.argument('account_name', account_name_type, id_part=None)
+
+
+def load_subvolume_arguments(self, account_name_type, pool_name_type, volume_name_type):
+    with self.argument_context('netappfiles subvolume') as c:
+        c.argument('account_name', account_name_type)
+        c.argument('pool_name', pool_name_type)
+        c.argument('volume_name', volume_name_type)
+        c.argument('subvolume_name', id_part='child_name_3', options_list=['--name', '--subvolume-name', '-n', '-s'], help='The name of the ANF subvolume')

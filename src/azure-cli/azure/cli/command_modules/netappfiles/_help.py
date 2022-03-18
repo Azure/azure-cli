@@ -47,21 +47,27 @@ parameters:
   - name: --server-root-ca-cert
     short-summary: When LDAP over SSL/TLS is enabled, the LDAP client is required to have base64 encoded Active Directory Certificate Service's self-signed root CA certificate, this optional parameter is used only for dual protocol with LDAP user-mapping volumes.
   - name: --backup-operators
-    short-summary: Users to be added to the Built-in Backup Operator active directory group. A list of unique usernames without domain specifier
+    short-summary: Users to be added to the Built-in Backup Operator active directory group. A space separated string of unique usernames without domain specifier
   - name: --aes-encryption
     short-summary: If enabled, AES encryption will be enabled for SMB communication
   - name: --ldap-signing
     short-summary: Specifies whether or not the LDAP traffic needs to be signed
   - name: --security-operators
-    short-summary: Domain Users in the Active directory to be given SeSecurityPrivilege privilege (Needed for SMB Continuously available shares for SQL). A list of unique usernames without domain specifier
+    short-summary: Domain Users in the Active directory to be given SeSecurityPrivilege privilege (Needed for SMB Continuously available shares for SQL). A space seperated list of unique usernames without domain specifier
   - name: --ldap-over-tls
     short-summary: Specifies whether or not the LDAP traffic needs to be secured via TLS
   - name: --allow-local-ldap-users
     short-summary: If enabled, NFS client local users can also (in addition to LDAP users) access the NFS volumes
   - name: --administrators
-    short-summary: Users to be added to the Built-in Administrators active directory group. A list of unique usernames without domain specifier.
+    short-summary: Users to be added to the Built-in Administrators active directory group. A space seperated string of unique usernames without domain specifier.
   - name: --encrypt-dc-conn
     short-summary: If enabled, Traffic between the SMB server to Domain Controller (DC) will be encrypted
+  - name: --user-dn
+    short-summary: This specifies the user DN, which overrides the base DN for user lookups
+  - name: --group-dn
+    short-summary: This specifies the group DN, which overrides the base DN for group lookups
+  - name: --group-filter
+    short-summary: This specifies the custom LDAP search filter to be used when looking up group membership from LDAP server
 examples:
   - name: Add an active directory to the account
     text: >
@@ -95,19 +101,19 @@ parameters:
   - name: --server-root-ca-cert
     short-summary: When LDAP over SSL/TLS is enabled, the LDAP client is required to have base64 encoded Active Directory Certificate Service's self-signed root CA certificate, this optional parameter is used only for dual protocol with LDAP user-mapping volumes.
   - name: --backup-operators
-    short-summary: Users to be added to the Built-in Backup Operator active directory group. A list of unique usernames without domain specifier
+    short-summary: Users to be added to the Built-in Backup Operator active directory group. A space seperated list of unique usernames without domain specifier
   - name: --aes-encryption
     short-summary: If enabled, AES encryption will be enabled for SMB communication
   - name: --ldap-signing
     short-summary: Specifies whether or not the LDAP traffic needs to be signed
   - name: --security-operators
-    short-summary: Domain Users in the Active directory to be given SeSecurityPrivilege privilege (Needed for SMB Continuously available shares for SQL). A list of unique usernames without domain specifier
+    short-summary: Domain Users in the Active directory to be given SeSecurityPrivilege privilege (Needed for SMB Continuously available shares for SQL). A space seperated list of unique usernames without domain specifier
   - name: --ldap-over-tls
     short-summary: Specifies whether or not the LDAP traffic needs to be secured via TLS
   - name: --allow-local-ldap-users
     short-summary: If enabled, NFS client local users can also (in addition to LDAP users) access the NFS volumes
   - name: --administrators
-    short-summary: Users to be added to the Built-in Administrators active directory group. A list of unique usernames without domain specifier.
+    short-summary: Users to be added to the Built-in Administrators active directory group. A space seperated list of unique usernames without domain specifier.
   - name: --encrypt-dc-conn
     short-summary: If enabled, Traffic between the SMB server to Domain Controller (DC) will be encrypted
 examples:
@@ -513,6 +519,28 @@ examples:
         az netappfiles snapshot show -g mygroup --account-name myaccname --pool-name mypoolname --volume-name myvolname --name mysnapname
 """
 
+helps['netappfiles snapshot restore-files'] = """
+type: command
+short-summary: Restore specified files from the specified snapshot to the active filesystem.
+parameters:
+  - name: --account-name -a
+    short-summary: The name of the ANF account
+  - name: --pool-name -p
+    short-summary: The name of the ANF pool
+  - name: --volume-name -v
+    short-summary: The name of the ANF volume
+  - name: --name --snapshot-name -n -s
+    short-summary: The name of the ANF snapshot
+  - name: --file-paths
+    short-summary: Required. A space seperated string of filed to be restored
+  - name: --destination-path
+    short-summary: Destination folder where the files will be restored
+examples:
+  - name: Restore files from snapshot
+    text: >
+        az netappfiles snapshot restore-files -g mygroup --account-name myaccname --pool-name mypoolname --volume-name myvolname --name mysnapname --file-paths myfilepaths
+"""
+
 helps['netappfiles volume'] = """
 type: group
 short-summary: Manage Azure NetApp Files (ANF) Volume Resources.
@@ -622,6 +650,8 @@ parameters:
     short-summary: Specifies whether the volume is enabled for Azure VMware Solution (AVS) datastore purpose. Possible values are Enabled and Disabled. Default value is Disabled.
   - name: --network-features
     short-summary: Basic network, or Standard features available to the volume. Possible values are Basic and Standard. Default value is Basic.
+  - name: --enable-subvolumes
+    short-summary:  Flag indicating whether subvolume operations are enabled on the volume. Possible values are Enabled and Disabled. Default value is Disabled
 examples:
   - name: Create an ANF volume
     text: >
@@ -912,11 +942,11 @@ parameters:
   - name: --is-def-quota-enabled
     short-summary: Specifies if default quota is enabled for the volume.
   - name: --default-user-quota
-    short-summary: Default user quota for volume in KiBs. If isDefaultQuotaEnabled is set, the minimum value of 4 KiBs applies.
+    short-summary: Default user quota for volume in KiBs. If isDefaultQuotaEnabled is set, the minimum value of 4 KiBs applies
   - name: --default-group-quota
-    short-summary: Default group quota for volume in KiBs. If isDefaultQuotaEnabled is set, the minimum value of 4 KiBs applies.
+    short-summary: Default group quota for volume in KiBs. If isDefaultQuotaEnabled is set, the minimum value of 4 KiBs applies
   - name: --throughput-mibps
-    short-summary: Maximum throughput in Mibps that can be achieved by this volume and this will be accepted as input only for manual qosType volume.
+    short-summary: Maximum throughput in Mibps that can be achieved by this volume and this will be accepted as input only for manual qosType volume
 examples:
   - name: Update an ANF volume
     text: >
@@ -1009,7 +1039,7 @@ parameters:
   - name: --pool-name -p
     short-summary: The name of the ANF pool
   - name: --name --volume-name -n -v
-    short-summary: The name of the ANF pool
+    short-summary: The name of the ANF volume
 examples:
   - name: Returns the backup status of the given ANF Volume
     text: >
@@ -1215,4 +1245,130 @@ examples:
   - name: List the vaults of the ANF account
     text: >
         az netappfiles vault list -g mygroup --account-name myname
+"""
+
+helps['netappfiles subvolume'] = """
+type: group
+short-summary: Manage Azure NetApp Files (ANF) Subvolume Resources.
+"""
+
+helps['netappfiles subvolume create'] = """
+type: command
+short-summary: Create a subvolume in the specified path or clones the subvolume specified in the parentPath
+parameters:
+  - name: --account-name -a
+    short-summary: The name of the ANF account
+  - name: --pool-name -p
+    short-summary: The name of the ANF pool
+  - name: --volume-name -v
+    short-summary: The name of the ANF volume
+  - name: --subvolume-name --name -n -s
+    short-summary: The name of the ANF subvolume
+  - name: --path
+    short-summary: Path to the subvolume
+  - name: --size
+    short-summary: Size of the subvolume
+  - name: --parent-path
+    short-summary: Path to the parent subvolume
+examples:
+  - name: Create a ANF subvolume
+    text: >
+        az netappfiles subvolume create -g mygroup --account-name myaccountname  --pool-name mypoolname --volume-name myvolumename --subvolume-name mysubvolumename
+"""
+
+helps['netappfiles subvolume update'] = """
+type: command
+short-summary: Update a specified ANF subvolume.
+parameters:
+  - name: --account-name -a
+    short-summary: The name of the ANF account
+  - name: --pool-name -p
+    short-summary: The name of the ANF pool
+  - name: --volume-name -v
+    short-summary: The name of the ANF volume
+  - name: --subvolume-name --name -n -s
+    short-summary: The name of the ANF subvolume
+  - name: --path
+    short-summary: Path to the subvolume
+  - name: --size
+    short-summary: Size of the subvolume
+examples:
+  - name: Update a subvolume
+    text: >
+        az netappfiles subvolume update -g mygroup --account-name myaccountname  --pool-name mypoolname --volume-name myvolumename --subvolume-name mysubvolumename
+"""
+
+helps['netappfiles subvolume list'] = """
+type: command
+short-summary: List all ANF subvolumes in the specified NetApp volume.
+parameters:
+  - name: --account-name -a
+    short-summary: The name of the ANF account
+  - name: --pool-name -p
+    short-summary: The name of the ANF pool
+  - name: --volume-name -v
+    short-summary: The name of the ANF volume
+examples:
+  - name: List all subvolumes of a ANF volume
+    text: >
+        az netappfiles subvolume list -g mygroup --account-name myaccountname  --pool-name mypoolname --volume-name myvolumename
+"""
+
+helps['netappfiles subvolume show'] = """
+type: command
+short-summary: Get the path associated with a subvolumeName
+parameters:
+  - name: --account-name -a
+    short-summary: The name of the ANF account
+  - name: --pool-name -p
+    short-summary: The name of the ANF pool
+  - name: --volume-name -v
+    short-summary: The name of the ANF volume
+  - name: --subvolume-name --name -n -s
+    short-summary: The name of the ANF subvolume
+examples:
+  - name: Get a subvolume of the ANF volume
+    text: >
+        az netappfiles subvolume show -g mygroup --account-name myaccountname  --pool-name mypoolname --volume-name myvolumename --subvolume-name mysubvolumename
+"""
+
+helps['netappfiles subvolume delete'] = """
+type: command
+short-summary: Delete a specified ANF subvolume.
+parameters:
+  - name: --account-name -a
+    short-summary: The name of the ANF account
+  - name: --pool-name -p
+    short-summary: The name of the ANF pool
+  - name: --volume-name -v
+    short-summary: The name of the ANF volume
+  - name: --subvolume-name --name -n -s
+    short-summary: The name of the ANF subvolume
+examples:
+  - name: Delete a subvolume of the ANF volume
+    text: >
+        az netappfiles subvolume delete -g mygroup --account-name myaccountname  --pool-name mypoolname --volume-name myvolumename --subvolume-name mysubvolumename
+"""
+
+helps['netappfiles subvolume metadata'] = """
+type: group
+short-summary: Manage Azure NetApp Files (ANF) Subvolume Metadata Resources.
+"""
+
+helps['netappfiles subvolume metadata show'] = """
+type: command
+short-summary: Get the specified ANF metadata of a subvolume.
+parameters:
+  - name: --account-name -a
+    short-summary: The name of the ANF account
+  - name: --pool-name -p
+    short-summary: The name of the ANF pool
+  - name: --volume-name -v
+    short-summary: The name of the ANF volume
+  - name: --subvolume-name --name -n -s
+    short-summary: The name of the ANF subvolume
+examples:
+  - name: Get a metadata of an ANF subvolume
+    text: >
+        az netappfiles subvolume metadata show -g mygroup --account-name myaccountname  --pool-name mypoolname --volume-name myvolumename --subvolume-name mysubvolumename
 """

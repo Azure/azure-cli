@@ -4,10 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
-
 from knack.log import get_logger
 from knack.util import CLIError
-from azure.mgmt.netapp.models import ActiveDirectory, NetAppAccount, NetAppAccountPatch, CapacityPool, CapacityPoolPatch, Volume, VolumePatch, VolumePropertiesExportPolicy, ExportPolicyRule, Snapshot, ReplicationObject, VolumePropertiesDataProtection, SnapshotPolicy, SnapshotPolicyPatch, HourlySchedule, DailySchedule, WeeklySchedule, MonthlySchedule, VolumeSnapshotProperties, VolumeBackupProperties, BackupPolicy, BackupPolicyPatch, VolumePatchPropertiesDataProtection, AccountEncryption, AuthorizeRequest, BreakReplicationRequest, PoolChangeRequest, VolumeRevert, Backup, BackupPatch
+from azure.mgmt.netapp.models import ActiveDirectory, NetAppAccount, NetAppAccountPatch, CapacityPool, CapacityPoolPatch, Volume, VolumePatch, VolumePropertiesExportPolicy, ExportPolicyRule, Snapshot, ReplicationObject, VolumePropertiesDataProtection, SnapshotPolicy, SnapshotPolicyPatch, HourlySchedule, DailySchedule, WeeklySchedule, MonthlySchedule, VolumeSnapshotProperties, VolumeBackupProperties, BackupPolicy, BackupPolicyPatch, VolumePatchPropertiesDataProtection, AccountEncryption, AuthorizeRequest, BreakReplicationRequest, PoolChangeRequest, VolumeRevert, Backup, BackupPatch, LdapSearchScopeOpt, SubvolumeInfo, SubvolumePatchRequest, SnapshotRestoreFiles
 from azure.cli.core.commands.client_factory import get_subscription_id
 from msrestazure.tools import is_valid_resource_id, parse_resource_id
 
@@ -40,8 +39,11 @@ def create_account(client, account_name, resource_group_name, location, tags=Non
 def add_active_directory(instance, account_name, resource_group_name, username, password, domain, dns,
                          smb_server_name, organizational_unit=None, kdc_ip=None, ad_name=None,
                          server_root_ca_cert=None, backup_operators=None, aes_encryption=None, ldap_signing=None,
-                         security_operators=None, ldap_over_tls=None, allow_local_ldap_users=None, tags=None,
-                         administrators=None, encrypt_dc_conn=None):
+                         security_operators=None, ldap_over_tls=None, allow_local_ldap_users=None,
+                         administrators=None, encrypt_dc_conn=None, user_dn=None, group_dn=None, group_filter=None):
+    ldap_search_scope = LdapSearchScopeOpt(user_dn=user_dn,
+                                           group_dn=group_dn,
+                                           group_membership_filter=group_filter)
     active_directories = []
     active_directory = ActiveDirectory(username=username, password=password, domain=domain, dns=dns,
                                        smb_server_name=smb_server_name, organizational_unit=organizational_unit,
@@ -50,7 +52,8 @@ def add_active_directory(instance, account_name, resource_group_name, username, 
                                        ldap_signing=ldap_signing, security_operators=security_operators,
                                        ldap_over_tls=ldap_over_tls,
                                        allow_local_nfs_users_with_ldap=allow_local_ldap_users,
-                                       administrators=administrators, encrypt_dc_connections=encrypt_dc_conn)
+                                       administrators=administrators, encrypt_dc_connections=encrypt_dc_conn,
+                                       ldap_search_scope=ldap_search_scope)
     active_directories.append(active_directory)
     body = NetAppAccountPatch(active_directories=active_directories)
     _update_mapper(instance, body, ['active_directories'])
@@ -64,8 +67,12 @@ def update_active_directory(instance, account_name, resource_group_name, active_
                             dns, smb_server_name, organizational_unit=None, kdc_ip=None, ad_name=None,
                             server_root_ca_cert=None, backup_operators=None, aes_encryption=None, ldap_signing=None,
                             security_operators=None, ldap_over_tls=None, allow_local_ldap_users=None,
-                            administrators=None, encrypt_dc_conn=None, tags=None):
+                            administrators=None, encrypt_dc_conn=None, user_dn=None, group_dn=None, group_filter=None):
     ad_list = instance.active_directories
+
+    ldap_search_scope = LdapSearchScopeOpt(user_dn=user_dn,
+                                           group_dn=group_dn,
+                                           group_membership_filter=group_filter)
 
     active_directory = ActiveDirectory(active_directory_id=active_directory_id, username=username, password=password,
                                        domain=domain, dns=dns, smb_server_name=smb_server_name,
@@ -74,7 +81,8 @@ def update_active_directory(instance, account_name, resource_group_name, active_
                                        aes_encryption=aes_encryption, ldap_signing=ldap_signing,
                                        security_operators=security_operators, ldap_over_tls=ldap_over_tls,
                                        allow_local_nfs_users_with_ldap=allow_local_ldap_users,
-                                       administrators=administrators, encrypt_dc_connections=encrypt_dc_conn)
+                                       administrators=administrators, encrypt_dc_connections=encrypt_dc_conn,
+                                       ldap_search_scope=ldap_search_scope)
 
     for ad in ad_list:
         if ad.active_directory_id == active_directory_id:
@@ -162,7 +170,7 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
                   rule_index=None, unix_read_only=None, unix_read_write=None, cifs=None,
                   allowed_clients=None, ldap_enabled=None, chown_mode=None, cool_access=None, coolness_period=None,
                   unix_permissions=None, is_def_quota_enabled=None, default_user_quota=None,
-                  default_group_quota=None, avs_data_store=None, network_features=None):
+                  default_group_quota=None, avs_data_store=None, network_features=None, enable_subvolumes=None):
     subs_id = get_subscription_id(cmd.cli_ctx)
 
     # default the resource group of the subnet to the volume's rg unless the subnet is specified by id
@@ -265,7 +273,8 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
         default_user_quota_in_ki_bs=default_user_quota,
         default_group_quota_in_ki_bs=default_group_quota,
         avs_data_store=avs_data_store,
-        network_features=network_features)
+        network_features=network_features,
+        enable_subvolumes=enable_subvolumes)
 
     return client.begin_create_or_update(resource_group_name, account_name, pool_name, volume_name, body)
 
@@ -273,7 +282,7 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
 # -- volume update
 def patch_volume(instance, usage_threshold=None, service_level=None, tags=None, vault_id=None, backup_enabled=False,
                  backup_policy_id=None, policy_enforced=False, throughput_mibps=None, snapshot_policy_id=None,
-                 is_def_quota_enabled=None, default_user_quota=None, default_group_quota=None):
+                 is_def_quota_enabled=None, default_user_quota=None, default_group_quota=None, unix_permissions=None):
     data_protection = None
     backup = None
     snapshot = None
@@ -293,7 +302,8 @@ def patch_volume(instance, usage_threshold=None, service_level=None, tags=None, 
         tags=tags,
         is_default_quota_enabled=is_def_quota_enabled,
         default_user_quota_in_ki_bs=default_user_quota,
-        default_group_quota_in_ki_bs=default_group_quota)
+        default_group_quota_in_ki_bs=default_group_quota,
+        unix_permissions=unix_permissions)
     if throughput_mibps is not None:
         params.throughput_mibps = throughput_mibps
     _update_mapper(instance, params, ['service_level', 'usage_threshold', 'tags', 'data_protection'])
@@ -392,6 +402,15 @@ def create_snapshot(client, resource_group_name, account_name, pool_name, volume
     return client.begin_create(resource_group_name, account_name, pool_name, volume_name, snapshot_name, body)
 
 
+def snapshot_restore_files(client, resource_group_name, account_name, pool_name, volume_name, snapshot_name, file_paths,
+                           destination_path=None):
+    body = SnapshotRestoreFiles(
+        file_paths=file_paths,
+        destination_path=destination_path
+    )
+    client.begin_restore_files(resource_group_name, account_name, pool_name, volume_name, snapshot_name, body)
+
+
 # ---- SNAPSHOT POLICIES ----
 def create_snapshot_policy(client, resource_group_name, account_name, snapshot_policy_name, location,
                            hourly_snapshots=None, hourly_minute=None,
@@ -466,3 +485,23 @@ def patch_backup_policy(client, resource_group_name, account_name, backup_policy
         enabled=enabled,
         tags=tags)
     return client.begin_update(resource_group_name, account_name, backup_policy_name, body)
+
+
+# ---- SUBVOLUME ----
+def create_subvolume(client, resource_group_name, account_name, pool_name, volume_name, subvolume_name, path=None,
+                     size=None, parent_path=None):
+    body = SubvolumeInfo(
+        path=path,
+        size=size,
+        parent_path=parent_path
+    )
+    return client.begin_create(resource_group_name, account_name, pool_name, volume_name, subvolume_name, body)
+
+
+def patch_subvolume(client, resource_group_name, account_name, pool_name, volume_name, subvolume_name, path=None,
+                    size=None):
+    body = SubvolumePatchRequest(
+        path=path,
+        size=size
+    )
+    return client.begin_update(resource_group_name, account_name, pool_name, volume_name, subvolume_name, body)
