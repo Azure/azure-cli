@@ -18,7 +18,7 @@ from ._completers import get_hostname_completion_list
 from ._constants import (FUNCTIONS_VERSIONS, WINDOWS_OS_NAME, LINUX_OS_NAME)
 
 from ._validators import (validate_timeout_value, validate_site_create, validate_asp_create,
-                          validate_add_vnet, validate_front_end_scale_factor, validate_ase_create, validate_ip_address,
+                          validate_front_end_scale_factor, validate_ase_create, validate_ip_address,
                           validate_service_tag, validate_public_cloud)
 
 AUTH_TYPES = {
@@ -398,6 +398,11 @@ def load_arguments(self, _):
     with self.argument_context('webapp deployment slot create') as c:
         c.argument('configuration_source',
                    help="source slot to clone configurations from. Use web app's name to refer to the production slot")
+        c.argument('deployment_container_image_name', options_list=['--deployment-container-image-name', '-i'],
+                   help='Container image name, e.g. publisher/image-name:tag')
+        c.argument('docker_registry_server_password', options_list=['--docker-registry-server-password', '-w'],
+                   help='The container registry server password')
+        c.argument('docker_registry_server_user', options_list=['--docker-registry-server-user', '-u'], help='the container registry server username')
     with self.argument_context('webapp deployment slot swap') as c:
         c.argument('action',
                    help="swap types. use 'preview' to apply target slot's settings on the source slot first; use 'swap' to complete it; use 'reset' to reset the swap",
@@ -695,7 +700,7 @@ def load_arguments(self, _):
     with self.argument_context('functionapp vnet-integration') as c:
         c.argument('name', arg_type=functionapp_name_arg_type, id_part=None)
         c.argument('slot', help="The name of the slot. Default to the productions slot if not specified")
-        c.argument('vnet', help="The name or resource ID of the Vnet", validator=validate_add_vnet,
+        c.argument('vnet', help="The name or resource ID of the Vnet",
                    local_context_attribute=LocalContextAttribute(name='vnet_name', actions=[LocalContextAction.GET]))
         c.argument('subnet', help="The name or resource ID of the subnet",
                    local_context_attribute=LocalContextAttribute(name='subnet_name', actions=[LocalContextAction.GET]))
@@ -812,6 +817,11 @@ def load_arguments(self, _):
     with self.argument_context('functionapp deployment slot create') as c:
         c.argument('configuration_source',
                    help="source slot to clone configurations from. Use function app's name to refer to the production slot")
+        c.argument('deployment_container_image_name', options_list=['--deployment-container-image-name', '-i'],
+                   help='Container image name, e.g. publisher/image-name:tag')
+        c.argument('docker_registry_server_password', options_list=['--docker-registry-server-password', '-d'],
+                   help='The container registry server password')
+        c.argument('docker_registry_server_user', options_list=['--docker-registry-server-user', '-u'], help='the container registry server username')
     with self.argument_context('functionapp deployment slot swap') as c:
         c.argument('action',
                    help="swap types. use 'preview' to apply target slot's settings on the source slot first; use 'swap' to complete it; use 'reset' to reset the swap",
@@ -975,6 +985,7 @@ def load_arguments(self, _):
         c.argument('hostname', options_list=['--hostname', '-n'], help='Name of the custom domain')
 
     with self.argument_context('staticwebapp', validator=validate_public_cloud) as c:
+        c.ignore('format_output')
         c.argument('name', options_list=['--name', '-n'], metavar='NAME', help="Name of the static site")
         c.argument('source', options_list=['--source', '-s'], help="URL for the repository of the static site.")
         c.argument('token', options_list=['--token', '-t'],

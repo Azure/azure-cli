@@ -79,6 +79,34 @@ class AKSAgentPoolContextTestCase(unittest.TestCase):
         with self.assertRaises(CLIInternalError):
             ctx_1.attach_agentpool(agentpool)
 
+    def test_validate_counts_in_autoscaler(self):
+        ctx = AKSAgentPoolContext(self.cmd, {}, self.models, decorator_mode=DecoratorMode.CREATE)
+        # default
+        ctx._AKSAgentPoolContext__validate_counts_in_autoscaler(3, False, None, None, DecoratorMode.CREATE)
+
+        # custom value
+        ctx._AKSAgentPoolContext__validate_counts_in_autoscaler(5, True, 1, 10, DecoratorMode.CREATE)
+
+        # fail on min_count/max_count not specified
+        with self.assertRaises(RequiredArgumentMissingError):
+            ctx._AKSAgentPoolContext__validate_counts_in_autoscaler(5, True, None, None, DecoratorMode.CREATE)
+
+        # fail on min_count > max_count
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx._AKSAgentPoolContext__validate_counts_in_autoscaler(5, True, 3, 1, DecoratorMode.CREATE)
+
+        # fail on node_count < min_count in create mode
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx._AKSAgentPoolContext__validate_counts_in_autoscaler(5, True, 7, 10, DecoratorMode.CREATE)
+
+        # skip node_count check in update mode
+        ctx._AKSAgentPoolContext__validate_counts_in_autoscaler(5, True, 7, 10, DecoratorMode.UPDATE)
+        ctx._AKSAgentPoolContext__validate_counts_in_autoscaler(None, True, 7, 10, DecoratorMode.UPDATE)
+
+        # fail on enable_cluster_autoscaler not specified
+        with self.assertRaises(RequiredArgumentMissingError):
+            ctx._AKSAgentPoolContext__validate_counts_in_autoscaler(5, False, 3, None, DecoratorMode.UPDATE)
+
     def test_get_resource_group_name(self):
         # default
         ctx_1 = AKSAgentPoolContext(
@@ -155,6 +183,63 @@ class AKSAgentPoolContextTestCase(unittest.TestCase):
         agentpool_1 = self.models.AgentPool(upgrade_settings=upgrade_settings_1)
         ctx_1.attach_agentpool(agentpool_1)
         self.assertEqual(ctx_1.get_max_surge(), "test_max_surge")
+
+    def test_get_node_count_and_enable_cluster_autoscaler_min_max_count(
+        self,
+    ):
+        # default
+        ctx_1 = AKSAgentPoolContext(
+            self.cmd,
+            {
+                "node_count": 3,
+                "enable_cluster_autoscaler": False,
+                "min_count": None,
+                "max_count": None,
+            },
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(
+            ctx_1.get_node_count_and_enable_cluster_autoscaler_min_max_count(),
+            (3, False, None, None),
+        )
+        agentpool = self.models.AgentPool(
+            count=5,
+            enable_auto_scaling=True,
+            min_count=1,
+            max_count=10,
+        )
+        ctx_1.attach_agentpool(agentpool)
+        self.assertEqual(
+            ctx_1.get_node_count_and_enable_cluster_autoscaler_min_max_count(),
+            (5, True, 1, 10),
+        )
+
+    def test_get_node_osdisk_size(self):
+        # default
+        ctx_1 = AKSAgentPoolContext(
+            self.cmd,
+            {"node_osdisk_size": 0},
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_1.get_node_osdisk_size(), 0)
+        agentpool = self.models.AgentPool(os_disk_size_gb=10)
+        ctx_1.attach_agentpool(agentpool)
+        self.assertEqual(ctx_1.get_node_osdisk_size(), 10)
+
+    def test_get_node_osdisk_type(self):
+        # default
+        ctx_1 = AKSAgentPoolContext(
+            self.cmd,
+            {"node_osdisk_type": None},
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_1.get_node_osdisk_type(), None)
+        agentpool = self.models.AgentPool(os_disk_type="test_mc_node_osdisk_type")
+        ctx_1.attach_agentpool(agentpool)
+        self.assertEqual(ctx_1.get_node_osdisk_type(), "test_mc_node_osdisk_type")
 
     def test_get_aks_custom_headers(self):
         # default
@@ -291,7 +376,9 @@ class AKSAgentPoolAddDecoratorTestCase(unittest.TestCase):
             dec_agentpool_1 = dec_1.construct_default_agentpool_profile()
 
         upgrade_settings_1 = self.models.AgentPoolUpgradeSettings()
-        agentpool_1 = self.models.AgentPool(upgrade_settings=upgrade_settings_1)
+        agentpool_1 = self.models.AgentPool(
+            upgrade_settings=upgrade_settings_1, count=3, enable_auto_scaling=False, os_disk_size_gb=0
+        )
         agentpool_1.name = "test_nodepool_name"
         self.assertEqual(dec_agentpool_1, agentpool_1)
         raw_param_dict.print_usage_statistics()
