@@ -698,7 +698,7 @@ def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
 
     blob_uri = block_blob_service.make_blob_url(container_name, blob_name, sas_token=blob_token)
     website_run_from_setting = "WEBSITE_RUN_FROM_PACKAGE={}".format(blob_uri)
-    update_app_settings(cmd, resource_group_name, name, settings=[website_run_from_setting])
+    update_app_settings(cmd, resource_group_name, name, settings=[website_run_from_setting], slot=slot)
     client = web_client_factory(cmd.cli_ctx)
 
     try:
