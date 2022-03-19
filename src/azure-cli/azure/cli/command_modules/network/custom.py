@@ -3727,6 +3727,16 @@ def list_load_balancer_nic(cmd, resource_group_name, load_balancer_name):
     return client.list(resource_group_name, load_balancer_name)
 
 
+def list_load_balancer_mapping(cmd, resource_group_name, load_balancer_name, backend_pool_name, request):
+    client = network_client_factory(cmd.cli_ctx).load_balancers
+    return client.begin_list_inbound_nat_rule_port_mappings(
+        resource_group_name,
+        load_balancer_name,
+        backend_pool_name,
+        request
+    )
+
+
 def create_lb_inbound_nat_rule(
         cmd, resource_group_name, load_balancer_name, item_name, protocol, backend_port, frontend_port=None,
         frontend_ip_name=None, floating_ip=None, idle_timeout=None, enable_tcp_reset=None,

@@ -18,7 +18,7 @@ from ._completers import get_hostname_completion_list
 from ._constants import (FUNCTIONS_VERSIONS, WINDOWS_OS_NAME, LINUX_OS_NAME)
 
 from ._validators import (validate_timeout_value, validate_site_create, validate_asp_create,
-                          validate_add_vnet, validate_front_end_scale_factor, validate_ase_create, validate_ip_address,
+                          validate_front_end_scale_factor, validate_ase_create, validate_ip_address,
                           validate_service_tag, validate_public_cloud)
 
 AUTH_TYPES = {
@@ -102,8 +102,7 @@ def load_arguments(self, _):
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                    configured_default='appserviceplan', id_part='name',
                    local_context_attribute=LocalContextAttribute(name='plan_name', actions=[LocalContextAction.GET]))
-        c.argument('admin_site_name', help='The name of the admin web app.',
-                   deprecate_info=c.deprecate(expiration='0.2.17'))
+        c.argument('number_of_workers', help='Number of workers to be allocated.', type=int, default=1)
         c.ignore('max_burst')
 
     with self.argument_context('appservice plan create') as c:
@@ -399,6 +398,11 @@ def load_arguments(self, _):
     with self.argument_context('webapp deployment slot create') as c:
         c.argument('configuration_source',
                    help="source slot to clone configurations from. Use web app's name to refer to the production slot")
+        c.argument('deployment_container_image_name', options_list=['--deployment-container-image-name', '-i'],
+                   help='Container image name, e.g. publisher/image-name:tag')
+        c.argument('docker_registry_server_password', options_list=['--docker-registry-server-password', '-w'],
+                   help='The container registry server password')
+        c.argument('docker_registry_server_user', options_list=['--docker-registry-server-user', '-u'], help='the container registry server username')
     with self.argument_context('webapp deployment slot swap') as c:
         c.argument('action',
                    help="swap types. use 'preview' to apply target slot's settings on the source slot first; use 'swap' to complete it; use 'reset' to reset the swap",
@@ -567,7 +571,7 @@ def load_arguments(self, _):
         c.argument('client_secret_certificate_thumbprint', options_list=['--aad-client-secret-certificate-thumbprint', '--thumbprint'], arg_group='Azure Active Directory',
                    help='Alternative to AAD Client Secret, thumbprint of a certificate used for signing purposes')
         c.argument('allowed_audiences', nargs='+', options_list=['--aad-allowed-token-audiences'],
-                   arg_group='Azure Active Directory', help="One or more token audiences (space-delimited).")
+                   arg_group='Azure Active Directory', help="One or more token audiences (comma-delimited).")
         c.argument('issuer', options_list=['--aad-token-issuer-url'],
                    help='This url can be found in the JSON output returned from your active directory endpoint using your tenantID. The endpoint can be queried from `az cloud show` at \"endpoints.activeDirectory\". '
                         'The tenantID can be found using `az account show`. Get the \"issuer\" from the JSON at <active directory endpoint>/<tenantId>/.well-known/openid-configuration.',
@@ -576,7 +580,7 @@ def load_arguments(self, _):
                    help="Application ID to integrate Facebook Sign-in into your web app")
         c.argument('facebook_app_secret', arg_group='Facebook', help='Facebook Application client secret')
         c.argument('facebook_oauth_scopes', nargs='+',
-                   help="One or more facebook authentication scopes (space-delimited).", arg_group='Facebook')
+                   help="One or more facebook authentication scopes (comma-delimited).", arg_group='Facebook')
         c.argument('twitter_consumer_key', arg_group='Twitter',
                    help='Application ID to integrate Twitter Sign-in into your web app')
         c.argument('twitter_consumer_secret', arg_group='Twitter', help='Twitter Application client secret')
@@ -589,7 +593,7 @@ def load_arguments(self, _):
                    help="AAD V2 Application ID to integrate Microsoft account Sign-in into your web app")
         c.argument('microsoft_account_client_secret', arg_group='Microsoft', help='AAD V2 Application client secret')
         c.argument('microsoft_account_oauth_scopes', nargs='+',
-                   help="One or more Microsoft authentification scopes (space-delimited).", arg_group='Microsoft')
+                   help="One or more Microsoft authentification scopes (comma-delimited).", arg_group='Microsoft')
 
     with self.argument_context('webapp hybrid-connection') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
@@ -639,7 +643,7 @@ def load_arguments(self, _):
                    help="Configure default logging required to enable viewing log stream immediately after launching the webapp",
                    default=False, action='store_true')
         c.argument('html', help="Ignore app detection and deploy as an html app", default=False, action='store_true')
-        c.argument('app_service_environment', options_list=['--app-service-environment', '-e'], help='name of the (pre-existing) App Service Environment to deploy to. Requires an Isolated V2 sku [I1v2, I2v2, I3v2]')
+        c.argument('app_service_environment', options_list=['--app-service-environment', '-e'], help='name or resource ID of the (pre-existing) App Service Environment to deploy to. Requires an Isolated V2 sku [I1v2, I2v2, I3v2]')
 
     with self.argument_context('webapp ssh') as c:
         c.argument('port', options_list=['--port', '-p'],
@@ -696,7 +700,7 @@ def load_arguments(self, _):
     with self.argument_context('functionapp vnet-integration') as c:
         c.argument('name', arg_type=functionapp_name_arg_type, id_part=None)
         c.argument('slot', help="The name of the slot. Default to the productions slot if not specified")
-        c.argument('vnet', help="The name or resource ID of the Vnet", validator=validate_add_vnet,
+        c.argument('vnet', help="The name or resource ID of the Vnet",
                    local_context_attribute=LocalContextAttribute(name='vnet_name', actions=[LocalContextAction.GET]))
         c.argument('subnet', help="The name or resource ID of the subnet",
                    local_context_attribute=LocalContextAttribute(name='subnet_name', actions=[LocalContextAction.GET]))
@@ -813,6 +817,11 @@ def load_arguments(self, _):
     with self.argument_context('functionapp deployment slot create') as c:
         c.argument('configuration_source',
                    help="source slot to clone configurations from. Use function app's name to refer to the production slot")
+        c.argument('deployment_container_image_name', options_list=['--deployment-container-image-name', '-i'],
+                   help='Container image name, e.g. publisher/image-name:tag')
+        c.argument('docker_registry_server_password', options_list=['--docker-registry-server-password', '-d'],
+                   help='The container registry server password')
+        c.argument('docker_registry_server_user', options_list=['--docker-registry-server-user', '-u'], help='the container registry server username')
     with self.argument_context('functionapp deployment slot swap') as c:
         c.argument('action',
                    help="swap types. use 'preview' to apply target slot's settings on the source slot first; use 'swap' to complete it; use 'reset' to reset the swap",
@@ -976,6 +985,7 @@ def load_arguments(self, _):
         c.argument('hostname', options_list=['--hostname', '-n'], help='Name of the custom domain')
 
     with self.argument_context('staticwebapp', validator=validate_public_cloud) as c:
+        c.ignore('format_output')
         c.argument('name', options_list=['--name', '-n'], metavar='NAME', help="Name of the static site")
         c.argument('source', options_list=['--source', '-s'], help="URL for the repository of the static site.")
         c.argument('token', options_list=['--token', '-t'],

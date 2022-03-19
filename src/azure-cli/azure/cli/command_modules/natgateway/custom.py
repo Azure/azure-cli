@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from azure.cli.core.azclierror import ValidationError
 from azure.cli.core.util import sdk_no_wait
 
 from knack.log import get_logger
@@ -19,6 +20,10 @@ def network_client_factory(cli_ctx, **kwargs):
 def create_nat_gateway(cmd, nat_gateway_name, resource_group_name,
                        location=None, public_ip_addresses=None,
                        public_ip_prefixes=None, idle_timeout=None, zone=None, no_wait=False):
+
+    if public_ip_addresses is None and public_ip_prefixes is None:
+        err_msg = "Validation Error: At least 1 public IP address/prefix need to be attached."
+        raise ValidationError(err_msg)
 
     client = network_client_factory(cmd.cli_ctx).nat_gateways
     NatGateway, NatGatewaySku = cmd.get_models('NatGateway', 'NatGatewaySku')

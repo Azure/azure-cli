@@ -111,6 +111,7 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     DATA_STORAGE_FILEDATALAKE = ('azure.multiapi.storagev2.filedatalake', None)
     DATA_STORAGE_FILESHARE = ('azure.multiapi.storagev2.fileshare', None)
     DATA_STORAGE_QUEUE = ('azure.multiapi.storagev2.queue', None)
+    DATA_STORAGE_TABLE = ('azure.data.tables', None)
 
     def __init__(self, import_prefix, client_name):
         """Constructor.
@@ -229,7 +230,7 @@ AZURE_API_PROFILES = {
             'private_endpoint_connections': '2019-10-17-preview',
             'subscription_diagnostic_settings': '2017-05-01-preview'
         }),
-        ResourceType.MGMT_APPSERVICE: '2020-09-01',
+        ResourceType.MGMT_APPSERVICE: '2021-03-01',
         ResourceType.MGMT_IOTHUB: '2021-07-02',
         ResourceType.MGMT_IOTDPS: '2021-10-15',
         ResourceType.MGMT_IOTCENTRAL: '2018-09-01',

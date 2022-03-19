@@ -13,7 +13,7 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           resource_type_type, services_type, validate_entity, validate_select, validate_blob_type,
                           validate_included_datasets_validator, validate_custom_domain, validate_hns_migration_type,
                           validate_container_public_access,
-                          validate_table_payload_format, add_progress_callback, process_resource_group,
+                          add_progress_callback, process_resource_group,
                           storage_account_key_options, process_file_download_namespace, process_metric_update_namespace,
                           get_char_options_validator, validate_bypass, validate_encryption_source, validate_marker,
                           validate_storage_data_plane_list, validate_azcopy_upload_destination_url,
@@ -67,7 +67,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                                                                 parent='share_name'))
     share_name_type = CLIArgumentType(options_list=['--share-name', '-s'], help='The file share name.',
                                       completer=get_storage_name_completion_list(t_file_service, 'list_shares'))
-    table_name_type = CLIArgumentType(options_list=['--table-name', '-t'],
+    table_name_type = CLIArgumentType(options_list=['--table-name', '-t'], help='The table name.',
                                       completer=get_storage_name_completion_list(t_table_service, 'list_tables'))
     queue_name_type = CLIArgumentType(options_list=['--queue-name', '-q'], help='The queue name.',
                                       completer=get_storage_name_completion_list(t_queue_service, 'list_queues'))
@@ -246,15 +246,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     public_network_access_enum = self.get_sdk('models._storage_management_client_enums#PublicNetworkAccess',
                                               resource_type=ResourceType.MGMT_STORAGE)
-
-    overwrite_type = CLIArgumentType(
-        arg_type=get_three_state_flag(),
-        help='Whether the blob to be uploaded should overwrite the current data. If True, upload_blob will '
-             'overwrite the existing data. If set to False, the operation will fail with ResourceExistsError. '
-             'The exception to the above is with Append blob types: if set to False and the data already exists, '
-             'an error will not be raised and the data will be appended to the existing blob. If set '
-             'overwrite=True, then the existing append blob will be deleted, and a new one created. '
-             'Defaults to False.')
 
     with self.argument_context('storage') as c:
         c.argument('container_name', container_name_type)
@@ -935,7 +926,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
         c.register_blob_arguments_track2()
         c.register_precondition_options()
-        c.register_content_settings_argument(t_blob_content_settings, update=False, arg_group="Content Control")
+        c.register_content_settings_argument(t_blob_content_settings, update=False, arg_group="Content Control",
+                                             process_md5=True)
         c.extra('blob_name', validator=validate_blob_name_for_upload)
 
         c.argument('file_path', options_list=('--file', '-f'), type=file_type, completer=FilesCompleter(),
@@ -968,6 +960,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('metadata', arg_group="Additional Flags")
         c.argument('timeout', arg_group="Additional Flags")
 
+    # pylint: disable=line-too-long
     with self.argument_context('storage blob upload-batch', resource_type=ResourceType.DATA_STORAGE_BLOB) as c:
         from .sdkutil import get_blob_types
 
@@ -985,7 +978,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('blob_type', options_list=('--type', '-t'), arg_type=get_enum_type(get_blob_types()))
         c.extra('no_progress', progress_type, validator=add_upload_progress_callback)
         c.extra('tier', tier_type, is_preview=True, validator=blob_tier_validator_track2)
-        c.extra('overwrite', overwrite_type, is_preview=True)
+        c.extra('overwrite', arg_type=get_three_state_flag(), is_preview=True,
+                help='Whether the blob to be uploaded should overwrite the current data. If True, blob upload '
+                     'operation will overwrite the existing data. If set to False, the operation will fail with '
+                     'ResourceExistsError. The exception to the above is with Append blob types: if set to False and the '
+                     'data already exists, an error will not be raised and the data will be appended to the existing '
+                     'blob. If set overwrite=True, then the existing append blob will be deleted, and a new one created. '
+                     'Defaults to False.')
 
     with self.argument_context('storage blob download') as c:
         c.argument('file_path', options_list=('--file', '-f'), type=file_type,
@@ -1805,18 +1804,31 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.ignore('service')
         c.ignore('target')
 
-    with self.argument_context('storage table') as c:
-        c.argument('table_name', table_name_type, options_list=('--name', '-n'))
+    for scope in ['create', 'delete', 'exists', 'generate-sas', 'stats']:
+        with self.argument_context('storage table {}'.format(scope)) as c:
+            c.argument('table_name', table_name_type, options_list=('--name', '-n'))
 
     with self.argument_context('storage table create') as c:
         c.argument('table_name', table_name_type, options_list=('--name', '-n'), completer=None)
         c.argument('fail_on_exist', help='Throw an exception if the table already exists.')
 
+    with self.argument_context('storage table delete') as c:
+        c.argument('fail_not_exist', help='Throw an exception if the table does not exist.')
+
+    with self.argument_context('storage table list') as c:
+        c.argument('marker', arg_type=marker_type)
+        c.argument('num_results', type=int, help='The maximum number of tables to return.')
+        c.argument('show_next_marker', action='store_true',
+                   help='Show nextMarker in result when specified.')
+
+    for scope in ['create', 'delete', 'list', 'show', 'update']:
+        with self.argument_context('storage table policy {}'.format(scope)) as c:
+            c.extra('table_name', table_name_type, required=True)
+
     with self.argument_context('storage table policy') as c:
         from ._validators import table_permission_validator
         from .completers import get_storage_acl_name_completion_list
 
-        c.argument('container_name', table_name_type)
         c.argument('policy_name', options_list=('--name', '-n'), help='The stored access policy name.',
                    completer=get_storage_acl_name_completion_list(t_table_service, 'table_name', 'get_table_acl'))
 
@@ -1837,22 +1849,49 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('permission', options_list='--permissions',
                    help=sas_help.format('(r)ead/query (a)dd (u)pdate (d)elete'),
                    validator=table_permission_validator)
+        c.argument('start_pk', help='The minimum partition key accessible with this shared access signature. '
+                                    'startpk must accompany startrk. Key values are inclusive. If omitted, '
+                                    'there is no lower bound on the table entities that can be accessed.')
+        c.argument('start_rk', help='The minimum row key accessible with this shared access signature. '
+                                    'startpk must accompany startrk. Key values are inclusive. If omitted, '
+                                    'there is no lower bound on the table entities that can be accessed.')
+        c.argument('end_pk', help='The maximum partition key accessible with this shared access signature. '
+                                  'endpk must accompany endrk. Key values are inclusive. If omitted, '
+                                  'there is no upper bound on the table entities that can be accessed.')
+        c.argument('end_rk', help='The maximum row key accessible with this shared access signature. '
+                                  'endpk must accompany endrk. Key values are inclusive. If omitted, '
+                                  'there is no upper bound on the table entities that can be accessed.')
         c.ignore('sas_token')
 
     with self.argument_context('storage entity') as c:
-        c.ignore('property_resolver')
-        c.argument('entity', options_list=('--entity', '-e'), validator=validate_entity, nargs='+')
-        c.argument('select', nargs='+', validator=validate_select,
-                   help='Space-separated list of properties to return for each entity.')
+        c.argument('entity', options_list=('--entity', '-e'), validator=validate_entity, nargs='+',
+                   help='Space-separated list of key=value pairs. Must contain a PartitionKey and a RowKey.')
+        c.argument('partition_key', help='The PartitionKey of the entity.')
+        c.argument('row_key', help='The RowKey of the entity.')
+
+    for scope in ['insert', 'show', 'query', 'replace', 'merge', 'delete']:
+        with self.argument_context('storage entity {}'.format(scope)) as c:
+            c.extra('table_name', table_name_type, required=True)
+
+    for scope in ['show', 'query']:
+        with self.argument_context('storage entity {}'.format(scope)) as c:
+            c.extra('select', nargs='+', validator=validate_select,
+                    help='Space-separated list of properties to return for each entity.')
+
+    for scope in ['replace', 'merge', 'delete']:
+        with self.argument_context('storage entity {}'.format(scope)) as c:
+            c.argument('if_match', arg_group='Precondition',
+                       help="An ETag value, or the wildcard character (*). "
+                            "Specify this header to perform the operation only if "
+                            "the resource's ETag matches the value specified.")
 
     with self.argument_context('storage entity insert') as c:
         c.argument('if_exists', arg_type=get_enum_type(['fail', 'merge', 'replace']))
 
     with self.argument_context('storage entity query') as c:
-        c.argument('accept', default='minimal', validator=validate_table_payload_format,
-                   arg_type=get_enum_type(['none', 'minimal', 'full']),
-                   help='Specifies how much metadata to include in the response payload.')
+        c.argument('filter', help='Specify a filter to return certain entities')
         c.argument('marker', validator=validate_marker, nargs='+')
+        c.argument('num_results', type=int, help='Number of entities returned per service request.')
 
     for item in ['create', 'show', 'delete', 'exists', 'metadata update', 'metadata show']:
         with self.argument_context('storage fs {}'.format(item)) as c:

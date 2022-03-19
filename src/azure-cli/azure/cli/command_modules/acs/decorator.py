@@ -16,17 +16,14 @@ from azure.cli.command_modules.acs._consts import (
     DecoratorEarlyExitException,
     DecoratorMode,
 )
-from azure.cli.command_modules.acs._loadbalancer import (
-    create_load_balancer_profile,
-    set_load_balancer_sku,
+from azure.cli.command_modules.acs._helpers import (
+    get_snapshot_by_snapshot_id,
+    get_user_assigned_identity_by_resource_id,
 )
-from azure.cli.command_modules.acs._loadbalancer import (
-    update_load_balancer_profile as _update_load_balancer_profile,
-)
+from azure.cli.command_modules.acs._loadbalancer import create_load_balancer_profile, set_load_balancer_sku
+from azure.cli.command_modules.acs._loadbalancer import update_load_balancer_profile as _update_load_balancer_profile
 from azure.cli.command_modules.acs._resourcegroup import get_rg_location
-from azure.cli.command_modules.acs._validators import (
-    extract_comma_separated_string,
-)
+from azure.cli.command_modules.acs._validators import extract_comma_separated_string
 from azure.cli.command_modules.acs.addonconfiguration import (
     ensure_container_insights_for_monitoring,
     ensure_default_log_analytics_workspace_for_monitoring,
@@ -36,12 +33,9 @@ from azure.cli.command_modules.acs.custom import (
     _ensure_aks_acr,
     _ensure_aks_service_principal,
     _ensure_cluster_identity_permission_on_kubelet_identity,
-    _get_user_assigned_identity,
     _put_managed_cluster_ensuring_permission,
     subnet_role_assignment_exists,
-    _get_snapshot,
 )
-
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core._profile import Profile
 from azure.cli.core.azclierror import (
@@ -896,9 +890,9 @@ class AKSContext:
 
         This fuction will store an intermediate "snapshot" to avoid sending the same request multiple times.
 
-        Function "_get_snapshot" will be called to retrieve the Snapshot object corresponding to a snapshot id, which
-        internally used the snapshot client (snapshots operations belonging to container service client) to send
-        the request.
+        Function "get_snapshot_by_snapshot_id" will be called to retrieve the Snapshot object corresponding to a
+        snapshot id, which internally used the snapshot client (snapshots operations belonging to container service
+        client) to send the request.
 
         :return: Snapshot or None
         """
@@ -909,7 +903,7 @@ class AKSContext:
 
         snapshot_id = self.get_snapshot_id()
         if snapshot_id:
-            snapshot = _get_snapshot(self.cmd.cli_ctx, snapshot_id)
+            snapshot = get_snapshot_by_snapshot_id(self.cmd.cli_ctx, snapshot_id)
             self.set_intermediate("snapshot", snapshot, overwrite_exists=True)
         return snapshot
 
@@ -2146,8 +2140,8 @@ class AKSContext:
     def get_identity_by_msi_client(self, assigned_identity: str) -> Identity:
         """Helper function to obtain the identity object by msi client.
 
-        Note: This is a wrapper of the external function "_get_user_assigned_identity", and the return result of this
-        function will not be directly decorated into the `mc` object.
+        Note: This is a wrapper of the external function "get_user_assigned_identity_by_resource_id", and the return
+        value of this function will not be directly decorated into the `mc` object.
 
         This function will use ManagedServiceIdentityClient to send the request, and return an identity object.
         ResourceNotFoundError, ClientRequestError or InvalidArgumentValueError exceptions might be raised in the above
@@ -2155,7 +2149,7 @@ class AKSContext:
 
         :return: string
         """
-        return _get_user_assigned_identity(self.cmd.cli_ctx, assigned_identity)
+        return get_user_assigned_identity_by_resource_id(self.cmd.cli_ctx, assigned_identity)
 
     def get_user_assigned_identity_client_id(self) -> str:
         """Helper function to obtain the client_id of user assigned identity.
