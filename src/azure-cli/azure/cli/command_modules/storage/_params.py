@@ -119,6 +119,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     exclude_path_type = CLIArgumentType(arg_group='Additional Flags', help='Exclude these paths. This option does not '
                                         'support wildcard characters (*). Checks relative path prefix. For example: '
                                         'myFolder;myFolder/subDirName/file.pdf.')
+    delete_destination_type = CLIArgumentType(arg_group='Additional Flags', help='Defines whether to delete extra files'
+                                              'from the destination that are not present at the source. Could be set to'
+                                              'true or false.(default true).')
     include_path_type = CLIArgumentType(arg_group='Additional Flags', help='Include only these paths. This option does '
                                         'not support wildcard characters (*). Checks relative path prefix. For example:'
                                         'myFolder;myFolder/subDirName/file.pdf')
@@ -1256,6 +1259,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('source', options_list=['--source', '-s'],
                    help='The source file path to sync from.')
         c.ignore('destination')
+        c.argument('delete_destination', delete_destination_type)
         c.argument('exclude_pattern', exclude_pattern_type)
         c.argument('include_pattern', include_pattern_type)
         c.argument('exclude_path', exclude_path_type)
