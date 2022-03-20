@@ -14,12 +14,12 @@ interactions:
       - -g --name --validate --image --disable-overprovision --instance-count --single-placement-group
         --admin-username --generate-ssh-keys --lb
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2","tags":{"product":"azurecli","cause":"automation","date":"2022-02-23T01:57:26Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2","tags":{"product":"azurecli","cause":"automation","date":"2022-03-17T07:32:47Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -28,7 +28,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 23 Feb 2022 01:57:29 GMT
+      - Thu, 17 Mar 2022 07:32:48 GMT
       expires:
       - '-1'
       pragma:
@@ -111,13 +111,13 @@ interactions:
       content-type:
       - text/plain; charset=utf-8
       date:
-      - Wed, 23 Feb 2022 01:57:30 GMT
+      - Thu, 17 Mar 2022 07:32:50 GMT
       etag:
       - W/"d5acead0b38a79d988c245a7a15ec01f999da9244c97bbdc1fa2ec70d9e433f5"
       expires:
-      - Wed, 23 Feb 2022 02:02:30 GMT
+      - Thu, 17 Mar 2022 07:37:50 GMT
       source-age:
-      - '2'
+      - '0'
       strict-transport-security:
       - max-age=31536000
       vary:
@@ -131,17 +131,128 @@ interactions:
       x-content-type-options:
       - nosniff
       x-fastly-request-id:
-      - 4600800bf6ca1f62cfe115099a4f31db29fc0f99
+      - f2130436da4688425d4051afd58b80e2706c053f
       x-frame-options:
       - deny
       x-github-request-id:
-      - 7C36:01D4:3AA050:48A76D:62158E03
+      - 2570:063C:1995B2:2734C1:62329D55
       x-served-by:
-      - cache-qpg1269-QPG
+      - cache-qpg1221-QPG
       x-timer:
-      - S1645581450.431633,VS0,VE0
+      - S1647502370.871494,VS0,VE297
       x-xss-protection:
       - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --name --validate --image --disable-overprovision --instance-count --single-placement-group
+        --admin-username --generate-ssh-keys --lb
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2/publishers/Canonical/artifacttypes/vmimage/offers/UbuntuServer/skus/18.04-LTS/versions?$top=1&$orderby=name%20desc&api-version=2021-11-01
+  response:
+    body:
+      string: "[\r\n  {\r\n    \"location\": \"eastus2\",\r\n    \"name\": \"18.04.202203080\",\r\n
+        \   \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/eastus2/Publishers/Canonical/ArtifactTypes/VMImage/Offers/UbuntuServer/Skus/18.04-LTS/Versions/18.04.202203080\"\r\n
+        \ }\r\n]"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '288'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Mar 2022 07:32:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/ListVMImagesVersionsFromLocation3Min;15999,Microsoft.Compute/ListVMImagesVersionsFromLocation30Min;43995
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --name --validate --image --disable-overprovision --instance-count --single-placement-group
+        --admin-username --generate-ssh-keys --lb
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2/publishers/Canonical/artifacttypes/vmimage/offers/UbuntuServer/skus/18.04-LTS/versions/18.04.202203080?api-version=2021-11-01
+  response:
+    body:
+      string: "{\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n    \"architecture\":
+        \"x64\",\r\n    \"replicaType\": \"Unmanaged\",\r\n    \"disallowed\": {\r\n
+        \     \"vmDiskType\": \"None\"\r\n    },\r\n    \"automaticOSUpgradeProperties\":
+        {\r\n      \"automaticOSUpgradeSupported\": true\r\n    },\r\n    \"imageDeprecationStatus\":
+        {\r\n      \"imageState\": \"Active\"\r\n    },\r\n    \"features\": [\r\n
+        \     {\r\n        \"name\": \"IsAcceleratedNetworkSupported\",\r\n        \"value\":
+        \"True\"\r\n      }\r\n    ],\r\n    \"osDiskImage\": {\r\n      \"operatingSystem\":
+        \"Linux\",\r\n      \"sizeInGb\": 31,\r\n      \"sizeInBytes\": 32213303808\r\n
+        \   },\r\n    \"dataDiskImages\": []\r\n  },\r\n  \"location\": \"eastus2\",\r\n
+        \ \"name\": \"18.04.202203080\",\r\n  \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/eastus2/Publishers/Canonical/ArtifactTypes/VMImage/Offers/UbuntuServer/Skus/18.04-LTS/Versions/18.04.202203080\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '875'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Mar 2022 07:32:52 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetVMImageFromLocation3Min;12999,Microsoft.Compute/GetVMImageFromLocation30Min;73997
     status:
       code: 200
       message: OK
@@ -160,7 +271,7 @@ interactions:
       - -g --name --validate --image --disable-overprovision --instance-count --single-placement-group
         --admin-username --generate-ssh-keys --lb
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-network/19.3.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks?api-version=2018-01-01
   response:
@@ -174,7 +285,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 23 Feb 2022 01:57:30 GMT
+      - Thu, 17 Mar 2022 07:32:52 GMT
       expires:
       - '-1'
       pragma:
@@ -202,11 +313,11 @@ interactions:
       {"osDisk": {"createOption": "FromImage", "caching": "ReadWrite", "managedDisk":
       {"storageAccountType": null}}, "imageReference": {"publisher": "Canonical",
       "offer": "UbuntuServer", "sku": "18.04-LTS", "version": "latest"}}, "osProfile":
-      {"computerNamePrefix": "vmss1cce5", "adminUsername": "ubuntuadmin", "linuxConfiguration":
+      {"computerNamePrefix": "vmss1a9e4", "adminUsername": "ubuntuadmin", "linuxConfiguration":
       {"disablePasswordAuthentication": true, "ssh": {"publicKeys": [{"path": "/home/ubuntuadmin/.ssh/authorized_keys",
       "keyData": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCyHIxtehmSa4iZExLrQ4pc7bklBKwAR865F9LEWNd8SIgFCYy2s+vA5Sofj2cMD06HqCAPeM+VJvjwImCmGhO3GQU816Zo7AOX21dKGUZLbGQ35lxXPMsd0aCx8J8Ncq1sReBPlZs9BT2X0pR2jkalCJQKFWXXkwXyj8l05PunQm2lnggijrnLAMjdI7+6S6rNUs4oA54egfrKIXSQiqjfSNMySytJzJkGYdbQzUrGrL47qNEy0keAPi1VGlijs/m3khFQAd2Bdb1Nhp1k8QC0OQ5BccKPVfFRyz/EoRMFvjzfNQrR75D6f2q+XZIrlee1Z7MX/KpYx1IOI2ATlfRqUoIlM7O1hWsQr9rGek+D10BtBJ4uZsrUOHs+llQo5fQXzVunZEzaYUBulRwPO1kBHjSkD0NNCO5490EnaCIFot41Wh/bDTWFNDZkZHxXhbrXRaA/d0vzrlAiLDUkUEtOKP0jc9o9vz/vSbEth6u8df06cq9yYVbn+1j93lX5vJ0=
       cxznmhdcxz\n"}]}}}, "networkProfile": {"networkInterfaceConfigurations": [{"name":
-      "vmss1cce5Nic", "properties": {"ipConfigurations": [{"name": "vmss1cce5IPConfig",
+      "vmss1a9e4Nic", "properties": {"ipConfigurations": [{"name": "vmss1a9e4IPConfig",
       "properties": {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/vmss1VNET/subnets/vmss1Subnet"}}}],
       "primary": "true"}}]}}, "orchestrationMode": "Uniform"}, "sku": {"name": "Standard_DS1_v2",
       "capacity": 101}}], "outputs": {"VMSS": {"type": "object", "value": "[reference(resourceId(''Microsoft.Compute/virtualMachineScaleSets'',
@@ -229,12 +340,12 @@ interactions:
       - -g --name --validate --image --disable-overprovision --instance-count --single-placement-group
         --admin-username --generate-ssh-keys --lb
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/vmss_deploy_uPnNo2K9NLSG0KhzrtJwO1xXQnMG5x0L","name":"vmss_deploy_uPnNo2K9NLSG0KhzrtJwO1xXQnMG5x0L","type":"Microsoft.Resources/deployments","properties":{"templateHash":"6576846652285303319","parameters":{},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"0001-01-01T00:00:00Z","duration":"PT0S","correlationId":"4040ed28-c0c7-49bb-bc1f-bb1959cf8b31","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["eastus2"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachineScaleSets","locations":["eastus2"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/vmss1VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vmss1VNET"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1","resourceType":"Microsoft.Compute/virtualMachineScaleSets","resourceName":"vmss1"}],"validatedResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/vmss1VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/vmss_deploy_uHbj4seUJ8xTYXvP8ak3UJMoL7l1KK7N","name":"vmss_deploy_uHbj4seUJ8xTYXvP8ak3UJMoL7l1KK7N","type":"Microsoft.Resources/deployments","properties":{"templateHash":"4076052764994340751","parameters":{},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"0001-01-01T00:00:00Z","duration":"PT0S","correlationId":"6574f496-edba-4d4e-8aa0-6c7b747b780a","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["eastus2"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachineScaleSets","locations":["eastus2"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/vmss1VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vmss1VNET"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1","resourceType":"Microsoft.Compute/virtualMachineScaleSets","resourceName":"vmss1"}],"validatedResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/vmss1VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1"}]}}'
     headers:
       cache-control:
       - no-cache
@@ -243,7 +354,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 23 Feb 2022 01:57:39 GMT
+      - Thu, 17 Mar 2022 07:33:01 GMT
       expires:
       - '-1'
       pragma:
@@ -257,7 +368,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
     status:
       code: 200
       message: OK
