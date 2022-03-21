@@ -360,6 +360,16 @@ class TestExtractCommaSeparatedString(unittest.TestCase):
         g14 = {"": ""}
         self.assertEqual(t14, g14)
 
+        s15 = "WindowsContainerRuntime=containerd,AKSHTTPCustomFeatures=Microsoft.ContainerService/AKSTestFeaturePreview,AKSHTTPCustomFeatures=Microsoft.ContainerService/AKSExampleFeaturePreview"
+        t15 = validators.extract_comma_separated_string(s15, enable_strip=True, extract_kv=True, default_value={},)
+        g15 = {"WindowsContainerRuntime": "containerd", "AKSHTTPCustomFeatures": "Microsoft.ContainerService/AKSExampleFeaturePreview"}
+        self.assertEqual(t15, g15)
+
+        s16 = "WindowsContainerRuntime=containerd,AKSHTTPCustomFeatures=Microsoft.ContainerService/AKSTestFeaturePreview,AKSHTTPCustomFeatures=Microsoft.ContainerService/AKSExampleFeaturePreview"
+        t16 = validators.extract_comma_separated_string(s16, enable_strip=True, extract_kv=True, default_value={}, allow_appending_values_to_same_key=True)
+        g16 = {"WindowsContainerRuntime": "containerd", "AKSHTTPCustomFeatures": "Microsoft.ContainerService/AKSTestFeaturePreview,Microsoft.ContainerService/AKSExampleFeaturePreview"}
+        self.assertEqual(t16, g16)
+
 
 class CredentialFormatNamespace:
     def __init__(self, credential_format):
@@ -381,3 +391,7 @@ class TestCredentialFormat(unittest.TestCase):
         namespace = CredentialFormatNamespace(credential_format)
 
         validators.validate_credential_format(namespace)
+
+
+if __name__ == "__main__":
+    unittest.main()

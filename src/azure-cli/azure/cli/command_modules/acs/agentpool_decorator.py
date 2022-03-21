@@ -349,6 +349,7 @@ class AKSAgentPoolContext:
             enable_strip=True,
             extract_kv=True,
             default_value={},
+            allow_appending_values_to_same_key=True,
         )
 
         # this parameter does not need validation
