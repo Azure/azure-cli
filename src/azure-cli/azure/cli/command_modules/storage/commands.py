@@ -317,7 +317,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         from ._transformers import transform_blob_list_output, transform_blob_json_output, transform_blob_upload_output
         from ._format import transform_blob_output
         from ._exception_handler import file_related_exception_handler
-        from ._validators import process_blob_upload_batch_parameters
+        from ._validators import process_blob_upload_batch_parameters, process_blob_download_batch_parameters
         g.storage_custom_command_oauth('copy start', 'copy_blob')
         g.storage_custom_command_oauth('show', 'show_blob_v2', transform=transform_blob_json_output,
                                        table_transformer=transform_blob_output,
@@ -336,6 +336,13 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                        exception_handler=file_related_exception_handler)
         g.storage_custom_command_oauth('upload-batch', 'storage_blob_upload_batch', client_factory=cf_blob_service,
                                        validator=process_blob_upload_batch_parameters,
+                                       exception_handler=file_related_exception_handler)
+        g.storage_custom_command_oauth('download', 'download_blob',
+                                       transform=transform_blob_json_output,
+                                       table_transformer=transform_blob_output,
+                                       exception_handler=file_related_exception_handler)
+        g.storage_custom_command_oauth('download-batch', 'storage_blob_download_batch', client_factory=cf_blob_service,
+                                       validator=process_blob_download_batch_parameters,
                                        exception_handler=file_related_exception_handler)
 
     blob_lease_client_sdk = CliCommandType(
@@ -359,11 +366,11 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         from ._format import transform_boolean_for_table, transform_blob_output
         from ._transformers import (transform_storage_list_output, transform_url,
                                     create_boolean_result_output_transformer)
-        from ._validators import (process_blob_download_batch_parameters, process_blob_delete_batch_parameters)
+        from ._validators import process_blob_delete_batch_parameters
         from ._exception_handler import file_related_exception_handler
-        g.storage_command_oauth(
-            'download', 'get_blob_to_path', table_transformer=transform_blob_output,
-            exception_handler=file_related_exception_handler)
+        # g.storage_command_oauth(
+        #     'download', 'get_blob_to_path', table_transformer=transform_blob_output,
+        #     exception_handler=file_related_exception_handler)
         g.storage_custom_command_oauth('generate-sas', 'generate_sas_blob_uri')
         g.storage_custom_command_oauth(
             'url', 'create_blob_url', transform=transform_url)
@@ -376,9 +383,9 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                 transform=create_boolean_result_output_transformer(
                                     'undeleted'),
                                 table_transformer=transform_boolean_for_table, min_api='2017-07-29')
-        g.storage_custom_command_oauth('download-batch', 'storage_blob_download_batch',
-                                       validator=process_blob_download_batch_parameters,
-                                       exception_handler=file_related_exception_handler)
+        # g.storage_custom_command_oauth('download-batch', 'storage_blob_download_batch',
+        #                                validator=process_blob_download_batch_parameters,
+        #                                exception_handler=file_related_exception_handler)
         g.storage_custom_command_oauth('delete-batch', 'storage_blob_delete_batch',
                                        validator=process_blob_delete_batch_parameters)
         g.storage_command_oauth(

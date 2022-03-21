@@ -1184,6 +1184,14 @@ examples:
         az storage blob upload-batch -d mycontainer -s <path-to-directory> --pattern cli-201[!89]-??-??.txt
 """
 
+helps['storage blob download'] = """
+type: command
+short-summary: Download a blob to a file path.
+examples:
+  - name: Download a blob.
+    text: az storage blob download -f /path/to/file -c mycontainer -n MyBlob
+"""
+
 helps['storage blob url'] = """
 type: command
 short-summary: Create the url to access a blob.
