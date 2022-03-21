@@ -97,6 +97,8 @@ def load_arguments(self, _):
     with self.argument_context('batch application set') as c:
         c.argument('application_name', options_list=('--application-name',), help="The name of the application.")
         c.argument('allow_updates', options_list=('--allow-updates',), help="Specify to indicate whether packages within the application may be overwritten using the same version string. Specify either 'true' or 'false' to update the property.")
+        c.argument('default_version', options_list=('--default-version',), help="Specifies which package to use if a client requests the application but does not specify a version.")
+        c.argument('display_name', options_list=('--display-name',), help="Specifies the display name for the application.")
 
     with self.argument_context('batch application create') as c:
         c.argument('allow_updates', options_list=('--allow-updates',), action="store_true", help="Specify to indicate whether packages within the application may be overwritten using the same version string. True if flag present.")
@@ -143,6 +145,14 @@ def load_arguments(self, _):
                    help='The maximum number of times the task may be retried.')
         c.argument('start_task_environment_settings', nargs='+', type=environment_setting_format, arg_group='Pool: Start Task',
                    help='A list of environment variable settings for the start task. Space-separated values in \'key=value\' format.')
+
+    with self.argument_context('batch private-endpoint-connection show') as c:
+         c.argument('private_endpoint_connection_name', options_list=['--name', '-n'],
+                   help='The private endpoint connection name. This must be unique within the account.')
+
+    with self.argument_context('batch private-link-resource show') as c:
+         c.argument('private_link_resource_name', options_list=['--name', '-n'],
+                   help='The private link resource name. This must be unique within the account.')
 
     with self.argument_context('batch job list') as c:
         c.argument('filter', help=' An OData $filter clause.', arg_group='Pre-condition and Query')
