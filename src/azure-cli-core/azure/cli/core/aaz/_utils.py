@@ -1,7 +1,7 @@
 import importlib
 from collections import OrderedDict
 
-from azure.cli.core.aaz.exceptions import AAZInvalidShorthandSyntaxError
+from azure.cli.core.aaz.exceptions import AAZInvalidShorthandSyntaxError, AAZShowHelp
 
 
 def _get_profile_pkg(aaz_module_name, cloud):
@@ -14,6 +14,7 @@ def _get_profile_pkg(aaz_module_name, cloud):
 
 class AAZShortHandSyntaxParser:
     NULL_EXPRESSIONS = ('null', 'None')
+    HELP_EXPRESSIONS = ('???', )
 
     def __call__(self, data, is_simple=False):
         assert isinstance(data, str)
@@ -24,6 +25,8 @@ class AAZShortHandSyntaxParser:
             # simple element type
             if data in self.NULL_EXPRESSIONS:
                 result = None
+            elif data in self.HELP_EXPRESSIONS:
+                raise AAZShowHelp()
             elif len(data) and data[0] == "'":
                 result, length = self.parse_shorthand_quote_string(data)
                 if length != len(data):
@@ -61,6 +64,8 @@ class AAZShortHandSyntaxParser:
                 ex.error_data = remain
                 ex.error_at += idx
                 raise ex
+            except AAZShowHelp as showHelp:
+                raise showHelp
 
             if '"' in key:
                 raise AAZInvalidShorthandSyntaxError(remain, idx, length,
@@ -86,6 +91,9 @@ class AAZShortHandSyntaxParser:
                 ex.error_data = remain
                 ex.error_at += idx
                 raise ex
+            except AAZShowHelp as showHelp:
+                showHelp.keys = [key, *showHelp.keys]
+                raise showHelp
 
             result[key] = value
             idx += length
@@ -122,6 +130,9 @@ class AAZShortHandSyntaxParser:
                 ex.error_data = remain
                 ex.error_at += idx
                 raise ex
+            except AAZShowHelp as showHelp:
+                showHelp.keys = [0, *showHelp.keys]
+                raise showHelp
 
             result.append(value)
             idx += length
@@ -159,6 +170,8 @@ class AAZShortHandSyntaxParser:
             raise AAZInvalidShorthandSyntaxError(remain, idx, 1, "Cannot parse empty")
         elif remain[:idx] in self.NULL_EXPRESSIONS:
             return None, idx
+        elif remain[:idx] in self.HELP_EXPRESSIONS:
+            raise AAZShowHelp()
         return remain[:idx], idx
 
     def parse_shorthand_quote_string(self, remain):
