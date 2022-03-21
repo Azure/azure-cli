@@ -262,8 +262,6 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
 
 
 def _validate_vnet_integration_location(cmd, subnet_resource_group, vnet_name, webapp_location, vnet_sub_id=None):
-    from azure.cli.core.commands.client_factory import get_subscription_id
-
     current_sub_id = get_subscription_id(cmd.cli_ctx)
     if vnet_sub_id:
         cmd.cli_ctx.data['subscription_id'] = vnet_sub_id
@@ -282,7 +280,6 @@ def _validate_vnet_integration_location(cmd, subnet_resource_group, vnet_name, w
 
 
 def _get_subnet_info(cmd, resource_group_name, vnet, subnet):
-    from azure.cli.core.commands.client_factory import get_subscription_id
     subnet_info = {"vnet_name": None,
                    "subnet_name": None,
                    "resource_group_name": None,
@@ -1962,7 +1959,6 @@ def update_app_service_plan(instance, sku=None, number_of_workers=None, elastic_
 
 
 def show_plan(cmd, resource_group_name, name):
-    from azure.cli.core.commands.client_factory import get_subscription_id
     client = web_client_factory(cmd.cli_ctx)
     serverfarm_url_base = 'subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/serverfarms/{}?api-version={}'
     subscription_id = get_subscription_id(cmd.cli_ctx)
@@ -2098,7 +2094,6 @@ def list_snapshots(cmd, resource_group_name, name, slot=None):
 
 def restore_snapshot(cmd, resource_group_name, name, time, slot=None, restore_content_only=False,  # pylint: disable=redefined-outer-name
                      source_resource_group=None, source_name=None, source_slot=None):
-    from azure.cli.core.commands.client_factory import get_subscription_id
     SnapshotRecoverySource, SnapshotRestoreRequest = cmd.get_models('SnapshotRecoverySource', 'SnapshotRestoreRequest')
     client = web_client_factory(cmd.cli_ctx)
     recover_config = not restore_content_only
@@ -2658,7 +2653,6 @@ def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certifi
     # subscription
     kv_secret_name = None
     cloud_type = cmd.cli_ctx.cloud.name
-    from azure.cli.core.commands.client_factory import get_subscription_id
     subscription_id = get_subscription_id(cmd.cli_ctx)
     if cloud_type.lower() == PUBLIC_CLOUD.lower():
         if kv_subscription.lower() != subscription_id.lower():
@@ -2749,7 +2743,6 @@ def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None)
 def _check_service_principal_permissions(cmd, resource_group_name, key_vault_name, key_vault_subscription):
     from azure.cli.command_modules.role._client_factory import _graph_client_factory
     from azure.graphrbac.models import GraphErrorException
-    from azure.cli.core.commands.client_factory import get_subscription_id
     subscription = get_subscription_id(cmd.cli_ctx)
     # Cannot check if key vault is in another subscription
     if subscription != key_vault_subscription:
@@ -4093,7 +4086,6 @@ def _add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=Non
 
 
 def _vnet_delegation_check(cmd, subnet_subscription_id, vnet_resource_group, vnet_name, subnet_name):
-    from azure.cli.core.commands.client_factory import get_subscription_id
     Delegation = cmd.get_models('Delegation', resource_type=ResourceType.MGMT_NETWORK)
     vnet_client = network_client_factory(cmd.cli_ctx)
 
@@ -4630,10 +4622,17 @@ def _build_onedeploy_url(params):
     else:
         client = web_client_factory(params.cmd.cli_ctx)
         sub_id = get_subscription_id(params.cmd.cli_ctx)
-        base_url = (
-            f"subscriptions/{sub_id}/resourceGroups/{params.resource_group_name}/providers/Microsoft.Web/sites/"
-            f"{params.webapp_name}/extensions/onedeploy?api-version={client.DEFAULT_API_VERSION}"
-        )
+        if not params.slot:
+            base_url = (
+                f"subscriptions/{sub_id}/resourceGroups/{params.resource_group_name}/providers/Microsoft.Web/sites/"
+                f"{params.webapp_name}/extensions/onedeploy?api-version={client.DEFAULT_API_VERSION}"
+            )
+        else:
+            base_url = (
+                f"subscriptions/{sub_id}/resourceGroups/{params.resource_group_name}/providers/Microsoft.Web/sites/"
+                f"{params.webapp_name}/slots/{params.slot}/extensions/onedeploy"
+                f"?api-version={client.DEFAULT_API_VERSION}"
+            )
         deploy_url = params.cmd.cli_ctx.cloud.endpoints.resource_manager + base_url
 
     return deploy_url
@@ -4731,9 +4730,7 @@ def _make_onedeploy_request(params):
     logger.info("Deployment API: %s", deploy_url)
     if not params.src_url:  # use SCM API
         response = requests.post(deploy_url, data=body, headers=headers, verify=not should_disable_connection_verify())
-        # For debugging purposes only, you can change the async deployment into a sync deployment by polling the API status
-        # For that, set poll_async_deployment_for_debugging=True
-        poll_async_deployment_for_debugging = True
+        poll_async_deployment_for_debugging = True  # TODO remove once polling supported
     else:  # use ARM proxy
         poll_async_deployment_for_debugging = False
         response = send_raw_request(params.cmd.cli_ctx, "PUT", deploy_url, body=body)
@@ -4744,7 +4741,7 @@ def _make_onedeploy_request(params):
         if poll_async_deployment_for_debugging:
             logger.info('Polling the status of async deployment')
             response_body = _check_zip_deployment_status(params.cmd, params.resource_group_name, params.webapp_name,
-                                                        deployment_status_url, headers, params.timeout)
+                                                         deployment_status_url, headers, params.timeout)
             logger.info('Async deployment complete. Server response: %s', response_body)
         else:
             # TODO add status polling for One Deploy API when it's available
@@ -4761,14 +4758,13 @@ def _make_onedeploy_request(params):
     # check if there's an ongoing process
     if response.status_code == 409:
         raise ValidationError("Another deployment is in progress. Please wait until that process is complete before "
-                              "starting a new deployment. You can track the ongoing deployment at {}"
-                              .format(deployment_status_url))
+                              "starting a new deployment. "
+                              f"You can track the ongoing deployment at {deployment_status_url}")
 
     # check if an error occured during deployment
     if response.status_code:
-        raise CLIError("An error occured during deployment. Status Code: {}, Details: {}"
-                    .format(response.status_code, response.text))
-
+        raise UnclassifiedUserFault(f"An error occured during deployment. Status Code: {response.status_code}, "
+                                    f"Details: {response.text}")
 
 
 # OneDeploy
@@ -4870,7 +4866,6 @@ def _validate_app_service_environment_id(cli_ctx, ase, resource_group_name):
     if ase_is_id:
         return ase
 
-    from azure.cli.core.commands.client_factory import get_subscription_id
     return resource_id(
         subscription=get_subscription_id(cli_ctx),
         resource_group=resource_group_name,
@@ -4884,7 +4879,6 @@ def _format_key_vault_id(cli_ctx, key_vault, resource_group_name):
     if key_vault_is_id:
         return key_vault
 
-    from azure.cli.core.commands.client_factory import get_subscription_id
     return resource_id(
         subscription=get_subscription_id(cli_ctx),
         resource_group=resource_group_name,

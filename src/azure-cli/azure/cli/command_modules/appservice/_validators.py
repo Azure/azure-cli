@@ -208,6 +208,13 @@ def validate_onedeploy_params(namespace):
     if namespace.src_url and not namespace.artifact_type:
         raise RequiredArgumentMissingError('Deployment type is mandatory when deploying from URLs. Use --type')
 
+    if namespace.src_url:
+        # TODO remove these warnings when polling is supported
+        if namespace.timeout:
+            logger.warning("Ignoring parameter --timeout. Polling not yet implemented when using '--src-url'")
+        if not namespace.is_async:
+            logger.warning("Synchronous deployments not yet supported when using '--src-url'")
+
 
 def _validate_ip_address_format(namespace):
     if namespace.ip_address is not None:
