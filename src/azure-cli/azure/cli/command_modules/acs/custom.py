@@ -4283,7 +4283,8 @@ def _get_linux_os_config(file_path):
         raise CLIError("{} is not valid file, or not accessable.".format(file_path))
     os_config = get_file_json(file_path)
     if not isinstance(os_config, dict):
-        msg = "Error reading Linux OS configuration at {}. Please see https://aka.ms/CustomNodeConfig for proper format."
+        msg = "Error reading Linux OS configuration at {}. \
+            Please see https://aka.ms/CustomNodeConfig for proper format."
         raise CLIError(msg.format(file_path))
     config_object = LinuxOSConfig()
     config_object.transparent_huge_page_enabled = os_config.get(
