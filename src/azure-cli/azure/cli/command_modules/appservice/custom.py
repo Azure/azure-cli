@@ -4210,9 +4210,6 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
     _is_linux = os_name.lower() == LINUX_OS_NAME
     helper = _StackRuntimeHelper(cmd, linux=_is_linux, windows=not _is_linux)
 
-    if runtime and html:
-        raise MutuallyExclusiveArgumentError('Conflicting parameters: cannot have both --runtime and --html specified.')
-
     if runtime:
         runtime = helper.remove_delimiters(runtime)
         match = helper.resolve(runtime, _is_linux)
@@ -4280,7 +4277,7 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
         site_config = client.web_apps.get_configuration(rg_name, name)
     else:  # need to create new app, check if we need to use default RG or use user entered values
         logger.warning("The webapp '%s' doesn't exist", name)
-        sku = get_sku_to_use(src_dir, html, sku, runtime)
+        sku = get_sku_to_use(src_dir, html, sku, runtime, app_service_environment)
         loc = set_location(cmd, sku, location)
         rg_name = get_rg_to_use(user, resource_group_name)
         _create_new_rg = not check_resource_group_exists(cmd, rg_name)
@@ -4325,6 +4322,10 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
         create_app_service_plan(cmd, rg_name, plan, _is_linux, hyper_v=False, per_site_scaling=False, sku=sku,
                                 number_of_workers=1 if _is_linux else None, location=loc,
                                 app_service_environment=app_service_environment)
+    except ResourceNotFoundError as ex:
+        raise ex
+    except CLIError as ex:
+        raise ex
     except Exception as ex:  # pylint: disable=broad-except
         if ex.response.status_code == 409:  # catch 409 conflict when trying to create existing ASP in diff location
             try:
@@ -4406,14 +4407,15 @@ def _set_webapp_up_default_args(cmd, rg_name, sku, plan, loc, name):
 
 
 def _update_app_settings_for_windows_if_needed(cmd, rg_name, name, match, site_config, runtime_version):
+    app_settings = _generic_site_operation(cmd.cli_ctx, rg_name, name, 'list_application_settings', slot=None)
     update_needed = False
     if 'node' in runtime_version:
         settings = []
         for k, v in match.configs.items():
-            for app_setting in site_config.app_settings:
-                if app_setting.name == k and app_setting.value != v:
+            for app_setting_name, app_setting_value in app_settings.properties.items():
+                if app_setting_name == k and app_setting_value != v:
                     update_needed = True
-                    settings.append('%s=%s', k, v)
+                    settings.append(f"{k}={v}")
         if update_needed:
             logger.warning('Updating runtime version to %s', runtime_version)
             update_app_settings(cmd, rg_name, name, settings=settings, slot=None, slot_settings=None)
@@ -4862,6 +4864,7 @@ def _configure_default_logging(cmd, rg_name, name):
                               docker_container_logging='filesystem')
 
 
+# TODO remove once appservice-kube extension removes
 def _validate_app_service_environment_id(cli_ctx, ase, resource_group_name):
     ase_is_id = is_valid_resource_id(ase)
     if ase_is_id:
