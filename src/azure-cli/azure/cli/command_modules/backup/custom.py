@@ -19,7 +19,7 @@ from azure.mgmt.recoveryservicesbackup.activestamp.models import ProtectedItemRe
     ILRRequestResource, IaasVMILRRegistrationRequest, BackupResourceConfig, BackupResourceConfigResource, \
     BackupResourceVaultConfig, BackupResourceVaultConfigResource, DiskExclusionProperties, ExtendedProperties, \
     MoveRPAcrossTiersRequest, RecoveryPointRehydrationInfo, IaasVMRestoreWithRehydrationRequest, IdentityInfo, \
-    BackupStatusRequest, ListRecoveryPointsRecommendedForMoveRequest, IdentityBasedRestoreDetails
+    BackupStatusRequest, ListRecoveryPointsRecommendedForMoveRequest, IdentityBasedRestoreDetails, ScheduleRunType
 from azure.mgmt.recoveryservicesbackup.passivestamp.models import CrrJobRequest, CrossRegionRestoreRequest
 
 import azure.cli.command_modules.backup._validators as validators
@@ -443,40 +443,31 @@ def set_policy(client, resource_group_name, vault_name, policy, policy_name):
     retention_range_in_days = policy_object.properties.instant_rp_retention_range_in_days
     schedule_run_frequency = policy_object.properties.schedule_policy.schedule_run_frequency
 
-    if schedule_run_frequency == 'Hourly':
+    if schedule_run_frequency == ScheduleRunType.hourly:
         raise InvalidArgumentValueError(
             """
             Hourly IaasVM backups are not allowed from CLI currently. Please try using portal experience for the same.
             """)
 
     # Validating range of days input
-    if schedule_run_frequency == 'Weekly' and retention_range_in_days != 5:
-        raise CLIError(
-            """
-            Retention policy range must be equal to 5.
-            """)
-    if schedule_run_frequency == 'Daily' and (retention_range_in_days > 5 or retention_range_in_days < 1):
-        raise CLIError(
-            """
-            Retention policy range must be between 1 to 5.
-            """)
-
-    error_message = "For SnapshotRetentionRangeInDays, the minimum value is 1 and"\
-                    "maximum is 5. For weekly backup policies, the only allowed value is 5 "\
-                    ". Please set the value accordingly."
-
-    if policy_object.properties.schedule_policy.schedule_run_frequency == "Weekly":
-        if policy_object.properties.instant_rp_retention_range_in_days is not None:
-            if policy_object.properties.instant_rp_retention_range_in_days != 5:
-                logger.error(error_message)
-        else:
-            policy_object.properties.instant_rp_retention_range_in_days = 5
+    if policy_object.properties.policy_type != 'V2':
+        if schedule_run_frequency == ScheduleRunType.weekly and retention_range_in_days != 5:
+            raise InvalidArgumentValueError(
+                """
+                Retention policy range must be equal to 5.
+                """)
+        if schedule_run_frequency == ScheduleRunType.daily and (retention_range_in_days > 5 or
+                                                                retention_range_in_days < 1):
+            raise InvalidArgumentValueError(
+                """
+                Retention policy range must be between 1 to 5.
+                """)
     else:
-        if policy_object.properties.instant_rp_retention_range_in_days is not None:
-            if not 1 <= policy_object.properties.instant_rp_retention_range_in_days <= 5:
-                logger.error(error_message)
-        else:
-            policy_object.properties.instant_rp_retention_range_in_days = 2
+        if (retention_range_in_days > 30 or retention_range_in_days < 1):
+            raise InvalidArgumentValueError(
+                """
+                Retention policy range must be between 1 to 30.
+                """)
     if policy_name is None:
         policy_name = policy_object.name
 
@@ -489,7 +480,7 @@ def set_policy(client, resource_group_name, vault_name, policy, policy_name):
 
 def create_policy(client, resource_group_name, vault_name, name, policy):
     policy_object = cust_help.get_policy_from_json(client, policy)
-    if policy_object.properties.schedule_policy.schedule_run_frequency == 'Hourly':
+    if policy_object.properties.schedule_policy.schedule_run_frequency == ScheduleRunType.hourly:
         raise InvalidArgumentValueError(
             """
             Hourly IaasVM backups are not allowed from CLI currently. Please try using portal experience for the same.
@@ -1024,7 +1015,7 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
                                              target_subnet_name, target_resource_group)
 
         if restore_as_unmanaged_disks and target_resource_group is not None:
-            raise CLIError(
+            raise MutuallyExclusiveArgumentError(
                 """
                 Both restore_as_unmanaged_disks and target_resource_group can't be spceified.
                 Please give Only one parameter and retry.
