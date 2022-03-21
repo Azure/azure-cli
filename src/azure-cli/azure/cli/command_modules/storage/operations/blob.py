@@ -415,9 +415,9 @@ def storage_blob_upload_batch(cmd, client, source, destination, pattern=None,  #
                               maxsize_condition=None, max_connections=2, lease_id=None, progress_callback=None,
                               if_modified_since=None, if_unmodified_since=None, if_match=None,
                               if_none_match=None, timeout=None, dryrun=False, socket_timeout=None, **kwargs):
-    def _create_return_result(blob_content_settings, upload_result=None):
+    def _create_return_result(blob_content_settings, upload_result=None, blob_client=None):
         return {
-            'Blob': client.url,
+            'Blob': blob_client.url,
             'Type': blob_content_settings.content_type,
             'Last Modified': upload_result['last_modified'] if upload_result else None,
             'eTag': upload_result['etag'] if upload_result else None}
@@ -467,7 +467,7 @@ def storage_blob_upload_batch(cmd, client, source, destination, pattern=None,  #
                                                if_none_match=if_none_match, timeout=timeout, **kwargs)
                 if include:
                     results.append(_create_return_result(blob_content_settings=guessed_content_settings,
-                                                         upload_result=result))
+                                                         upload_result=result, blob_client=blob_client))
             except (ResourceModifiedError, AzureResponseError) as ex:
                 logger.error(ex)
 
