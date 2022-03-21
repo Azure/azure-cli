@@ -69,7 +69,10 @@ from azure.graphrbac.models import (ApplicationCreateParameters,
                                     GetObjectsParameters,
                                     ResourceAccess, RequiredResourceAccess)
 
-from azure.mgmt.containerservice.models import (ContainerServiceOrchestratorTypes, KubeletConfig, LinuxOSConfig, SysctlConfig)
+from azure.mgmt.containerservice.models import (ContainerServiceOrchestratorTypes,
+                                                KubeletConfig,
+                                                LinuxOSConfig,
+                                                SysctlConfig)
 
 from ._client_factory import cf_container_services
 from ._client_factory import cf_resource_groups
@@ -4248,8 +4251,8 @@ def _get_kubelet_config(file_path):
         raise CLIError("{} is not valid file, or not accessable.".format(file_path))
     kubelet_config = get_file_json(file_path)
     if not isinstance(kubelet_config, dict):
-        raise CLIError(
-            "Error reading kubelet configuration at {}. Please see https://aka.ms/CustomNodeConfig for correct format.".format(file_path))
+        msg = "Error reading kubelet configuration at {}. Please see https://aka.ms/CustomNodeConfig for correct format."
+        raise CLIError(msg.format(file_path))
     config_object = KubeletConfig()
     config_object.cpu_manager_policy = kubelet_config.get(
         "cpuManagerPolicy", None)
@@ -4280,8 +4283,8 @@ def _get_linux_os_config(file_path):
         raise CLIError("{} is not valid file, or not accessable.".format(file_path))
     os_config = get_file_json(file_path)
     if not isinstance(os_config, dict):
-        raise CLIError(
-            "Error reading Linux OS configuration at {}. Please see https://aka.ms/CustomNodeConfig for correct format.".format(file_path))
+        msg = "Error reading Linux OS configuration at {}. Please see https://aka.ms/CustomNodeConfig for correct format."
+        raise CLIError(msg.format(file_path))
     config_object = LinuxOSConfig()
     config_object.transparent_huge_page_enabled = os_config.get(
         "transparentHugePageEnabled", None)
@@ -4291,8 +4294,8 @@ def _get_linux_os_config(file_path):
     # sysctl settings
     sysctls = os_config.get("sysctls", None)
     if not isinstance(sysctls, dict):
-        raise CLIError(
-            "Error reading Sysctl settings at {}. Please see https://aka.ms/CustomNodeConfig for correct format.".format(file_path))
+        msg = "Error reading Sysctl settings at {}. Please see https://aka.ms/CustomNodeConfig for correct format."
+        raise CLIError(msg.format(file_path))
     config_object.sysctls = SysctlConfig()
     config_object.sysctls.net_core_somaxconn = sysctls.get(
         "netCoreSomaxconn", None)
