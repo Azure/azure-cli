@@ -4862,7 +4862,7 @@ class AKSContext:
         # this parameter does not need dynamic completion
         # this parameter does not need validation
         return linux_os_config
- 
+
 
 class AKSCreateDecorator:
     def __init__(
