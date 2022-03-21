@@ -283,7 +283,7 @@ def load_arguments(self, _):
 
     with self.argument_context('monitor diagnostic-settings create') as c:
         c.resource_parameter('resource_uri', required=True, arg_group='Target Resource', skip_validator=True)
-        c.argument('logs', type=get_json_object, help=" JSON encoded list of logs settings. Use '@{file}' to load from a file."
+        c.argument('logs', type=get_json_object, help="JSON encoded list of logs settings. Use '@{file}' to load from a file."
                    'For more information, visit: https://docs.microsoft.com/rest/api/monitor/diagnosticsettings/createorupdate#logsettings')
         c.argument('metrics', type=get_json_object, help="JSON encoded list of metric settings. Use '@{file}' to load from a file. "
                    'For more information, visit: https://docs.microsoft.com/rest/api/monitor/diagnosticsettings/createorupdate#metricsettings')
