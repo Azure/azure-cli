@@ -6934,6 +6934,12 @@ short-summary: Configure flow logging on a network security group.
 parameters:
   - name: --nsg
     short-summary: Name or ID of the Network Security Group to target.
+  - name: --vnet
+    short-summary: Name of the Virtual Network to target.
+  - name: --subnet
+    short-summary: Name or ID of the subnet.
+  - name: --nic
+    short-summary: Name or ID of the Network Interface.
   - name: --enabled
     short-summary: Enable logging.
   - name: --retention
@@ -6949,7 +6955,7 @@ examples:
 
 helps['network watcher flow-log create'] = """
 type: command
-short-summary: Create a flow log on a network security group.
+short-summary: Create a flow log on a network security group or virtual network.
 examples:
   - name: Create a flow log with Network Security Group name
     text: >

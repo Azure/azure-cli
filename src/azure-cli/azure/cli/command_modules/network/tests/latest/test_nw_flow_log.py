@@ -17,6 +17,9 @@ class NWFlowLogScenarioTest(ScenarioTest):
             'location': resource_group_location,
             'storage_account': storage_account,
             'nsg': 'nsg1',
+            'vnet': 'vnet1',
+            'subnet': 'subnet1',
+            'nic': 'nic1',
             'watcher_rg': 'NetworkWatcherRG',
             'watcher_name': 'NetworkWatcher_{}'.format(resource_group_location),
             'flow_log': 'flow_log_test',
@@ -42,6 +45,9 @@ class NWFlowLogScenarioTest(ScenarioTest):
                  '--location {location} '
                  '--resource-group {rg} '
                  '--nsg {nsg} '
+                 '--vnet {vnet} '
+                 '--subnet {subnet} '
+                 '--nic {nic} '
                  '--storage-account {storage_account} '
                  '--workspace {workspace_id} '
                  '--name {flow_log} ')
@@ -67,6 +73,9 @@ class NWFlowLogScenarioTest(ScenarioTest):
             'location': resource_group_location,
             'storage_account': storage_account,
             'nsg': 'nsg1',
+            'vnet': 'vnet1',
+            'subnet': 'subnet1',
+            'nic': 'nic1',
             'watcher_rg': 'NetworkWatcherRG',
             'watcher_name': 'NetworkWatcher_{}'.format(resource_group_location),
             'flow_log': 'flow_log_test2',
@@ -185,6 +194,9 @@ class NWFlowLogScenarioTest(ScenarioTest):
             'storage_account': storage_account,
             'storage_account_2': 'storageaccount0395',
             'nsg': 'nsg1',
+            'vnet': 'vnet1',
+            'subnet': 'subnet1',
+            'nic': 'nic1',
             'watcher_rg': 'NetworkWatcherRG',
             'watcher_name': 'NetworkWatcher_{}'.format(resource_group_location),
             'flow_log': 'flow_log_test2',

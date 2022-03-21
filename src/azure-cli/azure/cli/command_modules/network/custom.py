@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 from collections import Counter, OrderedDict
-import logging
+
 
 from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
 
@@ -6040,27 +6040,21 @@ def create_nw_packet_capture(cmd, client, resource_group_name, capture_name, vm,
 
 
 def set_vnet_flow_logging(cmd, client, watcher_rg, watcher_name, vnet, resource_group_name=None):
-    vnet_id=_process_vnet_name_and_id(vnet,cmd,resource_group_name)
-    #logging.error("vnetid from setFL %s",vnet_id)
+    vnet_id = _process_vnet_name_and_id(vnet,cmd,resource_group_name)
     flowlog_status_parameters = cmd.get_models('FlowLogStatusParameters')(target_resource_id=vnet_id)
-    print("vnet",flowlog_status_parameters)
     return flowlog_status_parameters
 
 def set_subnet_flow_logging(cmd, subnet, resource_group_name=None):
-    subnet_id=_process_subnet_name_and_id(subnet,cmd,resource_group_name)
+    subnet_id = _process_subnet_name_and_id(subnet,cmd,resource_group_name)
     flowlog_status_parameters = cmd.get_models('FlowLogStatusParameters')(target_resource_id=subnet_id)
-    print("subnet",flowlog_status_parameters)
     return flowlog_status_parameters
 
 def set_nic_flow_logging(cmd, nic):
     flowlog_status_parameters = cmd.get_models('FlowLogStatusParameters')(target_resource_id=nic)
-    print("nic",flowlog_status_parameters)
     return flowlog_status_parameters
 
 def set_nsg_flow_logging(cmd, nsg):
     flowlog_status_parameters = cmd.get_models('FlowLogStatusParameters')(target_resource_id=nsg)
-    logging.error("nsgId from setFL %s",nsg)
-    print(nsg,flowlog_status_parameters)
     return flowlog_status_parameters
 
 
@@ -6077,13 +6071,9 @@ def set_nw_flow_logging(cmd, client, watcher_rg, watcher_name, nsg, vnet=None, s
         flowlog_status_parameters = set_subnet_flow_logging(cmd,client,watcher_rg,watcher_name,subnet,resource_group_name)
     elif nic!=None:
         flowlog_status_parameters = set_nic_flow_logging(cmd,client,watcher_rg,watcher_name,nic,resource_group_name)
-    #print("FLPARAMS: after", flowlog_status_parameters)
-    logging.error("FLPARAMS after %s", flowlog_status_parameters)
-    print(client.begin_get_flow_log_status(watcher_rg,watcher_name,flowlog_status_parameters))
     config = LongRunningOperation(cmd.cli_ctx)(client.begin_get_flow_log_status(watcher_rg,
                                                                                 watcher_name,
                                                                                 flowlog_status_parameters))
-    print("setNSG config:",config)
     try:
         if not config.flow_analytics_configuration.network_watcher_flow_analytics_configuration.workspace_id:
             config.flow_analytics_configuration = None
@@ -6166,7 +6156,6 @@ def create_vnet_flow_log(cmd, location, vnet, storage_account, resource_group_na
                        storage_id=storage_account,
                        enabled=enabled,
                        tags=tags)
-    print("vnet createFL", flow_log)
     return flow_log
 
 def create_subnet_flow_log(cmd, location, subnet, storage_account, enabled, tags):
@@ -6176,7 +6165,6 @@ def create_subnet_flow_log(cmd, location, subnet, storage_account, enabled, tags
                        storage_id=storage_account,
                        enabled=enabled,
                        tags=tags)
-    print("subnet createFL",flow_log)
     return flow_log
 
 def create_nic_flow_log(cmd, location, nic, storage_account, enabled, tags):
@@ -6186,7 +6174,6 @@ def create_nic_flow_log(cmd, location, nic, storage_account, enabled, tags):
                        storage_id=storage_account,
                        enabled=enabled,
                        tags=tags)
-    print("nic create FL",flow_log)
     return flow_log
 
 def create_nsg_flow_log(cmd, location, nsg, storage_account, enabled, tags):
@@ -6196,7 +6183,6 @@ def create_nsg_flow_log(cmd, location, nsg, storage_account, enabled, tags):
                        storage_id=storage_account,
                        enabled=enabled,
                        tags=tags)
-    print("nsg createFL",flow_log)
     return flow_log
 
 def create_nw_flow_log(cmd,
@@ -6224,9 +6210,9 @@ def create_nw_flow_log(cmd,
     if vnet != None:
         flow_log = create_vnet_flow_log(cmd, location, vnet, storage_account, resource_group_name, enabled, tags)
     elif subnet != None:
-        flow_log = create_vnet_flow_log(cmd,client,watcher_rg,watcher_name,vnet,resource_group_name)
+        flow_log = create_subnet_flow_log(cmd,client,watcher_rg,watcher_name,subnet,resource_group_name)
     elif nic != None:
-        flow_log = create_vnet_flow_log(cmd,client,watcher_rg,watcher_name,vnet,resource_group_name)
+        flow_log = create_nic_flow_log(cmd,client,watcher_rg,watcher_name,nic,resource_group_name)
 
     if retention > 0:
         RetentionPolicyParameters = cmd.get_models('RetentionPolicyParameters')
@@ -6292,7 +6278,14 @@ def update_nw_flow_log(cmd,
         c.set_param('enabled', enabled)
         c.set_param('tags', tags)
         c.set_param('storage_id', storage_account)
-        c.set_param('target_resource_id', nsg)
+        if vnet!=None:
+            c.set_param('target_resource_id', vnet)
+        elif subnet!=None:
+            c.set_param('target_resource_id', subnet)
+        elif nic!=None:
+            c.set_param('target_resource_id', nic)
+        else:
+            c.set_param('target_resource_id', nsg)
 
     with cmd.update_context(instance.retention_policy) as c:
         c.set_param('days', retention)
