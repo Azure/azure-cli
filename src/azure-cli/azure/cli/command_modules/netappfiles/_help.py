@@ -70,9 +70,9 @@ parameters:
     short-summary: This specifies the custom LDAP search filter to be used when looking up group membership from LDAP server
   - name: --user-dn
     short-summary: This specifies the user DN, which overrides the base DN for user lookups.
-  - name: group-dn
+  - name: --group-dn
     short-summary: This specifies the group DN, which overrides the base DN for group lookups.
-  - name: group-filter
+  - name: --group-filter
     short-summary: This specifies the custom LDAP search filter to be used when looking up group membership from LDAP server.
 examples:
   - name: Add an active directory to the account
@@ -674,6 +674,8 @@ parameters:
     short-summary: The name of the ANF pool
   - name: --name --volume-name -n -v
     short-summary: The name of the ANF volume
+  - name: --force --force-delete
+    short-summary: An option to force delete the volume. Will cleanup resources connected to the particular volume.
 examples:
   - name: Delete an ANF volume
     text: >
