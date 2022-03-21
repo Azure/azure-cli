@@ -98,5 +98,5 @@ def get_fs_access_type(cli_ctx, name):
     raise KeyError
 
 
-def get_delete_destination_types():
+def get_blob_sync_delete_destination_types():
     return 'true', 'false', 'prompt'

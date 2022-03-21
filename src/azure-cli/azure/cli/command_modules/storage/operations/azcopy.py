@@ -85,10 +85,10 @@ def storage_blob_sync(cmd, client, source, destination, delete_destination='true
                       include_pattern=None, exclude_path=None):
     azcopy = _azcopy_blob_client(cmd, client)
     flags = []
-    if delete_destination is not 'true':
-        flags.append('--delete-destination=' + delete_destination)
-    else:
+    if delete_destination == 'true':
         flags.append('--delete-destination=true')
+    else:
+        flags.append('--delete-destination=' + delete_destination)
     if include_pattern is not None:
         flags.append('--include-pattern=' + include_pattern)
     if exclude_pattern is not None:
