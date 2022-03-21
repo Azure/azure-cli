@@ -351,7 +351,7 @@ class TestExtractCommaSeparatedString(unittest.TestCase):
             validators.extract_comma_separated_string(s12, extract_kv=True)
 
         s13 = "WindowsContainerRuntime=containerd,AKSHTTPCustomFeatures=Microsoft.ContainerService/CustomNodeConfigPreview"
-        t13 = validators.extract_comma_separated_string(s13, enable_strip=True, extract_kv=True, default_value={},)
+        t13 = validators.extract_comma_separated_string(s13, enable_strip=True, extract_kv=True, default_value={}, allow_appending_values_to_same_key=True)
         g13 = {"WindowsContainerRuntime": "containerd", "AKSHTTPCustomFeatures": "Microsoft.ContainerService/CustomNodeConfigPreview"}
         self.assertEqual(t13, g13)
 
