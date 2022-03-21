@@ -11,10 +11,10 @@ import os
 
 
 id_sql = '/subscriptions/da364f0f-307b-41c9-9d47-b7413ec45535/resourceGroups/pstestwlRG1bca8/providers/Microsoft.Compute/virtualMachines/pstestwlvm1bca8'
-item_id_sql = '/Subscriptions/da364f0f-307b-41c9-9d47-b7413ec45535/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;pstestwlrg1bca8;pstestwlvm1bca8/protectedItems/sqldatabase;mssqlserver;testdb'
+item_id_sql = '/Subscriptions/da364f0f-307b-41c9-9d47-b7413ec45535/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/sql-clitest-vault/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;pstestwlrg1bca8;pstestwlvm1bca8/protectedItems/sqldatabase;mssqlserver;testdb'
 sub_sql = 'da364f0f-307b-41c9-9d47-b7413ec45535'
 rg_sql = 'pstestwlRG1bca8'
-vault_sql = 'pstestwlRSV1bca8'
+vault_sql = 'sql-clitest-vault'
 container_sql = 'VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8'
 container_friendly_sql = 'pstestwlvm1bca8'
 item_auto_sql = 'SQLInstance;mssqlserver'
@@ -27,11 +27,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     # SQL workload tests start here
     # Please make sure you have the following setup in place before running the tests -
 
-    # For the tests using pstestwlvm1bca8 and pstestwlRSV1bca8 -
-    # Each test will register the container at the start and unregister at the end of the test
-    # Make sure that the container is not already registered since the start of the test
-
-    # For the tests using PSTestVM664243 and hiagaSrcVault -
+    # For the tests using pstestwlvm1bca8 and sql-clitest-vault -
     # Each test will register the container at the start and unregister at the end of the test
     # Make sure that the container is not already registered since the start of the test
 
@@ -40,13 +36,13 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     def test_backup_wl_sql_container(self):
 
         self.kwargs.update({
-            'vault': "hiagaSrcVault",
-            'name': "VMAppContainer;Compute;hiagaSrcRG2;PSTestVM664243",
-            'fname': "PSTestVM664243",
-            'rg': "hiagaSrcRG",
+            'vault': vault_sql,
+            'name': container_sql,
+            'fname': container_friendly_sql,
+            'rg': rg_sql,
             'wt': 'MSSQL',
             'sub': sub_sql,
-            'id': "/subscriptions/da364f0f-307b-41c9-9d47-b7413ec45535/resourceGroups/HIAGASRCRG2/providers/Microsoft.Compute/virtualMachines/PSTestVM664243"
+            'id': id_sql
         })
 
         self.cmd('backup container register -v {vault} -g {rg} --backup-management-type AzureWorkload --workload-type {wt} --resource-id {id} ')

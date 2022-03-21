@@ -19,13 +19,38 @@ from .custom import show_app, _build_identities_info
 logger = get_logger(__name__)
 
 
+# remove irrelevant attributes from staticsites printed to the user
+def _format_staticsite(site, format_site=False):
+    if format_site:
+        props_to_remove = {"allow_config_file_updates",
+                           "build_properties",
+                           "content_distribution_endpoint",
+                           "key_vault_reference_identity",
+                           "kind",
+                           "private_endpoint_connections",
+                           "repository_token",
+                           "staging_environment_policy",
+                           "template_properties"}
+        sku_props_to_remove = {"capabilities",
+                               "capacity",
+                               "family",
+                               "locations",
+                               "size",
+                               "sku_capacity"}
+        for p in sku_props_to_remove:
+            if hasattr(site.sku, p):
+                delattr(site.sku, p)
+        for p in props_to_remove:
+            if hasattr(site, p):
+                delattr(site, p)
+    return site
+
+
 def list_staticsites(cmd, resource_group_name=None):
     client = _get_staticsites_client_factory(cmd.cli_ctx)
     if resource_group_name:
-        result = list(client.get_static_sites_by_resource_group(resource_group_name))
-    else:
-        result = list(client.list())
-    return result
+        return list(client.get_static_sites_by_resource_group(resource_group_name))
+    return list(client.list())
 
 
 def show_staticsite(cmd, name, resource_group_name=None):
@@ -339,10 +364,10 @@ def update_staticsite_users(cmd, name, roles, authentication_provider=None, user
                                           static_site_user_envelope=user_envelope)
 
 
-def create_staticsites(cmd, resource_group_name, name, location,
+def create_staticsites(cmd, resource_group_name, name, location,  # pylint: disable=too-many-locals,
                        source, branch, token=None,
-                       app_location='.', api_location='.', output_location='.github/workflows',
-                       tags=None, no_wait=False, sku='Free', login_with_github=False):
+                       app_location="/", api_location=None, output_location=None,
+                       tags=None, no_wait=False, sku='Free', login_with_github=False, format_output=True):
     from azure.core.exceptions import ResourceNotFoundError
 
     try:
@@ -381,6 +406,10 @@ def create_staticsites(cmd, resource_group_name, name, location,
         sku=sku_def)
 
     client = _get_staticsites_client_factory(cmd.cli_ctx)
+    if not no_wait and format_output:
+        client.begin_create_or_update_static_site(resource_group_name=resource_group_name, name=name,
+                                                  static_site_envelope=staticsite_deployment_properties)
+        return show_staticsite(cmd, name, resource_group_name)
     return sdk_no_wait(no_wait, client.begin_create_or_update_static_site,
                        resource_group_name=resource_group_name, name=name,
                        static_site_envelope=staticsite_deployment_properties)
