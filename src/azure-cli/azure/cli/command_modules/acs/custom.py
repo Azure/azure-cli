@@ -59,7 +59,7 @@ from azure.cli.core._profile import Profile
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
 from azure.cli.core.keys import is_valid_ssh_rsa_public_key
-from azure.cli.core.util import in_cloud_console, shell_safe_json_parse, truncate_text, sdk_no_wait
+from azure.cli.core.util import get_file_json, in_cloud_console, shell_safe_json_parse, truncate_text, sdk_no_wait
 from azure.cli.core.commands import LongRunningOperation
 from azure.graphrbac.models import (ApplicationCreateParameters,
                                     ApplicationUpdateParameters,
@@ -69,7 +69,7 @@ from azure.graphrbac.models import (ApplicationCreateParameters,
                                     GetObjectsParameters,
                                     ResourceAccess, RequiredResourceAccess)
 
-from azure.mgmt.containerservice.models import ContainerServiceOrchestratorTypes
+from azure.mgmt.containerservice.models import (ContainerServiceOrchestratorTypes, KubeletConfig, LinuxOSConfig, SysctlConfig)
 
 from ._client_factory import cf_container_services
 from ._client_factory import cf_resource_groups
@@ -3137,6 +3137,8 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
                       spot_max_price=float('nan'),
                       tags=None,
                       labels=None,
+                      kubelet_config=None,
+                      linux_os_config=None,
                       max_surge=None,
                       mode="User",
                       enable_encryption_at_host=False,
@@ -3240,6 +3242,12 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
 
     if node_osdisk_type:
         agent_pool.os_disk_type = node_osdisk_type
+
+    if kubelet_config:
+        agent_pool.kubelet_config = _get_kubelet_config(kubelet_config)
+
+    if linux_os_config:
+        agent_pool.linux_os_config = _get_linux_os_config(linux_os_config)
 
     # custom headers
     aks_custom_headers = extract_comma_separated_string(
@@ -4231,3 +4239,109 @@ def aks_snapshot_list(cmd, client, resource_group_name=None):  # pylint: disable
         return client.list()
 
     return client.list_by_resource_group(resource_group_name)
+
+
+def _get_kubelet_config(file_path):
+    if not os.path.isfile(file_path):
+        raise CLIError("{} is not valid file, or not accessable.".format(file_path))
+    kubelet_config = get_file_json(file_path)
+    if not isinstance(kubelet_config, dict):
+        raise CLIError(
+            "Error reading kubelet configuration at {}. Please see https://aka.ms/CustomNodeConfig for correct format.".format(file_path))
+    config_object = KubeletConfig()
+    config_object.cpu_manager_policy = kubelet_config.get(
+        "cpuManagerPolicy", None)
+    config_object.cpu_cfs_quota = kubelet_config.get("cpuCfsQuota", None)
+    config_object.cpu_cfs_quota_period = kubelet_config.get(
+        "cpuCfsQuotaPeriod", None)
+    config_object.image_gc_high_threshold = kubelet_config.get(
+        "imageGcHighThreshold", None)
+    config_object.image_gc_low_threshold = kubelet_config.get(
+        "imageGcLowThreshold", None)
+    config_object.topology_manager_policy = kubelet_config.get(
+        "topologyManagerPolicy", None)
+    config_object.allowed_unsafe_sysctls = kubelet_config.get(
+        "allowedUnsafeSysctls", None)
+    config_object.fail_swap_on = kubelet_config.get("failSwapOn", None)
+    config_object.container_log_max_files = kubelet_config.get(
+        "containerLogMaxFiles", None)
+    config_object.container_log_max_size_mb = kubelet_config.get(
+        "containerLogMaxSizeMB", None)
+    config_object.pod_max_pids = kubelet_config.get(
+        "podMaxPids", None)
+
+    return config_object
+
+
+def _get_linux_os_config(file_path):
+    if not os.path.isfile(file_path):
+        raise CLIError("{} is not valid file, or not accessable.".format(file_path))
+    os_config = get_file_json(file_path)
+    if not isinstance(os_config, dict):
+        raise CLIError(
+            "Error reading Linux OS configuration at {}. Please see https://aka.ms/CustomNodeConfig for correct format.".format(file_path))
+    config_object = LinuxOSConfig()
+    config_object.transparent_huge_page_enabled = os_config.get(
+        "transparentHugePageEnabled", None)
+    config_object.transparent_huge_page_defrag = os_config.get(
+        "transparentHugePageDefrag", None)
+    config_object.swap_file_size_mb = os_config.get("swapFileSizeMB", None)
+    # sysctl settings
+    sysctls = os_config.get("sysctls", None)
+    if not isinstance(sysctls, dict):
+        raise CLIError(
+            "Error reading Sysctl settings at {}. Please see https://aka.ms/CustomNodeConfig for correct format.".format(file_path))
+    config_object.sysctls = SysctlConfig()
+    config_object.sysctls.net_core_somaxconn = sysctls.get(
+        "netCoreSomaxconn", None)
+    config_object.sysctls.net_core_netdev_max_backlog = sysctls.get(
+        "netCoreNetdevMaxBacklog", None)
+    config_object.sysctls.net_core_rmem_max = sysctls.get(
+        "netCoreRmemMax", None)
+    config_object.sysctls.net_core_wmem_max = sysctls.get(
+        "netCoreWmemMax", None)
+    config_object.sysctls.net_core_optmem_max = sysctls.get(
+        "netCoreOptmemMax", None)
+    config_object.sysctls.net_ipv4_tcp_max_syn_backlog = sysctls.get(
+        "netIpv4TcpMaxSynBacklog", None)
+    config_object.sysctls.net_ipv4_tcp_max_tw_buckets = sysctls.get(
+        "netIpv4TcpMaxTwBuckets", None)
+    config_object.sysctls.net_ipv4_tcp_fin_timeout = sysctls.get(
+        "netIpv4TcpFinTimeout", None)
+    config_object.sysctls.net_ipv4_tcp_keepalive_time = sysctls.get(
+        "netIpv4TcpKeepaliveTime", None)
+    config_object.sysctls.net_ipv4_tcp_keepalive_probes = sysctls.get(
+        "netIpv4TcpKeepaliveProbes", None)
+    config_object.sysctls.net_ipv4_tcpkeepalive_intvl = sysctls.get(
+        "netIpv4TcpkeepaliveIntvl", None)
+    config_object.sysctls.net_ipv4_tcp_rmem = sysctls.get(
+        "netIpv4TcpRmem", None)
+    config_object.sysctls.net_ipv4_tcp_wmem = sysctls.get(
+        "netIpv4TcpWmem", None)
+    config_object.sysctls.net_ipv4_tcp_tw_reuse = sysctls.get(
+        "netIpv4TcpTwReuse", None)
+    config_object.sysctls.net_ipv4_ip_local_port_range = sysctls.get(
+        "netIpv4IpLocalPortRange", None)
+    config_object.sysctls.net_ipv4_neigh_default_gc_thresh1 = sysctls.get(
+        "netIpv4NeighDefaultGcThresh1", None)
+    config_object.sysctls.net_ipv4_neigh_default_gc_thresh2 = sysctls.get(
+        "netIpv4NeighDefaultGcThresh2", None)
+    config_object.sysctls.net_ipv4_neigh_default_gc_thresh3 = sysctls.get(
+        "netIpv4NeighDefaultGcThresh3", None)
+    config_object.sysctls.net_netfilter_nf_conntrack_max = sysctls.get(
+        "netNetfilterNfConntrackMax", None)
+    config_object.sysctls.net_netfilter_nf_conntrack_buckets = sysctls.get(
+        "netNetfilterNfConntrackBuckets", None)
+    config_object.sysctls.fs_inotify_max_user_watches = sysctls.get(
+        "fsInotifyMaxUserWatches", None)
+    config_object.sysctls.fs_file_max = sysctls.get("fsFileMax", None)
+    config_object.sysctls.fs_aio_max_nr = sysctls.get("fsAioMaxNr", None)
+    config_object.sysctls.fs_nr_open = sysctls.get("fsNrOpen", None)
+    config_object.sysctls.kernel_threads_max = sysctls.get(
+        "kernelThreadsMax", None)
+    config_object.sysctls.vm_max_map_count = sysctls.get("vmMaxMapCount", None)
+    config_object.sysctls.vm_swappiness = sysctls.get("vmSwappiness", None)
+    config_object.sysctls.vm_vfs_cache_pressure = sysctls.get(
+        "vmVfsCachePressure", None)
+
+    return config_object

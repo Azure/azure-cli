@@ -503,6 +503,12 @@ parameters:
   - name: --snapshot-id
     type: string
     short-summary: The source snapshot id used to create this cluster.
+  - name: --kubelet-config
+    type: string
+    short-summary: Kubelet configurations for agent nodes.
+  - name: --linux-os-config
+    type: string
+    short-summary: OS configurations for Linux agent nodes.
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --ssh-key-value /path/to/publickey
@@ -994,6 +1000,12 @@ parameters:
   - name: --aks-custom-headers
     type: string
     short-summary: Comma-separated key-value pairs to specify custom headers.
+  - name: --kubelet-config
+    type: string
+    short-summary: Kubelet configurations for agent nodes.
+  - name: --linux-os-config
+    type: string
+    short-summary: OS configurations for Linux agent nodes.
 examples:
   - name: Create a nodepool in an existing AKS cluster with ephemeral os enabled.
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --node-osdisk-type Ephemeral --node-osdisk-size 48
