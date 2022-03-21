@@ -27,13 +27,15 @@ def _update_mapper(existing, new, keys):
 # ---- ACCOUNT ----
 # pylint: disable=unused-argument
 # account update - active_directory is amended with subgroup commands
-def create_account(client, account_name, resource_group_name, location, tags=None, encryption=None):
+def create_account(client, account_name, resource_group_name, location=None, tags=None, encryption=None):
+    if location is None:
+        location = client.resource_groups.get(resource_group_name).location
     account_encryption = AccountEncryption(key_source=encryption) if encryption is not None else None
     body = NetAppAccount(location=location, tags=tags, encryption=account_encryption)
     return client.begin_create_or_update(resource_group_name, account_name, body)
 
 
-# pylint: disable=unused-argument
+# pylint: disable=unused-argument, disable=too-many-locals
 # add an active directory to the netapp account
 # current limitation is 1 AD/subscription
 def add_active_directory(instance, account_name, resource_group_name, username, password, domain, dns,
@@ -60,7 +62,7 @@ def add_active_directory(instance, account_name, resource_group_name, username, 
     return body
 
 
-# pylint: disable=unused-argument, disable=too-many-locals
+# pylint: disable=unused-argument, disable=too-many-locals, disable=too-many-statements
 # update an active directory on the netapp account
 # current limitation is 1 AD/subscription
 def update_active_directory(instance, account_name, resource_group_name, active_directory_id, username, password, domain,
@@ -191,7 +193,7 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
     # if NFSv4 is specified then the export policy must reflect this
     # the RP ordinarily only creates a default setting NFSv3.
     if protocol_types is not None and any(x in ['NFSv3', 'NFSv4.1'] for x in protocol_types) \
-            and not (protocol_types is 'NFSv3' and rule_index is None):
+            and not (protocol_types == 'NFSv3' and rule_index is None):
         rules = []
         isNfs41 = False
         isNfs3 = False
@@ -397,7 +399,9 @@ def remove_export_policy_rule(instance, rule_index):
 
 
 # ---- SNAPSHOTS ----
-def create_snapshot(client, resource_group_name, account_name, pool_name, volume_name, snapshot_name, location):
+def create_snapshot(client, resource_group_name, account_name, pool_name, volume_name, snapshot_name, location=None):
+    if location is None:
+        location = client.resource_groups.get(resource_group_name).location
     body = Snapshot(location=location)
     return client.begin_create(resource_group_name, account_name, pool_name, volume_name, snapshot_name, body)
 
@@ -412,12 +416,14 @@ def snapshot_restore_files(client, resource_group_name, account_name, pool_name,
 
 
 # ---- SNAPSHOT POLICIES ----
-def create_snapshot_policy(client, resource_group_name, account_name, snapshot_policy_name, location,
+def create_snapshot_policy(client, resource_group_name, account_name, snapshot_policy_name, location=None,
                            hourly_snapshots=None, hourly_minute=None,
                            daily_snapshots=None, daily_minute=None, daily_hour=None,
                            weekly_snapshots=None, weekly_minute=None, weekly_hour=None, weekly_day=None,
                            monthly_snapshots=None, monthly_minute=None, monthly_hour=None, monthly_days=None,
                            enabled=False, tags=None):
+    if location is None:
+        location = client.resource_groups.get(resource_group_name).location
     body = SnapshotPolicy(
         location=location,
         hourly_schedule=HourlySchedule(snapshots_to_keep=hourly_snapshots, minute=hourly_minute),
@@ -431,12 +437,14 @@ def create_snapshot_policy(client, resource_group_name, account_name, snapshot_p
     return client.create(resource_group_name, account_name, snapshot_policy_name, body)
 
 
-def patch_snapshot_policy(client, resource_group_name, account_name, snapshot_policy_name, location,
+def patch_snapshot_policy(client, resource_group_name, account_name, snapshot_policy_name, location=None,
                           hourly_snapshots=None, hourly_minute=None,
                           daily_snapshots=None, daily_minute=None, daily_hour=None,
                           weekly_snapshots=None, weekly_minute=None, weekly_hour=None, weekly_day=None,
                           monthly_snapshots=None, monthly_minute=None, monthly_hour=None, monthly_days=None,
                           enabled=False):
+    if location is None:
+        location = client.resource_groups.get(resource_group_name).location
     body = SnapshotPolicyPatch(
         location=location,
         hourly_schedule=HourlySchedule(snapshots_to_keep=hourly_snapshots, minute=hourly_minute),
@@ -450,8 +458,10 @@ def patch_snapshot_policy(client, resource_group_name, account_name, snapshot_po
 
 
 # ---- VOLUME BACKUPS ----
-def create_backup(client, resource_group_name, account_name, pool_name, volume_name, backup_name, location,
+def create_backup(client, resource_group_name, account_name, pool_name, volume_name, backup_name, location=None,
                   use_existing_snapshot=None):
+    if location is None:
+        location = client.resource_groups.get(resource_group_name).location
     body = Backup(location=location, use_existing_snapshot=use_existing_snapshot)
     return client.begin_create(resource_group_name, account_name, pool_name, volume_name, backup_name, body)
 
@@ -463,8 +473,10 @@ def update_backup(client, resource_group_name, account_name, pool_name, volume_n
 
 
 # ---- BACKUP POLICIES ----
-def create_backup_policy(client, resource_group_name, account_name, backup_policy_name, location,
+def create_backup_policy(client, resource_group_name, account_name, backup_policy_name, location=None,
                          daily_backups=None, weekly_backups=None, monthly_backups=None, enabled=False, tags=None):
+    if location is None:
+        location = client.resource_groups.get(resource_group_name).location
     body = BackupPolicy(
         location=location,
         daily_backups_to_keep=daily_backups,

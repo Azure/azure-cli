@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=line-too-long
+# pylint: disable=line-too-long, disable=too-many-statements
 from azure.cli.core.commands.parameters import tags_type, resource_group_name_type, get_enum_type, get_three_state_flag
 from knack.arguments import CLIArgumentType
 
@@ -92,7 +92,7 @@ def load_volume_arguments(self, account_name_type, pool_name_type, volume_name_t
         c.argument('is_def_quota_enabled', arg_type=get_three_state_flag())
 
     with self.argument_context('netappfiles volume delete') as c:
-        c.argument('force_delete', options_list=['--force', '--force-delete', '-f'], arg_type=get_three_state_flag())
+        c.argument('force_delete', arg_type=get_three_state_flag())
 
     with self.argument_context('netappfiles volume list') as c:
         c.argument('account_name', account_name_type, id_part=None)
@@ -173,4 +173,3 @@ def load_subvolume_arguments(self, account_name_type, pool_name_type, volume_nam
         c.argument('account_name', account_name_type)
         c.argument('pool_name', pool_name_type)
         c.argument('volume_name', volume_name_type)
-        c.argument('subvolume_name', id_part='child_name_3', options_list=['--name', '--subvolume-name', '-n', '-s'], help='The name of the ANF subvolume')

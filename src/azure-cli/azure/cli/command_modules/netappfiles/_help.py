@@ -68,12 +68,6 @@ parameters:
     short-summary: This specifies the group DN, which overrides the base DN for group lookups
   - name: --group-filter
     short-summary: This specifies the custom LDAP search filter to be used when looking up group membership from LDAP server
-  - name: --user-dn
-    short-summary: This specifies the user DN, which overrides the base DN for user lookups.
-  - name: --group-dn
-    short-summary: This specifies the group DN, which overrides the base DN for group lookups.
-  - name: --group-filter
-    short-summary: This specifies the custom LDAP search filter to be used when looking up group membership from LDAP server.
 examples:
   - name: Add an active directory to the account
     text: >
@@ -122,6 +116,12 @@ parameters:
     short-summary: Users to be added to the Built-in Administrators active directory group. A space seperated list of unique usernames without domain specifier.
   - name: --encrypt-dc-conn
     short-summary: If enabled, Traffic between the SMB server to Domain Controller (DC) will be encrypted
+  - name: --user-dn
+    short-summary: This specifies the user DN, which overrides the base DN for user lookups.
+  - name: --group-dn
+    short-summary: This specifies the group DN, which overrides the base DN for group lookups.
+  - name: --group-filter
+    short-summary: This specifies the custom LDAP search filter to be used when looking up group membership from LDAP server.
 examples:
   - name: Update an active directory on the account
     text: >
@@ -674,7 +674,7 @@ parameters:
     short-summary: The name of the ANF pool
   - name: --name --volume-name -n -v
     short-summary: The name of the ANF volume
-  - name: --force --force-delete
+  - name: --force-delete
     short-summary: An option to force delete the volume. Will cleanup resources connected to the particular volume.
 examples:
   - name: Delete an ANF volume
@@ -955,6 +955,8 @@ parameters:
     short-summary: Default group quota for volume in KiBs. If isDefaultQuotaEnabled is set, the minimum value of 4 KiBs applies
   - name: --throughput-mibps
     short-summary: Maximum throughput in Mibps that can be achieved by this volume and this will be accepted as input only for manual qosType volume
+  - name: --unix-permissions
+    short-summary: UNIX permissions for NFS volume accepted in octal 4 digit format. First digit selects the set user ID(4), set group ID (2) and sticky (1) attributes. Second digit selects permission for the owner of the file- read (4), write (2) and execute (1). Third selects permissions for other users in the same group. the fourth for other users not in the group. 0755 - gives read/write/execute permissions to owner and read/execute to group and other users.
 examples:
   - name: Update an ANF volume
     text: >
@@ -1270,7 +1272,7 @@ parameters:
     short-summary: The name of the ANF pool
   - name: --volume-name -v
     short-summary: The name of the ANF volume
-  - name: --subvolume-name --name -n -s
+  - name: --subvolume-name
     short-summary: The name of the ANF subvolume
   - name: --path
     short-summary: Path to the subvolume
@@ -1294,7 +1296,7 @@ parameters:
     short-summary: The name of the ANF pool
   - name: --volume-name -v
     short-summary: The name of the ANF volume
-  - name: --subvolume-name --name -n -s
+  - name: --subvolume-name
     short-summary: The name of the ANF subvolume
   - name: --path
     short-summary: Path to the subvolume
@@ -1332,7 +1334,7 @@ parameters:
     short-summary: The name of the ANF pool
   - name: --volume-name -v
     short-summary: The name of the ANF volume
-  - name: --subvolume-name --name -n -s
+  - name: --subvolume-name
     short-summary: The name of the ANF subvolume
 examples:
   - name: Get a subvolume of the ANF volume
@@ -1350,7 +1352,7 @@ parameters:
     short-summary: The name of the ANF pool
   - name: --volume-name -v
     short-summary: The name of the ANF volume
-  - name: --subvolume-name --name -n -s
+  - name: --subvolume-name
     short-summary: The name of the ANF subvolume
 examples:
   - name: Delete a subvolume of the ANF volume
@@ -1373,7 +1375,7 @@ parameters:
     short-summary: The name of the ANF pool
   - name: --volume-name -v
     short-summary: The name of the ANF volume
-  - name: --subvolume-name --name -n -s
+  - name: --subvolume-name
     short-summary: The name of the ANF subvolume
 examples:
   - name: Get a metadata of an ANF subvolume
