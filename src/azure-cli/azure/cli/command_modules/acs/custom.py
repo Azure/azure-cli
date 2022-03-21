@@ -2007,6 +2007,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                gmsa_dns_server=None,
                gmsa_root_domain_name=None,
                snapshot_id=None,
+               kubelet_config=None,
+               linux_os_config=None,
                ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
