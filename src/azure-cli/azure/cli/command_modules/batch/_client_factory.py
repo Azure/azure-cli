@@ -9,14 +9,18 @@ from azure.cli.core.util import in_cloud_console
 def mgmt_batch_account_client_factory(cli_ctx, _):
     return batch_client_factory(cli_ctx).batch_account
 
+
 def mgmt_pool_client_factory(cli_ctx, _):
     return batch_client_factory(cli_ctx).pool
 
+
 def mgmt_private_link_resource_client_factory(cli_ctx, _):
     return batch_client_factory(cli_ctx).private_link_resource
-                                         
+
+
 def mgmt_private_endpoint_connection_client_factory(cli_ctx, _):
     return batch_client_factory(cli_ctx).private_endpoint_connection
+
 
 def mgmt_application_client_factory(cli_ctx, _):
     return batch_client_factory(cli_ctx).application
