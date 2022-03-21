@@ -68,6 +68,12 @@ parameters:
     short-summary: This specifies the group DN, which overrides the base DN for group lookups
   - name: --group-filter
     short-summary: This specifies the custom LDAP search filter to be used when looking up group membership from LDAP server
+  - name: --user-dn
+    short-summary: This specifies the user DN, which overrides the base DN for user lookups.
+  - name: group-dn
+    short-summary: This specifies the group DN, which overrides the base DN for group lookups.
+  - name: group-filter
+    short-summary: This specifies the custom LDAP search filter to be used when looking up group membership from LDAP server.
 examples:
   - name: Add an active directory to the account
     text: >
