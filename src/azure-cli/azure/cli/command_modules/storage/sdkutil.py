@@ -96,3 +96,7 @@ def get_fs_access_type(cli_ctx, name):
     if name == 'filesystem':
         return get_sdk(cli_ctx, ResourceType.DATA_STORAGE_FILEDATALAKE, 'PublicAccess', mod='_models').FileSystem
     raise KeyError
+
+
+def get_delete_destination_types():
+    return 'true', 'false', 'prompt'
