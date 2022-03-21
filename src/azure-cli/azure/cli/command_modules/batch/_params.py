@@ -147,11 +147,11 @@ def load_arguments(self, _):
                    help='A list of environment variable settings for the start task. Space-separated values in \'key=value\' format.')
 
     with self.argument_context('batch private-endpoint-connection show') as c:
-         c.argument('private_endpoint_connection_name', options_list=['--name', '-n'],
+        c.argument('private_endpoint_connection_name', options_list=['--name', '-n'],
                    help='The private endpoint connection name. This must be unique within the account.')
 
     with self.argument_context('batch private-link-resource show') as c:
-         c.argument('private_link_resource_name', options_list=['--name', '-n'],
+        c.argument('private_link_resource_name', options_list=['--name', '-n'],
                    help='The private link resource name. This must be unique within the account.')
 
     with self.argument_context('batch job list') as c:
