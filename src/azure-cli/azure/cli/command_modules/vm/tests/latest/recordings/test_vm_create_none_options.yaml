@@ -68,13 +68,13 @@ interactions:
       content-type:
       - text/plain; charset=utf-8
       date:
-      - Tue, 22 Feb 2022 13:32:10 GMT
+      - Thu, 17 Mar 2022 06:40:39 GMT
       etag:
       - W/"d5acead0b38a79d988c245a7a15ec01f999da9244c97bbdc1fa2ec70d9e433f5"
       expires:
-      - Tue, 22 Feb 2022 13:37:10 GMT
+      - Thu, 17 Mar 2022 06:45:39 GMT
       source-age:
-      - '287'
+      - '0'
       strict-transport-security:
       - max-age=31536000
       vary:
@@ -88,17 +88,128 @@ interactions:
       x-content-type-options:
       - nosniff
       x-fastly-request-id:
-      - 11c3e087c22fc9a91a21f9f3db182ae358b4995a
+      - 080bd21dc1eea680f5c948af441c1e2564a36dbb
       x-frame-options:
       - deny
       x-github-request-id:
-      - 7CE8:7685:1220CD:1A4D54:6214E248
+      - 2570:063C:1995B2:2734C1:62329D55
       x-served-by:
-      - cache-qpg1271-QPG
+      - cache-qpg1248-QPG
       x-timer:
-      - S1645536730.448066,VS0,VE1
+      - S1647499239.943014,VS0,VE297
       x-xss-protection:
       - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --computer-name --image --availability-set --nsg --ssh-key-value --public-ip-address
+        --tags --location --admin-username
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/publishers/Debian/artifacttypes/vmimage/offers/debian-10/skus/10/versions?$top=1&$orderby=name%20desc&api-version=2021-11-01
+  response:
+    body:
+      string: "[\r\n  {\r\n    \"location\": \"eastus\",\r\n    \"name\": \"0.20220310.944\",\r\n
+        \   \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/eastus/Publishers/Debian/ArtifactTypes/VMImage/Offers/debian-10/Skus/10/Versions/0.20220310.944\"\r\n
+        \ }\r\n]"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '271'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Mar 2022 06:40:40 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/ListVMImagesVersionsFromLocation3Min;15999,Microsoft.Compute/ListVMImagesVersionsFromLocation30Min;43999
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --computer-name --image --availability-set --nsg --ssh-key-value --public-ip-address
+        --tags --location --admin-username
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/publishers/Debian/artifacttypes/vmimage/offers/debian-10/skus/10/versions/0.20220310.944?api-version=2021-11-01
+  response:
+    body:
+      string: "{\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n    \"architecture\":
+        \"x64\",\r\n    \"replicaType\": \"Unmanaged\",\r\n    \"disallowed\": {\r\n
+        \     \"vmDiskType\": \"None\"\r\n    },\r\n    \"automaticOSUpgradeProperties\":
+        {\r\n      \"automaticOSUpgradeSupported\": false\r\n    },\r\n    \"imageDeprecationStatus\":
+        {\r\n      \"imageState\": \"Active\"\r\n    },\r\n    \"features\": [\r\n
+        \     {\r\n        \"name\": \"IsAcceleratedNetworkSupported\",\r\n        \"value\":
+        \"True\"\r\n      }\r\n    ],\r\n    \"osDiskImage\": {\r\n      \"operatingSystem\":
+        \"Linux\",\r\n      \"sizeInGb\": 30,\r\n      \"sizeInBytes\": 32212255232\r\n
+        \   },\r\n    \"dataDiskImages\": []\r\n  },\r\n  \"location\": \"eastus\",\r\n
+        \ \"name\": \"0.20220310.944\",\r\n  \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/eastus/Publishers/Debian/ArtifactTypes/VMImage/Offers/debian-10/Skus/10/Versions/0.20220310.944\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '859'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Mar 2022 06:40:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetVMImageFromLocation3Min;12999,Microsoft.Compute/GetVMImageFromLocation30Min;73999
     status:
       code: 200
       message: OK
@@ -117,7 +228,7 @@ interactions:
       - -n -g --computer-name --image --availability-set --nsg --ssh-key-value --public-ip-address
         --tags --location --admin-username
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-network/19.3.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Network/virtualNetworks?api-version=2018-01-01
   response:
@@ -131,13 +242,15 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 22 Feb 2022 13:32:10 GMT
+      - Thu, 17 Mar 2022 06:40:41 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
     status:
@@ -164,8 +277,8 @@ interactions:
       "10", "version": "latest"}}, "osProfile": {"computerName": "nooptvm", "adminUsername":
       "user11", "linuxConfiguration": {"disablePasswordAuthentication": true, "ssh":
       {"publicKeys": [{"keyData": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ==
-      test@example.com\n", "path": "/home/user11/.ssh/authorized_keys"}]}}}, "additionalCapabilities":
-      {}}}], "outputs": {}}, "parameters": {}, "mode": "incremental"}}'
+      test@example.com\n", "path": "/home/user11/.ssh/authorized_keys"}]}}}}}], "outputs":
+      {}}, "parameters": {}, "mode": "incremental"}}'
     headers:
       Accept:
       - application/json
@@ -176,22 +289,22 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '2844'
+      - '2814'
       Content-Type:
       - application/json
       ParameterSetName:
       - -n -g --computer-name --image --availability-set --nsg --ssh-key-value --public-ip-address
         --tags --location --admin-username
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_none_options000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Resources/deployments/vm_deploy_rFWjUfClAHQbyuK19aSKNzwwgkyKtoV0","name":"vm_deploy_rFWjUfClAHQbyuK19aSKNzwwgkyKtoV0","type":"Microsoft.Resources/deployments","properties":{"templateHash":"8305423644852240510","parameters":{},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2022-02-22T13:32:14.4455081Z","duration":"PT0.0003117S","correlationId":"be6e0ca8-fca9-4b61-b17c-e1e8cbdccc0d","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["eastus"]},{"resourceType":"networkInterfaces","locations":["eastus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["eastus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Network/virtualNetworks/nooptvmVNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"nooptvmVNET"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Network/networkInterfaces/nooptvmVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"nooptvmVMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Network/networkInterfaces/nooptvmVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"nooptvmVMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Compute/virtualMachines/nooptvm","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"nooptvm"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Resources/deployments/vm_deploy_UOOn8JhWQ83pZPcLB7CFlmw4rpORlDL8","name":"vm_deploy_UOOn8JhWQ83pZPcLB7CFlmw4rpORlDL8","type":"Microsoft.Resources/deployments","properties":{"templateHash":"4289123675535315362","parameters":{},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2022-03-17T06:40:47.6996688Z","duration":"PT0.0008458S","correlationId":"7c8d092b-9ed7-45e7-b6f7-801316e8d100","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["eastus"]},{"resourceType":"networkInterfaces","locations":["eastus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["eastus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Network/virtualNetworks/nooptvmVNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"nooptvmVNET"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Network/networkInterfaces/nooptvmVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"nooptvmVMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Network/networkInterfaces/nooptvmVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"nooptvmVMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Compute/virtualMachines/nooptvm","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"nooptvm"}]}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_none_options000001/providers/Microsoft.Resources/deployments/vm_deploy_rFWjUfClAHQbyuK19aSKNzwwgkyKtoV0/operationStatuses/08585560701532803814?api-version=2021-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_none_options000001/providers/Microsoft.Resources/deployments/vm_deploy_UOOn8JhWQ83pZPcLB7CFlmw4rpORlDL8/operationStatuses/08585541076398758142?api-version=2021-04-01
       cache-control:
       - no-cache
       content-length:
@@ -199,7 +312,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 22 Feb 2022 13:32:15 GMT
+      - Thu, 17 Mar 2022 06:40:48 GMT
       expires:
       - '-1'
       pragma:
@@ -209,7 +322,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1196'
+      - '1195'
     status:
       code: 201
       message: Created
@@ -228,9 +341,9 @@ interactions:
       - -n -g --computer-name --image --availability-set --nsg --ssh-key-value --public-ip-address
         --tags --location --admin-username
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_none_options000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585560701532803814?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_none_options000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585541076398758142?api-version=2021-04-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -242,7 +355,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 22 Feb 2022 13:32:45 GMT
+      - Thu, 17 Mar 2022 06:41:19 GMT
       expires:
       - '-1'
       pragma:
@@ -271,9 +384,52 @@ interactions:
       - -n -g --computer-name --image --availability-set --nsg --ssh-key-value --public-ip-address
         --tags --location --admin-username
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_none_options000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585560701532803814?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_none_options000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585541076398758142?api-version=2021-04-01
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Mar 2022 06:41:49 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --computer-name --image --availability-set --nsg --ssh-key-value --public-ip-address
+        --tags --location --admin-username
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_none_options000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585541076398758142?api-version=2021-04-01
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -285,7 +441,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 22 Feb 2022 13:33:16 GMT
+      - Thu, 17 Mar 2022 06:42:19 GMT
       expires:
       - '-1'
       pragma:
@@ -314,21 +470,21 @@ interactions:
       - -n -g --computer-name --image --availability-set --nsg --ssh-key-value --public-ip-address
         --tags --location --admin-username
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_none_options000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Resources/deployments/vm_deploy_rFWjUfClAHQbyuK19aSKNzwwgkyKtoV0","name":"vm_deploy_rFWjUfClAHQbyuK19aSKNzwwgkyKtoV0","type":"Microsoft.Resources/deployments","properties":{"templateHash":"8305423644852240510","parameters":{},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2022-02-22T13:32:54.3934497Z","duration":"PT39.9482533S","correlationId":"be6e0ca8-fca9-4b61-b17c-e1e8cbdccc0d","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["eastus"]},{"resourceType":"networkInterfaces","locations":["eastus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["eastus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Network/virtualNetworks/nooptvmVNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"nooptvmVNET"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Network/networkInterfaces/nooptvmVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"nooptvmVMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Network/networkInterfaces/nooptvmVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"nooptvmVMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Compute/virtualMachines/nooptvm","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"nooptvm"}],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Compute/virtualMachines/nooptvm"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Network/networkInterfaces/nooptvmVMNic"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Network/virtualNetworks/nooptvmVNET"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Resources/deployments/vm_deploy_UOOn8JhWQ83pZPcLB7CFlmw4rpORlDL8","name":"vm_deploy_UOOn8JhWQ83pZPcLB7CFlmw4rpORlDL8","type":"Microsoft.Resources/deployments","properties":{"templateHash":"4289123675535315362","parameters":{},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2022-03-17T06:42:03.1352895Z","duration":"PT1M15.4364665S","correlationId":"7c8d092b-9ed7-45e7-b6f7-801316e8d100","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["eastus"]},{"resourceType":"networkInterfaces","locations":["eastus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["eastus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Network/virtualNetworks/nooptvmVNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"nooptvmVNET"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Network/networkInterfaces/nooptvmVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"nooptvmVMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Network/networkInterfaces/nooptvmVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"nooptvmVMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Compute/virtualMachines/nooptvm","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"nooptvm"}],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Compute/virtualMachines/nooptvm"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Network/networkInterfaces/nooptvmVMNic"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Network/virtualNetworks/nooptvmVNET"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2422'
+      - '2424'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 22 Feb 2022 13:33:16 GMT
+      - Thu, 17 Mar 2022 06:42:20 GMT
       expires:
       - '-1'
       pragma:
@@ -357,23 +513,23 @@ interactions:
       - -n -g --computer-name --image --availability-set --nsg --ssh-key-value --public-ip-address
         --tags --location --admin-username
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Compute/virtualMachines/nooptvm?$expand=instanceView&api-version=2021-11-01
   response:
     body:
       string: "{\r\n  \"name\": \"nooptvm\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Compute/virtualMachines/nooptvm\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"eastus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"2357b98d-462b-4d79-a7ea-abc9047a2c89\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"05011ab7-99bd-4d2d-81aa-9996ef72aa0c\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"Debian\",\r\n        \"offer\": \"debian-10\",\r\n        \"sku\": \"10\",\r\n
-        \       \"version\": \"latest\",\r\n        \"exactVersion\": \"0.20211011.792\"\r\n
+        \       \"version\": \"latest\",\r\n        \"exactVersion\": \"0.20220310.944\"\r\n
         \     },\r\n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"name\":
-        \"nooptvm_disk1_82f007aa018b4341b6aa80cdfd8dceac\",\r\n        \"createOption\":
+        \"nooptvm_OsDisk_1_7939f143b43e423d8eab14f770cf2999\",\r\n        \"createOption\":
         \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n        \"managedDisk\":
         {\r\n          \"storageAccountType\": \"Premium_LRS\",\r\n          \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Compute/disks/nooptvm_disk1_82f007aa018b4341b6aa80cdfd8dceac\"\r\n
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Compute/disks/nooptvm_OsDisk_1_7939f143b43e423d8eab14f770cf2999\"\r\n
         \       },\r\n        \"deleteOption\": \"Detach\",\r\n        \"diskSizeGB\":
         30\r\n      },\r\n      \"dataDisks\": []\r\n    },\r\n    \"osProfile\":
         {\r\n      \"computerName\": \"nooptvm\",\r\n      \"adminUsername\": \"user11\",\r\n
@@ -392,28 +548,28 @@ interactions:
         [\r\n          {\r\n            \"code\": \"ProvisioningState/succeeded\",\r\n
         \           \"level\": \"Info\",\r\n            \"displayStatus\": \"Ready\",\r\n
         \           \"message\": \"Guest Agent is running\",\r\n            \"time\":
-        \"2022-02-22T13:32:59+00:00\"\r\n          }\r\n        ],\r\n        \"extensionHandlers\":
-        []\r\n      },\r\n      \"disks\": [\r\n        {\r\n          \"name\": \"nooptvm_disk1_82f007aa018b4341b6aa80cdfd8dceac\",\r\n
+        \"2022-03-17T06:42:02+00:00\"\r\n          }\r\n        ],\r\n        \"extensionHandlers\":
+        []\r\n      },\r\n      \"disks\": [\r\n        {\r\n          \"name\": \"nooptvm_OsDisk_1_7939f143b43e423d8eab14f770cf2999\",\r\n
         \         \"statuses\": [\r\n            {\r\n              \"code\": \"ProvisioningState/succeeded\",\r\n
         \             \"level\": \"Info\",\r\n              \"displayStatus\": \"Provisioning
-        succeeded\",\r\n              \"time\": \"2022-02-22T13:32:39.4297768+00:00\"\r\n
+        succeeded\",\r\n              \"time\": \"2022-03-17T06:41:18.0638507+00:00\"\r\n
         \           }\r\n          ]\r\n        }\r\n      ],\r\n      \"hyperVGeneration\":
         \"V1\",\r\n      \"statuses\": [\r\n        {\r\n          \"code\": \"ProvisioningState/succeeded\",\r\n
         \         \"level\": \"Info\",\r\n          \"displayStatus\": \"Provisioning
-        succeeded\",\r\n          \"time\": \"2022-02-22T13:32:49.1017026+00:00\"\r\n
+        succeeded\",\r\n          \"time\": \"2022-03-17T06:41:56.4077941+00:00\"\r\n
         \       },\r\n        {\r\n          \"code\": \"PowerState/running\",\r\n
         \         \"level\": \"Info\",\r\n          \"displayStatus\": \"VM running\"\r\n
-        \       }\r\n      ]\r\n    },\r\n    \"timeCreated\": \"2022-02-22T13:32:36.8985422+00:00\"\r\n
+        \       }\r\n      ]\r\n    },\r\n    \"timeCreated\": \"2022-03-17T06:41:11.5793937+00:00\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '4220'
+      - '4229'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 22 Feb 2022 13:33:18 GMT
+      - Thu, 17 Mar 2022 06:42:21 GMT
       expires:
       - '-1'
       pragma:
@@ -430,7 +586,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3991,Microsoft.Compute/LowCostGet30Min;31979
+      - Microsoft.Compute/LowCostGet3Min;3971,Microsoft.Compute/LowCostGet30Min;31766
     status:
       code: 200
       message: OK
@@ -449,18 +605,18 @@ interactions:
       - -n -g --computer-name --image --availability-set --nsg --ssh-key-value --public-ip-address
         --tags --location --admin-username
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-network/19.3.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Network/networkInterfaces/nooptvmVMNic?api-version=2018-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"nooptvmVMNic\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Network/networkInterfaces/nooptvmVMNic\",\r\n
-        \ \"etag\": \"W/\\\"f0a84969-e7e1-4929-9972-87e0aa990101\\\"\",\r\n  \"location\":
+        \ \"etag\": \"W/\\\"ec3b9327-650c-4d39-96e7-d90ba1ce146b\\\"\",\r\n  \"location\":
         \"eastus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"resourceGuid\": \"e6f7572d-c910-4efa-8f83-66573979b278\",\r\n
+        \"Succeeded\",\r\n    \"resourceGuid\": \"ebb7d930-e878-4bf0-a208-8fc830703aa6\",\r\n
         \   \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfignooptvm\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Network/networkInterfaces/nooptvmVMNic/ipConfigurations/ipconfignooptvm\",\r\n
-        \       \"etag\": \"W/\\\"f0a84969-e7e1-4929-9972-87e0aa990101\\\"\",\r\n
+        \       \"etag\": \"W/\\\"ec3b9327-650c-4d39-96e7-d90ba1ce146b\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
@@ -468,8 +624,8 @@ interactions:
         \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
         \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
         [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
-        \"a3ttr2ytbr1e1ecn1km3c3b0ab.bx.internal.cloudapp.net\"\r\n    },\r\n    \"macAddress\":
-        \"00-0D-3A-12-D3-C8\",\r\n    \"enableAcceleratedNetworking\": false,\r\n
+        \"inz0yrph3ueuxfarb2ayfgzuic.bx.internal.cloudapp.net\"\r\n    },\r\n    \"macAddress\":
+        \"00-0D-3A-9D-7D-26\",\r\n    \"enableAcceleratedNetworking\": false,\r\n
         \   \"enableIPForwarding\": false,\r\n    \"primary\": true,\r\n    \"virtualMachine\":
         {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Compute/virtualMachines/nooptvm\"\r\n
         \   }\r\n  },\r\n  \"type\": \"Microsoft.Network/networkInterfaces\"\r\n}"
@@ -481,9 +637,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 22 Feb 2022 13:33:18 GMT
+      - Thu, 17 Mar 2022 06:42:21 GMT
       etag:
-      - W/"f0a84969-e7e1-4929-9972-87e0aa990101"
+      - W/"ec3b9327-650c-4d39-96e7-d90ba1ce146b"
       expires:
       - '-1'
       pragma:
@@ -500,7 +656,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 525dad93-ebb2-4239-a239-785f1e29cbeb
+      - afbfd865-dac4-49da-b90d-fec34764fd74
     status:
       code: 200
       message: OK
@@ -518,23 +674,23 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Compute/virtualMachines/nooptvm?api-version=2021-11-01
   response:
     body:
       string: "{\r\n  \"name\": \"nooptvm\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Compute/virtualMachines/nooptvm\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"eastus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"2357b98d-462b-4d79-a7ea-abc9047a2c89\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"05011ab7-99bd-4d2d-81aa-9996ef72aa0c\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"Debian\",\r\n        \"offer\": \"debian-10\",\r\n        \"sku\": \"10\",\r\n
-        \       \"version\": \"latest\",\r\n        \"exactVersion\": \"0.20211011.792\"\r\n
+        \       \"version\": \"latest\",\r\n        \"exactVersion\": \"0.20220310.944\"\r\n
         \     },\r\n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"name\":
-        \"nooptvm_disk1_82f007aa018b4341b6aa80cdfd8dceac\",\r\n        \"createOption\":
+        \"nooptvm_OsDisk_1_7939f143b43e423d8eab14f770cf2999\",\r\n        \"createOption\":
         \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n        \"managedDisk\":
         {\r\n          \"storageAccountType\": \"Premium_LRS\",\r\n          \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Compute/disks/nooptvm_disk1_82f007aa018b4341b6aa80cdfd8dceac\"\r\n
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Compute/disks/nooptvm_OsDisk_1_7939f143b43e423d8eab14f770cf2999\"\r\n
         \       },\r\n        \"deleteOption\": \"Detach\",\r\n        \"diskSizeGB\":
         30\r\n      },\r\n      \"dataDisks\": []\r\n    },\r\n    \"osProfile\":
         {\r\n      \"computerName\": \"nooptvm\",\r\n      \"adminUsername\": \"user11\",\r\n
@@ -547,17 +703,17 @@ interactions:
         \         \"assessmentMode\": \"ImageDefault\"\r\n        }\r\n      },\r\n
         \     \"secrets\": [],\r\n      \"allowExtensionOperations\": true,\r\n      \"requireGuestProvisionSignal\":
         true\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Network/networkInterfaces/nooptvmVMNic\"}]},\r\n
-        \   \"provisioningState\": \"Succeeded\",\r\n    \"timeCreated\": \"2022-02-22T13:32:36.8985422+00:00\"\r\n
+        \   \"provisioningState\": \"Succeeded\",\r\n    \"timeCreated\": \"2022-03-17T06:41:11.5793937+00:00\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2923'
+      - '2929'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 22 Feb 2022 13:33:19 GMT
+      - Thu, 17 Mar 2022 06:42:23 GMT
       expires:
       - '-1'
       pragma:
@@ -574,7 +730,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3990,Microsoft.Compute/LowCostGet30Min;31978
+      - Microsoft.Compute/LowCostGet3Min;3969,Microsoft.Compute/LowCostGet30Min;31764
     status:
       code: 200
       message: OK
@@ -592,7 +748,7 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-network/19.3.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Network/publicIPAddresses/nooptvmPublicIP?api-version=2021-05-01
   response:
@@ -608,7 +764,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 22 Feb 2022 13:33:19 GMT
+      - Thu, 17 Mar 2022 06:42:23 GMT
       expires:
       - '-1'
       pragma:

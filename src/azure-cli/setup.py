@@ -111,7 +111,7 @@ DEPENDENCIES = [
     'azure-mgmt-policyinsights~=1.0.0',
     'azure-mgmt-privatedns~=1.0.0',
     'azure-mgmt-rdbms~=10.0.0',
-    'azure-mgmt-recoveryservicesbackup~=4.0.0',
+    'azure-mgmt-recoveryservicesbackup~=4.1.1',
     'azure-mgmt-recoveryservices~=2.0.0',
     'azure-mgmt-redhatopenshift==1.0.0',
     'azure-mgmt-redis~=13.1.0',
@@ -139,6 +139,8 @@ DEPENDENCIES = [
     'azure-synapse-spark~=0.2.0',
     'chardet~=3.0.4',
     'colorama~=0.4.4',
+    # On Linux, the distribution (Ubuntu, Debian, etc) and version are checked for `az feedback`
+    'distro; sys_platform == "linux"',
     'fabric~=2.4',
     'javaproperties~=0.5.1',
     'jsondiff~=1.3.0',
@@ -153,10 +155,6 @@ DEPENDENCIES = [
     'websocket-client~=1.3.1',
     'xmltodict~=0.12'
 ]
-
-# On Linux, the distribution (Ubuntu, Debian, etc) and version are checked
-if sys.platform == 'linux':
-    DEPENDENCIES.append('distro')
 
 with open('README.rst', 'r', encoding='utf-8') as f:
     README = f.read()

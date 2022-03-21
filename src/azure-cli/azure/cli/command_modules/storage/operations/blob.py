@@ -520,6 +520,11 @@ def upload_blob(cmd, client, file_path=None, container_name=None, blob_name=None
         'max_concurrency': max_connections
     }
 
+    if file_path and 'content_settings' in kwargs:
+        t_blob_content_settings = cmd.get_models('_models#ContentSettings',
+                                                 resource_type=ResourceType.DATA_STORAGE_BLOB)
+        kwargs['content_settings'] = guess_content_type(file_path, kwargs['content_settings'], t_blob_content_settings)
+
     if overwrite is not None:
         upload_args['overwrite'] = overwrite
     if maxsize_condition:

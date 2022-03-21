@@ -211,6 +211,7 @@ def load_arguments(self, _):
         c.argument('vault_name', vault_name_type, id_part=None)
         c.argument('backup_management_type', backup_management_type)
         c.argument('workload_type', workload_type)
+        c.argument('policy_sub_type', arg_type=get_enum_type(['Standard', 'Enhanced']), help='Sub type of policies to be retrieved. To list standard backup policies, specify ‘Standard’ as the value of this parameter. To list enhanced backup policies for Azure VMs, specify ‘Enhanced’ as the value of this parameter.')
 
     with self.argument_context('backup policy get-default-for-vm') as c:
         c.argument('vault_name', vault_name_type, id_part=None)
@@ -350,6 +351,11 @@ def load_arguments(self, _):
         c.argument('mi_system_assigned', action='store_true', help='Use this flag to specify whether a system-assigned managed identity should be used for the restore operation. MI option is not applicable for restoring unmanaged disks.')
         c.argument('mi_user_assigned', help='ARM ID of the user-assigned managed identity to use for the restore operation. Specify a value for this parameter if you do not want to use a system-assigned MI for restoring the backup item.')
         c.argument('target_zone', arg_type=get_enum_type(['1', '2', '3']), help='A primary region currently can have three Azure availability zones. Use this argument to specify the target zone number while doing Cross Zonal Restore.')
+        c.argument('restore_mode', restore_mode_type)
+        c.argument('target_vm_name', help='Name of the VM to which the data should be restored, in the case of Alternate Location restore to a new VM.')
+        c.argument('target_vnet_name', help='Name of the VNet in which the target VM should be created, in the case of Alternate Location restore to a new VM.')
+        c.argument('target_vnet_resource_group', help='Name of the resource group which contains the target VNet, in the case of Alternate Location restore to a new VM.')
+        c.argument('target_subnet_name', help='Name of the subnet in which the target VM should be created, in the case of Alternate Location restore a new VM')
 
     with self.argument_context('backup restore restore-azurefileshare') as c:
         c.argument('resolve_conflict', resolve_conflict_type)

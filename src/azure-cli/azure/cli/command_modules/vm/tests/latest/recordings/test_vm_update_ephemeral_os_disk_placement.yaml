@@ -68,13 +68,13 @@ interactions:
       content-type:
       - text/plain; charset=utf-8
       date:
-      - Tue, 22 Feb 2022 13:29:22 GMT
+      - Thu, 17 Mar 2022 06:33:29 GMT
       etag:
       - W/"d5acead0b38a79d988c245a7a15ec01f999da9244c97bbdc1fa2ec70d9e433f5"
       expires:
-      - Tue, 22 Feb 2022 13:34:22 GMT
+      - Thu, 17 Mar 2022 06:38:29 GMT
       source-age:
-      - '118'
+      - '194'
       strict-transport-security:
       - max-age=31536000
       vary:
@@ -88,17 +88,126 @@ interactions:
       x-content-type-options:
       - nosniff
       x-fastly-request-id:
-      - ff021a554aa4f708cb56fabe0e730e24586e3e90
+      - 4ecd23e11a984db1d5203d950aad4338e0eeecb2
       x-frame-options:
       - deny
       x-github-request-id:
-      - 7CE8:7685:1220CD:1A4D54:6214E248
+      - 2570:063C:1995B2:2734C1:62329D55
       x-served-by:
-      - cache-qpg1249-QPG
+      - cache-qpg1267-QPG
       x-timer:
-      - S1645536562.050890,VS0,VE1
+      - S1647498810.814663,VS0,VE1
       x-xss-protection:
       - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --image --size --location --ephemeral-os-disk
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus2/publishers/Canonical/artifacttypes/vmimage/offers/UbuntuServer/skus/18.04-LTS/versions?$top=1&$orderby=name%20desc&api-version=2021-11-01
+  response:
+    body:
+      string: "[\r\n  {\r\n    \"location\": \"westus2\",\r\n    \"name\": \"18.04.202203080\",\r\n
+        \   \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus2/Publishers/Canonical/ArtifactTypes/VMImage/Offers/UbuntuServer/Skus/18.04-LTS/Versions/18.04.202203080\"\r\n
+        \ }\r\n]"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '288'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Mar 2022 06:33:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/ListVMImagesVersionsFromLocation3Min;15999,Microsoft.Compute/ListVMImagesVersionsFromLocation30Min;43999
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --image --size --location --ephemeral-os-disk
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus2/publishers/Canonical/artifacttypes/vmimage/offers/UbuntuServer/skus/18.04-LTS/versions/18.04.202203080?api-version=2021-11-01
+  response:
+    body:
+      string: "{\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n    \"architecture\":
+        \"x64\",\r\n    \"replicaType\": \"Unmanaged\",\r\n    \"disallowed\": {\r\n
+        \     \"vmDiskType\": \"None\"\r\n    },\r\n    \"automaticOSUpgradeProperties\":
+        {\r\n      \"automaticOSUpgradeSupported\": true\r\n    },\r\n    \"imageDeprecationStatus\":
+        {\r\n      \"imageState\": \"Active\"\r\n    },\r\n    \"features\": [\r\n
+        \     {\r\n        \"name\": \"IsAcceleratedNetworkSupported\",\r\n        \"value\":
+        \"True\"\r\n      }\r\n    ],\r\n    \"osDiskImage\": {\r\n      \"operatingSystem\":
+        \"Linux\",\r\n      \"sizeInGb\": 31,\r\n      \"sizeInBytes\": 32213303808\r\n
+        \   },\r\n    \"dataDiskImages\": []\r\n  },\r\n  \"location\": \"westus2\",\r\n
+        \ \"name\": \"18.04.202203080\",\r\n  \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus2/Publishers/Canonical/ArtifactTypes/VMImage/Offers/UbuntuServer/Skus/18.04-LTS/Versions/18.04.202203080\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '875'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Mar 2022 06:33:31 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetVMImageFromLocation3Min;12999,Microsoft.Compute/GetVMImageFromLocation30Min;73999
     status:
       code: 200
       message: OK
@@ -116,7 +225,7 @@ interactions:
       ParameterSetName:
       - -n -g --image --size --location --ephemeral-os-disk
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-network/19.3.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Network/virtualNetworks?api-version=2018-01-01
   response:
@@ -130,7 +239,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 22 Feb 2022 13:29:21 GMT
+      - Thu, 17 Mar 2022 06:33:31 GMT
       expires:
       - '-1'
       pragma:
@@ -158,7 +267,7 @@ interactions:
       ParameterSetName:
       - -n -g --image --size --location --ephemeral-os-disk
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus2/vmSizes?api-version=2021-11-01
   response:
@@ -1365,7 +1474,7 @@ interactions:
         2457600,\r\n      \"memoryInMB\": 262144,\r\n      \"maxDataDiskCount\": 32\r\n
         \   },\r\n    {\r\n      \"name\": \"Standard_D96ds_v5\",\r\n      \"numberOfCores\":
         96,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\":
-        2457600,\r\n      \"memoryInMB\": 393216,\r\n      \"maxDataDiskCount\": 32\r\n
+        3686400,\r\n      \"memoryInMB\": 393216,\r\n      \"maxDataDiskCount\": 32\r\n
         \   },\r\n    {\r\n      \"name\": \"Standard_D2d_v5\",\r\n      \"numberOfCores\":
         2,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\":
         76800,\r\n      \"memoryInMB\": 8192,\r\n      \"maxDataDiskCount\": 4\r\n
@@ -1389,7 +1498,7 @@ interactions:
         2457600,\r\n      \"memoryInMB\": 262144,\r\n      \"maxDataDiskCount\": 32\r\n
         \   },\r\n    {\r\n      \"name\": \"Standard_D96d_v5\",\r\n      \"numberOfCores\":
         96,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\":
-        2457600,\r\n      \"memoryInMB\": 393216,\r\n      \"maxDataDiskCount\": 32\r\n
+        3686400,\r\n      \"memoryInMB\": 393216,\r\n      \"maxDataDiskCount\": 32\r\n
         \   },\r\n    {\r\n      \"name\": \"Standard_D2s_v5\",\r\n      \"numberOfCores\":
         2,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\":
         0,\r\n      \"memoryInMB\": 8192,\r\n      \"maxDataDiskCount\": 4\r\n    },\r\n
@@ -1497,10 +1606,10 @@ interactions:
         2457600,\r\n      \"memoryInMB\": 688128,\r\n      \"maxDataDiskCount\": 32\r\n
         \   },\r\n    {\r\n      \"name\": \"Standard_E96ds_v5\",\r\n      \"numberOfCores\":
         96,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\":
-        2457600,\r\n      \"memoryInMB\": 688128,\r\n      \"maxDataDiskCount\": 32\r\n
+        3686400,\r\n      \"memoryInMB\": 688128,\r\n      \"maxDataDiskCount\": 32\r\n
         \   },\r\n    {\r\n      \"name\": \"Standard_E104ids_v5\",\r\n      \"numberOfCores\":
         104,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\":
-        2457600,\r\n      \"memoryInMB\": 688128,\r\n      \"maxDataDiskCount\": 64\r\n
+        3891200,\r\n      \"memoryInMB\": 688128,\r\n      \"maxDataDiskCount\": 64\r\n
         \   },\r\n    {\r\n      \"name\": \"Standard_E2d_v5\",\r\n      \"numberOfCores\":
         2,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\":
         76800,\r\n      \"memoryInMB\": 16384,\r\n      \"maxDataDiskCount\": 4\r\n
@@ -1527,10 +1636,10 @@ interactions:
         2457600,\r\n      \"memoryInMB\": 524288,\r\n      \"maxDataDiskCount\": 32\r\n
         \   },\r\n    {\r\n      \"name\": \"Standard_E96d_v5\",\r\n      \"numberOfCores\":
         96,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\":
-        2457600,\r\n      \"memoryInMB\": 688128,\r\n      \"maxDataDiskCount\": 32\r\n
+        3686400,\r\n      \"memoryInMB\": 688128,\r\n      \"maxDataDiskCount\": 32\r\n
         \   },\r\n    {\r\n      \"name\": \"Standard_E104id_v5\",\r\n      \"numberOfCores\":
         104,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\":
-        2457600,\r\n      \"memoryInMB\": 688128,\r\n      \"maxDataDiskCount\": 64\r\n
+        3891200,\r\n      \"memoryInMB\": 688128,\r\n      \"maxDataDiskCount\": 64\r\n
         \   },\r\n    {\r\n      \"name\": \"Standard_E2s_v5\",\r\n      \"numberOfCores\":
         2,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\":
         0,\r\n      \"memoryInMB\": 16384,\r\n      \"maxDataDiskCount\": 4\r\n    },\r\n
@@ -1644,7 +1753,7 @@ interactions:
         204800,\r\n      \"memoryInMB\": 16384,\r\n      \"maxDataDiskCount\": 4\r\n
         \   },\r\n    {\r\n      \"name\": \"Standard_HB120rs_v2\",\r\n      \"numberOfCores\":
         120,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\":
-        491520,\r\n      \"memoryInMB\": 466944,\r\n      \"maxDataDiskCount\": 8\r\n
+        491520,\r\n      \"memoryInMB\": 466944,\r\n      \"maxDataDiskCount\": 32\r\n
         \   },\r\n    {\r\n      \"name\": \"Standard_NV6s_v2\",\r\n      \"numberOfCores\":
         6,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\":
         344064,\r\n      \"memoryInMB\": 114688,\r\n      \"maxDataDiskCount\": 12\r\n
@@ -1815,11 +1924,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '114319'
+      - '114320'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 22 Feb 2022 13:29:22 GMT
+      - Thu, 17 Mar 2022 06:33:32 GMT
       expires:
       - '-1'
       pragma:
@@ -1874,8 +1983,8 @@ interactions:
       "osProfile": {"computerName": "cli-test-vm-local-vm1", "adminUsername": "ruijun_hu",
       "linuxConfiguration": {"disablePasswordAuthentication": true, "ssh": {"publicKeys":
       [{"keyData": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCyHIxtehmSa4iZExLrQ4pc7bklBKwAR865F9LEWNd8SIgFCYy2s+vA5Sofj2cMD06HqCAPeM+VJvjwImCmGhO3GQU816Zo7AOX21dKGUZLbGQ35lxXPMsd0aCx8J8Ncq1sReBPlZs9BT2X0pR2jkalCJQKFWXXkwXyj8l05PunQm2lnggijrnLAMjdI7+6S6rNUs4oA54egfrKIXSQiqjfSNMySytJzJkGYdbQzUrGrL47qNEy0keAPi1VGlijs/m3khFQAd2Bdb1Nhp1k8QC0OQ5BccKPVfFRyz/EoRMFvjzfNQrR75D6f2q+XZIrlee1Z7MX/KpYx1IOI2ATlfRqUoIlM7O1hWsQr9rGek+D10BtBJ4uZsrUOHs+llQo5fQXzVunZEzaYUBulRwPO1kBHjSkD0NNCO5490EnaCIFot41Wh/bDTWFNDZkZHxXhbrXRaA/d0vzrlAiLDUkUEtOKP0jc9o9vz/vSbEth6u8df06cq9yYVbn+1j93lX5vJ0=
-      cxznmhdcxz\n", "path": "/home/ruijun_hu/.ssh/authorized_keys"}]}}}, "additionalCapabilities":
-      {}}}], "outputs": {}}, "parameters": {}, "mode": "incremental"}}'
+      cxznmhdcxz\n", "path": "/home/ruijun_hu/.ssh/authorized_keys"}]}}}}}], "outputs":
+      {}}, "parameters": {}, "mode": "incremental"}}'
     headers:
       Accept:
       - application/json
@@ -1886,29 +1995,29 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '4212'
+      - '4182'
       Content-Type:
       - application/json
       ParameterSetName:
       - -n -g --image --size --location --ephemeral-os-disk
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Resources/deployments/vm_deploy_lnIx2fmA4H5M2g805syIO67RQ0whbUxr","name":"vm_deploy_lnIx2fmA4H5M2g805syIO67RQ0whbUxr","type":"Microsoft.Resources/deployments","properties":{"templateHash":"8359050731386067614","parameters":{},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2022-02-22T13:29:29.2435317Z","duration":"PT0.0004851S","correlationId":"6e697aae-2129-4dae-805c-3ad1854ba843","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus2"]},{"resourceType":"networkSecurityGroups","locations":["westus2"]},{"resourceType":"publicIPAddresses","locations":["westus2"]},{"resourceType":"networkInterfaces","locations":["westus2"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus2"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Network/virtualNetworks/cli-test-vm-local-vm1VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"cli-test-vm-local-vm1VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Network/networkSecurityGroups/cli-test-vm-local-vm1NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"cli-test-vm-local-vm1NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Network/publicIPAddresses/cli-test-vm-local-vm1PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"cli-test-vm-local-vm1PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Network/networkInterfaces/cli-test-vm-local-vm1VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"cli-test-vm-local-vm1VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Network/networkInterfaces/cli-test-vm-local-vm1VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"cli-test-vm-local-vm1VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Compute/virtualMachines/cli-test-vm-local-vm1","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"cli-test-vm-local-vm1"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Resources/deployments/vm_deploy_yruow84XqZJShJcIeUap6Oc3h7t5QA7e","name":"vm_deploy_yruow84XqZJShJcIeUap6Oc3h7t5QA7e","type":"Microsoft.Resources/deployments","properties":{"templateHash":"10656616702727285428","parameters":{},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2022-03-17T06:33:38.3188176Z","duration":"PT0.0009752S","correlationId":"bccd6621-daa4-49cc-bf4a-c7758545f501","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus2"]},{"resourceType":"networkSecurityGroups","locations":["westus2"]},{"resourceType":"publicIPAddresses","locations":["westus2"]},{"resourceType":"networkInterfaces","locations":["westus2"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus2"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Network/virtualNetworks/cli-test-vm-local-vm1VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"cli-test-vm-local-vm1VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Network/networkSecurityGroups/cli-test-vm-local-vm1NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"cli-test-vm-local-vm1NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Network/publicIPAddresses/cli-test-vm-local-vm1PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"cli-test-vm-local-vm1PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Network/networkInterfaces/cli-test-vm-local-vm1VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"cli-test-vm-local-vm1VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Network/networkInterfaces/cli-test-vm-local-vm1VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"cli-test-vm-local-vm1VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Compute/virtualMachines/cli-test-vm-local-vm1","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"cli-test-vm-local-vm1"}]}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Resources/deployments/vm_deploy_lnIx2fmA4H5M2g805syIO67RQ0whbUxr/operationStatuses/08585560703185857807?api-version=2021-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Resources/deployments/vm_deploy_yruow84XqZJShJcIeUap6Oc3h7t5QA7e/operationStatuses/08585541080700786115?api-version=2021-04-01
       cache-control:
       - no-cache
       content-length:
-      - '2809'
+      - '2810'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 22 Feb 2022 13:29:29 GMT
+      - Thu, 17 Mar 2022 06:33:39 GMT
       expires:
       - '-1'
       pragma:
@@ -1936,9 +2045,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --size --location --ephemeral-os-disk
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585560703185857807?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585541080700786115?api-version=2021-04-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1950,7 +2059,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 22 Feb 2022 13:30:01 GMT
+      - Thu, 17 Mar 2022 06:34:09 GMT
       expires:
       - '-1'
       pragma:
@@ -1978,9 +2087,51 @@ interactions:
       ParameterSetName:
       - -n -g --image --size --location --ephemeral-os-disk
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585560703185857807?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585541080700786115?api-version=2021-04-01
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Mar 2022 06:34:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --image --size --location --ephemeral-os-disk
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585541080700786115?api-version=2021-04-01
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -1992,7 +2143,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 22 Feb 2022 13:30:33 GMT
+      - Thu, 17 Mar 2022 06:35:10 GMT
       expires:
       - '-1'
       pragma:
@@ -2020,21 +2171,21 @@ interactions:
       ParameterSetName:
       - -n -g --image --size --location --ephemeral-os-disk
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Resources/deployments/vm_deploy_lnIx2fmA4H5M2g805syIO67RQ0whbUxr","name":"vm_deploy_lnIx2fmA4H5M2g805syIO67RQ0whbUxr","type":"Microsoft.Resources/deployments","properties":{"templateHash":"8359050731386067614","parameters":{},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2022-02-22T13:30:25.2866243Z","duration":"PT56.0435777S","correlationId":"6e697aae-2129-4dae-805c-3ad1854ba843","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus2"]},{"resourceType":"networkSecurityGroups","locations":["westus2"]},{"resourceType":"publicIPAddresses","locations":["westus2"]},{"resourceType":"networkInterfaces","locations":["westus2"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus2"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Network/virtualNetworks/cli-test-vm-local-vm1VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"cli-test-vm-local-vm1VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Network/networkSecurityGroups/cli-test-vm-local-vm1NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"cli-test-vm-local-vm1NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Network/publicIPAddresses/cli-test-vm-local-vm1PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"cli-test-vm-local-vm1PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Network/networkInterfaces/cli-test-vm-local-vm1VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"cli-test-vm-local-vm1VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Network/networkInterfaces/cli-test-vm-local-vm1VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"cli-test-vm-local-vm1VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Compute/virtualMachines/cli-test-vm-local-vm1","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"cli-test-vm-local-vm1"}],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Compute/virtualMachines/cli-test-vm-local-vm1"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Network/networkInterfaces/cli-test-vm-local-vm1VMNic"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Network/networkSecurityGroups/cli-test-vm-local-vm1NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Network/publicIPAddresses/cli-test-vm-local-vm1PublicIP"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Network/virtualNetworks/cli-test-vm-local-vm1VNET"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Resources/deployments/vm_deploy_yruow84XqZJShJcIeUap6Oc3h7t5QA7e","name":"vm_deploy_yruow84XqZJShJcIeUap6Oc3h7t5QA7e","type":"Microsoft.Resources/deployments","properties":{"templateHash":"10656616702727285428","parameters":{},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2022-03-17T06:34:42.2944165Z","duration":"PT1M3.9765741S","correlationId":"bccd6621-daa4-49cc-bf4a-c7758545f501","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus2"]},{"resourceType":"networkSecurityGroups","locations":["westus2"]},{"resourceType":"publicIPAddresses","locations":["westus2"]},{"resourceType":"networkInterfaces","locations":["westus2"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus2"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Network/virtualNetworks/cli-test-vm-local-vm1VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"cli-test-vm-local-vm1VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Network/networkSecurityGroups/cli-test-vm-local-vm1NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"cli-test-vm-local-vm1NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Network/publicIPAddresses/cli-test-vm-local-vm1PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"cli-test-vm-local-vm1PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Network/networkInterfaces/cli-test-vm-local-vm1VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"cli-test-vm-local-vm1VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Network/networkInterfaces/cli-test-vm-local-vm1VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"cli-test-vm-local-vm1VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Compute/virtualMachines/cli-test-vm-local-vm1","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"cli-test-vm-local-vm1"}],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Compute/virtualMachines/cli-test-vm-local-vm1"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Network/networkInterfaces/cli-test-vm-local-vm1VMNic"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Network/networkSecurityGroups/cli-test-vm-local-vm1NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Network/publicIPAddresses/cli-test-vm-local-vm1PublicIP"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Network/virtualNetworks/cli-test-vm-local-vm1VNET"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '3854'
+      - '3856'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 22 Feb 2022 13:30:33 GMT
+      - Thu, 17 Mar 2022 06:35:11 GMT
       expires:
       - '-1'
       pragma:
@@ -2062,25 +2213,25 @@ interactions:
       ParameterSetName:
       - -n -g --image --size --location --ephemeral-os-disk
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Compute/virtualMachines/cli-test-vm-local-vm1?$expand=instanceView&api-version=2021-11-01
   response:
     body:
       string: "{\r\n  \"name\": \"cli-test-vm-local-vm1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Compute/virtualMachines/cli-test-vm-local-vm1\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus2\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"ffeca5eb-383b-40cd-ae64-77fee8ffb7f7\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"cfbe8bdf-5ff6-41af-b6aa-31d561343314\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS4_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"Canonical\",\r\n        \"offer\": \"UbuntuServer\",\r\n        \"sku\":
         \"18.04-LTS\",\r\n        \"version\": \"latest\",\r\n        \"exactVersion\":
-        \"18.04.202202130\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
+        \"18.04.202203080\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
         \"Linux\",\r\n        \"diffDiskSettings\": {\r\n          \"option\": \"Local\",\r\n
         \         \"placement\": \"CacheDisk\"\r\n        },\r\n        \"name\":
-        \"cli-test-vm-local-vm1_OsDisk_1_095dc4b4cf4d48ea848195ec8f7c684e\",\r\n        \"createOption\":
+        \"cli-test-vm-local-vm1_OsDisk_1_5c4bdd8e23774e38b0e91f6281224180\",\r\n        \"createOption\":
         \"FromImage\",\r\n        \"caching\": \"ReadOnly\",\r\n        \"managedDisk\":
         {\r\n          \"storageAccountType\": \"Standard_LRS\",\r\n          \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Compute/disks/cli-test-vm-local-vm1_OsDisk_1_095dc4b4cf4d48ea848195ec8f7c684e\"\r\n
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Compute/disks/cli-test-vm-local-vm1_OsDisk_1_5c4bdd8e23774e38b0e91f6281224180\"\r\n
         \       },\r\n        \"deleteOption\": \"Delete\",\r\n        \"diskSizeGB\":
         30\r\n      },\r\n      \"dataDisks\": []\r\n    },\r\n    \"osProfile\":
         {\r\n      \"computerName\": \"cli-test-vm-local-vm1\",\r\n      \"adminUsername\":
@@ -2093,34 +2244,34 @@ interactions:
         \         \"assessmentMode\": \"ImageDefault\"\r\n        }\r\n      },\r\n
         \     \"secrets\": [],\r\n      \"allowExtensionOperations\": true,\r\n      \"requireGuestProvisionSignal\":
         true\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Network/networkInterfaces/cli-test-vm-local-vm1VMNic\"}]},\r\n
-        \   \"provisioningState\": \"Succeeded\",\r\n    \"instanceView\": {\r\n      \"computerName\":
-        \"cli-test-vm-local-vm1\",\r\n      \"osName\": \"ubuntu\",\r\n      \"osVersion\":
-        \"18.04\",\r\n      \"vmAgent\": {\r\n        \"vmAgentVersion\": \"2.6.0.2\",\r\n
-        \       \"statuses\": [\r\n          {\r\n            \"code\": \"ProvisioningState/succeeded\",\r\n
-        \           \"level\": \"Info\",\r\n            \"displayStatus\": \"Ready\",\r\n
-        \           \"message\": \"Guest Agent is running\",\r\n            \"time\":
-        \"2022-02-22T13:30:26+00:00\"\r\n          }\r\n        ],\r\n        \"extensionHandlers\":
-        []\r\n      },\r\n      \"disks\": [\r\n        {\r\n          \"name\": \"cli-test-vm-local-vm1_OsDisk_1_095dc4b4cf4d48ea848195ec8f7c684e\",\r\n
-        \         \"statuses\": [\r\n            {\r\n              \"code\": \"ProvisioningState/succeeded\",\r\n
+        \   \"provisioningState\": \"Succeeded\",\r\n    \"instanceView\": {\r\n      \"vmAgent\":
+        {\r\n        \"vmAgentVersion\": \"Unknown\",\r\n        \"statuses\": [\r\n
+        \         {\r\n            \"code\": \"ProvisioningState/Unavailable\",\r\n
+        \           \"level\": \"Warning\",\r\n            \"displayStatus\": \"Not
+        Ready\",\r\n            \"message\": \"VM status blob is found but not yet
+        populated.\",\r\n            \"time\": \"2022-03-17T06:35:11+00:00\"\r\n          }\r\n
+        \       ]\r\n      },\r\n      \"disks\": [\r\n        {\r\n          \"name\":
+        \"cli-test-vm-local-vm1_OsDisk_1_5c4bdd8e23774e38b0e91f6281224180\",\r\n          \"statuses\":
+        [\r\n            {\r\n              \"code\": \"ProvisioningState/succeeded\",\r\n
         \             \"level\": \"Info\",\r\n              \"displayStatus\": \"Provisioning
-        succeeded\",\r\n              \"time\": \"2022-02-22T13:29:55.687129+00:00\"\r\n
+        succeeded\",\r\n              \"time\": \"2022-03-17T06:34:05.4983739+00:00\"\r\n
         \           }\r\n          ]\r\n        }\r\n      ],\r\n      \"hyperVGeneration\":
         \"V1\",\r\n      \"statuses\": [\r\n        {\r\n          \"code\": \"ProvisioningState/succeeded\",\r\n
         \         \"level\": \"Info\",\r\n          \"displayStatus\": \"Provisioning
-        succeeded\",\r\n          \"time\": \"2022-02-22T13:30:19.7668455+00:00\"\r\n
+        succeeded\",\r\n          \"time\": \"2022-03-17T06:34:39.3889843+00:00\"\r\n
         \       },\r\n        {\r\n          \"code\": \"PowerState/running\",\r\n
         \         \"level\": \"Info\",\r\n          \"displayStatus\": \"VM running\"\r\n
-        \       }\r\n      ]\r\n    },\r\n    \"timeCreated\": \"2022-02-22T13:29:51.9369474+00:00\"\r\n
+        \       }\r\n      ]\r\n    },\r\n    \"timeCreated\": \"2022-03-17T06:34:01.2327056+00:00\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '4341'
+      - '4237'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 22 Feb 2022 13:30:34 GMT
+      - Thu, 17 Mar 2022 06:35:11 GMT
       expires:
       - '-1'
       pragma:
@@ -2137,7 +2288,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3997,Microsoft.Compute/LowCostGet30Min;31994
+      - Microsoft.Compute/LowCostGet3Min;3997,Microsoft.Compute/LowCostGet30Min;31997
     status:
       code: 200
       message: OK
@@ -2155,18 +2306,18 @@ interactions:
       ParameterSetName:
       - -n -g --image --size --location --ephemeral-os-disk
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-network/19.3.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Network/networkInterfaces/cli-test-vm-local-vm1VMNic?api-version=2018-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"cli-test-vm-local-vm1VMNic\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Network/networkInterfaces/cli-test-vm-local-vm1VMNic\",\r\n
-        \ \"etag\": \"W/\\\"66c4c13d-8c0e-4cfa-a5c2-89b6559c0cbc\\\"\",\r\n  \"location\":
+        \ \"etag\": \"W/\\\"ccf60adf-ea46-4826-bc4f-8ff7b9821a26\\\"\",\r\n  \"location\":
         \"westus2\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"resourceGuid\": \"6b10b736-ee53-4db8-9d26-8336d9703929\",\r\n
+        \"Succeeded\",\r\n    \"resourceGuid\": \"334e37c9-40dd-421e-9f23-13e89a0e624a\",\r\n
         \   \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfigcli-test-vm-local-vm1\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Network/networkInterfaces/cli-test-vm-local-vm1VMNic/ipConfigurations/ipconfigcli-test-vm-local-vm1\",\r\n
-        \       \"etag\": \"W/\\\"66c4c13d-8c0e-4cfa-a5c2-89b6559c0cbc\\\"\",\r\n
+        \       \"etag\": \"W/\\\"ccf60adf-ea46-4826-bc4f-8ff7b9821a26\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
@@ -2175,8 +2326,8 @@ interactions:
         \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
         \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
         [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
-        \"debcfqil1l4udia1beticgarmh.xx.internal.cloudapp.net\"\r\n    },\r\n    \"macAddress\":
-        \"00-0D-3A-C4-D8-90\",\r\n    \"enableAcceleratedNetworking\": true,\r\n    \"enableIPForwarding\":
+        \"pg4032ze5jme3ndgonvdzhvfwa.xx.internal.cloudapp.net\"\r\n    },\r\n    \"macAddress\":
+        \"00-22-48-7C-1B-04\",\r\n    \"enableAcceleratedNetworking\": true,\r\n    \"enableIPForwarding\":
         false,\r\n    \"networkSecurityGroup\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Network/networkSecurityGroups/cli-test-vm-local-vm1NSG\"\r\n
         \   },\r\n    \"primary\": true,\r\n    \"virtualMachine\": {\r\n      \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Compute/virtualMachines/cli-test-vm-local-vm1\"\r\n
@@ -2189,9 +2340,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 22 Feb 2022 13:30:35 GMT
+      - Thu, 17 Mar 2022 06:35:11 GMT
       etag:
-      - W/"66c4c13d-8c0e-4cfa-a5c2-89b6559c0cbc"
+      - W/"ccf60adf-ea46-4826-bc4f-8ff7b9821a26"
       expires:
       - '-1'
       pragma:
@@ -2208,7 +2359,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 7dec7f4e-430b-4137-8a37-491ddd905375
+      - 223c0a58-dc9d-473c-be57-2ed3a79708de
     status:
       code: 200
       message: OK
@@ -2226,17 +2377,17 @@ interactions:
       ParameterSetName:
       - -n -g --image --size --location --ephemeral-os-disk
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-network/19.3.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Network/publicIPAddresses/cli-test-vm-local-vm1PublicIP?api-version=2018-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"cli-test-vm-local-vm1PublicIP\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Network/publicIPAddresses/cli-test-vm-local-vm1PublicIP\",\r\n
-        \ \"etag\": \"W/\\\"e15f2dfc-fc54-4bc7-8498-cec277b0ccbe\\\"\",\r\n  \"location\":
+        \ \"etag\": \"W/\\\"28836f46-80de-47b6-8ba8-49622044a815\\\"\",\r\n  \"location\":
         \"westus2\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"resourceGuid\": \"6544bdb1-53be-49ac-b34b-96a2377535f5\",\r\n
-        \   \"ipAddress\": \"20.115.144.217\",\r\n    \"publicIPAddressVersion\":
-        \"IPv4\",\r\n    \"publicIPAllocationMethod\": \"Dynamic\",\r\n    \"idleTimeoutInMinutes\":
+        \"Succeeded\",\r\n    \"resourceGuid\": \"7f5cab58-c320-46a4-80ac-e62bc46c6616\",\r\n
+        \   \"ipAddress\": \"51.143.45.33\",\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n
+        \   \"publicIPAllocationMethod\": \"Dynamic\",\r\n    \"idleTimeoutInMinutes\":
         4,\r\n    \"ipTags\": [],\r\n    \"ipConfiguration\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Network/networkInterfaces/cli-test-vm-local-vm1VMNic/ipConfigurations/ipconfigcli-test-vm-local-vm1\"\r\n
         \   }\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n
         \ \"sku\": {\r\n    \"name\": \"Basic\"\r\n  }\r\n}"
@@ -2244,13 +2395,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1027'
+      - '1025'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 22 Feb 2022 13:30:35 GMT
+      - Thu, 17 Mar 2022 06:35:12 GMT
       etag:
-      - W/"e15f2dfc-fc54-4bc7-8498-cec277b0ccbe"
+      - W/"28836f46-80de-47b6-8ba8-49622044a815"
       expires:
       - '-1'
       pragma:
@@ -2267,7 +2418,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 695b1b48-73dd-4e02-9f15-a68beba92552
+      - fa19622b-9706-4632-9ccf-83b8bee8b85d
     status:
       code: 200
       message: OK
@@ -2285,25 +2436,25 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Compute/virtualMachines/cli-test-vm-local-vm1?api-version=2021-11-01
   response:
     body:
       string: "{\r\n  \"name\": \"cli-test-vm-local-vm1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Compute/virtualMachines/cli-test-vm-local-vm1\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus2\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"ffeca5eb-383b-40cd-ae64-77fee8ffb7f7\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"cfbe8bdf-5ff6-41af-b6aa-31d561343314\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS4_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"Canonical\",\r\n        \"offer\": \"UbuntuServer\",\r\n        \"sku\":
         \"18.04-LTS\",\r\n        \"version\": \"latest\",\r\n        \"exactVersion\":
-        \"18.04.202202130\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
+        \"18.04.202203080\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
         \"Linux\",\r\n        \"diffDiskSettings\": {\r\n          \"option\": \"Local\",\r\n
         \         \"placement\": \"CacheDisk\"\r\n        },\r\n        \"name\":
-        \"cli-test-vm-local-vm1_OsDisk_1_095dc4b4cf4d48ea848195ec8f7c684e\",\r\n        \"createOption\":
+        \"cli-test-vm-local-vm1_OsDisk_1_5c4bdd8e23774e38b0e91f6281224180\",\r\n        \"createOption\":
         \"FromImage\",\r\n        \"caching\": \"ReadOnly\",\r\n        \"managedDisk\":
         {\r\n          \"storageAccountType\": \"Standard_LRS\",\r\n          \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Compute/disks/cli-test-vm-local-vm1_OsDisk_1_095dc4b4cf4d48ea848195ec8f7c684e\"\r\n
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Compute/disks/cli-test-vm-local-vm1_OsDisk_1_5c4bdd8e23774e38b0e91f6281224180\"\r\n
         \       },\r\n        \"deleteOption\": \"Delete\",\r\n        \"diskSizeGB\":
         30\r\n      },\r\n      \"dataDisks\": []\r\n    },\r\n    \"osProfile\":
         {\r\n      \"computerName\": \"cli-test-vm-local-vm1\",\r\n      \"adminUsername\":
@@ -2316,7 +2467,7 @@ interactions:
         \         \"assessmentMode\": \"ImageDefault\"\r\n        }\r\n      },\r\n
         \     \"secrets\": [],\r\n      \"allowExtensionOperations\": true,\r\n      \"requireGuestProvisionSignal\":
         true\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Network/networkInterfaces/cli-test-vm-local-vm1VMNic\"}]},\r\n
-        \   \"provisioningState\": \"Succeeded\",\r\n    \"timeCreated\": \"2022-02-22T13:29:51.9369474+00:00\"\r\n
+        \   \"provisioningState\": \"Succeeded\",\r\n    \"timeCreated\": \"2022-03-17T06:34:01.2327056+00:00\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
@@ -2326,7 +2477,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 22 Feb 2022 13:30:35 GMT
+      - Thu, 17 Mar 2022 06:35:13 GMT
       expires:
       - '-1'
       pragma:
@@ -2343,7 +2494,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3996,Microsoft.Compute/LowCostGet30Min;31993
+      - Microsoft.Compute/LowCostGet3Min;3996,Microsoft.Compute/LowCostGet30Min;31996
     status:
       code: 200
       message: OK
@@ -2361,25 +2512,25 @@ interactions:
       ParameterSetName:
       - --resource-group --name --size --ephemeral-os-disk-placement
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Compute/virtualMachines/cli-test-vm-local-vm1?api-version=2021-11-01
   response:
     body:
       string: "{\r\n  \"name\": \"cli-test-vm-local-vm1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Compute/virtualMachines/cli-test-vm-local-vm1\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus2\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"ffeca5eb-383b-40cd-ae64-77fee8ffb7f7\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"cfbe8bdf-5ff6-41af-b6aa-31d561343314\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS4_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"Canonical\",\r\n        \"offer\": \"UbuntuServer\",\r\n        \"sku\":
         \"18.04-LTS\",\r\n        \"version\": \"latest\",\r\n        \"exactVersion\":
-        \"18.04.202202130\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
+        \"18.04.202203080\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
         \"Linux\",\r\n        \"diffDiskSettings\": {\r\n          \"option\": \"Local\",\r\n
         \         \"placement\": \"CacheDisk\"\r\n        },\r\n        \"name\":
-        \"cli-test-vm-local-vm1_OsDisk_1_095dc4b4cf4d48ea848195ec8f7c684e\",\r\n        \"createOption\":
+        \"cli-test-vm-local-vm1_OsDisk_1_5c4bdd8e23774e38b0e91f6281224180\",\r\n        \"createOption\":
         \"FromImage\",\r\n        \"caching\": \"ReadOnly\",\r\n        \"managedDisk\":
         {\r\n          \"storageAccountType\": \"Standard_LRS\",\r\n          \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Compute/disks/cli-test-vm-local-vm1_OsDisk_1_095dc4b4cf4d48ea848195ec8f7c684e\"\r\n
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Compute/disks/cli-test-vm-local-vm1_OsDisk_1_5c4bdd8e23774e38b0e91f6281224180\"\r\n
         \       },\r\n        \"deleteOption\": \"Delete\",\r\n        \"diskSizeGB\":
         30\r\n      },\r\n      \"dataDisks\": []\r\n    },\r\n    \"osProfile\":
         {\r\n      \"computerName\": \"cli-test-vm-local-vm1\",\r\n      \"adminUsername\":
@@ -2392,7 +2543,7 @@ interactions:
         \         \"assessmentMode\": \"ImageDefault\"\r\n        }\r\n      },\r\n
         \     \"secrets\": [],\r\n      \"allowExtensionOperations\": true,\r\n      \"requireGuestProvisionSignal\":
         true\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Network/networkInterfaces/cli-test-vm-local-vm1VMNic\"}]},\r\n
-        \   \"provisioningState\": \"Succeeded\",\r\n    \"timeCreated\": \"2022-02-22T13:29:51.9369474+00:00\"\r\n
+        \   \"provisioningState\": \"Succeeded\",\r\n    \"timeCreated\": \"2022-03-17T06:34:01.2327056+00:00\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
@@ -2402,7 +2553,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 22 Feb 2022 13:30:36 GMT
+      - Thu, 17 Mar 2022 06:35:14 GMT
       expires:
       - '-1'
       pragma:
@@ -2419,16 +2570,16 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3995,Microsoft.Compute/LowCostGet30Min;31992
+      - Microsoft.Compute/LowCostGet3Min;3995,Microsoft.Compute/LowCostGet30Min;31995
     status:
       code: 200
       message: OK
 - request:
     body: '{"location": "westus2", "tags": {}, "properties": {"hardwareProfile": {"vmSize":
       "Standard_DS5_v2"}, "storageProfile": {"osDisk": {"osType": "Linux", "name":
-      "cli-test-vm-local-vm1_OsDisk_1_095dc4b4cf4d48ea848195ec8f7c684e", "caching":
+      "cli-test-vm-local-vm1_OsDisk_1_5c4bdd8e23774e38b0e91f6281224180", "caching":
       "ReadOnly", "diffDiskSettings": {"option": "Local", "placement": "ResourceDisk"},
-      "createOption": "FromImage", "diskSizeGB": 30, "managedDisk": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Compute/disks/cli-test-vm-local-vm1_OsDisk_1_095dc4b4cf4d48ea848195ec8f7c684e",
+      "createOption": "FromImage", "diskSizeGB": 30, "managedDisk": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Compute/disks/cli-test-vm-local-vm1_OsDisk_1_5c4bdd8e23774e38b0e91f6281224180",
       "storageAccountType": "Standard_LRS"}, "deleteOption": "Delete"}, "dataDisks":
       []}, "osProfile": {"computerName": "cli-test-vm-local-vm1", "adminUsername":
       "ruijun_hu", "linuxConfiguration": {"disablePasswordAuthentication": true, "ssh":
@@ -2454,25 +2605,25 @@ interactions:
       ParameterSetName:
       - --resource-group --name --size --ephemeral-os-disk-placement
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Compute/virtualMachines/cli-test-vm-local-vm1?api-version=2021-11-01
   response:
     body:
       string: "{\r\n  \"name\": \"cli-test-vm-local-vm1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Compute/virtualMachines/cli-test-vm-local-vm1\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus2\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"ffeca5eb-383b-40cd-ae64-77fee8ffb7f7\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"cfbe8bdf-5ff6-41af-b6aa-31d561343314\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS5_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"Canonical\",\r\n        \"offer\": \"UbuntuServer\",\r\n        \"sku\":
         \"18.04-LTS\",\r\n        \"version\": \"latest\",\r\n        \"exactVersion\":
-        \"18.04.202202130\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
+        \"18.04.202203080\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
         \"Linux\",\r\n        \"diffDiskSettings\": {\r\n          \"option\": \"Local\",\r\n
         \         \"placement\": \"ResourceDisk\"\r\n        },\r\n        \"name\":
-        \"cli-test-vm-local-vm1_OsDisk_1_095dc4b4cf4d48ea848195ec8f7c684e\",\r\n        \"createOption\":
+        \"cli-test-vm-local-vm1_OsDisk_1_5c4bdd8e23774e38b0e91f6281224180\",\r\n        \"createOption\":
         \"FromImage\",\r\n        \"caching\": \"ReadOnly\",\r\n        \"managedDisk\":
         {\r\n          \"storageAccountType\": \"Standard_LRS\",\r\n          \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Compute/disks/cli-test-vm-local-vm1_OsDisk_1_095dc4b4cf4d48ea848195ec8f7c684e\"\r\n
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Compute/disks/cli-test-vm-local-vm1_OsDisk_1_5c4bdd8e23774e38b0e91f6281224180\"\r\n
         \       },\r\n        \"deleteOption\": \"Delete\",\r\n        \"diskSizeGB\":
         30\r\n      },\r\n      \"dataDisks\": []\r\n    },\r\n    \"osProfile\":
         {\r\n      \"computerName\": \"cli-test-vm-local-vm1\",\r\n      \"adminUsername\":
@@ -2485,13 +2636,13 @@ interactions:
         \         \"assessmentMode\": \"ImageDefault\"\r\n        }\r\n      },\r\n
         \     \"secrets\": [],\r\n      \"allowExtensionOperations\": true,\r\n      \"requireGuestProvisionSignal\":
         true\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Network/networkInterfaces/cli-test-vm-local-vm1VMNic\"}]},\r\n
-        \   \"provisioningState\": \"Updating\",\r\n    \"timeCreated\": \"2022-02-22T13:29:51.9369474+00:00\"\r\n
+        \   \"provisioningState\": \"Updating\",\r\n    \"timeCreated\": \"2022-03-17T06:34:01.2327056+00:00\"\r\n
         \ }\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus2/operations/a1a8d00f-9d50-4b6f-a99d-896491245ca6?p=86787c75-ed5e-4503-9048-66d86936d980&api-version=2021-11-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus2/operations/a9039828-c6d4-47d5-94e8-07d8cb7a8243?p=86787c75-ed5e-4503-9048-66d86936d980&api-version=2021-11-01
       cache-control:
       - no-cache
       content-length:
@@ -2499,7 +2650,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 22 Feb 2022 13:30:43 GMT
+      - Thu, 17 Mar 2022 06:35:17 GMT
       expires:
       - '-1'
       pragma:
@@ -2518,7 +2669,7 @@ interactions:
       x-ms-ratelimit-remaining-resource:
       - Microsoft.Compute/PutVM3Min;238,Microsoft.Compute/PutVM30Min;1198
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1196'
     status:
       code: 200
       message: OK
@@ -2536,22 +2687,22 @@ interactions:
       ParameterSetName:
       - --resource-group --name --size --ephemeral-os-disk-placement
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus2/operations/a1a8d00f-9d50-4b6f-a99d-896491245ca6?p=86787c75-ed5e-4503-9048-66d86936d980&api-version=2021-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus2/operations/a9039828-c6d4-47d5-94e8-07d8cb7a8243?p=86787c75-ed5e-4503-9048-66d86936d980&api-version=2021-11-01
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2022-02-22T13:30:39.9233465+00:00\",\r\n  \"status\":
-        \"InProgress\",\r\n  \"name\": \"a1a8d00f-9d50-4b6f-a99d-896491245ca6\"\r\n}"
+      string: "{\r\n  \"startTime\": \"2022-03-17T06:35:15.842009+00:00\",\r\n  \"status\":
+        \"InProgress\",\r\n  \"name\": \"a9039828-c6d4-47d5-94e8-07d8cb7a8243\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '134'
+      - '133'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 22 Feb 2022 13:31:13 GMT
+      - Thu, 17 Mar 2022 06:35:48 GMT
       expires:
       - '-1'
       pragma:
@@ -2586,23 +2737,23 @@ interactions:
       ParameterSetName:
       - --resource-group --name --size --ephemeral-os-disk-placement
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus2/operations/a1a8d00f-9d50-4b6f-a99d-896491245ca6?p=86787c75-ed5e-4503-9048-66d86936d980&api-version=2021-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus2/operations/a9039828-c6d4-47d5-94e8-07d8cb7a8243?p=86787c75-ed5e-4503-9048-66d86936d980&api-version=2021-11-01
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2022-02-22T13:30:39.9233465+00:00\",\r\n  \"endTime\":
-        \"2022-02-22T13:31:13.9076195+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
-        \ \"name\": \"a1a8d00f-9d50-4b6f-a99d-896491245ca6\"\r\n}"
+      string: "{\r\n  \"startTime\": \"2022-03-17T06:35:15.842009+00:00\",\r\n  \"endTime\":
+        \"2022-03-17T06:35:59.3262026+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
+        \ \"name\": \"a9039828-c6d4-47d5-94e8-07d8cb7a8243\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '184'
+      - '183'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 22 Feb 2022 13:31:43 GMT
+      - Thu, 17 Mar 2022 06:36:18 GMT
       expires:
       - '-1'
       pragma:
@@ -2619,7 +2770,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperation3Min;14997,Microsoft.Compute/GetOperation30Min;29997
+      - Microsoft.Compute/GetOperation3Min;14996,Microsoft.Compute/GetOperation30Min;29996
     status:
       code: 200
       message: OK
@@ -2637,25 +2788,25 @@ interactions:
       ParameterSetName:
       - --resource-group --name --size --ephemeral-os-disk-placement
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Compute/virtualMachines/cli-test-vm-local-vm1?api-version=2021-11-01
   response:
     body:
       string: "{\r\n  \"name\": \"cli-test-vm-local-vm1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Compute/virtualMachines/cli-test-vm-local-vm1\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus2\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"ffeca5eb-383b-40cd-ae64-77fee8ffb7f7\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"cfbe8bdf-5ff6-41af-b6aa-31d561343314\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS5_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"Canonical\",\r\n        \"offer\": \"UbuntuServer\",\r\n        \"sku\":
         \"18.04-LTS\",\r\n        \"version\": \"latest\",\r\n        \"exactVersion\":
-        \"18.04.202202130\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
+        \"18.04.202203080\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
         \"Linux\",\r\n        \"diffDiskSettings\": {\r\n          \"option\": \"Local\",\r\n
         \         \"placement\": \"ResourceDisk\"\r\n        },\r\n        \"name\":
-        \"cli-test-vm-local-vm1_OsDisk_1_095dc4b4cf4d48ea848195ec8f7c684e\",\r\n        \"createOption\":
+        \"cli-test-vm-local-vm1_OsDisk_1_5c4bdd8e23774e38b0e91f6281224180\",\r\n        \"createOption\":
         \"FromImage\",\r\n        \"caching\": \"ReadOnly\",\r\n        \"managedDisk\":
         {\r\n          \"storageAccountType\": \"Standard_LRS\",\r\n          \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Compute/disks/cli-test-vm-local-vm1_OsDisk_1_095dc4b4cf4d48ea848195ec8f7c684e\"\r\n
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Compute/disks/cli-test-vm-local-vm1_OsDisk_1_5c4bdd8e23774e38b0e91f6281224180\"\r\n
         \       },\r\n        \"deleteOption\": \"Delete\",\r\n        \"diskSizeGB\":
         30\r\n      },\r\n      \"dataDisks\": []\r\n    },\r\n    \"osProfile\":
         {\r\n      \"computerName\": \"cli-test-vm-local-vm1\",\r\n      \"adminUsername\":
@@ -2668,7 +2819,7 @@ interactions:
         \         \"assessmentMode\": \"ImageDefault\"\r\n        }\r\n      },\r\n
         \     \"secrets\": [],\r\n      \"allowExtensionOperations\": true,\r\n      \"requireGuestProvisionSignal\":
         true\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Network/networkInterfaces/cli-test-vm-local-vm1VMNic\"}]},\r\n
-        \   \"provisioningState\": \"Succeeded\",\r\n    \"timeCreated\": \"2022-02-22T13:29:51.9369474+00:00\"\r\n
+        \   \"provisioningState\": \"Succeeded\",\r\n    \"timeCreated\": \"2022-03-17T06:34:01.2327056+00:00\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
@@ -2678,7 +2829,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 22 Feb 2022 13:31:43 GMT
+      - Thu, 17 Mar 2022 06:36:18 GMT
       expires:
       - '-1'
       pragma:
@@ -2695,7 +2846,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3993,Microsoft.Compute/LowCostGet30Min;31990
+      - Microsoft.Compute/LowCostGet3Min;3992,Microsoft.Compute/LowCostGet30Min;31992
     status:
       code: 200
       message: OK
@@ -2713,25 +2864,25 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Compute/virtualMachines/cli-test-vm-local-vm1?api-version=2021-11-01
   response:
     body:
       string: "{\r\n  \"name\": \"cli-test-vm-local-vm1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Compute/virtualMachines/cli-test-vm-local-vm1\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus2\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"ffeca5eb-383b-40cd-ae64-77fee8ffb7f7\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"cfbe8bdf-5ff6-41af-b6aa-31d561343314\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS5_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"Canonical\",\r\n        \"offer\": \"UbuntuServer\",\r\n        \"sku\":
         \"18.04-LTS\",\r\n        \"version\": \"latest\",\r\n        \"exactVersion\":
-        \"18.04.202202130\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
+        \"18.04.202203080\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
         \"Linux\",\r\n        \"diffDiskSettings\": {\r\n          \"option\": \"Local\",\r\n
         \         \"placement\": \"ResourceDisk\"\r\n        },\r\n        \"name\":
-        \"cli-test-vm-local-vm1_OsDisk_1_095dc4b4cf4d48ea848195ec8f7c684e\",\r\n        \"createOption\":
+        \"cli-test-vm-local-vm1_OsDisk_1_5c4bdd8e23774e38b0e91f6281224180\",\r\n        \"createOption\":
         \"FromImage\",\r\n        \"caching\": \"ReadOnly\",\r\n        \"managedDisk\":
         {\r\n          \"storageAccountType\": \"Standard_LRS\",\r\n          \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Compute/disks/cli-test-vm-local-vm1_OsDisk_1_095dc4b4cf4d48ea848195ec8f7c684e\"\r\n
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Compute/disks/cli-test-vm-local-vm1_OsDisk_1_5c4bdd8e23774e38b0e91f6281224180\"\r\n
         \       },\r\n        \"deleteOption\": \"Delete\",\r\n        \"diskSizeGB\":
         30\r\n      },\r\n      \"dataDisks\": []\r\n    },\r\n    \"osProfile\":
         {\r\n      \"computerName\": \"cli-test-vm-local-vm1\",\r\n      \"adminUsername\":
@@ -2744,7 +2895,7 @@ interactions:
         \         \"assessmentMode\": \"ImageDefault\"\r\n        }\r\n      },\r\n
         \     \"secrets\": [],\r\n      \"allowExtensionOperations\": true,\r\n      \"requireGuestProvisionSignal\":
         true\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Network/networkInterfaces/cli-test-vm-local-vm1VMNic\"}]},\r\n
-        \   \"provisioningState\": \"Succeeded\",\r\n    \"timeCreated\": \"2022-02-22T13:29:51.9369474+00:00\"\r\n
+        \   \"provisioningState\": \"Succeeded\",\r\n    \"timeCreated\": \"2022-03-17T06:34:01.2327056+00:00\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
@@ -2754,7 +2905,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 22 Feb 2022 13:31:44 GMT
+      - Thu, 17 Mar 2022 06:36:20 GMT
       expires:
       - '-1'
       pragma:
@@ -2771,7 +2922,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3992,Microsoft.Compute/LowCostGet30Min;31989
+      - Microsoft.Compute/LowCostGet3Min;3991,Microsoft.Compute/LowCostGet30Min;31991
     status:
       code: 200
       message: OK
@@ -2789,25 +2940,25 @@ interactions:
       ParameterSetName:
       - --resource-group --name --size --ephemeral-os-disk-placement --set
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Compute/virtualMachines/cli-test-vm-local-vm1?api-version=2021-11-01
   response:
     body:
       string: "{\r\n  \"name\": \"cli-test-vm-local-vm1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Compute/virtualMachines/cli-test-vm-local-vm1\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus2\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"ffeca5eb-383b-40cd-ae64-77fee8ffb7f7\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"cfbe8bdf-5ff6-41af-b6aa-31d561343314\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS5_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"Canonical\",\r\n        \"offer\": \"UbuntuServer\",\r\n        \"sku\":
         \"18.04-LTS\",\r\n        \"version\": \"latest\",\r\n        \"exactVersion\":
-        \"18.04.202202130\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
+        \"18.04.202203080\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
         \"Linux\",\r\n        \"diffDiskSettings\": {\r\n          \"option\": \"Local\",\r\n
         \         \"placement\": \"ResourceDisk\"\r\n        },\r\n        \"name\":
-        \"cli-test-vm-local-vm1_OsDisk_1_095dc4b4cf4d48ea848195ec8f7c684e\",\r\n        \"createOption\":
+        \"cli-test-vm-local-vm1_OsDisk_1_5c4bdd8e23774e38b0e91f6281224180\",\r\n        \"createOption\":
         \"FromImage\",\r\n        \"caching\": \"ReadOnly\",\r\n        \"managedDisk\":
         {\r\n          \"storageAccountType\": \"Standard_LRS\",\r\n          \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Compute/disks/cli-test-vm-local-vm1_OsDisk_1_095dc4b4cf4d48ea848195ec8f7c684e\"\r\n
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Compute/disks/cli-test-vm-local-vm1_OsDisk_1_5c4bdd8e23774e38b0e91f6281224180\"\r\n
         \       },\r\n        \"deleteOption\": \"Delete\",\r\n        \"diskSizeGB\":
         30\r\n      },\r\n      \"dataDisks\": []\r\n    },\r\n    \"osProfile\":
         {\r\n      \"computerName\": \"cli-test-vm-local-vm1\",\r\n      \"adminUsername\":
@@ -2820,7 +2971,7 @@ interactions:
         \         \"assessmentMode\": \"ImageDefault\"\r\n        }\r\n      },\r\n
         \     \"secrets\": [],\r\n      \"allowExtensionOperations\": true,\r\n      \"requireGuestProvisionSignal\":
         true\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Network/networkInterfaces/cli-test-vm-local-vm1VMNic\"}]},\r\n
-        \   \"provisioningState\": \"Succeeded\",\r\n    \"timeCreated\": \"2022-02-22T13:29:51.9369474+00:00\"\r\n
+        \   \"provisioningState\": \"Succeeded\",\r\n    \"timeCreated\": \"2022-03-17T06:34:01.2327056+00:00\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
@@ -2830,7 +2981,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 22 Feb 2022 13:31:45 GMT
+      - Thu, 17 Mar 2022 06:36:20 GMT
       expires:
       - '-1'
       pragma:
@@ -2847,17 +2998,17 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3991,Microsoft.Compute/LowCostGet30Min;31988
+      - Microsoft.Compute/LowCostGet3Min;3990,Microsoft.Compute/LowCostGet30Min;31990
     status:
       code: 200
       message: OK
 - request:
     body: '{"location": "westus2", "tags": {"tagName": "tagValue"}, "properties":
       {"hardwareProfile": {"vmSize": "Standard_DS4_v2"}, "storageProfile": {"osDisk":
-      {"osType": "Linux", "name": "cli-test-vm-local-vm1_OsDisk_1_095dc4b4cf4d48ea848195ec8f7c684e",
+      {"osType": "Linux", "name": "cli-test-vm-local-vm1_OsDisk_1_5c4bdd8e23774e38b0e91f6281224180",
       "caching": "ReadOnly", "diffDiskSettings": {"option": "Local", "placement":
       "CacheDisk"}, "createOption": "FromImage", "diskSizeGB": 30, "managedDisk":
-      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Compute/disks/cli-test-vm-local-vm1_OsDisk_1_095dc4b4cf4d48ea848195ec8f7c684e",
+      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Compute/disks/cli-test-vm-local-vm1_OsDisk_1_5c4bdd8e23774e38b0e91f6281224180",
       "storageAccountType": "Standard_LRS"}, "deleteOption": "Delete"}, "dataDisks":
       []}, "osProfile": {"computerName": "cli-test-vm-local-vm1", "adminUsername":
       "ruijun_hu", "linuxConfiguration": {"disablePasswordAuthentication": true, "ssh":
@@ -2883,7 +3034,7 @@ interactions:
       ParameterSetName:
       - --resource-group --name --size --ephemeral-os-disk-placement --set
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Compute/virtualMachines/cli-test-vm-local-vm1?api-version=2021-11-01
   response:
@@ -2891,17 +3042,17 @@ interactions:
       string: "{\r\n  \"name\": \"cli-test-vm-local-vm1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Compute/virtualMachines/cli-test-vm-local-vm1\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus2\",\r\n
         \ \"tags\": {\r\n    \"tagName\": \"tagValue\"\r\n  },\r\n  \"properties\":
-        {\r\n    \"vmId\": \"ffeca5eb-383b-40cd-ae64-77fee8ffb7f7\",\r\n    \"hardwareProfile\":
+        {\r\n    \"vmId\": \"cfbe8bdf-5ff6-41af-b6aa-31d561343314\",\r\n    \"hardwareProfile\":
         {\r\n      \"vmSize\": \"Standard_DS4_v2\"\r\n    },\r\n    \"storageProfile\":
         {\r\n      \"imageReference\": {\r\n        \"publisher\": \"Canonical\",\r\n
         \       \"offer\": \"UbuntuServer\",\r\n        \"sku\": \"18.04-LTS\",\r\n
-        \       \"version\": \"latest\",\r\n        \"exactVersion\": \"18.04.202202130\"\r\n
+        \       \"version\": \"latest\",\r\n        \"exactVersion\": \"18.04.202203080\"\r\n
         \     },\r\n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"diffDiskSettings\":
         {\r\n          \"option\": \"Local\",\r\n          \"placement\": \"CacheDisk\"\r\n
-        \       },\r\n        \"name\": \"cli-test-vm-local-vm1_OsDisk_1_095dc4b4cf4d48ea848195ec8f7c684e\",\r\n
+        \       },\r\n        \"name\": \"cli-test-vm-local-vm1_OsDisk_1_5c4bdd8e23774e38b0e91f6281224180\",\r\n
         \       \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadOnly\",\r\n
         \       \"managedDisk\": {\r\n          \"storageAccountType\": \"Standard_LRS\",\r\n
-        \         \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Compute/disks/cli-test-vm-local-vm1_OsDisk_1_095dc4b4cf4d48ea848195ec8f7c684e\"\r\n
+        \         \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Compute/disks/cli-test-vm-local-vm1_OsDisk_1_5c4bdd8e23774e38b0e91f6281224180\"\r\n
         \       },\r\n        \"deleteOption\": \"Delete\",\r\n        \"diskSizeGB\":
         30\r\n      },\r\n      \"dataDisks\": []\r\n    },\r\n    \"osProfile\":
         {\r\n      \"computerName\": \"cli-test-vm-local-vm1\",\r\n      \"adminUsername\":
@@ -2914,13 +3065,13 @@ interactions:
         \         \"assessmentMode\": \"ImageDefault\"\r\n        }\r\n      },\r\n
         \     \"secrets\": [],\r\n      \"allowExtensionOperations\": true,\r\n      \"requireGuestProvisionSignal\":
         true\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Network/networkInterfaces/cli-test-vm-local-vm1VMNic\"}]},\r\n
-        \   \"provisioningState\": \"Updating\",\r\n    \"timeCreated\": \"2022-02-22T13:29:51.9369474+00:00\"\r\n
+        \   \"provisioningState\": \"Updating\",\r\n    \"timeCreated\": \"2022-03-17T06:34:01.2327056+00:00\"\r\n
         \ }\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus2/operations/0d19792a-1d6f-4b4a-ae8c-206846691fcc?p=86787c75-ed5e-4503-9048-66d86936d980&api-version=2021-11-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus2/operations/12b238f3-a60b-4e8d-abe3-a7f9a7c48303?p=86787c75-ed5e-4503-9048-66d86936d980&api-version=2021-11-01
       cache-control:
       - no-cache
       content-length:
@@ -2928,7 +3079,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 22 Feb 2022 13:31:49 GMT
+      - Thu, 17 Mar 2022 06:36:25 GMT
       expires:
       - '-1'
       pragma:
@@ -2945,9 +3096,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/PutVM3Min;237,Microsoft.Compute/PutVM30Min;1197
+      - Microsoft.Compute/PutVM3Min;236,Microsoft.Compute/PutVM30Min;1196
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1194'
     status:
       code: 200
       message: OK
@@ -2965,13 +3116,13 @@ interactions:
       ParameterSetName:
       - --resource-group --name --size --ephemeral-os-disk-placement --set
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus2/operations/0d19792a-1d6f-4b4a-ae8c-206846691fcc?p=86787c75-ed5e-4503-9048-66d86936d980&api-version=2021-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus2/operations/12b238f3-a60b-4e8d-abe3-a7f9a7c48303?p=86787c75-ed5e-4503-9048-66d86936d980&api-version=2021-11-01
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2022-02-22T13:31:48.1886666+00:00\",\r\n  \"status\":
-        \"InProgress\",\r\n  \"name\": \"0d19792a-1d6f-4b4a-ae8c-206846691fcc\"\r\n}"
+      string: "{\r\n  \"startTime\": \"2022-03-17T06:36:23.5916661+00:00\",\r\n  \"status\":
+        \"InProgress\",\r\n  \"name\": \"12b238f3-a60b-4e8d-abe3-a7f9a7c48303\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -2980,7 +3131,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 22 Feb 2022 13:32:20 GMT
+      - Thu, 17 Mar 2022 06:36:56 GMT
       expires:
       - '-1'
       pragma:
@@ -2997,7 +3148,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperation3Min;14995,Microsoft.Compute/GetOperation30Min;29995
+      - Microsoft.Compute/GetOperation3Min;14994,Microsoft.Compute/GetOperation30Min;29994
     status:
       code: 200
       message: OK
@@ -3015,14 +3166,14 @@ interactions:
       ParameterSetName:
       - --resource-group --name --size --ephemeral-os-disk-placement --set
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus2/operations/0d19792a-1d6f-4b4a-ae8c-206846691fcc?p=86787c75-ed5e-4503-9048-66d86936d980&api-version=2021-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus2/operations/12b238f3-a60b-4e8d-abe3-a7f9a7c48303?p=86787c75-ed5e-4503-9048-66d86936d980&api-version=2021-11-01
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2022-02-22T13:31:48.1886666+00:00\",\r\n  \"endTime\":
-        \"2022-02-22T13:32:21.1884435+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
-        \ \"name\": \"0d19792a-1d6f-4b4a-ae8c-206846691fcc\"\r\n}"
+      string: "{\r\n  \"startTime\": \"2022-03-17T06:36:23.5916661+00:00\",\r\n  \"endTime\":
+        \"2022-03-17T06:37:23.5598643+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
+        \ \"name\": \"12b238f3-a60b-4e8d-abe3-a7f9a7c48303\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -3031,7 +3182,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 22 Feb 2022 13:32:50 GMT
+      - Thu, 17 Mar 2022 06:37:26 GMT
       expires:
       - '-1'
       pragma:
@@ -3048,7 +3199,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperation3Min;14993,Microsoft.Compute/GetOperation30Min;29993
+      - Microsoft.Compute/GetOperation3Min;14991,Microsoft.Compute/GetOperation30Min;29991
     status:
       code: 200
       message: OK
@@ -3066,7 +3217,7 @@ interactions:
       ParameterSetName:
       - --resource-group --name --size --ephemeral-os-disk-placement --set
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Compute/virtualMachines/cli-test-vm-local-vm1?api-version=2021-11-01
   response:
@@ -3074,17 +3225,17 @@ interactions:
       string: "{\r\n  \"name\": \"cli-test-vm-local-vm1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Compute/virtualMachines/cli-test-vm-local-vm1\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus2\",\r\n
         \ \"tags\": {\r\n    \"tagName\": \"tagValue\"\r\n  },\r\n  \"properties\":
-        {\r\n    \"vmId\": \"ffeca5eb-383b-40cd-ae64-77fee8ffb7f7\",\r\n    \"hardwareProfile\":
+        {\r\n    \"vmId\": \"cfbe8bdf-5ff6-41af-b6aa-31d561343314\",\r\n    \"hardwareProfile\":
         {\r\n      \"vmSize\": \"Standard_DS4_v2\"\r\n    },\r\n    \"storageProfile\":
         {\r\n      \"imageReference\": {\r\n        \"publisher\": \"Canonical\",\r\n
         \       \"offer\": \"UbuntuServer\",\r\n        \"sku\": \"18.04-LTS\",\r\n
-        \       \"version\": \"latest\",\r\n        \"exactVersion\": \"18.04.202202130\"\r\n
+        \       \"version\": \"latest\",\r\n        \"exactVersion\": \"18.04.202203080\"\r\n
         \     },\r\n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"diffDiskSettings\":
         {\r\n          \"option\": \"Local\",\r\n          \"placement\": \"CacheDisk\"\r\n
-        \       },\r\n        \"name\": \"cli-test-vm-local-vm1_OsDisk_1_095dc4b4cf4d48ea848195ec8f7c684e\",\r\n
+        \       },\r\n        \"name\": \"cli-test-vm-local-vm1_OsDisk_1_5c4bdd8e23774e38b0e91f6281224180\",\r\n
         \       \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadOnly\",\r\n
         \       \"managedDisk\": {\r\n          \"storageAccountType\": \"Standard_LRS\",\r\n
-        \         \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Compute/disks/cli-test-vm-local-vm1_OsDisk_1_095dc4b4cf4d48ea848195ec8f7c684e\"\r\n
+        \         \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Compute/disks/cli-test-vm-local-vm1_OsDisk_1_5c4bdd8e23774e38b0e91f6281224180\"\r\n
         \       },\r\n        \"deleteOption\": \"Delete\",\r\n        \"diskSizeGB\":
         30\r\n      },\r\n      \"dataDisks\": []\r\n    },\r\n    \"osProfile\":
         {\r\n      \"computerName\": \"cli-test-vm-local-vm1\",\r\n      \"adminUsername\":
@@ -3097,7 +3248,7 @@ interactions:
         \         \"assessmentMode\": \"ImageDefault\"\r\n        }\r\n      },\r\n
         \     \"secrets\": [],\r\n      \"allowExtensionOperations\": true,\r\n      \"requireGuestProvisionSignal\":
         true\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Network/networkInterfaces/cli-test-vm-local-vm1VMNic\"}]},\r\n
-        \   \"provisioningState\": \"Succeeded\",\r\n    \"timeCreated\": \"2022-02-22T13:29:51.9369474+00:00\"\r\n
+        \   \"provisioningState\": \"Succeeded\",\r\n    \"timeCreated\": \"2022-03-17T06:34:01.2327056+00:00\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
@@ -3107,7 +3258,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 22 Feb 2022 13:32:50 GMT
+      - Thu, 17 Mar 2022 06:37:26 GMT
       expires:
       - '-1'
       pragma:
@@ -3124,7 +3275,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3987,Microsoft.Compute/LowCostGet30Min;31984
+      - Microsoft.Compute/LowCostGet3Min;3983,Microsoft.Compute/LowCostGet30Min;31983
     status:
       code: 200
       message: OK
@@ -3142,7 +3293,7 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Compute/virtualMachines/cli-test-vm-local-vm1?api-version=2021-11-01
   response:
@@ -3150,17 +3301,17 @@ interactions:
       string: "{\r\n  \"name\": \"cli-test-vm-local-vm1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Compute/virtualMachines/cli-test-vm-local-vm1\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus2\",\r\n
         \ \"tags\": {\r\n    \"tagName\": \"tagValue\"\r\n  },\r\n  \"properties\":
-        {\r\n    \"vmId\": \"ffeca5eb-383b-40cd-ae64-77fee8ffb7f7\",\r\n    \"hardwareProfile\":
+        {\r\n    \"vmId\": \"cfbe8bdf-5ff6-41af-b6aa-31d561343314\",\r\n    \"hardwareProfile\":
         {\r\n      \"vmSize\": \"Standard_DS4_v2\"\r\n    },\r\n    \"storageProfile\":
         {\r\n      \"imageReference\": {\r\n        \"publisher\": \"Canonical\",\r\n
         \       \"offer\": \"UbuntuServer\",\r\n        \"sku\": \"18.04-LTS\",\r\n
-        \       \"version\": \"latest\",\r\n        \"exactVersion\": \"18.04.202202130\"\r\n
+        \       \"version\": \"latest\",\r\n        \"exactVersion\": \"18.04.202203080\"\r\n
         \     },\r\n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"diffDiskSettings\":
         {\r\n          \"option\": \"Local\",\r\n          \"placement\": \"CacheDisk\"\r\n
-        \       },\r\n        \"name\": \"cli-test-vm-local-vm1_OsDisk_1_095dc4b4cf4d48ea848195ec8f7c684e\",\r\n
+        \       },\r\n        \"name\": \"cli-test-vm-local-vm1_OsDisk_1_5c4bdd8e23774e38b0e91f6281224180\",\r\n
         \       \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadOnly\",\r\n
         \       \"managedDisk\": {\r\n          \"storageAccountType\": \"Standard_LRS\",\r\n
-        \         \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Compute/disks/cli-test-vm-local-vm1_OsDisk_1_095dc4b4cf4d48ea848195ec8f7c684e\"\r\n
+        \         \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Compute/disks/cli-test-vm-local-vm1_OsDisk_1_5c4bdd8e23774e38b0e91f6281224180\"\r\n
         \       },\r\n        \"deleteOption\": \"Delete\",\r\n        \"diskSizeGB\":
         30\r\n      },\r\n      \"dataDisks\": []\r\n    },\r\n    \"osProfile\":
         {\r\n      \"computerName\": \"cli-test-vm-local-vm1\",\r\n      \"adminUsername\":
@@ -3173,7 +3324,7 @@ interactions:
         \         \"assessmentMode\": \"ImageDefault\"\r\n        }\r\n      },\r\n
         \     \"secrets\": [],\r\n      \"allowExtensionOperations\": true,\r\n      \"requireGuestProvisionSignal\":
         true\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_update_ephemeral_os_disk_placement_000001/providers/Microsoft.Network/networkInterfaces/cli-test-vm-local-vm1VMNic\"}]},\r\n
-        \   \"provisioningState\": \"Succeeded\",\r\n    \"timeCreated\": \"2022-02-22T13:29:51.9369474+00:00\"\r\n
+        \   \"provisioningState\": \"Succeeded\",\r\n    \"timeCreated\": \"2022-03-17T06:34:01.2327056+00:00\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
@@ -3183,7 +3334,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 22 Feb 2022 13:32:51 GMT
+      - Thu, 17 Mar 2022 06:37:27 GMT
       expires:
       - '-1'
       pragma:
@@ -3200,7 +3351,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3986,Microsoft.Compute/LowCostGet30Min;31983
+      - Microsoft.Compute/LowCostGet3Min;3982,Microsoft.Compute/LowCostGet30Min;31982
     status:
       code: 200
       message: OK
