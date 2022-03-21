@@ -152,12 +152,12 @@ class BatchMgmtApplicationScenarioTests(ScenarioTest):
              self.check('length(@)', 1),
             self.check('[0].name', '{acc}')])
 
-        self.cmd('batch private-link-resource show --account-name {acc} --resource-group {rg} --private-link-resource {acc}').assert_with_checks([
+        self.cmd('batch private-link-resource show --account-name {acc} --resource-group {rg} --name {acc}').assert_with_checks([
              self.check('name', '{acc}')])
 
         endpoints = self.cmd('batch private-endpoint-connection list --account-name {acc} --resource-group {rg}').get_output_in_json()
         self.kwargs['endpointId'] = endpoints[0]['name']
-        self.cmd('batch private-endpoint-connection show --account-name {acc} --resource-group {rg} --private-endpoint-connection-name {endpointId}').assert_with_checks([
+        self.cmd('batch private-endpoint-connection show --account-name {acc} --resource-group {rg} --name {endpointId}').assert_with_checks([
              self.check('name', '{endpointId}')])
 
 
