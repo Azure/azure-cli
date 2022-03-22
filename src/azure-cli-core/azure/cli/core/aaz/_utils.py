@@ -1,7 +1,8 @@
 import importlib
 from collections import OrderedDict
 
-from azure.cli.core.aaz.exceptions import AAZInvalidShorthandSyntaxError, AAZShowHelp
+from azure.cli.core.aaz.exceptions import AAZInvalidShorthandSyntaxError
+from ._help import AAZShowHelp
 
 
 def _get_profile_pkg(aaz_module_name, cloud):
@@ -14,7 +15,7 @@ def _get_profile_pkg(aaz_module_name, cloud):
 
 class AAZShortHandSyntaxParser:
     NULL_EXPRESSIONS = ('null', 'None')
-    HELP_EXPRESSIONS = ('???', )
+    HELP_EXPRESSIONS = ('??', )
 
     def __call__(self, data, is_simple=False):
         assert isinstance(data, str)
@@ -64,8 +65,8 @@ class AAZShortHandSyntaxParser:
                 ex.error_data = remain
                 ex.error_at += idx
                 raise ex
-            except AAZShowHelp as showHelp:
-                raise showHelp
+            except AAZShowHelp as aaz_help:
+                raise aaz_help
 
             if '"' in key:
                 raise AAZInvalidShorthandSyntaxError(remain, idx, length,
@@ -91,9 +92,9 @@ class AAZShortHandSyntaxParser:
                 ex.error_data = remain
                 ex.error_at += idx
                 raise ex
-            except AAZShowHelp as showHelp:
-                showHelp.keys = [key, *showHelp.keys]
-                raise showHelp
+            except AAZShowHelp as aaz_help:
+                aaz_help.keys = [key, *aaz_help.keys]
+                raise aaz_help
 
             result[key] = value
             idx += length
@@ -130,9 +131,9 @@ class AAZShortHandSyntaxParser:
                 ex.error_data = remain
                 ex.error_at += idx
                 raise ex
-            except AAZShowHelp as showHelp:
-                showHelp.keys = [0, *showHelp.keys]
-                raise showHelp
+            except AAZShowHelp as aaz_help:
+                aaz_help.keys = [0, *aaz_help.keys]
+                raise aaz_help
 
             result.append(value)
             idx += length

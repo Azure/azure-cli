@@ -62,15 +62,14 @@ class AAZBaseArg(AAZBaseType):
     def __init__(self, options=None, required=False, help=None, arg_group=None, is_preview=False, is_experimental=False,
                  id_part=None, default=AAZUndefined, blank=AAZUndefined, nullable=False):
         super().__init__(options=options, nullable=nullable)
-        self._help = {}  # the key of self._help is 'name', 'short-summary', 'long-summery', 'populator-commands'
+        self._help = {}  # the key of self._help is 'name', 'short-summary', 'long-summary', 'populator-commands'
 
         if self._options:
             self._help['name'] = ' '.join(self._options)
             if isinstance(help, str):
-                self._help['short-summery'] = help
+                self._help['short-summary'] = help
             elif isinstance(help, dict):
                 self._help.update(help)
-        # TODO: add arguments help into command's AZ_HELP
 
         self._required = required
         self._arg_group = arg_group
@@ -85,7 +84,7 @@ class AAZBaseArg(AAZBaseType):
             dest=name,
             options_list=[*self._options] if self._options else None,
             required=self._required,
-            help=self._help.get('short-summery', None),
+            help=self._help.get('short-summary', None),
             default=self._default,
         )
         if self._arg_group:
@@ -102,6 +101,10 @@ class AAZBaseArg(AAZBaseType):
 
     def _build_cmd_action(self):
         return None
+
+    @property
+    def _type_in_help(self):
+        return "Undefined"
 
 
 class AAZSimpleTypeArg(AAZBaseArg, AAZSimpleType):
@@ -125,11 +128,17 @@ class AAZSimpleTypeArg(AAZBaseArg, AAZSimpleType):
 
 
 class AAZStrArg(AAZSimpleTypeArg, AAZStrType):
-    pass
+
+    @property
+    def _type_in_help(self):
+        return "String"
 
 
 class AAZIntArg(AAZSimpleTypeArg, AAZIntType):
-    pass
+
+    @property
+    def _type_in_help(self):
+        return "Int"
 
 
 class AAZBoolArg(AAZSimpleTypeArg, AAZBoolType):
@@ -141,12 +150,18 @@ class AAZBoolArg(AAZSimpleTypeArg, AAZBoolType):
         }
         super().__init__(blank=blank, enum=enum, **kwargs)
 
+    @property
+    def _type_in_help(self):
+        return "Boolean"
+
 
 class AAZFloatArg(AAZSimpleTypeArg, AAZFloatType):
-    pass
+
+    @property
+    def _type_in_help(self):
+        return "Float"
 
 
-#
 class AAZObjectArg(AAZBaseArg, AAZObjectType):
 
     def __init__(self, fmt=None, **kwargs):
@@ -166,6 +181,10 @@ class AAZObjectArg(AAZBaseArg, AAZObjectType):
             _schema = self
 
         return Action
+
+    @property
+    def _type_in_help(self):
+        return "Object"
 
 
 class AAZDictArg(AAZBaseArg, AAZDictType):
@@ -187,6 +206,10 @@ class AAZDictArg(AAZBaseArg, AAZDictType):
             _schema = self
 
         return Action
+
+    @property
+    def _type_in_help(self):
+        return f"Dict<String,{self.Element._type_in_help}>"
 
 
 class AAZListArg(AAZBaseArg, AAZListType):
@@ -213,6 +236,10 @@ class AAZListArg(AAZBaseArg, AAZListType):
             _schema = self
 
         return Action
+
+    @property
+    def _type_in_help(self):
+        return f"List<{self.Element._type_in_help}>"
 
 
 class AAZResourceGroupNameArg(AAZStrArg):

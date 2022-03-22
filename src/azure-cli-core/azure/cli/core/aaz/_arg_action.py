@@ -8,7 +8,9 @@ from knack.log import get_logger
 
 from ._base import AAZUndefined
 from ._utils import AAZShortHandSyntaxParser
-from .exceptions import AAZInvalidShorthandSyntaxError, AAZInvalidValueError, AAZShowHelp
+from .exceptions import AAZInvalidShorthandSyntaxError, AAZInvalidValueError
+from ._help import AAZShowHelp
+
 
 logger = get_logger(__name__)
 
@@ -55,9 +57,9 @@ class AAZArgAction(Action):
             self.setup_operations(dest_ops, values)
         except (ValueError, KeyError) as ex:
             raise azclierror.InvalidArgumentValueError(f"Failed to parse '{option_string}' argument: {ex}") from ex
-        except AAZShowHelp as showHelp:
-            self.show_schema_help(parser, showHelp.schema, *showHelp.keys)
-            parser.exit()
+        except AAZShowHelp as aaz_help:
+            aaz_help.keys = (option_string, *aaz_help.keys)
+            self.show_aaz_help(parser, aaz_help)
 
     @classmethod
     def setup_operations(cls, dest_ops, values, prefix_keys=None):
@@ -69,9 +71,9 @@ class AAZArgAction(Action):
         raise NotImplementedError()
 
     @staticmethod
-    def show_schema_help(parser, schema, *keys):
-        # TODO: show help
-        pass
+    def show_aaz_help(parser, aaz_help):
+        aaz_help.show()
+        parser.exit()
 
 
 class AAZSimpleTypeArgAction(AAZArgAction):
@@ -94,9 +96,9 @@ class AAZSimpleTypeArgAction(AAZArgAction):
             if isinstance(values, str) and len(values) > 0:
                 try:
                     data = cls._str_parser(values, is_simple=True)
-                except AAZShowHelp as showHelp:
-                    showHelp.schema = cls._schema
-                    raise showHelp
+                except AAZShowHelp as aaz_help:
+                    aaz_help.schema = cls._schema
+                    raise aaz_help
             else:
                 data = values
             data = cls.format_data(data)
@@ -208,10 +210,10 @@ class AAZCompoundTypeArgAction(AAZArgAction):
                         except Exception as ex:
                             logger.debug(ex)  # log parse json failed expression
                             raise shorthand_ex  # raise shorthand syntax exception
-        except AAZShowHelp as showHelp:
-            showHelp.schema = cls._schema
-            showHelp.keys = [*key_items, *showHelp.keys]
-            raise showHelp
+        except AAZShowHelp as aaz_help:
+            aaz_help.schema = cls._schema
+            aaz_help.keys = (*key_items, *aaz_help.keys)
+            raise aaz_help
         return v
 
 
@@ -274,9 +276,9 @@ class AAZListArgAction(AAZCompoundTypeArgAction):
                 self.setup_operations(dest_ops, values)
         except (ValueError, KeyError) as ex:
             raise azclierror.InvalidArgumentValueError(f"Failed to parse '{option_string}' argument: {ex}") from ex
-        except AAZShowHelp as showHelp:
-            self.show_schema_help(parser, showHelp.schema, *showHelp.keys)
-            parser.exit()
+        except AAZShowHelp as aaz_help:
+            aaz_help.keys = (option_string, *aaz_help.keys)
+            self.show_aaz_help(parser, aaz_help)
 
     @classmethod
     def setup_operations(cls, dest_ops, values, prefix_keys=None):
@@ -298,8 +300,8 @@ class AAZListArgAction(AAZCompoundTypeArgAction):
                     action = schema._build_cmd_action()
                     data = action.format_data(value)
                     ops.append((key_parts, data))
-            except AAZShowHelp as showHelp:
-                raise showHelp
+            except AAZShowHelp as aaz_help:
+                raise aaz_help
             except Exception as ex:
                 # This part of logic is to support Separate Elements Expression which is widely used in current command,
                 # such as:
@@ -323,10 +325,10 @@ class AAZListArgAction(AAZCompoundTypeArgAction):
                     element_ops = AAZArgActionOperations()
                     for value in values:
                         element_action.setup_operations(element_ops, value, prefix_keys=[_ELEMENT_APPEND_KEY])
-                except AAZShowHelp as showHelp:
-                    showHelp.schema = cls._schema
-                    showHelp.keys = [0, *showHelp.keys]
-                    raise showHelp
+                except AAZShowHelp as aaz_help:
+                    aaz_help.schema = cls._schema
+                    aaz_help.keys = (0, *aaz_help.keys)
+                    raise aaz_help
 
                 elements = []
                 for _, data in element_ops._ops:

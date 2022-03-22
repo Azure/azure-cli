@@ -42,12 +42,5 @@ class AAZInvalidShorthandSyntaxError(ValueError):
         return f"Shorthand Syntax Error: {self.msg}:\n\t{self.error_data[:self.error_at + self.error_range]}\n\t" + ' ' * self.error_at + "^" * self.error_range
 
 
-class AAZShowHelp(Exception):
-
-    def __init__(self, *keys):
-        self.keys = keys
-        self.schema = None
-
-
 class AAZInvalidValueError(ValueError):
     pass
