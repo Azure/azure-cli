@@ -33,6 +33,12 @@ steps:
       echo module: ${{ parameters.module }}
       echo Build.Reason: $(Build.Reason)
 
+      # pull && rebase
+      git checkout dev
+      git pull
+      git checkout $(System.PullRequest.SourceBranch)
+      git rebase dev
+
       # Test specific module
       module="${{ parameters.module }}"
       if [[ -n $module ]]; then
