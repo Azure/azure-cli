@@ -4617,6 +4617,7 @@ class AKSContext:
             enable_strip=True,
             extract_kv=True,
             default_value={},
+            allow_appending_values_to_same_key=True,
         )
 
         # In create mode, add AAD session key to header.

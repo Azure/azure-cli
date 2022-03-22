@@ -3203,6 +3203,7 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
         enable_strip=True,
         extract_kv=True,
         default_value={},
+        allow_appending_values_to_same_key=True,
     )
 
     return sdk_no_wait(
@@ -3300,6 +3301,7 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
         enable_strip=True,
         extract_kv=True,
         default_value={},
+        allow_appending_values_to_same_key=True,
     )
 
     return sdk_no_wait(
@@ -3413,6 +3415,7 @@ def aks_agentpool_update(cmd, client, resource_group_name, cluster_name, nodepoo
         enable_strip=True,
         extract_kv=True,
         default_value={},
+        allow_appending_values_to_same_key=True,
     )
 
     return sdk_no_wait(
@@ -4161,6 +4164,7 @@ def aks_snapshot_create(cmd,    # pylint: disable=too-many-locals,too-many-state
         enable_strip=True,
         extract_kv=True,
         default_value={},
+        allow_appending_values_to_same_key=True,
     )
     return client.create_or_update(resource_group_name, name, snapshot, headers=aks_custom_headers)
 
