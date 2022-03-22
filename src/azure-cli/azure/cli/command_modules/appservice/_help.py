@@ -1818,7 +1818,7 @@ short-summary: List all scaled out instances of a web app or web app slot.
 
 helps['webapp list-runtimes'] = """
 type: command
-short-summary: List available built-in stacks which can be used for web apps.
+short-summary: List available built-in stacks which can be used for web apps. The Canonicalized web runtime should be used in the format of Framework|Version, e.g. "PHP|5.6".
 """
 
 helps['functionapp list-runtimes'] = """
