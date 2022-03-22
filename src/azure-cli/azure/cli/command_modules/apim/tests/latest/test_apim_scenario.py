@@ -420,7 +420,7 @@ class ApimScenarioTest(ScenarioTest):
         
         #delete schema
         self.cmd(
-            'apim api schema delete -g "{rg}" --service-name "{service_name}" --api-id "{graphql_api_id}" --schema-id "{graphql_sch_id}"')
+            'apim api schema delete -g "{rg}" --service-name "{service_name}" --api-id "{graphql_api_id}" --schema-id "{graphql_sch_id}" --yes')
         
         schema_count = len(self.cmd('apim api schema list -g "{rg}" -n "{service_name}" --api-id "{graphql_api_id}"').get_output_in_json())
         self.assertEqual(schema_count, 0)
