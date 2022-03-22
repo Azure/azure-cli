@@ -51,11 +51,12 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         for blob_type in ['block', 'page']:
             self.verify_blob_upload_and_download(resource_group, storage_account, 1, blob_type, 0)
 
+    @AllowLargeResponse(size_kb=2048)
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
     def test_storage_blob_upload_midsize_file(self, resource_group, storage_account):
         for blob_type in ['block', 'page']:
-            self.verify_blob_upload_and_download(resource_group, storage_account, 4096, 'block', 0)
+            self.verify_blob_upload_and_download(resource_group, storage_account, 2048, blob_type, 0)
 
     def verify_blob_upload_and_download(self, group, account, file_size_kb, blob_type,
                                         block_count=0, skip_download=False):
