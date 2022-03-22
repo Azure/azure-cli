@@ -302,4 +302,4 @@ def load_subvolumes_command_groups(self, netappfiles_subvolumes_sdk):
         g.command('delete', 'begin_delete', confirmation=True)
 
     with self.command_group('netappfiles subvolume metadata', netappfiles_subvolumes_sdk) as g:
-        g.command('show', 'begin_get_metadata')
+        g.show_command('show', 'begin_get_metadata')
