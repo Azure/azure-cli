@@ -180,4 +180,3 @@ def load_subvolume_arguments(self, account_name_type, pool_name_type, volume_nam
         c.argument('pool_name', id_part=None)
         c.argument('volume_name', id_part=None)
         c.argument('subvolume_name', id_part=None)
-
