@@ -137,6 +137,7 @@ def list_accounts(client, resource_group_name=None):
 
 
 # ---- POOL ----
+# pylint: disable=no-required-location-param
 def create_pool(client, account_name, pool_name, resource_group_name, service_level, location, size, tags=None,
                 qos_type=None, cool_access=None, encryption_type=None):
     body = CapacityPool(service_level=service_level,
@@ -159,7 +160,7 @@ def patch_pool(instance, size=None, qos_type=None, tags=None):
 
 
 # ---- VOLUME ----
-# pylint: disable=too-many-locals
+# pylint: disable=too-many-locals, disable=no-required-location-param
 def create_volume(cmd, client, account_name, pool_name, volume_name, resource_group_name, location, file_path,
                   usage_threshold, vnet, subnet='default', service_level=None, protocol_types=None, volume_type=None,
                   endpoint_type=None, replication_schedule=None, remote_volume_resource_id=None, tags=None,
