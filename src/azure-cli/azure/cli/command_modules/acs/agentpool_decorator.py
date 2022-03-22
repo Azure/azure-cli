@@ -30,13 +30,6 @@ class AKSAgentPoolModels(BaseAKSModels):
     The api version of the class corresponding to a model is determined by resource_type.
     """
 
-    def __init__(
-        self,
-        cmd: AzCommandsLoader,
-        resource_type: ResourceType,
-    ):
-        super().__init__(cmd, resource_type)
-
 
 # pylint: disable=too-few-public-methods
 class AKSAgentPoolParamDict(BaseAKSParamDict):
@@ -44,8 +37,6 @@ class AKSAgentPoolParamDict(BaseAKSParamDict):
 
     Only expose the "get" method externally to obtain parameter values, while recording usage.
     """
-    def __init__(self, param_dict: Dict):
-        super().__init__(param_dict)
 
 
 # pylint: disable=too-many-public-methods
@@ -372,7 +363,9 @@ class AKSAgentPoolAddDecorator:
         self.client = client
         self.models = AKSAgentPoolModels(cmd, resource_type)
         # store the context in the process of assemble the AgentPool object
-        self.context = AKSAgentPoolContext(cmd, AKSAgentPoolParamDict(raw_parameters), self.models, decorator_mode=DecoratorMode.CREATE)
+        self.context = AKSAgentPoolContext(
+            cmd, AKSAgentPoolParamDict(raw_parameters), self.models, decorator_mode=DecoratorMode.CREATE
+        )
 
     def _ensure_agentpool(self, agentpool: AgentPool) -> None:
         """Internal function to ensure that the incoming `agentpool` object is valid and the same as the attached
@@ -518,4 +511,6 @@ class AKSAgentPoolUpdateDecorator:
         self.client = client
         self.models = AKSAgentPoolModels(cmd, resource_type)
         # store the context in the process of assemble the AgentPool object
-        self.context = AKSAgentPoolContext(cmd, AKSAgentPoolParamDict(raw_parameters), self.models, decorator_mode=DecoratorMode.UPDATE)
+        self.context = AKSAgentPoolContext(
+            cmd, AKSAgentPoolParamDict(raw_parameters), self.models, decorator_mode=DecoratorMode.UPDATE
+        )

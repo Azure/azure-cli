@@ -44,7 +44,7 @@ class BaseAKSModels:
         self.__raw_models = None
         self.resource_type = resource_type
         self.set_up_models()
-    
+
     @property
     def raw_models(self):
         if self.__raw_models is None:
@@ -53,7 +53,7 @@ class BaseAKSModels:
                 operation_group="managed_clusters",
             ).models
         return self.__raw_models
-    
+
     def set_up_models(self):
         for model_name, model_class in vars(self.raw_models).items():
             if not model_name.startswith('_'):
@@ -102,7 +102,7 @@ class BaseAKSParamDict:
         for k, v in self.__count.items():
             print(k, v)
         print("Total: {}".format(len(self.__count.keys())))
-            
+
 
 class BaseAKSContext:
     """A base class for holding raw parameters, models and methods to get and store intermediates that will be used by
