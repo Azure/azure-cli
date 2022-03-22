@@ -371,7 +371,7 @@ def load_command_table(self, _):
 
     with self.command_group('vm extension', compute_vm_extension_sdk) as g:
         g.command('delete', 'begin_delete', supports_no_wait=True)
-        g.show_command('show', 'get', table_transformer=transform_extension_show_table_output)
+        g.custom_show_command('show', 'show_extensions', table_transformer=transform_extension_show_table_output)
         g.custom_command('set', 'set_extension', supports_no_wait=True)
         g.custom_command('list', 'list_extensions', table_transformer='[].' + transform_extension_show_table_output)
         g.wait_command('wait')

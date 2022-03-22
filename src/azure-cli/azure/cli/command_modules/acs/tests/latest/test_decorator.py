@@ -705,7 +705,7 @@ class AKSContextTestCase(unittest.TestCase):
         )
         mock_snapshot = Mock(kubernetes_version="test_kubernetes_version")
         with patch(
-            "azure.cli.command_modules.acs.decorator._get_snapshot",
+            "azure.cli.command_modules.acs.decorator.get_snapshot_by_snapshot_id",
             return_value=mock_snapshot,
         ):
             self.assertEqual(
@@ -724,7 +724,7 @@ class AKSContextTestCase(unittest.TestCase):
         )
         mock_snapshot = Mock(kubernetes_version="test_kubernetes_version")
         with patch(
-            "azure.cli.command_modules.acs.decorator._get_snapshot",
+            "azure.cli.command_modules.acs.decorator.get_snapshot_by_snapshot_id",
             return_value=mock_snapshot,
         ):
             self.assertEqual(
@@ -886,7 +886,7 @@ class AKSContextTestCase(unittest.TestCase):
         )
         mock_snapshot = Mock(vm_size="test_vm_size")
         with patch(
-            "azure.cli.command_modules.acs.decorator._get_snapshot",
+            "azure.cli.command_modules.acs.decorator.get_snapshot_by_snapshot_id",
             return_value=mock_snapshot,
         ):
             self.assertEqual(ctx_2.get_node_vm_size(), "test_vm_size")
@@ -903,7 +903,7 @@ class AKSContextTestCase(unittest.TestCase):
         )
         mock_snapshot = Mock(vm_size="test_vm_size")
         with patch(
-            "azure.cli.command_modules.acs.decorator._get_snapshot",
+            "azure.cli.command_modules.acs.decorator.get_snapshot_by_snapshot_id",
             return_value=mock_snapshot,
         ):
             self.assertEqual(ctx_3.get_node_vm_size(), "custom_node_vm_size")
@@ -935,7 +935,7 @@ class AKSContextTestCase(unittest.TestCase):
         )
         mock_snapshot = Mock(os_sku="test_os_sku")
         with patch(
-            "azure.cli.command_modules.acs.decorator._get_snapshot",
+            "azure.cli.command_modules.acs.decorator.get_snapshot_by_snapshot_id",
             return_value=mock_snapshot,
         ):
             self.assertEqual(ctx_2.get_os_sku(), "test_os_sku")
@@ -952,7 +952,7 @@ class AKSContextTestCase(unittest.TestCase):
         )
         mock_snapshot = Mock(os_sku="test_os_sku")
         with patch(
-            "azure.cli.command_modules.acs.decorator._get_snapshot",
+            "azure.cli.command_modules.acs.decorator.get_snapshot_by_snapshot_id",
             return_value=mock_snapshot,
         ):
             self.assertEqual(ctx_3.get_os_sku(), "custom_os_sku")
@@ -1799,7 +1799,7 @@ class AKSContextTestCase(unittest.TestCase):
             user_assigned_identities=Mock(get=Mock(return_value=identity_obj))
         )
         with patch(
-            "azure.cli.command_modules.acs.custom.get_msi_client",
+            "azure.cli.command_modules.acs._helpers.get_msi_client",
             return_value=msi_client,
         ) as get_msi_client:
             identity = ctx_1.get_identity_by_msi_client(
@@ -4731,7 +4731,7 @@ class AKSContextTestCase(unittest.TestCase):
         )
         mock_snapshot = Mock()
         with patch(
-            "azure.cli.command_modules.acs.decorator._get_snapshot",
+            "azure.cli.command_modules.acs.decorator.get_snapshot_by_snapshot_id",
             return_value=mock_snapshot,
         ):
             self.assertEqual(ctx_1.get_snapshot(), mock_snapshot)
@@ -4875,7 +4875,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             vm_size="snapshot_vm_size",
         )
         with patch(
-            "azure.cli.command_modules.acs.decorator._get_snapshot",
+            "azure.cli.command_modules.acs.decorator.get_snapshot_by_snapshot_id",
             return_value=mock_snapshot,
         ):
             dec_mc_2 = dec_2.set_up_agent_pool_profiles(mc_2)

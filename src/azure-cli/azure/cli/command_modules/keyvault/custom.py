@@ -1068,7 +1068,7 @@ def remove_network_rule(cmd, client, resource_group_name, vault_name, ip_address
             rules.virtual_network_rules = new_rules
 
     if ip_address and rules.ip_rules:
-        new_rules = [x for x in rules.ip_rules if x.value != ip_address]
+        new_rules = [x for x in rules.ip_rules if ip_network(x.value) != ip_network(ip_address)]
         to_modify |= len(new_rules) != len(rules.ip_rules)
         if to_modify:
             rules.ip_rules = new_rules
