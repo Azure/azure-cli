@@ -118,7 +118,7 @@ def get_config_value(cmd, section, key, default):
 
 
 def is_storagev2(import_prefix):
-    return import_prefix.startswith('azure.multiapi.storagev2.')
+    return import_prefix.startswith('azure.multiapi.storagev2.') or import_prefix.startswith('azure.data.tables')
 
 
 def validate_client_parameters(cmd, namespace):
@@ -674,7 +674,7 @@ def validate_entity(namespace):
     def cast_val(key, val):
         """ Attempts to cast numeric values (except RowKey and PartitionKey) to numbers so they
         can be queried correctly. """
-        if key in ['PartitionKey', 'RowKey']:
+        if key in ['PartitionKey', 'RowKey', 'DisplayVersion']:
             return val
 
         def try_cast(to_type):
@@ -839,14 +839,14 @@ def get_permission_validator(permission_class):
     return validator
 
 
-def table_permission_validator(cmd, namespace):
+def table_permission_validator(namespace):
     """ A special case for table because the SDK associates the QUERY permission with 'r' """
-    t_table_permissions = get_table_data_type(cmd.cli_ctx, 'table', 'TablePermissions')
+    from azure.data.tables._models import TableSasPermissions
     if namespace.permission:
         if set(namespace.permission) - set('raud'):
             help_string = '(r)ead/query (a)dd (u)pdate (d)elete'
             raise ValueError('valid values are {} or a combination thereof.'.format(help_string))
-        namespace.permission = t_table_permissions(_str=namespace.permission)
+        namespace.permission = TableSasPermissions(_str=namespace.permission)
 
 
 def validate_container_public_access(cmd, namespace):
@@ -1025,15 +1025,16 @@ def process_container_delete_parameters(cmd, namespace):
 
 def process_blob_download_batch_parameters(cmd, namespace):
     """Process the parameters for storage blob download command"""
+    from azure.cli.core.azclierror import InvalidArgumentValueError
     # 1. quick check
     if not os.path.exists(namespace.destination) or not os.path.isdir(namespace.destination):
-        raise ValueError('incorrect usage: destination must be an existing directory')
+        raise InvalidArgumentValueError('incorrect usage: destination must be an existing directory')
 
     # 2. try to extract account name and container name from source string
     _process_blob_batch_container_parameters(cmd, namespace)
 
     # 3. Call validators
-    add_progress_callback(cmd, namespace)
+    add_download_progress_callback(cmd, namespace)
 
 
 def process_blob_upload_batch_parameters(cmd, namespace):
@@ -2018,6 +2019,29 @@ def add_upload_progress_callback(cmd, namespace):
         message = getattr(_update_progress, 'message', 'Alive')
         reuse = getattr(_update_progress, 'reuse', False)
         current = response.context['upload_stream_current']
+        total = response.context['data_stream_total']
+
+        if total:
+            hook.add(message=message, value=current, total_val=total)
+            if total == current and not reuse:
+                hook.end()
+
+    hook = cmd.cli_ctx.get_progress_controller(det=True)
+    _update_progress.hook = hook
+
+    if not namespace.no_progress:
+        namespace.progress_callback = _update_progress
+    del namespace.no_progress
+
+
+def add_download_progress_callback(cmd, namespace):
+    def _update_progress(response):
+        if response.http_response.status_code not in [200, 201, 206]:
+            return
+
+        message = getattr(_update_progress, 'message', 'Alive')
+        reuse = getattr(_update_progress, 'reuse', False)
+        current = response.context['download_stream_current']
         total = response.context['data_stream_total']
 
         if total:

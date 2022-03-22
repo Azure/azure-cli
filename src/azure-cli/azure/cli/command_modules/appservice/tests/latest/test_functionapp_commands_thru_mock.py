@@ -120,6 +120,36 @@ class TestFunctionappMocked(unittest.TestCase):
         web_client_mock.web_apps.get.assert_called_with('rg', 'name')
         upload_zip_to_storage_mock.assert_called_with(cmd_mock, 'rg', 'name', 'src', None)
 
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom.parse_resource_id')
+    @mock.patch('azure.cli.command_modules.appservice.custom.upload_zip_to_storage')
+    @mock.patch('azure.cli.command_modules.appservice.custom.is_plan_consumption', return_value=True)
+    def test_functionapp_linux_consumption_non_remote_build_with_slot(self,
+                                                            is_plan_consumption_mock,
+                                                            upload_zip_to_storage_mock,
+                                                            parse_resource_id_mock,
+                                                            web_client_factory_mock):
+        # prepare
+        cmd_mock = _get_test_cmd()
+        cli_ctx_mock = mock.MagicMock()
+        cmd_mock.cli_ctx = cli_ctx_mock
+
+        appservice_mock = mock.Mock()
+        appservice_mock.reserved = True  # Marked app service as Linux
+
+        web_client_mock = mock.Mock()
+        web_client_mock.web_apps = mock.Mock()
+        web_client_mock.web_apps.get = mock.Mock(return_value=appservice_mock)
+        web_client_factory_mock.return_value = web_client_mock
+
+        # action
+        # Linux Consumption app should use update-storage to deploy when not using remote build
+        enable_zip_deploy_functionapp(cmd_mock, 'rg', 'name', 'src', build_remote=False, timeout=None, slot='slot')
+
+        # assert
+        web_client_mock.web_apps.get.assert_called_with('rg', 'name')
+        upload_zip_to_storage_mock.assert_called_with(cmd_mock, 'rg', 'name', 'src', 'slot')
+
     @mock.patch('azure.cli.command_modules.appservice.custom.add_remote_build_app_settings')
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.custom.parse_resource_id')

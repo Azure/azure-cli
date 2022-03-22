@@ -56,6 +56,7 @@ DEPENDENCIES = [
     'azure-batch~=12.0.0',
     'azure-cli-core=={}'.format(VERSION),
     'azure-cosmos~=3.0,>=3.0.2',
+    'azure-data-tables==12.2.0',
     'azure-datalake-store~=0.0.49',
     'azure-graphrbac~=0.60.0',
     'azure-identity',
@@ -65,7 +66,7 @@ DEPENDENCIES = [
     'azure-loganalytics~=0.1.0',
     'azure-mgmt-advisor==9.0.0',
     'azure-mgmt-apimanagement~=3.0.0',
-    'azure-mgmt-appconfiguration~=2.0.0',
+    'azure-mgmt-appconfiguration~=2.1.0b2',
     'azure-mgmt-applicationinsights~=1.0.0',
     'azure-mgmt-authorization~=0.61.0',
     'azure-mgmt-batchai~=7.0.0b1',
@@ -110,7 +111,7 @@ DEPENDENCIES = [
     'azure-mgmt-policyinsights~=1.0.0',
     'azure-mgmt-privatedns~=1.0.0',
     'azure-mgmt-rdbms~=10.0.0',
-    'azure-mgmt-recoveryservicesbackup~=4.0.0',
+    'azure-mgmt-recoveryservicesbackup~=4.1.1',
     'azure-mgmt-recoveryservices~=2.0.0',
     'azure-mgmt-redhatopenshift==1.0.0',
     'azure-mgmt-redis~=13.1.0',
@@ -130,7 +131,7 @@ DEPENDENCIES = [
     'azure-mgmt-synapse~=2.1.0b2',
     'azure-mgmt-trafficmanager~=1.0.0',
     'azure-mgmt-web~=6.1.0',
-    'azure-multiapi-storage~=0.7.0',
+    'azure-multiapi-storage~=0.8.0',
     'azure-storage-common~=1.4',
     'azure-synapse-accesscontrol~=0.5.0',
     'azure-synapse-artifacts~=0.10.0',
@@ -138,6 +139,8 @@ DEPENDENCIES = [
     'azure-synapse-spark~=0.2.0',
     'chardet~=3.0.4',
     'colorama~=0.4.4',
+    # On Linux, the distribution (Ubuntu, Debian, etc) and version are checked for `az feedback`
+    'distro; sys_platform == "linux"',
     'fabric~=2.4',
     'javaproperties~=0.5.1',
     'jsondiff~=1.3.0',
@@ -152,10 +155,6 @@ DEPENDENCIES = [
     'websocket-client~=1.3.1',
     'xmltodict~=0.12'
 ]
-
-# On Linux, the distribution (Ubuntu, Debian, etc) and version are checked
-if sys.platform == 'linux':
-    DEPENDENCIES.append('distro')
 
 with open('README.rst', 'r', encoding='utf-8') as f:
     README = f.read()

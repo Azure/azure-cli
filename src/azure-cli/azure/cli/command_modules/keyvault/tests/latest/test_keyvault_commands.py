@@ -1343,6 +1343,35 @@ class KeyVaultHSMKeyUsingHSMNameScenarioTest(ScenarioTest):
         self.cmd('keyvault key delete -n {key} --hsm-name {hsm_name}')
         self.cmd('keyvault key purge -n {key} --hsm-name {hsm_name}')
 
+    # Since the MHSM has to be activated manually so we use fixed hsm resource and mark the test as record_only
+    @record_only()
+    def test_keyvault_hsm_key_release_policy(self):
+        self.kwargs.update({
+            'hsm_name': TEST_HSM_NAME,
+            'hsm_url': TEST_HSM_URL,
+            'key1': self.create_random_name('skr1-', 24),
+            'key2': self.create_random_name('skr2-', 24),
+            'policy': os.path.join(TEST_DIR, 'release_policy.json').replace('\\', '\\\\')
+        })
+        # test create with policy file
+        key1 = self.cmd('keyvault key create --kty EC-HSM -n {key1} --exportable --policy {policy} --hsm-name {hsm_name}').get_output_in_json()
+        self.assertIn('x-ms-sgx-is-debuggable', key1['releasePolicy']['encodedPolicy'])
+        self.assertEqual(key1['releasePolicy']['immutable'], False)
+        # test create with default policy
+        key2 = self.cmd('keyvault key create --kty EC-HSM -n {key2} --exportable  --default-cvm-policy --hsm-name {hsm_name}').get_output_in_json()
+        self.assertIn('x-ms-attestation-type', key2['releasePolicy']['encodedPolicy'])
+        self.assertEqual(key2['releasePolicy']['immutable'], False)
+        # test update with immutability
+        result = self.cmd('keyvault key set-attributes --policy {policy} --immutable -n {key2} --hsm-name {hsm_name}').get_output_in_json()
+        self.assertIn('x-ms-sgx-is-debuggable', result['releasePolicy']['encodedPolicy'])
+        self.assertEqual(result['releasePolicy']['immutable'], True)
+
+        # clear test resources
+        self.cmd('keyvault key delete -n {key1} --hsm-name {hsm_name}')
+        self.cmd('keyvault key purge -n {key1} --hsm-name {hsm_name}')
+        self.cmd('keyvault key delete -n {key2} --hsm-name {hsm_name}')
+        self.cmd('keyvault key purge -n {key2} --hsm-name {hsm_name}')
+
 
 class KeyVaultHSMKeyUsingHSMURLScenarioTest(ScenarioTest):
     # @record_only()
@@ -2682,6 +2711,11 @@ class KeyVaultNetworkRuleScenarioTest(ScenarioTest):
 
         # remove network-rule for ip-address
         self.cmd('keyvault network-rule remove --ip-address {ip} --name {kv} --resource-group {rg}', checks=[
+            self.check('length(properties.networkAcls.ipRules)', 0)])
+
+        # remove network-rule for ip-address without CIDR
+        self.cmd('keyvault network-rule add --ip-address {ip} --name {kv} --resource-group {rg}')
+        self.cmd('keyvault network-rule remove --ip-address {ip5} --name {kv} --resource-group {rg}', checks=[
             self.check('length(properties.networkAcls.ipRules)', 0)])
 
         # Add multiple ip addresses
