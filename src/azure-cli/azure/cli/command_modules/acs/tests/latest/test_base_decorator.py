@@ -42,6 +42,7 @@ class BaseAKSModelsTestCase(unittest.TestCase):
         api_version = sdk_profile.default_api_version
         module_name = "azure.mgmt.containerservice.v{}.models".format(api_version.replace("-", "_"))
         module = importlib.import_module(module_name)
+
         models = BaseAKSModels(self.cmd, ResourceType.MGMT_CONTAINERSERVICE)
         self.assertEqual(models.raw_models, module)
 
