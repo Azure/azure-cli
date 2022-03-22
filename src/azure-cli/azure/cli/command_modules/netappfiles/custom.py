@@ -138,8 +138,10 @@ def list_accounts(client, resource_group_name=None):
 
 # ---- POOL ----
 # pylint: disable=no-required-location-param
-def create_pool(client, account_name, pool_name, resource_group_name, service_level, location, size, tags=None,
+def create_pool(client, account_name, pool_name, resource_group_name, service_level, size, location=None, tags=None,
                 qos_type=None, cool_access=None, encryption_type=None):
+    if location is None:
+        location = client.resource_groups.get(resource_group_name).location
     body = CapacityPool(service_level=service_level,
                         size=int(size) * tib_scale,
                         location=location,
@@ -161,8 +163,8 @@ def patch_pool(instance, size=None, qos_type=None, tags=None):
 
 # ---- VOLUME ----
 # pylint: disable=too-many-locals, disable=no-required-location-param
-def create_volume(cmd, client, account_name, pool_name, volume_name, resource_group_name, location, file_path,
-                  usage_threshold, vnet, subnet='default', service_level=None, protocol_types=None, volume_type=None,
+def create_volume(cmd, client, account_name, pool_name, volume_name, resource_group_name, file_path, usage_threshold,
+                  vnet, location=None, subnet='default', service_level=None, protocol_types=None, volume_type=None,
                   endpoint_type=None, replication_schedule=None, remote_volume_resource_id=None, tags=None,
                   snapshot_id=None, snapshot_policy_id=None, backup_policy_id=None, backup_enabled=None, backup_id=None,
                   policy_enforced=None, vault_id=None, kerberos_enabled=None, security_style=None, throughput_mibps=None,
@@ -174,6 +176,8 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
                   allowed_clients=None, ldap_enabled=None, chown_mode=None, cool_access=None, coolness_period=None,
                   unix_permissions=None, is_def_quota_enabled=None, default_user_quota=None,
                   default_group_quota=None, avs_data_store=None, network_features=None, enable_subvolumes=None):
+    if location is None:
+        location = client.resource_groups.get(resource_group_name).location
     subs_id = get_subscription_id(cmd.cli_ctx)
 
     # default the resource group of the subnet to the volume's rg unless the subnet is specified by id
