@@ -23,7 +23,7 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           validate_fs_public_access, validate_logging_version, validate_or_policy, validate_policy,
                           get_api_version_type, blob_download_file_path_validator, blob_tier_validator, validate_subnet,
                           validate_immutability_arguments, validate_blob_name_for_upload, validate_share_close_handle,
-                          add_upload_progress_callback, blob_tier_validator_track2)
+                          add_upload_progress_callback, blob_tier_validator_track2, add_download_progress_callback)
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines, too-many-branches, line-too-long
@@ -246,6 +246,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     public_network_access_enum = self.get_sdk('models._storage_management_client_enums#PublicNetworkAccess',
                                               resource_type=ResourceType.MGMT_STORAGE)
+
+    version_id_type = CLIArgumentType(
+        help='An optional blob version ID. This parameter is only for versioning enabled account. ',
+        min_api='2019-12-12', is_preview=True
+    )
 
     with self.argument_context('storage') as c:
         c.argument('container_name', container_name_type)
@@ -986,22 +991,45 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                      'blob. If set overwrite=True, then the existing append blob will be deleted, and a new one created. '
                      'Defaults to False.')
 
-    with self.argument_context('storage blob download') as c:
-        c.argument('file_path', options_list=('--file', '-f'), type=file_type,
-                   completer=FilesCompleter(), validator=blob_download_file_path_validator)
-        c.argument('max_connections', type=int)
-        c.argument('start_range', type=int)
-        c.argument('end_range', type=int)
-        c.argument('validate_content', action='store_true', min_api='2016-05-31')
-        c.extra('no_progress', progress_type)
+    with self.argument_context('storage blob download', resource_type=ResourceType.DATA_STORAGE_BLOB) as c:
+        c.register_blob_arguments_track2()
+        c.register_precondition_options()
+        c.argument('file_path', options_list=('--file', '-f'), type=file_type, completer=FilesCompleter(),
+                   help='Path of file to write out to.', validator=blob_download_file_path_validator)
+        c.argument('start_range', type=int,
+                   help='Start of byte range to use for downloading a section of the blob. If no end_range is given, '
+                        'all bytes after the start_range will be downloaded. The start_range and end_range params are '
+                        'inclusive. Ex: start_range=0, end_range=511 will download first 512 bytes of blob.')
+        c.argument('end_range', type=int,
+                   help='End of byte range to use for downloading a section of the blob. If end_range is given, '
+                        'start_range must be provided. The start_range and end_range params are inclusive. '
+                        'Ex: start_range=0, end_range=511 will download first 512 bytes of blob.')
+        c.extra('no_progress', progress_type, validator=add_download_progress_callback)
+        c.extra('snapshot', help='The snapshot parameter is an opaque DateTime value that, when present, '
+                                 'specifies the blob snapshot to retrieve.')
+        c.extra('lease', options_list=['--lease-id'], help='Required if the blob has an active lease.')
+        c.extra('version_id', version_id_type)
+        c.extra('max_concurrency', options_list=['--max-connections'], type=int, default=2,
+                help='The number of parallel connections with which to download.')
+        c.argument('open_mode', help='Mode to use when opening the file. Note that specifying append only open_mode '
+                                     'prevents parallel download. So, max_connections must be set to 1 '
+                                     'if this open_mode is used.')
+        c.extra('validate_content', action='store_true', min_api='2016-05-31',
+                help='If true, calculates an MD5 hash for each chunk of the blob. The storage service checks the '
+                     'hash of the content that has arrived with the hash that was sent. This is primarily valuable for '
+                     'detecting bitflips on the wire if using http instead of https, as https (the default), '
+                     'will already validate. Note that this MD5 hash is not stored with the blob. Also note that '
+                     'if enabled, the memory-efficient algorithm will not be used because computing the MD5 hash '
+                     'requires buffering entire blocks, and doing so defeats the purpose of the memory-efficient '
+                     'algorithm.')
 
     with self.argument_context('storage blob download-batch') as c:
         c.ignore('source_container_name')
         c.argument('destination', options_list=('--destination', '-d'))
         c.argument('source', options_list=('--source', '-s'))
         c.extra('no_progress', progress_type)
-        c.argument('max_connections', type=int,
-                   help='Maximum number of parallel connections to use when the blob size exceeds 64MB.')
+        c.extra('max_concurrency', options_list=['--max-connections'], type=int, default=2,
+                help='The number of parallel connections with which to download.')
 
     with self.argument_context('storage blob delete') as c:
         from .sdkutil import get_delete_blob_snapshot_type_names

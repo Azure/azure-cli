@@ -354,17 +354,10 @@ def storage_blob_copy_batch(cmd, client, source_client, container_name=None,
 
 # pylint: disable=unused-argument
 def storage_blob_download_batch(client, source, destination, source_container_name, pattern=None, dryrun=False,
-                                progress_callback=None, max_connections=2):
-
-    def _download_blob(blob_service, container, destination_folder, normalized_blob_name, blob_name):
-        # TODO: try catch IO exception
-        destination_path = os.path.join(destination_folder, normalized_blob_name)
-        destination_folder = os.path.dirname(destination_path)
-        if not os.path.exists(destination_folder):
-            mkdir_p(destination_folder)
-
-        blob = blob_service.get_blob_to_path(container, blob_name, destination_path, max_connections=max_connections,
-                                             progress_callback=progress_callback)
+                                progress_callback=None, **kwargs):
+    @check_precondition_success
+    def _download_blob(*args, **kwargs):
+        blob = download_blob(*args, **kwargs)
         return blob.name
 
     source_blobs = collect_blobs(client, source_container_name, pattern)
@@ -394,17 +387,34 @@ def storage_blob_download_batch(client, source, destination, source_container_na
 
     results = []
     for index, blob_normed in enumerate(blobs_to_download):
+        from azure.cli.core.azclierror import FileOperationError
         # add blob name and number to progress message
         if progress_callback:
             progress_callback.message = '{}/{}: "{}"'.format(
                 index + 1, len(blobs_to_download), blobs_to_download[blob_normed])
-        results.append(_download_blob(
-            client, source_container_name, destination, blob_normed, blobs_to_download[blob_normed]))
+        blob_client = client.get_blob_client(container=source_container_name,
+                                             blob=blobs_to_download[blob_normed])
+        destination_path = os.path.join(destination, os.path.normpath(blob_normed))
+        destination_folder = os.path.dirname(destination_path)
+        # Failed when there is same name for file and folder
+        if os.path.isfile(destination_path) and os.path.exists(destination_folder):
+            raise FileOperationError("%s already exists in %s. Please rename existing file or choose another "
+                                     "destination folder. ")
+        if not os.path.exists(destination_folder):
+            mkdir_p(destination_folder)
+        include, result = _download_blob(client=blob_client, file_path=destination_path,
+                                         progress_callback=progress_callback, **kwargs)
+        if include:
+            results.append(result)
 
     # end progress hook
     if progress_callback:
         progress_callback.hook.end()
 
+    num_failures = len(blobs_to_download) - len(results)
+    if num_failures:
+        logger.warning('%s of %s files not downloaded due to "Failed Precondition"',
+                       num_failures, len(blobs_to_download))
     return results
 
 
@@ -587,6 +597,22 @@ def upload_blob(cmd, client, file_path=None, container_name=None, blob_name=None
     if 'content_crc64' in response and response['content_crc64'] is not None:
         response['content_crc64'] = Serializer.serialize_bytearray(response['content_crc64'])
     return response
+
+
+def download_blob(client, file_path, open_mode='wb', start_range=None, end_range=None,
+                  progress_callback=None, **kwargs):
+    offset = None
+    length = None
+    if start_range is not None and end_range is not None:
+        offset = start_range
+        length = end_range - start_range + 1
+    if progress_callback:
+        kwargs['raw_response_hook'] = progress_callback
+    download_stream = client.download_blob(offset=offset, length=length, **kwargs)
+    with open(file_path, open_mode) as stream:
+        download_stream.readinto(stream)
+
+    return download_stream.properties
 
 
 def get_block_ids(content_length, block_length):
