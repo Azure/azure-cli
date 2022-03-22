@@ -173,8 +173,11 @@ def load_subvolume_arguments(self, account_name_type, pool_name_type, volume_nam
         c.argument('account_name', account_name_type)
         c.argument('pool_name', pool_name_type)
         c.argument('volume_name', volume_name_type)
+        c.argument('subvolume_name', id_part="child_name_3")
 
     with self.argument_context('netappfiles subvolume list') as c:
-        c.argument('account_name', account_name_type, id_part=None)
-        c.argument('pool_name', pool_name_type, id_part=None)
-        c.argument('volume_name', pool_name_type, id_part=None)
+        c.argument('account_name', id_part=None)
+        c.argument('pool_name', id_part=None)
+        c.argument('volume_name', id_part=None)
+        c.argument('subvolume_name', id_part=None)
+
