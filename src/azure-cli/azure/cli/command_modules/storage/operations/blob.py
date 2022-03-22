@@ -415,7 +415,7 @@ def storage_blob_upload_batch(cmd, client, source, destination, pattern=None,  #
                               maxsize_condition=None, max_connections=2, lease_id=None, progress_callback=None,
                               if_modified_since=None, if_unmodified_since=None, if_match=None,
                               if_none_match=None, timeout=None, dryrun=False, socket_timeout=None, **kwargs):
-    def _create_return_result(blob_content_settings, upload_result=None, blob_client=None):
+    def _create_return_result(blob_content_settings, blob_client, upload_result=None):
         return {
             'Blob': blob_client.url,
             'Type': blob_content_settings.content_type,
@@ -434,8 +434,11 @@ def storage_blob_upload_batch(cmd, client, source, destination, pattern=None,  #
         logger.info('      total %d', len(source_files))
         results = []
         for src, dst in source_files:
+            blob_client = client.get_blob_client(container=destination_container_name,
+                                                 blob=normalize_blob_file_path(destination_path, dst))
             results.append(_create_return_result(blob_content_settings=guess_content_type(src, content_settings,
-                                                                                          t_content_settings)))
+                                                                                          t_content_settings),
+                                                 blob_client=blob_client))
     else:
         @check_precondition_success
         def _upload_blob(*args, **kwargs):
@@ -467,7 +470,7 @@ def storage_blob_upload_batch(cmd, client, source, destination, pattern=None,  #
                                                if_none_match=if_none_match, timeout=timeout, **kwargs)
                 if include:
                     results.append(_create_return_result(blob_content_settings=guessed_content_settings,
-                                                         upload_result=result, blob_client=blob_client))
+                                                         blob_client=blob_client, upload_result=result))
             except (ResourceModifiedError, AzureResponseError) as ex:
                 logger.error(ex)
 
