@@ -43,7 +43,7 @@ steps:
 
       if [[ "$(Build.Reason)" == "PullRequest" && "${{ parameters.fullTest }}" == 'False' ]]; then
         echo "Running incremental test"
-        azdev test --no-exitfirst --repo=./ --src=HEAD --tgt=upstream/$(System.PullRequest.TargetBranch) --cli-ci --profile ${{ parameters.profile }} --verbose --series -a "-n 4 --durations=10"
+        azdev test --no-exitfirst --repo=./ --src=HEAD --tgt=origin/$(System.PullRequest.TargetBranch) --cli-ci --profile ${{ parameters.profile }} --verbose --series -a "-n 4 --durations=10"
       else
         echo "Running full test"
         azdev test --no-exitfirst --profile ${{ parameters.profile }} --verbose --series -a "-n 4 --durations=10"
