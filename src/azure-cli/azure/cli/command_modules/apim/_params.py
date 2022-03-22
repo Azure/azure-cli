@@ -127,7 +127,7 @@ def load_arguments(self, _):
             required=True)
         c.argument(
             'schema_type', arg_group='Schema',
-            help='Schema content type. Must be a valid a media type used in a Content-Type header as defined in the RFC 2616. Media type of the schema document (e.g. application/json, application/xml).',
+            help='Schema content type. Must be a valid media type used in a Content-Type header as defined in the RFC 2616. Media type of the schema document (e.g. application/json, application/xml).',
             required=True)
         c.argument(
             'resource_type', arg_group='Schema',
