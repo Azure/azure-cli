@@ -148,7 +148,8 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
         container = self.create_container(storage_account_info)
         result = self.storage_cmd('storage blob upload-batch -s "{}" -d {}', storage_account_info,
                          test_dir, container).get_output_in_json()
-        for res in result:
+        if result and result[0]:
+            res = result[0]
             self.assertRegex(res['Blob'], '^.*[^\/]+$')
             base_url = res['Blob'].split('/')[:3]
             container = res['Blob'].split('/')[3]
