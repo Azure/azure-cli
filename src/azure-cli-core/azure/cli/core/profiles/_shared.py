@@ -152,7 +152,7 @@ AZURE_API_PROFILES = {
             'disk_accesses': '2020-05-01',
             'snapshots': '2021-12-01',
             'galleries': '2021-07-01',
-            'gallery_images': '2022-01-03',
+            'gallery_images': '2021-10-01',
             'gallery_image_versions': '2021-07-01',
             'gallery_applications': '2021-07-01',
             'gallery_application_versions': '2021-07-01',
