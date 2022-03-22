@@ -731,6 +731,9 @@ examples:
   - name: Copy a blob asynchronously. Use `az storage blob show` to check the status of the blobs.
     text: |
         az storage blob copy start --account-name MyAccount --destination-blob MyDestinationBlob --destination-container MyDestinationContainer --sas-token $sas --source-uri https://storage.blob.core.windows.net/photos
+  - name: Copy a blob specific version
+    text: |
+        az storage blob copy start --account-name MyAccount --destination-blob MyDestinationBlob --destination-container MyDestinationContainer --source-uri https://my-account.blob.core.windows.net/my-container/my-blob?versionId=2022-03-21T18:28:44.4431011Z --auth-mode login
 """
 
 helps['storage blob copy start-batch'] = """
