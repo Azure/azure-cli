@@ -15,14 +15,14 @@ CLI_VERSION=`cat src/azure-cli/azure/cli/__main__.py | grep __version__ | sed s/
 docker build \
     --target build-env \
     --build-arg cli_version=${CLI_VERSION} \
-    -f ./scripts/release/rpm/Dockerfile.${IMAGE} \
+    -f ./scripts/release/rpm/${IMAGE}.dockerfile \
     -t azure/azure-cli:${IMAGE}-builder \
     .
 
 # Continue the previous build, and create a container that has the current azure-cli build but not the source code.
 docker build \
     --build-arg cli_version=${CLI_VERSION} \
-    -f ./scripts/release/rpm/Dockerfile.${IMAGE} \
+    -f ./scripts/release/rpm/${IMAGE}.dockerfile \
     -t azure/azure-cli:${IMAGE} \
     .
 
