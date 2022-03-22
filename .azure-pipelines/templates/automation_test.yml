@@ -44,13 +44,19 @@ steps:
       if [[ "$(Build.Reason)" == "PullRequest" && "${{ parameters.fullTest }}" == 'False' ]]; then
         echo "Running incremental test"
         # pull && rebase
-        git config --global user.email "AzurePipelines"
-        git config --global user.name "AzurePipelines"
-        git checkout dev
-        git pull
-        git checkout $(System.PullRequest.SourceBranch)
-        git rebase dev
-        azdev test --no-exitfirst --repo=./ --src=HEAD --tgt=origin/$(System.PullRequest.TargetBranch) --cli-ci --profile ${{ parameters.profile }} --verbose -a "--durations=10"
+        # git config --global user.email "AzurePipelines"
+        # git config --global user.name "AzurePipelines"
+        # git checkout dev
+        # git pull
+        # git checkout $(System.PullRequest.SourceBranch)
+        # git rebase dev
+        # azdev test --no-exitfirst --repo=./ --src=HEAD --tgt=origin/$(System.PullRequest.TargetBranch) --cli-ci --profile ${{ parameters.profile }} --verbose -a "--durations=10"
+        # upstream
+        git remote -v
+        git remote add upstream https://github.com/Azure/azure-cli.git
+        git remote -v
+        git rebase upstream/dev
+        azdev test --no-exitfirst --repo=./ --src=HEAD --tgt=upstream/$(System.PullRequest.TargetBranch) --cli-ci --profile ${{ parameters.profile }} --verbose -a "--durations=10"
       else
         echo "Running full test"
         azdev test --no-exitfirst --profile ${{ parameters.profile }} --verbose -a "--durations=10"
