@@ -674,7 +674,7 @@ def validate_entity(namespace):
     def cast_val(key, val):
         """ Attempts to cast numeric values (except RowKey and PartitionKey) to numbers so they
         can be queried correctly. """
-        if key in ['PartitionKey', 'RowKey']:
+        if key in ['PartitionKey', 'RowKey', 'DisplayVersion']:
             return val
 
         def try_cast(to_type):
