@@ -587,7 +587,7 @@ examples:
 
 helps['apim api schema get-etag'] = """
 type: command
-short-summary: List API Management API schema's.
+short-summary: Get etag of an API Management API schema.
 examples:
   - name: get a schema entity tag.
     text: |-
