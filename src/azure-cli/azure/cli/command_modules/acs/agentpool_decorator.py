@@ -9,7 +9,6 @@ from azure.cli.command_modules.acs._client_factory import cf_agent_pools
 from azure.cli.command_modules.acs._consts import DecoratorMode
 from azure.cli.command_modules.acs._validators import extract_comma_separated_string
 from azure.cli.command_modules.acs.base_decorator import BaseAKSContext, BaseAKSModels, BaseAKSParamDict
-from azure.cli.core import AzCommandsLoader
 from azure.cli.core.azclierror import CLIInternalError, InvalidArgumentValueError, RequiredArgumentMissingError
 from azure.cli.core.commands import AzCliCommand
 from azure.cli.core.profiles import ResourceType
