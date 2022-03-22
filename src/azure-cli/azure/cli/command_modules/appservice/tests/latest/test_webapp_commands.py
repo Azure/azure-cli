@@ -2306,7 +2306,6 @@ class WebappLocalContextScenarioTest(LocalContextScenarioTest):
 
 
 class WebappOneDeployScenarioTest(ScenarioTest):
-    @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_OneDeploy', location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_one_deploy(self, resource_group):
         webapp_name = self.create_random_name('webapp-oneDeploy-test', 40)
@@ -2323,6 +2322,43 @@ class WebappOneDeployScenarioTest(ScenarioTest):
             JMESPathCheck('complete', True)
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_webapp_OneDeploy', location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_one_deploy_from_url(self, resource_group):
+        webapp_name = self.create_random_name('webapp-oneDeploy-test', 40)
+        plan_name = self.create_random_name('webapp-oneDeploy-plan', 40)
+        path1 = "hello.html"
+        self.cmd(f'appservice plan create -g {resource_group} -n {plan_name} --sku S1')
+        self.cmd(f'webapp create -g {resource_group} -n {webapp_name} --plan {plan_name} -r "NODE|16-lts"')
+
+        self.cmd(f'webapp deploy -g {resource_group} -n {webapp_name} --target-path {path1} --src-url "https://www.microsoft.com/en-us/" --type static').assert_with_checks([
+            JMESPathCheck('properties.provisioningState', "InProgress")
+        ])
+
+        # poll instead of sleeping for a fixed amount of time
+        retries = 20
+        sleep_time = 1
+        status = 404
+        while retries > 0 and status != 200:
+            time.sleep(sleep_time)
+            status = requests.get(f"http://{webapp_name}.azurewebsites.net/{path1}").status_code
+            retries -= 1
+        self.assertEqual(status, 200)
+
+
+        path2 = "hello2.html"
+        slot = "staging"
+        self.cmd(f'webapp deployment slot create -g {resource_group} -n {webapp_name} -s {slot}')
+        self.cmd(f'webapp deploy -g {resource_group} -n {webapp_name} -s {slot} --target-path {path2} --src-url "https://www.microsoft.com/en-us/" --type static').assert_with_checks([
+            JMESPathCheck('properties.provisioningState', "InProgress")
+        ])
+
+        retries = 20
+        status = 404
+        while retries > 0 and status != 200:
+            time.sleep(sleep_time)
+            status = requests.get(f"http://{webapp_name}.azurewebsites.net/{path1}").status_code
+            retries -= 1
+        self.assertEqual(status, 200)
 
 class DomainScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)

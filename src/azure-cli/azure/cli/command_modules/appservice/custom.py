@@ -4749,6 +4749,7 @@ def _make_onedeploy_request(params):
                 state = response.json().get("properties", {}).get("provisioningState")
                 if state:
                     logger.warning("Deployment status is: \"%s\"", state)
+            response_body = response.json()
         return response_body
 
     # API not available yet!
