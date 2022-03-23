@@ -306,7 +306,7 @@ def connection_update(cmd, client,
         parameters['v_net_solution'] = {
             'type': 'serviceEndpoint'
         }
-    elif service_endpoint == False:
+    elif service_endpoint is False and linker.get('vNetSolution').get('type') == 'serviceEndpoint':
         parameters['v_net_solution'] = None
 
 

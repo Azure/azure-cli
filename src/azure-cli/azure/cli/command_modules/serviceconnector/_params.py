@@ -108,7 +108,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         context.argument('key_vault_id', options_list=['--vault-id'], help='The id of key vault to store secret value')
 
     def add_service_endpoint_argument(context):
-        context.argument('service_endpoint', options_list=['--service-endpoint'], arg_type=get_three_state_flag(), default=None, help='Connect target service by service endpoint')
+        context.argument('service_endpoint', options_list=['--service-endpoint'], arg_type=get_three_state_flag(),
+                         default=None, help='Connect target service by service endpoint')
 
     def add_confluent_kafka_argument(context):
         context.argument('bootstrap_server', options_list=['--bootstrap-server'], help='Kafka bootstrap server url')
