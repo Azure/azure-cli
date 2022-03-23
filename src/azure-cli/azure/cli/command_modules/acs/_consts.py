@@ -26,6 +26,13 @@ CONST_OS_DISK_TYPE_EPHEMERAL = "Ephemeral"
 CONST_NODEPOOL_MODE_SYSTEM = "System"
 CONST_NODEPOOL_MODE_USER = "User"
 
+# vm size
+CONST_DEFAULT_NODE_VM_SIZE = "Standard_DS2_v2"
+CONST_DEFAULT_WINDOWS_NODE_VM_SIZE = "Standard_D2s_v3"
+
+# os tye
+CONST_DEFAULT_NODE_OS_TYPE = "Linux"
+
 # consts for cluster related commands
 # outbound type
 CONST_OUTBOUND_TYPE_LOAD_BALANCER = "loadBalancer"
@@ -99,7 +106,6 @@ ADDONS = {
 
 # consts for check-acr command
 CONST_CANIPULL_IMAGE = "mcr.microsoft.com/aks/canipull:0.0.3-alpha"
-
 
 # consts for decorator pattern
 class DecoratorMode(Enum):

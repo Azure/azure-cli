@@ -3,16 +3,23 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import importlib
 import unittest
 from unittest.mock import Mock, patch
-import importlib
 
-from azure.cli.command_modules.acs._consts import DecoratorEarlyExitException, DecoratorMode, AgentPoolDecoratorMode
+from azure.cli.command_modules.acs._consts import (
+    CONST_DEFAULT_NODE_OS_TYPE,
+    CONST_DEFAULT_NODE_VM_SIZE,
+    CONST_DEFAULT_WINDOWS_NODE_VM_SIZE,
+    AgentPoolDecoratorMode,
+    DecoratorEarlyExitException,
+    DecoratorMode,
+)
 from azure.cli.command_modules.acs.agentpool_decorator import (
-    AKSAgentPoolModels,
-    AKSAgentPoolParamDict,
     AKSAgentPoolAddDecorator,
     AKSAgentPoolContext,
+    AKSAgentPoolModels,
+    AKSAgentPoolParamDict,
     AKSAgentPoolUpdateDecorator,
 )
 from azure.cli.command_modules.acs.tests.latest.mocks import MockCLI, MockClient, MockCmd
@@ -505,6 +512,8 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
             upgrade_settings=upgrade_settings_1, count=3, enable_auto_scaling=False, os_disk_size_gb=0
         )
         agentpool_1.name = "test_nodepool_name"
+        agentpool_1.os_type = CONST_DEFAULT_NODE_OS_TYPE
+        agentpool_1.vm_size = CONST_DEFAULT_NODE_VM_SIZE
         self.assertEqual(dec_agentpool_1, agentpool_1)
         dec_1.context.raw_param.print_usage_statistics()
 
