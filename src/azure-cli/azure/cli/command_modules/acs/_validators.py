@@ -416,6 +416,7 @@ def extract_comma_separated_string(
     allow_empty_value=False,
     keep_none=False,
     default_value=None,
+    allow_appending_values_to_same_key=False,
 ):
     """Extract comma-separated string.
 
@@ -425,6 +426,8 @@ def extract_comma_separated_string(
     Option allow_empty_value is valid since extract_kv is specified. When the number of string segments split by "="
     is 1, the first segment is retained as the key and empty string would be set as its corresponding value without
     raising an exception.
+    Option allow_appending_values_to_same_key is valid since extract_kv is specified. For the same key, the new value
+    is appended to the existing value separated by commas.
     If keep_none is specified, will return None when input is None. Otherwise will return default_value if input is
     None or empty string.
     """
@@ -457,6 +460,8 @@ def extract_comma_separated_string(
                 if enable_strip:
                     key = key.strip()
                     value = value.strip()
+                if allow_appending_values_to_same_key and key in result:
+                    value = "{},{}".format(result[key], value)
                 result[key] = value
             else:
                 raise InvalidArgumentValueError(

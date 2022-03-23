@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import re
+from typing import Any, List, TypeVar
 
 from azure.cli.command_modules.acs._client_factory import cf_snapshots, get_msi_client
 from azure.cli.core.azclierror import (
@@ -20,6 +21,69 @@ from azure.cli.core.azclierror import (
 )
 from azure.core.exceptions import AzureError, HttpResponseError, ServiceRequestError, ServiceResponseError
 from msrestazure.azure_exceptions import CloudError
+
+# type variables
+ManagedCluster = TypeVar("ManagedCluster")
+
+
+def format_parameter_name_to_option_name(parameter_name: str) -> str:
+    """Convert a name in parameter format to option format.
+
+    Underscores ("_") are used to connect the various parts of a parameter name, while hyphens ("-") are used to connect
+    each part of an option name. Besides, the option name starts with double hyphens ("--").
+
+    :return: str
+    """
+    option_name = "--" + parameter_name.replace("_", "-")
+    return option_name
+
+
+def safe_list_get(li: List, idx: int, default: Any = None) -> Any:
+    """Get an element from a list without raising IndexError.
+
+    Attempt to get the element with index idx from a list-like object li, and if the index is invalid (such as out of
+    range), return default (whose default value is None).
+
+    :return: an element of any type
+    """
+    if isinstance(li, list):
+        try:
+            return li[idx]
+        except IndexError:
+            return default
+    return None
+
+
+def safe_lower(obj: Any) -> Any:
+    """Return lowercase string if the provided obj is a string, otherwise return the object itself.
+
+    :return: Any
+    """
+    if isinstance(obj, str):
+        return obj.lower()
+    return obj
+
+
+def check_is_msi_cluster(mc: ManagedCluster) -> bool:
+    """Check `mc` object to determine whether managed identity is enabled.
+
+    :return: bool
+    """
+    if mc and mc.identity and mc.identity.type is not None:
+        identity_type = mc.identity.type.casefold()
+        if identity_type in ("systemassigned", "userassigned"):
+            return True
+    return False
+
+
+def check_is_private_cluster(mc: ManagedCluster) -> bool:
+    """Check `mc` object to determine whether private cluster is enabled.
+
+    :return: bool
+    """
+    if mc and mc.api_server_access_profile:
+        return bool(mc.api_server_access_profile.enable_private_cluster)
+    return False
 
 
 # pylint: disable=too-many-return-statements
