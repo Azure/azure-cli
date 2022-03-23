@@ -38,6 +38,7 @@ err_msg = 'Required argument is missing, please provide the arguments: {}'
 def connection_list(client,
                     source_resource_group=None,
                     source_id=None,
+                    cluster=None,
                     site=None,
                     spring=None, app=None, deployment=None):
     if not source_id:
@@ -81,6 +82,7 @@ def connection_show(client,
                     source_resource_group=None,
                     source_id=None,
                     indentifier=None,
+                    cluster=None,
                     site=None,
                     spring=None, app=None, deployment=None):
     if not source_id or not connection_name:
@@ -93,6 +95,7 @@ def connection_delete(client,
                       source_resource_group=None,
                       source_id=None,
                       indentifier=None,
+                      cluster=None,
                       site=None,
                       spring=None, app=None, deployment=None,
                       no_wait=False):
@@ -110,6 +113,7 @@ def connection_list_configuration(client,
                                   source_resource_group=None,
                                   source_id=None,
                                   indentifier=None,
+                                  cluster=None,
                                   site=None,
                                   spring=None, app=None, deployment=None):
     if not source_id or not connection_name:
@@ -124,6 +128,7 @@ def connection_validate(cmd, client,
                         source_resource_group=None,
                         source_id=None,
                         indentifier=None,
+                        cluster=None,
                         site=None,
                         spring=None, app=None, deployment=None):
     import re
@@ -153,6 +158,7 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals
                       service_principal_auth_info_secret=None,
                       key_vault_id=None,
                       new_addon=False, no_wait=False,
+                      cluster=None,
                       site=None,                                             # Resource.WebApp
                       spring=None, app=None, deployment=None,                # Resource.SpringCloud
                       server=None, database=None,                            # Resource.*Postgres, Resource.*Sql*
@@ -236,6 +242,7 @@ def connection_update(cmd, client,
                       service_principal_auth_info_secret=None,
                       key_vault_id=None,
                       no_wait=False,
+                      cluster=None,
                       site=None,                                              # Resource.WebApp
                       deployment=None,
                       spring=None, app=None):                                 # Resource.SpringCloud
@@ -312,6 +319,7 @@ def connection_create_kafka(cmd, client,  # pylint: disable=too-many-locals
                             client_type=None,
                             source_resource_group=None,
                             source_id=None,
+                            cluster=None,
                             site=None,                         # Resource.WebApp
                             deployment=None,
                             spring=None, app=None):            # Resource.SpringCloud
@@ -388,6 +396,7 @@ def connection_update_kafka(cmd, client,  # pylint: disable=too-many-locals
                             client_type=None,
                             source_resource_group=None,
                             source_id=None,
+                            cluster=None,
                             site=None,                         # Resource.WebApp
                             deployment=None,
                             spring=None, app=None):            # Resource.SpringCloud

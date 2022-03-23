@@ -35,8 +35,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
         required_args = []
         for arg, content in SOURCE_RESOURCES_PARAMS.get(source).items():
+            id_arg = '\'--id\'' if enable_id else '\'--source-id\''
             context.argument(arg, options_list=content.get('options'), type=str,
-                             help='{}. Required if \'--source-id\' is not specified.'.format(content.get('help')))
+                             help='{}. Required if {} is not specified.'.format(content.get('help'), id_arg))
             required_args.append(content.get('options')[0])
 
         validator_kwargs = {'validator': validate_params} if validate_source_id else {}

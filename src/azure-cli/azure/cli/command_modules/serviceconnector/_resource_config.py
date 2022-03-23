@@ -19,6 +19,7 @@ from .action import (
 class RESOURCE(Enum):
     WebApp = 'webapp'
     SpringCloud = 'spring-cloud'
+    KubernetesCluster = 'aks'
     CosmosCassandra = 'cosmos-cassandra'
     CosmosGremlin = 'cosmos-gremlin'
     CosmosMongo = 'cosmos-mongo'
@@ -33,8 +34,8 @@ class RESOURCE(Enum):
     Mysql = 'mysql'
     MysqlFlexible = 'mysql-flexible'
     # Sql = 'sql'
-    # Redis = 'redis'
-    # RedisEnterprise = 'redis-enterprise'
+    Redis = 'redis'
+    RedisEnterprise = 'redis-enterprise'
     KeyVault = 'keyvault'
     EventHub = 'eventhub'
     AppConfig = 'appconfig'
@@ -75,7 +76,9 @@ TARGET_RESOURCES_USERTOKEN = [RESOURCE.PostgresFlexible, RESOURCE.MysqlFlexible,
 # The dict defines the resource id pattern of source resources.
 SOURCE_RESOURCES = {
     RESOURCE.WebApp: '/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/Microsoft.Web/sites/{site}',
-    RESOURCE.SpringCloud: '/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/Microsoft.AppPlatform/Spring/{spring}/apps/{app}/deployments/{deployment}'
+    RESOURCE.SpringCloud: '/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/Microsoft.AppPlatform/Spring/{spring}/apps/{app}/deployments/{deployment}',
+    # TODO: Houk, uncomment this when AKS is officially supported
+    # RESOURCE.KubernetesCluster: '/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/Microsoft.ContainerService/managedClusters/{cluster}',
 }
 
 
@@ -86,8 +89,8 @@ TARGET_RESOURCES = {
     RESOURCE.MysqlFlexible: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.DBforMySQL/flexibleServers/{server}/databases/{database}',
     RESOURCE.Mysql: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.DBForMySQL/servers/{server}/databases/{database}',
     # RESOURCE.Sql: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.Sql/servers/{server}/databases/{database}',
-    # RESOURCE.Redis: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.Cache/redis/{server}/databases/{database}',
-    # RESOURCE.RedisEnterprise: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.Cache/redisEnterprise/{server}/databases/{database}',
+    RESOURCE.Redis: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.Cache/redis/{server}/databases/{database}',
+    RESOURCE.RedisEnterprise: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.Cache/redisEnterprise/{server}/databases/{database}',
 
     RESOURCE.CosmosCassandra: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.DocumentDB/databaseAccounts/{account}/cassandraKeyspaces/{key_space}',
     RESOURCE.CosmosGremlin: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.DocumentDB/databaseAccounts/{account}/gremlinDatabases/{database}/graphs/{graph}',
@@ -145,6 +148,18 @@ SOURCE_RESOURCES_PARAMS = {
             'options': ['--deployment'],
             'help': 'The deployment name of the app',
             'placeholder': 'MyDeployment'
+        }
+    },
+    RESOURCE.KubernetesCluster: {
+        'source_resource_group': {
+            'options': ['--resource-group', '-g'],
+            'help': 'The resource group which contains the managed cluster',
+            'placeholder': 'ClusterRG'
+        },
+        'cluster': {
+            'options': ['--name', '-n'],
+            'help': 'Name of the managed cluster',
+            'placeholder': 'MyCluster'
         }
     }
 }
@@ -239,40 +254,40 @@ TARGET_RESOURCES_PARAMS = {
     #         'placeholder': 'MyDB'
     #     }
     # },
-    # RESOURCE.Redis: {
-    #     'target_resource_group': {
-    #         'options': ['--target-resource-group', '--tg'],
-    #         'help': 'The resource group which contains the redis server',
-    #         'placeholder': 'RedisRG'
-    #     },
-    #     'server': {
-    #         'options': ['--server'],
-    #         'help': 'Name of the redis server',
-    #         'placeholder': 'MyServer'
-    #     },
-    #     'database': {
-    #         'options': ['--database'],
-    #         'help': 'Name of the redis database',
-    #         'placeholder': 'MyDB'
-    #     }
-    # },
-    # RESOURCE.RedisEnterprise: {
-    #     'target_resource_group': {
-    #         'options': ['--target-resource-group', '--tg'],
-    #         'help': 'The resource group which contains the redis server',
-    #         'placeholder': 'RedisRG'
-    #     },
-    #     'server': {
-    #         'options': ['--server'],
-    #         'help': 'Name of the redis enterprise server',
-    #         'placeholder': 'MyServer'
-    #     },
-    #     'database': {
-    #         'options': ['--database'],
-    #         'help': 'Name of the redis enterprise database',
-    #         'placeholder': 'MyDB'
-    #     }
-    # },
+    RESOURCE.Redis: {
+        'target_resource_group': {
+            'options': ['--target-resource-group', '--tg'],
+            'help': 'The resource group which contains the redis server',
+            'placeholder': 'RedisRG'
+        },
+        'server': {
+            'options': ['--server'],
+            'help': 'Name of the redis server',
+            'placeholder': 'MyServer'
+        },
+        'database': {
+            'options': ['--database'],
+            'help': 'Name of the redis database',
+            'placeholder': 'MyDB'
+        }
+    },
+    RESOURCE.RedisEnterprise: {
+        'target_resource_group': {
+            'options': ['--target-resource-group', '--tg'],
+            'help': 'The resource group which contains the redis server',
+            'placeholder': 'RedisRG'
+        },
+        'server': {
+            'options': ['--server'],
+            'help': 'Name of the redis enterprise server',
+            'placeholder': 'MyServer'
+        },
+        'database': {
+            'options': ['--database'],
+            'help': 'Name of the redis enterprise database',
+            'placeholder': 'MyDB'
+        }
+    },
     RESOURCE.CosmosCassandra: {
         'target_resource_group': {
             'options': ['--target-resource-group', '--tg'],
@@ -523,8 +538,8 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.Mysql: [AUTH_TYPE.Secret],
         RESOURCE.MysqlFlexible: [AUTH_TYPE.Secret],
         # RESOURCE.Sql: [AUTH_TYPE.Secret],
-        # RESOURCE.Redis: [AUTH_TYPE.SecretAuto],
-        # RESOURCE.RedisEnterprise: [AUTH_TYPE.SecretAuto],
+        RESOURCE.Redis: [AUTH_TYPE.SecretAuto],
+        RESOURCE.RedisEnterprise: [AUTH_TYPE.SecretAuto],
 
         RESOURCE.CosmosCassandra: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.CosmosGremlin: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
@@ -550,8 +565,8 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.Mysql: [AUTH_TYPE.Secret],
         RESOURCE.MysqlFlexible: [AUTH_TYPE.Secret],
         # RESOURCE.Sql: [AUTH_TYPE.Secret],
-        # RESOURCE.Redis: [AUTH_TYPE.SecretAuto],
-        # RESOURCE.RedisEnterprise: [AUTH_TYPE.SecretAuto],
+        RESOURCE.Redis: [AUTH_TYPE.SecretAuto],
+        RESOURCE.RedisEnterprise: [AUTH_TYPE.SecretAuto],
 
         RESOURCE.CosmosCassandra: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.CosmosGremlin: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
@@ -569,7 +584,34 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.EventHub: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.ServiceBus: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.ConfluentKafka: [AUTH_TYPE.Secret],
-    }
+    },
+    RESOURCE.KubernetesCluster: {
+        RESOURCE.Postgres: [AUTH_TYPE.Secret],
+        RESOURCE.PostgresFlexible: [AUTH_TYPE.Secret],
+        RESOURCE.Mysql: [AUTH_TYPE.Secret],
+        RESOURCE.MysqlFlexible: [AUTH_TYPE.Secret],
+        # RESOURCE.Sql: [AUTH_TYPE.Secret],
+        RESOURCE.Redis: [AUTH_TYPE.SecretAuto],
+        RESOURCE.RedisEnterprise: [AUTH_TYPE.SecretAuto],
+
+        RESOURCE.CosmosCassandra: [AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.CosmosGremlin: [AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.CosmosMongo: [AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.CosmosTable: [AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.CosmosSql: [AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
+
+        RESOURCE.StorageBlob: [AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.StorageQueue: [AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.StorageFile: [AUTH_TYPE.SecretAuto],
+        RESOURCE.StorageTable: [AUTH_TYPE.SecretAuto],
+
+        RESOURCE.KeyVault: [AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.AppConfig: [AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.EventHub: [AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.ServiceBus: [AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.SignalR: [AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.ConfluentKafka: [AUTH_TYPE.Secret],
+    },
 }
 
 
@@ -586,7 +628,8 @@ SUPPORTED_CLIENT_TYPE = {
             CLIENT_TYPE.Php,
             CLIENT_TYPE.Ruby,
             CLIENT_TYPE.Django,
-            CLIENT_TYPE.SpringBoot
+            CLIENT_TYPE.SpringBoot,
+            CLIENT_TYPE.Blank
         ],
         RESOURCE.PostgresFlexible: [
             CLIENT_TYPE.Dotnet,
@@ -597,7 +640,8 @@ SUPPORTED_CLIENT_TYPE = {
             CLIENT_TYPE.Php,
             CLIENT_TYPE.Ruby,
             CLIENT_TYPE.Django,
-            CLIENT_TYPE.SpringBoot
+            CLIENT_TYPE.SpringBoot,
+            CLIENT_TYPE.Blank
         ],
         RESOURCE.Mysql: [
             CLIENT_TYPE.Dotnet,
@@ -608,7 +652,8 @@ SUPPORTED_CLIENT_TYPE = {
             CLIENT_TYPE.Php,
             CLIENT_TYPE.Ruby,
             CLIENT_TYPE.Django,
-            CLIENT_TYPE.SpringBoot
+            CLIENT_TYPE.SpringBoot,
+            CLIENT_TYPE.Blank
         ],
         RESOURCE.MysqlFlexible: [
             CLIENT_TYPE.Dotnet,
@@ -619,7 +664,8 @@ SUPPORTED_CLIENT_TYPE = {
             CLIENT_TYPE.Php,
             CLIENT_TYPE.Ruby,
             CLIENT_TYPE.Django,
-            CLIENT_TYPE.SpringBoot
+            CLIENT_TYPE.SpringBoot,
+            CLIENT_TYPE.Blank
         ],
         # RESOURCE.Sql: [
         #     CLIENT_TYPE.Dotnet,
@@ -630,72 +676,82 @@ SUPPORTED_CLIENT_TYPE = {
         #     CLIENT_TYPE.Php,
         #     CLIENT_TYPE.Ruby,
         #     CLIENT_TYPE.Django,
-        #     CLIENT_TYPE.SpringBoot
+        #     CLIENT_TYPE.SpringBoot,
+        #     CLIENT_TYPE.Blank
         # ],
-        # RESOURCE.Redis: [
-        #     CLIENT_TYPE.Dotnet,
-        #     CLIENT_TYPE.Java,
-        #     CLIENT_TYPE.Python,
-        #     CLIENT_TYPE.Nodejs,
-        #     CLIENT_TYPE.Go,
-        #     CLIENT_TYPE.SpringBoot
-        # ],
-        # RESOURCE.RedisEnterprise: [
-        #     CLIENT_TYPE.Dotnet,
-        #     CLIENT_TYPE.Java,
-        #     CLIENT_TYPE.Python,
-        #     CLIENT_TYPE.Nodejs,
-        #     CLIENT_TYPE.Go,
-        #     CLIENT_TYPE.SpringBoot
-        # ],
+        RESOURCE.Redis: [
+            CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.Java,
+            CLIENT_TYPE.Python,
+            CLIENT_TYPE.Nodejs,
+            CLIENT_TYPE.Go,
+            CLIENT_TYPE.SpringBoot,
+            CLIENT_TYPE.Blank
+        ],
+        RESOURCE.RedisEnterprise: [
+            CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.Java,
+            CLIENT_TYPE.Python,
+            CLIENT_TYPE.Nodejs,
+            CLIENT_TYPE.Go,
+            CLIENT_TYPE.SpringBoot,
+            CLIENT_TYPE.Blank
+        ],
         RESOURCE.CosmosCassandra: [
             CLIENT_TYPE.Dotnet,
             CLIENT_TYPE.Java,
             CLIENT_TYPE.Python,
             CLIENT_TYPE.Nodejs,
             CLIENT_TYPE.Go,
-            CLIENT_TYPE.SpringBoot
+            CLIENT_TYPE.SpringBoot,
+            CLIENT_TYPE.Blank
         ],
         RESOURCE.CosmosGremlin: [
             CLIENT_TYPE.Dotnet,
             CLIENT_TYPE.Java,
             CLIENT_TYPE.Python,
             CLIENT_TYPE.Nodejs,
-            CLIENT_TYPE.Php
+            CLIENT_TYPE.Php,
+            CLIENT_TYPE.Blank
         ],
         RESOURCE.CosmosMongo: [
             CLIENT_TYPE.Dotnet,
             CLIENT_TYPE.Java,
             CLIENT_TYPE.Nodejs,
             CLIENT_TYPE.Go,
-            CLIENT_TYPE.SpringBoot
+            CLIENT_TYPE.SpringBoot,
+            CLIENT_TYPE.Blank
         ],
         RESOURCE.CosmosTable: [
             CLIENT_TYPE.Dotnet,
             CLIENT_TYPE.Java,
             CLIENT_TYPE.Python,
             CLIENT_TYPE.Nodejs,
-            CLIENT_TYPE.SpringBoot
+            CLIENT_TYPE.SpringBoot,
+            CLIENT_TYPE.Blank
         ],
         RESOURCE.CosmosSql: [
             CLIENT_TYPE.Dotnet,
             CLIENT_TYPE.Java,
             CLIENT_TYPE.Python,
-            CLIENT_TYPE.Nodejs
+            CLIENT_TYPE.Nodejs,
+            CLIENT_TYPE.Blank
         ],
         RESOURCE.StorageBlob: [
             CLIENT_TYPE.Dotnet,
             CLIENT_TYPE.Java,
             CLIENT_TYPE.Python,
             CLIENT_TYPE.Nodejs,
-            CLIENT_TYPE.SpringBoot
+            CLIENT_TYPE.SpringBoot,
+            CLIENT_TYPE.Blank
         ],
         RESOURCE.StorageQueue: [
             CLIENT_TYPE.Dotnet,
             CLIENT_TYPE.Java,
             CLIENT_TYPE.Python,
             CLIENT_TYPE.Nodejs,
-            CLIENT_TYPE.SpringBoot
+            CLIENT_TYPE.SpringBoot,
+            CLIENT_TYPE.Blank
         ],
         RESOURCE.StorageFile: [
             CLIENT_TYPE.Dotnet,
@@ -704,26 +760,30 @@ SUPPORTED_CLIENT_TYPE = {
             CLIENT_TYPE.Nodejs,
             CLIENT_TYPE.Php,
             CLIENT_TYPE.Ruby,
-            CLIENT_TYPE.SpringBoot
+            CLIENT_TYPE.SpringBoot,
+            CLIENT_TYPE.Blank
         ],
         RESOURCE.StorageTable: [
             CLIENT_TYPE.Dotnet,
             CLIENT_TYPE.Java,
             CLIENT_TYPE.Python,
-            CLIENT_TYPE.Nodejs
+            CLIENT_TYPE.Nodejs,
+            CLIENT_TYPE.Blank
         ],
         RESOURCE.KeyVault: [
             CLIENT_TYPE.Dotnet,
             CLIENT_TYPE.Java,
             CLIENT_TYPE.Python,
             CLIENT_TYPE.Nodejs,
-            CLIENT_TYPE.SpringBoot
+            CLIENT_TYPE.SpringBoot,
+            CLIENT_TYPE.Blank
         ],
         RESOURCE.AppConfig: [
             CLIENT_TYPE.Dotnet,
             CLIENT_TYPE.Java,
             CLIENT_TYPE.Python,
-            CLIENT_TYPE.Nodejs
+            CLIENT_TYPE.Nodejs,
+            CLIENT_TYPE.Blank
         ],
         RESOURCE.EventHub: [
             CLIENT_TYPE.Dotnet,
@@ -731,7 +791,8 @@ SUPPORTED_CLIENT_TYPE = {
             CLIENT_TYPE.Python,
             CLIENT_TYPE.Nodejs,
             CLIENT_TYPE.Go,
-            CLIENT_TYPE.SpringBoot
+            CLIENT_TYPE.SpringBoot,
+            CLIENT_TYPE.Blank
         ],
         RESOURCE.ServiceBus: [
             CLIENT_TYPE.Dotnet,
@@ -739,120 +800,145 @@ SUPPORTED_CLIENT_TYPE = {
             CLIENT_TYPE.Python,
             CLIENT_TYPE.Nodejs,
             CLIENT_TYPE.Go,
-            CLIENT_TYPE.SpringBoot
+            CLIENT_TYPE.SpringBoot,
+            CLIENT_TYPE.Blank
         ],
         RESOURCE.SignalR: [
-            CLIENT_TYPE.Dotnet
+            CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.Blank
         ],
         RESOURCE.ConfluentKafka: [
             CLIENT_TYPE.Dotnet,
             CLIENT_TYPE.Java,
             CLIENT_TYPE.Python,
             CLIENT_TYPE.Go,
-            CLIENT_TYPE.SpringBoot
+            CLIENT_TYPE.SpringBoot,
+            CLIENT_TYPE.Blank
         ]
     },
     RESOURCE.SpringCloud: {
         RESOURCE.Postgres: [
             CLIENT_TYPE.Java,
             CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet
+            CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.Blank
         ],
         RESOURCE.PostgresFlexible: [
             CLIENT_TYPE.Java,
             CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet
+            CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.Blank
         ],
         RESOURCE.Mysql: [
             CLIENT_TYPE.Java,
             CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet
+            CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.Blank
         ],
         RESOURCE.MysqlFlexible: [
             CLIENT_TYPE.Java,
             CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet
+            CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.Blank
         ],
         # RESOURCE.Sql: [
         #     CLIENT_TYPE.Java,
         #     CLIENT_TYPE.SpringBoot,
         #     CLIENT_TYPE.Dotnet
+        #     CLIENT_TYPE.Blank
         # ],
-        # RESOURCE.Redis: [
-        #     CLIENT_TYPE.Java,
-        #     CLIENT_TYPE.SpringBoot,
-        #     CLIENT_TYPE.Dotnet
-        # ],
-        # RESOURCE.RedisEnterprise: [
-        #     CLIENT_TYPE.Java,
-        #     CLIENT_TYPE.SpringBoot,
-        #     CLIENT_TYPE.Dotnet
-        # ],
+        RESOURCE.Redis: [
+            CLIENT_TYPE.Java,
+            CLIENT_TYPE.SpringBoot,
+            CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.Blank
+        ],
+        RESOURCE.RedisEnterprise: [
+            CLIENT_TYPE.Java,
+            CLIENT_TYPE.SpringBoot,
+            CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.Blank
+        ],
         RESOURCE.CosmosCassandra: [
             CLIENT_TYPE.Java,
             CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet
+            CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.Blank
         ],
         RESOURCE.CosmosGremlin: [
             CLIENT_TYPE.Java,
-            CLIENT_TYPE.Dotnet
+            CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.Blank
         ],
         RESOURCE.CosmosMongo: [
             CLIENT_TYPE.Java,
             CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet
+            CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.Blank
         ],
         RESOURCE.CosmosTable: [
             CLIENT_TYPE.Java,
             CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet
+            CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.Blank
         ],
         RESOURCE.CosmosSql: [
             CLIENT_TYPE.Java,
-            CLIENT_TYPE.Dotnet
+            CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.Blank
         ],
         RESOURCE.StorageBlob: [
             CLIENT_TYPE.Java,
             CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet
+            CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.Blank
         ],
         RESOURCE.StorageQueue: [
             CLIENT_TYPE.Java,
             CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet
+            CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.Blank
         ],
         RESOURCE.StorageFile: [
             CLIENT_TYPE.Java,
             CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet
+            CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.Blank
         ],
         RESOURCE.StorageTable: [
             CLIENT_TYPE.Java,
-            CLIENT_TYPE.Dotnet
+            CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.Blank
         ],
         RESOURCE.KeyVault: [
             CLIENT_TYPE.Java,
             CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet
+            CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.Blank
         ],
         RESOURCE.AppConfig: [
             CLIENT_TYPE.Java,
-            CLIENT_TYPE.Dotnet
+            CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.Blank
         ],
         RESOURCE.EventHub: [
             CLIENT_TYPE.Java,
             CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet
+            CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.Blank
         ],
         RESOURCE.ServiceBus: [
             CLIENT_TYPE.Java,
             CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet
+            CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.Blank
         ],
         RESOURCE.ConfluentKafka: [
             CLIENT_TYPE.Java,
             CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet
+            CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.Blank
         ]
     }
 }
+SUPPORTED_CLIENT_TYPE[RESOURCE.KubernetesCluster] = SUPPORTED_CLIENT_TYPE[RESOURCE.WebApp]
