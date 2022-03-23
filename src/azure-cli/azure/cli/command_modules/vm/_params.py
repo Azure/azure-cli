@@ -156,7 +156,7 @@ def load_arguments(self, _):
             operation_group = 'disks' if scope == 'disk' else 'snapshots'
             c.argument('network_access_policy', min_api='2020-05-01', help='Policy for accessing the disk via network.', arg_type=get_enum_type(self.get_models('NetworkAccessPolicy', operation_group=operation_group)))
             c.argument('disk_access', min_api='2020-05-01', help='Name or ID of the disk access resource for using private endpoints on disks.')
-            c.argument('enable_bursting', arg_type=get_three_state_flag(), help='Enable bursting beyond the provisioned performance target of the disk. Bursting is disabled by default, and it does not apply to Ultra disks.')
+            c.argument('enable_bursting', arg_type=get_three_state_flag(), help='Enable on-demand bursting beyond the provisioned performance target of the disk. On-demand bursting is disabled by default, and it does not apply to Ultra disks.')
             c.argument('public_network_access', arg_type=get_enum_type(['Disabled', 'Enabled']), min_api='2021-04-01', is_preview=True, help='Customers can set on Managed Disks or Snapshots to control the export policy on the disk.')
             c.argument('accelerated_network', arg_type=get_three_state_flag(), min_api='2021-04-01', is_preview=True, help='Customers can set on Managed Disks or Snapshots to enable the accelerated networking if the OS disk image support.')
 
@@ -472,7 +472,7 @@ def load_arguments(self, _):
         c.argument('disk_name', arg_type=name_arg_type, help='The data disk name.')
 
     with self.argument_context('vm encryption enable') as c:
-        c.argument('encrypt_format_all', action='store_true', help='Encrypts-formats data disks instead of encrypting them. Encrypt-formatting is a lot faster than in-place encryption but wipes out the partition getting encrypt-formatted.')
+        c.argument('encrypt_format_all', action='store_true', help='Encrypts-formats data disks instead of encrypting them. Encrypt-formatting is a lot faster than in-place encryption but wipes out the partition getting encrypt-formatted. (Only supported for Linux virtual machines.)')
         # Place aad arguments in their own group
         aad_arguments = 'Azure Active Directory'
         c.argument('aad_client_id', arg_group=aad_arguments)
@@ -482,10 +482,13 @@ def load_arguments(self, _):
     with self.argument_context('vm extension') as c:
         c.argument('vm_extension_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines/extensions'), help='Name of the extension.', id_part='child_name_1')
         c.argument('vm_name', arg_type=existing_vm_name, options_list=['--vm-name'], id_part='name')
-        c.argument('expand', deprecate_info=c.deprecate(expiration='3.0.0', hide=True))
+        c.argument('expand', help='The expand expression to apply on the operation.', deprecate_info=c.deprecate(expiration='3.0.0', hide=True))
 
     with self.argument_context('vm extension list') as c:
         c.argument('vm_name', arg_type=existing_vm_name, options_list=['--vm-name'], id_part=None)
+
+    with self.argument_context('vm extension show') as c:
+        c.argument('instance_view', action='store_true', help='The instance view of a virtual machine extension.')
 
     with self.argument_context('vm secret') as c:
         c.argument('secrets', multi_ids_type, options_list=['--secrets', '-s'], help='Space-separated list of key vault secret URIs. Perhaps, produced by \'az keyvault secret list-versions --vault-name vaultname -n cert1 --query "[?attributes.enabled].id" -o tsv\'')
@@ -833,7 +836,7 @@ def load_arguments(self, _):
         c.argument('vm_name', run_cmd_vm_name)
         c.argument('run_command_name', run_cmd_name_type)
         c.argument('expand', help='The expand expression to apply on the operation.', deprecate_info=c.deprecate(hide=True))
-        c.argument('instance_view', action='store_true', help='Track the run command progress')
+        c.argument('instance_view', action='store_true', help='The instance view of a run command.')
         c.argument('location', arg_type=get_location_type(self.cli_ctx))
         c.argument('command_id', help='The command id.')
 
@@ -841,7 +844,7 @@ def load_arguments(self, _):
         c.argument('vm_name', run_cmd_vm_name)
         c.argument('run_command_name', run_cmd_name_type)
         c.argument('expand', help='The expand expression to apply on the operation.', deprecate_info=c.deprecate(hide=True))
-        c.argument('instance_view', action='store_true', help='Track the run command progress')
+        c.argument('instance_view', action='store_true', help='The instance view of a run command.')
         c.argument('location', arg_type=get_location_type(self.cli_ctx))
         c.argument('command_id', help='The command id.')
 
@@ -887,7 +890,7 @@ def load_arguments(self, _):
         c.argument('instance_id', help='The instance ID of the virtual machine.')
         c.argument('run_command_name', run_cmd_name_type)
         c.argument('expand', help='The expand expression to apply on the operation.', deprecate_info=c.deprecate(hide=True))
-        c.argument('instance_view', action='store_true', help='Track the run command progress')
+        c.argument('instance_view', action='store_true', help='The instance view of a run command.')
 
     for scope in ['vm identity assign', 'vmss identity assign']:
         with self.argument_context(scope) as c:

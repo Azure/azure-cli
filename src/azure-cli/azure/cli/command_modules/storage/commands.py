@@ -5,7 +5,7 @@
 
 from azure.cli.command_modules.storage._client_factory import (cf_sa, cf_blob_container_mgmt, blob_data_service_factory,
                                                                page_blob_service_factory, file_data_service_factory,
-                                                               queue_data_service_factory, table_data_service_factory,
+                                                               queue_data_service_factory,
                                                                cloud_storage_account_service_factory,
                                                                multi_service_properties_factory,
                                                                cf_mgmt_policy,
@@ -17,9 +17,9 @@ from azure.cli.command_modules.storage._client_factory import (cf_sa, cf_blob_co
                                                                cf_adls_file, cf_adls_service,
                                                                cf_blob_client, cf_blob_lease_client,
                                                                cf_or_policy, cf_container_client,
-                                                               cf_queue_service, cf_sa_blob_inventory, cf_blob_service)
+                                                               cf_queue_service, cf_table_service, cf_table_client,
+                                                               cf_sa_blob_inventory, cf_blob_service)
 
-from azure.cli.command_modules.storage.sdkutil import cosmosdb_table_exists
 from azure.cli.core.commands import CliCommandType
 from azure.cli.core.commands.arm import show_exception_handler
 from azure.cli.core.profiles import ResourceType
@@ -317,7 +317,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         from ._transformers import transform_blob_list_output, transform_blob_json_output, transform_blob_upload_output
         from ._format import transform_blob_output
         from ._exception_handler import file_related_exception_handler
-        from ._validators import process_blob_upload_batch_parameters
+        from ._validators import process_blob_upload_batch_parameters, process_blob_download_batch_parameters
         g.storage_custom_command_oauth('copy start', 'copy_blob')
         g.storage_custom_command_oauth('show', 'show_blob_v2', transform=transform_blob_json_output,
                                        table_transformer=transform_blob_output,
@@ -336,6 +336,13 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                        exception_handler=file_related_exception_handler)
         g.storage_custom_command_oauth('upload-batch', 'storage_blob_upload_batch', client_factory=cf_blob_service,
                                        validator=process_blob_upload_batch_parameters,
+                                       exception_handler=file_related_exception_handler)
+        g.storage_custom_command_oauth('download', 'download_blob',
+                                       transform=transform_blob_json_output,
+                                       table_transformer=transform_blob_output,
+                                       exception_handler=file_related_exception_handler)
+        g.storage_custom_command_oauth('download-batch', 'storage_blob_download_batch', client_factory=cf_blob_service,
+                                       validator=process_blob_download_batch_parameters,
                                        exception_handler=file_related_exception_handler)
 
     blob_lease_client_sdk = CliCommandType(
@@ -359,12 +366,11 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         from ._format import transform_boolean_for_table, transform_blob_output
         from ._transformers import (transform_storage_list_output, transform_url,
                                     create_boolean_result_output_transformer)
-        from ._validators import (process_blob_download_batch_parameters, process_blob_delete_batch_parameters,
-                                  process_blob_upload_batch_parameters)
+        from ._validators import process_blob_delete_batch_parameters
         from ._exception_handler import file_related_exception_handler
-        g.storage_command_oauth(
-            'download', 'get_blob_to_path', table_transformer=transform_blob_output,
-            exception_handler=file_related_exception_handler)
+        # g.storage_command_oauth(
+        #     'download', 'get_blob_to_path', table_transformer=transform_blob_output,
+        #     exception_handler=file_related_exception_handler)
         g.storage_custom_command_oauth('generate-sas', 'generate_sas_blob_uri')
         g.storage_custom_command_oauth(
             'url', 'create_blob_url', transform=transform_url)
@@ -377,9 +383,9 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                 transform=create_boolean_result_output_transformer(
                                     'undeleted'),
                                 table_transformer=transform_boolean_for_table, min_api='2017-07-29')
-        g.storage_custom_command_oauth('download-batch', 'storage_blob_download_batch',
-                                       validator=process_blob_download_batch_parameters,
-                                       exception_handler=file_related_exception_handler)
+        # g.storage_custom_command_oauth('download-batch', 'storage_blob_download_batch',
+        #                                validator=process_blob_download_batch_parameters,
+        #                                exception_handler=file_related_exception_handler)
         g.storage_custom_command_oauth('delete-batch', 'storage_blob_delete_batch',
                                        validator=process_blob_delete_batch_parameters)
         g.storage_command_oauth(
@@ -730,61 +736,57 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                                                resource_type=ResourceType.DATA_STORAGE_QUEUE)) as g:
         g.storage_custom_command_oauth('list', 'list_queues', transform=transform_storage_list_output)
 
-    if cosmosdb_table_exists(self.cli_ctx):
-        table_sdk = CliCommandType(operations_tmpl='azure.multiapi.cosmosdb.table.tableservice#TableService.{}',
-                                   client_factory=table_data_service_factory,
-                                   resource_type=ResourceType.DATA_COSMOS_TABLE)
-    else:
-        table_sdk = CliCommandType(operations_tmpl='azure.multiapi.storage.table.tableservice#TableService.{}',
-                                   client_factory=table_data_service_factory,
-                                   resource_type=ResourceType.DATA_COSMOS_TABLE)
+    table_service_sdk = CliCommandType(operations_tmpl='azure.data.tables._table_service_client#TableServiceClient.{}',
+                                       client_factory=cf_table_service,
+                                       resource_type=ResourceType.DATA_STORAGE_TABLE)
 
-    with self.command_group('storage table', table_sdk,
-                            custom_command_type=get_custom_sdk('acl', table_data_service_factory)) as g:
-        from ._format import transform_boolean_for_table
-        from ._transformers import create_boolean_result_output_transformer
+    table_client_sdk = CliCommandType(operations_tmpl='azure.data.tables._table_client#TableClient.{}',
+                                      client_factory=cf_table_client,
+                                      resource_type=ResourceType.DATA_STORAGE_TABLE)
 
-        g.storage_command('create', 'create_table', transform=create_boolean_result_output_transformer('created'),
-                          table_transformer=transform_boolean_for_table)
-        g.storage_command('delete', 'delete_table', transform=create_boolean_result_output_transformer('deleted'),
-                          table_transformer=transform_boolean_for_table)
-        g.storage_command(
-            'exists', 'exists', transform=create_boolean_result_output_transformer('exists'))
-        g.storage_command(
-            'generate-sas', 'generate_table_shared_access_signature')
-        g.storage_command('list', 'list_tables',
-                          transform=transform_storage_list_output)
-        g.storage_command('stats', 'get_table_service_stats',
-                          min_api='2016-05-31')
+    with self.command_group('storage table', table_service_sdk, resource_type=ResourceType.DATA_STORAGE_TABLE,
+                            custom_command_type=get_custom_sdk('table', cf_table_service)) as g:
+        from ._transformers import transform_table_stats_output
+        g.storage_custom_command_oauth('create', 'create_table',
+                                       transform=create_boolean_result_output_transformer('created'),
+                                       table_transformer=transform_boolean_for_table)
+        g.storage_custom_command_oauth('delete', 'delete_table',
+                                       transform=create_boolean_result_output_transformer('deleted'),
+                                       table_transformer=transform_boolean_for_table)
+        g.storage_custom_command_oauth('exists', 'exists', transform=create_boolean_result_output_transformer('exists'))
+        g.storage_custom_command('generate-sas', 'generate_sas')
+        g.storage_custom_command_oauth('list', 'list_tables')
+        g.storage_command_oauth('stats', 'get_service_stats', transform=transform_table_stats_output)
 
-        g.storage_custom_command('policy create', 'create_acl_policy')
-        g.storage_custom_command('policy delete', 'delete_acl_policy')
-        g.storage_custom_command(
-            'policy show', 'get_acl_policy', exception_handler=show_exception_handler)
-        g.storage_custom_command(
-            'policy list', 'list_acl_policies', table_transformer=transform_acl_list_output)
-        g.storage_custom_command('policy update', 'set_acl_policy')
+    with self.command_group('storage table policy', table_client_sdk, resource_type=ResourceType.DATA_STORAGE_TABLE,
+                            custom_command_type=get_custom_sdk('access_policy', cf_table_client)) as g:
+        g.storage_custom_command('create', 'create_acl_policy')
+        g.storage_custom_command('delete', 'delete_acl_policy')
+        g.storage_custom_command('show', 'get_acl_policy',
+                                 exception_handler=show_exception_handler)
+        g.storage_custom_command('list', 'list_acl_policies',
+                                 table_transformer=transform_acl_list_output)
+        g.storage_custom_command('update', 'set_acl_policy')
 
-    with self.command_group('storage entity', table_sdk,
-                            custom_command_type=get_custom_sdk('table', table_data_service_factory)) as g:
-        from ._format import transform_boolean_for_table, transform_entity_show
-        from ._transformers import (create_boolean_result_output_transformer,
-                                    transform_entity_query_output,
+    with self.command_group('storage entity', table_client_sdk, resource_type=ResourceType.DATA_STORAGE_TABLE,
+                            custom_command_type=get_custom_sdk('table', cf_table_client)) as g:
+        from ._format import transform_entity_show
+        from ._transformers import (transform_entity_query_output,
                                     transform_entities_result,
                                     transform_entity_result)
-
-        g.storage_command('query',
-                          'query_entities',
-                          table_transformer=transform_entity_query_output,
-                          transform=transform_entities_result)
-        g.storage_command('replace', 'update_entity')
-        g.storage_command('merge', 'merge_entity')
-        g.storage_command('delete', 'delete_entity', transform=create_boolean_result_output_transformer('deleted'),
-                          table_transformer=transform_boolean_for_table)
-        g.storage_command('show', 'get_entity', table_transformer=transform_entity_show,
-                          exception_handler=show_exception_handler,
-                          transform=transform_entity_result)
-        g.storage_custom_command('insert', 'insert_table_entity')
+        g.storage_custom_command_oauth('insert', 'insert_entity')
+        g.storage_custom_command_oauth('replace', 'replace_entity')
+        g.storage_custom_command_oauth('merge', 'merge_entity')
+        g.storage_custom_command_oauth('delete', 'delete_entity',
+                                       transform=create_boolean_result_output_transformer('deleted'),
+                                       table_transformer=transform_boolean_for_table)
+        g.storage_command_oauth('show', 'get_entity',
+                                table_transformer=transform_entity_show,
+                                transform=transform_entity_result,
+                                exception_handler=show_exception_handler)
+        g.storage_custom_command_oauth('query', 'query_entity',
+                                       table_transformer=transform_entity_query_output,
+                                       transform=transform_entities_result)
 
     adls_service_sdk = CliCommandType(
         operations_tmpl='azure.multiapi.storagev2.filedatalake._data_lake_service_client#DataLakeServiceClient.{}',

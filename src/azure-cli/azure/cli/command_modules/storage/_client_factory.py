@@ -335,3 +335,33 @@ def cf_queue_service(cli_ctx, kwargs):
 
 def cf_queue_client(cli_ctx, kwargs):
     return cf_queue_service(cli_ctx, kwargs).get_queue_client(queue=kwargs.pop('queue_name'))
+
+
+def cf_table_service(cli_ctx, kwargs):
+    from azure.data.tables._table_service_client import TableServiceClient
+    client_kwargs = prepare_client_kwargs_track2(cli_ctx)
+    client_kwargs = _config_location_mode(kwargs, client_kwargs)
+    connection_string = kwargs.pop('connection_string', None)
+    account_name = kwargs.pop('account_name', None)
+    account_key = kwargs.pop('account_key', None)
+    token_credential = kwargs.pop('token_credential', None)
+    sas_token = kwargs.pop('sas_token', None)
+
+    if connection_string:
+        return TableServiceClient.from_connection_string(conn_str=connection_string, **client_kwargs)
+
+    account_url = get_account_url(cli_ctx, account_name=account_name, service='table')
+    if account_key:
+        from azure.core.credentials import AzureNamedKeyCredential
+        credential = AzureNamedKeyCredential(name=account_name, key=account_key)
+    elif sas_token:
+        from azure.core.credentials import AzureSasCredential
+        credential = AzureSasCredential(signature=sas_token)
+    else:
+        credential = token_credential
+
+    return TableServiceClient(endpoint=account_url, credential=credential, **client_kwargs)
+
+
+def cf_table_client(cli_ctx, kwargs):
+    return cf_table_service(cli_ctx, kwargs).get_table_client(table_name=kwargs.pop('table_name'))
