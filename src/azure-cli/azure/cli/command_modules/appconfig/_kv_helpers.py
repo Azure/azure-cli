@@ -259,6 +259,10 @@ def __read_features_from_file(file_path, format_):
 
 
 def __write_kv_and_features_to_file(file_path, key_values=None, features=None, format_=None, separator=None, skip_features=False, naming_convention='pascal'):
+    if not key_values and not features:
+        logger.warning('\nSource configuration is empty. No changes will be made.')
+        return
+
     try:
         exported_keyvalues = __export_keyvalues(key_values, format_, separator, None)
         if features and not skip_features:
@@ -364,6 +368,7 @@ def __write_kv_and_features_to_config_store(azconfig_client,
                                             preserve_labels=False,
                                             content_type=None):
     if not key_values and not features:
+        logger.warning('\nSource configuration is empty. No changes will be made.')
         return
 
     # write all keyvalues to target store
@@ -463,6 +468,10 @@ def __read_kv_from_app_service(cmd, appservice_account, prefix_to_add="", conten
 
 
 def __write_kv_to_app_service(cmd, key_values, appservice_account):
+    if not key_values:
+        logger.warning('\nSource configuration is empty. No changes will be made.')
+        return
+
     try:
         non_slot_settings = []
         slot_settings = []

@@ -532,12 +532,13 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
             }
         }
 
-    vm_properties['additionalCapabilities'] = {}
-    if ultra_ssd_enabled is not None:
-        vm_properties['additionalCapabilities']['ultraSSDEnabled'] = ultra_ssd_enabled
+    if any((ultra_ssd_enabled, enable_hibernation)):
+        vm_properties['additionalCapabilities'] = {}
+        if ultra_ssd_enabled is not None:
+            vm_properties['additionalCapabilities']['ultraSSDEnabled'] = ultra_ssd_enabled
 
-    if enable_hibernation is not None:
-        vm_properties['additionalCapabilities']['hibernationEnabled'] = enable_hibernation
+        if enable_hibernation is not None:
+            vm_properties['additionalCapabilities']['hibernationEnabled'] = enable_hibernation
 
     if proximity_placement_group:
         vm_properties['proximityPlacementGroup'] = {'id': proximity_placement_group}

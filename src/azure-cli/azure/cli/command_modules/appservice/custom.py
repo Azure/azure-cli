@@ -374,7 +374,7 @@ def parse_docker_image_name(deployment_container_image_name):
 
 def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None, slot_settings=None):
     if not settings and not slot_settings:
-        raise CLIError('Usage Error: --settings |--slot-settings')
+        raise MutuallyExclusiveArgumentError('Usage Error: --settings |--slot-settings')
 
     settings = settings or []
     slot_settings = slot_settings or []
@@ -432,9 +432,9 @@ def add_azure_storage_account(cmd, resource_group_name, name, custom_id, storage
                                                      'list_azure_storage_accounts', slot)
 
     if custom_id in azure_storage_accounts.properties:
-        raise CLIError("Site already configured with an Azure storage account with the id '{}'. "
-                       "Use 'az webapp config storage-account update' to update an existing "
-                       "Azure storage account configuration.".format(custom_id))
+        raise ValidationError("Site already configured with an Azure storage account with the id '{}'. "
+                              "Use 'az webapp config storage-account update' to update an existing "
+                              "Azure storage account configuration.".format(custom_id))
 
     azure_storage_accounts.properties[custom_id] = AzureStorageInfoValue(type=storage_type, account_name=account_name,
                                                                          share_name=share_name, access_key=access_key,
@@ -466,9 +466,9 @@ def update_azure_storage_account(cmd, resource_group_name, name, custom_id, stor
     existing_account_config = azure_storage_accounts.properties.pop(custom_id, None)
 
     if not existing_account_config:
-        raise CLIError("No Azure storage account configuration found with the id '{}'. "
-                       "Use 'az webapp config storage-account add' to add a new "
-                       "Azure storage account configuration.".format(custom_id))
+        raise ResourceNotFoundError("No Azure storage account configuration found with the id '{}'. "
+                                    "Use 'az webapp config storage-account add' to add a new "
+                                    "Azure storage account configuration.".format(custom_id))
 
     new_account_config = AzureStorageInfoValue(
         type=storage_type or existing_account_config.type,
@@ -499,8 +499,8 @@ def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, build_rem
     client = web_client_factory(cmd.cli_ctx)
     app = client.web_apps.get(resource_group_name, name)
     if app is None:
-        raise CLIError('The function app \'{}\' was not found in resource group \'{}\'. '
-                       'Please make sure these values are correct.'.format(name, resource_group_name))
+        raise ResourceNotFoundError('The function app \'{}\' was not found in resource group \'{}\'. '
+                                    'Please make sure these values are correct.'.format(name, resource_group_name))
     parse_plan_id = parse_resource_id(app.server_farm_id)
     plan_info = None
     retry_delay = 10  # seconds
@@ -535,7 +535,7 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
     try:
         scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
     except ValueError:
-        raise CLIError('Failed to fetch scm url for function app')
+        raise ResourceNotFoundError('Failed to fetch scm url for function app')
 
     zip_url = scm_url + '/api/zipdeploy?isAsync=true'
     deployment_status_url = scm_url + '/api/deployments/latest'
@@ -678,7 +678,7 @@ def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
             storage_connection = str(keyval['value'])
 
     if storage_connection is None:
-        raise CLIError('Could not find a \'AzureWebJobsStorage\' application setting')
+        raise ResourceNotFoundError('Could not find a \'AzureWebJobsStorage\' application setting')
 
     container_name = "function-releases"
     blob_name = "{}-{}.zip".format(datetime.datetime.today().strftime('%Y%m%d%H%M%S'), str(uuid.uuid4()))
@@ -711,7 +711,7 @@ def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
 
     blob_uri = block_blob_service.make_blob_url(container_name, blob_name, sas_token=blob_token)
     website_run_from_setting = "WEBSITE_RUN_FROM_PACKAGE={}".format(blob_uri)
-    update_app_settings(cmd, resource_group_name, name, settings=[website_run_from_setting])
+    update_app_settings(cmd, resource_group_name, name, settings=[website_run_from_setting], slot=slot)
     client = web_client_factory(cmd.cli_ctx)
 
     try:
@@ -991,7 +991,7 @@ def remove_identity(cmd, resource_group_name, name, remove_identities=None, slot
             to_remove = {x.lower() for x in external_identities}
             non_existing = to_remove.difference(existing_identities)
             if non_existing:
-                raise CLIError("'{}' are not associated with '{}'".format(','.join(non_existing), name))
+                raise ResourceNotFoundError("'{}' are not associated with '{}'".format(','.join(non_existing), name))
             if not list(existing_identities - to_remove):
                 if webapp.identity.type == IdentityType.user_assigned:
                     webapp.identity.type = IdentityType.none
@@ -1067,7 +1067,7 @@ def update_auth_settings(cmd, resource_group_name, name, enabled=None, action=No
         auth_settings.default_provider = AUTH_TYPES[action]
     # validate runtime version
     if not is_auth_runtime_version_valid(runtime_version):
-        raise CLIError('Usage Error: --runtime-version set to invalid value')
+        raise InvalidArgumentValueError('Usage Error: --runtime-version set to invalid value')
 
     import inspect
     frame = inspect.currentframe()
@@ -1263,7 +1263,7 @@ def _add_fx_version(cmd, resource_group_name, name, custom_image_name, slot=None
     fx_version = _format_fx_version(custom_image_name)
     web_app = get_webapp(cmd, resource_group_name, name, slot)
     if not web_app:
-        raise CLIError("'{}' app doesn't exist in resource group {}".format(name, resource_group_name))
+        raise ResourceNotFoundError("'{}' app doesn't exist in resource group {}".format(name, resource_group_name))
     linux_fx = fx_version if (web_app.reserved or not web_app.is_xenon) else None
     windows_fx = fx_version if web_app.is_xenon else None
     return update_site_configs(cmd, resource_group_name, name,
@@ -1291,8 +1291,8 @@ def _get_linux_multicontainer_decoded_config(cmd, resource_group_name, name, slo
     from base64 import b64decode
     linux_fx_version = _get_fx_version(cmd, resource_group_name, name, slot)
     if not any(linux_fx_version.startswith(s) for s in MULTI_CONTAINER_TYPES):
-        raise CLIError("Cannot decode config that is not one of the"
-                       " following types: {}".format(','.join(MULTI_CONTAINER_TYPES)))
+        raise ValidationError("Cannot decode config that is not one of the"
+                              " following types: {}".format(','.join(MULTI_CONTAINER_TYPES)))
     return b64decode(linux_fx_version.split('|')[1].encode('utf-8'))
 
 
@@ -1444,7 +1444,7 @@ def update_connection_strings(cmd, resource_group_name, name, connection_string_
                               settings=None, slot=None, slot_settings=None):
     from azure.mgmt.web.models import ConnStringValueTypePair
     if not settings and not slot_settings:
-        raise CLIError('Usage Error: --settings |--slot-settings')
+        raise ArgumentUsageError('Usage Error: --settings |--slot-settings')
 
     settings = settings or []
     slot_settings = slot_settings or []
@@ -1558,7 +1558,7 @@ def _get_acr_cred(cli_ctx, registry_name):
     result = get_resources_in_subscription(cli_ctx, 'Microsoft.ContainerRegistry/registries')
     result = [item for item in result if item.name.lower() == registry_name]
     if not result or len(result) > 1:
-        raise CLIError("No resource or more than one were found with name '{}'.".format(registry_name))
+        raise ResourceNotFoundError("No resource or more than one were found with name '{}'.".format(registry_name))
     resource_group_name = parse_resource_id(result[0].id)['resource_group']
 
     registry = client.get(resource_group_name, registry_name)
@@ -1566,9 +1566,9 @@ def _get_acr_cred(cli_ctx, registry_name):
     if registry.admin_user_enabled:  # pylint: disable=no-member
         cred = client.list_credentials(resource_group_name, registry_name)
         return cred.username, cred.passwords[0].value
-    raise CLIError("Failed to retrieve container registry credentials. Please either provide the "
-                   "credentials or run 'az acr update -n {} --admin-enabled true' to enable "
-                   "admin first.".format(registry_name))
+    raise ResourceNotFoundError("Failed to retrieve container registry credentials. Please either provide the "
+                                "credentials or run 'az acr update -n {} --admin-enabled true' to enable "
+                                "admin first.".format(registry_name))
 
 
 def delete_container_settings(cmd, resource_group_name, name, slot=None):
@@ -1614,7 +1614,7 @@ def add_hostname(cmd, resource_group_name, webapp_name, hostname, slot=None):
     client = web_client_factory(cmd.cli_ctx)
     webapp = client.web_apps.get(resource_group_name, webapp_name)
     if not webapp:
-        raise CLIError("'{}' app doesn't exist".format(webapp_name))
+        raise ResourceNotFoundError("'{}' app doesn't exist".format(webapp_name))
     binding = HostNameBinding(site_name=webapp.name)
     if slot is None:
         return client.web_apps.create_or_update_host_name_binding(resource_group_name=resource_group_name,
@@ -1648,7 +1648,7 @@ def get_external_ip(cmd, resource_group_name, webapp_name):
     client = web_client_factory(cmd.cli_ctx)
     webapp = client.web_apps.get(resource_group_name, webapp_name)
     if not webapp:
-        raise CLIError("'{}' app doesn't exist".format(webapp_name))
+        raise ResourceNotFoundError("'{}' app doesn't exist".format(webapp_name))
     if webapp.hosting_environment_profile:
         address = client.app_service_environments.list_vips(
             resource_group_name, webapp.hosting_environment_profile.name)
@@ -1668,15 +1668,26 @@ def _resolve_hostname_through_dns(hostname):
     return socket.gethostbyname(hostname)
 
 
-def create_webapp_slot(cmd, resource_group_name, webapp, slot, configuration_source=None):
+def create_webapp_slot(cmd, resource_group_name, webapp, slot, configuration_source=None,
+                       deployment_container_image_name=None, docker_registry_server_password=None,
+                       docker_registry_server_user=None):
+    container_args = deployment_container_image_name or docker_registry_server_password or docker_registry_server_user
+    if container_args and not configuration_source:
+        raise ArgumentUsageError("Cannot use arguments --deployment-container_image_name, "
+                                 "--docker-registry-server_password, or --docker-registry-server-user without argument "
+                                 "--configuration-source")
+
+    docker_registry_server_url = parse_docker_image_name(deployment_container_image_name)
+
     Site, SiteConfig, NameValuePair = cmd.get_models('Site', 'SiteConfig', 'NameValuePair')
     client = web_client_factory(cmd.cli_ctx)
     site = client.web_apps.get(resource_group_name, webapp)
     site_config = get_site_configs(cmd, resource_group_name, webapp, None)
     if not site:
-        raise CLIError("'{}' app doesn't exist".format(webapp))
+        raise ResourceNotFoundError("'{}' app doesn't exist".format(webapp))
     if 'functionapp' in site.kind:
-        raise CLIError("'{}' is a function app. Please use `az functionapp deployment slot create`.".format(webapp))
+        raise ValidationError("'{}' is a function app. Please use "
+                              "`az functionapp deployment slot create`.".format(webapp))
     location = site.location
     slot_def = Site(server_farm_id=site.server_farm_id, location=location)
     slot_def.site_config = SiteConfig()
@@ -1699,18 +1710,31 @@ def create_webapp_slot(cmd, resource_group_name, webapp, slot, configuration_sou
     result = LongRunningOperation(cmd.cli_ctx)(poller)
 
     if configuration_source:
-        update_slot_configuration_from_source(cmd, client, resource_group_name, webapp, slot, configuration_source)
+        update_slot_configuration_from_source(cmd, client, resource_group_name, webapp, slot, configuration_source,
+                                              deployment_container_image_name, docker_registry_server_password,
+                                              docker_registry_server_user,
+                                              docker_registry_server_url=docker_registry_server_url)
 
     result.name = result.name.split('/')[-1]
     return result
 
 
-def create_functionapp_slot(cmd, resource_group_name, name, slot, configuration_source=None):
+def create_functionapp_slot(cmd, resource_group_name, name, slot, configuration_source=None,
+                            deployment_container_image_name=None, docker_registry_server_password=None,
+                            docker_registry_server_user=None):
+    container_args = deployment_container_image_name or docker_registry_server_password or docker_registry_server_user
+    if container_args and not configuration_source:
+        raise ArgumentUsageError("Cannot use arguments --deployment-container-image_name, "
+                                 "--docker-registry-server_password, or --docker-registry-server-user without argument "
+                                 "--configuration-source")
+
+    docker_registry_server_url = parse_docker_image_name(deployment_container_image_name)
+
     Site = cmd.get_models('Site')
     client = web_client_factory(cmd.cli_ctx)
     site = client.web_apps.get(resource_group_name, name)
     if not site:
-        raise CLIError("'{}' function app doesn't exist".format(name))
+        raise ResourceNotFoundError("'{}' function app doesn't exist".format(name))
     location = site.location
     slot_def = Site(server_farm_id=site.server_farm_id, location=location)
 
@@ -1718,13 +1742,19 @@ def create_functionapp_slot(cmd, resource_group_name, name, slot, configuration_
     result = LongRunningOperation(cmd.cli_ctx)(poller)
 
     if configuration_source:
-        update_slot_configuration_from_source(cmd, client, resource_group_name, name, slot, configuration_source)
+        update_slot_configuration_from_source(cmd, client, resource_group_name, name, slot, configuration_source,
+                                              deployment_container_image_name, docker_registry_server_password,
+                                              docker_registry_server_user,
+                                              docker_registry_server_url=docker_registry_server_url)
 
     result.name = result.name.split('/')[-1]
     return result
 
 
-def update_slot_configuration_from_source(cmd, client, resource_group_name, webapp, slot, configuration_source=None):
+def update_slot_configuration_from_source(cmd, client, resource_group_name, webapp, slot, configuration_source=None,
+                                          deployment_container_image_name=None, docker_registry_server_password=None,
+                                          docker_registry_server_user=None, docker_registry_server_url=None):
+
     clone_from_prod = configuration_source.lower() == webapp.lower()
     site_config = get_site_configs(cmd, resource_group_name, webapp,
                                    None if clone_from_prod else configuration_source)
@@ -1754,6 +1784,13 @@ def update_slot_configuration_from_source(cmd, client, resource_group_name, weba
     _generic_settings_operation(cmd.cli_ctx, resource_group_name, webapp,
                                 'update_connection_strings',
                                 connection_strings, slot, client)
+
+    if deployment_container_image_name or docker_registry_server_password or docker_registry_server_user:
+        update_container_settings(cmd, resource_group_name, webapp,
+                                  docker_custom_image_name=deployment_container_image_name, slot=slot,
+                                  docker_registry_server_user=docker_registry_server_user,
+                                  docker_registry_server_password=docker_registry_server_password,
+                                  docker_registry_server_url=docker_registry_server_url)
 
 
 def config_source_control(cmd, resource_group_name, name, repo_url, repository_type='git', branch=None,  # pylint: disable=too-many-locals
@@ -1952,7 +1989,7 @@ def update_functionapp_app_service_plan(cmd, instance, sku=None, number_of_worke
     instance = update_app_service_plan(instance, sku, number_of_workers)
     if max_burst is not None:
         if not is_plan_elastic_premium(cmd, instance):
-            raise CLIError("Usage error: --max-burst is only supported for Elastic Premium (EP) plans")
+            raise ValidationError("Usage error: --max-burst is only supported for Elastic Premium (EP) plans")
         max_burst = validate_range_of_int_flag('--max-burst', max_burst, min_val=0, max_val=20)
         instance.maximum_elastic_worker_count = max_burst
     if number_of_workers is not None:
@@ -1966,7 +2003,7 @@ def show_backup_configuration(cmd, resource_group_name, webapp_name, slot=None):
         return _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp_name,
                                        'get_backup_configuration', slot)
     except Exception:  # pylint: disable=broad-except
-        raise CLIError('Backup configuration not found')
+        raise ResourceNotFoundError('Backup configuration not found')
 
 
 def list_backups(cmd, resource_group_name, webapp_name, slot=None):
@@ -2007,9 +2044,9 @@ def update_backup_schedule(cmd, resource_group_name, webapp_name, storage_accoun
         # No configuration set yet
         if not all([storage_account_url, frequency, retention_period_in_days,
                     keep_at_least_one_backup]):
-            raise CLIError('No backup configuration found. A configuration must be created. ' +
-                           'Usage: --container-url URL --frequency TIME --retention DAYS ' +
-                           '--retain-one TRUE/FALSE')
+            raise ResourceNotFoundError('No backup configuration found. A configuration must be created. ' +
+                                        'Usage: --container-url URL --frequency TIME --retention DAYS ' +
+                                        '--retain-one TRUE/FALSE')
 
     # If arguments were not specified, use the values in the current backup schedule
     if storage_account_url is None:
@@ -2092,7 +2129,8 @@ def restore_snapshot(cmd, resource_group_name, name, time, slot=None, restore_co
             return client.web_apps.begin_restore_snapshot_slot(resource_group_name, name, request, slot)
         return client.web_apps.begin_restore_snapshot(resource_group_name, name, request)
     if any([source_resource_group, source_name]):
-        raise CLIError('usage error: --source-resource-group and --source-name must both be specified if one is used')
+        raise ArgumentUsageError('usage error: --source-resource-group and '
+                                 '--source-name must both be specified if one is used')
     # Overwrite app with its own snapshot
     request = SnapshotRestoreRequest(overwrite=True, snapshot_time=time, recover_configuration=recover_config)
     if slot:
@@ -2106,7 +2144,7 @@ def _create_db_setting(cmd, db_name, db_type, db_connection_string):
     if all([db_name, db_type, db_connection_string]):
         return [DatabaseBackupSetting(database_type=db_type, name=db_name, connection_string=db_connection_string)]
     if any([db_name, db_type, db_connection_string]):
-        raise CLIError('usage error: --db-name NAME --db-type TYPE --db-connection-string STRING')
+        raise ArgumentUsageError('usage error: --db-name NAME --db-type TYPE --db-connection-string STRING')
 
 
 def _parse_frequency(cmd, frequency):
@@ -2117,15 +2155,15 @@ def _parse_frequency(cmd, frequency):
     elif unit_part == 'h':
         frequency_unit = FrequencyUnit.hour
     else:
-        raise CLIError('Frequency must end with d or h for "day" or "hour"')
+        raise InvalidArgumentValueError('Frequency must end with d or h for "day" or "hour"')
 
     try:
         frequency_num = int(frequency[:-1])
     except ValueError:
-        raise CLIError('Frequency must start with a number')
+        raise InvalidArgumentValueError('Frequency must start with a number')
 
     if frequency_num < 0:
-        raise CLIError('Frequency must be positive')
+        raise InvalidArgumentValueError('Frequency must be positive')
 
     return frequency_num, frequency_unit
 
@@ -2155,7 +2193,7 @@ def _get_scm_url(cmd, resource_group_name, name, slot=None):
             return "https://{}".format(host.name)
 
     # this should not happen, but throw anyway
-    raise ValueError('Failed to retrieve Scm Uri')
+    raise ResourceNotFoundError('Failed to retrieve Scm Uri')
 
 
 def get_publishing_user(cmd):
@@ -2174,7 +2212,7 @@ def set_deployment_user(cmd, user_name, password=None):
         try:
             password = prompt_pass(msg='Password: ', confirm=True)
         except NoTTYException:
-            raise CLIError('Please specify both username and password in non-interactive mode.')
+            raise ArgumentUsageError('Please specify both username and password in non-interactive mode.')
 
     user.publishing_password = password
     return client.update_publishing_user(user)
@@ -2255,7 +2293,7 @@ def _get_url(cmd, resource_group_name, name, slot=None):
     SslState = cmd.get_models('SslState')
     site = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
     if not site:
-        raise CLIError("'{}' app doesn't exist".format(name))
+        raise ResourceNotFoundError("'{}' app doesn't exist".format(name))
     url = site.enabled_host_names[0]  # picks the custom domain URL incase a domain is assigned
     ssl_host = next((h for h in site.host_name_ssl_states
                      if h.ssl_state != SslState.disabled), None)
@@ -2275,7 +2313,7 @@ def config_diagnostics(cmd, resource_group_name, name, level=None,
     # TODO: ensure we call get_site only once
     site = client.web_apps.get(resource_group_name, name)
     if not site:
-        raise CLIError("'{}' app doesn't exist".format(name))
+        raise ResourceNotFoundError("'{}' app doesn't exist".format(name))
 
     application_logs = None
     if application_logging:
@@ -2428,7 +2466,7 @@ def set_traffic_routing(cmd, resource_group_name, name, distribution):
     client = web_client_factory(cmd.cli_ctx)
     site = client.web_apps.get(resource_group_name, name)
     if not site:
-        raise CLIError("'{}' app doesn't exist".format(name))
+        raise ResourceNotFoundError("'{}' app doesn't exist".format(name))
     configs = get_site_configs(cmd, resource_group_name, name)
     host_name_split = site.default_host_name.split('.', 1)
     host_name_suffix = '.' + host_name_split[1]
@@ -2593,7 +2631,7 @@ def delete_ssl_cert(cmd, resource_group_name, certificate_thumbprint):
     for webapp_cert in webapp_certs:
         if webapp_cert.thumbprint == certificate_thumbprint:
             return client.certificates.delete(resource_group_name, webapp_cert.name)
-    raise CLIError("Certificate for thumbprint '{}' not found".format(certificate_thumbprint))
+    raise ResourceNotFoundError("Certificate for thumbprint '{}' not found".format(certificate_thumbprint))
 
 
 def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certificate_name):
@@ -2601,7 +2639,7 @@ def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certifi
     client = web_client_factory(cmd.cli_ctx)
     webapp = client.web_apps.get(resource_group_name, name)
     if not webapp:
-        raise CLIError("'{}' app doesn't exist in resource group {}".format(name, resource_group_name))
+        raise ResourceNotFoundError("'{}' app doesn't exist in resource group {}".format(name, resource_group_name))
     server_farm_id = webapp.server_farm_id
     location = webapp.location
     kv_id = None
@@ -2674,19 +2712,21 @@ def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None)
     webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
     if not webapp:
         slot_text = "Deployment slot {} in ".format(slot) if slot else ''
-        raise CLIError("{0}app {1} doesn't exist in resource group {2}".format(slot_text, name, resource_group_name))
+        raise ResourceNotFoundError("{0}app {1} doesn't exist in resource group {2}".format(slot_text,
+                                                                                            name,
+                                                                                            resource_group_name))
 
     parsed_plan_id = parse_resource_id(webapp.server_farm_id)
     plan_info = client.app_service_plans.get(parsed_plan_id['resource_group'], parsed_plan_id['name'])
     if plan_info.sku.tier.upper() == 'FREE' or plan_info.sku.tier.upper() == 'SHARED':
-        raise CLIError('Managed Certificate is not supported on Free and Shared tier.')
+        raise ValidationError('Managed Certificate is not supported on Free and Shared tier.')
 
     if not _verify_hostname_binding(cmd, resource_group_name, name, hostname, slot):
         slot_text = " --slot {}".format(slot) if slot else ""
-        raise CLIError("Hostname (custom domain) '{0}' is not registered with {1}. "
-                       "Use 'az webapp config hostname add --resource-group {2} "
-                       "--webapp-name {1}{3} --hostname {0}' "
-                       "to register the hostname.".format(hostname, name, resource_group_name, slot_text))
+        raise ValidationError("Hostname (custom domain) '{0}' is not registered with {1}. "
+                              "Use 'az webapp config hostname add --resource-group {2} "
+                              "--webapp-name {1}{3} --hostname {0}' "
+                              "to register the hostname.".format(hostname, name, resource_group_name, slot_text))
 
     server_farm_id = webapp.server_farm_id
     location = webapp.location
@@ -3288,7 +3328,8 @@ def get_app_insights_key(cli_ctx, resource_group, name):
     appinsights_client = get_mgmt_service_client(cli_ctx, ApplicationInsightsManagementClient)
     appinsights = appinsights_client.components.get(resource_group, name)
     if appinsights is None or appinsights.instrumentation_key is None:
-        raise CLIError("App Insights {} under resource group {} was not found.".format(name, resource_group))
+        raise ResourceNotFoundError("App Insights {} under resource group {} was not found.".format(name,
+                                                                                                    resource_group))
     return appinsights.instrumentation_key
 
 
@@ -3405,7 +3446,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         else:
             plan_info = client.app_service_plans.get(resource_group_name, plan)
         if not plan_info:
-            raise CLIError("The plan '{}' doesn't exist".format(plan))
+            raise ResourceNotFoundError("The plan '{}' doesn't exist".format(plan))
         location = plan_info.location
         is_linux = bool(plan_info.reserved)
         functionapp_def.server_farm_id = plan
@@ -4182,9 +4223,6 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
     _is_linux = os_name.lower() == LINUX_OS_NAME
     helper = _StackRuntimeHelper(cmd, linux=_is_linux, windows=not _is_linux)
 
-    if runtime and html:
-        raise MutuallyExclusiveArgumentError('Conflicting parameters: cannot have both --runtime and --html specified.')
-
     if runtime:
         runtime = helper.remove_delimiters(runtime)
         match = helper.resolve(runtime, _is_linux)
@@ -4214,15 +4252,16 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
         logger.warning("Webapp '%s' already exists. The command will deploy contents to the existing app.", name)
         app_details = get_app_details(cmd, name)
         if app_details is None:
-            raise CLIError("Unable to retrieve details of the existing app '{}'. Please check that the app "
-                           "is a part of the current subscription if updating an existing app. If creating "
-                           "a new app, app names must be globally unique. Please try a more unique name or "
-                           "leave unspecified to receive a randomly generated name.".format(name))
+            raise ResourceNotFoundError("Unable to retrieve details of the existing app '{}'. Please check that the "
+                                        "app is a part of the current subscription if updating an existing app. If "
+                                        "creating a new app, app names must be globally unique. Please try a more "
+                                        "unique name or leave unspecified to receive a randomly "
+                                        "generated name.".format(name))
         current_rg = app_details.resource_group
         if resource_group_name is not None and (resource_group_name.lower() != current_rg.lower()):
-            raise CLIError("The webapp '{}' exists in ResourceGroup '{}' and does not "
-                           "match the value entered '{}'. Please re-run command with the "
-                           "correct parameters.". format(name, current_rg, resource_group_name))
+            raise ValidationError("The webapp '{}' exists in ResourceGroup '{}' and does not "
+                                  "match the value entered '{}'. Please re-run command with the "
+                                  "correct parameters.". format(name, current_rg, resource_group_name))
         rg_name = resource_group_name or current_rg
         if location is None:
             loc = app_details.location.replace(" ", "").lower()
@@ -4231,27 +4270,27 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
         plan_details = parse_resource_id(app_details.server_farm_id)
         current_plan = plan_details['name']
         if plan is not None and current_plan.lower() != plan.lower():
-            raise CLIError("The plan name entered '{}' does not match the plan name that the webapp is hosted in '{}'."
-                           "Please check if you have configured defaults for plan name and re-run command."
-                           .format(plan, current_plan))
+            raise ValidationError("The plan name entered '{}' does not match the plan name that the webapp is "
+                                  "hosted in '{}'. Please check if you have configured defaults for plan name "
+                                  "and re-run command.".format(plan, current_plan))
         plan = plan or plan_details['name']
         plan_info = client.app_service_plans.get(plan_details['resource_group'], plan)
         sku = plan_info.sku.name if isinstance(plan_info, AppServicePlan) else 'Free'
         current_os = 'Linux' if plan_info.reserved else 'Windows'
         # Raise error if current OS of the app is different from the current one
         if current_os.lower() != os_name.lower():
-            raise CLIError("The webapp '{}' is a {} app. The code detected at '{}' will default to "
-                           "'{}'. Please create a new app "
-                           "to continue this operation. For more information on default behaviors, "
-                           "see https://docs.microsoft.com/cli/azure/webapp?view=azure-cli-latest#az_webapp_up."
-                           .format(name, current_os, src_dir, os_name))
+            raise ValidationError("The webapp '{}' is a {} app. The code detected at '{}' will default to "
+                                  "'{}'. Please create a new app "
+                                  "to continue this operation. For more information on default behaviors, "
+                                  "see https://docs.microsoft.com/cli/azure/webapp?view=azure-cli-latest#az_webapp_up."
+                                  .format(name, current_os, src_dir, os_name))
         _is_linux = plan_info.reserved
         # for an existing app check if the runtime version needs to be updated
         # Get site config to check the runtime version
         site_config = client.web_apps.get_configuration(rg_name, name)
     else:  # need to create new app, check if we need to use default RG or use user entered values
         logger.warning("The webapp '%s' doesn't exist", name)
-        sku = get_sku_to_use(src_dir, html, sku, runtime)
+        sku = get_sku_to_use(src_dir, html, sku, runtime, app_service_environment)
         loc = set_location(cmd, sku, location)
         rg_name = get_rg_to_use(user, resource_group_name)
         _create_new_rg = not check_resource_group_exists(cmd, rg_name)
@@ -4296,6 +4335,10 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
         create_app_service_plan(cmd, rg_name, plan, _is_linux, hyper_v=False, per_site_scaling=False, sku=sku,
                                 number_of_workers=1 if _is_linux else None, location=loc,
                                 app_service_environment=app_service_environment)
+    except ResourceNotFoundError as ex:
+        raise ex
+    except CLIError as ex:
+        raise ex
     except Exception as ex:  # pylint: disable=broad-except
         if ex.response.status_code == 409:  # catch 409 conflict when trying to create existing ASP in diff location
             try:
@@ -4377,14 +4420,15 @@ def _set_webapp_up_default_args(cmd, rg_name, sku, plan, loc, name):
 
 
 def _update_app_settings_for_windows_if_needed(cmd, rg_name, name, match, site_config, runtime_version):
+    app_settings = _generic_site_operation(cmd.cli_ctx, rg_name, name, 'list_application_settings', slot=None)
     update_needed = False
     if 'node' in runtime_version:
         settings = []
         for k, v in match.configs.items():
-            for app_setting in site_config.app_settings:
-                if app_setting.name == k and app_setting.value != v:
+            for app_setting_name, app_setting_value in app_settings.properties.items():
+                if app_setting_name == k and app_setting_value != v:
                     update_needed = True
-                    settings.append('%s=%s', k, v)
+                    settings.append(f"{k}={v}")
         if update_needed:
             logger.warning('Updating runtime version to %s', runtime_version)
             update_app_settings(cmd, rg_name, name, settings=settings, slot=None, slot_settings=None)
@@ -4448,7 +4492,7 @@ def get_tunnel(cmd, resource_group_name, name, port=None, slot=None, instance=No
     webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
     is_linux = webapp.reserved
     if not is_linux:
-        raise CLIError("Only Linux App Service Plans supported, Found a Windows App Service Plan")
+        raise ValidationError("Only Linux App Service Plans supported, Found a Windows App Service Plan")
 
     profiles = list_publish_profiles(cmd, resource_group_name, name, slot)
     profile_user_name = next(p['userName'] for p in profiles)
@@ -4464,8 +4508,9 @@ def get_tunnel(cmd, resource_group_name, name, port=None, slot=None, instance=No
         instance_names = set(i.name for i in instances)
         if instance not in instance_names:
             if slot is not None:
-                raise CLIError("The provided instance '{}' is not valid for this webapp and slot.".format(instance))
-            raise CLIError("The provided instance '{}' is not valid for this webapp.".format(instance))
+                raise ValidationError("The provided instance '{}' is not valid "
+                                      "for this webapp and slot.".format(instance))
+            raise ValidationError("The provided instance '{}' is not valid for this webapp.".format(instance))
 
     scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
 
@@ -4633,15 +4678,15 @@ def _get_onedeploy_request_body(params):
             with open(os.path.realpath(os.path.expanduser(params.src_path)), 'rb') as fs:
                 body = fs.read()
         except Exception as e:  # pylint: disable=broad-except
-            raise CLIError("Either '{}' is not a valid local file path or you do not have permissions to access it"
-                           .format(params.src_path)) from e
+            raise ResourceNotFoundError("Either '{}' is not a valid local file path or you do not have permissions to "
+                                        "access it".format(params.src_path)) from e
     elif params.src_url:
         logger.info('Deploying from URL: %s', params.src_url)
         body = json.dumps({
             "packageUri": params.src_url
         })
     else:
-        raise CLIError('Unable to determine source location of the artifact being deployed')
+        raise ResourceNotFoundError('Unable to determine source location of the artifact being deployed')
 
     return body
 
@@ -4697,13 +4742,13 @@ def _make_onedeploy_request(params):
 
     # API not available yet!
     if response.status_code == 404:
-        raise CLIError("This API isn't available in this environment yet!")
+        raise ResourceNotFoundError("This API isn't available in this environment yet!")
 
     # check if there's an ongoing process
     if response.status_code == 409:
-        raise CLIError("Another deployment is in progress. Please wait until that process is complete before "
-                       "starting a new deployment. You can track the ongoing deployment at {}"
-                       .format(deployment_status_url))
+        raise ValidationError("Another deployment is in progress. Please wait until that process is complete before "
+                              "starting a new deployment. You can track the ongoing deployment at {}"
+                              .format(deployment_status_url))
 
     # check if an error occured during deployment
     if response.status_code:
@@ -4804,6 +4849,7 @@ def _configure_default_logging(cmd, rg_name, name):
                               docker_container_logging='filesystem')
 
 
+# TODO remove once appservice-kube extension removes
 def _validate_app_service_environment_id(cli_ctx, ase, resource_group_name):
     ase_is_id = is_valid_resource_id(ase)
     if ase_is_id:
@@ -4981,9 +5027,9 @@ def add_github_actions(cmd, resource_group, name, repo, runtime=None, token=None
             raise CLIError(error_msg)
         logger.warning('Verified GitHub repo and branch')
     except BadCredentialsException:
-        raise CLIError("Could not authenticate to the repository. Please create a Personal Access Token and use "
-                       "the --token argument. Run 'az webapp deployment github-actions add --help' "
-                       "for more information.")
+        raise ValidationError("Could not authenticate to the repository. Please create a Personal Access Token and use "
+                              "the --token argument. Run 'az webapp deployment github-actions add --help' "
+                              "for more information.")
     except GithubException as e:
         error_msg = "Encountered GitHub error when accessing {} repo".format(repo)
         if e.data and e.data['message']:
@@ -5011,10 +5057,10 @@ def add_github_actions(cmd, resource_group, name, repo, runtime=None, token=None
         app_runtime_string = runtime
 
     if not app_runtime_string:
-        raise CLIError('Could not detect runtime. Please specify using the --runtime flag.')
+        raise ValidationError('Could not detect runtime. Please specify using the --runtime flag.')
 
     if not _runtime_supports_github_actions(cmd=cmd, runtime_string=app_runtime_string, is_linux=is_linux):
-        raise CLIError("Runtime %s is not supported for GitHub Actions deployments." % app_runtime_string)
+        raise ValidationError("Runtime %s is not supported for GitHub Actions deployments." % app_runtime_string)
 
     # Get workflow template
     logger.warning('Getting workflow template using runtime: %s', app_runtime_string)
@@ -5097,17 +5143,17 @@ def remove_github_actions(cmd, resource_group, name, repo, token=None, slot=None
     site_availability = get_site_availability(cmd, name)
     if site_availability.name_available or (not site_availability.name_available and
                                             site_availability.reason == 'Invalid'):
-        raise CLIError("The Resource 'Microsoft.Web/sites/%s' under resource group '%s' was not found." %
-                       (name, resource_group))
+        raise ResourceNotFoundError("The Resource 'Microsoft.Web/sites/%s' under resource group '%s' was not found." %
+                                    (name, resource_group))
     app_details = get_app_details(cmd, name)
     if app_details is None:
-        raise CLIError("Unable to retrieve details of the existing app %s. "
-                       "Please check that the app is a part of the current subscription" % name)
+        raise ResourceNotFoundError("Unable to retrieve details of the existing app %s. "
+                                    "Please check that the app is a part of the current subscription" % name)
     current_rg = app_details.resource_group
     if resource_group is not None and (resource_group.lower() != current_rg.lower()):
-        raise CLIError("The webapp %s exists in ResourceGroup %s and does not match "
-                       "the value entered %s. Please re-run command with the correct "
-                       "parameters." % (name, current_rg, resource_group))
+        raise ValidationError("The webapp %s exists in ResourceGroup %s and does not match "
+                              "the value entered %s. Please re-run command with the correct "
+                              "parameters." % (name, current_rg, resource_group))
 
     # Verify github repo
     from github import Github, GithubException
@@ -5129,9 +5175,9 @@ def remove_github_actions(cmd, resource_group, name, repo, token=None, slot=None
             raise CLIError(error_msg)
         logger.warning('Verified GitHub repo and branch')
     except BadCredentialsException:
-        raise CLIError("Could not authenticate to the repository. Please create a Personal Access Token and use "
-                       "the --token argument. Run 'az webapp deployment github-actions add --help' "
-                       "for more information.")
+        raise ValidationError("Could not authenticate to the repository. Please create a Personal Access Token and use "
+                              "the --token argument. Run 'az webapp deployment github-actions add --help' "
+                              "for more information.")
     except GithubException as e:
         error_msg = "Encountered GitHub error when accessing {} repo".format(repo)
         if e.data and e.data['message']:
@@ -5258,7 +5304,7 @@ def _fill_workflow_template(content, name, branch, slot, publish_profile, versio
 
 def _get_template_file_path(runtime_string, is_linux):
     if not runtime_string:
-        raise CLIError('Unable to retrieve workflow template')
+        raise ResourceNotFoundError('Unable to retrieve workflow template')
 
     runtime_string = runtime_string.lower()
     runtime_stack = runtime_string.split('|')[0]
@@ -5278,7 +5324,7 @@ def _get_template_file_path(runtime_string, is_linux):
         template_file_path = WINDOWS_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH.get(runtime_stack, None)
 
     if not template_file_path:
-        raise CLIError('Unable to retrieve workflow template.')
+        raise ResourceNotFoundError('Unable to retrieve workflow template.')
     return template_file_path
 
 
@@ -5294,7 +5340,7 @@ def _add_publish_profile_to_github(cmd, resource_group, name, repo, token, githu
     if publish_profile:
         publish_profile = publish_profile[0].decode('ascii')
     else:
-        raise CLIError('Unable to retrieve publish profile.')
+        raise ResourceNotFoundError('Unable to retrieve publish profile.')
 
     # Add publish profile with secrets as a GitHub Actions Secret in the repo
     headers = {}
@@ -5305,7 +5351,7 @@ def _add_publish_profile_to_github(cmd, resource_group, name, repo, token, githu
     public_key_url = "https://api.github.com/repos/{}/actions/secrets/public-key".format(repo)
     public_key = requests.get(public_key_url, headers=headers)
     if not public_key.ok:
-        raise CLIError('Request to GitHub for public key failed.')
+        raise ValidationError('Request to GitHub for public key failed.')
     public_key = public_key.json()
 
     encrypted_github_actions_secret = _encrypt_github_actions_secret(public_key=public_key['key'],
