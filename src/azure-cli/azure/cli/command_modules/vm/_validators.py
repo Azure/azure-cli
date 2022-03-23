@@ -1210,17 +1210,32 @@ def _validate_ssh_key_helper(ssh_key_value, should_generate_ssh_keys):
     return content
 
 
-def _validate_vm_vmss_msi(cmd, namespace, from_set_command=False):
-    if from_set_command or namespace.assign_identity is not None:
+def _validate_vm_vmss_msi(cmd, namespace, is_identity_assign=False):
+
+    # For the creation of VM and VMSS, "--role" and "--scope" should be passed in at the same time
+    # when assigning a role to the managed identity
+    if not is_identity_assign and namespace.assign_identity is not None:
+        if (namespace.identity_scope and not namespace.identity_role) or \
+                (not namespace.identity_scope and namespace.identity_role):
+            raise ArgumentUsageError(
+                "usage error: please specify both --role and --scope when assigning a role to the managed identity")
+
+    # For "az vm identity assign", "--scope" must be passed in when assigning a role to the managed identity
+    if is_identity_assign:
+        role_is_explicitly_specified = getattr(namespace.identity_role, 'is_default', None) is None
+        if not namespace.identity_scope and role_is_explicitly_specified:
+            raise ArgumentUsageError(
+                "usage error: please specify --scope when assigning a role to the managed identity")
+
+    # Assign managed identity
+    if is_identity_assign or namespace.assign_identity is not None:
         identities = namespace.assign_identity or []
         from ._vm_utils import MSI_LOCAL_ID
         for i, _ in enumerate(identities):
             if identities[i] != MSI_LOCAL_ID:
                 identities[i] = _get_resource_id(cmd.cli_ctx, identities[i], namespace.resource_group_name,
                                                  'userAssignedIdentities', 'Microsoft.ManagedIdentity')
-        if not namespace.identity_scope and getattr(namespace.identity_role, 'is_default', None) is None:
-            raise ArgumentUsageError("usage error: '--role {}' is not applicable as the '--scope' is not provided".
-                                     format(namespace.identity_role))
+
         user_assigned_identities = [x for x in identities if x != MSI_LOCAL_ID]
         if user_assigned_identities and not cmd.supported_api_version(min_api='2017-12-01'):
             raise ArgumentUsageError('usage error: user assigned identity is only available under profile '
@@ -1232,18 +1247,8 @@ def _validate_vm_vmss_msi(cmd, namespace, from_set_command=False):
             # keep 'identity_role' for output as logical name is more readable
             setattr(namespace, 'identity_role_id', _resolve_role_id(cmd.cli_ctx, namespace.identity_role,
                                                                     namespace.identity_scope))
-    elif namespace.identity_scope or getattr(namespace.identity_role, 'is_default', None) is None:
+    elif namespace.identity_scope or namespace.identity_role:
         raise ArgumentUsageError('usage error: --assign-identity [--scope SCOPE] [--role ROLE]')
-
-    # For the creation of VM and VMSS, the default value "Contributor" of "--role" will be removed in the future.
-    # Therefore, the first step is to prompt users that parameters "--role" and "--scope"  should be passed in
-    # at the same time to reduce the impact of breaking change
-    if not from_set_command and namespace.identity_scope and getattr(namespace.identity_role, 'is_default', None):
-        logger.warning(
-            "Please note that the default value of parameter '--role' will be removed in the future version 2.35.0. "
-            "So specify '--role' and '--scope' at the same time when assigning a role to the managed identity "
-            "to avoid breaking your automation script when the default value of '--role' is removed."
-        )
 
 
 def _validate_vm_vmss_set_applications(cmd, namespace):  # pylint: disable=unused-argument
@@ -1770,7 +1775,7 @@ def process_disk_encryption_namespace(cmd, namespace):
 
 
 def process_assign_identity_namespace(cmd, namespace):
-    _validate_vm_vmss_msi(cmd, namespace, from_set_command=True)
+    _validate_vm_vmss_msi(cmd, namespace, is_identity_assign=True)
 
 
 def process_remove_identity_namespace(cmd, namespace):

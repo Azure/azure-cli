@@ -1017,15 +1017,14 @@ def load_arguments(self, _):
     for scope in ['vm create', 'vmss create', 'vm identity assign', 'vmss identity assign']:
         with self.argument_context(scope) as c:
             arg_group = 'Managed Service Identity' if scope.split()[-1] == 'create' else None
-            c.argument('identity_scope', options_list=['--scope'], arg_group=arg_group, help="Scope that the system assigned identity can access")
+            c.argument('identity_scope', options_list=['--scope'], arg_group=arg_group,
+                       help="Scope that the system assigned identity can access. ")
             c.ignore('identity_role_id')
 
     for scope in ['vm create', 'vmss create']:
         with self.argument_context(scope) as c:
             c.argument('identity_role', options_list=['--role'], arg_group='Managed Service Identity',
-                       help='Role name or id the system assigned identity will have. '
-                            'Please note that the default value "Contributor" will be removed in the future version 2.35.0, '
-                            "so please specify '--role' and '--scope' at the same time when assigning a role to the managed identity")
+                       help='Role name or id the system assigned identity will have. ')
 
     for scope in ['vm identity assign', 'vmss identity assign']:
         with self.argument_context(scope) as c:
