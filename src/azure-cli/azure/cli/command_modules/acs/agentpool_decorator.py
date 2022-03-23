@@ -54,8 +54,6 @@ class AKSAgentPoolParamDict(BaseAKSParamDict):
 
     Only expose the "get" method externally to obtain parameter values, while recording usage.
     """
-    def __init__(self, param_dict: Dict):
-        super().__init__(param_dict)
 
 
 # pylint: disable=too-many-public-methods
