@@ -66,8 +66,8 @@ if not exist %WIX_DIR% (
     mkdir %WIX_DIR%
     pushd %WIX_DIR%
     echo Downloading Wix.
-    curl -o wix-archive.zip %WIX_DOWNLOAD_URL%
-    unzip -q wix-archive.zip
+    curl --output wix-archive.zip %WIX_DOWNLOAD_URL%
+    unzip wix-archive.zip
     if %errorlevel% neq 0 goto ERROR
     del wix-archive.zip
     echo Wix downloaded and extracted successfully.
@@ -84,8 +84,8 @@ if not exist %PYTHON_DIR% (
     pushd %PYTHON_DIR%
 
     echo Downloading Python
-    curl -o python-archive.zip %PYTHON_DOWNLOAD_URL%
-    unzip -q python-archive.zip
+    curl --output python-archive.zip %PYTHON_DOWNLOAD_URL%
+    unzip python-archive.zip
     if %errorlevel% neq 0 goto ERROR
     del python-archive.zip
     echo Python downloaded and extracted successfully
@@ -96,7 +96,7 @@ if not exist %PYTHON_DIR% (
     del python*._pth
 
     echo Installing pip
-    curl -o get-pip.py %GET_PIP_DOWNLOAD_URL%
+    curl --output get-pip.py %GET_PIP_DOWNLOAD_URL%
     %PYTHON_DIR%\python.exe get-pip.py
     del get-pip.py
     echo Pip set up successful
@@ -115,7 +115,7 @@ for %%a in (%CLI_SRC%\azure-cli %CLI_SRC%\azure-cli-core %CLI_SRC%\azure-cli-tel
    %BUILDING_DIR%\python.exe -m pip install --no-warn-script-location --no-cache-dir --no-deps .
    popd
 )
-%BUILDING_DIR%\python.exe -m pip install --no-warn-script-location -r %CLI_SRC%\azure-cli\requirements.py3.windows.txt
+%BUILDING_DIR%\python.exe -m pip install --no-warn-script-location --requirement %CLI_SRC%\azure-cli\requirements.py3.windows.txt
 
 if %errorlevel% neq 0 goto ERROR
 
@@ -186,8 +186,8 @@ if exist "%PROPAGATE_ENV_CHANGE_DIR%\propagate_env_change.exe" (
 ) else (
     pushd %PROPAGATE_ENV_CHANGE_DIR%
     echo Downloading propagate_env_change.exe.
-    curl -o propagate_env_change.zip %PROPAGATE_ENV_CHANGE_DOWNLOAD_URL% -k
-    unzip -q propagate_env_change.zip
+    curl --output propagate_env_change.zip %PROPAGATE_ENV_CHANGE_DOWNLOAD_URL%
+    unzip propagate_env_change.zip
     if %errorlevel% neq 0 goto ERROR
     del propagate_env_change.zip
     echo propagate_env_change.exe downloaded and extracted successfully.
