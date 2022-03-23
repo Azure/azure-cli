@@ -36,17 +36,17 @@ steps:
       git config --global user.email "AzurePipelines"
       git config --global user.name "AzurePipelines"
 
-#       pull && rebase
-       git checkout dev
-       git pull
-       git checkout $(System.PullRequest.SourceBranch)
-       git rebase dev
+      # pull && rebase
+      git checkout dev
+      git pull
+      git checkout $(System.PullRequest.SourceBranch)
+      git rebase dev
 
       # add upstream && rebase
-#      git remote -v
-#      git remote add upstream https://github.com/Azure/azure-cli.git
-#      git remote -v
-#      git rebase upstream/dev
+      # git remote -v
+      # git remote add upstream https://github.com/Azure/azure-cli.git
+      # git remote -v
+      # git rebase upstream/dev
 
       # Test specific module
       module="${{ parameters.module }}"
@@ -59,7 +59,7 @@ steps:
       if [[ "$(Build.Reason)" == "PullRequest" && "${{ parameters.fullTest }}" == 'False' ]]; then
         echo "Running incremental test"
         azdev test --no-exitfirst --repo=./ --src=HEAD --tgt=origin/$(System.PullRequest.TargetBranch) --cli-ci --profile ${{ parameters.profile }} --verbose -a "--durations=10"
-#        azdev test --no-exitfirst --repo=./ --src=HEAD --tgt=upstream/$(System.PullRequest.TargetBranch) --cli-ci --profile ${{ parameters.profile }} --verbose -a "--durations=10"
+        # azdev test --no-exitfirst --repo=./ --src=HEAD --tgt=upstream/$(System.PullRequest.TargetBranch) --cli-ci --profile ${{ parameters.profile }} --verbose -a "--durations=10"
       else
         echo "Running full test"
         azdev test --no-exitfirst --profile ${{ parameters.profile }} --verbose -a "--durations=10"
