@@ -7,7 +7,7 @@ from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccoun
 
 
 class AmsEncryptionTests(ScenarioTest):
-    @ResourceGroupPreparer(location='centralus')
+    @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
     @KeyVaultPreparer(location='centralus', additional_params='--enable-purge-protection')
     def test_ams_encryption_set_show(self, resource_group, storage_account_for_create, key_vault):
