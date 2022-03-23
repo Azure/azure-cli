@@ -42,6 +42,7 @@ class BaseAKSModelsTestCase(unittest.TestCase):
         api_version = sdk_profile.default_api_version
         module_name = "azure.mgmt.containerservice.v{}.models".format(api_version.replace("-", "_"))
         module = importlib.import_module(module_name)
+
         models = BaseAKSModels(self.cmd, ResourceType.MGMT_CONTAINERSERVICE)
         self.assertEqual(models.raw_models, module)
 
@@ -55,6 +56,9 @@ class BaseAKSParamDictTestCase(unittest.TestCase):
     def test_get(self):
         param_dict = BaseAKSParamDict({"abc": "xyz"})
         self.assertEqual(param_dict.get("abc"), "xyz")
+
+        param_dict_2 = BaseAKSParamDict({})
+        self.assertEqual(param_dict_2.get("abc", True), True)
 
     def test_keys(self):
         param_dict = BaseAKSParamDict({"abc": "xyz"})
