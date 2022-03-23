@@ -926,6 +926,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'webapp connection show --id {}'.format(id),
             checks = [
                 self.check('secretStore.keyVaultId', keyvault_id),
+                self.check('vNetSolution', None),
             ]
         )
 
@@ -942,6 +943,70 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
         for conn in self.cmd('webapp connection list --source-id {}'.format(source_id)).get_output_in_json():
             self.cmd('webapp connection delete --id {} --yes'.format(conn.get('id')))
+
+
+    @live_only()
+    @unittest.skip('"run_cli_cmd" could only work at live mode, please comment it for live test')
+    def test_webapp_storageblob_vnet(self):
+        self.kwargs.update({
+            'subscription': get_subscription_id(self.cli_ctx),
+            'source_resource_group': 'servicelinker-test-linux-group',
+            'target_resource_group': 'servicelinker-test-linux-group',
+            'site': 'servicelinker-storage-app',
+            'account': 'servicelinkerstorage',
+        })
+
+        # prepare params
+        name = 'testconn'
+        source_id = SOURCE_RESOURCES.get(RESOURCE.WebApp).format(**self.kwargs)
+        target_id = TARGET_RESOURCES.get(RESOURCE.StorageBlob).format(**self.kwargs)
+
+        # create connection
+        output = self.cmd('webapp connection create storage-blob --connection {} --source-id {} --target-id {} '
+                 '--secret --client-type python --service-endpoint'.format(name, source_id, target_id)).get_output_in_json()
+
+        id = output.get('id')
+        self.cmd(
+            'webapp connection list --source-id {}'.format(source_id),
+            checks = [
+                self.check('length(@)', 1),
+            ]
+        )
+
+        self.cmd(
+            'webapp connection show --id {}'.format(id),
+            checks = [
+                self.check('vNetSolution.type', "serviceEndpoint"),
+            ]
+        )
+
+        # update connection without vNetSolution
+        result = self.cmd('webapp connection update storage-blob --id {} '
+                 '--secret'.format(id)).get_output_in_json()
+
+        update_result = self.cmd(
+            'webapp connection show --id {}'.format(id),
+            checks = [
+                self.check('vNetSolution.type', "serviceEndpoint"),
+            ]
+        ).get_output_in_json()
+        print(update_result)
+
+        # update connection vnet solution
+        self.cmd('webapp connection update storage-blob --id {} '
+                 '--secret --service-endpoint false'.format(id))
+
+        update_result = self.cmd(
+            'webapp connection show --id {}'.format(id),
+            checks = [
+                self.check('vNetSolution', None),
+            ]
+        ).get_output_in_json()
+
+        for conn in self.cmd('webapp connection list --source-id {}'.format(source_id)).get_output_in_json():
+            self.cmd('webapp connection delete --id {} --yes'.format(conn.get('id')))
+
+
 
 
     @record_only()
