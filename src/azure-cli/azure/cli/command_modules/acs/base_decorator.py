@@ -83,9 +83,9 @@ class BaseAKSParamDict:
     def __increase(self, key):
         self.__count[key] = self.__count.get(key, 0) + 1
 
-    def get(self, key):
+    def get(self, key, default=None):
         self.__increase(key)
-        return self.__store.get(key)
+        return self.__store.get(key, default)
 
     def keys(self):
         return self.__store.keys()

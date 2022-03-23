@@ -57,6 +57,9 @@ class BaseAKSParamDictTestCase(unittest.TestCase):
         param_dict = BaseAKSParamDict({"abc": "xyz"})
         self.assertEqual(param_dict.get("abc"), "xyz")
 
+        param_dict_2 = BaseAKSParamDict({})
+        self.assertEqual(param_dict_2.get("abc", True), True)
+
     def test_keys(self):
         param_dict = BaseAKSParamDict({"abc": "xyz"})
         self.assertEqual(list(param_dict.keys()), ["abc"])

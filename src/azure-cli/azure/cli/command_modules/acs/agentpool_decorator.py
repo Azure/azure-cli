@@ -48,7 +48,6 @@ class AKSAgentPoolModels(BaseAKSModels):
         return self.AgentPool
 
 
-
 # pylint: disable=too-few-public-methods
 class AKSAgentPoolParamDict(BaseAKSParamDict):
     """Store the original parameters passed in by aks agentpool series of commands as an internal dictionary.
