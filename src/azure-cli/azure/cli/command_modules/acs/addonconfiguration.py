@@ -345,7 +345,7 @@ def ensure_container_insights_for_monitoring(
             for _ in range(3):
                 try:
                     location_list_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
-                        f"subscriptions/{subscription_id}/locations?api-version=2019-11-01"
+                        f"/subscriptions/{subscription_id}/locations?api-version=2019-11-01"
                     r = send_raw_request(cmd.cli_ctx, "GET", location_list_url)
                     # this is required to fool the static analyzer. The else statement will only run if an exception
                     # is thrown, but flake8 will complain that e is undefined if we don't also define it here.
@@ -366,7 +366,7 @@ def ensure_container_insights_for_monitoring(
             for _ in range(3):
                 try:
                     feature_check_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
-                        f"subscriptions/{subscription_id}/providers/Microsoft.Insights?api-version=2020-10-01"
+                        f"/subscriptions/{subscription_id}/providers/Microsoft.Insights?api-version=2020-10-01"
                     r = send_raw_request(cmd.cli_ctx, "GET", feature_check_url)
                     error = None
                     break
