@@ -30,6 +30,7 @@ def validate_decorator_mode(decorator_mode) -> bool:
     return is_valid_decorator_mode
 
 
+# pylint: disable=too-few-public-methods
 class BaseAKSModels:
     """A base class for storing the models used by aks commands.
 
@@ -43,10 +44,12 @@ class BaseAKSModels:
         self.__cmd = cmd
         self.__raw_models = None
         self.resource_type = resource_type
-        self.set_up_models()
+        self.__set_up_base_aks_models()
 
     @property
     def raw_models(self):
+        """Load the module that stores all aks models.
+        """
         if self.__raw_models is None:
             self.__raw_models = self.__cmd.get_models(
                 resource_type=self.resource_type,
@@ -54,7 +57,9 @@ class BaseAKSModels:
             ).models
         return self.__raw_models
 
-    def set_up_models(self):
+    def __set_up_base_aks_models(self):
+        """Expose all aks models as properties of the class.
+        """
         for model_name, model_class in vars(self.raw_models).items():
             if not model_name.startswith('_'):
                 setattr(self, model_name, model_class)
@@ -78,9 +83,9 @@ class BaseAKSParamDict:
     def __increase(self, key):
         self.__count[key] = self.__count.get(key, 0) + 1
 
-    def get(self, key):
+    def get(self, key, default=None):
         self.__increase(key)
-        return self.__store.get(key)
+        return self.__store.get(key, default)
 
     def keys(self):
         return self.__store.keys()
