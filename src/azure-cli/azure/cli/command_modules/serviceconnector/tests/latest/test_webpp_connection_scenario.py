@@ -945,8 +945,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             self.cmd('webapp connection delete --id {} --yes'.format(conn.get('id')))
 
 
-    @live_only()
-    @unittest.skip('"run_cli_cmd" could only work at live mode, please comment it for live test')
+    @record_only()
     def test_webapp_storageblob_vnet(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
