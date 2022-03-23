@@ -34,9 +34,9 @@ def load_arguments(self, _):
 
     # REUSABLE ARGUMENT DEFINITIONS
     api_id = CLIArgumentType(arg_group='API',
-            help='API identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.')
+                             help='API identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.')
     schema_id = CLIArgumentType(arg_group='Schema',
-            help='Schema identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.')
+                                help='Schema identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.')
 
     from azure.cli.core.commands.parameters import tags_type
     from azure.cli.core.commands.validators import get_default_location_from_resource_group
@@ -344,8 +344,7 @@ def load_arguments(self, _):
         c.argument('service_name', options_list=['--service-name', '-n'],
                    help="The name of the API Management service instance.")
         c.argument(
-            'api_id',
-           arg_type=api_id)
+            'api_id', arg_type=api_id)
         c.argument(
             'operation_id',
             help='Operation identifier within an API. Must be unique in the current API Management service instance.')
