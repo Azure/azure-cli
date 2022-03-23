@@ -365,3 +365,11 @@ def cf_table_service(cli_ctx, kwargs):
 
 def cf_table_client(cli_ctx, kwargs):
     return cf_table_service(cli_ctx, kwargs).get_table_client(table_name=kwargs.pop('table_name'))
+
+
+def cf_account_sas(cli_ctx, kwargs):
+    t_account_sas = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_BLOB,
+                            '_shared.shared_access_signature#SharedAccessSignature')
+
+    return t_account_sas(account_name=kwargs.pop('account_name', None),
+                      account_key=kwargs.pop('account_key', None))

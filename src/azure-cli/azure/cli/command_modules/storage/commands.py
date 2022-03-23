@@ -18,7 +18,7 @@ from azure.cli.command_modules.storage._client_factory import (cf_sa, cf_blob_co
                                                                cf_blob_client, cf_blob_lease_client,
                                                                cf_or_policy, cf_container_client,
                                                                cf_queue_service, cf_table_service, cf_table_client,
-                                                               cf_sa_blob_inventory, cf_blob_service)
+                                                               cf_sa_blob_inventory, cf_blob_service, cf_account_sas)
 
 from azure.cli.core.commands import CliCommandType
 from azure.cli.core.commands.arm import show_exception_handler
@@ -138,9 +138,9 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                   transform=lambda x: getattr(x, 'keys', x))
         g.command('revoke-delegation-keys', 'revoke_user_delegation_keys', min_api='2019-04-01')
 
-    with self.command_group('storage account',
-                            command_type=get_custom_sdk('account', cloud_storage_account_service_factory)) as g:
-        g.storage_command('generate-sas', 'generate_sas')
+    with self.command_group('storage account', resource_type=ResourceType.DATA_STORAGE_BLOB,
+                            custom_command_type=get_custom_sdk('account', cf_account_sas)) as g:
+        g.storage_custom_command_oauth('generate-sas', 'generate_sas')
 
     blob_inventory_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.storage.operations#BlobInventoryPoliciesOperations.{}',

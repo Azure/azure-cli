@@ -26,7 +26,7 @@ def regenerate_key(cmd, client, account_name, key_name, resource_group_name=None
     return client.regenerate_key(resource_group_name, account_name, regenerate_key_parameters)
 
 
-def generate_sas(client, services, resource_types, permission, expiry, start=None, ip=None, protocol=None):
+def generate_sas(client, services, resource_types, permission, expiry, start=None, ip=None, protocol=None, **kwargs):
     from azure.cli.core.azclierror import RequiredArgumentMissingError
     if not client.account_name or not client.account_key:
         error_msg = """
@@ -40,8 +40,8 @@ def generate_sas(client, services, resource_types, permission, expiry, start=Non
                 quoting to preserve literal character interpretation.
         """
         raise RequiredArgumentMissingError(error_msg)
-    return client.generate_shared_access_signature(services, resource_types, permission, expiry,
-                                                   start=start, ip=ip, protocol=protocol)
+    return client.generate_account(services=services, resource_types=resource_types, permission=permission,
+                                   expiry=expiry, start=start, ip=ip, protocol=protocol)
 
 
 # pylint: disable=too-many-locals, too-many-statements, too-many-branches, unused-argument

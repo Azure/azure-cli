@@ -790,11 +790,15 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             self.cmd('storage account generate-sas --resource-types o --services b --expiry 2000-01-01 '
                      '--permissions r --connection-string {}'.format(invalid_connection_string))
 
-        sas = self.storage_cmd('storage account generate-sas --resource-types o --services b '
-                               '--expiry 2046-12-31T08:23Z --permissions r --https-only ',
+        sas = self.storage_cmd('storage account generate-sas --resource-types sco --services bqtf '
+                               '--expiry 2046-12-31T08:23Z --permissions rwdxylacupfti --https-only ',
                                storage_account_info).output
         self.assertIn('sig=', sas, 'SAS token {} does not contain sig segment'.format(sas))
-        self.assertIn('se=', sas, 'SAS token {} does not contain se segment'.format(sas))
+        self.assertIn('se=', sas, 'SAS token {} does not contain se(expiry) segment'.format(sas))
+        self.assertIn('sp=rwdxylacupfti', sas, 'SAS token {} does not contain permission segment'.format(sas))
+        self.assertIn('spr=https', sas, 'SAS token {} does not contain https segment'.format(sas))
+        self.assertRegex(sas, '.*ss=[bqtf]{4}.*', 'SAS token {} does not contain services segment'.format(sas))
+        self.assertRegex(sas, '.*srt=[sco]{3}.*', 'SAS token {} does not contain resource type segment'.format(sas))
 
     def test_list_locations(self):
         self.cmd('az account list-locations',

@@ -23,7 +23,8 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           validate_fs_public_access, validate_logging_version, validate_or_policy, validate_policy,
                           get_api_version_type, blob_download_file_path_validator, blob_tier_validator, validate_subnet,
                           validate_immutability_arguments, validate_blob_name_for_upload, validate_share_close_handle,
-                          add_upload_progress_callback, blob_tier_validator_track2, add_download_progress_callback)
+                          add_upload_progress_callback, blob_tier_validator_track2, add_download_progress_callback,
+                          services_type_v2, resource_type_type_v2)
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines, too-many-branches, line-too-long
@@ -667,11 +668,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help="SMB channel encryption supported by server. Valid values are AES-128-CCM, AES-128-GCM, "
                         "AES-256-GCM. Should be passed as a string with delimiter ';' ")
 
-    with self.argument_context('storage account generate-sas') as c:
-        t_account_permissions = self.get_sdk('common.models#AccountPermissions')
+    with self.argument_context('storage account generate-sas', resource_type=ResourceType.DATA_STORAGE_BLOB) as c:
+        t_account_permissions = self.get_sdk('_shared.models#AccountSasPermissions',
+                                             resource_type=ResourceType.DATA_STORAGE_BLOB)
         c.register_sas_arguments()
-        c.argument('services', type=services_type(self))
-        c.argument('resource_types', type=resource_type_type(self))
+        c.argument('services', type=services_type_v2(self))
+        c.argument('resource_types', type=resource_type_type_v2(self))
         c.argument('expiry', type=get_datetime_type(True))
         c.argument('start', type=get_datetime_type(True))
         c.argument('account_name', acct_name_type, options_list=['--account-name'])
