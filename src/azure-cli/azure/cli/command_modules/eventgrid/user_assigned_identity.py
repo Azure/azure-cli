@@ -16,7 +16,7 @@ class AddUserAssignedIdentities(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):
         valuesLen = len(values)
         if valuesLen != 3:
-            raise CLIError('usage error: --delivery-attribute-mapping userAssignedIdentityArmId clientId principalId')
+            raise CLIError('usage error: --user-assigned-identity userAssignedIdentityArmId clientId principalId')
         armId = values[0]
         clientId = values[1]
         principalId = values[2]
@@ -24,6 +24,6 @@ class AddUserAssignedIdentities(argparse._AppendAction):
             principalId=principalId,
             clientId=clientId)
 
-        if namespace.user_assigned_identities is None:
-            namespace.user_assigned_identities = {}
-        namespace.user_assigned_identities[armId] = user_identity_property
+        if namespace.user_assigned_identity is None:
+            namespace.user_assigned_identity = {}
+        namespace.user_assigned_identity[armId] = user_identity_property

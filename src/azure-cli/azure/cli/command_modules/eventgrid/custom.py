@@ -133,7 +133,7 @@ def cli_topic_create_or_update(
         inbound_ip_rules=None,
         sku=SKU_BASIC,
         identity=None,
-        user_assigned_identities=None,
+        user_assigned_identity=None,
         kind=KIND_AZURE,
         extended_location_name=None,
         extended_location_type=None):
@@ -148,7 +148,7 @@ def cli_topic_create_or_update(
 
     kind_name = _get_kind(kind)
     extended_location = _get_extended_location(kind, extended_location_name, extended_location_type)
-    identity_info = _get_identity_info(identity, kind, user_assigned_identities)
+    identity_info = _get_identity_info(identity, kind, user_assigned_identity)
 
     topic_info = Topic(
         location=location,
@@ -177,13 +177,13 @@ def cli_topic_update(
         inbound_ip_rules=None,
         sku=None,
         identity=None,
-        user_assigned_identities=None):
+        user_assigned_identity=None):
     sku_info = None
     if sku is not None:
         sku_name = _get_sku(sku)
         sku_info = ResourceSku(name=sku_name)
 
-    identity_info = _get_identity_info_only_if_not_none(identity, user_assigned_identities)
+    identity_info = _get_identity_info_only_if_not_none(identity, user_assigned_identity)
     topic_update_parameters = TopicUpdateParameters(
         tags=tags,
         public_network_access=public_network_access,
@@ -220,13 +220,13 @@ def cli_domain_update(
         inbound_ip_rules=None,
         sku=None,
         identity=None,
-        user_assigned_identities=None):
+        user_assigned_identity=None):
     sku_info = None
     if sku is not None:
         sku_name = _get_sku(sku)
         sku_info = ResourceSku(name=sku_name)
 
-    identity_info = _get_identity_info_only_if_not_none(identity, user_assigned_identities)
+    identity_info = _get_identity_info_only_if_not_none(identity, user_assigned_identity)
     domain_update_parameters = DomainUpdateParameters(
         tags=tags,
         public_network_access=public_network_access,
@@ -278,7 +278,7 @@ def cli_domain_create_or_update(
         inbound_ip_rules=None,
         sku=SKU_BASIC,
         identity=None,
-        user_assigned_identities=None):
+        user_assigned_identity=None):
     final_input_schema, input_schema_mapping = _get_input_schema_and_mapping(
         input_schema,
         input_mapping_fields,
@@ -288,7 +288,7 @@ def cli_domain_create_or_update(
 
     identity_info = None
 
-    identity_info = _get_identity_info(identity, user_assigned_identities)
+    identity_info = _get_identity_info(identity, user_assigned_identity)
     domain_info = Domain(
         location=location,
         tags=tags,
@@ -646,9 +646,9 @@ def cli_system_topic_create_or_update(
         location=None,
         tags=None,
         identity=None,
-        user_assigned_identities=None):
+        user_assigned_identity=None):
 
-    identity_info = _get_identity_info_only_if_not_none(identity, user_assigned_identities)
+    identity_info = _get_identity_info_only_if_not_none(identity, user_assigned_identity)
 
     system_topic_info = SystemTopic(
         location=location,
@@ -669,9 +669,9 @@ def cli_system_topic_update(
         system_topic_name,
         tags=None,
         identity=None,
-        user_assigned_identities=None):
+        user_assigned_identity=None):
 
-    identity_info = _get_identity_info_only_if_not_none(identity, user_assigned_identities)
+    identity_info = _get_identity_info_only_if_not_none(identity, user_assigned_identity)
 
     system_topic_update_parameters = SystemTopicUpdateParameters(
         tags=tags,

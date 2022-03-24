@@ -21,7 +21,7 @@ from .advanced_filter import EventSubscriptionAddFilter
 from .event_channel_filter import EventChannelAddFilter
 from .inbound_ip_rules import AddInboundIpRule
 from .delivery_attribute_mapping import AddDeliveryAttributeMapping
-from .user_assigned_identities import AddUserAssignedIdentities
+from .user_assigned_identity import AddUserAssignedIdentities
 
 included_event_types_type = CLIArgumentType(
     help="A space-separated list of event types (e.g., Microsoft.Storage.BlobCreated and Microsoft.Storage.BlobDeleted). In order to subscribe to all default event types, do not specify any value for this argument. For event grid topics, event types are customer defined. For Azure events, e.g., Storage Accounts, IoT Hub, etc., you can query their event types using this CLI command 'az eventgrid topic-type list-event-types'.",
@@ -226,12 +226,12 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         c.argument('destination_resource_group_name', help="Azure Resource Group of the customer creating the event channel. The partner topic associated with the event channel will be created under this resource group.")
         c.argument('destination_subscription_id', help="Azure subscription Id of the customer creating the event channel. The partner topic associated with the event channel will be created under this Azure subscription.")
         c.argument('topic_type', help="Name of the topic type.", completer=get_resource_name_completion_list('Microsoft.EventGrid/topictypes'))
-        c.argument('user_assigned_identities',
+        c.argument('user_assigned_identity',
                    action=AddUserAssignedIdentities,
                    nargs='+',
                    is_preview=True,
-                   help='Add user assigned identities when identityType is user or mixed. This attribute is valid for all destination types except StorageQueue. Multiple attributes can be specified by using more than one `--user-assigned-identities` argument',
-                   options_list=['--user-assigned-identities'])
+                   help='Add user assigned identities when identityType is user or mixed. This attribute is valid for all destination types except StorageQueue. Multiple attributes can be specified by using more than one `--user-assigned-identity` argument',
+                   options_list=['--user-assigned-identity'])
 
     with self.argument_context('eventgrid topic') as c:
         c.argument('topic_name', arg_type=name_type, help='Name of the topic.', id_part='name', completer=get_resource_name_completion_list('Microsoft.EventGrid/topics'))
