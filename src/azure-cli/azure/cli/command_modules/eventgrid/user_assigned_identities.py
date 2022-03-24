@@ -10,7 +10,6 @@ from azure.mgmt.eventgrid.models import (
 )
 
 
-
 # pylint: disable=protected-access
 # pylint: disable=too-few-public-methods
 class AddUserAssignedIdentities(argparse._AppendAction):
@@ -22,10 +21,8 @@ class AddUserAssignedIdentities(argparse._AppendAction):
         clientId = values[1]
         principalId = values[2]
         user_identity_property = UserIdentityProperties(
-        principalId=principalId,
-        clientId=clientId)
-
-        
+            principalId=principalId,
+            clientId=clientId)
 
         if namespace.user_assigned_identities is None:
             namespace.user_assigned_identities = {}

@@ -48,8 +48,7 @@ from azure.mgmt.eventgrid.models import (
     DeliveryWithResourceIdentity,
     DeadLetterWithResourceIdentity,
     EventChannelFilter,
-    ExtendedLocation,
-    UserIdentityProperties)
+    ExtendedLocation)
 
 logger = get_logger(__name__)
 
@@ -134,7 +133,7 @@ def cli_topic_create_or_update(
         inbound_ip_rules=None,
         sku=SKU_BASIC,
         identity=None,
-        user_assigned_identities = None,
+        user_assigned_identities=None,
         kind=KIND_AZURE,
         extended_location_name=None,
         extended_location_type=None):
@@ -149,10 +148,7 @@ def cli_topic_create_or_update(
 
     kind_name = _get_kind(kind)
     extended_location = _get_extended_location(kind, extended_location_name, extended_location_type)
-   
     identity_info = _get_identity_info(identity, kind, user_assigned_identities)
-    
-    
 
     topic_info = Topic(
         location=location,
@@ -181,7 +177,7 @@ def cli_topic_update(
         inbound_ip_rules=None,
         sku=None,
         identity=None,
-        user_assigned_identities = None):
+        user_assigned_identities=None):
     sku_info = None
     if sku is not None:
         sku_name = _get_sku(sku)
@@ -224,7 +220,7 @@ def cli_domain_update(
         inbound_ip_rules=None,
         sku=None,
         identity=None,
-        user_assigned_identities = None):
+        user_assigned_identities=None):
     sku_info = None
     if sku is not None:
         sku_name = _get_sku(sku)
@@ -282,7 +278,7 @@ def cli_domain_create_or_update(
         inbound_ip_rules=None,
         sku=SKU_BASIC,
         identity=None,
-        user_assigned_identities = None):
+        user_assigned_identities=None):
     final_input_schema, input_schema_mapping = _get_input_schema_and_mapping(
         input_schema,
         input_mapping_fields,
@@ -650,7 +646,7 @@ def cli_system_topic_create_or_update(
         location=None,
         tags=None,
         identity=None,
-        user_assigned_identities = None):
+        user_assigned_identities=None):
 
     identity_info = _get_identity_info_only_if_not_none(identity, user_assigned_identities)
 
@@ -673,7 +669,7 @@ def cli_system_topic_update(
         system_topic_name,
         tags=None,
         identity=None,
-        user_assigned_identities = None):
+        user_assigned_identities=None):
 
     identity_info = _get_identity_info_only_if_not_none(identity, user_assigned_identities)
 
@@ -1815,7 +1811,7 @@ def _validate_subscription_id_matches_default_subscription_id(
         raise CLIError('The subscription ID in the specified resource-id'
                        ' does not match the default subscription ID. To set the default subscription ID,'
                        ' use az account set ID_OR_NAME, or use the global argument --subscription ')
-    
+
 
 def _get_identity_info(identity=None, kind=None, user_identity_properties=None):
     if (identity is not None and identity.lower() != IDENTITY_NONE.lower()):
