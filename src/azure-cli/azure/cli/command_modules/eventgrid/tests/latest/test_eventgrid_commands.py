@@ -286,6 +286,71 @@ class EventGridTests(ScenarioTest):
         self.cmd('az eventgrid domain delete --name {domain_name3} --resource-group {rg}')
 
     @ResourceGroupPreparer()
+    def test_create_topic_user_assigned_identity(self, resource_group):
+        endpoint_url = 'https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid?functionName=EventGridTrigger1&code=<HIDDEN>'
+        endpoint_baseurl = 'https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid'
+        extended_location_name = '/subscriptions/5b4b650e-28b9-4790-b3ab-ddbd88d727c4/resourcegroups/devexprg/providers/Microsoft.ExtendedLocation/CustomLocations/somelocation'
+
+        topic_name = self.create_random_name(prefix='cli', length=40)
+        topic_name2 = self.create_random_name(prefix='cli', length=40)
+        topic_name3 = self.create_random_name(prefix='cli', length=40)
+        topic_name4 = self.create_random_name(prefix='cli', length=40)
+        event_subscription_name = self.create_random_name(prefix='cli', length=40)
+        
+        self.kwargs.update({
+            'topic_name': topic_name,
+            'topic_name2': topic_name2,
+            'topic_name3': topic_name3,
+            'topic_name4': topic_name4,
+            'location': 'centraluseuap',
+            'event_subscription_name': event_subscription_name,
+            'endpoint_url': endpoint_url,
+            'endpoint_baseurl': endpoint_baseurl,
+            'extended_location_name': extended_location_name,
+        })
+        
+        outputtopic = self.cmd('az eventgrid topic create --name {topic_name4} --resource-group {rg} --location {location} --public-network-access disabled --inbound-ip-rules 19.12.43.90/12 allow --inbound-ip-rules 19.12.43.70/20 allow --sku BASic --identity mixed --user-assigned-identities /subscriptions/5b4b650e-28b9-4790-b3ab-ddbd88d727c4/resourceGroups/amh/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ahamadtestidentity1 26b9b438-7fe8-482f-b732-ea99c70f2abb 72f988bf-86f1-41af-91ab-2d7cd011db47').get_output_in_json()
+        self.check(outputtopic['type'], 'Microsoft.EventGrid/topics')
+        self.check(outputtopic['name'], self.kwargs['topic_name3'])
+        self.check(outputtopic['publicNetworkAccess'], 'Disabled')
+        self.check(outputtopic['inboundIpRules'][0], '19.12.43.90/102')
+        self.check(outputtopic['inboundIpRules'][1], '19.12.43.70/81')
+        self.check(outputtopic['provisioningState'], 'Succeeded')
+        self.check(outputtopic['sku'], 'Basic')
+        self.check(outputtopic['identity'], 'SystemAssigned, UserAssigned')
+        
+        outputtopic = self.cmd('az eventgrid topic create --name {topic_name4} --resource-group {rg} --location {location} --public-network-access disabled --inbound-ip-rules 19.12.43.90/12 allow --inbound-ip-rules 19.12.43.70/20 allow --sku BASic --identity userassigned --user-assigned-identities /subscriptions/5b4b650e-28b9-4790-b3ab-ddbd88d727c4/resourceGroups/amh/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ahamadtestidentity1 26b9b438-7fe8-482f-b732-ea99c70f2abb 72f988bf-86f1-41af-91ab-2d7cd011db47').get_output_in_json()
+        self.check(outputtopic['type'], 'Microsoft.EventGrid/topics')
+        self.check(outputtopic['name'], self.kwargs['topic_name4'])
+        self.check(outputtopic['publicNetworkAccess'], 'Disabled')
+        self.check(outputtopic['inboundIpRules'][0], '19.12.43.90/102')
+        self.check(outputtopic['inboundIpRules'][1], '19.12.43.70/81')
+        self.check(outputtopic['provisioningState'], 'Succeeded')
+        self.check(outputtopic['sku'], 'Basic')
+        self.check(outputtopic['identity'], 'UserAssigned')
+        
+        outputtopic = self.cmd('az eventgrid topic create --name {topic_name2} --resource-group {rg} --location {location} --public-network-access disabled --inbound-ip-rules 19.12.43.90/12 allow --inbound-ip-rules 19.12.43.70/20 allow --sku BASic --identity systemassigned ').get_output_in_json()
+        self.check(outputtopic['type'], 'Microsoft.EventGrid/topics')
+        self.check(outputtopic['name'], self.kwargs['topic_name4'])
+        self.check(outputtopic['publicNetworkAccess'], 'Disabled')
+        self.check(outputtopic['inboundIpRules'][0], '19.12.43.90/102')
+        self.check(outputtopic['inboundIpRules'][1], '19.12.43.70/81')
+        self.check(outputtopic['provisioningState'], 'Succeeded')
+        self.check(outputtopic['sku'], 'Basic')
+        self.check(outputtopic['identity'], 'SystemAssigned')
+        
+        outputtopic = self.cmd('az eventgrid topic update --name {topic_name2} --resource-group {rg} --identity userassigned --user-assigned-identities /subscriptions/5b4b650e-28b9-4790-b3ab-ddbd88d727c4/resourceGroups/amh/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ahamadtestidentity1 26b9b438-7fe8-482f-b732-ea99c70f2abb 72f988bf-86f1-41af-91ab-2d7cd011db47').get_output_in_json()
+        self.check(outputtopic['type'], 'Microsoft.EventGrid/topics')
+        self.check(outputtopic['name'], self.kwargs['topic_name4'])
+        self.check(outputtopic['publicNetworkAccess'], 'Disabled')
+        self.check(outputtopic['inboundIpRules'][0], '19.12.43.90/102')
+        self.check(outputtopic['inboundIpRules'][1], '19.12.43.70/81')
+        self.check(outputtopic['provisioningState'], 'Succeeded')
+        self.check(outputtopic['sku'], 'Basic')
+        self.check(outputtopic['identity'], 'SystemAssigned')
+        
+        
+    @ResourceGroupPreparer()
     def test_create_topic(self, resource_group):
         endpoint_url = 'https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid?functionName=EventGridTrigger1&code=<HIDDEN>'
         endpoint_baseurl = 'https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid'
