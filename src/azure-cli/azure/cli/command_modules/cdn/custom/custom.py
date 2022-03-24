@@ -31,10 +31,10 @@ from azure.mgmt.cdn.models import (Endpoint, SkuName, EndpointUpdateParameters, 
                                    UrlRewriteAction, UrlRewriteActionParameters, PurgeParameters,
                                    CheckNameAvailabilityInput, CustomDomainParameters, ProbeProtocol,
                                    HealthProbeRequestType, RequestMethodOperator, OriginGroupOverrideAction,
-                                   OriginGroupOverrideActionParameters, ResourceReference, CacheConfiguration, OriginGroupOverride,
-                                   DeliveryRuleRouteConfigurationOverrideAction, RouteConfigurationOverrideActionParameters,
-                                   RuleIsCompressionEnabled, DeliveryRuleSocketAddrCondition,
-                                   SocketAddrMatchConditionParameters,
+                                   OriginGroupOverrideActionParameters, ResourceReference, CacheConfiguration,
+                                   OriginGroupOverride, DeliveryRuleRouteConfigurationOverrideAction,
+                                   RouteConfigurationOverrideActionParameters, RuleIsCompressionEnabled,
+                                   SocketAddrMatchConditionParameters, DeliveryRuleSocketAddrCondition,
                                    DeliveryRuleClientPortCondition, ClientPortMatchConditionParameters,
                                    DeliveryRuleServerPortCondition, ServerPortMatchConditionParameters,
                                    DeliveryRuleHostNameCondition, HostNameMatchConditionParameters,
@@ -65,13 +65,15 @@ def _check_condition_allowed_opertors(conditon_name, operator):
             conditon_allowed_operators = ["Equal"]
         else:
             try:
-                conditon_allowed_operators = [operator.value for _, operator in getattr(sys.modules["azure.mgmt.cdn.models"], conditon_name + "Operator").__members__.items()]
+                attr = getattr(sys.modules["azure.mgmt.cdn.models"], conditon_name + "Operator")
+                conditon_allowed_operators = [operator.value for _, operator in attr.__members__.items()]
             except AttributeError:
                 pass
 
         if len(conditon_allowed_operators) > 0 and operator not in conditon_allowed_operators:
             allowed_operators = ", ".join(conditon_allowed_operators)
-            raise InvalidArgumentValueError(f"{operator} is not a valid operator for {conditon_name}, allowed values are: {allowed_operators}.")
+            raise InvalidArgumentValueError(
+                f"{operator} is not a valid operator for {conditon_name}, allowed values are: {allowed_operators}.")
 
 
 def _check_condition_allowed_match_values_opertors(conditon_name, match_values):
@@ -81,16 +83,22 @@ def _check_condition_allowed_match_values_opertors(conditon_name, match_values):
             conditon_allowed_match_values = [protocol.value for protocol in SslProtocol]
         else:
             try:
-                conditon_allowed_match_values = [match_value.value for _, match_value in getattr(sys.modules["azure.mgmt.cdn.models"], conditon_name + "MatchConditionParametersMatchValuesItem").__members__.items()]
+                attr = getattr(
+                    sys.modules["azure.mgmt.cdn.models"],
+                    conditon_name + "MatchConditionParametersMatchValuesItem")
+                conditon_allowed_match_values = [match_value.value for _, match_value in attr.__members__.items()]
             except AttributeError:
                 pass
 
         if len(conditon_allowed_match_values) > 0:
-            invalid_match_values = [match_value for match_value in match_values if match_value not in conditon_allowed_match_values]
+            invalid_match_values = [match_value for match_value in match_values
+                                    if match_value not in conditon_allowed_match_values]
             if len(invalid_match_values) > 0:
                 allowed_match_values = ", ".join(conditon_allowed_match_values)
                 invalid_match_values = ", ".join(invalid_match_values)
-                raise InvalidArgumentValueError(f"Below match values: {invalid_match_values} are invalid for {conditon_name}, allowed values are: {allowed_match_values}.")
+                raise InvalidArgumentValueError(
+                    f'Below match values: {invalid_match_values} are invalid for {conditon_name}, '
+                    f'allowed values are: {allowed_match_values}.')
 
 
 def default_content_types():
@@ -398,6 +406,7 @@ def create_condition(match_variable=None, operator=None, match_values=None,
 
 
 # pylint: disable=too-many-return-statements
+# pylint: disable=too-many-locals
 def create_action(action_name, cache_behavior=None, cache_duration=None, header_action=None,
                   header_name=None, header_value=None, query_string_behavior=None, query_parameters=None,
                   redirect_type=None, redirect_protocol=None, custom_hostname=None, custom_path=None,
@@ -470,8 +479,9 @@ def create_action(action_name, cache_behavior=None, cache_duration=None, header_
                     origin_group=ResourceReference(id=origin_group),
                     forwarding_protocol=forwarding_protocol)
             else:
-                origin_group_refernce = f'/subscriptions/{get_subscription_id(cmd.cli_ctx)}/resourcegroups/{resource_group_name}' \
-                                        f'/providers/Microsoft.Cdn/profiles/{profile_name}/origingroups/{origin_group}'
+                origin_group_refernce = f'/subscriptions/{get_subscription_id(cmd.cli_ctx)}/resourcegroups/' \
+                                        f'{resource_group_name}/providers/Microsoft.Cdn/profiles/{profile_name}/' \
+                                        f'origingroups/{origin_group}'
 
                 origin_group_override = OriginGroupOverride(
                     origin_group=ResourceReference(id=origin_group_refernce),
@@ -484,7 +494,8 @@ def create_action(action_name, cache_behavior=None, cache_duration=None, header_
                 cache_configuration=CacheConfiguration(
                     query_string_caching_behavior=query_string_caching_behavior,
                     query_parameters=query_parameters,
-                    is_compression_enabled=RuleIsCompressionEnabled.ENABLED.value if is_compression_enabled else RuleIsCompressionEnabled.DISABLED.value,
+                    is_compression_enabled=RuleIsCompressionEnabled.ENABLED.value if is_compression_enabled
+                    else RuleIsCompressionEnabled.DISABLED.value,
                     cache_behavior=cache_behavior,
                     cache_duration=cache_duration
                 ) if enable_caching else None

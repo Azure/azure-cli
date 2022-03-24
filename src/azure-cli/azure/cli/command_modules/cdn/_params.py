@@ -1,5 +1,5 @@
-# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
+# --------------------------------------------------------------------------------------------
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 from knack.arguments import CLIArgumentType
@@ -471,7 +471,9 @@ def load_arguments(self, _):
         c.argument('secret_name', secret_name_arg_type, id_part="child_name_1", help='Name of the secret.')
         c.argument('use_latest_version', arg_type=get_three_state_flag(),
                    help="Whether to use the latest version for the certificate.")
-        c.argument('secret_source', help='Resource reference to the Azure Key Vault certificate. Expected to be in format of /subscriptions/{​​​​​​​​​subscriptionId}​​​​​​​​​/resourceGroups/{​​​​​​​​​resourceGroupName}​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​/providers/Microsoft.KeyVault/vaults/{vaultName}​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​/secrets/{certificateName}​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​')
+        c.argument(
+            'secret_source',
+            help='Resource ID of the Azure Key Vault certificate, expected format is like "/subscriptions/sub1/resourceGroups/rg1/providers/Microsoft.KeyVault/vaults/vault1/secrets/cert1".')
         c.argument('secret_version', help='Version of the certificate to be used.')
 
     with self.argument_context('afd secret list') as c:
@@ -535,16 +537,20 @@ def configure_rule_parameters(c, is_afdx):
                'It does not require any condition and actions listed in it will always be applied.')
 
     if is_afdx:
-        c.argument('match_variable', arg_group="Match Condition", help='Name of the match condition: https://docs.microsoft.com/en-us/azure/cdn/cdn-standard-rules-engine-match-conditions',
+        c.argument('match_variable', arg_group="Match Condition",
+                   help='Name of the match condition: '
+                        'https://docs.microsoft.com/en-us/azure/frontdoor/rules-match-conditions',
                    arg_type=get_enum_type(DeliveryRuleCondition._subtype_map["name"].keys()))
     else:
-        c.argument('match_variable', arg_group="Match Condition", help='Name of the match condition: https://docs.microsoft.com/en-us/azure/frontdoor/rules-match-conditions?tabs=portal&pivots=front-door-standard-premium',
+        c.argument('match_variable', arg_group="Match Condition",
+                   help='Name of the match condition: '
+                        'https://docs.microsoft.com/en-us/azure/cdn/cdn-standard-rules-engine-match-conditions',
                    arg_type=get_enum_type(DeliveryRuleCondition._subtype_map["name"].keys()))
 
     c.argument('operator', arg_group="Match Condition", help='Operator of the match condition.')
     c.argument('selector', arg_group="Match Condition", help='Selector of the match condition.')
     c.argument('match_values', arg_group="Match Condition", nargs='+',
-               help='Match values of the match condition (comma separated).')
+               help='Match values of the match condition.')
 
     if not is_afdx:
         c.argument('transform', arg_group="Match Condition", arg_type=get_enum_type(['Lowercase', 'Uppercase']),
@@ -561,7 +567,8 @@ def configure_rule_parameters(c, is_afdx):
     if is_afdx:
         excldued_actions = ["UrlSigning", "CacheExpiration", "CacheKeyQueryString", "OriginGroupOverride"]
         c.argument('action_name', arg_group="Action",
-                   help='The name of the action for the delivery rule: https://docs.microsoft.com/en-us/azure/frontdoor/front-door-rules-engine-actions?tabs=portal&pivots=front-door-standard-premium',
+                   help='The name of the action for the delivery rule: '
+                        'https://docs.microsoft.com/en-us/azure/frontdoor/front-door-rules-engine-actions',
                    arg_type=get_enum_type([action for action in all_actions if action not in excldued_actions]))
 
         c.argument('cache_behavior', arg_group="Action",
@@ -596,7 +603,8 @@ def configure_rule_parameters(c, is_afdx):
     else:
         excldued_actions = ["RouteConfigurationOverride", "UrlSigning"]
         c.argument('action_name', arg_group="Action",
-                   help='The name of the action for the delivery rule: https://docs.microsoft.com/en-us/azure/cdn/cdn-standard-rules-engine-actions',
+                   help='The name of the action for the delivery rule: '
+                        'https://docs.microsoft.com/en-us/azure/cdn/cdn-standard-rules-engine-actions',
                    arg_type=get_enum_type([action for action in all_actions if action not in excldued_actions]))
 
         # CacheExpirationAction parameters
