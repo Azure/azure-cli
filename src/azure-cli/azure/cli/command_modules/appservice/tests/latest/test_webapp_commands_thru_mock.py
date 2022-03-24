@@ -25,7 +25,8 @@ from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          restore_deleted_webapp,
                                                          list_snapshots,
                                                          restore_snapshot,
-                                                         create_managed_ssl_cert)
+                                                         create_managed_ssl_cert,
+                                                         add_github_actions)
 
 # pylint: disable=line-too-long
 from azure.cli.core.profiles import ResourceType
@@ -46,6 +47,28 @@ def _get_test_cmd():
 class TestWebappMocked(unittest.TestCase):
     def setUp(self):
         self.client = WebSiteManagementClient(mock.MagicMock(), '123455678')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._update_site_source_control_properties_for_gh_action', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom._add_publish_profile_to_github', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom.prompt_y_n', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_app_runtime_info', autospec=True)
+    @mock.patch('github.Github', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom.parse_resource_id', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_app_details', autospec=True)
+    def test_webapp_github_actions_add(self, get_app_details_mock, web_client_factory_mock,  *args):
+        runtime = "python:3.9"
+        rg = "group"
+        is_linux = True
+        cmd = _get_test_cmd()
+        get_app_details_mock.return_value = mock.Mock()
+        get_app_details_mock.return_value.resource_group = rg
+        web_client_factory_mock.return_value.app_service_plans.get.return_value.reserved = is_linux
+
+        with mock.patch('azure.cli.command_modules.appservice.custom._runtime_supports_github_actions', autospec=True) as m:
+            add_github_actions(cmd, rg, "name", "repo", runtime, "token")
+            m.assert_called_with(cmd, runtime.replace(":", "|"), is_linux)
+
 
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     def test_set_deployment_user_creds(self, client_factory_mock):
