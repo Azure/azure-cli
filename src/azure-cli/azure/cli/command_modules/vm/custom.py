@@ -1877,6 +1877,11 @@ def set_extension(cmd, resource_group_name, vm_name, vm_extension_name, publishe
     if instance_name != extension_instance_name:
         msg = "A %s extension with name %s already exists. Updating it with your settings..."
         logger.warning(msg, vm_extension_name, instance_name)
+    if vm_extension_name == 'AHBForRHEL':
+        logger.warning('Please ensure that you are provisioning AHBForRHEL extension '
+                       'on a Red Hat based operating system.')
+    if vm_extension_name == 'AHBForSLES':
+        logger.warning('Please ensure that you are provisioning AHBForSLES extension on a SLES based operating system.')
 
     version = _normalize_extension_version(cmd.cli_ctx, publisher, vm_extension_name, version, vm.location)
     ext = VirtualMachineExtension(location=vm.location,

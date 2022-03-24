@@ -102,10 +102,19 @@ CONST_CANIPULL_IMAGE = "mcr.microsoft.com/aks/canipull:0.0.3-alpha"
 
 
 # consts for decorator pattern
-# decorator mode
 class DecoratorMode(Enum):
+    """Enumerations used to distinguish whether to handle creation or update.
+    """
     CREATE = 1
     UPDATE = 2
+
+
+class AgentPoolDecoratorMode(Enum):
+    """Enumerations used to distinguish whether to deal with the default system agentpool in the context of the cluster
+    or any specific agentpool.
+    """
+    MANAGED_CLUSTER = 1
+    STANDALONE = 2
 
 
 # custom exception for decorator pattern, used for gracefully exit

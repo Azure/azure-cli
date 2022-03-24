@@ -6,9 +6,9 @@
 from typing import Dict, Tuple, TypeVar, Union
 
 from azure.cli.command_modules.acs._client_factory import cf_agent_pools
-from azure.cli.command_modules.acs._consts import DecoratorMode
+from azure.cli.command_modules.acs._consts import DecoratorMode, AgentPoolDecoratorMode
 from azure.cli.command_modules.acs._validators import extract_comma_separated_string
-from azure.cli.command_modules.acs.decorator import validate_decorator_mode
+from azure.cli.command_modules.acs.base_decorator import BaseAKSContext, BaseAKSModels, BaseAKSParamDict
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core.azclierror import CLIInternalError, InvalidArgumentValueError, RequiredArgumentMissingError
 from azure.cli.core.commands import AzCliCommand
@@ -23,9 +23,9 @@ AgentPool = TypeVar("AgentPool")
 AgentPoolsOperations = TypeVar("AgentPoolsOperations")
 
 
-# pylint: disable=too-many-instance-attributes, too-few-public-methods
-class AKSAgentPoolModels:
-    """Store the models used in aks_agentpool_add and aks_agentpool_update.
+# pylint: disable=too-few-public-methods
+class AKSAgentPoolModels(BaseAKSModels):
+    """Store the models used in aks agentpool series of commands.
 
     The api version of the class corresponding to a model is determined by resource_type.
     """
@@ -34,49 +34,42 @@ class AKSAgentPoolModels:
         self,
         cmd: AzCommandsLoader,
         resource_type: ResourceType,
+        agentpool_decorator_mode: AgentPoolDecoratorMode,
     ):
-        self.__cmd = cmd
-        self.resource_type = resource_type
-        self.AgentPool = self.__cmd.get_models(
-            "AgentPool",
-            resource_type=self.resource_type,
-            operation_group="agent_pools",
-        )
-        self.AgentPoolUpgradeSettings = self.__cmd.get_models(
-            "AgentPoolUpgradeSettings",
-            resource_type=self.resource_type,
-            operation_group="agent_pools",
-        )
+        super().__init__(cmd, resource_type)
+        self.agentpool_decorator_mode = agentpool_decorator_mode
+        self.UnifiedAgentPoolModel = self.__choose_agentpool_model_by_agentpool_decorator_mode()
+
+    def __choose_agentpool_model_by_agentpool_decorator_mode(self):
+        """Choose the model reference for agentpool based on agentpool_decorator_mode.
+        """
+        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+            return self.ManagedClusterAgentPoolProfile
+        return self.AgentPool
+
+
+# pylint: disable=too-few-public-methods
+class AKSAgentPoolParamDict(BaseAKSParamDict):
+    """Store the original parameters passed in by aks agentpool series of commands as an internal dictionary.
+
+    Only expose the "get" method externally to obtain parameter values, while recording usage.
+    """
 
 
 # pylint: disable=too-many-public-methods
-class AKSAgentPoolContext:
+class AKSAgentPoolContext(BaseAKSContext):
     """Implement getter functions for all parameters in aks_agentpool_add and aks_agentpool_update.
     """
     def __init__(
         self,
         cmd: AzCliCommand,
-        raw_parameters: Dict,
+        raw_parameters: AKSAgentPoolParamDict,
         models: AKSAgentPoolModels,
         decorator_mode: DecoratorMode,
+        agentpool_decorator_mode: AgentPoolDecoratorMode,
     ):
-        if not isinstance(raw_parameters, dict):
-            raise CLIInternalError(
-                "Unexpected raw_parameters object with type '{}'.".format(
-                    type(raw_parameters)
-                )
-            )
-        if not validate_decorator_mode(decorator_mode):
-            raise CLIInternalError(
-                "Unexpected decorator_mode '{}' with type '{}'.".format(
-                    decorator_mode, type(decorator_mode)
-                )
-            )
-        self.cmd = cmd
-        self.raw_param = raw_parameters
-        self.models = models
-        self.decorator_mode = decorator_mode
-        self.intermediates = dict()
+        super().__init__(cmd, raw_parameters, models, decorator_mode)
+        self.agentpool_decorator_mode = agentpool_decorator_mode
         self.agentpool = None
 
     # pylint: disable=no-self-use
@@ -349,6 +342,7 @@ class AKSAgentPoolContext:
             enable_strip=True,
             extract_kv=True,
             default_value={},
+            allow_appending_values_to_same_key=True,
         )
 
         # this parameter does not need validation
@@ -376,6 +370,7 @@ class AKSAgentPoolAddDecorator:
         client: AgentPoolsOperations,
         raw_parameters: Dict,
         resource_type: ResourceType,
+        agentpool_decorator_mode: AgentPoolDecoratorMode,
     ):
         """Internal controller of aks_agentpool_add.
 
@@ -387,9 +382,12 @@ class AKSAgentPoolAddDecorator:
         """
         self.cmd = cmd
         self.client = client
-        self.models = AKSAgentPoolModels(cmd, resource_type)
+        self.agentpool_decorator_mode = agentpool_decorator_mode
+        self.models = AKSAgentPoolModels(cmd, resource_type, agentpool_decorator_mode)
         # store the context in the process of assemble the AgentPool object
-        self.context = AKSAgentPoolContext(cmd, raw_parameters, self.models, decorator_mode=DecoratorMode.CREATE)
+        self.context = AKSAgentPoolContext(
+            cmd, AKSAgentPoolParamDict(raw_parameters), self.models, DecoratorMode.CREATE, agentpool_decorator_mode
+        )
 
     def _ensure_agentpool(self, agentpool: AgentPool) -> None:
         """Internal function to ensure that the incoming `agentpool` object is valid and the same as the attached
@@ -400,7 +398,7 @@ class AKSAgentPoolAddDecorator:
 
         :return: None
         """
-        if not isinstance(agentpool, self.models.AgentPool):
+        if not isinstance(agentpool, self.models.UnifiedAgentPoolModel):
             raise CLIInternalError(
                 "Unexpected agentpool object with type '{}'.".format(type(agentpool))
             )
@@ -414,17 +412,18 @@ class AKSAgentPoolAddDecorator:
     def init_agentpool(self) -> AgentPool:
         """Initialize an AgentPool object with name and attach it to internal context.
 
-        Note: As a read only property, name would be ignored when serialized.
-
         :return: the AgentPool object
         """
-        # Initialize a AgentPool object with name.
-        agentpool = self.models.AgentPool()
-        # Note: As a read only property, name would be ignored when serialized.
-        # Set the name property by explicit assignment, otherwise it will be ignored by initialization.
-        agentpool.name = self.context.get_nodepool_name()
+        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+            # Note: As a required property, name must be provided during initialization.
+            agentpool = self.models.UnifiedAgentPoolModel(name=self.context.get_nodepool_name())
+        else:
+            # Note: As a read only property, name would be ignored when serialized.
+            # Set the name property by explicit assignment, otherwise it will be ignored by initialization.
+            agentpool = self.models.UnifiedAgentPoolModel()
+            agentpool.name = self.context.get_nodepool_name()
 
-        # attach mc to AKSContext
+        # attach agentpool to AKSAgentPoolContext
         self.context.attach_agentpool(agentpool)
         return agentpool
 
@@ -535,4 +534,6 @@ class AKSAgentPoolUpdateDecorator:
         self.client = client
         self.models = AKSAgentPoolModels(cmd, resource_type)
         # store the context in the process of assemble the AgentPool object
-        self.context = AKSAgentPoolContext(cmd, raw_parameters, self.models, decorator_mode=DecoratorMode.UPDATE)
+        self.context = AKSAgentPoolContext(
+            cmd, AKSAgentPoolParamDict(raw_parameters), self.models, decorator_mode=DecoratorMode.UPDATE
+        )
