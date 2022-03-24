@@ -33,8 +33,8 @@ def create_mediaservice(client, resource_group_name, account_name, storage_accou
 def add_mediaservice_secondary_storage(client, resource_group_name, account_name, storage_account,
                                        system_assigned=False, user_assigned=None):
     ams = client.get(resource_group_name, account_name)
-    if (system_assigned == False and user_assigned is None and ams.storage_authentication == 'ManagedIdentity'):
-        error_msg = 'Please specify either a system assigned identity or a user assigned identity'
+    if (system_assigned is False and user_assigned is None and ams.storage_authentication == 'ManagedIdentity'):
+        error_msg = 'Please specify either system assigned identity or a user assigned identity'
         raise ValidationError(error_msg)
 
     storage_accounts_filtered = list(filter(lambda s: storage_account in s.id, ams.storage_accounts))
@@ -78,7 +78,7 @@ def sync_storage_keys(client, resource_group_name, account_name, storage_account
 def set_mediaservice_trusted_storage(client, resource_group_name, account_name, storage_auth, storage_account_id=None,
                                      system_assigned=False, user_assigned=None):
     ams: MediaService = client.get(resource_group_name, account_name) if resource_group_name else client.get_by_subscription(account_name)
-    if storage_auth == 'ManagedIdentity' and storage_account_id == None:
+    if storage_auth == 'ManagedIdentity' and storage_account_id is None:
         error_msg = 'Please specify a storage account id for the storage account whose identity you would like to set'
         raise ValidationError(error_msg)
 
@@ -89,7 +89,6 @@ def set_mediaservice_trusted_storage(client, resource_group_name, account_name, 
                                                             user_assigned_identity=user_assigned)
         else:
             storage_account.identity = None
-
 
     media_service = MediaService(name=ams.name,location=ams.location, key_delivery=ams.key_delivery,
                                  identity=ams.identity, encryption=ams.encryption,

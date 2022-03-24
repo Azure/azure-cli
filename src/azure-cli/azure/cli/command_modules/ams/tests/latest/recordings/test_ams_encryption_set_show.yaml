@@ -2,7 +2,8 @@ interactions:
 - request:
     body: '{"location": "centralus", "identity": {"type": "SystemAssigned"}, "properties":
       {"storageAccounts": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002",
-      "type": "Primary"}], "publicNetworkAccess": "Disabled"}}'
+      "type": "Primary"}], "keyDelivery": {"accessControl": {"defaultAction": "Allow",
+      "ipAllowList": []}}, "publicNetworkAccess": "Disabled"}}'
     headers:
       Accept:
       - application/json
@@ -13,11 +14,11 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '309'
+      - '390'
       Content-Type:
       - application/json
       ParameterSetName:
-      - -n -g --storage-account -l --mi-system-assigned
+      - -n -g --storage-account -l --mi-system-assigned --default-action
       User-Agent:
       - AZURECLI/2.32.0 azsdk-python-mgmt-media/8.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
     method: PUT
@@ -25,14 +26,14 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\":\"ams000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000004\",\"type\":\"Microsoft.Media/mediaservices\",\"location\":\"Central
-        US\",\"properties\":{\r\n    \"mediaServiceId\":\"0f6b6166-5af3-4b9c-a4c8-f0bacb39d867\",\"storageAccounts\":[\r\n
+        US\",\"properties\":{\r\n    \"mediaServiceId\":\"787e823f-6653-417d-abbb-f8100472c67e\",\"storageAccounts\":[\r\n
         \     {\r\n        \"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002\",\"type\":\"Primary\"\r\n
         \     }\r\n    ],\"storageAuthentication\":\"System\",\"encryption\":{\r\n
         \     \"type\":\"SystemKey\"\r\n    },\"keyDelivery\":{\r\n      \"accessControl\":{\r\n
         \       \"defaultAction\":\"Allow\",\"ipAllowList\":[\r\n          \r\n        ]\r\n
         \     }\r\n    },\"publicNetworkAccess\":\"Disabled\"\r\n  },\"systemData\":{\r\n
-        \   \"createdBy\":\"hivyas@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2022-03-22T04:18:08.1106975Z\",\"lastModifiedBy\":\"hivyas@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2022-03-22T04:18:08.1106975Z\"\r\n
-        \ },\"identity\":{\r\n    \"type\":\"SystemAssigned\",\"principalId\":\"1636e1bf-7227-4d4a-8e39-03fa285f5bbf\",\"tenantId\":\"72f988bf-86f1-41af-91ab-2d7cd011db47\"\r\n
+        \   \"createdBy\":\"hivyas@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2022-03-23T23:48:36.5208093Z\",\"lastModifiedBy\":\"hivyas@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2022-03-23T23:48:36.5208093Z\"\r\n
+        \ },\"identity\":{\r\n    \"type\":\"SystemAssigned\",\"principalId\":\"e63e0bb3-4fd7-443a-b288-44e636225a35\",\"tenantId\":\"72f988bf-86f1-41af-91ab-2d7cd011db47\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
@@ -42,7 +43,7 @@ interactions:
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Tue, 22 Mar 2022 04:18:09 GMT
+      - Wed, 23 Mar 2022 23:48:38 GMT
       expires:
       - '-1'
       odata-version:
@@ -89,7 +90,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 22 Mar 2022 04:18:10 GMT
+      - Wed, 23 Mar 2022 23:48:38 GMT
       expires:
       - '-1'
       pragma:
@@ -102,7 +103,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-network-info:
-      - conn_type=Ipv4;addr=131.107.1.193;act_addr_fam=InterNetwork;
+      - conn_type=Ipv4;addr=131.107.160.129;act_addr_fam=InterNetwork;
       x-ms-keyvault-region:
       - centralus
       x-ms-keyvault-service-version:
@@ -131,7 +132,7 @@ interactions:
     uri: https://clitest000003.vault.azure.net/keys/ams000005/create?api-version=7.3-preview
   response:
     body:
-      string: '{"key":{"kid":"https://clitest000003.vault.azure.net/keys/ams000005/d9654b536ef74432b5fa1032502c5262","kty":"RSA","key_ops":["encrypt","decrypt","sign","verify","wrapKey","unwrapKey"],"n":"79l3rztBbTS5Vw4Wqt6umXvA8D1Dn8y9P9CEdDsrlZAKt4WfPGRUeo9d6Lsd3J1RsH-cHpcZcqutTWDk5OVpVMVO0qDnnAcNGabObu_wECWaZgPC3GJUp-rzFjcT5PVjcmuFExNOPeHGtLC79PLebL7biqjYZ15IvQQ-XCZqN7x3FzP_6lqb-vr9w4_O33kcVt65u9vITyJL7rZKsD9b43GhZMTRV60ayBvolOFsIDqLS-8RMuCWWgaZn8yUm7jTgqOqk1oxAvW6QzcmWFDH3ELKDPGxzQvrOnMicC_k3IDdlxq951zQTvhYoE4WzKEu6WNZVDvm7_i6twoyDGHwuQ","e":"AQAB"},"attributes":{"enabled":true,"created":1647922692,"updated":1647922692,"recoveryLevel":"CustomizedRecoverable","recoverableDays":7}}'
+      string: '{"key":{"kid":"https://clitest000003.vault.azure.net/keys/ams000005/348c2293164a480a8ea9b95d6d49d122","kty":"RSA","key_ops":["encrypt","decrypt","sign","verify","wrapKey","unwrapKey"],"n":"v4Kpq2OUqfxaC8aSM01qlnHhxQ4ek5FKPsdMIdwnf3TIlOG1BIYEGwOWiBg2MLkEV4C28oeTYPvYWi7kpC88Qh4B0mN4Z4P_lJ-yw9qtoQ9aKcb-NK-ZZrqCghKEeSlryxhnUFHwobDNtjN2BilLDFkybC8Wdl-mTwVqo6-WdLu4XRPJWPGfLHk0if5XTgUhn4Ucq7_NyhiCq22I5-OfJC__ORRwDZtnHpwVKN_EmsPdoqv4sj5CXqHwsmhUPURdBsp_J7d7oSjFSHRKijHlKtt8-HmyBlMxXzxQkx2PRs1EcCMyWgjTsIu4u_ZYRoqx6QD8e0lcPKLHLA5_oR-cSQ","e":"AQAB"},"attributes":{"enabled":true,"created":1648079320,"updated":1648079320,"recoveryLevel":"CustomizedRecoverable","recoverableDays":7}}'
     headers:
       cache-control:
       - no-cache
@@ -140,7 +141,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 22 Mar 2022 04:18:11 GMT
+      - Wed, 23 Mar 2022 23:48:40 GMT
       expires:
       - '-1'
       pragma:
@@ -150,7 +151,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-network-info:
-      - conn_type=Ipv4;addr=131.107.1.193;act_addr_fam=InterNetwork;
+      - conn_type=Ipv4;addr=131.107.160.129;act_addr_fam=InterNetwork;
       x-ms-keyvault-region:
       - centralus
       x-ms-keyvault-service-version:
@@ -188,7 +189,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 22 Mar 2022 04:18:11 GMT
+      - Wed, 23 Mar 2022 23:48:40 GMT
       expires:
       - '-1'
       pragma:
@@ -221,7 +222,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/clitest000003?api-version=2021-06-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/clitest000003","name":"clitest000003","type":"Microsoft.KeyVault/vaults","location":"centralus","tags":{},"systemData":{"createdBy":"hivyas@microsoft.com","createdByType":"User","createdAt":"2022-03-22T04:17:35.169Z","lastModifiedBy":"hivyas@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-03-22T04:17:35.169Z"},"properties":{"sku":{"family":"A","name":"standard"},"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","accessPolicies":[{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"508c96e0-d4ff-4c30-b886-34c377353339","permissions":{"keys":["all"],"secrets":["all"],"certificates":["all"],"storage":["all"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":7,"enablePurgeProtection":true,"vaultUri":"https://clitest000003.vault.azure.net/","provisioningState":"Succeeded","publicNetworkAccess":"Enabled"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/clitest000003","name":"clitest000003","type":"Microsoft.KeyVault/vaults","location":"centralus","tags":{},"systemData":{"createdBy":"hivyas@microsoft.com","createdByType":"User","createdAt":"2022-03-23T23:48:02.754Z","lastModifiedBy":"hivyas@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-03-23T23:48:02.754Z"},"properties":{"sku":{"family":"A","name":"standard"},"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","accessPolicies":[{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"508c96e0-d4ff-4c30-b886-34c377353339","permissions":{"keys":["all"],"secrets":["all"],"certificates":["all"],"storage":["all"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":7,"enablePurgeProtection":true,"vaultUri":"https://clitest000003.vault.azure.net/","provisioningState":"Succeeded","publicNetworkAccess":"Enabled"}}'
     headers:
       cache-control:
       - no-cache
@@ -230,7 +231,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 22 Mar 2022 04:18:12 GMT
+      - Wed, 23 Mar 2022 23:48:40 GMT
       expires:
       - '-1'
       pragma:
@@ -248,7 +249,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.5.308.0
+      - 1.5.322.0
     status:
       code: 200
       message: OK
@@ -258,11 +259,10 @@ interactions:
       "72f988bf-86f1-41af-91ab-2d7cd011db47", "objectId": "508c96e0-d4ff-4c30-b886-34c377353339",
       "permissions": {"keys": ["all"], "secrets": ["all"], "certificates": ["all"],
       "storage": ["all"]}}, {"tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47", "objectId":
-      "1636e1bf-7227-4d4a-8e39-03fa285f5bbf", "permissions": {"keys": ["wrapKey",
-      "unwrapKey", "get"]}}], "vaultUri": "https://clitest000003.vault.azure.net/",
-      "enabledForDeployment": false, "enableSoftDelete": true, "softDeleteRetentionInDays":
-      7, "enablePurgeProtection": true, "provisioningState": "Succeeded", "publicNetworkAccess":
-      "Enabled"}}'
+      "e63e0bb3-4fd7-443a-b288-44e636225a35", "permissions": {"keys": ["get", "wrapKey",
+      "unwrapKey"]}}], "vaultUri": "https://clitest000003.vault.azure.net/", "enabledForDeployment":
+      false, "enableSoftDelete": true, "softDeleteRetentionInDays": 7, "enablePurgeProtection":
+      true, "provisioningState": "Succeeded", "publicNetworkAccess": "Enabled"}}'
     headers:
       Accept:
       - application/json
@@ -284,7 +284,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/clitest000003?api-version=2021-06-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/clitest000003","name":"clitest000003","type":"Microsoft.KeyVault/vaults","location":"centralus","tags":{},"systemData":{"createdBy":"hivyas@microsoft.com","createdByType":"User","createdAt":"2022-03-22T04:17:35.169Z","lastModifiedBy":"hivyas@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-03-22T04:18:13.792Z"},"properties":{"sku":{"family":"A","name":"standard"},"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","accessPolicies":[{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"508c96e0-d4ff-4c30-b886-34c377353339","permissions":{"keys":["all"],"secrets":["all"],"certificates":["all"],"storage":["all"]}},{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"1636e1bf-7227-4d4a-8e39-03fa285f5bbf","permissions":{"keys":["wrapKey","unwrapKey","get"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":7,"enablePurgeProtection":true,"vaultUri":"https://clitest000003.vault.azure.net/","provisioningState":"Succeeded","publicNetworkAccess":"Enabled"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/clitest000003","name":"clitest000003","type":"Microsoft.KeyVault/vaults","location":"centralus","tags":{},"systemData":{"createdBy":"hivyas@microsoft.com","createdByType":"User","createdAt":"2022-03-23T23:48:02.754Z","lastModifiedBy":"hivyas@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-03-23T23:48:42.604Z"},"properties":{"sku":{"family":"A","name":"standard"},"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","accessPolicies":[{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"508c96e0-d4ff-4c30-b886-34c377353339","permissions":{"keys":["all"],"secrets":["all"],"certificates":["all"],"storage":["all"]}},{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"e63e0bb3-4fd7-443a-b288-44e636225a35","permissions":{"keys":["get","wrapKey","unwrapKey"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":7,"enablePurgeProtection":true,"vaultUri":"https://clitest000003.vault.azure.net/","provisioningState":"Succeeded","publicNetworkAccess":"Enabled"}}'
     headers:
       cache-control:
       - no-cache
@@ -293,7 +293,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 22 Mar 2022 04:18:13 GMT
+      - Wed, 23 Mar 2022 23:48:42 GMT
       expires:
       - '-1'
       pragma:
@@ -311,7 +311,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.5.308.0
+      - 1.5.322.0
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
@@ -337,14 +337,14 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\":\"ams000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000004\",\"type\":\"Microsoft.Media/mediaservices\",\"location\":\"Central
-        US\",\"properties\":{\r\n    \"mediaServiceId\":\"0f6b6166-5af3-4b9c-a4c8-f0bacb39d867\",\"storageAccounts\":[\r\n
+        US\",\"properties\":{\r\n    \"mediaServiceId\":\"787e823f-6653-417d-abbb-f8100472c67e\",\"storageAccounts\":[\r\n
         \     {\r\n        \"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002\",\"type\":\"Primary\"\r\n
         \     }\r\n    ],\"storageAuthentication\":\"System\",\"encryption\":{\r\n
         \     \"type\":\"SystemKey\"\r\n    },\"keyDelivery\":{\r\n      \"accessControl\":{\r\n
         \       \"defaultAction\":\"Allow\",\"ipAllowList\":[\r\n          \r\n        ]\r\n
         \     }\r\n    },\"publicNetworkAccess\":\"Disabled\"\r\n  },\"systemData\":{\r\n
-        \   \"createdBy\":\"hivyas@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2022-03-22T04:18:08.1106975Z\",\"lastModifiedBy\":\"hivyas@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2022-03-22T04:18:08.1106975Z\"\r\n
-        \ },\"identity\":{\r\n    \"type\":\"SystemAssigned\",\"principalId\":\"1636e1bf-7227-4d4a-8e39-03fa285f5bbf\",\"tenantId\":\"72f988bf-86f1-41af-91ab-2d7cd011db47\"\r\n
+        \   \"createdBy\":\"hivyas@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2022-03-23T23:48:36.5208093Z\",\"lastModifiedBy\":\"hivyas@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2022-03-23T23:48:36.5208093Z\"\r\n
+        \ },\"identity\":{\r\n    \"type\":\"SystemAssigned\",\"principalId\":\"e63e0bb3-4fd7-443a-b288-44e636225a35\",\"tenantId\":\"72f988bf-86f1-41af-91ab-2d7cd011db47\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
@@ -354,7 +354,7 @@ interactions:
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Tue, 22 Mar 2022 04:18:14 GMT
+      - Wed, 23 Mar 2022 23:48:42 GMT
       expires:
       - '-1'
       odata-version:
@@ -378,7 +378,7 @@ interactions:
     body: '{"location": "Central US", "identity": {"type": "SystemAssigned"}, "properties":
       {"storageAccounts": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002",
       "type": "Primary"}], "storageAuthentication": "System", "encryption": {"type":
-      "CustomerKey", "keyVaultProperties": {"keyIdentifier": "https://clitest000003.vault.azure.net/keys/ams000005/d9654b536ef74432b5fa1032502c5262"}},
+      "CustomerKey", "keyVaultProperties": {"keyIdentifier": "https://clitest000003.vault.azure.net/keys/ams000005/348c2293164a480a8ea9b95d6d49d122"}},
       "keyDelivery": {"accessControl": {"defaultAction": "Allow", "ipAllowList": []}},
       "publicNetworkAccess": "Disabled"}}'
     headers:
@@ -403,15 +403,15 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\":\"ams000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000004\",\"type\":\"Microsoft.Media/mediaservices\",\"location\":\"Central
-        US\",\"properties\":{\r\n    \"mediaServiceId\":\"0f6b6166-5af3-4b9c-a4c8-f0bacb39d867\",\"storageAccounts\":[\r\n
+        US\",\"properties\":{\r\n    \"mediaServiceId\":\"787e823f-6653-417d-abbb-f8100472c67e\",\"storageAccounts\":[\r\n
         \     {\r\n        \"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002\",\"type\":\"Primary\"\r\n
         \     }\r\n    ],\"storageAuthentication\":\"System\",\"encryption\":{\r\n
-        \     \"type\":\"CustomerKey\",\"keyVaultProperties\":{\r\n        \"keyIdentifier\":\"https://clitest000003.vault.azure.net/keys/ams000005/d9654b536ef74432b5fa1032502c5262\",\"currentKeyIdentifier\":\"https://clitest000003.vault.azure.net/keys/ams000005/d9654b536ef74432b5fa1032502c5262\"\r\n
+        \     \"type\":\"CustomerKey\",\"keyVaultProperties\":{\r\n        \"keyIdentifier\":\"https://clitest000003.vault.azure.net/keys/ams000005/348c2293164a480a8ea9b95d6d49d122\",\"currentKeyIdentifier\":\"https://clitest000003.vault.azure.net/keys/ams000005/348c2293164a480a8ea9b95d6d49d122\"\r\n
         \     },\"identity\":{\r\n        \"useSystemAssignedIdentity\":true\r\n      }\r\n
         \   },\"keyDelivery\":{\r\n      \"accessControl\":{\r\n        \"defaultAction\":\"Allow\",\"ipAllowList\":[\r\n
         \         \r\n        ]\r\n      }\r\n    },\"publicNetworkAccess\":\"Disabled\"\r\n
-        \ },\"systemData\":{\r\n    \"createdBy\":\"hivyas@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2022-03-22T04:18:08.1106975Z\",\"lastModifiedBy\":\"hivyas@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2022-03-22T04:18:15.1928339Z\"\r\n
-        \ },\"identity\":{\r\n    \"type\":\"SystemAssigned\",\"principalId\":\"1636e1bf-7227-4d4a-8e39-03fa285f5bbf\",\"tenantId\":\"72f988bf-86f1-41af-91ab-2d7cd011db47\"\r\n
+        \ },\"systemData\":{\r\n    \"createdBy\":\"hivyas@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2022-03-23T23:48:36.5208093Z\",\"lastModifiedBy\":\"hivyas@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2022-03-23T23:48:44.5405721Z\"\r\n
+        \ },\"identity\":{\r\n    \"type\":\"SystemAssigned\",\"principalId\":\"e63e0bb3-4fd7-443a-b288-44e636225a35\",\"tenantId\":\"72f988bf-86f1-41af-91ab-2d7cd011db47\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
@@ -421,7 +421,7 @@ interactions:
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Tue, 22 Mar 2022 04:18:16 GMT
+      - Wed, 23 Mar 2022 23:48:47 GMT
       expires:
       - '-1'
       odata-version:
@@ -463,15 +463,15 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\":\"ams000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000004\",\"type\":\"Microsoft.Media/mediaservices\",\"location\":\"Central
-        US\",\"properties\":{\r\n    \"mediaServiceId\":\"0f6b6166-5af3-4b9c-a4c8-f0bacb39d867\",\"storageAccounts\":[\r\n
+        US\",\"properties\":{\r\n    \"mediaServiceId\":\"787e823f-6653-417d-abbb-f8100472c67e\",\"storageAccounts\":[\r\n
         \     {\r\n        \"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002\",\"type\":\"Primary\"\r\n
         \     }\r\n    ],\"storageAuthentication\":\"System\",\"encryption\":{\r\n
-        \     \"type\":\"CustomerKey\",\"keyVaultProperties\":{\r\n        \"keyIdentifier\":\"https://clitest000003.vault.azure.net/keys/ams000005/d9654b536ef74432b5fa1032502c5262\",\"currentKeyIdentifier\":\"https://clitest000003.vault.azure.net/keys/ams000005/d9654b536ef74432b5fa1032502c5262\"\r\n
+        \     \"type\":\"CustomerKey\",\"keyVaultProperties\":{\r\n        \"keyIdentifier\":\"https://clitest000003.vault.azure.net/keys/ams000005/348c2293164a480a8ea9b95d6d49d122\",\"currentKeyIdentifier\":\"https://clitest000003.vault.azure.net/keys/ams000005/348c2293164a480a8ea9b95d6d49d122\"\r\n
         \     },\"identity\":{\r\n        \"useSystemAssignedIdentity\":true\r\n      }\r\n
         \   },\"keyDelivery\":{\r\n      \"accessControl\":{\r\n        \"defaultAction\":\"Allow\",\"ipAllowList\":[\r\n
         \         \r\n        ]\r\n      }\r\n    },\"publicNetworkAccess\":\"Disabled\"\r\n
-        \ },\"systemData\":{\r\n    \"createdBy\":\"hivyas@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2022-03-22T04:18:08.1106975Z\",\"lastModifiedBy\":\"hivyas@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2022-03-22T04:18:15.1928339Z\"\r\n
-        \ },\"identity\":{\r\n    \"type\":\"SystemAssigned\",\"principalId\":\"1636e1bf-7227-4d4a-8e39-03fa285f5bbf\",\"tenantId\":\"72f988bf-86f1-41af-91ab-2d7cd011db47\"\r\n
+        \ },\"systemData\":{\r\n    \"createdBy\":\"hivyas@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2022-03-23T23:48:36.5208093Z\",\"lastModifiedBy\":\"hivyas@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2022-03-23T23:48:44.5405721Z\"\r\n
+        \ },\"identity\":{\r\n    \"type\":\"SystemAssigned\",\"principalId\":\"e63e0bb3-4fd7-443a-b288-44e636225a35\",\"tenantId\":\"72f988bf-86f1-41af-91ab-2d7cd011db47\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
@@ -481,7 +481,7 @@ interactions:
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Tue, 22 Mar 2022 04:18:16 GMT
+      - Wed, 23 Mar 2022 23:48:47 GMT
       expires:
       - '-1'
       odata-version:
@@ -529,7 +529,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 22 Mar 2022 04:18:19 GMT
+      - Wed, 23 Mar 2022 23:48:52 GMT
       expires:
       - '-1'
       pragma:

@@ -1,8 +1,9 @@
 interactions:
 - request:
-    body: '{"location": "japaneast", "identity": {"type": "None"}, "properties": {"storageAccounts":
-      [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002",
-      "type": "Primary"}]}}'
+    body: '{"location": "japaneast", "identity": {"type": "SystemAssigned"}, "properties":
+      {"storageAccounts": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002",
+      "type": "Primary"}], "keyDelivery": {"accessControl": {"defaultAction": "Allow",
+      "ipAllowList": []}}, "publicNetworkAccess": "Disabled"}}'
     headers:
       Accept:
       - application/json
@@ -13,34 +14,144 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '334'
+      - '390'
       Content-Type:
       - application/json
       ParameterSetName:
-      - -n -g --storage-account -l
+      - -n -g --storage-account -l --mi-system-assigned --default-action
       User-Agent:
-      - AZURECLI/2.24.2 (MSI) azsdk-python-mgmt-media/7.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.32.0 azsdk-python-mgmt-media/8.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003?api-version=2021-06-01
+  response:
+    body:
+      string: '{"error":{"code":"InternalServerError","message":"Encountered internal
+        server error. Diagnostic information: timestamp ''20220323T234057Z'', subscription
+        id ''c526bbbc-c5ff-46b0-9ca8-3e8cb92a2cf5'', tracking id ''8386a764-8d55-489c-8230-38c6f9e67ac2'',
+        request correlation id ''8386a764-8d55-489c-8230-38c6f9e67ac2''."}}'
+    headers:
+      cache-control:
+      - no-cache
+      connection:
+      - close
+      content-length:
+      - '312'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Mar 2022 23:40:57 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - gateway
+    status:
+      code: 500
+      message: Internal Server Error
+- request:
+    body: '{"location": "japaneast", "identity": {"type": "SystemAssigned"}, "properties":
+      {"storageAccounts": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002",
+      "type": "Primary"}], "keyDelivery": {"accessControl": {"defaultAction": "Allow",
+      "ipAllowList": []}}, "publicNetworkAccess": "Disabled"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ams account create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '390'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --storage-account -l --mi-system-assigned --default-action
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-mgmt-media/8.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003?api-version=2021-06-01
+  response:
+    body:
+      string: '{"error":{"code":"InternalServerError","message":"Encountered internal
+        server error. Diagnostic information: timestamp ''20220323T234102Z'', subscription
+        id ''c526bbbc-c5ff-46b0-9ca8-3e8cb92a2cf5'', tracking id ''181f239c-f48f-46e3-aca4-3ebf6e096130'',
+        request correlation id ''181f239c-f48f-46e3-aca4-3ebf6e096130''."}}'
+    headers:
+      cache-control:
+      - no-cache
+      connection:
+      - close
+      content-length:
+      - '312'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Mar 2022 23:41:02 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - gateway
+    status:
+      code: 500
+      message: Internal Server Error
+- request:
+    body: '{"location": "japaneast", "identity": {"type": "SystemAssigned"}, "properties":
+      {"storageAccounts": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002",
+      "type": "Primary"}], "keyDelivery": {"accessControl": {"defaultAction": "Allow",
+      "ipAllowList": []}}, "publicNetworkAccess": "Disabled"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ams account create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '390'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --storage-account -l --mi-system-assigned --default-action
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-mgmt-media/8.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003?api-version=2021-06-01
   response:
     body:
       string: "{\r\n  \"name\":\"ams000003\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003\",\"type\":\"Microsoft.Media/mediaservices\",\"location\":\"Japan
-        East\",\"properties\":{\r\n    \"mediaServiceId\":\"6c5d1929-3875-4f75-be6a-47d48284df46\",\"storageAccounts\":[\r\n
+        East\",\"properties\":{\r\n    \"mediaServiceId\":\"d9d7955e-3831-4248-b2b0-b88136949367\",\"storageAccounts\":[\r\n
         \     {\r\n        \"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002\",\"type\":\"Primary\"\r\n
         \     }\r\n    ],\"storageAuthentication\":\"System\",\"encryption\":{\r\n
         \     \"type\":\"SystemKey\"\r\n    },\"keyDelivery\":{\r\n      \"accessControl\":{\r\n
         \       \"defaultAction\":\"Allow\",\"ipAllowList\":[\r\n          \r\n        ]\r\n
-        \     }\r\n    }\r\n  },\"systemData\":{\r\n    \"createdBy\":\"phcooper@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2021-07-30T19:12:03.3646843Z\",\"lastModifiedBy\":\"phcooper@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2021-07-30T19:12:03.3646843Z\"\r\n
-        \ },\"identity\":{\r\n    \"type\":\"None\"\r\n  }\r\n}"
+        \     }\r\n    },\"publicNetworkAccess\":\"Disabled\"\r\n  },\"systemData\":{\r\n
+        \   \"lastModifiedBy\":\"hivyas@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2022-03-23T23:41:05.7009347Z\"\r\n
+        \ },\"identity\":{\r\n    \"type\":\"SystemAssigned\",\"principalId\":\"a3d5152f-86a6-4645-b7ac-9b918daf895b\",\"tenantId\":\"72f988bf-86f1-41af-91ab-2d7cd011db47\"\r\n
+        \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1159'
+      - '1065'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Fri, 30 Jul 2021 19:12:05 GMT
+      - Wed, 23 Mar 2022 23:41:09 GMT
       expires:
       - '-1'
       odata-version:
@@ -51,13 +162,17 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1194'
+      - '1197'
     status:
-      code: 201
-      message: Created
+      code: 200
+      message: OK
 - request:
     body: '{"properties": {"outputs": [{"preset": {"@odata.type": "#Microsoft.Media.BuiltInStandardEncoderPreset",
       "presetName": "AACGoodQualityAudio"}}]}}'
@@ -77,26 +192,26 @@ interactions:
       ParameterSetName:
       - -a -n -g --preset
       User-Agent:
-      - AZURECLI/2.24.2 (MSI) azsdk-python-mgmt-media/7.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.32.0 azsdk-python-mgmt-media/8.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2021-06-01
   response:
     body:
       string: "{\r\n  \"name\":\"tra000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/transforms/tra000004\",\"type\":\"Microsoft.Media/mediaservices/transforms\",\"properties\":{\r\n
-        \   \"created\":\"2021-07-30T19:12:06.5487386Z\",\"lastModified\":\"2021-07-30T19:12:06.5487386Z\",\"outputs\":[\r\n
+        \   \"created\":\"2022-03-23T23:41:09.8744244Z\",\"lastModified\":\"2022-03-23T23:41:09.8744244Z\",\"outputs\":[\r\n
         \     {\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n
         \         \"@odata.type\":\"#Microsoft.Media.BuiltInStandardEncoderPreset\",\"presetName\":\"AACGoodQualityAudio\"\r\n
-        \       }\r\n      }\r\n    ]\r\n  },\"systemData\":{\r\n    \"createdBy\":\"phcooper@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2021-07-30T19:12:06.5487386Z\",\"lastModifiedBy\":\"phcooper@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2021-07-30T19:12:06.5487386Z\"\r\n
+        \       }\r\n      }\r\n    ]\r\n  },\"systemData\":{\r\n    \"createdBy\":\"hivyas@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2022-03-23T23:41:09.8744244Z\",\"lastModifiedBy\":\"hivyas@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2022-03-23T23:41:09.8744244Z\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '894'
+      - '826'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Fri, 30 Jul 2021 19:12:07 GMT
+      - Wed, 23 Mar 2022 23:41:09 GMT
       expires:
       - '-1'
       odata-version:
@@ -110,7 +225,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1195'
     status:
       code: 201
       message: Created
@@ -128,26 +243,26 @@ interactions:
       ParameterSetName:
       - -a -n -g --preset --on-error --relative-priority
       User-Agent:
-      - AZURECLI/2.24.2 (MSI) azsdk-python-mgmt-media/7.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.32.0 azsdk-python-mgmt-media/8.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2021-06-01
   response:
     body:
       string: "{\r\n  \"name\":\"tra000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/transforms/tra000004\",\"type\":\"Microsoft.Media/mediaservices/transforms\",\"properties\":{\r\n
-        \   \"created\":\"2021-07-30T19:12:06.5487386Z\",\"lastModified\":\"2021-07-30T19:12:06.5487386Z\",\"outputs\":[\r\n
+        \   \"created\":\"2022-03-23T23:41:09.8744244Z\",\"lastModified\":\"2022-03-23T23:41:09.8744244Z\",\"outputs\":[\r\n
         \     {\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n
         \         \"@odata.type\":\"#Microsoft.Media.BuiltInStandardEncoderPreset\",\"presetName\":\"AACGoodQualityAudio\"\r\n
-        \       }\r\n      }\r\n    ]\r\n  },\"systemData\":{\r\n    \"createdBy\":\"phcooper@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2021-07-30T19:12:06.5487386Z\",\"lastModifiedBy\":\"phcooper@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2021-07-30T19:12:06.5487386Z\"\r\n
+        \       }\r\n      }\r\n    ]\r\n  },\"systemData\":{\r\n    \"createdBy\":\"hivyas@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2022-03-23T23:41:09.8744244Z\",\"lastModifiedBy\":\"hivyas@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2022-03-23T23:41:09.8744244Z\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '894'
+      - '826'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Fri, 30 Jul 2021 19:12:07 GMT
+      - Wed, 23 Mar 2022 23:41:10 GMT
       expires:
       - '-1'
       odata-version:
@@ -202,13 +317,13 @@ interactions:
       ParameterSetName:
       - -a -n -g --preset --on-error --relative-priority
       User-Agent:
-      - AZURECLI/2.24.2 (MSI) azsdk-python-mgmt-media/7.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.32.0 azsdk-python-mgmt-media/8.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2021-06-01
   response:
     body:
       string: "{\r\n  \"name\":\"tra000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/transforms/tra000004\",\"type\":\"Microsoft.Media/mediaservices/transforms\",\"properties\":{\r\n
-        \   \"created\":\"2021-07-30T19:12:06.5487386Z\",\"lastModified\":\"2021-07-30T19:12:08.4367484Z\",\"outputs\":[\r\n
+        \   \"created\":\"2022-03-23T23:41:09.8744244Z\",\"lastModified\":\"2022-03-23T23:41:11.8984454Z\",\"outputs\":[\r\n
         \     {\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n
         \         \"@odata.type\":\"#Microsoft.Media.BuiltInStandardEncoderPreset\",\"presetName\":\"AACGoodQualityAudio\"\r\n
         \       }\r\n      },{\r\n        \"onError\":\"ContinueJob\",\"relativePriority\":\"High\",\"preset\":{\r\n
@@ -222,17 +337,17 @@ interactions:
         \               }\r\n              ]\r\n            }\r\n          ],\"formats\":[\r\n
         \           {\r\n              \"@odata.type\":\"#Microsoft.Media.Mp4Format\",\"filenamePattern\":\"{Basename}_{Bitrate}{Extension}\",\"outputFiles\":[\r\n
         \               \r\n              ]\r\n            }\r\n          ]\r\n        }\r\n
-        \     }\r\n    ]\r\n  },\"systemData\":{\r\n    \"createdBy\":\"phcooper@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2021-07-30T19:12:06.5487386Z\",\"lastModifiedBy\":\"phcooper@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2021-07-30T19:12:08.4367484Z\"\r\n
+        \     }\r\n    ]\r\n  },\"systemData\":{\r\n    \"createdBy\":\"hivyas@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2022-03-23T23:41:09.8744244Z\",\"lastModifiedBy\":\"hivyas@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2022-03-23T23:41:11.8984454Z\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2433'
+      - '2365'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Fri, 30 Jul 2021 19:12:07 GMT
+      - Wed, 23 Mar 2022 23:41:11 GMT
       expires:
       - '-1'
       odata-version:
@@ -250,7 +365,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1198'
     status:
       code: 200
       message: OK
@@ -268,13 +383,13 @@ interactions:
       ParameterSetName:
       - -a -n -g --preset --audio-language --audio-analysis-mode
       User-Agent:
-      - AZURECLI/2.24.2 (MSI) azsdk-python-mgmt-media/7.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.32.0 azsdk-python-mgmt-media/8.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2021-06-01
   response:
     body:
       string: "{\r\n  \"name\":\"tra000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/transforms/tra000004\",\"type\":\"Microsoft.Media/mediaservices/transforms\",\"properties\":{\r\n
-        \   \"created\":\"2021-07-30T19:12:06.5487386Z\",\"lastModified\":\"2021-07-30T19:12:08.4367484Z\",\"outputs\":[\r\n
+        \   \"created\":\"2022-03-23T23:41:09.8744244Z\",\"lastModified\":\"2022-03-23T23:41:11.8984454Z\",\"outputs\":[\r\n
         \     {\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n
         \         \"@odata.type\":\"#Microsoft.Media.BuiltInStandardEncoderPreset\",\"presetName\":\"AACGoodQualityAudio\"\r\n
         \       }\r\n      },{\r\n        \"onError\":\"ContinueJob\",\"relativePriority\":\"High\",\"preset\":{\r\n
@@ -283,22 +398,22 @@ interactions:
         \             }\r\n            ]\r\n          },\"codecs\":[\r\n            {\r\n
         \             \"@odata.type\":\"#Microsoft.Media.AacAudio\",\"channels\":2,\"samplingRate\":48000,\"bitrate\":128000,\"profile\":\"AacLc\"\r\n
         \           },{\r\n              \"@odata.type\":\"#Microsoft.Media.H264Video\",\"keyFrameInterval\":\"PT2S\",\"stretchMode\":\"AutoSize\",\"syncMode\":\"Auto\",\"sceneChangeDetection\":false,\"complexity\":\"Balanced\",\"layers\":[\r\n
-        \               {\r\n                  \"width\":\"1280\",\"height\":\"720\",\"bFrames\":3,\"bitrate\":2000000,\"maxBitrate\":2000000,\"slices\":0,\"adaptiveBFrame\":true,\"profile\":\"Auto\",\"level\":\"auto\",\"bufferWindow\":\"PT5S\",\"referenceFrames\":3,\"entropyMode\":\"Cabac\"\r\n
-        \               },{\r\n                  \"width\":\"640\",\"height\":\"360\",\"bFrames\":3,\"bitrate\":1000000,\"maxBitrate\":1000000,\"slices\":0,\"adaptiveBFrame\":true,\"profile\":\"Auto\",\"level\":\"auto\",\"bufferWindow\":\"PT5S\",\"referenceFrames\":3,\"entropyMode\":\"Cabac\"\r\n
+        \               {\r\n                  \"width\":\"1280\",\"height\":\"720\",\"bitrate\":2000000,\"maxBitrate\":2000000,\"bFrames\":3,\"slices\":0,\"adaptiveBFrame\":true,\"profile\":\"Auto\",\"level\":\"auto\",\"bufferWindow\":\"PT5S\",\"referenceFrames\":3,\"entropyMode\":\"Cabac\"\r\n
+        \               },{\r\n                  \"width\":\"640\",\"height\":\"360\",\"bitrate\":1000000,\"maxBitrate\":1000000,\"bFrames\":3,\"slices\":0,\"adaptiveBFrame\":true,\"profile\":\"Auto\",\"level\":\"auto\",\"bufferWindow\":\"PT5S\",\"referenceFrames\":3,\"entropyMode\":\"Cabac\"\r\n
         \               }\r\n              ]\r\n            }\r\n          ],\"formats\":[\r\n
         \           {\r\n              \"@odata.type\":\"#Microsoft.Media.Mp4Format\",\"filenamePattern\":\"{Basename}_{Bitrate}{Extension}\",\"outputFiles\":[\r\n
         \               \r\n              ]\r\n            }\r\n          ]\r\n        }\r\n
-        \     }\r\n    ]\r\n  },\"systemData\":{\r\n    \"createdBy\":\"phcooper@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2021-07-30T19:12:06.5487386Z\",\"lastModifiedBy\":\"phcooper@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2021-07-30T19:12:08.4367484Z\"\r\n
+        \     }\r\n    ]\r\n  },\"systemData\":{\r\n    \"createdBy\":\"hivyas@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2022-03-23T23:41:09.8744244Z\",\"lastModifiedBy\":\"hivyas@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2022-03-23T23:41:11.8984454Z\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2433'
+      - '2365'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Fri, 30 Jul 2021 19:12:09 GMT
+      - Wed, 23 Mar 2022 23:41:12 GMT
       expires:
       - '-1'
       odata-version:
@@ -355,13 +470,13 @@ interactions:
       ParameterSetName:
       - -a -n -g --preset --audio-language --audio-analysis-mode
       User-Agent:
-      - AZURECLI/2.24.2 (MSI) azsdk-python-mgmt-media/7.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.32.0 azsdk-python-mgmt-media/8.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2021-06-01
   response:
     body:
       string: "{\r\n  \"name\":\"tra000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/transforms/tra000004\",\"type\":\"Microsoft.Media/mediaservices/transforms\",\"properties\":{\r\n
-        \   \"created\":\"2021-07-30T19:12:06.5487386Z\",\"lastModified\":\"2021-07-30T19:12:09.7715782Z\",\"outputs\":[\r\n
+        \   \"created\":\"2022-03-23T23:41:09.8744244Z\",\"lastModified\":\"2022-03-23T23:41:13.344585Z\",\"outputs\":[\r\n
         \     {\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n
         \         \"@odata.type\":\"#Microsoft.Media.BuiltInStandardEncoderPreset\",\"presetName\":\"AACGoodQualityAudio\"\r\n
         \       }\r\n      },{\r\n        \"onError\":\"ContinueJob\",\"relativePriority\":\"High\",\"preset\":{\r\n
@@ -370,24 +485,24 @@ interactions:
         \             }\r\n            ]\r\n          },\"codecs\":[\r\n            {\r\n
         \             \"@odata.type\":\"#Microsoft.Media.AacAudio\",\"channels\":2,\"samplingRate\":48000,\"bitrate\":128000,\"profile\":\"AacLc\"\r\n
         \           },{\r\n              \"@odata.type\":\"#Microsoft.Media.H264Video\",\"keyFrameInterval\":\"PT2S\",\"stretchMode\":\"AutoSize\",\"syncMode\":\"Auto\",\"sceneChangeDetection\":false,\"complexity\":\"Balanced\",\"layers\":[\r\n
-        \               {\r\n                  \"width\":\"1280\",\"height\":\"720\",\"bFrames\":3,\"bitrate\":2000000,\"maxBitrate\":2000000,\"slices\":0,\"adaptiveBFrame\":true,\"profile\":\"Auto\",\"level\":\"auto\",\"bufferWindow\":\"PT5S\",\"referenceFrames\":3,\"entropyMode\":\"Cabac\"\r\n
-        \               },{\r\n                  \"width\":\"640\",\"height\":\"360\",\"bFrames\":3,\"bitrate\":1000000,\"maxBitrate\":1000000,\"slices\":0,\"adaptiveBFrame\":true,\"profile\":\"Auto\",\"level\":\"auto\",\"bufferWindow\":\"PT5S\",\"referenceFrames\":3,\"entropyMode\":\"Cabac\"\r\n
+        \               {\r\n                  \"width\":\"1280\",\"height\":\"720\",\"bitrate\":2000000,\"maxBitrate\":2000000,\"bFrames\":3,\"slices\":0,\"adaptiveBFrame\":true,\"profile\":\"Auto\",\"level\":\"auto\",\"bufferWindow\":\"PT5S\",\"referenceFrames\":3,\"entropyMode\":\"Cabac\"\r\n
+        \               },{\r\n                  \"width\":\"640\",\"height\":\"360\",\"bitrate\":1000000,\"maxBitrate\":1000000,\"bFrames\":3,\"slices\":0,\"adaptiveBFrame\":true,\"profile\":\"Auto\",\"level\":\"auto\",\"bufferWindow\":\"PT5S\",\"referenceFrames\":3,\"entropyMode\":\"Cabac\"\r\n
         \               }\r\n              ]\r\n            }\r\n          ],\"formats\":[\r\n
         \           {\r\n              \"@odata.type\":\"#Microsoft.Media.Mp4Format\",\"filenamePattern\":\"{Basename}_{Bitrate}{Extension}\",\"outputFiles\":[\r\n
         \               \r\n              ]\r\n            }\r\n          ]\r\n        }\r\n
         \     },{\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n
         \         \"@odata.type\":\"#Microsoft.Media.AudioAnalyzerPreset\",\"audioLanguage\":\"es-ES\",\"mode\":\"Basic\"\r\n
-        \       }\r\n      }\r\n    ]\r\n  },\"systemData\":{\r\n    \"createdBy\":\"phcooper@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2021-07-30T19:12:06.5487386Z\",\"lastModifiedBy\":\"phcooper@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2021-07-30T19:12:09.7715782Z\"\r\n
+        \       }\r\n      }\r\n    ]\r\n  },\"systemData\":{\r\n    \"createdBy\":\"hivyas@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2022-03-23T23:41:09.8744244Z\",\"lastModifiedBy\":\"hivyas@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2022-03-23T23:41:13.344585Z\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2636'
+      - '2566'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Fri, 30 Jul 2021 19:12:09 GMT
+      - Wed, 23 Mar 2022 23:41:12 GMT
       expires:
       - '-1'
       odata-version:
@@ -405,7 +520,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1196'
+      - '1197'
     status:
       code: 200
       message: OK
@@ -423,13 +538,13 @@ interactions:
       ParameterSetName:
       - -a -n -g --preset --audio-language --insights-to-extract --video-analysis-mode
       User-Agent:
-      - AZURECLI/2.24.2 (MSI) azsdk-python-mgmt-media/7.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.32.0 azsdk-python-mgmt-media/8.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2021-06-01
   response:
     body:
       string: "{\r\n  \"name\":\"tra000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/transforms/tra000004\",\"type\":\"Microsoft.Media/mediaservices/transforms\",\"properties\":{\r\n
-        \   \"created\":\"2021-07-30T19:12:06.5487386Z\",\"lastModified\":\"2021-07-30T19:12:09.7715782Z\",\"outputs\":[\r\n
+        \   \"created\":\"2022-03-23T23:41:09.8744244Z\",\"lastModified\":\"2022-03-23T23:41:13.344585Z\",\"outputs\":[\r\n
         \     {\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n
         \         \"@odata.type\":\"#Microsoft.Media.BuiltInStandardEncoderPreset\",\"presetName\":\"AACGoodQualityAudio\"\r\n
         \       }\r\n      },{\r\n        \"onError\":\"ContinueJob\",\"relativePriority\":\"High\",\"preset\":{\r\n
@@ -445,17 +560,17 @@ interactions:
         \               \r\n              ]\r\n            }\r\n          ]\r\n        }\r\n
         \     },{\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n
         \         \"@odata.type\":\"#Microsoft.Media.AudioAnalyzerPreset\",\"audioLanguage\":\"es-ES\",\"mode\":\"Basic\"\r\n
-        \       }\r\n      }\r\n    ]\r\n  },\"systemData\":{\r\n    \"createdBy\":\"phcooper@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2021-07-30T19:12:06.5487386Z\",\"lastModifiedBy\":\"phcooper@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2021-07-30T19:12:09.7715782Z\"\r\n
+        \       }\r\n      }\r\n    ]\r\n  },\"systemData\":{\r\n    \"createdBy\":\"hivyas@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2022-03-23T23:41:09.8744244Z\",\"lastModifiedBy\":\"hivyas@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2022-03-23T23:41:13.344585Z\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2636'
+      - '2566'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Fri, 30 Jul 2021 19:12:10 GMT
+      - Wed, 23 Mar 2022 23:41:14 GMT
       expires:
       - '-1'
       odata-version:
@@ -514,13 +629,13 @@ interactions:
       ParameterSetName:
       - -a -n -g --preset --audio-language --insights-to-extract --video-analysis-mode
       User-Agent:
-      - AZURECLI/2.24.2 (MSI) azsdk-python-mgmt-media/7.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.32.0 azsdk-python-mgmt-media/8.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2021-06-01
   response:
     body:
       string: "{\r\n  \"name\":\"tra000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/transforms/tra000004\",\"type\":\"Microsoft.Media/mediaservices/transforms\",\"properties\":{\r\n
-        \   \"created\":\"2021-07-30T19:12:06.5487386Z\",\"lastModified\":\"2021-07-30T19:12:11.0595129Z\",\"outputs\":[\r\n
+        \   \"created\":\"2022-03-23T23:41:09.8744244Z\",\"lastModified\":\"2022-03-23T23:41:15.3754904Z\",\"outputs\":[\r\n
         \     {\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n
         \         \"@odata.type\":\"#Microsoft.Media.BuiltInStandardEncoderPreset\",\"presetName\":\"AACGoodQualityAudio\"\r\n
         \       }\r\n      },{\r\n        \"onError\":\"ContinueJob\",\"relativePriority\":\"High\",\"preset\":{\r\n
@@ -538,17 +653,17 @@ interactions:
         \         \"@odata.type\":\"#Microsoft.Media.AudioAnalyzerPreset\",\"audioLanguage\":\"es-ES\",\"mode\":\"Basic\"\r\n
         \       }\r\n      },{\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n
         \         \"@odata.type\":\"#Microsoft.Media.VideoAnalyzerPreset\",\"audioLanguage\":\"en-US\",\"mode\":\"Basic\",\"insightsToExtract\":\"AudioInsightsOnly\"\r\n
-        \       }\r\n      }\r\n    ]\r\n  },\"systemData\":{\r\n    \"createdBy\":\"phcooper@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2021-07-30T19:12:06.5487386Z\",\"lastModifiedBy\":\"phcooper@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2021-07-30T19:12:11.0595129Z\"\r\n
+        \       }\r\n      }\r\n    ]\r\n  },\"systemData\":{\r\n    \"createdBy\":\"hivyas@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2022-03-23T23:41:09.8744244Z\",\"lastModifiedBy\":\"hivyas@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2022-03-23T23:41:15.3754904Z\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2879'
+      - '2811'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Fri, 30 Jul 2021 19:12:10 GMT
+      - Wed, 23 Mar 2022 23:41:15 GMT
       expires:
       - '-1'
       odata-version:
@@ -566,7 +681,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1196'
+      - '1199'
     status:
       code: 200
       message: OK
@@ -582,15 +697,15 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -a -n -g --preset --resolution
+      - -a -n -g --preset --resolution --face-detector-mode --blur-type
       User-Agent:
-      - AZURECLI/2.24.2 (MSI) azsdk-python-mgmt-media/7.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.32.0 azsdk-python-mgmt-media/8.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2021-06-01
   response:
     body:
       string: "{\r\n  \"name\":\"tra000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/transforms/tra000004\",\"type\":\"Microsoft.Media/mediaservices/transforms\",\"properties\":{\r\n
-        \   \"created\":\"2021-07-30T19:12:06.5487386Z\",\"lastModified\":\"2021-07-30T19:12:11.0595129Z\",\"outputs\":[\r\n
+        \   \"created\":\"2022-03-23T23:41:09.8744244Z\",\"lastModified\":\"2022-03-23T23:41:15.3754904Z\",\"outputs\":[\r\n
         \     {\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n
         \         \"@odata.type\":\"#Microsoft.Media.BuiltInStandardEncoderPreset\",\"presetName\":\"AACGoodQualityAudio\"\r\n
         \       }\r\n      },{\r\n        \"onError\":\"ContinueJob\",\"relativePriority\":\"High\",\"preset\":{\r\n
@@ -598,7 +713,7 @@ interactions:
         \           \"rotation\":\"Auto\",\"overlays\":[\r\n              {\r\n                \"@odata.type\":\"#Microsoft.Media.VideoOverlay\",\"inputLabel\":\"videooverlay\",\"audioGainLevel\":1.0,\"opacity\":1.0\r\n
         \             }\r\n            ]\r\n          },\"codecs\":[\r\n            {\r\n
         \             \"@odata.type\":\"#Microsoft.Media.AacAudio\",\"channels\":2,\"samplingRate\":48000,\"bitrate\":128000,\"profile\":\"AacLc\"\r\n
-        \           },{\r\n              \"@odata.type\":\"#Microsoft.Media.H264Video\",\"syncMode\":\"Auto\",\"keyFrameInterval\":\"PT2S\",\"stretchMode\":\"AutoSize\",\"sceneChangeDetection\":false,\"complexity\":\"Balanced\",\"layers\":[\r\n
+        \           },{\r\n              \"@odata.type\":\"#Microsoft.Media.H264Video\",\"keyFrameInterval\":\"PT2S\",\"stretchMode\":\"AutoSize\",\"syncMode\":\"Auto\",\"sceneChangeDetection\":false,\"complexity\":\"Balanced\",\"layers\":[\r\n
         \               {\r\n                  \"width\":\"1280\",\"height\":\"720\",\"bitrate\":2000000,\"maxBitrate\":2000000,\"bFrames\":3,\"slices\":0,\"adaptiveBFrame\":true,\"profile\":\"Auto\",\"level\":\"auto\",\"bufferWindow\":\"PT5S\",\"referenceFrames\":3,\"entropyMode\":\"Cabac\"\r\n
         \               },{\r\n                  \"width\":\"640\",\"height\":\"360\",\"bitrate\":1000000,\"maxBitrate\":1000000,\"bFrames\":3,\"slices\":0,\"adaptiveBFrame\":true,\"profile\":\"Auto\",\"level\":\"auto\",\"bufferWindow\":\"PT5S\",\"referenceFrames\":3,\"entropyMode\":\"Cabac\"\r\n
         \               }\r\n              ]\r\n            }\r\n          ],\"formats\":[\r\n
@@ -608,17 +723,17 @@ interactions:
         \         \"@odata.type\":\"#Microsoft.Media.AudioAnalyzerPreset\",\"audioLanguage\":\"es-ES\",\"mode\":\"Basic\"\r\n
         \       }\r\n      },{\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n
         \         \"@odata.type\":\"#Microsoft.Media.VideoAnalyzerPreset\",\"audioLanguage\":\"en-US\",\"mode\":\"Basic\",\"insightsToExtract\":\"AudioInsightsOnly\"\r\n
-        \       }\r\n      }\r\n    ]\r\n  },\"systemData\":{\r\n    \"createdBy\":\"phcooper@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2021-07-30T19:12:06.5487386Z\",\"lastModifiedBy\":\"phcooper@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2021-07-30T19:12:11.0595129Z\"\r\n
+        \       }\r\n      }\r\n    ]\r\n  },\"systemData\":{\r\n    \"createdBy\":\"hivyas@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2022-03-23T23:41:09.8744244Z\",\"lastModifiedBy\":\"hivyas@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2022-03-23T23:41:15.3754904Z\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2879'
+      - '2811'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Fri, 30 Jul 2021 19:12:12 GMT
+      - Wed, 23 Mar 2022 23:41:15 GMT
       expires:
       - '-1'
       odata-version:
@@ -662,7 +777,7 @@ interactions:
       {"onError": "StopProcessingJob", "relativePriority": "Normal", "preset": {"@odata.type":
       "#Microsoft.Media.VideoAnalyzerPreset", "audioLanguage": "en-US", "mode": "Basic",
       "insightsToExtract": "AudioInsightsOnly"}}, {"preset": {"@odata.type": "#Microsoft.Media.FaceDetectorPreset",
-      "resolution": "SourceResolution"}}]}}'
+      "resolution": "SourceResolution", "mode": "Redact", "blurType": "Low"}}]}}'
     headers:
       Accept:
       - application/json
@@ -673,19 +788,19 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '2009'
+      - '2046'
       Content-Type:
       - application/json
       ParameterSetName:
-      - -a -n -g --preset --resolution
+      - -a -n -g --preset --resolution --face-detector-mode --blur-type
       User-Agent:
-      - AZURECLI/2.24.2 (MSI) azsdk-python-mgmt-media/7.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.32.0 azsdk-python-mgmt-media/8.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2021-06-01
   response:
     body:
       string: "{\r\n  \"name\":\"tra000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/transforms/tra000004\",\"type\":\"Microsoft.Media/mediaservices/transforms\",\"properties\":{\r\n
-        \   \"created\":\"2021-07-30T19:12:06.5487386Z\",\"lastModified\":\"2021-07-30T19:12:12.4407601Z\",\"outputs\":[\r\n
+        \   \"created\":\"2022-03-23T23:41:09.8744244Z\",\"lastModified\":\"2022-03-23T23:41:16.0473479Z\",\"outputs\":[\r\n
         \     {\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n
         \         \"@odata.type\":\"#Microsoft.Media.BuiltInStandardEncoderPreset\",\"presetName\":\"AACGoodQualityAudio\"\r\n
         \       }\r\n      },{\r\n        \"onError\":\"ContinueJob\",\"relativePriority\":\"High\",\"preset\":{\r\n
@@ -693,7 +808,7 @@ interactions:
         \           \"rotation\":\"Auto\",\"overlays\":[\r\n              {\r\n                \"@odata.type\":\"#Microsoft.Media.VideoOverlay\",\"inputLabel\":\"videooverlay\",\"audioGainLevel\":1.0,\"opacity\":1.0\r\n
         \             }\r\n            ]\r\n          },\"codecs\":[\r\n            {\r\n
         \             \"@odata.type\":\"#Microsoft.Media.AacAudio\",\"channels\":2,\"samplingRate\":48000,\"bitrate\":128000,\"profile\":\"AacLc\"\r\n
-        \           },{\r\n              \"@odata.type\":\"#Microsoft.Media.H264Video\",\"syncMode\":\"Auto\",\"keyFrameInterval\":\"PT2S\",\"stretchMode\":\"AutoSize\",\"sceneChangeDetection\":false,\"complexity\":\"Balanced\",\"layers\":[\r\n
+        \           },{\r\n              \"@odata.type\":\"#Microsoft.Media.H264Video\",\"keyFrameInterval\":\"PT2S\",\"stretchMode\":\"AutoSize\",\"syncMode\":\"Auto\",\"sceneChangeDetection\":false,\"complexity\":\"Balanced\",\"layers\":[\r\n
         \               {\r\n                  \"width\":\"1280\",\"height\":\"720\",\"bitrate\":2000000,\"maxBitrate\":2000000,\"bFrames\":3,\"slices\":0,\"adaptiveBFrame\":true,\"profile\":\"Auto\",\"level\":\"auto\",\"bufferWindow\":\"PT5S\",\"referenceFrames\":3,\"entropyMode\":\"Cabac\"\r\n
         \               },{\r\n                  \"width\":\"640\",\"height\":\"360\",\"bitrate\":1000000,\"maxBitrate\":1000000,\"bFrames\":3,\"slices\":0,\"adaptiveBFrame\":true,\"profile\":\"Auto\",\"level\":\"auto\",\"bufferWindow\":\"PT5S\",\"referenceFrames\":3,\"entropyMode\":\"Cabac\"\r\n
         \               }\r\n              ]\r\n            }\r\n          ],\"formats\":[\r\n
@@ -704,18 +819,18 @@ interactions:
         \       }\r\n      },{\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n
         \         \"@odata.type\":\"#Microsoft.Media.VideoAnalyzerPreset\",\"audioLanguage\":\"en-US\",\"mode\":\"Basic\",\"insightsToExtract\":\"AudioInsightsOnly\"\r\n
         \       }\r\n      },{\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n
-        \         \"@odata.type\":\"#Microsoft.Media.FaceDetectorPreset\",\"resolution\":\"SourceResolution\",\"mode\":\"Analyze\"\r\n
-        \       }\r\n      }\r\n    ]\r\n  },\"systemData\":{\r\n    \"createdBy\":\"phcooper@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2021-07-30T19:12:06.5487386Z\",\"lastModifiedBy\":\"phcooper@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2021-07-30T19:12:12.4407601Z\"\r\n
+        \         \"@odata.type\":\"#Microsoft.Media.FaceDetectorPreset\",\"resolution\":\"SourceResolution\",\"mode\":\"Redact\",\"blurType\":\"Low\"\r\n
+        \       }\r\n      }\r\n    ]\r\n  },\"systemData\":{\r\n    \"createdBy\":\"hivyas@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2022-03-23T23:41:09.8744244Z\",\"lastModifiedBy\":\"hivyas@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2022-03-23T23:41:16.0473479Z\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '3091'
+      - '3039'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Fri, 30 Jul 2021 19:12:12 GMT
+      - Wed, 23 Mar 2022 23:41:15 GMT
       expires:
       - '-1'
       odata-version:
@@ -733,7 +848,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1196'
+      - '1198'
     status:
       code: 200
       message: OK

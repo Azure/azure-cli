@@ -20,8 +20,7 @@ def get_encryption(client, resource_group_name, account_name):
 def set_encryption(client, resource_group_name, account_name, key_type=None,
                    current_key_id=None, key_identifier=None, system_assigned=None, user_assigned=None):
     try:
-        account_info: MediaService = client.get(resource_group_name,
-                                  account_name) if resource_group_name else client.get_by_subscription(account_name)
+        account_info: MediaService = client.get(resource_group_name, account_name) if resource_group_name else client.get_by_subscription(account_name)
         if key_type == AccountEncryptionKeyType.CUSTOMER_KEY:
             key_vault_props = KeyVaultProperties(key_identifier=key_identifier,
                                                  current_key_identifier=current_key_id)
@@ -41,7 +40,7 @@ def set_encryption(client, resource_group_name, account_name, key_type=None,
 
         media_service: MediaService = MediaService(location=account_info.location, storage_accounts=account_info.storage_accounts,
                                                    key_delivery=account_info.key_delivery, identity=account_info.identity,
-                                                   encryption=encryption,storage_authentication=account_info.storage_authentication,
+                                                   encryption=encryption,storage_authentication=account_info.storage_authentication, 
                                                    name=account_info.name, public_network_access=account_info.public_network_access)
         print(encryption)
         return client.create_or_update(resource_group_name, account_name, media_service)

@@ -70,20 +70,26 @@ def get_transcription_langauges():
 def get_analysis_modes():
     return AudioAnalysisMode
 
+
 def get_face_detector_modes():
     return FaceRedactorMode
+
 
 def get_face_detector_blur_types():
     return BlurType
 
+
 def get_stretch_mode_types():
     return ['None', 'AutoSize', 'AutoFit']
+
 
 def get_encryption_key_types():
     return AccountEncryptionKeyType
 
+
 def get_storage_authentication_allowed_values():
     return ['System', 'ManagedIdentity']
+
 
 def get_default_action_allowed_values():
     return [DefaultAction.ALLOW, DefaultAction.DENY]

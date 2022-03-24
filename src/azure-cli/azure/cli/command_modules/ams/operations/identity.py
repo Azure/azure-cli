@@ -9,13 +9,20 @@ from azure.core.exceptions import HttpResponseError
 from azure.cli.core.azclierror import BadRequestError
 from azure.mgmt.media.models import (MediaService, AccountEncryption, KeyVaultProperties, ResourceIdentity, AccountEncryptionKeyType,
                                      MediaServiceUpdate, MediaServiceIdentity)
+from azure.cli.core.azclierror import ValidationError
 
 
 def assign_identity(client, resource_group_name, account_name, system_assigned=False, user_assigned=None):
+    if (system_assigned is False and user_assigned is None):
+        error_msg = 'Please specify either system assigned identity or a user assigned identity'
+        raise ValidationError(error_msg)
+
     account_info = client.get(resource_group_name,
                               account_name) if resource_group_name else client.get_by_subscription(account_name)
 
     current_identity_types = account_info.identity.type.split(',')
+    if ('None' in current_identity_types):
+        current_identity_types = []
 
     media_service = MediaServiceUpdate(identity=MediaServiceIdentity(type=''))
 
@@ -36,12 +43,20 @@ def assign_identity(client, resource_group_name, account_name, system_assigned=F
 
 
 def remove_identity(client, resource_group_name, account_name, system_assigned=False, user_assigned=None):
+    if (system_assigned is False and user_assigned is None):
+        error_msg = 'Please specify either system assigned identity or a user assigned identity'
+        raise ValidationError(error_msg)
+
     account_info = client.get(resource_group_name,
                               account_name) if resource_group_name else client.get_by_subscription(account_name)
 
     current_identity_types = account_info.identity.type.split(',')
 
-    media_service = MediaServiceUpdate(identity=MediaServiceIdentity(type=''))
+    media_service = MediaService(name=account_info.name, location=account_info.location, key_delivery=account_info.key_delivery,
+                                 identity=MediaServiceIdentity(type='', user_assigned_identities=account_info.identity.user_assigned_identities), encryption=account_info.encryption,
+                                 storage_accounts=account_info.storage_accounts,
+                                 storage_authentication=account_info.storage_authentication,
+                                 public_network_access=account_info.public_network_access)
 
     if (system_assigned and 'SystemAssigned' in current_identity_types):
         current_identity_types.remove('SystemAssigned')
@@ -54,9 +69,13 @@ def remove_identity(client, resource_group_name, account_name, system_assigned=F
     identity_type = ','.join(current_identity_types) if current_identity_types else 'None'
     media_service.identity.type = identity_type
 
-    return client.update(resource_group_name, account_name, media_service)
+    if (user_assigned and identity_type != 'None'):
+        return client.update(resource_group_name, account_name, media_service)
+    else:
+        return client.create_or_update(resource_group_name, account_name, media_service)
+
 
 def show_identity(client, resource_group_name, account_name):
     account_info = client.get(resource_group_name,
-                      account_name) if resource_group_name else client.get_by_subscription(account_name)
+                              account_name) if resource_group_name else client.get_by_subscription(account_name)
     return account_info.identity

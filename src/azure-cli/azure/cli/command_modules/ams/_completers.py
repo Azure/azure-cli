@@ -95,21 +95,26 @@ def get_stretch_mode_types_list():
     modes = get_stretch_mode_types()
     return modes
 
+
 def get_allowed_face_detector_modes():
     modes = get_face_detector_modes()
     return modes
+
 
 def get_allowed_face_dectector_blur_types():
     types = get_face_detector_blur_types()
     return types
 
+
 def get_allowed_encryption_key_types():
     types = get_encryption_key_types()
     return types
 
+
 def get_storage_authentication_allowed_values_list():
     values = get_storage_authentication_allowed_values()
     return values
+
 
 def get_default_action_allowed_values_list():
     values = get_default_action_allowed_values()
