@@ -1046,6 +1046,85 @@ class NetworkPrivateLinkWebappScenarioTest(ScenarioTest):
         self.cmd('network private-endpoint-connection delete -g {resource_group} --resource-name {webapp_name} -n {endpoint_request} --type Microsoft.Web/sites -y')
 
 
+class NetworkPrivateLinkApiManagementScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='test_api_management_private_endpoint_', location="westus2")
+    def test_private_endpoint_connection_apim(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'service_name': self.create_random_name('apim-privatelink-service', 40),
+            'vnet_name': self.create_random_name('apim-privatelink-vnet', 40),
+            'subnet_name': self.create_random_name('apim-privatelink-subnet', 40),
+            'endpoint_name': self.create_random_name('apim-privatelink-endpoint', 40),
+            'endpoint_conn_name': self.create_random_name('apim-privatelink-endpointconn', 40),
+            'endpoint_name2': self.create_random_name('apim-privatelink-endpoint2', 40),
+            'endpoint_conn_name2': self.create_random_name('apim-privatelink-endpointconn2', 40),
+            'description_msg': 'somedescription',
+            'location': resource_group_location,
+        })
+
+        # Create ApiManagement Service
+        service_created = self.cmd(
+            'apim create -g {resource_group} -n {service_name} --l {location} --publisher-email email@mydomain.com --publisher-name Microsoft').get_output_in_json()
+        self.kwargs['service_id'] = service_created['id']
+
+        # check private link resource is available
+        self.cmd('network private-link-resource list --id {service_id}', checks=[
+            self.check('length(@)', 1),
+        ])
+
+        # Prepare network
+        self.cmd('network vnet create -n {vnet_name} -g {resource_group} --subnet-name {subnet_name}',
+                 checks=self.check('length(newVNet.subnets)', 1))
+        self.cmd('network vnet subnet update -n {subnet_name} --vnet-name {vnet_name} -g {resource_group} '
+                 '--disable-private-endpoint-network-policies true',
+                 checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
+
+        result = self.cmd(
+            'network vnet subnet show -n {subnet_name} --vnet-name {vnet_name} -g {resource_group} ').get_output_in_json()
+
+        # Create endpoint with auto approval
+        result = self.cmd(
+            'network private-endpoint create -g {resource_group} -n {endpoint_name} --vnet-name {vnet_name} --subnet {subnet_name} '
+            '--connection-name {endpoint_conn_name} --private-connection-resource-id {service_id} '
+            '--group-id Gateway').get_output_in_json()
+        self.assertTrue(self.kwargs['endpoint_name'].lower() in result['name'].lower())
+
+        result = self.cmd(
+            'network private-endpoint-connection list -g {resource_group} -n {service_name} --type Microsoft.ApiManagement/service',
+            checks=[self.check('length(@)', 1), ]).get_output_in_json()
+        self.kwargs['endpoint_request'] = result[0]['name']
+
+        result = self.cmd(
+            'network private-endpoint-connection reject -g {resource_group} --resource-name {service_name} -n {endpoint_request} --type Microsoft.ApiManagement/service',
+            checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Rejected')])
+
+        # Create second endpoint with manual approval
+        result = self.cmd(
+            'network private-endpoint create -g {resource_group} -n {endpoint_name2} --vnet-name {vnet_name} --subnet {subnet_name} '
+            '--connection-name {endpoint_conn_name2} --private-connection-resource-id {service_id} '
+            '--group-id Gateway --manual-request').get_output_in_json()
+        self.assertTrue(self.kwargs['endpoint_name2'].lower() in result['name'].lower())
+
+        result = self.cmd(
+            'network private-endpoint-connection list -g {resource_group} -n {service_name} --type Microsoft.ApiManagement/service',
+            checks=[self.check('length(@)', 2), ]).get_output_in_json()
+        self.kwargs['endpoint_request2'] = [conn['name'] for conn in result if
+                                            self.kwargs['endpoint_name2'].lower() in
+                                            conn['properties']['privateEndpoint']['id'].lower()][0]
+
+        self.cmd(
+            'network private-endpoint-connection approve -g {resource_group} --resource-name {service_name} -n {endpoint_request2} --type Microsoft.ApiManagement/service',
+            checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Approved')])
+
+        self.cmd(
+            'network private-endpoint-connection reject -g {resource_group} --resource-name {service_name} -n {endpoint_request2} --type Microsoft.ApiManagement/service',
+            checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Rejected')])
+
+        # Remove endpoint
+        self.cmd(
+            'network private-endpoint-connection delete -g {resource_group} --resource-name {service_name} -n {endpoint_request} --type Microsoft.ApiManagement/service -y')
+
+
 class NetworkPrivateLinkEventGridScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_event_grid_plr')
     def test_private_link_resource_event_grid(self, resource_group):
