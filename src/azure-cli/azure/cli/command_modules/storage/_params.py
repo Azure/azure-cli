@@ -1405,9 +1405,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         with self.argument_context('storage container policy {}'.format(item)) as c:
             c.extra('lease_id', options_list='--lease-id', help='The container lease ID.')
 
-    with self.argument_context('storage container generate-sas') as c:
+    with self.argument_context('storage container generate-sas', resource_type=ResourceType.DATA_STORAGE_BLOB) as c:
         from .completers import get_storage_acl_name_completion_list
-        t_container_permissions = self.get_sdk('blob.models#ContainerPermissions')
+        t_container_permissions = self.get_sdk('_models#ContainerSasPermissions',
+                                               resource_type=ResourceType.DATA_STORAGE_BLOB)
         c.register_sas_arguments()
         c.argument('id', options_list='--policy-name', validator=validate_policy,
                    help='The name of a stored access policy within the container\'s ACL.',

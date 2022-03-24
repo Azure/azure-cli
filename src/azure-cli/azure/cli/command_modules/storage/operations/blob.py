@@ -6,7 +6,7 @@
 import os
 from datetime import datetime
 
-from azure.cli.core.profiles import ResourceType
+from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.core.util import sdk_no_wait
 from azure.cli.core.azclierror import AzureResponseError
 from azure.cli.command_modules.storage.url_quote_util import encode_for_url, make_encoded_file_url_and_params
@@ -751,21 +751,22 @@ def generate_sas_blob_uri(client, container_name, blob_name, permission=None,
     return quote(sas_token, safe='&%()$=\',~')
 
 
-def generate_container_shared_access_signature(client, container_name, permission=None,
-                                               expiry=None, start=None, id=None, ip=None,  # pylint: disable=redefined-builtin
-                                               protocol=None, cache_control=None, content_disposition=None,
-                                               content_encoding=None, content_language=None,
-                                               content_type=None, as_user=False):
+def generate_container_shared_access_signature(cmd, client, account_name=None, container_name=None, account_key=None,
+                                               permission=None, expiry=None, start=None,
+                                               policy_id=None, ip=None, as_user=False, **kwargs):
+
+    t_generate_container_sas = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_BLOB,
+                            '_shared_access_signature#generate_container_sas')
+
     user_delegation_key = None
     if as_user:
         user_delegation_key = client.get_user_delegation_key(
             get_datetime_from_string(start) if start else datetime.utcnow(), get_datetime_from_string(expiry))
+        account_name = client.account_name
 
-    return client.generate_container_shared_access_signature(
-        container_name, permission=permission, expiry=expiry, start=start, id=id, ip=ip,
-        protocol=protocol, cache_control=cache_control, content_disposition=content_disposition,
-        content_encoding=content_encoding, content_language=content_language, content_type=content_type,
-        user_delegation_key=user_delegation_key)
+    return t_generate_container_sas(account_name=account_name, container_name=container_name, account_key=account_key,
+                                    user_delegation_key=user_delegation_key, permission=permission, expiry=expiry,
+                                    start=start, policy_id=policy_id, ip=ip, **kwargs)
 
 
 def create_blob_url(client, container_name, blob_name, protocol=None, snapshot=None):
