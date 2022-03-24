@@ -1263,7 +1263,7 @@ examples:
 
 helps['afd custom-domain regenerate-validation-token'] = """
 type: command
-short-summary: Regnerate the domain validation token to restart the validation process.
+short-summary: Regenerate the domain validation token to restart the validation process.
 examples:
   - name: Regenerate the domain validation token.
     text: az afd custom-domain regenerate-validation-token -g MyResourceGroup --profile-name MyProfle --custom-domain-name MyCustomDomain
