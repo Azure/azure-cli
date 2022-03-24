@@ -996,6 +996,7 @@ class SqlServerDbShortTermRetentionScenarioTest(ScenarioTest):
 
 
 class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
+    @live_only()
     def test_sql_db_long_term_retention(
             self):
         self.kwargs.update({
