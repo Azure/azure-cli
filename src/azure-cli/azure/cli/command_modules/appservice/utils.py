@@ -19,6 +19,7 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
 
 from ._client_factory import web_client_factory
+from ._constants import LOGICAPP_KIND, FUNCTIONAPP_KIND
 
 logger = get_logger(__name__)
 
@@ -214,6 +215,38 @@ def get_pool_manager(url):
             ca_bundle_file = certifi.where()
         http.connection_pool_kw['ca_certs'] = ca_bundle_file
     return http
+
+
+def is_logicapp(app):
+    if app is None or app.kind is None:
+        return False
+    return LOGICAPP_KIND in app.kind
+
+
+def is_functionapp(app):
+    if app is None or app.kind is None:
+        return False
+    return not is_logicapp(app) and FUNCTIONAPP_KIND in app.kind
+
+
+def is_webapp(app):
+    if app is None or app.kind is None:
+        return False
+    return not is_logicapp(app) and not is_logicapp(app) and "app" in app.kind
+
+
+def get_plan_from_app(cmd, app):
+    if app is None or app.server_farm_id is None:
+        return None
+    plan_id = app.server_farm_id
+    parsed_plan = parse_resource_id(plan_id)
+    client = web_client_factory(cmd.cli_ctx)
+    return get_resource_if_exists(client.app_service_plans,
+                                  resource_group_name=parsed_plan.get("resource_group"), name=parsed_plan.get("name"))
+
+
+def is_app_linux(app):
+    return app and app.reserved
 
 
 def get_app_service_plan_from_webapp(cmd, webapp, api_version=None):

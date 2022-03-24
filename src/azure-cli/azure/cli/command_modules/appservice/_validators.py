@@ -17,8 +17,8 @@ from msrestazure.tools import is_valid_resource_id, parse_resource_id
 
 from ._appservice_utils import _generic_site_operation
 from ._client_factory import web_client_factory
-from .utils import (_normalize_sku, get_sku_tier, _normalize_location, get_resource_name_and_group,
-                    get_resource_if_exists)
+from .utils import (_normalize_sku, get_plan_from_app, get_sku_tier, _normalize_location, get_resource_name_and_group,
+                    get_resource_if_exists, is_app_linux, is_functionapp, is_logicapp)
 
 logger = get_logger(__name__)
 
@@ -199,6 +199,8 @@ def validate_ip_address(cmd, namespace):
 
 
 def validate_onedeploy_params(namespace):
+    from azure.cli.command_modules.appservice.custom import is_plan_consumption
+
     if namespace.src_path and namespace.src_url:
         raise MutuallyExclusiveArgumentError('Only one of --src-path and --src-url can be specified')
 
@@ -214,6 +216,21 @@ def validate_onedeploy_params(namespace):
             logger.warning("Ignoring parameter --timeout. Polling not yet implemented when using '--src-url'")
         if not namespace.is_async:
             logger.warning("Synchronous deployments not yet supported when using '--src-url'")
+
+    client = web_client_factory(namespace.cmd.cli_ctx)
+    app = get_resource_if_exists(client.web_apps,
+                                 name=namespace.name,
+                                 resource_group_name=namespace.resource_group_name)
+    if app is None:
+        raise ResourceNotFoundError(f"Could not find app {namespace.name} "
+                                    f"in resource group {namespace.resource_group_name}")
+    if is_logicapp(app):
+        raise ValidationError("Cannot deploy to a logic app with this command")
+
+    if is_functionapp(app):
+        plan_info = get_plan_from_app(namespace.cmd, app)
+        if is_plan_consumption(namespace.cmd, plan_info) and is_app_linux(app):
+            raise ValidationError("Deploying to a linux consumption functionapp with this command is not yet supported")
 
 
 def _validate_ip_address_format(namespace):

@@ -30,6 +30,8 @@ GITHUB_OAUTH_SCOPES = [
     "repo",
     "workflow"
 ]
+LOGICAPP_KIND = "workflowapp"
+FUNCTIONAPP_KIND = "functionapp"
 
 
 class FUNCTIONS_STACKS_API_KEYS():
