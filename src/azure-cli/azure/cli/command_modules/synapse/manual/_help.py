@@ -2315,7 +2315,7 @@ examples:
     text: |-
         az synapse link-connnection create --workspace-name testsynapseworkspace \\
           --name testlinkconnectionname \\
-          --file 'path/definition.json'
+          --file @"path/definition.json"
 """
 
 helps['synapse link-connnection update'] = """
@@ -2326,7 +2326,7 @@ examples:
     text: |-
         az synapse link-connnection update --workspace-name testsynapseworkspace \\
           --name testlinkconnectionname \\
-          --file 'path/definition.json'
+          --file @"path/definition.json"
 """
 
 helps['synapse link-connnection start'] = """
