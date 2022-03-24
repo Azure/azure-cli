@@ -107,6 +107,7 @@ ADDONS = {
 # consts for check-acr command
 CONST_CANIPULL_IMAGE = "mcr.microsoft.com/aks/canipull:0.0.3-alpha"
 
+
 # consts for decorator pattern
 class DecoratorMode(Enum):
     """Enumerations used to distinguish whether to handle creation or update.

@@ -340,9 +340,9 @@ class AKSAgentPoolContext(BaseAKSContext):
         snapshot_id = self.raw_param.get("snapshot_id")
         # try to read the property value corresponding to the parameter from the `agentpool` object
         if (
-            self.agentpool
-            and self.agentpool.creation_data
-            and self.agentpool.creation_data.source_resource_id is not None
+            self.agentpool and
+            self.agentpool.creation_data and
+            self.agentpool.creation_data.source_resource_id is not None
         ):
             snapshot_id = self.agentpool.creation_data.source_resource_id
 
@@ -450,8 +450,8 @@ class AKSAgentPoolContext(BaseAKSContext):
 
         # validation
         if (
-            self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER
-            and self.decorator_mode == DecoratorMode.CREATE
+            self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER and
+            self.decorator_mode == DecoratorMode.CREATE
         ):
             if os_type.lower() == "windows":
                 raise InvalidArgumentValueError("System node pool must be linux.")
