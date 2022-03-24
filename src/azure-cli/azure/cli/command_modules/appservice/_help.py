@@ -705,7 +705,7 @@ short-summary: assign managed identity to the web app
 examples:
   - name: assign local identity and assign a reader role to the current resource group.
     text: >
-        az functionapp identity assign -g MyResourceGroup -n MyUniqueApp --role reader --scope /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/MyResourceGroup
+        az functionapp identity assign -g MyResourceGroup -n MyUniqueApp --role reader --scope /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourcegroups/MyResourceGroup
   - name: enable identity for the web app.
     text: >
         az functionapp identity assign -g MyResourceGroup -n MyUniqueApp
@@ -1767,7 +1767,7 @@ short-summary: assign managed identity to the web app
 examples:
   - name: assign local identity and assign a reader role to the current resource group.
     text: >
-        az webapp identity assign -g MyResourceGroup -n MyUniqueApp --role reader --scope /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/MyResourceGroup
+        az webapp identity assign -g MyResourceGroup -n MyUniqueApp --role reader --scope /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourcegroups/MyResourceGroup
   - name: enable identity for the web app.
     text: >
         az webapp identity assign -g MyResourceGroup -n MyUniqueApp
@@ -2493,7 +2493,7 @@ short-summary: assign managed identity to the static web app
 examples:
   - name: assign local identity and assign a reader role to the current resource group.
     text: >
-        az staticwebapp identity assign -g MyResourceGroup -n MyUniqueApp --role reader --scope /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/MyResourceGroup
+        az staticwebapp identity assign -g MyResourceGroup -n MyUniqueApp --role reader --scope /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourcegroups/MyResourceGroup
   - name: enable identity for the web app.
     text: >
         az staticwebapp identity assign -g MyResourceGroup -n MyUniqueApp
