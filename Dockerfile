@@ -40,10 +40,15 @@ RUN apk add --no-cache bash openssh ca-certificates jq curl openssl perl git zip
  && apk add --no-cache bash-completion \
  && update-ca-certificates
 
-ARG JP_VERSION="0.1.3"
+ARG JP_VERSION="0.2.1"
 
-RUN curl -L https://github.com/jmespath/jp/releases/download/${JP_VERSION}/jp-linux-amd64 -o /usr/local/bin/jp \
- && chmod +x /usr/local/bin/jp
+RUN if [ `uname -m` = "aarch64" ] ; then \
+       export ARCH=arm64; \
+    else \
+       export ARCH=amd64; \
+    fi && \
+    curl -L https://github.com/jmespath/jp/releases/download/${JP_VERSION}/jp-linux-$ARCH -o /usr/local/bin/jp && \
+    chmod +x /usr/local/bin/jp
 
 WORKDIR azure-cli
 COPY . /azure-cli
