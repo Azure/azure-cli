@@ -292,7 +292,7 @@ Authentication failure. This may be caused by either invalid account key, connec
     def _register_data_plane_account_arguments(self, command_name):
         """ Add parameters required to create a storage client """
         from azure.cli.core.commands.parameters import get_resource_name_completion_list
-        from azure.cli.command_modules.storage._validators import validate_client_parameters
+        from azure.cli.command_modules.storage._validators import is_storagev2, validate_client_parameters
         command = self.command_loader.command_table.get(command_name, None)
         if not command:
             return
@@ -306,18 +306,34 @@ Authentication failure. This may be caused by either invalid account key, connec
                                   'present, the command will try to query the storage account key using the '
                                   'authenticated Azure account. If a large number of storage commands are executed the '
                                   'API quota may be hit')
-        command.add_argument('account_key', '--account-key', required=False, default=None,
-                             arg_group=group_name,
-                             help='Storage account key. Must be used in conjunction with storage account name. '
-                                  'Environment variable: AZURE_STORAGE_KEY')
         command.add_argument('connection_string', '--connection-string', required=False, default=None,
                              validator=validate_client_parameters, arg_group=group_name,
                              help='Storage account connection string. Environment variable: '
                                   'AZURE_STORAGE_CONNECTION_STRING')
-        command.add_argument('sas_token', '--sas-token', required=False, default=None,
-                             arg_group=group_name,
-                             help='A Shared Access Signature (SAS). Must be used in conjunction with storage account '
-                                  'name. Environment variable: AZURE_STORAGE_SAS_TOKEN')
+        if is_storagev2(command.command_kwargs['resource_type'].value[0]):
+            command.add_argument('account_url', '--service-endpoint', required=False, default=None,
+                                 arg_group=group_name,
+                                 help='Storage data service endpoint. Must be used in conjunction with either '
+                                      'storage account key or a SAS token. You can find each service primary endpoint '
+                                      'with `az storage account show`. '
+                                      'Environment variable: AZURE_STORAGE_SERVICE_ENDPOINT')
+            command.add_argument('account_key', '--account-key', required=False, default=None,
+                                 arg_group=group_name,
+                                 help='Storage account key. Must be used in conjunction with storage account '
+                                      'name or service endpoint. Environment variable: AZURE_STORAGE_KEY')
+            command.add_argument('sas_token', '--sas-token', required=False, default=None,
+                                 arg_group=group_name,
+                                 help='A Shared Access Signature (SAS). Must be used in conjunction with storage '
+                                      'account name or service endpoint. Environment variable: AZURE_STORAGE_SAS_TOKEN')
+        else:
+            command.add_argument('account_key', '--account-key', required=False, default=None,
+                                 arg_group=group_name,
+                                 help='Storage account key. Must be used in conjunction with storage account name. '
+                                      'Environment variable: AZURE_STORAGE_KEY')
+            command.add_argument('sas_token', '--sas-token', required=False, default=None,
+                                 arg_group=group_name,
+                                 help='A Shared Access Signature (SAS). Must be used in conjunction with storage '
+                                      'account name. Environment variable: AZURE_STORAGE_SAS_TOKEN')
 
     def _register_data_plane_oauth_arguments(self, command_name):
         from azure.cli.core.commands.parameters import get_enum_type
