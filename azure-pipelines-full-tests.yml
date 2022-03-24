@@ -13,90 +13,275 @@ pr:
       - '*'
 
 jobs:
-- job: AutomationTest
-  displayName: Automation Test (Profile Latest)
-  timeoutInMinutes: 120
+- job: AutomationFullTestPython36ProfileLatest
+  displayName: Automation Full Test Python36 Profile Latest
+  timeoutInMinutes: 9999
+  strategy:
+    maxParallel: 5
+    matrix:
+      rdbms:
+        Target: rdbms
+      vm:
+        Target: vm
+      synapse:
+        Target: synapse
+      eventhubs:
+        Target: eventhubs
+      appconfig:
+        Target: appconfig
+      monitor:
+        Target: monitor
+      batch:
+        Target: batch
+      privatedns:
+        Target: privatedns
+      netappfiles:
+        Target: netappfiles
+      container:
+        Target: container
+      batchai:
+        Target: batchai
+      maps:
+        Target: maps
+      configure:
+        Target: configure
+      advisor:
+        Target: advisor
+      reservations:
+        Target: reservations
   pool:
     vmImage: 'ubuntu-20.04'
-  strategy:
-    matrix:
-      Python36:
-        python.version: '3.6'
-      Python38:
-        python.version: '3.8'
-      Python39:
-        python.version: '3.9'
-      Python310:
-        python.version: '3.10'
   steps:
     - template: .azure-pipelines/templates/automation_test.yml
       parameters:
-        pythonVersion: '$(python.version)'
+        pythonVersion: '3.6'
         profile: 'latest'
-        fullTest: true
+        module: '$(Target)'
 
-- job: AutomationTest20200901
-  displayName: Automation Test (Profile 2020-09-01)
-  timeoutInMinutes: 120
+- job: AutomationFullTestPython36ProfileLatestPart2
+  displayName: Automation Full Test Python36 Profile Latest Part2
+  timeoutInMinutes: 9999
+  strategy:
+    maxParallel: 5
+    matrix:
+      storage:
+        Target: storage
+      apim:
+        Target: apim
+      search:
+        Target: search
+      hdinsight:
+        Target: hdinsight
+      aro:
+        Target: aro
+      iot:
+        Target: iot
+      keyvault:
+        Target: keyvault
+      profile:
+        Target: profile
+      eventgrid:
+        Target: eventgrid
+      databoxedge:
+        Target: databoxedge
+      dla:
+        Target: dla
+      dls:
+        Target: dls
+      natgateway:
+        Target: natgateway
+      managedservices:
+        Target: managedservices
+      config:
+        Target: config
   pool:
     vmImage: 'ubuntu-20.04'
-  strategy:
-    matrix:
-      Python36:
-        python.version: '3.6'
-      Python38:
-        python.version: '3.8'
-      Python39:
-        python.version: '3.9'
-      Python310:
-        python.version: '3.10'
   steps:
     - template: .azure-pipelines/templates/automation_test.yml
       parameters:
-        pythonVersion: '$(python.version)'
-        profile: '2020-09-01-hybrid'
-        fullTest: true
+        pythonVersion: '3.6'
+        profile: 'latest'
+        module: '$(Target)'
 
-- job: AutomationTest20190301
-  displayName: Automation Test (Profile 2019-03-01)
-  timeoutInMinutes: 120
+- job: AutomationFullTestPython36ProfileLatestPart3
+  displayName: Automation Full Test Python36 Profile Latest Part3
+  timeoutInMinutes: 9999
+  strategy:
+    maxParallel: 5
+    matrix:
+      network:
+        Target: network
+      acs:
+        Target: acs
+      redis:
+        Target: redis
+      kusto:
+        Target: kusto
+      servicebus:
+        Target: servicebus
+      acr:
+        Target: acr
+      cognitiveservices:
+        Target: cognitiveservices
+      resource:
+        Target: resource
+      policyinsights:
+        Target: policyinsights
+      role:
+        Target: role
+      security:
+        Target: security
+      deploymentmanager:
+        Target: deploymentmanager
+      extension:
+        Target: extension
+      dms:
+        Target: dms
+      consumption:
+        Target: consumption
+      find:
+        Target: find
   pool:
     vmImage: 'ubuntu-20.04'
-  strategy:
-    matrix:
-      Python36:
-        python.version: '3.6'
-      Python38:
-        python.version: '3.8'
-      Python39:
-        python.version: '3.9'
-      Python310:
-        python.version: '3.10'
   steps:
     - template: .azure-pipelines/templates/automation_test.yml
       parameters:
-        pythonVersion: '$(python.version)'
-        profile: '2019-03-01-hybrid'
-        fullTest: true
+        pythonVersion: '3.6'
+        profile: 'latest'
+        module: '$(Target)'
 
-- job: AutomationTest20180301
-  displayName: Automation Test (Profile 2018-03-01)
-  timeoutInMinutes: 120
+- job: AutomationFullTestPython36ProfileLatestPart4
+  displayName: Automation Full Test Python36 Profile Latest Part4
+  timeoutInMinutes: 9999
+  strategy:
+    maxParallel: 5
+    matrix:
+      servicefabric:
+        Target: servicefabric
+      backup:
+        Target: backup
+      cosmosdb:
+        Target: cosmosdb
+      appservice:
+        Target: appservice
+      sqlvm:
+        Target: sqlvm
+      sql:
+        Target: sql
+      ams:
+        Target: ams
+      cdn:
+        Target: cdn
+      signalr:
+        Target: signalr
+      relay:
+        Target: relay
+      util:
+        Target: util
+      botservice:
+        Target: botservice
+      cloud:
+        Target: cloud
+      feedback:
+        Target: feedback
+      billing:
+        Target: billing
+      lab:
+        Target: lab
   pool:
     vmImage: 'ubuntu-20.04'
-  strategy:
-    matrix:
-      Python36:
-        python.version: '3.6'
-      Python38:
-        python.version: '3.8'
-      Python39:
-        python.version: '3.9'
-      Python310:
-        python.version: '3.10'
   steps:
     - template: .azure-pipelines/templates/automation_test.yml
       parameters:
-        pythonVersion: '$(python.version)'
-        profile: '2018-03-01-hybrid'
-        fullTest: true
+        pythonVersion: '3.6'
+        profile: 'latest'
+        module: '$(Target)'
+
+#jobs:
+#- job: AutomationTest
+#  displayName: Automation Test (Profile Latest)
+#  timeoutInMinutes: 120
+#  pool:
+#    vmImage: 'ubuntu-20.04'
+#  strategy:
+#    matrix:
+#      Python36:
+#        python.version: '3.6'
+#      Python38:
+#        python.version: '3.8'
+#      Python39:
+#        python.version: '3.9'
+#      Python310:
+#        python.version: '3.10'
+#  steps:
+#    - template: .azure-pipelines/templates/automation_test.yml
+#      parameters:
+#        pythonVersion: '$(python.version)'
+#        profile: 'latest'
+#        fullTest: true
+#
+#- job: AutomationTest20200901
+#  displayName: Automation Test (Profile 2020-09-01)
+#  timeoutInMinutes: 120
+#  pool:
+#    vmImage: 'ubuntu-20.04'
+#  strategy:
+#    matrix:
+#      Python36:
+#        python.version: '3.6'
+#      Python38:
+#        python.version: '3.8'
+#      Python39:
+#        python.version: '3.9'
+#      Python310:
+#        python.version: '3.10'
+#  steps:
+#    - template: .azure-pipelines/templates/automation_test.yml
+#      parameters:
+#        pythonVersion: '$(python.version)'
+#        profile: '2020-09-01-hybrid'
+#        fullTest: true
+#
+#- job: AutomationTest20190301
+#  displayName: Automation Test (Profile 2019-03-01)
+#  timeoutInMinutes: 120
+#  pool:
+#    vmImage: 'ubuntu-20.04'
+#  strategy:
+#    matrix:
+#      Python36:
+#        python.version: '3.6'
+#      Python38:
+#        python.version: '3.8'
+#      Python39:
+#        python.version: '3.9'
+#      Python310:
+#        python.version: '3.10'
+#  steps:
+#    - template: .azure-pipelines/templates/automation_test.yml
+#      parameters:
+#        pythonVersion: '$(python.version)'
+#        profile: '2019-03-01-hybrid'
+#        fullTest: true
+#
+#- job: AutomationTest20180301
+#  displayName: Automation Test (Profile 2018-03-01)
+#  timeoutInMinutes: 120
+#  pool:
+#    vmImage: 'ubuntu-20.04'
+#  strategy:
+#    matrix:
+#      Python36:
+#        python.version: '3.6'
+#      Python38:
+#        python.version: '3.8'
+#      Python39:
+#        python.version: '3.9'
+#      Python310:
+#        python.version: '3.10'
+#  steps:
+#    - template: .azure-pipelines/templates/automation_test.yml
+#      parameters:
+#        pythonVersion: '$(python.version)'
+#        profile: '2018-03-01-hybrid'
+#        fullTest: true
