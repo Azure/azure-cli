@@ -402,6 +402,25 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         ):
             self.assertEqual(ctx_3.get_os_type(), "custom_os_type")
 
+        # custom value
+        ctx_4 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict(
+                {
+                    "os_type": "windows",
+                }
+            ),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+            # fail on windows os type for aks create
+            with self.assertRaises(InvalidArgumentValueError):
+                ctx_4.get_os_type()
+        else:
+            self.assertEqual(ctx_4.get_os_type(), "windows")
+
     def common_get_os_sku(self):
         # default
         ctx_1 = AKSAgentPoolContext(
@@ -513,7 +532,12 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
             DecoratorMode.CREATE,
             self.agentpool_decorator_mode,
         )
-        self.assertEqual(ctx_4.get_node_vm_size(), CONST_DEFAULT_WINDOWS_NODE_VM_SIZE)
+        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+            # fail on windows os type for aks create
+            with self.assertRaises(InvalidArgumentValueError):
+                ctx_4.get_node_vm_size()
+        else:
+            self.assertEqual(ctx_4.get_node_vm_size(), CONST_DEFAULT_WINDOWS_NODE_VM_SIZE)
 
     def common_get_aks_custom_headers(self):
         # default

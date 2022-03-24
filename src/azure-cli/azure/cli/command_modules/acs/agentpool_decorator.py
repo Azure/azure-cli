@@ -448,7 +448,13 @@ class AKSAgentPoolContext(BaseAKSContext):
         else:
             os_type = CONST_DEFAULT_NODE_OS_TYPE
 
-        # this parameter does not need validation
+        # validation
+        if (
+            self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER
+            and self.decorator_mode == DecoratorMode.CREATE
+        ):
+            if os_type.lower() == "windows":
+                raise InvalidArgumentValueError("System node pool must be linux.")
         return os_type
 
     def get_os_type(self) -> Union[str, None]:
