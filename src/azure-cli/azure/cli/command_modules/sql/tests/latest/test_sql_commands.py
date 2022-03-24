@@ -996,7 +996,6 @@ class SqlServerDbShortTermRetentionScenarioTest(ScenarioTest):
 
 
 class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
-    @live_only()
     def test_sql_db_long_term_retention(
             self):
         self.kwargs.update({
@@ -3877,8 +3876,6 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
                      JMESPathCheck('dtu', 250),
                      JMESPathCheck('zoneRedundant', True)])
 
-    # Skipping test because provisioning of servers are not available on euap region, but feature is only on euap region
-    @live_only()
     @ResourceGroupPreparer(location='eastus2euap')
     @SqlServerPreparer(location='eastus2euap')
     @AllowLargeResponse()
@@ -3959,8 +3956,6 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
 					 JMESPathCheck('requestedBackupStorageRedundancy', 'Zone'),
                      JMESPathCheck('zoneRedundant', True)])
 
-    # Skipping test because provisioning of servers are not available on euap region, but feature is only on euap region
-    @live_only()
     @ResourceGroupPreparer(parameter_name="resource_group_pri", location='eastus2euap')
     @SqlServerPreparer(parameter_name="server_name_pri", resource_group_parameter_name="resource_group_pri",location='eastus2euap')
     @ResourceGroupPreparer(parameter_name="resource_group_sec", location='eastus2euap')
@@ -4075,8 +4070,6 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
 					 JMESPathCheck('requestedBackupStorageRedundancy', 'Zone'),
                      JMESPathCheck('zoneRedundant', True)])
 
-    # Skipping test because provisioning of servers are not available on euap region, but feature is only on euap region
-    @live_only()
     @ResourceGroupPreparer(location='eastus2euap')
     @SqlServerPreparer(location='eastus2euap')
     @AllowLargeResponse()
