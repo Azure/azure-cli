@@ -309,7 +309,6 @@ def connection_update(cmd, client,
     elif service_endpoint is False and linker.get('vNetSolution').get('type') == 'serviceEndpoint':
         parameters['v_net_solution'] = None
 
-
     return auto_register(sdk_no_wait, no_wait,
                          client.begin_create_or_update,
                          resource_uri=source_id,
