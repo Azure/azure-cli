@@ -1004,6 +1004,8 @@ jobs:
       . env/bin/activate
       python scripts/ci/service_name.py
       if [[ "$(System.PullRequest.TargetBranch)" != "" ]]; then
+        # If CI is set to shallow fetch, target branch should be expilictly fetched.
+        git fetch origin --depth=1 $(System.PullRequest.TargetBranch)
         azdev linter --ci-exclusions --min-severity medium --repo=./ --src=HEAD --tgt=origin/$(System.PullRequest.TargetBranch)
       else
         azdev linter --ci-exclusions --min-severity medium
