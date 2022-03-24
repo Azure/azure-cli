@@ -17,38 +17,36 @@ jobs:
   displayName: Automation Full Test Python36 Profile Latest
   timeoutInMinutes: 9999
   strategy:
-    maxParallel: 5
+    maxParallel: 14
     matrix:
-      rdbms:
-        Target: rdbms
-      vm:
-        Target: vm
-      synapse:
-        Target: synapse
-      eventhubs:
-        Target: eventhubs
-      appconfig:
-        Target: appconfig
-      monitor:
-        Target: monitor
-      batch:
-        Target: batch
-      privatedns:
-        Target: privatedns
-      netappfiles:
-        Target: netappfiles
+      resource:
+        Target: resource
+      acs:
+        Target: acs
+      iot:
+        Target: iot
+      keyvault:
+        Target: keyvault
+      feedback:
+        Target: feedback
+      aro:
+        Target: aro
+      acr:
+        Target: acr
+      sqlvm:
+        Target: sqlvm
+      role:
+        Target: role
+      botservice:
+        Target: botservice
       container:
         Target: container
-      batchai:
-        Target: batchai
-      maps:
-        Target: maps
-      configure:
-        Target: configure
+      kusto:
+        Target: kusto
+      find:
+        Target: find
       advisor:
         Target: advisor
-      reservations:
-        Target: reservations
   pool:
     vmImage: 'ubuntu-20.04'
   steps:
@@ -62,38 +60,40 @@ jobs:
   displayName: Automation Full Test Python36 Profile Latest Part2
   timeoutInMinutes: 9999
   strategy:
-    maxParallel: 5
+    maxParallel: 16
     matrix:
+      sql:
+        Target: sql
       storage:
         Target: storage
       apim:
         Target: apim
+      eventhubs:
+        Target: eventhubs
+      relay:
+        Target: relay
+      netappfiles:
+        Target: netappfiles
+      cognitiveservices:
+        Target: cognitiveservices
+      reservations:
+        Target: reservations
+      servicebus:
+        Target: servicebus
+      batchai:
+        Target: batchai
       search:
         Target: search
-      hdinsight:
-        Target: hdinsight
-      aro:
-        Target: aro
-      iot:
-        Target: iot
-      keyvault:
-        Target: keyvault
-      profile:
-        Target: profile
-      eventgrid:
-        Target: eventgrid
+      cloud:
+        Target: cloud
       databoxedge:
         Target: databoxedge
-      dla:
-        Target: dla
-      dls:
-        Target: dls
-      natgateway:
-        Target: natgateway
-      managedservices:
-        Target: managedservices
-      config:
-        Target: config
+      billing:
+        Target: billing
+      maps:
+        Target: maps
+      extension:
+        Target: extension
   pool:
     vmImage: 'ubuntu-20.04'
   steps:
@@ -107,40 +107,40 @@ jobs:
   displayName: Automation Full Test Python36 Profile Latest Part3
   timeoutInMinutes: 9999
   strategy:
-    maxParallel: 5
+    maxParallel: 16
     matrix:
-      network:
-        Target: network
-      acs:
-        Target: acs
+      vm:
+        Target: vm
+      ams:
+        Target: ams
+      backup:
+        Target: backup
+      monitor:
+        Target: monitor
+      servicefabric:
+        Target: servicefabric
+      synapse:
+        Target: synapse
+      hdinsight:
+        Target: hdinsight
+      cdn:
+        Target: cdn
       redis:
         Target: redis
-      kusto:
-        Target: kusto
-      servicebus:
-        Target: servicebus
-      acr:
-        Target: acr
-      cognitiveservices:
-        Target: cognitiveservices
-      resource:
-        Target: resource
-      policyinsights:
-        Target: policyinsights
-      role:
-        Target: role
-      security:
-        Target: security
-      deploymentmanager:
-        Target: deploymentmanager
-      extension:
-        Target: extension
       dms:
         Target: dms
-      consumption:
-        Target: consumption
-      find:
-        Target: find
+      util:
+        Target: util
+      config:
+        Target: config
+      deploymentmanager:
+        Target: deploymentmanager
+      managedservices:
+        Target: managedservices
+      profile:
+        Target: profile
+      security:
+        Target: security
   pool:
     vmImage: 'ubuntu-20.04'
   steps:
@@ -154,40 +154,41 @@ jobs:
   displayName: Automation Full Test Python36 Profile Latest Part4
   timeoutInMinutes: 9999
   strategy:
-    maxParallel: 5
+    maxParallel: 16
     matrix:
-      servicefabric:
-        Target: servicefabric
-      backup:
-        Target: backup
-      cosmosdb:
-        Target: cosmosdb
+      rdbms:
+        Target: rdbms
+      network:
+        Target: network
       appservice:
         Target: appservice
-      sqlvm:
-        Target: sqlvm
-      sql:
-        Target: sql
-      ams:
-        Target: ams
-      cdn:
-        Target: cdn
-      signalr:
-        Target: signalr
-      relay:
-        Target: relay
-      util:
-        Target: util
-      botservice:
-        Target: botservice
-      cloud:
-        Target: cloud
-      feedback:
-        Target: feedback
-      billing:
-        Target: billing
+      cosmosdb:
+        Target: cosmosdb
+      dla:
+        Target: dla
       lab:
         Target: lab
+      appconfig:
+        Target: appconfig
+      privatedns:
+        Target: privatedns
+      eventgrid:
+        Target: eventgrid
+      policyinsights:
+        Target: policyinsights
+      batch:
+        Target: batch
+      natgateway:
+        Target: natgateway
+      signalr:
+        Target: signalr
+      consumption:
+        Target: consumption
+      dls:
+        Target: dls
+      configure:
+        Target: configure
+
   pool:
     vmImage: 'ubuntu-20.04'
   steps:
