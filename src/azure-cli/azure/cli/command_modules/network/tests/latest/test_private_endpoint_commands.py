@@ -1120,6 +1120,11 @@ class NetworkPrivateLinkApiManagementScenarioTest(ScenarioTest):
             'network private-endpoint-connection reject -g {resource_group} --resource-name {service_name} -n {endpoint_request2} --type Microsoft.ApiManagement/service',
             checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Rejected')])
 
+        self.cmd('network private-endpoint-connection show -g {resource_group} --resource-name {webapp_name} -n {endpoint_request2} --type Microsoft.ApiManagement/service', checks=[
+            self.check('properties.privateLinkServiceConnectionState.status', 'Rejected'),
+            self.check('name', '{endpoint_request2}')
+        ])
+
         # Remove endpoint
         self.cmd(
             'network private-endpoint-connection delete -g {resource_group} --resource-name {service_name} -n {endpoint_request} --type Microsoft.ApiManagement/service -y')
