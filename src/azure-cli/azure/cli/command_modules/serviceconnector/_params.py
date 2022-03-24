@@ -160,18 +160,18 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                 add_auth_block(c, source, target)
                 add_new_addon_argument(c, source, target)
                 add_secret_store_argument(c)
+                add_service_endpoint_argument(c)
+                if target not in TARGET_SUPPORT_SERVICE_ENDPOINT:
+                    c.ignore('service_endpoint')
             with self.argument_context('{} connection update {}'.format(source.value, target.value)) as c:
                 add_client_type_argument(c, source, target)
                 add_connection_name_argument(c, source)
                 add_source_resource_block(c, source)
                 add_auth_block(c, source, target)
                 add_secret_store_argument(c)
-
-        for target in TARGET_SUPPORT_SERVICE_ENDPOINT:
-            with self.argument_context('{} connection create {}'.format(source.value, target.value)) as c:
                 add_service_endpoint_argument(c)
-            with self.argument_context('{} connection update {}'.format(source.value, target.value)) as c:
-                add_service_endpoint_argument(c)
+                if target not in TARGET_SUPPORT_SERVICE_ENDPOINT:
+                    c.ignore('service_endpoint')
 
         # special target resource: independent implementation
         target = RESOURCE.ConfluentKafka
