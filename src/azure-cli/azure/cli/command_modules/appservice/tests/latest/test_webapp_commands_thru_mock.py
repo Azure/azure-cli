@@ -48,15 +48,16 @@ class TestWebappMocked(unittest.TestCase):
     def setUp(self):
         self.client = WebSiteManagementClient(mock.MagicMock(), '123455678')
 
-    @mock.patch('azure.cli.command_modules.appservice.custom._update_site_source_control_properties_for_gh_action', autospec=True)
-    @mock.patch('azure.cli.command_modules.appservice.custom._add_publish_profile_to_github', autospec=True)
-    @mock.patch('azure.cli.command_modules.appservice.custom.prompt_y_n', autospec=True)
-    @mock.patch('azure.cli.command_modules.appservice.custom._get_app_runtime_info', autospec=True)
-    @mock.patch('github.Github', autospec=True)
-    @mock.patch('azure.cli.command_modules.appservice.custom.parse_resource_id', autospec=True)
-    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
-    @mock.patch('azure.cli.command_modules.appservice.custom.get_app_details', autospec=True)
-    def test_webapp_github_actions_add(self, get_app_details_mock, web_client_factory_mock,  *args):
+    @mock.patch('azure.cli.command_modules.appservice.custom._update_site_source_control_properties_for_gh_action')
+    @mock.patch('azure.cli.command_modules.appservice.custom._add_publish_profile_to_github')
+    @mock.patch('azure.cli.command_modules.appservice.custom.prompt_y_n')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_app_runtime_info')
+    @mock.patch('github.Github')
+    @mock.patch('azure.cli.command_modules.appservice.custom.parse_resource_id')
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_site_availability')
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory')
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_app_details')
+    def test_webapp_github_actions_add(self, get_app_details_mock, web_client_factory_mock, site_availability_mock,  *args):
         runtime = "python:3.9"
         rg = "group"
         is_linux = True
@@ -64,6 +65,7 @@ class TestWebappMocked(unittest.TestCase):
         get_app_details_mock.return_value = mock.Mock()
         get_app_details_mock.return_value.resource_group = rg
         web_client_factory_mock.return_value.app_service_plans.get.return_value.reserved = is_linux
+        site_availability_mock.return_value.name_available = False
 
         with mock.patch('azure.cli.command_modules.appservice.custom._runtime_supports_github_actions', autospec=True) as m:
             add_github_actions(cmd, rg, "name", "repo", runtime, "token")
