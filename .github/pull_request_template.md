@@ -1,3 +1,6 @@
+**Related command**
+<!--- Please provide the related command with `az $command`, azure-cli bot will analyse command and route to related team --->
+
 **Description**<!--Mandatory-->
 <!--Why this PR? What is changed? What is the effect? etc. A high-quality description can accelerate the review process.-->
 
