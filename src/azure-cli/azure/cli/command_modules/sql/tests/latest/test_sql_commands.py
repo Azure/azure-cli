@@ -996,14 +996,13 @@ class SqlServerDbShortTermRetentionScenarioTest(ScenarioTest):
 
 
 class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
-    @live_only()
     def test_sql_db_long_term_retention(
             self):
         self.kwargs.update({
-            'rg': 'ayang',
-            'loc': 'southeastasia',
-            'server_name': 'ayang-seas',
-            'database_name': 'db1',
+            'rg': 'CustomerExperienceTeam_RG',
+            'loc': 'westcentralus',
+            'server_name': 'mi-tooling-server',
+            'database_name': 'a-reneamoso-qpi-testing',
             'weekly_retention': 'P1W',
             'monthly_retention': 'P1M',
             'yearly_retention': 'P2M',

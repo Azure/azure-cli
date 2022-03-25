@@ -20,31 +20,1703 @@ interactions:
       User-Agent:
       - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ayang/providers/Microsoft.Sql/servers/ayang-seas/databases/db1/backupLongTermRetentionPolicies/default?api-version=2020-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/servers/mi-tooling-server/databases/a-reneamoso-qpi-testing/backupLongTermRetentionPolicies/default?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"error":{"code":"ResourceGroupNotFound","message":"Resource group
-        ''ayang'' could not be found."}}'
+      string: '{"operation":"UpsertDatabaseBackupArchivalPolicyV2","startTime":"2022-03-25T09:19:30.537Z"}'
     headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionPolicyAzureAsyncOperation/6508714e-ccd9-47f8-b771-94ede4903533?api-version=2020-11-01-preview
       cache-control:
       - no-cache
       content-length:
-      - '97'
+      - '91'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 16 Mar 2022 10:34:43 GMT
+      - Fri, 25 Mar 2022 09:19:29 GMT
       expires:
       - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionPolicyOperationResults/6508714e-ccd9-47f8-b771-94ede4903533?api-version=2020-11-01-preview
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
-      x-ms-failure-cause:
-      - gateway
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
     status:
-      code: 404
-      message: Not Found
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db ltr-policy set
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -s -n --weekly-retention --monthly-retention --yearly-retention --week-of-year
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionPolicyAzureAsyncOperation/6508714e-ccd9-47f8-b771-94ede4903533?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"name":"6508714e-ccd9-47f8-b771-94ede4903533","status":"Succeeded","startTime":"2022-03-25T09:19:30.537Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 25 Mar 2022 09:19:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db ltr-policy set
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -s -n --weekly-retention --monthly-retention --yearly-retention --week-of-year
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/servers/mi-tooling-server/databases/a-reneamoso-qpi-testing/backupLongTermRetentionPolicies/default?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"properties":{"weeklyRetention":"P1W","monthlyRetention":"P1M","yearlyRetention":"P2M","weekOfYear":12},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/servers/mi-tooling-server/databases/a-reneamoso-qpi-testing/backupLongTermRetentionPolicies/default","name":"default","type":"Microsoft.Sql/servers/databases/backupLongTermRetentionPolicies"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '419'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 25 Mar 2022 09:19:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db ltr-policy show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -s -n
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/servers/mi-tooling-server/databases/a-reneamoso-qpi-testing/backupLongTermRetentionPolicies/default?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"properties":{"weeklyRetention":"P1W","monthlyRetention":"P1M","yearlyRetention":"P2M","weekOfYear":12},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/servers/mi-tooling-server/databases/a-reneamoso-qpi-testing/backupLongTermRetentionPolicies/default","name":"default","type":"Microsoft.Sql/servers/databases/backupLongTermRetentionPolicies"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '419'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 25 Mar 2022 09:19:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db ltr-backup list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -g
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionBackups?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"value":[{"properties":{"serverName":"mi-tooling-server","serverCreateTime":"2021-10-28T12:52:34.293Z","databaseName":"a-reneamoso-qpi-testing","backupTime":"2022-03-21T14:01:39Z","backupExpirationTime":"2022-05-20T14:01:39Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionServers/mi-tooling-server/longTermRetentionDatabases/a-reneamoso-qpi-testing/longTermRetentionBackups/c39f6e17-90ff-4ea9-9c2b-cdcb81457963;132923448990000000","name":"c39f6e17-90ff-4ea9-9c2b-cdcb81457963;132923448990000000","type":"Microsoft.Sql/locations/longTermRetentionServers/longTermRetentionDatabases/longTermRetentionBackups"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '760'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 25 Mar 2022 09:19:47 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db ltr-backup list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionBackups?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"value":[{"properties":{"serverName":"mi-tooling-server","serverCreateTime":"2021-10-28T12:52:34.293Z","databaseName":"a-reneamoso-qpi-testing","backupTime":"2022-03-21T14:01:39Z","backupExpirationTime":"2022-05-20T14:01:39Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionServers/mi-tooling-server/longTermRetentionDatabases/a-reneamoso-qpi-testing/longTermRetentionBackups/c39f6e17-90ff-4ea9-9c2b-cdcb81457963;132923448990000000","name":"c39f6e17-90ff-4ea9-9c2b-cdcb81457963;132923448990000000","type":"Microsoft.Sql/locations/longTermRetentionServers/longTermRetentionDatabases/longTermRetentionBackups"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '760'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 25 Mar 2022 09:19:48 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db ltr-backup list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -s -g
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionServers/mi-tooling-server/longTermRetentionBackups?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"value":[{"properties":{"serverName":"mi-tooling-server","serverCreateTime":"2021-10-28T12:52:34.293Z","databaseName":"a-reneamoso-qpi-testing","backupTime":"2022-03-21T14:01:39Z","backupExpirationTime":"2022-05-20T14:01:39Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionServers/mi-tooling-server/longTermRetentionDatabases/a-reneamoso-qpi-testing/longTermRetentionBackups/c39f6e17-90ff-4ea9-9c2b-cdcb81457963;132923448990000000","name":"c39f6e17-90ff-4ea9-9c2b-cdcb81457963;132923448990000000","type":"Microsoft.Sql/locations/longTermRetentionServers/longTermRetentionDatabases/longTermRetentionBackups"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '760'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 25 Mar 2022 09:19:49 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db ltr-backup list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -s
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionServers/mi-tooling-server/longTermRetentionBackups?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"value":[{"properties":{"serverName":"mi-tooling-server","serverCreateTime":"2021-10-28T12:52:34.293Z","databaseName":"a-reneamoso-qpi-testing","backupTime":"2022-03-21T14:01:39Z","backupExpirationTime":"2022-05-20T14:01:39Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionServers/mi-tooling-server/longTermRetentionDatabases/a-reneamoso-qpi-testing/longTermRetentionBackups/c39f6e17-90ff-4ea9-9c2b-cdcb81457963;132923448990000000","name":"c39f6e17-90ff-4ea9-9c2b-cdcb81457963;132923448990000000","type":"Microsoft.Sql/locations/longTermRetentionServers/longTermRetentionDatabases/longTermRetentionBackups"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '760'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 25 Mar 2022 09:19:49 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db ltr-backup list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -s -d -g
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionServers/mi-tooling-server/longTermRetentionDatabases/a-reneamoso-qpi-testing/longTermRetentionBackups?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"value":[{"properties":{"serverName":"mi-tooling-server","serverCreateTime":"2021-10-28T12:52:34.293Z","databaseName":"a-reneamoso-qpi-testing","backupTime":"2022-03-21T14:01:39Z","backupExpirationTime":"2022-05-20T14:01:39Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionServers/mi-tooling-server/longTermRetentionDatabases/a-reneamoso-qpi-testing/longTermRetentionBackups/c39f6e17-90ff-4ea9-9c2b-cdcb81457963;132923448990000000","name":"c39f6e17-90ff-4ea9-9c2b-cdcb81457963;132923448990000000","type":"Microsoft.Sql/locations/longTermRetentionServers/longTermRetentionDatabases/longTermRetentionBackups"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '760'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 25 Mar 2022 09:19:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db ltr-backup list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -s -d
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionServers/mi-tooling-server/longTermRetentionDatabases/a-reneamoso-qpi-testing/longTermRetentionBackups?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"value":[{"properties":{"serverName":"mi-tooling-server","serverCreateTime":"2021-10-28T12:52:34.293Z","databaseName":"a-reneamoso-qpi-testing","backupTime":"2022-03-21T14:01:39Z","backupExpirationTime":"2022-05-20T14:01:39Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionServers/mi-tooling-server/longTermRetentionDatabases/a-reneamoso-qpi-testing/longTermRetentionBackups/c39f6e17-90ff-4ea9-9c2b-cdcb81457963;132923448990000000","name":"c39f6e17-90ff-4ea9-9c2b-cdcb81457963;132923448990000000","type":"Microsoft.Sql/locations/longTermRetentionServers/longTermRetentionDatabases/longTermRetentionBackups"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '760'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 25 Mar 2022 09:19:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db ltr-backup list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -s -d --latest
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionServers/mi-tooling-server/longTermRetentionDatabases/a-reneamoso-qpi-testing/longTermRetentionBackups?onlyLatestPerDatabase=true&api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"value":[{"properties":{"serverName":"mi-tooling-server","serverCreateTime":"2021-10-28T12:52:34.293Z","databaseName":"a-reneamoso-qpi-testing","backupTime":"2022-03-21T14:01:39Z","backupExpirationTime":"2022-05-20T14:01:39Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionServers/mi-tooling-server/longTermRetentionDatabases/a-reneamoso-qpi-testing/longTermRetentionBackups/c39f6e17-90ff-4ea9-9c2b-cdcb81457963;132923448990000000","name":"c39f6e17-90ff-4ea9-9c2b-cdcb81457963;132923448990000000","type":"Microsoft.Sql/locations/longTermRetentionServers/longTermRetentionDatabases/longTermRetentionBackups"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '760'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 25 Mar 2022 09:19:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db ltr-backup show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -s -d -n
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionServers/mi-tooling-server/longTermRetentionDatabases/a-reneamoso-qpi-testing/longTermRetentionBackups/c39f6e17-90ff-4ea9-9c2b-cdcb81457963%3B132923448990000000?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"properties":{"serverName":"mi-tooling-server","serverCreateTime":"2021-10-28T12:52:34.293Z","databaseName":"a-reneamoso-qpi-testing","backupTime":"2022-03-21T14:01:39Z","backupExpirationTime":"2022-05-20T14:01:39Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionServers/mi-tooling-server/longTermRetentionDatabases/a-reneamoso-qpi-testing/longTermRetentionBackups/c39f6e17-90ff-4ea9-9c2b-cdcb81457963;132923448990000000","name":"c39f6e17-90ff-4ea9-9c2b-cdcb81457963;132923448990000000","type":"Microsoft.Sql/locations/longTermRetentionServers/longTermRetentionDatabases/longTermRetentionBackups"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '748'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 25 Mar 2022 09:19:52 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db ltr-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --backup-id --dest-database --dest-server --dest-resource-group
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/servers/mi-tooling-server?api-version=2021-02-01-preview
+  response:
+    body:
+      string: '{"kind":"v12.0","properties":{"administratorLogin":"cloudSA","version":"12.0","state":"Ready","fullyQualifiedDomainName":"mi-tooling-server.database.windows.net","privateEndpointConnections":[],"minimalTlsVersion":"1.2","publicNetworkAccess":"Enabled","restrictOutboundNetworkAccess":"Disabled"},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/servers/mi-tooling-server","name":"mi-tooling-server","type":"Microsoft.Sql/servers"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '541'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 25 Mar 2022 09:19:52 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westcentralus", "properties": {"createMode": "RestoreLongTermRetentionBackup",
+      "longTermRetentionBackupResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionServers/mi-tooling-server/longTermRetentionDatabases/a-reneamoso-qpi-testing/longTermRetentionBackups/c39f6e17-90ff-4ea9-9c2b-cdcb81457963;132923448990000000"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db ltr-backup restore
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '449'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --backup-id --dest-database --dest-server --dest-resource-group
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/servers/mi-tooling-server/databases/cli-restore-ltr?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"operation":"CreateRestoreFromLtrBackupRequest","startTime":"2022-03-25T09:20:00.077Z"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/databaseAzureAsyncOperation/352f641f-0908-4247-a031-069f7b89cd80?api-version=2021-05-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '88'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 25 Mar 2022 09:19:59 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/databaseOperationResults/352f641f-0908-4247-a031-069f7b89cd80?api-version=2021-05-01-preview
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db ltr-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --backup-id --dest-database --dest-server --dest-resource-group
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/databaseAzureAsyncOperation/352f641f-0908-4247-a031-069f7b89cd80?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"name":"352f641f-0908-4247-a031-069f7b89cd80","status":"InProgress","startTime":"2022-03-25T09:20:00.077Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 25 Mar 2022 09:20:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db ltr-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --backup-id --dest-database --dest-server --dest-resource-group
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/databaseAzureAsyncOperation/352f641f-0908-4247-a031-069f7b89cd80?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"name":"352f641f-0908-4247-a031-069f7b89cd80","status":"InProgress","startTime":"2022-03-25T09:20:00.077Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 25 Mar 2022 09:20:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db ltr-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --backup-id --dest-database --dest-server --dest-resource-group
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/databaseAzureAsyncOperation/352f641f-0908-4247-a031-069f7b89cd80?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"name":"352f641f-0908-4247-a031-069f7b89cd80","status":"InProgress","startTime":"2022-03-25T09:20:00.077Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 25 Mar 2022 09:20:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db ltr-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --backup-id --dest-database --dest-server --dest-resource-group
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/databaseAzureAsyncOperation/352f641f-0908-4247-a031-069f7b89cd80?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"name":"352f641f-0908-4247-a031-069f7b89cd80","status":"InProgress","startTime":"2022-03-25T09:20:00.077Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 25 Mar 2022 09:21:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db ltr-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --backup-id --dest-database --dest-server --dest-resource-group
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/databaseAzureAsyncOperation/352f641f-0908-4247-a031-069f7b89cd80?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"name":"352f641f-0908-4247-a031-069f7b89cd80","status":"InProgress","startTime":"2022-03-25T09:20:00.077Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 25 Mar 2022 09:21:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db ltr-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --backup-id --dest-database --dest-server --dest-resource-group
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/databaseAzureAsyncOperation/352f641f-0908-4247-a031-069f7b89cd80?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"name":"352f641f-0908-4247-a031-069f7b89cd80","status":"InProgress","startTime":"2022-03-25T09:20:00.077Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 25 Mar 2022 09:21:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db ltr-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --backup-id --dest-database --dest-server --dest-resource-group
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/databaseAzureAsyncOperation/352f641f-0908-4247-a031-069f7b89cd80?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"name":"352f641f-0908-4247-a031-069f7b89cd80","status":"InProgress","startTime":"2022-03-25T09:20:00.077Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 25 Mar 2022 09:21:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db ltr-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --backup-id --dest-database --dest-server --dest-resource-group
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/databaseAzureAsyncOperation/352f641f-0908-4247-a031-069f7b89cd80?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"name":"352f641f-0908-4247-a031-069f7b89cd80","status":"InProgress","startTime":"2022-03-25T09:20:00.077Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 25 Mar 2022 09:22:01 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db ltr-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --backup-id --dest-database --dest-server --dest-resource-group
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/databaseAzureAsyncOperation/352f641f-0908-4247-a031-069f7b89cd80?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"name":"352f641f-0908-4247-a031-069f7b89cd80","status":"InProgress","startTime":"2022-03-25T09:20:00.077Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 25 Mar 2022 09:22:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db ltr-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --backup-id --dest-database --dest-server --dest-resource-group
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/databaseAzureAsyncOperation/352f641f-0908-4247-a031-069f7b89cd80?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"name":"352f641f-0908-4247-a031-069f7b89cd80","status":"InProgress","startTime":"2022-03-25T09:20:00.077Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 25 Mar 2022 09:22:31 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db ltr-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --backup-id --dest-database --dest-server --dest-resource-group
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/databaseAzureAsyncOperation/352f641f-0908-4247-a031-069f7b89cd80?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"name":"352f641f-0908-4247-a031-069f7b89cd80","status":"InProgress","startTime":"2022-03-25T09:20:00.077Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 25 Mar 2022 09:22:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db ltr-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --backup-id --dest-database --dest-server --dest-resource-group
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/databaseAzureAsyncOperation/352f641f-0908-4247-a031-069f7b89cd80?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"name":"352f641f-0908-4247-a031-069f7b89cd80","status":"InProgress","startTime":"2022-03-25T09:20:00.077Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 25 Mar 2022 09:23:01 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db ltr-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --backup-id --dest-database --dest-server --dest-resource-group
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/databaseAzureAsyncOperation/352f641f-0908-4247-a031-069f7b89cd80?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"name":"352f641f-0908-4247-a031-069f7b89cd80","status":"InProgress","startTime":"2022-03-25T09:20:00.077Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 25 Mar 2022 09:23:17 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db ltr-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --backup-id --dest-database --dest-server --dest-resource-group
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/databaseAzureAsyncOperation/352f641f-0908-4247-a031-069f7b89cd80?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"name":"352f641f-0908-4247-a031-069f7b89cd80","status":"InProgress","startTime":"2022-03-25T09:20:00.077Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 25 Mar 2022 09:23:33 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db ltr-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --backup-id --dest-database --dest-server --dest-resource-group
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/databaseAzureAsyncOperation/352f641f-0908-4247-a031-069f7b89cd80?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"name":"352f641f-0908-4247-a031-069f7b89cd80","status":"InProgress","startTime":"2022-03-25T09:20:00.077Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 25 Mar 2022 09:23:48 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db ltr-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --backup-id --dest-database --dest-server --dest-resource-group
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/databaseAzureAsyncOperation/352f641f-0908-4247-a031-069f7b89cd80?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"name":"352f641f-0908-4247-a031-069f7b89cd80","status":"InProgress","startTime":"2022-03-25T09:20:00.077Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 25 Mar 2022 09:24:02 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db ltr-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --backup-id --dest-database --dest-server --dest-resource-group
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/databaseAzureAsyncOperation/352f641f-0908-4247-a031-069f7b89cd80?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"name":"352f641f-0908-4247-a031-069f7b89cd80","status":"InProgress","startTime":"2022-03-25T09:20:00.077Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 25 Mar 2022 09:24:19 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db ltr-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --backup-id --dest-database --dest-server --dest-resource-group
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/databaseAzureAsyncOperation/352f641f-0908-4247-a031-069f7b89cd80?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"name":"352f641f-0908-4247-a031-069f7b89cd80","status":"InProgress","startTime":"2022-03-25T09:20:00.077Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 25 Mar 2022 09:24:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db ltr-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --backup-id --dest-database --dest-server --dest-resource-group
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/databaseAzureAsyncOperation/352f641f-0908-4247-a031-069f7b89cd80?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"name":"352f641f-0908-4247-a031-069f7b89cd80","status":"InProgress","startTime":"2022-03-25T09:20:00.077Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 25 Mar 2022 09:24:49 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db ltr-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --backup-id --dest-database --dest-server --dest-resource-group
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/databaseAzureAsyncOperation/352f641f-0908-4247-a031-069f7b89cd80?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"name":"352f641f-0908-4247-a031-069f7b89cd80","status":"Succeeded","startTime":"2022-03-25T09:20:00.077Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 25 Mar 2022 09:25:04 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db ltr-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --backup-id --dest-database --dest-server --dest-resource-group
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/servers/mi-tooling-server/databases/cli-restore-ltr?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":2},"kind":"v12.0,user,vcore","properties":{"collation":"SQL_Latin1_General_CP1_CI_AS","maxSizeBytes":34359738368,"status":"Online","databaseId":"d0c75ffd-9fd9-469f-a6a5-074008e5979c","creationDate":"2022-03-25T09:24:20.057Z","currentServiceObjectiveName":"GP_Gen5_2","requestedServiceObjectiveName":"GP_Gen5_2","defaultSecondaryLocation":"westus2","catalogCollation":"SQL_Latin1_General_CP1_CI_AS","zoneRedundant":false,"licenseType":"LicenseIncluded","maxLogSizeBytes":193273528320,"readScale":"Disabled","currentSku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":2},"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","isLedgerOn":false,"isInfraEncryptionEnabled":false},"location":"westcentralus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/servers/mi-tooling-server/databases/cli-restore-ltr","name":"cli-restore-ltr","type":"Microsoft.Sql/servers/databases"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1228'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 25 Mar 2022 09:25:04 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db ltr-backup delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -l -s -d -n --yes
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionServers/mi-tooling-server/longTermRetentionDatabases/a-reneamoso-qpi-testing/longTermRetentionBackups/c39f6e17-90ff-4ea9-9c2b-cdcb81457963%3B132923448990000000?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"operation":"DeleteLTRBackup","startTime":"2022-03-25T09:25:06.667Z"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionBackupAzureAsyncOperation/85ea4eec-8517-488b-858a-794f9b977335?api-version=2021-05-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '70'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 25 Mar 2022 09:25:06 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionBackupOperationResults/85ea4eec-8517-488b-858a-794f9b977335?api-version=2021-05-01-preview
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db ltr-backup delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -s -d -n --yes
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionBackupAzureAsyncOperation/85ea4eec-8517-488b-858a-794f9b977335?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"name":"85ea4eec-8517-488b-858a-794f9b977335","status":"Succeeded","startTime":"2022-03-25T09:25:06.667Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 25 Mar 2022 09:25:21 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 version: 1
