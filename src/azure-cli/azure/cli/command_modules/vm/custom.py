@@ -1796,30 +1796,35 @@ def show_default_diagnostics_configuration(is_windows_os=False):
 
 
 # region VirtualMachines Disks (Managed)
-def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk, new=False, sku=None,
+def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=None, disks=None, new=False, sku=None,
                              size_gb=1023, lun=None, caching=None, enable_write_accelerator=False):
-    '''attach a managed disk'''
+    '''attach multiple managed disks'''
     from msrestazure.tools import parse_resource_id
     vm = get_vm_to_update(cmd, resource_group_name, vm_name)
     DataDisk, ManagedDiskParameters, DiskCreateOption = cmd.get_models(
         'DataDisk', 'ManagedDiskParameters', 'DiskCreateOptionTypes')
 
-    # pylint: disable=no-member
-    if lun is None:
-        lun = _get_disk_lun(vm.storage_profile.data_disks)
-    if new:
-        data_disk = DataDisk(lun=lun, create_option=DiskCreateOption.empty,
-                             name=parse_resource_id(disk)['name'],
-                             disk_size_gb=size_gb, caching=caching,
-                             managed_disk=ManagedDiskParameters(storage_account_type=sku))
-    else:
-        params = ManagedDiskParameters(id=disk, storage_account_type=sku)
-        data_disk = DataDisk(lun=lun, create_option=DiskCreateOption.attach, managed_disk=params, caching=caching)
+    for disk_item in disks:
+        if lun:
+            disk_lun = lun
+        else:
+            disk_lun = _get_disk_lun(vm.storage_profile.data_disks)
 
-    if enable_write_accelerator:
-        data_disk.write_accelerator_enabled = enable_write_accelerator
+        if new:
+            data_disk = DataDisk(lun=disk_lun, create_option=DiskCreateOption.empty,
+                                 name=parse_resource_id(disk_item)['name'],
+                                 disk_size_gb=size_gb, caching=caching,
+                                 managed_disk=ManagedDiskParameters(storage_account_type=sku))
+        else:
+            params = ManagedDiskParameters(id=disk_item, storage_account_type=sku)
+            data_disk = DataDisk(lun=disk_lun, create_option=DiskCreateOption.attach, managed_disk=params,
+                                 caching=caching)
 
-    vm.storage_profile.data_disks.append(data_disk)
+        if enable_write_accelerator:
+            data_disk.write_accelerator_enabled = enable_write_accelerator
+
+        vm.storage_profile.data_disks.append(data_disk)
+
     set_vm(cmd, vm)
 
 

@@ -19,7 +19,7 @@ from azure.cli.command_modules.vm._actions import _resource_not_exists
 from azure.cli.command_modules.vm._completers import (
     get_urn_aliases_completion_list, get_vm_size_completion_list, get_vm_run_command_completion_list)
 from azure.cli.command_modules.vm._validators import (
-    validate_nsg_name, validate_vm_nics, validate_vm_nic, validate_vm_disk, validate_vmss_disk,
+    validate_nsg_name, validate_vm_nics, validate_vm_nic, validate_vmss_disk,
     validate_asg_names_or_ids, validate_keyvault, _validate_proximity_placement_group,
     process_gallery_image_version_namespace, validate_vm_name_for_monitor_metrics)
 
@@ -465,8 +465,11 @@ def load_arguments(self, _):
     with self.argument_context('vm disk attach') as c:
         c.argument('enable_write_accelerator', min_api='2017-12-01', action='store_true', help='enable write accelerator')
         c.argument('disk', options_list=['--name', '-n', c.deprecate(target='--disk', redirect='--name', hide=True)],
-                   help="The name or ID of the managed disk", validator=validate_vm_disk, id_part='name',
+                   help="The name or ID of the managed disk", id_part='name',
                    completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
+        c.argument('disks', nargs='*', help="One or more names or IDs of the managed disk (space-delimited).",
+                   completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
+        c.argument('ids', deprecate_info=c.deprecate(target='--ids', redirect='--disks', hide=True))
 
     with self.argument_context('vm disk detach') as c:
         c.argument('disk_name', arg_type=name_arg_type, help='The data disk name.')

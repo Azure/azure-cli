@@ -15,7 +15,8 @@ except ImportError:
 from knack.log import get_logger
 from knack.util import CLIError
 
-from azure.cli.core.azclierror import ValidationError, ArgumentUsageError
+from azure.cli.core.azclierror import (ValidationError, ArgumentUsageError, RequiredArgumentMissingError,
+                                       MutuallyExclusiveArgumentError)
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_file_or_dict, validate_parameter_set, validate_tags)
 from azure.cli.core.util import (hash_string, DISALLOWED_USER_NAMES, get_default_admin_username)
@@ -529,7 +530,6 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
         if namespace.storage_profile == StorageProfile.SharedGalleryImage:
 
             if namespace.location is None:
-                from azure.cli.core.azclierror import RequiredArgumentMissingError
                 raise RequiredArgumentMissingError(
                     'Please input the location of the shared gallery image through the parameter --location.')
 
@@ -1627,9 +1627,25 @@ def validate_vmss_update_namespace(cmd, namespace):  # pylint: disable=unused-ar
 
 
 # region disk, snapshot, image validators
-def validate_vm_disk(cmd, namespace):
-    namespace.disk = _get_resource_id(cmd.cli_ctx, namespace.disk,
-                                      namespace.resource_group_name, 'disks', 'Microsoft.Compute')
+def process_vm_disk_attach_namespace(cmd, namespace):
+    disks = []
+    if not namespace.disks:
+        if not namespace.disk:
+            raise RequiredArgumentMissingError("Please use --name or --disks to specify the disk names")
+
+        disks = [_get_resource_id(cmd.cli_ctx, namespace.disk, namespace.resource_group_name,
+                                  'disks', 'Microsoft.Compute')]
+    else:
+        if namespace.disk:
+            raise MutuallyExclusiveArgumentError("You can only specify one of --name and --disks")
+
+        for disk in namespace.disks:
+            disks.append(_get_resource_id(cmd.cli_ctx, disk, namespace.resource_group_name,
+                                          'disks', 'Microsoft.Compute'))
+    namespace.disks = disks
+
+    if len(disks) > 1 and namespace.lun:
+        raise MutuallyExclusiveArgumentError("You cannot specify the --lun for multiple disks")
 
 
 def validate_vmss_disk(cmd, namespace):
