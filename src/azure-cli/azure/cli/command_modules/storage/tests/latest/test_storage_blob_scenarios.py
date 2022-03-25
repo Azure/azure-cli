@@ -13,7 +13,7 @@ from knack.util import CLIError
 from azure.cli.core.profiles import ResourceType
 
 from azure.cli.command_modules.storage._client_factory import MISSING_CREDENTIALS_ERROR_MESSAGE
-from ..storage_test_util import StorageScenarioMixin
+from ..storage_test_util import StorageScenarioMixin, StorageTestFilesPreparer
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 
@@ -51,11 +51,12 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         for blob_type in ['block', 'page']:
             self.verify_blob_upload_and_download(resource_group, storage_account, 1, blob_type, 0)
 
+    @AllowLargeResponse(size_kb=2048)
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
     def test_storage_blob_upload_midsize_file(self, resource_group, storage_account):
         for blob_type in ['block', 'page']:
-            self.verify_blob_upload_and_download(resource_group, storage_account, 4096, 'block', 0)
+            self.verify_blob_upload_and_download(resource_group, storage_account, 2048, blob_type, 0)
 
     def verify_blob_upload_and_download(self, group, account, file_size_kb, blob_type,
                                         block_count=0, skip_download=False):
@@ -559,6 +560,67 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         blob_name = self.create_random_name(prefix='blob', length=24)
         self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --content-md5 {}', account_info,
                          container, local_file, blob_name, md5_base64_encode)
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer()
+    def test_storage_blob_upload_precondition_scenarios(self, resource_group, storage_account_info):
+        from datetime import datetime
+        import time
+        account_info = storage_account_info
+        container = self.create_container(account_info)
+
+        local_file = self.create_temp_file(128)
+
+        blob_name = self.create_random_name(prefix='blob', length=24)
+
+        self.storage_cmd('storage blob upload -c {} -f "{}" -n {}', account_info,
+                         container, local_file, blob_name)
+        time.sleep(1)
+        current = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
+        time.sleep(1)
+        with self.assertRaises(Exception):
+            self.storage_cmd('storage blob upload -c {} -f "{}" -n {}', account_info,
+                             container, local_file, blob_name)
+        with self.assertRaises(Exception):
+            self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --if-modified-since {}', account_info,
+                             container, local_file, blob_name, current)
+        with self.assertRaises(Exception):
+            self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --if-modified-since {} --overwrite', account_info,
+                             container, local_file, blob_name, current)
+        self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --if-unmodified-since {}', account_info,
+                         container, local_file, blob_name, current)
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer()
+    def test_storage_blob_upload_guess_type_scenarios(self, resource_group, storage_account_info):
+        account_info = storage_account_info
+        container = self.create_container(account_info)
+
+        size_kb = 16
+        import tempfile
+
+        test_types = [(".png", "image/png"), (".html", "text/html"), (None, "application/octet-stream")]
+
+        for suffix, contentType in test_types:
+            fd, path = tempfile.mkstemp(suffix=suffix)
+            os.close(fd)
+            print(path)
+
+            with open(path, mode='r+b') as f:
+                chunk = bytearray([0] * 1024)
+                for _ in range(int(size_kb)):
+                    f.write(chunk)
+                chunk = os.urandom(int(1024 * (size_kb % 1)))
+                f.write(chunk)
+
+            blob_name = self.create_random_name(prefix='blob', length=24)
+
+            self.storage_cmd('storage blob upload -c {} -f "{}" -n {}', account_info,
+                             container, path, blob_name)
+            self.storage_cmd('storage blob show -c {} -n {}', account_info,
+                             container, blob_name).\
+                assert_with_checks(JMESPathCheck("properties.contentSettings.contentType", contentType))
+            os.remove(path)
 
 
 @api_version_constraint(ResourceType.DATA_STORAGE_BLOB, min_api='2019-02-02')

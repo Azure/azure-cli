@@ -6,6 +6,7 @@
 # AZURE CLI RBAC TEST DEFINITIONS
 import json
 import os
+import sys
 import tempfile
 import time
 import datetime
@@ -118,10 +119,22 @@ class RbacSPCertScenarioTest(RoleScenarioTest):
                 self.kwargs['app_id'] = result['appId']
 
                 self.assertTrue(result['fileWithCertAndPrivateKey'].endswith('.pem'))
+
+                # On Linux or MacOS, check the cert file is a regular file (S_IFREG 0100000) with permission 600
+                # https://manpages.ubuntu.com/manpages/focal/man7/inode.7.html
+                # Windows doesn't have the Linux permission concept.
+                if sys.platform != 'win32':
+                    assert os.stat(result['fileWithCertAndPrivateKey']).st_mode == 0o100600
+
                 os.remove(result['fileWithCertAndPrivateKey'])
+
                 result = self.cmd('ad sp credential reset -n {app_id} --create-cert',
                                   checks=self.check('name', '{app_id}')).get_output_in_json()
                 self.assertTrue(result['fileWithCertAndPrivateKey'].endswith('.pem'))
+
+                if sys.platform != 'win32':
+                    assert os.stat(result['fileWithCertAndPrivateKey']).st_mode == 0o100600
+
                 os.remove(result['fileWithCertAndPrivateKey'])
         finally:
             self.cmd('ad app delete --id {app_id}',

@@ -843,6 +843,9 @@ backup restore restore-disks:
     restore_to_staging_storage_account:
       rule_exclusions:
       - option_length_too_long
+    target_vnet_resource_group:
+      rule_exclusions:
+      - option_length_too_long
 backup vault backup-properties set:
   parameters:
     backup_storage_redundancy:
@@ -852,6 +855,9 @@ backup vault backup-properties set:
       rule_exclusions:
       - option_length_too_long
     cross_region_restore_flag:
+      rule_exclusions:
+      - option_length_too_long
+    hybrid_backup_security_features:
       rule_exclusions:
       - option_length_too_long
 backup vault encryption update:

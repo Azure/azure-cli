@@ -446,6 +446,8 @@ def load_arguments(self, _):
                        validator=process_key_release_policy, is_preview=True,
                        help='The policy rules under which the key can be exported. '
                             'Policy definition as JSON, or a path to a file containing JSON policy definition.')
+            c.extra('default_cvm_policy', action='store_true',
+                    help='Use default policy under which the key can be exported for CVM disk encryption.')
             c.extra('immutable', arg_type=get_three_state_flag(), is_preview=True,
                     help='Mark a release policy as immutable. '
                          'An immutable release policy cannot be changed or updated after being marked immutable. '
