@@ -24,6 +24,6 @@ class AddUserAssignedIdentities(argparse._AppendAction):
             principalId=principalId,
             clientId=clientId)
 
-        if namespace.user_assigned_identity is None:
-            namespace.user_assigned_identity = {}
-        namespace.user_assigned_identity[armId] = user_identity_property
+        if namespace.user_assigned is None:
+            namespace.user_assigned = {}
+        namespace.user_assigned[armId] = user_identity_property
