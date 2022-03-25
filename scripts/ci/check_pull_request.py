@@ -197,9 +197,9 @@ def regex_line(line):
         logger.error(' ' * idx + '↑')
         error_flag = True
 
-    # check is enclosed end with `
+    # check the ending ` character
     if not enclosed_end:
-        logger.info('%s%s: can not find enclosed end with `', line, yellow)
+        logger.info('%s%s: unable to find the ending ` character', line, yellow)
         error_flag = True
 
     return error_flag
