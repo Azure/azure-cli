@@ -121,6 +121,7 @@ def is_storagev2(import_prefix):
     return import_prefix.startswith('azure.multiapi.storagev2.') or import_prefix.startswith('azure.data.tables')
 
 
+# pylint: disable=too-many-branches, too-many-statements
 def validate_client_parameters(cmd, namespace):
     """ Retrieves storage connection parameters from environment variables and parses out connection string into
     account name and key """
@@ -218,7 +219,7 @@ Please provide --connection-string, --account-key or --sas-token in your command
 
         if 'auth_mode' in cmd.arguments:
             message += """
-You also can add `--auth-mode login` in your command to use Azure Active Directory (Azure AD) for authorization if your login account is assigned required RBAC roles. 
+You also can add `--auth-mode login` in your command to use Azure Active Directory (Azure AD) for authorization if your login account is assigned required RBAC roles.
 For more information about RBAC roles in storage, visit https://docs.microsoft.com/azure/storage/common/storage-auth-aad-rbac-cli."
             """
         from azure.cli.core.azclierror import InvalidArgumentValueError
