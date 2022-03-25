@@ -1005,7 +1005,7 @@ parameters:
     short-summary: Kubelet configurations for agent nodes.
   - name: --linux-os-config
     type: string
-    short-summary: OS configuration for Linux agent nodes.
+    short-summary: OS configurations for Linux agent nodes.
 examples:
   - name: Create a nodepool in an existing AKS cluster with ephemeral os enabled.
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --node-osdisk-type Ephemeral --node-osdisk-size 48
