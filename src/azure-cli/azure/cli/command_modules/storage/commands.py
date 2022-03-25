@@ -139,7 +139,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.command('revoke-delegation-keys', 'revoke_user_delegation_keys', min_api='2019-04-01')
 
     account_blob_service_custom_sdk = get_custom_sdk('account', client_factory=cf_blob_service,
-                                             resource_type=ResourceType.DATA_STORAGE_BLOB)
+                                                     resource_type=ResourceType.DATA_STORAGE_BLOB)
     with self.command_group('storage account', resource_type=ResourceType.DATA_STORAGE_BLOB,
                             custom_command_type=account_blob_service_custom_sdk) as g:
         g.storage_custom_command_oauth('generate-sas', 'generate_sas')
