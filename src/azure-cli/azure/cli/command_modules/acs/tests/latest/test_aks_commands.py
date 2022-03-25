@@ -6451,7 +6451,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # delete
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
-    
+
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_update_with_windows_gmsa(self, resource_group, resource_group_location):
@@ -6505,3 +6505,201 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # delete
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+
+    @live_only()
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_create_with_monitoring_aad_auth_msi(self, resource_group, resource_group_location,):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.create_new_cluster_with_monitoring_aad_auth(resource_group, resource_group_location, aks_name, user_assigned_identity=False)
+
+    @live_only()
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_create_with_monitoring_aad_auth_uai(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.create_new_cluster_with_monitoring_aad_auth(resource_group, resource_group_location, aks_name, user_assigned_identity=True)
+
+    def create_new_cluster_with_monitoring_aad_auth(self, resource_group, resource_group_location, aks_name, user_assigned_identity=False):
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'location': resource_group_location,
+            'ssh_key_value': self.generate_ssh_keys()
+        })
+
+        if user_assigned_identity:
+            uai_cmd = f'identity create -g {resource_group} -n {aks_name}_uai'
+            resp = self.cmd(uai_cmd).get_output_in_json()
+            identity_id = resp["id"]
+            print("********************")
+            print(f"identity_id: {identity_id}")
+            print("********************")
+
+        # create
+        create_cmd = f'aks create --resource-group={resource_group} --name={aks_name} --location={resource_group_location} ' \
+                     '--enable-managed-identity ' \
+                     '--enable-addons monitoring ' \
+                     '--enable-msi-auth-for-monitoring ' \
+                     '--node-count 1 ' \
+                     '--ssh-key-value={ssh_key_value} '
+        create_cmd += f'--assign-identity {identity_id}' if user_assigned_identity else ''
+
+        response = self.cmd(create_cmd, checks=[
+            self.check('addonProfiles.omsagent.enabled', True),
+            self.check('addonProfiles.omsagent.config.useAADAuth', 'True')
+        ]).get_output_in_json()
+
+        cluster_resource_id = response["id"]
+        subscription = cluster_resource_id.split("/")[2]
+        workspace_resource_id = response["addonProfiles"]["omsagent"]["config"]["logAnalyticsWorkspaceResourceID"]
+        workspace_name = workspace_resource_id.split("/")[-1]
+        workspace_resource_group = workspace_resource_id.split("/")[4]
+
+        # check that the DCR was created
+        dataCollectionRuleName = f"MSCI-{aks_name}-{resource_group_location}"
+        dcr_resource_id = f"/subscriptions/{subscription}/resourceGroups/{workspace_resource_group}/providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}"
+        get_cmd = f'rest --method get --url https://management.azure.com{dcr_resource_id}?api-version=2019-11-01-preview'
+        self.cmd(get_cmd, checks=[
+            self.check('properties.destinations.logAnalytics[0].workspaceResourceId', f'{workspace_resource_id}')
+        ])
+
+        # check that the DCR-A was created
+        dcra_resource_id = f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/ContainerInsightsExtension"
+        get_cmd = f'rest --method get --url https://management.azure.com{dcra_resource_id}?api-version=2019-11-01-preview'
+        self.cmd(get_cmd, checks=[
+            self.check('properties.dataCollectionRuleId', f'{dcr_resource_id}')
+        ])
+
+        # make sure monitoring can be smoothly disabled
+        self.cmd(f'aks disable-addons -a monitoring -g={resource_group} -n={aks_name}')
+
+        # delete
+        self.cmd(f'aks delete -g {resource_group} -n {aks_name} --yes --no-wait', checks=[self.is_empty()])
+
+
+    @live_only()
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_enable_monitoring_with_aad_auth_msi(self, resource_group, resource_group_location,):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.enable_monitoring_existing_cluster_aad_auth(resource_group, resource_group_location, aks_name, user_assigned_identity=False)
+
+    @live_only()
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_enable_monitoring_with_aad_auth_uai(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.enable_monitoring_existing_cluster_aad_auth(resource_group, resource_group_location, aks_name, user_assigned_identity=True)
+
+    def enable_monitoring_existing_cluster_aad_auth(self, resource_group, resource_group_location, aks_name, user_assigned_identity=False):
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'location': resource_group_location,
+            'ssh_key_value': self.generate_ssh_keys()
+        })
+
+        if user_assigned_identity:
+            uai_cmd = f'identity create -g {resource_group} -n {aks_name}_uai'
+            resp = self.cmd(uai_cmd).get_output_in_json()
+            identity_id = resp["id"]
+            print("********************")
+            print(f"identity_id: {identity_id}")
+            print("********************")
+
+        # create
+        create_cmd = f'aks create --resource-group={resource_group} --name={aks_name} --location={resource_group_location} ' \
+                     '--enable-managed-identity ' \
+                     '--node-count 1 ' \
+                     '--ssh-key-value={ssh_key_value} '
+        create_cmd += f'--assign-identity {identity_id}' if user_assigned_identity else ''
+        self.cmd(create_cmd)
+
+        enable_monitoring_cmd = f'aks enable-addons -a monitoring --resource-group={resource_group} --name={aks_name} ' \
+                                '--enable-msi-auth-for-monitoring '
+
+        response = self.cmd(enable_monitoring_cmd, checks=[
+            self.check('addonProfiles.omsagent.enabled', True),
+            self.check('addonProfiles.omsagent.config.useAADAuth', 'True')
+        ]).get_output_in_json()
+
+        cluster_resource_id = response["id"]
+        subscription = cluster_resource_id.split("/")[2]
+        workspace_resource_id = response["addonProfiles"]["omsagent"]["config"]["logAnalyticsWorkspaceResourceID"]
+        workspace_name = workspace_resource_id.split("/")[-1]
+        workspace_resource_group = workspace_resource_id.split("/")[4]
+
+        # check that the DCR was created
+        dataCollectionRuleName = f"MSCI-{aks_name}-{resource_group_location}"
+        dcr_resource_id = f"/subscriptions/{subscription}/resourceGroups/{workspace_resource_group}/providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}"
+        get_cmd = f'rest --method get --url https://management.azure.com{dcr_resource_id}?api-version=2019-11-01-preview'
+        self.cmd(get_cmd, checks=[
+            self.check('properties.destinations.logAnalytics[0].workspaceResourceId', f'{workspace_resource_id}')
+        ])
+
+        # check that the DCR-A was created
+        dcra_resource_id = f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/ContainerInsightsExtension"
+        get_cmd = f'rest --method get --url https://management.azure.com{dcra_resource_id}?api-version=2019-11-01-preview'
+        self.cmd(get_cmd, checks=[
+            self.check('properties.dataCollectionRuleId', f'{dcr_resource_id}')
+        ])
+
+        # make sure monitoring can be smoothly disabled
+        self.cmd(f'aks disable-addons -a monitoring -g={resource_group} -n={aks_name}')
+
+        # delete
+        self.cmd(f'aks delete -g {resource_group} -n {aks_name} --yes --no-wait', checks=[self.is_empty()])
+
+    @live_only()
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_create_with_monitoring_legacy_auth(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'location': resource_group_location,
+            'ssh_key_value': self.generate_ssh_keys()
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--enable-managed-identity ' \
+                     '--enable-addons monitoring ' \
+                     '--node-count 1 ' \
+                     '--ssh-key-value={ssh_key_value} '
+        response = self.cmd(create_cmd, checks=[
+            self.check('addonProfiles.omsagent.enabled', True),
+            self.exists('addonProfiles.omsagent.config.logAnalyticsWorkspaceResourceID'),
+            self.check('addonProfiles.omsagent.config.useAADAuth', 'False')
+        ]).get_output_in_json()
+
+        # make sure a DCR was not created
+
+        cluster_resource_id = response["id"]
+        subscription = cluster_resource_id.split("/")[2]
+        workspace_resource_id = response["addonProfiles"]["omsagent"]["config"]["logAnalyticsWorkspaceResourceID"]
+        workspace_name = workspace_resource_id.split("/")[-1]
+        workspace_resource_group = workspace_resource_id.split("/")[4]
+
+        try:
+            # check that the DCR was created
+            dataCollectionRuleName = f"MSCI-{aks_name}-{resource_group_location}"
+            dcr_resource_id = f"/subscriptions/{subscription}/resourceGroups/{workspace_resource_group}/providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}"
+            get_cmd = f'rest --method get --url https://management.azure.com{dcr_resource_id}?api-version=2019-11-01-preview'
+            self.cmd(get_cmd, checks=[
+                self.check('properties.destinations.logAnalytics[0].workspaceResourceId', f'{workspace_resource_id}')
+            ])
+
+            assert False
+        except Exception as err:
+            pass  # this is expected
+
+
+        # make sure monitoring can be smoothly disabled
+        self.cmd(f'aks disable-addons -a monitoring -g={resource_group} -n={aks_name}')
+
+        # delete
+        self.cmd(f'aks delete -g {resource_group} -n {aks_name} --yes --no-wait', checks=[self.is_empty()])
