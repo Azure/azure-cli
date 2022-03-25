@@ -1,5 +1,5 @@
-# Copyright (c) Microsoft Corporation. All rights reserved.
 # --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 from knack.arguments import CLIArgumentType
@@ -473,7 +473,9 @@ def load_arguments(self, _):
                    help="Whether to use the latest version for the certificate.")
         c.argument(
             'secret_source',
-            help='Resource ID of the Azure Key Vault certificate, expected format is like "/subscriptions/sub1/resourceGroups/rg1/providers/Microsoft.KeyVault/vaults/vault1/secrets/cert1".')
+            help='Resource ID of the Azure Key Vault certificate, '
+                 'expected format is like /subscriptions/sub1/resourceGroups/rg1/'
+                 'providers/Microsoft.KeyVault/vaults/vault1/secrets/cert1.')
         c.argument('secret_version', help='Version of the certificate to be used.')
 
     with self.argument_context('afd secret list') as c:
