@@ -360,6 +360,7 @@ def update_afd_origin(client: AFDOriginsOperations,
                                origin_name,
                                origin)
 
+
 # pylint: disable=too-many-locals
 def create_afd_route(cmd,
                      client: RoutesOperations,
