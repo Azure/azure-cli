@@ -672,7 +672,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         t_account_permissions = self.get_sdk('_shared.models#AccountSasPermissions',
                                              resource_type=ResourceType.DATA_STORAGE_BLOB)
         c.register_sas_arguments()
-        c.argument('services', type=services_type_v2(self))
+        c.argument('services', type=services_type_v2())
         c.argument('resource_types', type=resource_type_type_v2(self))
         c.argument('expiry', type=get_datetime_type(True))
         c.argument('start', type=get_datetime_type(True))
