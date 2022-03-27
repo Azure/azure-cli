@@ -728,26 +728,33 @@ def storage_blob_delete_batch(client, source, source_container_name, pattern=Non
         logger.warning('%s of %s blobs not deleted due to "Failed Precondition"', num_failures, len(source_blobs))
 
 
-def generate_sas_blob_uri(client, container_name, blob_name, permission=None,
-                          expiry=None, start=None, id=None, ip=None,  # pylint: disable=redefined-builtin
+def generate_sas_blob_uri(cmd, client, permission=None, expiry=None, start=None, id=None, ip=None,  # pylint: disable=redefined-builtin
                           protocol=None, cache_control=None, content_disposition=None,
                           content_encoding=None, content_language=None,
-                          content_type=None, full_uri=False, as_user=False):
+                          content_type=None, full_uri=False, as_user=False, snapshot=None, **kwargs):
     from ..url_quote_util import encode_url_path
     from urllib.parse import quote
+    t_generate_blob_sas = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_BLOB,
+                                       '_shared_access_signature#generate_blob_sas')
+
+    account_name = client.account_name
+    container_name = client.container_name
+    blob_name = client.blob_name
+    user_delegation_key = None
+    account_key = None
     if as_user:
         user_delegation_key = client.get_user_delegation_key(
             get_datetime_from_string(start) if start else datetime.utcnow(), get_datetime_from_string(expiry))
-        sas_token = client.generate_blob_shared_access_signature(
-            container_name, blob_name, permission=permission, expiry=expiry, start=start, id=id, ip=ip,
-            protocol=protocol, cache_control=cache_control, content_disposition=content_disposition,
-            content_encoding=content_encoding, content_language=content_language, content_type=content_type,
-            user_delegation_key=user_delegation_key)
     else:
-        sas_token = client.generate_blob_shared_access_signature(
-            container_name, blob_name, permission=permission, expiry=expiry, start=start, id=id, ip=ip,
-            protocol=protocol, cache_control=cache_control, content_disposition=content_disposition,
-            content_encoding=content_encoding, content_language=content_language, content_type=content_type)
+        account_key = client.credential.account_key
+
+    sas_token = t_generate_blob_sas(account_name=account_name, container_name=container_name, blob_name=blob_name,
+                                    snapshot=snapshot, account_key=account_key, user_delegation_key=user_delegation_key,
+                                    permission=permission, expiry=expiry, start=start, policy_id=id, ip=ip,
+                                    protocol=protocol, cache_control=cache_control,
+                                    content_disposition=content_disposition, content_encoding=content_encoding,
+                                    content_language=content_language, content_type=content_type, **kwargs)
+
     if full_uri:
         return encode_url_path(client.make_blob_url(container_name, blob_name, protocol=protocol,
                                                     sas_token=quote(sas_token, safe='&%()$=\',~')))

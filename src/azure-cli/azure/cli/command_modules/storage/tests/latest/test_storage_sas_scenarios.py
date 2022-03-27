@@ -114,8 +114,12 @@ class StorageSASScenario(StorageScenarioMixin, LiveScenarioTest):
 
         # test sas-token for a blob
         sas = self.cmd('storage blob generate-sas -c {container} -n {blob} --account-name {account} --https-only '
-                       '--permissions acdrw --expiry {expiry} -otsv').output.strip()
+                       '--permissions racwdxytmei --expiry {expiry} -otsv').output.strip()
         self.kwargs['blob_sas'] = sas
+        self.assertIn('sig=', sas, 'SAS token {} does not contain sig segment'.format(sas))
+        self.assertIn('se=', sas, 'SAS token {} does not contain se(expiry) segment'.format(sas))
+        self.assertIn('sp=racwdxytmei', sas, 'SAS token {} does not contain permission segment'.format(sas))
+        self.assertIn('spr=https', sas, 'SAS token {} does not contain https segment'.format(sas))
         self.cmd('storage blob show -c {container} -n {blob} --account-name {account} --sas-token {blob_sas}') \
             .assert_with_checks(JMESPathCheck('name', blob_name))
 

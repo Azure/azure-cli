@@ -798,11 +798,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('show_next_marker', action='store_true',
                    help='Show nextMarker in result when specified.')
 
-    with self.argument_context('storage blob generate-sas') as c:
+    with self.argument_context('storage blob generate-sas', resource_type=ResourceType.DATA_STORAGE_BLOB) as c:
         from .completers import get_storage_acl_name_completion_list
 
-        t_blob_permissions = self.get_sdk('blob.models#BlobPermissions')
+        t_blob_permissions = self.get_sdk('_models#BlobSasPermissions',  resource_type=ResourceType.DATA_STORAGE_BLOB)
         c.register_sas_arguments()
+        c.register_blob_arguments_track2()
         c.argument('cache_control', help='Response header value for Cache-Control when resource is accessed '
                                          'using this shared access signature.')
         c.argument('content_disposition', help='Response header value for Content-Disposition when resource is '
@@ -826,6 +827,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('permission', options_list='--permissions',
                    help=sas_help.format(get_permission_help_string(t_blob_permissions)),
                    validator=get_permission_validator(t_blob_permissions))
+        c.argument('snapshot', help='An optional blob snapshot ID. Opaque DateTime value that, when present, '
+                                    'specifies the blob snapshot to grant permission.')
         c.ignore('sas_token')
 
     with self.argument_context('storage blob restore', resource_type=ResourceType.MGMT_STORAGE) as c:
@@ -1410,9 +1413,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         t_container_permissions = self.get_sdk('_models#ContainerSasPermissions',
                                                resource_type=ResourceType.DATA_STORAGE_BLOB)
         c.register_sas_arguments()
-        c.argument('id', options_list=['--id', '--policy-name'], validator=validate_policy,
+        c.argument('id', options_list='--policy-name', validator=validate_policy,
                    help='The name of a stored access policy within the container\'s ACL.',
-                   completer=get_storage_acl_name_completion_list(t_container_permissions, 'container_name',
+                   completer=get_storage_acl_name_completion_list(t_base_blob_service, 'container_name',
                                                                   'get_container_acl'))
         c.argument('permission', options_list='--permissions',
                    help=sas_help.format(get_permission_help_string(t_container_permissions)),
