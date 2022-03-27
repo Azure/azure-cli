@@ -1296,7 +1296,7 @@ def services_type(loader):
     return impl
 
 
-def services_type_v2(loader):
+def services_type_v2():
     """ Returns a function which validates that services string contains only a combination of blob, queue, table,
     and file. Their shorthand representations are b, q, t, and f. """
 

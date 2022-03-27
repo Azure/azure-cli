@@ -10,7 +10,7 @@ from azure.cli.core.commands.parameters import (tags_type, file_type, get_locati
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction, ALL
 
 from ._validators import (get_datetime_type, validate_metadata, get_permission_validator, get_permission_help_string,
-                          resource_type_type, services_type, validate_entity, validate_select, validate_blob_type,
+                          validate_entity, validate_select, validate_blob_type,
                           validate_included_datasets_validator, validate_custom_domain, validate_hns_migration_type,
                           validate_container_public_access,
                           add_progress_callback, process_resource_group,
