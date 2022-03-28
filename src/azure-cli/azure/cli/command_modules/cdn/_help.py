@@ -1050,7 +1050,7 @@ examples:
 
 helps['afd'] = """
 type: group
-short-summary: Manage Azure Front Door.
+short-summary: Manage Azure Front Door Standard/Premium. For classical Azure Front Door, please refer https://docs.microsoft.com/en-us/cli/azure/network/front-door?view=azure-cli-latest
 """
 
 helps['afd profile'] = """
@@ -1198,9 +1198,11 @@ helps['afd custom-domain create'] = """
 type: command
 short-summary: Create a custom domain within the specified profile.
 long-summary: >
-    Your need to create a DNS TXT record to prove the custom domain's ownership to make the operation successful.
-    Suggest to use "--no-wait" if the DNS update take a lot of time. Use "az afd custom-domain show" to obtain the validation token and
-    create a DNS TXT record for record "_dnsauth.{your custom domain}" with the validation token as its value.
+    The operation will complete with a created custom domain with its validation state set to 'Pending.
+    You have to create a DNS TXT record "_dnsauth.<your_custom_domain>" with the validation token as its value to make the domain's validation state become 'Approved' to server traffic.
+    Use "az afd custom-domain show" to obtain the validation token.
+    The validation token will expire after 7 days and your domain's validation state will become "Timeout" if no correct TXT record detected in that period.
+    You could use 'az afd custom-domain regenerate-validation-token' to regenerate the validation token to restart the validation process.
 examples:
   - name: Create a custom domain that uses AFD managed cerficate for SSL/TLS encryption.
     text: >
@@ -1259,6 +1261,14 @@ examples:
     text: az afd custom-domain wait -g MyResourceGroup --profile-name MyProfle --custom-domain-name MyCustomDomain --created
 """
 
+helps['afd custom-domain regenerate-validation-token'] = """
+type: command
+short-summary: Regenerate the domain validation token to restart the validation process.
+examples:
+  - name: Regenerate the domain validation token.
+    text: az afd custom-domain regenerate-validation-token -g MyResourceGroup --profile-name MyProfle --custom-domain-name MyCustomDomain
+"""
+
 helps['afd endpoint'] = """
 type: group
 short-summary: Manage AFD endpoints within the specified profile.
@@ -1269,19 +1279,23 @@ long-summary: >
 helps['afd endpoint create'] = """
 type: command
 short-summary: Creates an endpoint within the specified profile.
+long-summary: >
+    Azure Front Door will generate a deterministic DNS domain based on the customer input endpoint name in the form of <endpoint name>-<hash>.z01.azurefd.net,
+    the deterministic DNS domain could be reused within the tenant, subscription, or resource group depends on the --name-reuse-scope option.
+    Customer will get the same DNS domain in the reuse scope if the endpoint get deleted and recreated.
 examples:
-  - name: Creates an enabled endpoint with origin response timeout set to 60 seconds.
+  - name: Creates an enabled endpoint
     text: >
-        az afd endpoint create -g group --endpoint-name endpoint1 --profile-name profile --origin-response-timeout-seconds 60 --enabled-state Enabled
+        az afd endpoint create -g group --endpoint-name endpoint1 --profile-name profile --enabled-state Enabled
 """
 
 helps['afd endpoint update'] = """
 type: command
 short-summary: Update an endpoint within the specified profile.
 examples:
-  - name: Update an endpoint's origin response timeout to 30 seconds.
+  - name: Update an endpoint's state to disabled.
     text: >
-        az afd endpoint update -g group --endpoint-name endpoint1 --profile-name profile --origin-response-timeout-seconds 30
+        az afd endpoint update -g group --endpoint-name endpoint1 --profile-name profile --enabled-state Disabled
 """
 
 helps['afd endpoint delete'] = """
@@ -1417,7 +1431,7 @@ examples:
   - name: Creates a secret using the specified certificate version.
     text: >
         az afd secret create -g group --profile-name profile --secret-name secret1 --secret-version version1
-        --secret-source /subscriptions/sub1/resourceGroups/rg1/providers/Microsoft.KeyVault/vaults/vault1/certificates/cert1
+        --secret-source /subscriptions/sub1/resourceGroups/rg1/providers/Microsoft.KeyVault/vaults/vault1/secrets/cert1
 """
 
 helps['afd secret update'] = """
