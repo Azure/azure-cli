@@ -6664,7 +6664,6 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             None,
             {},
             False,
-            None
         )
 
         # raise exception
@@ -8321,7 +8320,6 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
             None,
             {},
             False,
-            None
         )
 
 

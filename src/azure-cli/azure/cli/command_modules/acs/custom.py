@@ -4062,12 +4062,6 @@ def openshift_monitor_disable(cmd, client, resource_group_name, name, no_wait=Fa
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, name, instance)
 
 
-def _is_msi_cluster(managed_cluster):
-    return (managed_cluster and managed_cluster.identity and
-            (managed_cluster.identity.type.casefold() == "systemassigned" or
-             managed_cluster.identity.type.casefold() == "userassigned"))
-
-
 def _put_managed_cluster_ensuring_permission(
         cmd,     # pylint: disable=too-many-locals,too-many-statements,too-many-branches
         client,
@@ -4083,11 +4077,10 @@ def _put_managed_cluster_ensuring_permission(
         enable_managed_identity,
         attach_acr,
         headers,
-        no_wait,
-        enable_msi_auth_for_monitoring=False
+        no_wait
 ):
     # some addons require post cluster creation role assigment
-    need_post_creation_role_assignment = ((monitoring_addon_enabled and not enable_msi_auth_for_monitoring) or
+    need_post_creation_role_assignment = (monitoring_addon_enabled or
                                           ingress_appgw_addon_enabled or
                                           (enable_managed_identity and attach_acr) or
                                           virtual_node_addon_enabled or
