@@ -11,6 +11,10 @@ from azure.cli.command_modules.acs._consts import (
     CONST_DEFAULT_NODE_OS_TYPE,
     CONST_DEFAULT_NODE_VM_SIZE,
     CONST_DEFAULT_WINDOWS_NODE_VM_SIZE,
+    CONST_NODEPOOL_MODE_SYSTEM,
+    CONST_NODEPOOL_MODE_USER,
+    CONST_SCALE_DOWN_MODE_DELETE,
+    CONST_VIRTUAL_MACHINE_SCALE_SETS,
     AgentPoolDecoratorMode,
     DecoratorEarlyExitException,
     DecoratorMode,
@@ -849,7 +853,7 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
             self.cmd,
             self.client,
             {
-                "node_osdisk_size": "123",
+                "node_osdisk_size": 123,
                 "node_osdisk_type": "test_node_osdisk_type",
             },
             self.resource_type,
@@ -987,7 +991,38 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
             )
             self.assertEqual(dec_agentpool_1, ground_truth_sd_agentpool_1)
 
-    def common_construct_default_agentpool(self):
+
+class AKSAgentPoolAddDecoratorStandaloneModeTestCase(AKSAgentPoolAddDecoratorCommonTestCase):
+    def setUp(self):
+        self.cli_ctx = MockCLI()
+        self.cmd = MockCmd(self.cli_ctx)
+        self.resource_type = ResourceType.MGMT_CONTAINERSERVICE
+        self.agentpool_decorator_mode = AgentPoolDecoratorMode.STANDALONE
+        self.models = AKSAgentPoolModels(self.cmd, self.resource_type, self.agentpool_decorator_mode)
+        self.client = MockClient()
+
+    def test_ensure_agentpool(self):
+        self.common_ensure_agentpool()
+
+    def test_init_agentpool(self):
+        self.common_init_agentpool()
+
+    def test_set_up_upgrade_settings(self):
+        self.common_set_up_upgrade_settings()
+
+    def test_set_up_osdisk_properties(self):
+        self.common_set_up_osdisk_properties()
+
+    def test_set_up_auto_scaler_properties(self):
+        self.common_set_up_auto_scaler_properties()
+
+    def test_set_up_snapshot_properties(self):
+        self.common_set_up_snapshot_properties()
+
+    def test_set_up_label_tag_taint(self):
+        self.common_set_up_label_tag_taint()
+
+    def test_construct_default_agentpool(self):
         import inspect
 
         from azure.cli.command_modules.acs.custom import aks_agentpool_add
@@ -1038,42 +1073,15 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
         agentpool_1.name = "test_nodepool_name"
         agentpool_1.os_type = CONST_DEFAULT_NODE_OS_TYPE
         agentpool_1.vm_size = CONST_DEFAULT_NODE_VM_SIZE
+        agentpool_1.type_properties_type = CONST_VIRTUAL_MACHINE_SCALE_SETS
+        agentpool_1.enable_encryption_at_host = False
+        agentpool_1.enable_ultra_ssd = False
+        agentpool_1.enable_fips = False
+        agentpool_1.mode = CONST_NODEPOOL_MODE_USER
+        agentpool_1.scale_down_mode = CONST_SCALE_DOWN_MODE_DELETE
         self.assertEqual(dec_agentpool_1, agentpool_1)
+
         dec_1.context.raw_param.print_usage_statistics()
-
-
-class AKSAgentPoolAddDecoratorStandaloneModeTestCase(AKSAgentPoolAddDecoratorCommonTestCase):
-    def setUp(self):
-        self.cli_ctx = MockCLI()
-        self.cmd = MockCmd(self.cli_ctx)
-        self.resource_type = ResourceType.MGMT_CONTAINERSERVICE
-        self.agentpool_decorator_mode = AgentPoolDecoratorMode.STANDALONE
-        self.models = AKSAgentPoolModels(self.cmd, self.resource_type, self.agentpool_decorator_mode)
-        self.client = MockClient()
-
-    def test_ensure_agentpool(self):
-        self.common_ensure_agentpool()
-
-    def test_init_agentpool(self):
-        self.common_init_agentpool()
-
-    def test_set_up_upgrade_settings(self):
-        self.common_set_up_upgrade_settings()
-
-    def test_set_up_osdisk_properties(self):
-        self.common_set_up_osdisk_properties()
-
-    def test_set_up_auto_scaler_properties(self):
-        self.common_set_up_auto_scaler_properties()
-
-    def test_set_up_snapshot_properties(self):
-        self.common_set_up_snapshot_properties()
-
-    def test_set_up_label_tag_taint(self):
-        self.common_set_up_label_tag_taint()
-
-    def test_construct_default_agentpool(self):
-        self.common_construct_default_agentpool()
 
 
 class AKSAgentPoolAddDecoratorManagedClusterModeTestCase(AKSAgentPoolAddDecoratorCommonTestCase):
@@ -1107,7 +1115,66 @@ class AKSAgentPoolAddDecoratorManagedClusterModeTestCase(AKSAgentPoolAddDecorato
         self.common_set_up_label_tag_taint()
 
     def test_construct_default_agentpool(self):
-        self.common_construct_default_agentpool()
+        import inspect
+
+        from azure.cli.command_modules.acs.custom import aks_create
+
+        optional_params = {}
+        positional_params = []
+        for _, v in inspect.signature(aks_create).parameters.items():
+            if v.default != v.empty:
+                optional_params[v.name] = v.default
+            else:
+                positional_params.append(v.name)
+        ground_truth_positional_params = [
+            "cmd",
+            "client",
+            "resource_group_name",
+            "name",
+            "ssh_key_value",
+        ]
+        self.assertEqual(positional_params, ground_truth_positional_params)
+
+        # prepare a dictionary of default parameters
+        raw_param_dict = {
+            "resource_group_name": "test_rg_name",
+            "name": "test_cluster_name",
+            "ssh_key_value": None,
+        }
+        raw_param_dict.update(optional_params)
+
+        # default value in `aks_create`
+        dec_1 = AKSAgentPoolAddDecorator(
+            self.cmd,
+            self.client,
+            raw_param_dict,
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+
+        with patch(
+            "azure.cli.command_modules.acs.agentpool_decorator.cf_agent_pools",
+            return_value=Mock(),
+        ):
+            dec_agentpool_1 = dec_1.construct_default_agentpool_profile()
+
+        upgrade_settings_1 = self.models.AgentPoolUpgradeSettings()
+        agentpool_1 = self.create_initialized_agentpool_instance(
+            upgrade_settings=upgrade_settings_1, count=3, enable_auto_scaling=False, os_disk_size_gb=0
+        )
+        agentpool_1.name = "nodepool1"
+        agentpool_1.orchestrator_version = ""
+        agentpool_1.os_type = CONST_DEFAULT_NODE_OS_TYPE
+        agentpool_1.vm_size = CONST_DEFAULT_NODE_VM_SIZE
+        agentpool_1.type = CONST_VIRTUAL_MACHINE_SCALE_SETS
+        agentpool_1.enable_encryption_at_host = False
+        agentpool_1.enable_ultra_ssd = False
+        agentpool_1.enable_fips = False
+        agentpool_1.mode = CONST_NODEPOOL_MODE_SYSTEM
+        agentpool_1.scale_down_mode = CONST_SCALE_DOWN_MODE_DELETE
+        self.assertEqual(dec_agentpool_1, agentpool_1)
+
+        dec_1.context.raw_param.print_usage_statistics()
 
 
 class AKSAgentPoolUpdateDecoratorTestCase(unittest.TestCase):
