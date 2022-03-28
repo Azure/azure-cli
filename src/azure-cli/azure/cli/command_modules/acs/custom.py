@@ -4280,74 +4280,10 @@ def _get_kubelet_config(file_path):
 
 def _get_linux_os_config(file_path):
     if not os.path.isfile(file_path):
-        raise CLIError("{} is not valid file, or not accessable.".format(file_path))
+        raise InvalidArgumentValueError("{} is not valid file, or not accessable.".format(file_path))
     os_config = get_file_json(file_path)
     if not isinstance(os_config, dict):
         msg = "Error reading Linux OS configuration at {}. \
             Please see https://aka.ms/CustomNodeConfig for proper format."
-        raise CLIError(msg.format(file_path))
-    config_object = LinuxOSConfig()
-    config_object.transparent_huge_page_enabled = os_config.get(
-        "transparentHugePageEnabled", None)
-    config_object.transparent_huge_page_defrag = os_config.get(
-        "transparentHugePageDefrag", None)
-    config_object.swap_file_size_mb = os_config.get("swapFileSizeMB", None)
-    # sysctl settings
-    sysctls = os_config.get("sysctls", None)
-    if not isinstance(sysctls, dict):
-        msg = "Error reading Sysctl settings at {}. Please see https://aka.ms/CustomNodeConfig for correct format."
-        raise CLIError(msg.format(file_path))
-    config_object.sysctls = SysctlConfig()
-    config_object.sysctls.net_core_somaxconn = sysctls.get(
-        "netCoreSomaxconn", None)
-    config_object.sysctls.net_core_netdev_max_backlog = sysctls.get(
-        "netCoreNetdevMaxBacklog", None)
-    config_object.sysctls.net_core_rmem_max = sysctls.get(
-        "netCoreRmemMax", None)
-    config_object.sysctls.net_core_wmem_max = sysctls.get(
-        "netCoreWmemMax", None)
-    config_object.sysctls.net_core_optmem_max = sysctls.get(
-        "netCoreOptmemMax", None)
-    config_object.sysctls.net_ipv4_tcp_max_syn_backlog = sysctls.get(
-        "netIpv4TcpMaxSynBacklog", None)
-    config_object.sysctls.net_ipv4_tcp_max_tw_buckets = sysctls.get(
-        "netIpv4TcpMaxTwBuckets", None)
-    config_object.sysctls.net_ipv4_tcp_fin_timeout = sysctls.get(
-        "netIpv4TcpFinTimeout", None)
-    config_object.sysctls.net_ipv4_tcp_keepalive_time = sysctls.get(
-        "netIpv4TcpKeepaliveTime", None)
-    config_object.sysctls.net_ipv4_tcp_keepalive_probes = sysctls.get(
-        "netIpv4TcpKeepaliveProbes", None)
-    config_object.sysctls.net_ipv4_tcpkeepalive_intvl = sysctls.get(
-        "netIpv4TcpkeepaliveIntvl", None)
-    config_object.sysctls.net_ipv4_tcp_rmem = sysctls.get(
-        "netIpv4TcpRmem", None)
-    config_object.sysctls.net_ipv4_tcp_wmem = sysctls.get(
-        "netIpv4TcpWmem", None)
-    config_object.sysctls.net_ipv4_tcp_tw_reuse = sysctls.get(
-        "netIpv4TcpTwReuse", None)
-    config_object.sysctls.net_ipv4_ip_local_port_range = sysctls.get(
-        "netIpv4IpLocalPortRange", None)
-    config_object.sysctls.net_ipv4_neigh_default_gc_thresh1 = sysctls.get(
-        "netIpv4NeighDefaultGcThresh1", None)
-    config_object.sysctls.net_ipv4_neigh_default_gc_thresh2 = sysctls.get(
-        "netIpv4NeighDefaultGcThresh2", None)
-    config_object.sysctls.net_ipv4_neigh_default_gc_thresh3 = sysctls.get(
-        "netIpv4NeighDefaultGcThresh3", None)
-    config_object.sysctls.net_netfilter_nf_conntrack_max = sysctls.get(
-        "netNetfilterNfConntrackMax", None)
-    config_object.sysctls.net_netfilter_nf_conntrack_buckets = sysctls.get(
-        "netNetfilterNfConntrackBuckets", None)
-    config_object.sysctls.fs_inotify_max_user_watches = sysctls.get(
-        "fsInotifyMaxUserWatches", None)
-    config_object.sysctls.fs_file_max = sysctls.get("fsFileMax", None)
-    config_object.sysctls.fs_aio_max_nr = sysctls.get("fsAioMaxNr", None)
-    config_object.sysctls.fs_nr_open = sysctls.get("fsNrOpen", None)
-    config_object.sysctls.kernel_threads_max = sysctls.get(
-        "kernelThreadsMax", None)
-    config_object.sysctls.vm_max_map_count = sysctls.get("vmMaxMapCount", None)
-    config_object.sysctls.vm_swappiness = sysctls.get("vmSwappiness", None)
-    config_object.sysctls.vm_vfs_cache_pressure = sysctls.get(
-        "vmVfsCachePressure", None)
-
-    return config_object
+        raise InvalidArgumentValueError(msg.format(file_path))
+    return os_config
