@@ -159,8 +159,6 @@ def load_arguments(self, _):
             c.argument('enable_bursting', arg_type=get_three_state_flag(), help='Enable on-demand bursting beyond the provisioned performance target of the disk. On-demand bursting is disabled by default, and it does not apply to Ultra disks.')
             c.argument('public_network_access', arg_type=get_enum_type(['Disabled', 'Enabled']), min_api='2021-04-01', is_preview=True, help='Customers can set on Managed Disks or Snapshots to control the export policy on the disk.')
             c.argument('accelerated_network', arg_type=get_three_state_flag(), min_api='2021-04-01', is_preview=True, help='Customers can set on Managed Disks or Snapshots to enable the accelerated networking if the OS disk image support.')
-            if self.supported_api_version(min_api='2021-12-01', operation_group='disks') and self.supported_api_version(min_api='2021-12-01', operation_group='snapshots'):
-                c.argument('architecture', arg_type=get_enum_type(self.get_models('Architecture', operation_group='disks')), help='CPU architecture.')
 
     for scope in ['disk create', 'snapshot create']:
         with self.argument_context(scope) as c:
@@ -190,6 +188,8 @@ def load_arguments(self, _):
         c.argument('edge_zone', edge_zone_type)
         c.argument('security_type', choices=['TrustedLaunch'], help='The security type of the VM. Applicable for OS disks only.', min_api='2020-12-01')
         c.argument('support_hibernation', arg_type=get_three_state_flag(), help='Indicate the OS on a disk supports hibernation.', min_api='2020-12-01')
+        if self.supported_api_version(min_api='2021-12-01', operation_group='disks'):
+            c.argument('architecture', arg_type=get_enum_type(self.get_models('Architecture', operation_group='disks')), help='CPU architecture.')
     # endregion
 
     # region Snapshots
@@ -202,6 +202,7 @@ def load_arguments(self, _):
         c.argument('edge_zone', edge_zone_type)
         c.argument('copy_start', arg_type=get_three_state_flag(), min_api='2021-04-01',
                    help='Create snapshot by using a deep copy process, where the resource creation is considered complete only after all data has been copied from the source.')
+        c.argument('architecture', arg_type=get_enum_type(self.get_models('Architecture', operation_group='snapshots')), help='CPU architecture.')
     # endregion
 
     # region Images
