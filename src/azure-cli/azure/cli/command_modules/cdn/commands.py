@@ -381,6 +381,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_afd_custom_domain',
                          supports_no_wait=True)
         g.custom_command('update', 'update_afd_custom_domain')
+        g.custom_command('regenerate-validation-token', 'refresh_validation_token')
 
     with self.command_group('afd secret', cdn_afd_secret_sdk,
                             client_factory=cf_afd_secrets) as g:
