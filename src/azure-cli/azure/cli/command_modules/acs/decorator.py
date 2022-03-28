@@ -5718,7 +5718,8 @@ class AKSCreateDecorator:
                     self.context.get_resource_group_name(),
                     self.context.get_name(),
                     mc,
-                    self.context.get_intermediate("monitoring", default_value=False),
+                    self.context.get_intermediate("monitoring", default_value=False) and
+                    not self.context.get_enable_msi_auth_for_monitoring(),
                     self.context.get_intermediate("ingress_appgw_addon_enabled", default_value=False),
                     self.context.get_intermediate("enable_virtual_node", default_value=False),
                     self.context.get_intermediate("need_post_creation_vnet_permission_granting", default_value=False),
@@ -5726,8 +5727,7 @@ class AKSCreateDecorator:
                     self.context.get_enable_managed_identity(),
                     self.context.get_attach_acr(),
                     self.context.get_aks_custom_headers(),
-                    self.context.get_no_wait(),
-                    self.context.get_enable_msi_auth_for_monitoring())
+                    self.context.get_no_wait())
                 if self.context.get_intermediate("monitoring") and self.context.get_enable_msi_auth_for_monitoring():
                     # Create the DCR Association here
                     addon_consts = self.context.get_addon_consts()
@@ -6341,7 +6341,8 @@ class AKSUpdateDecorator:
             self.context.get_resource_group_name(),
             self.context.get_name(),
             mc,
-            self.context.get_intermediate("monitoring", default_value=False),
+            self.context.get_intermediate("monitoring", default_value=False) and
+            not self.context.get_enable_msi_auth_for_monitoring(),
             self.context.get_intermediate("ingress_appgw_addon_enabled", default_value=False),
             self.context.get_intermediate("enable_virtual_node", default_value=False),
             False,
@@ -6350,5 +6351,4 @@ class AKSUpdateDecorator:
             self.context.get_attach_acr(),
             self.context.get_aks_custom_headers(),
             self.context.get_no_wait(),
-            self.context.get_enable_msi_auth_for_monitoring()
         )
