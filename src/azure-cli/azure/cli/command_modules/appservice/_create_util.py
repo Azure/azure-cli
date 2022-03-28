@@ -308,7 +308,7 @@ def set_location(cmd, sku, location):
     return loc.replace(" ", "").lower()
 
 
-def get_site_availability(cmd, name):
+def get_site_availability(cmd, name, resource_group_name=None):
     """ This is used by az webapp up to verify if a site needs to be created or should just be deployed"""
     client = web_client_factory(cmd.cli_ctx)
     availability = client.check_name_availability(name, 'Site')
@@ -319,6 +319,14 @@ def get_site_availability(cmd, name):
         availability.reason = "Invalid"
         availability.message = ("Site names only allow alphanumeric characters and hyphens, "
                                 "cannot start or end in a hyphen, and must be less than 64 chars.")
+
+    # Additional check is needed to catch apps on ASEs
+    app = get_resource_if_exists(client.web_apps, name=name, resource_group_name=resource_group_name)
+    if app is not None:
+        availability.name_available = False
+        availability.reason = "AlreadyExists"
+        availability.message = f"Hostname '{name}' already exists. Please select a different name."
+
     return availability
 
 

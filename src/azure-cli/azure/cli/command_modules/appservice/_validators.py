@@ -18,7 +18,7 @@ from msrestazure.tools import is_valid_resource_id, parse_resource_id
 from ._appservice_utils import _generic_site_operation
 from ._client_factory import web_client_factory
 from .utils import (_normalize_sku, get_sku_tier, _normalize_location, get_resource_name_and_group,
-                    get_resource_if_exists)
+                    get_resource_if_exists, is_functionapp, is_logicapp)
 
 logger = get_logger(__name__)
 
@@ -390,3 +390,12 @@ def validate_webapp_up(cmd, namespace):
         ase = client.app_service_environments.get(resource_group_name=ase_rg, name=ase_name)
         _validate_ase_is_v3(ase)
         _validate_ase_not_ilb(ase)
+
+    name = namespace.name
+    rg = namespace.resource_group_name
+    app = get_resource_if_exists(client.web_apps, name=name, resource_group_name=rg)
+    if is_logicapp(app):
+        raise ValidationError(f"App '{name}' in group '{rg}' already exists and is a Logic App.")
+
+    if is_functionapp(app):
+        raise ValidationError(f"App '{name}' in group '{rg}' already exists and is a Function App.")

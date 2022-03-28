@@ -4217,7 +4217,7 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
     client = web_client_factory(cmd.cli_ctx)
     user = get_profile_username()
     _create_new_rg = False
-    _site_availability = get_site_availability(cmd, name)
+    _site_availability = get_site_availability(cmd, name, resource_group_name=resource_group_name)
     _create_new_app = _site_availability.name_available
     os_name = os_type if os_type else detect_os_form_src(src_dir, html)
     _is_linux = os_name.lower() == LINUX_OS_NAME
