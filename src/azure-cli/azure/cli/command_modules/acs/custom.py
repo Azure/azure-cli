@@ -4248,34 +4248,12 @@ def aks_snapshot_list(cmd, client, resource_group_name=None):  # pylint: disable
 
 def _get_kubelet_config(file_path):
     if not os.path.isfile(file_path):
-        raise CLIError("{} is not valid file, or not accessable.".format(file_path))
+        raise InvalidArgumentValueError("{} is not valid file, or not accessable.".format(file_path))
     kubelet_config = get_file_json(file_path)
     if not isinstance(kubelet_config, dict):
         msg = "Error reading kubelet configuration at {}. Please see https://aka.ms/CustomNodeConfig for proper format."
-        raise CLIError(msg.format(file_path))
-    config_object = KubeletConfig()
-    config_object.cpu_manager_policy = kubelet_config.get(
-        "cpuManagerPolicy", None)
-    config_object.cpu_cfs_quota = kubelet_config.get("cpuCfsQuota", None)
-    config_object.cpu_cfs_quota_period = kubelet_config.get(
-        "cpuCfsQuotaPeriod", None)
-    config_object.image_gc_high_threshold = kubelet_config.get(
-        "imageGcHighThreshold", None)
-    config_object.image_gc_low_threshold = kubelet_config.get(
-        "imageGcLowThreshold", None)
-    config_object.topology_manager_policy = kubelet_config.get(
-        "topologyManagerPolicy", None)
-    config_object.allowed_unsafe_sysctls = kubelet_config.get(
-        "allowedUnsafeSysctls", None)
-    config_object.fail_swap_on = kubelet_config.get("failSwapOn", None)
-    config_object.container_log_max_files = kubelet_config.get(
-        "containerLogMaxFiles", None)
-    config_object.container_log_max_size_mb = kubelet_config.get(
-        "containerLogMaxSizeMB", None)
-    config_object.pod_max_pids = kubelet_config.get(
-        "podMaxPids", None)
-
-    return config_object
+        raise InvalidArgumentValueError(msg.format(file_path))
+    return kubelet_config
 
 
 def _get_linux_os_config(file_path):
