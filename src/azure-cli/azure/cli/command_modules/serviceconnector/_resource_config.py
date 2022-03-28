@@ -489,6 +489,25 @@ TARGET_RESOURCES_PARAMS = {
 }
 
 
+# The dict defines the targets which supports service endpoint
+TARGET_SUPPORT_SERVICE_ENDPOINT = {
+    RESOURCE.Postgres: True,
+    RESOURCE.Mysql: True,
+    RESOURCE.StorageBlob: True,
+    RESOURCE.StorageQueue: True,
+    RESOURCE.StorageFile: True,
+    RESOURCE.StorageTable: True,
+    RESOURCE.KeyVault: True,
+    RESOURCE.CosmosSql: True,
+    RESOURCE.CosmosCassandra: True,
+    RESOURCE.CosmosGremlin: True,
+    RESOURCE.CosmosMongo: True,
+    RESOURCE.CosmosTable: True,
+    RESOURCE.ServiceBus: True,
+    RESOURCE.EventHub: True,
+    # RESOURCE.Sql: True
+}
+
 # The dict defines the parameters used to provide auth info
 AUTH_TYPE_PARAMS = {
     AUTH_TYPE.Secret: {
