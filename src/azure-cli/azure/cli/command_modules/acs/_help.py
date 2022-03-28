@@ -505,10 +505,10 @@ parameters:
     short-summary: The source snapshot id used to create this cluster.
   - name: --kubelet-config
     type: string
-    short-summary: Kubelet configurations for agent nodes.
+    short-summary: Path to JSON file containing Kubelet configurations for agent nodes. https://aka.ms/aks/custom-node-config
   - name: --linux-os-config
     type: string
-    short-summary: OS configurations for Linux agent nodes.
+    short-summary: Path to JSON file containing OS configurations for Linux agent nodes. https://aka.ms/aks/custom-node-config
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --ssh-key-value /path/to/publickey
@@ -1002,10 +1002,10 @@ parameters:
     short-summary: Comma-separated key-value pairs to specify custom headers.
   - name: --kubelet-config
     type: string
-    short-summary: Kubelet configurations for agent nodes.
+    short-summary: Path to JSON file containing Kubelet configurations for agent nodes. https://aka.ms/aks/custom-node-config
   - name: --linux-os-config
     type: string
-    short-summary: OS configurations for Linux agent nodes.
+    short-summary: Path to JSON file containing OS configurations for Linux agent nodes. https://aka.ms/aks/custom-node-config
 examples:
   - name: Create a nodepool in an existing AKS cluster with ephemeral os enabled.
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --node-osdisk-type Ephemeral --node-osdisk-size 48
