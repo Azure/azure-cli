@@ -143,8 +143,6 @@ def load_arguments(self, _):
                    help=_get_feature_in_preview_message() + 'The disk size for master pool vms. Unit in GB. Default: corresponding vmsize disk size')
         c.argument('master_vnet_subnet_id', type=str,
                    help=_get_feature_in_preview_message() + 'The custom vnet subnet id. Note agent need to used the same vnet if master set. Default: ""')
-        c.argument('master_pod_subnet_id', type=str,
-                   help=_get_feature_in_preview_message() + 'The custom pod subnet id. Default: ""')
         c.argument('master_first_consecutive_static_ip', type=str,
                    help=_get_feature_in_preview_message() + 'The first consecutive ip used to specify static ip block.')
         c.argument('master_storage_profile', get_enum_type(storage_profile_types),
@@ -261,7 +259,7 @@ def load_arguments(self, _):
         c.argument('vnet_subnet_id', type=str,
                    validator=validate_vnet_subnet_id)
         c.argument('pod_subnet_id', type=str,
-                    validator=validate_pod_subnet_id)
+                   validator=validate_pod_subnet_id)
         c.argument('workspace_resource_id')
         c.argument('skip_subnet_role_assignment', action='store_true')
         c.argument('api_server_authorized_ip_ranges',

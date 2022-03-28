@@ -3167,6 +3167,7 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
         os_type=os_type,
         os_sku=os_sku,
         vnet_subnet_id=vnet_subnet_id,
+        pod_subnet_id=pod_subnet_id,
         proximity_placement_group_id=ppg,
         agent_pool_type="VirtualMachineScaleSets",
         max_pods=int(max_pods) if max_pods else None,
