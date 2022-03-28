@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 import importlib
-from tkinter import FALSE
 import unittest
 from unittest.mock import Mock, call, patch
 
@@ -65,11 +64,9 @@ from azure.cli.core.azclierror import (
     UnknownError,
 )
 from azure.cli.core.profiles import ResourceType
-from azure.cli.testsdk.checkers import NoneCheck
 from azure.core.exceptions import HttpResponseError
 from knack.prompting import NoTTYException
 from knack.util import CLIError
-from msrestazure.azure_exceptions import CloudError
 
 
 class DecoratorFunctionsTestCase(unittest.TestCase):
