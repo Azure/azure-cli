@@ -564,7 +564,6 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
 
     @record_only()
-    @unittest.skip('Temporarily removed from supported target resources')
     def test_webapp_redis_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -609,7 +608,6 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
 
     @record_only()
-    @unittest.skip('Temporarily removed from supported target resources')
     def test_webapp_redisenterprise_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
