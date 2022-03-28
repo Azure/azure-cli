@@ -785,6 +785,7 @@ def generate_sas_blob_uri(cmd, client, permission=None, expiry=None, start=None,
                                              sas_token=quote(sas_token, safe='&%()$=\',~')))
     return quote(sas_token, safe='&%()$=\',~')
 
+
 # pylint: disable=redefined-builtin
 def generate_container_shared_access_signature(cmd, client, container_name, permission=None, expiry=None,
                                                start=None, id=None, ip=None, protocol=None, cache_control=None,
