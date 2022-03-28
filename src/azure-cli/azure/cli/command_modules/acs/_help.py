@@ -1248,6 +1248,26 @@ examples:
     crafted: true
 """
 
+helps['aks nodepool wait'] = """
+type: command
+short-summary: Wait for a node pool to reach a desired state.
+long-summary: If an operation on a node pool was interrupted or was started with `--no-wait`, use this command to wait for it to complete.
+examples:
+  - name: Wait for a node pool to reach a desired state, polling every minute for up to thirty minutes.
+    text: |-
+        az aks nodepool wait --created --interval 60 --name MyManagedCluster --resource-group MyResourceGroup --nodepool-name MyNodePool --timeout 1800
+"""
+
+helps['aks snapshot wait'] = """
+type: command
+short-summary: Wait for a snapshot of a node pool to reach a desired state.
+long-summary: If an operation on a snapshot was interrupted or was started with `--no-wait`, use this command to wait for it to complete.
+examples:
+  - name: Wait for a node pool to reach a desired state, polling every minute for up to thirty minutes.
+    text: |-
+        az aks snapshot wait --created --interval 60 --name MySnapshot --resource-group MyResourceGroup --timeout 1800
+"""
+
 helps['aks rotate-certs'] = """
     type: command
     short-summary: Rotate certificates and keys on a managed Kubernetes cluster
