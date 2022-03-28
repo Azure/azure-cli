@@ -801,7 +801,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage blob generate-sas', resource_type=ResourceType.DATA_STORAGE_BLOB) as c:
         from .completers import get_storage_acl_name_completion_list
 
-        t_blob_permissions = self.get_sdk('_models#BlobSasPermissions',  resource_type=ResourceType.DATA_STORAGE_BLOB)
+        t_blob_permissions = self.get_sdk('_models#BlobSasPermissions', resource_type=ResourceType.DATA_STORAGE_BLOB)
         c.register_sas_arguments()
         c.register_blob_arguments_track2()
         c.argument('cache_control', help='Response header value for Cache-Control when resource is accessed '

@@ -746,7 +746,7 @@ def generate_sas_blob_uri(cmd, client, permission=None, expiry=None, start=None,
     from ..url_quote_util import encode_url_path
     from urllib.parse import quote
     t_generate_blob_sas = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_BLOB,
-                                       '_shared_access_signature#generate_blob_sas')
+                                  '_shared_access_signature#generate_blob_sas')
 
     account_name = client.account_name
     user_delegation_key = None
@@ -766,9 +766,7 @@ def generate_sas_blob_uri(cmd, client, permission=None, expiry=None, start=None,
             credential = client.credential._credential
         else:
             credential = client.credential.account_key
-        blob_client = t_blob_client.from_blob_url(blob_url=blob_url,
-                                           credential=credential,
-                                           snapshot=snapshot)
+        blob_client = t_blob_client.from_blob_url(blob_url=blob_url, credential=credential, snapshot=snapshot)
         container_name = blob_client.container_name
         blob_name = blob_client.blob_name
     else:
@@ -783,10 +781,11 @@ def generate_sas_blob_uri(cmd, client, permission=None, expiry=None, start=None,
                                     content_language=content_language, content_type=content_type, **kwargs)
 
     if full_uri:
-        return encode_url_path(make_blob_url(url=blob_url, protocol=protocol,sas_token=quote(sas_token, safe='&%()$=\',~')))
+        return encode_url_path(make_blob_url(url=blob_url, protocol=protocol,
+                                             sas_token=quote(sas_token, safe='&%()$=\',~')))
     return quote(sas_token, safe='&%()$=\',~')
 
-
+# pylint: disable=redefined-builtin
 def generate_container_shared_access_signature(cmd, client, container_name, permission=None, expiry=None,
                                                start=None, id=None, ip=None, protocol=None, cache_control=None,
                                                content_disposition=None, content_encoding=None, content_language=None,
