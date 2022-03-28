@@ -345,6 +345,11 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_custom_command_oauth('download-batch', 'storage_blob_download_batch', client_factory=cf_blob_service,
                                        validator=process_blob_download_batch_parameters,
                                        exception_handler=file_related_exception_handler)
+
+    blob_service_custom_sdk = get_custom_sdk('blob', client_factory=cf_blob_service,
+                                             resource_type=ResourceType.DATA_STORAGE_BLOB)
+    with self.command_group('storage blob', resource_type=ResourceType.DATA_STORAGE_BLOB,
+                            custom_command_type=blob_service_custom_sdk) as g:
         g.storage_custom_command_oauth('generate-sas', 'generate_sas_blob_uri')
 
     blob_lease_client_sdk = CliCommandType(
@@ -472,8 +477,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command_oauth('lease change', 'change_container_lease')
         g.storage_command_oauth('lease break', 'break_container_lease')
 
-    blob_service_custom_sdk = get_custom_sdk('blob', client_factory=cf_blob_service,
-                                             resource_type=ResourceType.DATA_STORAGE_BLOB)
     with self.command_group('storage container', custom_command_type=blob_service_custom_sdk,
                             resource_type=ResourceType.DATA_STORAGE_BLOB,
                             min_api='2019-02-02') as g:

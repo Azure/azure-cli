@@ -728,6 +728,17 @@ def storage_blob_delete_batch(client, source, source_container_name, pattern=Non
         logger.warning('%s of %s blobs not deleted due to "Failed Precondition"', num_failures, len(source_blobs))
 
 
+def make_blob_url(url=None, protocol=None, sas_token=None, snapshot=None):
+    if snapshot and sas_token:
+        url = '{}?snapshot={}&{}'.format(url, snapshot, sas_token)
+    elif snapshot:
+        url = '{}?snapshot={}'.format(url, snapshot)
+    elif sas_token:
+        url = '{}?{}'.format(url, sas_token)
+
+    return url
+
+
 def generate_sas_blob_uri(cmd, client, permission=None, expiry=None, start=None, id=None, ip=None,  # pylint: disable=redefined-builtin
                           protocol=None, cache_control=None, content_disposition=None,
                           content_encoding=None, content_language=None,
@@ -738,8 +749,6 @@ def generate_sas_blob_uri(cmd, client, permission=None, expiry=None, start=None,
                                        '_shared_access_signature#generate_blob_sas')
 
     account_name = client.account_name
-    container_name = client.container_name
-    blob_name = client.blob_name
     user_delegation_key = None
     account_key = None
     if as_user:
@@ -747,6 +756,24 @@ def generate_sas_blob_uri(cmd, client, permission=None, expiry=None, start=None,
             get_datetime_from_string(start) if start else datetime.utcnow(), get_datetime_from_string(expiry))
     else:
         account_key = client.credential.account_key
+
+    blob_url = kwargs.pop('blob_url')
+    container_name = kwargs.pop('container_name')
+    blob_name = kwargs.pop('blob_name')
+    if blob_url:
+        t_blob_client = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_BLOB, '_blob_client#BlobClient')
+        if as_user:
+            credential = client.credential._credential
+        else:
+            credential = client.credential.account_key
+        blob_client = t_blob_client.from_blob_url(blob_url=blob_url,
+                                           credential=credential,
+                                           snapshot=snapshot)
+        container_name = blob_client.container_name
+        blob_name = blob_client.blob_name
+    else:
+        blob_client = client.get_blob_client(container=container_name, blob=blob_name, snapshot=snapshot)
+        blob_url = blob_client.url
 
     sas_token = t_generate_blob_sas(account_name=account_name, container_name=container_name, blob_name=blob_name,
                                     snapshot=snapshot, account_key=account_key, user_delegation_key=user_delegation_key,
@@ -756,12 +783,11 @@ def generate_sas_blob_uri(cmd, client, permission=None, expiry=None, start=None,
                                     content_language=content_language, content_type=content_type, **kwargs)
 
     if full_uri:
-        return encode_url_path(client.make_blob_url(container_name, blob_name, protocol=protocol,
-                                                    sas_token=quote(sas_token, safe='&%()$=\',~')))
+        return encode_url_path(make_blob_url(url=blob_url, protocol=protocol,sas_token=quote(sas_token, safe='&%()$=\',~')))
     return quote(sas_token, safe='&%()$=\',~')
 
 
-def generate_container_shared_access_signature(cmd, client, container_name=None, permission=None, expiry=None,
+def generate_container_shared_access_signature(cmd, client, container_name, permission=None, expiry=None,
                                                start=None, id=None, ip=None, protocol=None, cache_control=None,
                                                content_disposition=None, content_encoding=None, content_language=None,
                                                content_type=None, as_user=False, **kwargs):
