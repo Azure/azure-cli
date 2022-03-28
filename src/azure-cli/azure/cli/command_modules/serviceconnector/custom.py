@@ -157,6 +157,7 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals
                       user_identity_auth_info=None, system_identity_auth_info=None,
                       service_principal_auth_info_secret=None,
                       key_vault_id=None,
+                      service_endpoint=None,
                       new_addon=False, no_wait=False,
                       cluster=None,
                       site=None,                                             # Resource.WebApp
@@ -208,6 +209,12 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals
         from ._utils import create_key_vault_reference_connection_if_not_exist
         create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, key_vault_id)
 
+    if service_endpoint:
+        client = set_user_token_header(client, cmd.cli_ctx)
+        parameters['v_net_solution'] = {
+            'type': 'serviceEndpoint'
+        }
+
     if new_addon:
         addon = AddonFactory.get(target_type)(cmd, source_id)
         target_id, auth_info = addon.provision()
@@ -241,6 +248,7 @@ def connection_update(cmd, client,
                       user_identity_auth_info=None, system_identity_auth_info=None,
                       service_principal_auth_info_secret=None,
                       key_vault_id=None,
+                      service_endpoint=None,
                       no_wait=False,
                       cluster=None,
                       site=None,                                              # Resource.WebApp
@@ -299,6 +307,14 @@ def connection_update(cmd, client,
         client = set_user_token_header(client, cmd.cli_ctx)
         from ._utils import create_key_vault_reference_connection_if_not_exist
         create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, key_vault_id)
+
+    parameters['v_net_solution'] = linker.get('vNetSolution')
+    if service_endpoint:
+        parameters['v_net_solution'] = {
+            'type': 'serviceEndpoint'
+        }
+    elif service_endpoint is False and linker.get('vNetSolution').get('type') == 'serviceEndpoint':
+        parameters['v_net_solution'] = None
 
     return auto_register(sdk_no_wait, no_wait,
                          client.begin_create_or_update,
