@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 import importlib
-from tkinter import FALSE
 import unittest
 from unittest.mock import Mock, call, patch
 
