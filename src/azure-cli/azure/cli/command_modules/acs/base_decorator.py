@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from typing import Any, TypeVar, Dict
+from typing import Any, TypeVar
 
 from azure.cli.command_modules.acs._consts import DecoratorMode
 from azure.cli.core import AzCommandsLoader
@@ -206,8 +206,6 @@ class BaseAKSManagedClusterDecorator:
         self,
         cmd: AzCliCommand,
         client: ContainerServiceClient,
-        raw_parameters: Dict,
-        resource_type: ResourceType,
     ):
         """A basic controller that follows the decorator pattern, used to compose the ManagedCluster profile and
         send requests.
