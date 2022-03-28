@@ -69,10 +69,7 @@ from azure.graphrbac.models import (ApplicationCreateParameters,
                                     GetObjectsParameters,
                                     ResourceAccess, RequiredResourceAccess)
 
-from azure.mgmt.containerservice.models import (ContainerServiceOrchestratorTypes,
-                                                KubeletConfig,
-                                                LinuxOSConfig,
-                                                SysctlConfig)
+from azure.mgmt.containerservice.models import ContainerServiceOrchestratorTypes
 
 from ._client_factory import cf_container_services
 from ._client_factory import cf_resource_groups
