@@ -451,6 +451,8 @@ def load_arguments(self, _):
             c.argument('os_sku', completer=get_ossku_completion_list)
             c.argument('enable_cluster_autoscaler', options_list=[
                        "--enable-cluster-autoscaler", "-e"], action='store_true')
+            c.argument('min_count', type=int, validator=validate_nodes_count)
+            c.argument('max_count', type=int, validator=validate_nodes_count)
             c.argument('scale_down_mode', arg_type=get_enum_type([CONST_SCALE_DOWN_MODE_DELETE, CONST_SCALE_DOWN_MODE_DEALLOCATE]))
             c.argument('node_taints', validator=validate_taints)
             c.argument('priority', arg_type=get_enum_type(node_priorities), validator=validate_priority)
