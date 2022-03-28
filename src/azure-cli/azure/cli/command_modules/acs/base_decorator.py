@@ -19,6 +19,7 @@ logger = get_logger(__name__)
 # type variables
 ContainerServiceClient = TypeVar("ContainerServiceClient")
 
+
 def validate_decorator_mode(decorator_mode) -> bool:
     """Check if decorator_mode is a value of enum type DecoratorMode.
 
