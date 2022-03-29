@@ -241,7 +241,7 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals
                          parameters=parameters)
 
 
-def connection_update(cmd, client,
+def connection_update(cmd, client,  # pylint: disable=too-many-locals
                       connection_name=None, client_type=None,
                       source_resource_group=None, source_id=None, indentifier=None,
                       secret_auth_info=None, secret_auth_info_auto=None,
