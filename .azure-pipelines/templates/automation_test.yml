@@ -33,12 +33,21 @@ steps:
       echo module: ${{ parameters.module }}
       echo Build.Reason: $(Build.Reason)
 
+      series_modules="botservice"
+
       # Test specific module
       module="${{ parameters.module }}"
+      series="${{ parameters.series }}"
       if [[ -n $module ]]; then
         echo "Running test for module '$module'"
-        # azdev test --no-exitfirst --verbose --series $module
-        azdev test --no-exitfirst --verbose $module --pytest-args "--durations=0"
+        if [[ "$series_modules" =~ "$module" ]]
+        then
+          echo "Running in series"
+          azdev test --no-exitfirst --verbose --series $module --pytest-args "--durations=0"
+        else
+          echo "Running in parallels"
+          azdev test --no-exitfirst --verbose $module --pytest-args "--durations=0"
+        fi
         exit 0
       fi
 
@@ -46,11 +55,11 @@ steps:
         echo "Running incremental test"
         # If CI is set to shallow fetch, target branch should be expilictly fetched.
         git fetch origin --depth=1 $(System.PullRequest.TargetBranch)
-        # azdev test --no-exitfirst --repo=./ --src=HEAD --tgt=origin/$(System.PullRequest.TargetBranch) --cli-ci --profile ${{ parameters.profile }} --verbose --series
+        # azdev test --no-exitfirst --repo=./ --src=HEAD --tgt=origin/$(System.PullRequest.TargetBranch) --cli-ci --profile ${{ parameters.profile }} --verbose --series --pytest-args "--durations=0"
         azdev test --no-exitfirst --repo=./ --src=HEAD --tgt=origin/$(System.PullRequest.TargetBranch) --cli-ci --profile ${{ parameters.profile }} --verbose --pytest-args "--durations=0"
       else
         echo "Running full test"
-        # azdev test --no-exitfirst --profile ${{ parameters.profile }} --verbose --series
+        # azdev test --no-exitfirst --profile ${{ parameters.profile }} --verbose --series --pytest-args "--durations=0"
         azdev test --no-exitfirst --profile ${{ parameters.profile }} --verbose --pytest-args "--durations=0"
       fi
     displayName: "azdev test"
