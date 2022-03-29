@@ -138,7 +138,7 @@ Also, see the [FAQ](faq.md).
 
 ### Differences between hosting and not hosting source code in Azure/azure-cli-extensions
 
-An advantage of hosting extension in [Azure/azure-cli-extensions](https://github.com/Azure/azure-cli-extensionsb) is that you could save the time to repeatedly build and upload the WHL file to pass CI checks.
+An advantage of hosting extension in [Azure/azure-cli-extensions](https://github.com/Azure/azure-cli-extensions) is that you could save the time to repeatedly build and upload the WHL file to pass CI checks.
 
 As for hosting outside, you could easily provide a direct and explicit entry to end users with your customized introduction page, like [Azure DevOps Extension for Azure CLI](https://github.com/Azure/azure-devops-cli-extension), which is fit to popularize your Azure CLI extension if you plan to.
 Otherwise, users have to go deeper to find the detailed page in Azure/azure-cli-extensions, such as `src/azure-firewall`, `src/vm-repair`.
