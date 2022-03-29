@@ -10,7 +10,7 @@ import platform
 
 from argcomplete.completers import FilesCompleter
 from azure.cli.core.commands.parameters import (
-    file_type, get_enum_type, get_resource_name_completion_list, name_type, tags_type, zones_type, edge_zone_type)
+    file_type, get_enum_type, get_resource_name_completion_list, get_three_state_flag, name_type, tags_type, zones_type, edge_zone_type)
 from azure.cli.core.commands.validators import validate_file_or_dict
 from azure.cli.core.profiles import ResourceType
 from knack.arguments import CLIArgumentType
@@ -24,7 +24,7 @@ from ._validators import (
     validate_load_balancer_outbound_ips, validate_priority, validate_eviction_policy, validate_spot_max_price,
     validate_load_balancer_outbound_ip_prefixes, validate_taints, validate_ip_ranges, validate_acr, validate_nodepool_tags,
     validate_load_balancer_outbound_ports, validate_load_balancer_idle_timeout, validate_vnet_subnet_id, validate_nodepool_labels,
-    validate_ppg, validate_assign_identity, validate_max_surge, validate_assign_kubelet_identity)
+    validate_ppg, validate_assign_identity, validate_max_surge, validate_assign_kubelet_identity, validate_credential_format)
 from ._consts import (
     CONST_OUTBOUND_TYPE_LOAD_BALANCER,
     CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
@@ -32,6 +32,8 @@ from ._consts import (
     CONST_SCALE_SET_PRIORITY_SPOT,
     CONST_SPOT_EVICTION_POLICY_DELETE,
     CONST_SPOT_EVICTION_POLICY_DEALLOCATE,
+    CONST_SCALE_DOWN_MODE_DELETE,
+    CONST_SCALE_DOWN_MODE_DEALLOCATE,
     CONST_OS_DISK_TYPE_MANAGED,
     CONST_OS_DISK_TYPE_EPHEMERAL,
     CONST_RAPID_UPGRADE_CHANNEL,
@@ -253,9 +255,12 @@ def load_arguments(self, _):
         c.argument('pod_cidr')
         c.argument('service_cidr')
         c.argument('ppg', type=str, validator=validate_ppg)
+        c.argument('node_osdisk_type', arg_type=get_enum_type(node_os_disk_types))
+        c.argument('node_osdisk_size', type=int)
         c.argument('vnet_subnet_id', type=str,
                    validator=validate_vnet_subnet_id)
         c.argument('workspace_resource_id')
+        c.argument('enable_msi_auth_for_monitoring', arg_type=get_three_state_flag(), is_preview=True)
         c.argument('skip_subnet_role_assignment', action='store_true')
         c.argument('api_server_authorized_ip_ranges',
                    type=str, validator=validate_ip_ranges)
@@ -299,15 +304,16 @@ def load_arguments(self, _):
         c.argument('disable_local_accounts', action='store_true')
         c.argument('enable_secret_rotation', action='store_true')
         c.argument('rotation_poll_interval', type=str)
+        c.argument('enable_windows_gmsa', action='store_true',
+                   options_list=['--enable-windows-gmsa'])
+        c.argument('gmsa_dns_server', options_list=['--gmsa-dns-server'])
+        c.argument('gmsa_root_domain_name', options_list=[
+                   '--gmsa-root-domain-name'])
         c.argument('yes', options_list=[
                    '--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
         c.argument('enable_sgxquotehelper', action='store_true')
         c.argument('enable_fips_image', action='store_true')
         c.argument('snapshot_id', validator=validate_snapshot_id)
-
-    with self.argument_context('aks update', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
-        c.argument('attach_acr', acr_arg_type, validator=validate_acr)
-        c.argument('detach_acr', acr_arg_type, validator=validate_acr)
 
     with self.argument_context('aks update') as c:
         c.argument('enable_cluster_autoscaler', options_list=[
@@ -334,6 +340,8 @@ def load_arguments(self, _):
         c.argument('auto_upgrade_channel', arg_type=get_enum_type(auto_upgrade_channels))
         c.argument('api_server_authorized_ip_ranges',
                    type=str, validator=validate_ip_ranges)
+        c.argument('attach_acr', acr_arg_type, validator=validate_acr)
+        c.argument('detach_acr', acr_arg_type, validator=validate_acr)
         c.argument('enable_ahub', options_list=['--enable-ahub'], action='store_true')
         c.argument('disable_ahub', options_list=['--disable-ahub'], action='store_true')
         c.argument('enable_public_fqdn', action='store_true')
@@ -348,6 +356,11 @@ def load_arguments(self, _):
         c.argument('enable_secret_rotation', action='store_true')
         c.argument('disable_secret_rotation', action='store_true')
         c.argument('rotation_poll_interval', type=str)
+        c.argument('enable_windows_gmsa', action='store_true',
+                   options_list=['--enable-windows-gmsa'])
+        c.argument('gmsa_dns_server', options_list=['--gmsa-dns-server'])
+        c.argument('gmsa_root_domain_name', options_list=[
+                   '--gmsa-root-domain-name'])
         c.argument('yes', options_list=[
                    '--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
         c.argument('nodepool_labels', nargs='*', validator=validate_nodepool_labels,
@@ -377,10 +390,11 @@ def load_arguments(self, _):
     with self.argument_context('aks get-credentials', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
         c.argument('admin', options_list=['--admin', '-a'], default=False)
         c.argument('context_name', options_list=['--context'],
-                   help='If specified, overwrite the default context name.')
+                   help='If specified, overwrite the default context name. The `--admin` parameter takes precedence over `--context`')
         c.argument('path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
                    default=os.path.join(os.path.expanduser('~'), '.kube', 'config'))
         c.argument('public_fqdn', default=False, action='store_true')
+        c.argument('credential_format', type=str, options_list=['--format'], validator=validate_credential_format)
 
     for scope in ['aks', 'acs kubernetes', 'acs dcos']:
         with self.argument_context('{} install-cli'.format(scope)) as c:
@@ -421,44 +435,40 @@ def load_arguments(self, _):
 
     with self.argument_context('aks nodepool', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
         c.argument('cluster_name', type=str, help='The cluster name.')
+        # the following argument is declared for the wait command
+        c.argument('agent_pool_name', type=str, options_list=['--nodepool-name', '--agent-pool-name'], validator=validate_nodepool_name, help='The node pool name.')
 
-    for scope in ['aks nodepool add']:
-        with self.argument_context(scope) as c:
-            c.argument('nodepool_name', type=str, options_list=[
-                       '--name', '-n'], validator=validate_nodepool_name, help='The node pool name.')
-            c.argument('zones', zones_type, options_list=[
-                       '--zones', '-z'], help='Space-separated list of availability zones where agent nodes will be placed.')
-            c.argument('node_vm_size', options_list=[
-                       '--node-vm-size', '-s'], completer=get_vm_size_completion_list)
-            c.argument('max_pods', type=int, options_list=['--max-pods', '-m'])
-            c.argument('os_type', type=str)
-            c.argument('os_sku', completer=get_ossku_completion_list)
-            c.argument('enable_cluster_autoscaler', options_list=[
-                       "--enable-cluster-autoscaler", "-e"], action='store_true')
-            c.argument('node_taints', type=str, validator=validate_taints)
-            c.argument('priority', arg_type=get_enum_type(node_priorities), validator=validate_priority)
-            c.argument('eviction_policy', arg_type=get_enum_type(node_eviction_policies), validator=validate_eviction_policy)
-            c.argument('spot_max_price', type=float,
-                       validator=validate_spot_max_price)
-            c.argument('tags', tags_type)
-            c.argument('labels', nargs='*', validator=validate_nodepool_labels)
-            c.argument('mode', get_enum_type(node_mode_types))
-            c.argument('enable_node_public_ip', action='store_true')
-            c.argument('node_public_ip_prefix_id', type=str)
-            c.argument('ppg', type=str, validator=validate_ppg)
-            c.argument('max_surge', type=str, validator=validate_max_surge)
-            c.argument('node_os_disk_type', arg_type=get_enum_type(node_os_disk_types))
-            c.argument('enable_encryption_at_host', options_list=[
-                       '--enable-encryption-at-host'], action='store_true')
-            c.argument('enable_ultra_ssd', options_list=[
-                       '--enable-ultra-ssd'], action='store_true')
-            c.argument('enable_fips_image', action='store_true')
-            c.argument('snapshot_id', validator=validate_snapshot_id)
+    for sub_command in ['add', 'update', 'upgrade', 'scale', 'show', 'list', 'delete']:
+        with self.argument_context('aks nodepool ' + sub_command) as c:
+            c.argument('nodepool_name', type=str, options_list=['--nodepool-name', '--name', '-n'], validator=validate_nodepool_name, help='The node pool name.')
 
-    for scope in ['aks nodepool show', 'aks nodepool delete', 'aks nodepool scale', 'aks nodepool upgrade', 'aks nodepool update']:
-        with self.argument_context(scope) as c:
-            c.argument('nodepool_name', type=str, options_list=[
-                       '--name', '-n'], validator=validate_nodepool_name, help='The node pool name.')
+    with self.argument_context('aks nodepool add') as c:
+        c.argument('zones', zones_type, options_list=['--zones', '-z'], help='Space-separated list of availability zones where agent nodes will be placed.')
+        c.argument('node_vm_size', options_list=['--node-vm-size', '-s'], completer=get_vm_size_completion_list)
+        c.argument('max_pods', type=int, options_list=['--max-pods', '-m'])
+        c.argument('os_type', type=str)
+        c.argument('os_sku', completer=get_ossku_completion_list)
+        c.argument('enable_cluster_autoscaler', options_list=["--enable-cluster-autoscaler", "-e"], action='store_true')
+        c.argument('min_count', type=int, validator=validate_nodes_count)
+        c.argument('max_count', type=int, validator=validate_nodes_count)
+        c.argument('scale_down_mode', arg_type=get_enum_type([CONST_SCALE_DOWN_MODE_DELETE, CONST_SCALE_DOWN_MODE_DEALLOCATE]))
+        c.argument('node_taints', validator=validate_taints)
+        c.argument('priority', arg_type=get_enum_type(node_priorities), validator=validate_priority)
+        c.argument('eviction_policy', arg_type=get_enum_type(node_eviction_policies), validator=validate_eviction_policy)
+        c.argument('spot_max_price', type=float, validator=validate_spot_max_price)
+        c.argument('tags', tags_type)
+        c.argument('labels', nargs='*', validator=validate_nodepool_labels)
+        c.argument('mode', get_enum_type(node_mode_types))
+        c.argument('enable_node_public_ip', action='store_true')
+        c.argument('node_public_ip_prefix_id', type=str)
+        c.argument('ppg', type=str, validator=validate_ppg)
+        c.argument('max_surge', type=str, validator=validate_max_surge)
+        c.argument('node_osdisk_type', arg_type=get_enum_type(node_os_disk_types))
+        c.argument('node_osdisk_size', type=int)
+        c.argument('enable_encryption_at_host', options_list=['--enable-encryption-at-host'], action='store_true')
+        c.argument('enable_ultra_ssd', options_list=['--enable-ultra-ssd'], action='store_true')
+        c.argument('enable_fips_image', action='store_true')
+        c.argument('snapshot_id', validator=validate_snapshot_id)
 
     with self.argument_context('aks nodepool upgrade') as c:
         c.argument('snapshot_id', validator=validate_snapshot_id)
@@ -470,10 +480,14 @@ def load_arguments(self, _):
                    "--disable-cluster-autoscaler", "-d"], action='store_true')
         c.argument('update_cluster_autoscaler', options_list=[
                    "--update-cluster-autoscaler", "-u"], action='store_true')
+        c.argument('min_count', type=int, validator=validate_nodes_count)
+        c.argument('max_count', type=int, validator=validate_nodes_count)
+        c.argument('scale_down_mode', arg_type=get_enum_type([CONST_SCALE_DOWN_MODE_DELETE, CONST_SCALE_DOWN_MODE_DEALLOCATE]))
         c.argument('tags', tags_type)
         c.argument('mode', get_enum_type(node_mode_types))
         c.argument('max_surge', type=str, validator=validate_max_surge)
         c.argument('labels', nargs='*', validator=validate_nodepool_labels)
+        c.argument('node_taints', validator=validate_taints)
 
     with self.argument_context('aks command invoke') as c:
         c.argument('command_string', type=str, options_list=[

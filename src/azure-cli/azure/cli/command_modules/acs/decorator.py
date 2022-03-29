@@ -16,17 +16,14 @@ from azure.cli.command_modules.acs._consts import (
     DecoratorEarlyExitException,
     DecoratorMode,
 )
-from azure.cli.command_modules.acs._loadbalancer import (
-    create_load_balancer_profile,
-    set_load_balancer_sku,
+from azure.cli.command_modules.acs._helpers import (
+    get_snapshot_by_snapshot_id,
+    get_user_assigned_identity_by_resource_id,
 )
-from azure.cli.command_modules.acs._loadbalancer import (
-    update_load_balancer_profile as _update_load_balancer_profile,
-)
+from azure.cli.command_modules.acs._loadbalancer import create_load_balancer_profile, set_load_balancer_sku
+from azure.cli.command_modules.acs._loadbalancer import update_load_balancer_profile as _update_load_balancer_profile
 from azure.cli.command_modules.acs._resourcegroup import get_rg_location
-from azure.cli.command_modules.acs._validators import (
-    extract_comma_separated_string,
-)
+from azure.cli.command_modules.acs._validators import extract_comma_separated_string
 from azure.cli.command_modules.acs.addonconfiguration import (
     ensure_container_insights_for_monitoring,
     ensure_default_log_analytics_workspace_for_monitoring,
@@ -36,12 +33,9 @@ from azure.cli.command_modules.acs.custom import (
     _ensure_aks_acr,
     _ensure_aks_service_principal,
     _ensure_cluster_identity_permission_on_kubelet_identity,
-    _get_user_assigned_identity,
     _put_managed_cluster_ensuring_permission,
     subnet_role_assignment_exists,
-    _get_snapshot,
 )
-
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core._profile import Profile
 from azure.cli.core.azclierror import (
@@ -272,6 +266,11 @@ class AKSModels:
         )
         self.Snapshot = self.__cmd.get_models(
             "Snapshot",
+            resource_type=self.resource_type,
+            operation_group="managed_clusters",
+        )
+        self.WindowsGmsaProfile = self.__cmd.get_models(
+            "WindowsGmsaProfile",
             resource_type=self.resource_type,
             operation_group="managed_clusters",
         )
@@ -592,6 +591,43 @@ class AKSContext:
                     )
         return cluster_autoscaler_profile
 
+    # pylint: disable=no-self-use
+    def __validate_gmsa_options(
+        self,
+        enable_windows_gmsa,
+        gmsa_dns_server,
+        gmsa_root_domain_name,
+        yes,
+    ) -> None:
+        """Helper function to validate gmsa related options.
+
+        When enable_windows_gmsa is specified, if both gmsa_dns_server and gmsa_root_domain_name are not assigned and
+        user does not confirm the operation, a DecoratorEarlyExitException will be raised; if only one of
+        gmsa_dns_server or gmsa_root_domain_name is assigned, raise a RequiredArgumentMissingError. When
+        enable_windows_gmsa is not specified, if any of gmsa_dns_server or gmsa_root_domain_name is assigned, raise
+        a RequiredArgumentMissingError.
+
+        :return: bool
+        """
+        if enable_windows_gmsa:
+            if gmsa_dns_server is None and gmsa_root_domain_name is None:
+                msg = (
+                    "Please assure that you have set the DNS server in the vnet used by the cluster "
+                    "when not specifying --gmsa-dns-server and --gmsa-root-domain-name"
+                )
+                if not yes and not prompt_y_n(msg, default="n"):
+                    raise DecoratorEarlyExitException()
+            elif not all([gmsa_dns_server, gmsa_root_domain_name]):
+                raise RequiredArgumentMissingError(
+                    "You must set or not set --gmsa-dns-server and --gmsa-root-domain-name at the same time."
+                )
+        else:
+            if any([gmsa_dns_server, gmsa_root_domain_name]):
+                raise RequiredArgumentMissingError(
+                    "You only can set --gmsa-dns-server and --gmsa-root-domain-name "
+                    "when setting --enable-windows-gmsa."
+                )
+
     def get_subscription_id(self):
         """Helper function to obtain the value of subscription_id.
 
@@ -854,9 +890,9 @@ class AKSContext:
 
         This fuction will store an intermediate "snapshot" to avoid sending the same request multiple times.
 
-        Function "_get_snapshot" will be called to retrieve the Snapshot object corresponding to a snapshot id, which
-        internally used the snapshot client (snapshots operations belonging to container service client) to send
-        the request.
+        Function "get_snapshot_by_snapshot_id" will be called to retrieve the Snapshot object corresponding to a
+        snapshot id, which internally used the snapshot client (snapshots operations belonging to container service
+        client) to send the request.
 
         :return: Snapshot or None
         """
@@ -867,7 +903,7 @@ class AKSContext:
 
         snapshot_id = self.get_snapshot_id()
         if snapshot_id:
-            snapshot = _get_snapshot(self.cmd.cli_ctx, snapshot_id)
+            snapshot = get_snapshot_by_snapshot_id(self.cmd.cli_ctx, snapshot_id)
             self.set_intermediate("snapshot", snapshot, overwrite_exists=True)
         return snapshot
 
@@ -1640,12 +1676,13 @@ class AKSContext:
         return admin_username
 
     def _get_windows_admin_username_and_password(
-        self, read_only: bool = False
+        self, read_only: bool = False, enable_validation: bool = False
     ) -> Tuple[Union[str, None], Union[str, None]]:
         """Internal function to dynamically obtain the value of windows_admin_username and windows_admin_password
         according to the context.
 
         Note: This function is intended to be used in create mode.
+        Note: All the external parameters involved in the validation are not verified in their own getters.
 
         When one of windows_admin_username and windows_admin_password is not assigned, dynamic completion will be
         triggerd. The user will be prompted to enter the missing windows_admin_username or windows_admin_password in
@@ -1653,6 +1690,9 @@ class AKSContext:
         raised.
 
         This function supports the option of read_only. When enabled, it will skip dynamic completion and validation.
+        This function supports the option of enable_validation. When enabled, if neither windows_admin_username or
+        windows_admin_password is specified and any of enable_windows_gmsa, gmsa_dns_server or gmsa_root_domain_name is
+        specified, raise a RequiredArgumentMissingError.
 
         :return: a tuple containing two elements: windows_admin_username of string type or None and
         windows_admin_password of string type or None
@@ -1731,7 +1771,19 @@ class AKSContext:
                     "Please specify both username and password in non-interactive mode."
                 )
 
-        # these parameters does not need validation
+        # validation
+        # Note: The external parameters involved in the validation are not verified in their own getters.
+        if enable_validation:
+            if self.decorator_mode == DecoratorMode.CREATE:
+                if not any([windows_admin_username, windows_admin_password]):
+                    if self._get_enable_windows_gmsa(
+                        enable_validation=False
+                    ) or any(self._get_gmsa_dns_server_and_root_domain_name(
+                        enable_validation=False
+                    )):
+                        raise RequiredArgumentMissingError(
+                            "Please set windows admin username and password before setting gmsa related configs."
+                        )
         return windows_admin_username, windows_admin_password
 
     def get_windows_admin_username_and_password(
@@ -1740,16 +1792,21 @@ class AKSContext:
         """Dynamically obtain the value of windows_admin_username and windows_admin_password according to the context.
 
         Note: This function is intended to be used in create mode.
+        Note: All the external parameters involved in the validation are not verified in their own getters.
 
         When one of windows_admin_username and windows_admin_password is not assigned, dynamic completion will be
         triggerd. The user will be prompted to enter the missing windows_admin_username or windows_admin_password in
         tty (pseudo terminal). If the program is running in a non-interactive environment, a NoTTYError error will be
         raised.
 
+        This function will verify the parameter by default. If neither windows_admin_username or windows_admin_password
+        is specified and any of enable_windows_gmsa, gmsa_dns_server or gmsa_root_domain_name is specified, raise a
+        RequiredArgumentMissingError.
+
         :return: a tuple containing two elements: windows_admin_username of string type or None and
         windows_admin_password of string type or None
         """
-        return self._get_windows_admin_username_and_password()
+        return self._get_windows_admin_username_and_password(enable_validation=True)
 
     def get_windows_admin_password(self) -> Union[str, None]:
         """Obtain the value of windows_admin_password.
@@ -2083,8 +2140,8 @@ class AKSContext:
     def get_identity_by_msi_client(self, assigned_identity: str) -> Identity:
         """Helper function to obtain the identity object by msi client.
 
-        Note: This is a wrapper of the external function "_get_user_assigned_identity", and the return result of this
-        function will not be directly decorated into the `mc` object.
+        Note: This is a wrapper of the external function "get_user_assigned_identity_by_resource_id", and the return
+        value of this function will not be directly decorated into the `mc` object.
 
         This function will use ManagedServiceIdentityClient to send the request, and return an identity object.
         ResourceNotFoundError, ClientRequestError or InvalidArgumentValueError exceptions might be raised in the above
@@ -2092,7 +2149,7 @@ class AKSContext:
 
         :return: string
         """
-        return _get_user_assigned_identity(self.cmd.cli_ctx, assigned_identity)
+        return get_user_assigned_identity_by_resource_id(self.cmd.cli_ctx, assigned_identity)
 
     def get_user_assigned_identity_client_id(self) -> str:
         """Helper function to obtain the client_id of user assigned identity.
@@ -2125,6 +2182,127 @@ class AKSContext:
         if assigned_identity is None or assigned_identity == "":
             raise RequiredArgumentMissingError("No assigned identity provided.")
         return self.get_identity_by_msi_client(assigned_identity).principal_id
+
+    def _get_enable_windows_gmsa(self, enable_validation: bool = False) -> bool:
+        """Internal function to obtain the value of enable_windows_gmsa.
+
+        This function supports the option of enable_validation. Please refer to function __validate_gmsa_options for
+        details of validation.
+
+        :return: bool
+        """
+        # read the original value passed by the command
+        enable_windows_gmsa = self.raw_param.get("enable_windows_gmsa")
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.windows_profile and
+                hasattr(self.mc.windows_profile, "gmsa_profile") and  # backward compatibility
+                self.mc.windows_profile.gmsa_profile and
+                self.mc.windows_profile.gmsa_profile.enabled is not None
+            ):
+                enable_windows_gmsa = self.mc.windows_profile.gmsa_profile.enabled
+
+        # this parameter does not need dynamic completion
+        # validation
+        if enable_validation:
+            (
+                gmsa_dns_server,
+                gmsa_root_domain_name,
+            ) = self._get_gmsa_dns_server_and_root_domain_name(
+                enable_validation=False
+            )
+            self.__validate_gmsa_options(
+                enable_windows_gmsa, gmsa_dns_server, gmsa_root_domain_name, self.get_yes()
+            )
+        return enable_windows_gmsa
+
+    def get_enable_windows_gmsa(self) -> bool:
+        """Obtain the value of enable_windows_gmsa.
+
+        This function will verify the parameter by default. When enable_windows_gmsa is specified, if both
+        gmsa_dns_server and gmsa_root_domain_name are not assigned and user does not confirm the operation,
+        a DecoratorEarlyExitException will be raised; if only one of gmsa_dns_server or gmsa_root_domain_name is
+        assigned, raise a RequiredArgumentMissingError. When enable_windows_gmsa is not specified, if any of
+        gmsa_dns_server or gmsa_root_domain_name is assigned, raise a RequiredArgumentMissingError.
+
+        :return: bool
+        """
+        return self._get_enable_windows_gmsa(enable_validation=True)
+
+    def _get_gmsa_dns_server_and_root_domain_name(self, enable_validation: bool = False):
+        """Internal function to obtain the values of gmsa_dns_server and gmsa_root_domain_name.
+
+        This function supports the option of enable_validation. Please refer to function __validate_gmsa_options for
+        details of validation.
+
+        :return: a tuple containing two elements: gmsa_dns_server of string type or None and gmsa_root_domain_name of
+        string type or None
+        """
+        # gmsa_dns_server
+        # read the original value passed by the command
+        gmsa_dns_server = self.raw_param.get("gmsa_dns_server")
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
+        gmsa_dns_read_from_mc = False
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.windows_profile and
+                hasattr(self.mc.windows_profile, "gmsa_profile") and  # backward compatibility
+                self.mc.windows_profile.gmsa_profile and
+                self.mc.windows_profile.gmsa_profile.dns_server is not None
+            ):
+                gmsa_dns_server = self.mc.windows_profile.gmsa_profile.dns_server
+                gmsa_dns_read_from_mc = True
+
+        # gmsa_root_domain_name
+        # read the original value passed by the command
+        gmsa_root_domain_name = self.raw_param.get("gmsa_root_domain_name")
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
+        gmsa_root_read_from_mc = False
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.windows_profile and
+                hasattr(self.mc.windows_profile, "gmsa_profile") and  # backward compatibility
+                self.mc.windows_profile.gmsa_profile and
+                self.mc.windows_profile.gmsa_profile.root_domain_name is not None
+            ):
+                gmsa_root_domain_name = self.mc.windows_profile.gmsa_profile.root_domain_name
+                gmsa_root_read_from_mc = True
+
+        # consistent check
+        if gmsa_dns_read_from_mc != gmsa_root_read_from_mc:
+            raise CLIInternalError(
+                "Inconsistent state detected, one of gmsa_dns_server and gmsa_root_domain_name "
+                "is read from the `mc` object."
+            )
+
+        # this parameter does not need dynamic completion
+        # validation
+        if enable_validation:
+            self.__validate_gmsa_options(
+                self._get_enable_windows_gmsa(enable_validation=False),
+                gmsa_dns_server,
+                gmsa_root_domain_name,
+                self.get_yes(),
+            )
+        return gmsa_dns_server, gmsa_root_domain_name
+
+    def get_gmsa_dns_server_and_root_domain_name(self) -> Tuple[Union[str, None], Union[str, None]]:
+        """Obtain the values of gmsa_dns_server and gmsa_root_domain_name.
+
+        This function will verify the parameter by default. When enable_windows_gmsa is specified, if both
+        gmsa_dns_server and gmsa_root_domain_name are not assigned and user does not confirm the operation,
+        a DecoratorEarlyExitException will be raised; if only one of gmsa_dns_server or gmsa_root_domain_name is
+        assigned, raise a RequiredArgumentMissingError. When enable_windows_gmsa is not specified, if any of
+        gmsa_dns_server or gmsa_root_domain_name is assigned, raise a RequiredArgumentMissingError.
+
+        :return: a tuple containing two elements: gmsa_dns_server of string type or None and gmsa_root_domain_name of
+        string type or None
+        """
+        return self._get_gmsa_dns_server_and_root_domain_name(enable_validation=True)
 
     def get_yes(self) -> bool:
         """Obtain the value of yes.
@@ -2739,6 +2917,7 @@ class AKSContext:
             CONST_INGRESS_APPGW_WATCH_NAMESPACE,
             CONST_KUBE_DASHBOARD_ADDON_NAME, CONST_MONITORING_ADDON_NAME,
             CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID,
+            CONST_MONITORING_USING_AAD_MSI_AUTH,
             CONST_OPEN_SERVICE_MESH_ADDON_NAME, CONST_ROTATION_POLL_INTERVAL,
             CONST_SECRET_ROTATION_ENABLED, CONST_VIRTUAL_NODE_ADDON_NAME,
             CONST_VIRTUAL_NODE_SUBNET_NAME)
@@ -2801,6 +2980,9 @@ class AKSContext:
             "CONST_ROTATION_POLL_INTERVAL"
         ] = CONST_ROTATION_POLL_INTERVAL
 
+        addon_consts[
+            "CONST_MONITORING_USING_AAD_MSI_AUTH"
+        ] = CONST_MONITORING_USING_AAD_MSI_AUTH
         return addon_consts
 
     def _get_enable_addons(self, enable_validation: bool = False) -> List[str]:
@@ -3039,6 +3221,38 @@ class AKSContext:
         # this parameter does not need dynamic completion
         # this parameter does not need validation
         return appgw_name
+
+    def get_enable_msi_auth_for_monitoring(self) -> Union[bool, None]:
+        """Obtain the value of enable_msi_auth_for_monitoring.
+
+        Note: The arg type of this parameter supports three states (True, False or None), but the corresponding default
+        value in entry function is not None.
+
+        :return: bool or None
+        """
+        # determine the value of constants
+        addon_consts = self.get_addon_consts()
+        CONST_MONITORING_ADDON_NAME = addon_consts.get("CONST_MONITORING_ADDON_NAME")
+        CONST_MONITORING_USING_AAD_MSI_AUTH = addon_consts.get("CONST_MONITORING_USING_AAD_MSI_AUTH")
+
+        # read the original value passed by the command
+        enable_msi_auth_for_monitoring = self.raw_param.get("enable_msi_auth_for_monitoring")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if (
+            self.mc and
+            self.mc.addon_profiles and
+            CONST_MONITORING_ADDON_NAME in self.mc.addon_profiles and
+            self.mc.addon_profiles.get(
+                CONST_MONITORING_ADDON_NAME
+            ).config.get(CONST_MONITORING_USING_AAD_MSI_AUTH) is not None
+        ):
+            enable_msi_auth_for_monitoring = self.mc.addon_profiles.get(
+                CONST_MONITORING_ADDON_NAME
+            ).config.get(CONST_MONITORING_USING_AAD_MSI_AUTH)
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return enable_msi_auth_for_monitoring
 
     def get_appgw_subnet_cidr(self) -> Union[str, None]:
         """Obtain the value of appgw_subnet_cidr.
@@ -4083,7 +4297,6 @@ class AKSContext:
 
         # this parameter does not need dynamic completion
         # validation
-        # Note: The parameter involved in the validation is not verified in its own getter.
         if enable_validation:
             if self.decorator_mode == DecoratorMode.UPDATE:
                 if enable_public_fqdn:
@@ -4440,6 +4653,7 @@ class AKSContext:
             enable_strip=True,
             extract_kv=True,
             default_value={},
+            allow_appending_values_to_same_key=True,
         )
 
         # In create mode, add AAD session key to header.
@@ -4702,16 +4916,29 @@ class AKSCreateDecorator:
             windows_admin_password,
         ) = self.context.get_windows_admin_username_and_password()
         if windows_admin_username or windows_admin_password:
+            # license
             windows_license_type = None
             if self.context.get_enable_ahub():
                 windows_license_type = "Windows_Server"
 
+            # gmsa
+            gmsa_profile = None
+            if self.context.get_enable_windows_gmsa():
+                gmsa_dns_server, gmsa_root_domain_name = self.context.get_gmsa_dns_server_and_root_domain_name()
+                gmsa_profile = self.models.WindowsGmsaProfile(
+                    enabled=True,
+                    dns_server=gmsa_dns_server,
+                    root_domain_name=gmsa_root_domain_name,
+                )
+
             # this would throw an error if windows_admin_username is empty (the user enters an empty
             # string after being prompted), since admin_username is a required parameter
             windows_profile = self.models.ManagedClusterWindowsProfile(
+                # [SuppressMessage("Microsoft.Security", "CS002:SecretInNextLine", Justification="variable name")]
                 admin_username=windows_admin_username,
                 admin_password=windows_admin_password,
                 license_type=windows_license_type,
+                gmsa_profile=gmsa_profile,
             )
 
             mc.windows_profile = windows_profile
@@ -4976,12 +5203,16 @@ class AKSCreateDecorator:
         CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID = addon_consts.get(
             "CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID"
         )
+        CONST_MONITORING_USING_AAD_MSI_AUTH = addon_consts.get(
+            "CONST_MONITORING_USING_AAD_MSI_AUTH"
+        )
 
         # TODO: can we help the user find a workspace resource ID?
         monitoring_addon_profile = self.models.ManagedClusterAddonProfile(
             enabled=True,
             config={
-                CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: self.context.get_workspace_resource_id()
+                CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: self.context.get_workspace_resource_id(),
+                CONST_MONITORING_USING_AAD_MSI_AUTH: self.context.get_enable_msi_auth_for_monitoring(),
             },
         )
         # post-process, create a deployment
@@ -4991,7 +5222,10 @@ class AKSCreateDecorator:
             self.context.get_resource_group_name(),
             self.context.get_name(),
             self.context.get_location(),
-            aad_route=False,
+            remove_monitoring=False,
+            aad_route=self.context.get_enable_msi_auth_for_monitoring(),
+            create_dcr=True,
+            create_dcra=False,
         )
         # set intermediate
         self.context.set_intermediate("monitoring", True, overwrite_exists=True)
@@ -5484,7 +5718,8 @@ class AKSCreateDecorator:
                     self.context.get_resource_group_name(),
                     self.context.get_name(),
                     mc,
-                    self.context.get_intermediate("monitoring", default_value=False),
+                    self.context.get_intermediate("monitoring", default_value=False) and
+                    not self.context.get_enable_msi_auth_for_monitoring(),
                     self.context.get_intermediate("ingress_appgw_addon_enabled", default_value=False),
                     self.context.get_intermediate("enable_virtual_node", default_value=False),
                     self.context.get_intermediate("need_post_creation_vnet_permission_granting", default_value=False),
@@ -5493,6 +5728,22 @@ class AKSCreateDecorator:
                     self.context.get_attach_acr(),
                     self.context.get_aks_custom_headers(),
                     self.context.get_no_wait())
+                if self.context.get_intermediate("monitoring") and self.context.get_enable_msi_auth_for_monitoring():
+                    # Create the DCR Association here
+                    addon_consts = self.context.get_addon_consts()
+                    CONST_MONITORING_ADDON_NAME = addon_consts.get("CONST_MONITORING_ADDON_NAME")
+                    ensure_container_insights_for_monitoring(
+                        self.cmd,
+                        mc.addon_profiles[CONST_MONITORING_ADDON_NAME],
+                        self.context.get_subscription_id(),
+                        self.context.get_resource_group_name(),
+                        self.context.get_name(),
+                        self.context.get_location(),
+                        remove_monitoring=False,
+                        aad_route=self.context.get_enable_msi_auth_for_monitoring(),
+                        create_dcr=False,
+                        create_dcra=True,
+                    )
                 return created_cluster
             # CloudError was raised before, but since the adoption of track 2 SDK,
             # HttpResponseError would be raised instead
@@ -5589,7 +5840,8 @@ class AKSUpdateDecorator:
                 '"--enable-public-fqdn" or '
                 '"--disable-public-fqdn" or '
                 '"--tags" or '
-                '"--nodepool-labels".'
+                '"--nodepool-labels" or '
+                '"--enble-windows-gmsa".'
             )
 
     def _ensure_mc(self, mc: ManagedCluster) -> None:
@@ -5811,8 +6063,9 @@ class AKSUpdateDecorator:
         enable_ahub = self.context.get_enable_ahub()
         disable_ahub = self.context.get_disable_ahub()
         windows_admin_password = self.context.get_windows_admin_password()
+        enable_windows_gmsa = self.context.get_enable_windows_gmsa()
 
-        if any([enable_ahub, disable_ahub, windows_admin_password]) and not mc.windows_profile:
+        if any([enable_ahub, disable_ahub, windows_admin_password, enable_windows_gmsa]) and not mc.windows_profile:
             raise UnknownError(
                 "Encounter an unexpected error while getting windows profile from the cluster in the process of update."
             )
@@ -5823,6 +6076,13 @@ class AKSUpdateDecorator:
             mc.windows_profile.license_type = 'None'
         if windows_admin_password:
             mc.windows_profile.admin_password = windows_admin_password
+        if enable_windows_gmsa:
+            gmsa_dns_server, gmsa_root_domain_name = self.context.get_gmsa_dns_server_and_root_domain_name()
+            mc.windows_profile.gmsa_profile = self.models.WindowsGmsaProfile(
+                enabled=True,
+                dns_server=gmsa_dns_server,
+                root_domain_name=gmsa_root_domain_name,
+            )
         return mc
 
     def update_aad_profile(self, mc: ManagedCluster) -> ManagedCluster:
@@ -6081,7 +6341,8 @@ class AKSUpdateDecorator:
             self.context.get_resource_group_name(),
             self.context.get_name(),
             mc,
-            self.context.get_intermediate("monitoring", default_value=False),
+            self.context.get_intermediate("monitoring", default_value=False) and
+            not self.context.get_enable_msi_auth_for_monitoring(),
             self.context.get_intermediate("ingress_appgw_addon_enabled", default_value=False),
             self.context.get_intermediate("enable_virtual_node", default_value=False),
             False,
@@ -6089,5 +6350,5 @@ class AKSUpdateDecorator:
             check_is_msi_cluster(mc),
             self.context.get_attach_acr(),
             self.context.get_aks_custom_headers(),
-            self.context.get_no_wait()
+            self.context.get_no_wait(),
         )

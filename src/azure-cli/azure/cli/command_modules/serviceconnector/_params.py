@@ -19,6 +19,7 @@ from ._resource_config import (
     AUTH_TYPE_PARAMS,
     SUPPORTED_AUTH_TYPE,
     SUPPORTED_CLIENT_TYPE,
+    TARGET_SUPPORT_SERVICE_ENDPOINT,
 )
 from ._addon_factory import AddonFactory
 
@@ -35,8 +36,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
         required_args = []
         for arg, content in SOURCE_RESOURCES_PARAMS.get(source).items():
+            id_arg = '\'--id\'' if enable_id else '\'--source-id\''
             context.argument(arg, options_list=content.get('options'), type=str,
-                             help='{}. Required if \'--source-id\' is not specified.'.format(content.get('help')))
+                             help='{}. Required if {} is not specified.'.format(content.get('help'), id_arg))
             required_args.append(content.get('options')[0])
 
         validator_kwargs = {'validator': validate_params} if validate_source_id else {}
@@ -104,6 +106,15 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         else:
             context.ignore('new_addon')
 
+    def add_secret_store_argument(context):
+        context.argument('key_vault_id', options_list=['--vault-id'], help='The id of key vault to store secret value')
+
+    def add_service_endpoint_argument(context):
+        context.argument('service_endpoint', options_list=['--service-endpoint'], arg_type=get_three_state_flag(),
+                         default=None, help='Connect target service by service endpoint. '
+                         'Source resource must be in the VNet and target SKU must support service endpoint feature. '
+                         'More virtual network solution(private link) for connection can be found on Azure Portal.')
+
     def add_confluent_kafka_argument(context):
         context.argument('bootstrap_server', options_list=['--bootstrap-server'], help='Kafka bootstrap server url')
         context.argument('kafka_key', options_list=['--kafka-key'], help='Kafka API-Key (key)')
@@ -149,11 +160,19 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                 add_target_resource_block(c, target)
                 add_auth_block(c, source, target)
                 add_new_addon_argument(c, source, target)
+                add_secret_store_argument(c)
+                add_service_endpoint_argument(c)
+                if target not in TARGET_SUPPORT_SERVICE_ENDPOINT:
+                    c.ignore('service_endpoint')
             with self.argument_context('{} connection update {}'.format(source.value, target.value)) as c:
                 add_client_type_argument(c, source, target)
                 add_connection_name_argument(c, source)
                 add_source_resource_block(c, source)
                 add_auth_block(c, source, target)
+                add_secret_store_argument(c)
+                add_service_endpoint_argument(c)
+                if target not in TARGET_SUPPORT_SERVICE_ENDPOINT:
+                    c.ignore('service_endpoint')
 
         # special target resource: independent implementation
         target = RESOURCE.ConfluentKafka
@@ -161,7 +180,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
             add_client_type_argument(c, source, target)
             add_source_resource_block(c, source, enable_id=False)
             add_confluent_kafka_argument(c)
+            add_secret_store_argument(c)
         with self.argument_context('{} connection update {}'.format(source.value, target.value)) as c:
             add_client_type_argument(c, source, target)
             add_source_resource_block(c, source, enable_id=False)
             add_confluent_kafka_argument(c)
+            add_secret_store_argument(c)

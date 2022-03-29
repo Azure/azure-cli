@@ -14,6 +14,10 @@ CONST_SCALE_SET_PRIORITY_SPOT = "Spot"
 CONST_SPOT_EVICTION_POLICY_DELETE = "Delete"
 CONST_SPOT_EVICTION_POLICY_DEALLOCATE = "Deallocate"
 
+# Scale Down Mode
+CONST_SCALE_DOWN_MODE_DELETE = "Delete"
+CONST_SCALE_DOWN_MODE_DEALLOCATE = "Deallocate"
+
 # node os disk type
 CONST_OS_DISK_TYPE_MANAGED = "Managed"
 CONST_OS_DISK_TYPE_EPHEMERAL = "Ephemeral"
@@ -21,6 +25,13 @@ CONST_OS_DISK_TYPE_EPHEMERAL = "Ephemeral"
 # mode
 CONST_NODEPOOL_MODE_SYSTEM = "System"
 CONST_NODEPOOL_MODE_USER = "User"
+
+# vm size
+CONST_DEFAULT_NODE_VM_SIZE = "Standard_DS2_v2"
+CONST_DEFAULT_WINDOWS_NODE_VM_SIZE = "Standard_D2s_v3"
+
+# os tye
+CONST_DEFAULT_NODE_OS_TYPE = "Linux"
 
 # consts for cluster related commands
 # outbound type
@@ -49,6 +60,7 @@ CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME = "httpApplicationRouting"
 # monitoring
 CONST_MONITORING_ADDON_NAME = "omsagent"
 CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID = "logAnalyticsWorkspaceResourceID"
+CONST_MONITORING_USING_AAD_MSI_AUTH = "useAADAuth"
 
 # virtual node
 CONST_VIRTUAL_NODE_ADDON_NAME = "aciConnector"
@@ -98,10 +110,19 @@ CONST_CANIPULL_IMAGE = "mcr.microsoft.com/aks/canipull:0.0.3-alpha"
 
 
 # consts for decorator pattern
-# decorator mode
 class DecoratorMode(Enum):
+    """Enumerations used to distinguish whether to handle creation or update.
+    """
     CREATE = 1
     UPDATE = 2
+
+
+class AgentPoolDecoratorMode(Enum):
+    """Enumerations used to distinguish whether to deal with the default system agentpool in the context of the cluster
+    or any specific agentpool.
+    """
+    MANAGED_CLUSTER = 1
+    STANDALONE = 2
 
 
 # custom exception for decorator pattern, used for gracefully exit

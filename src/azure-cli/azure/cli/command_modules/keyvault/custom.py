@@ -254,7 +254,11 @@ def list_deleted_vault_or_hsm(cmd, client, resource_type=None):
         return client.list_deleted()
 
     if resource_type is None:
-        return client.list_deleted()
+        hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
+        resources = []
+        resources.extend(client.list_deleted())
+        resources.extend(hsm_client.list_deleted())
+        return resources
 
     if resource_type == 'hsm':
         hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
@@ -802,6 +806,7 @@ def update_vault_setter(cmd, client, parameters, resource_group_name, vault_name
                                 vault_name=vault_name,
                                 parameters=VaultCreateOrUpdateParameters(
                                     location=parameters.location,
+                                    tags=parameters.tags,
                                     properties=parameters.properties),
                                 no_wait=no_wait)
 
@@ -1063,7 +1068,7 @@ def remove_network_rule(cmd, client, resource_group_name, vault_name, ip_address
             rules.virtual_network_rules = new_rules
 
     if ip_address and rules.ip_rules:
-        new_rules = [x for x in rules.ip_rules if x.value != ip_address]
+        new_rules = [x for x in rules.ip_rules if ip_network(x.value) != ip_network(ip_address)]
         to_modify |= len(new_rules) != len(rules.ip_rules)
         if to_modify:
             rules.ip_rules = new_rules
@@ -1151,7 +1156,7 @@ def encrypt_key(cmd, client, algorithm, value, iv=None, aad=None, name=None, ver
     EncryptionAlgorithm = cmd.loader.get_sdk('EncryptionAlgorithm', mod='crypto._enums',
                                              resource_type=ResourceType.DATA_KEYVAULT_KEYS)
     import binascii
-    crypto_client = client.get_cryptography_client(name, version=version)
+    crypto_client = client.get_cryptography_client(name, key_version=version)
     return crypto_client.encrypt(EncryptionAlgorithm(algorithm), value,
                                  iv=binascii.unhexlify(iv) if iv else None,
                                  additional_authenticated_data=binascii.unhexlify(aad) if aad else None)
@@ -1162,7 +1167,7 @@ def decrypt_key(cmd, client, algorithm, value, iv=None, tag=None, aad=None,
     EncryptionAlgorithm = cmd.loader.get_sdk('EncryptionAlgorithm', mod='crypto._enums',
                                              resource_type=ResourceType.DATA_KEYVAULT_KEYS)
     import binascii
-    crypto_client = client.get_cryptography_client(name, version=version)
+    crypto_client = client.get_cryptography_client(name, key_version=version)
     return crypto_client.decrypt(EncryptionAlgorithm(algorithm), value,
                                  iv=binascii.unhexlify(iv) if iv else None,
                                  authentication_tag=binascii.unhexlify(tag) if tag else None,

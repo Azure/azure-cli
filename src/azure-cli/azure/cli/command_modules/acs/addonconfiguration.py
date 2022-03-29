@@ -2,12 +2,11 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
-import datetime
 import json
 
 from azure.cli.core.azclierror import (
     AzCLIError,
+    CLIError,
     ClientRequestError,
 )
 from azure.cli.core.commands import LongRunningOperation
@@ -120,6 +119,7 @@ def ensure_default_log_analytics_workspace_for_monitoring(
         "germanynorth": "germanywestcentral",
         "uaecentral": "uaecentral",
         "eastus2euap": "eastus2euap",
+        "centraluseuap": "eastus2euap",
         "brazilsoutheast": "brazilsoutheast",
     }
 
@@ -240,7 +240,30 @@ def sanitize_loganalytics_ws_resource_id(workspace_resource_id):
     return workspace_resource_id
 
 
-# pylint: disable=too-many-locals,too-many-branches,too-many-statements
+def is_container_insights_extension_dcr_exists(cmd, dcr_url, workspace_resource_id):
+    containerinsights_extension_dcr_exists = False
+    _MAX_RETRY_TIMES = 3
+    for retry_count in range(0, _MAX_RETRY_TIMES):
+        try:
+            resp = send_raw_request(
+                cmd.cli_ctx, "GET", dcr_url
+            )
+            json_response = json.loads(resp.text)
+            destinations = json_response["properties"]["destinations"]
+            if not destinations and not destinations["logAnalytics"] and len(destinations["logAnalytics"]) > 0:
+                destinationLogAnalyticsResourceId = destinations["logAnalytics"][0]
+                if destinationLogAnalyticsResourceId.tolower() == workspace_resource_id.tolower():
+                    containerinsights_extension_dcr_exists = True
+            break
+        except CLIError as e:
+            if "ResourceNotFound" in str(e):
+                break
+            if retry_count >= (_MAX_RETRY_TIMES - 1):
+                raise e
+    return containerinsights_extension_dcr_exists
+
+
+# pylint: disable=too-many-locals,too-many-branches,too-many-statements,line-too-long
 def ensure_container_insights_for_monitoring(
     cmd,
     addon,
@@ -288,7 +311,6 @@ def ensure_container_insights_for_monitoring(
     try:
         subscription_id = workspace_resource_id.split("/")[2]
         resource_group = workspace_resource_id.split("/")[4]
-        workspace_name = workspace_resource_id.split("/")[8]
     except IndexError:
         raise AzCLIError(
             "Could not locate resource group in workspace-resource-id URL."
@@ -310,7 +332,7 @@ def ensure_container_insights_for_monitoring(
             f"/subscriptions/{cluster_subscription}/resourceGroups/{cluster_resource_group_name}/"
             f"providers/Microsoft.ContainerService/managedClusters/{cluster_name}"
         )
-        dataCollectionRuleName = f"MSCI-{workspace_name}"
+        dataCollectionRuleName = f"MSCI-{cluster_name}-{cluster_region}"
         dcr_resource_id = (
             f"/subscriptions/{subscription_id}/resourceGroups/{resource_group}/"
             f"providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}"
@@ -322,12 +344,9 @@ def ensure_container_insights_for_monitoring(
             # retry the request up to two times
             for _ in range(3):
                 try:
-                    location_list_url = (
-                        f"https://management.azure.com/subscriptions/{subscription_id}/"
-                        "locations?api-version=2019-11-01"
-                    )
+                    location_list_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
+                        f"/subscriptions/{subscription_id}/locations?api-version=2019-11-01"
                     r = send_raw_request(cmd.cli_ctx, "GET", location_list_url)
-
                     # this is required to fool the static analyzer. The else statement will only run if an exception
                     # is thrown, but flake8 will complain that e is undefined if we don't also define it here.
                     error = None
@@ -346,10 +365,8 @@ def ensure_container_insights_for_monitoring(
             # check if region supports DCRs and DCR-A
             for _ in range(3):
                 try:
-                    feature_check_url = (
-                        f"https://management.azure.com/subscriptions/{subscription_id}/"
-                        "providers/Microsoft.Insights?api-version=2020-10-01"
-                    )
+                    feature_check_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
+                        f"/subscriptions/{subscription_id}/providers/Microsoft.Insights?api-version=2020-10-01"
                     r = send_raw_request(cmd.cli_ctx, "GET", feature_check_url)
                     error = None
                     break
@@ -376,16 +393,38 @@ def ensure_container_insights_for_monitoring(
                     raise ClientRequestError(
                         f"Data Collection Rule Associations are not supported for cluster region {location}"
                     )
-
-            # create the DCR
-            dcr_creation_body = json.dumps(
-                {
-                    "location": location,
-                    "properties": {
-                        "dataSources": {
-                            "extensions": [
+            dcr_url = cmd.cli_ctx.cloud.endpoints.resource_manager + f"{dcr_resource_id}?api-version=2019-11-01-preview"
+            # Create DCR if doesnt exists already with same destination
+            if not is_container_insights_extension_dcr_exists(cmd, dcr_url, workspace_resource_id):
+                # create the DCR
+                dcr_creation_body = json.dumps(
+                    {
+                        "location": location,
+                        "properties": {
+                            "dataSources": {
+                                "extensions": [
+                                    {
+                                        "name": "ContainerInsightsExtension",
+                                        "streams": [
+                                            "Microsoft-Perf",
+                                            "Microsoft-ContainerInventory",
+                                            "Microsoft-ContainerLog",
+                                            "Microsoft-ContainerLogV2",
+                                            "Microsoft-ContainerNodeInventory",
+                                            "Microsoft-KubeEvents",
+                                            "Microsoft-KubeMonAgentEvents",
+                                            "Microsoft-KubeNodeInventory",
+                                            "Microsoft-KubePodInventory",
+                                            "Microsoft-KubePVInventory",
+                                            "Microsoft-KubeServices",
+                                            "Microsoft-InsightsMetrics",
+                                        ],
+                                        "extensionName": "ContainerInsights",
+                                    }
+                                ]
+                            },
+                            "dataFlows": [
                                 {
-                                    "name": "ContainerInsightsExtension",
                                     "streams": [
                                         "Microsoft-Perf",
                                         "Microsoft-ContainerInventory",
@@ -393,7 +432,6 @@ def ensure_container_insights_for_monitoring(
                                         "Microsoft-ContainerLogV2",
                                         "Microsoft-ContainerNodeInventory",
                                         "Microsoft-KubeEvents",
-                                        "Microsoft-KubeHealth",
                                         "Microsoft-KubeMonAgentEvents",
                                         "Microsoft-KubeNodeInventory",
                                         "Microsoft-KubePodInventory",
@@ -401,53 +439,31 @@ def ensure_container_insights_for_monitoring(
                                         "Microsoft-KubeServices",
                                         "Microsoft-InsightsMetrics",
                                     ],
-                                    "extensionName": "ContainerInsights",
+                                    "destinations": ["la-workspace"],
                                 }
-                            ]
+                            ],
+                            "destinations": {
+                                "logAnalytics": [
+                                    {
+                                        "workspaceResourceId": workspace_resource_id,
+                                        "name": "la-workspace",
+                                    }
+                                ]
+                            },
                         },
-                        "dataFlows": [
-                            {
-                                "streams": [
-                                    "Microsoft-Perf",
-                                    "Microsoft-ContainerInventory",
-                                    "Microsoft-ContainerLog",
-                                    "Microsoft-ContainerLogV2",
-                                    "Microsoft-ContainerNodeInventory",
-                                    "Microsoft-KubeEvents",
-                                    "Microsoft-KubeHealth",
-                                    "Microsoft-KubeMonAgentEvents",
-                                    "Microsoft-KubeNodeInventory",
-                                    "Microsoft-KubePodInventory",
-                                    "Microsoft-KubePVInventory",
-                                    "Microsoft-KubeServices",
-                                    "Microsoft-InsightsMetrics",
-                                ],
-                                "destinations": ["la-workspace"],
-                            }
-                        ],
-                        "destinations": {
-                            "logAnalytics": [
-                                {
-                                    "workspaceResourceId": workspace_resource_id,
-                                    "name": "la-workspace",
-                                }
-                            ]
-                        },
-                    },
-                }
-            )
-            dcr_url = f"https://management.azure.com/{dcr_resource_id}?api-version=2019-11-01-preview"
-            for _ in range(3):
-                try:
-                    send_raw_request(
-                        cmd.cli_ctx, "PUT", dcr_url, body=dcr_creation_body
-                    )
-                    error = None
-                    break
-                except AzCLIError as e:
-                    error = e
-            else:
-                raise error
+                    }
+                )
+                for _ in range(3):
+                    try:
+                        send_raw_request(
+                            cmd.cli_ctx, "PUT", dcr_url, body=dcr_creation_body
+                        )
+                        error = None
+                        break
+                    except AzCLIError as e:
+                        error = e
+                else:
+                    raise error
 
         if create_dcra:
             # only create or delete the association between the DCR and cluster
@@ -460,10 +476,8 @@ def ensure_container_insights_for_monitoring(
                     },
                 }
             )
-            association_url = (
-                f"https://management.azure.com/{cluster_resource_id}/providers/Microsoft.Insights/"
-                f"dataCollectionRuleAssociations/send-to-{workspace_name}?api-version=2019-11-01-preview"
-            )
+            association_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
+                f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/ContainerInsightsExtension?api-version=2019-11-01-preview"
             for _ in range(3):
                 try:
                     send_raw_request(
@@ -478,100 +492,6 @@ def ensure_container_insights_for_monitoring(
                     error = e
             else:
                 raise error
-
-    else:
-        # legacy auth with LA workspace solution
-        unix_time_in_millis = int(
-            (
-                datetime.datetime.utcnow() -
-                datetime.datetime.utcfromtimestamp(0)
-            ).total_seconds() * 1000.0
-        )
-
-        solution_deployment_name = "ContainerInsights-{}".format(
-            unix_time_in_millis
-        )
-
-        # pylint: disable=line-too-long
-        template = {
-            "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-            "contentVersion": "1.0.0.0",
-            "parameters": {
-                "workspaceResourceId": {
-                    "type": "string",
-                    "metadata": {
-                        "description": "Azure Monitor Log Analytics Resource ID"
-                    },
-                },
-                "workspaceRegion": {
-                    "type": "string",
-                    "metadata": {
-                        "description": "Azure Monitor Log Analytics workspace region"
-                    },
-                },
-                "solutionDeploymentName": {
-                    "type": "string",
-                    "metadata": {
-                        "description": "Name of the solution deployment"
-                    },
-                },
-            },
-            "resources": [
-                {
-                    "type": "Microsoft.Resources/deployments",
-                    "name": "[parameters('solutionDeploymentName')]",
-                    "apiVersion": "2017-05-10",
-                    "subscriptionId": "[split(parameters('workspaceResourceId'),'/')[2]]",
-                    "resourceGroup": "[split(parameters('workspaceResourceId'),'/')[4]]",
-                    "properties": {
-                        "mode": "Incremental",
-                        "template": {
-                            "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-                            "contentVersion": "1.0.0.0",
-                            "parameters": {},
-                            "variables": {},
-                            "resources": [
-                                {
-                                    "apiVersion": "2015-11-01-preview",
-                                    "type": "Microsoft.OperationsManagement/solutions",
-                                    "location": "[parameters('workspaceRegion')]",
-                                    "name": "[Concat('ContainerInsights', '(', split(parameters('workspaceResourceId'),'/')[8], ')')]",
-                                    "properties": {
-                                        "workspaceResourceId": "[parameters('workspaceResourceId')]"
-                                    },
-                                    "plan": {
-                                        "name": "[Concat('ContainerInsights', '(', split(parameters('workspaceResourceId'),'/')[8], ')')]",
-                                        "product": "[Concat('OMSGallery/', 'ContainerInsights')]",
-                                        "promotionCode": "",
-                                        "publisher": "Microsoft",
-                                    },
-                                }
-                            ],
-                        },
-                        "parameters": {},
-                    },
-                }
-            ],
-        }
-
-        params = {
-            "workspaceResourceId": {"value": workspace_resource_id},
-            "workspaceRegion": {"value": location},
-            "solutionDeploymentName": {"value": solution_deployment_name},
-        }
-
-        deployment_name = "aks-monitoring-{}".format(unix_time_in_millis)
-        # publish the Container Insights solution to the Log Analytics workspace
-        return _invoke_deployment(
-            cmd,
-            resource_group,
-            deployment_name,
-            template,
-            params,
-            validate=False,
-            no_wait=False,
-            subscription_id=subscription_id,
-        )
 
 
 def _invoke_deployment(

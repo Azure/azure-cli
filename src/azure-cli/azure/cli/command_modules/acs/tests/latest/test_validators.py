@@ -351,7 +351,7 @@ class TestExtractCommaSeparatedString(unittest.TestCase):
             validators.extract_comma_separated_string(s12, extract_kv=True)
 
         s13 = "WindowsContainerRuntime=containerd,AKSHTTPCustomFeatures=Microsoft.ContainerService/CustomNodeConfigPreview"
-        t13 = validators.extract_comma_separated_string(s13, enable_strip=True, extract_kv=True, default_value={},)
+        t13 = validators.extract_comma_separated_string(s13, enable_strip=True, extract_kv=True, default_value={}, allow_appending_values_to_same_key=True)
         g13 = {"WindowsContainerRuntime": "containerd", "AKSHTTPCustomFeatures": "Microsoft.ContainerService/CustomNodeConfigPreview"}
         self.assertEqual(t13, g13)
 
@@ -359,3 +359,39 @@ class TestExtractCommaSeparatedString(unittest.TestCase):
         t14 = validators.extract_comma_separated_string(s14, extract_kv=True, allow_empty_value=True)
         g14 = {"": ""}
         self.assertEqual(t14, g14)
+
+        s15 = "WindowsContainerRuntime=containerd,AKSHTTPCustomFeatures=Microsoft.ContainerService/AKSTestFeaturePreview,AKSHTTPCustomFeatures=Microsoft.ContainerService/AKSExampleFeaturePreview"
+        t15 = validators.extract_comma_separated_string(s15, enable_strip=True, extract_kv=True, default_value={},)
+        g15 = {"WindowsContainerRuntime": "containerd", "AKSHTTPCustomFeatures": "Microsoft.ContainerService/AKSExampleFeaturePreview"}
+        self.assertEqual(t15, g15)
+
+        s16 = "WindowsContainerRuntime=containerd,AKSHTTPCustomFeatures=Microsoft.ContainerService/AKSTestFeaturePreview,AKSHTTPCustomFeatures=Microsoft.ContainerService/AKSExampleFeaturePreview"
+        t16 = validators.extract_comma_separated_string(s16, enable_strip=True, extract_kv=True, default_value={}, allow_appending_values_to_same_key=True)
+        g16 = {"WindowsContainerRuntime": "containerd", "AKSHTTPCustomFeatures": "Microsoft.ContainerService/AKSTestFeaturePreview,Microsoft.ContainerService/AKSExampleFeaturePreview"}
+        self.assertEqual(t16, g16)
+
+
+class CredentialFormatNamespace:
+    def __init__(self, credential_format):
+        self.credential_format = credential_format
+
+
+class TestCredentialFormat(unittest.TestCase):
+    def test_invalid_format(self):
+        credential_format = "foobar"
+        namespace = CredentialFormatNamespace(credential_format)
+        err = ("--format can only be azure or exec.")
+
+        with self.assertRaises(CLIError) as cm:
+            validators.validate_credential_format(namespace)
+        self.assertEqual(str(cm.exception), err)
+
+    def test_valid_format(self):
+        credential_format = "exec"
+        namespace = CredentialFormatNamespace(credential_format)
+
+        validators.validate_credential_format(namespace)
+
+
+if __name__ == "__main__":
+    unittest.main()

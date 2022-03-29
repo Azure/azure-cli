@@ -17,9 +17,9 @@ interactions:
       ParameterSetName:
       - -g --hostname --contact-info --dryrun
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.2 (macOS-10.16-x86_64-i386-64bit)
+      - AZURECLI/2.33.1 azsdk-python-azure-mgmt-web/6.1.0 Python/3.8.2 (macOS-10.16-x86_64-i386-64bit)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DomainRegistration/checkDomainAvailability?api-version=2020-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DomainRegistration/checkDomainAvailability?api-version=2021-03-01
   response:
     body:
       string: '{"name":"testuniquedomainname1.com","available":true,"domainType":"Regular"}'
@@ -31,7 +31,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 27 Oct 2021 01:38:18 GMT
+      - Thu, 24 Feb 2022 19:39:00 GMT
       expires:
       - '-1'
       pragma:
@@ -73,9 +73,9 @@ interactions:
       ParameterSetName:
       - -g --hostname --contact-info --dryrun
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.2 (macOS-10.16-x86_64-i386-64bit)
+      - AZURECLI/2.33.1 azsdk-python-azure-mgmt-web/6.1.0 Python/3.8.2 (macOS-10.16-x86_64-i386-64bit)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DomainRegistration/topLevelDomains/com/listAgreements?api-version=2020-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DomainRegistration/topLevelDomains/com/listAgreements?api-version=2021-03-01
   response:
     body:
       string: "{\"value\":[{\"agreementKey\":\"DNRA\",\"title\":\"Domain Registration
@@ -88,7 +88,7 @@ interactions:
         id=\\\"id-6de81dbb-6ddc-4107-a4fd-86de2b44f601\\\" class=\\\"vsc-legal-content-module\\\"
         >\\r\\n  <div class=\\\"lcm-title\\\">\\r\\n    <strong><span class=\\\"h5\\\">Azure
         - DOMAIN NAME REGISTRATION AGREEMENT</span></strong>\\r\\n  </div>\\r\\n    <div
-        class=\\\"lcm-subtitle\\\">\\r\\n      <strong>Last Revised: 10/7/2021</strong>\\r\\n
+        class=\\\"lcm-subtitle\\\">\\r\\n      <strong>Last Revised: 1/28/2022</strong>\\r\\n
         \   </div>\\r\\n        <strong><strong>PLEASE READ THIS AGREEMENT CAREFULLY,
         AS IT CONTAINS IMPORTANT INFORMATION REGARDING YOUR LEGAL RIGHTS AND REMEDIES.</strong></strong>\\r\\n\\r\\n
         \ <p></p>\\r\\n        <strong><strong>1. OVERVIEW</strong></strong>\\r\\n\\r\\n
@@ -275,8 +275,8 @@ interactions:
         renewal registration pricing (such that the Fee for a domain name registration
         renewal may differ from other domain names in the same TLD, e.g., renewal
         registration for one domain may be $100.00 and $33.00 for a different domain
-        name).</li>  \\r</p>\\r\\n        <strong><strong>3. FEES AND PAYMENTS</strong></strong>\\r\\n\\r\\n
-        \ <p><p><strong>(A) GENERAL TERMS, INCLUDING AUTOMATIC RENEWAL TERMS</strong></p>\\n<p>You
+        name).</li>  \\r</p>\\r\\n        <strong></ol><strong>3. FEES AND PAYMENTS</strong></strong>\\r\\n\\r\\n
+        \     <p><p><strong>(A) GENERAL TERMS, INCLUDING AUTOMATIC RENEWAL TERMS</strong></p>\\n<p>You
         agree to pay any and all prices and fees due for Services purchased or obtained
         at this Site at the time you order the Services.  Azure expressly reserves
         the right to change or modify its prices and fees at any time, and such changes
@@ -297,103 +297,105 @@ interactions:
         relating to fees, payment, refund and billing, etc. applicable to the Services
         offered under the scope of this Agreement, please refer to the \u201CFees
         and Payments\u201D section of our <a href=\\\"https://www.secureserver.net/legal/agreements/universal-terms-of-service-agreement?prog_id=510456&pl_id=510456&plid=510456\\\">Universal
-        Terms of Service</a>.   \\r</p>\\n<p><strong>(B) DOMAIN NAME RENEWAL TERMS_</strong></p>\\n<p>When
-        you register a domain name, you will have the following renewal options: </p>\\n<ol>\\n<li>\\n<p><strong>Automatic
-        Renewal.</strong> Automatic Renewal is the default setting. Domain names will
-        automatically renew, for a period equivalent to the length of your original
-        domain name registration, and payment will be taken from the Payment Method
-        you have on file with Azure, at Azure's then current rates. Thus, if you have
-        chosen to register your domain name for one (1) year, Azure will automatically
-        renew it for one (1) year. If you have chosen to register your domain name
-        for two (2) years, Azure will automatically renew it for two (2) years, and
-        so on. If you wish to change your automatic renewal term to a different period
-        from your original term,  as of 16 July 2020, you may manually renew the domain
-        registration to establish a new default automatic renewal term for the domain.</p>\\n</li>\\n<li>\\n<p><strong>Manual
-        Renewal.</strong>  If you have elected to turn off automatic renewal and cancel
-        the product (i.e., cancel the domain name registration) effective at expiration
-        of the then current term, you may nonetheless elect to manually renew the
-        domain name at anytime prior to its expiration date by logging into your <a
-        href=\\\"https://account.secureserver.net?prog_id=510456&pl_id=510456&plid=510456\\\">Account
+        Terms of Service</a>.   \\r</p>\\n</p>\\r\\n      <p><p><strong>(B) DOMAIN
+        NAME RENEWAL TERMS</strong></p>\\n<p>When you register a domain name, you
+        will have the following renewal options: </p>\\n<p><ol><li><em>Automatic Renewal.</em>
+        Automatic Renewal is the default setting. Domain names will automatically
+        renew, for a period equivalent to the length of your original domain name
+        registration, and payment will be taken from the Payment Method you have on
+        file with Azure, at Azure's then current rates. Thus, if you have chosen to
+        register your domain name for one (1) year, Azure will automatically renew
+        it for one (1) year. If you have chosen to register your domain name for two
+        (2) years, Azure will automatically renew it for two (2) years, and so on.
+        If you wish to change your automatic renewal term to a different period from
+        your original term,  as of 16 July 2020, you may manually renew the domain
+        registration to establish a new default automatic renewal term for the domain.</li></p>\\n</p>\\r\\n
+        \     <p><li><em>Manual Renewal.</em>  If you have elected to turn off automatic
+        renewal and cancel the product (i.e., cancel the domain name registration)
+        effective at expiration of the then current term, you may nonetheless elect
+        to manually renew the domain name at anytime prior to its expiration date
+        by logging into your <a href=\\\"https://account.secureserver.net?prog_id=510456&pl_id=510456&plid=510456\\\">Account
         Manager</a> and manually implementing the renewal or by calling customer service
         (should you in fact want the domain name to be renewed). If you fail to manually
         implement the renewal before the expiration date, the domain name will be
-        cancelled and you will no longer have use of that name.</p>\\n</li>\\n</ol>\\n<p>All
-        renewals will be subject to the terms of this Agreement, as it may be amended
-        from time to time, and you acknowledge and agree to be bound by the terms
-        of this Agreement (as amended) for all renewed domains.  Domain name renewals
-        will be non-refundable. In the event that we are unable to automatically renew
-        your domain name for the renewal option selected for any reason, we may automatically
-        renew your domain name for a period less than your original registration period
-        to the extent necessary for the transaction to succeed. If for any reason
-        Azure is not able to take the payment from the Payment Method you have on
-        file, and you fail to respond to our notices, your domain name registration
-        will expire. It is your responsibility to keep your Payment Method information
-        current, which includes the expiration date if you are using a credit card.
-        \ \\r</p>\\n<p>For certain ccTLDs (.am, .at, .be, .br, .ca, .cn, .com.cn,
-        .net.cn, .org.cn, .de, .eu, .fm, .fr, .gs, .it, .jp, .ms, .nu, .nz, .co.nz,
-        .net.nz, .org.nz, .tc, .tk, .tw, .com.tw, .org.tw, .idv.tw, .uk, and .vg),
-        renewal billing will occur on the first day of the month prior to the month
-        of expiration.</p>\\n<p>For certain ccTLDs (.am, .at, .be, .ca, .cn, .com.cn,
-        .net.cn, .org.cn, .de, .eu, .fm, .fr, .gs, .it, .jp, .ms, .nu, .nz, .co.nz,
-        .net.nz, .org.nz, .tc, .tk, .tw, .com.tw, .org.tw, .idv.tw, .uk, and .vg),
-        renewal will occur, or must occur manually if the product was previously cancelled,
-        no later than the 20th of the month prior to the expiration date, or your
-        domain name will be placed in non-renewal status. For some ccTLDs (.es) renewal
-        must be processed no later than seven days before the expiration date, or
-        your domain name will be placed in non-renewal status.  When the domain name
-        is in non-renewal status, you can renew the domain name only by calling Azure
-        and requesting that the domain name be renewed. You cannot renew the domain
-        name through your <a href=\\\"https://account.secureserver.net?prog_id=510456&pl_id=510456&plid=510456\\\">Account
+        cancelled and you will no longer have use of that name.</li></ol> </p>\\r\\n
+        \     <p>All renewals will be subject to the terms of this Agreement, as it
+        may be amended from time to time, and you acknowledge and agree to be bound
+        by the terms of this Agreement (as amended) for all renewed domains.  Domain
+        name renewals will be non-refundable. In the event that we are unable to automatically
+        renew your domain name for the renewal option selected for any reason, we
+        may automatically renew your domain name for a period less than your original
+        registration period to the extent necessary for the transaction to succeed.
+        If for any reason Azure is not able to take the payment from the Payment Method
+        you have on file, and you fail to respond to our notices, your domain name
+        registration will expire. It is your responsibility to keep your Payment Method
+        information current, which includes the expiration date if you are using a
+        credit card.  \\r</p>\\r\\n      <p><p>For certain ccTLDs (.am, .at, .be,
+        .br, .ca, .cn, .com.cn, .net.cn, .org.cn, .de, .eu, .fm, .fr, .gs, .it, .jp,
+        .ms, .nu, .nz, .co.nz, .net.nz, .org.nz, .tc, .tk, .tw, .com.tw, .org.tw,
+        .idv.tw, .uk, and .vg), renewal billing will occur on the first day of the
+        month prior to the month of expiration.</p>\\n<p>For certain ccTLDs (.am,
+        .at, .be, .ca, .cn, .com.cn, .net.cn, .org.cn, .de, .eu, .fm, .fr, .gs, .it,
+        .jp, .ms, .nu, .nz, .co.nz, .net.nz, .org.nz, .tc, .tk, .tw, .com.tw, .org.tw,
+        .idv.tw, .uk, and .vg), renewal will occur, or must occur manually if the
+        product was previously cancelled, no later than the 20th of the month prior
+        to the expiration date, or your domain name will be placed in non-renewal
+        status. For some ccTLDs (.es) renewal must be processed no later than seven
+        days before the expiration date, or your domain name will be placed in non-renewal
+        status.  When the domain name is in non-renewal status, you can renew the
+        domain name only by calling Azure and requesting that the domain name be renewed.
+        You cannot renew the domain name through your <a href=\\\"https://account.secureserver.net?prog_id=510456&pl_id=510456&plid=510456\\\">Account
         Manager</a>. If you fail to manually implement the renewal of any cancelled
         product before the expiration date, the domain name will be cancelled and
-        you will no longer have use of that name.  \\r</p>\\n<p>You agree that Azure
-        will not be responsible for cancelled domain names that you fail to renew
-        in the timeframes indicated in this Agreement. In any case, if you fail to
-        renew your domain name in a timely fashion, additional charges may apply.
-        If you signed up for privacy services, protected registration, or any other
-        similar service, with your domain name registration, these services will automatically
-        be renewed when your domain name registration is up for renewal, and you will
-        incur the applicable additional renewal fee unless you cancel in advance.
-        </p>\\n<p>If you fail to renew your domain name in the timeframes indicated
-        in this Agreement, you agree that Azure may, in its sole discretion, renew
-        your expired domain name on your behalf. If Azure decides to renew your expired
-        domain name on your behalf, you will have a Renewal Grace Period during which
-        you must reimburse Azure for the renewal and keep your domain name. The Renewal
-        Grace Period is currently twelve (12) days but subject to change under the
-        terms of this Agreement. </p>\\n<p>For certain ccTLDs (.am, .at, .be, .cn,
-        .com.cn, .net.cn, .org.cn, .de, .eu, .fm, .fr, .gs, .it, .jp, .ms, .nu, .nz,
-        .co.nz, .net.nz, .org.nz, .tc, .tk, .tw, .com.tw, .org.tw, .idv.tw, .uk, and
-        .vg) there is no Renewal Grace Period after the expiration date of the domain
-        name. If you do not reimburse Azure for the renewal during the Renewal Grace
-        Period your domain name will be placed on Hold and flagged for deletion after
-        which you may have up to a 30-day redemption period to redeem your domain
-        name, provided that your domain name is not subject to an expired domain name
-        auction bid and you pay Azure a Redemption fee. </p>\\n<p>The Redemption fee
-        is currently $80.00 USD and is subject to change under the terms of this Agreement.
-        If you do not redeem your domain name prior to the end of the 30-day redemption
-        period Azure may, in its sole discretion, delete your domain name or transfer
-        it to another registrant on your behalf.  During the redemption period your
-        domain name may be parked.</p>\\n<p>If your domain name is deleted, the Registry
-        also provides a 30-day Redemption Grace Period during which you may pay Azure
-        a redemption fee and redeem your domain name. The redemption fee is currently
-        $80.00 USD and is subject to change under the terms of this Agreement. If
-        you do not redeem your domain name prior to the end of the Registry's Redemption
-        Grace Period the Registry will release your name and it will become available
-        for registration on a first-come-first-served basis.</p>\\n<p>Renewal Grace
-        Periods and Redemption Grace Periods vary for different ccTLDs. Please refer
-        to the specific terms for the applicable TLD. In the event there is a conflict
-        between the provisions of this paragraph and the ccTLD terms, the ccTLD terms
-        shall control.</p>\\n<p>Our registration expiration notification policy and
-        associated fees are described <a href=\\\"https://www.secureserver.net/help/expired-registration-recovery-policy-errp-compliance-statement-8803?prog_id=510456&pl_id=510456&plid=510456\\\">here</a>.
-        \ \\r</p>\\n<p><strong>(C) FREE PRODUCT TERMS</strong></p>\\n<p>In the event
-        you are provided with free products with the registration of a domain name,
-        you acknowledge and agree that such free products will only be available with
-        a valid purchase and may be terminated in the event the domain name is deleted
-        or cancelled.  For free domain names, you acknowledge and agree that you may
-        not change the account associated with such free domain for the first five
-        (5) days after registration.  In the event a free domain name is offered with
-        the registration of another domain and if the paid domain name registered
-        fails, then we may, in its sole discretion, either delete the registration
+        you will no longer have use of that name.  \\r</p>\\n</p>\\r\\n      <p>You
+        agree that Azure will not be responsible for cancelled domain names that you
+        fail to renew in the timeframes indicated in this Agreement. In any case,
+        if you fail to renew your domain name in a timely fashion, additional charges
+        may apply. If you signed up for privacy services, protected registration,
+        or any other similar service, with your domain name registration, these services
+        will automatically be renewed when your domain name registration is up for
+        renewal, and you will incur the applicable additional renewal fee unless you
+        cancel in advance. </p>\\r\\n      <p><p>If you fail to renew your domain
+        name in the timeframes indicated in this Agreement, you agree that Azure may,
+        in its sole discretion, renew your expired domain name on your behalf. If
+        Azure decides to renew your expired domain name on your behalf, you will have
+        a Renewal Grace Period during which you must reimburse Azure for the renewal
+        and keep your domain name. The Renewal Grace Period is currently twelve (12)
+        days but subject to change under the terms of this Agreement. </p>\\n<p>For
+        certain ccTLDs (.am, .at, .be, .cn, .com.cn, .net.cn, .org.cn, .de, .eu, .fm,
+        .fr, .gs, .it, .jp, .ms, .nu, .nz, .co.nz, .net.nz, .org.nz, .tc, .tk, .tw,
+        .com.tw, .org.tw, .idv.tw, .uk, and .vg) there is no Renewal Grace Period
+        after the expiration date of the domain name. If you do not reimburse Azure
+        for the renewal during the Renewal Grace Period your domain name will be placed
+        on Hold and flagged for deletion after which you may have up to a 30-day redemption
+        period to redeem your domain name, provided that your domain name is not subject
+        to an expired domain name auction bid and you pay Azure a Redemption fee.
+        </p>\\n<p>The Redemption fee is displayed at checkout and is subject to change
+        under the terms of this Agreement. If you do not redeem your domain name prior
+        to the end of the 30-day redemption period Azure may, in its sole discretion,
+        delete your domain name or transfer it to another registrant on your behalf.
+        \ During the redemption period your domain name may be parked.</p>\\n</p>\\r\\n
+        \     <p><p>If your domain name is deleted, the Registry also provides a 30-day
+        Redemption Grace Period during which you may pay Azure a redemption fee and
+        redeem your domain name. The redemption fee is displayed at checkout and is
+        subject to change under the terms of this Agreement. If you do not redeem
+        your domain name prior to the end of the Registry's Redemption Grace Period
+        the Registry will release your name and it will become available for registration
+        on a first-come-first-served basis.</p>\\n<p>Renewal Grace Periods and Redemption
+        Grace Periods vary for different ccTLDs. Please refer to the specific terms
+        for the applicable TLD. In the event there is a conflict between the provisions
+        of this paragraph and the ccTLD terms, the ccTLD terms shall control.</p>\\n<p>Our
+        registration expiration notification policy and associated fees are described
+        <a href=\\\"https://www.secureserver.net/help/expired-registration-recovery-policy-errp-compliance-statement-8803?prog_id=510456&pl_id=510456&plid=510456\\\">here</a>.
+        \ </p>\\n</p>\\r\\n      <p><p><strong>(C) FREE PRODUCT TERMS</strong></p>\\n<p>In
+        the event you are provided with free products with the registration of a domain
+        name, you acknowledge and agree that such free products will only be available
+        with a valid purchase and may be terminated in the event the domain name is
+        deleted or cancelled.  For free domain names, you acknowledge and agree that
+        you may not change the account associated with such free domain for the first
+        five (5) days after registration.  In the event a free domain name is offered
+        with the registration of another domain and if the paid domain name registered
+        fails, then we may, in our sole discretion, either delete the registration
         of the free domain or refund the difference between the amount paid and the
         value of the free domain.  Failed registrations associated with promotional
         offers may result in the deletion of the free or discounted item or an adjustment
@@ -1659,11 +1661,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '124108'
+      - '124198'
       content-type:
       - application/json
       date:
-      - Wed, 27 Oct 2021 01:38:19 GMT
+      - Thu, 24 Feb 2022 19:39:01 GMT
       expires:
       - '-1'
       pragma:

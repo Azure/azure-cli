@@ -410,7 +410,15 @@ class JsonCTemplatePolicy(SansIOHTTPPolicy):
 
     def on_request(self, request):
         http_request = request.http_request
-        if (getattr(http_request, 'data', {}) or {}).get('properties', {}).get('template'):
+        request_data = getattr(http_request, 'data', {}) or {}
+
+        # In the case of retry, because the first request has been processed and
+        # converted the type of "request.http_request.data" from string to bytes,
+        # so there is no need to process request object again during retry
+        if isinstance(request_data, bytes):
+            return
+
+        if request_data.get('properties', {}).get('template'):
             template = http_request.data["properties"]["template"]
             if not isinstance(template, JsonCTemplate):
                 raise ValueError()
@@ -2844,6 +2852,24 @@ def _is_management_group_scope(scope):
     return scope is not None and scope.lower().startswith("/providers/microsoft.management/managementgroups")
 
 
+def cli_managementgroups_get_tenant_backfill_status(
+        cmd,
+        client):
+    return client.tenant_backfill_status()
+
+
+def cli_managementgroups_start_tenant_backfill(
+        cmd,
+        client):
+    return client.start_tenant_backfill()
+
+
+def cli_managementgroups_get_name_availability(cmd, client, group_name):
+    from azure.mgmt.managementgroups.models import CheckNameAvailabilityRequest
+    checkNameAvailabilityRequest = CheckNameAvailabilityRequest(name=group_name)
+    return client.check_name_availability(checkNameAvailabilityRequest)
+
+
 def cli_managementgroups_group_list(cmd, client, no_register=False):
     if not no_register:
         _register_rp(cmd.cli_ctx)
@@ -2882,22 +2908,22 @@ def cli_managementgroups_group_create(
         name=group_name,
         display_name=display_name,
         details=create_mgmt_grp_details)
-    return client.create_or_update(group_name, create_mgmt_grp_request)
+    return client.begin_create_or_update(group_name, create_mgmt_grp_request)
 
 
 def cli_managementgroups_group_update_custom_func(
         instance,
         display_name=None,
         parent_id=None):
-    parent_id = _get_parent_id_from_parent(parent_id)
+    parent_group_id = _get_parent_id_from_parent(parent_id)
     instance.display_name = display_name
-    instance.parent_id = parent_id
+    instance.parent_group_id = parent_group_id
     return instance
 
 
 def cli_managementgroups_group_update_get():
     from azure.mgmt.managementgroups.models import PatchManagementGroupRequest
-    update_parameters = PatchManagementGroupRequest(display_name=None, parent_id=None)
+    update_parameters = PatchManagementGroupRequest(display_name=None, parent_group_id=None)
     return update_parameters
 
 
@@ -2909,7 +2935,7 @@ def cli_managementgroups_group_update_set(
 def cli_managementgroups_group_delete(cmd, client, group_name, no_register=False):
     if not no_register:
         _register_rp(cmd.cli_ctx)
-    return client.delete(group_name)
+    return client.begin_delete(group_name)
 
 
 def cli_managementgroups_subscription_add(
@@ -2919,11 +2945,78 @@ def cli_managementgroups_subscription_add(
     return client.create(group_name, subscription_id)
 
 
+def cli_managementgroups_subscription_show(
+        cmd,
+        client,
+        group_name,
+        subscription):
+    subscription_id = _get_subscription_id_from_subscription(cmd.cli_ctx, subscription)
+    return client.get_subscription(group_name, subscription_id)
+
+
+def cli_managementgroups_subscription_show_sub_under_mg(
+        cmd,
+        client,
+        group_name):
+    return client.get_subscriptions_under_management_group(group_name)
+
+
 def cli_managementgroups_subscription_remove(
         cmd, client, group_name, subscription):
     subscription_id = _get_subscription_id_from_subscription(
         cmd.cli_ctx, subscription)
     return client.delete(group_name, subscription_id)
+
+
+def cli_managementgroups_entities_list(
+        cmd,
+        client):
+    return client.list()
+
+
+def cli_hierarchy_settings_list(
+        cmd,
+        client,
+        group_name):
+    return client.list(group_name)
+
+
+def cli_hierarchy_settings_create(
+        cmd,
+        client,
+        group_name,
+        require_authorization_for_group_creation=None,
+        default_management_group=None):
+    from azure.mgmt.managementgroups.models import CreateOrUpdateSettingsRequest
+    create_or_update_parameters = CreateOrUpdateSettingsRequest(require_authorization_for_group_creation=require_authorization_for_group_creation, default_management_group=default_management_group)
+    return client.create_or_update(group_name, create_or_update_parameters)
+
+
+def cli_hierarchy_settings_delete(
+        cmd,
+        client,
+        group_name):
+    return client.delete(group_name)
+
+
+def cli_hierarchysettings_group_update_custom_func(
+        instance,
+        require_authorization_for_group_creation=None,
+        default_management_group=None):
+    instance.require_authorization_for_group_creation = require_authorization_for_group_creation
+    instance.default_management_group = default_management_group
+    return instance
+
+
+def cli_hierarchysettings_group_update_get():
+    from azure.mgmt.managementgroups.models import CreateOrUpdateSettingsRequest
+    update_parameters = CreateOrUpdateSettingsRequest(require_authorization_for_group_creation=None, default_management_group=None)
+    return update_parameters
+
+
+def cli_hierarchysettings_group_update_set(
+        cmd, client, group_name, parameters=None):
+    return client.update(group_name, parameters)
 
 
 # region Locks
