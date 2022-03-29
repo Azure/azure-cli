@@ -48,16 +48,16 @@ steps:
       module="${{ parameters.module }}"
       if [[ -n $module ]]; then
         echo "Running test for module '$module'"
-        azdev test --no-exitfirst --verbose $module -a "--durations=0"
+        azdev test --no-exitfirst --verbose --series $module -a "--durations=0"
         exit 0
       fi
 
       if [[ "$(Build.Reason)" == "PullRequest" && "${{ parameters.fullTest }}" == 'False' ]]; then
         echo "Running incremental test"
-        azdev test --no-exitfirst --repo=./ --src=HEAD --tgt=origin/$(System.PullRequest.TargetBranch) --cli-ci --profile ${{ parameters.profile }} --verbose -a "--durations=0"
+        azdev test --no-exitfirst --repo=./ --src=HEAD --tgt=origin/$(System.PullRequest.TargetBranch) --cli-ci --profile ${{ parameters.profile }} --verbose --series -a "--durations=0"
       else
         echo "Running full test"
-        azdev test --no-exitfirst --profile ${{ parameters.profile }} --verbose -a "--durations=0"
+        azdev test --no-exitfirst --profile ${{ parameters.profile }} --verbose --series -a "--durations=0"
       fi
     displayName: "azdev test"
     env:
