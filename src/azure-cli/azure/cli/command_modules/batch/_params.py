@@ -108,7 +108,7 @@ def load_arguments(self, _):
             c.argument('package_file', type=file_type, help='The path of the application package in zip format', completer=FilesCompleter())
             c.argument('application_name', help="The name of the application.")
             c.argument('version_name', help="The version name of the application.")
-            c.argument('format', help="The format of the application package binary file.")
+            c.argument('f_ormat', options_list=('--format',), help="The format of the application package binary file.")
 
     with self.argument_context('batch location quotas show') as c:
         c.argument('location_name', get_location_type(self.cli_ctx), help='The region for which to display the Batch service quotas.')
