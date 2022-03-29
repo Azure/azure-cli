@@ -4167,14 +4167,14 @@ def _ensure_cluster_identity_permission_on_kubelet_identity(cmd, cluster_identit
 
 
 def aks_nodepool_snapshot_create(cmd,    # pylint: disable=too-many-locals,too-many-statements,too-many-branches
-                        client,
-                        resource_group_name,
-                        snapshot_name,
-                        nodepool_id,
-                        location=None,
-                        tags=None,
-                        aks_custom_headers=None,
-                        no_wait=False):
+                                 client,
+                                 resource_group_name,
+                                 snapshot_name,
+                                 nodepool_id,
+                                 location=None,
+                                 tags=None,
+                                 aks_custom_headers=None,
+                                 no_wait=False):
 
     rg_location = get_rg_location(cmd.cli_ctx, resource_group_name)
     if location is None:
@@ -4213,11 +4213,11 @@ def aks_nodepool_snapshot_show(cmd, client, resource_group_name, snapshot_name):
 
 
 def aks_nodepool_snapshot_delete(cmd,    # pylint: disable=unused-argument
-                        client,
-                        resource_group_name,
-                        snapshot_name,
-                        no_wait=False,
-                        yes=False):
+                                 client,
+                                 resource_group_name,
+                                 snapshot_name,
+                                 no_wait=False,
+                                 yes=False):
 
     msg = 'This will delete the snapshot "{}" in resource group "{}", Are you sure?'.format(snapshot_name, resource_group_name)
     if not yes and not prompt_y_n(msg, default="n"):
