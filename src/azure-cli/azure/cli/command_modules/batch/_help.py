@@ -232,7 +232,7 @@ short-summary: Manage Batch account private Link Resources.
 
 helps['batch private-link-resource show'] = """
 type: command
-short-summary: Gets information about the specified private link resource.
+short-summary: Get information about the specified private link resource.
 """
 
 helps['batch private-link-resource list'] = """
