@@ -157,7 +157,7 @@ class CdnEndpointScenarioTest(CdnScenarioMixin, ScenarioTest):
         checks = [JMESPathCheck('name', endpoint_name),
                   JMESPathCheck('origins[0].hostName', origin),
                   JMESPathCheck('origins[0].privateLinkResourceId', private_link_id),
-                  JMESPathCheck('origins[0].privateLinkLocation', private_link_location),
+                  JMESPathCheck('origins[0].privateLinkLocation', private_link_location, False),
                   JMESPathCheck('origins[0].privateLinkApprovalMessage', private_link_message)]
         self.endpoint_create_cmd(resource_group,
                                  endpoint_name,
@@ -172,7 +172,7 @@ class CdnEndpointScenarioTest(CdnScenarioMixin, ScenarioTest):
                        JMESPathCheck('@[0].name', endpoint_name),
                        JMESPathCheck('@[0].origins[0].hostName', origin),
                        JMESPathCheck('@[0].origins[0].privateLinkResourceId', private_link_id),
-                       JMESPathCheck('@[0].origins[0].privateLinkLocation', private_link_location),
+                       JMESPathCheck('@[0].origins[0].privateLinkLocation', private_link_location, False),
                        JMESPathCheck('@[0].origins[0].privateLinkApprovalMessage', private_link_message)]
         self.endpoint_list_cmd(resource_group, profile_name, checks=list_checks)
 

@@ -19,9 +19,7 @@ from ._format import (
     outbound_firewall_rule_table_format,
     server_table_format,
     usage_table_format,
-    LongRunningOperationResultTransform,
-    mi_transform,
-    mi_list_transform
+    LongRunningOperationResultTransform
 )
 
 from ._util import (
@@ -37,7 +35,6 @@ from ._util import (
     get_sql_database_sensitivity_labels_operations,
     get_sql_database_operations_operations,
     get_sql_database_threat_detection_policies_operations,
-    get_sql_database_transparent_data_encryption_activities_operations,
     get_sql_database_transparent_data_encryptions_operations,
     get_sql_database_usages_operations,
     get_sql_elastic_pools_operations,
@@ -216,16 +213,6 @@ def load_command_table(self, _):
 
         g.custom_command('set', 'transparent_data_encryptions_set')
         g.custom_show_command('show', 'transparent_data_encryptions_get')
-
-    transparent_data_encryption_activities_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.sql.operations#TransparentDataEncryptionActivitiesOperations.{}',
-        client_factory=get_sql_database_transparent_data_encryption_activities_operations)
-
-    with self.command_group('sql db tde',
-                            transparent_data_encryption_activities_operations,
-                            client_factory=get_sql_database_transparent_data_encryption_activities_operations) as g:
-
-        g.custom_command('list-activity', 'tde_list_by_configuration')
 
     replication_links_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#ReplicationLinksOperations.{}',
@@ -706,14 +693,13 @@ def load_command_table(self, _):
                             managed_instances_operations,
                             client_factory=get_sql_managed_instances_operations) as g:
 
-        g.custom_command('create', 'managed_instance_create', transform=mi_transform, supports_no_wait=True)
-        g.command('delete', 'begin_delete', transform=mi_transform, confirmation=True, supports_no_wait=True)
-        g.custom_show_command('show', 'managed_instance_get', transform=mi_transform)
-        g.custom_command('list', 'managed_instance_list', transform=mi_list_transform)
+        g.custom_command('create', 'managed_instance_create', supports_no_wait=True)
+        g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
+        g.custom_show_command('show', 'managed_instance_get')
+        g.custom_command('list', 'managed_instance_list')
         g.generic_update_command('update',
                                  setter_name='begin_create_or_update',
                                  custom_func_name='managed_instance_update',
-                                 transform=mi_transform,
                                  supports_no_wait=True)
         g.command('failover', 'begin_failover', supports_no_wait=True)
 

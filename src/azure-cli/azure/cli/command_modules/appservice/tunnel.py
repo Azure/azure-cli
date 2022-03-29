@@ -18,6 +18,7 @@ from threading import Thread
 import websocket
 from websocket import create_connection, WebSocket
 
+from azure.cli.core.util import should_disable_connection_verify
 from .utils import get_pool_manager
 from knack.util import CLIError
 from knack.log import get_logger
@@ -148,11 +149,12 @@ class TunnelServer:
             else:
                 logger.info('Websocket tracing disabled, use --verbose flag to enable')
                 websocket.enableTrace(False)
+            verify_mode = ssl.CERT_NONE if should_disable_connection_verify() else ssl.CERT_REQUIRED
             self.ws = create_connection(host,
                                         sockopt=((socket.IPPROTO_TCP, socket.TCP_NODELAY, 1),),
                                         class_=TunnelWebSocket,
                                         header=basic_auth_header,
-                                        sslopt={'cert_reqs': ssl.CERT_NONE},
+                                        sslopt={'cert_reqs': verify_mode},
                                         timeout=60 * 60,
                                         enable_multithread=True)
             logger.info('Websocket, connected status: %s', self.ws.connected)

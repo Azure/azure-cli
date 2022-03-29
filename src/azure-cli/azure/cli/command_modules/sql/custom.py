@@ -4105,7 +4105,7 @@ def ledger_digest_uploads_enable(
 
     kwargs['digest_storage_endpoint'] = endpoint
 
-    return client.create_or_update(
+    return client.begin_create_or_update(
         resource_group_name=resource_group_name,
         server_name=server_name,
         database_name=database_name,
@@ -4122,7 +4122,7 @@ def ledger_digest_uploads_disable(
     Disables ledger storage target
     '''
 
-    return client.disable(
+    return client.begin_disable(
         resource_group_name=resource_group_name,
         server_name=server_name,
         database_name=database_name,
@@ -4264,7 +4264,7 @@ def managed_instance_create(
     kwargs['maintenance_configuration_id'] = _complete_maintenance_configuration_id(cmd.cli_ctx, kwargs['maintenance_configuration_id'])
 
     if not kwargs['yes'] and kwargs['location'].lower() in ['southeastasia', 'brazilsouth', 'eastasia']:
-        if kwargs['storage_account_type'] == 'GRS':
+        if kwargs['requested_backup_storage_redundancy'] == 'Geo':
             confirmation = prompt_y_n("""Selected value for backup storage redundancy is geo-redundant storage.
              Note that database backups will be geo-replicated to the paired region.
              To learn more about Azure Paired Regions visit https://aka.ms/azure-ragrs-regions.
@@ -4272,7 +4272,7 @@ def managed_instance_create(
             if not confirmation:
                 return
 
-        if not kwargs['storage_account_type']:
+        if not kwargs['requested_backup_storage_redundancy']:
             confirmation = prompt_y_n("""You have not specified the value for backup storage redundancy
             which will default to geo-redundant storage. Note that database backups will be geo-replicated
             to the paired region. To learn more about Azure Paired Regions visit https://aka.ms/azure-ragrs-regions.
@@ -4360,9 +4360,11 @@ def managed_instance_update(
         maintenance_configuration_id=None,
         primary_user_assigned_identity_id=None,
         key_id=None,
+        requested_backup_storage_redundancy=None,
         identity_type=None,
         user_assigned_identity_id=None,
-        virtual_network_subnet_id=None):
+        virtual_network_subnet_id=None,
+        yes=None):
     '''
     Updates a managed instance. Custom update function to apply parameters to instance.
     '''
@@ -4397,6 +4399,18 @@ def managed_instance_update(
         cmd.cli_ctx,
         instance.location,
         instance.sku)
+
+    if not yes and _should_show_backup_storage_redundancy_warnings(instance.location) and requested_backup_storage_redundancy == 'Geo':
+        confirmation = prompt_y_n("""Selected value for backup storage redundancy is geo-redundant storage.
+             Note that database backups will be geo-replicated to the paired region.
+             To learn more about Azure Paired Regions visit https://aka.ms/azure-ragrs-regions.
+             Do you want to proceed?""")
+        if not confirmation:
+            return
+
+    if requested_backup_storage_redundancy is not None:
+        instance.requested_backup_storage_redundancy = requested_backup_storage_redundancy
+        instance.zone_redundant = None
 
     if public_data_endpoint_enabled is not None:
         instance.public_data_endpoint_enabled = public_data_endpoint_enabled
@@ -5455,7 +5469,7 @@ def update_conn_policy(
     '''
     Updates a connectin policy
     '''
-    return client.create_or_update(
+    return client.begin_create_or_update(
         resource_group_name=resource_group_name,
         server_name=server_name,
         connection_policy_name=ConnectionPolicyName.DEFAULT,
@@ -5478,13 +5492,13 @@ def transparent_data_encryptions_set(
     '''
     Sets a Transparent Data Encryption
     '''
-    kwargs['status'] = status
+    kwargs['state'] = status
 
     return client.create_or_update(
         resource_group_name=resource_group_name,
         server_name=server_name,
         database_name=database_name,
-        transparent_data_encryption_name=TransparentDataEncryptionName.CURRENT,
+        tde_name=TransparentDataEncryptionName.CURRENT,
         parameters=kwargs)
 
 
@@ -5501,23 +5515,8 @@ def transparent_data_encryptions_get(
         resource_group_name=resource_group_name,
         server_name=server_name,
         database_name=database_name,
-        transparent_data_encryption_name=TransparentDataEncryptionName.CURRENT)
+        tde_name=TransparentDataEncryptionName.CURRENT)
 
-
-def tde_list_by_configuration(
-        client,
-        resource_group_name,
-        server_name,
-        database_name):
-    '''
-    Lists Transparent Data Encryption
-    '''
-
-    return client.list_by_configuration(
-        resource_group_name=resource_group_name,
-        server_name=server_name,
-        database_name=database_name,
-        transparent_data_encryption_name=TransparentDataEncryptionName.CURRENT)
 
 ###############################################
 #              sql server vnet-rule           #
