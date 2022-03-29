@@ -68,12 +68,6 @@ parameters:
     short-summary: This specifies the group DN, which overrides the base DN for group lookups
   - name: --group-filter
     short-summary: This specifies the custom LDAP search filter to be used when looking up group membership from LDAP server
-  - name: --user-dn
-    short-summary: This specifies the user DN, which overrides the base DN for user lookups.
-  - name: group-dn
-    short-summary: This specifies the group DN, which overrides the base DN for group lookups.
-  - name: group-filter
-    short-summary: This specifies the custom LDAP search filter to be used when looking up group membership from LDAP server.
 examples:
   - name: Add an active directory to the account
     text: >
@@ -1388,3 +1382,99 @@ examples:
     text: >
         az netappfiles subvolume metadata show -g mygroup --account-name myaccountname  --pool-name mypoolname --volume-name myvolumename --subvolume-name mysubvolumename
 """
+
+helps['netappfiles volume-group'] = """
+type: group
+short-summary: Manage Azure NetApp Files (ANF) Volume Group Resources.
+"""
+
+helps['netappfiles volume-group show'] = """
+type: command
+short-summary: Get the specified ANF Volume Group.
+parameters:
+  - name: --account-name -a
+    short-summary: The name of the ANF account
+  - name: --volume-group-name --name -n
+    short-summary: The name of the ANF volume group
+examples:
+  - name: Get an ANF volume group
+    text: >
+        az netappfiles volume-group show -g mygroup --account-name myaccountname --pool-name mypoolname --volume-group-name myvolumegroupname
+"""
+
+helps['netappfiles volume-group list'] = """
+type: command
+short-summary: Get a list of ANF Volume Groups.
+parameters:
+  - name: --account-name -a
+    short-summary: The name of the ANF account
+examples:
+  - name: Get a list of ANF volume groups
+    text: >
+        az netappfiles volume-group list -g mygroup --account-name myaccountname
+"""
+
+helps['netappfiles volume-group create'] = """
+type: command
+short-summary: Create ANF Volume Groups.
+parameters:
+  - name: --account-name -a
+    short-summary: The name of the ANF account
+  - name: --pool-name -p
+    short-summary: The name of the ANF pool
+  - name: --volume-group-name --name -n
+    short-summary: The name of the ANF volume group
+  - name: --vnet
+    short-summary: The ARM Id or name of the vnet for the volumes
+  - name: --ppg
+    short-summary: The resource id of the Proximity Placement Group for volume placement
+  - name: --sap-sid
+    short-summary: The SAP system ID. Three characters long alpha-numeric string
+  - name: --subnet
+    short-summary: The delegated Subnet name
+  - name: --location -l
+    short-summary: ANF Location. If the resource group location is different than ANF location, ANF location needs to be specified
+  - name: --tags
+    short-summary: Space-separated tags in `key=value` format
+  - name: --global-placement-rules --gp-rules --rules
+    short-summary:  Application specific identifier of deployment rules for the volume group. Space-separated string in `key=value` format
+  - name: --memory
+    short-summary: SAP HANA memory in GiB (max supported 12000 GiB), used to auto compute storage size and throughput. Defaults to 100
+  - name: --add-snapshot-capacity
+    short-summary: Additional memory to store snapshots, must be specified as % of RAM (range 0-200). This is used to auto compute storage size. Daufault is 50
+  - name: --start-host-id
+    short-summary: Starting SAP HANA Host ID. Host ID 1 indicates Master Host. Shared, Data Backup and Log Backup volumes are only provisioned for Master Host i.e. HostID is 1
+  - name: --number-of-hots
+    short-summary: Total Number of SAP HANA host in this deployment (currently at max 3 nodes can be configured). Default is 1
+  - name: --prefix
+    short-summary: All volume names will be prefixed with the given text. The default values for prefix text depends on system role. For PRIMARY it will be `""` and HA it will be `"HA-"`.
+  - name: --system-role
+    short-summary: Type of role for the storage account. Primary indicates first of a SAP HANA Replication (HSR) setup or No HSR. High Availability (HA) specifies local scenario. Default is PRIMARY
+  - name: --data-size
+    short-summary: Specify capacity (in GiB) for data volumes. If not provided size will automatically be calculated
+  - name: --data-throughput
+    short-summary: Specify throughput in MiB/s for data volumes. If not provided size will automatically be calculated
+  - name: --log-size
+    short-summary: Specify capacity (in GiB) for log volumes. If not provided size will automatically be calculated
+  - name: --log-throughput
+    short-summary: Specify throughput in MiB/s for log volumes. If not provided size will automatically be calculated
+  - name: --shared-size
+    short-summary: Specify capacity (in GiB) for shared volumes. If not provided size will automatically be calculated
+  - name: --shared-throughput
+    short-summary: Specify throughput in MiB/s for shared volumes. If not provided size will automatically be calculated
+  - name: --data-backup-size
+    short-summary: Specify capacity (in GiB) for data backup volumes. If not provided size will automatically be calculated
+  - name: --data-backup-throughput
+    short-summary: Specify throughput in MiB/s for data backup volumes. If not provided size will automatically be calculated
+  - name: --log-backup-size
+    short-summary: Specify capacity (in GiB) for log backup volumes. If not provided size will automatically be calculated
+  - name: --log-backup-throughput
+    short-summary: Specify throughput in MiB/s for log backup volumes. If not provided size will automatically be calculated
+  - name: --backup-nfsv3
+    short-summary: Indicates if NFS Protocol version 3 is preferred for data backup and log backup volumes. Default is false 
+examples:
+  - name: Get a list of ANF volume groups
+    text: >
+        az netappfiles volume-group create -g mygroup --account-name myaccountname
+"""
+

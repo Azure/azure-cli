@@ -62,6 +62,7 @@ def load_arguments(self, _):
     load_snapshot_arguments(self, account_name_type, pool_name_type, volume_name_type)
     load_vault_arguments(self, account_name_type)
     load_subvolume_arguments(self, account_name_type, pool_name_type, volume_name_type)
+    load_volume_groups_arguments(self, account_name_type, pool_name_type)
 
 
 def load_pool_arguments(self, account_name_type, pool_name_type):
@@ -180,3 +181,17 @@ def load_subvolume_arguments(self, account_name_type, pool_name_type, volume_nam
         c.argument('pool_name', id_part=None)
         c.argument('volume_name', id_part=None)
         c.argument('subvolume_name', id_part=None)
+
+
+def load_volume_groups_arguments(self, account_name_type, pool_name_type):
+    with self.argument_context('netappfiles volume-group') as c:
+        c.argument('account_name', account_name_type)
+        c.argument('pool_name', pool_name_type, id_part=None)
+        c.argument('volume_group_name',  options_list=['--volume-group-name', '--group-name', '--name', '-n'], id_part='child_name_1')
+        c.argument('gp_rules', options_list=['--global-placement-rules]', '--gp-rules', '--rules'], nargs="+")
+
+    with self.argument_context('netappfiles volume-group list') as c:
+        c.argument('account_name', id_part=None)
+        c.argument('pool_name', id_part=None)
+        c.argument('volume_name', id_part=None)
+        c.argument('volume_group_name', id_part=None)
