@@ -309,7 +309,7 @@ class EventGridTests(ScenarioTest):
             'extended_location_name': extended_location_name,
         })
         
-        outputtopic = self.cmd('az eventgrid topic create --name {topic_name4} --resource-group {rg} --location {location} --public-network-access disabled --inbound-ip-rules 19.12.43.90/12 allow --inbound-ip-rules 19.12.43.70/20 allow --sku BASic --identity mixed --user-assigned /subscriptions/5b4b650e-28b9-4790-b3ab-ddbd88d727c4/resourceGroups/amh/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ahamadtestidentity1 26b9b438-7fe8-482f-b732-ea99c70f2abb 72f988bf-86f1-41af-91ab-2d7cd011db47').get_output_in_json()
+        outputtopic = self.cmd('az eventgrid topic create --name {topic_name4} --resource-group {rg} --location {location} --public-network-access disabled --inbound-ip-rules 19.12.43.90/12 allow --inbound-ip-rules 19.12.43.70/20 allow --sku BASic --identity mixed --mi-user-assigned /subscriptions/5b4b650e-28b9-4790-b3ab-ddbd88d727c4/resourceGroups/amh/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testIdentity1 26b9b438-7fe8-482f-b732-ea99c70f2abb 72f988bf-86f1-41af-91ab-2d7cd011db47').get_output_in_json()
         self.check(outputtopic['type'], 'Microsoft.EventGrid/topics')
         self.check(outputtopic['name'], self.kwargs['topic_name3'])
         self.check(outputtopic['publicNetworkAccess'], 'Disabled')
@@ -319,7 +319,7 @@ class EventGridTests(ScenarioTest):
         self.check(outputtopic['sku'], 'Basic')
         self.check(outputtopic['identity'], 'SystemAssigned, UserAssigned')
         
-        outputtopic = self.cmd('az eventgrid topic create --name {topic_name4} --resource-group {rg} --location {location} --public-network-access disabled --inbound-ip-rules 19.12.43.90/12 allow --inbound-ip-rules 19.12.43.70/20 allow --sku BASic --identity userassigned --user-assigned /subscriptions/5b4b650e-28b9-4790-b3ab-ddbd88d727c4/resourceGroups/amh/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ahamadtestidentity1 26b9b438-7fe8-482f-b732-ea99c70f2abb 72f988bf-86f1-41af-91ab-2d7cd011db47').get_output_in_json()
+        outputtopic = self.cmd('az eventgrid topic create --name {topic_name4} --resource-group {rg} --location {location} --public-network-access disabled --inbound-ip-rules 19.12.43.90/12 allow --inbound-ip-rules 19.12.43.70/20 allow --sku BASic --identity userassigned --mi-user-assigned /subscriptions/5b4b650e-28b9-4790-b3ab-ddbd88d727c4/resourceGroups/amh/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testIdentity1 26b9b438-7fe8-482f-b732-ea99c70f2abb 72f988bf-86f1-41af-91ab-2d7cd011db47').get_output_in_json()
         self.check(outputtopic['type'], 'Microsoft.EventGrid/topics')
         self.check(outputtopic['name'], self.kwargs['topic_name4'])
         self.check(outputtopic['publicNetworkAccess'], 'Disabled')
@@ -339,7 +339,7 @@ class EventGridTests(ScenarioTest):
         self.check(outputtopic['sku'], 'Basic')
         self.check(outputtopic['identity'], 'SystemAssigned')
         
-        outputtopic = self.cmd('az eventgrid topic update --name {topic_name2} --resource-group {rg} --identity userassigned --user-assigned /subscriptions/5b4b650e-28b9-4790-b3ab-ddbd88d727c4/resourceGroups/amh/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ahamadtestidentity1 26b9b438-7fe8-482f-b732-ea99c70f2abb 72f988bf-86f1-41af-91ab-2d7cd011db47').get_output_in_json()
+        outputtopic = self.cmd('az eventgrid topic update --name {topic_name2} --resource-group {rg} --identity userassigned --mi-user-assigned /subscriptions/5b4b650e-28b9-4790-b3ab-ddbd88d727c4/resourceGroups/amh/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testIdentity1 26b9b438-7fe8-482f-b732-ea99c70f2abb 72f988bf-86f1-41af-91ab-2d7cd011db47').get_output_in_json()
         self.check(outputtopic['type'], 'Microsoft.EventGrid/topics')
         self.check(outputtopic['name'], self.kwargs['topic_name4'])
         self.check(outputtopic['publicNetworkAccess'], 'Disabled')
@@ -348,7 +348,6 @@ class EventGridTests(ScenarioTest):
         self.check(outputtopic['provisioningState'], 'Succeeded')
         self.check(outputtopic['sku'], 'Basic')
         self.check(outputtopic['identity'], 'SystemAssigned')
-        
         
     @ResourceGroupPreparer()
     def test_create_topic(self, resource_group):

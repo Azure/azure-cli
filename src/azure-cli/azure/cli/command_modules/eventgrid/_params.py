@@ -230,8 +230,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                    action=AddUserAssignedIdentities,
                    nargs='+',
                    is_preview=True,
-                   help='Add user assigned identities when identityType is user or mixed. This attribute is valid for all destination types except StorageQueue. Multiple attributes can be specified by using more than one `--user-assigned` argument',
-                   options_list=['--user-assigned'])
+                   help='Add user assigned identities when identityType is user or mixed. This attribute is valid for all destination types except StorageQueue. Multiple attributes can be specified by using more than one `--mi-user-assigned` argument',
+                   options_list=['--mi-user-assigned'])
 
     with self.argument_context('eventgrid topic') as c:
         c.argument('topic_name', arg_type=name_type, help='Name of the topic.', id_part='name', completer=get_resource_name_completion_list('Microsoft.EventGrid/topics'))

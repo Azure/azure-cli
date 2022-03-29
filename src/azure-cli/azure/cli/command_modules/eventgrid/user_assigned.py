@@ -16,7 +16,7 @@ class AddUserAssignedIdentities(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):
         valuesLen = len(values)
         if valuesLen != 3:
-            raise CLIError('usage error: --user-assigned-identity userAssignedIdentityArmId clientId principalId')
+            raise CLIError('usage error: ----mi-user-assigned userAssignedIdentityArmId clientId principalId')
         armId = values[0]
         clientId = values[1]
         principalId = values[2]
