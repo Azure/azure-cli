@@ -383,9 +383,18 @@ def _validate_ase_not_ilb(ase):
         raise ValidationError("Internal Load Balancer (ILB) App Service Environments not supported")
 
 
+# allow reusing validators when some commands use "webapp" for the app's name param
+def _get_app_name(namespace):
+    if hasattr(namespace, "name"):
+        return namespace.name
+    if hasattr(namespace, "webapp"):
+        return namespace.webapp
+    return None
+
+
 def validate_app_is_webapp(cmd, namespace):
     client = web_client_factory(cmd.cli_ctx)
-    name = namespace.name
+    name = _get_app_name(namespace)
     rg = namespace.resource_group_name
     app = get_resource_if_exists(client.web_apps, name=name, resource_group_name=rg)
     if is_functionapp(app):
@@ -396,7 +405,7 @@ def validate_app_is_webapp(cmd, namespace):
 
 def validate_app_is_functionapp(cmd, namespace):
     client = web_client_factory(cmd.cli_ctx)
-    name = namespace.name
+    name = _get_app_name(namespace)
     rg = namespace.resource_group_name
     app = get_resource_if_exists(client.web_apps, name=name, resource_group_name=rg)
     if is_logicapp(app):
@@ -407,7 +416,7 @@ def validate_app_is_functionapp(cmd, namespace):
 
 def validate_app_is_logicapp(cmd, namespace):
     client = web_client_factory(cmd.cli_ctx)
-    name = namespace.name
+    name = _get_app_name(namespace)
     rg = namespace.resource_group_name
     app = get_resource_if_exists(client.web_apps, name=name, resource_group_name=rg)
     if is_functionapp(app):
