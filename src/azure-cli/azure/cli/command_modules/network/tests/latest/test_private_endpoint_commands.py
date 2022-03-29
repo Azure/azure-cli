@@ -958,6 +958,90 @@ class NetworkPrivateLinkCosmosDBScenarioTest(ScenarioTest):
         self.cmd('az network private-endpoint-connection delete --id {pec_id} -y')
 
 
+class NetworkPrivateLinkKustoClusterScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(location='westus')
+    def test_private_link_resource_kusto_cluster(self, resource_group):
+        self.kwargs.update({
+            'acc': self.create_random_name('cluster', 14),
+            'loc': 'eastus',
+            'rg': resource_group,
+            'sku': 'Standard_D12_v2'
+        })
+
+        self.cmd('az kusto cluster create -l {loc} -n {acc} -g {rg} --sku {sku}')
+
+        self.cmd('az network private-link-resource list --name {acc} --resource-group {rg} --type Microsoft.Kusto/clusters',
+                 checks=[self.check('length(@)', 1), self.check('[0].properties.groupId', 'cluster')])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_kusto_pe')
+    def test_private_endpoint_connection_kusto_cluster(self, resource_group):
+        self.kwargs.update({
+            'acc': self.create_random_name('cluster', 14),
+            'loc': 'eastus',
+            'rg': resource_group,
+            'vnet': self.create_random_name('cli-vnet-', 24),
+            'subnet': self.create_random_name('cli-subnet-', 24),
+            'pe': self.create_random_name('cli-pe-', 24),
+            'pe_connection': self.create_random_name('cli-pec-', 24),
+            'sku': 'Standard_D11_v2'
+        })
+
+        # Prepare kusto cluster and network
+        account = self.cmd('az kusto cluster create -l {loc} -n {acc} -g {rg} --sku {sku}').get_output_in_json()
+        self.kwargs['acc_id'] = account['id']
+        self.cmd('az network vnet create -n {vnet} -g {rg} -l {loc} --subnet-name {subnet}',
+                 checks=self.check('length(newVNet.subnets)', 1))
+        self.cmd('az network vnet subnet update -n {subnet} --vnet-name {vnet} -g {rg} '
+                 '--disable-private-endpoint-network-policies true',
+                 checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
+
+        # Create a private endpoint connection
+        pe = self.cmd(
+            'az network private-endpoint create -g {rg} -n {pe} --vnet-name {vnet} --subnet {subnet} -l {loc} '
+            '--connection-name {pe_connection} --private-connection-resource-id {acc_id} '
+            '--group-id cluster').get_output_in_json()
+        self.kwargs['pe_id'] = pe['id']
+        self.kwargs['pe_name'] = self.kwargs['pe_id'].split('/')[-1]
+
+        # Show the connection at kusto side
+        results = self.kwargs['pe_id'].split('/')
+        self.kwargs[
+            'pec_id'] = '/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Kusto/clusters/{2}/privateEndpointConnections/{3}'.format(
+            results[2], results[4], self.kwargs['acc'], results[-1])
+        self.cmd('az network private-endpoint-connection show --id {pec_id}',
+                 checks=self.check('id', '{pec_id}'))
+        self.cmd(
+            'az network private-endpoint-connection show --resource-name {acc} --name {pe_name} --resource-group {rg} --type Microsoft.Kusto/clusters',
+            checks=self.check('name', '{pe_name}'))
+        self.cmd(
+            'az network private-endpoint-connection show --resource-name {acc} -n {pe_name} -g {rg} --type Microsoft.Kusto/clusters',
+            checks=self.check('name', '{pe_name}'))
+
+        # Test approval/rejection
+        self.kwargs.update({
+            'approval_desc': 'You are approved!',
+            'rejection_desc': 'You are rejected!'
+        })
+        self.cmd(
+            'az network private-endpoint-connection approve --resource-name {acc} --resource-group {rg} --name {pe_name} --type Microsoft.Kusto/clusters'
+            '--description "{approval_desc}"', checks=[
+                self.check('properties.privateLinkServiceConnectionState.status', 'Approved')
+            ])
+        self.cmd('az network private-endpoint-connection reject --id {pec_id} '
+                 '--description "{rejection_desc}"',
+                 checks=[
+                     self.check('properties.privateLinkServiceConnectionState.status', 'Rejected')
+                 ])
+        self.cmd(
+            'az network private-endpoint-connection list --name {acc} --resource-group {rg} --type Microsoft.Kusto/clusters',
+            checks=[
+                self.check('length(@)', 1)
+            ])
+
+        # Test delete
+        self.cmd('az network private-endpoint-connection delete --id {pec_id} -y')
+
+
 class NetworkPrivateLinkWebappScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='westus')
     def test_private_link_resource_webapp(self, resource_group):
