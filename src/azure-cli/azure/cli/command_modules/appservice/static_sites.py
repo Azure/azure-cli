@@ -368,13 +368,13 @@ def create_staticsites(cmd, resource_group_name, name, location,  # pylint: disa
                        source, branch, token=None,
                        app_location="/", api_location=None, output_location=None,
                        tags=None, no_wait=False, sku='Free', login_with_github=False, format_output=True):
-    from azure.core.exceptions import ResourceNotFoundError
+    from azure.core.exceptions import ResourceNotFoundError as _ResourceNotFoundError
 
     try:
         site = show_staticsite(cmd, name, resource_group_name)
         logger.warning("Static Web App %s already exists in resource group %s", name, resource_group_name)
         return site
-    except ResourceNotFoundError:
+    except _ResourceNotFoundError:
         pass
 
     if not token and not login_with_github:
