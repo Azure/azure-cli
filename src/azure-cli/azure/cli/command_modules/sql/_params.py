@@ -1097,7 +1097,6 @@ def load_arguments(self, _):
         c.argument(
             'diffbackup_hours',
             options_list=['--diffbackup-hours'],
-            required=True,
             help='New backup short term retention policy differential backup interval in hours.'
             'Valid differential backup interval for live database can be 12 or 24 hours.')
 
