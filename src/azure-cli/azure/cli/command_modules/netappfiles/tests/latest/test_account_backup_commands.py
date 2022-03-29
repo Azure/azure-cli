@@ -5,7 +5,6 @@
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 import time
-import unittest
 LOCATION = "southcentralusstage"
 VNET_LOCATION = "southcentralus"
 
@@ -14,7 +13,6 @@ VNET_LOCATION = "southcentralus"
 # As a refactoring consideration for the future, consider use of authoring patterns described here
 # https://github.com/Azure/azure-cli/blob/dev/doc/authoring_tests.md#sample-5-get-more-from-resourcegrouppreparer
 
-@unittest.skip("showing class skipping")
 class AzureNetAppFilesAccountBackupServiceScenarioTest(ScenarioTest):
     def setup_vnet(self, vnet_name, subnet_name):
         self.cmd("az network vnet create -n %s -g {rg} -l %s --address-prefix 10.5.0.0/16" %
