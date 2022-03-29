@@ -137,12 +137,12 @@ def aks_versions_table_format(result):
 
 
 def aks_list_nodepool_snapshot_table_format(results):
-    """"Format a list of snapshots as summary results for display with "-o table"."""
+    """"Format a list of nodepool snapshots as summary results for display with "-o table"."""
     return [_aks_nodepool_snapshot_table_format(r) for r in results]
 
 
 def aks_show_nodepool_snapshot_table_format(result):
-    """Format a snapshot as summary results for display with "-o table"."""
+    """Format a nodepool snapshot as summary results for display with "-o table"."""
     return [_aks_nodepool_snapshot_table_format(result)]
 
 
