@@ -899,6 +899,8 @@ examples:
   - name: Move managed instance to another subnet
     text: az sql mi update -g myResourceGroup -n myServer -i \\
               --subnet /subscriptions/xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi \\
+  - name: Update mi backup storage redundancy
+    text: az sql mi update -g mygroup -n myinstance --bsr Local
 """
 
 helps['sql midb'] = """
