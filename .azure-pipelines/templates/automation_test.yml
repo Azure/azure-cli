@@ -37,9 +37,9 @@ steps:
 
       # Test specific module
       module="${{ parameters.module }}"
-      series="${{ parameters.series }}"
       if [[ -n $module ]]; then
         echo "Running test for module '$module'"
+        # Determine whether the module belongs to series_modules
         if [[ "$series_modules" =~ "$module" ]]
         then
           echo "Running in series"
