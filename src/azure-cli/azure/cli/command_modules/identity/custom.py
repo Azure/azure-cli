@@ -10,6 +10,7 @@ def list_user_assigned_identities(cmd, resource_group_name=None):
         return client.user_assigned_identities.list_by_resource_group(resource_group_name)
     return client.user_assigned_identities.list_by_subscription()
 
+
 def create_identity(client, resource_group_name, resource_name, location, tags=None):
     parameters = {}
     parameters['location'] = location
