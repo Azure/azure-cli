@@ -3,16 +3,23 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import importlib
 import unittest
 from unittest.mock import Mock, patch
-import importlib
 
-from azure.cli.command_modules.acs._consts import DecoratorEarlyExitException, DecoratorMode, AgentPoolDecoratorMode
+from azure.cli.command_modules.acs._consts import (
+    CONST_DEFAULT_NODE_OS_TYPE,
+    CONST_DEFAULT_NODE_VM_SIZE,
+    CONST_DEFAULT_WINDOWS_NODE_VM_SIZE,
+    AgentPoolDecoratorMode,
+    DecoratorEarlyExitException,
+    DecoratorMode,
+)
 from azure.cli.command_modules.acs.agentpool_decorator import (
-    AKSAgentPoolModels,
-    AKSAgentPoolParamDict,
     AKSAgentPoolAddDecorator,
     AKSAgentPoolContext,
+    AKSAgentPoolModels,
+    AKSAgentPoolParamDict,
     AKSAgentPoolUpdateDecorator,
 )
 from azure.cli.command_modules.acs.tests.latest.mocks import MockCLI, MockClient, MockCmd
@@ -54,9 +61,9 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
     def create_initialized_agentpool_instance(self, nodepool_name="nodepool1", **kwargs):
         # helper function to create a properly initialized agentpool instance
         if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
-            agentpool = self.models.UnifiedAgentPoolModel(name=nodepool_name)
+            agentpool = self.models.UnifiedAgentPoolModel(name=nodepool_name, os_type=None)
         else:
-            agentpool = self.models.UnifiedAgentPoolModel()
+            agentpool = self.models.UnifiedAgentPoolModel(os_type=None)
             agentpool.name = nodepool_name
         for key, value in kwargs.items():
             setattr(agentpool, key, value)
@@ -126,12 +133,15 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         # default
         ctx_1 = AKSAgentPoolContext(
             self.cmd,
-            AKSAgentPoolParamDict({"cluster_name": "test_cluster_name"}),
+            AKSAgentPoolParamDict({"cluster_name": "test_cluster_name", "name": "test_name"}),
             self.models,
             DecoratorMode.CREATE,
             self.agentpool_decorator_mode,
         )
-        self.assertEqual(ctx_1.get_cluster_name(), "test_cluster_name")
+        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+            self.assertEqual(ctx_1.get_cluster_name(), "test_name")
+        else:
+            self.assertEqual(ctx_1.get_cluster_name(), "test_cluster_name")
 
     def common_get_nodepool_name(self):
         # default
@@ -252,9 +262,333 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
             self.agentpool_decorator_mode,
         )
         self.assertEqual(ctx_1.get_node_osdisk_type(), None)
-        agentpool = self.create_initialized_agentpool_instance(os_disk_type="test_mc_node_osdisk_type")
+        agentpool = self.create_initialized_agentpool_instance(os_disk_type="test_node_osdisk_type")
         ctx_1.attach_agentpool(agentpool)
-        self.assertEqual(ctx_1.get_node_osdisk_type(), "test_mc_node_osdisk_type")
+        self.assertEqual(ctx_1.get_node_osdisk_type(), "test_node_osdisk_type")
+
+    def common_get_snapshot_id(self):
+        # default
+        ctx_1 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict(
+                {
+                    "snapshot_id": None,
+                }
+            ),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_1.get_snapshot_id(), None)
+        creation_data = self.models.CreationData(source_resource_id="test_source_resource_id")
+        agentpool = self.create_initialized_agentpool_instance(creation_data=creation_data)
+        ctx_1.attach_agentpool(agentpool)
+        self.assertEqual(ctx_1.get_snapshot_id(), "test_source_resource_id")
+
+    def common_get_snapshot(self):
+        # custom value
+        ctx_1 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict(
+                {
+                    "snapshot_id": "test_source_resource_id",
+                }
+            ),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        mock_snapshot = Mock()
+        with patch(
+            "azure.cli.command_modules.acs.agentpool_decorator.get_snapshot_by_snapshot_id",
+            return_value=mock_snapshot,
+        ):
+            self.assertEqual(ctx_1.get_snapshot(), mock_snapshot)
+        # test cache
+        self.assertEqual(ctx_1.get_snapshot(), mock_snapshot)
+
+    def common_get_kubernetes_version(self):
+        # default
+        ctx_1 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"kubernetes_version": ""}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_1.get_kubernetes_version(), "")
+        agentpool = self.create_initialized_agentpool_instance(orchestrator_version="test_kubernetes_version")
+        ctx_1.attach_agentpool(agentpool)
+        self.assertEqual(ctx_1.get_kubernetes_version(), "test_kubernetes_version")
+
+        # custom value
+        ctx_2 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"kubernetes_version": "", "snapshot_id": "test_snapshot_id"}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        mock_snapshot = Mock(kubernetes_version="test_kubernetes_version")
+        with patch(
+            "azure.cli.command_modules.acs.agentpool_decorator.get_snapshot_by_snapshot_id",
+            return_value=mock_snapshot,
+        ):
+            self.assertEqual(ctx_2.get_kubernetes_version(), "test_kubernetes_version")
+
+        # custom value
+        ctx_3 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict(
+                {
+                    "kubernetes_version": "custom_kubernetes_version",
+                    "snapshot_id": "test_snapshot_id",
+                }
+            ),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        mock_snapshot = Mock(kubernetes_version="test_kubernetes_version")
+        with patch(
+            "azure.cli.command_modules.acs.agentpool_decorator.get_snapshot_by_snapshot_id",
+            return_value=mock_snapshot,
+        ):
+            self.assertEqual(ctx_3.get_kubernetes_version(), "custom_kubernetes_version")
+
+    def common_get_os_type(self):
+        # default
+        ctx_1 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"os_type": None}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_1.get_os_type(), CONST_DEFAULT_NODE_OS_TYPE)
+        agentpool = self.create_initialized_agentpool_instance(os_type="test_os_type")
+        ctx_1.attach_agentpool(agentpool)
+        self.assertEqual(ctx_1.get_os_type(), "test_os_type")
+
+        # custom value
+        ctx_2 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"os_type": None, "snapshot_id": "test_snapshot_id"}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        mock_snapshot = Mock(os_type="test_os_type")
+        with patch(
+            "azure.cli.command_modules.acs.agentpool_decorator.get_snapshot_by_snapshot_id",
+            return_value=mock_snapshot,
+        ):
+            self.assertEqual(ctx_2.get_os_type(), "test_os_type")
+
+        # custom value
+        ctx_3 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict(
+                {
+                    "os_type": "custom_os_type",
+                    "snapshot_id": "test_snapshot_id",
+                }
+            ),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        mock_snapshot = Mock(os_type="test_os_type")
+        with patch(
+            "azure.cli.command_modules.acs.agentpool_decorator.get_snapshot_by_snapshot_id",
+            return_value=mock_snapshot,
+        ):
+            self.assertEqual(ctx_3.get_os_type(), "custom_os_type")
+
+        # custom value
+        ctx_4 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict(
+                {
+                    "os_type": "windows",
+                }
+            ),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+            # fail on windows os type for aks create
+            with self.assertRaises(InvalidArgumentValueError):
+                ctx_4.get_os_type()
+        else:
+            self.assertEqual(ctx_4.get_os_type(), "windows")
+
+    def common_get_os_sku(self):
+        # default
+        ctx_1 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"os_sku": None}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_1.get_os_sku(), None)
+        agentpool = self.create_initialized_agentpool_instance(os_sku="test_os_sku")
+        ctx_1.attach_agentpool(agentpool)
+        self.assertEqual(ctx_1.get_os_sku(), "test_os_sku")
+
+        # custom value
+        ctx_2 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"os_sku": None, "snapshot_id": "test_snapshot_id"}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        mock_snapshot = Mock(os_sku="test_os_sku")
+        with patch(
+            "azure.cli.command_modules.acs.agentpool_decorator.get_snapshot_by_snapshot_id",
+            return_value=mock_snapshot,
+        ):
+            self.assertEqual(ctx_2.get_os_sku(), "test_os_sku")
+
+        # custom value
+        ctx_3 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict(
+                {
+                    "os_sku": "custom_os_sku",
+                    "snapshot_id": "test_snapshot_id",
+                }
+            ),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        mock_snapshot = Mock(os_sku="test_os_sku")
+        with patch(
+            "azure.cli.command_modules.acs.agentpool_decorator.get_snapshot_by_snapshot_id",
+            return_value=mock_snapshot,
+        ):
+            self.assertEqual(ctx_3.get_os_sku(), "custom_os_sku")
+
+    def common_get_node_vm_size(self):
+        # default
+        ctx_1 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"node_vm_size": None}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_1.get_node_vm_size(), CONST_DEFAULT_NODE_VM_SIZE)
+        agentpool = self.create_initialized_agentpool_instance(vm_size="Standard_ABCD_v2")
+        ctx_1.attach_agentpool(agentpool)
+        self.assertEqual(ctx_1.get_node_vm_size(), "Standard_ABCD_v2")
+
+        # custom value
+        ctx_2 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"node_vm_size": None, "snapshot_id": "test_snapshot_id"}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        mock_snapshot = Mock(vm_size="test_vm_size")
+        with patch(
+            "azure.cli.command_modules.acs.agentpool_decorator.get_snapshot_by_snapshot_id",
+            return_value=mock_snapshot,
+        ):
+            self.assertEqual(ctx_2.get_node_vm_size(), "test_vm_size")
+
+        # custom value
+        ctx_3 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict(
+                {
+                    "node_vm_size": "custom_node_vm_size",
+                    "snapshot_id": "test_snapshot_id",
+                }
+            ),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        mock_snapshot = Mock(vm_size="test_vm_size")
+        with patch(
+            "azure.cli.command_modules.acs.agentpool_decorator.get_snapshot_by_snapshot_id",
+            return_value=mock_snapshot,
+        ):
+            self.assertEqual(ctx_3.get_node_vm_size(), "custom_node_vm_size")
+
+        # custom value
+        ctx_4 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict(
+                {
+                    "node_vm_size": None,
+                    "os_type": "WINDOWS",
+                }
+            ),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+            # fail on windows os type for aks create
+            with self.assertRaises(InvalidArgumentValueError):
+                ctx_4.get_node_vm_size()
+        else:
+            self.assertEqual(ctx_4.get_node_vm_size(), CONST_DEFAULT_WINDOWS_NODE_VM_SIZE)
+
+    def common_get_nodepool_labels(self):
+        # default
+        ctx_1 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"nodepool_labels": "test_nodepool_labels", "labels": "test_labels"}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+            self.assertEqual(ctx_1.get_nodepool_labels(), "test_nodepool_labels")
+        else:
+            self.assertEqual(ctx_1.get_nodepool_labels(), "test_labels")
+        agentpool = self.create_initialized_agentpool_instance(node_labels={"key1": "value1", "key2": "value2"})
+        ctx_1.attach_agentpool(agentpool)
+        self.assertEqual(ctx_1.get_nodepool_labels(), {"key1": "value1", "key2": "value2"})
+
+    def common_get_nodepool_tags(self):
+        # default
+        ctx_1 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"nodepool_tags": "test_nodepool_tags", "tags": "test_tags"}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+            self.assertEqual(ctx_1.get_nodepool_tags(), "test_nodepool_tags")
+        else:
+            self.assertEqual(ctx_1.get_nodepool_tags(), "test_tags")
+        agentpool = self.create_initialized_agentpool_instance(tags={})
+        ctx_1.attach_agentpool(agentpool)
+        self.assertEqual(ctx_1.get_nodepool_tags(), {})
+
+    def common_get_node_taints(self):
+        # default
+        ctx_1 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"node_taints": "abc=xyz:123,123=456:abc"}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_1.get_node_taints(), ["abc=xyz:123", "123=456:abc"])
+        agentpool = self.create_initialized_agentpool_instance(node_taints=[])
+        ctx_1.attach_agentpool(agentpool)
+        self.assertEqual(ctx_1.get_node_taints(), [])
 
     def common_get_aks_custom_headers(self):
         # default
@@ -337,6 +671,33 @@ class AKSAgentPoolContextStandaloneModeTestCase(AKSAgentPoolContextCommonTestCas
     def test_get_node_osdisk_type(self):
         self.common_get_node_osdisk_type()
 
+    def test_get_snapshot_id(self):
+        self.common_get_snapshot_id()
+
+    def test_get_snapshot(self):
+        self.common_get_snapshot()
+
+    def test_get_kubernetes_version(self):
+        self.common_get_kubernetes_version()
+
+    def test_get_os_type(self):
+        self.common_get_os_type()
+
+    def test_get_os_sku(self):
+        self.common_get_os_sku()
+
+    def test_get_node_vm_size(self):
+        self.common_get_node_vm_size()
+
+    def test_get_nodepool_labels(self):
+        self.common_get_nodepool_labels()
+
+    def test_get_nodepool_tags(self):
+        self.common_get_nodepool_tags()
+
+    def test_get_node_taints(self):
+        self.common_get_node_taints()
+
     def test_get_aks_custom_headers(self):
         self.common_get_aks_custom_headers()
 
@@ -384,6 +745,33 @@ class AKSAgentPoolContextManagedClusterModeTestCase(AKSAgentPoolContextCommonTes
     def test_get_node_osdisk_type(self):
         self.common_get_node_osdisk_type()
 
+    def test_get_snapshot_id(self):
+        self.common_get_snapshot_id()
+
+    def test_get_snapshot(self):
+        self.common_get_snapshot()
+
+    def test_get_kubernetes_version(self):
+        self.common_get_kubernetes_version()
+
+    def test_get_os_type(self):
+        self.common_get_os_type()
+
+    def test_get_os_sku(self):
+        self.common_get_os_sku()
+
+    def test_get_node_vm_size(self):
+        self.common_get_node_vm_size()
+
+    def test_get_nodepool_labels(self):
+        self.common_get_nodepool_labels()
+
+    def test_get_nodepool_tags(self):
+        self.common_get_nodepool_tags()
+
+    def test_get_node_taints(self):
+        self.common_get_node_taints()
+
     def test_get_aks_custom_headers(self):
         self.common_get_aks_custom_headers()
 
@@ -395,9 +783,9 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
     def create_initialized_agentpool_instance(self, nodepool_name="nodepool1", **kwargs):
         # helper function to create a properly initialized agentpool instance
         if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
-            agentpool = self.models.UnifiedAgentPoolModel(name=nodepool_name)
+            agentpool = self.models.UnifiedAgentPoolModel(name=nodepool_name, os_type=None)
         else:
-            agentpool = self.models.UnifiedAgentPoolModel()
+            agentpool = self.models.UnifiedAgentPoolModel(os_type=None)
             agentpool.name = nodepool_name
         for key, value in kwargs.items():
             setattr(agentpool, key, value)
@@ -456,6 +844,149 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
         )
         self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
 
+    def common_set_up_osdisk_properties(self):
+        dec_1 = AKSAgentPoolAddDecorator(
+            self.cmd,
+            self.client,
+            {
+                "node_osdisk_size": "123",
+                "node_osdisk_type": "test_node_osdisk_type",
+            },
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        # fail on passing the wrong agentpool object
+        with self.assertRaises(CLIInternalError):
+            dec_1.set_up_osdisk_properties(None)
+        agentpool_1 = self.create_initialized_agentpool_instance()
+        dec_1.context.attach_agentpool(agentpool_1)
+        dec_agentpool_1 = dec_1.set_up_osdisk_properties(agentpool_1)
+
+        ground_truth_agentpool_1 = self.create_initialized_agentpool_instance(
+            os_disk_size_gb=123, os_disk_type="test_node_osdisk_type"
+        )
+        self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
+
+    def common_set_up_auto_scaler_properties(self):
+        dec_1 = AKSAgentPoolAddDecorator(
+            self.cmd,
+            self.client,
+            {
+                "node_count": 3,
+                "enable_cluster_autoscaler": True,
+                "min_count": 1,
+                "max_count": 5,
+            },
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        # fail on passing the wrong agentpool object
+        with self.assertRaises(CLIInternalError):
+            dec_1.set_up_auto_scaler_properties(None)
+        agentpool_1 = self.create_initialized_agentpool_instance()
+        dec_1.context.attach_agentpool(agentpool_1)
+        dec_agentpool_1 = dec_1.set_up_auto_scaler_properties(agentpool_1)
+
+        ground_truth_agentpool_1 = self.create_initialized_agentpool_instance(
+            count=3, enable_auto_scaling=True, min_count=1, max_count=5
+        )
+        self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
+
+    def common_set_up_snapshot_properties(self):
+        dec_1 = AKSAgentPoolAddDecorator(
+            self.cmd,
+            self.client,
+            {"kubernetes_version": "test_kubernetes_version", "os_type": None, "os_sku": None, "node_vm_size": None},
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        # fail on passing the wrong agentpool object
+        with self.assertRaises(CLIInternalError):
+            dec_1.set_up_snapshot_properties(None)
+        agentpool_1 = self.create_initialized_agentpool_instance()
+        dec_1.context.attach_agentpool(agentpool_1)
+        dec_agentpool_1 = dec_1.set_up_snapshot_properties(agentpool_1)
+        ground_truth_agentpool_1 = self.create_initialized_agentpool_instance(
+            orchestrator_version="test_kubernetes_version",
+            os_type=CONST_DEFAULT_NODE_OS_TYPE,
+            os_sku=None,
+            vm_size=CONST_DEFAULT_NODE_VM_SIZE,
+        )
+        self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
+
+        dec_2 = AKSAgentPoolAddDecorator(
+            self.cmd,
+            self.client,
+            {
+                "kubernetes_version": "",
+                "os_type": None,
+                "os_sku": None,
+                "node_vm_size": None,
+                "snapshot_id": "test_snapshot_id",
+            },
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        # fail on passing the wrong agentpool object
+        with self.assertRaises(CLIInternalError):
+            dec_2.set_up_snapshot_properties(None)
+        agentpool_2 = self.create_initialized_agentpool_instance()
+        dec_2.context.attach_agentpool(agentpool_2)
+        mock_snapshot_2 = Mock(
+            kubernetes_version="test_kubernetes_version",
+            os_type="test_os_type",
+            os_sku="test_os_sku",
+            vm_size="test_vm_size",
+        )
+        with patch(
+            "azure.cli.command_modules.acs.agentpool_decorator.get_snapshot_by_snapshot_id",
+            return_value=mock_snapshot_2,
+        ):
+            dec_agentpool_2 = dec_2.set_up_snapshot_properties(agentpool_2)
+        ground_truth_creation_data_2 = dec_2.models.CreationData(source_resource_id="test_snapshot_id")
+        ground_truth_agentpool_2 = self.create_initialized_agentpool_instance(
+            orchestrator_version="test_kubernetes_version",
+            os_type="test_os_type",
+            os_sku="test_os_sku",
+            vm_size="test_vm_size",
+            creation_data=ground_truth_creation_data_2,
+        )
+        self.assertEqual(dec_agentpool_2, ground_truth_agentpool_2)
+
+    def common_set_up_label_tag_taint(self):
+        dec_1 = AKSAgentPoolAddDecorator(
+            self.cmd,
+            self.client,
+            {
+                "nodepool_labels": "test_nodepool_labels",
+                "labels": "test_labels",
+                "nodepool_tags": "test_nodepool_tags",
+                "tags": "test_tags",
+                "node_taints": "abc=xyz:123,123=456:abc",
+            },
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        # fail on passing the wrong agentpool object
+        with self.assertRaises(CLIInternalError):
+            dec_1.set_up_label_tag_taint(None)
+        agentpool_1 = self.create_initialized_agentpool_instance()
+        dec_1.context.attach_agentpool(agentpool_1)
+        dec_agentpool_1 = dec_1.set_up_label_tag_taint(agentpool_1)
+
+        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+            ground_truth_mc_agentpool_1 = self.create_initialized_agentpool_instance(
+                node_labels="test_nodepool_labels",
+                tags="test_nodepool_tags",
+                node_taints=["abc=xyz:123", "123=456:abc"],
+            )
+            self.assertEqual(dec_agentpool_1, ground_truth_mc_agentpool_1)
+        else:
+            ground_truth_sd_agentpool_1 = self.create_initialized_agentpool_instance(
+                node_labels="test_labels", tags="test_tags", node_taints=["abc=xyz:123", "123=456:abc"]
+            )
+            self.assertEqual(dec_agentpool_1, ground_truth_sd_agentpool_1)
+
     def common_construct_default_agentpool(self):
         import inspect
 
@@ -505,6 +1036,8 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
             upgrade_settings=upgrade_settings_1, count=3, enable_auto_scaling=False, os_disk_size_gb=0
         )
         agentpool_1.name = "test_nodepool_name"
+        agentpool_1.os_type = CONST_DEFAULT_NODE_OS_TYPE
+        agentpool_1.vm_size = CONST_DEFAULT_NODE_VM_SIZE
         self.assertEqual(dec_agentpool_1, agentpool_1)
         dec_1.context.raw_param.print_usage_statistics()
 
@@ -527,6 +1060,18 @@ class AKSAgentPoolAddDecoratorStandaloneModeTestCase(AKSAgentPoolAddDecoratorCom
     def test_set_up_upgrade_settings(self):
         self.common_set_up_upgrade_settings()
 
+    def test_set_up_osdisk_properties(self):
+        self.common_set_up_osdisk_properties()
+
+    def test_set_up_auto_scaler_properties(self):
+        self.common_set_up_auto_scaler_properties()
+
+    def test_set_up_snapshot_properties(self):
+        self.common_set_up_snapshot_properties()
+
+    def test_set_up_label_tag_taint(self):
+        self.common_set_up_label_tag_taint()
+
     def test_construct_default_agentpool(self):
         self.common_construct_default_agentpool()
 
@@ -548,6 +1093,18 @@ class AKSAgentPoolAddDecoratorManagedClusterModeTestCase(AKSAgentPoolAddDecorato
 
     def test_set_up_upgrade_settings(self):
         self.common_set_up_upgrade_settings()
+
+    def test_set_up_osdisk_properties(self):
+        self.common_set_up_osdisk_properties()
+
+    def test_set_up_auto_scaler_properties(self):
+        self.common_set_up_auto_scaler_properties()
+
+    def test_set_up_snapshot_properties(self):
+        self.common_set_up_snapshot_properties()
+
+    def test_set_up_label_tag_taint(self):
+        self.common_set_up_label_tag_taint()
 
     def test_construct_default_agentpool(self):
         self.common_construct_default_agentpool()
