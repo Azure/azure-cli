@@ -97,8 +97,8 @@ def load_arguments(self, _):
     with self.argument_context('batch application set') as c:
         c.argument('application_name', options_list=('--application-name',), help="The name of the application.")
         c.argument('allow_updates', options_list=('--allow-updates',), help="Specify to indicate whether packages within the application may be overwritten using the same version string. Specify either 'true' or 'false' to update the property.")
-        c.argument('default_version', options_list=('--default-version',), help="Specifies which package to use if a client requests the application but does not specify a version.")
-        c.argument('display_name', options_list=('--display-name',), help="Specifies the display name for the application.")
+        c.argument('default_version', help="Specify which package to use if a client requests the application but does not specify a version.")
+        c.argument('display_name', help="Specify the display name for the application.")
 
     with self.argument_context('batch application create') as c:
         c.argument('allow_updates', options_list=('--allow-updates',), action="store_true", help="Specify to indicate whether packages within the application may be overwritten using the same version string. True if flag present.")
