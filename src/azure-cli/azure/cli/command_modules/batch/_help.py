@@ -237,7 +237,7 @@ short-summary: Get information about the specified private link resource.
 
 helps['batch private-link-resource list'] = """
 type: command
-short-summary: Lists all of the private link resources in the specified account.
+short-summary: List all of the private link resources in the specified account.
 """
 
 helps['batch private-endpoint-connection'] = """
@@ -247,12 +247,12 @@ short-summary: Manage Batch account private endpoint connections.
 
 helps['batch private-endpoint-connection show'] = """
 type: command
-short-summary: Gets information about the specified private endpoint connection.
+short-summary: Get information about the specified private endpoint connection.
 """
 
 helps['batch private-endpoint-connection list'] = """
 type: command
-short-summary: Lists all of the private endpoint connections in the specified account.
+short-summary: List all of the private endpoint connections in the specified account.
 """
 
 
