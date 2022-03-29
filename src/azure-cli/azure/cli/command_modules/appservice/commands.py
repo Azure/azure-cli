@@ -10,7 +10,8 @@ from azure.cli.core.util import empty_on_404
 from ._client_factory import cf_web_client, cf_plans, cf_webapps
 from ._validators import (validate_onedeploy_params, validate_staticsite_link_function, validate_staticsite_sku,
                           validate_vnet_integration, validate_asp_create, validate_functionapp_asp_create,
-                          validate_webapp_up, validate_app_exists, validate_add_vnet)
+                          validate_webapp_up, validate_app_exists, validate_add_vnet, validate_app_is_webapp,
+                          validate_app_is_functionapp, validate_all)
 
 
 def output_slots_in_table(slots):
@@ -119,7 +120,7 @@ def load_command_table(self, _):
     logicapp_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.appservice.logicapp.custom#{}')
 
     with self.command_group('webapp', webapp_sdk) as g:
-        g.custom_command('create', 'create_webapp', exception_handler=ex_handler_factory(), validator=validate_vnet_integration)
+        g.custom_command('create', 'create_webapp', exception_handler=ex_handler_factory(), validator=validate_all(validate_app_is_webapp, validate_vnet_integration))
         g.custom_command('up', 'webapp_up', exception_handler=ex_handler_factory(), validator=validate_webapp_up)
         g.custom_command('ssh', 'ssh_webapp', exception_handler=ex_handler_factory(), is_preview=True)
         g.custom_command('list', 'list_webapp', table_transformer=transform_web_list_output)
@@ -135,9 +136,10 @@ def load_command_table(self, _):
         g.custom_show_command('identity show', 'show_identity')
         g.custom_command('identity remove', 'remove_identity')
         g.custom_command('create-remote-connection', 'create_tunnel', exception_handler=ex_handler_factory())
-        g.custom_command('deploy', 'perform_onedeploy', validator=validate_onedeploy_params, is_preview=True)
+        g.custom_command('deploy', 'perform_onedeploy', validator=validate_all(validate_app_exists, validate_app_is_webapp, validate_onedeploy_params),
+                         is_preview=True)
         g.generic_update_command('update', getter_name='get_webapp', setter_name='set_webapp',
-                                 custom_func_name='update_webapp', command_type=appservice_custom)
+                                 custom_func_name='update_webapp', command_type=appservice_custom, validator=validate_app_is_webapp)
 
     with self.command_group('webapp traffic-routing') as g:
         g.custom_command('set', 'set_traffic_routing')
@@ -215,7 +217,7 @@ def load_command_table(self, _):
 
     with self.command_group('webapp deployment source') as g:
         g.custom_command('config-local-git', 'enable_local_git')
-        g.custom_command('config-zip', 'enable_zip_deploy_webapp', exception_handler=ex_handler_factory())
+        g.custom_command('config-zip', 'enable_zip_deploy_webapp', exception_handler=ex_handler_factory(), validator=validate_all(validate_app_exists, validate_app_is_webapp))
         g.custom_command('config', 'config_source_control', exception_handler=ex_handler_factory())
         g.custom_command('sync', 'sync_site_repo', exception_handler=ex_handler_factory())
         g.custom_show_command('show', 'show_source_control')
@@ -241,7 +243,7 @@ def load_command_table(self, _):
         g.custom_command('delete', 'delete_slot')
         g.custom_command('auto-swap', 'config_slot_auto_swap')
         g.custom_command('swap', 'swap_slot', exception_handler=ex_handler_factory())
-        g.custom_command('create', 'create_webapp_slot', exception_handler=ex_handler_factory())
+        g.custom_command('create', 'create_webapp_slot', exception_handler=ex_handler_factory(), validator=validate_app_is_webapp)
 
     with self.command_group('webapp deployment') as g:
         g.custom_command('list-publishing-profiles', 'list_publish_profiles')
@@ -308,7 +310,7 @@ def load_command_table(self, _):
 
     with self.command_group('functionapp') as g:
         g.custom_command('create', 'create_functionapp', exception_handler=ex_handler_factory(),
-                         validator=validate_vnet_integration)
+                         validator=validate_all(validate_app_is_functionapp, validate_vnet_integration))
         g.custom_command('list-runtimes', 'list_function_app_runtimes')
         g.custom_command('list', 'list_function_app', table_transformer=transform_web_list_output)
         g.custom_show_command('show', 'show_app', table_transformer=transform_web_output)
@@ -322,7 +324,8 @@ def load_command_table(self, _):
         g.custom_command('identity remove', 'remove_identity')
         g.custom_command('deploy', 'perform_onedeploy', validator=validate_onedeploy_params, is_preview=True)
         g.generic_update_command('update', getter_name="get_functionapp", setter_name='set_functionapp', exception_handler=update_function_ex_handler_factory(),
-                                 custom_func_name='update_functionapp', getter_type=appservice_custom, setter_type=appservice_custom, command_type=webapp_sdk)
+                                 custom_func_name='update_functionapp', getter_type=appservice_custom, setter_type=appservice_custom, command_type=webapp_sdk,
+                                 validator=validate_all(validate_app_exists, validate_app_is_functionapp))
 
     with self.command_group('functionapp config') as g:
         g.custom_command('set', 'update_site_configs')
@@ -351,7 +354,7 @@ def load_command_table(self, _):
 
     with self.command_group('functionapp deployment source') as g:
         g.custom_command('config-local-git', 'enable_local_git')
-        g.custom_command('config-zip', 'enable_zip_deploy_functionapp')
+        g.custom_command('config-zip', 'enable_zip_deploy_functionapp', validator=validate_all(validate_app_exists, validate_app_is_functionapp))
         g.custom_command('config', 'config_source_control', exception_handler=ex_handler_factory())
         g.custom_command('sync', 'sync_site_repo')
         g.custom_show_command('show', 'show_source_control')

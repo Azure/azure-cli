@@ -18,7 +18,7 @@ from msrestazure.tools import is_valid_resource_id, parse_resource_id
 from ._appservice_utils import _generic_site_operation
 from ._client_factory import web_client_factory
 from .utils import (_normalize_sku, get_sku_tier, _normalize_location, get_resource_name_and_group,
-                    get_resource_if_exists, is_functionapp, is_logicapp)
+                    get_resource_if_exists, is_functionapp, is_logicapp, is_webapp)
 
 logger = get_logger(__name__)
 
@@ -120,13 +120,22 @@ def validate_functionapp_asp_create(namespace):
 
 
 def validate_app_exists(cmd, namespace):
-    app = namespace.name
-    resource_group_name = namespace.resource_group_name
-    slot = namespace.slot
-    app = _generic_site_operation(cmd.cli_ctx, resource_group_name, app, 'get', slot)
-    if not app:
-        raise ResourceNotFoundError("'{}' app not found in ResourceGroup '{}'".format(app, resource_group_name))
+    name = namespace.name
+    group = namespace.resource_group_name
+    client = web_client_factory(cmd.cli_ctx)
+    app = get_resource_if_exists(client.web_apps, resource_group_name=group, name=name)
+    if app is None:
+        raise ResourceNotFoundError(f"App '{name}' not found in resource group '{group}'.")
 
+    if hasattr(namespace, "slot") and namespace.slot is not None:
+        _validate_slot_exists(cmd, name, group, namespace.slot)
+
+
+def _validate_slot_exists(cmd, name, group, slot):
+    web_client = web_client_factory(cmd.cli_ctx).web_apps
+    app_slot = get_resource_if_exists(web_client, resource_group_name=group, name=name, slot=slot, method="get_slot")
+    if not app_slot:
+        raise ResourceNotFoundError(f"Slot '{slot}' of app '{name}' not found in resource group '{group}'.")
 
 def validate_add_vnet(cmd, namespace):
     from azure.core.exceptions import ResourceNotFoundError as ResNotFoundError
@@ -374,6 +383,39 @@ def _validate_ase_not_ilb(ase):
         raise ValidationError("Internal Load Balancer (ILB) App Service Environments not supported")
 
 
+def validate_app_is_webapp(cmd, namespace):
+    client = web_client_factory(cmd.cli_ctx)
+    name = namespace.name
+    rg = namespace.resource_group_name
+    app = get_resource_if_exists(client.web_apps, name=name, resource_group_name=rg)
+    if is_functionapp(app):
+        raise ValidationError(f"App '{name}' in group '{rg}' is a function app.")
+    if is_logicapp(app):
+        raise ValidationError(f"App '{name}' in group '{rg}' is a logic app.")
+
+
+def validate_app_is_functionapp(cmd, namespace):
+    client = web_client_factory(cmd.cli_ctx)
+    name = namespace.name
+    rg = namespace.resource_group_name
+    app = get_resource_if_exists(client.web_apps, name=name, resource_group_name=rg)
+    if is_logicapp(app):
+        raise ValidationError(f"App '{name}' in group '{rg}' is a logic app.")
+    if is_webapp(app):
+        raise ValidationError(f"App '{name}' in group '{rg}' is a web app.")
+
+
+def validate_app_is_logicapp(cmd, namespace):
+    client = web_client_factory(cmd.cli_ctx)
+    name = namespace.name
+    rg = namespace.resource_group_name
+    app = get_resource_if_exists(client.web_apps, name=name, resource_group_name=rg)
+    if is_functionapp(app):
+        raise ValidationError(f"App '{name}' in group '{rg}' is a function app.")
+    if is_webapp(app):
+        raise ValidationError(f"App '{name}' in group '{rg}' is a web app.")
+
+
 def validate_webapp_up(cmd, namespace):
     if namespace.runtime and namespace.html:
         raise MutuallyExclusiveArgumentError('Conflicting parameters: cannot have both --runtime and --html specified.')
@@ -391,11 +433,10 @@ def validate_webapp_up(cmd, namespace):
         _validate_ase_is_v3(ase)
         _validate_ase_not_ilb(ase)
 
-    name = namespace.name
-    rg = namespace.resource_group_name
-    app = get_resource_if_exists(client.web_apps, name=name, resource_group_name=rg)
-    if is_logicapp(app):
-        raise ValidationError(f"App '{name}' in group '{rg}' already exists and is a Logic App.")
 
-    if is_functionapp(app):
-        raise ValidationError(f"App '{name}' in group '{rg}' already exists and is a Function App.")
+# run multiple validators in order, for instance validate_app_exists and validate_app_is_webapp
+def validate_all(*args):
+    def _validator(cmd, namespace):
+        for validator_func in args:
+            validator_func(cmd, namespace)
+    return _validator

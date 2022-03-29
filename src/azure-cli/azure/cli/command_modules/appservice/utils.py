@@ -100,11 +100,12 @@ def get_sku_name(tier):
 
 
 # resource is client.web_apps for webapps, client.app_service_plans for ASPs, etc.
-def get_resource_if_exists(resource, **kwargs):
+# need to set method name if using slots
+def get_resource_if_exists(resource, method="get", **kwargs):
     from azure.core.exceptions import ResourceNotFoundError as R
 
     try:
-        return resource.get(**kwargs)
+        return getattr(resource, method)(**kwargs)
     except (R, ValueError):
         return None
 
@@ -232,7 +233,7 @@ def is_functionapp(app):
 def is_webapp(app):
     if app is None or app.kind is None:
         return False
-    return not is_logicapp(app) and not is_logicapp(app) and "app" in app.kind
+    return not is_logicapp(app) and not is_functionapp(app) and "app" in app.kind
 
 
 def get_plan_from_app(cmd, app):

@@ -55,7 +55,7 @@ from ._params import AUTH_TYPES, MULTI_CONTAINER_TYPES
 from ._client_factory import web_client_factory, ex_handler_factory, providers_client_factory
 from ._appservice_utils import _generic_site_operation, _generic_settings_operation
 from .utils import (_normalize_sku,
-                    get_sku_tier,
+                    get_sku_tier, is_functionapp, is_logicapp, is_webapp,
                     retryable_method,
                     raise_missing_token_suggestion,
                     _get_location_from_resource_group,
@@ -1681,13 +1681,14 @@ def create_webapp_slot(cmd, resource_group_name, webapp, slot, configuration_sou
 
     Site, SiteConfig, NameValuePair = cmd.get_models('Site', 'SiteConfig', 'NameValuePair')
     client = web_client_factory(cmd.cli_ctx)
-    site = client.web_apps.get(resource_group_name, webapp)
+    site = get_resource_if_exists(client.web_apps, name=webapp, resource_group_name=resource_group_name)
     site_config = get_site_configs(cmd, resource_group_name, webapp, None)
     if not site:
         raise ResourceNotFoundError("'{}' app doesn't exist".format(webapp))
-    if 'functionapp' in site.kind:
-        raise ValidationError("'{}' is a function app. Please use "
-                              "`az functionapp deployment slot create`.".format(webapp))
+    if is_functionapp(site):
+        raise ValidationError(f"'{webapp}' is a function app. Please use `az functionapp deployment slot create`.")
+    if is_logicapp(site):
+        raise ValidationError(f"'{webapp}' is a logic app.")
     location = site.location
     slot_def = Site(server_farm_id=site.server_farm_id, location=location)
     slot_def.site_config = SiteConfig()
@@ -1735,6 +1736,10 @@ def create_functionapp_slot(cmd, resource_group_name, name, slot, configuration_
     site = client.web_apps.get(resource_group_name, name)
     if not site:
         raise ResourceNotFoundError("'{}' function app doesn't exist".format(name))
+    if is_logicapp(site):
+        raise ValidationError(f"'{site}' is a logic app.")
+    if is_webapp(site):
+        raise ValidationError(f"'{site}' is a web app. Please use 'az webapp deployment slot create'")
     location = site.location
     slot_def = Site(server_farm_id=site.server_farm_id, location=location)
 
