@@ -55,6 +55,7 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_RESOURCE_DEPLOYMENTSCRIPTS = ('azure.mgmt.resource.deploymentscripts', 'DeploymentScriptsClient')
     MGMT_RESOURCE_TEMPLATESPECS = ('azure.mgmt.resource.templatespecs', 'TemplateSpecsClient')
     MGMT_MONITOR = ('azure.mgmt.monitor', 'MonitorManagementClient')
+    MGMT_MSI = ('azure.mgmt.msi', 'ManagedServiceIdentityClient')
     DATA_KEYVAULT = ('azure.keyvault', 'KeyVaultClient')
     DATA_KEYVAULT_KEYS = ('azure.keyvault.keys', 'KeyClient')
     DATA_PRIVATE_KEYVAULT = ('azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_t1', 'KeyVaultClient')
@@ -230,6 +231,7 @@ AZURE_API_PROFILES = {
             'private_endpoint_connections': '2019-10-17-preview',
             'subscription_diagnostic_settings': '2017-05-01-preview'
         }),
+        ResourceType.MGMT_MSI: '2018-11-30',
         ResourceType.MGMT_APPSERVICE: '2021-03-01',
         ResourceType.MGMT_IOTHUB: '2021-07-02',
         ResourceType.MGMT_IOTDPS: '2021-10-15',
