@@ -4920,12 +4920,15 @@ def restore_point_create(client,
                          restore_point_collection_name,
                          restore_point_name,
                          exclude_disks=None,
+                         source_restore_point=None,
                          no_wait=False):
     parameters = {}
     if exclude_disks is not None:
         parameters['exclude_disks'] = []
         for disk in exclude_disks:
             parameters['exclude_disks'].append({'id': disk})
+    if source_restore_point is not None:
+        parameters['source_restore_point'] = {'id': source_restore_point}
     return sdk_no_wait(no_wait,
                        client.begin_create,
                        resource_group_name=resource_group_name,
@@ -4933,16 +4936,34 @@ def restore_point_create(client,
                        restore_point_name=restore_point_name,
                        parameters=parameters)
 
+
+def restore_point_show(client,
+                       resource_group_name,
+                       restore_point_name,
+                       restore_point_collection_name,
+                       expand=None,
+                       instance_view=None):
+    if instance_view is not None:
+        expand = 'instanceView'
+    return client.get(resource_group_name=resource_group_name,
+                      restore_point_name=restore_point_name,
+                      restore_point_collection_name=restore_point_collection_name,
+                      expand=expand)
+
 # endRegion
 
 
 # region Restore point collection
 def restore_point_collection_show(client,
                                   resource_group_name,
-                                  restore_point_collection_name):
+                                  restore_point_collection_name,
+                                  expand=None,
+                                  restore_points=None):
+    if restore_points is not None:
+        expand = 'restorePoints'
     return client.get(resource_group_name=resource_group_name,
                       restore_point_collection_name=restore_point_collection_name,
-                      expand="restorePoints")
+                      expand=expand)
 
 
 def restore_point_collection_create(client,

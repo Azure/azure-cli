@@ -7491,8 +7491,8 @@ class RestorePointScenarioTest(ScenarioTest):
             'vm_id': vm['id']
         })
 
-        self.cmd('restore-point collection create -g {rg} --collection-name {collection_name} --source-id {vm_id}', checks=[
-            self.check('location', 'westus'),
+        self.cmd('restore-point collection create -g {rg} --collection-name {collection_name} --source-id {vm_id} -l eastus', checks=[
+            self.check('location', 'eastus'),
             self.check('name', '{collection_name}'),
             self.check('resourceGroup', '{rg}')
         ])
@@ -7506,14 +7506,15 @@ class RestorePointScenarioTest(ScenarioTest):
             'point_id': point['id']
         })
 
-        self.cmd('restore-point show -g {rg} -n {point_name} --collection-name {collection_name}', checks=[
+        self.cmd('restore-point show -g {rg} -n {point_name} --collection-name {collection_name} --instance-view', checks=[
             self.check('id', '{point_id}'),
             self.check('name', '{point_name}'),
-            self.check('resourceGroup', '{rg}')
+            self.check('resourceGroup', '{rg}'),
+            self.check('instanceView.diskRestorePoints[0].replicationStatus.status.code', 'ReplicationState/replicating')
         ])
 
-        self.cmd('restore-point collection show -g {rg} --collection-name {collection_name}', checks=[
-            self.check('location', 'westus'),
+        self.cmd('restore-point collection show -g {rg} --collection-name {collection_name} --restore-points', checks=[
+            self.check('location', 'eastus'),
             self.check('name', '{collection_name}'),
             self.check('restorePoints[0].id', '{point_id}'),
             self.check('restorePoints[0].name', '{point_name}'),

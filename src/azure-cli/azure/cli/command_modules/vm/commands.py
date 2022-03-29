@@ -641,7 +641,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_capacity_reservation')
 
     with self.command_group('restore-point', restore_point, client_factory=cf_restore_point, min_api='2021-03-01') as g:
-        g.show_command('show', 'get')
+        g.custom_show_command('show', 'restore_point_show')
         g.custom_command('create', 'restore_point_create', supports_no_wait=True)
         g.command('delete', 'begin_delete', supports_no_wait=True, confirmation=True)
         g.wait_command('wait')
