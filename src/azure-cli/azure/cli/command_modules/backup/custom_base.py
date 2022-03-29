@@ -33,8 +33,10 @@ def show_policy(client, resource_group_name, vault_name, name):
     return common.show_policy(client, resource_group_name, vault_name, name)
 
 
-def list_policies(client, resource_group_name, vault_name, workload_type=None, backup_management_type=None):
-    return common.list_policies(client, resource_group_name, vault_name, workload_type, backup_management_type)
+def list_policies(client, resource_group_name, vault_name, workload_type=None, backup_management_type=None,
+                  policy_sub_type=None):
+    return common.list_policies(client, resource_group_name, vault_name, workload_type, backup_management_type,
+                                policy_sub_type)
 
 
 def create_policy(client, resource_group_name, vault_name, name, policy, backup_management_type, workload_type=None):
@@ -394,7 +396,8 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
                   target_resource_group=None, restore_to_staging_storage_account=None, restore_only_osdisk=None,
                   diskslist=None, restore_as_unmanaged_disks=None, use_secondary_region=None, rehydration_duration=15,
                   rehydration_priority=None, disk_encryption_set_id=None, mi_system_assigned=None,
-                  mi_user_assigned=None, target_zone=None):
+                  mi_user_assigned=None, target_zone=None, restore_mode='AlternateLocation', target_vm_name=None,
+                  target_vnet_name=None, target_vnet_resource_group=None, target_subnet_name=None):
 
     if rehydration_duration < 10 or rehydration_duration > 30:
         raise InvalidArgumentValueError('--rehydration-duration must have a value between 10 and 30 (both inclusive).')
@@ -409,7 +412,8 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
                                 storage_account, target_resource_group, restore_to_staging_storage_account,
                                 restore_only_osdisk, diskslist, restore_as_unmanaged_disks, use_secondary_region,
                                 rehydration_duration, rehydration_priority, disk_encryption_set_id,
-                                mi_system_assigned, mi_user_assigned, target_zone)
+                                mi_system_assigned, mi_user_assigned, target_zone, restore_mode, target_vm_name,
+                                target_vnet_name, target_vnet_resource_group, target_subnet_name)
 
 
 def enable_for_azurefileshare(cmd, client, resource_group_name, vault_name, policy_name, storage_account,

@@ -95,7 +95,7 @@ class TestStaticAppCommands(unittest.TestCase):
         output_location = '/.git/'
         tags = {'key1': 'value1'}
 
-        with mock.patch("azure.cli.command_modules.appservice.static_sites.show_staticsite", side_effect=ResourceNotFoundError("msg")):
+        with mock.patch("azure.cli.command_modules.appservice.static_sites.show_staticsite", side_effect=[ResourceNotFoundError("msg"), None]):
             create_staticsites(
                 self.mock_cmd, self.rg1, self.name1, self.location1,
                 self.source1, self.branch1, self.token1,
@@ -128,7 +128,7 @@ class TestStaticAppCommands(unittest.TestCase):
         from azure.mgmt.web.models import StaticSiteARMResource, StaticSiteBuildProperties, SkuDescription
         self.mock_cmd.get_models.return_value = StaticSiteARMResource, StaticSiteBuildProperties, SkuDescription
 
-        with mock.patch("azure.cli.command_modules.appservice.static_sites.show_staticsite", side_effect=ResourceNotFoundError("msg")):
+        with mock.patch("azure.cli.command_modules.appservice.static_sites.show_staticsite", side_effect=[ResourceNotFoundError("msg"), None]):
             create_staticsites(
                 self.mock_cmd, self.rg1, self.name1, self.location1,
                 self.source1, self.branch1, self.token1, sku='standard')

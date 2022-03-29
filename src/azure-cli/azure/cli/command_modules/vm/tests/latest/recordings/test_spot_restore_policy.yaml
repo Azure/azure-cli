@@ -68,13 +68,13 @@ interactions:
       content-type:
       - text/plain; charset=utf-8
       date:
-      - Wed, 23 Feb 2022 03:30:34 GMT
+      - Thu, 17 Mar 2022 08:47:49 GMT
       etag:
       - W/"d5acead0b38a79d988c245a7a15ec01f999da9244c97bbdc1fa2ec70d9e433f5"
       expires:
-      - Wed, 23 Feb 2022 03:35:34 GMT
+      - Thu, 17 Mar 2022 08:52:49 GMT
       source-age:
-      - '0'
+      - '196'
       strict-transport-security:
       - max-age=31536000
       vary:
@@ -88,17 +88,126 @@ interactions:
       x-content-type-options:
       - nosniff
       x-fastly-request-id:
-      - 9a20de6178b085e9124477c82e499d7b2369c35b
+      - 0edd0db0c2b4fb30c8dd5f0a511b4eefc7774d2a
       x-frame-options:
       - deny
       x-github-request-id:
-      - 7C36:01D4:3AA050:48A76D:62158E03
+      - 2570:063C:1995B2:2734C1:62329D55
       x-served-by:
-      - cache-qpg1230-QPG
+      - cache-qpg1221-QPG
       x-timer:
-      - S1645587034.228249,VS0,VE309
+      - S1647506869.375973,VS0,VE1
       x-xss-protection:
       - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --location --instance-count --image --priority --eviction-policy --single-placement-group
+        --enable-spot-restore --spot-restore-timeout
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/NorthEurope/publishers/OpenLogic/artifacttypes/vmimage/offers/CentOS/skus/7.5/versions?$top=1&$orderby=name%20desc&api-version=2021-11-01
+  response:
+    body:
+      string: "[\r\n  {\r\n    \"location\": \"northeurope\",\r\n    \"name\": \"7.5.201808150\",\r\n
+        \   \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/northeurope/Publishers/OpenLogic/ArtifactTypes/VMImage/Offers/CentOS/Skus/7.5/Versions/7.5.201808150\"\r\n
+        \ }\r\n]"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '280'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Mar 2022 08:47:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/ListVMImagesVersionsFromLocation3Min;15999,Microsoft.Compute/ListVMImagesVersionsFromLocation30Min;43999
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --location --instance-count --image --priority --eviction-policy --single-placement-group
+        --enable-spot-restore --spot-restore-timeout
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/NorthEurope/publishers/OpenLogic/artifacttypes/vmimage/offers/CentOS/skus/7.5/versions/7.5.201808150?api-version=2021-11-01
+  response:
+    body:
+      string: "{\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n    \"architecture\":
+        \"x64\",\r\n    \"replicaType\": \"Unmanaged\",\r\n    \"disallowed\": {\r\n
+        \     \"vmDiskType\": \"None\"\r\n    },\r\n    \"automaticOSUpgradeProperties\":
+        {\r\n      \"automaticOSUpgradeSupported\": true\r\n    },\r\n    \"imageDeprecationStatus\":
+        {\r\n      \"imageState\": \"Active\"\r\n    },\r\n    \"osDiskImage\": {\r\n
+        \     \"operatingSystem\": \"Linux\",\r\n      \"sizeInGb\": 30,\r\n      \"sizeInBytes\":
+        32212255232\r\n    },\r\n    \"dataDiskImages\": []\r\n  },\r\n  \"location\":
+        \"northeurope\",\r\n  \"name\": \"7.5.201808150\",\r\n  \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/northeurope/Publishers/OpenLogic/ArtifactTypes/VMImage/Offers/CentOS/Skus/7.5/Versions/7.5.201808150\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '747'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Mar 2022 08:47:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetVMImageFromLocation3Min;12999,Microsoft.Compute/GetVMImageFromLocation30Min;73999
     status:
       code: 200
       message: OK
@@ -117,7 +226,7 @@ interactions:
       - -g -n --location --instance-count --image --priority --eviction-policy --single-placement-group
         --enable-spot-restore --spot-restore-timeout
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-network/19.3.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Network/virtualNetworks?api-version=2018-01-01
   response:
@@ -131,7 +240,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 23 Feb 2022 03:30:34 GMT
+      - Thu, 17 Mar 2022 08:47:51 GMT
       expires:
       - '-1'
       pragma:
@@ -171,13 +280,13 @@ interactions:
       true, "virtualMachineProfile": {"storageProfile": {"osDisk": {"createOption":
       "FromImage", "caching": "ReadWrite", "managedDisk": {"storageAccountType": null}},
       "imageReference": {"publisher": "OpenLogic", "offer": "CentOS", "sku": "7.5",
-      "version": "latest"}}, "osProfile": {"computerNamePrefix": "vmsss4e65", "adminUsername":
+      "version": "latest"}}, "osProfile": {"computerNamePrefix": "vmsssba33", "adminUsername":
       "ruijun_hu", "linuxConfiguration": {"disablePasswordAuthentication": true, "ssh":
       {"publicKeys": [{"path": "/home/ruijun_hu/.ssh/authorized_keys", "keyData":
       "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCyHIxtehmSa4iZExLrQ4pc7bklBKwAR865F9LEWNd8SIgFCYy2s+vA5Sofj2cMD06HqCAPeM+VJvjwImCmGhO3GQU816Zo7AOX21dKGUZLbGQ35lxXPMsd0aCx8J8Ncq1sReBPlZs9BT2X0pR2jkalCJQKFWXXkwXyj8l05PunQm2lnggijrnLAMjdI7+6S6rNUs4oA54egfrKIXSQiqjfSNMySytJzJkGYdbQzUrGrL47qNEy0keAPi1VGlijs/m3khFQAd2Bdb1Nhp1k8QC0OQ5BccKPVfFRyz/EoRMFvjzfNQrR75D6f2q+XZIrlee1Z7MX/KpYx1IOI2ATlfRqUoIlM7O1hWsQr9rGek+D10BtBJ4uZsrUOHs+llQo5fQXzVunZEzaYUBulRwPO1kBHjSkD0NNCO5490EnaCIFot41Wh/bDTWFNDZkZHxXhbrXRaA/d0vzrlAiLDUkUEtOKP0jc9o9vz/vSbEth6u8df06cq9yYVbn+1j93lX5vJ0=
       cxznmhdcxz\n"}]}}}, "priority": "Spot", "evictionPolicy": "Deallocate", "networkProfile":
-      {"networkInterfaceConfigurations": [{"name": "vmsss4e65Nic", "properties": {"ipConfigurations":
-      [{"name": "vmsss4e65IPConfig", "properties": {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Network/virtualNetworks/vmss-spot1VNET/subnets/vmss-spot1Subnet"},
+      {"networkInterfaceConfigurations": [{"name": "vmsssba33Nic", "properties": {"ipConfigurations":
+      [{"name": "vmsssba33IPConfig", "properties": {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Network/virtualNetworks/vmss-spot1VNET/subnets/vmss-spot1Subnet"},
       "loadBalancerBackendAddressPools": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Network/loadBalancers/vmss-spot1LB/backendAddressPools/vmss-spot1LBBEPool"}],
       "loadBalancerInboundNatPools": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Network/loadBalancers/vmss-spot1LB/inboundNatPools/vmss-spot1LBNatPool"}]}}],
       "primary": "true"}}]}}, "orchestrationMode": "Uniform"}, "sku": {"name": "Standard_DS1_v2",
@@ -201,23 +310,23 @@ interactions:
       - -g -n --location --instance-count --image --priority --eviction-policy --single-placement-group
         --enable-spot-restore --spot-restore-timeout
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Resources/deployments/vmss_deploy_M8VgGgiYmvbxO2B2MtXbR1JQyKRlLsin","name":"vmss_deploy_M8VgGgiYmvbxO2B2MtXbR1JQyKRlLsin","type":"Microsoft.Resources/deployments","properties":{"templateHash":"15415298923441310848","parameters":{},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2022-02-23T03:30:48.8600733Z","duration":"PT0.0006976S","correlationId":"7ea6de01-fd91-4134-a9d1-21c20d5ec2ad","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["northeurope"]},{"resourceType":"publicIPAddresses","locations":["northeurope"]},{"resourceType":"loadBalancers","locations":["northeurope"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachineScaleSets","locations":["northeurope"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Network/virtualNetworks/vmss-spot1VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vmss-spot1VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Network/publicIPAddresses/vmss-spot1LBPublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vmss-spot1LBPublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Network/loadBalancers/vmss-spot1LB","resourceType":"Microsoft.Network/loadBalancers","resourceName":"vmss-spot1LB"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Network/virtualNetworks/vmss-spot1VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vmss-spot1VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Network/loadBalancers/vmss-spot1LB","resourceType":"Microsoft.Network/loadBalancers","resourceName":"vmss-spot1LB"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss-spot1","resourceType":"Microsoft.Compute/virtualMachineScaleSets","resourceName":"vmss-spot1"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Resources/deployments/vmss_deploy_hNU9N9PVI6ocD52G87f58il5ukEpqXQj","name":"vmss_deploy_hNU9N9PVI6ocD52G87f58il5ukEpqXQj","type":"Microsoft.Resources/deployments","properties":{"templateHash":"9742513808302756677","parameters":{},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2022-03-17T08:48:04.7397596Z","duration":"PT0.0002304S","correlationId":"d99773be-6a0b-43a5-ac4d-70ac410589ee","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["northeurope"]},{"resourceType":"publicIPAddresses","locations":["northeurope"]},{"resourceType":"loadBalancers","locations":["northeurope"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachineScaleSets","locations":["northeurope"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Network/virtualNetworks/vmss-spot1VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vmss-spot1VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Network/publicIPAddresses/vmss-spot1LBPublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vmss-spot1LBPublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Network/loadBalancers/vmss-spot1LB","resourceType":"Microsoft.Network/loadBalancers","resourceName":"vmss-spot1LB"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Network/virtualNetworks/vmss-spot1VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vmss-spot1VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Network/loadBalancers/vmss-spot1LB","resourceType":"Microsoft.Network/loadBalancers","resourceName":"vmss-spot1LB"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss-spot1","resourceType":"Microsoft.Compute/virtualMachineScaleSets","resourceName":"vmss-spot1"}]}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Resources/deployments/vmss_deploy_M8VgGgiYmvbxO2B2MtXbR1JQyKRlLsin/operationStatuses/08585560198391146843?api-version=2021-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Resources/deployments/vmss_deploy_hNU9N9PVI6ocD52G87f58il5ukEpqXQj/operationStatuses/08585541000036981639?api-version=2021-04-01
       cache-control:
       - no-cache
       content-length:
-      - '2472'
+      - '2471'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 23 Feb 2022 03:30:50 GMT
+      - Thu, 17 Mar 2022 08:48:06 GMT
       expires:
       - '-1'
       pragma:
@@ -246,9 +355,9 @@ interactions:
       - -g -n --location --instance-count --image --priority --eviction-policy --single-placement-group
         --enable-spot-restore --spot-restore-timeout
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585560198391146843?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585541000036981639?api-version=2021-04-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -260,7 +369,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 23 Feb 2022 03:31:21 GMT
+      - Thu, 17 Mar 2022 08:48:37 GMT
       expires:
       - '-1'
       pragma:
@@ -289,9 +398,9 @@ interactions:
       - -g -n --location --instance-count --image --priority --eviction-policy --single-placement-group
         --enable-spot-restore --spot-restore-timeout
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585560198391146843?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585541000036981639?api-version=2021-04-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -303,7 +412,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 23 Feb 2022 03:31:53 GMT
+      - Thu, 17 Mar 2022 08:49:07 GMT
       expires:
       - '-1'
       pragma:
@@ -332,9 +441,9 @@ interactions:
       - -g -n --location --instance-count --image --priority --eviction-policy --single-placement-group
         --enable-spot-restore --spot-restore-timeout
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585560198391146843?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585541000036981639?api-version=2021-04-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -346,7 +455,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 23 Feb 2022 03:32:23 GMT
+      - Thu, 17 Mar 2022 08:49:39 GMT
       expires:
       - '-1'
       pragma:
@@ -375,9 +484,9 @@ interactions:
       - -g -n --location --instance-count --image --priority --eviction-policy --single-placement-group
         --enable-spot-restore --spot-restore-timeout
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585560198391146843?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585541000036981639?api-version=2021-04-01
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -389,7 +498,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 23 Feb 2022 03:32:53 GMT
+      - Thu, 17 Mar 2022 08:50:09 GMT
       expires:
       - '-1'
       pragma:
@@ -418,23 +527,23 @@ interactions:
       - -g -n --location --instance-count --image --priority --eviction-policy --single-placement-group
         --enable-spot-restore --spot-restore-timeout
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Resources/deployments/vmss_deploy_M8VgGgiYmvbxO2B2MtXbR1JQyKRlLsin","name":"vmss_deploy_M8VgGgiYmvbxO2B2MtXbR1JQyKRlLsin","type":"Microsoft.Resources/deployments","properties":{"templateHash":"15415298923441310848","parameters":{},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2022-02-23T03:32:25.9599389Z","duration":"PT1M37.1005632S","correlationId":"7ea6de01-fd91-4134-a9d1-21c20d5ec2ad","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["northeurope"]},{"resourceType":"publicIPAddresses","locations":["northeurope"]},{"resourceType":"loadBalancers","locations":["northeurope"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachineScaleSets","locations":["northeurope"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Network/virtualNetworks/vmss-spot1VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vmss-spot1VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Network/publicIPAddresses/vmss-spot1LBPublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vmss-spot1LBPublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Network/loadBalancers/vmss-spot1LB","resourceType":"Microsoft.Network/loadBalancers","resourceName":"vmss-spot1LB"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Network/virtualNetworks/vmss-spot1VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vmss-spot1VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Network/loadBalancers/vmss-spot1LB","resourceType":"Microsoft.Network/loadBalancers","resourceName":"vmss-spot1LB"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss-spot1","resourceType":"Microsoft.Compute/virtualMachineScaleSets","resourceName":"vmss-spot1"}],"outputs":{"vmss":{"type":"Object","value":{"singlePlacementGroup":true,"upgradePolicy":{"mode":"Manual","rollingUpgradePolicy":{"maxBatchInstancePercent":20,"maxUnhealthyInstancePercent":20,"maxUnhealthyUpgradedInstancePercent":20,"pauseTimeBetweenBatches":"PT0S"}},"virtualMachineProfile":{"osProfile":{"computerNamePrefix":"vmsss4e65","adminUsername":"ruijun_hu","linuxConfiguration":{"disablePasswordAuthentication":true,"ssh":{"publicKeys":[{"path":"/home/ruijun_hu/.ssh/authorized_keys","keyData":"ssh-rsa
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Resources/deployments/vmss_deploy_hNU9N9PVI6ocD52G87f58il5ukEpqXQj","name":"vmss_deploy_hNU9N9PVI6ocD52G87f58il5ukEpqXQj","type":"Microsoft.Resources/deployments","properties":{"templateHash":"9742513808302756677","parameters":{},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2022-03-17T08:49:40.8592596Z","duration":"PT1M36.1197304S","correlationId":"d99773be-6a0b-43a5-ac4d-70ac410589ee","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["northeurope"]},{"resourceType":"publicIPAddresses","locations":["northeurope"]},{"resourceType":"loadBalancers","locations":["northeurope"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachineScaleSets","locations":["northeurope"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Network/virtualNetworks/vmss-spot1VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vmss-spot1VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Network/publicIPAddresses/vmss-spot1LBPublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vmss-spot1LBPublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Network/loadBalancers/vmss-spot1LB","resourceType":"Microsoft.Network/loadBalancers","resourceName":"vmss-spot1LB"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Network/virtualNetworks/vmss-spot1VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vmss-spot1VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Network/loadBalancers/vmss-spot1LB","resourceType":"Microsoft.Network/loadBalancers","resourceName":"vmss-spot1LB"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss-spot1","resourceType":"Microsoft.Compute/virtualMachineScaleSets","resourceName":"vmss-spot1"}],"outputs":{"vmss":{"type":"Object","value":{"singlePlacementGroup":true,"upgradePolicy":{"mode":"Manual","rollingUpgradePolicy":{"maxBatchInstancePercent":20,"maxUnhealthyInstancePercent":20,"maxUnhealthyUpgradedInstancePercent":20,"pauseTimeBetweenBatches":"PT0S"}},"virtualMachineProfile":{"osProfile":{"computerNamePrefix":"vmsssba33","adminUsername":"ruijun_hu","linuxConfiguration":{"disablePasswordAuthentication":true,"ssh":{"publicKeys":[{"path":"/home/ruijun_hu/.ssh/authorized_keys","keyData":"ssh-rsa
         AAAAB3NzaC1yc2EAAAADAQABAAABgQCyHIxtehmSa4iZExLrQ4pc7bklBKwAR865F9LEWNd8SIgFCYy2s+vA5Sofj2cMD06HqCAPeM+VJvjwImCmGhO3GQU816Zo7AOX21dKGUZLbGQ35lxXPMsd0aCx8J8Ncq1sReBPlZs9BT2X0pR2jkalCJQKFWXXkwXyj8l05PunQm2lnggijrnLAMjdI7+6S6rNUs4oA54egfrKIXSQiqjfSNMySytJzJkGYdbQzUrGrL47qNEy0keAPi1VGlijs/m3khFQAd2Bdb1Nhp1k8QC0OQ5BccKPVfFRyz/EoRMFvjzfNQrR75D6f2q+XZIrlee1Z7MX/KpYx1IOI2ATlfRqUoIlM7O1hWsQr9rGek+D10BtBJ4uZsrUOHs+llQo5fQXzVunZEzaYUBulRwPO1kBHjSkD0NNCO5490EnaCIFot41Wh/bDTWFNDZkZHxXhbrXRaA/d0vzrlAiLDUkUEtOKP0jc9o9vz/vSbEth6u8df06cq9yYVbn+1j93lX5vJ0=
-        cxznmhdcxz\n"}]},"provisionVMAgent":true},"secrets":[],"allowExtensionOperations":true,"requireGuestProvisionSignal":true},"storageProfile":{"osDisk":{"osType":"Linux","createOption":"FromImage","caching":"ReadWrite","managedDisk":{"storageAccountType":"Premium_LRS"},"diskSizeGB":30},"imageReference":{"publisher":"OpenLogic","offer":"CentOS","sku":"7.5","version":"latest"}},"networkProfile":{"networkInterfaceConfigurations":[{"name":"vmsss4e65Nic","properties":{"primary":true,"enableAcceleratedNetworking":false,"dnsSettings":{"dnsServers":[]},"enableIPForwarding":false,"ipConfigurations":[{"name":"vmsss4e65IPConfig","properties":{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Network/virtualNetworks/vmss-spot1VNET/subnets/vmss-spot1Subnet"},"privateIPAddressVersion":"IPv4","loadBalancerBackendAddressPools":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Network/loadBalancers/vmss-spot1LB/backendAddressPools/vmss-spot1LBBEPool"}],"loadBalancerInboundNatPools":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Network/loadBalancers/vmss-spot1LB/inboundNatPools/vmss-spot1LBNatPool"}]}}]}}]},"priority":"Spot","evictionPolicy":"Deallocate","billingProfile":{"maxPrice":-1.0}},"provisioningState":"Succeeded","overprovision":true,"doNotRunExtensionsOnOverprovisionedVMs":false,"uniqueId":"b3078f5f-c087-4e50-9b17-ddf56dd3516c","platformFaultDomainCount":1,"spotRestorePolicy":{"enabled":true,"restoreTimeout":"PT1H"},"timeCreated":"2022-02-23T03:31:13.4988801+00:00"}}},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss-spot1"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Network/loadBalancers/vmss-spot1LB"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Network/publicIPAddresses/vmss-spot1LBPublicIP"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Network/virtualNetworks/vmss-spot1VNET"}]}}'
+        cxznmhdcxz\n"}]},"provisionVMAgent":true},"secrets":[],"allowExtensionOperations":true,"requireGuestProvisionSignal":true},"storageProfile":{"osDisk":{"osType":"Linux","createOption":"FromImage","caching":"ReadWrite","managedDisk":{"storageAccountType":"Premium_LRS"},"diskSizeGB":30},"imageReference":{"publisher":"OpenLogic","offer":"CentOS","sku":"7.5","version":"latest"}},"networkProfile":{"networkInterfaceConfigurations":[{"name":"vmsssba33Nic","properties":{"primary":true,"enableAcceleratedNetworking":false,"dnsSettings":{"dnsServers":[]},"enableIPForwarding":false,"ipConfigurations":[{"name":"vmsssba33IPConfig","properties":{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Network/virtualNetworks/vmss-spot1VNET/subnets/vmss-spot1Subnet"},"privateIPAddressVersion":"IPv4","loadBalancerBackendAddressPools":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Network/loadBalancers/vmss-spot1LB/backendAddressPools/vmss-spot1LBBEPool"}],"loadBalancerInboundNatPools":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Network/loadBalancers/vmss-spot1LB/inboundNatPools/vmss-spot1LBNatPool"}]}}]}}]},"priority":"Spot","evictionPolicy":"Deallocate","billingProfile":{"maxPrice":-1.0}},"provisioningState":"Succeeded","overprovision":true,"doNotRunExtensionsOnOverprovisionedVMs":false,"uniqueId":"b7fb34da-e6ab-440a-8ea7-75840cfeb420","platformFaultDomainCount":1,"spotRestorePolicy":{"enabled":true,"restoreTimeout":"PT1H"},"timeCreated":"2022-03-17T08:48:28.5418987+00:00"}}},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss-spot1"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Network/loadBalancers/vmss-spot1LB"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Network/publicIPAddresses/vmss-spot1LBPublicIP"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Network/virtualNetworks/vmss-spot1VNET"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '5961'
+      - '5960'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 23 Feb 2022 03:32:54 GMT
+      - Thu, 17 Mar 2022 08:50:10 GMT
       expires:
       - '-1'
       pragma:
@@ -462,7 +571,7 @@ interactions:
       ParameterSetName:
       - -g -n --enable-spot-restore --spot-restore-timeout
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss-spot1?api-version=2021-11-01
   response:
@@ -476,7 +585,7 @@ interactions:
         20,\r\n        \"maxUnhealthyInstancePercent\": 20,\r\n        \"maxUnhealthyUpgradedInstancePercent\":
         20,\r\n        \"pauseTimeBetweenBatches\": \"PT0S\"\r\n      }\r\n    },\r\n
         \   \"virtualMachineProfile\": {\r\n      \"osProfile\": {\r\n        \"computerNamePrefix\":
-        \"vmsss4e65\",\r\n        \"adminUsername\": \"ruijun_hu\",\r\n        \"linuxConfiguration\":
+        \"vmsssba33\",\r\n        \"adminUsername\": \"ruijun_hu\",\r\n        \"linuxConfiguration\":
         {\r\n          \"disablePasswordAuthentication\": true,\r\n          \"ssh\":
         {\r\n            \"publicKeys\": [\r\n              {\r\n                \"path\":
         \"/home/ruijun_hu/.ssh/authorized_keys\",\r\n                \"keyData\":
@@ -490,14 +599,14 @@ interactions:
         \         \"diskSizeGB\": 30\r\n        },\r\n        \"imageReference\":
         {\r\n          \"publisher\": \"OpenLogic\",\r\n          \"offer\": \"CentOS\",\r\n
         \         \"sku\": \"7.5\",\r\n          \"version\": \"latest\"\r\n        }\r\n
-        \     },\r\n      \"networkProfile\": {\"networkInterfaceConfigurations\":[{\"name\":\"vmsss4e65Nic\",\"properties\":{\"primary\":true,\"enableAcceleratedNetworking\":false,\"dnsSettings\":{\"dnsServers\":[]},\"enableIPForwarding\":false,\"ipConfigurations\":[{\"name\":\"vmsss4e65IPConfig\",\"properties\":{\"subnet\":{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Network/virtualNetworks/vmss-spot1VNET/subnets/vmss-spot1Subnet\"},\"privateIPAddressVersion\":\"IPv4\",\"loadBalancerBackendAddressPools\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Network/loadBalancers/vmss-spot1LB/backendAddressPools/vmss-spot1LBBEPool\"}],\"loadBalancerInboundNatPools\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Network/loadBalancers/vmss-spot1LB/inboundNatPools/vmss-spot1LBNatPool\"}]}}]}}]},\r\n
+        \     },\r\n      \"networkProfile\": {\"networkInterfaceConfigurations\":[{\"name\":\"vmsssba33Nic\",\"properties\":{\"primary\":true,\"enableAcceleratedNetworking\":false,\"dnsSettings\":{\"dnsServers\":[]},\"enableIPForwarding\":false,\"ipConfigurations\":[{\"name\":\"vmsssba33IPConfig\",\"properties\":{\"subnet\":{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Network/virtualNetworks/vmss-spot1VNET/subnets/vmss-spot1Subnet\"},\"privateIPAddressVersion\":\"IPv4\",\"loadBalancerBackendAddressPools\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Network/loadBalancers/vmss-spot1LB/backendAddressPools/vmss-spot1LBBEPool\"}],\"loadBalancerInboundNatPools\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Network/loadBalancers/vmss-spot1LB/inboundNatPools/vmss-spot1LBNatPool\"}]}}]}}]},\r\n
         \     \"priority\": \"Spot\",\r\n      \"evictionPolicy\": \"Deallocate\",\r\n
         \     \"billingProfile\": {\r\n        \"maxPrice\": -1.0\r\n      }\r\n    },\r\n
         \   \"provisioningState\": \"Succeeded\",\r\n    \"overprovision\": true,\r\n
         \   \"doNotRunExtensionsOnOverprovisionedVMs\": false,\r\n    \"uniqueId\":
-        \"b3078f5f-c087-4e50-9b17-ddf56dd3516c\",\r\n    \"platformFaultDomainCount\":
+        \"b7fb34da-e6ab-440a-8ea7-75840cfeb420\",\r\n    \"platformFaultDomainCount\":
         1,\r\n    \"spotRestorePolicy\": {\r\n      \"enabled\": true,\r\n      \"restoreTimeout\":
-        \"PT1H\"\r\n    },\r\n    \"timeCreated\": \"2022-02-23T03:31:13.4988801+00:00\"\r\n
+        \"PT1H\"\r\n    },\r\n    \"timeCreated\": \"2022-03-17T08:48:28.5418987+00:00\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
@@ -507,7 +616,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 23 Feb 2022 03:32:55 GMT
+      - Thu, 17 Mar 2022 08:50:11 GMT
       expires:
       - '-1'
       pragma:
@@ -524,7 +633,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetVMScaleSet3Min;396,Microsoft.Compute/GetVMScaleSet30Min;2596
+      - Microsoft.Compute/GetVMScaleSet3Min;395,Microsoft.Compute/GetVMScaleSet30Min;2588
     status:
       code: 200
       message: OK
@@ -533,7 +642,7 @@ interactions:
       "tier": "Standard", "capacity": 2}, "properties": {"upgradePolicy": {"mode":
       "Manual", "rollingUpgradePolicy": {"maxBatchInstancePercent": 20, "maxUnhealthyInstancePercent":
       20, "maxUnhealthyUpgradedInstancePercent": 20, "pauseTimeBetweenBatches": "PT0S"}},
-      "virtualMachineProfile": {"osProfile": {"computerNamePrefix": "vmsss4e65", "adminUsername":
+      "virtualMachineProfile": {"osProfile": {"computerNamePrefix": "vmsssba33", "adminUsername":
       "ruijun_hu", "linuxConfiguration": {"disablePasswordAuthentication": true, "ssh":
       {"publicKeys": [{"path": "/home/ruijun_hu/.ssh/authorized_keys", "keyData":
       "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCyHIxtehmSa4iZExLrQ4pc7bklBKwAR865F9LEWNd8SIgFCYy2s+vA5Sofj2cMD06HqCAPeM+VJvjwImCmGhO3GQU816Zo7AOX21dKGUZLbGQ35lxXPMsd0aCx8J8Ncq1sReBPlZs9BT2X0pR2jkalCJQKFWXXkwXyj8l05PunQm2lnggijrnLAMjdI7+6S6rNUs4oA54egfrKIXSQiqjfSNMySytJzJkGYdbQzUrGrL47qNEy0keAPi1VGlijs/m3khFQAd2Bdb1Nhp1k8QC0OQ5BccKPVfFRyz/EoRMFvjzfNQrR75D6f2q+XZIrlee1Z7MX/KpYx1IOI2ATlfRqUoIlM7O1hWsQr9rGek+D10BtBJ4uZsrUOHs+llQo5fQXzVunZEzaYUBulRwPO1kBHjSkD0NNCO5490EnaCIFot41Wh/bDTWFNDZkZHxXhbrXRaA/d0vzrlAiLDUkUEtOKP0jc9o9vz/vSbEth6u8df06cq9yYVbn+1j93lX5vJ0=
@@ -541,8 +650,8 @@ interactions:
       true}, "storageProfile": {"osDisk": {"caching": "ReadWrite", "createOption":
       "FromImage", "diskSizeGB": 30, "osType": "Linux", "managedDisk": {"storageAccountType":
       "Premium_LRS"}}}, "networkProfile": {"networkInterfaceConfigurations": [{"name":
-      "vmsss4e65Nic", "properties": {"primary": true, "enableAcceleratedNetworking":
-      false, "dnsSettings": {"dnsServers": []}, "ipConfigurations": [{"name": "vmsss4e65IPConfig",
+      "vmsssba33Nic", "properties": {"primary": true, "enableAcceleratedNetworking":
+      false, "dnsSettings": {"dnsServers": []}, "ipConfigurations": [{"name": "vmsssba33IPConfig",
       "properties": {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Network/virtualNetworks/vmss-spot1VNET/subnets/vmss-spot1Subnet"},
       "privateIPAddressVersion": "IPv4", "loadBalancerBackendAddressPools": [{"id":
       "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Network/loadBalancers/vmss-spot1LB/backendAddressPools/vmss-spot1LBBEPool"}],
@@ -567,7 +676,7 @@ interactions:
       ParameterSetName:
       - -g -n --enable-spot-restore --spot-restore-timeout
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss-spot1?api-version=2021-11-01
   response:
@@ -581,7 +690,7 @@ interactions:
         20,\r\n        \"maxUnhealthyInstancePercent\": 20,\r\n        \"maxUnhealthyUpgradedInstancePercent\":
         20,\r\n        \"pauseTimeBetweenBatches\": \"PT0S\"\r\n      }\r\n    },\r\n
         \   \"virtualMachineProfile\": {\r\n      \"osProfile\": {\r\n        \"computerNamePrefix\":
-        \"vmsss4e65\",\r\n        \"adminUsername\": \"ruijun_hu\",\r\n        \"linuxConfiguration\":
+        \"vmsssba33\",\r\n        \"adminUsername\": \"ruijun_hu\",\r\n        \"linuxConfiguration\":
         {\r\n          \"disablePasswordAuthentication\": true,\r\n          \"ssh\":
         {\r\n            \"publicKeys\": [\r\n              {\r\n                \"path\":
         \"/home/ruijun_hu/.ssh/authorized_keys\",\r\n                \"keyData\":
@@ -595,20 +704,20 @@ interactions:
         \         \"diskSizeGB\": 30\r\n        },\r\n        \"imageReference\":
         {\r\n          \"publisher\": \"OpenLogic\",\r\n          \"offer\": \"CentOS\",\r\n
         \         \"sku\": \"7.5\",\r\n          \"version\": \"latest\"\r\n        }\r\n
-        \     },\r\n      \"networkProfile\": {\"networkInterfaceConfigurations\":[{\"name\":\"vmsss4e65Nic\",\"properties\":{\"primary\":true,\"enableAcceleratedNetworking\":false,\"dnsSettings\":{\"dnsServers\":[]},\"enableIPForwarding\":false,\"ipConfigurations\":[{\"name\":\"vmsss4e65IPConfig\",\"properties\":{\"subnet\":{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Network/virtualNetworks/vmss-spot1VNET/subnets/vmss-spot1Subnet\"},\"privateIPAddressVersion\":\"IPv4\",\"loadBalancerBackendAddressPools\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Network/loadBalancers/vmss-spot1LB/backendAddressPools/vmss-spot1LBBEPool\"}],\"loadBalancerInboundNatPools\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Network/loadBalancers/vmss-spot1LB/inboundNatPools/vmss-spot1LBNatPool\"}]}}]}}]},\r\n
+        \     },\r\n      \"networkProfile\": {\"networkInterfaceConfigurations\":[{\"name\":\"vmsssba33Nic\",\"properties\":{\"primary\":true,\"enableAcceleratedNetworking\":false,\"dnsSettings\":{\"dnsServers\":[]},\"enableIPForwarding\":false,\"ipConfigurations\":[{\"name\":\"vmsssba33IPConfig\",\"properties\":{\"subnet\":{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Network/virtualNetworks/vmss-spot1VNET/subnets/vmss-spot1Subnet\"},\"privateIPAddressVersion\":\"IPv4\",\"loadBalancerBackendAddressPools\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Network/loadBalancers/vmss-spot1LB/backendAddressPools/vmss-spot1LBBEPool\"}],\"loadBalancerInboundNatPools\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Network/loadBalancers/vmss-spot1LB/inboundNatPools/vmss-spot1LBNatPool\"}]}}]}}]},\r\n
         \     \"priority\": \"Spot\",\r\n      \"evictionPolicy\": \"Deallocate\",\r\n
         \     \"billingProfile\": {\r\n        \"maxPrice\": -1.0\r\n      }\r\n    },\r\n
         \   \"provisioningState\": \"Updating\",\r\n    \"overprovision\": true,\r\n
         \   \"doNotRunExtensionsOnOverprovisionedVMs\": false,\r\n    \"uniqueId\":
-        \"b3078f5f-c087-4e50-9b17-ddf56dd3516c\",\r\n    \"platformFaultDomainCount\":
+        \"b7fb34da-e6ab-440a-8ea7-75840cfeb420\",\r\n    \"platformFaultDomainCount\":
         1,\r\n    \"spotRestorePolicy\": {\r\n      \"enabled\": false,\r\n      \"restoreTimeout\":
-        \"PT2H\"\r\n    },\r\n    \"timeCreated\": \"2022-02-23T03:31:13.4988801+00:00\"\r\n
+        \"PT2H\"\r\n    },\r\n    \"timeCreated\": \"2022-03-17T08:48:28.5418987+00:00\"\r\n
         \ }\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/northeurope/operations/21a62442-fb3e-4e73-997c-c2794651cc0e?p=5c3e95df-a2c2-4d04-b8ed-9542a645fa77&api-version=2021-11-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/northeurope/operations/33620fc3-16d7-41fd-ad3a-4de3801d807b?p=5c3e95df-a2c2-4d04-b8ed-9542a645fa77&api-version=2021-11-01
       cache-control:
       - no-cache
       content-length:
@@ -616,7 +725,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 23 Feb 2022 03:33:02 GMT
+      - Thu, 17 Mar 2022 08:50:19 GMT
       expires:
       - '-1'
       pragma:
@@ -635,7 +744,7 @@ interactions:
       x-ms-ratelimit-remaining-resource:
       - Microsoft.Compute/CreateVMScaleSet3Min;191,Microsoft.Compute/CreateVMScaleSet30Min;965,Microsoft.Compute/VmssQueuedVMOperations;0
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
       x-ms-request-charge:
       - '0'
     status:
@@ -655,23 +764,22 @@ interactions:
       ParameterSetName:
       - -g -n --enable-spot-restore --spot-restore-timeout
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/northeurope/operations/21a62442-fb3e-4e73-997c-c2794651cc0e?p=5c3e95df-a2c2-4d04-b8ed-9542a645fa77&api-version=2021-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/northeurope/operations/33620fc3-16d7-41fd-ad3a-4de3801d807b?p=5c3e95df-a2c2-4d04-b8ed-9542a645fa77&api-version=2021-11-01
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2022-02-23T03:33:01.0185154+00:00\",\r\n  \"endTime\":
-        \"2022-02-23T03:33:01.2060247+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
-        \ \"name\": \"21a62442-fb3e-4e73-997c-c2794651cc0e\"\r\n}"
+      string: "{\r\n  \"startTime\": \"2022-03-17T08:50:17.9516657+00:00\",\r\n  \"status\":
+        \"InProgress\",\r\n  \"name\": \"33620fc3-16d7-41fd-ad3a-4de3801d807b\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '184'
+      - '134'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 23 Feb 2022 03:33:13 GMT
+      - Thu, 17 Mar 2022 08:50:29 GMT
       expires:
       - '-1'
       pragma:
@@ -706,52 +814,23 @@ interactions:
       ParameterSetName:
       - -g -n --enable-spot-restore --spot-restore-timeout
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss-spot1?api-version=2021-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/northeurope/operations/33620fc3-16d7-41fd-ad3a-4de3801d807b?p=5c3e95df-a2c2-4d04-b8ed-9542a645fa77&api-version=2021-11-01
   response:
     body:
-      string: "{\r\n  \"name\": \"vmss-spot1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss-spot1\",\r\n
-        \ \"type\": \"Microsoft.Compute/virtualMachineScaleSets\",\r\n  \"location\":
-        \"northeurope\",\r\n  \"tags\": {},\r\n  \"sku\": {\r\n    \"name\": \"Standard_DS1_v2\",\r\n
-        \   \"tier\": \"Standard\",\r\n    \"capacity\": 2\r\n  },\r\n  \"properties\":
-        {\r\n    \"singlePlacementGroup\": true,\r\n    \"upgradePolicy\": {\r\n      \"mode\":
-        \"Manual\",\r\n      \"rollingUpgradePolicy\": {\r\n        \"maxBatchInstancePercent\":
-        20,\r\n        \"maxUnhealthyInstancePercent\": 20,\r\n        \"maxUnhealthyUpgradedInstancePercent\":
-        20,\r\n        \"pauseTimeBetweenBatches\": \"PT0S\"\r\n      }\r\n    },\r\n
-        \   \"virtualMachineProfile\": {\r\n      \"osProfile\": {\r\n        \"computerNamePrefix\":
-        \"vmsss4e65\",\r\n        \"adminUsername\": \"ruijun_hu\",\r\n        \"linuxConfiguration\":
-        {\r\n          \"disablePasswordAuthentication\": true,\r\n          \"ssh\":
-        {\r\n            \"publicKeys\": [\r\n              {\r\n                \"path\":
-        \"/home/ruijun_hu/.ssh/authorized_keys\",\r\n                \"keyData\":
-        \"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCyHIxtehmSa4iZExLrQ4pc7bklBKwAR865F9LEWNd8SIgFCYy2s+vA5Sofj2cMD06HqCAPeM+VJvjwImCmGhO3GQU816Zo7AOX21dKGUZLbGQ35lxXPMsd0aCx8J8Ncq1sReBPlZs9BT2X0pR2jkalCJQKFWXXkwXyj8l05PunQm2lnggijrnLAMjdI7+6S6rNUs4oA54egfrKIXSQiqjfSNMySytJzJkGYdbQzUrGrL47qNEy0keAPi1VGlijs/m3khFQAd2Bdb1Nhp1k8QC0OQ5BccKPVfFRyz/EoRMFvjzfNQrR75D6f2q+XZIrlee1Z7MX/KpYx1IOI2ATlfRqUoIlM7O1hWsQr9rGek+D10BtBJ4uZsrUOHs+llQo5fQXzVunZEzaYUBulRwPO1kBHjSkD0NNCO5490EnaCIFot41Wh/bDTWFNDZkZHxXhbrXRaA/d0vzrlAiLDUkUEtOKP0jc9o9vz/vSbEth6u8df06cq9yYVbn+1j93lX5vJ0=
-        cxznmhdcxz\\n\"\r\n              }\r\n            ]\r\n          },\r\n          \"provisionVMAgent\":
-        true\r\n        },\r\n        \"secrets\": [],\r\n        \"allowExtensionOperations\":
-        true,\r\n        \"requireGuestProvisionSignal\": true\r\n      },\r\n      \"storageProfile\":
-        {\r\n        \"osDisk\": {\r\n          \"osType\": \"Linux\",\r\n          \"createOption\":
-        \"FromImage\",\r\n          \"caching\": \"ReadWrite\",\r\n          \"managedDisk\":
-        {\r\n            \"storageAccountType\": \"Premium_LRS\"\r\n          },\r\n
-        \         \"diskSizeGB\": 30\r\n        },\r\n        \"imageReference\":
-        {\r\n          \"publisher\": \"OpenLogic\",\r\n          \"offer\": \"CentOS\",\r\n
-        \         \"sku\": \"7.5\",\r\n          \"version\": \"latest\"\r\n        }\r\n
-        \     },\r\n      \"networkProfile\": {\"networkInterfaceConfigurations\":[{\"name\":\"vmsss4e65Nic\",\"properties\":{\"primary\":true,\"enableAcceleratedNetworking\":false,\"dnsSettings\":{\"dnsServers\":[]},\"enableIPForwarding\":false,\"ipConfigurations\":[{\"name\":\"vmsss4e65IPConfig\",\"properties\":{\"subnet\":{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Network/virtualNetworks/vmss-spot1VNET/subnets/vmss-spot1Subnet\"},\"privateIPAddressVersion\":\"IPv4\",\"loadBalancerBackendAddressPools\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Network/loadBalancers/vmss-spot1LB/backendAddressPools/vmss-spot1LBBEPool\"}],\"loadBalancerInboundNatPools\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Network/loadBalancers/vmss-spot1LB/inboundNatPools/vmss-spot1LBNatPool\"}]}}]}}]},\r\n
-        \     \"priority\": \"Spot\",\r\n      \"evictionPolicy\": \"Deallocate\",\r\n
-        \     \"billingProfile\": {\r\n        \"maxPrice\": -1.0\r\n      }\r\n    },\r\n
-        \   \"provisioningState\": \"Succeeded\",\r\n    \"overprovision\": true,\r\n
-        \   \"doNotRunExtensionsOnOverprovisionedVMs\": false,\r\n    \"uniqueId\":
-        \"b3078f5f-c087-4e50-9b17-ddf56dd3516c\",\r\n    \"platformFaultDomainCount\":
-        1,\r\n    \"spotRestorePolicy\": {\r\n      \"enabled\": false,\r\n      \"restoreTimeout\":
-        \"PT2H\"\r\n    },\r\n    \"timeCreated\": \"2022-02-23T03:31:13.4988801+00:00\"\r\n
-        \ }\r\n}"
+      string: "{\r\n  \"startTime\": \"2022-03-17T08:50:17.9516657+00:00\",\r\n  \"endTime\":
+        \"2022-03-17T08:50:34.608523+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
+        \ \"name\": \"33620fc3-16d7-41fd-ad3a-4de3801d807b\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '3838'
+      - '183'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 23 Feb 2022 03:33:13 GMT
+      - Thu, 17 Mar 2022 08:51:06 GMT
       expires:
       - '-1'
       pragma:
@@ -768,7 +847,87 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetVMScaleSet3Min;393,Microsoft.Compute/GetVMScaleSet30Min;2593
+      - Microsoft.Compute/GetOperation3Min;14996,Microsoft.Compute/GetOperation30Min;29996
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --enable-spot-restore --spot-restore-timeout
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss-spot1?api-version=2021-11-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"vmss-spot1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss-spot1\",\r\n
+        \ \"type\": \"Microsoft.Compute/virtualMachineScaleSets\",\r\n  \"location\":
+        \"northeurope\",\r\n  \"tags\": {},\r\n  \"sku\": {\r\n    \"name\": \"Standard_DS1_v2\",\r\n
+        \   \"tier\": \"Standard\",\r\n    \"capacity\": 2\r\n  },\r\n  \"properties\":
+        {\r\n    \"singlePlacementGroup\": true,\r\n    \"upgradePolicy\": {\r\n      \"mode\":
+        \"Manual\",\r\n      \"rollingUpgradePolicy\": {\r\n        \"maxBatchInstancePercent\":
+        20,\r\n        \"maxUnhealthyInstancePercent\": 20,\r\n        \"maxUnhealthyUpgradedInstancePercent\":
+        20,\r\n        \"pauseTimeBetweenBatches\": \"PT0S\"\r\n      }\r\n    },\r\n
+        \   \"virtualMachineProfile\": {\r\n      \"osProfile\": {\r\n        \"computerNamePrefix\":
+        \"vmsssba33\",\r\n        \"adminUsername\": \"ruijun_hu\",\r\n        \"linuxConfiguration\":
+        {\r\n          \"disablePasswordAuthentication\": true,\r\n          \"ssh\":
+        {\r\n            \"publicKeys\": [\r\n              {\r\n                \"path\":
+        \"/home/ruijun_hu/.ssh/authorized_keys\",\r\n                \"keyData\":
+        \"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCyHIxtehmSa4iZExLrQ4pc7bklBKwAR865F9LEWNd8SIgFCYy2s+vA5Sofj2cMD06HqCAPeM+VJvjwImCmGhO3GQU816Zo7AOX21dKGUZLbGQ35lxXPMsd0aCx8J8Ncq1sReBPlZs9BT2X0pR2jkalCJQKFWXXkwXyj8l05PunQm2lnggijrnLAMjdI7+6S6rNUs4oA54egfrKIXSQiqjfSNMySytJzJkGYdbQzUrGrL47qNEy0keAPi1VGlijs/m3khFQAd2Bdb1Nhp1k8QC0OQ5BccKPVfFRyz/EoRMFvjzfNQrR75D6f2q+XZIrlee1Z7MX/KpYx1IOI2ATlfRqUoIlM7O1hWsQr9rGek+D10BtBJ4uZsrUOHs+llQo5fQXzVunZEzaYUBulRwPO1kBHjSkD0NNCO5490EnaCIFot41Wh/bDTWFNDZkZHxXhbrXRaA/d0vzrlAiLDUkUEtOKP0jc9o9vz/vSbEth6u8df06cq9yYVbn+1j93lX5vJ0=
+        cxznmhdcxz\\n\"\r\n              }\r\n            ]\r\n          },\r\n          \"provisionVMAgent\":
+        true\r\n        },\r\n        \"secrets\": [],\r\n        \"allowExtensionOperations\":
+        true,\r\n        \"requireGuestProvisionSignal\": true\r\n      },\r\n      \"storageProfile\":
+        {\r\n        \"osDisk\": {\r\n          \"osType\": \"Linux\",\r\n          \"createOption\":
+        \"FromImage\",\r\n          \"caching\": \"ReadWrite\",\r\n          \"managedDisk\":
+        {\r\n            \"storageAccountType\": \"Premium_LRS\"\r\n          },\r\n
+        \         \"diskSizeGB\": 30\r\n        },\r\n        \"imageReference\":
+        {\r\n          \"publisher\": \"OpenLogic\",\r\n          \"offer\": \"CentOS\",\r\n
+        \         \"sku\": \"7.5\",\r\n          \"version\": \"latest\"\r\n        }\r\n
+        \     },\r\n      \"networkProfile\": {\"networkInterfaceConfigurations\":[{\"name\":\"vmsssba33Nic\",\"properties\":{\"primary\":true,\"enableAcceleratedNetworking\":false,\"dnsSettings\":{\"dnsServers\":[]},\"enableIPForwarding\":false,\"ipConfigurations\":[{\"name\":\"vmsssba33IPConfig\",\"properties\":{\"subnet\":{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Network/virtualNetworks/vmss-spot1VNET/subnets/vmss-spot1Subnet\"},\"privateIPAddressVersion\":\"IPv4\",\"loadBalancerBackendAddressPools\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Network/loadBalancers/vmss-spot1LB/backendAddressPools/vmss-spot1LBBEPool\"}],\"loadBalancerInboundNatPools\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Network/loadBalancers/vmss-spot1LB/inboundNatPools/vmss-spot1LBNatPool\"}]}}]}}]},\r\n
+        \     \"priority\": \"Spot\",\r\n      \"evictionPolicy\": \"Deallocate\",\r\n
+        \     \"billingProfile\": {\r\n        \"maxPrice\": -1.0\r\n      }\r\n    },\r\n
+        \   \"provisioningState\": \"Succeeded\",\r\n    \"overprovision\": true,\r\n
+        \   \"doNotRunExtensionsOnOverprovisionedVMs\": false,\r\n    \"uniqueId\":
+        \"b7fb34da-e6ab-440a-8ea7-75840cfeb420\",\r\n    \"platformFaultDomainCount\":
+        1,\r\n    \"spotRestorePolicy\": {\r\n      \"enabled\": false,\r\n      \"restoreTimeout\":
+        \"PT2H\"\r\n    },\r\n    \"timeCreated\": \"2022-03-17T08:48:28.5418987+00:00\"\r\n
+        \ }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3838'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Mar 2022 08:51:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetVMScaleSet3Min;390,Microsoft.Compute/GetVMScaleSet30Min;2583
     status:
       code: 200
       message: OK

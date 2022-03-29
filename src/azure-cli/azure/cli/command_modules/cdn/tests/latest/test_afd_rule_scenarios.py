@@ -6,7 +6,11 @@ from azure.cli.testsdk import ResourceGroupPreparer, JMESPathCheck
 from azure.cli.testsdk import ScenarioTest, record_only
 from .afdx_scenario_mixin import CdnAfdScenarioMixin
 
+from azure.cli.core.azclierror import (InvalidArgumentValueError)
+
 from azure.mgmt.cdn.models import SkuName
+
+from collections import namedtuple
 
 
 class CdnAfdRuleScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
@@ -50,19 +54,23 @@ class CdnAfdRuleScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
         rule_name = 'r1'
         rule_checks = [JMESPathCheck('order', 1),
                        JMESPathCheck('name', rule_name),
+                       JMESPathCheck('matchProcessingBehavior', "Stop"),
                        JMESPathCheck('length(conditions)', 1),
                        JMESPathCheck('conditions[0].name', "RemoteAddress"),
                        JMESPathCheck('conditions[0].parameters.operator', 'GeoMatch'),
                        JMESPathCheck('conditions[0].parameters.matchValues[0]', 'TH'),
                        JMESPathCheck('length(actions)', 1),
-                       JMESPathCheck('actions[0].name', "CacheExpiration"),
-                       JMESPathCheck('actions[0].parameters.cacheBehavior', 'BypassCache')]
+                       JMESPathCheck('actions[0].name', "RouteConfigurationOverride"),
+                       JMESPathCheck('actions[0].parameters.cacheConfiguration.queryStringCachingBehavior', 'UseQueryString'),
+                       JMESPathCheck('actions[0].parameters.cacheConfiguration.cacheBehavior', 'HonorOrigin'),
+                       JMESPathCheck('actions[0].parameters.cacheConfiguration.isCompressionEnabled', 'Disabled'),
+                       JMESPathCheck('actions[0].parameters.originGroupOverride', None)]
 
         self.afd_rule_add_cmd(resource_group,
                               rule_set_name,
                               rule_name,
                               profile_name,
-                              options='--match-variable RemoteAddress --operator GeoMatch --match-values "TH" --action-name CacheExpiration --cache-behavior BypassCache --order 1')
+                              options='--match-processing-behavior Stop --match-variable RemoteAddress --operator GeoMatch --match-values "TH" --action-name RouteConfigurationOverride --enable-caching True --enable-compression False --query-string-caching-behavior UseQueryString --cache-behavior HonorOrigin --order 1')
 
         self.afd_rule_show_cmd(resource_group,
                                rule_set_name,
@@ -107,8 +115,11 @@ class CdnAfdRuleScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
                        JMESPathCheck('conditions[1].parameters.matchValues[0]', 'TH'),
                        JMESPathCheck('conditions[1].parameters.matchValues[1]', 'US'),
                        JMESPathCheck('length(actions)', 1),
-                       JMESPathCheck('actions[0].name', "CacheExpiration"),
-                       JMESPathCheck('actions[0].parameters.cacheBehavior', 'BypassCache')]
+                       JMESPathCheck('actions[0].name', "RouteConfigurationOverride"),
+                       JMESPathCheck('actions[0].parameters.cacheConfiguration.queryStringCachingBehavior', 'UseQueryString'),
+                       JMESPathCheck('actions[0].parameters.cacheConfiguration.cacheBehavior', 'HonorOrigin'),
+                       JMESPathCheck('actions[0].parameters.cacheConfiguration.isCompressionEnabled', 'Disabled'),
+                       JMESPathCheck('actions[0].parameters.originGroupOverride', None)]
         self.afd_rule_add_condition_cmd(resource_group,
                                         rule_set_name,
                                         rule_name,
@@ -130,8 +141,11 @@ class CdnAfdRuleScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
                        JMESPathCheck('conditions[1].parameters.matchValues[0]', 'TH'),
                        JMESPathCheck('conditions[1].parameters.matchValues[1]', 'US'),
                        JMESPathCheck('length(actions)', 2),
-                       JMESPathCheck('actions[0].name', "CacheExpiration"),
-                       JMESPathCheck('actions[0].parameters.cacheBehavior', 'BypassCache'),
+                       JMESPathCheck('actions[0].name', "RouteConfigurationOverride"),
+                       JMESPathCheck('actions[0].parameters.cacheConfiguration.queryStringCachingBehavior', 'UseQueryString'),
+                       JMESPathCheck('actions[0].parameters.cacheConfiguration.cacheBehavior', 'HonorOrigin'),
+                       JMESPathCheck('actions[0].parameters.cacheConfiguration.isCompressionEnabled', 'Disabled'),
+                       JMESPathCheck('actions[0].parameters.originGroupOverride', None),
                        JMESPathCheck('actions[1].name', "UrlRewrite"),
                        JMESPathCheck('actions[1].parameters.sourcePattern', '/abc'),
                        JMESPathCheck('actions[1].parameters.destination', '/def')]
@@ -156,8 +170,11 @@ class CdnAfdRuleScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
                        JMESPathCheck('conditions[0].parameters.matchValues[0]', 'TH'),
                        JMESPathCheck('conditions[0].parameters.matchValues[1]', 'US'),
                        JMESPathCheck('length(actions)', 2),
-                       JMESPathCheck('actions[0].name', "CacheExpiration"),
-                       JMESPathCheck('actions[0].parameters.cacheBehavior', 'BypassCache'),
+                       JMESPathCheck('actions[0].name', "RouteConfigurationOverride"),
+                       JMESPathCheck('actions[0].parameters.cacheConfiguration.queryStringCachingBehavior', 'UseQueryString'),
+                       JMESPathCheck('actions[0].parameters.cacheConfiguration.cacheBehavior', 'HonorOrigin'),
+                       JMESPathCheck('actions[0].parameters.cacheConfiguration.isCompressionEnabled', 'Disabled'),
+                       JMESPathCheck('actions[0].parameters.originGroupOverride', None),
                        JMESPathCheck('actions[1].name', "UrlRewrite"),
                        JMESPathCheck('actions[1].parameters.sourcePattern', '/abc'),
                        JMESPathCheck('actions[1].parameters.destination', '/def')]
@@ -188,7 +205,55 @@ class CdnAfdRuleScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
                                         rule_set_name,
                                         rule_name,
                                         profile_name,
-                                        0)
+                                        0)        
+
+        origin_group_name = self.create_random_name(prefix='og', length=16)
+        origin_group_id = f'/subscriptions/{self.get_subscription_id()}/resourceGroups/{resource_group}/providers/Microsoft.Cdn/profiles/{profile_name}/originGroups/{origin_group_name}'
+        self.afd_origin_group_create_cmd(resource_group,
+                                         profile_name,
+                                         origin_group_name,
+                                         "--probe-request-type GET --probe-protocol Http --probe-interval-in-seconds 120 --probe-path /test1/azure.txt " +
+                                         "--sample-size 4 --successful-samples-required 3 --additional-latency-in-milliseconds 50")
+
+        origin_name1 = self.create_random_name(prefix='origin', length=16)
+        create_options = "--host-name huaiyiztesthost1.blob.core.chinacloudapi.cn " \
+                         + "--origin-host-header huaiyiztesthost1.blob.core.chinacloudapi.cn " \
+                         + "--priority 1 --weight 666 --http-port 8080 --https-port 443 --enabled-state Enabled"
+
+        self.afd_origin_create_cmd(resource_group,
+                                   profile_name,
+                                   origin_group_name,
+                                   origin_name1,
+                                   create_options)
+
+        rule_checks = [JMESPathCheck('order', 1),
+                       JMESPathCheck('name', rule_name),
+                       JMESPathCheck('length(conditions)', 1),
+                       JMESPathCheck('conditions[0].name', "RemoteAddress"),
+                       JMESPathCheck('conditions[0].parameters.operator', 'GeoMatch'),
+                       JMESPathCheck('conditions[0].parameters.matchValues[0]', 'TH'),
+                       JMESPathCheck('conditions[0].parameters.matchValues[1]', 'US'),
+                       JMESPathCheck('length(actions)', 2),
+                       JMESPathCheck('actions[1].name', "RouteConfigurationOverride"),
+                       JMESPathCheck('actions[1].parameters.cacheConfiguration.queryStringCachingBehavior', 'IncludeSpecifiedQueryStrings'),
+                       JMESPathCheck('actions[1].parameters.cacheConfiguration.cacheBehavior', 'OverrideAlways'),
+                       JMESPathCheck('actions[1].parameters.cacheConfiguration.cacheDuration', '1.00:00:00'),
+                       JMESPathCheck('actions[1].parameters.cacheConfiguration.isCompressionEnabled', 'Enabled'),
+                       JMESPathCheck('actions[1].parameters.originGroupOverride.originGroup.id', origin_group_id, False),
+                       JMESPathCheck('actions[1].parameters.originGroupOverride.forwardingProtocol', "MatchRequest"),
+                       JMESPathCheck('actions[0].name', "UrlRewrite"),
+                       JMESPathCheck('actions[0].parameters.sourcePattern', '/abc'),
+                       JMESPathCheck('actions[0].parameters.destination', '/def')]
+        self.afd_rule_add_action_cmd(resource_group,
+                                     rule_set_name,
+                                     rule_name,
+                                     profile_name,
+                                     options='--action-name "RouteConfigurationOverride" '
+                                             f'--origin-group {origin_group_name} --forwarding-protocol MatchRequest '
+                                             '--enable-compression True --enable-caching True '
+                                             '--cache-behavior OverrideAlways --cache-duration 1.00:00:00 '
+                                             '--query-string-caching-behavior IncludeSpecifiedQueryStrings '
+                                             '--query-parameters x y z')
 
         self.afd_rule_show_cmd(resource_group,
                                rule_set_name,
@@ -200,6 +265,185 @@ class CdnAfdRuleScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
                                  rule_set_name,
                                  rule_name,
                                  profile_name)
+
+        rule_list_checks = [JMESPathCheck('length(@)', 0)]
+        self.afd_rule_list_cmd(resource_group, rule_set_name, profile_name, checks=rule_list_checks)
+
+        self.afd_rule_set_delete_cmd(resource_group, rule_set_name, profile_name)
+
+    @ResourceGroupPreparer()
+    def test_afd_rule_complex_condition_creation(self, resource_group):
+        profile_name = self.create_random_name(prefix='profile', length=16)
+        self.afd_profile_create_cmd(resource_group, profile_name)
+
+        rule_set_name = self.create_random_name(prefix='ruleset', length=16)
+        self.afd_rule_set_add_cmd(resource_group, rule_set_name, profile_name)
+
+        rule_list_checks = [JMESPathCheck('length(@)', 0)]
+        self.afd_rule_list_cmd(resource_group, rule_set_name, profile_name, checks=rule_list_checks)
+
+        Condition = namedtuple('Condition', 'MatchVariable Operator MatchValues IsNegative Transforms Selector')
+        conditions = [Condition("RemoteAddress", "GeoMatch", ["TH", "CN"], True, [], None),
+                      Condition("RequestMethod", "Equal", ["HEAD"], False, [], None),
+                      Condition("QueryString", "Contains", ["abc"], False, ["Lowercase", "UrlDecode"], None),
+                      Condition("PostArgs", "RegEx", ["abc[0-9]+"], False, ["Lowercase"], "Arg1"),
+                      Condition("RequestUri", "Equal", ["/test1/submit"], False, ["Lowercase", "UrlDecode"], None),
+                      Condition("RequestHeader", "BeginsWith", ["head1", "header2"], False, ["Lowercase", "UrlDecode"], "Header1"),
+                      Condition("RequestBody", "Contains", ["b1", "b2"], False, ["Lowercase", "UrlDecode"], None),
+                      #Condition("RequestScheme", "Equal", ["HTTPS"], False, [], None),
+                      Condition("UrlPath", "Contains", ["url1"], True, ["Lowercase"], None),
+                      Condition("UrlFileExtension", "Equal", ["exe", "apk", "msi"], True, ["Lowercase"], None),
+                      Condition("UrlFileName", "RegEx", ["[a-z1-9]+"], True, ["Lowercase"], None),
+                      Condition("HttpVersion", "Equal", ["1.0", "1.1"], True, None, None),
+                      Condition("Cookies", "Equal", ["exe", "apk", "msi"], True, ["Lowercase"], "cookie1"),
+                      Condition("IsDevice", "Equal", ["Mobile"], False, [], None),
+                      Condition("SocketAddr", "IPMatch", ["127.0.0.1"], True, [], None),
+                      Condition("ClientPort", "Equal", ["8000"], True, [], None),
+                      Condition("ServerPort", "Equal", ["80", "443"], False, [], None),
+                      Condition("HostName", "Equal", ["www.contoso.com"], False, ["Lowercase"], None),
+                      Condition("SslProtocol", "Equal", ["TLSv1", "TLSv1.1"], True, [], None)]
+
+        for idx, condition in enumerate(conditions):           
+            rule_name = self.create_random_name(prefix='rule', length=16)
+            rule_checks = [JMESPathCheck('order', idx),
+                        JMESPathCheck('name', rule_name),
+                        JMESPathCheck('length(conditions)', 1),
+                        JMESPathCheck(f'conditions[0].name', condition.MatchVariable),
+                        JMESPathCheck(f'conditions[0].parameters.operator', condition.Operator),
+                        JMESPathCheck(f'conditions[0].parameters.negateCondition', condition.IsNegative),                        
+                        JMESPathCheck('length(actions)', 1),
+                        JMESPathCheck('actions[0].name', "RouteConfigurationOverride"),
+                        JMESPathCheck('actions[0].parameters.cacheConfiguration.queryStringCachingBehavior', 'UseQueryString'),
+                        JMESPathCheck('actions[0].parameters.cacheConfiguration.cacheBehavior', 'HonorOrigin'),
+                        JMESPathCheck('actions[0].parameters.cacheConfiguration.isCompressionEnabled', 'Disabled'),
+                        JMESPathCheck('actions[0].parameters.originGroupOverride', None)]
+            
+            if condition.MatchValues is not None:
+                for ii, matchValue in enumerate(condition.MatchValues):
+                    rule_checks.append(JMESPathCheck(f'conditions[0].parameters.matchValues[{ii}]', matchValue))
+
+            if condition.Transforms is not None:
+                for ii, transform in enumerate(condition.Transforms):
+                    rule_checks.append(JMESPathCheck(f'conditions[0].parameters.transforms[{ii}]', transform))
+
+            matchValues = ' '.join(condition.MatchValues)
+            options = f'--match-variable {condition.MatchVariable} --operator {condition.Operator} --negate-condition {condition.IsNegative} --match-values {matchValues} --action-name RouteConfigurationOverride --enable-caching True --enable-compression False --query-string-caching-behavior UseQueryString --cache-behavior HonorOrigin --order {idx}'
+            
+            if condition.Transforms is not None and len(condition.Transforms) > 0:
+                options += " --transforms " + ' '.join(condition.Transforms)
+
+            if condition.Selector is not None:
+                options += f" --selector {condition.Selector}"
+
+            self.afd_rule_add_cmd(resource_group,
+                                rule_set_name,
+                                rule_name,
+                                profile_name,
+                                options=options)
+
+            self.afd_rule_show_cmd(resource_group,
+                                rule_set_name,
+                                rule_name,
+                                profile_name,
+                                checks=rule_checks)
+
+        rule_list_checks = [JMESPathCheck('length(@)', len(conditions))]
+        self.afd_rule_list_cmd(resource_group, rule_set_name, profile_name, checks=rule_list_checks)
+
+        self.afd_rule_set_delete_cmd(resource_group, rule_set_name, profile_name)
+
+    @ResourceGroupPreparer()
+    def test_afd_rule_creation_invalid_operator(self, resource_group):
+        profile_name = self.create_random_name(prefix='profile', length=16)
+        self.afd_profile_create_cmd(resource_group, profile_name)
+
+        rule_set_name = self.create_random_name(prefix='ruleset', length=16)
+        self.afd_rule_set_add_cmd(resource_group, rule_set_name, profile_name)
+
+        rule_list_checks = [JMESPathCheck('length(@)', 0)]
+        self.afd_rule_list_cmd(resource_group, rule_set_name, profile_name, checks=rule_list_checks)
+
+        Condition = namedtuple('Condition', 'MatchVariable Operator MatchValues IsNegative Transforms Selector')
+        conditions = [Condition("RemoteAddress", "GeoMatch1", ["TH", "CN"], True, [], None),
+                      Condition("RequestMethod", "Equal1", ["HEAD"], False, [], None),
+                      Condition("QueryString", "Contains1", ["abc"], False, ["Lowercase", "UrlDecode"], None),
+                      Condition("PostArgs", "RegEx1", ["abc[0-9]+"], False, ["Lowercase"], "Arg1"),
+                      Condition("RequestUri", "Equal1", ["/test1/submit"], False, ["Lowercase", "UrlDecode"], None),
+                      Condition("RequestHeader", "BeginsWith1", ["head1", "header2"], False, ["Lowercase", "UrlDecode"], "Header1"),
+                      Condition("RequestBody", "Contains1", ["b1", "b2"], False, ["Lowercase", "UrlDecode"], None),
+                      Condition("RequestScheme", "Equal1", ["HTTPS"], False, [], None),
+                      Condition("UrlPath", "Contains1", ["url1"], True, ["Lowercase"], None),
+                      Condition("UrlFileExtension", "Equal1", ["exe", "apk", "msi"], True, ["Lowercase"], None),
+                      Condition("UrlFileName", "RegEx1", ["[a-z1-9]+"], True, ["Lowercase"], None),
+                      Condition("HttpVersion", "Equal1", ["1.0", "1.1"], True, None, None),
+                      Condition("Cookies", "Equal1", ["exe", "apk", "msi"], True, ["Lowercase"], "cookie1"),
+                      Condition("IsDevice", "Equal1", ["Mobile"], False, [], None),
+                      Condition("SocketAddr", "IPMatch1", ["127.0.0.1"], True, [], None),
+                      Condition("ClientPort", "Equal1", ["8000"], True, [], None),
+                      Condition("ServerPort", "Equal1", ["80", "443"], False, [], None),
+                      Condition("HostName", "Equal1", ["www.contoso.com"], False, ["Lowercase"], None),
+                      Condition("SslProtocol", "Equal1", ["TLSv1", "TLSv1.1"], True, [], None)]
+
+        for idx, condition in enumerate(conditions):           
+            rule_name = self.create_random_name(prefix='rule', length=16)
+
+            matchValues = ' '.join(condition.MatchValues)
+            options = f'--match-variable {condition.MatchVariable} --operator {condition.Operator} --negate-condition {condition.IsNegative} --match-values {matchValues} --action-name RouteConfigurationOverride --enable-caching True --enable-compression False --query-string-caching-behavior UseQueryString --cache-behavior HonorOrigin --order {idx}'
+            
+            if condition.Transforms is not None and len(condition.Transforms) > 0:
+                options += " --transforms " + ' '.join(condition.Transforms)
+
+            if condition.Selector is not None:
+                options += f" --selector {condition.Selector}"
+
+            with self.assertRaises(InvalidArgumentValueError):
+                self.afd_rule_add_cmd(resource_group,
+                                    rule_set_name,
+                                    rule_name,
+                                    profile_name,
+                                    options=options)
+
+        rule_list_checks = [JMESPathCheck('length(@)', 0)]
+        self.afd_rule_list_cmd(resource_group, rule_set_name, profile_name, checks=rule_list_checks)
+
+        self.afd_rule_set_delete_cmd(resource_group, rule_set_name, profile_name)
+
+    @ResourceGroupPreparer()
+    def test_afd_rule_creation_invalid_match_values(self, resource_group):
+        profile_name = self.create_random_name(prefix='profile', length=16)
+        self.afd_profile_create_cmd(resource_group, profile_name)
+
+        rule_set_name = self.create_random_name(prefix='ruleset', length=16)
+        self.afd_rule_set_add_cmd(resource_group, rule_set_name, profile_name)
+
+        rule_list_checks = [JMESPathCheck('length(@)', 0)]
+        self.afd_rule_list_cmd(resource_group, rule_set_name, profile_name, checks=rule_list_checks)
+
+        Condition = namedtuple('Condition', 'MatchVariable Operator MatchValues IsNegative Transforms Selector')
+        conditions = [#Condition("HttpVersion", "Equal", ["1.8", "1.1"], True, None, None),
+                      Condition("RequestMethod", "Equal", ["HEAD1"], False, [], None),
+                      Condition("RequestScheme", "Equal", ["HTTPS1"], False, [], None),
+                      Condition("IsDevice", "Equal", ["Mobile1"], False, [], None),
+                      Condition("SslProtocol", "Equal", ["TLSv11", "TLSv1.1"], True, [], None)]
+
+        for idx, condition in enumerate(conditions):           
+            rule_name = self.create_random_name(prefix='rule', length=16)
+
+            matchValues = ' '.join(condition.MatchValues)
+            options = f'--match-variable {condition.MatchVariable} --operator {condition.Operator} --negate-condition {condition.IsNegative} --match-values {matchValues} --action-name RouteConfigurationOverride --enable-caching True --enable-compression False --query-string-caching-behavior UseQueryString --cache-behavior HonorOrigin --order {idx}'
+            
+            if condition.Transforms is not None and len(condition.Transforms) > 0:
+                options += " --transforms " + ' '.join(condition.Transforms)
+
+            if condition.Selector is not None:
+                options += f" --selector {condition.Selector}"
+
+            with self.assertRaises(InvalidArgumentValueError):
+                self.afd_rule_add_cmd(resource_group,
+                                    rule_set_name,
+                                    rule_name,
+                                    profile_name,
+                                    options=options)
 
         rule_list_checks = [JMESPathCheck('length(@)', 0)]
         self.afd_rule_list_cmd(resource_group, rule_set_name, profile_name, checks=rule_list_checks)

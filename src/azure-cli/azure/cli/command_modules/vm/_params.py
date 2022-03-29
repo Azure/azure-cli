@@ -156,7 +156,7 @@ def load_arguments(self, _):
             operation_group = 'disks' if scope == 'disk' else 'snapshots'
             c.argument('network_access_policy', min_api='2020-05-01', help='Policy for accessing the disk via network.', arg_type=get_enum_type(self.get_models('NetworkAccessPolicy', operation_group=operation_group)))
             c.argument('disk_access', min_api='2020-05-01', help='Name or ID of the disk access resource for using private endpoints on disks.')
-            c.argument('enable_bursting', arg_type=get_three_state_flag(), help='Enable bursting beyond the provisioned performance target of the disk. Bursting is disabled by default, and it does not apply to Ultra disks.')
+            c.argument('enable_bursting', arg_type=get_three_state_flag(), help='Enable on-demand bursting beyond the provisioned performance target of the disk. On-demand bursting is disabled by default, and it does not apply to Ultra disks.')
             c.argument('public_network_access', arg_type=get_enum_type(['Disabled', 'Enabled']), min_api='2021-04-01', is_preview=True, help='Customers can set on Managed Disks or Snapshots to control the export policy on the disk.')
             c.argument('accelerated_network', arg_type=get_three_state_flag(), min_api='2021-04-01', is_preview=True, help='Customers can set on Managed Disks or Snapshots to enable the accelerated networking if the OS disk image support.')
 
@@ -166,7 +166,7 @@ def load_arguments(self, _):
     # endregion
 
     # region Disks
-    with self.argument_context('disk') as c:
+    with self.argument_context('disk', resource_type=ResourceType.MGMT_COMPUTE, operation_group='disks') as c:
         c.argument('zone', zone_type, min_api='2017-03-30', options_list=['--zone'])  # TODO: --size-gb currently has claimed -z. We can do a breaking change later if we want to.
         c.argument('disk_name', existing_disk_name, completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
         c.argument('name', arg_type=name_arg_type)
@@ -188,6 +188,7 @@ def load_arguments(self, _):
         c.argument('edge_zone', edge_zone_type)
         c.argument('security_type', choices=['TrustedLaunch'], help='The security type of the VM. Applicable for OS disks only.', min_api='2020-12-01')
         c.argument('support_hibernation', arg_type=get_three_state_flag(), help='Indicate the OS on a disk supports hibernation.', min_api='2020-12-01')
+        c.argument('architecture', arg_type=get_enum_type(self.get_models('Architecture', operation_group='disks')), min_api='2021-12-01', help='CPU architecture.')
     # endregion
 
     # region Snapshots
@@ -200,6 +201,7 @@ def load_arguments(self, _):
         c.argument('edge_zone', edge_zone_type)
         c.argument('copy_start', arg_type=get_three_state_flag(), min_api='2021-04-01',
                    help='Create snapshot by using a deep copy process, where the resource creation is considered complete only after all data has been copied from the source.')
+        c.argument('architecture', arg_type=get_enum_type(self.get_models('Architecture', operation_group='snapshots')), min_api='2021-12-01', help='CPU architecture.')
     # endregion
 
     # region Images
@@ -472,7 +474,7 @@ def load_arguments(self, _):
         c.argument('disk_name', arg_type=name_arg_type, help='The data disk name.')
 
     with self.argument_context('vm encryption enable') as c:
-        c.argument('encrypt_format_all', action='store_true', help='Encrypts-formats data disks instead of encrypting them. Encrypt-formatting is a lot faster than in-place encryption but wipes out the partition getting encrypt-formatted.')
+        c.argument('encrypt_format_all', action='store_true', help='Encrypts-formats data disks instead of encrypting them. Encrypt-formatting is a lot faster than in-place encryption but wipes out the partition getting encrypt-formatted. (Only supported for Linux virtual machines.)')
         # Place aad arguments in their own group
         aad_arguments = 'Azure Active Directory'
         c.argument('aad_client_id', arg_group=aad_arguments)
@@ -1166,6 +1168,7 @@ def load_arguments(self, _):
         c.argument('end_of_life_date', help="the end of life date, e.g. '2020-12-31'")
         c.argument('disallowed_disk_types', nargs='*', help='disk types which would not work with the image, e.g., Standard_LRS')
         c.argument('features', help='A list of gallery image features. E.g. "IsSecureBootSupported=true IsMeasuredBootSupported=false"')
+        c.argument('architecture', arg_type=get_enum_type(self.get_models('Architecture', operation_group='gallery_images')), min_api='2021-10-01', help='CPU architecture.')
 
     with self.argument_context('sig image-definition list-shared') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')

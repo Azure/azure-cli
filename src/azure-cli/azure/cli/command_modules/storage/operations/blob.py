@@ -8,6 +8,7 @@ from datetime import datetime
 
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import sdk_no_wait
+from azure.cli.core.azclierror import AzureResponseError
 from azure.cli.command_modules.storage.url_quote_util import encode_for_url, make_encoded_file_url_and_params
 from azure.cli.command_modules.storage.util import (create_blob_service_from_storage_client,
                                                     create_file_share_from_storage_client,
@@ -16,6 +17,8 @@ from azure.cli.command_modules.storage.util import (create_blob_service_from_sto
                                                     filter_none, collect_blobs, collect_blob_objects, collect_files,
                                                     mkdir_p, guess_content_type, normalize_blob_file_path,
                                                     check_precondition_success)
+from azure.core.exceptions import ResourceExistsError, ResourceModifiedError
+
 from knack.log import get_logger
 from knack.util import CLIError
 from .._transformers import transform_response_with_bytearray
@@ -351,17 +354,10 @@ def storage_blob_copy_batch(cmd, client, source_client, container_name=None,
 
 # pylint: disable=unused-argument
 def storage_blob_download_batch(client, source, destination, source_container_name, pattern=None, dryrun=False,
-                                progress_callback=None, max_connections=2):
-
-    def _download_blob(blob_service, container, destination_folder, normalized_blob_name, blob_name):
-        # TODO: try catch IO exception
-        destination_path = os.path.join(destination_folder, normalized_blob_name)
-        destination_folder = os.path.dirname(destination_path)
-        if not os.path.exists(destination_folder):
-            mkdir_p(destination_folder)
-
-        blob = blob_service.get_blob_to_path(container, blob_name, destination_path, max_connections=max_connections,
-                                             progress_callback=progress_callback)
+                                progress_callback=None, **kwargs):
+    @check_precondition_success
+    def _download_blob(*args, **kwargs):
+        blob = download_blob(*args, **kwargs)
         return blob.name
 
     source_blobs = collect_blobs(client, source_container_name, pattern)
@@ -391,17 +387,34 @@ def storage_blob_download_batch(client, source, destination, source_container_na
 
     results = []
     for index, blob_normed in enumerate(blobs_to_download):
+        from azure.cli.core.azclierror import FileOperationError
         # add blob name and number to progress message
         if progress_callback:
             progress_callback.message = '{}/{}: "{}"'.format(
                 index + 1, len(blobs_to_download), blobs_to_download[blob_normed])
-        results.append(_download_blob(
-            client, source_container_name, destination, blob_normed, blobs_to_download[blob_normed]))
+        blob_client = client.get_blob_client(container=source_container_name,
+                                             blob=blobs_to_download[blob_normed])
+        destination_path = os.path.join(destination, os.path.normpath(blob_normed))
+        destination_folder = os.path.dirname(destination_path)
+        # Failed when there is same name for file and folder
+        if os.path.isfile(destination_path) and os.path.exists(destination_folder):
+            raise FileOperationError("%s already exists in %s. Please rename existing file or choose another "
+                                     "destination folder. ")
+        if not os.path.exists(destination_folder):
+            mkdir_p(destination_folder)
+        include, result = _download_blob(client=blob_client, file_path=destination_path,
+                                         progress_callback=progress_callback, **kwargs)
+        if include:
+            results.append(result)
 
     # end progress hook
     if progress_callback:
         progress_callback.hook.end()
 
+    num_failures = len(blobs_to_download) - len(results)
+    if num_failures:
+        logger.warning('%s of %s files not downloaded due to "Failed Precondition"',
+                       num_failures, len(blobs_to_download))
     return results
 
 
@@ -412,9 +425,9 @@ def storage_blob_upload_batch(cmd, client, source, destination, pattern=None,  #
                               maxsize_condition=None, max_connections=2, lease_id=None, progress_callback=None,
                               if_modified_since=None, if_unmodified_since=None, if_match=None,
                               if_none_match=None, timeout=None, dryrun=False, socket_timeout=None, **kwargs):
-    def _create_return_result(blob_content_settings, upload_result=None):
+    def _create_return_result(blob_content_settings, blob_client, upload_result=None):
         return {
-            'Blob': client.url,
+            'Blob': blob_client.url,
             'Type': blob_content_settings.content_type,
             'Last Modified': upload_result['last_modified'] if upload_result else None,
             'eTag': upload_result['etag'] if upload_result else None}
@@ -431,8 +444,11 @@ def storage_blob_upload_batch(cmd, client, source, destination, pattern=None,  #
         logger.info('      total %d', len(source_files))
         results = []
         for src, dst in source_files:
+            blob_client = client.get_blob_client(container=destination_container_name,
+                                                 blob=normalize_blob_file_path(destination_path, dst))
             results.append(_create_return_result(blob_content_settings=guess_content_type(src, content_settings,
-                                                                                          t_content_settings)))
+                                                                                          t_content_settings),
+                                                 blob_client=blob_client))
     else:
         @check_precondition_success
         def _upload_blob(*args, **kwargs):
@@ -453,17 +469,21 @@ def storage_blob_upload_batch(cmd, client, source, destination, pattern=None,  #
                     index + 1, len(source_files), normalize_blob_file_path(destination_path, dst))
             blob_client = client.get_blob_client(container=destination_container_name,
                                                  blob=normalize_blob_file_path(destination_path, dst))
-            include, result = _upload_blob(cmd, blob_client, file_path=src,
-                                           blob_type=blob_type, content_settings=guessed_content_settings,
-                                           metadata=metadata, validate_content=validate_content,
-                                           maxsize_condition=maxsize_condition, max_connections=max_connections,
-                                           lease_id=lease_id, progress_callback=progress_callback,
-                                           if_modified_since=if_modified_since,
-                                           if_unmodified_since=if_unmodified_since, if_match=if_match,
-                                           if_none_match=if_none_match, timeout=timeout, **kwargs)
-            if include:
-                results.append(_create_return_result(blob_content_settings=guessed_content_settings,
-                                                     upload_result=result))
+            try:
+                include, result = _upload_blob(cmd, blob_client, file_path=src,
+                                               blob_type=blob_type, content_settings=guessed_content_settings,
+                                               metadata=metadata, validate_content=validate_content,
+                                               maxsize_condition=maxsize_condition, max_connections=max_connections,
+                                               lease_id=lease_id, progress_callback=progress_callback,
+                                               if_modified_since=if_modified_since,
+                                               if_unmodified_since=if_unmodified_since, if_match=if_match,
+                                               if_none_match=if_none_match, timeout=timeout, **kwargs)
+                if include:
+                    results.append(_create_return_result(blob_content_settings=guessed_content_settings,
+                                                         blob_client=blob_client, upload_result=result))
+            except (ResourceModifiedError, AzureResponseError) as ex:
+                logger.error(ex)
+
         # end progress hook
         if progress_callback:
             progress_callback.hook.end()
@@ -507,12 +527,16 @@ def upload_blob(cmd, client, file_path=None, container_name=None, blob_name=None
                 timeout=None, progress_callback=None, encryption_scope=None, overwrite=None, data=None,
                 length=None, **kwargs):
     """Upload a blob to a container."""
-    from azure.core.exceptions import ResourceExistsError
     upload_args = {
         'blob_type': transform_blob_type(cmd, blob_type),
         'lease': lease_id,
         'max_concurrency': max_connections
     }
+
+    if file_path and 'content_settings' in kwargs:
+        t_blob_content_settings = cmd.get_models('_models#ContentSettings',
+                                                 resource_type=ResourceType.DATA_STORAGE_BLOB)
+        kwargs['content_settings'] = guess_content_type(file_path, kwargs['content_settings'], t_blob_content_settings)
 
     if overwrite is not None:
         upload_args['overwrite'] = overwrite
@@ -536,6 +560,11 @@ def upload_blob(cmd, client, file_path=None, container_name=None, blob_name=None
     if blob_type == 'append':
         if client.exists(timeout=timeout):
             client.get_blob_properties(lease=lease_id, timeout=timeout, **check_blob_args)
+    else:
+        upload_args['if_modified_since'] = if_modified_since
+        upload_args['if_unmodified_since'] = if_unmodified_since
+        upload_args['if_match'] = if_match
+        upload_args['if_none_match'] = if_none_match
 
     # Because the contents of the uploaded file may be too large, it should be passed into the a stream object,
     # upload_blob() read file data in batches to avoid OOM problems
@@ -553,7 +582,6 @@ def upload_blob(cmd, client, file_path=None, container_name=None, blob_name=None
                                           encryption_scope=encryption_scope,
                                           **upload_args, **kwargs)
     except ResourceExistsError as ex:
-        from azure.cli.core.azclierror import AzureResponseError
         raise AzureResponseError(
             "{}\nIf you want to overwrite the existing one, please add --overwrite in your command.".format(ex.message))
 
@@ -572,6 +600,22 @@ def upload_blob(cmd, client, file_path=None, container_name=None, blob_name=None
     if 'content_crc64' in response and response['content_crc64'] is not None:
         response['content_crc64'] = Serializer.serialize_bytearray(response['content_crc64'])
     return response
+
+
+def download_blob(client, file_path, open_mode='wb', start_range=None, end_range=None,
+                  progress_callback=None, **kwargs):
+    offset = None
+    length = None
+    if start_range is not None and end_range is not None:
+        offset = start_range
+        length = end_range - start_range + 1
+    if progress_callback:
+        kwargs['raw_response_hook'] = progress_callback
+    download_stream = client.download_blob(offset=offset, length=length, **kwargs)
+    with open(file_path, open_mode) as stream:
+        download_stream.readinto(stream)
+
+    return download_stream.properties
 
 
 def get_block_ids(content_length, block_length):

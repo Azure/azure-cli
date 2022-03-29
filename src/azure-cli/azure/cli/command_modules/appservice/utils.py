@@ -14,14 +14,34 @@ from knack.log import get_logger
 from azure.cli.core.azclierror import (RequiredArgumentMissingError, ValidationError, ResourceNotFoundError)
 from azure.cli.core.commands.parameters import get_subscription_locations
 from azure.cli.core.util import should_disable_connection_verify
+from azure.cli.core.commands.client_factory import get_subscription_id
 
-from msrestazure.tools import parse_resource_id
+from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
 
 from ._client_factory import web_client_factory
 
 logger = get_logger(__name__)
 
 REQUESTS_CA_BUNDLE = "REQUESTS_CA_BUNDLE"
+
+
+# get a RID when the name may be an RID
+def get_resource_id(cmd, name, resource_group, namespace, type, **rid_kwargs):  # pylint: disable=redefined-builtin
+    if is_valid_resource_id(name):
+        return name
+    return resource_id(subscription=get_subscription_id(cmd.cli_ctx),
+                       resource_group=resource_group,
+                       name=name,
+                       namespace=namespace,
+                       type=type,
+                       **rid_kwargs)
+
+
+# get a resource's name and group when the name may be an RID
+def get_resource_name_and_group(cmd, name, resource_group, namespace, type, **rid_kwargs):  # pylint: disable=redefined-builtin
+    rid = get_resource_id(cmd, name, resource_group, namespace, type, **rid_kwargs)
+    rid_parsed = parse_resource_id(rid)
+    return rid_parsed.get("name"), rid_parsed.get("resource_group"), rid
 
 
 def str2bool(v):
@@ -80,10 +100,11 @@ def get_sku_name(tier):
 
 # resource is client.web_apps for webapps, client.app_service_plans for ASPs, etc.
 def get_resource_if_exists(resource, **kwargs):
-    from azure.core.exceptions import ResourceNotFoundError as E
+    from azure.core.exceptions import ResourceNotFoundError as R
+
     try:
         return resource.get(**kwargs)
-    except E:
+    except (R, ValueError):
         return None
 
 
