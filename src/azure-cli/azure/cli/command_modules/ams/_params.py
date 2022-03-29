@@ -72,7 +72,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='The name or resource ID of the primary storage account to attach to the Azure Media Services account. The storage account MUST be in the same Azure subscription as the Media Services account. It is strongly recommended that the storage account be in the same resource group as the Media Services account. Blob only accounts are not allowed as primary.')
         c.argument('mi_system_assigned', action='store_true', help='Set the system managed identity on the media services account.', arg_group='Identity')
         c.argument('mi_user_assigned', nargs='+', help='Set the user managed identities on the media services account.', arg_group='Identity')
-        c.argument('public_network_access', help='Set this flag to determine whether or not public network access is allowed for resources under the Media Services account.')
+        c.argument('disable_public_network', help='Set this flag to disable public network access for resources under the Media Services account. If not set public network access will be enabled')
         c.argument('default_action', help='The behavior for IP access control in Key Delivery. Allowed values: {}'.format(','.join(get_default_action_allowed_values_list())), arg_group='Key Delivery')
         c.argument('ip_allow_list', nargs='+', help='The IP allow list for access control in Key Delivery. If the default action is set to Allow, the IP allow list must be empty.', arg_group='Key Delivery')
 

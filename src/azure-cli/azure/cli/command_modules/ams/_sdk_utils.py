@@ -4,7 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 import importlib
-from azure.mgmt.media.models import (FaceRedactorMode, AudioAnalysisMode, BlurType, AccountEncryptionKeyType, DefaultAction)
+from azure.mgmt.media.models import (FaceRedactorMode, AudioAnalysisMode, BlurType, AccountEncryptionKeyType,
+                                     DefaultAction)
 models_module = importlib.import_module('azure.mgmt.media.models')
 
 
