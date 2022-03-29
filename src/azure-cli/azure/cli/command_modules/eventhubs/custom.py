@@ -256,7 +256,7 @@ def cli_eheventhub_update(cmd, instance, message_retention_in_days=None, partiti
 
         if instance.capture_description:
             if enabled is not None:
-                instance.capture_description.enabled = enabled;
+                instance.capture_description.enabled = enabled
             if capture_interval_seconds:
                 instance.capture_description.interval_in_seconds = capture_interval_seconds
             if capture_size_limit_bytes:
