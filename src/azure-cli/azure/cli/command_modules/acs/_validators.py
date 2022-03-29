@@ -151,6 +151,15 @@ def validate_linux_host_name(namespace):
                        'letters, numbers, or dashes (-).')
 
 
+def validate_snapshot_name(namespace):
+    """Validates a nodepool snapshot name to be alphanumeric and dashes."""
+    rfc1123_regex = re.compile(r'^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])(\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9]))*$')  # pylint:disable=line-too-long
+    found = rfc1123_regex.findall(namespace.snapshot_name)
+    if not found:
+        raise CLIError('--name cannot exceed 63 characters and can only contain '
+                       'letters, numbers, or dashes (-).')
+
+
 def validate_vm_set_type(namespace):
     """Validates the vm set type string."""
     if namespace.vm_set_type is not None:
