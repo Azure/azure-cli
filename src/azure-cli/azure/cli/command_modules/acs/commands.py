@@ -162,9 +162,14 @@ def load_command_table(self, _):
                          supports_no_wait=False, table_transformer=aks_run_command_result_format)
 
     # AKS nodepool snapshot commands
-    with self.command_group('aks nodepool snapshot', snapshot_sdk, client_factory=cf_snapshots, min_api='2021-08-01') as g:
-        g.custom_command('list', 'aks_nodepool_snapshot_list', table_transformer=aks_list_nodepool_snapshot_table_format)
-        g.custom_show_command('show', 'aks_nodepool_snapshot_show', table_transformer=aks_show_nodepool_snapshot_table_format)
+    with self.command_group('aks nodepool snapshot',
+                            snapshot_sdk,
+                            client_factory=cf_snapshots,
+                            min_api='2021-08-01') as g:
+        g.custom_command('list', 'aks_nodepool_snapshot_list',
+                            table_transformer=aks_list_nodepool_snapshot_table_format)
+        g.custom_show_command('show', 'aks_nodepool_snapshot_show',
+                            table_transformer=aks_show_nodepool_snapshot_table_format)
         g.custom_command('create', 'aks_nodepool_snapshot_create', supports_no_wait=True)
         g.custom_command('delete', 'aks_nodepool_snapshot_delete', supports_no_wait=True)
         g.wait_command('wait')
