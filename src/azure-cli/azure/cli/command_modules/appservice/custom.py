@@ -3298,13 +3298,13 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
                     linux_settings = minor_version.stack_settings.linux_runtime_settings
                     windows_settings = minor_version.stack_settings.windows_runtime_settings
 
-                    if linux_settings is not None:
+                    if linux_settings is not None and not linux_settings.is_hidden:
                         self._parse_minor_version(runtime_settings=linux_settings,
                                                   major_version_name=runtime.name,
                                                   minor_version_name=runtime_version,
                                                   runtime_to_version=runtime_to_version_linux)
 
-                    if windows_settings is not None:
+                    if windows_settings is not None and not windows_settings.is_hidden:
                         self._parse_minor_version(runtime_settings=windows_settings,
                                                   major_version_name=runtime.name,
                                                   minor_version_name=runtime_version,
@@ -4977,6 +4977,7 @@ def delete_function_key(cmd, resource_group_name, name, key_name, function_name=
 
 def add_github_actions(cmd, resource_group, name, repo, runtime=None, token=None, slot=None,  # pylint: disable=too-many-statements,too-many-branches
                        branch='master', login_with_github=False, force=False):
+    runtime = _StackRuntimeHelper(cmd).remove_delimiters(runtime)  # normalize "runtime:version"
     if not token and not login_with_github:
         raise_missing_token_suggestion()
     elif not token:

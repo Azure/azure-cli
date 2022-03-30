@@ -18,6 +18,7 @@ TYPE_CLIENT_MAPPING = {
 def register_providers():
     _register_one_provider("Microsoft.Automation/automationAccounts", "2020-01-13-preview", True)
     _register_one_provider('Microsoft.Authorization/resourceManagementPrivateLinks', '2020-05-01', False)
+    _register_one_provider('Microsoft.ApiManagement/service', '2021-08-01', True)
     _register_one_provider('Microsoft.AppConfiguration/configurationStores', '2020-06-01', True)
     _register_one_provider("Microsoft.Batch/batchAccounts", "2020-03-01", True)
     _register_one_provider("Microsoft.BotService/botServices", "2021-03-01", True)
