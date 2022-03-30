@@ -35,7 +35,8 @@ from ._client_factory import (cf_security_tasks,
                               cf_security_regulatory_compliance_assessment,
                               cf_security_secure_scores,
                               cf_security_secure_score_controls,
-                              cf_security_secure_score_control_definitions)
+                              cf_security_secure_score_control_definitions,
+                              cf_security_security_solutions_reference_data)
 
 
 # pylint: disable=line-too-long
@@ -71,6 +72,12 @@ def load_command_table(self, _):
     security_regulatory_compliance_assessment_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.security.operations#RegulatoryComplianceAssessmentsOperations.{}',
         client_factory=cf_security_regulatory_compliance_assessment
+    )
+
+    security_solutions_reference_data_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.security.operations#SecuritySolutionsReferenceDataOperations.{}',
+        client_factory=cf_security_security_solutions_reference_data,
+        operation_group='security_solutions_reference_data'
     )
 
     security_tasks_sdk = CliCommandType(
@@ -241,6 +248,11 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_regulatory_compliance_standards')
         g.custom_show_command('show', 'get_regulatory_compliance_standard')
 
+    with self.command_group('security security_solutions_reference_data',
+                            security_solutions_reference_data_sdk,
+                            client_factory=cf_security_security_solutions_reference_data) as g:
+        g.custom_command('list', 'list_security_security_solutions_reference_data')
+        
     with self.command_group('security regulatory-compliance-controls',
                             security_regulatory_compliance_controls_sdk,
                             client_factory=cf_security_regulatory_compliance_control) as g:

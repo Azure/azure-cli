@@ -253,6 +253,18 @@ def get_security_location(client, resource_name):
     client.config.asc_location = resource_name
 
     return client.get()
+    
+
+# --------------------------------------------------------------------------------------------
+# securitySolutionsReferenceData
+# --------------------------------------------------------------------------------------------
+
+def list_security_security_solutions_reference_data(client):
+
+    for loc in client.locations.list():
+        client.config.asc_location = loc.name
+
+    return client.security_solutions_reference_data.list()
 
 
 # --------------------------------------------------------------------------------------------
