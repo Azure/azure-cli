@@ -41,7 +41,7 @@ def _list_role_assignments(cmd, workspace_name, role=None, assignee=None, scope=
                                                cls=cust_help.get_deserialized_and_headers)
         token = request[1]['x-ms-continuation']
         result += request[0].value
-        if (token == "") or token is None:
+        if not token:
             break
     return result
 
