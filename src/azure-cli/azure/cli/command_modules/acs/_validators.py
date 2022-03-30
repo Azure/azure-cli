@@ -157,7 +157,7 @@ def validate_snapshot_name(namespace):
     found = rfc1123_regex.findall(namespace.snapshot_name)
     if not found:
         raise InvalidArgumentValueError('--name cannot exceed 63 characters and can only contain '
-                       'letters, numbers, or dashes (-).')
+                                        'letters, numbers, or dashes (-).')
 
 
 def validate_vm_set_type(namespace):
