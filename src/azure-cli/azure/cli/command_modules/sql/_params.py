@@ -57,6 +57,7 @@ from .custom import (
     ElasticPoolCapabilitiesAdditionalDetails,
     FailoverPolicyType,
     ResourceIdType,
+    ServicePrincipalType,
     SqlServerMinimalTlsVersionType,
     SqlManagedInstanceMinimalTlsVersionType,
     AuthenticationType
@@ -1944,6 +1945,12 @@ def load_arguments(self, _):
                    options_list=['--external-admin-principal-type'],
                    help='User, Group or Application')
 
+        c.argument('service_principal_type',
+                   options_list=['--service-principal-type'],
+                   arg_type=get_enum_type(ServicePrincipalType),
+                   required=False,
+                   help='Service Principal type to be used for this Managed Instance. Possible values are SystemAssigned and None')
+
     with self.argument_context('sql mi update') as c:
         # Create args that will be used to build up the ManagedInstance object
         create_args_for_complex_type(
@@ -1991,6 +1998,12 @@ def load_arguments(self, _):
                    required=False,
                    help='Name or ID of the subnet that allows access to an Azure Sql Managed Instance. '
                    'If subnet name is provided, --vnet-name must be provided.')
+
+        c.argument('service_principal_type',
+                   options_list=['--service-principal-type'],
+                   arg_type=get_enum_type(ServicePrincipalType),
+                   required=False,
+                   help='Service Principal type to be used for this Managed Instance. Possible values are SystemAssigned and None')
 
     with self.argument_context('sql mi show') as c:
         c.argument('expand_ad_admin',
