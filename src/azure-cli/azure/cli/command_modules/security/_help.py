@@ -997,3 +997,21 @@ examples:
     text: >
         az security secure-score-control-definitions list
 """
+
+helps['security security_solutions list'] = """
+type: command
+short-summary: List all security solutions.
+examples:
+  - name: List security solutions.
+    text: >
+        az security security_solutions list
+"""
+
+helps['security security_solutions show'] = """
+type: command
+short-summary: Shows a security solution.
+examples:
+  - name: Get a security solution.
+    text: >
+        az security security_solutions show --resource-name aad_defaultworks --resource-group defaultresourcegroup-eus
+"""

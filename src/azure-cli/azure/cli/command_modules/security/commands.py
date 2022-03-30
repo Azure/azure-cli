@@ -35,7 +35,8 @@ from ._client_factory import (cf_security_tasks,
                               cf_security_regulatory_compliance_assessment,
                               cf_security_secure_scores,
                               cf_security_secure_score_controls,
-                              cf_security_secure_score_control_definitions)
+                              cf_security_secure_score_control_definitions,
+                              cf_security_security_solutions)
 
 
 # pylint: disable=line-too-long
@@ -216,6 +217,12 @@ def load_command_table(self, _):
     security_iot_recommendations_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.security.operations#IotRecommendationsOperations.{}',
         client_factory=cf_security_iot_recommendations
+    )
+
+    security_security_solutions_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.security.operations#SecuritySolutionsOperations.{}',
+        client_factory=cf_security_security_solutions,
+        operation_group='security_security_solutions'
     )
 
     with self.command_group('security secure-scores',
@@ -427,6 +434,12 @@ def load_command_table(self, _):
                             client_factory=cf_security_iot_recommendations) as g:
         g.custom_command('list', 'list_security_iot_recommendations')
         g.custom_show_command('show', 'show_security_iot_recommendations')
+
+    with self.command_group('security security_solutions',
+                            security_security_solutions_sdk,
+                            client_factory=cf_security_security_solutions) as g:
+        g.custom_command('list', 'list_security_security_solutions')
+        g.custom_command('show', 'get_security_security_solutions')
 
     with self.command_group('security'):
         pass
