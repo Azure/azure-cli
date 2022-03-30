@@ -18,7 +18,7 @@ def load_command_table(self, _):
         client_factory=_msi_user_identities_operations
     )
 
-    with self.command_group('identity', identity_sdk, client_factory=_msi_user_identities_operations) as g:
+    with self.command_group('identity', identity_sdk, client_factory=_msi_user_identities_operations, min_api='2018-11-30') as g:
         g.custom_command('create', 'create_identity', validator=process_msi_namespace)
         g.show_command('show', 'get')
         g.command('delete', 'delete')
