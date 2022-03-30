@@ -1,6 +1,6 @@
 interactions:
 - request:
-    body: '{"location": "eastus", "identity": {"type": "SystemAssigned"}, "properties":
+    body: '{"location": "centralus", "identity": {"type": "SystemAssigned"}, "properties":
       {"storageAccounts": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002",
       "type": "Primary"}], "keyDelivery": {"accessControl": {"defaultAction": "Allow",
       "ipAllowList": []}}, "publicNetworkAccess": "Enabled"}}'
@@ -14,7 +14,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '386'
+      - '389'
       Content-Type:
       - application/json
       ParameterSetName:
@@ -25,25 +25,25 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003?api-version=2021-06-01
   response:
     body:
-      string: "{\r\n  \"name\":\"ams000003\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003\",\"type\":\"Microsoft.Media/mediaservices\",\"location\":\"East
-        US\",\"properties\":{\r\n    \"mediaServiceId\":\"9c0b5a5e-f204-4d89-bddf-8c7eec643564\",\"storageAccounts\":[\r\n
+      string: "{\r\n  \"name\":\"ams000003\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003\",\"type\":\"Microsoft.Media/mediaservices\",\"location\":\"Central
+        US\",\"properties\":{\r\n    \"mediaServiceId\":\"8c04e961-bbb3-4585-80b9-185dce5a01ff\",\"storageAccounts\":[\r\n
         \     {\r\n        \"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002\",\"type\":\"Primary\"\r\n
         \     }\r\n    ],\"storageAuthentication\":\"System\",\"encryption\":{\r\n
         \     \"type\":\"SystemKey\"\r\n    },\"keyDelivery\":{\r\n      \"accessControl\":{\r\n
         \       \"defaultAction\":\"Allow\",\"ipAllowList\":[\r\n          \r\n        ]\r\n
         \     }\r\n    },\"publicNetworkAccess\":\"Enabled\"\r\n  },\"systemData\":{\r\n
-        \   \"createdBy\":\"hivyas@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2022-03-28T23:27:47.2905021Z\",\"lastModifiedBy\":\"hivyas@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2022-03-28T23:27:47.2905021Z\"\r\n
-        \ },\"identity\":{\r\n    \"type\":\"SystemAssigned\",\"principalId\":\"264d5dae-e694-49ed-93e9-8d43e50436a8\",\"tenantId\":\"72f988bf-86f1-41af-91ab-2d7cd011db47\"\r\n
+        \   \"createdBy\":\"hivyas@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2022-03-28T23:27:20.1630014Z\",\"lastModifiedBy\":\"hivyas@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2022-03-28T23:27:20.1630014Z\"\r\n
+        \ },\"identity\":{\r\n    \"type\":\"SystemAssigned\",\"principalId\":\"349e298d-c6fe-48c5-a24a-867f4940cd0d\",\"tenantId\":\"72f988bf-86f1-41af-91ab-2d7cd011db47\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1162'
+      - '1165'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Mon, 28 Mar 2022 23:27:49 GMT
+      - Mon, 28 Mar 2022 23:27:22 GMT
       expires:
       - '-1'
       odata-version:
@@ -54,159 +54,51 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
-    status:
-      code: 201
-      message: Created
-- request:
-    body: '{"name": "ams000003", "type": "MICROSOFT.MEDIA/MEDIASERVICES"}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - ams account check-name
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '62'
-      Content-Type:
-      - application/json
-      ParameterSetName:
-      - --location -n
-      User-Agent:
-      - AZURECLI/2.32.0 azsdk-python-mgmt-media/8.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
-    method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Media/locations/eastus/checkNameAvailability?api-version=2021-06-01
-  response:
-    body:
-      string: "{\r\n  \"nameAvailable\":false,\"reason\":\"AlreadyExists\",\"message\":\"Already
-        in use by another account. Please try again with a name that is not likely
-        to be in use.\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '163'
-      content-type:
-      - application/json; odata.metadata=minimal
-      date:
-      - Mon, 28 Mar 2022 23:27:50 GMT
-      expires:
-      - '-1'
-      odata-version:
-      - '4.0'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"name": "unnombrequenoexiste", "type": "MICROSOFT.MEDIA/MEDIASERVICES"}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - ams account check-name
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '72'
-      Content-Type:
-      - application/json
-      ParameterSetName:
-      - --location -n
-      User-Agent:
-      - AZURECLI/2.32.0 azsdk-python-mgmt-media/8.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
-    method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Media/locations/eastus/checkNameAvailability?api-version=2021-06-01
-  response:
-    body:
-      string: "{\r\n  \"nameAvailable\":true\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '28'
-      content-type:
-      - application/json; odata.metadata=minimal
-      date:
-      - Mon, 28 Mar 2022 23:27:50 GMT
-      expires:
-      - '-1'
-      odata-version:
-      - '4.0'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
       - '1198'
     status:
-      code: 200
-      message: OK
+      code: 201
+      message: Created
 - request:
-    body: '{"name": "dgoifdgoisdfapodsgmpfdofmdspfoamdsfpodsamfpds%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%",
-      "type": "MICROSOFT.MEDIA/MEDIASERVICES"}'
+    body: null
     headers:
       Accept:
       - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - ams account check-name
+      - ams account list
       Connection:
       - keep-alive
-      Content-Length:
-      - '138'
-      Content-Type:
-      - application/json
       ParameterSetName:
-      - --location -n
+      - -g
       User-Agent:
       - AZURECLI/2.32.0 azsdk-python-mgmt-media/8.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
-    method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Media/locations/eastus/checkNameAvailability?api-version=2021-06-01
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices?api-version=2021-06-01
   response:
     body:
-      string: "{\r\n  \"nameAvailable\":false,\"reason\":\"Invalid\",\"message\":\"The
-        Media Account account name should be between 3 and 24 characters and may contain
-        only lowercase letters and numbers.\"\r\n}"
+      string: "{\r\n  \"value\":[\r\n    {\r\n      \"name\":\"ams000003\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003\",\"type\":\"Microsoft.Media/mediaservices\",\"location\":\"Central
+        US\",\"properties\":{\r\n        \"mediaServiceId\":\"8c04e961-bbb3-4585-80b9-185dce5a01ff\",\"storageAccounts\":[\r\n
+        \         {\r\n            \"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002\",\"type\":\"Primary\"\r\n
+        \         }\r\n        ],\"storageAuthentication\":\"System\",\"encryption\":{\r\n
+        \         \"type\":\"SystemKey\"\r\n        },\"keyDelivery\":{\r\n          \"accessControl\":{\r\n
+        \           \"defaultAction\":\"Allow\",\"ipAllowList\":[\r\n              \r\n
+        \           ]\r\n          }\r\n        },\"publicNetworkAccess\":\"Enabled\"\r\n
+        \     },\"systemData\":{\r\n        \"createdBy\":\"hivyas@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2022-03-28T23:27:20.1630014Z\",\"lastModifiedBy\":\"hivyas@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2022-03-28T23:27:20.1630014Z\"\r\n
+        \     },\"identity\":{\r\n        \"type\":\"SystemAssigned\",\"principalId\":\"349e298d-c6fe-48c5-a24a-867f4940cd0d\",\"tenantId\":\"72f988bf-86f1-41af-91ab-2d7cd011db47\"\r\n
+        \     }\r\n    }\r\n  ]\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '181'
+      - '1273'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Mon, 28 Mar 2022 23:27:50 GMT
+      - Mon, 28 Mar 2022 23:27:23 GMT
       expires:
       - '-1'
       odata-version:
@@ -223,8 +115,63 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ams account show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-mgmt-media/8.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003?api-version=2021-06-01
+  response:
+    body:
+      string: "{\r\n  \"name\":\"ams000003\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003\",\"type\":\"Microsoft.Media/mediaservices\",\"location\":\"Central
+        US\",\"properties\":{\r\n    \"mediaServiceId\":\"8c04e961-bbb3-4585-80b9-185dce5a01ff\",\"storageAccounts\":[\r\n
+        \     {\r\n        \"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002\",\"type\":\"Primary\"\r\n
+        \     }\r\n    ],\"storageAuthentication\":\"System\",\"encryption\":{\r\n
+        \     \"type\":\"SystemKey\"\r\n    },\"keyDelivery\":{\r\n      \"accessControl\":{\r\n
+        \       \"defaultAction\":\"Allow\",\"ipAllowList\":[\r\n          \r\n        ]\r\n
+        \     }\r\n    },\"publicNetworkAccess\":\"Enabled\"\r\n  },\"systemData\":{\r\n
+        \   \"createdBy\":\"hivyas@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2022-03-28T23:27:20.1630014Z\",\"lastModifiedBy\":\"hivyas@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2022-03-28T23:27:20.1630014Z\"\r\n
+        \ },\"identity\":{\r\n    \"type\":\"SystemAssigned\",\"principalId\":\"349e298d-c6fe-48c5-a24a-867f4940cd0d\",\"tenantId\":\"72f988bf-86f1-41af-91ab-2d7cd011db47\"\r\n
+        \ }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1165'
+      content-type:
+      - application/json; odata.metadata=minimal
+      date:
+      - Mon, 28 Mar 2022 23:27:23 GMT
+      expires:
+      - '-1'
+      odata-version:
+      - '4.0'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
     status:
       code: 200
       message: OK
@@ -256,7 +203,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Mon, 28 Mar 2022 23:27:54 GMT
+      - Mon, 28 Mar 2022 23:27:25 GMT
       expires:
       - '-1'
       pragma:
