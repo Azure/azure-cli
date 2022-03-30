@@ -65,8 +65,8 @@ class StorageArgumentContext(AzArgumentContext):
                            'use if a stored access policy is referenced with --policy-name that specifies this value.')
         self.argument('start', type=get_datetime_type(True),
                       help='Specifies the UTC datetime (Y-m-d\'T\'H:M\'Z\') at which the SAS becomes valid. Do not use '
-                           'if a stored access policy is referenced with --policy-name that specifies this value. Defaults to '
-                           'the time of the request.')
+                           'if a stored access policy is referenced with --policy-name that specifies this value. '
+                           'Defaults to the time of the request.')
         self.argument('protocol', options_list=('--https-only',), action='store_const', const='https',
                       help='Only permit requests made with the HTTPS protocol. If omitted, requests from both the HTTP '
                            'and HTTPS protocol are permitted.')
