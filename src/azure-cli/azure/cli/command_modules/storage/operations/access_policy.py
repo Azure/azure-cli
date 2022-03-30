@@ -9,7 +9,7 @@ from azure.cli.core.profiles import ResourceType
 
 def create_acl_policy(cmd, client, policy_name, start=None, expiry=None, permission=None, **kwargs):
     """Create a stored access policy on the containing object"""
-    t_access_policy = cmd.get_models('_models#AccessPolicy', resource_type=ResourceType.DATA_STORAGE_BLOB)
+    t_access_policy = cmd.get_models('_models#AccessPolicy')
     acl = _get_acl(cmd, client, **kwargs)
     acl[policy_name] = t_access_policy(permission if permission else '',
                                        expiry if expiry else datetime.max,
@@ -63,9 +63,13 @@ def delete_acl_policy(cmd, client, policy_name, **kwargs):
 
 
 def _get_service_container_type(cmd, client):
-    t_blob_svc = cmd.get_models('_container_client#ContainerClient', resource_type=ResourceType.DATA_STORAGE_BLOB)
-    if isinstance(client, t_blob_svc):
-        return "container"
+    try:
+        t_blob_svc = cmd.get_models('_container_client#ContainerClient', resource_type=ResourceType.DATA_STORAGE_BLOB)
+        if isinstance(client, t_blob_svc):
+            return "container"
+
+    except TypeError:
+        pass
 
     t_file_svc = cmd.get_models('_share_client#ShareClient', resource_type=ResourceType.DATA_STORAGE_FILESHARE)
     if isinstance(client, t_file_svc):
