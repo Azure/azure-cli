@@ -29,7 +29,9 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 
 from ._client_factory import cf_acr_registries
 from ._constants import get_managed_sku
+from ._constants import ACR_AUDIENCE_RESOURCE_NAME
 from ._utils import get_registry_by_name, ResourceNotFound
+from .policy import acr_config_authentication_as_arm_show
 
 
 logger = get_logger(__name__)
@@ -119,16 +121,24 @@ def _get_aad_token_after_challenge(cli_ctx,
                                    repository,
                                    artifact_repository,
                                    permission,
-                                   is_diagnostics_context):
+                                   is_diagnostics_context,
+                                   use_acr_audience):
     authurl = urlparse(token_params['realm'])
     authhost = urlunparse((authurl[0], authurl[1], '/oauth2/exchange', '', '', ''))
 
     from azure.cli.core._profile import Profile
     profile = Profile(cli_ctx=cli_ctx)
 
+    scope = None
+    if use_acr_audience:
+        logger.debug("Using ACR audience token for authentication")
+        scope = "https://{}.azure.net".format(ACR_AUDIENCE_RESOURCE_NAME)
+
     # this might be a cross tenant scenario, so pass subscription to get_raw_token
     subscription = get_subscription_id(cli_ctx)
-    creds, _, tenant = profile.get_raw_token(subscription=subscription)
+    creds, _, tenant = profile.get_raw_token(
+                                    subscription=subscription,
+                                    resource = scope)
 
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
     content = {
@@ -187,7 +197,8 @@ def _get_aad_token(cli_ctx,
                    repository=None,
                    artifact_repository=None,
                    permission=None,
-                   is_diagnostics_context=False):
+                   is_diagnostics_context=False,
+                   use_acr_audience=False):
     """Obtains refresh and access tokens for an AAD-enabled registry.
     :param str login_server: The registry login server URL to log in to
     :param bool only_refresh_token: Whether to ask for only refresh token, or for both refresh and access tokens
@@ -212,7 +223,8 @@ def _get_aad_token(cli_ctx,
                                           repository,
                                           artifact_repository,
                                           permission,
-                                          is_diagnostics_context)
+                                          is_diagnostics_context,
+                                          use_acr_audience)
 
 
 def _get_token_with_username_and_password(login_server,
@@ -365,8 +377,19 @@ def _get_credentials(cmd,  # pylint: disable=too-many-statements
     if not registry or registry.sku.name in get_managed_sku(cmd):
         logger.info("Attempting to retrieve AAD refresh token...")
         try:
+            use_acr_audience = False
+            aad_auth_policy = acr_config_authentication_as_arm_show(cmd, registry_name, resource_group_name)
+            if registry and aad_auth_policy.status == 'disabled':
+                use_acr_audience = True
+
             return login_server, EMPTY_GUID, _get_aad_token(
-                cli_ctx, login_server, only_refresh_token, repository, artifact_repository, permission)
+                                                cli_ctx, 
+                                                login_server, 
+                                                only_refresh_token, 
+                                                repository, 
+                                                artifact_repository, 
+                                                permission, 
+                                                use_acr_audience=use_acr_audience)
         except CLIError as e:
             logger.warning("%s: %s", AAD_TOKEN_BASE_ERROR_MESSAGE, str(e))
 

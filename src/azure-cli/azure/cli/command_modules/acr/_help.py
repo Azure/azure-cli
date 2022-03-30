@@ -70,6 +70,32 @@ type: group
 short-summary: Manage content-trust policy for Azure Container Registries.
 """
 
+helps['acr config authentication-as-arm'] = """
+type: group
+short-summary: Manage 'Azure AD authenticate as ARM' policy for Azure Container Registries.
+"""
+
+helps['acr config authentication-as-arm show'] = """
+type: command
+short-summary: Show the configured 'Azure AD authenticate as ARM' policy for an Azure Container Registry.
+examples:
+  - name: Show the configured 'Azure AD authenticate as ARM' policy for an Azure Container Registry
+    text: >
+        az acr config authentication-as-arm show -r MyRegistry
+"""
+
+helps['acr config authentication-as-arm update'] = """
+type: command
+short-summary: Update 'Azure AD authenticate as ARM' policy for an Azure Container Registry.
+examples:
+  - name: Disable 'Azure AD authenticate as ARM' policy for an Azure Container Registry, so only ACR audienced tokens can be used for authentication
+    text: >
+        az acr config authentication-as-arm update -r MyRegistry --status Disabled
+  - name: Enable 'Azure AD authenticate as ARM' policy for an Azure Container Registry, it will allow both ACR and ARM audienced tokens to be used for authentication
+    text: >
+        az acr config authentication-as-arm update -r MyRegistry --status Enable
+"""
+
 helps['acr config content-trust show'] = """
 type: command
 short-summary: Show the configured content-trust policy for an Azure Container Registry.

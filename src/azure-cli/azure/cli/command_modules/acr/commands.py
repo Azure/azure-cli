@@ -315,6 +315,10 @@ def load_command_table(self, _):
         g.show_command('show', 'acr_config_retention_show')
         g.command('update', 'acr_config_retention_update')
 
+    with self.command_group('acr config authentication-as-arm', acr_policy_util, is_preview=True) as g:
+        g.show_command('show', 'acr_config_authentication_as_arm_show')
+        g.command('update', 'acr_config_authentication_as_arm_update')
+
     def _helm_deprecate_message(self):
         msg = "This {} has been deprecated and will be removed in future release.".format(self.object_type)
         msg += " Use '{}' instead.".format(self.redirect)
