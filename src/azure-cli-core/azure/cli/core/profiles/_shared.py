@@ -260,7 +260,6 @@ AZURE_API_PROFILES = {
             'virtual_machine_scale_sets': '2020-06-01'
         }),
         ResourceType.MGMT_KEYVAULT: '2016-10-01',
-        ResourceType.MGMT_MSI: '2018-11-30',
         ResourceType.MGMT_RESOURCE_FEATURES: '2021-07-01',
         ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
         ResourceType.MGMT_RESOURCE_LOCKS: '2016-09-01',
@@ -303,7 +302,6 @@ AZURE_API_PROFILES = {
             'disks': '2017-03-30',
             'snapshots': '2017-03-30'
         }),
-        ResourceType.MGMT_MSI: '2018-11-30',
         ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
         ResourceType.MGMT_RESOURCE_LOCKS: '2016-09-01',
         ResourceType.MGMT_RESOURCE_POLICY: '2016-12-01',
@@ -340,7 +338,6 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_STORAGE: '2016-01-01',
         ResourceType.MGMT_NETWORK: '2017-10-01',
         ResourceType.MGMT_COMPUTE: SDKProfile('2017-03-30'),
-        ResourceType.MGMT_MSI: '2018-11-30',
         ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
         ResourceType.MGMT_RESOURCE_LOCKS: '2016-09-01',
         ResourceType.MGMT_RESOURCE_POLICY: '2016-12-01',
@@ -367,7 +364,6 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_STORAGE: '2016-01-01',
         ResourceType.MGMT_NETWORK: '2015-06-15',
         ResourceType.MGMT_COMPUTE: SDKProfile('2016-03-30'),
-        ResourceType.MGMT_MSI: '2018-11-30',
         ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
         ResourceType.MGMT_RESOURCE_LOCKS: '2015-01-01',
         ResourceType.MGMT_RESOURCE_POLICY: '2015-10-01-preview',
