@@ -83,6 +83,14 @@ def load_command_table(self, _):
     with self.command_group('batch location', get_mgmt_type('location')) as g:
         g.show_command('list-skus', 'list_supported_virtual_machine_skus')
 
+    with self.command_group('batch private-link-resource', get_mgmt_type('private_link_resource'), client_factory=get_mgmt_factory('private_link_resource')) as g:
+        g.show_command('show', 'get')
+        g.command('list', 'list_by_batch_account')
+
+    with self.command_group('batch private-endpoint-connection', get_mgmt_type('private_endpoint_connection'), client_factory=get_mgmt_factory('private_endpoint_connection')) as g:
+        g.show_command('show', 'get')
+        g.command('list', 'list_by_batch_account')
+
     # Data Plane Commands
     with self.command_group('batch application summary', get_data_type('application')) as g:
         g.batch_command('list', 'list')
