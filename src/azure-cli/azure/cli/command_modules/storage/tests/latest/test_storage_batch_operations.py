@@ -124,6 +124,8 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
         self.storage_cmd('storage blob list -c {} --prefix some_dir',
                          storage_account_info, container).assert_with_checks(JMESPathCheck('length(@)', 4))
 
+        # upload-batch with preconditon
+        container = self.create_container(storage_account_info)
         self.storage_cmd('storage blob upload-batch -d {} -s "{}"',
                                   storage_account_info, container, test_dir)
         import time
@@ -141,6 +143,19 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
                                   storage_account_info,
                                   container, test_dir, current).get_output_in_json()
         self.assertEqual(len(result), 41)
+
+        #check result url
+        container = self.create_container(storage_account_info)
+        result = self.storage_cmd('storage blob upload-batch -s "{}" -d {}', storage_account_info,
+                         test_dir, container).get_output_in_json()
+        if result and result[0]:
+            res = result[0]
+            self.assertRegex(res['Blob'], '^.*[^\/]+$')
+            base_url = res['Blob'].split('/')[:3]
+            container = res['Blob'].split('/')[3]
+            blob_name = '/'.join(res['Blob'].split('/')[4:])
+            self.storage_cmd('storage blob show -c {} -n {}', storage_account_info,
+                             container, blob_name)
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer()

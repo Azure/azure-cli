@@ -92,6 +92,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                   using_webapp_up=False, language=None, assign_identities=None,
                   role='Contributor', scope=None, vnet=None, subnet=None, https_only=False):
     from azure.mgmt.web.models import Site
+    from azure.core.exceptions import ResourceNotFoundError as _ResourceNotFoundError
     SiteConfig, SkuDescription, NameValuePair = cmd.get_models(
         'SiteConfig', 'SkuDescription', 'NameValuePair')
 
@@ -101,14 +102,26 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     docker_registry_server_url = parse_docker_image_name(deployment_container_image_name)
 
     client = web_client_factory(cmd.cli_ctx)
+    plan_info = None
     if is_valid_resource_id(plan):
         parse_result = parse_resource_id(plan)
         plan_info = client.app_service_plans.get(parse_result['resource_group'], parse_result['name'])
     else:
-        plan_info = client.app_service_plans.get(name=plan, resource_group_name=resource_group_name)
+        try:
+            plan_info = client.app_service_plans.get(name=plan, resource_group_name=resource_group_name)
+        except _ResourceNotFoundError:
+            plan_info = None
+        if not plan_info:
+            plans = list(client.app_service_plans.list(detailed=True))
+            for user_plan in plans:
+                if user_plan.name.lower() == plan.lower():
+                    if plan_info:
+                        raise InvalidArgumentValueError("There are multiple plans with name {}.".format(plan),
+                                                        "Try using the plan resource ID instead.")
+                    parse_result = parse_resource_id(user_plan.id)
+                    plan_info = client.app_service_plans.get(parse_result['resource_group'], parse_result['name'])
     if not plan_info:
-        raise ResourceNotFoundError("The plan '{}' doesn't exist in the resource group '{}".format(plan,
-                                                                                                   resource_group_name))
+        raise ResourceNotFoundError("The plan '{}' doesn't exist.".format(plan))
     is_linux = plan_info.reserved
     helper = _StackRuntimeHelper(cmd, linux=is_linux, windows=not is_linux)
     location = plan_info.location
@@ -3285,13 +3298,13 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
                     linux_settings = minor_version.stack_settings.linux_runtime_settings
                     windows_settings = minor_version.stack_settings.windows_runtime_settings
 
-                    if linux_settings is not None:
+                    if linux_settings is not None and not linux_settings.is_hidden:
                         self._parse_minor_version(runtime_settings=linux_settings,
                                                   major_version_name=runtime.name,
                                                   minor_version_name=runtime_version,
                                                   runtime_to_version=runtime_to_version_linux)
 
-                    if windows_settings is not None:
+                    if windows_settings is not None and not windows_settings.is_hidden:
                         self._parse_minor_version(runtime_settings=windows_settings,
                                                   major_version_name=runtime.name,
                                                   minor_version_name=runtime_version,
@@ -4964,6 +4977,7 @@ def delete_function_key(cmd, resource_group_name, name, key_name, function_name=
 
 def add_github_actions(cmd, resource_group, name, repo, runtime=None, token=None, slot=None,  # pylint: disable=too-many-statements,too-many-branches
                        branch='master', login_with_github=False, force=False):
+    runtime = _StackRuntimeHelper(cmd).remove_delimiters(runtime)  # normalize "runtime:version"
     if not token and not login_with_github:
         raise_missing_token_suggestion()
     elif not token:

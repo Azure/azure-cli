@@ -28,7 +28,11 @@ from azure.cli.command_modules.ams._completers import (get_role_definition_name_
                                                        get_allowed_transcription_languages,
                                                        get_allowed_analysis_modes,
                                                        get_stretch_mode_types_list,
-                                                       get_storage_authentication_allowed_values_list)
+                                                       get_storage_authentication_allowed_values_list,
+                                                       get_allowed_face_detector_modes,
+                                                       get_allowed_face_dectector_blur_types,
+                                                       get_allowed_encryption_key_types,
+                                                       get_default_action_allowed_values_list)
 
 from azure.cli.command_modules.ams._validators import (validate_storage_account_id,
                                                        datetime_format,
@@ -66,7 +70,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('ams account create') as c:
         c.argument('storage_account', storage_account_arg_type,
                    help='The name or resource ID of the primary storage account to attach to the Azure Media Services account. The storage account MUST be in the same Azure subscription as the Media Services account. It is strongly recommended that the storage account be in the same resource group as the Media Services account. Blob only accounts are not allowed as primary.')
-        c.argument('assign_identity', options_list=['--mi-system-assigned'], action='store_true', help='Set the system managed identity on the media services account.')
+        c.argument('mi_system_assigned', help='Set the system managed identity on the media services account.', arg_group='Identity', arg_type=get_three_state_flag())
+        c.argument('mi_user_assigned', nargs='+', help='Set the user managed identities on the media services account.', arg_group='Identity')
+        c.argument('disable_public_network', help='Set this flag to disable public network access for resources under the Media Services account. If not set public network access will be enabled')
+        c.argument('default_action', help='The behavior for IP access control in Key Delivery. Allowed values: {}'.format(','.join(get_default_action_allowed_values_list())), arg_group='Key Delivery')
+        c.argument('ip_allow_list', nargs='+', help='The IP allow list for access control in Key Delivery. If the default action is set to Allow, the IP allow list must be empty.', arg_group='Key Delivery')
 
     with self.argument_context('ams account check-name') as c:
         c.argument('account_name', options_list=['--name', '-n'], id_part=None,
@@ -86,8 +94,15 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('ams account storage sync-storage-keys') as c:
         c.argument('storage_account_id', required=True, help="The storage account Id.")
 
+    with self.argument_context('ams account storage add') as c:
+        c.argument('system_assigned', help='Set the system managed identity on the storage account.', arg_type=get_three_state_flag())
+        c.argument('user_assigned', help='Set the user managed identity on the storage account.')
+
     with self.argument_context('ams account storage set-authentication') as c:
         c.argument('storage_auth', arg_type=get_enum_type(get_storage_authentication_allowed_values_list()), help='The type of authentication for the storage account associated with the media services account.')
+        c.argument('storage_account_id', help="The storage account Id.")
+        c.argument('system_assigned', help='Set the system managed identity on the storage account.', arg_type=get_three_state_flag())
+        c.argument('user_assigned', help='Set the user managed identity on the storage account.')
 
     with self.argument_context('ams account sp') as c:
         c.argument('account_name', account_name_arg_type)
@@ -102,9 +117,17 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('ams account encryption') as c:
         c.argument('account_name', account_name_arg_type)
-        c.argument('key_type', help='The encryption key source (provider). Allowed values: SystemKey, CustomerKey.', required=True)
+        c.argument('key_type', help='The encryption key source (provider). Allowed values: {}.'
+                   .format(", ").join(get_allowed_encryption_key_types()), required=True)
         c.argument('key_identifier', help='The URL of the Key Vault key used to encrypt the account. The key may either be versioned (for example https://vault/keys/mykey/version1) or reference a key without a version (for example https://vault/keys/mykey).')
         c.argument('current_key_id', help='The current key used to encrypt the Media Services account, including the key version.')
+        c.argument('current_key_id', help='The current key used to encrypt the Media Services account, including the key version.')
+        c.argument('system_assigned', help='Set the system managed identity for account encryption.', arg_type=get_three_state_flag())
+        c.argument('user_assigned', help='Set the user managed identity for account encryption.')
+
+    with self.argument_context('ams account identity') as c:
+        c.argument('system_assigned', help='Set the system managed identity on the media services account.', arg_type=get_three_state_flag())
+        c.argument('user_assigned', nargs='+', help='Set the user managed identities on the media services account.')
 
     with self.argument_context('ams transform') as c:
         c.argument('account_name', account_name_arg_type)
@@ -119,6 +142,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('audio_analysis_mode', arg_group='Audio/Video Analyzer', help='Determines the set of audio analysis operations to be performed. If unspecified, the Standard AudioAnalysisMode would be chosen. Allowed values: {}.'.format(", ".join(get_allowed_analysis_modes())))
         c.argument('resolution', arg_group='Face Detector', help='Specifies the maximum resolution at which your video is analyzed. The default behavior is "SourceResolution," which will keep the input video at its original resolution when analyzed. Using StandardDefinition will resize input videos to standard definition while preserving the appropriate aspect ratio. It will only resize if the video is of higher resolution. For example, a 1920x1080 input would be scaled to 640x360 before processing. Switching to "StandardDefinition" will reduce the time it takes to process high resolution video. It may also reduce the cost of using this component (see https://azure.microsoft.com/pricing/details/media-services/#analytics for details). However, faces that end up being too small in the resized video may not be detected. Allowed values: {}.'
                    .format(", ".join(get_allowed_resolutions_completion_list())))
+        c.argument('face_detector_mode', arg_group='Face Detector', help='This mode provides the ability to choose between the following settings: 1) Analyze - For detection only.This mode generates a metadata JSON file marking appearances of faces throughout the video.Where possible, appearances of the same person are assigned the same ID. 2) Combined - Additionally redacts(blurs) detected faces. 3) Redact - This enables a 2-pass process, allowing for selective redaction of a subset of detected faces.It takes in the metadata file from a prior analyze pass, along with the source video, and a user-selected subset of IDs that require redaction. Allowed values: {}.'
+                   .format(", ".join(get_allowed_face_detector_modes())))
+        c.argument('blur_type', arg_group='Face Detector', help='Allowed values: {}.'.format(", ".join(get_allowed_face_dectector_blur_types())))
         c.argument('relative_priority', arg_type=get_enum_type(Priority), help='Sets the relative priority of the transform outputs within a transform. This sets the priority that the service uses for processing TransformOutputs. The default priority is Normal.')
         c.argument('on_error', arg_type=get_enum_type(OnErrorType), help="A Transform can define more than one output. This property defines what the service should do when one output fails - either continue to produce other outputs, or, stop the other outputs. The overall Job state will not reflect failures of outputs that are specified with 'ContinueJob'. The default is 'StopProcessingJob'.")
         c.argument('description', help='The description of the transform.')

@@ -43,6 +43,11 @@ acr manifest list-referrers:
     manifest_id:
       rule_exclusions:
       - no_positional_parameters
+acr manifest list-metadata:
+  parameters:
+    repo_id:
+      rule_exclusions:
+      - no_positional_parameters
 acr manifest metadata list:
   parameters:
     repo_id:
@@ -59,6 +64,16 @@ acr manifest metadata update:
       rule_exclusions:
       - no_positional_parameters
 acr manifest show:
+  parameters:
+    manifest_id:
+      rule_exclusions:
+      - no_positional_parameters
+acr manifest show-metadata:
+  parameters:
+    manifest_id:
+      rule_exclusions:
+      - no_positional_parameters
+acr manifest update-metadata:
   parameters:
     manifest_id:
       rule_exclusions:
@@ -291,6 +306,9 @@ aks create:
     workspace_resource_id:
       rule_exclusions:
       - option_length_too_long
+    enable_msi_auth_for_monitoring:
+      rule_exclusions:
+      - option_length_too_long
     node_osdisk_diskencryptionset_id:
       rule_exclusions:
       - option_length_too_long
@@ -303,6 +321,9 @@ aks create:
 aks enable-addons:
   parameters:
     workspace_resource_id:
+      rule_exclusions:
+      - option_length_too_long
+    enable_msi_auth_for_monitoring:
       rule_exclusions:
       - option_length_too_long
 aks install-cli:

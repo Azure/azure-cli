@@ -3,12 +3,19 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from typing import Dict, Tuple, TypeVar, Union
+from typing import Dict, List, Tuple, TypeVar, Union
 
 from azure.cli.command_modules.acs._client_factory import cf_agent_pools
-from azure.cli.command_modules.acs._consts import DecoratorMode
+from azure.cli.command_modules.acs._consts import (
+    CONST_DEFAULT_NODE_OS_TYPE,
+    CONST_DEFAULT_NODE_VM_SIZE,
+    CONST_DEFAULT_WINDOWS_NODE_VM_SIZE,
+    AgentPoolDecoratorMode,
+    DecoratorMode,
+)
+from azure.cli.command_modules.acs._helpers import get_snapshot_by_snapshot_id
 from azure.cli.command_modules.acs._validators import extract_comma_separated_string
-from azure.cli.command_modules.acs.decorator import validate_decorator_mode
+from azure.cli.command_modules.acs.base_decorator import BaseAKSContext, BaseAKSModels, BaseAKSParamDict
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core.azclierror import CLIInternalError, InvalidArgumentValueError, RequiredArgumentMissingError
 from azure.cli.core.commands import AzCliCommand
@@ -21,11 +28,12 @@ logger = get_logger(__name__)
 # type variables
 AgentPool = TypeVar("AgentPool")
 AgentPoolsOperations = TypeVar("AgentPoolsOperations")
+Snapshot = TypeVar("Snapshot")
 
 
-# pylint: disable=too-many-instance-attributes, too-few-public-methods
-class AKSAgentPoolModels:
-    """Store the models used in aks_agentpool_add and aks_agentpool_update.
+# pylint: disable=too-few-public-methods
+class AKSAgentPoolModels(BaseAKSModels):
+    """Store the models used in aks agentpool series of commands.
 
     The api version of the class corresponding to a model is determined by resource_type.
     """
@@ -34,49 +42,42 @@ class AKSAgentPoolModels:
         self,
         cmd: AzCommandsLoader,
         resource_type: ResourceType,
+        agentpool_decorator_mode: AgentPoolDecoratorMode,
     ):
-        self.__cmd = cmd
-        self.resource_type = resource_type
-        self.AgentPool = self.__cmd.get_models(
-            "AgentPool",
-            resource_type=self.resource_type,
-            operation_group="agent_pools",
-        )
-        self.AgentPoolUpgradeSettings = self.__cmd.get_models(
-            "AgentPoolUpgradeSettings",
-            resource_type=self.resource_type,
-            operation_group="agent_pools",
-        )
+        super().__init__(cmd, resource_type)
+        self.agentpool_decorator_mode = agentpool_decorator_mode
+        self.UnifiedAgentPoolModel = self.__choose_agentpool_model_by_agentpool_decorator_mode()
+
+    def __choose_agentpool_model_by_agentpool_decorator_mode(self):
+        """Choose the model reference for agentpool based on agentpool_decorator_mode.
+        """
+        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+            return self.ManagedClusterAgentPoolProfile
+        return self.AgentPool
+
+
+# pylint: disable=too-few-public-methods
+class AKSAgentPoolParamDict(BaseAKSParamDict):
+    """Store the original parameters passed in by aks agentpool series of commands as an internal dictionary.
+
+    Only expose the "get" method externally to obtain parameter values, while recording usage.
+    """
 
 
 # pylint: disable=too-many-public-methods
-class AKSAgentPoolContext:
+class AKSAgentPoolContext(BaseAKSContext):
     """Implement getter functions for all parameters in aks_agentpool_add and aks_agentpool_update.
     """
     def __init__(
         self,
         cmd: AzCliCommand,
-        raw_parameters: Dict,
+        raw_parameters: AKSAgentPoolParamDict,
         models: AKSAgentPoolModels,
         decorator_mode: DecoratorMode,
+        agentpool_decorator_mode: AgentPoolDecoratorMode,
     ):
-        if not isinstance(raw_parameters, dict):
-            raise CLIInternalError(
-                "Unexpected raw_parameters object with type '{}'.".format(
-                    type(raw_parameters)
-                )
-            )
-        if not validate_decorator_mode(decorator_mode):
-            raise CLIInternalError(
-                "Unexpected decorator_mode '{}' with type '{}'.".format(
-                    decorator_mode, type(decorator_mode)
-                )
-            )
-        self.cmd = cmd
-        self.raw_param = raw_parameters
-        self.models = models
-        self.decorator_mode = decorator_mode
-        self.intermediates = dict()
+        super().__init__(cmd, raw_parameters, models, decorator_mode)
+        self.agentpool_decorator_mode = agentpool_decorator_mode
         self.agentpool = None
 
     # pylint: disable=no-self-use
@@ -169,7 +170,10 @@ class AKSAgentPoolContext:
         :return: string
         """
         # read the original value passed by the command
-        cluster_name = self.raw_param.get("cluster_name")
+        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+            cluster_name = self.raw_param.get("name")
+        else:
+            cluster_name = self.raw_param.get("cluster_name")
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
@@ -230,7 +234,7 @@ class AKSAgentPoolContext:
         """
         # read the original value passed by the command
         max_surge = self.raw_param.get("max_surge")
-        # try to read the property value corresponding to the parameter from the `mc` object.
+        # try to read the property value corresponding to the parameter from the `agentpool` object.
         if (
             self.agentpool and
             self.agentpool.upgrade_settings and
@@ -330,6 +334,284 @@ class AKSAgentPoolContext:
         # this parameter does not need validation
         return node_osdisk_type
 
+    def get_snapshot_id(self) -> Union[str, None]:
+        """Obtain the values of snapshot_id.
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        snapshot_id = self.raw_param.get("snapshot_id")
+        # try to read the property value corresponding to the parameter from the `agentpool` object
+        if (
+            self.agentpool and
+            self.agentpool.creation_data and
+            self.agentpool.creation_data.source_resource_id is not None
+        ):
+            snapshot_id = self.agentpool.creation_data.source_resource_id
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return snapshot_id
+
+    def get_snapshot(self) -> Union[Snapshot, None]:
+        """Helper function to retrieve the Snapshot object corresponding to a snapshot id.
+
+        This fuction will store an intermediate "snapshot" to avoid sending the same request multiple times.
+
+        Function "get_snapshot_by_snapshot_id" will be called to retrieve the Snapshot object corresponding to a
+        snapshot id, which internally used the snapshot client (snapshots operations belonging to container service
+        client) to send the request.
+
+        :return: Snapshot or None
+        """
+        # try to read from intermediates
+        snapshot = self.get_intermediate("snapshot")
+        if snapshot:
+            return snapshot
+
+        snapshot_id = self.get_snapshot_id()
+        if snapshot_id:
+            snapshot = get_snapshot_by_snapshot_id(self.cmd.cli_ctx, snapshot_id)
+            self.set_intermediate("snapshot", snapshot, overwrite_exists=True)
+        return snapshot
+
+    def _get_kubernetes_version(self, read_only: bool = False) -> str:
+        """Internal function to dynamically obtain the value of kubernetes_version according to the context.
+
+        If snapshot_id is specified, dynamic completion will be triggerd, and will try to get the corresponding value
+        from the Snapshot. When determining the value of the parameter, obtaining from `agentpool` takes precedence over
+        user's explicit input over snapshot over default vaule.
+
+        :return: string
+        """
+        # read the original value passed by the command
+        raw_value = self.raw_param.get("kubernetes_version")
+        # try to read the property value corresponding to the parameter from the `agentpool` object
+        value_obtained_from_agentpool = None
+        if self.agentpool:
+            value_obtained_from_agentpool = self.agentpool.orchestrator_version
+        # try to retrieve the value from snapshot
+        value_obtained_from_snapshot = None
+        # skip dynamic completion if read_only is specified
+        if not read_only:
+            snapshot = self.get_snapshot()
+            if snapshot:
+                value_obtained_from_snapshot = snapshot.kubernetes_version
+
+        # set default value
+        if value_obtained_from_agentpool is not None:
+            kubernetes_version = value_obtained_from_agentpool
+        elif raw_value not in [None, ""]:
+            kubernetes_version = raw_value
+        elif not read_only and value_obtained_from_snapshot is not None:
+            kubernetes_version = value_obtained_from_snapshot
+        else:
+            kubernetes_version = raw_value
+
+        # this parameter does not need validation
+        return kubernetes_version
+
+    def get_kubernetes_version(self) -> str:
+        """Obtain the value of kubernetes_version.
+
+        :return: string
+        """
+        return self._get_kubernetes_version(read_only=False)
+
+    def _get_os_type(self, read_only: bool = False) -> Union[str, None]:
+        """Internal function to dynamically obtain the value of os_type according to the context.
+
+        If snapshot_id is specified, dynamic completion will be triggerd, and will try to get the corresponding value
+        from the Snapshot. When determining the value of the parameter, obtaining from `agentpool` takes precedence over
+        user's explicit input over snapshot over default vaule.
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        raw_value = self.raw_param.get("os_type")
+        # try to read the property value corresponding to the parameter from the `agentpool` object
+        value_obtained_from_agentpool = None
+        if self.agentpool:
+            value_obtained_from_agentpool = self.agentpool.os_type
+        # try to retrieve the value from snapshot
+        value_obtained_from_snapshot = None
+        # skip dynamic completion if read_only is specified
+        if not read_only:
+            snapshot = self.get_snapshot()
+            if snapshot:
+                value_obtained_from_snapshot = snapshot.os_type
+
+        # set default value
+        if value_obtained_from_agentpool is not None:
+            os_type = value_obtained_from_agentpool
+        elif raw_value is not None:
+            os_type = raw_value
+        elif not read_only and value_obtained_from_snapshot is not None:
+            os_type = value_obtained_from_snapshot
+        else:
+            os_type = CONST_DEFAULT_NODE_OS_TYPE
+
+        # validation
+        if (
+            self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER and
+            self.decorator_mode == DecoratorMode.CREATE
+        ):
+            if os_type.lower() == "windows":
+                raise InvalidArgumentValueError("System node pool must be linux.")
+        return os_type
+
+    def get_os_type(self) -> Union[str, None]:
+        """Obtain the value of os_type.
+
+        :return: string or None
+        """
+        return self._get_os_type(read_only=False)
+
+    def _get_os_sku(self, read_only: bool = False) -> Union[str, None]:
+        """Internal function to dynamically obtain the value of os_sku according to the context.
+
+        If snapshot_id is specified, dynamic completion will be triggerd, and will try to get the corresponding value
+        from the Snapshot. When determining the value of the parameter, obtaining from `agentpool` takes precedence over
+        user's explicit input over snapshot over default vaule.
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        raw_value = self.raw_param.get("os_sku")
+        # try to read the property value corresponding to the parameter from the `agentpool` object
+        value_obtained_from_agentpool = None
+        if self.agentpool:
+            value_obtained_from_agentpool = self.agentpool.os_sku
+        # try to retrieve the value from snapshot
+        value_obtained_from_snapshot = None
+        # skip dynamic completion if read_only is specified
+        if not read_only:
+            snapshot = self.get_snapshot()
+            if snapshot:
+                value_obtained_from_snapshot = snapshot.os_sku
+
+        # set default value
+        if value_obtained_from_agentpool is not None:
+            os_sku = value_obtained_from_agentpool
+        elif raw_value is not None:
+            os_sku = raw_value
+        elif not read_only and value_obtained_from_snapshot is not None:
+            os_sku = value_obtained_from_snapshot
+        else:
+            os_sku = raw_value
+
+        # this parameter does not need validation
+        return os_sku
+
+    def get_os_sku(self) -> Union[str, None]:
+        """Obtain the value of os_sku.
+
+        :return: string or None
+        """
+        return self._get_os_sku(read_only=False)
+
+    def _get_node_vm_size(self, read_only: bool = False) -> str:
+        """Internal function to dynamically obtain the value of node_vm_size according to the context.
+
+        If snapshot_id is specified, dynamic completion will be triggerd, and will try to get the corresponding value
+        from the Snapshot. When determining the value of the parameter, obtaining from `agentpool` takes precedence over
+        user's explicit input over snapshot over default vaule.
+
+        :return: string
+        """
+        # read the original value passed by the command
+        raw_value = self.raw_param.get("node_vm_size")
+        # try to read the property value corresponding to the parameter from the `agentpool` object
+        value_obtained_from_agentpool = None
+        if self.agentpool:
+            value_obtained_from_agentpool = self.agentpool.vm_size
+        # try to retrieve the value from snapshot
+        value_obtained_from_snapshot = None
+        # skip dynamic completion if read_only is specified
+        if not read_only:
+            snapshot = self.get_snapshot()
+            if snapshot:
+                value_obtained_from_snapshot = snapshot.vm_size
+
+        # set default value
+        if value_obtained_from_agentpool is not None:
+            node_vm_size = value_obtained_from_agentpool
+        elif raw_value is not None:
+            node_vm_size = raw_value
+        elif not read_only and value_obtained_from_snapshot is not None:
+            node_vm_size = value_obtained_from_snapshot
+        else:
+            if self.get_os_type().lower() == "windows":
+                node_vm_size = CONST_DEFAULT_WINDOWS_NODE_VM_SIZE
+            else:
+                node_vm_size = CONST_DEFAULT_NODE_VM_SIZE
+
+        # this parameter does not need validation
+        return node_vm_size
+
+    def get_node_vm_size(self) -> str:
+        """Obtain the value of node_vm_size.
+
+        :return: string
+        """
+        return self._get_node_vm_size(read_only=False)
+
+    def get_nodepool_labels(self) -> Union[Dict[str, str], None]:
+        """Obtain the value of nodepool_labels.
+
+        :return: dictionary or None
+        """
+        # read the original value passed by the command
+        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+            nodepool_labels = self.raw_param.get("nodepool_labels")
+        else:
+            nodepool_labels = self.raw_param.get("labels")
+
+        # try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.agentpool and self.agentpool.node_labels is not None:
+            nodepool_labels = self.agentpool.node_labels
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return nodepool_labels
+
+    def get_nodepool_tags(self) -> Union[Dict[str, str], None]:
+        """Obtain the value of nodepool_tags.
+
+        :return: dictionary or None
+        """
+        # read the original value passed by the command
+        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+            nodepool_tags = self.raw_param.get("nodepool_tags")
+        else:
+            nodepool_tags = self.raw_param.get("tags")
+
+        # try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.agentpool and self.agentpool.tags is not None:
+            nodepool_tags = self.agentpool.tags
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return nodepool_tags
+
+    def get_node_taints(self) -> Union[List[str], None]:
+        """Obtain the value of node_taints.
+
+        :return: empty list, list of strings or None
+        """
+        # read the original value passed by the command
+        node_taints = self.raw_param.get("node_taints")
+        # normalize, keep None as None
+        if node_taints is not None:
+            node_taints = [x.strip() for x in (node_taints.split(",") if node_taints else [])]
+
+        # try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.agentpool and self.agentpool.node_taints is not None:
+            node_taints = self.agentpool.node_taints
+
+        # this parameter does not need validation
+        return node_taints
+
     def get_aks_custom_headers(self) -> Dict[str, str]:
         """Obtain the value of aks_custom_headers.
 
@@ -377,6 +659,7 @@ class AKSAgentPoolAddDecorator:
         client: AgentPoolsOperations,
         raw_parameters: Dict,
         resource_type: ResourceType,
+        agentpool_decorator_mode: AgentPoolDecoratorMode,
     ):
         """Internal controller of aks_agentpool_add.
 
@@ -388,9 +671,12 @@ class AKSAgentPoolAddDecorator:
         """
         self.cmd = cmd
         self.client = client
-        self.models = AKSAgentPoolModels(cmd, resource_type)
+        self.agentpool_decorator_mode = agentpool_decorator_mode
+        self.models = AKSAgentPoolModels(cmd, resource_type, agentpool_decorator_mode)
         # store the context in the process of assemble the AgentPool object
-        self.context = AKSAgentPoolContext(cmd, raw_parameters, self.models, decorator_mode=DecoratorMode.CREATE)
+        self.context = AKSAgentPoolContext(
+            cmd, AKSAgentPoolParamDict(raw_parameters), self.models, DecoratorMode.CREATE, agentpool_decorator_mode
+        )
 
     def _ensure_agentpool(self, agentpool: AgentPool) -> None:
         """Internal function to ensure that the incoming `agentpool` object is valid and the same as the attached
@@ -401,7 +687,7 @@ class AKSAgentPoolAddDecorator:
 
         :return: None
         """
-        if not isinstance(agentpool, self.models.AgentPool):
+        if not isinstance(agentpool, self.models.UnifiedAgentPoolModel):
             raise CLIInternalError(
                 "Unexpected agentpool object with type '{}'.".format(type(agentpool))
             )
@@ -415,17 +701,18 @@ class AKSAgentPoolAddDecorator:
     def init_agentpool(self) -> AgentPool:
         """Initialize an AgentPool object with name and attach it to internal context.
 
-        Note: As a read only property, name would be ignored when serialized.
-
         :return: the AgentPool object
         """
-        # Initialize a AgentPool object with name.
-        agentpool = self.models.AgentPool()
-        # Note: As a read only property, name would be ignored when serialized.
-        # Set the name property by explicit assignment, otherwise it will be ignored by initialization.
-        agentpool.name = self.context.get_nodepool_name()
+        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+            # Note: As a required property, name must be provided during initialization.
+            agentpool = self.models.UnifiedAgentPoolModel(name=self.context.get_nodepool_name(), os_type=None)
+        else:
+            # Note: As a read only property, name would be ignored when serialized.
+            # Set the name property by explicit assignment, otherwise it will be ignored by initialization.
+            agentpool = self.models.UnifiedAgentPoolModel(os_type=None)
+            agentpool.name = self.context.get_nodepool_name()
 
-        # attach mc to AKSContext
+        # attach agentpool to AKSAgentPoolContext
         self.context.attach_agentpool(agentpool)
         return agentpool
 
@@ -475,6 +762,39 @@ class AKSAgentPoolAddDecorator:
         agentpool.max_count = max_count
         return agentpool
 
+    def set_up_snapshot_properties(self, agentpool: AgentPool) -> AgentPool:
+        """Set up auto snapshot related properties for the AgentPool object.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        creation_data = None
+        snapshot_id = self.context.get_snapshot_id()
+        if snapshot_id:
+            creation_data = self.models.CreationData(
+                source_resource_id=snapshot_id
+            )
+        agentpool.creation_data = creation_data
+
+        agentpool.orchestrator_version = self.context.get_kubernetes_version()
+        agentpool.os_type = self.context.get_os_type()
+        agentpool.os_sku = self.context.get_os_sku()
+        agentpool.vm_size = self.context.get_node_vm_size()
+        return agentpool
+
+    def set_up_label_tag_taint(self, agentpool: AgentPool) -> AgentPool:
+        """Set up label, tag, taint for the AgentPool object.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        agentpool.tags = self.context.get_nodepool_tags()
+        agentpool.node_labels = self.context.get_nodepool_labels()
+        agentpool.node_taints = self.context.get_node_taints()
+        return agentpool
+
     def construct_default_agentpool_profile(self) -> AgentPool:
         """The overall controller used to construct the default AgentPool profile.
 
@@ -491,6 +811,10 @@ class AKSAgentPoolAddDecorator:
         agentpool = self.set_up_osdisk_properties(agentpool)
         # set up auto scaler properties
         agentpool = self.set_up_auto_scaler_properties(agentpool)
+        # set up snapshot properties
+        agentpool = self.set_up_snapshot_properties(agentpool)
+        # set up label, tag, taint
+        agentpool = self.set_up_label_tag_taint(agentpool)
         return agentpool
 
     # pylint: disable=protected-access
@@ -536,4 +860,6 @@ class AKSAgentPoolUpdateDecorator:
         self.client = client
         self.models = AKSAgentPoolModels(cmd, resource_type)
         # store the context in the process of assemble the AgentPool object
-        self.context = AKSAgentPoolContext(cmd, raw_parameters, self.models, decorator_mode=DecoratorMode.UPDATE)
+        self.context = AKSAgentPoolContext(
+            cmd, AKSAgentPoolParamDict(raw_parameters), self.models, decorator_mode=DecoratorMode.UPDATE
+        )
