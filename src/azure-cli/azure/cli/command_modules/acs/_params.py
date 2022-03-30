@@ -449,6 +449,8 @@ def load_arguments(self, _):
         c.argument('zones', zones_type, options_list=['--zones', '-z'], help='Space-separated list of availability zones where agent nodes will be placed.')
         c.argument('node_vm_size', options_list=['--node-vm-size', '-s'], completer=get_vm_size_completion_list)
         c.argument('max_pods', type=int, options_list=['--max-pods', '-m'])
+        c.argument('vnet_subnet_id', type=str, validator=validate_vnet_subnet_id)
+        c.argument('pod_subnet_id', type=str, validator=validate_pod_subnet_id)
         c.argument('os_type', type=str)
         c.argument('os_sku', completer=get_ossku_completion_list)
         c.argument('enable_cluster_autoscaler', options_list=["--enable-cluster-autoscaler", "-e"], action='store_true')
