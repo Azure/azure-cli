@@ -435,6 +435,14 @@ examples:
     text: az acr repository list -n MyRegistry
 """
 
+helps['acr repository list-deleted'] = """
+type: command
+short-summary: List soft-deleted repositories in an Azure Container Registry.
+examples:
+  - name: List soft-deleted repositories in a given Azure Container Registry.
+    text: az acr repository list -n MyRegistry
+"""
+
 helps['acr repository show'] = """
 type: command
 short-summary: Get the attributes of a repository or image in an Azure Container Registry.
@@ -545,10 +553,7 @@ examples:
     text: az acr manifest list-referrers -r MyRegistry -n hello-world@sha256:abc123
 """
 
-helps['acr manifest metadata'] = """
-type: group
-short-summary: Manage artifact manifest metadata in Azure Container Registries.
-"""
+
 
 helps['acr manifest show-metadata'] = """
 type: command
@@ -584,16 +589,63 @@ examples:
     text: az acr manifest update-metadata -r MyRegistry -n hello-world@sha256:abc123 --write-enabled false
 """
 
+helps['acr manifest list-deleted'] = """
+type: command
+short-summary: List the soft-deleted manifests in a repository in an Azure Container Registry.
+examples:
+  - name: List the soft-deleted manifests in the repository 'hello-world'.
+    text: az acr manifest list-deleted -r MyRegistry -n hello-world
+  - name: List the soft-deleted manifests in the repository 'hello-world'.
+    text: az acr manifest list-deleted MyRegistry.azurecr.io/hello-world
+"""
+
+helps['acr manifest list-deleted-tags'] = """
+type: command
+short-summary: List the soft-deleted tags in a repository in an Azure Container Registry.
+examples:
+  - name: List the soft-deleted tags in the repository 'hello-world'.
+    text: az acr manifest list-deleted-tags -r MyRegistry -n hello-world
+  - name: List the soft-deleted tags in the repository 'hello-world'.
+    text: az acr manifest list-deleted-tags MyRegistry.azurecr.io/hello-world
+  - name: List the soft-deleted tags that match tag 'latest' in the repository 'hello-world'.
+    text: az acr manifest list-deleted-tags -r MyRegistry -n hello-world:latest
+  - name: List the soft-deleted tags that match tag 'latest' in the repository 'hello-world'.
+    text: az acr manifest list-deleted-tags MyRegistry.azurecr.io/hello-world:latest
+"""
+
+helps['acr manifest restore'] = """
+type: command
+short-summary: Restore a soft-deleted artifact in an Azure Container Registry.
+examples:
+  - name: Restore the manifest matching digest 'sha256:abc123' with tag 'latest' in the repository 'hello-world'.
+    text: az acr manifest restore -r MyRegistry -n hello-world:latest -d sha256:abc123
+  - name: Restore the manifest matching digest 'sha256:abc123' with tag 'latest' in the repository 'hello-world'.
+    text: az acr manifest restore MyRegistry.azurecr.io/hello-world:latest -d sha256:abc123
+  - name: Restore the most recently deleted manifest associated with the tag 'latest' in the repository 'hello-world'.
+    text: az acr manifest restore -r MyRegistry -n hello-world:latest
+  - name: Restore the most recently deleted manifest associated with the tag 'latest' in the repository 'hello-world'.
+    text: az acr manifest restore MyRegistry.azurecr.io/hello-world:latest
+"""
+
+# Deprecated
+helps['acr manifest metadata'] = """
+type: group
+short-summary: Manage artifact manifest metadata in Azure Container Registries.
+"""
+
+# Deprecated
 helps['acr manifest metadata show'] = """
 type: command
 short-summary: Get the metadata of an artifact in an Azure Container Registry.
 """
 
+# Deprecated
 helps['acr manifest metadata list'] = """
 type: command
 short-summary: List the metadata of the manifests in a repository in an Azure Container Registry.
 """
 
+# Deprecated
 helps['acr manifest metadata update'] = """
 type: command
 short-summary: Update the manifest metadata of an artifact in an Azure Container Registry.

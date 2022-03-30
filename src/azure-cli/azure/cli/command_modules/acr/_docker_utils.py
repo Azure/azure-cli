@@ -36,7 +36,7 @@ logger = get_logger(__name__)
 
 
 EMPTY_GUID = '00000000-0000-0000-0000-000000000000'
-ALLOWED_HTTP_METHOD = ['get', 'patch', 'put', 'delete']
+ALLOWED_HTTP_METHOD = ['get', 'patch', 'put', 'delete', 'post']
 AAD_TOKEN_BASE_ERROR_MESSAGE = "Unable to get AAD authorization tokens with message"
 ADMIN_USER_BASE_ERROR_MESSAGE = "Unable to get admin user credentials with message"
 ALLOWS_BASIC_AUTH = "allows_basic_auth"
