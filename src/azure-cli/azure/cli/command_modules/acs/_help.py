@@ -1335,6 +1335,12 @@ helps['aks snapshot delete'] = """
     short-summary: Delete a nodepool snapshot.
 """
 
+helps['aks snapshot wait'] = """
+type: command
+short-summary: Wait for a nodepool snapshot to reach a desired state.
+long-summary: If an operation on a nodepool snapshot was interrupted or was started with `--no-wait`, use this command to wait for it to complete.
+"""
+
 helps['aks nodepool snapshot'] = """
     type: group
     short-summary: Commands to manage nodepool snapshots.
