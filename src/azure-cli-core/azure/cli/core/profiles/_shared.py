@@ -148,12 +148,12 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_NETWORK: '2021-05-01',
         ResourceType.MGMT_COMPUTE: SDKProfile('2021-11-01', {
             'resource_skus': '2019-04-01',
-            'disks': '2021-04-01',
+            'disks': '2021-12-01',
             'disk_encryption_sets': '2020-12-01',
             'disk_accesses': '2020-05-01',
-            'snapshots': '2021-04-01',
+            'snapshots': '2021-12-01',
             'galleries': '2021-07-01',
-            'gallery_images': '2020-09-30',
+            'gallery_images': '2021-10-01',
             'gallery_image_versions': '2021-07-01',
             'gallery_applications': '2021-07-01',
             'gallery_application_versions': '2021-07-01',
@@ -237,7 +237,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_ARO: '2020-04-30',
         ResourceType.MGMT_DATABOXEDGE: '2021-02-01-preview',
         ResourceType.MGMT_CUSTOMLOCATION: '2021-03-15-preview',
-        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2022-01-01', {
+        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2022-02-01', {
             'container_services': '2017-07-01',
             'open_shift_managed_clusters': '2019-09-30-preview'
         }),

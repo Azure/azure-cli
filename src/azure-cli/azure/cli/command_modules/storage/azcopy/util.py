@@ -53,8 +53,7 @@ class AzCopy:
         else:
             raise CLIError('Azcopy ({}) does not exist.'.format(self.system))
         try:
-            os.chmod(install_dir,
-                     os.stat(install_dir).st_mode | stat.S_IWUSR | stat.S_IWGRP | stat.S_IWOTH)
+            os.chmod(install_dir, os.stat(install_dir).st_mode | stat.S_IWUSR)
             _urlretrieve(file_url, install_location)
             os.chmod(install_location,
                      os.stat(install_location).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
