@@ -6,6 +6,7 @@ labels: ''
 assignees: ''
 
 ---
+
 **Related command**
 <!--- Please provide the related command with `az $command`, azure-cli bot will analyse command and route to related team --->
 
