@@ -2753,7 +2753,7 @@ def update_short_term_retention(
         server_name,
         resource_group_name,
         retention_days,
-        diffbackup_hours,
+        diffbackup_hours=None,
         no_wait=False,
         **kwargs):
     '''

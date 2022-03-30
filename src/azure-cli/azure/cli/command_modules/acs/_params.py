@@ -19,7 +19,7 @@ from ._completers import (
     get_vm_size_completion_list, get_k8s_versions_completion_list, get_k8s_upgrades_completion_list, get_ossku_completion_list)
 from ._validators import (
     validate_create_parameters, validate_kubectl_version, validate_kubelogin_version, validate_k8s_version, validate_linux_host_name,
-    validate_list_of_integers, validate_ssh_key, validate_nodes_count,
+    validate_list_of_integers, validate_ssh_key, validate_nodes_count, validate_snapshot_name,
     validate_nodepool_name, validate_vm_set_type, validate_load_balancer_sku, validate_nodepool_id, validate_snapshot_id,
     validate_load_balancer_outbound_ips, validate_priority, validate_eviction_policy, validate_spot_max_price,
     validate_load_balancer_outbound_ip_prefixes, validate_taints, validate_ip_ranges, validate_acr, validate_nodepool_tags,
@@ -531,16 +531,16 @@ def load_arguments(self, _):
         c.argument(
             'workspace_id', help='The resource ID of an existing Log Analytics Workspace to use for storing monitoring data.')
 
-    for scope in ['aks snapshot create']:
+    for scope in ['aks nodepool snapshot create', 'aks snapshot create']:
         with self.argument_context(scope) as c:
-            c.argument('snapshot_name', options_list=['--name', '-n'], required=True, validator=validate_linux_host_name, help='The snapshot name.')
+            c.argument('snapshot_name', options_list=['--name', '-n'], required=True, validator=validate_snapshot_name, help='The nodepool snapshot name.')
             c.argument('tags', tags_type)
             c.argument('nodepool_id', required=True, validator=validate_nodepool_id, help='The nodepool id.')
             c.argument('aks_custom_headers')
 
-    for scope in ['aks snapshot show', 'aks snapshot delete']:
+    for scope in ['aks nodepool snapshot show', 'aks nodepool snapshot delete', 'aks snapshot show', 'aks snapshot delete']:
         with self.argument_context(scope) as c:
-            c.argument('snapshot_name', options_list=['--name', '-n'], required=True, validator=validate_linux_host_name, help='The snapshot name.')
+            c.argument('snapshot_name', options_list=['--name', '-n'], required=True, validator=validate_snapshot_name, help='The nodepool snapshot name.')
             c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
 
 

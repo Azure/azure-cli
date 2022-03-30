@@ -324,10 +324,10 @@ parameters:
     long-summary: If specified, please make sure the kubernetes version is larger than 1.10.6.
   - name: --min-count
     type: int
-    short-summary: Minimum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 100].
+    short-summary: Minimum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 1000].
   - name: --max-count
     type: int
-    short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 100].
+    short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 1000].
   - name: --vm-set-type
     type: string
     short-summary: Agent pool vm set type. VirtualMachineScaleSets or AvailabilitySet.
@@ -581,10 +581,10 @@ parameters:
     short-summary: Update min-count or max-count for cluster autoscaler.
   - name: --min-count
     type: int
-    short-summary: Minimum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 100]
+    short-summary: Minimum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 1000]
   - name: --max-count
     type: int
-    short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 100]
+    short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 1000]
   - name: --uptime-sla
     type: bool
     short-summary: Enable a paid managed cluster service with a financially backed SLA.
@@ -951,10 +951,10 @@ parameters:
     short-summary: Enable cluster autoscaler.
   - name: --min-count
     type: int
-    short-summary: Minimum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 100]
+    short-summary: Minimum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 1000]
   - name: --max-count
     type: int
-    short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 100]
+    short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 1000]
   - name: --scale-down-mode
     type: string
     short-summary: "Describe how VMs are added to or removed from nodepools."
@@ -1061,10 +1061,10 @@ parameters:
     short-summary: Update min-count or max-count for cluster autoscaler.
   - name: --min-count
     type: int
-    short-summary: Minimum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 100]
+    short-summary: Minimum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 1000]
   - name: --max-count
     type: int
-    short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 100]
+    short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 1000]
   - name: --scale-down-mode
     type: string
     short-summary: "Describe how VMs are added to or removed from nodepools."
@@ -1258,14 +1258,14 @@ examples:
         az aks nodepool wait --created --interval 60 --name MyManagedCluster --resource-group MyResourceGroup --nodepool-name MyNodePool --timeout 1800
 """
 
-helps['aks snapshot wait'] = """
+helps['aks nodepool snapshot wait'] = """
 type: command
-short-summary: Wait for a snapshot of a node pool to reach a desired state.
-long-summary: If an operation on a snapshot was interrupted or was started with `--no-wait`, use this command to wait for it to complete.
+short-summary: Wait for a nodepool snapshot to reach a desired state.
+long-summary: If an operation on a nodepool snapshot was interrupted or was started with `--no-wait`, use this command to wait for it to complete.
 examples:
   - name: Wait for a node pool to reach a desired state, polling every minute for up to thirty minutes.
     text: |-
-        az aks snapshot wait --created --interval 60 --name MySnapshot --resource-group MyResourceGroup --timeout 1800
+        az aks nodepool snapshot wait --created --interval 60 --name MySnapshot --resource-group MyResourceGroup --timeout 1800
 """
 
 helps['aks rotate-certs'] = """
@@ -1302,22 +1302,63 @@ helps['aks command result'] = """
 
 helps['aks snapshot'] = """
     type: group
-    short-summary: Commands to manage snapshots.
+    short-summary: Commands to manage nodepool snapshots.
 """
 
 helps['aks snapshot show'] = """
     type: command
-    short-summary: Show the details of a snapshot.
+    short-summary: Show the details of a nodepool snapshot.
 """
 
 helps['aks snapshot list'] = """
     type: command
-    short-summary: List snapshots.
+    short-summary: List nodepool snapshots.
 """
 
 helps['aks snapshot create'] = """
     type: command
-    short-summary: Create a snapshot of a node pool.
+    short-summary: Create a nodepool snapshot.
+    parameters:
+        - name: --nodepool-id
+          type: string
+          short-summary: The source nodepool id from which to create this snapshot.
+        - name: --tags
+          type: string
+          short-summary: The tags of the snapshot.
+        - name: --aks-custom-headers
+          type: string
+          short-summary: Send custom headers. When specified, format should be Key1=Value1,Key2=Value2
+"""
+
+helps['aks snapshot delete'] = """
+    type: command
+    short-summary: Delete a nodepool snapshot.
+"""
+
+helps['aks snapshot wait'] = """
+type: command
+short-summary: Wait for a nodepool snapshot to reach a desired state.
+long-summary: If an operation on a nodepool snapshot was interrupted or was started with `--no-wait`, use this command to wait for it to complete.
+"""
+
+helps['aks nodepool snapshot'] = """
+    type: group
+    short-summary: Commands to manage nodepool snapshots.
+"""
+
+helps['aks nodepool snapshot show'] = """
+    type: command
+    short-summary: Show the details of a nodepool snapshot.
+"""
+
+helps['aks nodepool snapshot list'] = """
+    type: command
+    short-summary: List nodepool snapshots.
+"""
+
+helps['aks nodepool snapshot create'] = """
+    type: command
+    short-summary: Create a nodepool snapshot.
     parameters:
         - name: --nodepool-id
           type: string
@@ -1329,15 +1370,15 @@ helps['aks snapshot create'] = """
           type: string
           short-summary: Send custom headers. When specified, format should be Key1=Value1,Key2=Value2
     examples:
-        - name: Create a snapshot.
-          text: az aks snapshot create -g MyResourceGroup -n snapshot1 --nodepool-id "/subscriptions/00000/resourceGroups/AnotherResourceGroup/providers/Microsoft.ContainerService/managedClusters/akscluster1/agentPools/nodepool1"
-        - name: Create a snapshot with custom tags.
-          text: az aks snapshot create -g MyResourceGroup -n snapshot1 --nodepool-id "/subscriptions/00000/resourceGroups/AnotherResourceGroup/providers/Microsoft.ContainerService/managedClusters/akscluster1/agentPools/nodepool1" --tags "foo=bar" "key1=val1"
+        - name: Create a nodepool snapshot.
+          text: az aks nodepool snapshot create -g MyResourceGroup -n snapshot1 --nodepool-id "/subscriptions/00000/resourceGroups/AnotherResourceGroup/providers/Microsoft.ContainerService/managedClusters/akscluster1/agentPools/nodepool1"
+        - name: Create a nodepool snapshot with custom tags.
+          text: az aks nodepool snapshot create -g MyResourceGroup -n snapshot1 --nodepool-id "/subscriptions/00000/resourceGroups/AnotherResourceGroup/providers/Microsoft.ContainerService/managedClusters/akscluster1/agentPools/nodepool1" --tags "foo=bar" "key1=val1"
 """
 
-helps['aks snapshot delete'] = """
+helps['aks nodepool snapshot delete'] = """
     type: command
-    short-summary: Delete a snapshot.
+    short-summary: Delete a nodepool snapshot.
 """
 
 helps['openshift'] = """

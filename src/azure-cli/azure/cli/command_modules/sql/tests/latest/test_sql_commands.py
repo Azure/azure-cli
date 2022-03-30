@@ -961,13 +961,14 @@ class SqlServerDbShortTermRetentionScenarioTest(ScenarioTest):
     def test_sql_db_short_term_retention(self):
         # Initial parameters. default_diffbackup_hours will be changed to 24 soon.
         self.kwargs.update({
-            'resource_group': 'WestUS2ResourceGroup',
-            'server_name': 'lillian-westus2-server',
-            'database_name': 'ps5691',
+            'resource_group': 'qiangdsrg',
+            'server_name': 'qiangdsmemberserver',
+            'database_name': 'hubdatabase',
             'retention_days_v1': 7,
             'diffbackup_hours_v1': 24,
             'retention_days_v2': 6,
-            'diffbackup_hours_v2': 12
+            'diffbackup_hours_v2': 12,
+            'retention_days_v3': 5
         })
 
         # Test UPDATE short term retention policy on live database, value updated to v1.
@@ -992,6 +993,14 @@ class SqlServerDbShortTermRetentionScenarioTest(ScenarioTest):
             checks=[
                 self.check('resourceGroup', '{resource_group}'),
                 self.check('retentionDays', '{retention_days_v2}'),
+                self.check('diffBackupIntervalInHours', '{diffbackup_hours_v2}')])
+
+        # Test UPDATE short term retention policy on live database, only update retention days value to v3.
+        self.cmd(
+            'sql db str-policy set -g {resource_group} -s {server_name} -n {database_name} --retention-days {retention_days_v3}',
+            checks=[
+                self.check('resourceGroup', '{resource_group}'),
+                self.check('retentionDays', '{retention_days_v3}'),
                 self.check('diffBackupIntervalInHours', '{diffbackup_hours_v2}')])
 
 

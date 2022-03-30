@@ -4166,15 +4166,15 @@ def _ensure_cluster_identity_permission_on_kubelet_identity(cmd, cluster_identit
                                 'permission to cluster identity at scope {}'.format(scope))
 
 
-def aks_snapshot_create(cmd,    # pylint: disable=too-many-locals,too-many-statements,too-many-branches
-                        client,
-                        resource_group_name,
-                        name,
-                        nodepool_id,
-                        location=None,
-                        tags=None,
-                        aks_custom_headers=None,
-                        no_wait=False):
+def aks_nodepool_snapshot_create(cmd,    # pylint: disable=too-many-locals,too-many-statements,too-many-branches
+                                 client,
+                                 resource_group_name,
+                                 snapshot_name,
+                                 nodepool_id,
+                                 location=None,
+                                 tags=None,
+                                 aks_custom_headers=None,
+                                 no_wait=False):
 
     rg_location = get_rg_location(cmd.cli_ctx, resource_group_name)
     if location is None:
@@ -4190,7 +4190,7 @@ def aks_snapshot_create(cmd,    # pylint: disable=too-many-locals,too-many-state
     )
 
     snapshot = Snapshot(
-        name=name,
+        name=snapshot_name,
         tags=tags,
         location=location,
         creation_data=creationData
@@ -4204,29 +4204,29 @@ def aks_snapshot_create(cmd,    # pylint: disable=too-many-locals,too-many-state
         default_value={},
         allow_appending_values_to_same_key=True,
     )
-    return client.create_or_update(resource_group_name, name, snapshot, headers=aks_custom_headers)
+    return client.create_or_update(resource_group_name, snapshot_name, snapshot, headers=aks_custom_headers)
 
 
-def aks_snapshot_show(cmd, client, resource_group_name, name):   # pylint: disable=unused-argument
-    snapshot = client.get(resource_group_name, name)
+def aks_nodepool_snapshot_show(cmd, client, resource_group_name, snapshot_name):   # pylint: disable=unused-argument
+    snapshot = client.get(resource_group_name, snapshot_name)
     return snapshot
 
 
-def aks_snapshot_delete(cmd,    # pylint: disable=unused-argument
-                        client,
-                        resource_group_name,
-                        name,
-                        no_wait=False,
-                        yes=False):
+def aks_nodepool_snapshot_delete(cmd,    # pylint: disable=unused-argument
+                                 client,
+                                 resource_group_name,
+                                 snapshot_name,
+                                 no_wait=False,
+                                 yes=False):
 
-    msg = 'This will delete the snapshot "{}" in resource group "{}", Are you sure?'.format(name, resource_group_name)
+    msg = 'This will delete the snapshot "{}" in resource group "{}", Are you sure?'.format(snapshot_name, resource_group_name)
     if not yes and not prompt_y_n(msg, default="n"):
         return None
 
-    return client.delete(resource_group_name, name)
+    return client.delete(resource_group_name, snapshot_name)
 
 
-def aks_snapshot_list(cmd, client, resource_group_name=None):  # pylint: disable=unused-argument
+def aks_nodepool_snapshot_list(cmd, client, resource_group_name=None):  # pylint: disable=unused-argument
     if resource_group_name is None or resource_group_name == '':
         return client.list()
 
