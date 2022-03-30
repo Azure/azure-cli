@@ -156,7 +156,7 @@ def validate_snapshot_name(namespace):
     rfc1123_regex = re.compile(r'^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])(\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9]))*$')  # pylint:disable=line-too-long
     found = rfc1123_regex.findall(namespace.snapshot_name)
     if not found:
-        raise CLIError('--name cannot exceed 63 characters and can only contain '
+        raise InvalidArgumentValueError('--name cannot exceed 63 characters and can only contain '
                        'letters, numbers, or dashes (-).')
 
 
