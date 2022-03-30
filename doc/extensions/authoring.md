@@ -41,11 +41,11 @@ Address comments as appropriate and consult the Azure CLI team if something is u
 
 ### Publish
 
-**For the extension whose source code is hosted in [Azure/azure-cli-extensions](https://github.com/Azure/azure-cli-extensionsb)**, we will release for you once your code is merged into `master` branch. You must not update [index.json](https://github.com/Azure/azure-cli-extensions/blob/master/src/index.json) manually in this case.
+**For the extension whose source code is hosted in [Azure/azure-cli-extensions](https://github.com/Azure/azure-cli-extensions)**, we will release for you once your code is merged into `master` branch. You must not update [index.json](https://github.com/Azure/azure-cli-extensions/blob/master/src/index.json) manually in this case.
 
 We detect Python package version via `python setup.py --version`. Only when the version is upgraded, the release process is triggered to help you build and upload the extension WHL file, then update the `index.json` automatically. Subsequently, a PR with newer extension info will be created to update `index.json`, we will merge it once CI passes. Then, the new extension is published.
 
-**For the extension that source code is not hosted in [Azure/azure-cli-extensions](https://github.com/Azure/azure-cli-extensionsb)**, you need to build and upload the WHL file to a public location and optionally advertise the new extension in the repo's index.json file for discoverability. For public extensions that are published to a storage account, the following command will accomplish all of this.
+**For the extension that source code is not hosted in [Azure/azure-cli-extensions](https://github.com/Azure/azure-cli-extensions)**, you need to build and upload the WHL file to a public location and optionally advertise the new extension in the repo's index.json file for discoverability. For public extensions that are published to a storage account, the following command will accomplish all of this.
 
 `azdev extension publish <NAME> --update-index [--storage-account NAME --storage-container NAME --storage-subscription GUID]`
 
