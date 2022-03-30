@@ -70,7 +70,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('ams account create') as c:
         c.argument('storage_account', storage_account_arg_type,
                    help='The name or resource ID of the primary storage account to attach to the Azure Media Services account. The storage account MUST be in the same Azure subscription as the Media Services account. It is strongly recommended that the storage account be in the same resource group as the Media Services account. Blob only accounts are not allowed as primary.')
-        c.argument('mi_system_assigned', action='store_true', help='Set the system managed identity on the media services account.', arg_group='Identity')
+        c.argument('mi_system_assigned', help='Set the system managed identity on the media services account.', arg_group='Identity', arg_type=get_three_state_flag())
         c.argument('mi_user_assigned', nargs='+', help='Set the user managed identities on the media services account.', arg_group='Identity')
         c.argument('disable_public_network', help='Set this flag to disable public network access for resources under the Media Services account. If not set public network access will be enabled')
         c.argument('default_action', help='The behavior for IP access control in Key Delivery. Allowed values: {}'.format(','.join(get_default_action_allowed_values_list())), arg_group='Key Delivery')
@@ -95,13 +95,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('storage_account_id', required=True, help="The storage account Id.")
 
     with self.argument_context('ams account storage add') as c:
-        c.argument('system_assigned', help='Set the system managed identity on the storage account.')
+        c.argument('system_assigned', help='Set the system managed identity on the storage account.', arg_type=get_three_state_flag())
         c.argument('user_assigned', help='Set the user managed identity on the storage account.')
 
     with self.argument_context('ams account storage set-authentication') as c:
         c.argument('storage_auth', arg_type=get_enum_type(get_storage_authentication_allowed_values_list()), help='The type of authentication for the storage account associated with the media services account.')
         c.argument('storage_account_id', help="The storage account Id.")
-        c.argument('system_assigned', help='Set the system managed identity on the storage account.')
+        c.argument('system_assigned', help='Set the system managed identity on the storage account.', arg_type=get_three_state_flag())
         c.argument('user_assigned', help='Set the user managed identity on the storage account.')
 
     with self.argument_context('ams account sp') as c:
@@ -122,11 +122,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('key_identifier', help='The URL of the Key Vault key used to encrypt the account. The key may either be versioned (for example https://vault/keys/mykey/version1) or reference a key without a version (for example https://vault/keys/mykey).')
         c.argument('current_key_id', help='The current key used to encrypt the Media Services account, including the key version.')
         c.argument('current_key_id', help='The current key used to encrypt the Media Services account, including the key version.')
-        c.argument('system_assigned', help='Set the system managed identity for account encryption.')
+        c.argument('system_assigned', help='Set the system managed identity for account encryption.', arg_type=get_three_state_flag())
         c.argument('user_assigned', help='Set the user managed identity for account encryption.')
 
     with self.argument_context('ams account identity') as c:
-        c.argument('system_assigned', help='Set the system managed identity on the media services account.')
+        c.argument('system_assigned', help='Set the system managed identity on the media services account.', arg_type=get_three_state_flag())
         c.argument('user_assigned', nargs='+', help='Set the user managed identities on the media services account.')
 
     with self.argument_context('ams transform') as c:

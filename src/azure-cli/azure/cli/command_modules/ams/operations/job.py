@@ -13,7 +13,6 @@ def create_job(client, resource_group_name, account_name, transform_name, job_na
                label=None, correlation_data=None,
                description=None, priority=None, files=None, base_uri=None):
     from azure.mgmt.media.models import (Job, JobInputAsset, JobInputHttp)
-    print(files)
     if input_asset_name:
         job_input = JobInputAsset(asset_name=input_asset_name, files=files, label=label)
     else:

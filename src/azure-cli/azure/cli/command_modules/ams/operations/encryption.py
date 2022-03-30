@@ -46,7 +46,6 @@ def set_encryption(client, resource_group_name, account_name, key_type=None,
                                                    storage_authentication=account_info.storage_authentication,
                                                    name=account_info.name,
                                                    public_network_access=account_info.public_network_access)
-        print(encryption)
         return client.create_or_update(resource_group_name, account_name, media_service)
     except HttpResponseError as ex:
         recommendation = ''
