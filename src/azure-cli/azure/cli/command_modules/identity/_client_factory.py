@@ -7,7 +7,7 @@
 def _msi_client_factory(cli_ctx, **_):
     from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_MSI)
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_MSI, api_version='2018-11-30')
 
 
 def _msi_user_identities_operations(cli_ctx, _):
