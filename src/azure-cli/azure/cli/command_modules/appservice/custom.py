@@ -92,6 +92,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                   using_webapp_up=False, language=None, assign_identities=None,
                   role='Contributor', scope=None, vnet=None, subnet=None, https_only=False):
     from azure.mgmt.web.models import Site
+    from azure.core.exceptions import ResourceNotFoundError as _ResourceNotFoundError
     SiteConfig, SkuDescription, NameValuePair = cmd.get_models(
         'SiteConfig', 'SkuDescription', 'NameValuePair')
 
@@ -101,14 +102,26 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     docker_registry_server_url = parse_docker_image_name(deployment_container_image_name)
 
     client = web_client_factory(cmd.cli_ctx)
+    plan_info = None
     if is_valid_resource_id(plan):
         parse_result = parse_resource_id(plan)
         plan_info = client.app_service_plans.get(parse_result['resource_group'], parse_result['name'])
     else:
-        plan_info = client.app_service_plans.get(name=plan, resource_group_name=resource_group_name)
+        try:
+            plan_info = client.app_service_plans.get(name=plan, resource_group_name=resource_group_name)
+        except _ResourceNotFoundError:
+            plan_info = None
+        if not plan_info:
+            plans = list(client.app_service_plans.list(detailed=True))
+            for user_plan in plans:
+                if user_plan.name.lower() == plan.lower():
+                    if plan_info:
+                        raise InvalidArgumentValueError("There are multiple plans with name {}.".format(plan),
+                                                        "Try using the plan resource ID instead.")
+                    parse_result = parse_resource_id(user_plan.id)
+                    plan_info = client.app_service_plans.get(parse_result['resource_group'], parse_result['name'])
     if not plan_info:
-        raise ResourceNotFoundError("The plan '{}' doesn't exist in the resource group '{}".format(plan,
-                                                                                                   resource_group_name))
+        raise ResourceNotFoundError("The plan '{}' doesn't exist.".format(plan))
     is_linux = plan_info.reserved
     helper = _StackRuntimeHelper(cmd, linux=is_linux, windows=not is_linux)
     location = plan_info.location

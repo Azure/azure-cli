@@ -206,7 +206,7 @@ def load_command_table(self, _):
         g.command('list', 'acr_repository_list')
         g.command('show-tags', 'acr_repository_show_tags')
         g.command('show-manifests', 'acr_repository_show_manifests',
-                  deprecate_info=self.deprecate(redirect='acr manifest metadata list', hide=True))
+                  deprecate_info=self.deprecate(redirect='acr manifest list-metadata', hide=True))
         g.show_command('show', 'acr_repository_show')
         g.command('update', 'acr_repository_update')
         g.command('delete', 'acr_repository_delete')
@@ -217,8 +217,19 @@ def load_command_table(self, _):
         g.command('list', 'acr_manifest_list', table_transformer=manifest_output_format)
         g.command('delete', 'acr_manifest_delete')
         g.command('list-referrers', 'acr_manifest_list_referrers', table_transformer=list_referrers_output_format)
+        g.show_command('show-metadata', 'acr_manifest_metadata_show')
+        g.command('list-metadata', 'acr_manifest_metadata_list')
+        g.command('update-metadata', 'acr_manifest_metadata_update')
 
-    with self.command_group('acr manifest metadata', acr_manifest_util, is_preview=True) as g:
+    def _metadata_deprecate_message(self):
+        msg = "This {} has been deprecated and will be removed in future release.".format(self.object_type)
+        msg += " Use '{}' instead.".format(self.redirect)
+        return msg
+
+    with self.command_group('acr manifest metadata', acr_manifest_util, is_preview=True,
+                            deprecate_info=self.deprecate(redirect="az acr manifest",
+                                                          message_func=_metadata_deprecate_message,
+                                                          hide=True)) as g:
         g.show_command('show', 'acr_manifest_metadata_show')
         g.command('list', 'acr_manifest_metadata_list')
         g.command('update', 'acr_manifest_metadata_update')
