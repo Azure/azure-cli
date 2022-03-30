@@ -6280,7 +6280,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
-    def test_aks_snapshot(self, resource_group, resource_group_location):
+    def test_aks_nodepool_snapshot(self, resource_group, resource_group_location):
         create_version, upgrade_version = self._get_versions(resource_group_location)
         aks_name = self.create_random_name('cliakstest', 16)
         aks_name2 = self.create_random_name('cliakstest', 16)
@@ -6319,7 +6319,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         print("The nodepool resource id %s " % nodepool_resource_id)
 
         # create snapshot from the nodepool
-        create_snapshot_cmd = 'aks snapshot create --resource-group {resource_group} --name {snapshot_name} --location {location} ' \
+        create_snapshot_cmd = 'aks nodepool snapshot create --resource-group {resource_group} --name {snapshot_name} --location {location} ' \
                               '--nodepool-id {nodepool_resource_id} -o json'
         response = self.cmd(create_snapshot_cmd, checks=[
             self.check('creationData.sourceResourceId', nodepool_resource_id)
@@ -6337,13 +6337,13 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
         # show the snapshot
-        show_snapshot_cmd = 'aks snapshot show --resource-group {resource_group} --name {snapshot_name} -o json'
+        show_snapshot_cmd = 'aks nodepool snapshot show --resource-group {resource_group} --name {snapshot_name} -o json'
         response = self.cmd(show_snapshot_cmd, checks=[
             self.check('creationData.sourceResourceId', nodepool_resource_id)
         ]).get_output_in_json()
 
         # list the snapshots
-        list_snapshot_cmd = 'aks snapshot list --resource-group {resource_group} -o json'
+        list_snapshot_cmd = 'aks nodepool snapshot list --resource-group {resource_group} -o json'
         response = self.cmd(list_snapshot_cmd, checks=[]).get_output_in_json()
         assert len(response) > 0
 
@@ -6400,7 +6400,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd('aks delete -g {resource_group} -n {aks_name2} --yes --no-wait', checks=[self.is_empty()])
 
         # delete the snapshot
-        delete_snapshot_cmd = 'aks snapshot delete --resource-group {resource_group} --name {snapshot_name} --yes --no-wait'
+        delete_snapshot_cmd = 'aks nodepool snapshot delete --resource-group {resource_group} --name {snapshot_name} --yes --no-wait'
         self.cmd(delete_snapshot_cmd, checks=[
             self.is_empty()
         ])
