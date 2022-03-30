@@ -146,6 +146,7 @@ partner_topic_source_type = CLIArgumentType(
     arg_type=name_type,
     options_list=['--partner-topic-source'])
 
+
 phone_number_type = CLIArgumentType(
     help='The customer service number of the publisher. The expected phone format should start with a \'+\' sign'
          ' followed by the country code. The remaining digits are then followed. Only digits and spaces are allowed and its'
@@ -226,6 +227,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         c.argument('destination_resource_group_name', help="Azure Resource Group of the customer creating the event channel. The partner topic associated with the event channel will be created under this resource group.")
         c.argument('destination_subscription_id', help="Azure subscription Id of the customer creating the event channel. The partner topic associated with the event channel will be created under this Azure subscription.")
         c.argument('topic_type', help="Name of the topic type.", completer=get_resource_name_completion_list('Microsoft.EventGrid/topictypes'))
+        c.argument('system_assigned', options_list=['--mi-system-assigned'], action='store_true', help='Presence of this param indicates that SystemAssigned managed identity will be used')
         c.argument('user_assigned',
                    action=AddUserAssignedIdentities,
                    nargs='+',
