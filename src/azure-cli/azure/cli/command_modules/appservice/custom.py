@@ -4977,6 +4977,7 @@ def delete_function_key(cmd, resource_group_name, name, key_name, function_name=
 
 def add_github_actions(cmd, resource_group, name, repo, runtime=None, token=None, slot=None,  # pylint: disable=too-many-statements,too-many-branches
                        branch='master', login_with_github=False, force=False):
+    runtime = _StackRuntimeHelper(cmd).remove_delimiters(runtime)  # normalize "runtime:version"
     if not token and not login_with_github:
         raise_missing_token_suggestion()
     elif not token:
