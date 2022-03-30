@@ -26,6 +26,38 @@ examples:
     text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --enable-public-network --disable-local-auth
 """
 
+helps['appconfig list-deleted'] = """
+type: command
+short-summary: List all deleted, but not yet purged App Configurations.
+examples:
+  - name: List all deleted, but not yet purged App Configurations.
+    text: az appconfig list-deleted
+"""
+
+helps['appconfig show-deleted'] = """
+type: command
+short-summary: Show properties of a deleted, but not yet purged App Configuration.
+examples:
+  - name: Show properties of a deleted App Configuration named 'sample-app-configuration'.
+    text: az appconfig show-deleted --name sample-app-configuration
+"""
+
+helps['appconfig purge'] = """
+type: command
+short-summary: Permanently delete an App Configuration. Aka 'purge' the deleted App Configuration.
+examples:
+  - name: Purge a deleted App Configuration named 'sample-app-configuration'.
+    text: az appconfig purge --name sample-app-configuration
+"""
+
+helps['appconfig recover'] = """
+type: command
+short-summary: Recover a previously deleted, but not yet purged App Configuration.
+examples:
+  - name: Recover a deleted App Configuration named 'sample-app-configuration'.
+    text: az appconfig recover --name sample-app-configuration
+"""
+
 helps['appconfig identity'] = """
 type: group
 short-summary: Managed identities for App Configurations.

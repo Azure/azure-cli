@@ -151,6 +151,15 @@ def validate_linux_host_name(namespace):
                        'letters, numbers, or dashes (-).')
 
 
+def validate_snapshot_name(namespace):
+    """Validates a nodepool snapshot name to be alphanumeric and dashes."""
+    rfc1123_regex = re.compile(r'^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])(\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9]))*$')  # pylint:disable=line-too-long
+    found = rfc1123_regex.findall(namespace.snapshot_name)
+    if not found:
+        raise InvalidArgumentValueError('--name cannot exceed 63 characters and can only contain '
+                                        'letters, numbers, or dashes (-).')
+
+
 def validate_vm_set_type(namespace):
     """Validates the vm set type string."""
     if namespace.vm_set_type is not None:
@@ -416,6 +425,7 @@ def extract_comma_separated_string(
     allow_empty_value=False,
     keep_none=False,
     default_value=None,
+    allow_appending_values_to_same_key=False,
 ):
     """Extract comma-separated string.
 
@@ -425,6 +435,8 @@ def extract_comma_separated_string(
     Option allow_empty_value is valid since extract_kv is specified. When the number of string segments split by "="
     is 1, the first segment is retained as the key and empty string would be set as its corresponding value without
     raising an exception.
+    Option allow_appending_values_to_same_key is valid since extract_kv is specified. For the same key, the new value
+    is appended to the existing value separated by commas.
     If keep_none is specified, will return None when input is None. Otherwise will return default_value if input is
     None or empty string.
     """
@@ -457,6 +469,8 @@ def extract_comma_separated_string(
                 if enable_strip:
                     key = key.strip()
                     value = value.strip()
+                if allow_appending_values_to_same_key and key in result:
+                    value = "{},{}".format(result[key], value)
                 result[key] = value
             else:
                 raise InvalidArgumentValueError(

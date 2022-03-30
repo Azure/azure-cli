@@ -78,8 +78,8 @@ def load_arguments(self, _):
             c.argument('locations', nargs='+', action=CreateLocation)
             c.argument('tags', arg_type=tags_type)
             c.argument('default_consistency_level', arg_type=get_enum_type(DefaultConsistencyLevel), help="default consistency level of the Cosmos DB database account")
-            c.argument('max_staleness_prefix', type=int, help="when used with Bounded Staleness consistency, this value represents the number of stale requests tolerated. Accepted range for this value is 1 - 2,147,483,647")
-            c.argument('max_interval', type=int, help="when used with Bounded Staleness consistency, this value represents the time amount of staleness (in seconds) tolerated. Accepted range for this value is 1 - 100")
+            c.argument('max_staleness_prefix', type=int, help="when used with Bounded Staleness consistency, this value represents the number of stale requests tolerated. Accepted range for this value is 10 - 2,147,483,647")
+            c.argument('max_interval', type=int, help="when used with Bounded Staleness consistency, this value represents the time amount of staleness (in seconds) tolerated. Accepted range for this value is 5 - 86400")
             c.argument('ip_range_filter', nargs='+', options_list=['--ip-range-filter'], validator=validate_ip_range_filter, help="firewall support. Specifies the set of IP addresses or IP address ranges in CIDR form to be included as the allowed list of client IPs for a given database account. IP addresses/ranges must be comma-separated and must not contain any spaces")
             c.argument('kind', arg_type=get_enum_type(DatabaseAccountKind), help='The type of Cosmos DB database account to create')
             c.argument('enable_automatic_failover', arg_type=get_three_state_flag(), help='Enables automatic failover of the write region in the rare event that the region is unavailable due to an outage. Automatic failover will result in a new write region for the account and is chosen based on the failover priorities configured for the account.')
@@ -446,14 +446,14 @@ def load_arguments(self, _):
             'managed-cassandra cluster update']:
         with self.argument_context(scope) as c:
             c.argument('tags', arg_type=tags_type)
-            c.argument('external_gossip_certificates', nargs='+', validator=validate_gossip_certificates, options_list=['--external-gossip-certificates', '-e'], help="A list of certificates that the managed cassandra data center's should accept.")
+            c.argument('external_gossip_certificates', nargs='*', validator=validate_gossip_certificates, options_list=['--external-gossip-certificates', '-e'], help="A list of certificates that the managed cassandra data center's should accept.")
             c.argument('cassandra_version', help="The version of Cassandra chosen.")
             c.argument('authentication_method', arg_type=get_enum_type(['None', 'Cassandra']), help="Authentication mode can be None or Cassandra. If None, no authentication will be required to connect to the Cassandra API. If Cassandra, then passwords will be used.")
             c.argument('hours_between_backups', help="The number of hours between backup attempts.")
-            c.argument('repair_enabled', help="Enables automatic repair.")
-            c.argument('client_certificates', nargs='+', validator=validate_client_certificates, help="If specified, enables client certificate authentication to the Cassandra API.")
+            c.argument('repair_enabled', arg_type=get_three_state_flag(), help="Enables automatic repair.")
+            c.argument('client_certificates', nargs='*', validator=validate_client_certificates, help="If specified, enables client certificate authentication to the Cassandra API.")
             c.argument('gossip_certificates', help="A list of certificates that should be accepted by on-premise data centers.")
-            c.argument('external_seed_nodes', nargs='+', validator=validate_seednodes, help="A list of ip addresses of the seed nodes of on-premise data centers.")
+            c.argument('external_seed_nodes', nargs='*', validator=validate_seednodes, help="A list of ip addresses of the seed nodes of on-premise data centers.")
             c.argument('identity_type', options_list=['--identity-type'], arg_type=get_enum_type(['None', 'SystemAssigned']), help="Type of identity used for Customer Managed Disk Key.")
 
     # Managed Cassandra Cluster
