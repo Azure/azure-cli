@@ -50,6 +50,12 @@ repo_id_type = CLIArgumentType(
     help="A fully qualified repository specifier such as 'MyRegistry.azurecr.io/hello-world'."
 )
 
+permissive_repo_id_type = CLIArgumentType(
+    nargs='*',
+    default=None,
+    help="A fully qualified repository specifier such as 'MyRegistry.azurecr.io/hello-world'. May include a tag such as MyRegistry.azurecr.io/hello-world:latest"
+)
+
 manifest_id_type = CLIArgumentType(
     nargs='*',
     default=None,
@@ -190,6 +196,18 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     with self.argument_context('acr manifest metadata show') as c:
         c.positional('manifest_id', arg_type=manifest_id_type)
+
+    with self.argument_context('acr manifest list-deleted') as c:
+        c.positional('repo_id', arg_type=repo_id_type)
+
+    with self.argument_context('acr manifest list-deleted-tags') as c:
+        c.positional('perm_repo_id', arg_type=permissive_repo_id_type)
+        c.argument('permissive_repo', help="The name of the repository. May include a tag in the format 'name:tag'", options_list=['--name', '-n'])
+
+    with self.argument_context('acr manifest restore') as c:
+        c.positional('manifest_id', arg_type=manifest_id_type)
+        c.argument('digest', options_list=['--digest', '-d'], help="The digest of the manifest such as 'sha256@abc123'.")
+        c.argument('force', options_list=['--force', '-f'], help='Overwrite the existing tag.', action='store_true')
 
     with self.argument_context('acr manifest metadata list') as c:
         c.positional('repo_id', arg_type=repo_id_type)

@@ -55,6 +55,14 @@ def _get_v2_manifest_path(repository, manifest):
 def _get_referrers_path(repository, manifest):
     return '/oras/artifacts/v1/{}/manifests/{}/referrers'.format(repository, manifest)
 
+def _get_deleted_manifest_path(repository):
+    return '/acr/v1/_deleted/{}/_manifests'.format(repository)
+
+def _get_deleted_tag_path(repository):
+    return '/acr/v1/_deleted/{}/_tags'.format(repository)
+
+def _get_restore_deleted_manifest_path(repository, manifest, force):
+    return '/acr/v1/_deleted/{}/_manifests/{}?force={}'.format(repository, manifest, force)
 
 def _obtain_manifest_from_registry(login_server,
                                    path,
@@ -116,7 +124,7 @@ def _obtain_referrers_from_registry(login_server,
     return result_list
 
 
-def _parse_fqdn(cmd, fqdn, is_manifest=True):
+def _parse_fqdn(cmd, fqdn, is_manifest=True, default_latest=True):
     try:
         fqdn = fqdn.lstrip('https://')
         reg_addr = fqdn.split('/', 1)[0]
@@ -131,7 +139,8 @@ def _parse_fqdn(cmd, fqdn, is_manifest=True):
             raise InvalidArgumentValueError("The positional parameter 'repo_id'"
                                             " should not include a tag or digest.")
 
-        repository, tag, manifest = _parse_image_name(manifest_spec, allow_digest=True)
+
+        repository, tag, manifest = _parse_image_name(manifest_spec, allow_digest=True, default_latest=default_latest)
 
     except IndexError as e:
         if is_manifest:
@@ -233,6 +242,139 @@ def acr_manifest_metadata_list(cmd,
 
     return raw_result
 
+def acr_manifest_deleted_list(cmd,
+                               registry_name=None,
+                               repository=None,
+                               repo_id=None,
+                               tenant_suffix=None,
+                               username=None,
+                               password=None):
+    if (repo_id and repository) or (not repo_id and not (registry_name and repository)):
+        raise InvalidArgumentValueError(BAD_ARGS_ERROR_REPO)
+
+    if repo_id:
+        registry_name, repository, _, _ = _parse_fqdn(cmd, repo_id[0], is_manifest=False)
+
+    login_server, username, password = get_access_credentials(
+        cmd=cmd,
+        registry_name=registry_name,
+        tenant_suffix=tenant_suffix,
+        username=username,
+        password=password,
+        repository=repository,
+        permission=RepoAccessTokenPermission.METADATA_READ.value)
+
+    raw_result = _obtain_data_from_registry(
+        login_server=login_server,
+        path=_get_deleted_manifest_path(repository),
+        username=username,
+        password=password,
+        result_index='manifests')
+
+    return raw_result
+
+def acr_manifest_deleted_tags_list(cmd,
+                               registry_name=None,
+                               permissive_repo=None,
+                               perm_repo_id=None,
+                               tenant_suffix=None,
+                               username=None,
+                               password=None):
+    if (perm_repo_id and permissive_repo) or (not perm_repo_id and not (registry_name and permissive_repo)):
+        raise InvalidArgumentValueError(BAD_ARGS_ERROR_REPO)
+
+    if perm_repo_id:
+        registry_name, repository, tag, _ = _parse_fqdn(cmd, perm_repo_id[0], is_manifest=True, default_latest=False)
+
+    else:
+        repository, tag, _ = _parse_image_name(permissive_repo, allow_digest=False, default_latest=False)
+
+    login_server, username, password = get_access_credentials(
+        cmd=cmd,
+        registry_name=registry_name,
+        tenant_suffix=tenant_suffix,
+        username=username,
+        password=password,
+        repository=repository,
+        permission=RepoAccessTokenPermission.METADATA_READ.value)
+
+    raw_result = _obtain_data_from_registry(
+        login_server=login_server,
+        path=_get_deleted_tag_path(repository),
+        username=username,
+        password=password,
+        result_index='tags')
+
+    if tag:
+        return [x for x in raw_result if x['tag'] == tag]
+
+    return raw_result
+
+def acr_manifest_deleted_restore(cmd,
+                               registry_name=None,
+                               manifest_spec=None,
+                               manifest_id=None,
+                               digest=None,
+                               force=False,
+                               yes = False,
+                               tenant_suffix=None,
+                               username=None,
+                               password=None):
+    if (manifest_id and manifest_spec) or (not manifest_id and not (registry_name and manifest_spec)):
+        raise InvalidArgumentValueError(BAD_ARGS_ERROR_MANIFEST)
+
+    if manifest_id:
+        registry_name, repository, tag, _ = _parse_fqdn(cmd, manifest_id[0])
+
+#default latest here?
+    else:
+        repository, tag, _ = _parse_image_name(manifest_spec, allow_digest=True)
+
+    login_server, username, password = get_access_credentials(
+        cmd=cmd,
+        registry_name=registry_name,
+        tenant_suffix=tenant_suffix,
+        username=username,
+        password=password,
+        repository=repository,
+        permission=RepoAccessTokenPermission.META_WRITE_META_READ.value)
+
+    post_payload = {"tag":tag}
+
+    if not digest:
+        tag_obj_list = _obtain_data_from_registry(
+            login_server=login_server,
+            path=_get_deleted_tag_path(repository),
+            username=username,
+            password=password,
+            result_index='tags')
+
+        digest_list = [x['digest'] for x in tag_obj_list if x['tag'] == tag]
+
+        if(len(digest_list) == 0):
+            raise InvalidArgumentValueError(f'No deleted manifests found for tag: {tag}')
+
+        digest = digest_list[-1]
+
+        if(len(digest_list) > 1):
+            user_confirmation("Multiple deleted manifests found for tag: {}. Restoring most recently deleted manifest with digest: {}. Is this okay?".format(tag, digest), yes)
+
+    raw_result, _ = request_data_from_registry('post',
+                               login_server,
+                               _get_restore_deleted_manifest_path(repository, digest, force),
+                               username,
+                               password,
+                               result_index=None,
+                               json_payload=post_payload,
+                               file_payload=None,
+                               params=None,
+                               manifest_headers=False,
+                               raw=False,
+                               retry_times=3,
+                               retry_interval=5,
+                               timeout=300)
+
+    return raw_result
 
 def acr_manifest_list_referrers(cmd,
                                 registry_name=None,
