@@ -990,13 +990,13 @@ class ReplicationPostgreSqlMgmtScenarioTest(ScenarioTest):  # pylint: disable=to
 
     @ResourceGroupPreparer(parameter_name='resource_group')
     def test_postgrsql_basic_replica_mgmt(self, resource_group):
-        self._test_replica_mgmt(resource_group, 'B_Gen5_2', 'B_Gen5_2', True)
+        self._test_replica_mgmt(resource_group, 'B_Gen5_2', 'B_Gen5_2', True, self.is_live)
 
     @ResourceGroupPreparer(parameter_name='resource_group')
     def test_postgrsql_general_purpose_replica_mgmt(self, resource_group):
-        self._test_replica_mgmt(resource_group, 'GP_Gen5_2', 'GP_Gen5_4', False)
+        self._test_replica_mgmt(resource_group, 'GP_Gen5_2', 'GP_Gen5_4', False, self.is_live)
 
-    def _test_replica_mgmt(self, resource_group, skuName, testSkuName, isBasicTier):
+    def _test_replica_mgmt(self, resource_group, skuName, testSkuName, isBasicTier, is_live):
         database_engine = 'postgres'
         server = self.create_random_name(SERVER_NAME_PREFIX, 32)
         server = self.create_random_name(SERVER_NAME_PREFIX, 32)
@@ -1026,7 +1026,8 @@ class ReplicationPostgreSqlMgmtScenarioTest(ScenarioTest):  # pylint: disable=to
             # restart server
             self.cmd('{} server restart -g {} --name {}'
                      .format(database_engine, resource_group, server), checks=NoneCheck())
-            sleep(120)
+            if is_live:
+                sleep(120)
 
         # test replica create
         self.cmd('{} server replica create -g {} -n {} -l westus --sku-name {} '
