@@ -27,6 +27,8 @@ ACR_TASK_QUICKTASK = 'quicktask'
 
 ACR_RUN_DEFAULT_TIMEOUT_IN_SEC = 60 * 60  # 60 minutes
 
+ACR_AUDIENCE_RESOURCE_NAME="containerregistry"
+
 
 def get_classic_sku(cmd):
     SkuName = cmd.get_models('SkuName')
