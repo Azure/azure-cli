@@ -19,7 +19,7 @@ from azure.cli.command_modules.vm._actions import _resource_not_exists
 from azure.cli.command_modules.vm._completers import (
     get_urn_aliases_completion_list, get_vm_size_completion_list, get_vm_run_command_completion_list)
 from azure.cli.command_modules.vm._validators import (
-    validate_nsg_name, validate_vm_nics, validate_vm_nic, validate_vm_disk, validate_vmss_disk,
+    validate_nsg_name, validate_vm_nics, validate_vm_nic, validate_vmss_disk,
     validate_asg_names_or_ids, validate_keyvault, _validate_proximity_placement_group,
     process_gallery_image_version_namespace, validate_vm_name_for_monitor_metrics)
 
@@ -467,8 +467,11 @@ def load_arguments(self, _):
     with self.argument_context('vm disk attach') as c:
         c.argument('enable_write_accelerator', min_api='2017-12-01', action='store_true', help='enable write accelerator')
         c.argument('disk', options_list=['--name', '-n', c.deprecate(target='--disk', redirect='--name', hide=True)],
-                   help="The name or ID of the managed disk", validator=validate_vm_disk, id_part='name',
+                   help="The name or ID of the managed disk", id_part='name',
                    completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
+        c.argument('disks', nargs='*', help="One or more names or IDs of the managed disk (space-delimited).",
+                   completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
+        c.argument('ids', deprecate_info=c.deprecate(target='--ids', redirect='--disks', hide=True))
 
     with self.argument_context('vm disk detach') as c:
         c.argument('disk_name', arg_type=name_arg_type, help='The data disk name.')
@@ -1019,15 +1022,14 @@ def load_arguments(self, _):
     for scope in ['vm create', 'vmss create', 'vm identity assign', 'vmss identity assign']:
         with self.argument_context(scope) as c:
             arg_group = 'Managed Service Identity' if scope.split()[-1] == 'create' else None
-            c.argument('identity_scope', options_list=['--scope'], arg_group=arg_group, help="Scope that the system assigned identity can access")
+            c.argument('identity_scope', options_list=['--scope'], arg_group=arg_group,
+                       help="Scope that the system assigned identity can access. ")
             c.ignore('identity_role_id')
 
     for scope in ['vm create', 'vmss create']:
         with self.argument_context(scope) as c:
             c.argument('identity_role', options_list=['--role'], arg_group='Managed Service Identity',
-                       help='Role name or id the system assigned identity will have. '
-                            'Please note that the default value "Contributor" will be removed in the future version 2.35.0, '
-                            "so please specify '--role' and '--scope' at the same time when assigning a role to the managed identity")
+                       help='Role name or id the system assigned identity will have. ')
 
     for scope in ['vm identity assign', 'vmss identity assign']:
         with self.argument_context(scope) as c:

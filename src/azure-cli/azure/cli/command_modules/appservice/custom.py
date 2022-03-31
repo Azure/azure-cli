@@ -1326,11 +1326,15 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
                         vnet_route_all_enabled=None,
                         generic_configurations=None):
     configs = get_site_configs(cmd, resource_group_name, name, slot)
+    app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
+                                           'list_application_settings', slot)
     if number_of_workers is not None:
         number_of_workers = validate_range_of_int_flag('--number-of-workers', number_of_workers, min_val=0, max_val=20)
     if linux_fx_version:
         if linux_fx_version.strip().lower().startswith('docker|'):
-            update_app_settings(cmd, resource_group_name, name, ["WEBSITES_ENABLE_APP_SERVICE_STORAGE=false"])
+            if ('WEBSITES_ENABLE_APP_SERVICE_STORAGE' not in app_settings.properties or
+                    app_settings.properties['WEBSITES_ENABLE_APP_SERVICE_STORAGE'] != 'true'):
+                update_app_settings(cmd, resource_group_name, name, ["WEBSITES_ENABLE_APP_SERVICE_STORAGE=false"])
         else:
             delete_app_settings(cmd, resource_group_name, name, ["WEBSITES_ENABLE_APP_SERVICE_STORAGE"])
 
@@ -3298,13 +3302,13 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
                     linux_settings = minor_version.stack_settings.linux_runtime_settings
                     windows_settings = minor_version.stack_settings.windows_runtime_settings
 
-                    if linux_settings is not None:
+                    if linux_settings is not None and not linux_settings.is_hidden:
                         self._parse_minor_version(runtime_settings=linux_settings,
                                                   major_version_name=runtime.name,
                                                   minor_version_name=runtime_version,
                                                   runtime_to_version=runtime_to_version_linux)
 
-                    if windows_settings is not None:
+                    if windows_settings is not None and not windows_settings.is_hidden:
                         self._parse_minor_version(runtime_settings=windows_settings,
                                                   major_version_name=runtime.name,
                                                   minor_version_name=runtime_version,
@@ -4977,6 +4981,7 @@ def delete_function_key(cmd, resource_group_name, name, key_name, function_name=
 
 def add_github_actions(cmd, resource_group, name, repo, runtime=None, token=None, slot=None,  # pylint: disable=too-many-statements,too-many-branches
                        branch='master', login_with_github=False, force=False):
+    runtime = _StackRuntimeHelper(cmd).remove_delimiters(runtime)  # normalize "runtime:version"
     if not token and not login_with_github:
         raise_missing_token_suggestion()
     elif not token:
