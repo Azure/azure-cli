@@ -13,821 +13,6 @@ pr:
       - '*'
 
 jobs:
-- job: AutomationFullTestPython36ProfileLatest
-  displayName: Automation Full Test Python36 Profile Latest
-  timeoutInMinutes: 9999
-  strategy:
-    maxParallel: 16
-    matrix:
-      resource:
-        Target: resource
-      acs:
-        Target: acs
-      azure-cli-testsdk:
-        Target: azure-cli-testsdk
-      relay:
-        Target: relay
-      netappfiles:
-        Target: netappfiles
-      cognitiveservices:
-        Target: cognitiveservices
-      reservations:
-        Target: reservations
-      servicebus:
-        Target: servicebus
-      batchai:
-        Target: batchai
-      batch:
-        Target: batch
-      container:
-        Target: container
-      databoxedge:
-        Target: databoxedge
-      billing:
-        Target: billing
-      maps:
-        Target: maps
-      azure-cli-telemetry:
-        Target: azure-cli-telemetry
-      interactive:
-        Target: interactive
-  pool:
-    vmImage: 'ubuntu-20.04'
-  steps:
-    - template: .azure-pipelines/templates/automation_test.yml
-      parameters:
-        pythonVersion: '3.6'
-        profile: 'latest'
-        module: '$(Target)'
-
-- job: AutomationFullTestPython38ProfileLatest
-  displayName: Automation Full Test Python38 Profile Latest
-  timeoutInMinutes: 9999
-  strategy:
-    maxParallel: 16
-    matrix:
-      resource:
-        Target: resource
-      acs:
-        Target: acs
-      azure-cli-testsdk:
-        Target: azure-cli-testsdk
-      relay:
-        Target: relay
-      netappfiles:
-        Target: netappfiles
-      cognitiveservices:
-        Target: cognitiveservices
-      reservations:
-        Target: reservations
-      servicebus:
-        Target: servicebus
-      batchai:
-        Target: batchai
-      batch:
-        Target: batch
-      container:
-        Target: container
-      databoxedge:
-        Target: databoxedge
-      billing:
-        Target: billing
-      maps:
-        Target: maps
-      azure-cli-telemetry:
-        Target: azure-cli-telemetry
-      interactive:
-        Target: interactive
-  pool:
-    vmImage: 'ubuntu-20.04'
-  steps:
-    - template: .azure-pipelines/templates/automation_test.yml
-      parameters:
-        pythonVersion: '3.8'
-        profile: 'latest'
-        module: '$(Target)'
-
-- job: AutomationFullTestPython39ProfileLatest
-  displayName: Automation Full Test Python39 Profile Latest
-  timeoutInMinutes: 9999
-  strategy:
-    maxParallel: 16
-    matrix:
-      resource:
-        Target: resource
-      acs:
-        Target: acs
-      azure-cli-testsdk:
-        Target: azure-cli-testsdk
-      relay:
-        Target: relay
-      netappfiles:
-        Target: netappfiles
-      cognitiveservices:
-        Target: cognitiveservices
-      reservations:
-        Target: reservations
-      servicebus:
-        Target: servicebus
-      batchai:
-        Target: batchai
-      batch:
-        Target: batch
-      container:
-        Target: container
-      databoxedge:
-        Target: databoxedge
-      billing:
-        Target: billing
-      maps:
-        Target: maps
-      azure-cli-telemetry:
-        Target: azure-cli-telemetry
-      interactive:
-        Target: interactive
-  pool:
-    vmImage: 'ubuntu-20.04'
-  steps:
-    - template: .azure-pipelines/templates/automation_test.yml
-      parameters:
-        pythonVersion: '3.9'
-        profile: 'latest'
-        module: '$(Target)'
-
-- job: AutomationFullTestPython310ProfileLatest
-  displayName: Automation Full Test Python310 Profile Latest
-  timeoutInMinutes: 9999
-  strategy:
-    maxParallel: 16
-    matrix:
-      resource:
-        Target: resource
-      acs:
-        Target: acs
-      azure-cli-testsdk:
-        Target: azure-cli-testsdk
-      relay:
-        Target: relay
-      netappfiles:
-        Target: netappfiles
-      cognitiveservices:
-        Target: cognitiveservices
-      reservations:
-        Target: reservations
-      servicebus:
-        Target: servicebus
-      batchai:
-        Target: batchai
-      batch:
-        Target: batch
-      container:
-        Target: container
-      databoxedge:
-        Target: databoxedge
-      billing:
-        Target: billing
-      maps:
-        Target: maps
-      azure-cli-telemetry:
-        Target: azure-cli-telemetry
-      interactive:
-        Target: interactive
-  pool:
-    vmImage: 'ubuntu-20.04'
-  steps:
-    - template: .azure-pipelines/templates/automation_test.yml
-      parameters:
-        pythonVersion: '3.10'
-        profile: 'latest'
-        module: '$(Target)'
-
-- job: AutomationFullTestPython36ProfileLatestPart2
-  displayName: Automation Full Test Python36 Profile Latest Part2
-  timeoutInMinutes: 9999
-  strategy:
-    maxParallel: 17
-    matrix:
-      sql:
-        Target: sql
-      storage:
-        Target: storage
-      apim:
-        Target: apim
-      eventhubs:
-        Target: eventhubs
-      dla:
-        Target: dla
-      lab:
-        Target: lab
-      appconfig:
-        Target: appconfig
-      cdn:
-        Target: cdn
-      eventgrid:
-        Target: eventgrid
-      policyinsights:
-        Target: policyinsights
-      util:
-        Target: util
-      natgateway:
-        Target: natgateway
-      kusto:
-        Target: kusto
-      find:
-        Target: find
-      advisor:
-        Target: advisor
-      azure-cli-core:
-        Target: azure-cli-core
-      azure-cli:
-        Target: azure-cli
-  pool:
-    vmImage: 'ubuntu-20.04'
-  steps:
-    - template: .azure-pipelines/templates/automation_test.yml
-      parameters:
-        pythonVersion: '3.6'
-        profile: 'latest'
-        module: '$(Target)'
-
-- job: AutomationFullTestPython38ProfileLatestPart2
-  displayName: Automation Full Test Python38 Profile Latest Part2
-  timeoutInMinutes: 9999
-  strategy:
-    maxParallel: 17
-    matrix:
-      sql:
-        Target: sql
-      storage:
-        Target: storage
-      apim:
-        Target: apim
-      eventhubs:
-        Target: eventhubs
-      dla:
-        Target: dla
-      lab:
-        Target: lab
-      appconfig:
-        Target: appconfig
-      cdn:
-        Target: cdn
-      eventgrid:
-        Target: eventgrid
-      policyinsights:
-        Target: policyinsights
-      util:
-        Target: util
-      natgateway:
-        Target: natgateway
-      kusto:
-        Target: kusto
-      find:
-        Target: find
-      advisor:
-        Target: advisor
-      azure-cli-core:
-        Target: azure-cli-core
-      azure-cli:
-        Target: azure-cli
-  pool:
-    vmImage: 'ubuntu-20.04'
-  steps:
-    - template: .azure-pipelines/templates/automation_test.yml
-      parameters:
-        pythonVersion: '3.8'
-        profile: 'latest'
-        module: '$(Target)'
-
-- job: AutomationFullTestPython39ProfileLatestPart2
-  displayName: Automation Full Test Python39 Profile Latest Part2
-  timeoutInMinutes: 9999
-  strategy:
-    maxParallel: 17
-    matrix:
-      sql:
-        Target: sql
-      storage:
-        Target: storage
-      apim:
-        Target: apim
-      eventhubs:
-        Target: eventhubs
-      dla:
-        Target: dla
-      lab:
-        Target: lab
-      appconfig:
-        Target: appconfig
-      cdn:
-        Target: cdn
-      eventgrid:
-        Target: eventgrid
-      policyinsights:
-        Target: policyinsights
-      util:
-        Target: util
-      natgateway:
-        Target: natgateway
-      kusto:
-        Target: kusto
-      find:
-        Target: find
-      advisor:
-        Target: advisor
-      azure-cli-core:
-        Target: azure-cli-core
-      azure-cli:
-        Target: azure-cli
-  pool:
-    vmImage: 'ubuntu-20.04'
-  steps:
-    - template: .azure-pipelines/templates/automation_test.yml
-      parameters:
-        pythonVersion: '3.9'
-        profile: 'latest'
-        module: '$(Target)'
-
-- job: AutomationFullTestPython310ProfileLatestPart2
-  displayName: Automation Full Test Python310 Profile Latest Part2
-  timeoutInMinutes: 9999
-  strategy:
-    maxParallel: 17
-    matrix:
-      sql:
-        Target: sql
-      storage:
-        Target: storage
-      apim:
-        Target: apim
-      eventhubs:
-        Target: eventhubs
-      dla:
-        Target: dla
-      lab:
-        Target: lab
-      appconfig:
-        Target: appconfig
-      cdn:
-        Target: cdn
-      eventgrid:
-        Target: eventgrid
-      policyinsights:
-        Target: policyinsights
-      util:
-        Target: util
-      natgateway:
-        Target: natgateway
-      kusto:
-        Target: kusto
-      find:
-        Target: find
-      advisor:
-        Target: advisor
-      azure-cli-core:
-        Target: azure-cli-core
-      azure-cli:
-        Target: azure-cli
-  pool:
-    vmImage: 'ubuntu-20.04'
-  steps:
-    - template: .azure-pipelines/templates/automation_test.yml
-      parameters:
-        pythonVersion: '3.10'
-        profile: 'latest'
-        module: '$(Target)'
-
-- job: AutomationFullTestPython36ProfileLatestPart3
-  displayName: Automation Full Test Python36 Profile Latest Part3
-  timeoutInMinutes: 9999
-  strategy:
-    maxParallel: 18
-    matrix:
-      network:
-        Target: network
-      ams:
-        Target: ams
-      appservice:
-        Target: appservice
-      cosmosdb:
-        Target: cosmosdb
-      servicefabric:
-        Target: servicefabric
-      synapse:
-        Target: synapse
-      feedback:
-        Target: feedback
-      aro:
-        Target: aro
-      acr:
-        Target: acr
-      dms:
-        Target: dms
-      role:
-        Target: role
-      search:
-        Target: search
-      signalr:
-        Target: signalr
-      consumption:
-        Target: consumption
-      dls:
-        Target: dls
-      configure:
-        Target: configure
-      identity:
-        Target: identity
-      cloud:
-        Target: cloud
-  pool:
-    vmImage: 'ubuntu-20.04'
-  steps:
-    - template: .azure-pipelines/templates/automation_test.yml
-      parameters:
-        pythonVersion: '3.6'
-        profile: 'latest'
-        module: '$(Target)'
-
-- job: AutomationFullTestPython38ProfileLatestPart3
-  displayName: Automation Full Test Python38 Profile Latest Part3
-  timeoutInMinutes: 9999
-  strategy:
-    maxParallel: 18
-    matrix:
-      network:
-        Target: network
-      ams:
-        Target: ams
-      appservice:
-        Target: appservice
-      cosmosdb:
-        Target: cosmosdb
-      servicefabric:
-        Target: servicefabric
-      synapse:
-        Target: synapse
-      feedback:
-        Target: feedback
-      aro:
-        Target: aro
-      acr:
-        Target: acr
-      dms:
-        Target: dms
-      role:
-        Target: role
-      search:
-        Target: search
-      signalr:
-        Target: signalr
-      consumption:
-        Target: consumption
-      dls:
-        Target: dls
-      configure:
-        Target: configure
-      identity:
-        Target: identity
-      cloud:
-        Target: cloud
-  pool:
-    vmImage: 'ubuntu-20.04'
-  steps:
-    - template: .azure-pipelines/templates/automation_test.yml
-      parameters:
-        pythonVersion: '3.8'
-        profile: 'latest'
-        module: '$(Target)'
-
-- job: AutomationFullTestPython39ProfileLatestPart3
-  displayName: Automation Full Test Python39 Profile Latest Part3
-  timeoutInMinutes: 9999
-  strategy:
-    maxParallel: 18
-    matrix:
-      network:
-        Target: network
-      ams:
-        Target: ams
-      appservice:
-        Target: appservice
-      cosmosdb:
-        Target: cosmosdb
-      servicefabric:
-        Target: servicefabric
-      synapse:
-        Target: synapse
-      feedback:
-        Target: feedback
-      aro:
-        Target: aro
-      acr:
-        Target: acr
-      dms:
-        Target: dms
-      role:
-        Target: role
-      search:
-        Target: search
-      signalr:
-        Target: signalr
-      consumption:
-        Target: consumption
-      dls:
-        Target: dls
-      configure:
-        Target: configure
-      identity:
-        Target: identity
-      cloud:
-        Target: cloud
-  pool:
-    vmImage: 'ubuntu-20.04'
-  steps:
-    - template: .azure-pipelines/templates/automation_test.yml
-      parameters:
-        pythonVersion: '3.9'
-        profile: 'latest'
-        module: '$(Target)'
-
-- job: AutomationFullTestPython310ProfileLatestPart3
-  displayName: Automation Full Test Python310 Profile Latest Part3
-  timeoutInMinutes: 9999
-  strategy:
-    maxParallel: 18
-    matrix:
-      network:
-        Target: network
-      ams:
-        Target: ams
-      appservice:
-        Target: appservice
-      cosmosdb:
-        Target: cosmosdb
-      servicefabric:
-        Target: servicefabric
-      synapse:
-        Target: synapse
-      feedback:
-        Target: feedback
-      aro:
-        Target: aro
-      acr:
-        Target: acr
-      dms:
-        Target: dms
-      role:
-        Target: role
-      search:
-        Target: search
-      signalr:
-        Target: signalr
-      consumption:
-        Target: consumption
-      dls:
-        Target: dls
-      configure:
-        Target: configure
-      identity:
-        Target: identity
-      cloud:
-        Target: cloud
-  pool:
-    vmImage: 'ubuntu-20.04'
-  steps:
-    - template: .azure-pipelines/templates/automation_test.yml
-      parameters:
-        pythonVersion: '3.10'
-        profile: 'latest'
-        module: '$(Target)'
-
-- job: AutomationFullTestPython36ProfileLatestPart4
-  displayName: Automation Full Test Python36 Profile Latest Part4
-  timeoutInMinutes: 9999
-  strategy:
-    maxParallel: 18
-    matrix:
-      vm:
-        Target: vm
-      rdbms:
-        Target: rdbms
-      backup:
-        Target: backup
-      monitor:
-        Target: monitor
-      iot:
-        Target: iot
-      keyvault:
-        Target: keyvault
-      hdinsight:
-        Target: hdinsight
-      privatedns:
-        Target: privatedns
-      redis:
-        Target: redis
-      sqlvm:
-        Target: sqlvm
-      serviceconnector:
-        Target: serviceconnector
-      config:
-        Target: config
-      deploymentmanager:
-        Target: deploymentmanager
-      managedservices:
-        Target: managedservices
-      profile:
-        Target: profile
-      security:
-        Target: security
-      marketplaceordering:
-        Target: marketplaceordering
-      botservice:
-        Target: botservice
-  pool:
-    vmImage: 'ubuntu-20.04'
-  steps:
-    - template: .azure-pipelines/templates/automation_test.yml
-      parameters:
-        pythonVersion: '3.6'
-        profile: 'latest'
-        module: '$(Target)'
-
-- job: AutomationFullTestPython38ProfileLatestPart4
-  displayName: Automation Full Test Python38 Profile Latest Part4
-  timeoutInMinutes: 9999
-  strategy:
-    maxParallel: 18
-    matrix:
-      vm:
-        Target: vm
-      rdbms:
-        Target: rdbms
-      backup:
-        Target: backup
-      monitor:
-        Target: monitor
-      iot:
-        Target: iot
-      keyvault:
-        Target: keyvault
-      hdinsight:
-        Target: hdinsight
-      privatedns:
-        Target: privatedns
-      redis:
-        Target: redis
-      sqlvm:
-        Target: sqlvm
-      serviceconnector:
-        Target: serviceconnector
-      config:
-        Target: config
-      deploymentmanager:
-        Target: deploymentmanager
-      managedservices:
-        Target: managedservices
-      profile:
-        Target: profile
-      security:
-        Target: security
-      marketplaceordering:
-        Target: marketplaceordering
-      botservice:
-        Target: botservice
-  pool:
-    vmImage: 'ubuntu-20.04'
-  steps:
-    - template: .azure-pipelines/templates/automation_test.yml
-      parameters:
-        pythonVersion: '3.8'
-        profile: 'latest'
-        module: '$(Target)'
-
-- job: AutomationFullTestPython39ProfileLatestPart4
-  displayName: Automation Full Test Python39 Profile Latest Part4
-  timeoutInMinutes: 9999
-  strategy:
-    maxParallel: 18
-    matrix:
-      vm:
-        Target: vm
-      rdbms:
-        Target: rdbms
-      backup:
-        Target: backup
-      monitor:
-        Target: monitor
-      iot:
-        Target: iot
-      keyvault:
-        Target: keyvault
-      hdinsight:
-        Target: hdinsight
-      privatedns:
-        Target: privatedns
-      redis:
-        Target: redis
-      sqlvm:
-        Target: sqlvm
-      serviceconnector:
-        Target: serviceconnector
-      config:
-        Target: config
-      deploymentmanager:
-        Target: deploymentmanager
-      managedservices:
-        Target: managedservices
-      profile:
-        Target: profile
-      security:
-        Target: security
-      marketplaceordering:
-        Target: marketplaceordering
-      botservice:
-        Target: botservice
-  pool:
-    vmImage: 'ubuntu-20.04'
-  steps:
-    - template: .azure-pipelines/templates/automation_test.yml
-      parameters:
-        pythonVersion: '3.9'
-        profile: 'latest'
-        module: '$(Target)'
-
-- job: AutomationFullTestPython310ProfileLatestPart4
-  displayName: Automation Full Test Python310 Profile Latest Part4
-  timeoutInMinutes: 9999
-  strategy:
-    maxParallel: 18
-    matrix:
-      vm:
-        Target: vm
-      rdbms:
-        Target: rdbms
-      backup:
-        Target: backup
-      monitor:
-        Target: monitor
-      iot:
-        Target: iot
-      keyvault:
-        Target: keyvault
-      hdinsight:
-        Target: hdinsight
-      privatedns:
-        Target: privatedns
-      redis:
-        Target: redis
-      sqlvm:
-        Target: sqlvm
-      serviceconnector:
-        Target: serviceconnector
-      config:
-        Target: config
-      deploymentmanager:
-        Target: deploymentmanager
-      managedservices:
-        Target: managedservices
-      profile:
-        Target: profile
-      security:
-        Target: security
-      marketplaceordering:
-        Target: marketplaceordering
-      botservice:
-        Target: botservice
-  pool:
-    vmImage: 'ubuntu-20.04'
-  steps:
-    - template: .azure-pipelines/templates/automation_test.yml
-      parameters:
-        pythonVersion: '3.10'
-        profile: 'latest'
-        module: '$(Target)'
-
-#jobs:
-#- job: AutomationTest
-#  displayName: Automation Test (Profile Latest)
-#  timeoutInMinutes: 120
-#  pool:
-#    vmImage: 'ubuntu-20.04'
-#  strategy:
-#    matrix:
-#      Python36:
-#        python.version: '3.6'
-#      Python38:
-#        python.version: '3.8'
-#      Python39:
-#        python.version: '3.9'
-#      Python310:
-#        python.version: '3.10'
-#  steps:
-#    - template: .azure-pipelines/templates/automation_test.yml
-#      parameters:
-#        pythonVersion: '$(python.version)'
-#        profile: 'latest'
-#        fullTest: true
-#
 - job: AutomationTest20200901
   displayName: Automation Test (Profile 2020-09-01)
   timeoutInMinutes: 120
@@ -893,3 +78,819 @@ jobs:
         pythonVersion: '$(python.version)'
         profile: '2018-03-01-hybrid'
         fullTest: true
+
+- job: AutomationFullTestPython36ProfileLatest
+  displayName: Automation Full Test Python36 Profile Latest
+  timeoutInMinutes: 9999
+  strategy:
+    maxParallel: 17
+    matrix:
+      network:
+        Target: network
+      sql:
+        Target: sql
+      monitor:
+        Target: monitor
+      iot:
+        Target: iot
+      keyvault:
+        Target: keyvault
+      feedback:
+        Target: feedback
+      aro:
+        Target: aro
+      acr:
+        Target: acr
+      sqlvm:
+        Target: sqlvm
+      role:
+        Target: role
+      search:
+        Target: search
+      deploymentmanager:
+        Target: deploymentmanager
+      managedservices:
+        Target: managedservices
+      profile:
+        Target: profile
+      configure:
+        Target: configure
+      identity:
+        Target: identity
+      botservice:
+        Target: botservice
+  pool:
+    vmImage: 'ubuntu-20.04'
+  steps:
+    - template: .azure-pipelines/templates/automation_test.yml
+      parameters:
+        pythonVersion: '3.6'
+        profile: 'latest'
+        module: '$(Target)'
+
+- job: AutomationFullTestPython38ProfileLatest
+  displayName: Automation Full Test Python38 Profile Latest
+  timeoutInMinutes: 9999
+  strategy:
+    maxParallel: 17
+    matrix:
+      network:
+        Target: network
+      sql:
+        Target: sql
+      monitor:
+        Target: monitor
+      iot:
+        Target: iot
+      keyvault:
+        Target: keyvault
+      feedback:
+        Target: feedback
+      aro:
+        Target: aro
+      acr:
+        Target: acr
+      sqlvm:
+        Target: sqlvm
+      role:
+        Target: role
+      search:
+        Target: search
+      deploymentmanager:
+        Target: deploymentmanager
+      managedservices:
+        Target: managedservices
+      profile:
+        Target: profile
+      configure:
+        Target: configure
+      identity:
+        Target: identity
+      botservice:
+        Target: botservice
+  pool:
+    vmImage: 'ubuntu-20.04'
+  steps:
+    - template: .azure-pipelines/templates/automation_test.yml
+      parameters:
+        pythonVersion: '3.8'
+        profile: 'latest'
+        module: '$(Target)'
+
+- job: AutomationFullTestPython39ProfileLatest
+  displayName: Automation Full Test Python39 Profile Latest
+  timeoutInMinutes: 9999
+  strategy:
+    maxParallel: 17
+    matrix:
+      network:
+        Target: network
+      sql:
+        Target: sql
+      monitor:
+        Target: monitor
+      iot:
+        Target: iot
+      keyvault:
+        Target: keyvault
+      feedback:
+        Target: feedback
+      aro:
+        Target: aro
+      acr:
+        Target: acr
+      sqlvm:
+        Target: sqlvm
+      role:
+        Target: role
+      search:
+        Target: search
+      deploymentmanager:
+        Target: deploymentmanager
+      managedservices:
+        Target: managedservices
+      profile:
+        Target: profile
+      configure:
+        Target: configure
+      identity:
+        Target: identity
+      botservice:
+        Target: botservice
+  pool:
+    vmImage: 'ubuntu-20.04'
+  steps:
+    - template: .azure-pipelines/templates/automation_test.yml
+      parameters:
+        pythonVersion: '3.9'
+        profile: 'latest'
+        module: '$(Target)'
+
+- job: AutomationFullTestPython310ProfileLatest
+  displayName: Automation Full Test Python310 Profile Latest
+  timeoutInMinutes: 9999
+  strategy:
+    maxParallel: 17
+    matrix:
+      network:
+        Target: network
+      sql:
+        Target: sql
+      monitor:
+        Target: monitor
+      iot:
+        Target: iot
+      keyvault:
+        Target: keyvault
+      feedback:
+        Target: feedback
+      aro:
+        Target: aro
+      acr:
+        Target: acr
+      sqlvm:
+        Target: sqlvm
+      role:
+        Target: role
+      search:
+        Target: search
+      deploymentmanager:
+        Target: deploymentmanager
+      managedservices:
+        Target: managedservices
+      profile:
+        Target: profile
+      configure:
+        Target: configure
+      identity:
+        Target: identity
+      botservice:
+        Target: botservice
+  pool:
+    vmImage: 'ubuntu-20.04'
+  steps:
+    - template: .azure-pipelines/templates/automation_test.yml
+      parameters:
+        pythonVersion: '3.10'
+        profile: 'latest'
+        module: '$(Target)'
+
+- job: AutomationFullTestPython36ProfileLatestPart2
+  displayName: Automation Full Test Python36 Profile Latest Part2
+  timeoutInMinutes: 9999
+  strategy:
+    maxParallel: 17
+    matrix:
+      vm:
+        Target: vm
+      resource:
+        Target: resource
+      rdbms:
+        Target: rdbms
+      azure-cli-testsdk:
+        Target: azure-cli-testsdk
+      relay:
+        Target: relay
+      netappfiles:
+        Target: netappfiles
+      cognitiveservices:
+        Target: cognitiveservices
+      reservations:
+        Target: reservations
+      servicebus:
+        Target: servicebus
+      batchai:
+        Target: batchai
+      batch:
+        Target: batch
+      container:
+        Target: container
+      kusto:
+        Target: kusto
+      find:
+        Target: find
+      advisor:
+        Target: advisor
+      azure-cli-telemetry:
+        Target: azure-cli-telemetry
+      azure-cli:
+        Target: azure-cli
+  pool:
+    vmImage: 'ubuntu-20.04'
+  steps:
+    - template: .azure-pipelines/templates/automation_test.yml
+      parameters:
+        pythonVersion: '3.6'
+        profile: 'latest'
+        module: '$(Target)'
+
+- job: AutomationFullTestPython38ProfileLatestPart2
+  displayName: Automation Full Test Python38 Profile Latest Part2
+  timeoutInMinutes: 9999
+  strategy:
+    maxParallel: 17
+    matrix:
+      vm:
+        Target: vm
+      resource:
+        Target: resource
+      rdbms:
+        Target: rdbms
+      azure-cli-testsdk:
+        Target: azure-cli-testsdk
+      relay:
+        Target: relay
+      netappfiles:
+        Target: netappfiles
+      cognitiveservices:
+        Target: cognitiveservices
+      reservations:
+        Target: reservations
+      servicebus:
+        Target: servicebus
+      batchai:
+        Target: batchai
+      batch:
+        Target: batch
+      container:
+        Target: container
+      kusto:
+        Target: kusto
+      find:
+        Target: find
+      advisor:
+        Target: advisor
+      azure-cli-telemetry:
+        Target: azure-cli-telemetry
+      azure-cli:
+        Target: azure-cli
+  pool:
+    vmImage: 'ubuntu-20.04'
+  steps:
+    - template: .azure-pipelines/templates/automation_test.yml
+      parameters:
+        pythonVersion: '3.8'
+        profile: 'latest'
+        module: '$(Target)'
+
+- job: AutomationFullTestPython39ProfileLatestPart2
+  displayName: Automation Full Test Python39 Profile Latest Part2
+  timeoutInMinutes: 9999
+  strategy:
+    maxParallel: 17
+    matrix:
+      vm:
+        Target: vm
+      resource:
+        Target: resource
+      rdbms:
+        Target: rdbms
+      azure-cli-testsdk:
+        Target: azure-cli-testsdk
+      relay:
+        Target: relay
+      netappfiles:
+        Target: netappfiles
+      cognitiveservices:
+        Target: cognitiveservices
+      reservations:
+        Target: reservations
+      servicebus:
+        Target: servicebus
+      batchai:
+        Target: batchai
+      batch:
+        Target: batch
+      container:
+        Target: container
+      kusto:
+        Target: kusto
+      find:
+        Target: find
+      advisor:
+        Target: advisor
+      azure-cli-telemetry:
+        Target: azure-cli-telemetry
+      azure-cli:
+        Target: azure-cli
+  pool:
+    vmImage: 'ubuntu-20.04'
+  steps:
+    - template: .azure-pipelines/templates/automation_test.yml
+      parameters:
+        pythonVersion: '3.9'
+        profile: 'latest'
+        module: '$(Target)'
+
+- job: AutomationFullTestPython310ProfileLatestPart2
+  displayName: Automation Full Test Python310 Profile Latest Part2
+  timeoutInMinutes: 9999
+  strategy:
+    maxParallel: 17
+    matrix:
+      vm:
+        Target: vm
+      resource:
+        Target: resource
+      rdbms:
+        Target: rdbms
+      azure-cli-testsdk:
+        Target: azure-cli-testsdk
+      relay:
+        Target: relay
+      netappfiles:
+        Target: netappfiles
+      cognitiveservices:
+        Target: cognitiveservices
+      reservations:
+        Target: reservations
+      servicebus:
+        Target: servicebus
+      batchai:
+        Target: batchai
+      batch:
+        Target: batch
+      container:
+        Target: container
+      kusto:
+        Target: kusto
+      find:
+        Target: find
+      advisor:
+        Target: advisor
+      azure-cli-telemetry:
+        Target: azure-cli-telemetry
+      azure-cli:
+        Target: azure-cli
+  pool:
+    vmImage: 'ubuntu-20.04'
+  steps:
+    - template: .azure-pipelines/templates/automation_test.yml
+      parameters:
+        pythonVersion: '3.10'
+        profile: 'latest'
+        module: '$(Target)'
+
+- job: AutomationFullTestPython36ProfileLatestPart3
+  displayName: Automation Full Test Python36 Profile Latest Part3
+  timeoutInMinutes: 9999
+  strategy:
+    maxParallel: 18
+    matrix:
+      ams:
+        Target: ams
+      appservice:
+        Target: appservice
+      acs:
+        Target: acs
+      eventhubs:
+        Target: eventhubs
+      dla:
+        Target: dla
+      lab:
+        Target: lab
+      appconfig:
+        Target: appconfig
+      cdn:
+        Target: cdn
+      eventgrid:
+        Target: eventgrid
+      policyinsights:
+        Target: policyinsights
+      util:
+        Target: util
+      natgateway:
+        Target: natgateway
+      databoxedge:
+        Target: databoxedge
+      billing:
+        Target: billing
+      maps:
+        Target: maps
+      azure-cli-core:
+        Target: azure-cli-core
+      marketplaceordering:
+        Target: marketplaceordering
+      cloud:
+        Target: cloud
+  pool:
+    vmImage: 'ubuntu-20.04'
+  steps:
+    - template: .azure-pipelines/templates/automation_test.yml
+      parameters:
+        pythonVersion: '3.6'
+        profile: 'latest'
+        module: '$(Target)'
+
+- job: AutomationFullTestPython38ProfileLatestPart3
+  displayName: Automation Full Test Python38 Profile Latest Part3
+  timeoutInMinutes: 9999
+  strategy:
+    maxParallel: 18
+    matrix:
+      ams:
+        Target: ams
+      appservice:
+        Target: appservice
+      acs:
+        Target: acs
+      eventhubs:
+        Target: eventhubs
+      dla:
+        Target: dla
+      lab:
+        Target: lab
+      appconfig:
+        Target: appconfig
+      cdn:
+        Target: cdn
+      eventgrid:
+        Target: eventgrid
+      policyinsights:
+        Target: policyinsights
+      util:
+        Target: util
+      natgateway:
+        Target: natgateway
+      databoxedge:
+        Target: databoxedge
+      billing:
+        Target: billing
+      maps:
+        Target: maps
+      azure-cli-core:
+        Target: azure-cli-core
+      marketplaceordering:
+        Target: marketplaceordering
+      cloud:
+        Target: cloud
+  pool:
+    vmImage: 'ubuntu-20.04'
+  steps:
+    - template: .azure-pipelines/templates/automation_test.yml
+      parameters:
+        pythonVersion: '3.8'
+        profile: 'latest'
+        module: '$(Target)'
+
+- job: AutomationFullTestPython39ProfileLatestPart3
+  displayName: Automation Full Test Python39 Profile Latest Part3
+  timeoutInMinutes: 9999
+  strategy:
+    maxParallel: 18
+    matrix:
+      ams:
+        Target: ams
+      appservice:
+        Target: appservice
+      acs:
+        Target: acs
+      eventhubs:
+        Target: eventhubs
+      dla:
+        Target: dla
+      lab:
+        Target: lab
+      appconfig:
+        Target: appconfig
+      cdn:
+        Target: cdn
+      eventgrid:
+        Target: eventgrid
+      policyinsights:
+        Target: policyinsights
+      util:
+        Target: util
+      natgateway:
+        Target: natgateway
+      databoxedge:
+        Target: databoxedge
+      billing:
+        Target: billing
+      maps:
+        Target: maps
+      azure-cli-core:
+        Target: azure-cli-core
+      marketplaceordering:
+        Target: marketplaceordering
+      cloud:
+        Target: cloud
+  pool:
+    vmImage: 'ubuntu-20.04'
+  steps:
+    - template: .azure-pipelines/templates/automation_test.yml
+      parameters:
+        pythonVersion: '3.9'
+        profile: 'latest'
+        module: '$(Target)'
+
+- job: AutomationFullTestPython310ProfileLatestPart3
+  displayName: Automation Full Test Python310 Profile Latest Part3
+  timeoutInMinutes: 9999
+  strategy:
+    maxParallel: 18
+    matrix:
+      ams:
+        Target: ams
+      appservice:
+        Target: appservice
+      acs:
+        Target: acs
+      eventhubs:
+        Target: eventhubs
+      dla:
+        Target: dla
+      lab:
+        Target: lab
+      appconfig:
+        Target: appconfig
+      cdn:
+        Target: cdn
+      eventgrid:
+        Target: eventgrid
+      policyinsights:
+        Target: policyinsights
+      util:
+        Target: util
+      natgateway:
+        Target: natgateway
+      databoxedge:
+        Target: databoxedge
+      billing:
+        Target: billing
+      maps:
+        Target: maps
+      azure-cli-core:
+        Target: azure-cli-core
+      marketplaceordering:
+        Target: marketplaceordering
+      cloud:
+        Target: cloud
+  pool:
+    vmImage: 'ubuntu-20.04'
+  steps:
+    - template: .azure-pipelines/templates/automation_test.yml
+      parameters:
+        pythonVersion: '3.10'
+        profile: 'latest'
+        module: '$(Target)'
+
+- job: AutomationFullTestPython36ProfileLatestPart4
+  displayName: Automation Full Test Python36 Profile Latest Part4
+  timeoutInMinutes: 9999
+  strategy:
+    maxParallel: 17
+    matrix:
+      storage:
+        Target: storage
+      backup:
+        Target: backup
+      apim:
+        Target: apim
+      cosmosdb:
+        Target: cosmosdb
+      servicefabric:
+        Target: servicefabric
+      synapse:
+        Target: synapse
+      hdinsight:
+        Target: hdinsight
+      privatedns:
+        Target: privatedns
+      redis:
+        Target: redis
+      dms:
+        Target: dms
+      serviceconnector:
+        Target: serviceconnector
+      config:
+        Target: config
+      signalr:
+        Target: signalr
+      consumption:
+        Target: consumption
+      dls:
+        Target: dls
+      security:
+        Target: security
+      interactive:
+        Target: interactive
+  pool:
+    vmImage: 'ubuntu-20.04'
+  steps:
+    - template: .azure-pipelines/templates/automation_test.yml
+      parameters:
+        pythonVersion: '3.6'
+        profile: 'latest'
+        module: '$(Target)'
+
+- job: AutomationFullTestPython38ProfileLatestPart4
+  displayName: Automation Full Test Python38 Profile Latest Part4
+  timeoutInMinutes: 9999
+  strategy:
+    maxParallel: 17
+    matrix:
+      storage:
+        Target: storage
+      backup:
+        Target: backup
+      apim:
+        Target: apim
+      cosmosdb:
+        Target: cosmosdb
+      servicefabric:
+        Target: servicefabric
+      synapse:
+        Target: synapse
+      hdinsight:
+        Target: hdinsight
+      privatedns:
+        Target: privatedns
+      redis:
+        Target: redis
+      dms:
+        Target: dms
+      serviceconnector:
+        Target: serviceconnector
+      config:
+        Target: config
+      signalr:
+        Target: signalr
+      consumption:
+        Target: consumption
+      dls:
+        Target: dls
+      security:
+        Target: security
+      interactive:
+        Target: interactive
+  pool:
+    vmImage: 'ubuntu-20.04'
+  steps:
+    - template: .azure-pipelines/templates/automation_test.yml
+      parameters:
+        pythonVersion: '3.8'
+        profile: 'latest'
+        module: '$(Target)'
+
+- job: AutomationFullTestPython39ProfileLatestPart4
+  displayName: Automation Full Test Python39 Profile Latest Part4
+  timeoutInMinutes: 9999
+  strategy:
+    maxParallel: 17
+    matrix:
+      storage:
+        Target: storage
+      backup:
+        Target: backup
+      apim:
+        Target: apim
+      cosmosdb:
+        Target: cosmosdb
+      servicefabric:
+        Target: servicefabric
+      synapse:
+        Target: synapse
+      hdinsight:
+        Target: hdinsight
+      privatedns:
+        Target: privatedns
+      redis:
+        Target: redis
+      dms:
+        Target: dms
+      serviceconnector:
+        Target: serviceconnector
+      config:
+        Target: config
+      signalr:
+        Target: signalr
+      consumption:
+        Target: consumption
+      dls:
+        Target: dls
+      security:
+        Target: security
+      interactive:
+        Target: interactive
+  pool:
+    vmImage: 'ubuntu-20.04'
+  steps:
+    - template: .azure-pipelines/templates/automation_test.yml
+      parameters:
+        pythonVersion: '3.9'
+        profile: 'latest'
+        module: '$(Target)'
+
+- job: AutomationFullTestPython310ProfileLatestPart4
+  displayName: Automation Full Test Python310 Profile Latest Part4
+  timeoutInMinutes: 9999
+  strategy:
+    maxParallel: 17
+    matrix:
+      storage:
+        Target: storage
+      backup:
+        Target: backup
+      apim:
+        Target: apim
+      cosmosdb:
+        Target: cosmosdb
+      servicefabric:
+        Target: servicefabric
+      synapse:
+        Target: synapse
+      hdinsight:
+        Target: hdinsight
+      privatedns:
+        Target: privatedns
+      redis:
+        Target: redis
+      dms:
+        Target: dms
+      serviceconnector:
+        Target: serviceconnector
+      config:
+        Target: config
+      signalr:
+        Target: signalr
+      consumption:
+        Target: consumption
+      dls:
+        Target: dls
+      security:
+        Target: security
+      interactive:
+        Target: interactive
+  pool:
+    vmImage: 'ubuntu-20.04'
+  steps:
+    - template: .azure-pipelines/templates/automation_test.yml
+      parameters:
+        pythonVersion: '3.10'
+        profile: 'latest'
+        module: '$(Target)'
+
+#jobs:
+#- job: AutomationTest
+#  displayName: Automation Test (Profile Latest)
+#  timeoutInMinutes: 120
+#  pool:
+#    vmImage: 'ubuntu-20.04'
+#  strategy:
+#    matrix:
+#      Python36:
+#        python.version: '3.6'
+#      Python38:
+#        python.version: '3.8'
+#      Python39:
+#        python.version: '3.9'
+#      Python310:
+#        python.version: '3.10'
+#  steps:
+#    - template: .azure-pipelines/templates/automation_test.yml
+#      parameters:
+#        pythonVersion: '$(python.version)'
+#        profile: 'latest'
+#        fullTest: true
+#
