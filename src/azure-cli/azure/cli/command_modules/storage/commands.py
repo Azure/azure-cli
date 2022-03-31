@@ -691,10 +691,10 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
         g.storage_custom_command_oauth('create', 'create_queue',
                                        transform=create_boolean_result_output_transformer('created'),
-                                table_transformer=transform_boolean_for_table)
+                                       table_transformer=transform_boolean_for_table)
         g.storage_custom_command_oauth('delete', 'delete_queue',
                                        transform=create_boolean_result_output_transformer('deleted'),
-                                table_transformer=transform_boolean_for_table)
+                                       table_transformer=transform_boolean_for_table)
         g.storage_custom_command(
             'generate-sas', 'generate_queue_sas')
         g.storage_custom_command_oauth('exists', 'queue_exists',
