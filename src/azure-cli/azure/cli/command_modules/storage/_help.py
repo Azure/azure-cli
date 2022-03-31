@@ -2464,7 +2464,7 @@ helps['storage queue delete'] = """
     short-summary:  Delete the specified queue and any messages it contains.
     examples:
         - name: Delete the specified queue, throw an exception if the queue doesn't exist.
-          text: az storage queue delete -n myqueue --fail-not-exist --account-name mystorageaccount
+          text: az storage queue delete -n myqueue --fail-not-exist fail-not-exist --account-name mystorageaccount
 """
 
 helps['storage queue metadata show'] = """
