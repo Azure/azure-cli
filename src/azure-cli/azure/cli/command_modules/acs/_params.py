@@ -23,8 +23,9 @@ from ._validators import (
     validate_nodepool_name, validate_vm_set_type, validate_load_balancer_sku, validate_nodepool_id, validate_snapshot_id,
     validate_load_balancer_outbound_ips, validate_priority, validate_eviction_policy, validate_spot_max_price,
     validate_load_balancer_outbound_ip_prefixes, validate_taints, validate_ip_ranges, validate_acr, validate_nodepool_tags,
-    validate_load_balancer_outbound_ports, validate_load_balancer_idle_timeout, validate_vnet_subnet_id, validate_nodepool_labels,
-    validate_ppg, validate_assign_identity, validate_max_surge, validate_assign_kubelet_identity, validate_credential_format)
+    validate_load_balancer_outbound_ports, validate_load_balancer_idle_timeout, validate_vnet_subnet_id, validate_pod_subnet_id,
+    validate_nodepool_labels, validate_ppg, validate_assign_identity, validate_max_surge, validate_assign_kubelet_identity,
+    validate_credential_format)
 from ._consts import (
     CONST_OUTBOUND_TYPE_LOAD_BALANCER,
     CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
@@ -259,6 +260,8 @@ def load_arguments(self, _):
         c.argument('node_osdisk_size', type=int)
         c.argument('vnet_subnet_id', type=str,
                    validator=validate_vnet_subnet_id)
+        c.argument('pod_subnet_id', type=str,
+                   validator=validate_pod_subnet_id)
         c.argument('workspace_resource_id')
         c.argument('enable_msi_auth_for_monitoring', arg_type=get_three_state_flag(), is_preview=True)
         c.argument('skip_subnet_role_assignment', action='store_true')
@@ -446,6 +449,8 @@ def load_arguments(self, _):
         c.argument('zones', zones_type, options_list=['--zones', '-z'], help='Space-separated list of availability zones where agent nodes will be placed.')
         c.argument('node_vm_size', options_list=['--node-vm-size', '-s'], completer=get_vm_size_completion_list)
         c.argument('max_pods', type=int, options_list=['--max-pods', '-m'])
+        c.argument('vnet_subnet_id', type=str, validator=validate_vnet_subnet_id)
+        c.argument('pod_subnet_id', type=str, validator=validate_pod_subnet_id)
         c.argument('os_type', type=str)
         c.argument('os_sku', completer=get_ossku_completion_list)
         c.argument('enable_cluster_autoscaler', options_list=["--enable-cluster-autoscaler", "-e"], action='store_true')
