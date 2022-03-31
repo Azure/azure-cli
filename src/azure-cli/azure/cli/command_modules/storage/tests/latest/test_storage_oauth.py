@@ -52,7 +52,8 @@ class StorageOauthTests(StorageScenarioMixin, ScenarioTest):
             'queue': self.create_random_name(prefix='queue', length=20)
         })
 
-        self.oauth_cmd('storage queue create -n {queue} --account-name {account} --fail-on-exist --metadata a=b c=d',
+        self.oauth_cmd('storage queue create -n {queue} --account-name {account} --fail-on-exist fail-on-exist '
+                       '--metadata a=b c=d',
                        checks=[JMESPathCheck('created', True)])
         self.oauth_cmd('storage queue exists -n {queue} --account-name {account}', checks=[
             JMESPathCheck('exists', True)])
