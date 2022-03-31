@@ -2844,7 +2844,7 @@ examples:
   - name: Create a VMSS from shared gallery image. (private preview feature, please contact shared image gallery team by email sigpmdev@microsoft.com to register for preview if you're interested in using this feature).
     text: >
         az vmss create -n MyVmss -g MyResourceGroup --image /SharedGalleries/{gallery_unique_name}/Images/{image}/Versions/{version}
-  - name: Create a VMSS from community gallery image. (private preview feature, please contact community image gallery team by email sigpmdev@microsoft.com to register for preview if you're interested in using this feature).
+  - name: Create a VMSS from community gallery image (private preview feature, please contact community image gallery team by email sigpmdev@microsoft.com to register for preview if you're interested in using this feature).
     text: >
         az vmss create -n MyVmss -g MyResourceGroup --image /CommunityGalleries/{gallery_unique_name}/Images/{image}/Versions/{version}
   - name: Create a Windows VMSS with patch mode 'Manual' (Currently patch mode 'AutomaticByPlatform' is not supported during VMSS creation as health extension which is required for 'AutomaticByPlatform' mode cannot be set during VMSS creation).
