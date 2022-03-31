@@ -1326,7 +1326,7 @@ def _create_db_wait_for_first_backup(test, resource_group, server, database_name
     # Wait until earliestRestoreDate is in the past. When run live, this will take at least
     # 10 minutes. Unforunately there's no way to speed this up
     while db['earliestRestoreDate'] is None:
-        sleep(60)
+        time.sleep(60)
         db = test.cmd('sql db show -g {} -s {} -n {}'
                       .format(resource_group, server, database_name)).get_output_in_json()
 
@@ -1336,7 +1336,7 @@ def _create_db_wait_for_first_backup(test, resource_group, server, database_name
         print('Waiting until earliest restore date', earliest_restore_date)
 
     while datetime.utcnow() <= earliest_restore_date:
-        sleep(10)  # seconds
+        time.sleep(10)
 
     return db
 
@@ -3410,7 +3410,7 @@ class SqlTransparentDataEncryptionScenarioTest(ScenarioTest):
         self.cmd('sql db tde set -g {} -s {} -d {} --status Disabled'
                  .format(resource_group, sn, db_name))
 
-        sleep(5)
+        time.sleep(5)
 
         self.cmd('sql db tde show -g {} -s {} -d {}'
                  .format(resource_group, sn, db_name),
@@ -3420,7 +3420,7 @@ class SqlTransparentDataEncryptionScenarioTest(ScenarioTest):
         self.cmd('sql db tde set -g {} -s {} -d {} --status Enabled'
                  .format(resource_group, sn, db_name))
 
-        sleep(5)
+        time.sleep(5)
 
         # validate encryption is enabled
         self.cmd('sql db tde show -g {} -s {} -d {}'
@@ -5939,7 +5939,7 @@ class SqlLedgerDigestUploadsScenarioTest(ScenarioTest):
         self.cmd('sql db ledger-digest-uploads enable -g {} -s {} --name {} --endpoint {}'
                  .format(resource_group, server, db_name, endpoint))
 
-        sleep(2)
+        time.sleep(2)
 
         # validate setting through show command
         self.cmd('sql db ledger-digest-uploads show -g {} -s {} --name {}'
@@ -5951,7 +5951,7 @@ class SqlLedgerDigestUploadsScenarioTest(ScenarioTest):
         self.cmd('sql db ledger-digest-uploads disable -g {} -s {} --name {}'
                  .format(resource_group, server, db_name))
 
-        sleep(2)
+        time.sleep(2)
 
         # validate setting through show command
         self.cmd('sql db ledger-digest-uploads show -g {} -s {} --name {}'
