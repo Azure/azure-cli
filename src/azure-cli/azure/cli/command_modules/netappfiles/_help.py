@@ -1438,43 +1438,30 @@ parameters:
     short-summary: Space-separated tags in `key=value` format
   - name: --global-placement-rules --gp-rules --rules
     short-summary:  Application specific identifier of deployment rules for the volume group. Space-separated string in `key=value` format
-  - name: --memory
-    short-summary: SAP HANA memory in GiB (max supported 12000 GiB), used to auto compute storage size and throughput. Defaults to 100
-  - name: --add-snapshot-capacity
-    short-summary: Additional memory to store snapshots, must be specified as % of RAM (range 0-200). This is used to auto compute storage size. Daufault is 50
-  - name: --start-host-id
-    short-summary: Starting SAP HANA Host ID. Host ID 1 indicates Master Host. Shared, Data Backup and Log Backup volumes are only provisioned for Master Host i.e. HostID is 1
-  - name: --number-of-hots
-    short-summary: Total Number of SAP HANA host in this deployment (currently at max 3 nodes can be configured). Default is 1
   - name: --prefix
     short-summary: All volume names will be prefixed with the given text. The default values for prefix text depends on system role. For PRIMARY it will be `""` and HA it will be `"HA-"`.
   - name: --system-role
     short-summary: Type of role for the storage account. Primary indicates first of a SAP HANA Replication (HSR) setup or No HSR. High Availability (HA) specifies local scenario. Default is PRIMARY
-  - name: --data-size
-    short-summary: Specify capacity (in GiB) for data volumes. If not provided size will automatically be calculated
-  - name: --data-throughput
-    short-summary: Specify throughput in MiB/s for data volumes. If not provided size will automatically be calculated
-  - name: --log-size
-    short-summary: Specify capacity (in GiB) for log volumes. If not provided size will automatically be calculated
-  - name: --log-throughput
-    short-summary: Specify throughput in MiB/s for log volumes. If not provided size will automatically be calculated
-  - name: --shared-size
-    short-summary: Specify capacity (in GiB) for shared volumes. If not provided size will automatically be calculated
-  - name: --shared-throughput
-    short-summary: Specify throughput in MiB/s for shared volumes. If not provided size will automatically be calculated
-  - name: --data-backup-size
-    short-summary: Specify capacity (in GiB) for data backup volumes. If not provided size will automatically be calculated
-  - name: --data-backup-throughput
-    short-summary: Specify throughput in MiB/s for data backup volumes. If not provided size will automatically be calculated
-  - name: --log-backup-size
-    short-summary: Specify capacity (in GiB) for log backup volumes. If not provided size will automatically be calculated
-  - name: --log-backup-throughput
-    short-summary: Specify throughput in MiB/s for log backup volumes. If not provided size will automatically be calculated
   - name: --backup-nfsv3
     short-summary: Indicates if NFS Protocol version 3 is preferred for data backup and log backup volumes. Default is false 
+  - name: --data_repl_skd
+    short-summary: Replication Schedule for data volume
+  - name: --data_src_id
+    short-summary: ResourceId of the data source volume
+  - name: --shared_repl_skd
+    short-summary: Replication Schedule for shared volume
+  - name: --shared_src_id
+    short-summary: ResourceId of the shared source volume
+  - name: --data_backup_repl_skd
+    short-summary: Replication Schedule for data backup volume
+  - name: --data_backup_src_id
+    short-summary: ResourceId of the data backup source volume
+  - name: --log_backup_repl_skd
+    short-summary: Replication Schedule for log backup volume
+  - name: --log_backup_src_id
+    short-summary: ResourceId of the log backup source volume
 examples:
-  - name: Get a list of ANF volume groups
+  - name: Create ANF volume group
     text: >
-        az netappfiles volume-group create -g mygroup --account-name myaccountname
+        az netappfiles volume-group create -g mygroup --account-name myaccountname --pool-name mypoolname --volume-group-name myvolumegroupname --vnet myvnet --ppg myppg --sap-sid mysapsid
 """
-
