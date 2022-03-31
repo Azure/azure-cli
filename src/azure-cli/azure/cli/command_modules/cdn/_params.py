@@ -344,6 +344,8 @@ def load_arguments(self, _):
                  'You can use "az network private-link-resource list" to obtain the supported sub-resource types.')
         c.argument('private_link_request_message',
                    help="The message that is shown to the approver of the private link request.")
+        c.argument('enforce_certificate_name_check', arg_type=get_three_state_flag(invert=False),
+                   help='"Whether to enable certificate name check at origin level')
 
     with self.argument_context('afd origin list') as c:
         c.argument('profile_name', id_part=None)
