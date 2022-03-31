@@ -235,6 +235,7 @@ def _validate_secrets(secrets, os_type):
 # region VM Create Validators
 
 
+# pylint: disable=too-many-return-statements
 def _parse_image_argument(cmd, namespace):
     """ Systematically determines what type is supplied for the --image parameter. Updates the
         namespace and returns the type for subsequent processing. """
@@ -373,7 +374,7 @@ def _validate_location(cmd, namespace, zone_info, size_info):
                                "used to find such locations".format(namespace.resource_group_name))
 
 
-# pylint: disable=too-many-branches, too-many-statements
+# pylint: disable=too-many-branches, too-many-statements, too-many-locals
 def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
     from msrestazure.tools import parse_resource_id
 
@@ -540,7 +541,6 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
     if namespace.storage_profile == StorageProfile.SharedGalleryImage:
 
         if namespace.location is None:
-            from azure.cli.core.azclierror import RequiredArgumentMissingError
             raise RequiredArgumentMissingError(
                 'Please input the location of the shared gallery image through the parameter --location.')
 
@@ -559,7 +559,6 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
     if namespace.storage_profile == StorageProfile.CommunityGalleryImage:
 
         if namespace.location is None:
-            from azure.cli.core.azclierror import RequiredArgumentMissingError
             raise RequiredArgumentMissingError(
                 'Please input the location of the community gallery image through the parameter --location.')
 
