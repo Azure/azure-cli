@@ -8,7 +8,8 @@ from knack.arguments import CLIArgumentType
 from azure.cli.core.commands.parameters import get_location_type, tags_type
 
 
-name_arg_type = CLIArgumentType(options_list=('--name', '-n'), metavar='NAME')
+name_arg_type = CLIArgumentType(options_list=('--name', '-n'), metavar='NAME',
+                                help='The name of the identity resource.')
 
 
 def load_arguments(self, _):
@@ -17,5 +18,5 @@ def load_arguments(self, _):
         c.argument('resource_name', arg_type=name_arg_type, id_part='name')
 
     with self.argument_context('identity create') as c:
-        c.argument('location', get_location_type(self.cli_ctx))
+        c.argument('location', get_location_type(self.cli_ctx), required=False)
         c.argument('tags', tags_type)
