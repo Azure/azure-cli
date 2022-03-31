@@ -18,7 +18,7 @@ def load_command_table(self, _):
         client_factory=_msi_user_identities_operations
     )
     msi_operations_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.msi.operations#UserAssignedIdentitiesOperations.{}',
+        operations_tmpl='azure.mgmt.msi.operations#Operations.{}',
         client_factory=_msi_operations_operations
     )
 
