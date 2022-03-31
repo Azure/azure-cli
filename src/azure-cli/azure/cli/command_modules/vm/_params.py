@@ -19,7 +19,7 @@ from azure.cli.command_modules.vm._actions import _resource_not_exists
 from azure.cli.command_modules.vm._completers import (
     get_urn_aliases_completion_list, get_vm_size_completion_list, get_vm_run_command_completion_list)
 from azure.cli.command_modules.vm._validators import (
-    validate_nsg_name, validate_vm_nics, validate_vm_nic, validate_vm_disk, validate_vmss_disk,
+    validate_nsg_name, validate_vm_nics, validate_vm_nic, validate_vmss_disk,
     validate_asg_names_or_ids, validate_keyvault, _validate_proximity_placement_group,
     process_gallery_image_version_namespace, validate_vm_name_for_monitor_metrics)
 
@@ -33,11 +33,10 @@ from azure.cli.command_modules.monitor.actions import get_period_type
 # pylint: disable=too-many-statements, too-many-branches, too-many-locals, too-many-lines
 def load_arguments(self, _):
     # Model imports
-    StorageAccountTypes = self.get_models('StorageAccountTypes')
-    DiskStorageAccountTypes = self.get_models('DiskStorageAccountTypes,', operation_group='disks')
+    DiskStorageAccountTypes = self.get_models('DiskStorageAccountTypes', operation_group='disks')
     SnapshotStorageAccountTypes = self.get_models('SnapshotStorageAccountTypes', operation_group='snapshots')
     UpgradeMode, CachingTypes, OperatingSystemTypes = self.get_models('UpgradeMode', 'CachingTypes', 'OperatingSystemTypes')
-    HyperVGenerationTypes, HyperVGeneration = self.get_models('HyperVGenerationTypes', 'HyperVGeneration')
+    HyperVGenerationTypes = self.get_models('HyperVGenerationTypes')
     DedicatedHostLicenseTypes = self.get_models('DedicatedHostLicenseTypes')
     OrchestrationServiceNames, OrchestrationServiceStateAction = self.get_models('OrchestrationServiceNames', 'OrchestrationServiceStateAction', operation_group='virtual_machine_scale_sets')
     RebootSetting, VMGuestPatchClassificationWindows, VMGuestPatchClassificationLinux = self.get_models('VMGuestPatchRebootSetting', 'VMGuestPatchClassificationWindows', 'VMGuestPatchClassificationLinux')
@@ -73,7 +72,7 @@ def load_arguments(self, _):
                                 'None', 'RHEL_ELS_6']))
 
     # StorageAccountTypes renamed to DiskStorageAccountTypes in 2018_06_01 of azure-mgmt-compute
-    DiskStorageAccountTypes = DiskStorageAccountTypes or StorageAccountTypes
+    DiskStorageAccountTypes = DiskStorageAccountTypes or self.get_models('StorageAccountTypes')
 
     if DiskStorageAccountTypes:
         disk_sku = CLIArgumentType(arg_type=get_enum_type(DiskStorageAccountTypes))
@@ -93,7 +92,7 @@ def load_arguments(self, _):
     with self.argument_context('network nic scale-set list') as c:
         c.argument('virtual_machine_scale_set_name', options_list=['--vmss-name'], completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'), id_part='name')
 
-    HyperVGenerationTypes = HyperVGenerationTypes or HyperVGeneration
+    HyperVGenerationTypes = HyperVGenerationTypes or self.get_models('HyperVGeneration', operation_group='disks')
     if HyperVGenerationTypes:
         hyper_v_gen_sku = CLIArgumentType(arg_type=get_enum_type(HyperVGenerationTypes, default="V1"))
     else:
@@ -153,14 +152,14 @@ def load_arguments(self, _):
                 c.argument('hyper_v_generation', arg_type=hyper_v_gen_sku, help='The hypervisor generation of the Virtual Machine. Applicable to OS disks only.')
             else:
                 c.ignore('access_level', 'for_upload', 'hyper_v_generation')
-            c.argument('encryption_type', min_api='2019-07-01', arg_type=get_enum_type(self.get_models('EncryptionType')),
+            c.argument('encryption_type', min_api='2019-07-01', arg_type=get_enum_type(self.get_models('EncryptionType', operation_group='disks')),
                        help='Encryption type. EncryptionAtRestWithPlatformKey: Disk is encrypted with XStore managed key at rest. It is the default encryption type. EncryptionAtRestWithCustomerKey: Disk is encrypted with Customer managed key at rest.')
             c.argument('disk_encryption_set', min_api='2019-07-01', help='Name or ID of disk encryption set that is used to encrypt the disk.')
             c.argument('location', help='Location. Values from: `az account list-locations`. You can configure the default location using `az configure --defaults location=<location>`. If location is not specified and no default location specified, location will be automatically set as same as the resource group.')
             operation_group = 'disks' if scope == 'disk' else 'snapshots'
             c.argument('network_access_policy', min_api='2020-05-01', help='Policy for accessing the disk via network.', arg_type=get_enum_type(self.get_models('NetworkAccessPolicy', operation_group=operation_group)))
             c.argument('disk_access', min_api='2020-05-01', help='Name or ID of the disk access resource for using private endpoints on disks.')
-            c.argument('enable_bursting', arg_type=get_three_state_flag(), help='Enable bursting beyond the provisioned performance target of the disk. Bursting is disabled by default, and it does not apply to Ultra disks.')
+            c.argument('enable_bursting', arg_type=get_three_state_flag(), help='Enable on-demand bursting beyond the provisioned performance target of the disk. On-demand bursting is disabled by default, and it does not apply to Ultra disks.')
             c.argument('public_network_access', arg_type=get_enum_type(['Disabled', 'Enabled']), min_api='2021-04-01', is_preview=True, help='Customers can set on Managed Disks or Snapshots to control the export policy on the disk.')
             c.argument('accelerated_network', arg_type=get_three_state_flag(), min_api='2021-04-01', is_preview=True, help='Customers can set on Managed Disks or Snapshots to enable the accelerated networking if the OS disk image support.')
 
@@ -170,7 +169,7 @@ def load_arguments(self, _):
     # endregion
 
     # region Disks
-    with self.argument_context('disk') as c:
+    with self.argument_context('disk', resource_type=ResourceType.MGMT_COMPUTE, operation_group='disks') as c:
         c.argument('zone', zone_type, min_api='2017-03-30', options_list=['--zone'])  # TODO: --size-gb currently has claimed -z. We can do a breaking change later if we want to.
         c.argument('disk_name', existing_disk_name, completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
         c.argument('name', arg_type=name_arg_type)
@@ -192,6 +191,7 @@ def load_arguments(self, _):
         c.argument('edge_zone', edge_zone_type)
         c.argument('security_type', choices=['TrustedLaunch'], help='The security type of the VM. Applicable for OS disks only.', min_api='2020-12-01')
         c.argument('support_hibernation', arg_type=get_three_state_flag(), help='Indicate the OS on a disk supports hibernation.', min_api='2020-12-01')
+        c.argument('architecture', arg_type=get_enum_type(self.get_models('Architecture', operation_group='disks')), min_api='2021-12-01', help='CPU architecture.')
     # endregion
 
     # region Snapshots
@@ -204,6 +204,7 @@ def load_arguments(self, _):
         c.argument('edge_zone', edge_zone_type)
         c.argument('copy_start', arg_type=get_three_state_flag(), min_api='2021-04-01',
                    help='Create snapshot by using a deep copy process, where the resource creation is considered complete only after all data has been copied from the source.')
+        c.argument('architecture', arg_type=get_enum_type(self.get_models('Architecture', operation_group='snapshots')), min_api='2021-12-01', help='CPU architecture.')
     # endregion
 
     # region Images
@@ -469,14 +470,17 @@ def load_arguments(self, _):
     with self.argument_context('vm disk attach') as c:
         c.argument('enable_write_accelerator', min_api='2017-12-01', action='store_true', help='enable write accelerator')
         c.argument('disk', options_list=['--name', '-n', c.deprecate(target='--disk', redirect='--name', hide=True)],
-                   help="The name or ID of the managed disk", validator=validate_vm_disk, id_part='name',
+                   help="The name or ID of the managed disk", id_part='name',
                    completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
+        c.argument('disks', nargs='*', help="One or more names or IDs of the managed disk (space-delimited).",
+                   completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
+        c.argument('ids', deprecate_info=c.deprecate(target='--ids', redirect='--disks', hide=True))
 
     with self.argument_context('vm disk detach') as c:
         c.argument('disk_name', arg_type=name_arg_type, help='The data disk name.')
 
     with self.argument_context('vm encryption enable') as c:
-        c.argument('encrypt_format_all', action='store_true', help='Encrypts-formats data disks instead of encrypting them. Encrypt-formatting is a lot faster than in-place encryption but wipes out the partition getting encrypt-formatted.')
+        c.argument('encrypt_format_all', action='store_true', help='Encrypts-formats data disks instead of encrypting them. Encrypt-formatting is a lot faster than in-place encryption but wipes out the partition getting encrypt-formatted. (Only supported for Linux virtual machines.)')
         # Place aad arguments in their own group
         aad_arguments = 'Azure Active Directory'
         c.argument('aad_client_id', arg_group=aad_arguments)
@@ -486,10 +490,13 @@ def load_arguments(self, _):
     with self.argument_context('vm extension') as c:
         c.argument('vm_extension_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines/extensions'), help='Name of the extension.', id_part='child_name_1')
         c.argument('vm_name', arg_type=existing_vm_name, options_list=['--vm-name'], id_part='name')
-        c.argument('expand', deprecate_info=c.deprecate(expiration='3.0.0', hide=True))
+        c.argument('expand', help='The expand expression to apply on the operation.', deprecate_info=c.deprecate(expiration='3.0.0', hide=True))
 
     with self.argument_context('vm extension list') as c:
         c.argument('vm_name', arg_type=existing_vm_name, options_list=['--vm-name'], id_part=None)
+
+    with self.argument_context('vm extension show') as c:
+        c.argument('instance_view', action='store_true', help='The instance view of a virtual machine extension.')
 
     with self.argument_context('vm secret') as c:
         c.argument('secrets', multi_ids_type, options_list=['--secrets', '-s'], help='Space-separated list of key vault secret URIs. Perhaps, produced by \'az keyvault secret list-versions --vault-name vaultname -n cert1 --query "[?attributes.enabled].id" -o tsv\'')
@@ -837,7 +844,7 @@ def load_arguments(self, _):
         c.argument('vm_name', run_cmd_vm_name)
         c.argument('run_command_name', run_cmd_name_type)
         c.argument('expand', help='The expand expression to apply on the operation.', deprecate_info=c.deprecate(hide=True))
-        c.argument('instance_view', action='store_true', help='Track the run command progress')
+        c.argument('instance_view', action='store_true', help='The instance view of a run command.')
         c.argument('location', arg_type=get_location_type(self.cli_ctx))
         c.argument('command_id', help='The command id.')
 
@@ -845,7 +852,7 @@ def load_arguments(self, _):
         c.argument('vm_name', run_cmd_vm_name)
         c.argument('run_command_name', run_cmd_name_type)
         c.argument('expand', help='The expand expression to apply on the operation.', deprecate_info=c.deprecate(hide=True))
-        c.argument('instance_view', action='store_true', help='Track the run command progress')
+        c.argument('instance_view', action='store_true', help='The instance view of a run command.')
         c.argument('location', arg_type=get_location_type(self.cli_ctx))
         c.argument('command_id', help='The command id.')
 
@@ -891,7 +898,7 @@ def load_arguments(self, _):
         c.argument('instance_id', help='The instance ID of the virtual machine.')
         c.argument('run_command_name', run_cmd_name_type)
         c.argument('expand', help='The expand expression to apply on the operation.', deprecate_info=c.deprecate(hide=True))
-        c.argument('instance_view', action='store_true', help='Track the run command progress')
+        c.argument('instance_view', action='store_true', help='The instance view of a run command.')
 
     for scope in ['vm identity assign', 'vmss identity assign']:
         with self.argument_context(scope) as c:
@@ -1018,15 +1025,14 @@ def load_arguments(self, _):
     for scope in ['vm create', 'vmss create', 'vm identity assign', 'vmss identity assign']:
         with self.argument_context(scope) as c:
             arg_group = 'Managed Service Identity' if scope.split()[-1] == 'create' else None
-            c.argument('identity_scope', options_list=['--scope'], arg_group=arg_group, help="Scope that the system assigned identity can access")
+            c.argument('identity_scope', options_list=['--scope'], arg_group=arg_group,
+                       help="Scope that the system assigned identity can access. ")
             c.ignore('identity_role_id')
 
     for scope in ['vm create', 'vmss create']:
         with self.argument_context(scope) as c:
             c.argument('identity_role', options_list=['--role'], arg_group='Managed Service Identity',
-                       help='Role name or id the system assigned identity will have. '
-                            'Please note that the default value "Contributor" will be removed in the future version 2.35.0, '
-                            "so please specify '--role' and '--scope' at the same time when assigning a role to the managed identity")
+                       help='Role name or id the system assigned identity will have. ')
 
     for scope in ['vm identity assign', 'vmss identity assign']:
         with self.argument_context(scope) as c:
@@ -1202,6 +1208,7 @@ def load_arguments(self, _):
         c.argument('end_of_life_date', help="the end of life date, e.g. '2020-12-31'")
         c.argument('disallowed_disk_types', nargs='*', help='disk types which would not work with the image, e.g., Standard_LRS')
         c.argument('features', help='A list of gallery image features. E.g. "IsSecureBootSupported=true IsMeasuredBootSupported=false"')
+        c.argument('architecture', arg_type=get_enum_type(self.get_models('Architecture', operation_group='gallery_images')), min_api='2021-10-01', help='CPU architecture.')
 
     with self.argument_context('sig image-definition list-shared') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')

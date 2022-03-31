@@ -111,6 +111,7 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     DATA_STORAGE_FILEDATALAKE = ('azure.multiapi.storagev2.filedatalake', None)
     DATA_STORAGE_FILESHARE = ('azure.multiapi.storagev2.fileshare', None)
     DATA_STORAGE_QUEUE = ('azure.multiapi.storagev2.queue', None)
+    DATA_STORAGE_TABLE = ('azure.data.tables', None)
 
     def __init__(self, import_prefix, client_name):
         """Constructor.
@@ -147,12 +148,12 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_NETWORK: '2021-05-01',
         ResourceType.MGMT_COMPUTE: SDKProfile('2021-11-01', {
             'resource_skus': '2019-04-01',
-            'disks': '2021-04-01',
+            'disks': '2021-12-01',
             'disk_encryption_sets': '2020-12-01',
             'disk_accesses': '2020-05-01',
-            'snapshots': '2021-04-01',
+            'snapshots': '2021-12-01',
             'galleries': '2021-07-01',
-            'gallery_images': '2020-09-30',
+            'gallery_images': '2021-10-01',
             'gallery_image_versions': '2021-07-01',
             'gallery_applications': '2021-07-01',
             'gallery_application_versions': '2021-07-01',
@@ -190,7 +191,7 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP: '7.2-preview',
         ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL: '7.2-preview',
         ResourceType.DATA_STORAGE: '2018-11-09',
-        ResourceType.DATA_STORAGE_BLOB: '2020-10-02',
+        ResourceType.DATA_STORAGE_BLOB: '2021-04-10',
         ResourceType.DATA_STORAGE_FILEDATALAKE: '2020-02-10',
         ResourceType.DATA_STORAGE_FILESHARE: '2019-07-07',
         ResourceType.DATA_STORAGE_QUEUE: '2018-03-28',
@@ -236,7 +237,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_ARO: '2020-04-30',
         ResourceType.MGMT_DATABOXEDGE: '2021-02-01-preview',
         ResourceType.MGMT_CUSTOMLOCATION: '2021-03-15-preview',
-        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2022-01-01', {
+        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2022-02-01', {
             'container_services': '2017-07-01',
             'open_shift_managed_clusters': '2019-09-30-preview'
         }),

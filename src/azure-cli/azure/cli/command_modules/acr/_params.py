@@ -179,6 +179,15 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('artifact_type', help='Filter referrers based on artifact type.')
         c.argument('recursive', help='Recursively include referrer artifacts.', action='store_true')
 
+    with self.argument_context('acr manifest show-metadata') as c:
+        c.positional('manifest_id', arg_type=manifest_id_type)
+
+    with self.argument_context('acr manifest list-metadata') as c:
+        c.positional('repo_id', arg_type=repo_id_type)
+
+    with self.argument_context('acr manifest update-metadata') as c:
+        c.positional('manifest_id', arg_type=manifest_id_type)
+
     with self.argument_context('acr manifest metadata show') as c:
         c.positional('manifest_id', arg_type=manifest_id_type)
 
@@ -408,7 +417,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    help='repository permissions. Use the format "--repository REPO [ACTION1 ACTION2 ...]" per flag. ' + repo_valid_actions)
         c.argument('gateway_actions_list', options_list=['--gateway'], nargs='+', action='append',
                    help='gateway permissions. Use the format "--gateway GATEWAY [ACTION1 ACTION2 ...]" per flag. ' + gateway_valid_actions)
-        c.argument('no_passwords', arg_type=get_three_state_flag(), help='Do not generate passwords, instead use "az acr token credential generate"')
+        c.argument('no_passwords', arg_type=get_three_state_flag(), help='Do not generate passwords during token creation. You can generate the passwords after the token is created by using `az acr token credentials generate` command.')
         c.argument('expiration_in_days', help='Number of days for which the credentials will be valid. If not specified, the expiration will default to the max value "9999-12-31T23:59:59.999999+00:00"', type=int, required=False)
 
     with self.argument_context('acr token update') as c:

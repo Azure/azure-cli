@@ -254,6 +254,18 @@ class WebappQuickCreateTest(ScenarioTest):
             JMESPathCheck('name', webapp_name)
         ])
 
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(parameter_name='resource_group', parameter_name_for_location='resource_group_location', location=WINDOWS_ASP_LOCATION_WEBAPP)
+    @ResourceGroupPreparer(parameter_name='resource_group2', parameter_name_for_location='resource_group_location2', location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_create_in_different_group_name(self, resource_group, resource_group_location, resource_group2, resource_group_location2):
+        plan = self.create_random_name(prefix='planInOneRG', length=15)
+        webapp_name = self.create_random_name(prefix='webInOtherRG', length=24)
+        self.cmd('group create -n {} -l {}'.format(resource_group2, resource_group_location))
+        self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group2, webapp_name, plan), checks=[
+            JMESPathCheck('name', webapp_name)
+        ])
+
     @unittest.skip("This test needs to be updated first to have unique names & re-tested before recording")
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name="resource_group_one", name_prefix="clitest", random_name_length=24, location=WINDOWS_ASP_LOCATION_WEBAPP)
@@ -964,6 +976,21 @@ class LinuxWebappScenarioTest(ScenarioTest):
             (x for x in result if x['name'] == 'WEBSITES_ENABLE_APP_SERVICE_STORAGE'))
         self.assertEqual(sample, {
                          'name': 'WEBSITES_ENABLE_APP_SERVICE_STORAGE', 'slotSetting': False, 'value': 'false'})
+
+        result = self.cmd('webapp config container set -g {} -n {} --docker-custom-image-name {} --docker-registry-server-password {} --docker-registry-server-user {} --docker-registry-server-url {} --enable-app-service-storage {}'.format(
+            resource_group, webapp, 'foo-image', 'foo-password', 'foo-user', 'foo-url', 'true')).get_output_in_json()
+        self.assertEqual(set(x['value'] for x in result if x['name'] ==
+                             'DOCKER_REGISTRY_SERVER_PASSWORD'), set([None]))  # we mask the password
+        sample = next(
+            (x for x in result if x['name'] == 'WEBSITES_ENABLE_APP_SERVICE_STORAGE'))
+        self.assertEqual(sample, {
+                         'name': 'WEBSITES_ENABLE_APP_SERVICE_STORAGE', 'slotSetting': False, 'value': 'true'})
+
+        result = self.cmd('webapp config container show -g {} -n {} '.format(
+            resource_group, webapp)).get_output_in_json()
+        self.assertEqual(set(x['name'] for x in result), set(['DOCKER_REGISTRY_SERVER_URL', 'DOCKER_REGISTRY_SERVER_USERNAME',
+                                                              'DOCKER_CUSTOM_IMAGE_NAME', 'DOCKER_REGISTRY_SERVER_PASSWORD', 'WEBSITES_ENABLE_APP_SERVICE_STORAGE']))
+
         self.cmd(
             'webapp config container delete -g {} -n {}'.format(resource_group, webapp))
         result2 = self.cmd('webapp config container show -g {} -n {} '.format(
@@ -972,7 +999,6 @@ class LinuxWebappScenarioTest(ScenarioTest):
 
 
 class LinuxWebappSSHScenarioTest(ScenarioTest):
-    @unittest.skip("Flaky test")
     @live_only()
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_WEBAPP)
     def test_linux_webapp_ssh(self, resource_group):
@@ -1076,6 +1102,57 @@ class WebappACRScenarioTest(ScenarioTest):
                 JMESPathCheck(
                     "[?name=='DOCKER_REGISTRY_SERVER_USERNAME']|[0].value", creds['username'])
         ])
+
+
+class WebappContainerScenarioTests(ScenarioTest):
+    @ResourceGroupPreparer(location='eastus')
+    @AllowLargeResponse()
+    def test_linux_slot_container_settings_override(self, resource_group):
+        app_name = self.create_random_name(prefix="", length=24)
+        plan = self.create_random_name(prefix="", length=24)
+        acr_registry_name = self.create_random_name(prefix="", length=24)
+        self.cmd('acr create --admin-enabled -g {} -n {} --sku Basic'.format(
+            resource_group, acr_registry_name))
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan))
+        creds = self.cmd('acr credential show -n {} -g {}'.format(
+            acr_registry_name, resource_group)).get_output_in_json()
+        self.cmd('az webapp create -g {} -n {} -p {} -i {}.azurecr.io/image-name:latest -s {} -w {}'.format(
+            resource_group, app_name, plan, acr_registry_name, creds['username'], creds['passwords'][0]['value']
+        ))
+
+        self.cmd('webapp config container show -g {} -n {} '.format(resource_group, app_name), checks=[
+            JMESPathCheck(
+                "[?name=='DOCKER_REGISTRY_SERVER_USERNAME']|[0].value", creds['username']),
+            JMESPathCheck(
+                "[?name=='DOCKER_REGISTRY_SERVER_URL']|[0].name", 'DOCKER_REGISTRY_SERVER_URL')
+        ])
+        self.cmd('webapp config appsettings list -g {} -n {}'.format(resource_group, app_name), checks=[
+            JMESPathCheck(
+                "[?name=='DOCKER_REGISTRY_SERVER_USERNAME'].value|[0]", creds['username'])
+        ])
+        self.cmd('webapp config show -g {} -n {}'.format(resource_group, app_name), checks=[
+            JMESPathCheck('linuxFxVersion', 'DOCKER|{}.azurecr.io/image-name:latest'.format(acr_registry_name))])
+
+        slot_name = "slot"
+        # note the different image name
+        self.cmd('az webapp deployment slot create -g {} -n {} --configuration-source {} -s {} --deployment-container-image-name {}.azurecr.io/image-name-2:latest'.format(
+            resource_group, app_name, app_name, slot_name, acr_registry_name
+        ))
+
+        self.cmd('webapp config container show -g {} -n {} -s {}'.format(resource_group, app_name, slot_name), checks=[
+            JMESPathCheck(
+                "[?name=='DOCKER_REGISTRY_SERVER_USERNAME']|[0].value", creds['username']),
+            JMESPathCheck(
+                "[?name=='DOCKER_REGISTRY_SERVER_URL']|[0].name", 'DOCKER_REGISTRY_SERVER_URL')
+        ])
+        self.cmd('webapp config appsettings list -g {} -n {} -s {}'.format(resource_group, app_name, slot_name), checks=[
+            JMESPathCheck(
+                "[?name=='DOCKER_REGISTRY_SERVER_USERNAME'].value|[0]", creds['username'])
+        ])
+        self.cmd('webapp config show -g {} -n {} -s {}'.format(resource_group, app_name, slot_name), checks=[
+            JMESPathCheck('linuxFxVersion', 'DOCKER|{}.azurecr.io/image-name-2:latest'.format(acr_registry_name))])
+
 
 
 class WebappGitScenarioTest(ScenarioTest):

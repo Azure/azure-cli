@@ -137,6 +137,7 @@ cat >>$testsrc_dir/setup.py <<EOL
     package_data={'': ['*.bat',
                        '*.byok',
                        '*.cer',
+                       '*.gql',  # graphql used by apim
                        '*.js',
                        '*.json',
                        '*.kql',
@@ -152,6 +153,7 @@ cat >>$testsrc_dir/setup.py <<EOL
                        '**/*.bat',
                        '**/*.byok',
                        '**/*.cer',
+                       '**/*.gql',
                        '**/*.ipynb',
                        '**/*.jar',
                        '**/*.js',

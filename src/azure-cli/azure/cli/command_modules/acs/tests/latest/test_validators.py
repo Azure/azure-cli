@@ -133,6 +133,36 @@ class VnetSubnetIdNamespace:
     def __init__(self, vnet_subnet_id):
         self.vnet_subnet_id = vnet_subnet_id
 
+class TestPodSubnetId(unittest.TestCase):
+    def test_invalid_pod_subnet_id(self):
+        invalid_pod_subnet_id = "dummy subnet id"
+        namespace = PodSubnetIdNamespace(invalid_pod_subnet_id)
+        err = ("--pod-subnet-id is not a valid Azure resource ID.")
+
+        with self.assertRaises(CLIError) as cm:
+            validators.validate_pod_subnet_id(namespace)
+        self.assertEqual(str(cm.exception), err)
+
+    def test_valid_pod_subnet_id(self):
+        invalid_pod_subnet_id = "/subscriptions/testid/resourceGroups/MockedResourceGroup/providers/Microsoft.Network/virtualNetworks/MockedNetworkId/subnets/MockedSubNetId"
+        namespace = PodSubnetIdNamespace(invalid_pod_subnet_id)
+        validators.validate_pod_subnet_id(namespace)
+
+    def test_none_pod_subnet_id(self):
+        invalid_pod_subnet_id = None
+        namespace = PodSubnetIdNamespace(invalid_pod_subnet_id)
+        validators.validate_pod_subnet_id(namespace)
+
+    def test_empty_pod_subnet_id(self):
+        invalid_pod_subnet_id = ""
+        namespace = PodSubnetIdNamespace(invalid_pod_subnet_id)
+        validators.validate_pod_subnet_id(namespace)
+
+
+class PodSubnetIdNamespace:
+    def __init__(self, pod_subnet_id):
+        self.pod_subnet_id = pod_subnet_id
+
 
 class MaxSurgeNamespace:
     def __init__(self, max_surge):
@@ -351,7 +381,7 @@ class TestExtractCommaSeparatedString(unittest.TestCase):
             validators.extract_comma_separated_string(s12, extract_kv=True)
 
         s13 = "WindowsContainerRuntime=containerd,AKSHTTPCustomFeatures=Microsoft.ContainerService/CustomNodeConfigPreview"
-        t13 = validators.extract_comma_separated_string(s13, enable_strip=True, extract_kv=True, default_value={},)
+        t13 = validators.extract_comma_separated_string(s13, enable_strip=True, extract_kv=True, default_value={}, allow_appending_values_to_same_key=True)
         g13 = {"WindowsContainerRuntime": "containerd", "AKSHTTPCustomFeatures": "Microsoft.ContainerService/CustomNodeConfigPreview"}
         self.assertEqual(t13, g13)
 
@@ -359,6 +389,16 @@ class TestExtractCommaSeparatedString(unittest.TestCase):
         t14 = validators.extract_comma_separated_string(s14, extract_kv=True, allow_empty_value=True)
         g14 = {"": ""}
         self.assertEqual(t14, g14)
+
+        s15 = "WindowsContainerRuntime=containerd,AKSHTTPCustomFeatures=Microsoft.ContainerService/AKSTestFeaturePreview,AKSHTTPCustomFeatures=Microsoft.ContainerService/AKSExampleFeaturePreview"
+        t15 = validators.extract_comma_separated_string(s15, enable_strip=True, extract_kv=True, default_value={},)
+        g15 = {"WindowsContainerRuntime": "containerd", "AKSHTTPCustomFeatures": "Microsoft.ContainerService/AKSExampleFeaturePreview"}
+        self.assertEqual(t15, g15)
+
+        s16 = "WindowsContainerRuntime=containerd,AKSHTTPCustomFeatures=Microsoft.ContainerService/AKSTestFeaturePreview,AKSHTTPCustomFeatures=Microsoft.ContainerService/AKSExampleFeaturePreview"
+        t16 = validators.extract_comma_separated_string(s16, enable_strip=True, extract_kv=True, default_value={}, allow_appending_values_to_same_key=True)
+        g16 = {"WindowsContainerRuntime": "containerd", "AKSHTTPCustomFeatures": "Microsoft.ContainerService/AKSTestFeaturePreview,Microsoft.ContainerService/AKSExampleFeaturePreview"}
+        self.assertEqual(t16, g16)
 
 
 class CredentialFormatNamespace:
@@ -381,3 +421,7 @@ class TestCredentialFormat(unittest.TestCase):
         namespace = CredentialFormatNamespace(credential_format)
 
         validators.validate_credential_format(namespace)
+
+
+if __name__ == "__main__":
+    unittest.main()

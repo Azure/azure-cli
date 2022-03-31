@@ -705,7 +705,7 @@ short-summary: assign managed identity to the web app
 examples:
   - name: assign local identity and assign a reader role to the current resource group.
     text: >
-        az functionapp identity assign -g MyResourceGroup -n MyUniqueApp --role reader --scope /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/MyResourceGroup
+        az functionapp identity assign -g MyResourceGroup -n MyUniqueApp --role reader --scope /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourcegroups/MyResourceGroup
   - name: enable identity for the web app.
     text: >
         az functionapp identity assign -g MyResourceGroup -n MyUniqueApp
@@ -1767,7 +1767,7 @@ short-summary: assign managed identity to the web app
 examples:
   - name: assign local identity and assign a reader role to the current resource group.
     text: >
-        az webapp identity assign -g MyResourceGroup -n MyUniqueApp --role reader --scope /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/MyResourceGroup
+        az webapp identity assign -g MyResourceGroup -n MyUniqueApp --role reader --scope /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourcegroups/MyResourceGroup
   - name: enable identity for the web app.
     text: >
         az webapp identity assign -g MyResourceGroup -n MyUniqueApp
@@ -2493,7 +2493,7 @@ short-summary: assign managed identity to the static web app
 examples:
   - name: assign local identity and assign a reader role to the current resource group.
     text: >
-        az staticwebapp identity assign -g MyResourceGroup -n MyUniqueApp --role reader --scope /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/MyResourceGroup
+        az staticwebapp identity assign -g MyResourceGroup -n MyUniqueApp --role reader --scope /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourcegroups/MyResourceGroup
   - name: enable identity for the web app.
     text: >
         az staticwebapp identity assign -g MyResourceGroup -n MyUniqueApp
@@ -2608,7 +2608,7 @@ helps['webapp deploy'] = """
     short-summary: Deploys a provided artifact to Azure Web Apps.
     examples:
     - name: Deploy a war file asynchronously.
-      text: az webapp deploy --resource-group ResouceGroup --name AppName --src-path SourcePath --type war --async IsAsync
+      text: az webapp deploy --resource-group ResouceGroup --name AppName --src-path SourcePath --type war --async true
     - name: Deploy a static text file to wwwroot/staticfiles/test.txt
       text: az webapp deploy --resource-group ResouceGroup --name AppName --src-path SourcePath --type static --target-path staticfiles/test.txt
 """

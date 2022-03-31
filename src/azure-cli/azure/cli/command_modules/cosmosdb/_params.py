@@ -65,7 +65,6 @@ def load_arguments(self, _):
 
     with self.argument_context('cosmosdb create') as c:
         c.argument('account_name', completer=None)
-        c.argument('key_uri', help="The URI of the key vault", is_preview=True)
         c.argument('enable_free_tier', arg_type=get_three_state_flag(), help="If enabled the account is free-tier.", is_preview=True)
         c.argument('assign_identity', nargs='*', help="Assign system or user assigned identities separated by spaces. Use '[system]' to refer system assigned identity.", is_preview=True)
         c.argument('is_restore_request', options_list=['--is-restore-request', '-r'], arg_type=get_three_state_flag(), help="Restore from an existing/deleted account.", is_preview=True, arg_group='Restore')
@@ -79,8 +78,8 @@ def load_arguments(self, _):
             c.argument('locations', nargs='+', action=CreateLocation)
             c.argument('tags', arg_type=tags_type)
             c.argument('default_consistency_level', arg_type=get_enum_type(DefaultConsistencyLevel), help="default consistency level of the Cosmos DB database account")
-            c.argument('max_staleness_prefix', type=int, help="when used with Bounded Staleness consistency, this value represents the number of stale requests tolerated. Accepted range for this value is 1 - 2,147,483,647")
-            c.argument('max_interval', type=int, help="when used with Bounded Staleness consistency, this value represents the time amount of staleness (in seconds) tolerated. Accepted range for this value is 1 - 100")
+            c.argument('max_staleness_prefix', type=int, help="when used with Bounded Staleness consistency, this value represents the number of stale requests tolerated. Accepted range for this value is 10 - 2,147,483,647")
+            c.argument('max_interval', type=int, help="when used with Bounded Staleness consistency, this value represents the time amount of staleness (in seconds) tolerated. Accepted range for this value is 5 - 86400")
             c.argument('ip_range_filter', nargs='+', options_list=['--ip-range-filter'], validator=validate_ip_range_filter, help="firewall support. Specifies the set of IP addresses or IP address ranges in CIDR form to be included as the allowed list of client IPs for a given database account. IP addresses/ranges must be comma-separated and must not contain any spaces")
             c.argument('kind', arg_type=get_enum_type(DatabaseAccountKind), help='The type of Cosmos DB database account to create')
             c.argument('enable_automatic_failover', arg_type=get_three_state_flag(), help='Enables automatic failover of the write region in the rare event that the region is unavailable due to an outage. Automatic failover will result in a new write region for the account and is chosen based on the failover priorities configured for the account.')
@@ -89,6 +88,7 @@ def load_arguments(self, _):
             c.argument('virtual_network_rules', nargs='+', validator=validate_virtual_network_rules, help='ACL\'s for virtual network')
             c.argument('enable_multiple_write_locations', arg_type=get_three_state_flag(), help="Enable Multiple Write Locations")
             c.argument('disable_key_based_metadata_write_access', arg_type=get_three_state_flag(), help="Disable write operations on metadata resources (databases, containers, throughput) via account keys")
+            c.argument('key_uri', help="The URI of the key vault", is_preview=True)
             c.argument('enable_public_network', options_list=['--enable-public-network', '-e'], arg_type=get_three_state_flag(), help="Enable or disable public network access to server.")
             c.argument('enable_analytical_storage', arg_type=get_three_state_flag(), help="Flag to enable log storage on the account.")
             c.argument('network_acl_bypass', arg_type=get_enum_type(NetworkAclBypass), options_list=['--network-acl-bypass'], help="Flag to enable or disable Network Acl Bypass.")
@@ -107,7 +107,7 @@ def load_arguments(self, _):
 
     with self.argument_context('cosmosdb failover-priority-change') as c:
         c.argument('failover_parameters', options_list=['--failover-policies'], validator=validate_failover_policies,
-                   help="space-separated failover policies in 'regionName=failoverPriority' format. E.g eastus=0 westus=1", nargs='+')
+                   help="space-separated failover policies in 'regionName=failoverPriority' format. Number of policies must match the number of regions the account is currently replicated. All regionName values must match those of the regions the account is currently replicated. All failoverPriority values must be unique. There must be one failoverPriority value zero (0) specified. All remaining failoverPriority values can be any positive integer and they don't have to be contiguos, neither written in any specific order. E.g eastus=0 westus=1", nargs='+')
 
     with self.argument_context('cosmosdb network-rule list') as c:
         c.argument('account_name', id_part=None)
@@ -446,14 +446,14 @@ def load_arguments(self, _):
             'managed-cassandra cluster update']:
         with self.argument_context(scope) as c:
             c.argument('tags', arg_type=tags_type)
-            c.argument('external_gossip_certificates', nargs='+', validator=validate_gossip_certificates, options_list=['--external-gossip-certificates', '-e'], help="A list of certificates that the managed cassandra data center's should accept.")
+            c.argument('external_gossip_certificates', nargs='*', validator=validate_gossip_certificates, options_list=['--external-gossip-certificates', '-e'], help="A list of certificates that the managed cassandra data center's should accept.")
             c.argument('cassandra_version', help="The version of Cassandra chosen.")
             c.argument('authentication_method', arg_type=get_enum_type(['None', 'Cassandra']), help="Authentication mode can be None or Cassandra. If None, no authentication will be required to connect to the Cassandra API. If Cassandra, then passwords will be used.")
             c.argument('hours_between_backups', help="The number of hours between backup attempts.")
-            c.argument('repair_enabled', help="Enables automatic repair.")
-            c.argument('client_certificates', nargs='+', validator=validate_client_certificates, help="If specified, enables client certificate authentication to the Cassandra API.")
+            c.argument('repair_enabled', arg_type=get_three_state_flag(), help="Enables automatic repair.")
+            c.argument('client_certificates', nargs='*', validator=validate_client_certificates, help="If specified, enables client certificate authentication to the Cassandra API.")
             c.argument('gossip_certificates', help="A list of certificates that should be accepted by on-premise data centers.")
-            c.argument('external_seed_nodes', nargs='+', validator=validate_seednodes, help="A list of ip addresses of the seed nodes of on-premise data centers.")
+            c.argument('external_seed_nodes', nargs='*', validator=validate_seednodes, help="A list of ip addresses of the seed nodes of on-premise data centers.")
             c.argument('identity_type', options_list=['--identity-type'], arg_type=get_enum_type(['None', 'SystemAssigned']), help="Type of identity used for Customer Managed Disk Key.")
 
     # Managed Cassandra Cluster

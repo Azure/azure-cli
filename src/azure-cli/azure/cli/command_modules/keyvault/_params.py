@@ -446,6 +446,8 @@ def load_arguments(self, _):
                        validator=process_key_release_policy, is_preview=True,
                        help='The policy rules under which the key can be exported. '
                             'Policy definition as JSON, or a path to a file containing JSON policy definition.')
+            c.extra('default_cvm_policy', action='store_true',
+                    help='Use default policy under which the key can be exported for CVM disk encryption.')
             c.extra('immutable', arg_type=get_three_state_flag(), is_preview=True,
                     help='Mark a release policy as immutable. '
                          'An immutable release policy cannot be changed or updated after being marked immutable. '
@@ -453,9 +455,9 @@ def load_arguments(self, _):
 
     with self.argument_context('keyvault key create') as c:
         c.argument('kty', arg_type=get_enum_type(JsonWebKeyType), validator=validate_key_type,
-                   help='The type of key to create. For valid values, see: https://docs.microsoft.com/rest/api/keyvault/createkey/createkey#jsonwebkeytype')
+                   help='The type of key to create. For valid values, see: https://docs.microsoft.com/rest/api/keyvault/keys/create-key/create-key#jsonwebkeytype')
         c.argument('curve', arg_type=get_enum_type(KeyCurveName),
-                   help='Elliptic curve name. For valid values, see: https://docs.microsoft.com/rest/api/keyvault/createkey/createkey#jsonwebkeycurvename')
+                   help='Elliptic curve name. For valid values, see: https://docs.microsoft.com/rest/api/keyvault/keys/create-key/create-key#jsonwebkeycurvename')
 
     with self.argument_context('keyvault key import') as c:
         c.argument('kty', arg_type=get_enum_type(CLIKeyTypeForBYOKImport), validator=validate_key_import_type,

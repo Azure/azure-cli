@@ -23,6 +23,7 @@ from azure.cli.command_modules.storage.oauth_token_util import TokenUpdater
 
 from knack.log import get_logger
 from knack.util import CLIError
+from ._client_factory import cf_blob_service
 
 storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
 logger = get_logger(__name__)
@@ -117,7 +118,7 @@ def get_config_value(cmd, section, key, default):
 
 
 def is_storagev2(import_prefix):
-    return import_prefix.startswith('azure.multiapi.storagev2.')
+    return import_prefix.startswith('azure.multiapi.storagev2.') or import_prefix.startswith('azure.data.tables')
 
 
 def validate_client_parameters(cmd, namespace):
@@ -523,10 +524,11 @@ def validate_storage_data_plane_list(namespace):
         namespace.num_results = int(namespace.num_results)
 
 
-def get_content_setting_validator(settings_class, update, guess_from_file=None):
+def get_content_setting_validator(settings_class, update, guess_from_file=None, process_md5=False):
     def _class_name(class_type):
         return class_type.__module__ + "." + class_type.__class__.__name__
 
+    # pylint: disable=too-many-locals
     def validator(cmd, namespace):
         t_base_blob_service, t_file_service, t_blob_content_settings, t_file_content_settings = cmd.get_models(
             'blob.baseblobservice#BaseBlobService',
@@ -534,11 +536,18 @@ def get_content_setting_validator(settings_class, update, guess_from_file=None):
             'blob.models#ContentSettings',
             'file.models#ContentSettings')
 
+        prefix = cmd.command_kwargs['resource_type'].value[0]
+        if is_storagev2(prefix):
+            t_blob_content_settings = cmd.get_models('_models#ContentSettings',
+                                                     resource_type=ResourceType.DATA_STORAGE_BLOB)
+
         # must run certain validators first for an update
         if update:
             validate_client_parameters(cmd, namespace)
-        if update and _class_name(settings_class) == _class_name(t_file_content_settings):
-            get_file_path_validator()(namespace)
+        if not is_storagev2(prefix):
+            if update and _class_name(settings_class) == _class_name(t_file_content_settings):
+                get_file_path_validator()(namespace)
+
         ns = vars(namespace)
         clear_content_settings = ns.pop('clear_content_settings', False)
 
@@ -550,15 +559,26 @@ def get_content_setting_validator(settings_class, update, guess_from_file=None):
             sas = ns.get('sas_token')
             token_credential = ns.get('token_credential')
             if _class_name(settings_class) == _class_name(t_blob_content_settings):
-                client = get_storage_data_service_client(cmd.cli_ctx,
-                                                         service=t_base_blob_service,
-                                                         name=account,
-                                                         key=key, connection_string=cs, sas_token=sas,
-                                                         token_credential=token_credential)
                 container = ns.get('container_name')
                 blob = ns.get('blob_name')
                 lease_id = ns.get('lease_id')
-                props = client.get_blob_properties(container, blob, lease_id=lease_id).properties.content_settings
+                if is_storagev2(prefix):
+                    account_kwargs = {'connection_string': cs,
+                                      'account_name': account,
+                                      'account_key': key,
+                                      'token_credential': token_credential,
+                                      'sas_token': sas}
+                    client = cf_blob_service(cmd.cli_ctx, account_kwargs).get_blob_client(container=container,
+                                                                                          blob=blob)
+                    props = client.get_blob_properties(lease=lease_id).content_settings
+                else:
+                    client = get_storage_data_service_client(cmd.cli_ctx,
+                                                             service=t_base_blob_service,
+                                                             name=account,
+                                                             key=key, connection_string=cs, sas_token=sas,
+                                                             token_credential=token_credential)
+                    props = client.get_blob_properties(container, blob, lease_id=lease_id).properties.content_settings
+
             elif _class_name(settings_class) == _class_name(t_file_content_settings):
                 client = get_storage_data_service_client(cmd.cli_ctx, t_file_service, account, key, cs, sas)
                 share = ns.get('share_name')
@@ -586,6 +606,14 @@ def get_content_setting_validator(settings_class, update, guess_from_file=None):
         else:
             if guess_from_file:
                 new_props = guess_content_type(ns[guess_from_file], new_props, settings_class)
+
+        # In track2 SDK, the content_md5 type should be bytearray. And then it will serialize to a string for request.
+        # To keep consistent with track1 input and CLI will treat all parameter values as string. Here is to transform
+        # content_md5 value to bytearray. And track2 SDK will serialize it into the right value with str type in header.
+        if is_storagev2(prefix):
+            if process_md5 and new_props.content_md5:
+                from .track2_util import _str_to_bytearray
+                new_props.content_md5 = _str_to_bytearray(new_props.content_md5)
 
         ns['content_settings'] = new_props
 
@@ -646,7 +674,7 @@ def validate_entity(namespace):
     def cast_val(key, val):
         """ Attempts to cast numeric values (except RowKey and PartitionKey) to numbers so they
         can be queried correctly. """
-        if key in ['PartitionKey', 'RowKey']:
+        if key in ['PartitionKey', 'RowKey', 'DisplayVersion']:
             return val
 
         def try_cast(to_type):
@@ -811,14 +839,14 @@ def get_permission_validator(permission_class):
     return validator
 
 
-def table_permission_validator(cmd, namespace):
+def table_permission_validator(namespace):
     """ A special case for table because the SDK associates the QUERY permission with 'r' """
-    t_table_permissions = get_table_data_type(cmd.cli_ctx, 'table', 'TablePermissions')
+    from azure.data.tables._models import TableSasPermissions
     if namespace.permission:
         if set(namespace.permission) - set('raud'):
             help_string = '(r)ead/query (a)dd (u)pdate (d)elete'
             raise ValueError('valid values are {} or a combination thereof.'.format(help_string))
-        namespace.permission = t_table_permissions(_str=namespace.permission)
+        namespace.permission = TableSasPermissions(_str=namespace.permission)
 
 
 def validate_container_public_access(cmd, namespace):
@@ -997,15 +1025,16 @@ def process_container_delete_parameters(cmd, namespace):
 
 def process_blob_download_batch_parameters(cmd, namespace):
     """Process the parameters for storage blob download command"""
+    from azure.cli.core.azclierror import InvalidArgumentValueError
     # 1. quick check
     if not os.path.exists(namespace.destination) or not os.path.isdir(namespace.destination):
-        raise ValueError('incorrect usage: destination must be an existing directory')
+        raise InvalidArgumentValueError('incorrect usage: destination must be an existing directory')
 
     # 2. try to extract account name and container name from source string
     _process_blob_batch_container_parameters(cmd, namespace)
 
     # 3. Call validators
-    add_progress_callback(cmd, namespace)
+    add_download_progress_callback(cmd, namespace)
 
 
 def process_blob_upload_batch_parameters(cmd, namespace):
@@ -1037,7 +1066,10 @@ def process_blob_upload_batch_parameters(cmd, namespace):
         else:
             namespace.blob_type = 'block'
 
-    # 5. call other validators
+    # 5. Ignore content-md5 for batch upload
+    namespace.content_md5 = None
+
+    # 6. call other validators
     validate_metadata(namespace)
     t_blob_content_settings = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_BLOB, '_models#ContentSettings')
     get_content_setting_validator(t_blob_content_settings, update=False)(cmd, namespace)
@@ -1987,6 +2019,29 @@ def add_upload_progress_callback(cmd, namespace):
         message = getattr(_update_progress, 'message', 'Alive')
         reuse = getattr(_update_progress, 'reuse', False)
         current = response.context['upload_stream_current']
+        total = response.context['data_stream_total']
+
+        if total:
+            hook.add(message=message, value=current, total_val=total)
+            if total == current and not reuse:
+                hook.end()
+
+    hook = cmd.cli_ctx.get_progress_controller(det=True)
+    _update_progress.hook = hook
+
+    if not namespace.no_progress:
+        namespace.progress_callback = _update_progress
+    del namespace.no_progress
+
+
+def add_download_progress_callback(cmd, namespace):
+    def _update_progress(response):
+        if response.http_response.status_code not in [200, 201, 206]:
+            return
+
+        message = getattr(_update_progress, 'message', 'Alive')
+        reuse = getattr(_update_progress, 'reuse', False)
+        current = response.context['download_stream_current']
         total = response.context['data_stream_total']
 
         if total:

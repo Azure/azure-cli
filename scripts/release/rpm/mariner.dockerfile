@@ -1,6 +1,6 @@
-ARG tag=1.0
+ARG tag=2.0
 
-FROM cblmariner.azurecr.io/base/core:${tag} AS build-env
+FROM cblmariner2preview.azurecr.io/base/core:${tag} AS build-env
 ARG cli_version=dev
 
 RUN tdnf update -y
@@ -14,7 +14,7 @@ RUN dos2unix ./scripts/release/rpm/azure-cli.spec && \
     REPO_PATH=$(pwd) CLI_VERSION=$cli_version rpmbuild -v -bb --clean scripts/release/rpm/azure-cli.spec && \
     cp /usr/src/mariner/RPMS/x86_64/azure-cli-${cli_version}-1.x86_64.rpm /azure-cli-dev.rpm
 
-FROM cblmariner.azurecr.io/base/core:${tag} AS execution-env
+FROM cblmariner2preview.azurecr.io/base/core:${tag} AS execution-env
 
 RUN tdnf update -y
 RUN tdnf install -y python3 python3-virtualenv

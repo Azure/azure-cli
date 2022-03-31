@@ -172,6 +172,11 @@ jobs:
        build_scripts/windows/scripts/build.cmd
     displayName: 'Build Windows MSI'
 
+  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+    displayName: 'SBOM'
+    inputs:
+      BuildDropPath: 'build_scripts/windows/out/'
+
   - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: MSI'
     inputs:
@@ -257,6 +262,11 @@ jobs:
       targetType: 'filePath'
       filePath: scripts/release/docker/pipeline.sh
 
+  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+    displayName: 'SBOM'
+    inputs:
+      BuildDropPath: $(Build.ArtifactStagingDirectory)
+      DockerImagesToScan: 'clibuild$BUILD_BUILDNUMBER:latest'
 
   - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: docker image'
@@ -322,6 +332,10 @@ jobs:
       scripts/release/pypi/build.sh $branch
     displayName: 'Run Wheel Build Script'
 
+  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+    displayName: 'SBOM'
+    inputs:
+      BuildDropPath: $(Build.ArtifactStagingDirectory)
 
   - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: pypi'
@@ -607,6 +621,11 @@ jobs:
        docker rm --force azurecli
     displayName: 'Build homebrew formula'
 
+  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+    displayName: 'SBOM'
+    inputs:
+      BuildDropPath: $(Build.ArtifactStagingDirectory)
+
   - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: homebrew'
     inputs:
@@ -681,8 +700,9 @@ jobs:
     displayName: 'Test Homebrew Package'
 
 
-- job: BuildYumPackageMariner
-  displayName: Build Yum Package Mariner
+- job: BuildRpmPackageMariner
+  displayName: Build Rpm Package Mariner
+  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
     vmImage: 'ubuntu-20.04'
   steps:
@@ -691,15 +711,23 @@ jobs:
     inputs:
       targetType: 'filePath'
       filePath: scripts/release/rpm/pipeline_mariner.sh
+
+  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+    displayName: 'SBOM'
+    inputs:
+      BuildDropPath: $(Build.ArtifactStagingDirectory)
+
   - task: PublishPipelineArtifact@0
-    displayName: 'Publish Artifact: yum-mariner'
+    displayName: 'Publish Artifact: rpm-mariner'
     inputs:
       TargetPath: $(Build.ArtifactStagingDirectory)
-      ArtifactName: yum-mariner
+      ArtifactName: rpm-mariner
 
 
-- job: BuildYumPackage
-  displayName: Build Yum Package
+- job: BuildRpmPackageCentOS7
+  displayName: Build Rpm Package CentOS 7
+  # Uncomment this line to disable this job on Pull Requests
+  # condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
     vmImage: 'ubuntu-20.04'
   steps:
@@ -708,17 +736,50 @@ jobs:
     inputs:
       targetType: 'filePath'
       filePath: scripts/release/rpm/pipeline.sh
+    env:
+      IMAGE: centos7
+  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+    displayName: 'SBOM'
+    inputs:
+      BuildDropPath: $(Build.ArtifactStagingDirectory)
   - task: PublishPipelineArtifact@0
-    displayName: 'Publish Artifact: yum'
+    displayName: 'Publish Artifact: rpm'
     inputs:
       TargetPath: $(Build.ArtifactStagingDirectory)
-      ArtifactName: yum
+      ArtifactName: rpm-centos7
+
+# TODO: rpmbuild on Red Hat UBI 8 is slow for unknown reason. Still working with Red Hat to investigate.
+# We use a separate job for Red Hat UBI 8 instead of strategy.matrix so that TestRpmPackage can start right after
+# BuildRpmPackageCentOS7 finishes.
+- job: BuildRpmPackageUbi8
+  displayName: Build Rpm Package Red Hat Universal Base Image 8
+  # Do not run this job for Pull Requests due to the slowness
+  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
+  pool:
+    vmImage: 'ubuntu-20.04'
+  steps:
+  - task: Bash@3
+    displayName: 'Build Rpm Package'
+    inputs:
+      targetType: 'filePath'
+      filePath: scripts/release/rpm/pipeline.sh
+    env:
+      IMAGE: ubi8
+  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+    displayName: 'SBOM'
+    inputs:
+      BuildDropPath: $(Build.ArtifactStagingDirectory)
+  - task: PublishPipelineArtifact@0
+    displayName: 'Publish Artifact: rpm'
+    inputs:
+      TargetPath: $(Build.ArtifactStagingDirectory)
+      ArtifactName: rpm-ubi8
 
 
-- job: TestYumPackage
-  displayName: Test Yum Package
+- job: TestRpmPackage
+  displayName: Test Rpm Package
   timeoutInMinutes: 120
-  dependsOn: BuildYumPackage
+  dependsOn: BuildRpmPackageCentOS7
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
     vmImage: 'ubuntu-20.04'
@@ -733,24 +794,24 @@ jobs:
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Build Artifacts'
     inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/yum'
-      artifactName: yum
+      TargetPath: '$(Build.ArtifactStagingDirectory)/rpm'
+      artifactName: rpm-centos7
 
 
   - bash: |
        set -ex
 
        CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
-       YUM_NAME=azure-cli-$CLI_VERSION-1.el7.x86_64.rpm
-       YUM_FILE=$SYSTEM_ARTIFACTSDIRECTORY/yum/$YUM_NAME
+       RPM_NAME=azure-cli-$CLI_VERSION-1.el7.x86_64.rpm
+       RPM_FILE=$SYSTEM_ARTIFACTSDIRECTORY/rpm/$RPM_NAME
 
-       echo "== Test yum package on CentOS =="
+       echo "== Test rpm package on CentOS =="
       
        IMAGE=centos:centos7
        docker pull $IMAGE
-       docker run --rm -e YUM_NAME=$YUM_NAME -v $SYSTEM_ARTIFACTSDIRECTORY/yum:/mnt/yum -v $(pwd):/azure-cli $IMAGE /bin/bash "/azure-cli/scripts/release/rpm/test_rpm_in_docker.sh"
+       docker run --rm -e RPM_NAME=$RPM_NAME -v $SYSTEM_ARTIFACTSDIRECTORY/rpm:/mnt/rpm -v $(pwd):/azure-cli $IMAGE /bin/bash "/azure-cli/scripts/release/rpm/test_rpm_in_docker.sh"
 
-    displayName: 'Test Yum Package'
+    displayName: 'Test Rpm Package'
 
 - job: BuildDebPackages
   displayName: Build Deb Packages
@@ -807,6 +868,11 @@ jobs:
     env:
       DISTRO: $(distro)
       DISTRO_BASE_IMAGE: $(deb_system):$(distro)
+
+  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+    displayName: 'SBOM'
+    inputs:
+      BuildDropPath: $(Build.ArtifactStagingDirectory)
 
   - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: debian'
@@ -939,6 +1005,8 @@ jobs:
       . env/bin/activate
       python scripts/ci/service_name.py
       if [[ "$(System.PullRequest.TargetBranch)" != "" ]]; then
+        # If CI is set to shallow fetch, target branch should be expilictly fetched.
+        git fetch origin --depth=1 $(System.PullRequest.TargetBranch)
         azdev linter --ci-exclusions --min-severity medium --repo=./ --src=HEAD --tgt=origin/$(System.PullRequest.TargetBranch)
       else
         azdev linter --ci-exclusions --min-severity medium

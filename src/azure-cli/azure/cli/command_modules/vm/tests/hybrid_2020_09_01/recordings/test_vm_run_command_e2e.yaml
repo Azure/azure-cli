@@ -3,7 +3,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - application/json, text/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -13,54 +13,12 @@ interactions:
       ParameterSetName:
       - -l
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-compute/13.0.0 Azure-SDK-For-Python AZURECLI/2.11.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/runCommands?api-version=2020-06-01
   response:
     body:
       string: "{\r\n  \"value\": [\r\n    {\r\n      \"$schema\": \"http://schema.management.azure.com/schemas/2016-11-17/runcommands.json\",\r\n
-        \     \"id\": \"EnableRemotePS\",\r\n      \"osType\": \"Windows\",\r\n      \"label\":
-        \"Enable remote PowerShell\",\r\n      \"description\": \"Configure the machine
-        to enable remote PowerShell.\"\r\n    },\r\n    {\r\n      \"$schema\": \"http://schema.management.azure.com/schemas/2016-11-17/runcommands.json\",\r\n
-        \     \"id\": \"IPConfig\",\r\n      \"osType\": \"Windows\",\r\n      \"label\":
-        \"List IP configuration\",\r\n      \"description\": \"Shows detailed information
-        for the IP address, subnet mask and default gateway for each adapter bound
-        to TCP/IP.\"\r\n    },\r\n    {\r\n      \"$schema\": \"http://schema.management.azure.com/schemas/2016-11-17/runcommands.json\",\r\n
-        \     \"id\": \"RunPowerShellScript\",\r\n      \"osType\": \"Windows\",\r\n
-        \     \"label\": \"Executes a PowerShell script\",\r\n      \"description\":
-        \"Custom multiline PowerShell script should be defined in script property.
-        Optional parameters can be set in parameters property.\"\r\n    },\r\n    {\r\n
-        \     \"$schema\": \"http://schema.management.azure.com/schemas/2016-11-17/runcommands.json\",\r\n
-        \     \"id\": \"RunShellScript\",\r\n      \"osType\": \"Linux\",\r\n      \"label\":
-        \"Executes a Linux shell script\",\r\n      \"description\": \"Custom multiline
-        shell script should be defined in script property. Optional parameters can
-        be set in parameters property.\"\r\n    },\r\n    {\r\n      \"$schema\":
-        \"http://schema.management.azure.com/schemas/2016-11-17/runcommands.json\",\r\n
-        \     \"id\": \"ifconfig\",\r\n      \"osType\": \"Linux\",\r\n      \"label\":
-        \"List network configuration\",\r\n      \"description\": \"Get the configuration
-        of all network interfaces.\"\r\n    },\r\n    {\r\n      \"$schema\": \"http://schema.management.azure.com/schemas/2016-11-17/runcommands.json\",\r\n
-        \     \"id\": \"EnableAdminAccount\",\r\n      \"osType\": \"Windows\",\r\n
-        \     \"label\": \"Enable administrator account\",\r\n      \"description\":
-        \"Checks if the local Administrator account is disabled, and if so enables
-        it.\"\r\n    },\r\n    {\r\n      \"$schema\": \"http://schema.management.azure.com/schemas/2016-11-17/runcommands.json\",\r\n
-        \     \"id\": \"RDPSettings\",\r\n      \"osType\": \"Windows\",\r\n      \"label\":
-        \"Verify RDP Listener Settings\",\r\n      \"description\": \"Checks registry
-        settings and domain policy settings. Suggests policy actions if machine is
-        part of a domain or modifies the settings to default values.\"\r\n    },\r\n
-        \   {\r\n      \"$schema\": \"http://schema.management.azure.com/schemas/2016-11-17/runcommands.json\",\r\n
-        \     \"id\": \"SetRDPPort\",\r\n      \"osType\": \"Windows\",\r\n      \"label\":
-        \"Set Remote Desktop port\",\r\n      \"description\": \"Sets the default
-        or user specified port number for Remote Desktop connections. Enables firewall
-        rule for inbound access to the port.\"\r\n    },\r\n    {\r\n      \"$schema\":
-        \"http://schema.management.azure.com/schemas/2016-11-17/runcommands.json\",\r\n
-        \     \"id\": \"ResetRDPCert\",\r\n      \"osType\": \"Windows\",\r\n      \"label\":
-        \"Restore RDP Authentication mode to defaults\",\r\n      \"description\":
-        \"Removes the SSL certificate tied to the RDP listener and restores the RDP
-        listener security to default. Use this script if you see any issues with the
-        certificate.\"\r\n    },\r\n    {\r\n      \"$schema\": \"http://schema.management.azure.com/schemas/2016-11-17/runcommands.json\",\r\n
         \     \"id\": \"DisableNLA\",\r\n      \"osType\": \"Windows\",\r\n      \"label\":
         \"Disable Network Level Authentication\",\r\n      \"description\": \"Disables
         Network Level Authentication (NLA). You must restart the VM after the script
@@ -73,26 +31,65 @@ interactions:
         that should only be disabled temporarily to allow RDP connections to succeed
         until the domain controller connectivity issue has been resolved.\"\r\n    },\r\n
         \   {\r\n      \"$schema\": \"http://schema.management.azure.com/schemas/2016-11-17/runcommands.json\",\r\n
+        \     \"id\": \"DisableWindowsUpdate\",\r\n      \"osType\": \"Windows\",\r\n
+        \     \"label\": \"Disable Windows Update Automatic Updates\",\r\n      \"description\":
+        \"Disable Automatic Updates through Windows Update.\"\r\n    },\r\n    {\r\n
+        \     \"$schema\": \"http://schema.management.azure.com/schemas/2016-11-17/runcommands.json\",\r\n
+        \     \"id\": \"EnableAdminAccount\",\r\n      \"osType\": \"Windows\",\r\n
+        \     \"label\": \"Enable administrator account\",\r\n      \"description\":
+        \"Checks if the local Administrator account is disabled, and if so enables
+        it.\"\r\n    },\r\n    {\r\n      \"$schema\": \"http://schema.management.azure.com/schemas/2016-11-17/runcommands.json\",\r\n
+        \     \"id\": \"EnableEMS\",\r\n      \"osType\": \"Windows\",\r\n      \"label\":
+        \"Enable EMS\",\r\n      \"description\": \"Enable Emergency Management Services
+        (EMS) to allow for serial console connection in troubleshooting scenarios.\"\r\n
+        \   },\r\n    {\r\n      \"$schema\": \"http://schema.management.azure.com/schemas/2016-11-17/runcommands.json\",\r\n
+        \     \"id\": \"EnableRemotePS\",\r\n      \"osType\": \"Windows\",\r\n      \"label\":
+        \"Enable remote PowerShell\",\r\n      \"description\": \"Configure the machine
+        to enable remote PowerShell.\"\r\n    },\r\n    {\r\n      \"$schema\": \"http://schema.management.azure.com/schemas/2016-11-17/runcommands.json\",\r\n
+        \     \"id\": \"EnableWindowsUpdate\",\r\n      \"osType\": \"Windows\",\r\n
+        \     \"label\": \"Enable Windows Update Automatic Updates\",\r\n      \"description\":
+        \"Enable Automatic Updates through Windows Update.\"\r\n    },\r\n    {\r\n
+        \     \"$schema\": \"http://schema.management.azure.com/schemas/2016-11-17/runcommands.json\",\r\n
+        \     \"id\": \"ifconfig\",\r\n      \"osType\": \"Linux\",\r\n      \"label\":
+        \"List network configuration\",\r\n      \"description\": \"Get the configuration
+        of all network interfaces.\"\r\n    },\r\n    {\r\n      \"$schema\": \"http://schema.management.azure.com/schemas/2016-11-17/runcommands.json\",\r\n
+        \     \"id\": \"IPConfig\",\r\n      \"osType\": \"Windows\",\r\n      \"label\":
+        \"List IP configuration\",\r\n      \"description\": \"Shows detailed information
+        for the IP address, subnet mask and default gateway for each adapter bound
+        to TCP/IP.\"\r\n    },\r\n    {\r\n      \"$schema\": \"http://schema.management.azure.com/schemas/2016-11-17/runcommands.json\",\r\n
+        \     \"id\": \"RDPSettings\",\r\n      \"osType\": \"Windows\",\r\n      \"label\":
+        \"Verify RDP Listener Settings\",\r\n      \"description\": \"Checks registry
+        settings and domain policy settings. Suggests policy actions if machine is
+        part of a domain or modifies the settings to default values.\"\r\n    },\r\n
+        \   {\r\n      \"$schema\": \"http://schema.management.azure.com/schemas/2016-11-17/runcommands.json\",\r\n
+        \     \"id\": \"RemoveRunCommandLinuxExtension\",\r\n      \"osType\": \"Linux\",\r\n
+        \     \"label\": \"Removes the internal RunCommandLinux extension\",\r\n      \"description\":
+        \"Removes RunCommandLinux extension deployed to execute previous RunCommand
+        operations.\"\r\n    },\r\n    {\r\n      \"$schema\": \"http://schema.management.azure.com/schemas/2016-11-17/runcommands.json\",\r\n
         \     \"id\": \"RemoveRunCommandWindowsExtension\",\r\n      \"osType\": \"Windows\",\r\n
         \     \"label\": \"Removes the internal RunCommandWindows extension\",\r\n
         \     \"description\": \"Removes RunCommandWindows extension deployed to execute
         previous RunCommand operations.\"\r\n    },\r\n    {\r\n      \"$schema\":
         \"http://schema.management.azure.com/schemas/2016-11-17/runcommands.json\",\r\n
-        \     \"id\": \"RemoveRunCommandLinuxExtension\",\r\n      \"osType\": \"Linux\",\r\n
-        \     \"label\": \"Removes the internal RunCommandLinux extension\",\r\n      \"description\":
-        \"Removes RunCommandLinux extension deployed to execute previous RunCommand
-        operations.\"\r\n    },\r\n    {\r\n      \"$schema\": \"http://schema.management.azure.com/schemas/2016-11-17/runcommands.json\",\r\n
-        \     \"id\": \"EnableEMS\",\r\n      \"osType\": \"Windows\",\r\n      \"label\":
-        \"Enable EMS\",\r\n      \"description\": \"Enable Emergency Management Services
-        (EMS) to allow for serial console connection in troubleshooting scenarios.\"\r\n
-        \   },\r\n    {\r\n      \"$schema\": \"http://schema.management.azure.com/schemas/2016-11-17/runcommands.json\",\r\n
-        \     \"id\": \"DisableWindowsUpdate\",\r\n      \"osType\": \"Windows\",\r\n
-        \     \"label\": \"Disable Windows Update Automatic Updates\",\r\n      \"description\":
-        \"Disable Automatic Updates through Windows Update.\"\r\n    },\r\n    {\r\n
+        \     \"id\": \"ResetRDPCert\",\r\n      \"osType\": \"Windows\",\r\n      \"label\":
+        \"Restore RDP Authentication mode to defaults\",\r\n      \"description\":
+        \"Removes the SSL certificate tied to the RDP listener and restores the RDP
+        listener security to default. Use this script if you see any issues with the
+        certificate.\"\r\n    },\r\n    {\r\n      \"$schema\": \"http://schema.management.azure.com/schemas/2016-11-17/runcommands.json\",\r\n
+        \     \"id\": \"RunPowerShellScript\",\r\n      \"osType\": \"Windows\",\r\n
+        \     \"label\": \"Executes a PowerShell script\",\r\n      \"description\":
+        \"Custom multiline PowerShell script should be defined in script property.
+        Optional parameters can be set in parameters property.\"\r\n    },\r\n    {\r\n
         \     \"$schema\": \"http://schema.management.azure.com/schemas/2016-11-17/runcommands.json\",\r\n
-        \     \"id\": \"EnableWindowsUpdate\",\r\n      \"osType\": \"Windows\",\r\n
-        \     \"label\": \"Enable Windows Update Automatic Updates\",\r\n      \"description\":
-        \"Enable Automatic Updates through Windows Update.\"\r\n    }\r\n  ]\r\n}"
+        \     \"id\": \"RunShellScript\",\r\n      \"osType\": \"Linux\",\r\n      \"label\":
+        \"Executes a Linux shell script\",\r\n      \"description\": \"Custom multiline
+        shell script should be defined in script property. Optional parameters can
+        be set in parameters property.\"\r\n    },\r\n    {\r\n      \"$schema\":
+        \"http://schema.management.azure.com/schemas/2016-11-17/runcommands.json\",\r\n
+        \     \"id\": \"SetRDPPort\",\r\n      \"osType\": \"Windows\",\r\n      \"label\":
+        \"Set Remote Desktop port\",\r\n      \"description\": \"Sets the default
+        or user specified port number for Remote Desktop connections. Enables firewall
+        rule for inbound access to the port.\"\r\n    }\r\n  ]\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -101,7 +98,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 28 Sep 2020 21:13:36 GMT
+      - Thu, 17 Mar 2022 05:19:08 GMT
       expires:
       - '-1'
       pragma:
@@ -118,7 +115,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetSubscriptionInfo3Min;419
+      - Microsoft.Compute/GetSubscriptionInfo3Min;359
     status:
       code: 200
       message: OK
@@ -126,7 +123,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - application/json, text/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -136,10 +133,7 @@ interactions:
       ParameterSetName:
       - --command-id -l
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-compute/13.0.0 Azure-SDK-For-Python AZURECLI/2.11.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/runCommands/RunShellScript?api-version=2020-06-01
   response:
@@ -161,7 +155,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 28 Sep 2020 21:13:36 GMT
+      - Thu, 17 Mar 2022 05:19:09 GMT
       expires:
       - '-1'
       pragma:
@@ -178,7 +172,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetSubscriptionInfo3Min;418
+      - Microsoft.Compute/GetSubscriptionInfo3Min;358
     status:
       code: 200
       message: OK
@@ -196,24 +190,21 @@ interactions:
       ParameterSetName:
       - -g -n --image --admin-username --admin-password
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.11.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_run_command000001?api-version=2019-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001","name":"cli_test_vm_run_command000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-09-28T21:13:35Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001","name":"cli_test_vm_run_command000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-03-17T05:19:07Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '428'
+      - '336'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 28 Sep 2020 21:13:36 GMT
+      - Thu, 17 Mar 2022 05:19:10 GMT
       expires:
       - '-1'
       pragma:
@@ -237,9 +228,9 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python-requests/2.22.0
+      - python-requests/2.26.0
     method: GET
-    uri: https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json
+    uri: https://raw.githubusercontent.com/Azure/azure-rest-api-specs/main/arm-compute/quickstart-templates/aliases.json
   response:
     body:
       string: "{\n  \"$schema\": \"http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json\",\n
@@ -248,34 +239,38 @@ interactions:
         \"object\",\n      \"value\": {\n        \"Linux\": {\n          \"CentOS\":
         {\n            \"publisher\": \"OpenLogic\",\n            \"offer\": \"CentOS\",\n
         \           \"sku\": \"7.5\",\n            \"version\": \"latest\"\n          },\n
-        \         \"CoreOS\": {\n            \"publisher\": \"CoreOS\",\n            \"offer\":
-        \"CoreOS\",\n            \"sku\": \"Stable\",\n            \"version\": \"latest\"\n
-        \         },\n          \"Debian\": {\n            \"publisher\": \"Debian\",\n
-        \           \"offer\": \"debian-10\",\n            \"sku\": \"10\",\n            \"version\":
-        \"latest\"\n          },\n          \"openSUSE-Leap\": {\n            \"publisher\":
-        \"SUSE\",\n            \"offer\": \"openSUSE-Leap\",\n            \"sku\":
-        \"42.3\",\n            \"version\": \"latest\"\n          },\n          \"RHEL\":
-        {\n            \"publisher\": \"RedHat\",\n            \"offer\": \"RHEL\",\n
-        \           \"sku\": \"7-LVM\",\n            \"version\": \"latest\"\n          },\n
-        \         \"SLES\": {\n            \"publisher\": \"SUSE\",\n            \"offer\":
-        \"SLES\",\n            \"sku\": \"15\",\n            \"version\": \"latest\"\n
-        \         },\n          \"UbuntuLTS\": {\n            \"publisher\": \"Canonical\",\n
-        \           \"offer\": \"UbuntuServer\",\n            \"sku\": \"18.04-LTS\",\n
-        \           \"version\": \"latest\"\n          }\n        },\n        \"Windows\":
-        {\n          \"Win2019Datacenter\": {\n            \"publisher\": \"MicrosoftWindowsServer\",\n
-        \           \"offer\": \"WindowsServer\",\n            \"sku\": \"2019-Datacenter\",\n
-        \           \"version\": \"latest\"\n          },\n          \"Win2016Datacenter\":
+        \         \"Debian\": {\n            \"publisher\": \"Debian\",\n            \"offer\":
+        \"debian-10\",\n            \"sku\": \"10\",\n            \"version\": \"latest\"\n
+        \         },\n          \"Flatcar\": {\n            \"publisher\": \"kinvolk\",\n
+        \           \"offer\": \"flatcar-container-linux-free\",\n            \"sku\":
+        \"stable\",\n            \"version\": \"latest\"\n          },\n          \"openSUSE-Leap\":
+        {\n            \"publisher\": \"SUSE\",\n            \"offer\": \"opensuse-leap-15-3\",\n
+        \           \"sku\": \"gen2\",\n            \"version\": \"latest\"\n          },\n
+        \         \"RHEL\": {\n            \"publisher\": \"RedHat\",\n            \"offer\":
+        \"RHEL\",\n            \"sku\": \"7-LVM\",\n            \"version\": \"latest\"\n
+        \         },\n          \"SLES\": {\n            \"publisher\": \"SUSE\",\n
+        \           \"offer\": \"sles-15-sp3\",\n            \"sku\": \"gen2\",\n
+        \           \"version\": \"latest\"\n          },\n          \"UbuntuLTS\":
+        {\n            \"publisher\": \"Canonical\",\n            \"offer\": \"UbuntuServer\",\n
+        \           \"sku\": \"18.04-LTS\",\n            \"version\": \"latest\"\n
+        \         }\n        },\n        \"Windows\": {\n          \"Win2022Datacenter\":
         {\n            \"publisher\": \"MicrosoftWindowsServer\",\n            \"offer\":
-        \"WindowsServer\",\n            \"sku\": \"2016-Datacenter\",\n            \"version\":
-        \"latest\"\n          },\n          \"Win2012R2Datacenter\": {\n            \"publisher\":
+        \"WindowsServer\",\n            \"sku\": \"2022-Datacenter\",\n            \"version\":
+        \"latest\"\n          },\n          \"Win2019Datacenter\": {\n            \"publisher\":
         \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\",\n            \"sku\":
-        \"2012-R2-Datacenter\",\n            \"version\": \"latest\"\n          },\n
-        \         \"Win2012Datacenter\": {\n            \"publisher\": \"MicrosoftWindowsServer\",\n
-        \           \"offer\": \"WindowsServer\",\n            \"sku\": \"2012-Datacenter\",\n
-        \           \"version\": \"latest\"\n          },\n          \"Win2008R2SP1\":
+        \"2019-Datacenter\",\n            \"version\": \"latest\"\n          },\n
+        \         \"Win2016Datacenter\": {\n            \"publisher\": \"MicrosoftWindowsServer\",\n
+        \           \"offer\": \"WindowsServer\",\n            \"sku\": \"2016-Datacenter\",\n
+        \           \"version\": \"latest\"\n          },\n          \"Win2012R2Datacenter\":
         {\n            \"publisher\": \"MicrosoftWindowsServer\",\n            \"offer\":
-        \"WindowsServer\",\n            \"sku\": \"2008-R2-SP1\",\n            \"version\":
-        \"latest\"\n          }\n        }\n      }\n    }\n  }\n}\n"
+        \"WindowsServer\",\n            \"sku\": \"2012-R2-Datacenter\",\n            \"version\":
+        \"latest\"\n          },\n          \"Win2012Datacenter\": {\n            \"publisher\":
+        \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\",\n            \"sku\":
+        \"2012-Datacenter\",\n            \"version\": \"latest\"\n          },\n
+        \         \"Win2008R2SP1\": {\n            \"publisher\": \"MicrosoftWindowsServer\",\n
+        \           \"offer\": \"WindowsServer\",\n            \"sku\": \"2008-R2-SP1\",\n
+        \           \"version\": \"latest\"\n          }\n        }\n      }\n    }\n
+        \ }\n}\n"
     headers:
       accept-ranges:
       - bytes
@@ -286,42 +281,41 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '2501'
+      - '2744'
       content-security-policy:
       - default-src 'none'; style-src 'unsafe-inline'; sandbox
       content-type:
       - text/plain; charset=utf-8
       date:
-      - Mon, 28 Sep 2020 21:13:37 GMT
+      - Thu, 17 Mar 2022 05:19:10 GMT
       etag:
-      - W/"540044b4084c3c314537f1baa1770f248628b2bc9ba0328f1004c33862e049da"
+      - W/"d5acead0b38a79d988c245a7a15ec01f999da9244c97bbdc1fa2ec70d9e433f5"
       expires:
-      - Mon, 28 Sep 2020 21:18:37 GMT
+      - Thu, 17 Mar 2022 05:24:10 GMT
       source-age:
-      - '0'
+      - '195'
       strict-transport-security:
       - max-age=31536000
       vary:
-      - Authorization,Accept-Encoding
+      - Authorization,Accept-Encoding,Origin
       via:
-      - 1.1 varnish (Varnish/6.0)
       - 1.1 varnish
       x-cache:
-      - HFM, HIT
+      - HIT
       x-cache-hits:
-      - 0, 1
+      - '1'
       x-content-type-options:
       - nosniff
       x-fastly-request-id:
-      - 1f0237a6bd93258fcc92b534718eef0b4f19b9d2
+      - 87aa858dd988cd064800436df694a384790e5634
       x-frame-options:
       - deny
       x-github-request-id:
-      - 9D1C:7C2A:86896:9DCFB:5F7244DA
+      - 2570:063C:1995B2:2734C1:62329D55
       x-served-by:
-      - cache-sea4430-SEA
+      - cache-qpg1228-QPG
       x-timer:
-      - S1601327617.202661,VS0,VE155
+      - S1647494351.854473,VS0,VE0
       x-xss-protection:
       - 1; mode=block
     status:
@@ -341,10 +335,115 @@ interactions:
       ParameterSetName:
       - -g -n --image --admin-username --admin-password
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.11.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/Canonical/artifacttypes/vmimage/offers/UbuntuServer/skus/18.04-LTS/versions?$top=1&$orderby=name%20desc&api-version=2020-06-01
+  response:
+    body:
+      string: "[\r\n  {\r\n    \"name\": \"18.04.202203080\",\r\n    \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/Canonical/ArtifactTypes/VMImage/Offers/UbuntuServer/Skus/18.04-LTS/Versions/18.04.202203080\",\r\n
+        \   \"location\": \"westus\"\r\n  }\r\n]"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '286'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Mar 2022 05:19:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/ListVMImagesVersionsFromLocation3Min;15998,Microsoft.Compute/ListVMImagesVersionsFromLocation30Min;43977
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --admin-username --admin-password
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/Canonical/artifacttypes/vmimage/offers/UbuntuServer/skus/18.04-LTS/versions/18.04.202203080?api-version=2020-06-01
+  response:
+    body:
+      string: "{\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n    \"architecture\":
+        \"x64\",\r\n    \"replicaType\": \"Unmanaged\",\r\n    \"disallowed\": {\r\n
+        \     \"vmDiskType\": \"None\"\r\n    },\r\n    \"automaticOSUpgradeProperties\":
+        {\r\n      \"automaticOSUpgradeSupported\": true\r\n    },\r\n    \"imageDeprecationStatus\":
+        {\r\n      \"imageState\": \"Active\"\r\n    },\r\n    \"features\": [\r\n
+        \     {\r\n        \"name\": \"IsAcceleratedNetworkSupported\",\r\n        \"value\":
+        \"True\"\r\n      }\r\n    ],\r\n    \"osDiskImage\": {\r\n      \"operatingSystem\":
+        \"Linux\",\r\n      \"sizeInGb\": 31,\r\n      \"sizeInBytes\": 32213303808\r\n
+        \   },\r\n    \"dataDiskImages\": []\r\n  },\r\n  \"location\": \"westus\",\r\n
+        \ \"name\": \"18.04.202203080\",\r\n  \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/Canonical/ArtifactTypes/VMImage/Offers/UbuntuServer/Skus/18.04-LTS/Versions/18.04.202203080\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '873'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Mar 2022 05:19:13 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetVMImageFromLocation3Min;12998,Microsoft.Compute/GetVMImageFromLocation30Min;73984
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --admin-username --admin-password
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-network/19.3.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Network/virtualNetworks?api-version=2018-11-01
   response:
@@ -358,7 +457,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 28 Sep 2020 21:13:37 GMT
+      - Thu, 17 Mar 2022 05:19:13 GMT
       expires:
       - '-1'
       pragma:
@@ -398,13 +497,14 @@ interactions:
       {"apiVersion": "2020-06-01", "type": "Microsoft.Compute/virtualMachines", "name":
       "test-run-command-vm", "location": "westus", "tags": {}, "dependsOn": ["Microsoft.Network/networkInterfaces/test-run-command-vmVMNic"],
       "properties": {"hardwareProfile": {"vmSize": "Standard_DS1_v2"}, "networkProfile":
-      {"networkInterfaces": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Network/networkInterfaces/test-run-command-vmVMNic"}]},
-      "storageProfile": {"osDisk": {"createOption": "fromImage", "name": null, "caching":
-      "ReadWrite", "managedDisk": {"storageAccountType": null}}, "imageReference":
-      {"publisher": "Canonical", "offer": "UbuntuServer", "sku": "18.04-LTS", "version":
-      "latest"}}, "osProfile": {"computerName": "test-run-command-vm", "adminUsername":
-      "clitest1", "adminPassword": "[parameters(''adminPassword'')]"}}}], "outputs":
-      {}}, "parameters": {"adminPassword": {"value": "Test12345678!!"}}, "mode": "Incremental"}}'
+      {"networkInterfaces": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Network/networkInterfaces/test-run-command-vmVMNic",
+      "properties": {"deleteOption": null}}]}, "storageProfile": {"osDisk": {"createOption":
+      "fromImage", "name": null, "caching": "ReadWrite", "managedDisk": {"storageAccountType":
+      null}}, "imageReference": {"publisher": "Canonical", "offer": "UbuntuServer",
+      "sku": "18.04-LTS", "version": "latest"}}, "osProfile": {"computerName": "test-run-command-vm",
+      "adminUsername": "clitest1", "adminPassword": "[parameters(''adminPassword'')]"}}}],
+      "outputs": {}}, "parameters": {"adminPassword": {"value": "Test12345678!!"}},
+      "mode": "incremental"}}'
     headers:
       Accept:
       - application/json
@@ -415,32 +515,29 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '3585'
+      - '3439'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g -n --image --admin-username --admin-password
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.11.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_run_command000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2019-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Resources/deployments/vm_deploy_yMqryHOEMzEQyDm1PI7YfBZFA34ae24G","name":"vm_deploy_yMqryHOEMzEQyDm1PI7YfBZFA34ae24G","type":"Microsoft.Resources/deployments","properties":{"templateHash":"1041276173352346525","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2020-09-28T21:13:39.4831172Z","duration":"PT1.3612328S","correlationId":"74d5ff2a-68ef-457e-ade7-c63c06641bce","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"networkSecurityGroups","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"networkInterfaces","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Network/virtualNetworks/test-run-command-vmVNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"test-run-command-vmVNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Network/networkSecurityGroups/test-run-command-vmNSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"test-run-command-vmNSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Network/publicIPAddresses/test-run-command-vmPublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"test-run-command-vmPublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Network/networkInterfaces/test-run-command-vmVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"test-run-command-vmVMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Network/networkInterfaces/test-run-command-vmVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"test-run-command-vmVMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Compute/virtualMachines/test-run-command-vm","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"test-run-command-vm"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Resources/deployments/vm_deploy_lQwZQeqcrnmpuQPdfkUw8nhaT3dA1Tiq","name":"vm_deploy_lQwZQeqcrnmpuQPdfkUw8nhaT3dA1Tiq","type":"Microsoft.Resources/deployments","properties":{"templateHash":"7877008870261103652","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2022-03-17T05:19:19.5227633Z","duration":"PT0.0006662S","correlationId":"6ad7c399-f8d6-4a85-98fb-701902e634ef","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"networkSecurityGroups","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"networkInterfaces","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Network/virtualNetworks/test-run-command-vmVNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"test-run-command-vmVNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Network/networkSecurityGroups/test-run-command-vmNSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"test-run-command-vmNSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Network/publicIPAddresses/test-run-command-vmPublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"test-run-command-vmPublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Network/networkInterfaces/test-run-command-vmVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"test-run-command-vmVMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Network/networkInterfaces/test-run-command-vmVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"test-run-command-vmVMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Compute/virtualMachines/test-run-command-vm","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"test-run-command-vm"}]}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_run_command000001/providers/Microsoft.Resources/deployments/vm_deploy_yMqryHOEMzEQyDm1PI7YfBZFA34ae24G/operationStatuses/08586002792673557911?api-version=2019-10-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_run_command000001/providers/Microsoft.Resources/deployments/vm_deploy_lQwZQeqcrnmpuQPdfkUw8nhaT3dA1Tiq/operationStatuses/08585541125289796393?api-version=2019-10-01
       cache-control:
       - no-cache
       content-length:
-      - '2973'
+      - '2651'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 28 Sep 2020 21:13:39 GMT
+      - Thu, 17 Mar 2022 05:19:20 GMT
       expires:
       - '-1'
       pragma:
@@ -450,7 +547,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1196'
     status:
       code: 201
       message: Created
@@ -458,7 +555,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -468,10 +565,9 @@ interactions:
       ParameterSetName:
       - -g -n --image --admin-username --admin-password
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.11.1
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_run_command000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586002792673557911?api-version=2019-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_run_command000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585541125289796393?api-version=2019-10-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -483,7 +579,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 28 Sep 2020 21:14:09 GMT
+      - Thu, 17 Mar 2022 05:19:50 GMT
       expires:
       - '-1'
       pragma:
@@ -501,7 +597,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -511,10 +607,9 @@ interactions:
       ParameterSetName:
       - -g -n --image --admin-username --admin-password
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.11.1
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_run_command000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586002792673557911?api-version=2019-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_run_command000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585541125289796393?api-version=2019-10-01
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -526,7 +621,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 28 Sep 2020 21:14:40 GMT
+      - Thu, 17 Mar 2022 05:20:21 GMT
       expires:
       - '-1'
       pragma:
@@ -544,7 +639,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -554,22 +649,21 @@ interactions:
       ParameterSetName:
       - -g -n --image --admin-username --admin-password
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.11.1
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_run_command000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2019-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Resources/deployments/vm_deploy_yMqryHOEMzEQyDm1PI7YfBZFA34ae24G","name":"vm_deploy_yMqryHOEMzEQyDm1PI7YfBZFA34ae24G","type":"Microsoft.Resources/deployments","properties":{"templateHash":"1041276173352346525","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-09-28T21:14:20.2181583Z","duration":"PT42.0962739S","correlationId":"74d5ff2a-68ef-457e-ade7-c63c06641bce","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"networkSecurityGroups","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"networkInterfaces","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Network/virtualNetworks/test-run-command-vmVNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"test-run-command-vmVNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Network/networkSecurityGroups/test-run-command-vmNSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"test-run-command-vmNSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Network/publicIPAddresses/test-run-command-vmPublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"test-run-command-vmPublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Network/networkInterfaces/test-run-command-vmVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"test-run-command-vmVMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Network/networkInterfaces/test-run-command-vmVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"test-run-command-vmVMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Compute/virtualMachines/test-run-command-vm","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"test-run-command-vm"}],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Compute/virtualMachines/test-run-command-vm"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Network/networkInterfaces/test-run-command-vmVMNic"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Network/networkSecurityGroups/test-run-command-vmNSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Network/publicIPAddresses/test-run-command-vmPublicIP"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Network/virtualNetworks/test-run-command-vmVNET"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Resources/deployments/vm_deploy_lQwZQeqcrnmpuQPdfkUw8nhaT3dA1Tiq","name":"vm_deploy_lQwZQeqcrnmpuQPdfkUw8nhaT3dA1Tiq","type":"Microsoft.Resources/deployments","properties":{"templateHash":"7877008870261103652","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2022-03-17T05:19:58.7503363Z","duration":"PT39.2282392S","correlationId":"6ad7c399-f8d6-4a85-98fb-701902e634ef","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"networkSecurityGroups","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"networkInterfaces","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Network/virtualNetworks/test-run-command-vmVNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"test-run-command-vmVNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Network/networkSecurityGroups/test-run-command-vmNSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"test-run-command-vmNSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Network/publicIPAddresses/test-run-command-vmPublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"test-run-command-vmPublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Network/networkInterfaces/test-run-command-vmVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"test-run-command-vmVMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Network/networkInterfaces/test-run-command-vmVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"test-run-command-vmVMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Compute/virtualMachines/test-run-command-vm","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"test-run-command-vm"}],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Compute/virtualMachines/test-run-command-vm"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Network/networkInterfaces/test-run-command-vmVMNic"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Network/networkSecurityGroups/test-run-command-vmNSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Network/publicIPAddresses/test-run-command-vmPublicIP"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Network/virtualNetworks/test-run-command-vmVNET"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '4118'
+      - '3566'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 28 Sep 2020 21:14:40 GMT
+      - Thu, 17 Mar 2022 05:20:22 GMT
       expires:
       - '-1'
       pragma:
@@ -597,26 +691,23 @@ interactions:
       ParameterSetName:
       - -g -n --image --admin-username --admin-password
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-compute/13.0.0 Azure-SDK-For-Python AZURECLI/2.11.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Compute/virtualMachines/test-run-command-vm?$expand=instanceView&api-version=2020-06-01
   response:
     body:
       string: "{\r\n  \"name\": \"test-run-command-vm\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Compute/virtualMachines/test-run-command-vm\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"b934b4b9-ed61-421e-9f49-d9fa82cfdf4d\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"54004cc5-4bd9-44d8-af51-57232e177980\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"Canonical\",\r\n        \"offer\": \"UbuntuServer\",\r\n        \"sku\":
         \"18.04-LTS\",\r\n        \"version\": \"latest\",\r\n        \"exactVersion\":
-        \"18.04.202009220\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
-        \"Linux\",\r\n        \"name\": \"test-run-command-vm_disk1_90abdc68068c4b75b5280a0442839a34\",\r\n
+        \"18.04.202203080\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
+        \"Linux\",\r\n        \"name\": \"test-run-command-vm_disk1_1f9067f6558b4105948ffc9a3957e0e5\",\r\n
         \       \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n
         \       \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\",\r\n
-        \         \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI_TEST_VM_RUN_COMMANDVGLMT4ERCFZOMQNOQSRREW2VUSLWR7ZVQAHC7A2WL352ZF7EFIXN/providers/Microsoft.Compute/disks/test-run-command-vm_disk1_90abdc68068c4b75b5280a0442839a34\"\r\n
+        \         \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Compute/disks/test-run-command-vm_disk1_1f9067f6558b4105948ffc9a3957e0e5\"\r\n
         \       },\r\n        \"diskSizeGB\": 30\r\n      },\r\n      \"dataDisks\":
         []\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"test-run-command-vm\",\r\n
         \     \"adminUsername\": \"clitest1\",\r\n      \"linuxConfiguration\": {\r\n
@@ -627,19 +718,19 @@ interactions:
         {\"networkInterfaces\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Network/networkInterfaces/test-run-command-vmVMNic\"}]},\r\n
         \   \"provisioningState\": \"Succeeded\",\r\n    \"instanceView\": {\r\n      \"computerName\":
         \"test-run-command-vm\",\r\n      \"osName\": \"ubuntu\",\r\n      \"osVersion\":
-        \"18.04\",\r\n      \"vmAgent\": {\r\n        \"vmAgentVersion\": \"2.2.49.2\",\r\n
+        \"18.04\",\r\n      \"vmAgent\": {\r\n        \"vmAgentVersion\": \"2.7.0.6\",\r\n
         \       \"statuses\": [\r\n          {\r\n            \"code\": \"ProvisioningState/succeeded\",\r\n
         \           \"level\": \"Info\",\r\n            \"displayStatus\": \"Ready\",\r\n
         \           \"message\": \"Guest Agent is running\",\r\n            \"time\":
-        \"2020-09-28T21:14:37+00:00\"\r\n          }\r\n        ],\r\n        \"extensionHandlers\":
-        []\r\n      },\r\n      \"disks\": [\r\n        {\r\n          \"name\": \"test-run-command-vm_disk1_90abdc68068c4b75b5280a0442839a34\",\r\n
+        \"2022-03-17T05:20:04+00:00\"\r\n          }\r\n        ],\r\n        \"extensionHandlers\":
+        []\r\n      },\r\n      \"disks\": [\r\n        {\r\n          \"name\": \"test-run-command-vm_disk1_1f9067f6558b4105948ffc9a3957e0e5\",\r\n
         \         \"statuses\": [\r\n            {\r\n              \"code\": \"ProvisioningState/succeeded\",\r\n
         \             \"level\": \"Info\",\r\n              \"displayStatus\": \"Provisioning
-        succeeded\",\r\n              \"time\": \"2020-09-28T21:14:05.9278361+00:00\"\r\n
+        succeeded\",\r\n              \"time\": \"2022-03-17T05:19:41.6146152+00:00\"\r\n
         \           }\r\n          ]\r\n        }\r\n      ],\r\n      \"hyperVGeneration\":
-        \"V1\",\r\n      \"statuses\": [\r\n        {\r\n          \"code\": \"ProvisioningState/succeeded/osProvisioningInProgress\",\r\n
-        \         \"level\": \"Info\",\r\n          \"displayStatus\": \"OS provisioning
-        in progress\",\r\n          \"time\": \"2020-09-28T21:14:19.5999365+00:00\"\r\n
+        \"V1\",\r\n      \"statuses\": [\r\n        {\r\n          \"code\": \"ProvisioningState/succeeded\",\r\n
+        \         \"level\": \"Info\",\r\n          \"displayStatus\": \"Provisioning
+        succeeded\",\r\n          \"time\": \"2022-03-17T05:19:55.3802662+00:00\"\r\n
         \       },\r\n        {\r\n          \"code\": \"PowerState/running\",\r\n
         \         \"level\": \"Info\",\r\n          \"displayStatus\": \"VM running\"\r\n
         \       }\r\n      ]\r\n    }\r\n  }\r\n}"
@@ -647,11 +738,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '3410'
+      - '3241'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 28 Sep 2020 21:14:39 GMT
+      - Thu, 17 Mar 2022 05:20:23 GMT
       expires:
       - '-1'
       pragma:
@@ -668,7 +759,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3988,Microsoft.Compute/LowCostGet30Min;31981
+      - Microsoft.Compute/LowCostGet3Min;3909,Microsoft.Compute/LowCostGet30Min;31203
     status:
       code: 200
       message: OK
@@ -686,21 +777,18 @@ interactions:
       ParameterSetName:
       - -g -n --image --admin-username --admin-password
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.11.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-network/19.3.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Network/networkInterfaces/test-run-command-vmVMNic?api-version=2018-11-01
   response:
     body:
       string: "{\r\n  \"name\": \"test-run-command-vmVMNic\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Network/networkInterfaces/test-run-command-vmVMNic\",\r\n
-        \ \"etag\": \"W/\\\"5bff4d7d-4e42-4eb8-a0a2-b6e98682362a\\\"\",\r\n  \"location\":
+        \ \"etag\": \"W/\\\"78606275-446f-46b5-ad9d-3dcc845bfed8\\\"\",\r\n  \"location\":
         \"westus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"resourceGuid\": \"045bdd63-ff66-489f-a195-1d57ef60b15d\",\r\n
+        \"Succeeded\",\r\n    \"resourceGuid\": \"a9954708-df79-4c79-b4eb-b705f15ccd08\",\r\n
         \   \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfigtest-run-command-vm\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Network/networkInterfaces/test-run-command-vmVMNic/ipConfigurations/ipconfigtest-run-command-vm\",\r\n
-        \       \"etag\": \"W/\\\"5bff4d7d-4e42-4eb8-a0a2-b6e98682362a\\\"\",\r\n
+        \       \"etag\": \"W/\\\"78606275-446f-46b5-ad9d-3dcc845bfed8\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
@@ -709,8 +797,8 @@ interactions:
         \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
         \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
         [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
-        \"bgzqskm5m3hezlasdi2ah433ff.dx.internal.cloudapp.net\"\r\n    },\r\n    \"macAddress\":
-        \"00-22-48-0A-6F-BA\",\r\n    \"enableAcceleratedNetworking\": false,\r\n
+        \"hlkn1oj0whlerpzfbofvcrwrsc.dx.internal.cloudapp.net\"\r\n    },\r\n    \"macAddress\":
+        \"00-0D-3A-5B-54-6E\",\r\n    \"enableAcceleratedNetworking\": false,\r\n
         \   \"enableIPForwarding\": false,\r\n    \"networkSecurityGroup\": {\r\n
         \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Network/networkSecurityGroups/test-run-command-vmNSG\"\r\n
         \   },\r\n    \"primary\": true,\r\n    \"virtualMachine\": {\r\n      \"id\":
@@ -721,13 +809,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '2786'
+      - '2510'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 28 Sep 2020 21:14:40 GMT
+      - Thu, 17 Mar 2022 05:20:24 GMT
       etag:
-      - W/"5bff4d7d-4e42-4eb8-a0a2-b6e98682362a"
+      - W/"78606275-446f-46b5-ad9d-3dcc845bfed8"
       expires:
       - '-1'
       pragma:
@@ -744,7 +832,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 7bf160f6-0848-4e43-94e4-6931ee64b040
+      - 9b5b972e-65cf-4723-a77e-186613b4b43d
     status:
       code: 200
       message: OK
@@ -762,19 +850,16 @@ interactions:
       ParameterSetName:
       - -g -n --image --admin-username --admin-password
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.11.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-network/19.3.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Network/publicIPAddresses/test-run-command-vmPublicIP?api-version=2018-11-01
   response:
     body:
       string: "{\r\n  \"name\": \"test-run-command-vmPublicIP\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Network/publicIPAddresses/test-run-command-vmPublicIP\",\r\n
-        \ \"etag\": \"W/\\\"8e27ee52-0147-4a7d-9309-643aebba1e14\\\"\",\r\n  \"location\":
+        \ \"etag\": \"W/\\\"21e2f1f6-123b-4c81-a818-46ac7a2e4c44\\\"\",\r\n  \"location\":
         \"westus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"resourceGuid\": \"c522d318-d534-4f71-9e06-f43a6170ad70\",\r\n
-        \   \"ipAddress\": \"40.83.223.2\",\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n
+        \"Succeeded\",\r\n    \"resourceGuid\": \"49bd321f-3d7c-4b19-a6be-3babca29b6cb\",\r\n
+        \   \"ipAddress\": \"13.91.107.30\",\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n
         \   \"publicIPAllocationMethod\": \"Dynamic\",\r\n    \"idleTimeoutInMinutes\":
         4,\r\n    \"ipTags\": [],\r\n    \"ipConfiguration\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Network/networkInterfaces/test-run-command-vmVMNic/ipConfigurations/ipconfigtest-run-command-vm\"\r\n
         \   }\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n
@@ -783,13 +868,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1059'
+      - '968'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 28 Sep 2020 21:14:40 GMT
+      - Thu, 17 Mar 2022 05:20:24 GMT
       etag:
-      - W/"8e27ee52-0147-4a7d-9309-643aebba1e14"
+      - W/"21e2f1f6-123b-4c81-a818-46ac7a2e4c44"
       expires:
       - '-1'
       pragma:
@@ -806,7 +891,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - e7c58462-12f3-4bc0-bcc9-ecacb615b868
+      - dbd7df32-5511-4cc7-9153-c0dcb23d6d5b
     status:
       code: 200
       message: OK
@@ -824,26 +909,23 @@ interactions:
       ParameterSetName:
       - -g -n --port
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-compute/13.0.0 Azure-SDK-For-Python AZURECLI/2.11.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Compute/virtualMachines/test-run-command-vm?api-version=2020-06-01
   response:
     body:
       string: "{\r\n  \"name\": \"test-run-command-vm\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Compute/virtualMachines/test-run-command-vm\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"b934b4b9-ed61-421e-9f49-d9fa82cfdf4d\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"54004cc5-4bd9-44d8-af51-57232e177980\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"Canonical\",\r\n        \"offer\": \"UbuntuServer\",\r\n        \"sku\":
         \"18.04-LTS\",\r\n        \"version\": \"latest\",\r\n        \"exactVersion\":
-        \"18.04.202009220\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
-        \"Linux\",\r\n        \"name\": \"test-run-command-vm_disk1_90abdc68068c4b75b5280a0442839a34\",\r\n
+        \"18.04.202203080\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
+        \"Linux\",\r\n        \"name\": \"test-run-command-vm_disk1_1f9067f6558b4105948ffc9a3957e0e5\",\r\n
         \       \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n
         \       \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\",\r\n
-        \         \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI_TEST_VM_RUN_COMMANDVGLMT4ERCFZOMQNOQSRREW2VUSLWR7ZVQAHC7A2WL352ZF7EFIXN/providers/Microsoft.Compute/disks/test-run-command-vm_disk1_90abdc68068c4b75b5280a0442839a34\"\r\n
+        \         \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Compute/disks/test-run-command-vm_disk1_1f9067f6558b4105948ffc9a3957e0e5\"\r\n
         \       },\r\n        \"diskSizeGB\": 30\r\n      },\r\n      \"dataDisks\":
         []\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"test-run-command-vm\",\r\n
         \     \"adminUsername\": \"clitest1\",\r\n      \"linuxConfiguration\": {\r\n
@@ -857,11 +939,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '2057'
+      - '1919'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 28 Sep 2020 21:14:40 GMT
+      - Thu, 17 Mar 2022 05:20:24 GMT
       expires:
       - '-1'
       pragma:
@@ -878,7 +960,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3987,Microsoft.Compute/LowCostGet30Min;31980
+      - Microsoft.Compute/LowCostGet3Min;3906,Microsoft.Compute/LowCostGet30Min;31200
     status:
       code: 200
       message: OK
@@ -896,21 +978,18 @@ interactions:
       ParameterSetName:
       - -g -n --port
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.11.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-network/19.3.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Network/networkInterfaces/test-run-command-vmVMNic?api-version=2018-11-01
   response:
     body:
       string: "{\r\n  \"name\": \"test-run-command-vmVMNic\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Network/networkInterfaces/test-run-command-vmVMNic\",\r\n
-        \ \"etag\": \"W/\\\"5bff4d7d-4e42-4eb8-a0a2-b6e98682362a\\\"\",\r\n  \"location\":
+        \ \"etag\": \"W/\\\"78606275-446f-46b5-ad9d-3dcc845bfed8\\\"\",\r\n  \"location\":
         \"westus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"resourceGuid\": \"045bdd63-ff66-489f-a195-1d57ef60b15d\",\r\n
+        \"Succeeded\",\r\n    \"resourceGuid\": \"a9954708-df79-4c79-b4eb-b705f15ccd08\",\r\n
         \   \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfigtest-run-command-vm\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Network/networkInterfaces/test-run-command-vmVMNic/ipConfigurations/ipconfigtest-run-command-vm\",\r\n
-        \       \"etag\": \"W/\\\"5bff4d7d-4e42-4eb8-a0a2-b6e98682362a\\\"\",\r\n
+        \       \"etag\": \"W/\\\"78606275-446f-46b5-ad9d-3dcc845bfed8\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
@@ -919,8 +998,8 @@ interactions:
         \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
         \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
         [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
-        \"bgzqskm5m3hezlasdi2ah433ff.dx.internal.cloudapp.net\"\r\n    },\r\n    \"macAddress\":
-        \"00-22-48-0A-6F-BA\",\r\n    \"enableAcceleratedNetworking\": false,\r\n
+        \"hlkn1oj0whlerpzfbofvcrwrsc.dx.internal.cloudapp.net\"\r\n    },\r\n    \"macAddress\":
+        \"00-0D-3A-5B-54-6E\",\r\n    \"enableAcceleratedNetworking\": false,\r\n
         \   \"enableIPForwarding\": false,\r\n    \"networkSecurityGroup\": {\r\n
         \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Network/networkSecurityGroups/test-run-command-vmNSG\"\r\n
         \   },\r\n    \"primary\": true,\r\n    \"virtualMachine\": {\r\n      \"id\":
@@ -931,13 +1010,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '2786'
+      - '2510'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 28 Sep 2020 21:14:41 GMT
+      - Thu, 17 Mar 2022 05:20:25 GMT
       etag:
-      - W/"5bff4d7d-4e42-4eb8-a0a2-b6e98682362a"
+      - W/"78606275-446f-46b5-ad9d-3dcc845bfed8"
       expires:
       - '-1'
       pragma:
@@ -954,14 +1033,14 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 978738b7-134b-47ce-9fab-131aef7ed9a2
+      - 05958a0b-3e74-4591-bb40-31eeffcde22c
     status:
       code: 200
       message: OK
 - request:
-    body: '{"properties": {"protocol": "*", "sourcePortRange": "*", "destinationPortRange":
-      "80", "sourceAddressPrefix": "*", "destinationAddressPrefix": "*", "access":
-      "allow", "priority": 900, "direction": "inbound"}, "name": "open-port-80"}'
+    body: '{"name": "open-port-80", "properties": {"protocol": "*", "sourcePortRange":
+      "*", "destinationPortRange": "80", "sourceAddressPrefix": "*", "destinationAddressPrefix":
+      "*", "access": "allow", "priority": 900, "direction": "inbound"}}'
     headers:
       Accept:
       - application/json
@@ -974,20 +1053,17 @@ interactions:
       Content-Length:
       - '232'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g -n --port
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.11.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-network/19.3.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Network/networkSecurityGroups/test-run-command-vmNSG/securityRules/open-port-80?api-version=2018-11-01
   response:
     body:
       string: "{\r\n  \"name\": \"open-port-80\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Network/networkSecurityGroups/test-run-command-vmNSG/securityRules/open-port-80\",\r\n
-        \ \"etag\": \"W/\\\"f6eecd58-1575-4d9b-ae22-5cb75f99ea0c\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"5caaa107-e1b5-4506-8a11-eeb3be624c76\\\"\",\r\n  \"type\":
         \"Microsoft.Network/networkSecurityGroups/securityRules\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Updating\",\r\n    \"protocol\": \"*\",\r\n
         \   \"sourcePortRange\": \"*\",\r\n    \"destinationPortRange\": \"80\",\r\n
@@ -998,15 +1074,15 @@ interactions:
         []\r\n  }\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/8b2c3c60-5071-4ae7-9112-83ae6b3b106c?api-version=2018-11-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/c76828cd-49c6-4c2e-86e7-f8a8c7bc6f6d?api-version=2018-11-01
       cache-control:
       - no-cache
       content-length:
-      - '840'
+      - '794'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 28 Sep 2020 21:14:41 GMT
+      - Thu, 17 Mar 2022 05:20:26 GMT
       expires:
       - '-1'
       pragma:
@@ -1019,9 +1095,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 97ca3a64-f256-47ce-88b0-9fb381205f77
+      - 75aacaa2-4c69-4bef-845e-056b258f9270
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1194'
     status:
       code: 201
       message: Created
@@ -1029,7 +1105,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -1039,10 +1115,9 @@ interactions:
       ParameterSetName:
       - -g -n --port
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.11.1
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-network/19.3.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/8b2c3c60-5071-4ae7-9112-83ae6b3b106c?api-version=2018-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/c76828cd-49c6-4c2e-86e7-f8a8c7bc6f6d?api-version=2018-11-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -1054,7 +1129,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 28 Sep 2020 21:14:52 GMT
+      - Thu, 17 Mar 2022 05:20:36 GMT
       expires:
       - '-1'
       pragma:
@@ -1071,7 +1146,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 84c6d72d-7c9c-423b-9312-69ada652a85c
+      - b5493471-2202-47de-a449-49c5a1a046f0
     status:
       code: 200
       message: OK
@@ -1079,7 +1154,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -1089,14 +1164,13 @@ interactions:
       ParameterSetName:
       - -g -n --port
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.11.1
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-network/19.3.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Network/networkSecurityGroups/test-run-command-vmNSG/securityRules/open-port-80?api-version=2018-11-01
   response:
     body:
       string: "{\r\n  \"name\": \"open-port-80\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Network/networkSecurityGroups/test-run-command-vmNSG/securityRules/open-port-80\",\r\n
-        \ \"etag\": \"W/\\\"79bc9806-828c-4765-8f6c-a709d86b73cb\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"17521e91-b9da-470b-8e19-9199b3ad2bf8\\\"\",\r\n  \"type\":
         \"Microsoft.Network/networkSecurityGroups/securityRules\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"protocol\": \"*\",\r\n
         \   \"sourcePortRange\": \"*\",\r\n    \"destinationPortRange\": \"80\",\r\n
@@ -1109,13 +1183,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '841'
+      - '795'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 28 Sep 2020 21:14:52 GMT
+      - Thu, 17 Mar 2022 05:20:36 GMT
       etag:
-      - W/"79bc9806-828c-4765-8f6c-a709d86b73cb"
+      - W/"17521e91-b9da-470b-8e19-9199b3ad2bf8"
       expires:
       - '-1'
       pragma:
@@ -1132,7 +1206,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - efcf1f09-04ad-4045-9057-9240bccacbd8
+      - deb8a831-145b-4382-8acd-066cc88fa37c
     status:
       code: 200
       message: OK
@@ -1150,22 +1224,19 @@ interactions:
       ParameterSetName:
       - -g -n --port
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.11.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-network/19.3.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Network/networkSecurityGroups/test-run-command-vmNSG?api-version=2018-11-01
   response:
     body:
       string: "{\r\n  \"name\": \"test-run-command-vmNSG\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Network/networkSecurityGroups/test-run-command-vmNSG\",\r\n
-        \ \"etag\": \"W/\\\"79bc9806-828c-4765-8f6c-a709d86b73cb\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"17521e91-b9da-470b-8e19-9199b3ad2bf8\\\"\",\r\n  \"type\":
         \"Microsoft.Network/networkSecurityGroups\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"95b345ab-a813-46e7-b1a8-ae3d1fe2f483\",\r\n    \"securityRules\":
+        \   \"resourceGuid\": \"26ee3427-a437-4b35-9efd-0697f3609046\",\r\n    \"securityRules\":
         [\r\n      {\r\n        \"name\": \"default-allow-ssh\",\r\n        \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Network/networkSecurityGroups/test-run-command-vmNSG/securityRules/default-allow-ssh\",\r\n
-        \       \"etag\": \"W/\\\"79bc9806-828c-4765-8f6c-a709d86b73cb\\\"\",\r\n
+        \       \"etag\": \"W/\\\"17521e91-b9da-470b-8e19-9199b3ad2bf8\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/securityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"protocol\": \"Tcp\",\r\n          \"sourcePortRange\": \"*\",\r\n
@@ -1176,7 +1247,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"open-port-80\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Network/networkSecurityGroups/test-run-command-vmNSG/securityRules/open-port-80\",\r\n
-        \       \"etag\": \"W/\\\"79bc9806-828c-4765-8f6c-a709d86b73cb\\\"\",\r\n
+        \       \"etag\": \"W/\\\"17521e91-b9da-470b-8e19-9199b3ad2bf8\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/securityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"protocol\": \"*\",\r\n          \"sourcePortRange\": \"*\",\r\n
@@ -1187,7 +1258,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      }\r\n    ],\r\n    \"defaultSecurityRules\": [\r\n
         \     {\r\n        \"name\": \"AllowVnetInBound\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Network/networkSecurityGroups/test-run-command-vmNSG/defaultSecurityRules/AllowVnetInBound\",\r\n
-        \       \"etag\": \"W/\\\"79bc9806-828c-4765-8f6c-a709d86b73cb\\\"\",\r\n
+        \       \"etag\": \"W/\\\"17521e91-b9da-470b-8e19-9199b3ad2bf8\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Allow inbound traffic from all VMs in VNET\",\r\n
@@ -1199,7 +1270,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"AllowAzureLoadBalancerInBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Network/networkSecurityGroups/test-run-command-vmNSG/defaultSecurityRules/AllowAzureLoadBalancerInBound\",\r\n
-        \       \"etag\": \"W/\\\"79bc9806-828c-4765-8f6c-a709d86b73cb\\\"\",\r\n
+        \       \"etag\": \"W/\\\"17521e91-b9da-470b-8e19-9199b3ad2bf8\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Allow inbound traffic from azure load balancer\",\r\n
@@ -1211,7 +1282,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"DenyAllInBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Network/networkSecurityGroups/test-run-command-vmNSG/defaultSecurityRules/DenyAllInBound\",\r\n
-        \       \"etag\": \"W/\\\"79bc9806-828c-4765-8f6c-a709d86b73cb\\\"\",\r\n
+        \       \"etag\": \"W/\\\"17521e91-b9da-470b-8e19-9199b3ad2bf8\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Deny all inbound traffic\",\r\n          \"protocol\":
@@ -1222,7 +1293,7 @@ interactions:
         \         \"destinationPortRanges\": [],\r\n          \"sourceAddressPrefixes\":
         [],\r\n          \"destinationAddressPrefixes\": []\r\n        }\r\n      },\r\n
         \     {\r\n        \"name\": \"AllowVnetOutBound\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Network/networkSecurityGroups/test-run-command-vmNSG/defaultSecurityRules/AllowVnetOutBound\",\r\n
-        \       \"etag\": \"W/\\\"79bc9806-828c-4765-8f6c-a709d86b73cb\\\"\",\r\n
+        \       \"etag\": \"W/\\\"17521e91-b9da-470b-8e19-9199b3ad2bf8\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Allow outbound traffic from all VMs to all VMs
@@ -1234,7 +1305,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"AllowInternetOutBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Network/networkSecurityGroups/test-run-command-vmNSG/defaultSecurityRules/AllowInternetOutBound\",\r\n
-        \       \"etag\": \"W/\\\"79bc9806-828c-4765-8f6c-a709d86b73cb\\\"\",\r\n
+        \       \"etag\": \"W/\\\"17521e91-b9da-470b-8e19-9199b3ad2bf8\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Allow outbound traffic from all VMs to Internet\",\r\n
@@ -1246,7 +1317,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"DenyAllOutBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Network/networkSecurityGroups/test-run-command-vmNSG/defaultSecurityRules/DenyAllOutBound\",\r\n
-        \       \"etag\": \"W/\\\"79bc9806-828c-4765-8f6c-a709d86b73cb\\\"\",\r\n
+        \       \"etag\": \"W/\\\"17521e91-b9da-470b-8e19-9199b3ad2bf8\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Deny all outbound traffic\",\r\n          \"protocol\":
@@ -1262,13 +1333,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '9334'
+      - '8874'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 28 Sep 2020 21:14:53 GMT
+      - Thu, 17 Mar 2022 05:20:37 GMT
       etag:
-      - W/"79bc9806-828c-4765-8f6c-a709d86b73cb"
+      - W/"17521e91-b9da-470b-8e19-9199b3ad2bf8"
       expires:
       - '-1'
       pragma:
@@ -1285,7 +1356,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 9f5cb9e5-335c-43cb-a120-37ec1ec5f130
+      - a578abf0-f108-402f-ac34-aa47fde537e4
     status:
       code: 200
       message: OK
@@ -1294,7 +1365,7 @@ interactions:
       apt-get install -y nginx"], "parameters": []}'
     headers:
       Accept:
-      - application/json
+      - application/json, text/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -1304,14 +1375,11 @@ interactions:
       Content-Length:
       - '117'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g -n --command-id --script
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-compute/13.0.0 Azure-SDK-For-Python AZURECLI/2.11.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_run_command000001/providers/Microsoft.Compute/virtualMachines/test-run-command-vm/runCommand?api-version=2020-06-01
   response:
@@ -1319,17 +1387,17 @@ interactions:
       string: ''
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/da755d41-90c4-45de-8b64-2a33af904053?api-version=2020-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/1b691418-5be3-4eaf-9eab-c999e09ad0d2?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2020-06-01
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Mon, 28 Sep 2020 21:14:53 GMT
+      - Thu, 17 Mar 2022 05:20:38 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/da755d41-90c4-45de-8b64-2a33af904053?monitor=true&api-version=2020-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/1b691418-5be3-4eaf-9eab-c999e09ad0d2?p=571046f6-b640-41c1-86f7-f9f044b5adf9&monitor=true&api-version=2020-06-01
       pragma:
       - no-cache
       server:
@@ -1340,7 +1408,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/UpdateVM3Min;238,Microsoft.Compute/UpdateVM30Min;1197
+      - Microsoft.Compute/UpdateVM3Min;238,Microsoft.Compute/UpdateVM30Min;1193
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
@@ -1350,7 +1418,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -1360,14 +1428,13 @@ interactions:
       ParameterSetName:
       - -g -n --command-id --script
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-compute/13.0.0 Azure-SDK-For-Python AZURECLI/2.11.1
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/da755d41-90c4-45de-8b64-2a33af904053?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/1b691418-5be3-4eaf-9eab-c999e09ad0d2?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2020-06-01
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2020-09-28T21:14:53.5063261+00:00\",\r\n  \"status\":
-        \"InProgress\",\r\n  \"name\": \"da755d41-90c4-45de-8b64-2a33af904053\"\r\n}"
+      string: "{\r\n  \"startTime\": \"2022-03-17T05:20:38.6927953+00:00\",\r\n  \"status\":
+        \"InProgress\",\r\n  \"name\": \"1b691418-5be3-4eaf-9eab-c999e09ad0d2\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -1376,7 +1443,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 28 Sep 2020 21:15:23 GMT
+      - Thu, 17 Mar 2022 05:21:08 GMT
       expires:
       - '-1'
       pragma:
@@ -1393,7 +1460,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperation3Min;14986,Microsoft.Compute/GetOperation30Min;29941
+      - Microsoft.Compute/GetOperation3Min;14978,Microsoft.Compute/GetOperation30Min;29699
     status:
       code: 200
       message: OK
@@ -1401,7 +1468,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -1411,82 +1478,22 @@ interactions:
       ParameterSetName:
       - -g -n --command-id --script
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-compute/13.0.0 Azure-SDK-For-Python AZURECLI/2.11.1
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/da755d41-90c4-45de-8b64-2a33af904053?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/1b691418-5be3-4eaf-9eab-c999e09ad0d2?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2020-06-01
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2020-09-28T21:14:53.5063261+00:00\",\r\n  \"endTime\":
-        \"2020-09-28T21:15:39.2251237+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
-        \ \"properties\": {\r\n    \"output\": {\"value\":[{\"code\":\"ProvisioningState/succeeded\",\"level\":\"Info\",\"displayStatus\":\"Provisioning
-        succeeded\",\"message\":\"Enable succeeded: \\n[stdout]\\n(2.12.6-0ubuntu2)
-        ...\\r\\nSelecting previously unselected package libjpeg8:amd64.\\r\\nPreparing
-        to unpack .../04-libjpeg8_8c-2ubuntu8_amd64.deb ...\\r\\nUnpacking libjpeg8:amd64
-        (8c-2ubuntu8) ...\\r\\nSelecting previously unselected package libjbig0:amd64.\\r\\nPreparing
-        to unpack .../05-libjbig0_2.1-3.1build1_amd64.deb ...\\r\\nUnpacking libjbig0:amd64
-        (2.1-3.1build1) ...\\r\\nSelecting previously unselected package libtiff5:amd64.\\r\\nPreparing
-        to unpack .../06-libtiff5_4.0.9-5ubuntu0.3_amd64.deb ...\\r\\nUnpacking libtiff5:amd64
-        (4.0.9-5ubuntu0.3) ...\\r\\nSelecting previously unselected package libwebp6:amd64.\\r\\nPreparing
-        to unpack .../07-libwebp6_0.6.1-2_amd64.deb ...\\r\\nUnpacking libwebp6:amd64
-        (0.6.1-2) ...\\r\\nSelecting previously unselected package libxpm4:amd64.\\r\\nPreparing
-        to unpack .../08-libxpm4_1%3a3.5.12-1_amd64.deb ...\\r\\nUnpacking libxpm4:amd64
-        (1:3.5.12-1) ...\\r\\nSelecting previously unselected package libgd3:amd64.\\r\\nPreparing
-        to unpack .../09-libgd3_2.2.5-4ubuntu0.4_amd64.deb ...\\r\\nUnpacking libgd3:amd64
-        (2.2.5-4ubuntu0.4) ...\\r\\nSelecting previously unselected package nginx-common.\\r\\nPreparing
-        to unpack .../10-nginx-common_1.14.0-0ubuntu1.7_all.deb ...\\r\\nUnpacking
-        nginx-common (1.14.0-0ubuntu1.7) ...\\r\\nSelecting previously unselected
-        package libnginx-mod-http-geoip.\\r\\nPreparing to unpack .../11-libnginx-mod-http-geoip_1.14.0-0ubuntu1.7_amd64.deb
-        ...\\r\\nUnpacking libnginx-mod-http-geoip (1.14.0-0ubuntu1.7) ...\\r\\nSelecting
-        previously unselected package libnginx-mod-http-image-filter.\\r\\nPreparing
-        to unpack .../12-libnginx-mod-http-image-filter_1.14.0-0ubuntu1.7_amd64.deb
-        ...\\r\\nUnpacking libnginx-mod-http-image-filter (1.14.0-0ubuntu1.7) ...\\r\\nSelecting
-        previously unselected package libnginx-mod-http-xslt-filter.\\r\\nPreparing
-        to unpack .../13-libnginx-mod-http-xslt-filter_1.14.0-0ubuntu1.7_amd64.deb
-        ...\\r\\nUnpacking libnginx-mod-http-xslt-filter (1.14.0-0ubuntu1.7) ...\\r\\nSelecting
-        previously unselected package libnginx-mod-mail.\\r\\nPreparing to unpack
-        .../14-libnginx-mod-mail_1.14.0-0ubuntu1.7_amd64.deb ...\\r\\nUnpacking libnginx-mod-mail
-        (1.14.0-0ubuntu1.7) ...\\r\\nSelecting previously unselected package libnginx-mod-stream.\\r\\nPreparing
-        to unpack .../15-libnginx-mod-stream_1.14.0-0ubuntu1.7_amd64.deb ...\\r\\nUnpacking
-        libnginx-mod-stream (1.14.0-0ubuntu1.7) ...\\r\\nSelecting previously unselected
-        package nginx-core.\\r\\nPreparing to unpack .../16-nginx-core_1.14.0-0ubuntu1.7_amd64.deb
-        ...\\r\\nUnpacking nginx-core (1.14.0-0ubuntu1.7) ...\\r\\nSelecting previously
-        unselected package nginx.\\r\\nPreparing to unpack .../17-nginx_1.14.0-0ubuntu1.7_all.deb
-        ...\\r\\nUnpacking nginx (1.14.0-0ubuntu1.7) ...\\r\\nSetting up libjbig0:amd64
-        (2.1-3.1build1) ...\\r\\nSetting up fonts-dejavu-core (2.37-1) ...\\r\\nSetting
-        up nginx-common (1.14.0-0ubuntu1.7) ...\\r\\ndebconf: unable to initialize
-        frontend: Dialog\\r\\ndebconf: (Dialog frontend will not work on a dumb terminal,
-        an emacs shell buffer, or without a controlling terminal.)\\r\\ndebconf: falling
-        back to frontend: Readline\\r\\nCreated symlink /etc/systemd/system/multi-user.target.wants/nginx.service
-        \u2192 /lib/systemd/system/nginx.service.\\r\\nSetting up libjpeg-turbo8:amd64
-        (1.5.2-0ubuntu5.18.04.4) ...\\r\\nSetting up libnginx-mod-mail (1.14.0-0ubuntu1.7)
-        ...\\r\\nSetting up libxpm4:amd64 (1:3.5.12-1) ...\\r\\nSetting up libnginx-mod-http-xslt-filter
-        (1.14.0-0ubuntu1.7) ...\\r\\nSetting up libnginx-mod-http-geoip (1.14.0-0ubuntu1.7)
-        ...\\r\\nSetting up libwebp6:amd64 (0.6.1-2) ...\\r\\nSetting up libjpeg8:amd64
-        (8c-2ubuntu8) ...\\r\\nSetting up fontconfig-config (2.12.6-0ubuntu2) ...\\r\\nSetting
-        up libnginx-mod-stream (1.14.0-0ubuntu1.7) ...\\r\\nSetting up libtiff5:amd64
-        (4.0.9-5ubuntu0.3) ...\\r\\nSetting up libfontconfig1:amd64 (2.12.6-0ubuntu2)
-        ...\\r\\nSetting up libgd3:amd64 (2.2.5-4ubuntu0.4) ...\\r\\nSetting up libnginx-mod-http-image-filter
-        (1.14.0-0ubuntu1.7) ...\\r\\nSetting up nginx-core (1.14.0-0ubuntu1.7) ...\\r\\nSetting
-        up nginx (1.14.0-0ubuntu1.7) ...\\r\\nProcessing triggers for systemd (237-3ubuntu10.42)
-        ...\\r\\nProcessing triggers for man-db (2.8.3-2ubuntu0.1) ...\\r\\nProcessing
-        triggers for ufw (0.36-0ubuntu0.18.04.1) ...\\r\\nProcessing triggers for
-        ureadahead (0.100.0-21) ...\\r\\nProcessing triggers for libc-bin (2.27-3ubuntu1.2)
-        ...\\r\\n\\n[stderr]\\ndebconf: unable to initialize frontend: Dialog\\ndebconf:
-        (Dialog frontend will not work on a dumb terminal, an emacs shell buffer,
-        or without a controlling terminal.)\\ndebconf: falling back to frontend: Readline\\ndebconf:
-        unable to initialize frontend: Readline\\ndebconf: (This frontend requires
-        a controlling tty.)\\ndebconf: falling back to frontend: Teletype\\ndpkg-preconfigure:
-        unable to re-open stdin: \\n\"}]}\r\n  },\r\n  \"name\": \"da755d41-90c4-45de-8b64-2a33af904053\"\r\n}"
+      string: "{\r\n  \"startTime\": \"2022-03-17T05:20:38.6927953+00:00\",\r\n  \"status\":
+        \"InProgress\",\r\n  \"name\": \"1b691418-5be3-4eaf-9eab-c999e09ad0d2\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '5030'
+      - '134'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 28 Sep 2020 21:15:53 GMT
+      - Thu, 17 Mar 2022 05:21:39 GMT
       expires:
       - '-1'
       pragma:
@@ -1503,7 +1510,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperation3Min;14986,Microsoft.Compute/GetOperation30Min;29938
+      - Microsoft.Compute/GetOperation3Min;14973,Microsoft.Compute/GetOperation30Min;29692
     status:
       code: 200
       message: OK
@@ -1511,7 +1518,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -1521,80 +1528,189 @@ interactions:
       ParameterSetName:
       - -g -n --command-id --script
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-compute/13.0.0 Azure-SDK-For-Python AZURECLI/2.11.1
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/da755d41-90c4-45de-8b64-2a33af904053?monitor=true&api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/1b691418-5be3-4eaf-9eab-c999e09ad0d2?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2020-06-01
+  response:
+    body:
+      string: "{\r\n  \"startTime\": \"2022-03-17T05:20:38.6927953+00:00\",\r\n  \"endTime\":
+        \"2022-03-17T05:22:07.3179249+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
+        \ \"properties\": {\r\n    \"output\": {\r\n  \"value\": [\r\n    {\r\n      \"code\":
+        \"ProvisioningState/succeeded\",\r\n      \"level\": \"Info\",\r\n      \"displayStatus\":
+        \"Provisioning succeeded\",\r\n      \"message\": \"Enable succeeded: \\n[stdout]\\nnselected
+        package libjpeg8:amd64.\\r\\nPreparing to unpack .../04-libjpeg8_8c-2ubuntu8_amd64.deb
+        ...\\r\\nUnpacking libjpeg8:amd64 (8c-2ubuntu8) ...\\r\\nSelecting previously
+        unselected package libjbig0:amd64.\\r\\nPreparing to unpack .../05-libjbig0_2.1-3.1build1_amd64.deb
+        ...\\r\\nUnpacking libjbig0:amd64 (2.1-3.1build1) ...\\r\\nSelecting previously
+        unselected package libtiff5:amd64.\\r\\nPreparing to unpack .../06-libtiff5_4.0.9-5ubuntu0.4_amd64.deb
+        ...\\r\\nUnpacking libtiff5:amd64 (4.0.9-5ubuntu0.4) ...\\r\\nSelecting previously
+        unselected package libwebp6:amd64.\\r\\nPreparing to unpack .../07-libwebp6_0.6.1-2ubuntu0.18.04.1_amd64.deb
+        ...\\r\\nUnpacking libwebp6:amd64 (0.6.1-2ubuntu0.18.04.1) ...\\r\\nSelecting
+        previously unselected package libxpm4:amd64.\\r\\nPreparing to unpack .../08-libxpm4_1%3a3.5.12-1_amd64.deb
+        ...\\r\\nUnpacking libxpm4:amd64 (1:3.5.12-1) ...\\r\\nSelecting previously
+        unselected package libgd3:amd64.\\r\\nPreparing to unpack .../09-libgd3_2.2.5-4ubuntu0.5_amd64.deb
+        ...\\r\\nUnpacking libgd3:amd64 (2.2.5-4ubuntu0.5) ...\\r\\nSelecting previously
+        unselected package nginx-common.\\r\\nPreparing to unpack .../10-nginx-common_1.14.0-0ubuntu1.9_all.deb
+        ...\\r\\nUnpacking nginx-common (1.14.0-0ubuntu1.9) ...\\r\\nSelecting previously
+        unselected package libnginx-mod-http-geoip.\\r\\nPreparing to unpack .../11-libnginx-mod-http-geoip_1.14.0-0ubuntu1.9_amd64.deb
+        ...\\r\\nUnpacking libnginx-mod-http-geoip (1.14.0-0ubuntu1.9) ...\\r\\nSelecting
+        previously unselected package libnginx-mod-http-image-filter.\\r\\nPreparing
+        to unpack .../12-libnginx-mod-http-image-filter_1.14.0-0ubuntu1.9_amd64.deb
+        ...\\r\\nUnpacking libnginx-mod-http-image-filter (1.14.0-0ubuntu1.9) ...\\r\\nSelecting
+        previously unselected package libnginx-mod-http-xslt-filter.\\r\\nPreparing
+        to unpack .../13-libnginx-mod-http-xslt-filter_1.14.0-0ubuntu1.9_amd64.deb
+        ...\\r\\nUnpacking libnginx-mod-http-xslt-filter (1.14.0-0ubuntu1.9) ...\\r\\nSelecting
+        previously unselected package libnginx-mod-mail.\\r\\nPreparing to unpack
+        .../14-libnginx-mod-mail_1.14.0-0ubuntu1.9_amd64.deb ...\\r\\nUnpacking libnginx-mod-mail
+        (1.14.0-0ubuntu1.9) ...\\r\\nSelecting previously unselected package libnginx-mod-stream.\\r\\nPreparing
+        to unpack .../15-libnginx-mod-stream_1.14.0-0ubuntu1.9_amd64.deb ...\\r\\nUnpacking
+        libnginx-mod-stream (1.14.0-0ubuntu1.9) ...\\r\\nSelecting previously unselected
+        package nginx-core.\\r\\nPreparing to unpack .../16-nginx-core_1.14.0-0ubuntu1.9_amd64.deb
+        ...\\r\\nUnpacking nginx-core (1.14.0-0ubuntu1.9) ...\\r\\nSelecting previously
+        unselected package nginx.\\r\\nPreparing to unpack .../17-nginx_1.14.0-0ubuntu1.9_all.deb
+        ...\\r\\nUnpacking nginx (1.14.0-0ubuntu1.9) ...\\r\\nSetting up libjbig0:amd64
+        (2.1-3.1build1) ...\\r\\nSetting up fonts-dejavu-core (2.37-1) ...\\r\\nSetting
+        up nginx-common (1.14.0-0ubuntu1.9) ...\\r\\ndebconf: unable to initialize
+        frontend: Dialog\\r\\ndebconf: (Dialog frontend will not work on a dumb terminal,
+        an emacs shell buffer, or without a controlling terminal.)\\r\\ndebconf: falling
+        back to frontend: Readline\\r\\nCreated symlink /etc/systemd/system/multi-user.target.wants/nginx.service
+        \u2192 /lib/systemd/system/nginx.service.\\r\\nSetting up libjpeg-turbo8:amd64
+        (1.5.2-0ubuntu5.18.04.4) ...\\r\\nSetting up libnginx-mod-mail (1.14.0-0ubuntu1.9)
+        ...\\r\\nSetting up libxpm4:amd64 (1:3.5.12-1) ...\\r\\nSetting up libnginx-mod-http-xslt-filter
+        (1.14.0-0ubuntu1.9) ...\\r\\nSetting up libnginx-mod-http-geoip (1.14.0-0ubuntu1.9)
+        ...\\r\\nSetting up libwebp6:amd64 (0.6.1-2ubuntu0.18.04.1) ...\\r\\nSetting
+        up libjpeg8:amd64 (8c-2ubuntu8) ...\\r\\nSetting up fontconfig-config (2.12.6-0ubuntu2)
+        ...\\r\\nSetting up libnginx-mod-stream (1.14.0-0ubuntu1.9) ...\\r\\nSetting
+        up libtiff5:amd64 (4.0.9-5ubuntu0.4) ...\\r\\nSetting up libfontconfig1:amd64
+        (2.12.6-0ubuntu2) ...\\r\\nSetting up libgd3:amd64 (2.2.5-4ubuntu0.5) ...\\r\\nSetting
+        up libnginx-mod-http-image-filter (1.14.0-0ubuntu1.9) ...\\r\\nSetting up
+        nginx-core (1.14.0-0ubuntu1.9) ...\\r\\nSetting up nginx (1.14.0-0ubuntu1.9)
+        ...\\r\\nProcessing triggers for systemd (237-3ubuntu10.53) ...\\r\\nProcessing
+        triggers for man-db (2.8.3-2ubuntu0.1) ...\\r\\nProcessing triggers for ufw
+        (0.36-0ubuntu0.18.04.2) ...\\r\\nProcessing triggers for ureadahead (0.100.0-21)
+        ...\\r\\nProcessing triggers for libc-bin (2.27-3ubuntu1.5) ...\\r\\n\\n[stderr]\\ndebconf:
+        unable to initialize frontend: Dialog\\ndebconf: (Dialog frontend will not
+        work on a dumb terminal, an emacs shell buffer, or without a controlling terminal.)\\ndebconf:
+        falling back to frontend: Readline\\ndebconf: unable to initialize frontend:
+        Readline\\ndebconf: (This frontend requires a controlling tty.)\\ndebconf:
+        falling back to frontend: Teletype\\ndpkg-preconfigure: unable to re-open
+        stdin: \\n\"\r\n    }\r\n  ]\r\n}\r\n  },\r\n  \"name\": \"1b691418-5be3-4eaf-9eab-c999e09ad0d2\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '5085'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Mar 2022 05:22:09 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetOperation3Min;14973,Microsoft.Compute/GetOperation30Min;29686
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm run-command invoke
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --command-id --script
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/1b691418-5be3-4eaf-9eab-c999e09ad0d2?p=571046f6-b640-41c1-86f7-f9f044b5adf9&monitor=true&api-version=2020-06-01
   response:
     body:
       string: "{\"value\":[{\"code\":\"ProvisioningState/succeeded\",\"level\":\"Info\",\"displayStatus\":\"Provisioning
-        succeeded\",\"message\":\"Enable succeeded: \\n[stdout]\\n(2.12.6-0ubuntu2)
-        ...\\r\\nSelecting previously unselected package libjpeg8:amd64.\\r\\nPreparing
-        to unpack .../04-libjpeg8_8c-2ubuntu8_amd64.deb ...\\r\\nUnpacking libjpeg8:amd64
-        (8c-2ubuntu8) ...\\r\\nSelecting previously unselected package libjbig0:amd64.\\r\\nPreparing
-        to unpack .../05-libjbig0_2.1-3.1build1_amd64.deb ...\\r\\nUnpacking libjbig0:amd64
-        (2.1-3.1build1) ...\\r\\nSelecting previously unselected package libtiff5:amd64.\\r\\nPreparing
-        to unpack .../06-libtiff5_4.0.9-5ubuntu0.3_amd64.deb ...\\r\\nUnpacking libtiff5:amd64
-        (4.0.9-5ubuntu0.3) ...\\r\\nSelecting previously unselected package libwebp6:amd64.\\r\\nPreparing
-        to unpack .../07-libwebp6_0.6.1-2_amd64.deb ...\\r\\nUnpacking libwebp6:amd64
-        (0.6.1-2) ...\\r\\nSelecting previously unselected package libxpm4:amd64.\\r\\nPreparing
-        to unpack .../08-libxpm4_1%3a3.5.12-1_amd64.deb ...\\r\\nUnpacking libxpm4:amd64
-        (1:3.5.12-1) ...\\r\\nSelecting previously unselected package libgd3:amd64.\\r\\nPreparing
-        to unpack .../09-libgd3_2.2.5-4ubuntu0.4_amd64.deb ...\\r\\nUnpacking libgd3:amd64
-        (2.2.5-4ubuntu0.4) ...\\r\\nSelecting previously unselected package nginx-common.\\r\\nPreparing
-        to unpack .../10-nginx-common_1.14.0-0ubuntu1.7_all.deb ...\\r\\nUnpacking
-        nginx-common (1.14.0-0ubuntu1.7) ...\\r\\nSelecting previously unselected
-        package libnginx-mod-http-geoip.\\r\\nPreparing to unpack .../11-libnginx-mod-http-geoip_1.14.0-0ubuntu1.7_amd64.deb
-        ...\\r\\nUnpacking libnginx-mod-http-geoip (1.14.0-0ubuntu1.7) ...\\r\\nSelecting
+        succeeded\",\"message\":\"Enable succeeded: \\n[stdout]\\nnselected package
+        libjpeg8:amd64.\\r\\nPreparing to unpack .../04-libjpeg8_8c-2ubuntu8_amd64.deb
+        ...\\r\\nUnpacking libjpeg8:amd64 (8c-2ubuntu8) ...\\r\\nSelecting previously
+        unselected package libjbig0:amd64.\\r\\nPreparing to unpack .../05-libjbig0_2.1-3.1build1_amd64.deb
+        ...\\r\\nUnpacking libjbig0:amd64 (2.1-3.1build1) ...\\r\\nSelecting previously
+        unselected package libtiff5:amd64.\\r\\nPreparing to unpack .../06-libtiff5_4.0.9-5ubuntu0.4_amd64.deb
+        ...\\r\\nUnpacking libtiff5:amd64 (4.0.9-5ubuntu0.4) ...\\r\\nSelecting previously
+        unselected package libwebp6:amd64.\\r\\nPreparing to unpack .../07-libwebp6_0.6.1-2ubuntu0.18.04.1_amd64.deb
+        ...\\r\\nUnpacking libwebp6:amd64 (0.6.1-2ubuntu0.18.04.1) ...\\r\\nSelecting
+        previously unselected package libxpm4:amd64.\\r\\nPreparing to unpack .../08-libxpm4_1%3a3.5.12-1_amd64.deb
+        ...\\r\\nUnpacking libxpm4:amd64 (1:3.5.12-1) ...\\r\\nSelecting previously
+        unselected package libgd3:amd64.\\r\\nPreparing to unpack .../09-libgd3_2.2.5-4ubuntu0.5_amd64.deb
+        ...\\r\\nUnpacking libgd3:amd64 (2.2.5-4ubuntu0.5) ...\\r\\nSelecting previously
+        unselected package nginx-common.\\r\\nPreparing to unpack .../10-nginx-common_1.14.0-0ubuntu1.9_all.deb
+        ...\\r\\nUnpacking nginx-common (1.14.0-0ubuntu1.9) ...\\r\\nSelecting previously
+        unselected package libnginx-mod-http-geoip.\\r\\nPreparing to unpack .../11-libnginx-mod-http-geoip_1.14.0-0ubuntu1.9_amd64.deb
+        ...\\r\\nUnpacking libnginx-mod-http-geoip (1.14.0-0ubuntu1.9) ...\\r\\nSelecting
         previously unselected package libnginx-mod-http-image-filter.\\r\\nPreparing
-        to unpack .../12-libnginx-mod-http-image-filter_1.14.0-0ubuntu1.7_amd64.deb
-        ...\\r\\nUnpacking libnginx-mod-http-image-filter (1.14.0-0ubuntu1.7) ...\\r\\nSelecting
+        to unpack .../12-libnginx-mod-http-image-filter_1.14.0-0ubuntu1.9_amd64.deb
+        ...\\r\\nUnpacking libnginx-mod-http-image-filter (1.14.0-0ubuntu1.9) ...\\r\\nSelecting
         previously unselected package libnginx-mod-http-xslt-filter.\\r\\nPreparing
-        to unpack .../13-libnginx-mod-http-xslt-filter_1.14.0-0ubuntu1.7_amd64.deb
-        ...\\r\\nUnpacking libnginx-mod-http-xslt-filter (1.14.0-0ubuntu1.7) ...\\r\\nSelecting
+        to unpack .../13-libnginx-mod-http-xslt-filter_1.14.0-0ubuntu1.9_amd64.deb
+        ...\\r\\nUnpacking libnginx-mod-http-xslt-filter (1.14.0-0ubuntu1.9) ...\\r\\nSelecting
         previously unselected package libnginx-mod-mail.\\r\\nPreparing to unpack
-        .../14-libnginx-mod-mail_1.14.0-0ubuntu1.7_amd64.deb ...\\r\\nUnpacking libnginx-mod-mail
-        (1.14.0-0ubuntu1.7) ...\\r\\nSelecting previously unselected package libnginx-mod-stream.\\r\\nPreparing
-        to unpack .../15-libnginx-mod-stream_1.14.0-0ubuntu1.7_amd64.deb ...\\r\\nUnpacking
-        libnginx-mod-stream (1.14.0-0ubuntu1.7) ...\\r\\nSelecting previously unselected
-        package nginx-core.\\r\\nPreparing to unpack .../16-nginx-core_1.14.0-0ubuntu1.7_amd64.deb
-        ...\\r\\nUnpacking nginx-core (1.14.0-0ubuntu1.7) ...\\r\\nSelecting previously
-        unselected package nginx.\\r\\nPreparing to unpack .../17-nginx_1.14.0-0ubuntu1.7_all.deb
-        ...\\r\\nUnpacking nginx (1.14.0-0ubuntu1.7) ...\\r\\nSetting up libjbig0:amd64
+        .../14-libnginx-mod-mail_1.14.0-0ubuntu1.9_amd64.deb ...\\r\\nUnpacking libnginx-mod-mail
+        (1.14.0-0ubuntu1.9) ...\\r\\nSelecting previously unselected package libnginx-mod-stream.\\r\\nPreparing
+        to unpack .../15-libnginx-mod-stream_1.14.0-0ubuntu1.9_amd64.deb ...\\r\\nUnpacking
+        libnginx-mod-stream (1.14.0-0ubuntu1.9) ...\\r\\nSelecting previously unselected
+        package nginx-core.\\r\\nPreparing to unpack .../16-nginx-core_1.14.0-0ubuntu1.9_amd64.deb
+        ...\\r\\nUnpacking nginx-core (1.14.0-0ubuntu1.9) ...\\r\\nSelecting previously
+        unselected package nginx.\\r\\nPreparing to unpack .../17-nginx_1.14.0-0ubuntu1.9_all.deb
+        ...\\r\\nUnpacking nginx (1.14.0-0ubuntu1.9) ...\\r\\nSetting up libjbig0:amd64
         (2.1-3.1build1) ...\\r\\nSetting up fonts-dejavu-core (2.37-1) ...\\r\\nSetting
-        up nginx-common (1.14.0-0ubuntu1.7) ...\\r\\ndebconf: unable to initialize
+        up nginx-common (1.14.0-0ubuntu1.9) ...\\r\\ndebconf: unable to initialize
         frontend: Dialog\\r\\ndebconf: (Dialog frontend will not work on a dumb terminal,
         an emacs shell buffer, or without a controlling terminal.)\\r\\ndebconf: falling
         back to frontend: Readline\\r\\nCreated symlink /etc/systemd/system/multi-user.target.wants/nginx.service
         \u2192 /lib/systemd/system/nginx.service.\\r\\nSetting up libjpeg-turbo8:amd64
-        (1.5.2-0ubuntu5.18.04.4) ...\\r\\nSetting up libnginx-mod-mail (1.14.0-0ubuntu1.7)
+        (1.5.2-0ubuntu5.18.04.4) ...\\r\\nSetting up libnginx-mod-mail (1.14.0-0ubuntu1.9)
         ...\\r\\nSetting up libxpm4:amd64 (1:3.5.12-1) ...\\r\\nSetting up libnginx-mod-http-xslt-filter
-        (1.14.0-0ubuntu1.7) ...\\r\\nSetting up libnginx-mod-http-geoip (1.14.0-0ubuntu1.7)
-        ...\\r\\nSetting up libwebp6:amd64 (0.6.1-2) ...\\r\\nSetting up libjpeg8:amd64
-        (8c-2ubuntu8) ...\\r\\nSetting up fontconfig-config (2.12.6-0ubuntu2) ...\\r\\nSetting
-        up libnginx-mod-stream (1.14.0-0ubuntu1.7) ...\\r\\nSetting up libtiff5:amd64
-        (4.0.9-5ubuntu0.3) ...\\r\\nSetting up libfontconfig1:amd64 (2.12.6-0ubuntu2)
-        ...\\r\\nSetting up libgd3:amd64 (2.2.5-4ubuntu0.4) ...\\r\\nSetting up libnginx-mod-http-image-filter
-        (1.14.0-0ubuntu1.7) ...\\r\\nSetting up nginx-core (1.14.0-0ubuntu1.7) ...\\r\\nSetting
-        up nginx (1.14.0-0ubuntu1.7) ...\\r\\nProcessing triggers for systemd (237-3ubuntu10.42)
-        ...\\r\\nProcessing triggers for man-db (2.8.3-2ubuntu0.1) ...\\r\\nProcessing
-        triggers for ufw (0.36-0ubuntu0.18.04.1) ...\\r\\nProcessing triggers for
-        ureadahead (0.100.0-21) ...\\r\\nProcessing triggers for libc-bin (2.27-3ubuntu1.2)
-        ...\\r\\n\\n[stderr]\\ndebconf: unable to initialize frontend: Dialog\\ndebconf:
-        (Dialog frontend will not work on a dumb terminal, an emacs shell buffer,
-        or without a controlling terminal.)\\ndebconf: falling back to frontend: Readline\\ndebconf:
-        unable to initialize frontend: Readline\\ndebconf: (This frontend requires
-        a controlling tty.)\\ndebconf: falling back to frontend: Teletype\\ndpkg-preconfigure:
-        unable to re-open stdin: \\n\"}]}"
+        (1.14.0-0ubuntu1.9) ...\\r\\nSetting up libnginx-mod-http-geoip (1.14.0-0ubuntu1.9)
+        ...\\r\\nSetting up libwebp6:amd64 (0.6.1-2ubuntu0.18.04.1) ...\\r\\nSetting
+        up libjpeg8:amd64 (8c-2ubuntu8) ...\\r\\nSetting up fontconfig-config (2.12.6-0ubuntu2)
+        ...\\r\\nSetting up libnginx-mod-stream (1.14.0-0ubuntu1.9) ...\\r\\nSetting
+        up libtiff5:amd64 (4.0.9-5ubuntu0.4) ...\\r\\nSetting up libfontconfig1:amd64
+        (2.12.6-0ubuntu2) ...\\r\\nSetting up libgd3:amd64 (2.2.5-4ubuntu0.5) ...\\r\\nSetting
+        up libnginx-mod-http-image-filter (1.14.0-0ubuntu1.9) ...\\r\\nSetting up
+        nginx-core (1.14.0-0ubuntu1.9) ...\\r\\nSetting up nginx (1.14.0-0ubuntu1.9)
+        ...\\r\\nProcessing triggers for systemd (237-3ubuntu10.53) ...\\r\\nProcessing
+        triggers for man-db (2.8.3-2ubuntu0.1) ...\\r\\nProcessing triggers for ufw
+        (0.36-0ubuntu0.18.04.2) ...\\r\\nProcessing triggers for ureadahead (0.100.0-21)
+        ...\\r\\nProcessing triggers for libc-bin (2.27-3ubuntu1.5) ...\\r\\n\\n[stderr]\\ndebconf:
+        unable to initialize frontend: Dialog\\ndebconf: (Dialog frontend will not
+        work on a dumb terminal, an emacs shell buffer, or without a controlling terminal.)\\ndebconf:
+        falling back to frontend: Readline\\ndebconf: unable to initialize frontend:
+        Readline\\ndebconf: (This frontend requires a controlling tty.)\\ndebconf:
+        falling back to frontend: Teletype\\ndpkg-preconfigure: unable to re-open
+        stdin: \\n\"}]}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '4805'
+      - '4801'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 28 Sep 2020 21:15:53 GMT
+      - Thu, 17 Mar 2022 05:22:09 GMT
       expires:
       - '-1'
       pragma:
@@ -1611,7 +1727,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperation3Min;14985,Microsoft.Compute/GetOperation30Min;29937
+      - Microsoft.Compute/GetOperation3Min;14972,Microsoft.Compute/GetOperation30Min;29685
     status:
       code: 200
       message: OK
@@ -1625,9 +1741,9 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python-requests/2.22.0
+      - python-requests/2.26.0
     method: GET
-    uri: http://40.83.223.2/
+    uri: http://13.91.107.30/
   response:
     body:
       string: "<!DOCTYPE html>\n<html>\n<head>\n<title>Welcome to nginx!</title>\n<style>\n
@@ -1646,11 +1762,11 @@ interactions:
       content-type:
       - text/html
       date:
-      - Mon, 28 Sep 2020 21:16:09 GMT
+      - Thu, 17 Mar 2022 05:22:25 GMT
       etag:
-      - W/"5f72526b-264"
+      - W/"6232c548-264"
       last-modified:
-      - Mon, 28 Sep 2020 21:15:23 GMT
+      - Thu, 17 Mar 2022 05:21:12 GMT
       server:
       - nginx/1.14.0 (Ubuntu)
       transfer-encoding:

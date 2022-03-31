@@ -31,7 +31,12 @@ def collect_blob_objects(blob_service, container, pattern=None):
         if blob_service.exists(container, pattern):
             yield pattern, blob_service.get_blob_properties(container, pattern)
     else:
-        for blob in blob_service.list_blobs(container):
+        if hasattr(blob_service, 'list_blobs'):
+            blobs = blob_service.list_blobs(container)
+        else:
+            container_client = blob_service.get_container_client(container=container)
+            blobs = container_client.list_blobs()
+        for blob in blobs:
             try:
                 blob_name = blob.name.encode('utf-8') if isinstance(blob.name, unicode) else blob.name
             except NameError:

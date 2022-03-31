@@ -15,7 +15,8 @@ except ImportError:
 from knack.log import get_logger
 from knack.util import CLIError
 
-from azure.cli.core.azclierror import ValidationError, ArgumentUsageError
+from azure.cli.core.azclierror import (ValidationError, ArgumentUsageError, RequiredArgumentMissingError,
+                                       MutuallyExclusiveArgumentError)
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_file_or_dict, validate_parameter_set, validate_tags)
 from azure.cli.core.util import (hash_string, DISALLOWED_USER_NAMES, get_default_admin_username)
@@ -282,6 +283,12 @@ def _parse_image_argument(cmd, namespace):
             namespace.os_offer = matched['offer']
             namespace.os_sku = matched['sku']
             namespace.os_version = matched['version']
+            if not any([namespace.plan_name, namespace.plan_product, namespace.plan_publisher]):
+                image_plan = _get_image_plan_info_if_exists(cmd, namespace)
+                if image_plan:
+                    namespace.plan_name = image_plan.name
+                    namespace.plan_product = image_plan.product
+                    namespace.plan_publisher = image_plan.publisher
             return 'urn'
     except requests.exceptions.ConnectionError:
         pass
@@ -523,7 +530,6 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
         if namespace.storage_profile == StorageProfile.SharedGalleryImage:
 
             if namespace.location is None:
-                from azure.cli.core.azclierror import RequiredArgumentMissingError
                 raise RequiredArgumentMissingError(
                     'Please input the location of the shared gallery image through the parameter --location.')
 
@@ -1204,17 +1210,32 @@ def _validate_ssh_key_helper(ssh_key_value, should_generate_ssh_keys):
     return content
 
 
-def _validate_vm_vmss_msi(cmd, namespace, from_set_command=False):
-    if from_set_command or namespace.assign_identity is not None:
+def _validate_vm_vmss_msi(cmd, namespace, is_identity_assign=False):
+
+    # For the creation of VM and VMSS, "--role" and "--scope" should be passed in at the same time
+    # when assigning a role to the managed identity
+    if not is_identity_assign and namespace.assign_identity is not None:
+        if (namespace.identity_scope and not namespace.identity_role) or \
+                (not namespace.identity_scope and namespace.identity_role):
+            raise ArgumentUsageError(
+                "usage error: please specify both --role and --scope when assigning a role to the managed identity")
+
+    # For "az vm identity assign", "--scope" must be passed in when assigning a role to the managed identity
+    if is_identity_assign:
+        role_is_explicitly_specified = getattr(namespace.identity_role, 'is_default', None) is None
+        if not namespace.identity_scope and role_is_explicitly_specified:
+            raise ArgumentUsageError(
+                "usage error: please specify --scope when assigning a role to the managed identity")
+
+    # Assign managed identity
+    if is_identity_assign or namespace.assign_identity is not None:
         identities = namespace.assign_identity or []
         from ._vm_utils import MSI_LOCAL_ID
         for i, _ in enumerate(identities):
             if identities[i] != MSI_LOCAL_ID:
                 identities[i] = _get_resource_id(cmd.cli_ctx, identities[i], namespace.resource_group_name,
                                                  'userAssignedIdentities', 'Microsoft.ManagedIdentity')
-        if not namespace.identity_scope and getattr(namespace.identity_role, 'is_default', None) is None:
-            raise ArgumentUsageError("usage error: '--role {}' is not applicable as the '--scope' is not provided".
-                                     format(namespace.identity_role))
+
         user_assigned_identities = [x for x in identities if x != MSI_LOCAL_ID]
         if user_assigned_identities and not cmd.supported_api_version(min_api='2017-12-01'):
             raise ArgumentUsageError('usage error: user assigned identity is only available under profile '
@@ -1226,18 +1247,8 @@ def _validate_vm_vmss_msi(cmd, namespace, from_set_command=False):
             # keep 'identity_role' for output as logical name is more readable
             setattr(namespace, 'identity_role_id', _resolve_role_id(cmd.cli_ctx, namespace.identity_role,
                                                                     namespace.identity_scope))
-    elif namespace.identity_scope or getattr(namespace.identity_role, 'is_default', None) is None:
+    elif namespace.identity_scope or namespace.identity_role:
         raise ArgumentUsageError('usage error: --assign-identity [--scope SCOPE] [--role ROLE]')
-
-    # For the creation of VM and VMSS, the default value "Contributor" of "--role" will be removed in the future.
-    # Therefore, the first step is to prompt users that parameters "--role" and "--scope"  should be passed in
-    # at the same time to reduce the impact of breaking change
-    if not from_set_command and namespace.identity_scope and getattr(namespace.identity_role, 'is_default', None):
-        logger.warning(
-            "Please note that the default value of parameter '--role' will be removed in the future version 2.35.0. "
-            "So specify '--role' and '--scope' at the same time when assigning a role to the managed identity "
-            "to avoid breaking your automation script when the default value of '--role' is removed."
-        )
 
 
 def _validate_vm_vmss_set_applications(cmd, namespace):  # pylint: disable=unused-argument
@@ -1621,9 +1632,25 @@ def validate_vmss_update_namespace(cmd, namespace):  # pylint: disable=unused-ar
 
 
 # region disk, snapshot, image validators
-def validate_vm_disk(cmd, namespace):
-    namespace.disk = _get_resource_id(cmd.cli_ctx, namespace.disk,
-                                      namespace.resource_group_name, 'disks', 'Microsoft.Compute')
+def process_vm_disk_attach_namespace(cmd, namespace):
+    disks = []
+    if not namespace.disks:
+        if not namespace.disk:
+            raise RequiredArgumentMissingError("Please use --name or --disks to specify the disk names")
+
+        disks = [_get_resource_id(cmd.cli_ctx, namespace.disk, namespace.resource_group_name,
+                                  'disks', 'Microsoft.Compute')]
+    else:
+        if namespace.disk:
+            raise MutuallyExclusiveArgumentError("You can only specify one of --name and --disks")
+
+        for disk in namespace.disks:
+            disks.append(_get_resource_id(cmd.cli_ctx, disk, namespace.resource_group_name,
+                                          'disks', 'Microsoft.Compute'))
+    namespace.disks = disks
+
+    if len(disks) > 1 and namespace.lun:
+        raise MutuallyExclusiveArgumentError("You cannot specify the --lun for multiple disks")
 
 
 def validate_vmss_disk(cmd, namespace):
@@ -1764,7 +1791,7 @@ def process_disk_encryption_namespace(cmd, namespace):
 
 
 def process_assign_identity_namespace(cmd, namespace):
-    _validate_vm_vmss_msi(cmd, namespace, from_set_command=True)
+    _validate_vm_vmss_msi(cmd, namespace, is_identity_assign=True)
 
 
 def process_remove_identity_namespace(cmd, namespace):
