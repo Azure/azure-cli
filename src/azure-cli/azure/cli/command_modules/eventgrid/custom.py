@@ -1633,11 +1633,13 @@ def _get_sku(sku_name):
         result = SKU_PREMIUM
 
     return result
-    
-def _get_identity_type_with_checks(identity_type_name=IDENTITY_NONE, user_identity_properties=None, mi_system_assigned = None):
-    if identity_type_name is not None and (user_identity_properties is not None or mi_system_assigned is not None):
-        raise CLIError('usage error: cannot use parameter --identity together with --mi-system-assigned or --mi-user-assigned')
-    elif identity_type_name is not None and user_identity_properties is None and mi_system_assigned is None:
+
+
+def _get_identity_type_with_checks(
+        identity_type_name=IDENTITY_NONE,
+        user_identity_properties=None,
+        mi_system_assigned=None):
+    if identity_type_name is not None and user_identity_properties is None and mi_system_assigned is None:
         result = _get_identity_type(identity_type_name)
     elif identity_type_name is None and user_identity_properties is None and mi_system_assigned is not None:
         result = IDENTITY_SYSTEM_ASSIGNED
@@ -1645,6 +1647,8 @@ def _get_identity_type_with_checks(identity_type_name=IDENTITY_NONE, user_identi
         result = IDENTITY_USER_ASSIGNED
     elif identity_type_name is None and user_identity_properties is not None and mi_system_assigned is not None:
         result = IDENTITY_MIXED_MODE
+    elif identity_type_name is not None and (user_identity_properties is not None or mi_system_assigned is not None):
+        raise CLIError('usage error: cannot use --identity together with --mi-system-assigned or --mi-user-assigned')
 
     return result
 
@@ -1824,7 +1828,7 @@ def _validate_subscription_id_matches_default_subscription_id(
                        ' use az account set ID_OR_NAME, or use the global argument --subscription ')
 
 
-def _get_identity_info(identity=None, kind=None, user_identity_properties=None, mi_system_assigned = None):
+def _get_identity_info(identity=None, kind=None, user_identity_properties=None, mi_system_assigned=None):
     if (identity is not None and identity.lower() != IDENTITY_NONE.lower()):
         identity_type_name = _get_identity_type_with_checks(identity, user_identity_properties, mi_system_assigned)
         identity_info = IdentityInfo(type=identity_type_name, user_assigned_identities=user_identity_properties)
@@ -1836,7 +1840,7 @@ def _get_identity_info(identity=None, kind=None, user_identity_properties=None, 
     return identity_info
 
 
-def _get_identity_info_only_if_not_none(identity=None, user_identity_properties=None, mi_system_assigned = None):
+def _get_identity_info_only_if_not_none(identity=None, user_identity_properties=None, mi_system_assigned=None):
     identity_info = None
     if (identity is not None and identity.lower() != IDENTITY_NONE.lower()):
         identity_type_name = _get_identity_type_with_checks(identity, user_identity_properties, mi_system_assigned)
