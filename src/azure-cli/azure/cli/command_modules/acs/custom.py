@@ -84,7 +84,7 @@ from ._consts import CONST_SCALE_SET_PRIORITY_REGULAR, CONST_SCALE_SET_PRIORITY_
 from ._consts import CONST_SCALE_DOWN_MODE_DELETE
 from ._consts import CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME
 from ._consts import CONST_MONITORING_ADDON_NAME
-from ._consts import CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID
+from ._consts import CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID, CONST_MONITORING_USING_AAD_MSI_AUTH
 from ._consts import CONST_VIRTUAL_NODE_ADDON_NAME
 from ._consts import CONST_VIRTUAL_NODE_SUBNET_NAME
 from ._consts import CONST_KUBE_DASHBOARD_ADDON_NAME
@@ -1959,6 +1959,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                auto_upgrade_channel=None,
                enable_addons=None,
                workspace_resource_id=None,
+               enable_msi_auth_for_monitoring=False,
                vnet_subnet_id=None,
                ppg=None,
                max_pods=0,
@@ -2028,9 +2029,30 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     return aks_create_decorator.create_mc(mc)
 
 
+# pylint: disable=line-too-long
 def aks_disable_addons(cmd, client, resource_group_name, name, addons, no_wait=False):
     instance = client.get(resource_group_name, name)
     subscription_id = get_subscription_id(cmd.cli_ctx)
+    try:
+        if addons == "monitoring" and CONST_MONITORING_ADDON_NAME in instance.addon_profiles and \
+                instance.addon_profiles[CONST_MONITORING_ADDON_NAME].enabled and \
+                CONST_MONITORING_USING_AAD_MSI_AUTH in instance.addon_profiles[CONST_MONITORING_ADDON_NAME].config and \
+                str(instance.addon_profiles[CONST_MONITORING_ADDON_NAME].config[CONST_MONITORING_USING_AAD_MSI_AUTH]).lower() == 'true':
+            # remove the DCR association because otherwise the DCR can't be deleted
+            ensure_container_insights_for_monitoring(
+                cmd,
+                instance.addon_profiles[CONST_MONITORING_ADDON_NAME],
+                subscription_id,
+                resource_group_name,
+                name,
+                instance.location,
+                remove_monitoring=True,
+                aad_route=True,
+                create_dcr=False,
+                create_dcra=True
+            )
+    except TypeError:
+        pass
 
     instance = _update_addons(
         cmd,
@@ -2047,6 +2069,7 @@ def aks_disable_addons(cmd, client, resource_group_name, name, addons, no_wait=F
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, name, instance)
 
 
+# pylint: disable=line-too-long
 def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                       workspace_resource_id=None,
                       subnet_name=None,
@@ -2058,12 +2081,17 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                       enable_sgxquotehelper=False,
                       enable_secret_rotation=False,
                       rotation_poll_interval=None,
-                      no_wait=False):
+                      no_wait=False,
+                      enable_msi_auth_for_monitoring=False):
     instance = client.get(resource_group_name, name)
+    msi_auth = False
+    if instance.service_principal_profile.client_id == "msi":
+        msi_auth = True
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
     instance = _update_addons(cmd, instance, subscription_id, resource_group_name, name, addons, enable=True,
                               workspace_resource_id=workspace_resource_id,
+                              enable_msi_auth_for_monitoring=enable_msi_auth_for_monitoring,
                               subnet_name=subnet_name,
                               appgw_name=appgw_name,
                               appgw_subnet_cidr=appgw_subnet_cidr,
@@ -2089,21 +2117,33 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
 
     if need_pull_for_result:
         if enable_monitoring:
-            ensure_container_insights_for_monitoring(
-                cmd,
-                instance.addon_profiles[CONST_MONITORING_ADDON_NAME],
-                subscription_id,
-                resource_group_name,
-                name,
-                instance.location,
-                aad_route=False,
-            )
+            if CONST_MONITORING_USING_AAD_MSI_AUTH in instance.addon_profiles[CONST_MONITORING_ADDON_NAME].config and \
+               str(instance.addon_profiles[CONST_MONITORING_ADDON_NAME].config[CONST_MONITORING_USING_AAD_MSI_AUTH]).lower() == 'true':
+                if msi_auth:
+                    # create a Data Collection Rule (DCR) and associate it with the cluster
+                    ensure_container_insights_for_monitoring(
+                        cmd, instance.addon_profiles[CONST_MONITORING_ADDON_NAME],
+                        subscription_id,
+                        resource_group_name,
+                        name,
+                        instance.location,
+                        aad_route=True,
+                        create_dcr=True,
+                        create_dcra=True)
+                else:
+                    raise ArgumentUsageError(
+                        "--enable-msi-auth-for-monitoring can not be used on clusters with service principal auth.")
+            else:
+                # monitoring addon will use legacy path
+                ensure_container_insights_for_monitoring(
+                    cmd, instance.addon_profiles[CONST_MONITORING_ADDON_NAME], subscription_id, resource_group_name, name, instance.location, aad_route=False)
 
         # adding a wait here since we rely on the result for role assignment
         result = LongRunningOperation(cmd.cli_ctx)(
             client.begin_create_or_update(resource_group_name, name, instance))
 
-        if enable_monitoring:
+        # For monitoring addon, Metrics role assignement doesnt require in case of MSI auth
+        if enable_monitoring and not enable_msi_auth_for_monitoring:
             cloud_name = cmd.cli_ctx.cloud.name
             # mdm metrics supported only in Azure Public cloud so add the role assignment only in this cloud
             if cloud_name.lower() == 'azurecloud':
@@ -2606,6 +2646,7 @@ def aks_rotate_certs(cmd, client, resource_group_name, name, no_wait=True):
 
 def _update_addons(cmd, instance, subscription_id, resource_group_name, name, addons, enable,
                    workspace_resource_id=None,
+                   enable_msi_auth_for_monitoring=False,
                    subnet_name=None,
                    appgw_name=None,
                    appgw_subnet_cidr=None,
@@ -2663,6 +2704,7 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, name, ad
                     workspace_resource_id = workspace_resource_id.rstrip('/')
                 addon_profile.config = {
                     CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: workspace_resource_id}
+                addon_profile.config[CONST_MONITORING_USING_AAD_MSI_AUTH] = enable_msi_auth_for_monitoring
             elif addon == (CONST_VIRTUAL_NODE_ADDON_NAME + os_type):
                 if addon_profile.enabled:
                     raise CLIError('The virtual-node addon is already enabled for this managed cluster.\n'
@@ -2763,6 +2805,7 @@ def _get_azext_module(extension_name, module_name):
 
 def _handle_addons_args(cmd, addons_str, subscription_id, resource_group_name, addon_profiles=None,
                         workspace_resource_id=None,
+                        enable_msi_auth_for_monitoring=False,
                         aci_subnet_name=None,
                         vnet_subnet_id=None,
                         appgw_name=None,
@@ -2800,7 +2843,8 @@ def _handle_addons_args(cmd, addons_str, subscription_id, resource_group_name, a
         if workspace_resource_id.endswith('/'):
             workspace_resource_id = workspace_resource_id.rstrip('/')
         addon_profiles[CONST_MONITORING_ADDON_NAME] = ManagedClusterAddonProfile(
-            enabled=True, config={CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: workspace_resource_id})
+            enabled=True, config={CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: workspace_resource_id,
+                                  CONST_MONITORING_USING_AAD_MSI_AUTH: enable_msi_auth_for_monitoring})
         addons.remove('monitoring')
     # error out if '--enable-addons=monitoring' isn't set but workspace_resource_id is
     elif workspace_resource_id:
@@ -4018,12 +4062,6 @@ def openshift_monitor_disable(cmd, client, resource_group_name, name, no_wait=Fa
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, name, instance)
 
 
-def _is_msi_cluster(managed_cluster):
-    return (managed_cluster and managed_cluster.identity and
-            (managed_cluster.identity.type.casefold() == "systemassigned" or
-             managed_cluster.identity.type.casefold() == "userassigned"))
-
-
 def _put_managed_cluster_ensuring_permission(
         cmd,     # pylint: disable=too-many-locals,too-many-statements,too-many-branches
         client,
@@ -4128,15 +4166,15 @@ def _ensure_cluster_identity_permission_on_kubelet_identity(cmd, cluster_identit
                                 'permission to cluster identity at scope {}'.format(scope))
 
 
-def aks_snapshot_create(cmd,    # pylint: disable=too-many-locals,too-many-statements,too-many-branches
-                        client,
-                        resource_group_name,
-                        name,
-                        nodepool_id,
-                        location=None,
-                        tags=None,
-                        aks_custom_headers=None,
-                        no_wait=False):
+def aks_nodepool_snapshot_create(cmd,    # pylint: disable=too-many-locals,too-many-statements,too-many-branches
+                                 client,
+                                 resource_group_name,
+                                 snapshot_name,
+                                 nodepool_id,
+                                 location=None,
+                                 tags=None,
+                                 aks_custom_headers=None,
+                                 no_wait=False):
 
     rg_location = get_rg_location(cmd.cli_ctx, resource_group_name)
     if location is None:
@@ -4152,7 +4190,7 @@ def aks_snapshot_create(cmd,    # pylint: disable=too-many-locals,too-many-state
     )
 
     snapshot = Snapshot(
-        name=name,
+        name=snapshot_name,
         tags=tags,
         location=location,
         creation_data=creationData
@@ -4166,29 +4204,29 @@ def aks_snapshot_create(cmd,    # pylint: disable=too-many-locals,too-many-state
         default_value={},
         allow_appending_values_to_same_key=True,
     )
-    return client.create_or_update(resource_group_name, name, snapshot, headers=aks_custom_headers)
+    return client.create_or_update(resource_group_name, snapshot_name, snapshot, headers=aks_custom_headers)
 
 
-def aks_snapshot_show(cmd, client, resource_group_name, name):   # pylint: disable=unused-argument
-    snapshot = client.get(resource_group_name, name)
+def aks_nodepool_snapshot_show(cmd, client, resource_group_name, snapshot_name):   # pylint: disable=unused-argument
+    snapshot = client.get(resource_group_name, snapshot_name)
     return snapshot
 
 
-def aks_snapshot_delete(cmd,    # pylint: disable=unused-argument
-                        client,
-                        resource_group_name,
-                        name,
-                        no_wait=False,
-                        yes=False):
+def aks_nodepool_snapshot_delete(cmd,    # pylint: disable=unused-argument
+                                 client,
+                                 resource_group_name,
+                                 snapshot_name,
+                                 no_wait=False,
+                                 yes=False):
 
-    msg = 'This will delete the snapshot "{}" in resource group "{}", Are you sure?'.format(name, resource_group_name)
+    msg = 'This will delete the snapshot "{}" in resource group "{}", Are you sure?'.format(snapshot_name, resource_group_name)
     if not yes and not prompt_y_n(msg, default="n"):
         return None
 
-    return client.delete(resource_group_name, name)
+    return client.delete(resource_group_name, snapshot_name)
 
 
-def aks_snapshot_list(cmd, client, resource_group_name=None):  # pylint: disable=unused-argument
+def aks_nodepool_snapshot_list(cmd, client, resource_group_name=None):  # pylint: disable=unused-argument
     if resource_group_name is None or resource_group_name == '':
         return client.list()
 
