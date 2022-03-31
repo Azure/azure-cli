@@ -728,17 +728,6 @@ def storage_blob_delete_batch(client, source, source_container_name, pattern=Non
         logger.warning('%s of %s blobs not deleted due to "Failed Precondition"', num_failures, len(source_blobs))
 
 
-def make_blob_url(url=None, protocol=None, sas_token=None, snapshot=None):
-    if snapshot and sas_token:
-        url = '{}?snapshot={}&{}'.format(url, snapshot, sas_token)
-    elif snapshot:
-        url = '{}?snapshot={}'.format(url, snapshot)
-    elif sas_token:
-        url = '{}?{}'.format(url, sas_token)
-
-    return url
-
-
 def generate_sas_blob_uri(cmd, client, permission=None, expiry=None, start=None, id=None, ip=None,  # pylint: disable=redefined-builtin
                           protocol=None, cache_control=None, content_disposition=None,
                           content_encoding=None, content_language=None,
@@ -760,8 +749,8 @@ def generate_sas_blob_uri(cmd, client, permission=None, expiry=None, start=None,
     blob_url = kwargs.pop('blob_url')
     container_name = kwargs.pop('container_name')
     blob_name = kwargs.pop('blob_name')
+    t_blob_client = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_BLOB, '_blob_client#BlobClient')
     if blob_url:
-        t_blob_client = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_BLOB, '_blob_client#BlobClient')
         if as_user:
             credential = client.credential._credential
         else:
@@ -781,8 +770,9 @@ def generate_sas_blob_uri(cmd, client, permission=None, expiry=None, start=None,
                                     content_language=content_language, content_type=content_type, **kwargs)
 
     if full_uri:
-        return encode_url_path(make_blob_url(url=blob_url, protocol=protocol,
-                                             sas_token=quote(sas_token, safe='&%()$=\',~')))
+        blob_client = t_blob_client(account_url=client.url, container_name=container_name, blob_name=blob_name,
+                                    snapshot=snapshot, credential=sas_token)
+        return encode_url_path(blob_client.url)
     return quote(sas_token, safe='&%()$=\',~')
 
 
