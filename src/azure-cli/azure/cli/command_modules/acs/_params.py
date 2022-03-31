@@ -317,6 +317,8 @@ def load_arguments(self, _):
         c.argument('enable_sgxquotehelper', action='store_true')
         c.argument('enable_fips_image', action='store_true')
         c.argument('snapshot_id', validator=validate_snapshot_id)
+        c.argument('kubelet_config')
+        c.argument('linux_os_config')
 
     with self.argument_context('aks update') as c:
         c.argument('enable_cluster_autoscaler', options_list=[
@@ -474,6 +476,8 @@ def load_arguments(self, _):
         c.argument('enable_ultra_ssd', options_list=['--enable-ultra-ssd'], action='store_true')
         c.argument('enable_fips_image', action='store_true')
         c.argument('snapshot_id', validator=validate_snapshot_id)
+        c.argument('kubelet_config')
+        c.argument('linux_os_config')
 
     with self.argument_context('aks nodepool upgrade') as c:
         c.argument('snapshot_id', validator=validate_snapshot_id)

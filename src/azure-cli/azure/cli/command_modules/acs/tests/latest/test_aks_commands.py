@@ -40,7 +40,9 @@ def _process_sp_name(sp_name):
     from azure.cli.core.util import is_guid
     return sp_name if is_guid(sp_name) else 'http://{}'.format(sp_name)
 
-
+def _get_test_data_file(filename):
+    curr_dir = os.path.dirname(os.path.realpath(__file__))
+    return os.path.join(curr_dir, 'data', filename)
 class AzureKubernetesServiceScenarioTest(ScenarioTest):
     def __init__(self, method_name):
         super(AzureKubernetesServiceScenarioTest, self).__init__(
@@ -6506,7 +6508,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
-
     @live_only()
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
@@ -6577,7 +6578,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # delete
         self.cmd(f'aks delete -g {resource_group} -n {aks_name} --yes --no-wait', checks=[self.is_empty()])
-
 
     @live_only()
     @AllowLargeResponse()
@@ -6729,4 +6729,34 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(runCommand, [
             self.check('provisioningState', 'Succeeded'),
             self.check('exitCode', 0),
+        ])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_create_with_node_config(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'kc_path': _get_test_data_file('kubeletconfig.json'),
+            'oc_path': _get_test_data_file('linuxosconfig.json')
+        })
+
+        # use custom feature so it does not require subscription to regiter the feature
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --generate-ssh-keys ' \
+                     '--kubelet-config={kc_path} --linux-os-config={oc_path} -o json'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('agentPoolProfiles[0].kubeletConfig.cpuManagerPolicy', 'static'),
+            self.check('agentPoolProfiles[0].linuxOsConfig.swapFileSizeMb', 1500),
+            self.check('agentPoolProfiles[0].linuxOsConfig.sysctls.netIpv4TcpTwReuse', True)
+        ])
+
+        # nodepool add
+        nodepool_cmd = 'aks nodepool add --resource-group={resource_group} --cluster-name={name} --name=nodepool2 --node-count=1 ' \
+                       '--kubelet-config={kc_path} --linux-os-config={oc_path}'
+        self.cmd(nodepool_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('kubeletConfig.cpuCfsQuotaPeriod', '200ms'),
+            self.check('linuxOsConfig.sysctls.netCoreSomaxconn', 163849)
         ])

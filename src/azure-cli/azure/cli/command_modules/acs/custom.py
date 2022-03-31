@@ -59,7 +59,7 @@ from azure.cli.core._profile import Profile
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
 from azure.cli.core.keys import is_valid_ssh_rsa_public_key
-from azure.cli.core.util import in_cloud_console, shell_safe_json_parse, truncate_text, sdk_no_wait
+from azure.cli.core.util import get_file_json, in_cloud_console, shell_safe_json_parse, truncate_text, sdk_no_wait
 from azure.cli.core.commands import LongRunningOperation
 from azure.graphrbac.models import (ApplicationCreateParameters,
                                     ApplicationUpdateParameters,
@@ -2008,6 +2008,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                gmsa_dns_server=None,
                gmsa_root_domain_name=None,
                snapshot_id=None,
+               kubelet_config=None,
+               linux_os_config=None,
                ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -3140,6 +3142,8 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
                       spot_max_price=float('nan'),
                       tags=None,
                       labels=None,
+                      kubelet_config=None,
+                      linux_os_config=None,
                       max_surge=None,
                       mode="User",
                       enable_encryption_at_host=False,
@@ -3244,6 +3248,12 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
 
     if node_osdisk_type:
         agent_pool.os_disk_type = node_osdisk_type
+
+    if kubelet_config:
+        agent_pool.kubelet_config = _get_kubelet_config(kubelet_config)
+
+    if linux_os_config:
+        agent_pool.linux_os_config = _get_linux_os_config(linux_os_config)
 
     # custom headers
     aks_custom_headers = extract_comma_separated_string(
@@ -4235,3 +4245,24 @@ def aks_nodepool_snapshot_list(cmd, client, resource_group_name=None):  # pylint
         return client.list()
 
     return client.list_by_resource_group(resource_group_name)
+
+
+def _get_kubelet_config(file_path):
+    if not os.path.isfile(file_path):
+        raise InvalidArgumentValueError("{} is not valid file, or not accessable.".format(file_path))
+    kubelet_config = get_file_json(file_path)
+    if not isinstance(kubelet_config, dict):
+        msg = "Error reading kubelet configuration at {}. Please see https://aka.ms/CustomNodeConfig for proper format."
+        raise InvalidArgumentValueError(msg.format(file_path))
+    return kubelet_config
+
+
+def _get_linux_os_config(file_path):
+    if not os.path.isfile(file_path):
+        raise InvalidArgumentValueError("{} is not valid file, or not accessable.".format(file_path))
+    os_config = get_file_json(file_path)
+    if not isinstance(os_config, dict):
+        msg = "Error reading Linux OS configuration at {}. \
+            Please see https://aka.ms/CustomNodeConfig for proper format."
+        raise InvalidArgumentValueError(msg.format(file_path))
+    return os_config
