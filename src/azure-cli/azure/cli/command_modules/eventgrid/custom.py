@@ -11,6 +11,7 @@ from knack.util import CLIError
 from msrestazure.tools import parse_resource_id
 from dateutil.parser import parse   # pylint: disable=import-error,relative-import
 
+from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
 from azure.mgmt.eventgrid.models import (
     EventSubscription,
     EventSubscriptionUpdateParameters,
@@ -1648,7 +1649,8 @@ def _get_identity_type_with_checks(
     elif identity_type_name is None and user_identity_properties is not None and mi_system_assigned is not None:
         result = IDENTITY_MIXED_MODE
     elif identity_type_name is not None and (user_identity_properties is not None or mi_system_assigned is not None):
-        raise CLIError('usage error: cannot use --identity together with --mi-system-assigned or --mi-user-assigned')
+        raise MutuallyExclusiveArgumentError(
+            'usage error: cannot use --identity together with --mi-system-assigned or --mi-user-assigned')
 
     return result
 
