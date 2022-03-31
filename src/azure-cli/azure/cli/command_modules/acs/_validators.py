@@ -283,12 +283,19 @@ def validate_nodepool_tags(ns):
 
 
 def validate_vnet_subnet_id(namespace):
-    if namespace.vnet_subnet_id is not None:
-        if namespace.vnet_subnet_id == '':
-            return
-        from msrestazure.tools import is_valid_resource_id
-        if not is_valid_resource_id(namespace.vnet_subnet_id):
-            raise CLIError("--vnet-subnet-id is not a valid Azure resource ID.")
+    _validate_subnet_id(namespace.vnet_subnet_id, "--vnet-subnet-id")
+
+
+def validate_pod_subnet_id(namespace):
+    _validate_subnet_id(namespace.pod_subnet_id, "--pod-subnet-id")
+
+
+def _validate_subnet_id(subnet_id, name):
+    if subnet_id is None or subnet_id == '':
+        return
+    from msrestazure.tools import is_valid_resource_id
+    if not is_valid_resource_id(subnet_id):
+        raise InvalidArgumentValueError(name + " is not a valid Azure resource ID.")
 
 
 def validate_ppg(namespace):
