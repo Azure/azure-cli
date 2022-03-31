@@ -267,7 +267,8 @@ def create_afd_origin(client: AFDOriginsOperations,
                       https_port: int = 443,
                       origin_host_header: Optional[str] = None,
                       priority: int = 1,
-                      weight: int = 1000):
+                      weight: int = 1000,
+                      enforce_certificate_name_check: bool = True):
 
     shared_private_link_resource = None
     if enable_private_link:
@@ -289,7 +290,8 @@ def create_afd_origin(client: AFDOriginsOperations,
                                    priority=priority,
                                    weight=weight,
                                    shared_private_link_resource=shared_private_link_resource,
-                                   enabled_state=enabled_state))
+                                   enabled_state=enabled_state,
+                                   enforce_certificate_name_check=enforce_certificate_name_check))
 
 
 def update_afd_origin(client: AFDOriginsOperations,
@@ -308,7 +310,8 @@ def update_afd_origin(client: AFDOriginsOperations,
                       private_link_resource: str = None,
                       private_link_location: str = None,
                       private_link_sub_resource_type: str = None,
-                      private_link_request_message: str = None):
+                      private_link_request_message: str = None,
+                      enforce_certificate_name_check: bool = None):
 
     existing = client.get(resource_group_name, profile_name, origin_group_name, origin_name)
     origin = AFDOrigin(
@@ -318,12 +321,14 @@ def update_afd_origin(client: AFDOriginsOperations,
         origin_host_header=origin_host_header,
         priority=priority,
         weight=weight,
-        enabled_state=enabled_state)
+        enabled_state=enabled_state,
+        enforce_certificate_name_check=enforce_certificate_name_check)
 
     _update_mapper(
         existing,
         origin,
-        ["host_name", "http_port", "https_port", "origin_host_header", "priority", "weight", "enabled_state"])
+        ["host_name", "http_port", "https_port", "origin_host_header",
+         "priority", "weight", "enabled_state", "enforce_certificate_name_check"])
 
     if enable_private_link is not None and not enable_private_link:
         origin.shared_private_link_resource = None
@@ -495,7 +500,7 @@ def update_afd_route(cmd,
             origin_group = f'/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}' \
                            f'/providers/Microsoft.Cdn/profiles/{profile_name}/originGroups/{origin_group}'
 
-        route.origin_group = origin_group
+        route.origin_group = ResourceReference(id=origin_group)
 
     if rule_sets is not None:
         formatted_rule_sets = []
