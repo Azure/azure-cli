@@ -1,8 +1,9 @@
 interactions:
 - request:
-    body: '{"location": "centralindia", "identity": {"type": "None"}, "properties":
-      {"storageAccounts": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002",
-      "type": "Primary"}]}}'
+    body: '{"location": "centralindia", "properties": {"storageAccounts": [{"id":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002",
+      "type": "Primary"}], "keyDelivery": {"accessControl": {"defaultAction": "Allow",
+      "ipAllowList": []}}, "publicNetworkAccess": "Enabled"}}'
     headers:
       Accept:
       - application/json
@@ -13,34 +14,35 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '337'
+      - '352'
       Content-Type:
       - application/json
       ParameterSetName:
       - -n -g --storage-account -l
       User-Agent:
-      - AZURECLI/2.24.2 (MSI) azsdk-python-mgmt-media/7.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.32.0 azsdk-python-mgmt-media/8.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003?api-version=2021-06-01
   response:
     body:
       string: "{\r\n  \"name\":\"ams000003\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003\",\"type\":\"Microsoft.Media/mediaservices\",\"location\":\"Central
-        India\",\"properties\":{\r\n    \"mediaServiceId\":\"c89650ce-2f17-4c17-9ee5-a397ca92fb7a\",\"storageAccounts\":[\r\n
+        India\",\"properties\":{\r\n    \"mediaServiceId\":\"e5b5b473-05b1-49bc-87c0-0d5110b92084\",\"storageAccounts\":[\r\n
         \     {\r\n        \"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002\",\"type\":\"Primary\"\r\n
         \     }\r\n    ],\"storageAuthentication\":\"System\",\"encryption\":{\r\n
         \     \"type\":\"SystemKey\"\r\n    },\"keyDelivery\":{\r\n      \"accessControl\":{\r\n
         \       \"defaultAction\":\"Allow\",\"ipAllowList\":[\r\n          \r\n        ]\r\n
-        \     }\r\n    }\r\n  },\"systemData\":{\r\n    \"createdBy\":\"phcooper@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2021-07-30T18:59:39.2974232Z\",\"lastModifiedBy\":\"phcooper@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2021-07-30T18:59:39.2974232Z\"\r\n
-        \ },\"identity\":{\r\n    \"type\":\"None\"\r\n  }\r\n}"
+        \     }\r\n    },\"publicNetworkAccess\":\"Enabled\"\r\n  },\"systemData\":{\r\n
+        \   \"createdBy\":\"hivyas@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2022-03-28T23:29:05.7924283Z\",\"lastModifiedBy\":\"hivyas@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2022-03-28T23:29:05.7924283Z\"\r\n
+        \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1162'
+      - '1018'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Fri, 30 Jul 2021 18:59:42 GMT
+      - Mon, 28 Mar 2022 23:29:09 GMT
       expires:
       - '-1'
       odata-version:
@@ -54,7 +56,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1196'
     status:
       code: 201
       message: Created
@@ -76,23 +78,24 @@ interactions:
       ParameterSetName:
       - -a -n -g
       User-Agent:
-      - AZURECLI/2.24.2 (MSI) azsdk-python-mgmt-media/7.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.32.0 azsdk-python-mgmt-media/8.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/assets/asset000004?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/assets/asset000004?api-version=2021-06-01
   response:
     body:
       string: "{\r\n  \"name\":\"asset000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/assets/asset000004\",\"type\":\"Microsoft.Media/mediaservices/assets\",\"properties\":{\r\n
-        \   \"assetId\":\"c862627e-b281-42e6-afbf-722473290437\",\"created\":\"2021-07-30T18:59:44.827Z\",\"lastModified\":\"2021-07-30T18:59:44.827Z\",\"storageAccountName\":\"clitest000002\",\"storageEncryptionFormat\":\"None\"\r\n
+        \   \"assetId\":\"91f64e8b-1276-4f06-b2c6-5992f3f40ff9\",\"created\":\"2022-03-28T23:29:11.47Z\",\"lastModified\":\"2022-03-28T23:29:11.47Z\",\"storageAccountName\":\"clitest000002\",\"storageEncryptionFormat\":\"None\"\r\n
+        \ },\"systemData\":{\r\n    \"createdBy\":\"hivyas@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2022-03-28T23:29:10.0569855Z\",\"lastModifiedBy\":\"hivyas@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2022-03-28T23:29:10.0569855Z\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '532'
+      - '697'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Fri, 30 Jul 2021 18:59:46 GMT
+      - Mon, 28 Mar 2022 23:29:12 GMT
       expires:
       - '-1'
       odata-version:
@@ -122,29 +125,31 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '101'
+      - '100'
       Content-Type:
       - application/json
       ParameterSetName:
       - -n -a -g --streaming-policy-name --asset-name
       User-Agent:
-      - AZURECLI/2.24.2 (MSI) azsdk-python-mgmt-media/7.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.32.0 azsdk-python-mgmt-media/8.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/streamingLocators/str000005?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/streamingLocators/str000005?api-version=2021-06-01
   response:
     body:
       string: "{\r\n  \"name\":\"str000005\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/streamingLocators/str000005\",\"type\":\"Microsoft.Media/mediaservices/streamingLocators\",\"properties\":{\r\n
-        \   \"assetName\":\"asset000004\",\"created\":\"2021-07-30T18:59:47.8452738Z\",\"endTime\":\"9999-12-31T23:59:59.9999999Z\",\"streamingLocatorId\":\"15f948ce-aa09-49f6-b71d-efde86a5e858\",\"streamingPolicyName\":\"Predefined_ClearStreamingOnly\",\"contentKeys\":[\r\n
-        \     \r\n    ],\"filters\":[\r\n      \r\n    ]\r\n  }\r\n}"
+        \   \"assetName\":\"asset000004\",\"created\":\"2022-03-28T23:29:14.764452Z\",\"endTime\":\"9999-12-31T23:59:59.9999999Z\",\"streamingLocatorId\":\"c903bcb4-2f7d-4c2d-9745-33cc098a3937\",\"streamingPolicyName\":\"Predefined_ClearStreamingOnly\",\"contentKeys\":[\r\n
+        \     \r\n    ],\"filters\":[\r\n      \r\n    ]\r\n  },\"systemData\":{\r\n
+        \   \"createdBy\":\"hivyas@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2022-03-28T23:29:13.3560206Z\",\"lastModifiedBy\":\"hivyas@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2022-03-28T23:29:13.3560206Z\"\r\n
+        \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '626'
+      - '798'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Fri, 30 Jul 2021 18:59:47 GMT
+      - Mon, 28 Mar 2022 23:29:14 GMT
       expires:
       - '-1'
       odata-version:
@@ -178,22 +183,22 @@ interactions:
       ParameterSetName:
       - -a -n -g
       User-Agent:
-      - AZURECLI/2.24.2 (MSI) azsdk-python-mgmt-media/7.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.32.0 azsdk-python-mgmt-media/8.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/assets/asset000004/listStreamingLocators?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/assets/asset000004/listStreamingLocators?api-version=2021-06-01
   response:
     body:
-      string: "{\r\n  \"streamingLocators\":[\r\n    {\r\n      \"name\":\"str000005\",\"assetName\":\"asset000004\",\"created\":\"2021-07-30T18:59:47.847Z\",\"endTime\":\"9999-12-31T23:59:59.997Z\",\"streamingLocatorId\":\"15f948ce-aa09-49f6-b71d-efde86a5e858\",\"streamingPolicyName\":\"Predefined_ClearStreamingOnly\"\r\n
+      string: "{\r\n  \"streamingLocators\":[\r\n    {\r\n      \"name\":\"str000005\",\"assetName\":\"asset000004\",\"created\":\"2022-03-28T23:29:14.763Z\",\"endTime\":\"9999-12-31T23:59:59.997Z\",\"streamingLocatorId\":\"c903bcb4-2f7d-4c2d-9745-33cc098a3937\",\"streamingPolicyName\":\"Predefined_ClearStreamingOnly\"\r\n
         \   }\r\n  ]\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '292'
+      - '288'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Fri, 30 Jul 2021 18:59:49 GMT
+      - Mon, 28 Mar 2022 23:29:15 GMT
       expires:
       - '-1'
       odata-version:

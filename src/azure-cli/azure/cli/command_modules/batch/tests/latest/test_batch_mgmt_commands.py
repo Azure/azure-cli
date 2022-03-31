@@ -5,7 +5,7 @@
 
 import tempfile
 import time
-
+import sys
 from azure.cli.testsdk import (
     ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, LiveScenarioTest)
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
@@ -95,7 +95,7 @@ class BatchMgmtScenarioTests(ScenarioTest):
         self.cmd('batch account list -g {rg}').assert_with_checks(self.is_empty())
 
         self.cmd('batch location quotas show -l {loc}').assert_with_checks(
-            [self.check('accountQuota', 1000)])
+            [self.check('accountQuota', 1)])
 
         self.cmd('batch location list-skus -l {loc} --query "[0:20]"').assert_with_checks([
             self.check('length(@)', 20), # Ensure at least 20 entries
@@ -111,11 +111,62 @@ class BatchMgmtApplicationScenarioTests(ScenarioTest):
             StorageSASReplacer()
         ])
 
+
+    @ResourceGroupPreparer(location='eastus')
+    @StorageAccountPreparer(location='eastus', name_prefix='clibatchteststor')
+    def test_batch_privateendpoint_cmd(self, resource_group, storage_account):
+        account_name = self.create_random_name(prefix='clibatchtestacct', length=24)
+        vnet_name = self.create_random_name(prefix='clibatchtestvn', length=24)
+        pe_name = self.create_random_name(prefix='clibatchtestpe', length=24)
+
+        _, package_file_name = tempfile.mkstemp()
+
+        
+        self.kwargs.update({
+            'rg': resource_group,
+            'str_n': storage_account,
+            'loc': 'eastus',
+            'acc': account_name,
+            'app': 'testapp',
+            'app_p': '1.0',
+            'app_f': package_file_name,
+            'vnetname': vnet_name,
+            'pename': pe_name
+        })
+
+        # test create account with default set
+        batchaccount = self.cmd('batch account create -g {rg} -n {acc} -l {loc} --storage-account {str_n} --public-network-access Disabled').assert_with_checks([
+            self.check('name', '{acc}'),
+            self.check('location', '{loc}'),
+            self.check('resourceGroup', '{rg}')]).get_output_in_json()
+        
+        self.kwargs['accountId'] = batchaccount['id']
+
+        # create private endpoint
+        self.cmd('network vnet create --resource-group {rg} --name {vnetname} -l {loc}')
+        self.cmd('network vnet subnet create --resource-group {rg} --name default --vnet-name {vnetname} --address-prefixes 10.0.0.0/24')
+        self.cmd('network vnet subnet update --name default --resource-group {rg} --vnet-name {vnetname} --disable-private-endpoint-network-policies true')
+        self.cmd('network private-endpoint create -g {rg} -n {pename} --vnet-name {vnetname} --subnet default --private-connection-resource-id {accountId} --group-id batchAccount --connection-name {pename} -l {loc}')
+       
+        self.cmd('batch private-link-resource list --account-name {acc} --resource-group {rg}').assert_with_checks([
+             self.check('length(@)', 1),
+            self.check('[0].name', '{acc}')])
+
+        self.cmd('batch private-link-resource show --account-name {acc} --resource-group {rg} --name {acc}').assert_with_checks([
+             self.check('name', '{acc}')])
+
+        endpoints = self.cmd('batch private-endpoint-connection list --account-name {acc} --resource-group {rg}').get_output_in_json()
+        self.kwargs['endpointId'] = endpoints[0]['name']
+        self.cmd('batch private-endpoint-connection show --account-name {acc} --resource-group {rg} --name {endpointId}').assert_with_checks([
+             self.check('name', '{endpointId}')])
+
+
     @ResourceGroupPreparer(location='eastus')
     @StorageAccountPreparer(location='eastus', name_prefix='clibatchteststor')
     def test_batch_application_cmd(self, resource_group, storage_account):
         account_name = self.create_random_name(prefix='clibatchtestacct', length=24)
 
+        
         _, package_file_name = tempfile.mkstemp()
 
         self.kwargs.update({

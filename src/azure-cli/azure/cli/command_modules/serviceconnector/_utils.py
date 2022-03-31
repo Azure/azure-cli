@@ -212,7 +212,7 @@ def get_auth_if_no_valid_key_vault_connection(logger, source_name, source_id, ke
     client_id = None
     subscription_id = None
 
-    if len(key_vault_connections) > 0:
+    if key_vault_connections:
         from ._resource_config import RESOURCE
         from msrestazure.tools import (
             is_valid_resource_id

@@ -89,7 +89,7 @@ def cli_namespace_update(cmd, client, instance, tags=None, sku=None, capacity=No
         if capacity:
             instance.sku.capacity = capacity
 
-        if is_auto_inflate_enabled:
+        if is_auto_inflate_enabled is not None:
             instance.is_auto_inflate_enabled = is_auto_inflate_enabled
 
         if maximum_throughput_units:
@@ -248,13 +248,15 @@ def cli_eheventhub_update(cmd, instance, message_retention_in_days=None, partiti
         if status:
             instance.status = status
 
-        if enabled and not instance.capture_description:
+        if enabled is not None and not instance.capture_description:
             instance.capture_description = capturedescription()
             instance.capture_description.destination = destination()
             instance.capture_description.encoding = encodingcapturedescription.avro
             instance.capture_description.enabled = enabled
 
         if instance.capture_description:
+            if enabled is not None:
+                instance.capture_description.enabled = enabled
             if capture_interval_seconds:
                 instance.capture_description.interval_in_seconds = capture_interval_seconds
             if capture_size_limit_bytes:

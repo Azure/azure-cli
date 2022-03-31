@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from typing import Dict, Tuple, TypeVar, Union
+from typing import Dict, List, Tuple, TypeVar, Union
 
 from azure.cli.command_modules.acs._client_factory import cf_agent_pools
 from azure.cli.command_modules.acs._consts import (
@@ -170,7 +170,10 @@ class AKSAgentPoolContext(BaseAKSContext):
         :return: string
         """
         # read the original value passed by the command
-        cluster_name = self.raw_param.get("cluster_name")
+        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+            cluster_name = self.raw_param.get("name")
+        else:
+            cluster_name = self.raw_param.get("cluster_name")
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
@@ -553,6 +556,62 @@ class AKSAgentPoolContext(BaseAKSContext):
         """
         return self._get_node_vm_size(read_only=False)
 
+    def get_nodepool_labels(self) -> Union[Dict[str, str], None]:
+        """Obtain the value of nodepool_labels.
+
+        :return: dictionary or None
+        """
+        # read the original value passed by the command
+        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+            nodepool_labels = self.raw_param.get("nodepool_labels")
+        else:
+            nodepool_labels = self.raw_param.get("labels")
+
+        # try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.agentpool and self.agentpool.node_labels is not None:
+            nodepool_labels = self.agentpool.node_labels
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return nodepool_labels
+
+    def get_nodepool_tags(self) -> Union[Dict[str, str], None]:
+        """Obtain the value of nodepool_tags.
+
+        :return: dictionary or None
+        """
+        # read the original value passed by the command
+        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+            nodepool_tags = self.raw_param.get("nodepool_tags")
+        else:
+            nodepool_tags = self.raw_param.get("tags")
+
+        # try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.agentpool and self.agentpool.tags is not None:
+            nodepool_tags = self.agentpool.tags
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return nodepool_tags
+
+    def get_node_taints(self) -> Union[List[str], None]:
+        """Obtain the value of node_taints.
+
+        :return: empty list, list of strings or None
+        """
+        # read the original value passed by the command
+        node_taints = self.raw_param.get("node_taints")
+        # normalize, keep None as None
+        if node_taints is not None:
+            node_taints = [x.strip() for x in (node_taints.split(",") if node_taints else [])]
+
+        # try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.agentpool and self.agentpool.node_taints is not None:
+            node_taints = self.agentpool.node_taints
+
+        # this parameter does not need validation
+        return node_taints
+
     def get_aks_custom_headers(self) -> Dict[str, str]:
         """Obtain the value of aks_custom_headers.
 
@@ -724,6 +783,18 @@ class AKSAgentPoolAddDecorator:
         agentpool.vm_size = self.context.get_node_vm_size()
         return agentpool
 
+    def set_up_label_tag_taint(self, agentpool: AgentPool) -> AgentPool:
+        """Set up label, tag, taint for the AgentPool object.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        agentpool.tags = self.context.get_nodepool_tags()
+        agentpool.node_labels = self.context.get_nodepool_labels()
+        agentpool.node_taints = self.context.get_node_taints()
+        return agentpool
+
     def construct_default_agentpool_profile(self) -> AgentPool:
         """The overall controller used to construct the default AgentPool profile.
 
@@ -742,6 +813,8 @@ class AKSAgentPoolAddDecorator:
         agentpool = self.set_up_auto_scaler_properties(agentpool)
         # set up snapshot properties
         agentpool = self.set_up_snapshot_properties(agentpool)
+        # set up label, tag, taint
+        agentpool = self.set_up_label_tag_taint(agentpool)
         return agentpool
 
     # pylint: disable=protected-access
