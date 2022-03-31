@@ -31,11 +31,11 @@ class AzureNetAppFilesPoolServiceScenarioTest(ScenarioTest):
         assert pool['tags']['Tag2'] == 'Value2'
 
         pool_list = self.cmd("netappfiles pool list --resource-group {rg} --account-name %s" % account_name).get_output_in_json()
-        assert len(pool_list) is 1
+        assert len(pool_list) == 1
 
         self.cmd("az netappfiles pool delete --resource-group {rg} --account-name '%s' --pool-name '%s'" % (account_name, pool_name))
         pool_list = self.cmd("netappfiles pool list --resource-group {rg} --account-name %s" % account_name).get_output_in_json()
-        assert len(pool_list) is 0
+        assert len(pool_list) == 0
 
         # and again with short forms and also unquoted
         pool = self.cmd("az netappfiles pool create -g {rg} -a %s -p %s -l %s --service-level 'Premium' --size 4 --tags %s" % (account_name, pool_name, LOCATION, tags)).get_output_in_json()
@@ -46,7 +46,7 @@ class AzureNetAppFilesPoolServiceScenarioTest(ScenarioTest):
 
         self.cmd("az netappfiles pool delete --resource-group {rg} -a %s -p %s" % (account_name, pool_name))
         pool_list = self.cmd("netappfiles pool list --resource-group {rg} -a %s" % account_name).get_output_in_json()
-        assert len(pool_list) is 0
+        assert len(pool_list) == 0
 
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_pool_', additional_tags={'owner': 'cli_test'})
     def test_create_pool_too_small(self):

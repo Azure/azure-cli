@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import importlib
+import os
 import unittest
 from unittest.mock import Mock, call, patch
 
@@ -31,6 +32,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_SECRET_ROTATION_ENABLED,
     CONST_VIRTUAL_NODE_ADDON_NAME,
     CONST_VIRTUAL_NODE_SUBNET_NAME,
+    CONST_MONITORING_USING_AAD_MSI_AUTH,
     DecoratorEarlyExitException,
     DecoratorMode,
 )
@@ -66,7 +68,6 @@ from azure.cli.core.profiles import ResourceType
 from azure.core.exceptions import HttpResponseError
 from knack.prompting import NoTTYException
 from knack.util import CLIError
-from msrestazure.azure_exceptions import CloudError
 
 
 class DecoratorFunctionsTestCase(unittest.TestCase):
@@ -2595,6 +2596,7 @@ class AKSContextTestCase(unittest.TestCase):
             "CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME": CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME,
             "CONST_SECRET_ROTATION_ENABLED": CONST_SECRET_ROTATION_ENABLED,
             "CONST_ROTATION_POLL_INTERVAL": CONST_ROTATION_POLL_INTERVAL,
+            "CONST_MONITORING_USING_AAD_MSI_AUTH": CONST_MONITORING_USING_AAD_MSI_AUTH
         }
         self.assertEqual(addon_consts, ground_truth_addon_consts)
 
@@ -4818,6 +4820,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             os_type="Linux",
             os_sku=None,
             vnet_subnet_id=None,
+            pod_subnet_id=None,
             proximity_placement_group_id=None,
             availability_zones=None,
             enable_node_public_ip=False,
@@ -5528,6 +5531,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
                 "location": "test_location",
                 "enable_addons": "monitoring",
                 "workspace_resource_id": "test_workspace_resource_id",
+                "enable-msi-auth-for-monitoring": False
             },
             ResourceType.MGMT_CONTAINERSERVICE,
         )
@@ -5547,7 +5551,8 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             ground_truth_monitoring_addon_profile = self.models.ManagedClusterAddonProfile(
                 enabled=True,
                 config={
-                    CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: "/test_workspace_resource_id"
+                    CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: "/test_workspace_resource_id",
+                    CONST_MONITORING_USING_AAD_MSI_AUTH: None
                 },
             )
             self.assertEqual(
@@ -5807,6 +5812,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
                 "enable_sgxquotehelper": False,
                 "enable_secret_rotation": False,
                 "rotation_poll_interval": None,
+                "enable-msi-auth-for-monitoring": None
             },
             ResourceType.MGMT_CONTAINERSERVICE,
         )
@@ -5845,7 +5851,8 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
                 "appgw_watch_namespace": "test_appgw_watch_namespace",
                 "enable_sgxquotehelper": True,
                 "enable_secret_rotation": True,
-                "rotation_poll_interval": "30m",
+                "rotation_poll_interval": "30m" ,
+                "enable-msi-auth-for-monitoring": False
             },
             ResourceType.MGMT_CONTAINERSERVICE,
         )
@@ -5869,7 +5876,8 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             CONST_MONITORING_ADDON_NAME: self.models.ManagedClusterAddonProfile(
                 enabled=True,
                 config={
-                    CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: "/test_workspace_resource_id"
+                    CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: "/test_workspace_resource_id",
+                    CONST_MONITORING_USING_AAD_MSI_AUTH: None
                 },
             ),
             CONST_VIRTUAL_NODE_ADDON_NAME
@@ -5935,6 +5943,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
                 "appgw_subnet_id": None,
                 "appgw_watch_namespace": None,
                 "enable_sgxquotehelper": False,
+                "useAADAuth": None
             },
             ResourceType.MGMT_CONTAINERSERVICE,
         )
@@ -8314,7 +8323,98 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
             {},
             False,
         )
+    
+    def test_get_kubelet_config(self):
+        # default
+        ctx_1 = AKSContext(
+            self.cmd,
+            {"kubelet_config": None},
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_1.get_kubelet_config(), None)
+        agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
+            name="test_nodepool_name",
+            kubelet_config=self.models.KubeletConfig(pod_max_pids=100),
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", agent_pool_profiles=[agent_pool_profile]
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(
+            ctx_1.get_kubelet_config(),
+            self.models.KubeletConfig(pod_max_pids=100),
+        )
 
+        # custom value
+        ctx_2 = AKSContext(
+            self.cmd,
+            {"kubelet_config": "fake-path"},
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        # fail on invalid file path
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx_2.get_kubelet_config()
+
+        # custom value
+        ctx_3 = AKSContext(
+            self.cmd,
+            {"kubelet_config": _get_test_data_file("invalidconfig.json")},
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        # fail on invalid file content
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx_3.get_kubelet_config()
+
+    def test_get_linux_os_config(self):
+        # default
+        ctx_1 = AKSContext(
+            self.cmd,
+            {"linux_os_config": None},
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_1.get_linux_os_config(), None)
+        agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
+            name="test_nodepool_name",
+            linux_os_config=self.models.LinuxOSConfig(swap_file_size_mb=200),
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", agent_pool_profiles=[agent_pool_profile]
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(
+            ctx_1.get_linux_os_config(),
+            self.models.LinuxOSConfig(swap_file_size_mb=200),
+        )
+
+        # custom value
+        ctx_2 = AKSContext(
+            self.cmd,
+            {"linux_os_config": "fake-path"},
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        # fail on invalid file path
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx_2.get_linux_os_config()
+
+        # custom value
+        ctx_3 = AKSContext(
+            self.cmd,
+            {"linux_os_config": _get_test_data_file("invalidconfig.json")},
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        # fail on invalid file content
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx_3.get_linux_os_config()
+
+def _get_test_data_file(filename):
+    curr_dir = os.path.dirname(os.path.realpath(__file__))
+    return os.path.join(curr_dir, 'data', filename)
 
 if __name__ == "__main__":
     unittest.main()

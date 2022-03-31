@@ -106,7 +106,7 @@ class StorageTableScenarioTests(StorageScenarioMixin, ScenarioTest):
 
         acl = self.storage_cmd('storage table policy list -t {}', account_info,
                                table_name).get_output_in_json().keys()
-        self.assertSetEqual(set(acl), set(['test1', 'test2', 'test3', 'test4']))
+        self.assertSetEqual(set(acl), {'test1', 'test2', 'test3', 'test4'})
 
         self.storage_cmd('storage table policy show -t {} -n test1', account_info,
                          table_name).assert_with_checks(JMESPathCheck('permission', 'a'))
@@ -128,4 +128,4 @@ class StorageTableScenarioTests(StorageScenarioMixin, ScenarioTest):
 
         acl = self.storage_cmd('storage table policy list -t {}', account_info,
                                table_name).get_output_in_json().keys()
-        self.assertSetEqual(set(acl), set(['test2', 'test3', 'test4']))
+        self.assertSetEqual(set(acl), {'test2', 'test3', 'test4'})

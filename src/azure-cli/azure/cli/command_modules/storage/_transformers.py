@@ -4,9 +4,10 @@
 # --------------------------------------------------------------------------------------------
 
 import base64
-from knack.log import get_logger
 from dateutil import parser
-from knack.util import todict, to_camel_case
+from knack.log import get_logger
+from knack.util import to_camel_case, todict
+
 from .track2_util import _encode_bytes
 from .url_quote_util import encode_url_path
 

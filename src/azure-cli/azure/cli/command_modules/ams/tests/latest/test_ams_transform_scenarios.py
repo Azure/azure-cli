@@ -22,7 +22,7 @@ class AmsTransformTests(ScenarioTest):
             'location': 'southindia'
         })
 
-        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}', checks=[
+        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location} --mi-system-assigned --default-action Allow', checks=[
             self.check('name', '{amsname}'),
             self.check('location', 'South India')
         ])
@@ -87,7 +87,7 @@ class AmsTransformTests(ScenarioTest):
             'location': 'centralindia'
         })
 
-        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}', checks=[
+        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location} --mi-system-assigned --default-action Allow', checks=[
             self.check('name', '{amsname}'),
             self.check('location', 'Central India')
         ])
@@ -113,7 +113,7 @@ class AmsTransformTests(ScenarioTest):
             'location': 'westindia'
         })
 
-        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}', checks=[
+        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location} --mi-system-assigned --default-action Allow', checks=[
             self.check('name', '{amsname}'),
             self.check('location', 'West India')
         ])
@@ -143,7 +143,7 @@ class AmsTransformTests(ScenarioTest):
             'location': 'japaneast'
         })
 
-        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
+        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location} --mi-system-assigned --default-action Allow')
 
         transformName = self.create_random_name(prefix='tra', length=10)
 
@@ -171,7 +171,9 @@ class AmsTransformTests(ScenarioTest):
             'insightsToExtract': 'AudioInsightsOnly',
             'resolution': 'SourceResolution',
             'audioAnalysisMode': 'Basic',
-            'videoAnalysisMode': 'Basic'
+            'videoAnalysisMode': 'Basic',
+            'faceAnalysisMode': 'Redact',
+            'blurType': 'Low'
         })
 
         self.cmd('az ams transform output add -a {amsname} -n {transformName} -g {rg} --preset {presetName} --audio-language {audioLanguage} --audio-analysis-mode {audioAnalysisMode}', checks=[
@@ -185,6 +187,6 @@ class AmsTransformTests(ScenarioTest):
             self.check('outputs[3].preset.mode', '{videoAnalysisMode}'),
         ])
 
-        self.cmd('az ams transform output add -a {amsname} -n {transformName} -g {rg} --preset {presetName3} --resolution {resolution}', checks=[
+        self.cmd('az ams transform output add -a {amsname} -n {transformName} -g {rg} --preset {presetName3} --resolution {resolution} --face-detector-mode {faceAnalysisMode} --blur-type {blurType}', checks=[
             self.check('outputs[4].preset.resolution', '{resolution}')
         ])

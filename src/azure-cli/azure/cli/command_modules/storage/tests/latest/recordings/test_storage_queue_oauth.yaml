@@ -13,21 +13,19 @@ interactions:
       Content-Length:
       - '0'
       ParameterSetName:
-      - -n --account-name --fail-on-exist --metadata --auth-mode
+      - -n --metadata --account-name --auth-mode
       User-Agent:
       - AZURECLI/2.34.1 azsdk-python-storage-queue/12.1.6 Python/3.8.7 (Windows-10-10.0.22000-SP0)
       x-ms-date:
-      - Thu, 31 Mar 2022 12:17:37 GMT
+      - Tue, 29 Mar 2022 06:57:06 GMT
       x-ms-meta:
-      - '{''a'': ''b'', ''c'': ''d''}'
-      x-ms-meta-a:
-      - b
-      x-ms-meta-c:
-      - d
+      - '{''key1'': ''value1''}'
+      x-ms-meta-key1:
+      - value1
       x-ms-version:
       - '2018-03-28'
     method: PUT
-    uri: https://clitest000002.queue.core.windows.net/queue000003
+    uri: https://storage000002.queue.core.windows.net/queue000003
   response:
     body:
       string: ''
@@ -35,7 +33,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Thu, 31 Mar 2022 12:17:38 GMT
+      - Tue, 29 Mar 2022 06:57:14 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
@@ -59,11 +57,11 @@ interactions:
       User-Agent:
       - AZURECLI/2.34.1 azsdk-python-storage-queue/12.1.6 Python/3.8.7 (Windows-10-10.0.22000-SP0)
       x-ms-date:
-      - Thu, 31 Mar 2022 12:17:39 GMT
+      - Tue, 29 Mar 2022 06:57:15 GMT
       x-ms-version:
       - '2018-03-28'
     method: GET
-    uri: https://clitest000002.queue.core.windows.net/queue000003?comp=metadata
+    uri: https://storage000002.queue.core.windows.net/queue000003?comp=metadata
   response:
     body:
       string: ''
@@ -73,15 +71,13 @@ interactions:
       content-length:
       - '0'
       date:
-      - Thu, 31 Mar 2022 12:17:42 GMT
+      - Tue, 29 Mar 2022 06:57:16 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       x-ms-approximate-messages-count:
       - '0'
-      x-ms-meta-a:
-      - b
-      x-ms-meta-c:
-      - d
+      x-ms-meta-key1:
+      - value1
       x-ms-version:
       - '2018-03-28'
     status:
@@ -95,37 +91,33 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - storage queue metadata show
+      - storage queue stats
       Connection:
       - keep-alive
       ParameterSetName:
-      - -n --account-name --auth-mode
+      - --account-name --auth-mode
       User-Agent:
       - AZURECLI/2.34.1 azsdk-python-storage-queue/12.1.6 Python/3.8.7 (Windows-10-10.0.22000-SP0)
       x-ms-date:
-      - Thu, 31 Mar 2022 12:17:44 GMT
+      - Tue, 29 Mar 2022 06:57:17 GMT
       x-ms-version:
       - '2018-03-28'
     method: GET
-    uri: https://clitest000002.queue.core.windows.net/queue000003?comp=metadata
+    uri: https://storage000002-secondary.queue.core.windows.net/?restype=service&comp=stats
   response:
     body:
-      string: ''
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><StorageServiceStats><GeoReplication><Status>unavailable</Status><LastSyncTime></LastSyncTime></GeoReplication></StorageServiceStats>"
     headers:
       cache-control:
       - no-cache
-      content-length:
-      - '0'
+      content-type:
+      - application/xml
       date:
-      - Thu, 31 Mar 2022 12:17:44 GMT
+      - Tue, 29 Mar 2022 06:57:20 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
-      x-ms-approximate-messages-count:
-      - '0'
-      x-ms-meta-a:
-      - b
-      x-ms-meta-c:
-      - d
+      transfer-encoding:
+      - chunked
       x-ms-version:
       - '2018-03-28'
     status:
@@ -139,25 +131,21 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - storage queue metadata update
+      - storage queue delete
       Connection:
       - keep-alive
       Content-Length:
       - '0'
       ParameterSetName:
-      - -n --account-name --metadata --auth-mode
+      - -n --account-name --auth-mode
       User-Agent:
       - AZURECLI/2.34.1 azsdk-python-storage-queue/12.1.6 Python/3.8.7 (Windows-10-10.0.22000-SP0)
       x-ms-date:
-      - Thu, 31 Mar 2022 12:17:45 GMT
-      x-ms-meta-e:
-      - f
-      x-ms-meta-g:
-      - h
+      - Tue, 29 Mar 2022 06:57:23 GMT
       x-ms-version:
       - '2018-03-28'
-    method: PUT
-    uri: https://clitest000002.queue.core.windows.net/queue000003?comp=metadata
+    method: DELETE
+    uri: https://storage000002.queue.core.windows.net/queue000003
   response:
     body:
       string: ''
@@ -165,7 +153,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Thu, 31 Mar 2022 12:17:46 GMT
+      - Tue, 29 Mar 2022 06:57:28 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
@@ -173,48 +161,4 @@ interactions:
     status:
       code: 204
       message: No Content
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/xml
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - storage queue metadata show
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n --account-name --auth-mode
-      User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-storage-queue/12.1.6 Python/3.8.7 (Windows-10-10.0.22000-SP0)
-      x-ms-date:
-      - Thu, 31 Mar 2022 12:17:47 GMT
-      x-ms-version:
-      - '2018-03-28'
-    method: GET
-    uri: https://clitest000002.queue.core.windows.net/queue000003?comp=metadata
-  response:
-    body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      date:
-      - Thu, 31 Mar 2022 12:17:47 GMT
-      server:
-      - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
-      x-ms-approximate-messages-count:
-      - '0'
-      x-ms-meta-e:
-      - f
-      x-ms-meta-g:
-      - h
-      x-ms-version:
-      - '2018-03-28'
-    status:
-      code: 200
-      message: OK
 version: 1

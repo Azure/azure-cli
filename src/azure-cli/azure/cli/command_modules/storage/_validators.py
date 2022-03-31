@@ -813,11 +813,15 @@ def get_permission_allowed_values(permission_class):
         for i, item in enumerate(allowed_values):
             if item == 'delete_previous_version':
                 allowed_values[i] = 'x' + item
+            if item == 'permanent_delete':
+                allowed_values[i] = 'y' + item
+            if item == 'set_immutability_policy':
+                allowed_values[i] = 'i' + item
             if item == 'manage_access_control':
                 allowed_values[i] = 'permissions'
             if item == 'manage_ownership':
                 allowed_values[i] = 'ownership'
-        return allowed_values
+        return sorted(allowed_values)
     return None
 
 
@@ -1266,6 +1270,19 @@ def resource_type_type(loader):
     return impl
 
 
+def resource_type_type_v2(loader):
+    """ Returns a function which validates that resource types string contains only a combination of service,
+    container, and object. Their shorthand representations are s, c, and o. """
+
+    def impl(string):
+        t_resources = loader.get_models('_shared.models#ResourceTypes', resource_type=ResourceType.DATA_STORAGE_BLOB)
+        if set(string) - set("sco"):
+            raise ValueError
+        return t_resources.from_string(''.join(set(string)))
+
+    return impl
+
+
 def services_type(loader):
     """ Returns a function which validates that services string contains only a combination of blob, queue, table,
     and file. Their shorthand representations are b, q, t, and f. """
@@ -1275,6 +1292,18 @@ def services_type(loader):
         if set(string) - set("bqtf"):
             raise ValueError
         return t_services(_str=''.join(set(string)))
+
+    return impl
+
+
+def services_type_v2():
+    """ Returns a function which validates that services string contains only a combination of blob, queue, table,
+    and file. Their shorthand representations are b, q, t, and f. """
+
+    def impl(string):
+        if set(string) - set("bqtf"):
+            raise ValueError
+        return ''.join(set(string))
 
     return impl
 

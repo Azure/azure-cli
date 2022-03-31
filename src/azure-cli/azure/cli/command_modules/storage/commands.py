@@ -5,6 +5,7 @@
 
 from azure.cli.command_modules.storage._client_factory import (cf_sa, cf_blob_container_mgmt, blob_data_service_factory,
                                                                page_blob_service_factory, file_data_service_factory,
+                                                               queue_data_service_factory,
                                                                cloud_storage_account_service_factory,
                                                                multi_service_properties_factory,
                                                                cf_mgmt_policy,
@@ -95,7 +96,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
     with self.command_group('storage', command_type=block_blob_sdk,
                             custom_command_type=get_custom_sdk('azcopy', blob_data_service_factory)) as g:
-        g.storage_custom_command('remove', 'storage_remove', is_preview=True)
+        g.storage_custom_command('remove', 'storage_remove')
 
     with self.command_group('storage', custom_command_type=get_custom_sdk('azcopy', None)) as g:
         from ._validators import validate_azcopy_credential
@@ -138,9 +139,11 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                   transform=lambda x: getattr(x, 'keys', x))
         g.command('revoke-delegation-keys', 'revoke_user_delegation_keys', min_api='2019-04-01')
 
-    with self.command_group('storage account',
-                            command_type=get_custom_sdk('account', cloud_storage_account_service_factory)) as g:
-        g.storage_command('generate-sas', 'generate_sas')
+    account_blob_service_custom_sdk = get_custom_sdk('account', client_factory=cf_blob_service,
+                                                     resource_type=ResourceType.DATA_STORAGE_BLOB)
+    with self.command_group('storage account', resource_type=ResourceType.DATA_STORAGE_BLOB,
+                            custom_command_type=account_blob_service_custom_sdk) as g:
+        g.storage_custom_command_oauth('generate-sas', 'generate_sas')
 
     blob_inventory_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.storage.operations#BlobInventoryPoliciesOperations.{}',
@@ -345,6 +348,12 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                        validator=process_blob_download_batch_parameters,
                                        exception_handler=file_related_exception_handler)
 
+    blob_service_custom_sdk = get_custom_sdk('blob', client_factory=cf_blob_service,
+                                             resource_type=ResourceType.DATA_STORAGE_BLOB)
+    with self.command_group('storage blob', resource_type=ResourceType.DATA_STORAGE_BLOB,
+                            custom_command_type=blob_service_custom_sdk) as g:
+        g.storage_custom_command_oauth('generate-sas', 'generate_sas_blob_uri')
+
     blob_lease_client_sdk = CliCommandType(
         operations_tmpl='azure.multiapi.storagev2.blob._lease#BlobLeaseClient.{}',
         client_factory=cf_blob_lease_client,
@@ -371,7 +380,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         # g.storage_command_oauth(
         #     'download', 'get_blob_to_path', table_transformer=transform_blob_output,
         #     exception_handler=file_related_exception_handler)
-        g.storage_custom_command_oauth('generate-sas', 'generate_sas_blob_uri')
         g.storage_custom_command_oauth(
             'url', 'create_blob_url', transform=transform_url)
         g.storage_command_oauth('snapshot', 'snapshot_blob')
@@ -456,10 +464,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                        client_factory=None,
                                        transform=create_boolean_result_output_transformer('created'),
                                        table_transformer=transform_boolean_for_table)
-        g.storage_custom_command_oauth('generate-sas', 'generate_container_shared_access_signature',
-                                       min_api='2018-11-09')
-        g.storage_command_oauth(
-            'generate-sas', 'generate_container_shared_access_signature', max_api='2018-03-28')
         g.storage_command_oauth('exists', 'exists', transform=create_boolean_result_output_transformer('exists'),
                                 table_transformer=transform_boolean_for_table)
         g.storage_command_oauth('set-permission', 'set_container_acl')
@@ -475,8 +479,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command_oauth('lease change', 'change_container_lease')
         g.storage_command_oauth('lease break', 'break_container_lease')
 
-    blob_service_custom_sdk = get_custom_sdk('blob', client_factory=cf_blob_service,
-                                             resource_type=ResourceType.DATA_STORAGE_BLOB)
     with self.command_group('storage container', custom_command_type=blob_service_custom_sdk,
                             resource_type=ResourceType.DATA_STORAGE_BLOB,
                             min_api='2019-02-02') as g:
@@ -486,6 +488,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_custom_command_oauth('list', 'list_containers',
                                        transform=transform_container_list_output,
                                        table_transformer=transform_container_list)
+        g.storage_custom_command_oauth('generate-sas', 'generate_container_shared_access_signature')
 
     blob_service_sdk = CliCommandType(
         operations_tmpl='azure.multiapi.storagev2.blob._blob_service_client#'
@@ -691,10 +694,10 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
         g.storage_custom_command_oauth('create', 'create_queue',
                                        transform=create_boolean_result_output_transformer('created'),
-                                table_transformer=transform_boolean_for_table)
+                                       table_transformer=transform_boolean_for_table)
         g.storage_custom_command_oauth('delete', 'delete_queue',
                                        transform=create_boolean_result_output_transformer('deleted'),
-                                table_transformer=transform_boolean_for_table)
+                                       table_transformer=transform_boolean_for_table)
         g.storage_custom_command(
             'generate-sas', 'generate_queue_sas')
         g.storage_custom_command_oauth('exists', 'queue_exists',

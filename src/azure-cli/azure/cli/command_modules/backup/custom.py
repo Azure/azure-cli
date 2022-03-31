@@ -384,17 +384,20 @@ def show_encryption(client, resource_group_name, vault_name):
 
 
 def set_backup_properties(cmd, client, vault_name, resource_group_name, backup_storage_redundancy=None,
-                          soft_delete_feature_state=None, cross_region_restore_flag=None):
-    if soft_delete_feature_state:
+                          soft_delete_feature_state=None, cross_region_restore_flag=None,
+                          hybrid_backup_security_features=None):
+    if soft_delete_feature_state or hybrid_backup_security_features:
         logger.warning("""
         --backup-storage-redundancy and --cross-region-restore-flag parameters will be ignored if provided.
         """)
-        soft_delete_feature_state += "d"
         vault_config_client = backup_resource_vault_config_cf(cmd.cli_ctx)
         vault_config_response = vault_config_client.get(vault_name, resource_group_name)
-        enhanced_security_state = vault_config_response.properties.enhanced_security_state
+        soft_delete_feature_state = vault_config_response.properties.soft_delete_feature_state if (
+            soft_delete_feature_state is None) else soft_delete_feature_state + "d"
+        hybrid_backup_security_features = vault_config_response.properties.enhanced_security_state if (
+            hybrid_backup_security_features is None) else hybrid_backup_security_features + "d"
         vault_config = BackupResourceVaultConfig(soft_delete_feature_state=soft_delete_feature_state,
-                                                 enhanced_security_state=enhanced_security_state)
+                                                 enhanced_security_state=hybrid_backup_security_features)
         vault_config_resource = BackupResourceVaultConfigResource(properties=vault_config)
         return vault_config_client.update(vault_name, resource_group_name, vault_config_resource)
 

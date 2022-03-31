@@ -307,7 +307,7 @@ for source in SOURCE_RESOURCES:
     # special target resource, independent implementation
     target = RESOURCE.ConfluentKafka
     server_params = ('--bootstrap-server xxx.eastus.azure.confluent.cloud:9092 '
-                     '--kafka-key Name --kafka-secret Secret ')
+                     '--kafka-key Name --kafka-secret Secret')
     registry_params = ('--schema-registry https://xxx.eastus.azure.confluent.cloud '
                        '--schema-key Name --schema-secret Secret')
 
