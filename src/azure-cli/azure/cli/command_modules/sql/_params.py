@@ -1948,7 +1948,8 @@ def load_arguments(self, _):
                    options_list=['--service-principal-type'],
                    arg_type=get_enum_type(ServicePrincipalType),
                    required=False,
-                   help='Service Principal type to be used for this Managed Instance. Possible values are SystemAssigned and None')
+                   help='Service Principal type to be used for this Managed Instance. '
+                   'Possible values are SystemAssigned and None')
 
     with self.argument_context('sql mi update') as c:
         # Create args that will be used to build up the ManagedInstance object
@@ -2002,7 +2003,8 @@ def load_arguments(self, _):
                    options_list=['--service-principal-type'],
                    arg_type=get_enum_type(ServicePrincipalType),
                    required=False,
-                   help='Service Principal type to be used for this Managed Instance. Possible values are SystemAssigned and None')
+                   help='Service Principal type to be used for this Managed Instance. '
+                   'Possible values are SystemAssigned and None')
 
     with self.argument_context('sql mi show') as c:
         c.argument('expand_ad_admin',

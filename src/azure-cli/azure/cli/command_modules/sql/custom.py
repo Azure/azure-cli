@@ -422,16 +422,20 @@ def _get_tenant_id():
     sub = profile.get_subscription()
     return sub['tenantId']
 
+
 def _get_service_principal_object_from_type(servicePrincipalType):
     '''
     Gets the service principal object from type.
     '''
     servicePrincipalResult = None
 
-    if servicePrincipalType is not None and (servicePrincipalType == ServicePrincipalType.system_assigned.value or servicePrincipalType == ServicePrincipalType.none.value):
-        servicePrincipalResult = ServicePrincipal(type=servicePrincipalType)       
+    if (servicePrincipalType is not None and
+        (servicePrincipalType == ServicePrincipalType.system_assigned.value or
+         servicePrincipalType == ServicePrincipalType.none.value)):
+        servicePrincipalResult = ServicePrincipal(type=servicePrincipalType)
 
     return servicePrincipalResult
+
 
 def _get_identity_object_from_type(
         assignIdentityIsPresent,
@@ -614,12 +618,14 @@ class ResourceIdType(Enum):
     system_assigned_user_assigned = 'SystemAssigned,UserAssigned'
     none = 'None'
 
+
 class ServicePrincipalType(Enum):
     '''
     Types of service principal.
     '''
     system_assigned = 'SystemAssigned'
     none = 'None'
+
 
 class SqlManagedInstanceMinimalTlsVersionType(Enum):
     no_tls = "None"
