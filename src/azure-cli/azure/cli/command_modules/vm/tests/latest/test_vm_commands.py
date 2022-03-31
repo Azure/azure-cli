@@ -16,7 +16,7 @@ import uuid
 from azure.cli.testsdk.exceptions import JMESPathCheckAssertionError
 from knack.util import CLIError
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse, record_only, live_only
-from azure.cli.core.azclierror import ArgumentUsageError
+from azure.cli.core.azclierror import ArgumentUsageError, RequiredArgumentMissingError, MutuallyExclusiveArgumentError
 from azure.cli.core.profiles import ResourceType
 from azure.cli.testsdk import (
     ScenarioTest, ResourceGroupPreparer, LiveScenarioTest, api_version_constraint,
@@ -2385,6 +2385,46 @@ class VMDiskAttachDetachTest(ScenarioTest):
             self.check('storageProfile.dataDisks[0].lun', 0)
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli-test-disk-attach-multiple-disks')
+    def test_vm_disk_attach_multiple_disks(self, resource_group):
+
+        self.kwargs.update({
+            'loc': 'westus',
+            'vm': 'vm-attach-multiple-disks-test',
+            'disk1': 'd1',
+            'disk2': 'd2',
+            'disk3': 'd3'
+        })
+
+        self.cmd('vm create -g {rg} --location {loc} -n {vm} --admin-username admin123 --image centos --admin-password testPassword0 --authentication-type password --nsg-rule NONE')
+
+        with self.assertRaisesRegex(RequiredArgumentMissingError, 'Please use --name or --disks to specify the disk names'):
+            self.cmd('vm disk attach -g {rg} --vm-name {vm} --new --size-gb 1 ')
+
+        with self.assertRaisesRegex(MutuallyExclusiveArgumentError, 'You can only specify one of --name and --disks'):
+            self.cmd('vm disk attach -g {rg} --name {disk1} --disks {disk1} {disk2} {disk3} --vm-name {vm} --new --size-gb 1 ')
+
+        with self.assertRaisesRegex(MutuallyExclusiveArgumentError, 'You cannot specify the --lun for multiple disks'):
+            self.cmd('vm disk attach -g {rg} --disks {disk1} {disk2} {disk3} --vm-name {vm} --new --size-gb 1 --lun 2')
+
+        self.cmd('vm disk attach -g {rg} --vm-name {vm} --disks {disk1} {disk2} {disk3} --new --size-gb 1 ')
+
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('length(storageProfile.dataDisks)', 3),
+            self.check('storageProfile.dataDisks[0].name', '{disk1}'),
+            self.check('storageProfile.dataDisks[0].lun', 0),
+            self.check('storageProfile.dataDisks[1].name', '{disk2}'),
+            self.check('storageProfile.dataDisks[1].lun', 1),
+            self.check('storageProfile.dataDisks[2].name', '{disk3}'),
+            self.check('storageProfile.dataDisks[2].lun', 2)
+        ])
+
+        self.cmd('vm disk detach -g {rg} --vm-name {vm} -n {disk1}')
+        self.cmd('vm disk detach -g {rg} --vm-name {vm} -n {disk2}')
+        self.cmd('vm disk detach -g {rg} --vm-name {vm} -n {disk3}')
+        self.cmd('vm show -g {rg} -n {vm}',
+                 checks=self.check('length(storageProfile.dataDisks)', 0))
+
     @ResourceGroupPreparer(name_prefix='cli-test-stdssdk', location='eastus2')
     def test_vm_disk_storage_sku(self, resource_group):
 
@@ -3752,9 +3792,15 @@ class MSIScenarioTest(ScenarioTest):
             'sub': subscription_id
         })
 
+        with self.assertRaisesRegex(ArgumentUsageError, "please specify both --role and --scope"):
+            self.cmd('vm create -g {rg} -n {vm1} --image debian --assign-identity --admin-username admin123 --admin-password PasswordPassword1! --nsg-rule NONE --scope {scope}')
+
+        with self.assertRaisesRegex(ArgumentUsageError, "please specify both --role and --scope"):
+            self.cmd('vm create -g {rg} -n {vm1} --image debian --assign-identity --admin-username admin123 --admin-password PasswordPassword1! --nsg-rule NONE --role Contributor')
+
         with mock.patch('azure.cli.core.commands.arm._gen_guid', side_effect=self.create_guid):
             # create a linux vm with default configuration
-            self.cmd('vm create -g {rg} -n {vm1} --image debian --assign-identity --admin-username admin123 --admin-password PasswordPassword1! --scope {scope} --nsg-rule NONE', checks=[
+            self.cmd('vm create -g {rg} -n {vm1} --image debian --assign-identity --admin-username admin123 --admin-password PasswordPassword1! --scope {scope} --role Contributor --nsg-rule NONE', checks=[
                 self.check('identity.role', 'Contributor'),
                 self.check('identity.scope', '/subscriptions/{sub}/resourceGroups/{rg}'),
             ])
@@ -3790,9 +3836,16 @@ class MSIScenarioTest(ScenarioTest):
             'vmss3': 'vmss3',
             'sub': subscription_id
         })
+
+        with self.assertRaisesRegex(ArgumentUsageError, "please specify both --role and --scope"):
+            self.cmd('vmss create -g {rg} -n {vmss1} --image debian --instance-count 1 --assign-identity --admin-username admin123 --admin-password PasswordPassword1! --scope {scope}')
+
+        with self.assertRaisesRegex(ArgumentUsageError, "please specify both --role and --scope"):
+            self.cmd('vmss create -g {rg} -n {vmss1} --image debian --instance-count 1 --assign-identity --admin-username admin123 --admin-password PasswordPassword1! --role Contributor')
+
         with mock.patch('azure.cli.core.commands.arm._gen_guid', side_effect=self.create_guid):
             # create linux vm with default configuration
-            self.cmd('vmss create -g {rg} -n {vmss1} --image debian --instance-count 1 --assign-identity --admin-username admin123 --admin-password PasswordPassword1! --scope {scope}', checks=[
+            self.cmd('vmss create -g {rg} -n {vmss1} --image debian --instance-count 1 --assign-identity --admin-username admin123 --admin-password PasswordPassword1! --scope {scope} --role Contributor', checks=[
                 self.check('vmss.identity.role', 'Contributor'),
                 self.check('vmss.identity.scope', '/subscriptions/{sub}/resourceGroups/{rg}'),
             ])

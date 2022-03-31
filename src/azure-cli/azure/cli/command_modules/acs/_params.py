@@ -19,12 +19,13 @@ from ._completers import (
     get_vm_size_completion_list, get_k8s_versions_completion_list, get_k8s_upgrades_completion_list, get_ossku_completion_list)
 from ._validators import (
     validate_create_parameters, validate_kubectl_version, validate_kubelogin_version, validate_k8s_version, validate_linux_host_name,
-    validate_list_of_integers, validate_ssh_key, validate_nodes_count,
+    validate_list_of_integers, validate_ssh_key, validate_nodes_count, validate_snapshot_name,
     validate_nodepool_name, validate_vm_set_type, validate_load_balancer_sku, validate_nodepool_id, validate_snapshot_id,
     validate_load_balancer_outbound_ips, validate_priority, validate_eviction_policy, validate_spot_max_price,
     validate_load_balancer_outbound_ip_prefixes, validate_taints, validate_ip_ranges, validate_acr, validate_nodepool_tags,
-    validate_load_balancer_outbound_ports, validate_load_balancer_idle_timeout, validate_vnet_subnet_id, validate_nodepool_labels,
-    validate_ppg, validate_assign_identity, validate_max_surge, validate_assign_kubelet_identity, validate_credential_format)
+    validate_load_balancer_outbound_ports, validate_load_balancer_idle_timeout, validate_vnet_subnet_id, validate_pod_subnet_id,
+    validate_nodepool_labels, validate_ppg, validate_assign_identity, validate_max_surge, validate_assign_kubelet_identity,
+    validate_credential_format)
 from ._consts import (
     CONST_OUTBOUND_TYPE_LOAD_BALANCER,
     CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
@@ -259,6 +260,8 @@ def load_arguments(self, _):
         c.argument('node_osdisk_size', type=int)
         c.argument('vnet_subnet_id', type=str,
                    validator=validate_vnet_subnet_id)
+        c.argument('pod_subnet_id', type=str,
+                   validator=validate_pod_subnet_id)
         c.argument('workspace_resource_id')
         c.argument('enable_msi_auth_for_monitoring', arg_type=get_three_state_flag(), is_preview=True)
         c.argument('skip_subnet_role_assignment', action='store_true')
@@ -314,6 +317,8 @@ def load_arguments(self, _):
         c.argument('enable_sgxquotehelper', action='store_true')
         c.argument('enable_fips_image', action='store_true')
         c.argument('snapshot_id', validator=validate_snapshot_id)
+        c.argument('kubelet_config')
+        c.argument('linux_os_config')
 
     with self.argument_context('aks update') as c:
         c.argument('enable_cluster_autoscaler', options_list=[
@@ -446,6 +451,8 @@ def load_arguments(self, _):
         c.argument('zones', zones_type, options_list=['--zones', '-z'], help='Space-separated list of availability zones where agent nodes will be placed.')
         c.argument('node_vm_size', options_list=['--node-vm-size', '-s'], completer=get_vm_size_completion_list)
         c.argument('max_pods', type=int, options_list=['--max-pods', '-m'])
+        c.argument('vnet_subnet_id', type=str, validator=validate_vnet_subnet_id)
+        c.argument('pod_subnet_id', type=str, validator=validate_pod_subnet_id)
         c.argument('os_type', type=str)
         c.argument('os_sku', completer=get_ossku_completion_list)
         c.argument('enable_cluster_autoscaler', options_list=["--enable-cluster-autoscaler", "-e"], action='store_true')
@@ -469,6 +476,8 @@ def load_arguments(self, _):
         c.argument('enable_ultra_ssd', options_list=['--enable-ultra-ssd'], action='store_true')
         c.argument('enable_fips_image', action='store_true')
         c.argument('snapshot_id', validator=validate_snapshot_id)
+        c.argument('kubelet_config')
+        c.argument('linux_os_config')
 
     with self.argument_context('aks nodepool upgrade') as c:
         c.argument('snapshot_id', validator=validate_snapshot_id)
@@ -531,16 +540,16 @@ def load_arguments(self, _):
         c.argument(
             'workspace_id', help='The resource ID of an existing Log Analytics Workspace to use for storing monitoring data.')
 
-    for scope in ['aks snapshot create']:
+    for scope in ['aks nodepool snapshot create', 'aks snapshot create']:
         with self.argument_context(scope) as c:
-            c.argument('snapshot_name', options_list=['--name', '-n'], required=True, validator=validate_linux_host_name, help='The snapshot name.')
+            c.argument('snapshot_name', options_list=['--name', '-n'], required=True, validator=validate_snapshot_name, help='The nodepool snapshot name.')
             c.argument('tags', tags_type)
             c.argument('nodepool_id', required=True, validator=validate_nodepool_id, help='The nodepool id.')
             c.argument('aks_custom_headers')
 
-    for scope in ['aks snapshot show', 'aks snapshot delete']:
+    for scope in ['aks nodepool snapshot show', 'aks nodepool snapshot delete', 'aks snapshot show', 'aks snapshot delete']:
         with self.argument_context(scope) as c:
-            c.argument('snapshot_name', options_list=['--name', '-n'], required=True, validator=validate_linux_host_name, help='The snapshot name.')
+            c.argument('snapshot_name', options_list=['--name', '-n'], required=True, validator=validate_snapshot_name, help='The nodepool snapshot name.')
             c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
 
 
