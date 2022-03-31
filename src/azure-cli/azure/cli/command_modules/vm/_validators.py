@@ -16,7 +16,7 @@ from knack.log import get_logger
 from knack.util import CLIError
 
 from azure.cli.core.azclierror import (ValidationError, ArgumentUsageError, RequiredArgumentMissingError,
-                                       MutuallyExclusiveArgumentError)
+                                       MutuallyExclusiveArgumentError, CLIInternalError)
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_file_or_dict, validate_parameter_set, validate_tags)
 from azure.cli.core.util import (hash_string, DISALLOWED_USER_NAMES, get_default_admin_username)
@@ -2105,9 +2105,12 @@ def _validate_community_gallery_legal_agreement_acceptance(cmd, namespace):
         return
 
     community_gallery_name, _ = parse_community_gallery_image_id(namespace.image)
-    compute_client = _compute_client_factory(cmd.cli_ctx)
-    community_gallery_info = compute_client.community_galleries.get(namespace.location, community_gallery_name)
-    eula = community_gallery_info.community_metadata.eula
+    from ._client_factory import cf_community_gallery
+    try:
+        community_gallery_info = cf_community_gallery(cmd.cli_ctx).get(namespace.location, community_gallery_name)
+        eula = community_gallery_info.additional_properties['communityMetadata']['eula']
+    except Exception as err:
+        raise CLIInternalError('Get the eula from community gallery failed: {0}'.format(err))
 
     from knack.prompting import prompt_y_n
     msg = "To create the VM/VMSS from community gallery image, you must accept the license agreement and " \
@@ -2117,4 +2120,3 @@ def _validate_community_gallery_legal_agreement_acceptance(cmd, namespace):
     if not prompt_y_n(msg, default="y"):
         import sys
         sys.exit(0)
-
