@@ -159,9 +159,11 @@ def regex_line(line):
             if not enclosed_begin:
                 param = '--'
                 index = idx + 2
+                # get each parameter separate by space or /
                 while index < len(line) and line[index] not in [' ', '/']:
                     param += line[index]
                     index += 1
+                # Check the starting ` character
                 try:
                     assert line[idx - 1] == '`'
                 except:
