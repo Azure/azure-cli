@@ -50,7 +50,7 @@ class AzureNetAppFilesVolumeGroupServiceScenarioTest(ScenarioTest):
                  ])
 
         # Get Volume Group
-        self.cmd("az netappfiles volume-group show -g {rg} -a {acc} -n {vg_name}",
+        self.cmd("az netappfiles volume-group show -g {rg} -a {acc} --volume-group-name {vg_name}",
                  checks=[
                      self.check('name', '{acc}/{vg_name}'),
                      self.check('groupMetaData.groupName', '{vg_name}'),
@@ -80,7 +80,7 @@ class AzureNetAppFilesVolumeGroupServiceScenarioTest(ScenarioTest):
         self.cmd("az netappfiles volume delete -g {rg} -a {acc} -p {pool} -v {vol_5}")
 
         # Delete Volume Group
-        self.cmd("az netappfiles volume-group delete -g {rg} -a {acc} -n {vg_name} -y")
+        self.cmd("az netappfiles volume-group delete -g {rg} -a {acc} --volume-group-name {vg_name} -y")
 
         # Delete pool and account
         self.cmd("az netappfiles pool delete -g {rg} -a {acc} -p {pool}")
@@ -117,7 +117,7 @@ class AzureNetAppFilesVolumeGroupServiceScenarioTest(ScenarioTest):
             'vg_ha_name': 'cli-test-volume-group-HA',
             'system_role': 'HA'
         })
-        self.cmd("az netappfiles volume-group create -g {rg} -a {acc} -p {pool} --volume-group-name {vg_ha_name} "
+        self.cmd("az netappfiles volume-group create -g {rg} -a {acc} -p {pool} --group-name {vg_ha_name} "
                  "--vnet {vnet} --ppg {ppg} --sap-sid {sap_sid} -l {loc} --add-snapshot-capacity {add_snap_cap} "
                  "--data-size {size} --data-throughput {throughput} --log-size {size} --log-throughput {throughput} "
                  "--shared-size {size} --shared-throughput {throughput} --data-backup-size {size} "
@@ -159,8 +159,8 @@ class AzureNetAppFilesVolumeGroupServiceScenarioTest(ScenarioTest):
         self.cmd("az netappfiles volume delete -g {rg} -a {acc} -p {pool} -v {vol_5}")
 
         # Delete Volume Group
-        self.cmd("az netappfiles volume-group delete -g {rg} -a {acc} -n {vg_name} -y")
-        self.cmd("az netappfiles volume-group delete -g {rg} -a {acc} -n {vg_ha_name} -y")
+        self.cmd("az netappfiles volume-group delete -g {rg} -a {acc} --group-name {vg_name} -y")
+        self.cmd("az netappfiles volume-group delete -g {rg} -a {acc} --group-name {vg_ha_name} -y")
 
         # Delete pool and account
         self.cmd("az netappfiles pool delete -g {rg} -a {acc} -p {pool}")
