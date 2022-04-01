@@ -151,7 +151,6 @@ Release History
 
 * `az network nat gateway`: Validate attaching public IPs (#21483)
 * `az network lb`: Support inbound NAT rule port mapping query (#21482)
-* Description of network bastion tunnel command (#21446)
 * Fix #21716: `az network private-dns zone import`: Allow hyphenated SRV records (#21717)
 * `az network application-gateway waf-policy managed-rule exclusion rule-set`: Support pre-rule exclusion creation without exclusion (#21879)
 
