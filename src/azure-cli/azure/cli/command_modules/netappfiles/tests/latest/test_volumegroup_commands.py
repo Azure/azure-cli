@@ -24,7 +24,6 @@ class AzureNetAppFilesVolumeGroupServiceScenarioTest(ScenarioTest):
             'pool_size': 20,
             'qos': 'Manual'
         })
-        self.cmd("az account set -s 69a75bda-882e-44d5-8431-63421204132a")
         self.cmd("az netappfiles account create -g {rg} -a {acc} -l {loc}")
         self.cmd("az netappfiles pool create -g {rg} -a {acc} -p {pool} -l {loc} --service-level {service_level} "
                  "--size {pool_size} --qos-type {qos}")
@@ -41,7 +40,7 @@ class AzureNetAppFilesVolumeGroupServiceScenarioTest(ScenarioTest):
             'gpr': "'key1=value1' 'key2=value2'"
         })
         self.cmd("az netappfiles volume-group create -g {rg} -a {acc} -p {pool} --volume-group-name {vg_name} "
-                 "--vnet {vnet} --ppg {ppg} --sap-sid {sap_sid} -l {loc} --global-placement-rules {gpr}",
+                 "--vnet {vnet} --ppg {ppg} --sap-sid {sap_sid} -l {loc} --gp-rules {gpr}",
                  checks=[
                      self.check('name', '{acc}/{vg_name}'),
                      self.check('groupMetaData.groupName', '{vg_name}'),
@@ -99,10 +98,9 @@ class AzureNetAppFilesVolumeGroupServiceScenarioTest(ScenarioTest):
             'size': 100,
             'throughput': 64
         })
-        self.cmd("az netappfiles volume-group create -g {rg} -a {acc} -p {pool} --name {vg_name} "
-                 "--vnet {vnet} --ppg {ppg} --sap-sid {sap_sid} -l {loc} "
-                 "--add-snapshot-capacity {add_snap_cap} --data-size {size} --data-throughput {throughput} "
-                 "--log-size {size} --log-throughput {throughput} --shared-size {size} "
+        self.cmd("az netappfiles volume-group create -g {rg} -a {acc} -p {pool} --name {vg_name} --vnet {vnet} "
+                 "--ppg {ppg} --sap-sid {sap_sid} -l {loc} --add-snapshot-capacity {add_snap_cap} --data-size {size} "
+                 "--data-throughput {throughput} --log-size {size} --log-throughput {throughput} --shared-size {size} "
                  "--shared-throughput {throughput} --data-backup-size {size} --data-backup-throughput {throughput} "
                  "--log-backup-size {size} --log-backup-throughput {throughput}",
                  checks=[
@@ -120,11 +118,11 @@ class AzureNetAppFilesVolumeGroupServiceScenarioTest(ScenarioTest):
             'system_role': 'HA'
         })
         self.cmd("az netappfiles volume-group create -g {rg} -a {acc} -p {pool} --volume-group-name {vg_ha_name} "
-                 "--vnet {vnet} --ppg {ppg} --sap-sid {sap_sid} -l {loc} "
-                 "--add-snapshot-capacity {add_snap_cap} --data-size {size} --data-throughput {throughput} "
-                 "--log-size {size} --log-throughput {throughput} --shared-size {size} "
-                 "--shared-throughput {throughput} --data-backup-size {size} --data-backup-throughput {throughput} "
-                 "--log-backup-size {size} --log-backup-throughput {throughput} --system-role {system_role}",
+                 "--vnet {vnet} --ppg {ppg} --sap-sid {sap_sid} -l {loc} --add-snapshot-capacity {add_snap_cap} "
+                 "--data-size {size} --data-throughput {throughput} --log-size {size} --log-throughput {throughput} "
+                 "--shared-size {size} --shared-throughput {throughput} --data-backup-size {size} "
+                 "--data-backup-throughput {throughput} --log-backup-size {size} --log-backup-throughput {throughput} "
+                 "--system-role {system_role}",
                  checks=[
                      self.check('name', '{acc}/{vg_ha_name}'),
                      self.check('groupMetaData.groupName', '{vg_ha_name}'),

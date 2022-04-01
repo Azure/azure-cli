@@ -1422,7 +1422,7 @@ parameters:
     short-summary: The name of the ANF account
   - name: --pool-name -p
     short-summary: The name of the ANF pool
-  - name: --volume-group-name --name -n
+  - name: --volume-group-name --group-name --name -n
     short-summary: The name of the ANF volume group
   - name: --vnet
     short-summary: The ARM Id or name of the vnet for the volumes
@@ -1436,7 +1436,7 @@ parameters:
     short-summary: ANF Location. If the resource group location is different than ANF location, ANF location needs to be specified
   - name: --tags
     short-summary: Space-separated tags in `key=value` format
-  - name: --gp-rules --global-placement-rules --rules
+  - name: --gp-rules --global-placement-rules
     short-summary:  Application specific identifier of deployment rules for the volume group. Space-separated string in `key=value` format
   - name: --prefix
     short-summary: All volume names will be prefixed with the given text. The default values for prefix text depends on system role. For PRIMARY it will be `""` and HA it will be `"HA-"`.

@@ -323,3 +323,4 @@ def load_volume_groups_command_groups(self, netappfiles_volume_groups_sdk):
                          doc_string_source='azure.mgmt.netapp.models#VolumeGroupDetails',
                          exception_handler=netappfiles_exception_handler)
         g.command('delete', 'begin_delete', confirmation=True)
+        g.wait_command('wait')
