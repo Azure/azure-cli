@@ -1399,7 +1399,7 @@ parameters:
 examples:
   - name: Get an ANF volume group
     text: >
-        az netappfiles volume-group show -g mygroup --account-name myaccountname --pool-name mypoolname --volume-group-name myvolumegroupname
+        az netappfiles volume-group show -g mygroup --account-name myaccountname --volume-group-name myvolumegroupname
 """
 
 helps['netappfiles volume-group list'] = """
@@ -1436,7 +1436,7 @@ parameters:
     short-summary: ANF Location. If the resource group location is different than ANF location, ANF location needs to be specified
   - name: --tags
     short-summary: Space-separated tags in `key=value` format
-  - name: --global-placement-rules --gp-rules --rules
+  - name: --gp-rules --global-placement-rules --rules
     short-summary:  Application specific identifier of deployment rules for the volume group. Space-separated string in `key=value` format
   - name: --prefix
     short-summary: All volume names will be prefixed with the given text. The default values for prefix text depends on system role. For PRIMARY it will be `""` and HA it will be `"HA-"`.
@@ -1444,21 +1444,21 @@ parameters:
     short-summary: Type of role for the storage account. Primary indicates first of a SAP HANA Replication (HSR) setup or No HSR. High Availability (HA) specifies local scenario. Default is PRIMARY
   - name: --backup-nfsv3
     short-summary: Indicates if NFS Protocol version 3 is preferred for data backup and log backup volumes. Default is false 
-  - name: --data_repl_skd
+  - name: --data-repl-skd
     short-summary: Replication Schedule for data volume
-  - name: --data_src_id
+  - name: --data-src-id
     short-summary: ResourceId of the data source volume
-  - name: --shared_repl_skd
+  - name: --shared-repl-skd
     short-summary: Replication Schedule for shared volume
-  - name: --shared_src_id
+  - name: --shared-src-id
     short-summary: ResourceId of the shared source volume
-  - name: --data_backup_repl_skd
+  - name: --data-backup-repl-skd
     short-summary: Replication Schedule for data backup volume
-  - name: --data_backup_src_id
+  - name: --data-backup-src-id
     short-summary: ResourceId of the data backup source volume
-  - name: --log_backup_repl_skd
+  - name: --log-backup-repl-skd
     short-summary: Replication Schedule for log backup volume
-  - name: --log_backup_src_id
+  - name: --log-backup-src-id
     short-summary: ResourceId of the log backup source volume
 examples:
   - name: Create ANF volume group

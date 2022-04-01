@@ -188,7 +188,7 @@ def load_volume_groups_arguments(self, account_name_type, pool_name_type):
         c.argument('account_name', account_name_type)
         c.argument('pool_name', pool_name_type, id_part=None)
         c.argument('volume_group_name', options_list=['--volume-group-name', '--group-name', '--name', '-n'], id_part='child_name_1')
-        c.argument('gp_rules', options_list=['--global-placement-rules]', '--gp-rules', '--rules'], nargs="+")
+        c.argument('gp_rules', options_list=['--gp-rules', '--global-placement-rules]', '--rules'], nargs="+")
         c.argument('system_role', arg_type=get_enum_type(['PRIMARY', 'HA', 'DR']))
         c.argument('add_snapshot_capacity', type=int, default=50,
                    help="Additional memory to store snapshots, must be specified as % of RAM (range 0-200). "
