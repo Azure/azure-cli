@@ -156,7 +156,7 @@ Release History
 
 **Packaging**
 
-* Use CentOS Stream 8 to build `el8` RPM package (#20918)
+* Use Red Hat Universal Base Image 8 to build `el8` RPM package (#21655)
 * Bump Python image to `3.10.3-alpine3.15` (#21688)
 * Bump MSI embedded Python to 3.10.3 (#21746)
 
