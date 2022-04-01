@@ -12,7 +12,7 @@ Release History
 * [BREAKING CHANGE] `az acr connected-registry create`: Reject request with a name using uppercase letters (#21162)
 * `az acr update`: Disable public network now displays a warning message (#21162)
 * Deprecate `az acr manifest metadata` command group (#21639)
-* `az acr manifest`: Add `show-metadata`, `list-metadata`, and `update-metadata` commands (#21639)
+* `az acr manifest`: Add `show-metadata`, `list-metadata` and `update-metadata` commands (#21639)
 
 **AKS**
 
@@ -127,8 +127,7 @@ Release History
 
 * Fix #18319 & #21555: `az keyvault list-deleted`: List all deleted resources if no specified resource type (#18411)
 * `az keyvault key create`: Support `--default-cvm-policy` (#21527)
-* Fix#21330: `az keyvault network-rule remove`: Fix ip address remove issue (#21630)
-* Fix#21330: `az keyvault network-rule remove`: Fix ip address remove issue (#21407)
+* Fix #21330: `az keyvault network-rule remove`: Fix ip address remove issue (#21630)
 
 **NetAppFiles**
 
@@ -176,9 +175,6 @@ Release History
 **Service Connector**
 
 * `az webapp/spring-cloud connection create/update`: Provide `--service-endpoint` parameter to support vnet scenario (#21766)
-
-**ServiceConnector**
-
 * `az webapp/spring-cloud connection`: Add command `create redis/redis-enterprise` to support more target resources (#21763)
 
 **SQL**
@@ -190,7 +186,7 @@ Release History
 **Storage**
 
 * [BREAKING CHANGE] Fix #21494: `az storage blob upload/upload-batch`: Fix `--content-md5` for upload, ignore `--content-md5` for upload-batch (#21523)
-* [BREAKING CHANGE] `az storage table[ policy]/entity`: `--timeout` is removed for all sub commands (#21631)
+* [BREAKING CHANGE] `az storage table/entity`: `--timeout` is removed for all sub commands (#21631)
 * [BREAKING CHANGE] `az storage entity query/show`: `--accept` is removed (#21631)
 * `az storage table/entity`: Add `--auth-mode login` to support RBAC (#21631)
 * `az storage blob upload/upload-batch`: Make precondition work (#21603)
@@ -198,7 +194,7 @@ Release History
 * Fix #21591: `az storage blob upload`: Fix storage blob upload not auto guessing file type (#21682)
 * Fix `az storage entity merge`: Stop automatically casting DisplayVersion to float (#21240)
 * `az storage blob download`: Support downloading managed disk with both SASUri and OAuth by specifying `--blob-url` with `--auth-mode login` (#21711)
-* Fix #21699: Fix upload-batch result url truncation issue (#21720)
+* Fix #21699: `az storage blob upload-batch`: Fix upload-batch result url truncation issue (#21720)
 * `az storage account\container\blob generate-sas`: Allow new permissions (#21767)
 
 **Synapse**
