@@ -62,7 +62,7 @@ def load_arguments(self, _):
     load_snapshot_arguments(self, account_name_type, pool_name_type, volume_name_type)
     load_vault_arguments(self, account_name_type)
     load_subvolume_arguments(self, account_name_type, pool_name_type, volume_name_type)
-    load_volume_groups_arguments(self)
+    load_volume_groups_arguments(self, account_name_type, pool_name_type)
 
 
 def load_pool_arguments(self, account_name_type, pool_name_type):
@@ -183,10 +183,10 @@ def load_subvolume_arguments(self, account_name_type, pool_name_type, volume_nam
         c.argument('subvolume_name', id_part=None)
 
 
-def load_volume_groups_arguments(self):
-    with self.argument_context('netappfiles volume-group') as c:
-        c.argument('account_name', options_list=['--account-name', '-a'], id_part='name')
-        c.argument('pool_name', options_list=['--pool-name', '-p'], id_part=None)
+def load_volume_groups_arguments(self, account_name_type, pool_name_type):
+    with self.argument_context('netappfiles volume-group', id_part=None) as c:
+        c.argument('account_name', account_name_type)
+        c.argument('pool_name', pool_name_type)
         c.argument('volume_group_name', options_list=['--volume-group-name', '--group-name', '--name', '-n'], id_part='child_name_1',
                    help='The name of the ANF volume group')
         c.argument('gp_rules', options_list=['--gp-rules', '--global-placement-rules]'], nargs="+",
