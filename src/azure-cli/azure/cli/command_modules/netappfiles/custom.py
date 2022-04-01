@@ -765,7 +765,7 @@ def create_data_backup_volume_properties(subnet_id, sap_sid, pool_id, ppg, memor
         name=name,
         usage_threshold=size,
         throughput_mibps=data_backup_throughput,
-        export_policy=create_default_export_policy_for_vg(True if backup_nfsv3 else False),
+        export_policy=create_default_export_policy_for_vg(backup_nfsv3),
         data_protection=data_protection
     )
 
@@ -801,7 +801,7 @@ def create_log_backup_volume_properties(subnet_id, sap_sid, pool_id, ppg, memory
         name=name,
         usage_threshold=size,
         throughput_mibps=log_backup_throughput,
-        export_policy=create_default_export_policy_for_vg(True if backup_nfsv3 else False),
+        export_policy=create_default_export_policy_for_vg(backup_nfsv3),
         data_protection=data_protection
     )
 
@@ -829,6 +829,7 @@ def calculate_usage_threshold(memory, volume_type, add_snap_capacity=50, total_h
 
 
 # Memory should be sent in in GiB. Returns throughput in MiB/s.
+# pylint: disable=too-many-return-statements
 def calculate_throughput(memory, volume_type):
     if volume_type == VolumeType.DATA:
         if memory <= 1024:
@@ -857,12 +858,9 @@ def calculate_throughput(memory, volume_type):
 
 
 def create_default_export_policy_for_vg(nfsv3=False):
-    is_nfs41 = True if not nfsv3 else False
-    is_nfs3 = True if nfsv3 else False
-
     rules = []
-    export_policy = ExportPolicyRule(rule_index=1, unix_read_only=False, unix_read_write=True, nfsv3=is_nfs3,
-                                     nfsv41=is_nfs41, allowed_clients="0.0.0.0/0")
+    export_policy = ExportPolicyRule(rule_index=1, unix_read_only=False, unix_read_write=True, nfsv3=nfsv3,
+                                     nfsv41=not nfsv3, allowed_clients="0.0.0.0/0")
     rules.append(export_policy)
     volume_export_policy = VolumePropertiesExportPolicy(rules=rules)
     return volume_export_policy
