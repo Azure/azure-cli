@@ -21,6 +21,7 @@ from .advanced_filter import EventSubscriptionAddFilter
 from .event_channel_filter import EventChannelAddFilter
 from .inbound_ip_rules import AddInboundIpRule
 from .delivery_attribute_mapping import AddDeliveryAttributeMapping
+from .user_assigned import AddUserAssignedIdentities
 
 included_event_types_type = CLIArgumentType(
     help="A space-separated list of event types (e.g., Microsoft.Storage.BlobCreated and Microsoft.Storage.BlobDeleted). In order to subscribe to all default event types, do not specify any value for this argument. For event grid topics, event types are customer defined. For Azure events, e.g., Storage Accounts, IoT Hub, etc., you can query their event types using this CLI command 'az eventgrid topic-type list-event-types'.",
@@ -56,7 +57,7 @@ sku_type = CLIArgumentType(
 )
 
 identity_type = CLIArgumentType(
-    help="The managed identity type for the resource.",
+    help="The managed identity type for the resource. Will be deprecated and replaced by --mi-system-assigned-identity in future",
     arg_type=get_enum_type(['noidentity', 'systemassigned']),
     options_list=['--identity'],
     is_preview=True
@@ -85,6 +86,7 @@ input_mapping_default_values_type = CLIArgumentType(
     help="When input-schema is specified as customeventschema, this parameter can be used to specify input mappings based on default values. You can use this parameter when your custom schema does not include a field that corresponds to one of the three fields supported by this parameter. Specify space separated mappings in 'key=value' format. Allowed key names are 'subject', 'eventtype', 'dataversion'. The corresponding value names should specify the default values to be used for the mapping and they will be used only when the published event doesn't have a valid mapping for a particular field.",
     arg_type=tags_type
 )
+
 
 odata_query_type = CLIArgumentType(
     help="The OData query used for filtering the list results. Filtering is currently allowed on the Name property only. The supported operations include: CONTAINS, eq (for equal), ne (for not equal), AND, OR and NOT.",
@@ -143,6 +145,7 @@ partner_topic_source_type = CLIArgumentType(
     help='The identifier of the resource that forms the partner source of the events. This represents a unique resource in the partner\'s resource model.',
     arg_type=name_type,
     options_list=['--partner-topic-source'])
+
 
 phone_number_type = CLIArgumentType(
     help='The customer service number of the publisher. The expected phone format should start with a \'+\' sign'
@@ -204,7 +207,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         c.argument('public_network_access', arg_type=public_network_access_type)
         c.argument('inbound_ip_rules', action=AddInboundIpRule, nargs='+')
         c.argument('sku', arg_type=sku_type)
-        c.argument('identity', arg_type=identity_type)
+        c.argument('identity', arg_type=identity_type, deprecate_info=c.deprecate(expiration='2.46.0'))
         c.argument('delivery_identity', arg_type=delivery_identity_type)
         c.argument('deadletter_identity', arg_type=deadletter_identity_type)
         c.argument('partner_registration_name', arg_type=partner_registration_name_type)
@@ -224,6 +227,13 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         c.argument('destination_resource_group_name', help="Azure Resource Group of the customer creating the event channel. The partner topic associated with the event channel will be created under this resource group.")
         c.argument('destination_subscription_id', help="Azure subscription Id of the customer creating the event channel. The partner topic associated with the event channel will be created under this Azure subscription.")
         c.argument('topic_type', help="Name of the topic type.", completer=get_resource_name_completion_list('Microsoft.EventGrid/topictypes'))
+        c.argument('system_assigned', options_list=['--mi-system-assigned'], action='store_true', help='Presence of this param indicates that SystemAssigned managed identity will be used')
+        c.argument('user_assigned',
+                   action=AddUserAssignedIdentities,
+                   nargs='+',
+                   is_preview=True,
+                   help='Add user assigned identities when identityType is user or mixed. This attribute is valid for all destination types except StorageQueue. Multiple attributes can be specified by using more than one `--mi-user-assigned` argument',
+                   options_list=['--mi-user-assigned'])
 
     with self.argument_context('eventgrid topic') as c:
         c.argument('topic_name', arg_type=name_type, help='Name of the topic.', id_part='name', completer=get_resource_name_completion_list('Microsoft.EventGrid/topics'))
