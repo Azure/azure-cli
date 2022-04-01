@@ -16,7 +16,7 @@ from knack.log import get_logger
 from knack.util import CLIError
 
 from azure.cli.core.azclierror import (ValidationError, ArgumentUsageError, RequiredArgumentMissingError,
-                                       MutuallyExclusiveArgumentError)
+                                       MutuallyExclusiveArgumentError, CLIInternalError)
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_file_or_dict, validate_parameter_set, validate_tags)
 from azure.cli.core.util import (hash_string, DISALLOWED_USER_NAMES, get_default_admin_username)
@@ -235,6 +235,7 @@ def _validate_secrets(secrets, os_type):
 # region VM Create Validators
 
 
+# pylint: disable=too-many-return-statements
 def _parse_image_argument(cmd, namespace):
     """ Systematically determines what type is supplied for the --image parameter. Updates the
         namespace and returns the type for subsequent processing. """
@@ -246,9 +247,12 @@ def _parse_image_argument(cmd, namespace):
     if is_valid_resource_id(namespace.image):
         return 'image_id'
 
-    from ._vm_utils import is_shared_gallery_image_id
+    from ._vm_utils import is_shared_gallery_image_id, is_community_gallery_image_id
     if is_shared_gallery_image_id(namespace.image):
         return 'shared_gallery_image_id'
+
+    if is_community_gallery_image_id(namespace.image):
+        return 'community_gallery_image_id'
 
     # 2 - attempt to match an URN pattern
     urn_match = re.match('([^:]*):([^:]*):([^:]*):([^:]*)', namespace.image)
@@ -351,6 +355,8 @@ def _get_storage_profile_description(profile):
         return 'attach existing managed OS disk'
     if profile == StorageProfile.SharedGalleryImage:
         return 'create OS disk from shared gallery image'
+    if profile == StorageProfile.CommunityGalleryImage:
+        return 'create OS disk from community gallery image'
 
 
 def _validate_location(cmd, namespace, zone_info, size_info):
@@ -368,7 +374,7 @@ def _validate_location(cmd, namespace, zone_info, size_info):
                                "used to find such locations".format(namespace.resource_group_name))
 
 
-# pylint: disable=too-many-branches, too-many-statements
+# pylint: disable=too-many-branches, too-many-statements, too-many-locals
 def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
     from msrestazure.tools import parse_resource_id
 
@@ -396,6 +402,8 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
             namespace.storage_profile = StorageProfile.ManagedCustomImage
         elif image_type == 'shared_gallery_image_id':
             namespace.storage_profile = StorageProfile.SharedGalleryImage
+        elif image_type == 'community_gallery_image_id':
+            namespace.storage_profile = StorageProfile.CommunityGalleryImage
         elif image_type == 'urn':
             if namespace.use_unmanaged_disk:
                 # STORAGE PROFILE #1
@@ -429,6 +437,10 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
             forbidden.append('os_disk_name')
 
     elif namespace.storage_profile == StorageProfile.SharedGalleryImage:
+        required = ['image']
+        forbidden = ['attach_os_disk', 'storage_account', 'storage_container_name', 'use_unmanaged_disk']
+
+    elif namespace.storage_profile == StorageProfile.CommunityGalleryImage:
         required = ['image']
         forbidden = ['attach_os_disk', 'storage_account', 'storage_container_name', 'use_unmanaged_disk']
 
@@ -526,23 +538,45 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
             namespace.attach_data_disks = [_get_resource_id(cmd.cli_ctx, d, namespace.resource_group_name, 'disks',
                                                             'Microsoft.Compute') for d in namespace.attach_data_disks]
 
+    if namespace.storage_profile == StorageProfile.SharedGalleryImage:
+
+        if namespace.location is None:
+            raise RequiredArgumentMissingError(
+                'Please input the location of the shared gallery image through the parameter --location.')
+
+        from ._vm_utils import parse_shared_gallery_image_id
+        image_info = parse_shared_gallery_image_id(namespace.image)
+
+        from ._client_factory import cf_shared_gallery_image
+        shared_gallery_image_info = cf_shared_gallery_image(cmd.cli_ctx).get(
+            location=namespace.location, gallery_unique_name=image_info[0], gallery_image_name=image_info[1])
+
+        if namespace.os_type and namespace.os_type.lower() != shared_gallery_image_info.os_type.lower():
+            raise ArgumentUsageError("The --os-type is not the correct os type of this shared gallery image, "
+                                     "the os type of this image should be {}".format(shared_gallery_image_info.os_type))
+        namespace.os_type = shared_gallery_image_info.os_type
+
+    if namespace.storage_profile == StorageProfile.CommunityGalleryImage:
+
+        if namespace.location is None:
+            raise RequiredArgumentMissingError(
+                'Please input the location of the community gallery image through the parameter --location.')
+
+        from ._vm_utils import parse_community_gallery_image_id
+        image_info = parse_community_gallery_image_id(namespace.image)
+
+        from ._client_factory import cf_community_gallery_image
+        community_gallery_image_info = cf_community_gallery_image(cmd.cli_ctx).get(
+            location=namespace.location, public_gallery_name=image_info[0], gallery_image_name=image_info[1])
+
+        if namespace.os_type and namespace.os_type.lower() != community_gallery_image_info.os_type.lower():
+            raise ArgumentUsageError(
+                "The --os-type is not the correct os type of this community gallery image, "
+                "the os type of this image should be {}".format(community_gallery_image_info.os_type))
+        namespace.os_type = community_gallery_image_info.os_type
+
     if not namespace.os_type:
-        if namespace.storage_profile == StorageProfile.SharedGalleryImage:
-
-            if namespace.location is None:
-                raise RequiredArgumentMissingError(
-                    'Please input the location of the shared gallery image through the parameter --location.')
-
-            from ._vm_utils import parse_shared_gallery_image_id
-            image_info = parse_shared_gallery_image_id(namespace.image)
-
-            from ._client_factory import cf_shared_gallery_image
-            shared_gallery_image_info = cf_shared_gallery_image(cmd.cli_ctx).get(
-                location=namespace.location, gallery_unique_name=image_info[0], gallery_image_name=image_info[1])
-            namespace.os_type = shared_gallery_image_info.os_type
-
-        else:
-            namespace.os_type = 'windows' if 'windows' in namespace.os_offer.lower() else 'linux'
+        namespace.os_type = 'windows' if 'windows' in namespace.os_offer.lower() else 'linux'
 
     from ._vm_utils import normalize_disk_info
     # attach_data_disks are not exposed yet for VMSS, so use 'getattr' to avoid crash
@@ -1320,6 +1354,7 @@ def process_vm_create_namespace(cmd, namespace):
 
     _validate_capacity_reservation_group(cmd, namespace)
     _validate_vm_nic_delete_option(namespace)
+    _validate_community_gallery_legal_agreement_acceptance(cmd, namespace)
 
 # endregion
 
@@ -1617,6 +1652,7 @@ def process_vmss_create_namespace(cmd, namespace):
         raise ArgumentUsageError('usage error: --priority PRIORITY [--eviction-policy POLICY]')
 
     _validate_capacity_reservation_group(cmd, namespace)
+    _validate_community_gallery_legal_agreement_acceptance(cmd, namespace)
 
 
 def validate_vmss_update_namespace(cmd, namespace):  # pylint: disable=unused-argument
@@ -2060,3 +2096,26 @@ def _validate_vm_vmss_update_ephemeral_placement(cmd, namespace):  # pylint: dis
         if source == 'vmss' and not vm_sku:
             raise ArgumentUsageError('usage error: --ephemeral-os-disk-placement is only configurable when '
                                      '--vm-sku is specified.')
+
+
+def _validate_community_gallery_legal_agreement_acceptance(cmd, namespace):
+    from ._vm_utils import is_community_gallery_image_id, parse_community_gallery_image_id
+    if not is_community_gallery_image_id(namespace.image) or namespace.accept_term:
+        return
+
+    community_gallery_name, _ = parse_community_gallery_image_id(namespace.image)
+    from ._client_factory import cf_community_gallery
+    try:
+        community_gallery_info = cf_community_gallery(cmd.cli_ctx).get(namespace.location, community_gallery_name)
+        eula = community_gallery_info.additional_properties['communityMetadata']['eula']
+    except Exception as err:
+        raise CLIInternalError('Get the eula from community gallery failed: {0}'.format(err))
+
+    from knack.prompting import prompt_y_n
+    msg = "To create the VM/VMSS from community gallery image, you must accept the license agreement and " \
+          "privacy statement: {}. (If you want to accept the legal terms by default, " \
+          "please use the option '--accept-term' when creating VM/VMSS)".format(eula)
+
+    if not prompt_y_n(msg, default="y"):
+        import sys
+        sys.exit(0)
