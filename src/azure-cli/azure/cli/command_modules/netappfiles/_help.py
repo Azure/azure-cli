@@ -1394,7 +1394,7 @@ short-summary: Get the specified ANF Volume Group.
 parameters:
   - name: --account-name -a
     short-summary: The name of the ANF account
-  - name: --volume-group-name --name -n
+  - name: --volume-group-name --group-name --name -n
     short-summary: The name of the ANF volume group
 examples:
   - name: Get an ANF volume group
@@ -1436,8 +1436,6 @@ parameters:
     short-summary: ANF Location. If the resource group location is different than ANF location, ANF location needs to be specified
   - name: --tags
     short-summary: Space-separated tags in `key=value` format
-  - name: --gp-rules --global-placement-rules
-    short-summary:  Application specific identifier of deployment rules for the volume group. Space-separated string in `key=value` format
   - name: --prefix
     short-summary: All volume names will be prefixed with the given text. The default values for prefix text depends on system role. For PRIMARY it will be `""` and HA it will be `"HA-"`.
   - name: --system-role
@@ -1464,4 +1462,9 @@ examples:
   - name: Create ANF volume group
     text: >
         az netappfiles volume-group create -g mygroup --account-name myaccountname --pool-name mypoolname --volume-group-name myvolumegroupname --vnet myvnet --ppg myppg --sap-sid mysapsid
+"""
+
+helps['netappfiles volume-group wait'] = """
+type: command
+short-summary: Wait for a volume group to be created.
 """

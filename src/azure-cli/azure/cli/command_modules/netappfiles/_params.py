@@ -62,7 +62,7 @@ def load_arguments(self, _):
     load_snapshot_arguments(self, account_name_type, pool_name_type, volume_name_type)
     load_vault_arguments(self, account_name_type)
     load_subvolume_arguments(self, account_name_type, pool_name_type, volume_name_type)
-    load_volume_groups_arguments(self, account_name_type, pool_name_type)
+    load_volume_groups_arguments(self)
 
 
 def load_pool_arguments(self, account_name_type, pool_name_type):
@@ -183,12 +183,14 @@ def load_subvolume_arguments(self, account_name_type, pool_name_type, volume_nam
         c.argument('subvolume_name', id_part=None)
 
 
-def load_volume_groups_arguments(self, account_name_type, pool_name_type):
+def load_volume_groups_arguments(self):
     with self.argument_context('netappfiles volume-group') as c:
         c.argument('account_name', options_list=['--account-name', '-a'], id_part='name')
         c.argument('pool_name', options_list=['--pool-name', '-p'], id_part=None)
-        c.argument('volume_group_name', options_list=['--volume-group-name', '--group-name', '--name', '-n'], id_part='child_name_1')
-        c.argument('gp_rules', options_list=['--gp-rules', '--global-placement-rules]'], nargs="+")
+        c.argument('volume_group_name', options_list=['--volume-group-name', '--group-name', '--name', '-n'], id_part='child_name_1',
+                   help='The name of the ANF volume group')
+        c.argument('gp_rules', options_list=['--gp-rules', '--global-placement-rules]'], nargs="+",
+                   help='Application specific identifier of deployment rules for the volume group. Space-separated string in `key=value` format')
         c.argument('system_role', arg_type=get_enum_type(['PRIMARY', 'HA', 'DR']))
         c.argument('add_snapshot_capacity', type=int, default=50,
                    help="Additional memory to store snapshots, must be specified as % of RAM (range 0-200). "

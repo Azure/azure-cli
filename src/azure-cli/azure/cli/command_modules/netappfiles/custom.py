@@ -847,8 +847,7 @@ def calculate_throughput(memory, volume_type):
     if volume_type == VolumeType.LOG:
         if memory <= 4096:
             return 250
-        else:
-            return 500
+        return 500
     if volume_type == VolumeType.SHARED:
         return 64
     if volume_type == VolumeType.DATA_BACKUP:
