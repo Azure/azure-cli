@@ -1391,11 +1391,6 @@ short-summary: Manage Azure NetApp Files (ANF) Volume Group Resources.
 helps['netappfiles volume-group show'] = """
 type: command
 short-summary: Get the specified ANF Volume Group.
-parameters:
-  - name: --account-name -a
-    short-summary: The name of the ANF account
-  - name: --volume-group-name --group-name --name -n
-    short-summary: The name of the ANF volume group
 examples:
   - name: Get an ANF volume group
     text: >
@@ -1405,9 +1400,6 @@ examples:
 helps['netappfiles volume-group list'] = """
 type: command
 short-summary: Get a list of ANF Volume Groups.
-parameters:
-  - name: --account-name -a
-    short-summary: The name of the ANF account
 examples:
   - name: Get a list of ANF volume groups
     text: >
@@ -1418,12 +1410,6 @@ helps['netappfiles volume-group create'] = """
 type: command
 short-summary: Create ANF Volume Groups.
 parameters:
-  - name: --account-name -a
-    short-summary: The name of the ANF account
-  - name: --pool-name -p
-    short-summary: The name of the ANF pool
-  - name: --volume-group-name --group-name --name -n
-    short-summary: The name of the ANF volume group
   - name: --vnet
     short-summary: The ARM Id or name of the vnet for the volumes
   - name: --ppg
@@ -1441,7 +1427,7 @@ parameters:
   - name: --system-role
     short-summary: Type of role for the storage account. Primary indicates first of a SAP HANA Replication (HSR) setup or No HSR. High Availability (HA) specifies local scenario. Default is PRIMARY
   - name: --backup-nfsv3
-    short-summary: Indicates if NFS Protocol version 3 is preferred for data backup and log backup volumes. Default is false 
+    short-summary: Indicates if NFS Protocol version 3 is preferred for data backup and log backup volumes. Default is false
   - name: --data-repl-skd
     short-summary: Replication Schedule for data volume
   - name: --data-src-id

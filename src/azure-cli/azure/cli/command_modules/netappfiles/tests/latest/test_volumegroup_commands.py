@@ -98,7 +98,7 @@ class AzureNetAppFilesVolumeGroupServiceScenarioTest(ScenarioTest):
             'size': 100,
             'throughput': 64
         })
-        self.cmd("az netappfiles volume-group create -g {rg} -a {acc} -p {pool} --name {vg_name} --vnet {vnet} "
+        self.cmd("az netappfiles volume-group create -g {rg} -a {acc} -p {pool} --group-name {vg_name} --vnet {vnet} "
                  "--ppg {ppg} --sap-sid {sap_sid} -l {loc} --add-snapshot-capacity {add_snap_cap} --data-size {size} "
                  "--data-throughput {throughput} --log-size {size} --log-throughput {throughput} --shared-size {size} "
                  "--shared-throughput {throughput} --data-backup-size {size} --data-backup-throughput {throughput} "
