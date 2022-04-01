@@ -29,11 +29,11 @@ Release History
 
 **AMS**
 
-* `az ams account identity assign`: Added ability to assign managed identity to media services account (#21795)
-* `az ams account identity remove`: Added ability to assign managed identity to media services account (#21795)
-* `az ams transform create`: Added new parameter `blur-type` for FaceDetector presets (#21795)
-* `az ams account encryption set`: Added new parameters `system-assigned` and `user-assigned` to allow users to set managed identities to their account encryption (#21795)
-* `az ams account storage set-authentication`: Added new parameters `system-assigned` and `user-assigned` to allow users to set managed identities for their storage account attached to Media Services (#21795)
+* `az ams account identity assign`: Add ability to assign managed identity to media services account (#21795)
+* `az ams account identity remove`: Add ability to assign managed identity to media services account (#21795)
+* `az ams transform create`: Add new parameter `blur-type` for FaceDetector presets (#21795)
+* `az ams account encryption set`: Add new parameters `system-assigned` and `user-assigned` to allow users to set managed identities to their account encryption (#21795)
+* `az ams account storage set-authentication`: Add new parameters `system-assigned` and `user-assigned` to allow users to set managed identities for their storage account attached to Media Services (#21795)
 
 **APIM**
 
