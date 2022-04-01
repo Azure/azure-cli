@@ -560,14 +560,14 @@ jobs:
 - job: TestExtensionsLoading
   displayName: Test Extensions Loading
   condition: succeeded()
-  timeoutInMinutes: 20
+  timeoutInMinutes: 40
 
   pool:
     vmImage: 'ubuntu-20.04'
   strategy:
     matrix:
-      Python38:
-        python.version: '3.8'
+      Python310:
+        python.version: '3.10'
   steps:
     - task: UsePythonVersion@0
       displayName: 'Use Python $(python.version)'
