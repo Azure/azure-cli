@@ -243,7 +243,7 @@ class StorageOauthTests(StorageScenarioMixin, ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='clitest')
     @StorageAccountPreparer(name_prefix='storage', kind='StorageV2', location='eastus2', sku='Standard_RAGRS')
-    def test_storage_queue_oauth(self, resource_group, storage_account):
+    def test_storage_queue_oauth_track2(self, resource_group, storage_account):
         self.kwargs.update({
             'rg': resource_group,
             'account': storage_account,
