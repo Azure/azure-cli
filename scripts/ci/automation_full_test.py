@@ -146,95 +146,100 @@ def run_paraller_modules(paraller_modules, profile):
     if series:
         cmd = f'azdev test --no-exitfirst --verbose --series {series}--profile {profile} --pytest-args "--durations=0"'
         print(cmd)
-        # os.popen(cmd)
+        os.popen(cmd)
     if parallers:
         cmd = f'azdev test --no-exitfirst --verbose {parallers}--profile {profile} --pytest-args "--durations=0"'
         print(cmd)
-        # os.popen(cmd)
+        os.popen(cmd)
 
 
-if __name__ == '__main__':
-    works = []
-    for i in range(8):
-        worker = {}
-        works.append(worker)
-    part, part_idx = [int(i) for i in '4_1'.split('_')]
-    parallel, para_idx = [int(i) for i in '8_1'.split('_')]
-    profile = 'latest'
-    part_modules = get_part_modules(part, part_idx)
-    para_modules = get_paraller_modules(part_modules, para_idx)
-    pprint(works)
-    run_paraller_modules(para_modules, profile)
-    works = []
-    for i in range(8):
-        worker = {}
-        works.append(worker)
-    part, part_idx = [int(i) for i in '4_1'.split('_')]
-    parallel, para_idx = [int(i) for i in '8_2'.split('_')]
-    profile = 'latest'
-    part_modules = get_part_modules(part, part_idx)
-    para_modules = get_paraller_modules(part_modules, para_idx)
-    run_paraller_modules(para_modules, profile)
-    works = []
-    for i in range(8):
-        worker = {}
-        works.append(worker)
-    part, part_idx = [int(i) for i in '4_1'.split('_')]
-    parallel, para_idx = [int(i) for i in '8_3'.split('_')]
-    profile = 'latest'
-    part_modules = get_part_modules(part, part_idx)
-    para_modules = get_paraller_modules(part_modules, para_idx)
-    run_paraller_modules(para_modules, profile)
-    works = []
-    for i in range(8):
-        worker = {}
-        works.append(worker)
-    part, part_idx = [int(i) for i in '4_1'.split('_')]
-    parallel, para_idx = [int(i) for i in '8_4'.split('_')]
-    profile = 'latest'
-    part_modules = get_part_modules(part, part_idx)
-    para_modules = get_paraller_modules(part_modules, para_idx)
-    run_paraller_modules(para_modules, profile)
-    works = []
-    for i in range(8):
-        worker = {}
-        works.append(worker)
-    part, part_idx = [int(i) for i in '4_1'.split('_')]
-    parallel, para_idx = [int(i) for i in '8_5'.split('_')]
-    profile = 'latest'
-    part_modules = get_part_modules(part, part_idx)
-    para_modules = get_paraller_modules(part_modules, para_idx)
-    run_paraller_modules(para_modules, profile)
-    works = []
-    for i in range(8):
-        worker = {}
-        works.append(worker)
-    part, part_idx = [int(i) for i in '4_1'.split('_')]
-    parallel, para_idx = [int(i) for i in '8_6'.split('_')]
-    profile = 'latest'
-    part_modules = get_part_modules(part, part_idx)
-    para_modules = get_paraller_modules(part_modules, para_idx)
-    run_paraller_modules(para_modules, profile)
-    works = []
-    for i in range(8):
-        worker = {}
-        works.append(worker)
-    part, part_idx = [int(i) for i in '4_1'.split('_')]
-    parallel, para_idx = [int(i) for i in '8_7'.split('_')]
-    profile = 'latest'
-    part_modules = get_part_modules(part, part_idx)
-    para_modules = get_paraller_modules(part_modules, para_idx)
-    run_paraller_modules(para_modules, profile)
-    works = []
-    for i in range(8):
-        worker = {}
-        works.append(worker)
-    part, part_idx = [int(i) for i in '4_1'.split('_')]
-    parallel, para_idx = [int(i) for i in '8_8'.split('_')]
-    profile = 'latest'
-    part_modules = get_part_modules(part, part_idx)
-    para_modules = get_paraller_modules(part_modules, para_idx)
-    run_paraller_modules(para_modules, profile)
+part_modules = get_part_modules(part, part_idx)
+para_modules = get_paraller_modules(part_modules, para_idx)
+run_paraller_modules(para_modules, profile)
+
+
+# if __name__ == '__main__':
+#     works = []
+#     for i in range(8):
+#         worker = {}
+#         works.append(worker)
+#     part, part_idx = [int(i) for i in '4_1'.split('_')]
+#     parallel, para_idx = [int(i) for i in '8_1'.split('_')]
+#     profile = 'latest'
+#     part_modules = get_part_modules(part, part_idx)
+#     para_modules = get_paraller_modules(part_modules, para_idx)
+#     pprint(works)
+#     run_paraller_modules(para_modules, profile)
+#     works = []
+#     for i in range(8):
+#         worker = {}
+#         works.append(worker)
+#     part, part_idx = [int(i) for i in '4_1'.split('_')]
+#     parallel, para_idx = [int(i) for i in '8_2'.split('_')]
+#     profile = 'latest'
+#     part_modules = get_part_modules(part, part_idx)
+#     para_modules = get_paraller_modules(part_modules, para_idx)
+#     run_paraller_modules(para_modules, profile)
+#     works = []
+#     for i in range(8):
+#         worker = {}
+#         works.append(worker)
+#     part, part_idx = [int(i) for i in '4_1'.split('_')]
+#     parallel, para_idx = [int(i) for i in '8_3'.split('_')]
+#     profile = 'latest'
+#     part_modules = get_part_modules(part, part_idx)
+#     para_modules = get_paraller_modules(part_modules, para_idx)
+#     run_paraller_modules(para_modules, profile)
+#     works = []
+#     for i in range(8):
+#         worker = {}
+#         works.append(worker)
+#     part, part_idx = [int(i) for i in '4_1'.split('_')]
+#     parallel, para_idx = [int(i) for i in '8_4'.split('_')]
+#     profile = 'latest'
+#     part_modules = get_part_modules(part, part_idx)
+#     para_modules = get_paraller_modules(part_modules, para_idx)
+#     run_paraller_modules(para_modules, profile)
+#     works = []
+#     for i in range(8):
+#         worker = {}
+#         works.append(worker)
+#     part, part_idx = [int(i) for i in '4_1'.split('_')]
+#     parallel, para_idx = [int(i) for i in '8_5'.split('_')]
+#     profile = 'latest'
+#     part_modules = get_part_modules(part, part_idx)
+#     para_modules = get_paraller_modules(part_modules, para_idx)
+#     run_paraller_modules(para_modules, profile)
+#     works = []
+#     for i in range(8):
+#         worker = {}
+#         works.append(worker)
+#     part, part_idx = [int(i) for i in '4_1'.split('_')]
+#     parallel, para_idx = [int(i) for i in '8_6'.split('_')]
+#     profile = 'latest'
+#     part_modules = get_part_modules(part, part_idx)
+#     para_modules = get_paraller_modules(part_modules, para_idx)
+#     run_paraller_modules(para_modules, profile)
+#     works = []
+#     for i in range(8):
+#         worker = {}
+#         works.append(worker)
+#     part, part_idx = [int(i) for i in '4_1'.split('_')]
+#     parallel, para_idx = [int(i) for i in '8_7'.split('_')]
+#     profile = 'latest'
+#     part_modules = get_part_modules(part, part_idx)
+#     para_modules = get_paraller_modules(part_modules, para_idx)
+#     run_paraller_modules(para_modules, profile)
+#     works = []
+#     for i in range(8):
+#         worker = {}
+#         works.append(worker)
+#     part, part_idx = [int(i) for i in '4_1'.split('_')]
+#     parallel, para_idx = [int(i) for i in '8_8'.split('_')]
+#     profile = 'latest'
+#     part_modules = get_part_modules(part, part_idx)
+#     para_modules = get_paraller_modules(part_modules, para_idx)
+#     run_paraller_modules(para_modules, profile)
 
     # part, part_idx = [int(i) for i in '4_1'.split('_')]
     # part_modules = get_part(part, part_idx)
