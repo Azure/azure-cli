@@ -71,7 +71,7 @@ steps:
           azdev test --no-exitfirst --profile ${{ parameters.profile }} --verbose --pytest-args "--durations=0"
         fi
       else
-        echo "Running full test on scheduled mode"
+        echo "Running test on scheduled mode"
         python scripts/ci/automation_full_test.py "${{ parameters.part }}" "${{ parameters.parallel }}" "${{ parameters.profile }}"
       fi
 
