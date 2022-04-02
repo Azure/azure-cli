@@ -84,8 +84,8 @@ jobs = {
     'azure-cli': 165,
     'azure-cli-telemetry': 171,
  }
-
-series_modules = ['appservice', 'botservice', 'cloud', 'network']
+series_modules = []
+# series_modules = ['appservice', 'botservice', 'cloud', 'network']
 part, part_idx = [int(i) for i in sys.argv[1].split('_')]
 parallel, para_idx = [int(i) for i in sys.argv[2].split('_')]
 profile = sys.argv[3]
