@@ -28,6 +28,19 @@ def transform_acl_list_output(result):
     return new_result
 
 
+def transform_acl_edit(result):
+    if "last_modified" in result.keys():
+        result["lastModified"] = result.pop("last_modified")
+    return result
+
+
+def transform_acl_list_output_v2(result):
+    new_result = {}
+    for identifier in result['signed_identifiers']:
+        new_result[identifier.id] = identifier.access_policy
+    return new_result
+
+
 def transform_container_permission_output(result):
     return {'publicAccess': result.public_access or 'off'}
 
