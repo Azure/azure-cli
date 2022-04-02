@@ -2278,73 +2278,83 @@ type: group
 short-summary: Manage Synapse's link connection.
 """
 
-helps['synapse link-connnection list'] = """
+helps['synapse link-connection list'] = """
 type: command
 short-summary: List link connections in a synapse workspace.
 examples:
   - name: List link connections.
     text: |-
-        az synapse link-connnection list --workspace-name testsynapseworkspace
+        az synapse link-connection list --workspace-name testsynapseworkspace
 """
 
-helps['synapse link-connnection show'] = """
+helps['synapse link-connection show'] = """
 type: command
-short-summary: Get a link connnection.
+short-summary: Get a link connection.
 examples:
-  - name: Get a link-connnection.
+  - name: Get a link-connection.
     text: |-
-        az synapse link-connnection show --workspace-name testsynapseworkspace \\
+        az synapse link-connection show --workspace-name testsynapseworkspace \\
+          --name testlinkconectionname
+"""
+
+helps['synapse link-connection delete'] = """
+type: command
+short-summary: Delete a link connection.
+examples:
+  - name: Delete a link connection.
+    text: |-
+        az synapse link-connection delete --workspace-name testsynapseworkspace \\
           --name testlinkconnectionname
 """
 
-helps['synapse link-connnection delete'] = """
+helps['synapse link-connection create'] = """
 type: command
-short-summary: Delete a link connnection.
+short-summary: Create a link connection.
 examples:
-  - name: Delete a link connnection.
+  - name: Create a link connection.
     text: |-
-        az synapse link-connnection delete --workspace-name testsynapseworkspace \\
-          --name testlinkconnectionname
-"""
-
-helps['synapse link-connnection create'] = """
-type: command
-short-summary: Create a link connnection.
-examples:
-  - name: Create a link connnection.
-    text: |-
-        az synapse link-connnection create --workspace-name testsynapseworkspace \\
+        az synapse link-connection create --workspace-name testsynapseworkspace \\
           --name testlinkconnectionname \\
           --file @"path/definition.json"
 """
 
-helps['synapse link-connnection update'] = """
+helps['synapse link-connection update'] = """
 type: command
-short-summary: Update a link connnection.
+short-summary: Update a link connection.
 examples:
   - name: Update a link connnection.
     text: |-
-        az synapse link-connnection update --workspace-name testsynapseworkspace \\
+        az synapse link-connection update --workspace-name testsynapseworkspace \\
           --name testlinkconnectionname \\
           --file @"path/definition.json"
 """
 
-helps['synapse link-connnection start'] = """
+helps['synapse link-connection start'] = """
 type: command
 short-summary: Start a link connnection.
 examples:
-  - name: Start a link connnection.
+  - name: Start a link connection.
     text: |-
-        az synapse link-connnection start --workspace-name testsynapseworkspace \\
+        az synapse link-connection start --workspace-name testsynapseworkspace \\
+          --name testlinkconnectionname"
+"""
+
+helps['synapse link-connection stop'] = """
+type: command
+short-summary: Stop a link connection.
+examples:
+  - name: Stop a link connection.
+    text: |-
+        az synapse link-connection stop --workspace-name testsynapseworkspace \\
           --name testlinkconnectionname
 """
 
-helps['synapse link-connnection stop'] = """
+helps['synapse link-connection get-status'] = """
 type: command
-short-summary: Stop a link connnection.
+short-summary: check a link connection status after start/stop a link connection.
 examples:
-  - name: Stop a link connnection.
+  - name: Stop a link connection.
     text: |-
-        az synapse link-connnection stop --workspace-name testsynapseworkspace \\
+        az synapse link-connection get-status --workspace-name testsynapseworkspace \\
           --name testlinkconnectionname
 """
