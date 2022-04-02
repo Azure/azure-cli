@@ -2,22 +2,30 @@ interactions:
 - request:
     body: null
     headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage queue create
       Connection:
       - keep-alive
       Content-Length:
       - '0'
+      ParameterSetName:
+      - -n --metadata --account-name --auth-mode
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.8; Windows 10) AZURECLI/2.14.0
+      - AZURECLI/2.34.1 azsdk-python-storage-queue/12.2.0 Python/3.8.7 (Windows-10-10.0.22000-SP0)
       x-ms-date:
-      - Fri, 06 Nov 2020 11:10:26 GMT
-      x-ms-meta-a:
-      - b
-      x-ms-meta-c:
-      - d
+      - Fri, 01 Apr 2022 12:12:21 GMT
+      x-ms-meta:
+      - '{''key1'': ''value1''}'
+      x-ms-meta-key1:
+      - value1
       x-ms-version:
-      - '2018-03-28'
+      - '2021-02-12'
     method: PUT
-    uri: https://clitest000002.queue.core.windows.net/queue000003
+    uri: https://storage000002.queue.core.windows.net/queue000003
   response:
     body:
       string: ''
@@ -25,27 +33,35 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 06 Nov 2020 11:10:33 GMT
+      - Fri, 01 Apr 2022 12:12:26 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
-      - '2018-03-28'
+      - '2021-02-12'
     status:
       code: 201
       message: Created
 - request:
     body: null
     headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage queue exists
       Connection:
       - keep-alive
+      ParameterSetName:
+      - -n --account-name --auth-mode
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.8; Windows 10) AZURECLI/2.14.0
+      - AZURECLI/2.34.1 azsdk-python-storage-queue/12.2.0 Python/3.8.7 (Windows-10-10.0.22000-SP0)
       x-ms-date:
-      - Fri, 06 Nov 2020 11:10:34 GMT
+      - Fri, 01 Apr 2022 12:12:27 GMT
       x-ms-version:
-      - '2018-03-28'
+      - '2021-02-12'
     method: GET
-    uri: https://clitest000002.queue.core.windows.net/queue000003?comp=metadata
+    uri: https://storage000002.queue.core.windows.net/queue000003?comp=metadata
   response:
     body:
       string: ''
@@ -55,75 +71,81 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 06 Nov 2020 11:10:41 GMT
+      - Fri, 01 Apr 2022 12:12:29 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       x-ms-approximate-messages-count:
       - '0'
-      x-ms-meta-a:
-      - b
-      x-ms-meta-c:
-      - d
+      x-ms-meta-key1:
+      - value1
       x-ms-version:
-      - '2018-03-28'
+      - '2021-02-12'
     status:
       code: 200
       message: OK
 - request:
     body: null
     headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage queue stats
       Connection:
       - keep-alive
+      ParameterSetName:
+      - --account-name --auth-mode
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.8; Windows 10) AZURECLI/2.14.0
+      - AZURECLI/2.34.1 azsdk-python-storage-queue/12.2.0 Python/3.8.7 (Windows-10-10.0.22000-SP0)
       x-ms-date:
-      - Fri, 06 Nov 2020 11:10:42 GMT
+      - Fri, 01 Apr 2022 12:12:30 GMT
       x-ms-version:
-      - '2018-03-28'
+      - '2021-02-12'
     method: GET
-    uri: https://clitest000002.queue.core.windows.net/queue000003?comp=metadata
+    uri: https://storage000002-secondary.queue.core.windows.net/?restype=service&comp=stats
   response:
     body:
-      string: ''
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><StorageServiceStats><GeoReplication><Status>unavailable</Status><LastSyncTime></LastSyncTime></GeoReplication></StorageServiceStats>"
     headers:
       cache-control:
       - no-cache
-      content-length:
-      - '0'
+      content-type:
+      - application/xml
       date:
-      - Fri, 06 Nov 2020 11:10:48 GMT
+      - Fri, 01 Apr 2022 12:12:30 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
-      x-ms-approximate-messages-count:
-      - '0'
-      x-ms-meta-a:
-      - b
-      x-ms-meta-c:
-      - d
+      transfer-encoding:
+      - chunked
       x-ms-version:
-      - '2018-03-28'
+      - '2021-02-12'
     status:
       code: 200
       message: OK
 - request:
     body: null
     headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage queue delete
       Connection:
       - keep-alive
       Content-Length:
       - '0'
+      ParameterSetName:
+      - -n --account-name --auth-mode
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.8; Windows 10) AZURECLI/2.14.0
+      - AZURECLI/2.34.1 azsdk-python-storage-queue/12.2.0 Python/3.8.7 (Windows-10-10.0.22000-SP0)
       x-ms-date:
-      - Fri, 06 Nov 2020 11:10:49 GMT
-      x-ms-meta-e:
-      - f
-      x-ms-meta-g:
-      - h
+      - Fri, 01 Apr 2022 12:12:32 GMT
       x-ms-version:
-      - '2018-03-28'
-    method: PUT
-    uri: https://clitest000002.queue.core.windows.net/queue000003?comp=metadata
+      - '2021-02-12'
+    method: DELETE
+    uri: https://storage000002.queue.core.windows.net/queue000003
   response:
     body:
       string: ''
@@ -131,48 +153,12 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 06 Nov 2020 11:10:55 GMT
+      - Fri, 01 Apr 2022 12:12:33 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
-      - '2018-03-28'
+      - '2021-02-12'
     status:
       code: 204
       message: No Content
-- request:
-    body: null
-    headers:
-      Connection:
-      - keep-alive
-      User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.8; Windows 10) AZURECLI/2.14.0
-      x-ms-date:
-      - Fri, 06 Nov 2020 11:10:56 GMT
-      x-ms-version:
-      - '2018-03-28'
-    method: GET
-    uri: https://clitest000002.queue.core.windows.net/queue000003?comp=metadata
-  response:
-    body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      date:
-      - Fri, 06 Nov 2020 11:11:03 GMT
-      server:
-      - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
-      x-ms-approximate-messages-count:
-      - '0'
-      x-ms-meta-e:
-      - f
-      x-ms-meta-g:
-      - h
-      x-ms-version:
-      - '2018-03-28'
-    status:
-      code: 200
-      message: OK
 version: 1
