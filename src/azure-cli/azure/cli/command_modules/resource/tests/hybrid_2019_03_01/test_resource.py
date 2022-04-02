@@ -798,17 +798,19 @@ class PolicyScenarioTest(ScenarioTest):
     def test_show_built_in_policy(self):
         # get the list of builtins, then retrieve each via show and validate the results match
         results = self.cmd('policy definition list --query "[?policyType==\'BuiltIn\']"').get_output_in_json()
-        for i, result in enumerate(results):
-            self.kwargs['pn'] = result['name']
-            self.kwargs['dn'] = result['displayName']
-            self.kwargs['desc'] = result['description']
-            self.kwargs['id'] = result['id']
-            self.cmd('policy definition show -n {pn}', checks=[
-                self.check('name', '{pn}'),
-                self.check('description', '{desc}'),
-                self.check('displayName', '{dn}'),
-                self.check('id', '{id}')
-            ])
+        import random
+        random_number = random.randint(0, len(results))
+        result = results[random_number]
+        self.kwargs['pn'] = result['name']
+        self.kwargs['dn'] = result['displayName']
+        self.kwargs['desc'] = result['description']
+        self.kwargs['id'] = result['id']
+        self.cmd('policy definition show -n {pn}', checks=[
+            self.check('name', '{pn}'),
+            self.check('description', '{desc}'),
+            self.check('displayName', '{dn}'),
+            self.check('id', '{id}')
+        ])
 
 
 class ManagedAppDefinitionScenarioTest(ScenarioTest):
