@@ -389,20 +389,22 @@ def ensure_container_insights_for_monitoring(
                     raise ClientRequestError(
                         f"Data Collection Rule Associations are not supported for cluster region {location}"
                     )
-            dcr_url = cmd.cli_ctx.cloud.endpoints.resource_manager + f"{dcr_resource_id}?api-version=2019-11-01-preview"
+            dcr_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
+                f"{dcr_resource_id}?api-version=2019-11-01-preview"
             # get existing tags on the container insights extension DCR if the customer added any
-            existing_tags = get_existing_container_insights_extension_dcr_tags(cmd, dcr_url)
+            existing_tags = get_existing_container_insights_extension_dcr_tags(
+                cmd, dcr_url)
             # create the DCR
             dcr_creation_body = json.dumps(
                 {
                     "location": location,
-                    "tags":existing_tags,
+                    "tags": existing_tags,
                     "properties": {
                         "dataSources": {
                             "extensions": [
-                                    {
-                                        "name": "ContainerInsightsExtension",
-                                        "streams": [
+                                {
+                                    "name": "ContainerInsightsExtension",
+                                    "streams": [
                                             "Microsoft-Perf",
                                             "Microsoft-ContainerInventory",
                                             "Microsoft-ContainerLog",
@@ -415,37 +417,37 @@ def ensure_container_insights_for_monitoring(
                                             "Microsoft-KubePVInventory",
                                             "Microsoft-KubeServices",
                                             "Microsoft-InsightsMetrics",
-                                        ],
-                                        "extensionName": "ContainerInsights",
-                                    }
-                                ]
+                                    ],
+                                    "extensionName": "ContainerInsights",
+                                }
+                            ]
                         },
                         "dataFlows": [
-                                {
-                                    "streams": [
-                                        "Microsoft-Perf",
-                                        "Microsoft-ContainerInventory",
-                                        "Microsoft-ContainerLog",
-                                        "Microsoft-ContainerLogV2",
-                                        "Microsoft-ContainerNodeInventory",
-                                        "Microsoft-KubeEvents",
-                                        "Microsoft-KubeMonAgentEvents",
-                                        "Microsoft-KubeNodeInventory",
-                                        "Microsoft-KubePodInventory",
-                                        "Microsoft-KubePVInventory",
-                                        "Microsoft-KubeServices",
-                                        "Microsoft-InsightsMetrics",
-                                    ],
-                                    "destinations": ["la-workspace"],
-                                }
-                            ],
+                            {
+                                "streams": [
+                                    "Microsoft-Perf",
+                                    "Microsoft-ContainerInventory",
+                                    "Microsoft-ContainerLog",
+                                    "Microsoft-ContainerLogV2",
+                                    "Microsoft-ContainerNodeInventory",
+                                    "Microsoft-KubeEvents",
+                                    "Microsoft-KubeMonAgentEvents",
+                                    "Microsoft-KubeNodeInventory",
+                                    "Microsoft-KubePodInventory",
+                                    "Microsoft-KubePVInventory",
+                                    "Microsoft-KubeServices",
+                                    "Microsoft-InsightsMetrics",
+                                ],
+                                "destinations": ["la-workspace"],
+                            }
+                        ],
                         "destinations": {
-                                "logAnalytics": [
-                                    {
-                                        "workspaceResourceId": workspace_resource_id,
-                                        "name": "la-workspace",
-                                    }
-                                ]
+                            "logAnalytics": [
+                                {
+                                    "workspaceResourceId": workspace_resource_id,
+                                    "name": "la-workspace",
+                                }
+                            ]
                         },
                     },
                 }
@@ -556,7 +558,7 @@ def add_monitoring_role_assignment(result, cluster_resource_id, cmd):
         hasattr(result.addon_profiles[CONST_MONITORING_ADDON_NAME].config, "useAADAuth") and
         result.addon_profiles[CONST_MONITORING_ADDON_NAME].config.useAADAuth
     ):
-      is_useAADAuth = True
+        is_useAADAuth = True
     elif (
         hasattr(result, "service_principal_profile") and
         hasattr(result.service_principal_profile, "client_id") and
@@ -587,7 +589,8 @@ def add_monitoring_role_assignment(result, cluster_resource_id, cmd):
         is_service_principal = False
 
     if is_useAADAuth:
-        logger.info("Monitoring Metrics Publisher role assignment not required for monitoring addon with managed identity auth")
+        logger.info(
+            "Monitoring Metrics Publisher role assignment not required for monitoring addon with managed identity auth")
     elif service_principal_msi_id is not None:
         if not add_role_assignment(
             cmd,
