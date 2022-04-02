@@ -568,12 +568,12 @@ def get_link_connection(cmd, workspace_name, link_connection_name):
 def create_or_update_link_connection(cmd, workspace_name, link_connection_name, definition_file):
     client = cf_synapse_link_connection(cmd.cli_ctx, workspace_name)
     properties = LinkConnectionResource.from_dict(definition_file['properties'])
-    return client.create_or_update_link_connection(link_connection_name, properties, polling=True)
+    return client.create_or_update_link_connection(link_connection_name, properties)
 
 
 def delete_link_connection(cmd, workspace_name, link_connection_name):
     client = cf_synapse_link_connection(cmd.cli_ctx, workspace_name)
-    return client.delete_link_connection(link_connection_name, polling=True)
+    return client.delete_link_connection(link_connection_name)
 
 
 def get_link_connection_status(cmd, workspace_name, link_connection_name):
