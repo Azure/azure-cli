@@ -64,7 +64,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
     with self.command_group('iot dps access-policy',
                             client_factory=iot_service_provisioning_factory,
                             deprecate_info=self.deprecate(redirect='iot dps policy',
-                                                          expiration='2.35.0')
+                                                          expiration='2.36.0')
                             ) as g:
         g.custom_command('list', 'iot_dps_policy_list')
         g.custom_show_command('show', 'iot_dps_policy_get')

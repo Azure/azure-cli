@@ -7,13 +7,12 @@ import json
 import logging
 import os
 import time
-
-import collections.abc as collections
+from collections.abc import MutableMapping
 
 from knack.log import get_logger
 
 
-class Session(collections.MutableMapping):
+class Session(MutableMapping):
     """
     A simple dict-like class that is backed by a JSON file.
 

@@ -10,6 +10,15 @@ type: group
 short-summary: Managed Identities
 """
 
+helps['identity create'] = """
+type: command
+short-summary: Create Identities
+examples:
+  - name: Create an identity.
+    text: |
+        az identity create --name MyIdentity --resource-group MyResourceGroup
+"""
+
 helps['identity list'] = """
 type: command
 short-summary: List Managed Identities

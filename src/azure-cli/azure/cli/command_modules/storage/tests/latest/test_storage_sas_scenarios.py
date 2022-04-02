@@ -7,7 +7,7 @@ import os
 from azure.cli.testsdk import (LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer,
                                JMESPathCheck, live_only)
 from ..storage_test_util import StorageScenarioMixin
-
+from knack.util import CLIError
 
 class StorageSASScenario(StorageScenarioMixin, LiveScenarioTest):
     @ResourceGroupPreparer()
@@ -102,16 +102,24 @@ class StorageSASScenario(StorageScenarioMixin, LiveScenarioTest):
                                   '-otsv').output.strip()
         self.kwargs['con_str'] = connection_str
         # test sas-token for a container
-        sas = self.cmd('storage container generate-sas -n {container} --https-only --permissions dlrw '
+        sas = self.cmd('storage container generate-sas -n {container} --https-only --permissions racwdxyltfmei '
                        '--connection-string {con_str} --expiry {expiry} -otsv').output.strip()
         self.kwargs['container_sas'] = sas
+        self.assertIn('sig=', sas, 'SAS token {} does not contain sig segment'.format(sas))
+        self.assertIn('se=', sas, 'SAS token {} does not contain se(expiry) segment'.format(sas))
+        self.assertIn('sp=racwdxyltfmei', sas, 'SAS token {} does not contain permission segment'.format(sas))
+        self.assertIn('spr=https', sas, 'SAS token {} does not contain https segment'.format(sas))
         self.cmd('storage blob upload -c {container} -f "{local_file}" -n {blob} '
-                 '--account-name {account} --sas-token "{container_sas}"')
+                 '--account-name {account} --sas-token "{container_sas}" --overwrite')
 
         # test sas-token for a blob
         sas = self.cmd('storage blob generate-sas -c {container} -n {blob} --account-name {account} --https-only '
-                       '--permissions acdrw --expiry {expiry} -otsv').output.strip()
+                       '--permissions racwdxytmei --expiry {expiry} -otsv').output.strip()
         self.kwargs['blob_sas'] = sas
+        self.assertIn('sig=', sas, 'SAS token {} does not contain sig segment'.format(sas))
+        self.assertIn('se=', sas, 'SAS token {} does not contain se(expiry) segment'.format(sas))
+        self.assertIn('sp=racwdxytmei', sas, 'SAS token {} does not contain permission segment'.format(sas))
+        self.assertIn('spr=https', sas, 'SAS token {} does not contain https segment'.format(sas))
         self.cmd('storage blob show -c {container} -n {blob} --account-name {account} --sas-token {blob_sas}') \
             .assert_with_checks(JMESPathCheck('name', blob_name))
 
@@ -151,6 +159,26 @@ class StorageSASScenario(StorageScenarioMixin, LiveScenarioTest):
         self.cmd('storage blob exists -c {} -n {} --account-name {} --sas-token {}'
                  .format(container, blob_name, storage_account, sas),
                  checks=JMESPathCheck('exists', False))
+
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        with self.assertRaises(CLIError):
+            self.cmd('storage account generate-sas --resource-types o --services b --expiry 2000-01-01 '
+                     '--permissions r --account-name ""')
+
+        invalid_connection_string = "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;"
+        with self.assertRaises(InvalidArgumentValueError):
+            self.cmd('storage account generate-sas --resource-types o --services b --expiry 2000-01-01 '
+                     '--permissions r --connection-string {}'.format(invalid_connection_string))
+
+        sas = self.storage_cmd('storage account generate-sas --resource-types sco --services bqtf '
+                               '--expiry 2046-12-31T08:23Z --permissions rwdxylacupfti --https-only ',
+                               account_info).output
+        self.assertIn('sig=', sas, 'SAS token {} does not contain sig segment'.format(sas))
+        self.assertIn('se=', sas, 'SAS token {} does not contain se(expiry) segment'.format(sas))
+        self.assertIn('sp=rwdxylacupfti', sas, 'SAS token {} does not contain permission segment'.format(sas))
+        self.assertIn('spr=https', sas, 'SAS token {} does not contain https segment'.format(sas))
+        self.assertRegex(sas, '.*ss=[bqtf]{4}.*', 'SAS token {} does not contain services segment'.format(sas))
+        self.assertRegex(sas, '.*srt=[sco]{3}.*', 'SAS token {} does not contain resource type segment'.format(sas))
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(hns=True, kind='StorageV2')
