@@ -240,8 +240,8 @@ def sanitize_loganalytics_ws_resource_id(workspace_resource_id):
     return workspace_resource_id
 
 
-def is_container_insights_extension_dcr_exists(cmd, dcr_url, workspace_resource_id):
-    containerinsights_extension_dcr_exists = False
+def get_existing_container_insights_extension_dcr_tags(cmd, dcr_url):
+    tags = {}
     _MAX_RETRY_TIMES = 3
     for retry_count in range(0, _MAX_RETRY_TIMES):
         try:
@@ -249,18 +249,14 @@ def is_container_insights_extension_dcr_exists(cmd, dcr_url, workspace_resource_
                 cmd.cli_ctx, "GET", dcr_url
             )
             json_response = json.loads(resp.text)
-            destinations = json_response["properties"]["destinations"]
-            if not destinations and not destinations["logAnalytics"] and len(destinations["logAnalytics"]) > 0:
-                destinationLogAnalyticsResourceId = destinations["logAnalytics"][0]
-                if destinationLogAnalyticsResourceId.tolower() == workspace_resource_id.tolower():
-                    containerinsights_extension_dcr_exists = True
+            tags = json_response["tags"]
             break
         except CLIError as e:
             if "ResourceNotFound" in str(e):
                 break
             if retry_count >= (_MAX_RETRY_TIMES - 1):
                 raise e
-    return containerinsights_extension_dcr_exists
+    return tags
 
 
 # pylint: disable=too-many-locals,too-many-branches,too-many-statements,line-too-long
@@ -394,15 +390,16 @@ def ensure_container_insights_for_monitoring(
                         f"Data Collection Rule Associations are not supported for cluster region {location}"
                     )
             dcr_url = cmd.cli_ctx.cloud.endpoints.resource_manager + f"{dcr_resource_id}?api-version=2019-11-01-preview"
-            # Create DCR if doesnt exists already with same destination
-            if not is_container_insights_extension_dcr_exists(cmd, dcr_url, workspace_resource_id):
-                # create the DCR
-                dcr_creation_body = json.dumps(
-                    {
-                        "location": location,
-                        "properties": {
-                            "dataSources": {
-                                "extensions": [
+            # get existing tags on the container insights extension DCR if the customer added any
+            existing_tags = get_existing_container_insights_extension_dcr_tags(cmd, dcr_url)
+            # create the DCR
+            dcr_creation_body = json.dumps(
+                {
+                    "location": location,
+                    "tags":existing_tags,
+                    "properties": {
+                        "dataSources": {
+                            "extensions": [
                                     {
                                         "name": "ContainerInsightsExtension",
                                         "streams": [
@@ -422,8 +419,8 @@ def ensure_container_insights_for_monitoring(
                                         "extensionName": "ContainerInsights",
                                     }
                                 ]
-                            },
-                            "dataFlows": [
+                        },
+                        "dataFlows": [
                                 {
                                     "streams": [
                                         "Microsoft-Perf",
@@ -442,28 +439,28 @@ def ensure_container_insights_for_monitoring(
                                     "destinations": ["la-workspace"],
                                 }
                             ],
-                            "destinations": {
+                        "destinations": {
                                 "logAnalytics": [
                                     {
                                         "workspaceResourceId": workspace_resource_id,
                                         "name": "la-workspace",
                                     }
                                 ]
-                            },
                         },
-                    }
-                )
-                for _ in range(3):
-                    try:
-                        send_raw_request(
-                            cmd.cli_ctx, "PUT", dcr_url, body=dcr_creation_body
-                        )
-                        error = None
-                        break
-                    except AzCLIError as e:
-                        error = e
-                else:
-                    raise error
+                    },
+                }
+            )
+            for _ in range(3):
+                try:
+                    send_raw_request(
+                        cmd.cli_ctx, "PUT", dcr_url, body=dcr_creation_body
+                    )
+                    error = None
+                    break
+                except AzCLIError as e:
+                    error = e
+            else:
+                raise error
 
         if create_dcra:
             # only create or delete the association between the DCR and cluster
@@ -548,9 +545,19 @@ def _invoke_deployment(
 
 def add_monitoring_role_assignment(result, cluster_resource_id, cmd):
     service_principal_msi_id = None
+    is_useAADAuth = False
+    # Check if monitoring addon enabled with useAADAuth = True, if it does, ignore role assignment
     # Check if service principal exists, if it does, assign permissions to service principal
     # Else, provide permissions to MSI
     if (
+        (hasattr(result, "addon_profiles")) and
+        (CONST_MONITORING_ADDON_NAME in result.addon_profiles) and
+        hasattr(result.addon_profiles[CONST_MONITORING_ADDON_NAME], "config") and
+        hasattr(result.addon_profiles[CONST_MONITORING_ADDON_NAME].config, "useAADAuth") and
+        result.addon_profiles[CONST_MONITORING_ADDON_NAME].config.useAADAuth
+    ):
+      is_useAADAuth = True
+    elif (
         hasattr(result, "service_principal_profile") and
         hasattr(result.service_principal_profile, "client_id") and
         result.service_principal_profile.client_id.lower() != "msi"
@@ -579,7 +586,9 @@ def add_monitoring_role_assignment(result, cluster_resource_id, cmd):
         ].identity.object_id
         is_service_principal = False
 
-    if service_principal_msi_id is not None:
+    if is_useAADAuth:
+        logger.info("Monitoring Metrics Publisher role assignment not required for monitoring addon with managed identity auth")
+    elif service_principal_msi_id is not None:
         if not add_role_assignment(
             cmd,
             "Monitoring Metrics Publisher",
