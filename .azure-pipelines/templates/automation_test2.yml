@@ -44,7 +44,7 @@ steps:
       schedule="${{ parameters.schedule }}"
       series_modules="appservice botservice cloud network"
 
-      if [[ -n schedule ]]; then
+      if [[ "$schedule" = false ]]; then
         echo "Running full test on normal mode"
         # Test specific module
         module="${{ parameters.module }}"
