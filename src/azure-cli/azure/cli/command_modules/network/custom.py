@@ -7598,8 +7598,7 @@ def create_virtual_hub(cmd, client,
     LongRunningOperation(cmd.cli_ctx)(vhub_poller)
 
     ip_config = HubIpConfiguration(
-        subnet=SubResource(id=hosted_subnet),
-        public_ip_address=SubResource(id=public_ip_address) if public_ip_address else None,
+        subnet=SubResource(id=hosted_subnet)
     )
     vhub_ip_config_client = network_client_factory(cmd.cli_ctx).virtual_hub_ip_configuration
     try:
