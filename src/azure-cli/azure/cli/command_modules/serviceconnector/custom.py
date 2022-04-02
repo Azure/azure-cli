@@ -38,8 +38,9 @@ err_msg = 'Required argument is missing, please provide the arguments: {}'
 def connection_list(client,
                     source_resource_group=None,
                     source_id=None,
+                    cluster=None,
                     site=None,
-                    spring=None, app=None, deployment=None):
+                    spring=None, app=None, deployment='default'):
     if not source_id:
         raise RequiredArgumentMissingError(err_msg.format('--source-id'))
     return auto_register(client.list, resource_uri=source_id)
@@ -81,8 +82,9 @@ def connection_show(client,
                     source_resource_group=None,
                     source_id=None,
                     indentifier=None,
+                    cluster=None,
                     site=None,
-                    spring=None, app=None, deployment=None):
+                    spring=None, app=None, deployment='default'):
     if not source_id or not connection_name:
         raise RequiredArgumentMissingError(err_msg.format('--source-id, --connection'))
     return auto_register(client.get, resource_uri=source_id, linker_name=connection_name)
@@ -93,8 +95,9 @@ def connection_delete(client,
                       source_resource_group=None,
                       source_id=None,
                       indentifier=None,
+                      cluster=None,
                       site=None,
-                      spring=None, app=None, deployment=None,
+                      spring=None, app=None, deployment='default',
                       no_wait=False):
     if not source_id or not connection_name:
         raise RequiredArgumentMissingError(err_msg.format('--source-id, --connection'))
@@ -110,8 +113,9 @@ def connection_list_configuration(client,
                                   source_resource_group=None,
                                   source_id=None,
                                   indentifier=None,
+                                  cluster=None,
                                   site=None,
-                                  spring=None, app=None, deployment=None):
+                                  spring=None, app=None, deployment='default'):
     if not source_id or not connection_name:
         raise RequiredArgumentMissingError(err_msg.format('--source-id, --connection'))
     return auto_register(client.list_configurations,
@@ -124,8 +128,9 @@ def connection_validate(cmd, client,
                         source_resource_group=None,
                         source_id=None,
                         indentifier=None,
+                        cluster=None,
                         site=None,
-                        spring=None, app=None, deployment=None):
+                        spring=None, app=None, deployment='default'):
     import re
     from ._validators import get_resource_regex
 
@@ -152,15 +157,18 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals
                       user_identity_auth_info=None, system_identity_auth_info=None,
                       service_principal_auth_info_secret=None,
                       key_vault_id=None,
+                      service_endpoint=None,
                       new_addon=False, no_wait=False,
+                      cluster=None,
                       site=None,                                             # Resource.WebApp
-                      spring=None, app=None, deployment=None,                # Resource.SpringCloud
+                      spring=None, app=None, deployment='default',           # Resource.SpringCloud
                       server=None, database=None,                            # Resource.*Postgres, Resource.*Sql*
                       vault=None,                                            # Resource.KeyVault
                       account=None,                                          # Resource.Storage*
                       key_space=None, graph=None, table=None,                # Resource.Cosmos*,
                       config_store=None,                                     # Resource.AppConfig
                       namespace=None,                                        # Resource.EventHub
+                      webpubsub=None,                                        # Resource.WebPubSub
                       signalr=None):                                         # Resource.SignalR
 
     if not source_id:
@@ -202,6 +210,12 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals
         from ._utils import create_key_vault_reference_connection_if_not_exist
         create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, key_vault_id)
 
+    if service_endpoint:
+        client = set_user_token_header(client, cmd.cli_ctx)
+        parameters['v_net_solution'] = {
+            'type': 'serviceEndpoint'
+        }
+
     if new_addon:
         addon = AddonFactory.get(target_type)(cmd, source_id)
         target_id, auth_info = addon.provision()
@@ -228,16 +242,18 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals
                          parameters=parameters)
 
 
-def connection_update(cmd, client,
+def connection_update(cmd, client,  # pylint: disable=too-many-locals
                       connection_name=None, client_type=None,
                       source_resource_group=None, source_id=None, indentifier=None,
                       secret_auth_info=None, secret_auth_info_auto=None,
                       user_identity_auth_info=None, system_identity_auth_info=None,
                       service_principal_auth_info_secret=None,
                       key_vault_id=None,
+                      service_endpoint=None,
                       no_wait=False,
+                      cluster=None,
                       site=None,                                              # Resource.WebApp
-                      deployment=None,
+                      deployment='default',
                       spring=None, app=None):                                 # Resource.SpringCloud
 
     linker = todict(client.get(resource_uri=source_id, linker_name=connection_name))
@@ -293,6 +309,14 @@ def connection_update(cmd, client,
         from ._utils import create_key_vault_reference_connection_if_not_exist
         create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, key_vault_id)
 
+    parameters['v_net_solution'] = linker.get('vNetSolution')
+    if service_endpoint:
+        parameters['v_net_solution'] = {
+            'type': 'serviceEndpoint'
+        }
+    elif service_endpoint is False and linker.get('vNetSolution').get('type') == 'serviceEndpoint':
+        parameters['v_net_solution'] = None
+
     return auto_register(sdk_no_wait, no_wait,
                          client.begin_create_or_update,
                          resource_uri=source_id,
@@ -312,8 +336,9 @@ def connection_create_kafka(cmd, client,  # pylint: disable=too-many-locals
                             client_type=None,
                             source_resource_group=None,
                             source_id=None,
+                            cluster=None,
                             site=None,                         # Resource.WebApp
-                            deployment=None,
+                            deployment='default',
                             spring=None, app=None):            # Resource.SpringCloud
 
     from ._transformers import transform_linker_properties
@@ -388,8 +413,9 @@ def connection_update_kafka(cmd, client,  # pylint: disable=too-many-locals
                             client_type=None,
                             source_resource_group=None,
                             source_id=None,
+                            cluster=None,
                             site=None,                         # Resource.WebApp
-                            deployment=None,
+                            deployment='default',
                             spring=None, app=None):            # Resource.SpringCloud
 
     # use the suffix to decide the connection type

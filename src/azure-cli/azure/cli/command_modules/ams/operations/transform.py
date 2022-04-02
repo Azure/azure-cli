@@ -19,10 +19,11 @@ from azure.mgmt.media.models import (BuiltInStandardEncoderPreset, EncoderNamedP
 def create_transform(client, account_name, resource_group_name, transform_name, preset,
                      insights_to_extract=None, video_analysis_mode=None, audio_language=None,
                      audio_analysis_mode=None, on_error=None, relative_priority=None,
-                     description=None, resolution=None):
+                     description=None, resolution=None, face_detector_mode=None, blur_type=None):
 
     outputs = [build_transform_output(preset, insights_to_extract, video_analysis_mode, audio_language,
-                                      audio_analysis_mode, on_error, relative_priority, resolution)]
+                                      audio_analysis_mode, on_error, relative_priority, resolution,
+                                      face_detector_mode, blur_type)]
     parameters = Transform(description=description, outputs=outputs)
     return client.create_or_update(resource_group_name, account_name, transform_name,
                                    parameters)
@@ -30,7 +31,8 @@ def create_transform(client, account_name, resource_group_name, transform_name, 
 
 def add_transform_output(client, account_name, resource_group_name, transform_name, preset,
                          insights_to_extract=None, video_analysis_mode=None, audio_language=None,
-                         audio_analysis_mode=None, on_error=None, relative_priority=None, resolution=None):
+                         audio_analysis_mode=None, on_error=None, relative_priority=None, resolution=None,
+                         face_detector_mode=None, blur_type=None):
 
     transform = client.get(resource_group_name, account_name, transform_name)
 
@@ -39,7 +41,8 @@ def add_transform_output(client, account_name, resource_group_name, transform_na
 
     transform.outputs.append(build_transform_output(preset, insights_to_extract, video_analysis_mode,
                                                     audio_language, audio_analysis_mode, on_error,
-                                                    relative_priority, resolution))
+                                                    relative_priority, resolution,
+                                                    face_detector_mode, blur_type))
 
     parameters = Transform(outputs=transform.outputs)
 
@@ -47,7 +50,8 @@ def add_transform_output(client, account_name, resource_group_name, transform_na
 
 
 def build_transform_output(preset, insights_to_extract, video_analysis_mode,
-                           audio_language, audio_analysis_mode, on_error, relative_priority, resolution):
+                           audio_language, audio_analysis_mode, on_error, relative_priority, resolution,
+                           face_detector_mode, blur_type):
 
     validate_arguments(preset, insights_to_extract, audio_language, resolution)
     transform_output = get_transform_output(preset)
@@ -61,6 +65,8 @@ def build_transform_output(preset, insights_to_extract, video_analysis_mode,
         transform_output.preset.mode = audio_analysis_mode
     elif preset == 'FaceDetector':
         transform_output.preset.resolution = resolution
+        transform_output.preset.mode = face_detector_mode
+        transform_output.preset.blur_type = blur_type
 
     if on_error is not None:
         transform_output.on_error = OnErrorType(on_error)

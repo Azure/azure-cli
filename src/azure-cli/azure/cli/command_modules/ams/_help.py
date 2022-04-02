@@ -47,6 +47,44 @@ helps['ams account check-name'] = """
     short-summary: Checks whether the Media Service resource name is available.
 """
 
+helps['ams account identity'] = """
+    type: group
+    short-summary: Manage managed identity settings for an Azure Media Services account.
+"""
+
+helps['ams account identity show'] = """
+    type: command
+    short-summary: Show the details of managed identity settings for an Azure Media Services account.
+    examples:
+        - name: Show the media account's managed identity details
+          text: >
+            az ams account identity show -n myAmsAccount -g myRG
+"""
+
+helps['ams account identity assign'] = """
+    type: command
+    short-summary: Assign a managed identity to an Azure Media Services account.
+    examples:
+        - name: Assign a system managed identity to an Azure Media Services account.
+          text: >
+            az ams account identity assign -n myAmsAccount -g myRG --system-assigned
+        - name: Assign a user managed identity to an Azure Media Services account.
+          text: >
+            az ams account identity assign -n myAmsAccount -g myRG --user-assigned myUserId
+"""
+
+helps['ams account identity remove'] = """
+    type: command
+    short-summary: Remove a managed identity to an Azure Media Services account.
+    examples:
+        - name: Remove a system managed identity to an Azure Media Services account.
+          text: >
+            az ams account identity remove -n myAmsAccount -g myRG --system-assigned
+        - name: Remove a user managed identity to an Azure Media Services account.
+          text: >
+            az ams account identity remove -n myAmsAccount -g myRG --user-assigned myUserId
+"""
+
 helps['ams account encryption'] = """
     type: group
     short-summary: Manage encryption for an Azure Media Services account.

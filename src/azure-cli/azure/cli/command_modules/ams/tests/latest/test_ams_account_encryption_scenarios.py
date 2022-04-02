@@ -7,7 +7,7 @@ from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccoun
 
 
 class AmsEncryptionTests(ScenarioTest):
-    @ResourceGroupPreparer(location='centralus')
+    @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
     @KeyVaultPreparer(location='centralus', additional_params='--enable-purge-protection')
     def test_ams_encryption_set_show(self, resource_group, storage_account_for_create, key_vault):
@@ -23,7 +23,7 @@ class AmsEncryptionTests(ScenarioTest):
             'identityPermissions': "get unwrapkey wrapkey",
         })
 
-        account_result = self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location} --mi-system-assigned', checks=[
+        account_result = self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location} --mi-system-assigned --default-action Allow', checks=[
             self.check('name', '{amsname}'),
             self.check('location', 'Central US')
         ])
