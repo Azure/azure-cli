@@ -87,9 +87,8 @@ jobs = {
  }
 
 series_modules = ['appservice', 'botservice', 'cloud', 'network']
-
-part, part_idx = sys.argv[1].split('_')
-parallel, para_idx = sys.argv[2].split('_')
+part, part_idx = [int(i) for i in sys.argv[1].split('_')]
+parallel, para_idx = [int(i) for i in sys.argv[2].split('_')]
 profile = sys.argv[3]
 
 jobs = sorted(jobs.items(), key=lambda item:-item[1])
