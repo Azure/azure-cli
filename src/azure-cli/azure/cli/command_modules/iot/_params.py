@@ -78,8 +78,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    'cross geo-pair disaster recovery. This property is immutable once set on the resource. '
                    'Only available in select regions. Learn more at https://aka.ms/dpsdr')
 
+    for subgroup in ['policy', 'linked-hub', 'certificate']:
+        with self.argument_context('iot dps {}'.format(subgroup)) as c:
+            c.argument('dps_name', options_list=['--dps-name'], id_part=None)
+
     with self.argument_context('iot dps policy') as c:
-        c.argument('access_policy_name', options_list=['--policy-name', '--pn'],
+        c.argument('access_policy_name', options_list=['--policy-name', '--pn', '--name', '-n'],
                    help='A friendly name for DPS access policy.')
 
     for subgroup in ['create', 'update']:
@@ -98,7 +102,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('connection_string',
                    help='Connection string of the IoT hub. Required if hub name is not provided using --hub-name.',
                    arg_group='IoT Hub Identifier')
-        c.argument('hub_name', help='IoT Hub name.', arg_group='IoT Hub Identifier')
+        c.argument('hub_name',
+                   options_list=['--hub-name', '--hn'],
+                   help='IoT Hub name.',
+                   arg_group='IoT Hub Identifier')
         c.argument('hub_resource_group',
                    options_list=['--hub-resource-group', '--hrg'],
                    help='IoT Hub resource group name.',
