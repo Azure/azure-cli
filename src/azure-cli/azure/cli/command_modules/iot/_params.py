@@ -78,55 +78,18 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    'cross geo-pair disaster recovery. This property is immutable once set on the resource. '
                    'Only available in select regions. Learn more at https://aka.ms/dpsdr')
 
-    # To deprecate
-    for subgroup in ['access-policy', 'linked-hub', 'certificate']:
-        with self.argument_context('iot dps {}'.format(subgroup)) as c:
-            c.argument('dps_name', options_list=['--dps-name'], id_part=None)
-
-    # To replace deprecated
-    for subgroup in ['policy']:
-        with self.argument_context('iot dps {}'.format(subgroup)) as c:
-            c.argument('dps_name', options_list=['--dps-name', '-n'], id_part=None)
-
-    with self.argument_context('iot dps access-policy') as c:
-        c.argument('access_policy_name', options_list=['--access-policy-name', '--name', '-n'],
-                   help='A friendly name for DPS shared access policy.')
-
-    with self.argument_context('iot dps access-policy create') as c:
-        c.argument('rights', options_list=['--rights', '-r'], nargs='+',
-                   arg_type=get_enum_type(AccessRightsDescription),
-                   help='Access rights for the IoT Hub Device Provisioning Service. '
-                        'Use space-separated list for multiple rights.')
-        c.argument('primary_key', help='Primary SAS key value.')
-        c.argument('secondary_key', help='Secondary SAS key value.')
-
-    with self.argument_context('iot dps access-policy update') as c:
-        c.argument('rights', options_list=['--rights', '-r'], nargs='+',
-                   arg_type=get_enum_type(AccessRightsDescription),
-                   help='Access rights for the IoT Hub Device Provisioning Service. '
-                        'Use space-separated list for multiple rights.')
-        c.argument('primary_key', help='Primary SAS key value.')
-        c.argument('secondary_key', help='Secondary SAS key value.')
-
     with self.argument_context('iot dps policy') as c:
         c.argument('access_policy_name', options_list=['--policy-name', '--pn'],
                    help='A friendly name for DPS access policy.')
 
-    with self.argument_context('iot dps policy create') as c:
-        c.argument('rights', options_list=['--rights', '-r'], nargs='+',
-                   arg_type=get_enum_type(AccessRightsDescription),
-                   help='Access rights for the IoT Hub Device Provisioning Service. '
-                        'Use space-separated list for multiple rights.')
-        c.argument('primary_key', help='Primary SAS key value.')
-        c.argument('secondary_key', help='Secondary SAS key value.')
-
-    with self.argument_context('iot dps policy update') as c:
-        c.argument('rights', options_list=['--rights', '-r'], nargs='+',
-                   arg_type=get_enum_type(AccessRightsDescription),
-                   help='Access rights for the IoT Hub Device Provisioning Service. '
-                        'Use space-separated list for multiple rights.')
-        c.argument('primary_key', help='Primary SAS key value.')
-        c.argument('secondary_key', help='Secondary SAS key value.')
+    for subgroup in ['create', 'update']:
+        with self.argument_context('iot dps policy {}'.format(subgroup)) as c:
+            c.argument('rights', options_list=['--rights', '-r'], nargs='+',
+                    arg_type=get_enum_type(AccessRightsDescription),
+                    help='Access rights for the IoT Hub Device Provisioning Service. '
+                            'Use space-separated list for multiple rights.')
+            c.argument('primary_key', help='Primary SAS key value.')
+            c.argument('secondary_key', help='Secondary SAS key value.')
 
     with self.argument_context('iot dps linked-hub') as c:
         c.argument('linked_hub', options_list=['--linked-hub'], help='Host name of linked IoT Hub.')
