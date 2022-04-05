@@ -77,7 +77,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    'cross geo-pair disaster recovery. This property is immutable once set on the resource. '
                    'Only available in select regions. Learn more at https://aka.ms/dpsdr')
 
-    # plan to slowly align this with extension naming patterns - name should be aligned with dps_name
+    # plan to slowly align this with extension naming patterns - n should be aligned with dps_name
     for subgroup in ['linked-hub', 'certificate']:
         with self.argument_context('iot dps {}'.format(subgroup)) as c:
             c.argument('dps_name', options_list=['--dps-name'], id_part=None)
