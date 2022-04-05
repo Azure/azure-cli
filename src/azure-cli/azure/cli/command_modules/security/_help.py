@@ -1020,7 +1020,7 @@ short-summary: Shows a security automation.
 examples:
   - name: Shows a security automation.
     text: >
-        az security automation show -n "sampleAutomation"
+        az security automation show -g Sample-RG -n 'sampleAutomation'
 """
 
 helps['security automation create_or_update'] = """
