@@ -36,6 +36,7 @@ from._featuremodels import (map_keyvalue_to_featureflag,
 logger = get_logger(__name__)
 FEATURE_MANAGEMENT_KEYWORDS = ["FeatureManagement", "featureManagement", "feature_management", "feature-management"]
 ENABLED_FOR_KEYWORDS = ["EnabledFor", "enabledFor", "enabled_for", "enabled-for"]
+FEATURE_FLAG_PROPERTIES = {'id', 'description', 'enabled', 'conditions'}
 
 
 class FeatureManagementReservedKeywords:
@@ -1127,7 +1128,7 @@ def __validate_import_feature_flag(kv):
     if kv and validate_import_feature(kv.key):
         try:
             ff = json.loads(kv.value)
-            if ff['id'] and ff['description'] and ff['enabled'] and ff['conditions']:
+            if FEATURE_FLAG_PROPERTIES.issubset(ff.keys()):
                 return True
             logger.warning("The feature flag with key '{%s}' is not a valid feature flag. It will not be imported.", kv.key)
         except JSONDecodeError as exception:
