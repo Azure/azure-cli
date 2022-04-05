@@ -1,3 +1,5 @@
+import json
+
 # --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
@@ -18,7 +20,14 @@ from azure.mgmt.security.models import (SecurityContact,
                                         RulesResultsInput,
                                         AlertSyncSettings,
                                         DataExportSettings,
-                                        Automation)
+                                        Automation,
+                                        AutomationScope,
+                                        AutomationSource,
+                                        AutomationActionWorkspace,
+                                        AutomationActionLogicApp,
+                                        AutomationActionEventHub,
+                                        AutomationRuleSet,
+                                        AutomationTriggeringRule)
 from azure.mgmt.security.models._security_center_enums import Enum69
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
@@ -842,27 +851,77 @@ def delete_security_automation(client, resource_group_name, resource_name):
 
 def create_or_update_security_automation(client, resource_group_name, resource_name, location, scopes,  sources, actions, etag=None, tags=None, description=None, isEnabled=None):
 
-    automation = Automation(location=location,
-                                    scopes=scopes,
-                                    sources=sources,
-                                    actions=actions,
-                                    tags=tags,
-                                    etag=etag,
-                                    description=description,
-                                    isEnabled=isEnabled)
-
+    automation = create_security_automation_object(location, scopes,  sources, actions, etag, tags, description, isEnabled)
     return client.create_or_update(resource_group_name, resource_name,automation)
 
 
 def validate_security_automation(client, resource_group_name, resource_name, location, scopes,  sources, actions, etag=None, tags=None, description=None, isEnabled=None):
 
-    automation = Automation(location=location,
-                                    scopes=scopes,
-                                    sources=sources,
-                                    actions=actions,
+    automation = create_security_automation_object(location, scopes,  sources, actions, etag, tags, description, isEnabled)
+    return client.validate(resource_group_name, resource_name, automation)
+
+# Security Automations Utils
+
+def create_security_automation_object(location, scopes,  sources, actions, etag=None, tags=None, description=None, isEnabled=None):
+    
+    scopes = json.loads(scopes)
+    scopesAsObjectList =  list()
+    for scope in scopes:
+        scopeAsObject = AutomationScope(description=scope['description'],
+                                        scope_path=scope['scopePath'])
+        scopesAsObjectList.append(scopeAsObject)
+
+    sources = json.loads(sources)
+    sourcesAsObjectList =  list()
+    for source in sources:
+        sourceAsObject = AutomationSource(event_source=source['eventSource'],
+                                          rule_sets=get_security_automation_ruleSets_object(source['ruleSets']))
+        sourcesAsObjectList.append(sourceAsObject)
+
+    actions = json.loads(actions)
+    actionsAsObjectList =  list()
+    for action in actions:
+        if(action['actionType'] == 'LogicApp'):
+            actionAsObject = AutomationActionLogicApp(logic_app_resource_id=action['logicAppResourceId'],
+                                                      uri=action['ruleSets'])
+        elif(action['actionType'] == 'EventHub'):
+            actionAsObject = AutomationActionEventHub(event_hub_resource_id=action['eventHubResourceId'],
+                                                      connection_string=action['connectionString'])
+        elif(action['actionType'] == 'Workspace'):
+            actionAsObject = AutomationActionWorkspace(workspace_resource_id=action['workspaceResourceId'])
+
+        actionsAsObjectList.append(actionAsObject)
+    
+    if(tags != None):
+        tags = json.loads(tags)
+
+    return Automation(location=location,
+                                    scopes=scopesAsObjectList,
+                                    sources=sourcesAsObjectList,
+                                    actions=actionsAsObjectList,
                                     tags=tags,
                                     etag=etag,
                                     description=description,
                                     isEnabled=isEnabled)
 
-    return client.validate(resource_group_name, resource_name, automation)
+
+def get_security_automation_ruleSets_object(ruleSets):
+    if(ruleSets == None):
+        return
+    ruleSetsAsObjectList =  list()
+    for ruleSet in ruleSets:
+        ruleSetAsObject = AutomationRuleSet(rules=get_security_automation_rules_object(ruleSet['rules']))
+        ruleSetsAsObjectList.append(ruleSetAsObject)
+    return ruleSetsAsObjectList
+
+def get_security_automation_rules_object(rules):
+    if(rules == None):
+        return
+    ruleAsObjectList =  list()
+    for rule in rules:
+        ruleAsObject = AutomationTriggeringRule (property_j_path=rule['propertyJPath'],
+                                                 property_type=rule['propertyType'],
+                                                 expected_value=rule['expectedValue'],
+                                                 operator=rule['operator'])
+        ruleAsObjectList.append(ruleAsObject)
+    return ruleAsObjectList
