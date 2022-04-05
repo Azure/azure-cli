@@ -223,7 +223,7 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.security.operations#AutomationsOperations.{}',
         client_factory=cf_security_automations,
         operation_group='security_automations'
-    )    
+    )
 
     with self.command_group('security secure-scores',
                             security_secure_scores_sdk,

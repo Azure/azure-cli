@@ -100,7 +100,6 @@ automation_description_arg_type = CLIArgumentType(options_list=('--description')
 automation_isEnabled_arg_type = CLIArgumentType(options_list=('--isEnabled'), metavar='ISENABLED', help='Indicates whether the security automation is enabled')
 
 
-
 # pylint: disable=too-many-branches
 def load_arguments(self, _):
     for scope in ['alert',

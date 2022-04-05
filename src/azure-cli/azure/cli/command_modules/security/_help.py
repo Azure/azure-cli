@@ -1011,7 +1011,7 @@ examples:
         az security automation list
   - name: List all security automations under resource group
     text: >
-        az security automation list -g 'sampleRg'      
+        az security automation list -g 'sampleRg'
 """
 
 helps['security automation show'] = """
