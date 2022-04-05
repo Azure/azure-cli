@@ -1128,7 +1128,7 @@ def __validate_import_feature_flag(kv):
     if kv and validate_import_feature(kv.key):
         try:
             ff = json.loads(kv.value)
-            if FEATURE_FLAG_PROPERTIES.issubset(ff.keys()):
+            if FEATURE_FLAG_PROPERTIES == ff.keys():
                 return True
             logger.warning("The feature flag with key '{%s}' is not a valid feature flag. It will not be imported.", kv.key)
         except JSONDecodeError as exception:

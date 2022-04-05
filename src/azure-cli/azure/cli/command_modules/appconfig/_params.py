@@ -149,8 +149,8 @@ def load_arguments(self, _):
     with self.argument_context('appconfig kv import', arg_group='AppConfig') as c:
         c.argument('src_name', help='The name of the source App Configuration.')
         c.argument('src_connection_string', validator=validate_connection_string, help="Combination of access key and endpoint of the source store.")
-        c.argument('src_key', help='If no key specified, import all keys by default. Support star sign as filters, for instance abc* means keys with abc as prefix. Key filtering not applicable for feature flags. By default, all feature flags with specified label will be imported. This argument is ignored when using `appconfig/kvset` profile.')
-        c.argument('src_label', help="Only keys with this label in source AppConfig will be imported. If no value specified, import keys with null label by default. Support star sign as filters, for instance * means all labels, abc* means labels with abc as prefix.  This argument is ignored when using `appconfig/kvset` profile.")
+        c.argument('src_key', help='If no key specified, import all keys by default. Support star sign as filters, for instance abc* means keys with abc as prefix. Key filtering not applicable for feature flags. By default, all feature flags with specified label will be imported.')
+        c.argument('src_label', help="Only keys with this label in source AppConfig will be imported. If no value specified, import keys with null label by default. Support star sign as filters, for instance * means all labels, abc* means labels with abc as prefix.")
         c.argument('preserve_labels', arg_type=get_three_state_flag(), help="Flag to preserve labels from source AppConfig. This argument should NOT be specified along with --label.")
         c.argument('src_endpoint', help='If --src-auth-mode is "login", provide endpoint URL of the source App Configuration.')
         c.argument('src_auth_mode', arg_type=get_enum_type(['login', 'key']),
