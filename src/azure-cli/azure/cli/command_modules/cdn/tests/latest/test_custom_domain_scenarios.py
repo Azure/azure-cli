@@ -8,8 +8,7 @@ from .scenario_mixin import CdnScenarioMixin
 from azure.mgmt.cdn.models import (SkuName, CustomHttpsProvisioningState, ProtocolType,
                                    CertificateType)
 
-from azure.core.exceptions import (HttpResponseError)
-
+from azure.core.exceptions import (HttpResponseError, ResourceNotFoundError, ResourceExistsError)
 
 class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_cdn_domain')
@@ -37,9 +36,10 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
         with self.assertRaises(SystemExit):  # exits with code 3 due to missing resource
             self.cmd('cdn custom-domain show -g {rg} --endpoint-name {endpoint} --profile-name {profile} -n {name}')
         self.cmd('cdn custom-domain delete -g {rg} --endpoint-name {endpoint} --profile-name {profile} -n {name}')
-        with self.assertRaises(HttpResponseError):
+        with self.assertRaises(ResourceNotFoundError):
             self.cmd(
                 'cdn custom-domain enable-https -g {rg} --endpoint-name {endpoint} --profile-name {profile} -n {name}')
+
         with self.assertRaises(CLIError):
             self.cmd(
                 'cdn custom-domain disable-https -g {rg} --endpoint-name {endpoint} --profile-name {profile} -n {name}')

@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import os
 import re
 import time
 from distutils.version import StrictVersion
@@ -51,7 +52,7 @@ from azure.cli.core.azclierror import (
 from azure.cli.core.commands import AzCliCommand
 from azure.cli.core.keys import is_valid_ssh_rsa_public_key
 from azure.cli.core.profiles import ResourceType
-from azure.cli.core.util import truncate_text
+from azure.cli.core.util import truncate_text, get_file_json
 from azure.core.exceptions import HttpResponseError
 from knack.log import get_logger
 from knack.prompting import NoTTYException, prompt, prompt_pass, prompt_y_n
@@ -69,6 +70,8 @@ ManagedClusterPropertiesAutoScalerProfile = TypeVar("ManagedClusterPropertiesAut
 ResourceReference = TypeVar("ResourceReference")
 ManagedClusterAddonProfile = TypeVar("ManagedClusterAddonProfile")
 Snapshot = TypeVar("Snapshot")
+KubeletConfig = TypeVar("KubeletConfig")
+LinuxOSConfig = TypeVar("LinuxOSConfig")
 
 # TODO
 # add validation for all/some of the parameters involved in the getter of outbound_type/enable_addons
@@ -271,6 +274,16 @@ class AKSModels:
         )
         self.WindowsGmsaProfile = self.__cmd.get_models(
             "WindowsGmsaProfile",
+            resource_type=self.resource_type,
+            operation_group="managed_clusters",
+        )
+        self.KubeletConfig = self.__cmd.get_models(
+            "KubeletConfig",
+            resource_type=self.resource_type,
+            operation_group="managed_clusters",
+        )
+        self.LinuxOSConfig = self.__cmd.get_models(
+            "LinuxOSConfig",
             resource_type=self.resource_type,
             operation_group="managed_clusters",
         )
@@ -4770,6 +4783,86 @@ class AKSContext:
             raise UnknownError('Cannot get the AKS cluster\'s service principal.')
         return assignee, is_service_principal
 
+    def get_kubelet_config(self) -> Union[dict, KubeletConfig, None]:
+        """Obtain the value of kubelet_config.
+
+        :return: dict, KubeletConfig or None
+        """
+        # read the original value passed by the command
+        kubelet_config = None
+        kubelet_config_file_path = self.raw_param.get("kubelet_config")
+        # validate user input
+        if kubelet_config_file_path:
+            if not os.path.isfile(kubelet_config_file_path):
+                raise InvalidArgumentValueError(
+                    "{} is not valid file, or not accessable.".format(
+                        kubelet_config_file_path
+                    )
+                )
+            kubelet_config = get_file_json(kubelet_config_file_path)
+            if not isinstance(kubelet_config, dict):
+                raise InvalidArgumentValueError(
+                    "Error reading kubelet configuration from {}. "
+                    "Please see https://aka.ms/CustomNodeConfig for correct format.".format(
+                        kubelet_config_file_path
+                    )
+                )
+
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if self.mc and self.mc.agent_pool_profiles:
+            agent_pool_profile = safe_list_get(
+                self.mc.agent_pool_profiles, 0, None
+            )
+            if (
+                agent_pool_profile and
+                agent_pool_profile.kubelet_config is not None
+            ):
+                kubelet_config = agent_pool_profile.kubelet_config
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return kubelet_config
+
+    def get_linux_os_config(self) -> Union[dict, LinuxOSConfig, None]:
+        """Obtain the value of linux_os_config.
+
+        :return: dict, LinuxOSConfig or None
+        """
+        # read the original value passed by the command
+        linux_os_config = None
+        linux_os_config_file_path = self.raw_param.get("linux_os_config")
+        # validate user input
+        if linux_os_config_file_path:
+            if not os.path.isfile(linux_os_config_file_path):
+                raise InvalidArgumentValueError(
+                    "{} is not valid file, or not accessable.".format(
+                        linux_os_config_file_path
+                    )
+                )
+            linux_os_config = get_file_json(linux_os_config_file_path)
+            if not isinstance(linux_os_config, dict):
+                raise InvalidArgumentValueError(
+                    "Error reading Linux OS configuration from {}. "
+                    "Please see https://aka.ms/CustomNodeConfig for correct format.".format(
+                        linux_os_config_file_path
+                    )
+                )
+
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if self.mc and self.mc.agent_pool_profiles:
+            agent_pool_profile = safe_list_get(
+                self.mc.agent_pool_profiles, 0, None
+            )
+            if (
+                agent_pool_profile and
+                agent_pool_profile.linux_os_config is not None
+            ):
+                linux_os_config = agent_pool_profile.linux_os_config
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return linux_os_config
+
 
 class AKSCreateDecorator:
     def __init__(
@@ -4860,6 +4953,8 @@ class AKSCreateDecorator:
             max_count=max_count,
             enable_auto_scaling=enable_auto_scaling,
             enable_fips=self.context.get_enable_fips_image(),
+            kubelet_config=self.context.get_kubelet_config(),
+            linux_os_config=self.context.get_linux_os_config(),
         )
 
         # snapshot creation data
@@ -5718,7 +5813,8 @@ class AKSCreateDecorator:
                     self.context.get_resource_group_name(),
                     self.context.get_name(),
                     mc,
-                    self.context.get_intermediate("monitoring", default_value=False),
+                    self.context.get_intermediate("monitoring", default_value=False) and
+                    not self.context.get_enable_msi_auth_for_monitoring(),
                     self.context.get_intermediate("ingress_appgw_addon_enabled", default_value=False),
                     self.context.get_intermediate("enable_virtual_node", default_value=False),
                     self.context.get_intermediate("need_post_creation_vnet_permission_granting", default_value=False),
@@ -5726,8 +5822,7 @@ class AKSCreateDecorator:
                     self.context.get_enable_managed_identity(),
                     self.context.get_attach_acr(),
                     self.context.get_aks_custom_headers(),
-                    self.context.get_no_wait(),
-                    self.context.get_enable_msi_auth_for_monitoring())
+                    self.context.get_no_wait())
                 if self.context.get_intermediate("monitoring") and self.context.get_enable_msi_auth_for_monitoring():
                     # Create the DCR Association here
                     addon_consts = self.context.get_addon_consts()
@@ -6341,7 +6436,8 @@ class AKSUpdateDecorator:
             self.context.get_resource_group_name(),
             self.context.get_name(),
             mc,
-            self.context.get_intermediate("monitoring", default_value=False),
+            self.context.get_intermediate("monitoring", default_value=False) and
+            not self.context.get_enable_msi_auth_for_monitoring(),
             self.context.get_intermediate("ingress_appgw_addon_enabled", default_value=False),
             self.context.get_intermediate("enable_virtual_node", default_value=False),
             False,
@@ -6350,5 +6446,4 @@ class AKSUpdateDecorator:
             self.context.get_attach_acr(),
             self.context.get_aks_custom_headers(),
             self.context.get_no_wait(),
-            self.context.get_enable_msi_auth_for_monitoring()
         )

@@ -43,6 +43,11 @@ acr manifest list-referrers:
     manifest_id:
       rule_exclusions:
       - no_positional_parameters
+acr manifest list-metadata:
+  parameters:
+    repo_id:
+      rule_exclusions:
+      - no_positional_parameters
 acr manifest metadata list:
   parameters:
     repo_id:
@@ -59,6 +64,16 @@ acr manifest metadata update:
       rule_exclusions:
       - no_positional_parameters
 acr manifest show:
+  parameters:
+    manifest_id:
+      rule_exclusions:
+      - no_positional_parameters
+acr manifest show-metadata:
+  parameters:
+    manifest_id:
+      rule_exclusions:
+      - no_positional_parameters
+acr manifest update-metadata:
   parameters:
     manifest_id:
       rule_exclusions:
@@ -156,6 +171,9 @@ acs create:
       rule_exclusions:
       - option_length_too_long
     master_vnet_subnet_id:
+      rule_exclusions:
+      - option_length_too_long
+    master_pod_subnet_id:
       rule_exclusions:
       - option_length_too_long
 acs kubernetes install-cli:

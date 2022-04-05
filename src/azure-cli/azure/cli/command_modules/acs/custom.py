@@ -59,7 +59,7 @@ from azure.cli.core._profile import Profile
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
 from azure.cli.core.keys import is_valid_ssh_rsa_public_key
-from azure.cli.core.util import in_cloud_console, shell_safe_json_parse, truncate_text, sdk_no_wait
+from azure.cli.core.util import get_file_json, in_cloud_console, shell_safe_json_parse, truncate_text, sdk_no_wait
 from azure.cli.core.commands import LongRunningOperation
 from azure.graphrbac.models import (ApplicationCreateParameters,
                                     ApplicationUpdateParameters,
@@ -1961,6 +1961,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                workspace_resource_id=None,
                enable_msi_auth_for_monitoring=False,
                vnet_subnet_id=None,
+               pod_subnet_id=None,
                ppg=None,
                max_pods=0,
                min_count=None,
@@ -2007,6 +2008,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                gmsa_dns_server=None,
                gmsa_root_domain_name=None,
                snapshot_id=None,
+               kubelet_config=None,
+               linux_os_config=None,
                ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -2808,6 +2811,7 @@ def _handle_addons_args(cmd, addons_str, subscription_id, resource_group_name, a
                         enable_msi_auth_for_monitoring=False,
                         aci_subnet_name=None,
                         vnet_subnet_id=None,
+                        pod_subnet_id=None,
                         appgw_name=None,
                         appgw_subnet_cidr=None,
                         appgw_id=None,
@@ -3123,6 +3127,7 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
                       node_osdisk_size=0,
                       node_count=3,
                       vnet_subnet_id=None,
+                      pod_subnet_id=None,
                       ppg=None,
                       max_pods=0,
                       os_type=None,
@@ -3137,6 +3142,8 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
                       spot_max_price=float('nan'),
                       tags=None,
                       labels=None,
+                      kubelet_config=None,
+                      linux_os_config=None,
                       max_surge=None,
                       mode="User",
                       enable_encryption_at_host=False,
@@ -3208,6 +3215,7 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
         os_type=os_type,
         os_sku=os_sku,
         vnet_subnet_id=vnet_subnet_id,
+        pod_subnet_id=pod_subnet_id,
         proximity_placement_group_id=ppg,
         agent_pool_type="VirtualMachineScaleSets",
         max_pods=int(max_pods) if max_pods else None,
@@ -3240,6 +3248,12 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
 
     if node_osdisk_type:
         agent_pool.os_disk_type = node_osdisk_type
+
+    if kubelet_config:
+        agent_pool.kubelet_config = _get_kubelet_config(kubelet_config)
+
+    if linux_os_config:
+        agent_pool.linux_os_config = _get_linux_os_config(linux_os_config)
 
     # custom headers
     aks_custom_headers = extract_comma_separated_string(
@@ -4062,12 +4076,6 @@ def openshift_monitor_disable(cmd, client, resource_group_name, name, no_wait=Fa
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, name, instance)
 
 
-def _is_msi_cluster(managed_cluster):
-    return (managed_cluster and managed_cluster.identity and
-            (managed_cluster.identity.type.casefold() == "systemassigned" or
-             managed_cluster.identity.type.casefold() == "userassigned"))
-
-
 def _put_managed_cluster_ensuring_permission(
         cmd,     # pylint: disable=too-many-locals,too-many-statements,too-many-branches
         client,
@@ -4083,11 +4091,10 @@ def _put_managed_cluster_ensuring_permission(
         enable_managed_identity,
         attach_acr,
         headers,
-        no_wait,
-        enable_msi_auth_for_monitoring=False
+        no_wait
 ):
     # some addons require post cluster creation role assigment
-    need_post_creation_role_assignment = ((monitoring_addon_enabled and not enable_msi_auth_for_monitoring) or
+    need_post_creation_role_assignment = (monitoring_addon_enabled or
                                           ingress_appgw_addon_enabled or
                                           (enable_managed_identity and attach_acr) or
                                           virtual_node_addon_enabled or
@@ -4173,15 +4180,15 @@ def _ensure_cluster_identity_permission_on_kubelet_identity(cmd, cluster_identit
                                 'permission to cluster identity at scope {}'.format(scope))
 
 
-def aks_snapshot_create(cmd,    # pylint: disable=too-many-locals,too-many-statements,too-many-branches
-                        client,
-                        resource_group_name,
-                        name,
-                        nodepool_id,
-                        location=None,
-                        tags=None,
-                        aks_custom_headers=None,
-                        no_wait=False):
+def aks_nodepool_snapshot_create(cmd,    # pylint: disable=too-many-locals,too-many-statements,too-many-branches
+                                 client,
+                                 resource_group_name,
+                                 snapshot_name,
+                                 nodepool_id,
+                                 location=None,
+                                 tags=None,
+                                 aks_custom_headers=None,
+                                 no_wait=False):
 
     rg_location = get_rg_location(cmd.cli_ctx, resource_group_name)
     if location is None:
@@ -4197,7 +4204,7 @@ def aks_snapshot_create(cmd,    # pylint: disable=too-many-locals,too-many-state
     )
 
     snapshot = Snapshot(
-        name=name,
+        name=snapshot_name,
         tags=tags,
         location=location,
         creation_data=creationData
@@ -4211,30 +4218,51 @@ def aks_snapshot_create(cmd,    # pylint: disable=too-many-locals,too-many-state
         default_value={},
         allow_appending_values_to_same_key=True,
     )
-    return client.create_or_update(resource_group_name, name, snapshot, headers=aks_custom_headers)
+    return client.create_or_update(resource_group_name, snapshot_name, snapshot, headers=aks_custom_headers)
 
 
-def aks_snapshot_show(cmd, client, resource_group_name, name):   # pylint: disable=unused-argument
-    snapshot = client.get(resource_group_name, name)
+def aks_nodepool_snapshot_show(cmd, client, resource_group_name, snapshot_name):   # pylint: disable=unused-argument
+    snapshot = client.get(resource_group_name, snapshot_name)
     return snapshot
 
 
-def aks_snapshot_delete(cmd,    # pylint: disable=unused-argument
-                        client,
-                        resource_group_name,
-                        name,
-                        no_wait=False,
-                        yes=False):
+def aks_nodepool_snapshot_delete(cmd,    # pylint: disable=unused-argument
+                                 client,
+                                 resource_group_name,
+                                 snapshot_name,
+                                 no_wait=False,
+                                 yes=False):
 
-    msg = 'This will delete the snapshot "{}" in resource group "{}", Are you sure?'.format(name, resource_group_name)
+    msg = 'This will delete the snapshot "{}" in resource group "{}", Are you sure?'.format(snapshot_name, resource_group_name)
     if not yes and not prompt_y_n(msg, default="n"):
         return None
 
-    return client.delete(resource_group_name, name)
+    return client.delete(resource_group_name, snapshot_name)
 
 
-def aks_snapshot_list(cmd, client, resource_group_name=None):  # pylint: disable=unused-argument
+def aks_nodepool_snapshot_list(cmd, client, resource_group_name=None):  # pylint: disable=unused-argument
     if resource_group_name is None or resource_group_name == '':
         return client.list()
 
     return client.list_by_resource_group(resource_group_name)
+
+
+def _get_kubelet_config(file_path):
+    if not os.path.isfile(file_path):
+        raise InvalidArgumentValueError("{} is not valid file, or not accessable.".format(file_path))
+    kubelet_config = get_file_json(file_path)
+    if not isinstance(kubelet_config, dict):
+        msg = "Error reading kubelet configuration at {}. Please see https://aka.ms/CustomNodeConfig for proper format."
+        raise InvalidArgumentValueError(msg.format(file_path))
+    return kubelet_config
+
+
+def _get_linux_os_config(file_path):
+    if not os.path.isfile(file_path):
+        raise InvalidArgumentValueError("{} is not valid file, or not accessable.".format(file_path))
+    os_config = get_file_json(file_path)
+    if not isinstance(os_config, dict):
+        msg = "Error reading Linux OS configuration at {}. \
+            Please see https://aka.ms/CustomNodeConfig for proper format."
+        raise InvalidArgumentValueError(msg.format(file_path))
+    return os_config
