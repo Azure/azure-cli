@@ -61,7 +61,7 @@ system_assigned_type = CLIArgumentType(
 def load_arguments(self, _):  # pylint: disable=too-many-statements
     # Arguments for IoT DPS
     with self.argument_context('iot dps') as c:
-        c.argument('dps_name', dps_name_type, options_list=['--dps-name', '--name', '-n'], id_part='name')
+        c.argument('dps_name', dps_name_type, options_list=['--name', '-n'], id_part='name')
         c.argument('tags', tags_type)
 
     with self.argument_context('iot dps create') as c:
@@ -81,6 +81,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     for subgroup in ['linked-hub', 'certificate']:
         with self.argument_context('iot dps {}'.format(subgroup)) as c:
             c.argument('dps_name', options_list=['--dps-name'], id_part=None)
+
+    # To replace above
+    for subgroup in ['policy']:
+        with self.argument_context('iot dps {}'.format(subgroup)) as c:
+            c.argument('dps_name', options_list=['--dps-name', '-n'], id_part=None)
 
     with self.argument_context('iot dps policy') as c:
         c.argument('access_policy_name', options_list=['--policy-name', '--pn'],

@@ -66,33 +66,33 @@ class IoTDpsTest(ScenarioTest):
         new_right = 'EnrollmentWrite'
 
         # Create access policy
-        self.cmd('az iot dps policy create -g {} --name {} --pn {} -r {}'.format(group_name, dps_name, policy_name, right), checks=[
+        self.cmd('az iot dps policy create -g {} --dps-name {} --pn {} -r {}'.format(group_name, dps_name, policy_name, right), checks=[
             self.check('keyName', policy_name),
             self.check('rights', right)
         ])
 
         # List access policy
-        self.cmd('az iot dps policy list -g {} --name {}'.format(group_name, dps_name), checks=[
+        self.cmd('az iot dps policy list -g {} --dps-name {}'.format(group_name, dps_name), checks=[
             self.check('length([*])', 2),
             self.check('[1].keyName', policy_name),
             self.check('[1].rights', right)
         ])
 
         # Get access policy
-        self.cmd('az iot dps policy show -g {} --name {} --pn {}'.format(group_name, dps_name, policy_name), checks=[
+        self.cmd('az iot dps policy show -g {} --dps-name {} --pn {}'.format(group_name, dps_name, policy_name), checks=[
             self.check('keyName', policy_name),
             self.check('rights', right)
         ])
 
         # Create update policy
-        self.cmd('az iot dps policy update -g {} --name {} --pn {} -r {}'.format(group_name, dps_name, policy_name, new_right),
+        self.cmd('az iot dps policy update -g {} --dps-name {} --pn {} -r {}'.format(group_name, dps_name, policy_name, new_right),
                  checks=[
                      self.check('keyName', policy_name),
                      self.check('rights', new_right)
         ])
 
         # Delete policy
-        self.cmd('az iot dps policy delete -g {} --name {} --pn {}'.format(group_name, dps_name, policy_name))
+        self.cmd('az iot dps policy delete -g {} --dps-name {} --pn {}'.format(group_name, dps_name, policy_name))
 
         # Delete DPS
         self.cmd('az iot dps delete -g {} -n {}'.format(group_name, dps_name))
