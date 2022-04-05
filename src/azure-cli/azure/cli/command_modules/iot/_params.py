@@ -16,7 +16,6 @@ from azure.cli.core.commands.parameters import (get_location_type,
 from azure.mgmt.iotcentral.models import AppSku
 from azure.mgmt.iothub.models import IotHubSku
 from azure.mgmt.iothubprovisioningservices.models import (IotDpsSku,
-                                                          AllocationPolicy,
                                                           AccessRightsDescription)
 from azure.cli.command_modules.iot.shared import (EndpointType,
                                                   RouteSourceType,
@@ -78,12 +77,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    'cross geo-pair disaster recovery. This property is immutable once set on the resource. '
                    'Only available in select regions. Learn more at https://aka.ms/dpsdr')
 
-    for subgroup in ['policy', 'linked-hub', 'certificate']:
+    # plan to slowly align this with extension naming patterns - name should be aligned with dps_name
+    for subgroup in ['linked-hub', 'certificate']:
         with self.argument_context('iot dps {}'.format(subgroup)) as c:
             c.argument('dps_name', options_list=['--dps-name'], id_part=None)
 
     with self.argument_context('iot dps policy') as c:
-        c.argument('access_policy_name', options_list=['--policy-name', '--pn', '--name', '-n'],
+        c.argument('access_policy_name', options_list=['--policy-name', '--pn'],
                    help='A friendly name for DPS access policy.')
 
     for subgroup in ['create', 'update']:
@@ -124,10 +124,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    help='A boolean indicating whether to apply allocation policy to the Iot hub.',
                    arg_type=get_three_state_flag())
         c.argument('allocation_weight', help='Allocation weight of the IoT hub.')
-
-    with self.argument_context('iot dps allocation-policy update') as c:
-        c.argument('allocation_policy', options_list=['--policy', '-p'], arg_type=get_enum_type(AllocationPolicy),
-                   help='Allocation policy for the IoT Hub Device Provisioning Service.')
 
     with self.argument_context('iot dps certificate') as c:
         c.argument('certificate_path', options_list=['--path', '-p'], type=file_type,
