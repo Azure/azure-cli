@@ -1029,7 +1029,7 @@ short-summary: Creates or update a security automation.
 examples:
   - name: Creates a security automation.
     text: >
-        az security automation create_or_update
+        az security automation create_or_update -g Sample-RG -n sampleAutomation -l eastus --scopes '[{\"description\": \"Scope for 487bb485-b5b0-471e-9c0d-10717612f869\", \"scopePath\": \"/subscriptions/487bb485-b5b0-471e-9c0d-10717612f869\"}]' --sources '[{\"eventSource\":\"SubAssessments\",\"ruleSets\":null}]' --actions '[{\"actionType\":\"EventHub\",\"eventHubResourceId\":\"subscriptions/212f9889-769e-45ae-ab43-6da33674bd26/resourceGroups/ContosoSiemPipeRg/providers/Microsoft.EventHub/namespaces/contososiempipe-ns/eventhubs/surashed-test\",\"connectionString\":\"Endpoint=sb://contososiempipe-ns.servicebus.windows.net/;SharedAccessKeyName=Send;SharedAccessKey=dummy=;EntityPath=dummy\",\"SasPolicyName\":\"dummy\"}]'
 """
 
 helps['security automation validate'] = """
@@ -1038,7 +1038,7 @@ short-summary: Validates a security automation model before create or update.
 examples:
   - name: Validates a security automation model before create or update.
     text: >
-        az security automation validate
+        az security automation validate -g Sample-RG -n sampleAutomation -l eastus --scopes '[{\"description\": \"Scope for 487bb485-b5b0-471e-9c0d-10717612f869\", \"scopePath\": \"/subscriptions/487bb485-b5b0-471e-9c0d-10717612f869\"}]' --sources '[{\"eventSource\":\"SubAssessments\",\"ruleSets\":null}]' --actions '[{\"actionType\":\"EventHub\",\"eventHubResourceId\":\"subscriptions/212f9889-769e-45ae-ab43-6da33674bd26/resourceGroups/ContosoSiemPipeRg/providers/Microsoft.EventHub/namespaces/contososiempipe-ns/eventhubs/surashed-test\",\"connectionString\":\"Endpoint=sb://contososiempipe-ns.servicebus.windows.net/;SharedAccessKeyName=Send;SharedAccessKey=dummy=;EntityPath=dummy\",\"SasPolicyName\":\"dummy\"}]'
 """
 
 helps['security automation delete'] = """
