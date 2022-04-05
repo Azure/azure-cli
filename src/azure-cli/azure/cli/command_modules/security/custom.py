@@ -833,7 +833,7 @@ def list_security_automations(client, resource_group_name=None):
 
 def get_security_automation(client, resource_group_name, resource_name):
 
-    return client.get(resource_group_name,resource_name)
+    return client.get(resource_group_name,automation_resource_namename)
 
 def delete_security_automation(client, resource_group_name, resource_name):
 
@@ -851,7 +851,7 @@ def create_or_update_security_automation(client, resource_group_name, resource_n
                                     description=description,
                                     isEnabled=isEnabled)
 
-    return client.create_or_update(resource_group_name, resource_name, automation)
+    return client.create_or_update(resource_group_name, resource_name,automation)
 
 
 def validate_security_automation(client, resource_group_name, resource_name, location, scopes,  sources, actions, etag=None, tags=None, description=None, isEnabled=None):
