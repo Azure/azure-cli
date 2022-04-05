@@ -39,7 +39,8 @@ from ._validators import (
     validate_expiration_time,
     validate_manifest_id,
     validate_repo_id,
-    validate_repository
+    validate_repository,
+    validate_permissive_repo_id
 )
 from .scope_map import RepoScopeMapActions, GatewayScopeMapActions
 
@@ -53,6 +54,7 @@ repo_id_type = CLIArgumentType(
 permissive_repo_id_type = CLIArgumentType(
     nargs='*',
     default=None,
+    validator=validate_permissive_repo_id,
     help="A fully qualified repository specifier such as 'MyRegistry.azurecr.io/hello-world'. May include a tag such as MyRegistry.azurecr.io/hello-world:latest"
 )
 

@@ -440,7 +440,7 @@ type: command
 short-summary: List soft-deleted repositories in an Azure Container Registry.
 examples:
   - name: List soft-deleted repositories in a given Azure Container Registry.
-    text: az acr repository list -n MyRegistry
+    text: az acr repository list-deleted -n MyRegistry
 """
 
 helps['acr repository show'] = """

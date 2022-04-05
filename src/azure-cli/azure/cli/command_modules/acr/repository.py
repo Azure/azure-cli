@@ -457,12 +457,13 @@ def _parse_image_name(image, allow_digest=False, default_latest=True):
         if len(tokens) == 2:
             return tokens[0], None, tokens[1]
 
-    if ':' in image:
+    if ':' in image and '@' not in image:
         # This is probably an image name by tag
         tokens = image.split(':')
         if len(tokens) == 2:
             return tokens[0], tokens[1], None
-    else:
+
+    if ':' not in image and '@' not in image:
         # This is probably an image with implicit latest tag
         if default_latest:
             return image, 'latest', None

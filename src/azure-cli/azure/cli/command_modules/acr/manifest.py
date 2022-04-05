@@ -124,7 +124,7 @@ def _obtain_referrers_from_registry(login_server,
     return result_list
 
 
-def _parse_fqdn(cmd, fqdn, is_manifest=True, default_latest=True):
+def _parse_fqdn(cmd, fqdn, is_manifest=True, allow_digest=True, default_latest=True):
     try:
         fqdn = fqdn.lstrip('https://')
         reg_addr = fqdn.split('/', 1)[0]
@@ -140,7 +140,7 @@ def _parse_fqdn(cmd, fqdn, is_manifest=True, default_latest=True):
                                             " should not include a tag or digest.")
 
 
-        repository, tag, manifest = _parse_image_name(manifest_spec, allow_digest=True, default_latest=default_latest)
+        repository, tag, manifest = _parse_image_name(manifest_spec, allow_digest=allow_digest, default_latest=default_latest)
 
     except IndexError as e:
         if is_manifest:
@@ -284,7 +284,7 @@ def acr_manifest_deleted_tags_list(cmd,
         raise InvalidArgumentValueError(BAD_ARGS_ERROR_REPO)
 
     if perm_repo_id:
-        registry_name, repository, tag, _ = _parse_fqdn(cmd, perm_repo_id[0], is_manifest=True, default_latest=False)
+        registry_name, repository, tag, _ = _parse_fqdn(cmd, perm_repo_id[0], is_manifest=True, allow_digest=False, default_latest=False)
 
     else:
         repository, tag, _ = _parse_image_name(permissive_repo, allow_digest=False, default_latest=False)
@@ -324,11 +324,10 @@ def acr_manifest_deleted_restore(cmd,
         raise InvalidArgumentValueError(BAD_ARGS_ERROR_MANIFEST)
 
     if manifest_id:
-        registry_name, repository, tag, _ = _parse_fqdn(cmd, manifest_id[0])
+        registry_name, repository, tag, _ = _parse_fqdn(cmd, manifest_id[0], allow_digest=False)
 
-#default latest here?
     else:
-        repository, tag, _ = _parse_image_name(manifest_spec, allow_digest=True)
+        repository, tag, _ = _parse_image_name(manifest_spec, allow_digest=False, default_latest=False)
 
     login_server, username, password = get_access_credentials(
         cmd=cmd,
