@@ -17,7 +17,8 @@ from azure.mgmt.security.models import (SecurityContact,
                                         RuleResultsInput,
                                         RulesResultsInput,
                                         AlertSyncSettings,
-                                        DataExportSettings)
+                                        DataExportSettings,
+                                        Automation)
 from azure.mgmt.security.models._security_center_enums import Enum69
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
@@ -816,3 +817,52 @@ def list_by_score(client, resource_name):
 def list_secure_score_control_definitions(client):
 
     return client.list_by_subscription()
+
+# --------------------------------------------------------------------------------------------
+# Security Automations
+# --------------------------------------------------------------------------------------------
+
+
+def list_security_automations(client, resource_group_name=None):
+
+    if resource_group_name:
+        return client.list_by_resource_group(resource_group_name)
+
+    return client.list()
+
+
+def get_security_automation(client, resource_group_name, resource_name):
+
+    return client.get(resource_group_name,resource_name)
+
+def delete_security_automation(client, resource_group_name, resource_name):
+
+    return client.delete(resource_group_name,resource_name)
+
+
+def create_or_update_security_automation(client, resource_group_name, resource_name, location, scopes,  sources, actions, etag=None, tags=None, description=None, isEnabled=None):
+
+    automation = Automation(location=location,
+                                    scopes=scopes,
+                                    sources=sources,
+                                    actions=actions,
+                                    tags=tags,
+                                    etag=etag,
+                                    description=description,
+                                    isEnabled=isEnabled)
+
+    return client.create_or_update(resource_group_name, resource_name, automation)
+
+
+def validate_security_automation(client, resource_group_name, resource_name, location, scopes,  sources, actions, etag=None, tags=None, description=None, isEnabled=None):
+
+    automation = Automation(location=location,
+                                    scopes=scopes,
+                                    sources=sources,
+                                    actions=actions,
+                                    tags=tags,
+                                    etag=etag,
+                                    description=description,
+                                    isEnabled=isEnabled)
+
+    return client.validate(resource_group_name, resource_name, automation)

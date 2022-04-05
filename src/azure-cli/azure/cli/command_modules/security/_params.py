@@ -90,6 +90,16 @@ adaptive_network_hardenings_resource_adaptive_network_hardenings_resource_name =
 # Adaptive Application Controls
 adaptive_application_controls_group_name = CLIArgumentType(option_list=('--group-name'), metave='GROUPNAME', help='Name of an application control VM/server group')
 
+# Automations
+automation_scopes_arg_type = CLIArgumentType(options_list=('--scopes'), metavar='SCOPES', help='A collection of scopes on which the security automations logic is applied')
+automation_sources_arg_type = CLIArgumentType(options_list=('--sources'), metavar='SOURCES', help='A collection of the source event types which evaluate the security automation set of rules')
+automation_actions_arg_type = CLIArgumentType(options_list=('--actions'), metavar='ACTIONS', help='A collection of the actions which are triggered if all the configured rules evaluations, within at least one rule set, are true')
+automation_etag_arg_type = CLIArgumentType(options_list=('--etag'), metavar='ETAG', help='Entity tag is used for comparing two or more entities from the same requested resource')
+automation_tags_arg_type = CLIArgumentType(options_list=('--tags'), metavar='TAGS', help='A list of key value pairs that describe the resource')
+automation_description_arg_type = CLIArgumentType(options_list=('--description'), metavar='DESCRIPTION', help='The security automation description')
+automation_isEnabled_arg_type = CLIArgumentType(options_list=('--isEnabled'), metavar='ISENABLED', help='Indicates whether the security automation is enabled')
+
+
 
 # pylint: disable=too-many-branches
 def load_arguments(self, _):
@@ -123,7 +133,8 @@ def load_arguments(self, _):
                   'secure-scores',
                   'secure-score-controls',
                   'secure-score-control-definitions',
-                  'setting'
+                  'setting',
+                  'automation'
                   ]:
         with self.argument_context('security {}'.format(scope)) as c:
             c.argument(
@@ -348,3 +359,27 @@ def load_arguments(self, _):
         with self.argument_context('security {}'.format(scope)) as c:
             c.argument('setting_name', options_list=['--name', '-n'], help='The name of the setting', arg_type=get_enum_type(Enum69))
             c.argument('enabled', help='Enable or disable the setting status.', arg_type=get_three_state_flag())
+
+    for scope in ['automation create_or_update', 'automation validate']:
+        with self.argument_context('security {}'.format(scope)) as c:
+            c.argument(
+                'scopes',
+                arg_type=automation_scopes_arg_type)
+            c.argument(
+                'sources',
+                arg_type=automation_sources_arg_type)
+            c.argument(
+                'actions',
+                arg_type=automation_actions_arg_type)
+            c.argument(
+                'etag',
+                arg_type=automation_etag_arg_type)
+            c.argument(
+                'tags',
+                arg_type=automation_tags_arg_type)
+            c.argument(
+                'description',
+                arg_type=automation_description_arg_type)
+            c.argument(
+                'isEnabled',
+                arg_type=automation_isEnabled_arg_type)

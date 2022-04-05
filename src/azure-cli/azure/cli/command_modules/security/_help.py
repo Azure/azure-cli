@@ -997,3 +997,55 @@ examples:
     text: >
         az security secure-score-control-definitions list
 """
+helps['security automation'] = """
+type: group
+short-summary: View your security automations.
+"""
+
+helps['security automation list'] = """
+type: command
+short-summary: List all security automations under subscription/resource group
+examples:
+  - name: List all security automations under subscription
+    text: >
+        az security automation list
+  - name: List all security automations under resource group
+    text: >
+        az security automation list -g 'sampleRg'      
+"""
+
+helps['security automation show'] = """
+type: command
+short-summary: Shows a security automation.
+examples:
+  - name: Shows a security automation.
+    text: >
+        az security automation show -n "sampleAutomation"
+"""
+
+helps['security automation create_or_update'] = """
+type: command
+short-summary: Creates or update a security automation.
+examples:
+  - name: Creates a security automation.
+    text: >
+        az security automation create_or_update
+"""
+
+helps['security automation validate'] = """
+type: command
+short-summary: Validates a security automation model before create or update.
+examples:
+  - name: Validates a security automation model before create or update.
+    text: >
+        az security automation validate
+"""
+
+helps['security automation delete'] = """
+type: command
+short-summary: Deletes a security automation.
+examples:
+  - name: Deletes a security automation.
+    text: >
+        az security automation delete -g 'sampleRg' -n 'sampleAutomation'
+"""
