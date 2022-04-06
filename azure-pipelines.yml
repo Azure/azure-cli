@@ -816,8 +816,6 @@ jobs:
 
 - job: BuildDebPackages
   displayName: Build Deb Packages
-
-  dependsOn: BuildPythonWheel
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
     vmImage: 'ubuntu-20.04'
@@ -859,12 +857,6 @@ jobs:
         deb_system: debian
         distro: bullseye
   steps:
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Build Artifacts'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
-      artifactName: pypi
-
   - task: Bash@3
     displayName: 'Build $(deb_system) $(distro) Package'
     inputs:
