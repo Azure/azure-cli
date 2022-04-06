@@ -6,7 +6,7 @@
 import os
 from datetime import datetime
 
-from azure.cli.core.profiles import ResourceType
+from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.core.util import sdk_no_wait
 from azure.cli.core.azclierror import AzureResponseError
 from azure.cli.command_modules.storage.url_quote_util import encode_for_url, make_encoded_file_url_and_params
@@ -354,17 +354,10 @@ def storage_blob_copy_batch(cmd, client, source_client, container_name=None,
 
 # pylint: disable=unused-argument
 def storage_blob_download_batch(client, source, destination, source_container_name, pattern=None, dryrun=False,
-                                progress_callback=None, max_connections=2):
-
-    def _download_blob(blob_service, container, destination_folder, normalized_blob_name, blob_name):
-        # TODO: try catch IO exception
-        destination_path = os.path.join(destination_folder, normalized_blob_name)
-        destination_folder = os.path.dirname(destination_path)
-        if not os.path.exists(destination_folder):
-            mkdir_p(destination_folder)
-
-        blob = blob_service.get_blob_to_path(container, blob_name, destination_path, max_connections=max_connections,
-                                             progress_callback=progress_callback)
+                                progress_callback=None, **kwargs):
+    @check_precondition_success
+    def _download_blob(*args, **kwargs):
+        blob = download_blob(*args, **kwargs)
         return blob.name
 
     source_blobs = collect_blobs(client, source_container_name, pattern)
@@ -394,17 +387,34 @@ def storage_blob_download_batch(client, source, destination, source_container_na
 
     results = []
     for index, blob_normed in enumerate(blobs_to_download):
+        from azure.cli.core.azclierror import FileOperationError
         # add blob name and number to progress message
         if progress_callback:
             progress_callback.message = '{}/{}: "{}"'.format(
                 index + 1, len(blobs_to_download), blobs_to_download[blob_normed])
-        results.append(_download_blob(
-            client, source_container_name, destination, blob_normed, blobs_to_download[blob_normed]))
+        blob_client = client.get_blob_client(container=source_container_name,
+                                             blob=blobs_to_download[blob_normed])
+        destination_path = os.path.join(destination, os.path.normpath(blob_normed))
+        destination_folder = os.path.dirname(destination_path)
+        # Failed when there is same name for file and folder
+        if os.path.isfile(destination_path) and os.path.exists(destination_folder):
+            raise FileOperationError("%s already exists in %s. Please rename existing file or choose another "
+                                     "destination folder. ")
+        if not os.path.exists(destination_folder):
+            mkdir_p(destination_folder)
+        include, result = _download_blob(client=blob_client, file_path=destination_path,
+                                         progress_callback=progress_callback, **kwargs)
+        if include:
+            results.append(result)
 
     # end progress hook
     if progress_callback:
         progress_callback.hook.end()
 
+    num_failures = len(blobs_to_download) - len(results)
+    if num_failures:
+        logger.warning('%s of %s files not downloaded due to "Failed Precondition"',
+                       num_failures, len(blobs_to_download))
     return results
 
 
@@ -415,9 +425,9 @@ def storage_blob_upload_batch(cmd, client, source, destination, pattern=None,  #
                               maxsize_condition=None, max_connections=2, lease_id=None, progress_callback=None,
                               if_modified_since=None, if_unmodified_since=None, if_match=None,
                               if_none_match=None, timeout=None, dryrun=False, socket_timeout=None, **kwargs):
-    def _create_return_result(blob_content_settings, upload_result=None):
+    def _create_return_result(blob_content_settings, blob_client, upload_result=None):
         return {
-            'Blob': client.url,
+            'Blob': blob_client.url,
             'Type': blob_content_settings.content_type,
             'Last Modified': upload_result['last_modified'] if upload_result else None,
             'eTag': upload_result['etag'] if upload_result else None}
@@ -434,8 +444,11 @@ def storage_blob_upload_batch(cmd, client, source, destination, pattern=None,  #
         logger.info('      total %d', len(source_files))
         results = []
         for src, dst in source_files:
+            blob_client = client.get_blob_client(container=destination_container_name,
+                                                 blob=normalize_blob_file_path(destination_path, dst))
             results.append(_create_return_result(blob_content_settings=guess_content_type(src, content_settings,
-                                                                                          t_content_settings)))
+                                                                                          t_content_settings),
+                                                 blob_client=blob_client))
     else:
         @check_precondition_success
         def _upload_blob(*args, **kwargs):
@@ -467,7 +480,7 @@ def storage_blob_upload_batch(cmd, client, source, destination, pattern=None,  #
                                                if_none_match=if_none_match, timeout=timeout, **kwargs)
                 if include:
                     results.append(_create_return_result(blob_content_settings=guessed_content_settings,
-                                                         upload_result=result))
+                                                         blob_client=blob_client, upload_result=result))
             except (ResourceModifiedError, AzureResponseError) as ex:
                 logger.error(ex)
 
@@ -589,6 +602,22 @@ def upload_blob(cmd, client, file_path=None, container_name=None, blob_name=None
     return response
 
 
+def download_blob(client, file_path, open_mode='wb', start_range=None, end_range=None,
+                  progress_callback=None, **kwargs):
+    offset = None
+    length = None
+    if start_range is not None and end_range is not None:
+        offset = start_range
+        length = end_range - start_range + 1
+    if progress_callback:
+        kwargs['raw_response_hook'] = progress_callback
+    download_stream = client.download_blob(offset=offset, length=length, **kwargs)
+    with open(file_path, open_mode) as stream:
+        download_stream.readinto(stream)
+
+    return download_stream.properties
+
+
 def get_block_ids(content_length, block_length):
     """Get the block id arrary from block blob length, block size"""
     block_count = 0
@@ -699,47 +728,78 @@ def storage_blob_delete_batch(client, source, source_container_name, pattern=Non
         logger.warning('%s of %s blobs not deleted due to "Failed Precondition"', num_failures, len(source_blobs))
 
 
-def generate_sas_blob_uri(client, container_name, blob_name, permission=None,
-                          expiry=None, start=None, id=None, ip=None,  # pylint: disable=redefined-builtin
+def generate_sas_blob_uri(cmd, client, permission=None, expiry=None, start=None, id=None, ip=None,  # pylint: disable=redefined-builtin
                           protocol=None, cache_control=None, content_disposition=None,
                           content_encoding=None, content_language=None,
-                          content_type=None, full_uri=False, as_user=False):
+                          content_type=None, full_uri=False, as_user=False, snapshot=None, **kwargs):
     from ..url_quote_util import encode_url_path
     from urllib.parse import quote
+    t_generate_blob_sas = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_BLOB,
+                                  '_shared_access_signature#generate_blob_sas')
+
+    account_name = client.account_name
+    user_delegation_key = None
+    account_key = None
     if as_user:
         user_delegation_key = client.get_user_delegation_key(
             get_datetime_from_string(start) if start else datetime.utcnow(), get_datetime_from_string(expiry))
-        sas_token = client.generate_blob_shared_access_signature(
-            container_name, blob_name, permission=permission, expiry=expiry, start=start, id=id, ip=ip,
-            protocol=protocol, cache_control=cache_control, content_disposition=content_disposition,
-            content_encoding=content_encoding, content_language=content_language, content_type=content_type,
-            user_delegation_key=user_delegation_key)
     else:
-        sas_token = client.generate_blob_shared_access_signature(
-            container_name, blob_name, permission=permission, expiry=expiry, start=start, id=id, ip=ip,
-            protocol=protocol, cache_control=cache_control, content_disposition=content_disposition,
-            content_encoding=content_encoding, content_language=content_language, content_type=content_type)
+        account_key = client.credential.account_key
+
+    blob_url = kwargs.pop('blob_url')
+    container_name = kwargs.pop('container_name')
+    blob_name = kwargs.pop('blob_name')
+    t_blob_client = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_BLOB, '_blob_client#BlobClient')
+    if blob_url:
+        if as_user:
+            credential = client.credential._credential
+        else:
+            credential = client.credential.account_key
+        blob_client = t_blob_client.from_blob_url(blob_url=blob_url, credential=credential, snapshot=snapshot)
+        container_name = blob_client.container_name
+        blob_name = blob_client.blob_name
+    else:
+        blob_client = client.get_blob_client(container=container_name, blob=blob_name, snapshot=snapshot)
+        blob_url = blob_client.url
+
+    sas_token = t_generate_blob_sas(account_name=account_name, container_name=container_name, blob_name=blob_name,
+                                    snapshot=snapshot, account_key=account_key, user_delegation_key=user_delegation_key,
+                                    permission=permission, expiry=expiry, start=start, policy_id=id, ip=ip,
+                                    protocol=protocol, cache_control=cache_control,
+                                    content_disposition=content_disposition, content_encoding=content_encoding,
+                                    content_language=content_language, content_type=content_type, **kwargs)
+
     if full_uri:
-        return encode_url_path(client.make_blob_url(container_name, blob_name, protocol=protocol,
-                                                    sas_token=quote(sas_token, safe='&%()$=\',~')))
+        blob_client = t_blob_client(account_url=client.url, container_name=container_name, blob_name=blob_name,
+                                    snapshot=snapshot, credential=sas_token)
+        return encode_url_path(blob_client.url)
     return quote(sas_token, safe='&%()$=\',~')
 
 
-def generate_container_shared_access_signature(client, container_name, permission=None,
-                                               expiry=None, start=None, id=None, ip=None,  # pylint: disable=redefined-builtin
-                                               protocol=None, cache_control=None, content_disposition=None,
-                                               content_encoding=None, content_language=None,
-                                               content_type=None, as_user=False):
+# pylint: disable=redefined-builtin
+def generate_container_shared_access_signature(cmd, client, container_name, permission=None, expiry=None,
+                                               start=None, id=None, ip=None, protocol=None, cache_control=None,
+                                               content_disposition=None, content_encoding=None, content_language=None,
+                                               content_type=None, as_user=False, **kwargs):
+
+    t_generate_container_sas = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_BLOB,
+                                       '_shared_access_signature#generate_container_sas')
+
+    account_name = client.account_name
     user_delegation_key = None
+    account_key = None
     if as_user:
         user_delegation_key = client.get_user_delegation_key(
             get_datetime_from_string(start) if start else datetime.utcnow(), get_datetime_from_string(expiry))
+    else:
+        account_key = client.credential.account_key
 
-    return client.generate_container_shared_access_signature(
-        container_name, permission=permission, expiry=expiry, start=start, id=id, ip=ip,
-        protocol=protocol, cache_control=cache_control, content_disposition=content_disposition,
-        content_encoding=content_encoding, content_language=content_language, content_type=content_type,
-        user_delegation_key=user_delegation_key)
+    return t_generate_container_sas(account_name=account_name, container_name=container_name,
+                                    account_key=account_key, user_delegation_key=user_delegation_key,
+                                    permission=permission, expiry=expiry, start=start, policy_id=id, ip=ip,
+                                    protocol=protocol, cache_control=cache_control,
+                                    content_disposition=content_disposition, content_encoding=content_encoding,
+                                    content_language=content_language, content_type=content_type, **kwargs)
 
 
 def create_blob_url(client, container_name, blob_name, protocol=None, snapshot=None):

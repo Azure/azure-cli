@@ -151,6 +151,15 @@ def validate_linux_host_name(namespace):
                        'letters, numbers, or dashes (-).')
 
 
+def validate_snapshot_name(namespace):
+    """Validates a nodepool snapshot name to be alphanumeric and dashes."""
+    rfc1123_regex = re.compile(r'^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])(\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9]))*$')  # pylint:disable=line-too-long
+    found = rfc1123_regex.findall(namespace.snapshot_name)
+    if not found:
+        raise InvalidArgumentValueError('--name cannot exceed 63 characters and can only contain '
+                                        'letters, numbers, or dashes (-).')
+
+
 def validate_vm_set_type(namespace):
     """Validates the vm set type string."""
     if namespace.vm_set_type is not None:
@@ -274,12 +283,19 @@ def validate_nodepool_tags(ns):
 
 
 def validate_vnet_subnet_id(namespace):
-    if namespace.vnet_subnet_id is not None:
-        if namespace.vnet_subnet_id == '':
-            return
-        from msrestazure.tools import is_valid_resource_id
-        if not is_valid_resource_id(namespace.vnet_subnet_id):
-            raise CLIError("--vnet-subnet-id is not a valid Azure resource ID.")
+    _validate_subnet_id(namespace.vnet_subnet_id, "--vnet-subnet-id")
+
+
+def validate_pod_subnet_id(namespace):
+    _validate_subnet_id(namespace.pod_subnet_id, "--pod-subnet-id")
+
+
+def _validate_subnet_id(subnet_id, name):
+    if subnet_id is None or subnet_id == '':
+        return
+    from msrestazure.tools import is_valid_resource_id
+    if not is_valid_resource_id(subnet_id):
+        raise InvalidArgumentValueError(name + " is not a valid Azure resource ID.")
 
 
 def validate_ppg(namespace):
@@ -416,6 +432,7 @@ def extract_comma_separated_string(
     allow_empty_value=False,
     keep_none=False,
     default_value=None,
+    allow_appending_values_to_same_key=False,
 ):
     """Extract comma-separated string.
 
@@ -425,6 +442,8 @@ def extract_comma_separated_string(
     Option allow_empty_value is valid since extract_kv is specified. When the number of string segments split by "="
     is 1, the first segment is retained as the key and empty string would be set as its corresponding value without
     raising an exception.
+    Option allow_appending_values_to_same_key is valid since extract_kv is specified. For the same key, the new value
+    is appended to the existing value separated by commas.
     If keep_none is specified, will return None when input is None. Otherwise will return default_value if input is
     None or empty string.
     """
@@ -457,6 +476,8 @@ def extract_comma_separated_string(
                 if enable_strip:
                     key = key.strip()
                     value = value.strip()
+                if allow_appending_values_to_same_key and key in result:
+                    value = "{},{}".format(result[key], value)
                 result[key] = value
             else:
                 raise InvalidArgumentValueError(

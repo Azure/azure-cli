@@ -674,7 +674,7 @@ def validate_entity(namespace):
     def cast_val(key, val):
         """ Attempts to cast numeric values (except RowKey and PartitionKey) to numbers so they
         can be queried correctly. """
-        if key in ['PartitionKey', 'RowKey']:
+        if key in ['PartitionKey', 'RowKey', 'DisplayVersion']:
             return val
 
         def try_cast(to_type):
@@ -813,11 +813,15 @@ def get_permission_allowed_values(permission_class):
         for i, item in enumerate(allowed_values):
             if item == 'delete_previous_version':
                 allowed_values[i] = 'x' + item
+            if item == 'permanent_delete':
+                allowed_values[i] = 'y' + item
+            if item == 'set_immutability_policy':
+                allowed_values[i] = 'i' + item
             if item == 'manage_access_control':
                 allowed_values[i] = 'permissions'
             if item == 'manage_ownership':
                 allowed_values[i] = 'ownership'
-        return allowed_values
+        return sorted(allowed_values)
     return None
 
 
@@ -1025,15 +1029,16 @@ def process_container_delete_parameters(cmd, namespace):
 
 def process_blob_download_batch_parameters(cmd, namespace):
     """Process the parameters for storage blob download command"""
+    from azure.cli.core.azclierror import InvalidArgumentValueError
     # 1. quick check
     if not os.path.exists(namespace.destination) or not os.path.isdir(namespace.destination):
-        raise ValueError('incorrect usage: destination must be an existing directory')
+        raise InvalidArgumentValueError('incorrect usage: destination must be an existing directory')
 
     # 2. try to extract account name and container name from source string
     _process_blob_batch_container_parameters(cmd, namespace)
 
     # 3. Call validators
-    add_progress_callback(cmd, namespace)
+    add_download_progress_callback(cmd, namespace)
 
 
 def process_blob_upload_batch_parameters(cmd, namespace):
@@ -1265,6 +1270,19 @@ def resource_type_type(loader):
     return impl
 
 
+def resource_type_type_v2(loader):
+    """ Returns a function which validates that resource types string contains only a combination of service,
+    container, and object. Their shorthand representations are s, c, and o. """
+
+    def impl(string):
+        t_resources = loader.get_models('_shared.models#ResourceTypes', resource_type=ResourceType.DATA_STORAGE_BLOB)
+        if set(string) - set("sco"):
+            raise ValueError
+        return t_resources.from_string(''.join(set(string)))
+
+    return impl
+
+
 def services_type(loader):
     """ Returns a function which validates that services string contains only a combination of blob, queue, table,
     and file. Their shorthand representations are b, q, t, and f. """
@@ -1274,6 +1292,18 @@ def services_type(loader):
         if set(string) - set("bqtf"):
             raise ValueError
         return t_services(_str=''.join(set(string)))
+
+    return impl
+
+
+def services_type_v2():
+    """ Returns a function which validates that services string contains only a combination of blob, queue, table,
+    and file. Their shorthand representations are b, q, t, and f. """
+
+    def impl(string):
+        if set(string) - set("bqtf"):
+            raise ValueError
+        return ''.join(set(string))
 
     return impl
 
@@ -2018,6 +2048,29 @@ def add_upload_progress_callback(cmd, namespace):
         message = getattr(_update_progress, 'message', 'Alive')
         reuse = getattr(_update_progress, 'reuse', False)
         current = response.context['upload_stream_current']
+        total = response.context['data_stream_total']
+
+        if total:
+            hook.add(message=message, value=current, total_val=total)
+            if total == current and not reuse:
+                hook.end()
+
+    hook = cmd.cli_ctx.get_progress_controller(det=True)
+    _update_progress.hook = hook
+
+    if not namespace.no_progress:
+        namespace.progress_callback = _update_progress
+    del namespace.no_progress
+
+
+def add_download_progress_callback(cmd, namespace):
+    def _update_progress(response):
+        if response.http_response.status_code not in [200, 201, 206]:
+            return
+
+        message = getattr(_update_progress, 'message', 'Alive')
+        reuse = getattr(_update_progress, 'reuse', False)
+        current = response.context['download_stream_current']
         total = response.context['data_stream_total']
 
         if total:

@@ -2231,9 +2231,6 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
         })
         # create a waf-policy
         self.cmd("network application-gateway waf-policy create -g {rg} -n {waf}")
-        # add an exclusion rule
-        self.cmd("network application-gateway waf-policy managed-rule exclusion add -g {rg} --policy-name {waf} \
-                 --match-variable RequestHeaderNames --match-operator StartsWith --selector Bing")
         # add one rule group to exclusion
         self.cmd(
             "network application-gateway waf-policy managed-rule exclusion rule-set add -g {rg} --policy-name {waf} \

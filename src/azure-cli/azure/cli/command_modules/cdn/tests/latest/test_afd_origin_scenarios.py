@@ -32,6 +32,7 @@ class CdnAfdOriginScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
                          JMESPathCheck('priority', 1),
                          JMESPathCheck('weight', 1000),
                          JMESPathCheck('enabledState', "Enabled"),
+                         JMESPathCheck('enforceCertificateNameCheck', True),
                          JMESPathCheck('provisioningState', 'Succeeded')]
         self.afd_origin_create_cmd(resource_group,
                                    profile_name,
@@ -42,6 +43,7 @@ class CdnAfdOriginScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
 
         origin_name1 = self.create_random_name(prefix='origin', length=16)
         create_options = "--host-name huaiyiztesthost1.blob.core.chinacloudapi.cn " \
+                         + "--enforce-certificate-name-check false " \
                          + "--origin-host-header huaiyiztesthost1.blob.core.chinacloudapi.cn " \
                          + "--priority 1 --weight 666 --http-port 8080 --https-port 443 --enabled-state Enabled"
 
@@ -52,6 +54,7 @@ class CdnAfdOriginScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
                          JMESPathCheck('priority', 1),
                          JMESPathCheck('weight', 666),
                          JMESPathCheck('enabledState', "Enabled"),
+                         JMESPathCheck('enforceCertificateNameCheck', False),
                          JMESPathCheck('provisioningState', 'Succeeded')]
         self.afd_origin_create_cmd(resource_group,
                                    profile_name,
@@ -72,8 +75,26 @@ class CdnAfdOriginScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
                          JMESPathCheck('priority', 1),
                          JMESPathCheck('weight', 58),
                          JMESPathCheck('enabledState', "Enabled"),
+                         JMESPathCheck('enforceCertificateNameCheck', False),
                          JMESPathCheck('provisioningState', 'Succeeded')]
-        options = '--weight 58 --http-port 8080'
+        options = '--weight 58 --http-port 8080 --enforce-certificate-name-check false'
+        self.afd_origin_update_cmd(resource_group,
+                                   profile_name,
+                                   origin_group_name,
+                                   origin_name,
+                                   options=options,
+                                   checks=update_checks)
+
+        update_checks = [JMESPathCheck('name', origin_name),
+                         JMESPathCheck('hostName', "plstestcli.blob.core.windows.net"),
+                         JMESPathCheck('httpPort', 8080),
+                         JMESPathCheck('httpsPort', 443),
+                         JMESPathCheck('priority', 1),
+                         JMESPathCheck('weight', 58),
+                         JMESPathCheck('enabledState', "Enabled"),
+                         JMESPathCheck('enforceCertificateNameCheck', True),
+                         JMESPathCheck('provisioningState', 'Succeeded')]
+        options = '--enforce-certificate-name-check true'
         self.afd_origin_update_cmd(resource_group,
                                    profile_name,
                                    origin_group_name,
@@ -88,6 +109,7 @@ class CdnAfdOriginScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
                          JMESPathCheck('priority', 1),
                          JMESPathCheck('weight', 58),
                          JMESPathCheck('enabledState', "Enabled"),
+                         JMESPathCheck('enforceCertificateNameCheck', True),
                          JMESPathCheck('sharedPrivateLinkResource.privateLink.id', f"/subscriptions/{self.get_subscription_id()}/resourceGroups/CliDevReservedGroup/providers/Microsoft.Storage/storageAccounts/plstestcli"),
                          JMESPathCheck('sharedPrivateLinkResource.groupId', "blob"),
                          JMESPathCheck('sharedPrivateLinkResource.privateLinkLocation', "eastus"),
@@ -112,6 +134,7 @@ class CdnAfdOriginScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
                          JMESPathCheck('priority', 1),
                          JMESPathCheck('weight', 58),
                          JMESPathCheck('enabledState', "Enabled"),
+                         JMESPathCheck('enforceCertificateNameCheck', True),
                          JMESPathCheck('sharedPrivateLinkResource.privateLink.id', f"/subscriptions/{self.get_subscription_id()}/resourceGroups/CliDevReservedGroup/providers/Microsoft.Storage/storageAccounts/plstestcli"),
                          JMESPathCheck('sharedPrivateLinkResource.groupId', "table"),
                          JMESPathCheck('sharedPrivateLinkResource.privateLinkLocation', "eastus"),
@@ -132,6 +155,7 @@ class CdnAfdOriginScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
                          JMESPathCheck('priority', 1),
                          JMESPathCheck('weight', 99),
                          JMESPathCheck('enabledState', "Disabled"),
+                         JMESPathCheck('enforceCertificateNameCheck', True),
                          JMESPathCheck('sharedPrivateLinkResource', None),
                          JMESPathCheck('provisioningState', 'Succeeded')]
         options = '--weight 99 --enable-private-link false --enabled-state Disabled'

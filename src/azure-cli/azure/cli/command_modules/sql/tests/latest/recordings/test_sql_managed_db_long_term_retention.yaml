@@ -12,9 +12,9 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
-        --family --tags --proxy-override --public-data-endpoint-enabled
+        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.1 (Windows-10-10.0.14393-SP0)
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/capabilities?include=supportedManagedInstanceVersions&api-version=2020-11-01-preview
   response:
@@ -32,7 +32,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 31 Dec 2021 14:30:59 GMT
+      - Wed, 16 Mar 2022 12:38:25 GMT
       expires:
       - '-1'
       pragma:
@@ -54,9 +54,9 @@ interactions:
     body: '{"location": "westcentralus", "tags": {}, "sku": {"name": "GP_Gen5"}, "properties":
       {"administratorLogin": "admin123", "administratorLoginPassword": "SecretPassword123SecretPassword",
       "subnetId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance",
-      "licenseType": "LicenseIncluded", "vCores": 8, "storageSizeInGB": 32, "collation":
+      "licenseType": "LicenseIncluded", "vCores": 4, "storageSizeInGB": 32, "collation":
       "Serbian_Cyrillic_100_CS_AS", "publicDataEndpointEnabled": true, "proxyOverride":
-      "Proxy", "administrators": {}}}'
+      "Proxy", "requestedBackupStorageRedundancy": "Geo", "administrators": {}}}'
     headers:
       Accept:
       - application/json
@@ -67,28 +67,28 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '572'
+      - '615'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
-        --family --tags --proxy-override --public-data-endpoint-enabled
+        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.1 (Windows-10-10.0.14393-SP0)
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
   response:
     body:
-      string: '{"identity":{"type":"None"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":8},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","licenseType":"LicenseIncluded","vCores":8,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"SystemDefault","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+      string: '{"identity":{"type":"None"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"SystemDefault","privateEndpointConnections":[],"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo"},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '822'
+      - '781'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 31 Dec 2021 14:31:06 GMT
+      - Wed, 16 Mar 2022 12:38:33 GMT
       expires:
       - '-1'
       pragma:
@@ -100,7 +100,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
     status:
       code: 201
       message: Created
@@ -117,23 +117,23 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
-        --family --tags --proxy-override --public-data-endpoint-enabled
+        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.1 (Windows-10-10.0.14393-SP0)
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
   response:
     body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":8},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":8,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1291'
+      - '1203'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 31 Dec 2021 14:32:07 GMT
+      - Wed, 16 Mar 2022 12:39:33 GMT
       expires:
       - '-1'
       pragma:
@@ -164,23 +164,23 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
-        --family --tags --proxy-override --public-data-endpoint-enabled
+        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.1 (Windows-10-10.0.14393-SP0)
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
   response:
     body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":8},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":8,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1291'
+      - '1203'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 31 Dec 2021 14:32:37 GMT
+      - Wed, 16 Mar 2022 12:40:04 GMT
       expires:
       - '-1'
       pragma:
@@ -211,23 +211,23 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
-        --family --tags --proxy-override --public-data-endpoint-enabled
+        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.1 (Windows-10-10.0.14393-SP0)
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
   response:
     body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":8},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":8,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1291'
+      - '1203'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 31 Dec 2021 14:33:07 GMT
+      - Wed, 16 Mar 2022 12:40:34 GMT
       expires:
       - '-1'
       pragma:
@@ -258,23 +258,23 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
-        --family --tags --proxy-override --public-data-endpoint-enabled
+        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.1 (Windows-10-10.0.14393-SP0)
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
   response:
     body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":8},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":8,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1291'
+      - '1203'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 31 Dec 2021 14:33:38 GMT
+      - Wed, 16 Mar 2022 12:41:04 GMT
       expires:
       - '-1'
       pragma:
@@ -305,23 +305,1950 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
-        --family --tags --proxy-override --public-data-endpoint-enabled
+        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.1 (Windows-10-10.0.14393-SP0)
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
   response:
     body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":8},"properties":{"provisioningState":"Succeeded","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Ready","licenseType":"LicenseIncluded","vCores":8,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1289'
+      - '1203'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 31 Dec 2021 14:34:08 GMT
+      - Wed, 16 Mar 2022 12:41:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
+        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1203'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Mar 2022 12:42:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
+        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1203'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Mar 2022 12:42:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
+        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1203'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Mar 2022 12:43:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
+        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1203'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Mar 2022 12:43:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
+        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1203'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Mar 2022 12:44:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
+        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1203'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Mar 2022 12:44:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
+        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1203'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Mar 2022 12:45:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
+        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1203'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Mar 2022 12:45:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
+        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1203'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Mar 2022 12:46:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
+        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1203'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Mar 2022 12:46:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
+        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1203'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Mar 2022 12:47:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
+        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1203'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Mar 2022 12:47:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
+        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1203'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Mar 2022 12:48:08 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
+        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1203'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Mar 2022 12:48:38 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
+        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1203'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Mar 2022 12:49:08 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
+        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1203'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Mar 2022 12:49:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
+        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1203'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Mar 2022 12:50:09 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
+        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1203'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Mar 2022 12:50:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
+        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1203'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Mar 2022 12:51:09 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
+        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1203'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Mar 2022 12:51:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
+        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1203'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Mar 2022 12:52:09 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
+        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1203'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Mar 2022 12:52:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
+        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1203'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Mar 2022 12:53:09 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
+        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1203'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Mar 2022 12:53:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
+        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1203'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Mar 2022 12:54:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
+        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1203'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Mar 2022 12:54:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
+        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1203'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Mar 2022 12:55:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
+        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1203'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Mar 2022 12:55:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
+        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1203'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Mar 2022 12:56:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
+        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1203'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Mar 2022 12:56:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
+        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1203'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Mar 2022 12:57:12 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
+        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1203'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Mar 2022 12:57:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
+        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1203'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Mar 2022 12:58:12 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
+        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1203'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Mar 2022 12:58:43 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
+        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1203'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Mar 2022 12:59:13 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
+        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1203'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Mar 2022 12:59:43 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
+        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1203'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Mar 2022 13:00:13 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
+        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1203'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Mar 2022 13:00:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
+        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1203'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Mar 2022 13:01:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
+        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1203'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Mar 2022 13:01:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
+        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Succeeded","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Ready","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1201'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Mar 2022 13:02:15 GMT
       expires:
       - '-1'
       pragma:
@@ -353,21 +2280,21 @@ interactions:
       ParameterSetName:
       - -g --mi -n --collation
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.1 (Windows-10-10.0.14393-SP0)
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
   response:
     body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":8},"properties":{"provisioningState":"Succeeded","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Ready","licenseType":"LicenseIncluded","vCores":8,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Succeeded","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Ready","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1289'
+      - '1201'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 31 Dec 2021 14:34:09 GMT
+      - Wed, 16 Mar 2022 13:02:16 GMT
       expires:
       - '-1'
       pragma:
@@ -403,15 +2330,15 @@ interactions:
       ParameterSetName:
       - -g --mi -n --collation
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.1 (Windows-10-10.0.14393-SP0)
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/MIDBLongTermRetention000002?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"operation":"CreateManagedDatabase","startTime":"2021-12-31T14:34:14.467Z"}'
+      string: '{"operation":"CreateManagedDatabase","startTime":"2022-03-16T13:02:21.797Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/managedDatabaseAzureAsyncOperation/b2281c28-7099-4947-989f-78c88f511672?api-version=2020-11-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/managedDatabaseAzureAsyncOperation/b6f5e253-0eaa-41f5-a046-bdde8414f1dc?api-version=2020-11-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -419,11 +2346,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 31 Dec 2021 14:34:14 GMT
+      - Wed, 16 Mar 2022 13:02:21 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/managedDatabaseOperationResults/b2281c28-7099-4947-989f-78c88f511672?api-version=2020-11-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/managedDatabaseOperationResults/b6f5e253-0eaa-41f5-a046-bdde8414f1dc?api-version=2020-11-01-preview
       pragma:
       - no-cache
       server:
@@ -433,7 +2360,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1196'
     status:
       code: 202
       message: Accepted
@@ -451,12 +2378,12 @@ interactions:
       ParameterSetName:
       - -g --mi -n --collation
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.1 (Windows-10-10.0.14393-SP0)
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/managedDatabaseAzureAsyncOperation/b2281c28-7099-4947-989f-78c88f511672?api-version=2020-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/managedDatabaseAzureAsyncOperation/b6f5e253-0eaa-41f5-a046-bdde8414f1dc?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"name":"b2281c28-7099-4947-989f-78c88f511672","status":"Succeeded","startTime":"2021-12-31T14:34:14.467Z"}'
+      string: '{"name":"b6f5e253-0eaa-41f5-a046-bdde8414f1dc","status":"Succeeded","startTime":"2022-03-16T13:02:21.797Z"}'
     headers:
       cache-control:
       - no-cache
@@ -465,7 +2392,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 31 Dec 2021 14:34:29 GMT
+      - Wed, 16 Mar 2022 13:02:36 GMT
       expires:
       - '-1'
       pragma:
@@ -497,21 +2424,21 @@ interactions:
       ParameterSetName:
       - -g --mi -n --collation
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.1 (Windows-10-10.0.14393-SP0)
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/MIDBLongTermRetention000002?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"properties":{"collation":"Serbian_Cyrillic_100_CS_AS","status":"Online","creationDate":"2021-12-31T14:34:14.717Z","defaultSecondaryLocation":"westus2"},"location":"westcentralus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/MIDBLongTermRetention000002","name":"MIDBLongTermRetention000002","type":"Microsoft.Sql/managedInstances/databases"}'
+      string: '{"properties":{"collation":"Serbian_Cyrillic_100_CS_AS","status":"Online","creationDate":"2022-03-16T13:02:22.127Z","defaultSecondaryLocation":"westus2"},"location":"westcentralus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/MIDBLongTermRetention000002","name":"MIDBLongTermRetention000002","type":"Microsoft.Sql/managedInstances/databases"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '556'
+      - '463'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 31 Dec 2021 14:34:29 GMT
+      - Wed, 16 Mar 2022 13:02:36 GMT
       expires:
       - '-1'
       pragma:
@@ -548,15 +2475,15 @@ interactions:
       ParameterSetName:
       - -g --mi -n --weekly-retention --monthly-retention --yearly-retention --week-of-year
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.1 (Windows-10-10.0.14393-SP0)
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/MIDBLongTermRetention000002/backupLongTermRetentionPolicies/default?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"operation":"UpsertDatabaseBackupArchivalPolicyV2","startTime":"2021-12-31T14:34:31.053Z"}'
+      string: '{"operation":"UpsertDatabaseBackupArchivalPolicyV2","startTime":"2022-03-16T13:02:39.437Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/managedInstanceLongTermRetentionPolicyAzureAsyncOperation/8fc42b1c-7c15-4095-9075-a7fda27d93a2?api-version=2020-11-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/managedInstanceLongTermRetentionPolicyAzureAsyncOperation/b9e0b267-e062-43da-8f87-ba69afc389a3?api-version=2020-11-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -564,11 +2491,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 31 Dec 2021 14:34:30 GMT
+      - Wed, 16 Mar 2022 13:02:39 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/managedInstanceLongTermRetentionPolicyOperationResults/8fc42b1c-7c15-4095-9075-a7fda27d93a2?api-version=2020-11-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/managedInstanceLongTermRetentionPolicyOperationResults/b9e0b267-e062-43da-8f87-ba69afc389a3?api-version=2020-11-01-preview
       pragma:
       - no-cache
       server:
@@ -596,12 +2523,12 @@ interactions:
       ParameterSetName:
       - -g --mi -n --weekly-retention --monthly-retention --yearly-retention --week-of-year
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.1 (Windows-10-10.0.14393-SP0)
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/managedInstanceLongTermRetentionPolicyAzureAsyncOperation/8fc42b1c-7c15-4095-9075-a7fda27d93a2?api-version=2020-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/managedInstanceLongTermRetentionPolicyAzureAsyncOperation/b9e0b267-e062-43da-8f87-ba69afc389a3?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"name":"8fc42b1c-7c15-4095-9075-a7fda27d93a2","status":"InProgress","startTime":"2021-12-31T14:34:31.053Z"}'
+      string: '{"name":"b9e0b267-e062-43da-8f87-ba69afc389a3","status":"InProgress","startTime":"2022-03-16T13:02:39.437Z"}'
     headers:
       cache-control:
       - no-cache
@@ -610,7 +2537,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 31 Dec 2021 14:34:45 GMT
+      - Wed, 16 Mar 2022 13:02:54 GMT
       expires:
       - '-1'
       pragma:
@@ -642,58 +2569,12 @@ interactions:
       ParameterSetName:
       - -g --mi -n --weekly-retention --monthly-retention --yearly-retention --week-of-year
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.1 (Windows-10-10.0.14393-SP0)
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/managedInstanceLongTermRetentionPolicyAzureAsyncOperation/8fc42b1c-7c15-4095-9075-a7fda27d93a2?api-version=2020-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/managedInstanceLongTermRetentionPolicyAzureAsyncOperation/b9e0b267-e062-43da-8f87-ba69afc389a3?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"name":"8fc42b1c-7c15-4095-9075-a7fda27d93a2","status":"InProgress","startTime":"2021-12-31T14:34:31.053Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '108'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 31 Dec 2021 14:35:00 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql midb ltr-policy set
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g --mi -n --weekly-retention --monthly-retention --yearly-retention --week-of-year
-      User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.1 (Windows-10-10.0.14393-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/managedInstanceLongTermRetentionPolicyAzureAsyncOperation/8fc42b1c-7c15-4095-9075-a7fda27d93a2?api-version=2020-11-01-preview
-  response:
-    body:
-      string: '{"name":"8fc42b1c-7c15-4095-9075-a7fda27d93a2","status":"Succeeded","startTime":"2021-12-31T14:34:31.053Z"}'
+      string: '{"name":"b9e0b267-e062-43da-8f87-ba69afc389a3","status":"Succeeded","startTime":"2022-03-16T13:02:39.437Z"}'
     headers:
       cache-control:
       - no-cache
@@ -702,7 +2583,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 31 Dec 2021 14:35:16 GMT
+      - Wed, 16 Mar 2022 13:03:09 GMT
       expires:
       - '-1'
       pragma:
@@ -734,7 +2615,7 @@ interactions:
       ParameterSetName:
       - -g --mi -n --weekly-retention --monthly-retention --yearly-retention --week-of-year
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.1 (Windows-10-10.0.14393-SP0)
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/MIDBLongTermRetention000002/backupLongTermRetentionPolicies/default?api-version=2020-11-01-preview
   response:
@@ -744,11 +2625,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '509'
+      - '439'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 31 Dec 2021 14:35:16 GMT
+      - Wed, 16 Mar 2022 13:03:09 GMT
       expires:
       - '-1'
       pragma:
@@ -780,7 +2661,7 @@ interactions:
       ParameterSetName:
       - -g --mi -n
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.1 (Windows-10-10.0.14393-SP0)
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/MIDBLongTermRetention000002/backupLongTermRetentionPolicies/default?api-version=2020-11-01-preview
   response:
@@ -790,11 +2671,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '509'
+      - '439'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 31 Dec 2021 14:35:17 GMT
+      - Wed, 16 Mar 2022 13:03:10 GMT
       expires:
       - '-1'
       pragma:
@@ -826,21 +2707,21 @@ interactions:
       ParameterSetName:
       - -l -g
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.1 (Windows-10-10.0.14393-SP0)
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstanceBackups?api-version=2020-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstanceBackups?api-version=2021-05-01-preview
   response:
     body:
-      string: '{"value":[{"properties":{"managedInstanceName":"autobot-managed-instance","managedInstanceCreateTime":"2021-09-27T23:01:13.797Z","databaseName":"autobot-managed-instance","databaseDeletionTime":"2021-11-03T05:49:49.53Z","backupTime":"2021-10-27T08:00:36Z","backupExpirationTime":"2022-01-05T08:00:36Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/autobot-managed-instance/longTermRetentionDatabases/autobot-managed-instance/longTermRetentionManagedInstanceBackups/ad70e36b-7c28-4e63-92a3-210e64d7f798;132797952360000000","name":"ad70e36b-7c28-4e63-92a3-210e64d7f798;132797952360000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"},{"properties":{"managedInstanceName":"autobot-managed-instance","managedInstanceCreateTime":"2021-09-27T23:01:13.797Z","databaseName":"autobot-managed-database","backupTime":"2021-10-22T17:07:26Z","backupExpirationTime":"2021-12-31T17:07:26Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/autobot-managed-instance/longTermRetentionDatabases/autobot-managed-database/longTermRetentionManagedInstanceBackups/ba6ce0cd-2496-469a-8642-c6418fce94f1;132793960460000000","name":"ba6ce0cd-2496-469a-8642-c6418fce94f1;132793960460000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"},{"properties":{"managedInstanceName":"autobot-managed-instance","managedInstanceCreateTime":"2021-09-27T23:01:13.797Z","databaseName":"autobot-managed-database","backupTime":"2021-11-03T20:03:55Z","backupExpirationTime":"2022-01-12T20:03:55Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/autobot-managed-instance/longTermRetentionDatabases/autobot-managed-database/longTermRetentionManagedInstanceBackups/ba6ce0cd-2496-469a-8642-c6418fce94f1;132804434350000000","name":"ba6ce0cd-2496-469a-8642-c6418fce94f1;132804434350000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"},{"properties":{"managedInstanceName":"autobot-managed-instance","managedInstanceCreateTime":"2021-09-27T23:01:13.797Z","databaseName":"autobot-managed-database","backupTime":"2021-11-10T20:02:33Z","backupExpirationTime":"2022-01-19T20:02:33Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/autobot-managed-instance/longTermRetentionDatabases/autobot-managed-database/longTermRetentionManagedInstanceBackups/ba6ce0cd-2496-469a-8642-c6418fce94f1;132810481530000000","name":"ba6ce0cd-2496-469a-8642-c6418fce94f1;132810481530000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"},{"properties":{"managedInstanceName":"autobot-managed-instance","managedInstanceCreateTime":"2021-09-27T23:01:13.797Z","databaseName":"autobot-managed-database","backupTime":"2021-11-17T20:00:07Z","backupExpirationTime":"2022-01-26T20:00:07Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/autobot-managed-instance/longTermRetentionDatabases/autobot-managed-database/longTermRetentionManagedInstanceBackups/ba6ce0cd-2496-469a-8642-c6418fce94f1;132816528070000000","name":"ba6ce0cd-2496-469a-8642-c6418fce94f1;132816528070000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"},{"properties":{"managedInstanceName":"autobot-managed-instance","managedInstanceCreateTime":"2021-09-27T23:01:13.797Z","databaseName":"autobot-managed-database","backupTime":"2021-11-24T20:01:51Z","backupExpirationTime":"2022-02-02T20:01:51Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/autobot-managed-instance/longTermRetentionDatabases/autobot-managed-database/longTermRetentionManagedInstanceBackups/ba6ce0cd-2496-469a-8642-c6418fce94f1;132822577110000000","name":"ba6ce0cd-2496-469a-8642-c6418fce94f1;132822577110000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"},{"properties":{"managedInstanceName":"autobot-managed-instance","managedInstanceCreateTime":"2021-09-27T23:01:13.797Z","databaseName":"autobot-managed-database","backupTime":"2021-12-01T20:04:36Z","backupExpirationTime":"2022-02-09T20:04:36Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/autobot-managed-instance/longTermRetentionDatabases/autobot-managed-database/longTermRetentionManagedInstanceBackups/ba6ce0cd-2496-469a-8642-c6418fce94f1;132828626760000000","name":"ba6ce0cd-2496-469a-8642-c6418fce94f1;132828626760000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"},{"properties":{"managedInstanceName":"autobot-managed-instance","managedInstanceCreateTime":"2021-09-27T23:01:13.797Z","databaseName":"autobot-managed-database","backupTime":"2021-12-08T20:00:15Z","backupExpirationTime":"2022-02-16T20:00:15Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/autobot-managed-instance/longTermRetentionDatabases/autobot-managed-database/longTermRetentionManagedInstanceBackups/ba6ce0cd-2496-469a-8642-c6418fce94f1;132834672150000000","name":"ba6ce0cd-2496-469a-8642-c6418fce94f1;132834672150000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"},{"properties":{"managedInstanceName":"autobot-managed-instance","managedInstanceCreateTime":"2021-09-27T23:01:13.797Z","databaseName":"autobot-managed-database","backupTime":"2021-12-15T20:02:26Z","backupExpirationTime":"2022-02-23T20:02:26Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/autobot-managed-instance/longTermRetentionDatabases/autobot-managed-database/longTermRetentionManagedInstanceBackups/ba6ce0cd-2496-469a-8642-c6418fce94f1;132840721460000000","name":"ba6ce0cd-2496-469a-8642-c6418fce94f1;132840721460000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"},{"properties":{"managedInstanceName":"autobot-managed-instance","managedInstanceCreateTime":"2021-09-27T23:01:13.797Z","databaseName":"autobot-managed-database","backupTime":"2021-12-22T20:04:14Z","backupExpirationTime":"2022-03-02T20:04:14Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/autobot-managed-instance/longTermRetentionDatabases/autobot-managed-database/longTermRetentionManagedInstanceBackups/ba6ce0cd-2496-469a-8642-c6418fce94f1;132846770540000000","name":"ba6ce0cd-2496-469a-8642-c6418fce94f1;132846770540000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"},{"properties":{"managedInstanceName":"autobot-managed-instance","managedInstanceCreateTime":"2021-09-27T23:01:13.797Z","databaseName":"autobot-managed-database","backupTime":"2021-12-29T20:04:22Z","backupExpirationTime":"2022-03-09T20:04:22Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/autobot-managed-instance/longTermRetentionDatabases/autobot-managed-database/longTermRetentionManagedInstanceBackups/ba6ce0cd-2496-469a-8642-c6418fce94f1;132852818620000000","name":"ba6ce0cd-2496-469a-8642-c6418fce94f1;132852818620000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"}]}'
+      string: '{"value":[{"properties":{"managedInstanceName":"autobot-managed-instance","managedInstanceCreateTime":"2021-09-27T23:01:13.797Z","databaseName":"autobot-managed-database","backupTime":"2022-01-05T20:03:09Z","backupExpirationTime":"2022-03-16T20:03:09Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/autobot-managed-instance/longTermRetentionDatabases/autobot-managed-database/longTermRetentionManagedInstanceBackups/ba6ce0cd-2496-469a-8642-c6418fce94f1;132858865890000000","name":"ba6ce0cd-2496-469a-8642-c6418fce94f1;132858865890000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"},{"properties":{"managedInstanceName":"autobot-managed-instance","managedInstanceCreateTime":"2021-09-27T23:01:13.797Z","databaseName":"autobot-managed-database","backupTime":"2022-01-12T20:00:44Z","backupExpirationTime":"2022-03-23T20:00:44Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/autobot-managed-instance/longTermRetentionDatabases/autobot-managed-database/longTermRetentionManagedInstanceBackups/ba6ce0cd-2496-469a-8642-c6418fce94f1;132864912440000000","name":"ba6ce0cd-2496-469a-8642-c6418fce94f1;132864912440000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"},{"properties":{"managedInstanceName":"autobot-managed-instance","managedInstanceCreateTime":"2021-09-27T23:01:13.797Z","databaseName":"autobot-managed-database","backupTime":"2022-01-19T20:04:15Z","backupExpirationTime":"2022-03-30T20:04:15Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/autobot-managed-instance/longTermRetentionDatabases/autobot-managed-database/longTermRetentionManagedInstanceBackups/ba6ce0cd-2496-469a-8642-c6418fce94f1;132870962550000000","name":"ba6ce0cd-2496-469a-8642-c6418fce94f1;132870962550000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"},{"properties":{"managedInstanceName":"autobot-managed-instance","managedInstanceCreateTime":"2021-09-27T23:01:13.797Z","databaseName":"autobot-managed-database","backupTime":"2022-01-26T20:04:53Z","backupExpirationTime":"2022-04-06T20:04:53Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/autobot-managed-instance/longTermRetentionDatabases/autobot-managed-database/longTermRetentionManagedInstanceBackups/ba6ce0cd-2496-469a-8642-c6418fce94f1;132877010930000000","name":"ba6ce0cd-2496-469a-8642-c6418fce94f1;132877010930000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"},{"properties":{"managedInstanceName":"autobot-managed-instance","managedInstanceCreateTime":"2021-09-27T23:01:13.797Z","databaseName":"autobot-managed-database","backupTime":"2022-02-02T20:04:39Z","backupExpirationTime":"2022-04-13T20:04:39Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/autobot-managed-instance/longTermRetentionDatabases/autobot-managed-database/longTermRetentionManagedInstanceBackups/ba6ce0cd-2496-469a-8642-c6418fce94f1;132883058790000000","name":"ba6ce0cd-2496-469a-8642-c6418fce94f1;132883058790000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"},{"properties":{"managedInstanceName":"autobot-managed-instance","managedInstanceCreateTime":"2021-09-27T23:01:13.797Z","databaseName":"autobot-managed-database","backupTime":"2022-02-09T20:01:26Z","backupExpirationTime":"2022-04-20T20:01:26Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/autobot-managed-instance/longTermRetentionDatabases/autobot-managed-database/longTermRetentionManagedInstanceBackups/ba6ce0cd-2496-469a-8642-c6418fce94f1;132889104860000000","name":"ba6ce0cd-2496-469a-8642-c6418fce94f1;132889104860000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"},{"properties":{"managedInstanceName":"autobot-managed-instance","managedInstanceCreateTime":"2021-09-27T23:01:13.797Z","databaseName":"autobot-managed-database","backupTime":"2022-02-16T20:01:08Z","backupExpirationTime":"2022-04-27T20:01:08Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/autobot-managed-instance/longTermRetentionDatabases/autobot-managed-database/longTermRetentionManagedInstanceBackups/ba6ce0cd-2496-469a-8642-c6418fce94f1;132895152680000000","name":"ba6ce0cd-2496-469a-8642-c6418fce94f1;132895152680000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"},{"properties":{"managedInstanceName":"autobot-managed-instance","managedInstanceCreateTime":"2021-09-27T23:01:13.797Z","databaseName":"autobot-managed-database","backupTime":"2022-02-23T20:00:15Z","backupExpirationTime":"2022-05-04T20:00:15Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/autobot-managed-instance/longTermRetentionDatabases/autobot-managed-database/longTermRetentionManagedInstanceBackups/ba6ce0cd-2496-469a-8642-c6418fce94f1;132901200150000000","name":"ba6ce0cd-2496-469a-8642-c6418fce94f1;132901200150000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"},{"properties":{"managedInstanceName":"autobot-managed-instance","managedInstanceCreateTime":"2021-09-27T23:01:13.797Z","databaseName":"autobot-managed-database","backupTime":"2022-03-02T20:00:31Z","backupExpirationTime":"2022-05-11T20:00:31Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/autobot-managed-instance/longTermRetentionDatabases/autobot-managed-database/longTermRetentionManagedInstanceBackups/ba6ce0cd-2496-469a-8642-c6418fce94f1;132907248310000000","name":"ba6ce0cd-2496-469a-8642-c6418fce94f1;132907248310000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"},{"properties":{"managedInstanceName":"autobot-managed-instance","managedInstanceCreateTime":"2021-09-27T23:01:13.797Z","databaseName":"autobot-managed-database","backupTime":"2022-03-09T20:04:16Z","backupExpirationTime":"2022-05-18T20:04:16Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/autobot-managed-instance/longTermRetentionDatabases/autobot-managed-database/longTermRetentionManagedInstanceBackups/ba6ce0cd-2496-469a-8642-c6418fce94f1;132913298560000000","name":"ba6ce0cd-2496-469a-8642-c6418fce94f1;132913298560000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"},{"properties":{"managedInstanceName":"brka0190","managedInstanceCreateTime":"2022-01-31T10:51:54.03Z","databaseName":"brkadb1","databaseDeletionTime":"2022-02-23T14:38:11.567Z","backupTime":"2022-02-04T12:28:09Z","backupExpirationTime":"2027-02-03T12:28:09Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/brka0190/longTermRetentionDatabases/brkadb1/longTermRetentionManagedInstanceBackups/cbdb1de0-669b-4a4d-b084-39c0d0c0b444;132884512890000000","name":"cbdb1de0-669b-4a4d-b084-39c0d0c0b444;132884512890000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"},{"properties":{"managedInstanceName":"brka0190","managedInstanceCreateTime":"2022-01-31T10:51:54.03Z","databaseName":"brkadb1","databaseDeletionTime":"2022-02-23T14:38:11.567Z","backupTime":"2022-02-21T06:01:15Z","backupExpirationTime":"2022-03-23T06:01:15Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/brka0190/longTermRetentionDatabases/brkadb1/longTermRetentionManagedInstanceBackups/cbdb1de0-669b-4a4d-b084-39c0d0c0b444;132898968750000000","name":"cbdb1de0-669b-4a4d-b084-39c0d0c0b444;132898968750000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"},{"properties":{"managedInstanceName":"brka0190","managedInstanceCreateTime":"2022-01-31T10:51:54.03Z","databaseName":"ltr_db","backupTime":"2022-03-02T06:01:55Z","backupExpirationTime":"2022-03-23T06:01:55Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/brka0190/longTermRetentionDatabases/ltr_db/longTermRetentionManagedInstanceBackups/5aebb1c5-3a54-4253-90c2-4ddd6f7ca2f1;132906745150000000","name":"5aebb1c5-3a54-4253-90c2-4ddd6f7ca2f1;132906745150000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"},{"properties":{"managedInstanceName":"brka0190","managedInstanceCreateTime":"2022-01-31T10:51:54.03Z","databaseName":"ltr_db","backupTime":"2022-03-08T14:23:58Z","backupExpirationTime":"2022-03-29T14:23:58Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/brka0190/longTermRetentionDatabases/ltr_db/longTermRetentionManagedInstanceBackups/5aebb1c5-3a54-4253-90c2-4ddd6f7ca2f1;132912230380000000","name":"5aebb1c5-3a54-4253-90c2-4ddd6f7ca2f1;132912230380000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"},{"properties":{"managedInstanceName":"brka0190","managedInstanceCreateTime":"2022-01-31T10:51:54.03Z","databaseName":"ltr_db","backupTime":"2022-03-15T13:23:54Z","backupExpirationTime":"2022-04-05T13:23:54Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/brka0190/longTermRetentionDatabases/ltr_db/longTermRetentionManagedInstanceBackups/5aebb1c5-3a54-4253-90c2-4ddd6f7ca2f1;132918242340000000","name":"5aebb1c5-3a54-4253-90c2-4ddd6f7ca2f1;132918242340000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '9201'
+      - '12235'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 31 Dec 2021 14:35:17 GMT
+      - Wed, 16 Mar 2022 13:03:11 GMT
       expires:
       - '-1'
       pragma:
@@ -872,21 +2753,21 @@ interactions:
       ParameterSetName:
       - -l
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.1 (Windows-10-10.0.14393-SP0)
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstanceBackups?api-version=2020-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstanceBackups?api-version=2021-05-01-preview
   response:
     body:
-      string: '{"value":[{"properties":{"managedInstanceName":"autobot-managed-instance","managedInstanceCreateTime":"2021-09-27T23:01:13.797Z","databaseName":"autobot-managed-instance","databaseDeletionTime":"2021-11-03T05:49:49.53Z","backupTime":"2021-10-27T08:00:36Z","backupExpirationTime":"2022-01-05T08:00:36Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/autobot-managed-instance/longTermRetentionDatabases/autobot-managed-instance/longTermRetentionManagedInstanceBackups/ad70e36b-7c28-4e63-92a3-210e64d7f798;132797952360000000","name":"ad70e36b-7c28-4e63-92a3-210e64d7f798;132797952360000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"},{"properties":{"managedInstanceName":"autobot-managed-instance","managedInstanceCreateTime":"2021-09-27T23:01:13.797Z","databaseName":"autobot-managed-database","backupTime":"2021-10-22T17:07:26Z","backupExpirationTime":"2021-12-31T17:07:26Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/autobot-managed-instance/longTermRetentionDatabases/autobot-managed-database/longTermRetentionManagedInstanceBackups/ba6ce0cd-2496-469a-8642-c6418fce94f1;132793960460000000","name":"ba6ce0cd-2496-469a-8642-c6418fce94f1;132793960460000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"},{"properties":{"managedInstanceName":"autobot-managed-instance","managedInstanceCreateTime":"2021-09-27T23:01:13.797Z","databaseName":"autobot-managed-database","backupTime":"2021-11-03T20:03:55Z","backupExpirationTime":"2022-01-12T20:03:55Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/autobot-managed-instance/longTermRetentionDatabases/autobot-managed-database/longTermRetentionManagedInstanceBackups/ba6ce0cd-2496-469a-8642-c6418fce94f1;132804434350000000","name":"ba6ce0cd-2496-469a-8642-c6418fce94f1;132804434350000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"},{"properties":{"managedInstanceName":"autobot-managed-instance","managedInstanceCreateTime":"2021-09-27T23:01:13.797Z","databaseName":"autobot-managed-database","backupTime":"2021-11-10T20:02:33Z","backupExpirationTime":"2022-01-19T20:02:33Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/autobot-managed-instance/longTermRetentionDatabases/autobot-managed-database/longTermRetentionManagedInstanceBackups/ba6ce0cd-2496-469a-8642-c6418fce94f1;132810481530000000","name":"ba6ce0cd-2496-469a-8642-c6418fce94f1;132810481530000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"},{"properties":{"managedInstanceName":"autobot-managed-instance","managedInstanceCreateTime":"2021-09-27T23:01:13.797Z","databaseName":"autobot-managed-database","backupTime":"2021-11-17T20:00:07Z","backupExpirationTime":"2022-01-26T20:00:07Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/autobot-managed-instance/longTermRetentionDatabases/autobot-managed-database/longTermRetentionManagedInstanceBackups/ba6ce0cd-2496-469a-8642-c6418fce94f1;132816528070000000","name":"ba6ce0cd-2496-469a-8642-c6418fce94f1;132816528070000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"},{"properties":{"managedInstanceName":"autobot-managed-instance","managedInstanceCreateTime":"2021-09-27T23:01:13.797Z","databaseName":"autobot-managed-database","backupTime":"2021-11-24T20:01:51Z","backupExpirationTime":"2022-02-02T20:01:51Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/autobot-managed-instance/longTermRetentionDatabases/autobot-managed-database/longTermRetentionManagedInstanceBackups/ba6ce0cd-2496-469a-8642-c6418fce94f1;132822577110000000","name":"ba6ce0cd-2496-469a-8642-c6418fce94f1;132822577110000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"},{"properties":{"managedInstanceName":"autobot-managed-instance","managedInstanceCreateTime":"2021-09-27T23:01:13.797Z","databaseName":"autobot-managed-database","backupTime":"2021-12-01T20:04:36Z","backupExpirationTime":"2022-02-09T20:04:36Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/autobot-managed-instance/longTermRetentionDatabases/autobot-managed-database/longTermRetentionManagedInstanceBackups/ba6ce0cd-2496-469a-8642-c6418fce94f1;132828626760000000","name":"ba6ce0cd-2496-469a-8642-c6418fce94f1;132828626760000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"},{"properties":{"managedInstanceName":"autobot-managed-instance","managedInstanceCreateTime":"2021-09-27T23:01:13.797Z","databaseName":"autobot-managed-database","backupTime":"2021-12-08T20:00:15Z","backupExpirationTime":"2022-02-16T20:00:15Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/autobot-managed-instance/longTermRetentionDatabases/autobot-managed-database/longTermRetentionManagedInstanceBackups/ba6ce0cd-2496-469a-8642-c6418fce94f1;132834672150000000","name":"ba6ce0cd-2496-469a-8642-c6418fce94f1;132834672150000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"},{"properties":{"managedInstanceName":"autobot-managed-instance","managedInstanceCreateTime":"2021-09-27T23:01:13.797Z","databaseName":"autobot-managed-database","backupTime":"2021-12-15T20:02:26Z","backupExpirationTime":"2022-02-23T20:02:26Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/autobot-managed-instance/longTermRetentionDatabases/autobot-managed-database/longTermRetentionManagedInstanceBackups/ba6ce0cd-2496-469a-8642-c6418fce94f1;132840721460000000","name":"ba6ce0cd-2496-469a-8642-c6418fce94f1;132840721460000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"},{"properties":{"managedInstanceName":"autobot-managed-instance","managedInstanceCreateTime":"2021-09-27T23:01:13.797Z","databaseName":"autobot-managed-database","backupTime":"2021-12-22T20:04:14Z","backupExpirationTime":"2022-03-02T20:04:14Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/autobot-managed-instance/longTermRetentionDatabases/autobot-managed-database/longTermRetentionManagedInstanceBackups/ba6ce0cd-2496-469a-8642-c6418fce94f1;132846770540000000","name":"ba6ce0cd-2496-469a-8642-c6418fce94f1;132846770540000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"},{"properties":{"managedInstanceName":"autobot-managed-instance","managedInstanceCreateTime":"2021-09-27T23:01:13.797Z","databaseName":"autobot-managed-database","backupTime":"2021-12-29T20:04:22Z","backupExpirationTime":"2022-03-09T20:04:22Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/autobot-managed-instance/longTermRetentionDatabases/autobot-managed-database/longTermRetentionManagedInstanceBackups/ba6ce0cd-2496-469a-8642-c6418fce94f1;132852818620000000","name":"ba6ce0cd-2496-469a-8642-c6418fce94f1;132852818620000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"}]}'
+      string: '{"value":[{"properties":{"managedInstanceName":"autobot-managed-instance","managedInstanceCreateTime":"2021-09-27T23:01:13.797Z","databaseName":"autobot-managed-database","backupTime":"2022-01-05T20:03:09Z","backupExpirationTime":"2022-03-16T20:03:09Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/autobot-managed-instance/longTermRetentionDatabases/autobot-managed-database/longTermRetentionManagedInstanceBackups/ba6ce0cd-2496-469a-8642-c6418fce94f1;132858865890000000","name":"ba6ce0cd-2496-469a-8642-c6418fce94f1;132858865890000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"},{"properties":{"managedInstanceName":"autobot-managed-instance","managedInstanceCreateTime":"2021-09-27T23:01:13.797Z","databaseName":"autobot-managed-database","backupTime":"2022-01-12T20:00:44Z","backupExpirationTime":"2022-03-23T20:00:44Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/autobot-managed-instance/longTermRetentionDatabases/autobot-managed-database/longTermRetentionManagedInstanceBackups/ba6ce0cd-2496-469a-8642-c6418fce94f1;132864912440000000","name":"ba6ce0cd-2496-469a-8642-c6418fce94f1;132864912440000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"},{"properties":{"managedInstanceName":"autobot-managed-instance","managedInstanceCreateTime":"2021-09-27T23:01:13.797Z","databaseName":"autobot-managed-database","backupTime":"2022-01-19T20:04:15Z","backupExpirationTime":"2022-03-30T20:04:15Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/autobot-managed-instance/longTermRetentionDatabases/autobot-managed-database/longTermRetentionManagedInstanceBackups/ba6ce0cd-2496-469a-8642-c6418fce94f1;132870962550000000","name":"ba6ce0cd-2496-469a-8642-c6418fce94f1;132870962550000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"},{"properties":{"managedInstanceName":"autobot-managed-instance","managedInstanceCreateTime":"2021-09-27T23:01:13.797Z","databaseName":"autobot-managed-database","backupTime":"2022-01-26T20:04:53Z","backupExpirationTime":"2022-04-06T20:04:53Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/autobot-managed-instance/longTermRetentionDatabases/autobot-managed-database/longTermRetentionManagedInstanceBackups/ba6ce0cd-2496-469a-8642-c6418fce94f1;132877010930000000","name":"ba6ce0cd-2496-469a-8642-c6418fce94f1;132877010930000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"},{"properties":{"managedInstanceName":"autobot-managed-instance","managedInstanceCreateTime":"2021-09-27T23:01:13.797Z","databaseName":"autobot-managed-database","backupTime":"2022-02-02T20:04:39Z","backupExpirationTime":"2022-04-13T20:04:39Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/autobot-managed-instance/longTermRetentionDatabases/autobot-managed-database/longTermRetentionManagedInstanceBackups/ba6ce0cd-2496-469a-8642-c6418fce94f1;132883058790000000","name":"ba6ce0cd-2496-469a-8642-c6418fce94f1;132883058790000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"},{"properties":{"managedInstanceName":"autobot-managed-instance","managedInstanceCreateTime":"2021-09-27T23:01:13.797Z","databaseName":"autobot-managed-database","backupTime":"2022-02-09T20:01:26Z","backupExpirationTime":"2022-04-20T20:01:26Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/autobot-managed-instance/longTermRetentionDatabases/autobot-managed-database/longTermRetentionManagedInstanceBackups/ba6ce0cd-2496-469a-8642-c6418fce94f1;132889104860000000","name":"ba6ce0cd-2496-469a-8642-c6418fce94f1;132889104860000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"},{"properties":{"managedInstanceName":"autobot-managed-instance","managedInstanceCreateTime":"2021-09-27T23:01:13.797Z","databaseName":"autobot-managed-database","backupTime":"2022-02-16T20:01:08Z","backupExpirationTime":"2022-04-27T20:01:08Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/autobot-managed-instance/longTermRetentionDatabases/autobot-managed-database/longTermRetentionManagedInstanceBackups/ba6ce0cd-2496-469a-8642-c6418fce94f1;132895152680000000","name":"ba6ce0cd-2496-469a-8642-c6418fce94f1;132895152680000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"},{"properties":{"managedInstanceName":"autobot-managed-instance","managedInstanceCreateTime":"2021-09-27T23:01:13.797Z","databaseName":"autobot-managed-database","backupTime":"2022-02-23T20:00:15Z","backupExpirationTime":"2022-05-04T20:00:15Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/autobot-managed-instance/longTermRetentionDatabases/autobot-managed-database/longTermRetentionManagedInstanceBackups/ba6ce0cd-2496-469a-8642-c6418fce94f1;132901200150000000","name":"ba6ce0cd-2496-469a-8642-c6418fce94f1;132901200150000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"},{"properties":{"managedInstanceName":"autobot-managed-instance","managedInstanceCreateTime":"2021-09-27T23:01:13.797Z","databaseName":"autobot-managed-database","backupTime":"2022-03-02T20:00:31Z","backupExpirationTime":"2022-05-11T20:00:31Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/autobot-managed-instance/longTermRetentionDatabases/autobot-managed-database/longTermRetentionManagedInstanceBackups/ba6ce0cd-2496-469a-8642-c6418fce94f1;132907248310000000","name":"ba6ce0cd-2496-469a-8642-c6418fce94f1;132907248310000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"},{"properties":{"managedInstanceName":"autobot-managed-instance","managedInstanceCreateTime":"2021-09-27T23:01:13.797Z","databaseName":"autobot-managed-database","backupTime":"2022-03-09T20:04:16Z","backupExpirationTime":"2022-05-18T20:04:16Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/autobot-managed-instance/longTermRetentionDatabases/autobot-managed-database/longTermRetentionManagedInstanceBackups/ba6ce0cd-2496-469a-8642-c6418fce94f1;132913298560000000","name":"ba6ce0cd-2496-469a-8642-c6418fce94f1;132913298560000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"},{"properties":{"managedInstanceName":"brka0190","managedInstanceCreateTime":"2022-01-31T10:51:54.03Z","databaseName":"brkadb1","databaseDeletionTime":"2022-02-23T14:38:11.567Z","backupTime":"2022-02-04T12:28:09Z","backupExpirationTime":"2027-02-03T12:28:09Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/brka0190/longTermRetentionDatabases/brkadb1/longTermRetentionManagedInstanceBackups/cbdb1de0-669b-4a4d-b084-39c0d0c0b444;132884512890000000","name":"cbdb1de0-669b-4a4d-b084-39c0d0c0b444;132884512890000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"},{"properties":{"managedInstanceName":"brka0190","managedInstanceCreateTime":"2022-01-31T10:51:54.03Z","databaseName":"brkadb1","databaseDeletionTime":"2022-02-23T14:38:11.567Z","backupTime":"2022-02-21T06:01:15Z","backupExpirationTime":"2022-03-23T06:01:15Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/brka0190/longTermRetentionDatabases/brkadb1/longTermRetentionManagedInstanceBackups/cbdb1de0-669b-4a4d-b084-39c0d0c0b444;132898968750000000","name":"cbdb1de0-669b-4a4d-b084-39c0d0c0b444;132898968750000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"},{"properties":{"managedInstanceName":"brka0190","managedInstanceCreateTime":"2022-01-31T10:51:54.03Z","databaseName":"ltr_db","backupTime":"2022-03-02T06:01:55Z","backupExpirationTime":"2022-03-23T06:01:55Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/brka0190/longTermRetentionDatabases/ltr_db/longTermRetentionManagedInstanceBackups/5aebb1c5-3a54-4253-90c2-4ddd6f7ca2f1;132906745150000000","name":"5aebb1c5-3a54-4253-90c2-4ddd6f7ca2f1;132906745150000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"},{"properties":{"managedInstanceName":"brka0190","managedInstanceCreateTime":"2022-01-31T10:51:54.03Z","databaseName":"ltr_db","backupTime":"2022-03-08T14:23:58Z","backupExpirationTime":"2022-03-29T14:23:58Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/brka0190/longTermRetentionDatabases/ltr_db/longTermRetentionManagedInstanceBackups/5aebb1c5-3a54-4253-90c2-4ddd6f7ca2f1;132912230380000000","name":"5aebb1c5-3a54-4253-90c2-4ddd6f7ca2f1;132912230380000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"},{"properties":{"managedInstanceName":"brka0190","managedInstanceCreateTime":"2022-01-31T10:51:54.03Z","databaseName":"ltr_db","backupTime":"2022-03-15T13:23:54Z","backupExpirationTime":"2022-04-05T13:23:54Z","backupStorageRedundancy":"Geo"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/brka0190/longTermRetentionDatabases/ltr_db/longTermRetentionManagedInstanceBackups/5aebb1c5-3a54-4253-90c2-4ddd6f7ca2f1;132918242340000000","name":"5aebb1c5-3a54-4253-90c2-4ddd6f7ca2f1;132918242340000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '9201'
+      - '12235'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 31 Dec 2021 14:35:18 GMT
+      - Wed, 16 Mar 2022 13:03:13 GMT
       expires:
       - '-1'
       pragma:
@@ -918,9 +2799,9 @@ interactions:
       ParameterSetName:
       - -l --mi -g
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.1 (Windows-10-10.0.14393-SP0)
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/clitestmi000001/longTermRetentionManagedInstanceBackups?api-version=2020-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/clitestmi000001/longTermRetentionManagedInstanceBackups?api-version=2021-05-01-preview
   response:
     body:
       string: '{"value":[]}'
@@ -932,7 +2813,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 31 Dec 2021 14:35:19 GMT
+      - Wed, 16 Mar 2022 13:03:13 GMT
       expires:
       - '-1'
       pragma:
@@ -964,9 +2845,9 @@ interactions:
       ParameterSetName:
       - -l --mi
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.1 (Windows-10-10.0.14393-SP0)
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/clitestmi000001/longTermRetentionManagedInstanceBackups?api-version=2020-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/clitestmi000001/longTermRetentionManagedInstanceBackups?api-version=2021-05-01-preview
   response:
     body:
       string: '{"value":[]}'
@@ -978,7 +2859,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 31 Dec 2021 14:35:20 GMT
+      - Wed, 16 Mar 2022 13:03:14 GMT
       expires:
       - '-1'
       pragma:
@@ -1010,9 +2891,9 @@ interactions:
       ParameterSetName:
       - -l --mi -d -g
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.1 (Windows-10-10.0.14393-SP0)
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/clitestmi000001/longTermRetentionDatabases/MIDBLongTermRetention000002/longTermRetentionManagedInstanceBackups?api-version=2020-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/clitestmi000001/longTermRetentionDatabases/MIDBLongTermRetention000002/longTermRetentionManagedInstanceBackups?api-version=2021-05-01-preview
   response:
     body:
       string: '{"value":[]}'
@@ -1024,7 +2905,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 31 Dec 2021 14:35:20 GMT
+      - Wed, 16 Mar 2022 13:03:15 GMT
       expires:
       - '-1'
       pragma:
@@ -1056,9 +2937,9 @@ interactions:
       ParameterSetName:
       - -l --mi -d
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.1 (Windows-10-10.0.14393-SP0)
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/clitestmi000001/longTermRetentionDatabases/MIDBLongTermRetention000002/longTermRetentionManagedInstanceBackups?api-version=2020-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/longTermRetentionManagedInstances/clitestmi000001/longTermRetentionDatabases/MIDBLongTermRetention000002/longTermRetentionManagedInstanceBackups?api-version=2021-05-01-preview
   response:
     body:
       string: '{"value":[]}'
@@ -1070,7 +2951,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 31 Dec 2021 14:35:21 GMT
+      - Wed, 16 Mar 2022 13:03:16 GMT
       expires:
       - '-1'
       pragma:
@@ -1104,15 +2985,15 @@ interactions:
       ParameterSetName:
       - -g -n --yes --no-wait
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.1 (Windows-10-10.0.14393-SP0)
+      - AZURECLI/2.34.1 azsdk-python-mgmt-sql/4.0.0b1 Python/3.8.3 (Windows-10-10.0.17763-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
   response:
     body:
-      string: '{"operation":"DropManagedServer","startTime":"2021-12-31T14:35:23.66Z"}'
+      string: '{"operation":"DropManagedServer","startTime":"2022-03-16T13:03:19.61Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/managedInstanceAzureAsyncOperation/8af3d98a-43f5-4b57-8a12-a8a5e083fe8e?api-version=2020-11-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/managedInstanceAzureAsyncOperation/3bbfc564-f136-4a29-9c76-f840ae93627e?api-version=2021-05-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -1120,11 +3001,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 31 Dec 2021 14:35:23 GMT
+      - Wed, 16 Mar 2022 13:03:19 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/managedInstanceOperationResults/8af3d98a-43f5-4b57-8a12-a8a5e083fe8e?api-version=2020-11-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/managedInstanceOperationResults/3bbfc564-f136-4a29-9c76-f840ae93627e?api-version=2021-05-01-preview
       pragma:
       - no-cache
       server:

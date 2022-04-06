@@ -441,7 +441,7 @@ def load_command_table(self, _):
     with self.command_group('staticwebapp', custom_command_type=staticsite_sdk) as g:
         g.custom_command('list', 'list_staticsites')
         g.custom_show_command('show', 'show_staticsite')
-        g.custom_command('create', 'create_staticsites', supports_no_wait=True)
+        g.custom_command('create', 'create_staticsites', supports_no_wait=True, exception_handler=ex_handler_factory())
         g.custom_command('delete', 'delete_staticsite', supports_no_wait=True, confirmation=True)
         g.custom_command('disconnect', 'disconnect_staticsite', supports_no_wait=True)
         g.custom_command('reconnect', 'reconnect_staticsite', supports_no_wait=True)
@@ -455,12 +455,12 @@ def load_command_table(self, _):
 
     with self.command_group('staticwebapp hostname', custom_command_type=staticsite_sdk) as g:
         g.custom_command('list', 'list_staticsite_domains')
-        g.custom_command('set', 'set_staticsite_domain', supports_no_wait=True)
+        g.custom_command('set', 'set_staticsite_domain', supports_no_wait=True, exception_handler=ex_handler_factory())
         g.custom_command('delete', 'delete_staticsite_domain', supports_no_wait=True, confirmation=True)
         g.custom_show_command('show', 'get_staticsite_domain')
 
     with self.command_group('staticwebapp identity', custom_command_type=staticsite_sdk) as g:
-        g.custom_command('assign', 'assign_identity')
+        g.custom_command('assign', 'assign_identity', exception_handler=ex_handler_factory())
         g.custom_command('remove', 'remove_identity', confirmation=True)
         g.custom_show_command('show', 'show_identity')
 
