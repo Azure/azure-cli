@@ -11,7 +11,7 @@ def create_acl_policy(cmd, client, policy_name, start=None, expiry=None, permiss
     """Create a stored access policy on the containing object"""
     t_access_policy = cmd.get_models('_models#AccessPolicy', resource_type=ResourceType.DATA_STORAGE_BLOB)
     acl = _get_acl(cmd, client, **kwargs)
-    if _get_service_container_type(cmd, client)=='container':
+    if _get_service_container_type(cmd, client) == 'container':
         signed_identifiers = {}
         for identifier in acl["signed_identifiers"]:
             signed_identifiers[identifier.id] = identifier.access_policy

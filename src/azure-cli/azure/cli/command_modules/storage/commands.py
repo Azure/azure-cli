@@ -502,7 +502,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
     with self.command_group('storage container', resource_type=ResourceType.DATA_STORAGE_BLOB,
                             custom_command_type=get_custom_sdk('access_policy', client_factory=cf_container_client,
-                                                  resource_type=ResourceType.DATA_STORAGE_BLOB)) as g:
+                                                               resource_type=ResourceType.DATA_STORAGE_BLOB)) as g:
         g.storage_custom_command_oauth('policy create', 'create_acl_policy', transform=transform_acl_edit)
         g.storage_custom_command_oauth('policy delete', 'delete_acl_policy', transform=transform_acl_edit)
         g.storage_custom_command_oauth(

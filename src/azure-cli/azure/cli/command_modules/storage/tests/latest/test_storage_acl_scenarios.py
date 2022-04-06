@@ -27,6 +27,11 @@ class StorageAccessControlListTests(StorageScenarioMixin, ScenarioTest):
 
         self._verify_access_control_list(account_info, 'share', share)
 
+    def _change_time_format(self, service_type, time):
+        if service_type=='container':
+            return time.split('+')[0]+'.'+"0000000Z"
+        return time
+
     def _verify_access_control_list(self, account_info, service_type, container_name):
         container_id_parameter = '--{}-name {}'.format(service_type, container_name)
         self.storage_cmd('storage {} policy list {}', account_info, service_type,
@@ -49,15 +54,16 @@ class StorageAccessControlListTests(StorageScenarioMixin, ScenarioTest):
         self.storage_cmd('storage {} policy show {} -n test1', account_info, service_type,
                          container_id_parameter).assert_with_checks(JMESPathCheck('permission', 'l'))
         self.storage_cmd('storage {} policy show {} -n test2', account_info, service_type,
-                         container_id_parameter).assert_with_checks(JMESPathCheck('start', '2016-01-01T00:00:00+00:00'))
+                         container_id_parameter).assert_with_checks(
+            JMESPathCheck('start', self._change_time_format(service_type, '2016-01-01T00:00:00+00:00')))
         self.storage_cmd('storage {} policy show {} -n test3', account_info, service_type,
                          container_id_parameter).assert_with_checks(
-                             JMESPathCheck('expiry', '2018-01-01T00:00:00+00:00'))
+            JMESPathCheck('expiry', self._change_time_format(service_type, '2018-01-01T00:00:00+00:00')))
         self.storage_cmd('storage {} policy show {} -n test4', account_info, service_type,
-                         container_id_parameter).assert_with_checks(JMESPathCheck('start', '2016-01-01T00:00:00+00:00'),
-                                                                    JMESPathCheck('expiry',
-                                                                                  '2016-05-01T00:00:00+00:00'),
-                                                                    JMESPathCheck('permission', 'rwdl'))
+                         container_id_parameter).assert_with_checks(
+            JMESPathCheck('start', self._change_time_format(service_type, '2016-01-01T00:00:00+00:00')),
+            JMESPathCheck('expiry', self._change_time_format(service_type, '2016-05-01T00:00:00+00:00')),
+            JMESPathCheck('permission', 'rwdl'))
         self.storage_cmd('storage {} policy update {} -n test1 --permission r', account_info, service_type,
                          container_id_parameter)
         self.storage_cmd('storage {} policy show {} -n test1', account_info, service_type,
