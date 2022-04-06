@@ -7624,6 +7624,42 @@ class RestorePointScenarioTest(ScenarioTest):
 
         self.cmd('restore-point collection delete -g {rg} --collection-name {collection_name} -y')
 
+    @ResourceGroupPreparer(name_prefix='cli_test_copy_vm_restore_point', location='westus')
+    def test_copy_vm_restore_point(self, resource_group):
+        self.kwargs.update({
+            'rg': resource_group,
+            'collection_name': self.create_random_name('collection_', 20),
+            'collection_name1': self.create_random_name('collection_', 20),
+            'point_name': self.create_random_name('point_', 15),
+            'point_name1': self.create_random_name('point_', 15),
+            'vm_name': self.create_random_name('vm_', 15)
+        })
+
+        vm = self.cmd('vm create -n {vm_name} -g {rg} --image UbuntuLTS --admin-username vmtest').get_output_in_json()
+        self.kwargs.update({
+            'vm_id': vm['id']
+        })
+
+        collection = self.cmd('restore-point collection create -g {rg} --collection-name {collection_name} --source-id {vm_id}').get_output_in_json()
+        self.kwargs.update({
+            'collection_id': collection['id']
+        })
+
+        self.cmd('restore-point collection create -g {rg} --collection-name {collection_name1} --source-id {collection_id} -l eastus', checks=[
+            self.check('location', 'eastus'),
+            self.check('source.id', '{collection_id}'),
+            self.check('source.location', 'westus')
+        ])
+
+        point = self.cmd('restore-point create -g {rg} -n {point_name} --collection-name {collection_name}').get_output_in_json()
+        self.kwargs.update({
+            'point_id': point['id']
+        })
+
+        self.cmd('restore-point create -g {rg} -n {point_name1} --collection-name {collection_name1} --source-restore-point {point_id}', checks=[
+            self.check('sourceRestorePoint.id', '{point_id}')
+        ])
+
 
 class ArchitectureScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='westus')
