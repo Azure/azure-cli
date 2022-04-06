@@ -4,9 +4,10 @@
 # --------------------------------------------------------------------------------------------
 import unittest
 from unittest import mock
+from knack.util import CLIError
 
 from azure.cli.command_modules.appservice.static_sites import \
-    list_staticsites, show_staticsite, delete_staticsite, create_staticsites, CLIError, disconnect_staticsite, \
+    list_staticsites, show_staticsite, delete_staticsite, create_staticsites, disconnect_staticsite, \
     reconnect_staticsite, list_staticsite_environments, show_staticsite_environment, list_staticsite_domains, \
     set_staticsite_domain, delete_staticsite_domain, list_staticsite_functions, list_staticsite_app_settings, \
     set_staticsite_app_settings, delete_staticsite_app_settings, list_staticsite_users, \
@@ -159,7 +160,7 @@ class TestStaticAppCommands(unittest.TestCase):
         tags = {'key1': 'value1'}
         sku = 'Standard'
 
-        update_staticsite(self.mock_cmd, self.name1, self.source2, self.branch2, self.token2, tags=tags, sku=sku)
+        update_staticsite(cmd=self.mock_cmd, name=self.name1, source=self.source2, branch=self.branch2, token=self.token2, tags=tags, sku=sku)
 
         self.staticapp_client.update_static_site.assert_called_once()
         arg_list = self.staticapp_client.update_static_site.call_args[1]

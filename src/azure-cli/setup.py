@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.34.1"
+VERSION = "2.35.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -70,11 +70,11 @@ DEPENDENCIES = [
     'azure-mgmt-applicationinsights~=1.0.0',
     'azure-mgmt-authorization~=0.61.0',
     'azure-mgmt-batchai~=7.0.0b1',
-    'azure-mgmt-batch~=16.0.0',
+    'azure-mgmt-batch~=16.1.0',
     'azure-mgmt-billing==6.0.0',
     'azure-mgmt-botservice~=0.3.0',
     'azure-mgmt-cdn==12.0.0',
-    'azure-mgmt-cognitiveservices~=13.0.0',
+    'azure-mgmt-cognitiveservices~=13.1.0',
     'azure-mgmt-compute~=26.1.0',
     'azure-mgmt-consumption~=2.0',
     'azure-mgmt-containerinstance~=9.1.0',
@@ -103,9 +103,9 @@ DEPENDENCIES = [
     'azure-mgmt-managementgroups~=1.0.0',
     'azure-mgmt-maps~=2.0.0',
     'azure-mgmt-marketplaceordering==1.1.0',
-    'azure-mgmt-media~=7.0',
+    'azure-mgmt-media~=8.0',
     'azure-mgmt-monitor~=3.0.0',
-    'azure-mgmt-msi~=0.2',
+    'azure-mgmt-msi~=6.0.0',
     'azure-mgmt-netapp~=7.0.0',
     'azure-mgmt-network~=19.3.0',
     'azure-mgmt-policyinsights~=1.0.0',
@@ -125,7 +125,7 @@ DEPENDENCIES = [
     'azure-mgmt-servicelinker==1.0.0b2',
     'azure-mgmt-servicefabric~=1.0.0',
     'azure-mgmt-signalr~=1.0.0b2',
-    'azure-mgmt-sqlvirtualmachine~=1.0.0b1',
+    'azure-mgmt-sqlvirtualmachine~=1.0.0b2',
     'azure-mgmt-sql==4.0.0b1',
     'azure-mgmt-storage~=19.1.0',
     'azure-mgmt-synapse~=2.1.0b2',
@@ -134,7 +134,7 @@ DEPENDENCIES = [
     'azure-multiapi-storage~=0.8.0',
     'azure-storage-common~=1.4',
     'azure-synapse-accesscontrol~=0.5.0',
-    'azure-synapse-artifacts~=0.10.0',
+    'azure-synapse-artifacts~=0.12.0',
     'azure-synapse-managedprivateendpoints~=0.3.0',
     'azure-synapse-spark~=0.2.0',
     'chardet~=3.0.4',

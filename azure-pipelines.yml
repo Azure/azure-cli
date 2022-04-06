@@ -560,14 +560,14 @@ jobs:
 - job: TestExtensionsLoading
   displayName: Test Extensions Loading
   condition: succeeded()
-  timeoutInMinutes: 20
+  timeoutInMinutes: 40
 
   pool:
     vmImage: 'ubuntu-20.04'
   strategy:
     matrix:
-      Python38:
-        python.version: '3.8'
+      Python310:
+        python.version: '3.10'
   steps:
     - task: UsePythonVersion@0
       displayName: 'Use Python $(python.version)'
@@ -746,7 +746,8 @@ jobs:
     displayName: 'Publish Artifact: rpm'
     inputs:
       TargetPath: $(Build.ArtifactStagingDirectory)
-      ArtifactName: rpm-centos7
+      # Should be 'rpm-centos7', but we keep 'yum' for backward compatibility
+      ArtifactName: yum
 
 # TODO: rpmbuild on Red Hat UBI 8 is slow for unknown reason. Still working with Red Hat to investigate.
 # We use a separate job for Red Hat UBI 8 instead of strategy.matrix so that TestRpmPackage can start right after
@@ -795,7 +796,7 @@ jobs:
     displayName: 'Download Build Artifacts'
     inputs:
       TargetPath: '$(Build.ArtifactStagingDirectory)/rpm'
-      artifactName: rpm-centos7
+      artifactName: yum
 
 
   - bash: |
