@@ -179,7 +179,7 @@ def apim_restore(client, resource_group_name, name, backup_name, storage_account
 
 
 def apim_apply_network_configuration_updates(client, resource_group_name, name, location=None):
-    """Updates the Microsoft.ApiManagement resource running in the Virtual network to pick the updated DNS changes. """
+    """Update the Microsoft.ApiManagement resource running in the Virtual network to pick the updated DNS changes. """
     properties = {}
     if location is not None:
         properties['location'] = location
