@@ -879,7 +879,6 @@ jobs:
 
 - job: TestDebPackages
   displayName: Test Deb Packages
-
   dependsOn:
    - BuildDebPackages
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
@@ -888,9 +887,15 @@ jobs:
       Focal:
         deb_system: ubuntu
         distro: focal
+      Jammy:
+        deb_system: ubuntu
+        distro: jammy
       Buster:
         deb_system: debian
         distro: buster
+      Bullseye:
+        deb_system: debian
+        distro: bullseye
   pool:
     vmImage: 'ubuntu-20.04'
   steps:
