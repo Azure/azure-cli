@@ -352,7 +352,7 @@ def load_arguments(self, _):
             c.argument('docker_registry_server_url', options_list=['--docker-registry-server-url', '-r'],
                        help='the container registry server url')
             c.argument('docker_custom_image_name', options_list=['--docker-custom-image-name', '-c', '-i'],
-                       help='the container custom image name and optionally the tag name')
+                       help='the container custom image name and optionally the tag name (e.g., <registry-name>/<image-name>:<tag>)')
             c.argument('docker_registry_server_user', options_list=['--docker-registry-server-user', '-u'],
                        help='the container registry server username')
             c.argument('docker_registry_server_password', options_list=['--docker-registry-server-password', '-p'],
