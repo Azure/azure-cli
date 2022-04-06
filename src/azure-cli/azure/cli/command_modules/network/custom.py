@@ -6678,7 +6678,7 @@ def create_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endp
                                 endpoint)
 
 
-def update_traffic_manager_endpoint(instance, endpoint_type=None, endpoint_location=None,
+def update_traffic_manager_endpoint(instance, endpoint_type, endpoint_location=None,
                                     endpoint_status=None, endpoint_monitor_status=None,
                                     priority=None, target=None, target_resource_id=None,
                                     weight=None, min_child_endpoints=None, min_child_ipv4=None,
