@@ -7382,7 +7382,7 @@ short-summary: Open a tunnel through Azure bastion to a target virtual machine.
 examples:
   - name: Open a tunnel through Azure bastion to a target virtual machine.
     text: |
-        az network bastion tunnel --name MyBastionHost --resource-group MyResourceGroup --target-resource-id vmResourceId --resource-port 111 --port 222
+        az network bastion tunnel --name MyBastionHost --resource-group MyResourceGroup --target-resource-id vmResourceId --resource-port 22 --port 50022
 """
 
 helps['network security-partner-provider'] = """
