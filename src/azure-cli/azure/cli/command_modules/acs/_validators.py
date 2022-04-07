@@ -211,6 +211,20 @@ def validate_load_balancer_idle_timeout(namespace):
             raise CLIError("--load-balancer-idle-timeout must be in the range [4,100]")
 
 
+def validate_nat_gateway_managed_outbound_ip_count(namespace):
+    """validate NAT gateway profile managed outbound IP count"""
+    if namespace.nat_gateway_managed_outbound_ip_count is not None:
+        if namespace.nat_gateway_managed_outbound_ip_count < 1 or namespace.nat_gateway_managed_outbound_ip_count > 16:
+            raise InvalidArgumentValueError("--nat-gateway-managed-outbound-ip-count must be in the range [1,16]")
+
+
+def validate_nat_gateway_idle_timeout(namespace):
+    """validate NAT gateway profile idle timeout"""
+    if namespace.nat_gateway_idle_timeout is not None:
+        if namespace.nat_gateway_idle_timeout < 4 or namespace.nat_gateway_idle_timeout > 120:
+            raise InvalidArgumentValueError("--nat-gateway-idle-timeout must be in the range [4,120]")
+
+
 def validate_nodes_count(namespace):
     """Validates that min_count and max_count is set between 1-100"""
     if namespace.min_count is not None:
