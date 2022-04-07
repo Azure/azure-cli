@@ -1049,3 +1049,66 @@ examples:
     text: >
         az security automation delete -g 'sampleRg' -n 'sampleAutomation'
 """
+
+helps['security automation-scope create'] = """
+type: command
+short-summary: Creates security automation scope.
+examples:
+  - name: Creates security automation scope.
+    text: >
+        az security automation-scope create --description 'this is a sample description' --scope_path '/subscriptions/03b601f1-7eca-4496-8f8d-355219eee254/'
+"""
+
+helps['security automation-rule create'] = """
+type: command
+short-summary: Creates security automation rule.
+examples:
+  - name: Creates security automation rule.
+    text: >
+        az security automation-rule create --expected_value 'High' --operator 'Equals' --property_j_path 'properties.metadata.severity' --property_type 'string'
+"""
+
+helps['security automation-rule-set create'] = """
+type: command
+short-summary: Creates security automation rule set.
+examples:
+  - name: Creates security automation rule set.
+    text: >
+        az security automation-rule-set create
+"""
+
+helps['security automation-source create'] = """
+type: command
+short-summary: Creates security automation source.
+examples:
+  - name: Creates security automation source.
+    text: >
+        az security automation-source create --event_source 'Assessments'
+"""
+
+helps['security automation-action-logic-app create'] = """
+type: command
+short-summary: Creates security automation logic app action.
+examples:
+  - name: Creates security automation logic app action.
+    text: >
+        az security automation-action-logic-app create --logic_app_resource_id '/subscriptions/03b601f1-7eca-4496-8f8d-355219eee254/resourceGroups/sample-rg/providers/Microsoft.Logic/workflows/LA' --uri 'https://ms.portal.azure.com/'
+"""
+
+helps['security automation-action-event-hub create'] = """
+type: command
+short-summary: Creates security automation event hub action.
+examples:
+  - name: Creates security automation event hub action.
+    text: >
+        az security automation-action-event-hub create --event_hub_resource_id '/subscriptions/03b601f1-7eca-4496-8f8d-355219eee254/resourceGroups/sample-rg/providers/Microsoft.EventHub/namespaces/evenhubnamespace1/eventhubs/evenhubname1' --connection_string 'Endpoint=sb://dummy/;SharedAccessKeyName=dummy;SharedAccessKey=dummy;EntityPath=dummy' --sas_policy_name 'Send'
+"""
+
+helps['security automation-action-workspace create'] = """
+type: command
+short-summary: Creates security automation workspace action.
+examples:
+  - name: Creates security automation workspace action.
+    text: >
+        az security automation-action-workspace create --workspace_resource_id '/subscriptions/03b601f1-7eca-4496-8f8d-355219eee254/resourcegroups/sample-rg/providers/microsoft.operationalinsights/workspaces/sampleworkspace'
+"""
