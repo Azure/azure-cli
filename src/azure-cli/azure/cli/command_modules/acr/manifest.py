@@ -41,10 +41,10 @@ ORDERBY_PARAMS = {
 DEFAULT_PAGINATION = 100
 
 BAD_ARGS_ERROR_REPO = "You must provide either a fully qualified repository specifier such as"\
-                      " 'MyRegistry.azurecr.io/hello-world' as a positional parameter or"\
+                      " 'myregistry.azurecr.io/hello-world' as a positional parameter or"\
                       " provide '-r MyRegistry -n hello-world' argument values."
 BAD_ARGS_ERROR_MANIFEST = "You must provide either a fully qualified manifest specifier such as"\
-                          " 'MyRegistry.azurecr.io/hello-world:latest' as a positional parameter or provide"\
+                          " 'myregistry.azurecr.io/hello-world:latest' as a positional parameter or provide"\
                           " '-r MyRegistry -n hello-world:latest' argument values."
 
 
@@ -126,7 +126,8 @@ def _obtain_referrers_from_registry(login_server,
 
 def _parse_fqdn(cmd, fqdn, is_manifest=True, allow_digest=True, default_latest=True):
     try:
-        fqdn = fqdn.lstrip('https://')
+        if fqdn.startswith('https://'):
+            fqdn = fqdn[len('https://'):]
         reg_addr = fqdn.split('/', 1)[0]
         registry_name = reg_addr.split('.', 1)[0]
         reg_suffix = '.' + reg_addr.split('.', 1)[1]

@@ -48,21 +48,21 @@ repo_id_type = CLIArgumentType(
     nargs='*',
     default=None,
     validator=validate_repo_id,
-    help="A fully qualified repository specifier such as 'MyRegistry.azurecr.io/hello-world'."
+    help="A fully qualified repository specifier such as 'myregistry.azurecr.io/hello-world'."
 )
 
 permissive_repo_id_type = CLIArgumentType(
     nargs='*',
     default=None,
     validator=validate_permissive_repo_id,
-    help="A fully qualified repository specifier such as 'MyRegistry.azurecr.io/hello-world'. May include a tag such as MyRegistry.azurecr.io/hello-world:latest"
+    help="A fully qualified repository specifier such as 'myregistry.azurecr.io/hello-world'. May include a tag such as myregistry.azurecr.io/hello-world:latest"
 )
 
 manifest_id_type = CLIArgumentType(
     nargs='*',
     default=None,
     validator=validate_manifest_id,
-    help="A fully qualified manifest specifier such as 'MyRegistry.azurecr.io/hello-world:latest'."
+    help="A fully qualified manifest specifier such as 'myregistry.azurecr.io/hello-world:latest'."
 )
 
 image_by_tag_or_digest_type = CLIArgumentType(

@@ -512,7 +512,7 @@ examples:
   - name: Get the manifest of the artifact 'hello-world:latest'.
     text: az acr manifest show -r MyRegistry -n hello-world:latest
   - name: Get the manifest of the artifact 'hello-world:latest'.
-    text: az acr manifest show MyRegistry.azurecr.io/hello-world:latest
+    text: az acr manifest show myregistry.azurecr.io/hello-world:latest
   - name: Get the manifest of the artifact referenced by digest 'hello-world@sha256:abc123'.
     text: az acr manifest show -r MyRegistry -n hello-world@sha256:abc123
   - name: Get the raw, unformatted manifest of the artifact 'hello-world:latest'.
@@ -526,7 +526,7 @@ examples:
   - name: List the manifests of the repository 'hello-world'.
     text: az acr manifest list -r MyRegistry -n hello-world
   - name: List the manifests of the repository 'hello-world'.
-    text: az acr manifest list MyRegistry.azurecr.io/hello-world
+    text: az acr manifest list myregistry.azurecr.io/hello-world
 """
 
 helps['acr manifest delete'] = """
@@ -536,7 +536,7 @@ examples:
   - name: Delete the manifest of the artifact 'hello-world:latest'.
     text: az acr manifest delete -r MyRegistry -n hello-world:latest
   - name: Delete the manifest of the artifact 'hello-world:latest'.
-    text: az acr manifest delete MyRegistry.azurecr.io/hello-world:latest
+    text: az acr manifest delete myregistry.azurecr.io/hello-world:latest
   - name: Delete the manifest of the artifact referenced by digest 'hello-world@sha256:abc123'.
     text: az acr manifest delete -r MyRegistry -n hello-world@sha256:abc123
 """
@@ -548,7 +548,7 @@ examples:
   - name: List the referrers to the manifest of the artifact 'hello-world:latest'.
     text: az acr manifest list-referrers -r MyRegistry -n hello-world:latest
   - name: List the referrers to the manifest of the artifact 'hello-world:latest'.
-    text: az acr manifest list-referrers MyRegistry.azurecr.io/hello-world:latest
+    text: az acr manifest list-referrers myregistry.azurecr.io/hello-world:latest
   - name: List the referrers to the manifest of the artifact referenced by digest 'hello-world@sha256:abc123'.
     text: az acr manifest list-referrers -r MyRegistry -n hello-world@sha256:abc123
 """
@@ -562,7 +562,7 @@ examples:
   - name: Get the metadata of the tag 'hello-world:latest'.
     text: az acr manifest show-metadata -r MyRegistry -n hello-world:latest
   - name: Get the metadata of the tag 'hello-world:latest'.
-    text: az acr manifest show-metadata MyRegistry.azurecr.io/hello-world:latest
+    text: az acr manifest show-metadata myregistry.azurecr.io/hello-world:latest
   - name: Get the metadata of the manifest referenced by digest 'hello-world@sha256:abc123'.
     text: az acr manifest show-metadata -r MyRegistry -n hello-world@sha256:abc123
 """
@@ -574,7 +574,7 @@ examples:
   - name: List the metadata of the manifests in the repository 'hello-world'.
     text: az acr manifest list-metadata -r MyRegistry -n hello-world
   - name: List the metadata of the manifests in the repository 'hello-world'.
-    text: az acr manifest list-metadata MyRegistry.azurecr.io/hello-world
+    text: az acr manifest list-metadata myregistry.azurecr.io/hello-world
 """
 
 helps['acr manifest update-metadata'] = """
@@ -584,7 +584,7 @@ examples:
   - name: Update the metadata of the tag 'hello-world:latest'.
     text: az acr manifest update-metadata -r MyRegistry -n hello-world:latest --write-enabled false
   - name: Update the metadata of the tag 'hello-world:latest'.
-    text: az acr manifest update-metadata MyRegistry.azurecr.io/hello-world:latest --write-enabled false
+    text: az acr manifest update-metadata myregistry.azurecr.io/hello-world:latest --write-enabled false
   - name: Update the metadata of the artifact referenced by digest 'hello-world@sha256:abc123'.
     text: az acr manifest update-metadata -r MyRegistry -n hello-world@sha256:abc123 --write-enabled false
 """
@@ -596,7 +596,7 @@ examples:
   - name: List the soft-deleted manifests in the repository 'hello-world'.
     text: az acr manifest list-deleted -r MyRegistry -n hello-world
   - name: List the soft-deleted manifests in the repository 'hello-world'.
-    text: az acr manifest list-deleted MyRegistry.azurecr.io/hello-world
+    text: az acr manifest list-deleted myregistry.azurecr.io/hello-world
 """
 
 helps['acr manifest list-deleted-tags'] = """
@@ -606,11 +606,11 @@ examples:
   - name: List the soft-deleted tags in the repository 'hello-world'.
     text: az acr manifest list-deleted-tags -r MyRegistry -n hello-world
   - name: List the soft-deleted tags in the repository 'hello-world'.
-    text: az acr manifest list-deleted-tags MyRegistry.azurecr.io/hello-world
+    text: az acr manifest list-deleted-tags myregistry.azurecr.io/hello-world
   - name: List the soft-deleted tags that match tag 'latest' in the repository 'hello-world'.
     text: az acr manifest list-deleted-tags -r MyRegistry -n hello-world:latest
   - name: List the soft-deleted tags that match tag 'latest' in the repository 'hello-world'.
-    text: az acr manifest list-deleted-tags MyRegistry.azurecr.io/hello-world:latest
+    text: az acr manifest list-deleted-tags myregistry.azurecr.io/hello-world:latest
 """
 
 helps['acr manifest restore'] = """
@@ -620,11 +620,11 @@ examples:
   - name: Restore the manifest matching digest 'sha256:abc123' with tag 'latest' in the repository 'hello-world'.
     text: az acr manifest restore -r MyRegistry -n hello-world:latest -d sha256:abc123
   - name: Restore the manifest matching digest 'sha256:abc123' with tag 'latest' in the repository 'hello-world'.
-    text: az acr manifest restore MyRegistry.azurecr.io/hello-world:latest -d sha256:abc123
+    text: az acr manifest restore myregistry.azurecr.io/hello-world:latest -d sha256:abc123
   - name: Restore the most recently deleted manifest associated with the tag 'latest' in the repository 'hello-world'.
     text: az acr manifest restore -r MyRegistry -n hello-world:latest
   - name: Restore the most recently deleted manifest associated with the tag 'latest' in the repository 'hello-world'.
-    text: az acr manifest restore MyRegistry.azurecr.io/hello-world:latest
+    text: az acr manifest restore myregistry.azurecr.io/hello-world:latest
 """
 
 # Deprecated
