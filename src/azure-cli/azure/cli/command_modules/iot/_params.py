@@ -16,7 +16,6 @@ from azure.cli.core.commands.parameters import (get_location_type,
 from azure.mgmt.iotcentral.models import AppSku
 from azure.mgmt.iothub.models import IotHubSku
 from azure.mgmt.iothubprovisioningservices.models import (IotDpsSku,
-                                                          AllocationPolicy,
                                                           AccessRightsDescription)
 from azure.cli.command_modules.iot.shared import (EndpointType,
                                                   RouteSourceType,
@@ -78,55 +77,28 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    'cross geo-pair disaster recovery. This property is immutable once set on the resource. '
                    'Only available in select regions. Learn more at https://aka.ms/dpsdr')
 
-    # To deprecate
-    for subgroup in ['access-policy', 'linked-hub', 'certificate']:
+    # plan to slowly align this with extension naming patterns - n should be aligned with dps_name
+    for subgroup in ['linked-hub', 'certificate']:
         with self.argument_context('iot dps {}'.format(subgroup)) as c:
             c.argument('dps_name', options_list=['--dps-name'], id_part=None)
 
-    # To replace deprecated
+    # To replace above
     for subgroup in ['policy']:
         with self.argument_context('iot dps {}'.format(subgroup)) as c:
             c.argument('dps_name', options_list=['--dps-name', '-n'], id_part=None)
-
-    with self.argument_context('iot dps access-policy') as c:
-        c.argument('access_policy_name', options_list=['--access-policy-name', '--name', '-n'],
-                   help='A friendly name for DPS shared access policy.')
-
-    with self.argument_context('iot dps access-policy create') as c:
-        c.argument('rights', options_list=['--rights', '-r'], nargs='+',
-                   arg_type=get_enum_type(AccessRightsDescription),
-                   help='Access rights for the IoT Hub Device Provisioning Service. '
-                        'Use space-separated list for multiple rights.')
-        c.argument('primary_key', help='Primary SAS key value.')
-        c.argument('secondary_key', help='Secondary SAS key value.')
-
-    with self.argument_context('iot dps access-policy update') as c:
-        c.argument('rights', options_list=['--rights', '-r'], nargs='+',
-                   arg_type=get_enum_type(AccessRightsDescription),
-                   help='Access rights for the IoT Hub Device Provisioning Service. '
-                        'Use space-separated list for multiple rights.')
-        c.argument('primary_key', help='Primary SAS key value.')
-        c.argument('secondary_key', help='Secondary SAS key value.')
 
     with self.argument_context('iot dps policy') as c:
         c.argument('access_policy_name', options_list=['--policy-name', '--pn'],
                    help='A friendly name for DPS access policy.')
 
-    with self.argument_context('iot dps policy create') as c:
-        c.argument('rights', options_list=['--rights', '-r'], nargs='+',
-                   arg_type=get_enum_type(AccessRightsDescription),
-                   help='Access rights for the IoT Hub Device Provisioning Service. '
-                        'Use space-separated list for multiple rights.')
-        c.argument('primary_key', help='Primary SAS key value.')
-        c.argument('secondary_key', help='Secondary SAS key value.')
-
-    with self.argument_context('iot dps policy update') as c:
-        c.argument('rights', options_list=['--rights', '-r'], nargs='+',
-                   arg_type=get_enum_type(AccessRightsDescription),
-                   help='Access rights for the IoT Hub Device Provisioning Service. '
-                        'Use space-separated list for multiple rights.')
-        c.argument('primary_key', help='Primary SAS key value.')
-        c.argument('secondary_key', help='Secondary SAS key value.')
+    for subgroup in ['create', 'update']:
+        with self.argument_context('iot dps policy {}'.format(subgroup)) as c:
+            c.argument('rights', options_list=['--rights', '-r'], nargs='+',
+                       arg_type=get_enum_type(AccessRightsDescription),
+                       help='Access rights for the IoT Hub Device Provisioning Service. '
+                            'Use space-separated list for multiple rights.')
+            c.argument('primary_key', help='Primary SAS key value.')
+            c.argument('secondary_key', help='Secondary SAS key value.')
 
     with self.argument_context('iot dps linked-hub') as c:
         c.argument('linked_hub', options_list=['--linked-hub'], help='Host name of linked IoT Hub.')
@@ -135,7 +107,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('connection_string',
                    help='Connection string of the IoT hub. Required if hub name is not provided using --hub-name.',
                    arg_group='IoT Hub Identifier')
-        c.argument('hub_name', help='IoT Hub name.', arg_group='IoT Hub Identifier')
+        c.argument('hub_name',
+                   options_list=['--hub-name', '--hn'],
+                   help='IoT Hub name.',
+                   arg_group='IoT Hub Identifier')
         c.argument('hub_resource_group',
                    options_list=['--hub-resource-group', '--hrg'],
                    help='IoT Hub resource group name.',
@@ -154,10 +129,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    help='A boolean indicating whether to apply allocation policy to the Iot hub.',
                    arg_type=get_three_state_flag())
         c.argument('allocation_weight', help='Allocation weight of the IoT hub.')
-
-    with self.argument_context('iot dps allocation-policy update') as c:
-        c.argument('allocation_policy', options_list=['--policy', '-p'], arg_type=get_enum_type(AllocationPolicy),
-                   help='Allocation policy for the IoT Hub Device Provisioning Service.')
 
     with self.argument_context('iot dps certificate') as c:
         c.argument('certificate_path', options_list=['--path', '-p'], type=file_type,
