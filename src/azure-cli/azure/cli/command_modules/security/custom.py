@@ -922,7 +922,6 @@ def create_security_automation_object(location, scopes, sources, actions, etag=N
             actionAsObject = AutomationActionLogicApp(logic_app_resource_id=action['logicAppResourceId'], uri=action['ruleSets'])
         elif action['actionType'] == 'EventHub':
             actionAsObject = AutomationActionEventHub(event_hub_resource_id=action['eventHubResourceId'], connection_string=action['connectionString'])
-            actionAsObject.sas_policy_name = action['sas_policy_name']
         elif action['actionType'] == 'Workspace':
             actionAsObject = AutomationActionWorkspace(workspace_resource_id=action['workspaceResourceId'])
 
