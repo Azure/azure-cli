@@ -74,7 +74,9 @@ class AzCopy:
 
     def run_command(self, args):
         args = [self.executable] + args
-        logger.warning("Azcopy command: %s", args)
+        args_hides = args.copy()
+        args_hides[2] = args_hides[2][0:args_hides[2].index('?')]
+        logger.warning("Azcopy command: %s", args_hides)
         env_kwargs = {}
         if self.creds and self.creds.token_info:
             env_kwargs = {'AZCOPY_OAUTH_TOKEN_INFO': json.dumps(self.creds.token_info)}
