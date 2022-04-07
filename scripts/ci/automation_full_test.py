@@ -158,11 +158,11 @@ run_paraller_modules(para_modules, profile)
 
 # if __name__ == '__main__':
     # works = []
-    # for i in range(8):
+    # for i in range(14):
     #     worker = {}
     #     works.append(worker)
-    # part, part_idx = [int(i) for i in '4_1'.split('_')]
-    # parallel, para_idx = [int(i) for i in '8_1'.split('_')]
+    # part, part_idx = [int(i) for i in '1_1'.split('_')]
+    # parallel, para_idx = [int(i) for i in '14_1'.split('_')]
     # profile = 'latest'
     # part_modules = get_part_modules(part, part_idx)
     # para_modules = get_paraller_modules(part_modules, para_idx)
