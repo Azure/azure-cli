@@ -210,6 +210,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.positional('manifest_id', arg_type=manifest_id_type)
         c.argument('digest', options_list=['--digest', '-d'], help="The digest of the manifest such as 'sha256@abc123'.")
         c.argument('force', options_list=['--force', '-f'], help='Overwrite the existing tag.', action='store_true')
+        c.argument('manifest_spec', help="The name of the artifact. May include a tag in the format 'name:tag'.", options_list=['--name', '-n'])
+
 
     with self.argument_context('acr manifest metadata list') as c:
         c.positional('repo_id', arg_type=repo_id_type)
