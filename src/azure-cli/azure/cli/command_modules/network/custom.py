@@ -6678,7 +6678,7 @@ def create_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endp
                                 endpoint)
 
 
-def update_traffic_manager_endpoint(instance, endpoint_type=None, endpoint_location=None,
+def update_traffic_manager_endpoint(instance, endpoint_type, endpoint_location=None,
                                     endpoint_status=None, endpoint_monitor_status=None,
                                     priority=None, target=None, target_resource_id=None,
                                     weight=None, min_child_endpoints=None, min_child_ipv4=None,
@@ -7598,7 +7598,7 @@ def create_virtual_hub(cmd, client,
                        resource_group_name,
                        virtual_hub_name,
                        hosted_subnet,
-                       public_ip_address=None,
+                       public_ip_address,
                        location=None,
                        tags=None):
     from azure.core.exceptions import HttpResponseError
@@ -7623,7 +7623,7 @@ def create_virtual_hub(cmd, client,
 
     ip_config = HubIpConfiguration(
         subnet=SubResource(id=hosted_subnet),
-        public_ip_address=SubResource(id=public_ip_address) if public_ip_address else None,
+        public_ip_address=SubResource(id=public_ip_address),
     )
     vhub_ip_config_client = network_client_factory(cmd.cli_ctx).virtual_hub_ip_configuration
     try:
