@@ -444,5 +444,38 @@ def load_command_table(self, _):
         g.custom_command('create_or_update', 'create_or_update_security_automation')
         g.custom_command('validate', 'validate_security_automation')
 
+    with self.command_group('security automation-scope',
+                            security_automations_sdk,
+                            client_factory=cf_security_automations) as g:
+        g.custom_command('create', 'create_security_automation_scope')
+
+    with self.command_group('security automation-rule',
+                            security_automations_sdk,
+                            client_factory=cf_security_automations) as g:
+        g.custom_command('create', 'create_security_automation_rule')
+
+    with self.command_group('security automation-rule-set',
+                            security_automations_sdk,
+                            client_factory=cf_security_automations) as g:
+        g.custom_command('create', 'create_security_automation_rule_set')
+
+    with self.command_group('security automation-source',
+                            security_automations_sdk,
+                            client_factory=cf_security_automations) as g:
+        g.custom_command('create', 'create_security_automation_source')
+
+    with self.command_group('security automation-action-logic-app',
+                            security_automations_sdk,
+                            client_factory=cf_security_automations) as g:
+        g.custom_command('create', 'create_security_automation_action_logic_app')
+    with self.command_group('security automation-action-event-hub',
+                            security_automations_sdk,
+                            client_factory=cf_security_automations) as g:
+        g.custom_command('create', 'create_security_automation_action_event_hub')
+    with self.command_group('security automation-action-workspace',
+                            security_automations_sdk,
+                            client_factory=cf_security_automations) as g:
+        g.custom_command('create', 'create_security_automation_action_workspace')                
+
     with self.command_group('security'):
         pass

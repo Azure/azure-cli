@@ -861,6 +861,11 @@ def validate_security_automation(client, resource_group_name, resource_name, loc
     automation = create_security_automation_object(location, scopes, sources, actions, etag, tags, description, isEnabled)
     return client.validate(resource_group_name, resource_name, automation)
 
+def create_security_automation_scope(description, scope_path):
+     
+    return AutomationScope(description=description, scope_path=scope_path)
+
+
 # Security Automations Utils
 
 
@@ -869,26 +874,22 @@ def create_security_automation_object(location, scopes, sources, actions, etag=N
     scopes = json.loads(scopes)
     scopesAsObjectList = []
     for scope in scopes:
-        scopeAsObject = AutomationScope(description=scope['description'],
-                                        scope_path=scope['scopePath'])
+        scopeAsObject = AutomationScope(description=scope['description'], scope_path=scope['scopePath'])
         scopesAsObjectList.append(scopeAsObject)
 
     sources = json.loads(sources)
     sourcesAsObjectList = []
     for source in sources:
-        sourceAsObject = AutomationSource(event_source=source['eventSource'],
-                                          rule_sets=get_security_automation_ruleSets_object(source['ruleSets']))
+        sourceAsObject = AutomationSource(event_source=source['eventSource'], rule_sets=get_security_automation_ruleSets_object(source['ruleSets']))
         sourcesAsObjectList.append(sourceAsObject)
 
     actions = json.loads(actions)
     actionsAsObjectList = []
     for action in actions:
         if action['actionType'] == 'LogicApp':
-            actionAsObject = AutomationActionLogicApp(logic_app_resource_id=action['logicAppResourceId'],
-                                                      uri=action['ruleSets'])
+            actionAsObject = AutomationActionLogicApp(logic_app_resource_id=action['logicAppResourceId'], uri=action['ruleSets'])
         elif action['actionType'] == 'EventHub':
-            actionAsObject = AutomationActionEventHub(event_hub_resource_id=action['eventHubResourceId'],
-                                                      connection_string=action['connectionString'])
+            actionAsObject = AutomationActionEventHub(event_hub_resource_id=action['eventHubResourceId'], connection_string=action['connectionString'])
         elif action['actionType'] == 'Workspace':
             actionAsObject = AutomationActionWorkspace(workspace_resource_id=action['workspaceResourceId'])
 
@@ -922,9 +923,6 @@ def get_security_automation_rules_object(rules):
         return
     ruleAsObjectList = []
     for rule in rules:
-        ruleAsObject = AutomationTriggeringRule(property_j_path=rule['propertyJPath'],
-                                                property_type=rule['propertyType'],
-                                                expected_value=rule['expectedValue'],
-                                                operator=rule['operator'])
+        ruleAsObject = AutomationTriggeringRule(property_j_path=rule['propertyJPath'], property_type=rule['propertyType'], expected_value=rule['expectedValue'], operator=rule['operator'])
         ruleAsObjectList.append(ruleAsObject)
     return ruleAsObjectList
