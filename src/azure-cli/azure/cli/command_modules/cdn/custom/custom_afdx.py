@@ -570,7 +570,7 @@ def create_afd_rule(cmd, client: RulesOperations, resource_group_name, profile_n
                     header_name=None, header_value=None, query_parameters=None,
                     redirect_type=None, redirect_protocol=None, custom_hostname=None, custom_path=None,
                     custom_querystring=None, custom_fragment=None, source_pattern=None,
-                    destination=None, preserve_unmatched_path=None,
+                    destination=None, preserve_unmatched_path=None, origin_group=None,
                     enable_caching=None, is_compression_enabled=None, query_string_caching_behavior=None,
                     match_processing_behavior: MatchProcessingBehavior = None,
                     forwarding_protocol: ForwardingProtocol = None):
@@ -588,6 +588,7 @@ def create_afd_rule(cmd, client: RulesOperations, resource_group_name, profile_n
                            header_value, None, None if query_parameters is None else ",".join(query_parameters),
                            redirect_type, redirect_protocol, custom_hostname, custom_path, custom_querystring,
                            custom_fragment, source_pattern, destination, preserve_unmatched_path,
+                           origin_group=origin_group,
                            cmd=cmd,
                            enable_caching=enable_caching,
                            resource_group_name=resource_group_name,

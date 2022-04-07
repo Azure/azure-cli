@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-from azure.cli.testsdk import ResourceGroupPreparer, JMESPathCheck
+from azure.cli.testsdk import ResourceGroupPreparer, JMESPathCheck, checkers
 from azure.cli.testsdk import ScenarioTest, record_only
 from .afdx_scenario_mixin import CdnAfdScenarioMixin
 
@@ -447,5 +447,176 @@ class CdnAfdRuleScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
 
         rule_list_checks = [JMESPathCheck('length(@)', 0)]
         self.afd_rule_list_cmd(resource_group, rule_set_name, profile_name, checks=rule_list_checks)
+
+        self.afd_rule_set_delete_cmd(resource_group, rule_set_name, profile_name)
+
+    @ResourceGroupPreparer()
+    def test_afd_rule_actions(self, resource_group):
+        profile_name = self.create_random_name(prefix='profile', length=16)
+        self.afd_profile_create_cmd(resource_group, profile_name)
+
+        rule_set_name = self.create_random_name(prefix='ruleset', length=16)
+        self.afd_rule_set_add_cmd(resource_group, rule_set_name, profile_name)
+
+        rule_list_checks = [JMESPathCheck('length(@)', 0)]
+        self.afd_rule_list_cmd(resource_group, rule_set_name, profile_name, checks=rule_list_checks)
+
+        rule_name = 'r1'
+        origin_group_name = self.create_random_name(prefix='og', length=16)
+        origin_group_id = f'/subscriptions/{self.get_subscription_id()}/resourceGroups/{resource_group}/providers/Microsoft.Cdn/profiles/{profile_name}/originGroups/{origin_group_name}'
+        self.afd_origin_group_create_cmd(resource_group,
+                                         profile_name,
+                                         origin_group_name,
+                                         "--probe-request-type GET --probe-protocol Http --probe-interval-in-seconds 120 --probe-path /test1/azure.txt " +
+                                         "--sample-size 4 --successful-samples-required 3 --additional-latency-in-milliseconds 50")
+
+        origin_name1 = self.create_random_name(prefix='origin', length=16)
+        create_options = "--host-name huaiyiztesthost1.blob.core.chinacloudapi.cn " \
+                         + "--origin-host-header huaiyiztesthost1.blob.core.chinacloudapi.cn " \
+                         + "--priority 1 --weight 666 --http-port 8080 --https-port 443 --enabled-state Enabled"
+
+        self.afd_origin_create_cmd(resource_group,
+                                   profile_name,
+                                   origin_group_name,
+                                   origin_name1,
+                                   create_options)
+
+        # RouteConfigurationOverride
+        rule_checks = [JMESPathCheck('order', 1),
+                       JMESPathCheck('name', rule_name),
+                       JMESPathCheck('matchProcessingBehavior', "Stop"),
+                       JMESPathCheck('length(conditions)', 1),
+                       JMESPathCheck('conditions[0].name', "RemoteAddress"),
+                       JMESPathCheck('conditions[0].parameters.operator', 'GeoMatch'),
+                       JMESPathCheck('conditions[0].parameters.matchValues[0]', 'TH'),
+                       JMESPathCheck('conditions[0].parameters.matchValues[1]', 'US'),
+                       JMESPathCheck('length(actions)', 1),
+                       JMESPathCheck('actions[0].name', "RouteConfigurationOverride"),
+                       JMESPathCheck('actions[0].parameters.cacheConfiguration.queryStringCachingBehavior', 'UseQueryString'),
+                       JMESPathCheck('actions[0].parameters.cacheConfiguration.cacheBehavior', 'HonorOrigin'),
+                       JMESPathCheck('actions[0].parameters.cacheConfiguration.isCompressionEnabled', 'Disabled'),
+                       JMESPathCheck('actions[0].parameters.originGroupOverride.originGroup.id', origin_group_id, False),
+                       JMESPathCheck('actions[0].parameters.originGroupOverride.forwardingProtocol', "MatchRequest")]
+        self.afd_rule_add_cmd(resource_group,
+                              rule_set_name,
+                              rule_name,
+                              profile_name,
+                              options=f'--match-processing-behavior Stop --match-variable RemoteAddress --operator GeoMatch --match-values "TH" "US" '
+                                      f'--action-name RouteConfigurationOverride --enable-caching True --enable-compression False --query-string-caching-behavior UseQueryString '
+                                      f'--cache-behavior HonorOrigin --order 1 --origin-group {origin_group_name} --forwarding-protocol MatchRequest')
+        self.afd_rule_show_cmd(resource_group,
+                                rule_set_name,
+                                rule_name,
+                                profile_name,
+                                checks=rule_checks)
+
+        # URL Redirect
+        rule_name = 'r2'
+        rule_checks = [JMESPathCheck('order', 2),
+                       JMESPathCheck('name', rule_name),
+                       JMESPathCheck('length(conditions)', 1),
+                       JMESPathCheck('conditions[0].name', "UrlFileExtension"),
+                       JMESPathCheck('conditions[0].parameters.operator', 'Contains'),
+                       JMESPathCheck('conditions[0].parameters.matchValues[0]', 'exe'),
+                       JMESPathCheck('conditions[0].parameters.matchValues[1]', 'apk'),
+                       JMESPathCheck('matchProcessingBehavior', "Continue"),
+                       JMESPathCheck('length(actions)', 1),
+                       JMESPathCheck('actions[0].name', "UrlRedirect"),
+                       JMESPathCheck('actions[0].parameters.redirectType', "Moved"),
+                       JMESPathCheck('actions[0].parameters.destinationProtocol', 'Https'),
+                       JMESPathCheck('actions[0].parameters.customHostname', "www.contoso.com"),
+                       JMESPathCheck('actions[0].parameters.customPath', '/path1'),
+                       JMESPathCheck('actions[0].parameters.customQueryString', "a=b"),
+                       JMESPathCheck('actions[0].parameters.customFragment', 'fg1')]
+        self.afd_rule_add_cmd(resource_group,
+                              rule_set_name,
+                              rule_name,
+                              profile_name,
+                              options='--match-variable UrlFileExtension --operator Contains --match-values exe apk '
+                                      '--action-name UrlRedirect --redirect-protocol Https --redirect-type Moved --order 2 '
+                                      '--custom-host "www.contoso.com" --custom-path "/path1" --custom-querystring "a=b" --custom-fragment fg1')
+        self.afd_rule_show_cmd(resource_group,
+                                rule_set_name,
+                                rule_name,
+                                profile_name,
+                                checks=rule_checks)
+        
+        # URL Rewrite
+        rule_name = 'r3'
+        rule_checks = [JMESPathCheck('order', 3),
+                       JMESPathCheck('name', rule_name),
+                       JMESPathCheck('length(conditions)', 1),
+                       JMESPathCheck('matchProcessingBehavior', "Continue"),
+                       JMESPathCheck('conditions[0].name', "RequestScheme"),
+                       JMESPathCheck('conditions[0].parameters.matchValues[0]', 'HTTP'),
+                       JMESPathCheck('length(actions)', 1),
+                       JMESPathCheck('actions[0].name', "UrlRewrite"),
+                       JMESPathCheck('actions[0].parameters.sourcePattern', "/abc"),
+                       JMESPathCheck('actions[0].parameters.destination', '/def'),
+                       JMESPathCheck('actions[0].parameters.preserveUnmatchedPath', True)]
+        self.afd_rule_add_cmd(resource_group,
+                              rule_set_name,
+                              rule_name,
+                              profile_name,
+                              options='--order 3 --match-variable RequestScheme --match-values "HTTP" '
+                                      '--action-name UrlRewrite --source-pattern "/abc" --destination "/def" --preserve-unmatched-path true')
+        self.afd_rule_show_cmd(resource_group,
+                                rule_set_name,
+                                rule_name,
+                                profile_name,
+                                checks=rule_checks)
+        
+        # ModifyRequestHeader
+        rule_name = 'r4'
+        rule_checks = [JMESPathCheck('order', 4),
+                       JMESPathCheck('name', rule_name),
+                       JMESPathCheck('length(conditions)', 1),
+                       JMESPathCheck('matchProcessingBehavior', "Continue"),
+                       JMESPathCheck('conditions[0].name', "ServerPort"),
+                       JMESPathCheck('conditions[0].parameters.matchValues[0]', 443),
+                       JMESPathCheck('length(actions)', 1),
+                       JMESPathCheck('actions[0].name', "ModifyRequestHeader"),
+                       JMESPathCheck('actions[0].parameters.headerAction', "Append"),
+                       JMESPathCheck('actions[0].parameters.headerName', 'header1'),
+                       JMESPathCheck('actions[0].parameters.value', 'value1')]
+        self.afd_rule_add_cmd(resource_group,
+                              rule_set_name,
+                              rule_name,
+                              profile_name,
+                              options='--order 4 --match-variable ServerPort --operator Equal --match-values 443 '
+                                      '--action-name ModifyRequestHeader --header-action Append --header-name header1 --header-value value1')
+        self.afd_rule_show_cmd(resource_group,
+                                rule_set_name,
+                                rule_name,
+                                profile_name,
+                                checks=rule_checks)
+
+        # ModifyResponseHeader
+        rule_name = 'r5'
+        rule_checks = [JMESPathCheck('order', 5),
+                       JMESPathCheck('name', rule_name),
+                       JMESPathCheck('length(conditions)', 1),
+                       JMESPathCheck('matchProcessingBehavior', "Continue"),
+                       JMESPathCheck('conditions[0].name', "ClientPort"),
+                       JMESPathCheck('conditions[0].parameters.matchValues[0]', 8888),
+                       JMESPathCheck('length(actions)', 1),
+                       JMESPathCheck('actions[0].name', "ModifyResponseHeader"),
+                       JMESPathCheck('actions[0].parameters.headerAction', "Overwrite"),
+                       JMESPathCheck('actions[0].parameters.headerName', 'header1'),
+                       JMESPathCheck('actions[0].parameters.value', 'value1')]
+        self.afd_rule_add_cmd(resource_group,
+                              rule_set_name,
+                              rule_name,
+                              profile_name,
+                              options='--order 5 --match-variable ClientPort --operator Equal --match-values 8888 '
+                                      '--action-name ModifyResponseHeader --header-action Overwrite --header-name header1 --header-value value1')
+        self.afd_rule_show_cmd(resource_group,
+                                rule_set_name,
+                                rule_name,
+                                profile_name,
+                                checks=rule_checks)
+       
+        for rule_name in ["r1", "r2", "r3", "r4", "r5"]:
+            self.afd_rule_delete_cmd(resource_group, rule_set_name, rule_name, profile_name)
 
         self.afd_rule_set_delete_cmd(resource_group, rule_set_name, profile_name)
