@@ -491,6 +491,41 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.is_empty()
         ])
 
+    @AllowLargeResponse(8192)
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_create_and_update_with_managed_nat_gateway_outbound(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'ssh_key_value': self.generate_ssh_keys(),
+            'location': resource_group_location
+        })
+
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--vm-set-type VirtualMachineScaleSets -c 1 ' \
+                     '--outbound-type=managedNATGateway ' \
+                     '--generate-ssh-keys ' \
+                     '--nat-gateway-managed-outbound-ip-count=1 ' \
+                     '--nat-gateway-idle-timeout=4 ' \
+                     '--location={location}'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('networkProfile.outboundType', 'managedNATGateway'),
+            self.check('networkProfile.natGatewayProfile.idleTimeoutInMinutes', 4),
+            self.check('networkProfile.natGatewayProfile.managedOutboundIpProfile.count', 1),
+        ])
+
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
+                     '--nat-gateway-managed-outbound-ip-count=2 ' \
+                     '--nat-gateway-idle-timeout=30 ' 
+        self.cmd(update_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('networkProfile.outboundType', 'managedNATGateway'),
+            self.check('networkProfile.natGatewayProfile.idleTimeoutInMinutes', 30),
+            self.check('networkProfile.natGatewayProfile.managedOutboundIpProfile.count', 2),
+        ])
+
     # live only due to role assignment is not mocked
     @live_only()
     @AllowLargeResponse(8192)
