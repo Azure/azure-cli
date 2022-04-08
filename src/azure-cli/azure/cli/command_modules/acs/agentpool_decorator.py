@@ -41,6 +41,7 @@ Snapshot = TypeVar("Snapshot")
 # TODO:
 # 1. Add extra type checking for getter functions
 
+
 # pylint: disable=too-few-public-methods
 class AKSAgentPoolModels(BaseAKSModels):
     """Store the models used in aks agentpool series of commands.
@@ -853,7 +854,7 @@ class AKSAgentPoolContext(BaseAKSContext):
         """
         # read the original value passed by the command
         if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
-            mode = self.raw_param.get("mode",  CONST_NODEPOOL_MODE_SYSTEM)
+            mode = self.raw_param.get("mode", CONST_NODEPOOL_MODE_SYSTEM)
         else:
             mode = self.raw_param.get("mode", CONST_NODEPOOL_MODE_USER)
         # try to read the property value corresponding to the parameter from the `agentpool` object
