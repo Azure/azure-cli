@@ -123,8 +123,8 @@ class StorageSASScenario(StorageScenarioMixin, LiveScenarioTest):
         self.cmd('storage blob show -c {container} -n {blob} --account-name {account} --sas-token {blob_sas}') \
             .assert_with_checks(JMESPathCheck('name', blob_name))
 
-    @ResourceGroupPreparer()
-    @StorageAccountPreparer()
+    @ResourceGroupPreparer(name_prefix='clitest')
+    @StorageAccountPreparer(name_prefix='queuesas', kind='StorageV2', location='eastus2', sku='Standard_RAGRS')
     def test_storage_queue_sas_scenario(self, resource_group, storage_account):
         from datetime import datetime, timedelta
         expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
@@ -139,6 +139,14 @@ class StorageSASScenario(StorageScenarioMixin, LiveScenarioTest):
         self.assertIn('sig', sas, 'The sig segment is not in the sas {}'.format(sas))
 
         self.cmd('storage queue exists -n {} --account-name {} --sas-token {}'.format(queue, storage_account, sas),
+                 checks=JMESPathCheck('exists', True))
+        self.storage_cmd('storage queue policy create -n testqp -q {} --permissions r --expiry {}',
+                         account_info, queue, expiry)
+
+        sas2 = self.storage_cmd('storage queue generate-sas -n {} --policy-name testqp', account_info, queue).output
+        self.assertIn('sig', sas2, 'The sig segment is not in the sas {}'.format(sas2))
+
+        self.cmd('storage queue exists -n {} --account-name {} --sas-token {}'.format(queue, storage_account, sas2),
                  checks=JMESPathCheck('exists', True))
 
     @ResourceGroupPreparer()
