@@ -439,11 +439,11 @@ def load_arguments(self, _):
                        type=datetime_type)
             c.argument('not_before', default=None, type=datetime_type,
                        help='Key not usable before the provided UTC datetime  (Y-m-d\'T\'H:M:S\'Z\').')
-            c.argument('exportable', arg_type=get_three_state_flag(), is_preview=True,
+            c.argument('exportable', arg_type=get_three_state_flag(),
                        help='Whether the private key can be exported. To create key with release policy, '
                             '"exportable" must be true and caller must have "export" permission.')
             c.argument('release_policy', options_list=['--policy'], type=file_type, completer=FilesCompleter(),
-                       validator=process_key_release_policy, is_preview=True,
+                       validator=process_key_release_policy,
                        help='The policy rules under which the key can be exported. '
                             'Policy definition as JSON, or a path to a file containing JSON policy definition.')
             c.extra('default_cvm_policy', action='store_true',
