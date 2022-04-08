@@ -15,6 +15,10 @@ from azure.cli.command_modules.acs._consts import (
     CONST_NODEPOOL_MODE_USER,
     CONST_SCALE_DOWN_MODE_DELETE,
     CONST_VIRTUAL_MACHINE_SCALE_SETS,
+    CONST_SCALE_SET_PRIORITY_REGULAR,
+    CONST_SCALE_SET_PRIORITY_SPOT,
+    CONST_SPOT_EVICTION_POLICY_DELETE,
+    CONST_SPOT_EVICTION_POLICY_DEALLOCATE,
     AgentPoolDecoratorMode,
     DecoratorEarlyExitException,
     DecoratorMode,
@@ -25,6 +29,7 @@ from azure.cli.command_modules.acs.agentpool_decorator import (
     AKSAgentPoolModels,
     AKSAgentPoolParamDict,
     AKSAgentPoolUpdateDecorator,
+    AgentPool,
 )
 from azure.cli.command_modules.acs.tests.latest.mocks import MockCLI, MockClient, MockCmd
 from azure.cli.core.azclierror import (
@@ -62,15 +67,58 @@ class AKSAgentPoolModelsTestCase(unittest.TestCase):
 
 
 class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
-    def create_initialized_agentpool_instance(self, nodepool_name="nodepool1", **kwargs):
-        # helper function to create a properly initialized agentpool instance
+    def _remove_defaults_in_agentpool(self, agentpool: AgentPool) -> AgentPool:
+        """Internal function to remove values from properties with default values of the `agentpool` object.
+
+        Removing default values is to prevent getters from mistakenly overwriting user provided values with default
+        values in the object.
+
+        :return: the AgentPool object
+        """
+        self.defaults_in_agentpool = {}
+        for attr_name, attr_value in vars(agentpool).items():
+            if not attr_name.startswith("_") and attr_name != "name" and attr_value is not None:
+                self.defaults_in_agentpool[attr_name] = attr_value
+                setattr(agentpool, attr_name, None)
+        return agentpool
+
+    def _restore_defaults_in_agentpool(self, agentpool: AgentPool) -> AgentPool:
+        """Internal function to restore values of properties with default values of the `agentpool` object.
+
+        Restoring default values is to keep the content of the request sent by cli consistent with that before the
+        refactoring.
+
+        :return: the AgentPool object
+        """
+        for key, value in self.defaults_in_agentpool.items():
+            if getattr(agentpool, key, None) is None:
+                setattr(agentpool, key, value)
+        return agentpool
+
+    def create_initialized_agentpool_instance(
+        self, nodepool_name="nodepool1", remove_defaults=True, restore_defaults=True, **kwargs
+    ) -> AgentPool:
+        """Helper function to create a properly initialized agentpool instance.
+
+        :return: the AgentPool object
+        """
         if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
-            agentpool = self.models.UnifiedAgentPoolModel(name=nodepool_name, os_type=None)
+            agentpool = self.models.UnifiedAgentPoolModel(name=nodepool_name)
         else:
-            agentpool = self.models.UnifiedAgentPoolModel(os_type=None)
+            agentpool = self.models.UnifiedAgentPoolModel()
             agentpool.name = nodepool_name
+
+        # remove defaults
+        if remove_defaults:
+            self._remove_defaults_in_agentpool(agentpool)
+
+        # set properties
         for key, value in kwargs.items():
             setattr(agentpool, key, value)
+
+        # resote defaults
+        if restore_defaults:
+            self._restore_defaults_in_agentpool(agentpool)
         return agentpool
 
     def common__init__(self):
@@ -146,47 +194,6 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
             self.assertEqual(ctx_1.get_cluster_name(), "test_name")
         else:
             self.assertEqual(ctx_1.get_cluster_name(), "test_cluster_name")
-
-    def common_get_nodepool_name(self):
-        # default
-        ctx_1 = AKSAgentPoolContext(
-            self.cmd,
-            AKSAgentPoolParamDict({"nodepool_name": "test_nodepool_name"}),
-            self.models,
-            DecoratorMode.CREATE,
-            self.agentpool_decorator_mode,
-        )
-        with patch(
-            "azure.cli.command_modules.acs.agentpool_decorator.cf_agent_pools",
-            return_value=Mock(),
-        ):
-            self.assertEqual(ctx_1.get_nodepool_name(), "test_nodepool_name")
-
-        agentpool_1 = self.create_initialized_agentpool_instance("test_ap_name")
-        ctx_1.attach_agentpool(agentpool_1)
-        with patch(
-            "azure.cli.command_modules.acs.agentpool_decorator.cf_agent_pools",
-            return_value=Mock(),
-        ):
-            self.assertEqual(ctx_1.get_nodepool_name(), "test_ap_name")
-
-        # custom
-        ctx_2 = AKSAgentPoolContext(
-            self.cmd,
-            AKSAgentPoolParamDict({"nodepool_name": "test_nodepool_name"}),
-            self.models,
-            DecoratorMode.CREATE,
-            self.agentpool_decorator_mode,
-        )
-        mock_agentpool_instance_1 = Mock()
-        mock_agentpool_instance_1.name = "test_nodepool_name"
-        mock_agentpool_operations = Mock(list=Mock(return_value=[mock_agentpool_instance_1]))
-        # fail on existing nodepool name
-        with patch(
-            "azure.cli.command_modules.acs.agentpool_decorator.cf_agent_pools",
-            mock_agentpool_operations,
-        ), self.assertRaises(InvalidArgumentValueError):
-            ctx_2.get_nodepool_name()
 
     def common_get_max_surge(self):
         # default
@@ -422,7 +429,7 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
             self.agentpool_decorator_mode,
         )
         if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
-            # fail on windows os type for aks create
+            # fail on windows os type for ManagedCluster mode (aks create)
             with self.assertRaises(InvalidArgumentValueError):
                 ctx_4.get_os_type()
         else:
@@ -540,7 +547,7 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
             self.agentpool_decorator_mode,
         )
         if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
-            # fail on windows os type for aks create
+            # fail on windows os type for ManagedCluster mode (aks create)
             with self.assertRaises(InvalidArgumentValueError):
                 ctx_4.get_node_vm_size()
         else:
@@ -593,6 +600,48 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         agentpool = self.create_initialized_agentpool_instance(node_taints=[])
         ctx_1.attach_agentpool(agentpool)
         self.assertEqual(ctx_1.get_node_taints(), [])
+
+    def common_get_priority(self):
+        # default
+        ctx_1 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"priority": None}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_1.get_priority(), CONST_SCALE_SET_PRIORITY_REGULAR)
+        agentpool = self.create_initialized_agentpool_instance(scale_set_priority="test_priority")
+        ctx_1.attach_agentpool(agentpool)
+        self.assertEqual(ctx_1.get_priority(), "test_priority")
+
+    def common_get_eviction_policy(self):
+        # default
+        ctx_1 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"eviction_policy": None}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_1.get_eviction_policy(), CONST_SPOT_EVICTION_POLICY_DELETE)
+        agentpool = self.create_initialized_agentpool_instance(scale_set_eviction_policy="test_eviction_policy")
+        ctx_1.attach_agentpool(agentpool)
+        self.assertEqual(ctx_1.get_eviction_policy(), "test_eviction_policy")
+
+    def common_get_spot_max_price(self):
+        # default
+        ctx_1 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"spot_max_price": None}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_1.get_spot_max_price(), -1)
+        agentpool = self.create_initialized_agentpool_instance(spot_max_price=1.2345)
+        ctx_1.attach_agentpool(agentpool)
+        self.assertEqual(ctx_1.get_spot_max_price(), 1.2345)
 
     def common_get_aks_custom_headers(self):
         # default
@@ -659,7 +708,45 @@ class AKSAgentPoolContextStandaloneModeTestCase(AKSAgentPoolContextCommonTestCas
         self.common_get_cluster_name()
 
     def test_get_nodepool_name(self):
-        self.common_get_nodepool_name()
+        # default
+        ctx_1 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"nodepool_name": "test_nodepool_name"}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        with patch(
+            "azure.cli.command_modules.acs.agentpool_decorator.cf_agent_pools",
+            return_value=Mock(),
+        ):
+            self.assertEqual(ctx_1.get_nodepool_name(), "test_nodepool_name")
+
+        agentpool_1 = self.create_initialized_agentpool_instance("test_ap_name")
+        ctx_1.attach_agentpool(agentpool_1)
+        with patch(
+            "azure.cli.command_modules.acs.agentpool_decorator.cf_agent_pools",
+            return_value=Mock(),
+        ):
+            self.assertEqual(ctx_1.get_nodepool_name(), "test_ap_name")
+
+        # custom
+        ctx_2 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"nodepool_name": "test_nodepool_name"}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        mock_agentpool_instance_1 = Mock()
+        mock_agentpool_instance_1.name = "test_nodepool_name"
+        mock_agentpool_operations = Mock(list=Mock(return_value=[mock_agentpool_instance_1]))
+        # fail on existing nodepool name
+        with patch(
+            "azure.cli.command_modules.acs.agentpool_decorator.cf_agent_pools",
+            mock_agentpool_operations,
+        ), self.assertRaises(InvalidArgumentValueError):
+            ctx_2.get_nodepool_name()
 
     def test_get_max_surge(self):
         self.common_get_max_surge()
@@ -701,6 +788,15 @@ class AKSAgentPoolContextStandaloneModeTestCase(AKSAgentPoolContextCommonTestCas
 
     def test_get_node_taints(self):
         self.common_get_node_taints()
+
+    def test_get_priority(self):
+        self.common_get_priority()
+
+    def test_get_eviction_policy(self):
+        self.common_get_eviction_policy()
+
+    def test_get_spot_max_price(self):
+        self.common_get_spot_max_price()
 
     def test_get_aks_custom_headers(self):
         self.common_get_aks_custom_headers()
@@ -733,7 +829,19 @@ class AKSAgentPoolContextManagedClusterModeTestCase(AKSAgentPoolContextCommonTes
         self.common_get_cluster_name()
 
     def test_get_nodepool_name(self):
-        self.common_get_nodepool_name()
+        # default
+        ctx_1 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_1.get_nodepool_name(), "nodepool1")
+
+        agentpool_1 = self.create_initialized_agentpool_instance("test_ap_name")
+        ctx_1.attach_agentpool(agentpool_1)
+        self.assertEqual(ctx_1.get_nodepool_name(), "test_ap_name")
 
     def test_get_max_surge(self):
         self.common_get_max_surge()
@@ -776,6 +884,15 @@ class AKSAgentPoolContextManagedClusterModeTestCase(AKSAgentPoolContextCommonTes
     def test_get_node_taints(self):
         self.common_get_node_taints()
 
+    def test_get_priority(self):
+        self.common_get_priority()
+
+    def test_get_eviction_policy(self):
+        self.common_get_eviction_policy()
+
+    def test_get_spot_max_price(self):
+        self.common_get_spot_max_price()
+
     def test_get_aks_custom_headers(self):
         self.common_get_aks_custom_headers()
 
@@ -784,15 +901,58 @@ class AKSAgentPoolContextManagedClusterModeTestCase(AKSAgentPoolContextCommonTes
 
 
 class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
-    def create_initialized_agentpool_instance(self, nodepool_name="nodepool1", **kwargs):
-        # helper function to create a properly initialized agentpool instance
+    def _remove_defaults_in_agentpool(self, agentpool: AgentPool) -> AgentPool:
+        """Internal function to remove values from properties with default values of the `agentpool` object.
+
+        Removing default values is to prevent getters from mistakenly overwriting user provided values with default
+        values in the object.
+
+        :return: the AgentPool object
+        """
+        self.defaults_in_agentpool = {}
+        for attr_name, attr_value in vars(agentpool).items():
+            if not attr_name.startswith("_") and attr_name != "name" and attr_value is not None:
+                self.defaults_in_agentpool[attr_name] = attr_value
+                setattr(agentpool, attr_name, None)
+        return agentpool
+
+    def _restore_defaults_in_agentpool(self, agentpool: AgentPool) -> AgentPool:
+        """Internal function to restore values of properties with default values of the `agentpool` object.
+
+        Restoring default values is to keep the content of the request sent by cli consistent with that before the
+        refactoring.
+
+        :return: the AgentPool object
+        """
+        for key, value in self.defaults_in_agentpool.items():
+            if getattr(agentpool, key, None) is None:
+                setattr(agentpool, key, value)
+        return agentpool
+
+    def create_initialized_agentpool_instance(
+        self, nodepool_name="nodepool1", remove_defaults=True, restore_defaults=True, **kwargs
+    ) -> AgentPool:
+        """Helper function to create a properly initialized agentpool instance.
+
+        :return: the AgentPool object
+        """
         if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
-            agentpool = self.models.UnifiedAgentPoolModel(name=nodepool_name, os_type=None)
+            agentpool = self.models.UnifiedAgentPoolModel(name=nodepool_name)
         else:
-            agentpool = self.models.UnifiedAgentPoolModel(os_type=None)
+            agentpool = self.models.UnifiedAgentPoolModel()
             agentpool.name = nodepool_name
+
+        # remove defaults
+        if remove_defaults:
+            self._remove_defaults_in_agentpool(agentpool)
+
+        # set properties
         for key, value in kwargs.items():
             setattr(agentpool, key, value)
+
+        # resote defaults
+        if restore_defaults:
+            self._restore_defaults_in_agentpool(agentpool)
         return agentpool
 
     def common_ensure_agentpool(self):
@@ -811,6 +971,12 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
         with self.assertRaises(CLIInternalError):
             dec_1._ensure_agentpool(agentpool_1)
 
+    def common_remove_defaults_in_agentpool(self):
+        pass
+
+    def common_restore_defaults_in_agentpool(self):
+        pass
+
     def common_init_agentpool(self):
         dec_1 = AKSAgentPoolAddDecorator(
             self.cmd,
@@ -824,7 +990,9 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
             return_value=Mock(),
         ):
             dec_agentpool_1 = dec_1.init_agentpool()
-        ground_truth_agentpool_1 = self.create_initialized_agentpool_instance("test_nodepool_name")
+        ground_truth_agentpool_1 = self.create_initialized_agentpool_instance(
+            "test_nodepool_name", remove_defaults=False, restore_defaults=False
+        )
         self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
         self.assertEqual(dec_agentpool_1, dec_1.context.agentpool)
 
@@ -839,9 +1007,10 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
         # fail on passing the wrong agentpool object
         with self.assertRaises(CLIInternalError):
             dec_1.set_up_upgrade_settings(None)
-        agentpool_1 = self.create_initialized_agentpool_instance()
+        agentpool_1 = self.create_initialized_agentpool_instance(restore_defaults=False)
         dec_1.context.attach_agentpool(agentpool_1)
         dec_agentpool_1 = dec_1.set_up_upgrade_settings(agentpool_1)
+        dec_agentpool_1 = self._restore_defaults_in_agentpool(dec_agentpool_1)
         ground_truth_upgrade_settings_1 = self.models.AgentPoolUpgradeSettings(max_surge="test_max_surge")
         ground_truth_agentpool_1 = self.create_initialized_agentpool_instance(
             upgrade_settings=ground_truth_upgrade_settings_1
@@ -862,9 +1031,10 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
         # fail on passing the wrong agentpool object
         with self.assertRaises(CLIInternalError):
             dec_1.set_up_osdisk_properties(None)
-        agentpool_1 = self.create_initialized_agentpool_instance()
+        agentpool_1 = self.create_initialized_agentpool_instance(restore_defaults=False)
         dec_1.context.attach_agentpool(agentpool_1)
         dec_agentpool_1 = dec_1.set_up_osdisk_properties(agentpool_1)
+        dec_agentpool_1 = self._restore_defaults_in_agentpool(dec_agentpool_1)
 
         ground_truth_agentpool_1 = self.create_initialized_agentpool_instance(
             os_disk_size_gb=123, os_disk_type="test_node_osdisk_type"
@@ -887,9 +1057,10 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
         # fail on passing the wrong agentpool object
         with self.assertRaises(CLIInternalError):
             dec_1.set_up_auto_scaler_properties(None)
-        agentpool_1 = self.create_initialized_agentpool_instance()
+        agentpool_1 = self.create_initialized_agentpool_instance(restore_defaults=False)
         dec_1.context.attach_agentpool(agentpool_1)
         dec_agentpool_1 = dec_1.set_up_auto_scaler_properties(agentpool_1)
+        dec_agentpool_1 = self._restore_defaults_in_agentpool(dec_agentpool_1)
 
         ground_truth_agentpool_1 = self.create_initialized_agentpool_instance(
             count=3, enable_auto_scaling=True, min_count=1, max_count=5
@@ -907,9 +1078,10 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
         # fail on passing the wrong agentpool object
         with self.assertRaises(CLIInternalError):
             dec_1.set_up_snapshot_properties(None)
-        agentpool_1 = self.create_initialized_agentpool_instance()
+        agentpool_1 = self.create_initialized_agentpool_instance(restore_defaults=False)
         dec_1.context.attach_agentpool(agentpool_1)
         dec_agentpool_1 = dec_1.set_up_snapshot_properties(agentpool_1)
+        dec_agentpool_1 = self._restore_defaults_in_agentpool(dec_agentpool_1)
         ground_truth_agentpool_1 = self.create_initialized_agentpool_instance(
             orchestrator_version="test_kubernetes_version",
             os_type=CONST_DEFAULT_NODE_OS_TYPE,
@@ -934,7 +1106,7 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
         # fail on passing the wrong agentpool object
         with self.assertRaises(CLIInternalError):
             dec_2.set_up_snapshot_properties(None)
-        agentpool_2 = self.create_initialized_agentpool_instance()
+        agentpool_2 = self.create_initialized_agentpool_instance(restore_defaults=False)
         dec_2.context.attach_agentpool(agentpool_2)
         mock_snapshot_2 = Mock(
             kubernetes_version="test_kubernetes_version",
@@ -947,6 +1119,7 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
             return_value=mock_snapshot_2,
         ):
             dec_agentpool_2 = dec_2.set_up_snapshot_properties(agentpool_2)
+        dec_agentpool_2 = self._restore_defaults_in_agentpool(dec_agentpool_2)
         ground_truth_creation_data_2 = dec_2.models.CreationData(source_resource_id="test_snapshot_id")
         ground_truth_agentpool_2 = self.create_initialized_agentpool_instance(
             orchestrator_version="test_kubernetes_version",
@@ -974,9 +1147,10 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
         # fail on passing the wrong agentpool object
         with self.assertRaises(CLIInternalError):
             dec_1.set_up_label_tag_taint(None)
-        agentpool_1 = self.create_initialized_agentpool_instance()
+        agentpool_1 = self.create_initialized_agentpool_instance(restore_defaults=False)
         dec_1.context.attach_agentpool(agentpool_1)
         dec_agentpool_1 = dec_1.set_up_label_tag_taint(agentpool_1)
+        dec_agentpool_1 = self._restore_defaults_in_agentpool(dec_agentpool_1)
 
         if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
             ground_truth_mc_agentpool_1 = self.create_initialized_agentpool_instance(
@@ -990,6 +1164,62 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
                 node_labels="test_labels", tags="test_tags", node_taints=["abc=xyz:123", "123=456:abc"]
             )
             self.assertEqual(dec_agentpool_1, ground_truth_sd_agentpool_1)
+
+    def common_set_up_priority_properties(self):
+        # default
+        dec_1 = AKSAgentPoolAddDecorator(
+            self.cmd,
+            self.client,
+            {
+                "priority": CONST_SCALE_SET_PRIORITY_REGULAR,
+                "eviction_policy": CONST_SPOT_EVICTION_POLICY_DELETE,
+                "spot_max_price": float("nan"),
+            },
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        # fail on passing the wrong agentpool object
+        with self.assertRaises(CLIInternalError):
+            dec_1.set_up_priority_properties(None)
+        agentpool_1 = self.create_initialized_agentpool_instance(restore_defaults=False)
+        dec_1.context.attach_agentpool(agentpool_1)
+        dec_agentpool_1 = dec_1.set_up_priority_properties(agentpool_1)
+        dec_agentpool_1 = self._restore_defaults_in_agentpool(dec_agentpool_1)
+
+        ground_truth_agentpool_1 = self.create_initialized_agentpool_instance(
+            scale_set_priority=CONST_SCALE_SET_PRIORITY_REGULAR,
+        )
+        self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
+
+        # custom
+        dec_2 = AKSAgentPoolAddDecorator(
+            self.cmd,
+            self.client,
+            {
+                "priority": CONST_SCALE_SET_PRIORITY_SPOT,
+                "eviction_policy": CONST_SPOT_EVICTION_POLICY_DEALLOCATE,
+                "spot_max_price": float(1.2345),
+            },
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        agentpool_2 = self.create_initialized_agentpool_instance(restore_defaults=False)
+        dec_2.context.attach_agentpool(agentpool_2)
+        dec_agentpool_2 = dec_2.set_up_priority_properties(agentpool_2)
+        dec_agentpool_2 = self._restore_defaults_in_agentpool(dec_agentpool_2)
+
+        ground_truth_agentpool_2 = self.create_initialized_agentpool_instance(
+            scale_set_priority=CONST_SCALE_SET_PRIORITY_SPOT,
+            scale_set_eviction_policy=CONST_SPOT_EVICTION_POLICY_DEALLOCATE,
+            spot_max_price=float(1.2345),
+        )
+        self.assertEqual(dec_agentpool_2, ground_truth_agentpool_2)
+
+    def common_set_up_node_network_properties(self):
+        pass
+
+    def common_set_up_vm_properties(self):
+        pass
 
 
 class AKSAgentPoolAddDecoratorStandaloneModeTestCase(AKSAgentPoolAddDecoratorCommonTestCase):
@@ -1021,6 +1251,15 @@ class AKSAgentPoolAddDecoratorStandaloneModeTestCase(AKSAgentPoolAddDecoratorCom
 
     def test_set_up_label_tag_taint(self):
         self.common_set_up_label_tag_taint()
+
+    def test_set_up_priority_properties(self):
+        self.common_set_up_priority_properties()
+
+    def test_set_up_node_network_properties(self):
+        self.common_set_up_node_network_properties()
+
+    def test_set_up_vm_properties(self):
+        self.common_set_up_vm_properties()
 
     def test_construct_default_agentpool(self):
         import inspect
@@ -1066,20 +1305,24 @@ class AKSAgentPoolAddDecoratorStandaloneModeTestCase(AKSAgentPoolAddDecoratorCom
         ):
             dec_agentpool_1 = dec_1.construct_default_agentpool_profile()
 
-        upgrade_settings_1 = self.models.AgentPoolUpgradeSettings()
-        agentpool_1 = self.create_initialized_agentpool_instance(
-            upgrade_settings=upgrade_settings_1, count=3, enable_auto_scaling=False, os_disk_size_gb=0
+        ground_truth_upgrade_settings_1 = self.models.AgentPoolUpgradeSettings()
+        ground_truth_agentpool_1 = self.create_initialized_agentpool_instance(
+            nodepool_name="test_nodepool_name",
+            upgrade_settings=ground_truth_upgrade_settings_1,
+            count=3,
+            enable_auto_scaling=False,
+            os_disk_size_gb=0,
+            os_type=CONST_DEFAULT_NODE_OS_TYPE,
+            vm_size=CONST_DEFAULT_NODE_VM_SIZE,
+            type_properties_type=CONST_VIRTUAL_MACHINE_SCALE_SETS,
+            enable_encryption_at_host=False,
+            enable_ultra_ssd=False,
+            enable_fips=False,
+            enable_node_public_ip=False,
+            mode=CONST_NODEPOOL_MODE_USER,
+            scale_down_mode=CONST_SCALE_DOWN_MODE_DELETE,
         )
-        agentpool_1.name = "test_nodepool_name"
-        agentpool_1.os_type = CONST_DEFAULT_NODE_OS_TYPE
-        agentpool_1.vm_size = CONST_DEFAULT_NODE_VM_SIZE
-        agentpool_1.type_properties_type = CONST_VIRTUAL_MACHINE_SCALE_SETS
-        agentpool_1.enable_encryption_at_host = False
-        agentpool_1.enable_ultra_ssd = False
-        agentpool_1.enable_fips = False
-        agentpool_1.mode = CONST_NODEPOOL_MODE_USER
-        agentpool_1.scale_down_mode = CONST_SCALE_DOWN_MODE_DELETE
-        self.assertEqual(dec_agentpool_1, agentpool_1)
+        self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
 
         dec_1.context.raw_param.print_usage_statistics()
 
@@ -1113,6 +1356,15 @@ class AKSAgentPoolAddDecoratorManagedClusterModeTestCase(AKSAgentPoolAddDecorato
 
     def test_set_up_label_tag_taint(self):
         self.common_set_up_label_tag_taint()
+
+    def test_set_up_priority_properties(self):
+        self.common_set_up_priority_properties()
+
+    def test_set_up_node_network_properties(self):
+        self.common_set_up_node_network_properties()
+
+    def test_set_up_vm_properties(self):
+        self.common_set_up_vm_properties()
 
     def test_construct_default_agentpool(self):
         import inspect
@@ -1159,20 +1411,24 @@ class AKSAgentPoolAddDecoratorManagedClusterModeTestCase(AKSAgentPoolAddDecorato
             dec_agentpool_1 = dec_1.construct_default_agentpool_profile()
 
         upgrade_settings_1 = self.models.AgentPoolUpgradeSettings()
-        agentpool_1 = self.create_initialized_agentpool_instance(
-            upgrade_settings=upgrade_settings_1, count=3, enable_auto_scaling=False, os_disk_size_gb=0
+        ground_truth_agentpool_1 = self.create_initialized_agentpool_instance(
+            nodepool_name="nodepool1",
+            upgrade_settings=upgrade_settings_1,
+            count=3,
+            enable_auto_scaling=False,
+            os_disk_size_gb=0,
+            orchestrator_version="",
+            os_type=CONST_DEFAULT_NODE_OS_TYPE,
+            vm_size=CONST_DEFAULT_NODE_VM_SIZE,
+            type=CONST_VIRTUAL_MACHINE_SCALE_SETS,
+            enable_encryption_at_host=False,
+            enable_ultra_ssd=False,
+            enable_fips=False,
+            enable_node_public_ip=False,
+            mode=CONST_NODEPOOL_MODE_SYSTEM,
+            scale_down_mode=CONST_SCALE_DOWN_MODE_DELETE,
         )
-        agentpool_1.name = "nodepool1"
-        agentpool_1.orchestrator_version = ""
-        agentpool_1.os_type = CONST_DEFAULT_NODE_OS_TYPE
-        agentpool_1.vm_size = CONST_DEFAULT_NODE_VM_SIZE
-        agentpool_1.type = CONST_VIRTUAL_MACHINE_SCALE_SETS
-        agentpool_1.enable_encryption_at_host = False
-        agentpool_1.enable_ultra_ssd = False
-        agentpool_1.enable_fips = False
-        agentpool_1.mode = CONST_NODEPOOL_MODE_SYSTEM
-        agentpool_1.scale_down_mode = CONST_SCALE_DOWN_MODE_DELETE
-        self.assertEqual(dec_agentpool_1, agentpool_1)
+        self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
 
         dec_1.context.raw_param.print_usage_statistics()
 

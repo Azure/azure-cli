@@ -16,6 +16,8 @@ from azure.cli.command_modules.acs._consts import (
     CONST_NODEPOOL_MODE_SYSTEM,
     CONST_NODEPOOL_MODE_USER,
     CONST_SCALE_DOWN_MODE_DELETE,
+    CONST_SCALE_SET_PRIORITY_REGULAR,
+    CONST_SPOT_EVICTION_POLICY_DELETE,
     AgentPoolDecoratorMode,
     DecoratorMode,
 )
@@ -212,15 +214,16 @@ class AKSAgentPoolContext(BaseAKSContext):
         # this parameter does not need dynamic completion
         # validation
         if enable_validation:
-            instances = cf_agent_pools.list(self.get_resource_group_name, self.get_cluster_name)
-            for agentpool_profile in instances:
-                if agentpool_profile.name == nodepool_name:
-                    raise InvalidArgumentValueError(
-                        "Node pool {} already exists, please try a different name, "
-                        "use 'aks nodepool list' to get current list of node pool".format(
-                            nodepool_name
+            if self.agentpool_decorator_mode == AgentPoolDecoratorMode.STANDALONE:
+                instances = cf_agent_pools.list(self.get_resource_group_name, self.get_cluster_name)
+                for agentpool_profile in instances:
+                    if agentpool_profile.name == nodepool_name:
+                        raise InvalidArgumentValueError(
+                            "Node pool {} already exists, please try a different name, "
+                            "use 'aks nodepool list' to get current list of node pool".format(
+                                nodepool_name
+                            )
                         )
-                    )
         return nodepool_name
 
     def get_nodepool_name(self) -> str:
@@ -621,12 +624,12 @@ class AKSAgentPoolContext(BaseAKSContext):
         return node_taints
 
     def get_priority(self) -> str:
-        """Obtain the value of priority.
+        """Obtain the value of priority, default value is CONST_SCALE_SET_PRIORITY_REGULAR.
 
         :return: string
         """
         # read the original value passed by the command
-        priority = self.raw_param.get("priority")
+        priority = self.raw_param.get("priority", CONST_SCALE_SET_PRIORITY_REGULAR)
         # try to read the property value corresponding to the parameter from the `agentpool` object
         if self.agentpool and self.agentpool.scale_set_priority is not None:
             priority = self.agentpool.scale_set_priority
@@ -636,12 +639,12 @@ class AKSAgentPoolContext(BaseAKSContext):
         return priority
 
     def get_eviction_policy(self) -> str:
-        """Obtain the value of eviction_policy.
+        """Obtain the value of eviction_policy, default value is CONST_SPOT_EVICTION_POLICY_DELETE.
 
         :return: string
         """
         # read the original value passed by the command
-        eviction_policy = self.raw_param.get("eviction_policy")
+        eviction_policy = self.raw_param.get("eviction_policy", CONST_SPOT_EVICTION_POLICY_DELETE)
         # try to read the property value corresponding to the parameter from the `agentpool` object
         if self.agentpool and self.agentpool.scale_set_eviction_policy is not None:
             eviction_policy = self.agentpool.scale_set_eviction_policy
@@ -651,12 +654,12 @@ class AKSAgentPoolContext(BaseAKSContext):
         return eviction_policy
 
     def get_spot_max_price(self) -> float:
-        """Obtain the value of spot_max_price.
+        """Obtain the value of spot_max_price, default value is float('nan').
 
         :return: float
         """
         # read the original value passed by the command
-        spot_max_price = self.raw_param.get("spot_max_price")
+        spot_max_price = self.raw_param.get("spot_max_price", float('nan'))
         # normalize
         if isnan(spot_max_price):
             spot_max_price = -1
@@ -947,6 +950,40 @@ class AKSAgentPoolAddDecorator:
                 "is not the same as the `agentpool` in the context."
             )
 
+    def _remove_defaults_in_agentpool(self, agentpool: AgentPool) -> AgentPool:
+        """Internal function to remove values from properties with default values of the `agentpool` object.
+
+        Removing default values is to prevent getters from mistakenly overwriting user provided values with default
+        values in the object.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        defaults_in_agentpool = {}
+        for attr_name, attr_value in vars(agentpool).items():
+            if not attr_name.startswith("_") and attr_name != "name" and attr_value is not None:
+                defaults_in_agentpool[attr_name] = attr_value
+                setattr(agentpool, attr_name, None)
+        self.context.set_intermediate("defaults_in_agentpool", defaults_in_agentpool, overwrite_exists=True)
+        return agentpool
+
+    def _restore_defaults_in_agentpool(self, agentpool: AgentPool) -> AgentPool:
+        """Internal function to restore values of properties with default values of the `agentpool` object.
+
+        Restoring default values is to keep the content of the request sent by cli consistent with that before the
+        refactoring.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        defaults_in_agentpool = self.context.get_intermediate("defaults_in_agentpool", {})
+        for key, value in defaults_in_agentpool.items():
+            if getattr(agentpool, key, None) is None:
+                setattr(agentpool, key, value)
+        return agentpool
+
     def init_agentpool(self) -> AgentPool:
         """Initialize an AgentPool object with name and attach it to internal context.
 
@@ -954,11 +991,11 @@ class AKSAgentPoolAddDecorator:
         """
         if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
             # Note: As a required property, name must be provided during initialization.
-            agentpool = self.models.UnifiedAgentPoolModel(name=self.context.get_nodepool_name(), os_type=None)
+            agentpool = self.models.UnifiedAgentPoolModel(name=self.context.get_nodepool_name())
         else:
             # Note: As a read only property, name would be ignored when serialized.
             # Set the name property by explicit assignment, otherwise it will be ignored by initialization.
-            agentpool = self.models.UnifiedAgentPoolModel(os_type=None)
+            agentpool = self.models.UnifiedAgentPoolModel()
             agentpool.name = self.context.get_nodepool_name()
 
         # attach agentpool to AKSAgentPoolContext
@@ -1103,6 +1140,8 @@ class AKSAgentPoolAddDecorator:
         """
         # initialize the AgentPool object
         agentpool = self.init_agentpool()
+        # remove defaults
+        self._remove_defaults_in_agentpool(agentpool)
         # set up upgrade settings
         agentpool = self.set_up_upgrade_settings(agentpool)
         # set up osdisk properties
@@ -1113,8 +1152,14 @@ class AKSAgentPoolAddDecorator:
         agentpool = self.set_up_snapshot_properties(agentpool)
         # set up label, tag, taint
         agentpool = self.set_up_label_tag_taint(agentpool)
+        # set up priority properties
+        agentpool = self.set_up_priority_properties(agentpool)
+        # set up node network properties
+        agentpool = self.set_up_node_network_properties(agentpool)
         # set up misc vm properties
         agentpool = self.set_up_vm_properties(agentpool)
+        # restore defaults
+        agentpool = self._restore_defaults_in_agentpool(agentpool)
         return agentpool
 
     # pylint: disable=protected-access
