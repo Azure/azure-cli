@@ -8,28 +8,30 @@ import unittest
 from unittest.mock import Mock, patch
 
 from azure.cli.command_modules.acs._consts import (
+    CONST_AVAILABILITY_SET,
     CONST_DEFAULT_NODE_OS_TYPE,
     CONST_DEFAULT_NODE_VM_SIZE,
     CONST_DEFAULT_WINDOWS_NODE_VM_SIZE,
     CONST_NODEPOOL_MODE_SYSTEM,
     CONST_NODEPOOL_MODE_USER,
+    CONST_SCALE_DOWN_MODE_DEALLOCATE,
     CONST_SCALE_DOWN_MODE_DELETE,
-    CONST_VIRTUAL_MACHINE_SCALE_SETS,
     CONST_SCALE_SET_PRIORITY_REGULAR,
     CONST_SCALE_SET_PRIORITY_SPOT,
-    CONST_SPOT_EVICTION_POLICY_DELETE,
     CONST_SPOT_EVICTION_POLICY_DEALLOCATE,
+    CONST_SPOT_EVICTION_POLICY_DELETE,
+    CONST_VIRTUAL_MACHINE_SCALE_SETS,
     AgentPoolDecoratorMode,
     DecoratorEarlyExitException,
     DecoratorMode,
 )
 from azure.cli.command_modules.acs.agentpool_decorator import (
+    AgentPool,
     AKSAgentPoolAddDecorator,
     AKSAgentPoolContext,
     AKSAgentPoolModels,
     AKSAgentPoolParamDict,
     AKSAgentPoolUpdateDecorator,
-    AgentPool,
 )
 from azure.cli.command_modules.acs.tests.latest.mocks import MockCLI, MockClient, MockCmd
 from azure.cli.core.azclierror import (
@@ -647,29 +649,29 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         # default
         ctx_1 = AKSAgentPoolContext(
             self.cmd,
-            AKSAgentPoolParamDict({"vnet_subnet_id": "test_vnet_subnet_id"}),
+            AKSAgentPoolParamDict({"vnet_subnet_id": None}),
             self.models,
             DecoratorMode.CREATE,
             self.agentpool_decorator_mode,
         )
-        self.assertEqual(ctx_1.get_vnet_subnet_id(), "test_vnet_subnet_id")
-        agentpool = self.create_initialized_agentpool_instance(vnet_subnet_id="")
+        self.assertEqual(ctx_1.get_vnet_subnet_id(), None)
+        agentpool = self.create_initialized_agentpool_instance(vnet_subnet_id="test_vnet_subnet_id")
         ctx_1.attach_agentpool(agentpool)
-        self.assertEqual(ctx_1.get_vnet_subnet_id(), "")
+        self.assertEqual(ctx_1.get_vnet_subnet_id(), "test_vnet_subnet_id")
 
     def common_get_pod_subnet_id(self):
         # default
         ctx_1 = AKSAgentPoolContext(
             self.cmd,
-            AKSAgentPoolParamDict({"pod_subnet_id": "test_pod_subnet_id"}),
+            AKSAgentPoolParamDict({"pod_subnet_id": None}),
             self.models,
             DecoratorMode.CREATE,
             self.agentpool_decorator_mode,
         )
-        self.assertEqual(ctx_1.get_pod_subnet_id(), "test_pod_subnet_id")
-        agentpool = self.create_initialized_agentpool_instance(pod_subnet_id="")
+        self.assertEqual(ctx_1.get_pod_subnet_id(), None)
+        agentpool = self.create_initialized_agentpool_instance(pod_subnet_id="test_pod_subnet_id")
         ctx_1.attach_agentpool(agentpool)
-        self.assertEqual(ctx_1.get_pod_subnet_id(), "")
+        self.assertEqual(ctx_1.get_pod_subnet_id(), "test_pod_subnet_id")
 
     def common_get_enable_node_public_ip(self):
         # default
@@ -689,42 +691,164 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         # default
         ctx_1 = AKSAgentPoolContext(
             self.cmd,
-            AKSAgentPoolParamDict({"node_public_ip_prefix_id": "test_node_public_ip_prefix_id"}),
+            AKSAgentPoolParamDict({"node_public_ip_prefix_id": None}),
             self.models,
             DecoratorMode.CREATE,
             self.agentpool_decorator_mode,
         )
-        self.assertEqual(ctx_1.get_node_public_ip_prefix_id(), "test_node_public_ip_prefix_id")
-        agentpool = self.create_initialized_agentpool_instance(node_public_ip_prefix_id="")
+        self.assertEqual(ctx_1.get_node_public_ip_prefix_id(), None)
+        agentpool = self.create_initialized_agentpool_instance(node_public_ip_prefix_id="test_node_public_ip_prefix_id")
         ctx_1.attach_agentpool(agentpool)
-        self.assertEqual(ctx_1.get_node_public_ip_prefix_id(), "")
+        self.assertEqual(ctx_1.get_node_public_ip_prefix_id(), "test_node_public_ip_prefix_id")
 
     def common_get_vm_set_type(self):
-        pass
+        # default
+        ctx_1 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"vm_set_type": None}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_1.get_vm_set_type(), CONST_VIRTUAL_MACHINE_SCALE_SETS)
+        agentpool = self.create_initialized_agentpool_instance(
+            type=CONST_AVAILABILITY_SET, type_properties_type=CONST_AVAILABILITY_SET
+        )
+        ctx_1.attach_agentpool(agentpool)
+        self.assertEqual(ctx_1.get_vm_set_type(), CONST_AVAILABILITY_SET)
 
     def common_get_ppg(self):
-        pass
+        # default
+        ctx_1 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"ppg": None}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_1.get_ppg(), None)
+        agentpool = self.create_initialized_agentpool_instance(
+            proximity_placement_group_id="test_proximity_placement_group_id"
+        )
+        ctx_1.attach_agentpool(agentpool)
+        self.assertEqual(ctx_1.get_ppg(), "test_proximity_placement_group_id")
 
     def common_get_enable_encryption_at_host(self):
-        pass
+        # default
+        ctx_1 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"enable_encryption_at_host": False}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_1.get_enable_encryption_at_host(), False)
+        agentpool = self.create_initialized_agentpool_instance(enable_encryption_at_host=True)
+        ctx_1.attach_agentpool(agentpool)
+        self.assertEqual(ctx_1.get_enable_encryption_at_host(), True)
 
     def common_get_enable_ultra_ssd(self):
-        pass
+        # default
+        ctx_1 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"enable_ultra_ssd": False}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_1.get_enable_ultra_ssd(), False)
+        agentpool = self.create_initialized_agentpool_instance(enable_ultra_ssd=True)
+        ctx_1.attach_agentpool(agentpool)
+        self.assertEqual(ctx_1.get_enable_ultra_ssd(), True)
 
     def common_get_enable_fips_image(self):
-        pass
+        # default
+        ctx_1 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"enable_fips_image": False}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_1.get_enable_fips_image(), False)
+        agentpool = self.create_initialized_agentpool_instance(enable_fips=True)
+        ctx_1.attach_agentpool(agentpool)
+        self.assertEqual(ctx_1.get_enable_fips_image(), True)
 
     def common_get_zones(self):
-        pass
+        # default
+        ctx_1 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"zones": None}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_1.get_zones(), None)
+        agentpool = self.create_initialized_agentpool_instance(availability_zones=[1, 2, 3])
+        ctx_1.attach_agentpool(agentpool)
+        self.assertEqual(ctx_1.get_zones(), [1, 2, 3])
 
     def common_get_max_pods(self):
-        pass
+        # default
+        ctx_1 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"max_pods": 0}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_1.get_max_pods(), None)
+        agentpool = self.create_initialized_agentpool_instance(max_pods=110)
+        ctx_1.attach_agentpool(agentpool)
+        self.assertEqual(ctx_1.get_max_pods(), 110)
 
     def common_get_mode(self):
-        pass
+        # default
+        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+            ctx_1 = AKSAgentPoolContext(
+                self.cmd,
+                AKSAgentPoolParamDict({"mode": None}),
+                self.models,
+                DecoratorMode.CREATE,
+                self.agentpool_decorator_mode,
+            )
+            self.assertEqual(ctx_1.get_mode(), CONST_NODEPOOL_MODE_SYSTEM)
+        else:
+            ctx_1 = AKSAgentPoolContext(
+                self.cmd,
+                AKSAgentPoolParamDict({"mode": CONST_NODEPOOL_MODE_USER}),
+                self.models,
+                DecoratorMode.CREATE,
+                self.agentpool_decorator_mode,
+            )
+            self.assertEqual(ctx_1.get_mode(), CONST_NODEPOOL_MODE_USER)
+        agentpool = self.create_initialized_agentpool_instance(mode="test_mode")
+        ctx_1.attach_agentpool(agentpool)
+        self.assertEqual(ctx_1.get_mode(), "test_mode")
 
     def common_get_scale_down_mode(self):
-        pass
+        # default
+        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+            ctx_1 = AKSAgentPoolContext(
+                self.cmd,
+                AKSAgentPoolParamDict({"scale_down_mode": None}),
+                self.models,
+                DecoratorMode.CREATE,
+                self.agentpool_decorator_mode,
+            )
+        else:
+            ctx_1 = AKSAgentPoolContext(
+                self.cmd,
+                AKSAgentPoolParamDict({"scale_down_mode": CONST_SCALE_DOWN_MODE_DELETE}),
+                self.models,
+                DecoratorMode.CREATE,
+                self.agentpool_decorator_mode,
+            )
+        self.assertEqual(ctx_1.get_scale_down_mode(), CONST_SCALE_DOWN_MODE_DELETE)
+        agentpool = self.create_initialized_agentpool_instance(scale_down_mode=CONST_SCALE_DOWN_MODE_DEALLOCATE)
+        ctx_1.attach_agentpool(agentpool)
+        self.assertEqual(ctx_1.get_scale_down_mode(), CONST_SCALE_DOWN_MODE_DEALLOCATE)
 
     def common_get_aks_custom_headers(self):
         # default
@@ -1346,33 +1470,7 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
             self.assertEqual(dec_agentpool_1, ground_truth_sd_agentpool_1)
 
     def common_set_up_priority_properties(self):
-        # default
         dec_1 = AKSAgentPoolAddDecorator(
-            self.cmd,
-            self.client,
-            {
-                "priority": CONST_SCALE_SET_PRIORITY_REGULAR,
-                "eviction_policy": CONST_SPOT_EVICTION_POLICY_DELETE,
-                "spot_max_price": float("nan"),
-            },
-            self.resource_type,
-            self.agentpool_decorator_mode,
-        )
-        # fail on passing the wrong agentpool object
-        with self.assertRaises(CLIInternalError):
-            dec_1.set_up_priority_properties(None)
-        agentpool_1 = self.create_initialized_agentpool_instance(restore_defaults=False)
-        dec_1.context.attach_agentpool(agentpool_1)
-        dec_agentpool_1 = dec_1.set_up_priority_properties(agentpool_1)
-        dec_agentpool_1 = self._restore_defaults_in_agentpool(dec_agentpool_1)
-
-        ground_truth_agentpool_1 = self.create_initialized_agentpool_instance(
-            scale_set_priority=CONST_SCALE_SET_PRIORITY_REGULAR,
-        )
-        self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
-
-        # custom
-        dec_2 = AKSAgentPoolAddDecorator(
             self.cmd,
             self.client,
             {
@@ -1383,23 +1481,82 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
             self.resource_type,
             self.agentpool_decorator_mode,
         )
-        agentpool_2 = self.create_initialized_agentpool_instance(restore_defaults=False)
-        dec_2.context.attach_agentpool(agentpool_2)
-        dec_agentpool_2 = dec_2.set_up_priority_properties(agentpool_2)
-        dec_agentpool_2 = self._restore_defaults_in_agentpool(dec_agentpool_2)
+        agentpool_1 = self.create_initialized_agentpool_instance(restore_defaults=False)
+        dec_1.context.attach_agentpool(agentpool_1)
+        dec_agentpool_1 = dec_1.set_up_priority_properties(agentpool_1)
+        dec_agentpool_1 = self._restore_defaults_in_agentpool(dec_agentpool_1)
 
-        ground_truth_agentpool_2 = self.create_initialized_agentpool_instance(
+        ground_truth_agentpool_1 = self.create_initialized_agentpool_instance(
             scale_set_priority=CONST_SCALE_SET_PRIORITY_SPOT,
             scale_set_eviction_policy=CONST_SPOT_EVICTION_POLICY_DEALLOCATE,
             spot_max_price=float(1.2345),
         )
-        self.assertEqual(dec_agentpool_2, ground_truth_agentpool_2)
+        self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
 
     def common_set_up_node_network_properties(self):
-        pass
+        dec_1 = AKSAgentPoolAddDecorator(
+            self.cmd,
+            self.client,
+            {
+                "vnet_subnet_id": "test_vnet_subnet_id",
+                "pod_subnet_id": "test_pod_subnet_id",
+                "enable_node_public_ip": True,
+                "node_public_ip_prefix_id": "test_node_public_ip_prefix_id",
+            },
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        agentpool_1 = self.create_initialized_agentpool_instance(restore_defaults=False)
+        dec_1.context.attach_agentpool(agentpool_1)
+        dec_agentpool_1 = dec_1.set_up_node_network_properties(agentpool_1)
+        dec_agentpool_1 = self._restore_defaults_in_agentpool(dec_agentpool_1)
+
+        ground_truth_agentpool_1 = self.create_initialized_agentpool_instance(
+            vnet_subnet_id="test_vnet_subnet_id",
+            pod_subnet_id="test_pod_subnet_id",
+            enable_node_public_ip=True,
+            node_public_ip_prefix_id="test_node_public_ip_prefix_id",
+        )
+        self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
 
     def common_set_up_vm_properties(self):
-        pass
+        dec_1 = AKSAgentPoolAddDecorator(
+            self.cmd,
+            self.client,
+            {
+                "vm_set_type": "test_vm_set_type",
+                "ppg": "test_ppg",
+                "enable_encryption_at_host": True,
+                "enable_ultra_ssd": True,
+                "enable_fips_image": True,
+                "zones": [1, 2, 3],
+                "max_pods": 110,
+                "mode": "test_mode",
+                "scale_down_mode": "test_scale_down_mode",
+            },
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        agentpool_1 = self.create_initialized_agentpool_instance(restore_defaults=False)
+        dec_1.context.attach_agentpool(agentpool_1)
+        dec_agentpool_1 = dec_1.set_up_vm_properties(agentpool_1)
+        dec_agentpool_1 = self._restore_defaults_in_agentpool(dec_agentpool_1)
+
+        ground_truth_agentpool_1 = self.create_initialized_agentpool_instance(
+            proximity_placement_group_id="test_ppg",
+            enable_encryption_at_host=True,
+            enable_ultra_ssd=True,
+            enable_fips=True,
+            availability_zones=[1, 2, 3],
+            max_pods=110,
+            mode="test_mode",
+            scale_down_mode="test_scale_down_mode",
+        )
+        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+            ground_truth_agentpool_1.type = "test_vm_set_type"
+        else:
+            ground_truth_agentpool_1.type_properties_type = "test_vm_set_type"
+        self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
 
 
 class AKSAgentPoolAddDecoratorStandaloneModeTestCase(AKSAgentPoolAddDecoratorCommonTestCase):
