@@ -177,7 +177,6 @@ class AzureNetAppFilesSnapshotServiceScenarioTest(ScenarioTest):
         snapshot_from_id = self.cmd("az netappfiles snapshot show --ids %s" % snapshot['id']).get_output_in_json()
         assert snapshot_from_id['name'] == account_name + '/' + pool_name + '/' + volume_name + '/' + snapshot_name
 
-    @serial_test()
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_snapshot_', additional_tags={'owner': 'cli_test'})
     def test_restore_file_returns_not_found(self):
         # create volume
