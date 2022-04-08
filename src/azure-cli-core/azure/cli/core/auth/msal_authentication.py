@@ -14,7 +14,7 @@ from knack.log import get_logger
 from knack.util import CLIError
 from msal import PublicClientApplication, ConfidentialClientApplication
 
-from .util import check_result, AccessToken
+from .util import check_result, build_sdk_access_token
 
 # OAuth 2.0 client credentials flow parameter
 # https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-client-creds-grant-flow
@@ -87,7 +87,7 @@ class UserCredential(PublicClientApplication):
             # launch browser, but show the error message and `az login` command instead.
             else:
                 raise
-        return _build_sdk_access_token(result)
+        return build_sdk_access_token(result)
 
 
 class ServicePrincipalCredential(ConfidentialClientApplication):
@@ -130,21 +130,4 @@ class ServicePrincipalCredential(ConfidentialClientApplication):
         if not result:
             result = self.acquire_token_for_client(scopes, **kwargs)
         check_result(result)
-        return _build_sdk_access_token(result)
-
-
-def _build_sdk_access_token(token_entry):
-    import time
-    request_time = int(time.time())
-
-    # MSAL token entry sample:
-    # {
-    #     'access_token': 'eyJ0eXAiOiJKV...',
-    #     'token_type': 'Bearer',
-    #     'expires_in': 1618
-    # }
-
-    # Importing azure.core.credentials.AccessToken is expensive.
-    # This can slow down commands that doesn't need azure.core, like `az account get-access-token`.
-    # So We define our own AccessToken.
-    return AccessToken(token_entry["access_token"], request_time + token_entry["expires_in"])
+        return build_sdk_access_token(result)

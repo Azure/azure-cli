@@ -7,6 +7,7 @@ import requests
 from knack.log import get_logger
 from msrestazure.azure_active_directory import MSIAuthentication
 
+from azure.cli.core.util import in_cloud_console
 from .util import _normalize_scopes, scopes_to_resource, AccessToken
 
 logger = get_logger(__name__)
@@ -18,9 +19,21 @@ class MSIAuthenticationWrapper(MSIAuthentication):
     def get_token(self, *scopes, **kwargs):  # pylint:disable=unused-argument
         logger.debug("MSIAuthenticationWrapper.get_token invoked by Track 2 SDK with scopes=%s", scopes)
 
+        # In Cloud Shell, we use
+        # - msrestazure to get access token
+        # - MSAL to get VM SSH certificate
         if 'data' in kwargs:
-            from azure.cli.core.azclierror import AuthenticationError
-            raise AuthenticationError("VM SSH currently doesn't support managed identity or Cloud Shell.")
+            if in_cloud_console():
+                import msal
+                from .util import check_result, build_sdk_access_token
+                app = msal.PublicClientApplication(None)
+                result = app.acquire_token_silent(scopes, account=msal.application.CLOUD_SHELL_ACCOUNT,
+                                                  data=kwargs['data'])
+                check_result(result)
+                return build_sdk_access_token(result)
+            else:
+                from azure.cli.core.azclierror import AuthenticationError
+                raise AuthenticationError("VM SSH currently doesn't support managed identity.")
 
         resource = scopes_to_resource(_normalize_scopes(scopes))
         if resource:
@@ -55,7 +68,7 @@ class MSIAuthenticationWrapper(MSIAuthentication):
         import traceback
         from azure.cli.core.azclierror import AzureConnectionError, AzureResponseError
         try:
-            super(MSIAuthenticationWrapper, self).set_token()
+            super().set_token()
         except requests.exceptions.ConnectionError as err:
             logger.debug('throw requests.exceptions.ConnectionError when doing MSIAuthentication: \n%s',
                          traceback.format_exc())

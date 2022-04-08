@@ -139,6 +139,23 @@ def check_result(result, **kwargs):
     return None
 
 
+def build_sdk_access_token(token_entry):
+    import time
+    request_time = int(time.time())
+
+    # MSAL token entry sample:
+    # {
+    #     'access_token': 'eyJ0eXAiOiJKV...',
+    #     'token_type': 'Bearer',
+    #     'expires_in': 1618
+    # }
+
+    # Importing azure.core.credentials.AccessToken is expensive.
+    # This can slow down commands that doesn't need azure.core, like `az account get-access-token`.
+    # So We define our own AccessToken.
+    return AccessToken(token_entry["access_token"], request_time + token_entry["expires_in"])
+
+
 def decode_access_token(access_token):
     # Decode the access token. We can do the same with https://jwt.ms
     from msal.oauth2cli.oidc import decode_part
