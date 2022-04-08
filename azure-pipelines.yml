@@ -816,8 +816,6 @@ jobs:
 
 - job: BuildDebPackages
   displayName: Build Deb Packages
-
-  dependsOn: BuildPythonWheel
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
     vmImage: 'ubuntu-20.04'
@@ -840,6 +838,10 @@ jobs:
         # 21.10
         deb_system: ubuntu
         distro: impish
+      Jammy:
+        # 22.04
+        deb_system: ubuntu
+        distro: jammy
 
       # https://wiki.debian.org/DebianReleases
       Stretch:
@@ -855,12 +857,6 @@ jobs:
         deb_system: debian
         distro: bullseye
   steps:
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Build Artifacts'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
-      artifactName: pypi
-
   - task: Bash@3
     displayName: 'Build $(deb_system) $(distro) Package'
     inputs:
@@ -883,7 +879,6 @@ jobs:
 
 - job: TestDebPackages
   displayName: Test Deb Packages
-
   dependsOn:
    - BuildDebPackages
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
@@ -892,9 +887,15 @@ jobs:
       Focal:
         deb_system: ubuntu
         distro: focal
+      Jammy:
+        deb_system: ubuntu
+        distro: jammy
       Buster:
         deb_system: debian
         distro: buster
+      Bullseye:
+        deb_system: debian
+        distro: bullseye
   pool:
     vmImage: 'ubuntu-20.04'
   steps:
