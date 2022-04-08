@@ -149,13 +149,16 @@ If you want to get the latest build from the `dev` branch, you can use our "edge
 
 You can download the latest builds by following the links below:
 
-| Package  | Link                                       |
-| :-------: | :----------------------------------------- |
-| MSI   | https://aka.ms/InstallAzureCliWindowsEdge  |
-| Homebrew Formula | https://aka.ms/InstallAzureCliHomebrewEdge |
-| Ubuntu Xenial Deb | https://aka.ms/InstallAzureCliXenialEdge |
-| Ubuntu Bionic Deb | https://aka.ms/InstallAzureCliBionicEdge |
-| RPM | https://aka.ms/InstallAzureCliRpmEdge |
+|      Package      | Link                                       |
+|:-----------------:|:-------------------------------------------|
+|        MSI        | https://aka.ms/InstallAzureCliWindowsEdge  |
+| Homebrew Formula  | https://aka.ms/InstallAzureCliHomebrewEdge |
+| Ubuntu Xenial Deb | https://aka.ms/InstallAzureCliXenialEdge   |
+| Ubuntu Bionic Deb | https://aka.ms/InstallAzureCliBionicEdge   |
+| Ubuntu Focal Deb  | https://aka.ms/InstallAzureCliFocalEdge    |
+| Ubuntu Impish Deb | https://aka.ms/InstallAzureCliImpishEdge   |
+| Ubuntu Jammy Deb  | https://aka.ms/InstallAzureCliJammyEdge    |
+|        RPM        | https://aka.ms/InstallAzureCliRpmEdge      |
 
 You can easily install the latest Homebrew edge build with the following command:
 
