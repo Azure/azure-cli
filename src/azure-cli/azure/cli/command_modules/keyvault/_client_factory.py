@@ -221,7 +221,7 @@ def data_plane_azure_keyvault_key_client(cli_ctx, command_args):
     command_args.pop('hsm_name', None)
     command_args.pop('vault_base_url', None)
     command_args.pop('identifier', None)
-    api_version = '7.3-preview' if not is_azure_stack_profile(cmd=None, cli_ctx=cli_ctx) else '2016-10-01'
+    api_version = '7.3' if not is_azure_stack_profile(cmd=None, cli_ctx=cli_ctx) else '2016-10-01'
     return KeyClient(
         vault_url=vault_url, credential=credential, api_version=api_version or version)
 

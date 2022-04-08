@@ -518,6 +518,11 @@ def load_arguments(self, _):
                      'Release policies are mutable by default.')
         c.extra('tags', tags_type)
 
+    with self.argument_context('keyvault key rotation-policy') as c:
+        c.argument('key_name', options_list=['--name', '-n'], id_part='child_name_1',
+                   required=False, completer=get_keyvault_name_completion_list('key'),
+                   help='Name of the key. Required if --id is not specified.')
+
     with self.argument_context('keyvault key rotation-policy update') as c:
         c.argument('value', type=file_type, completer=FilesCompleter(),
                    help='The rotation policy file definition as JSON, or a path to a file containing JSON policy definition.')
