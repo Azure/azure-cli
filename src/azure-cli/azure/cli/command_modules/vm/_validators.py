@@ -1571,7 +1571,7 @@ def process_vmss_create_namespace(cmd, namespace):
         if namespace.tags is not None:
             validate_tags(namespace)
         _validate_location(cmd, namespace, namespace.zones, namespace.vm_sku)
-        # validate_edge_zone(cmd, namespace)
+        validate_edge_zone(cmd, namespace)
         if namespace.application_security_groups is not None:
             validate_asg_names_or_ids(cmd, namespace)
 
