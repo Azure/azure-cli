@@ -686,6 +686,21 @@ class AKSAgentPoolContext(BaseAKSContext):
         # this parameter does not need validation
         return vnet_subnet_id
 
+    def get_pod_subnet_id(self) -> Union[str, None]:
+        """Obtain the value of pod_subnet_id.
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        pod_subnet_id = self.raw_param.get("pod_subnet_id")
+        # try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.agentpool and self.agentpool.pod_subnet_id is not None:
+            pod_subnet_id = self.agentpool.pod_subnet_id
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return pod_subnet_id
+
     def get_enable_node_public_ip(self) -> bool:
         """Obtain the value of enable_node_public_ip.
 
@@ -1103,6 +1118,7 @@ class AKSAgentPoolAddDecorator:
         self._ensure_agentpool(agentpool)
 
         agentpool.vnet_subnet_id = self.context.get_vnet_subnet_id()
+        agentpool.pod_subnet_id = self.context.get_pod_subnet_id()
         agentpool.enable_node_public_ip = self.context.get_enable_node_public_ip()
         agentpool.node_public_ip_prefix_id = self.context.get_node_public_ip_prefix_id()
         return agentpool
