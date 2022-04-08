@@ -39,7 +39,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     t_base_blob_service = self.get_sdk('blob.baseblobservice#BaseBlobService')
     t_file_service = self.get_sdk('file#FileService')
-    t_queue_service = self.get_sdk('queue#QueueService')
+    t_queue_service = self.get_sdk('_queue_service_client#QueueServiceClient',
+                                   resource_type=ResourceType.DATA_STORAGE_QUEUE)
     t_table_service = get_table_data_type(self.cli_ctx, 'table', 'TableService')
 
     storage_account_type = CLIArgumentType(options_list='--storage-account',
@@ -1765,24 +1766,29 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.extra('services', validator=get_char_options_validator('bfqt', 'services'), required=True,
                 options_list='--services')
 
+    for item in ['stats', 'exists', 'metadata show', 'metadata update']:
+        with self.argument_context('storage queue {}'.format(item)) as c:
+            c.extra('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
+
+    for item in ['exists', 'generate-sas', 'create', 'delete', 'metadata show', 'metadata update']:
+        with self.argument_context('storage queue {}'.format(item)) as c:
+            c.extra('queue_name', queue_name_type, options_list=('--name', '-n'), required=True)
+
     with self.argument_context('storage queue generate-sas') as c:
         from .completers import get_storage_acl_name_completion_list
 
-        t_queue_permissions = self.get_sdk('queue.models#QueuePermissions')
+        t_queue_permissions = self.get_sdk('_models#QueueSasPermissions', resource_type=ResourceType.DATA_STORAGE_QUEUE)
 
         c.register_sas_arguments()
 
-        c.argument('id', options_list='--policy-name',
+        c.argument('policy_id', options_list='--policy-name',
                    help='The name of a stored access policy within the share\'s ACL.',
-                   completer=get_storage_acl_name_completion_list(t_queue_permissions, 'queue_name', 'get_queue_acl'))
+                   completer=get_storage_acl_name_completion_list(t_queue_service, 'container_name',
+                                                                  'get_queue_access_policy'))
         c.argument('permission', options_list='--permissions',
                    help=sas_help.format(get_permission_help_string(t_queue_permissions)),
                    validator=get_permission_validator(t_queue_permissions))
         c.ignore('sas_token')
-        c.ignore('auth_mode')
-
-    with self.argument_context('storage queue') as c:
-        c.argument('queue_name', queue_name_type, options_list=('--name', '-n'))
 
     with self.argument_context('storage queue list') as c:
         c.argument('include_metadata', help='Specify that queue metadata be returned in the response.')
@@ -1795,16 +1801,24 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.extra('timeout', help='Request timeout in seconds. Apply to each call to the service.', type=int)
 
     with self.argument_context('storage queue create') as c:
-        c.argument('queue_name', queue_name_type, options_list=('--name', '-n'), completer=None)
+        c.argument('fail_on_exist', help='Specify whether to throw an exception if the queue already exists.')
+
+    with self.argument_context('storage queue delete') as c:
+        c.argument('fail_not_exist', help='Specify whether to throw an exception if the queue doesn\'t exist.')
+
+    for item in ['create', 'delete', 'show', 'list', 'update']:
+        with self.argument_context('storage queue policy {}'.format(item)) as c:
+            c.extra('queue_name', queue_name_type, required=True)
 
     with self.argument_context('storage queue policy') as c:
         from .completers import get_storage_acl_name_completion_list
 
-        t_queue_permissions = self.get_sdk('queue.models#QueuePermissions')
+        t_queue_permissions = self.get_sdk('_models#QueueSasPermissions', resource_type=ResourceType.DATA_STORAGE_QUEUE)
 
         c.argument('container_name', queue_name_type)
         c.argument('policy_name', options_list=('--name', '-n'), help='The stored access policy name.',
-                   completer=get_storage_acl_name_completion_list(t_queue_service, 'container_name', 'get_queue_acl'))
+                   completer=get_storage_acl_name_completion_list(t_queue_service, 'container_name',
+                                                                  'get_queue_access_policy'))
 
         help_str = 'Allowed values: {}. Can be combined'.format(get_permission_help_string(t_queue_permissions))
         c.argument('permission', options_list='--permissions', help=help_str,
@@ -1815,10 +1829,55 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('expiry', type=get_datetime_type(True), help='expiration UTC datetime in (Y-m-d\'T\'H:M:S\'Z\')')
         c.ignore('auth_mode')
 
-    with self.argument_context('storage message') as c:
-        c.argument('queue_name', queue_name_type)
-        c.argument('message_id', options_list='--id')
-        c.argument('content', type=str, help='Message content, up to 64KB in size.')
+    from six import u as unicode_string
+    for item in ['get', 'peek', 'put', 'update', 'delete', 'clear']:
+        with self.argument_context('storage message {}'.format(item)) as c:
+            c.extra('queue_name', queue_name_type, required=True)
+            c.extra('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
+
+    for item in ['update', 'delete']:
+        with self.argument_context('storage message {}'.format(item)) as c:
+            c.argument('message', options_list='--id', required=True,
+                       help='The message id identifying the message to delete.')
+            c.argument('pop_receipt', required=True,
+                       help='A valid pop receipt value returned from an earlier call to '
+                            'the :func:`~get_messages` or :func:`~update_message` operation.')
+
+    with self.argument_context('storage message put') as c:
+        c.argument('content', type=unicode_string, help='Message content, up to 64KB in size.')
+        c.extra('time_to_live', type=int,
+                help='Specify the time-to-live interval for the message, in seconds. '
+                     'The time-to-live may be any positive number or -1 for infinity. '
+                     'If this parameter is omitted, the default time-to-live is 7 days.')
+        c.extra('visibility_timeout', type=int,
+                help='If not specified, the default value is 0. Specify the new visibility timeout value, '
+                     'in seconds, relative to server time. The value must be larger than or equal to 0, '
+                     'and cannot be larger than 7 days. The visibility timeout of a message cannot be set '
+                     'to a value later than the expiry time. visibility_timeout should be set to a value '
+                     'smaller than the time_to_live value.')
+
+    with self.argument_context('storage message get') as c:
+        c.extra('messages_per_page', options_list='--num-messages', type=int, default=1,
+                help='A nonzero integer value that specifies the number of messages to retrieve from the queue, '
+                     'up to a maximum of 32. If fewer are visible, the visible messages are returned. '
+                     'By default, a single message is retrieved from the queue with this operation.')
+        c.extra('visibility_timeout', type=int,
+                help='Specify the new visibility timeout value, in seconds, relative to server time. '
+                     'The new value must be larger than or equal to 1 second, and cannot be larger than 7 days. '
+                     'The visibility timeout of a message can be set to a value later than the expiry time.')
+
+    with self.argument_context('storage message peek') as c:
+        c.extra('max_messages', options_list='--num-messages', type=int,
+                help='A nonzero integer value that specifies the number of messages to peek from the queue, up to '
+                     'a maximum of 32. By default, a single message is peeked from the queue with this operation.')
+
+    with self.argument_context('storage message update') as c:
+        c.argument('content', type=unicode_string, help='Message content, up to 64KB in size.')
+        c.extra('visibility_timeout', type=int,
+                help='If not specified, the default value is 0. Specify the new visibility timeout value, in seconds, '
+                     'relative to server time. The new value must be larger than or equal to 0, and cannot be larger '
+                     'than 7 days. The visibility timeout of a message cannot be set to a value later than the expiry '
+                     'time. A message can be updated until it has been deleted or has expired.')
 
     with self.argument_context('storage remove') as c:
         from .completers import file_path_completer
