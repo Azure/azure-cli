@@ -378,7 +378,7 @@ def create_afd_route(cmd,
                      origin_group: str,
                      forwarding_protocol: ForwardingProtocol,
                      enabled_state: EnabledState = EnabledState.ENABLED.value,
-                     link_to_default_domain: LinkToDefaultDomain = None,
+                     link_to_default_domain: LinkToDefaultDomain = LinkToDefaultDomain.DISABLED.value,
                      is_compression_enabled: bool = False,
                      content_types_to_compress: List[str] = None,
                      enable_caching: bool = False,
@@ -444,8 +444,7 @@ def create_afd_route(cmd,
                                    rule_sets=formatted_rule_sets,
                                    enabled_state=enabled_state,
                                    cache_configuration=cache_configuration,
-                                   link_to_default_domain=LinkToDefaultDomain.enabled if link_to_default_domain else
-                                   LinkToDefaultDomain.disabled))
+                                   link_to_default_domain=link_to_default_domain))
 
 
 # pylint: disable=too-many-locals
