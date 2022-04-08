@@ -159,6 +159,7 @@ You can download the latest builds by following the links below:
 | Ubuntu Impish Deb | https://aka.ms/InstallAzureCliImpishEdge   |
 | Ubuntu Jammy Deb  | https://aka.ms/InstallAzureCliJammyEdge    |
 |        RPM        | https://aka.ms/InstallAzureCliRpmEdge      |
+|      RPM el8      | https://aka.ms/InstallAzureCliRpmEl8Edge   |
 
 You can easily install the latest Homebrew edge build with the following command:
 
