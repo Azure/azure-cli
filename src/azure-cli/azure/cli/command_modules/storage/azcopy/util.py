@@ -77,7 +77,7 @@ class AzCopy:
         args_hides = args.copy()
         for i in range(len(args_hides)):
             if args_hides[i].find('sig') > 0:
-                args_hides[i] = args_hides[i][0:args_hides[i].index('sig')+4]
+                args_hides[i] = args_hides[i][0:args_hides[i].index('sig') + 4]
         logger.warning("Azcopy command: %s", args_hides)
         env_kwargs = {}
         if self.creds and self.creds.token_info:
