@@ -5,15 +5,13 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import logging
 import subprocess
 import sys
-from pprint import pprint
 from azdev.utilities import get_path_table
 
+logger = logging.getLogger(__name__)
 
-# part, part_idx = 1, 1
-# parallel, para_idx = 8, 1
-# profile = 'latest'
 part, part_idx = [int(i) for i in sys.argv[1].split('_')]
 parallel, para_idx = [int(i) for i in sys.argv[2].split('_')]
 profile = sys.argv[3]
@@ -118,13 +116,23 @@ class AutomaticScheduling(object):
         self.modules = {**result['mod'], **result['core']}
 
     def append_new_modules(self):
+        # if add a new module, use average test time
         avg_cost = int(sum(jobs.values()) / len(jobs.values()))
         for module in self.modules:
             if module not in jobs.keys():
                 jobs[module] = avg_cost
         self.jobs = sorted(jobs.items(), key=lambda item: -item[1])
 
+    def get_part_modules(self):
+        part_modules = []
+        self.part_idx -= 1
+        while self.part_idx < len(self.jobs):
+            part_modules.append(self.jobs[self.part_idx])
+            self.part_idx += self.part
+        return part_modules
+
     def get_worker(self):
+        # distribute jobs equally to each worker
         for idx, worker in enumerate(self.works):
             tmp_time = sum(worker.values()) if sum(worker.values()) else 0
             if idx == 0:
@@ -135,26 +143,16 @@ class AutomaticScheduling(object):
                 worker_num = idx
         return worker_num
 
-    def get_part_modules(self):
-        part_modules = []
-        self.part_idx -= 1
-        while self.part_idx < len(self.jobs):
-            part_modules.append(self.jobs[self.part_idx])
-            self.part_idx += self.part
-        # pprint(part_modules)
-        # pprint(len(part_modules))
-        return part_modules
-
     def get_paraller_modules(self, part_modules):
         for k, v in part_modules:
             idx = self.get_worker()
             self.works[idx][k] = v
-        pprint(self.works)
-        pprint(self.para_idx)
+        # para_idx: 1~n, python list index: 0~n-1
         self.para_idx -= 1
         return self.works[self.para_idx]
 
     def run_paraller_modules(self, paraller_modules):
+        # divide all modules into parallel or serial execution
         series = []
         parallers = []
         for k, v in paraller_modules.items():
@@ -164,11 +162,11 @@ class AutomaticScheduling(object):
                 parallers.append(k)
         if series:
             cmd = ['azdev', 'test', '--no-exitfirst', '--verbose', '--series'] + series + ['--profile', f'{profile}', '--pytest-args', '"--durations=0"']
-            print(cmd)
+            logger.warning(cmd)
             subprocess.call(cmd)
         if parallers:
             cmd = ['azdev', 'test', '--no-exitfirst', '--verbose'] + parallers + ['--profile', f'{profile}', '--pytest-args', '"--durations=0"']
-            print(cmd)
+            logger.warning(cmd)
             subprocess.call(cmd)
 
 
