@@ -223,8 +223,9 @@ def data_plane_azure_keyvault_key_client(cli_ctx, command_args):
 
     vault_url, credential, version = _prepare_data_plane_azure_keyvault_client(
         cli_ctx, command_args, ResourceType.DATA_KEYVAULT_KEYS)
-    is_hsm = command_args.get('hsm_name', None) or \
-             (command_args.get('identifier', None) is not None and 'managedhsm' in command_args.get('identifier'))
+    is_hsm = command_args.get('hsm_name', None) is not None
+    if not is_hsm and command_args.get('identifier', None) is not None:
+        is_hsm = 'managedhsm' in command_args.get('identifier')
     if is_hsm and ('key rotate' in cli_ctx.data['command'] or 'key rotation-policy' in cli_ctx.data['command']):
         logger.warning("This command is in preview and under development.")
     command_args.pop('hsm_name', None)
