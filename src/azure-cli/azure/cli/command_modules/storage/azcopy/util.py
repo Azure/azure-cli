@@ -75,7 +75,9 @@ class AzCopy:
     def run_command(self, args):
         args = [self.executable] + args
         args_hides = args.copy()
-        args_hides[2] = args_hides[2][0:args_hides[2].index('?')]
+        for i in range(len(args_hides)):
+            if args_hides[i].find('?') > 0:
+                args_hides[i] = args_hides[i][0:args_hides[i].index('?')]
         logger.warning("Azcopy command: %s", args_hides)
         env_kwargs = {}
         if self.creds and self.creds.token_info:
