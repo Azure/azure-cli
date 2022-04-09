@@ -166,8 +166,6 @@ def keyvault_data_plane_factory(cli_ctx, *_):
         verify = not should_disable_connection_verify()
         client._client.config.connection.verify = verify
     else:
-        from knack.log import get_logger
-        logger = get_logger(__name__)
         logger.info('Could not find the configuration object to turn off the verification if needed')
 
     return client
@@ -193,8 +191,6 @@ def keyvault_private_data_plane_factory_v7_2_preview(cli_ctx, _):
         verify = not should_disable_connection_verify()
         client._client.config.connection.verify = verify
     else:
-        from knack.log import get_logger
-        logger = get_logger(__name__)
         logger.info('Could not find the configuration object to turn off the verification if needed')
 
     return client
