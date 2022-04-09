@@ -162,11 +162,11 @@ class AutomaticScheduling(object):
                 parallers.append(k)
         if series:
             cmd = ['azdev', 'test', '--no-exitfirst', '--verbose', '--series'] + series + ['--profile', f'{profile}', '--pytest-args', '"--durations=0"']
-            logger.warning(cmd)
+            logger.info(cmd)
             subprocess.call(cmd)
         if parallers:
             cmd = ['azdev', 'test', '--no-exitfirst', '--verbose'] + parallers + ['--profile', f'{profile}', '--pytest-args', '"--durations=0"']
-            logger.warning(cmd)
+            logger.info(cmd)
             subprocess.call(cmd)
 
 
