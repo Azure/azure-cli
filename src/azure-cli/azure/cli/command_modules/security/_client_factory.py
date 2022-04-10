@@ -20,6 +20,10 @@ def cf_security_alerts(cli_ctx, _):
     return _cf_security(cli_ctx).alerts
 
 
+def cf_security_alerts_suppression_rule(cli_ctx, _):
+    return _cf_security(cli_ctx).alerts_suppression_rules
+
+
 def cf_security_settings(cli_ctx, _):
     return _cf_security(cli_ctx).settings
 

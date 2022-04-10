@@ -25,6 +25,16 @@ location_arg_type = CLIArgumentType(options_list=('--location', '-l'), metavar='
 # Alerts
 alert_status_arg_type = CLIArgumentType(options_list=('--status'), metavar='STATUS', help='target status of the alert. possible values are "dismiss" and "activate"')
 
+
+# Alerts Suppression Rules
+suppression_rule_name_arg_type = CLIArgumentType(options_list=('--rule-name'), metavar='RULENAME', help='The unique name of the alerts suppression rule.')
+suppression_alert_type_arg_type = CLIArgumentType(options_list=('--alert-type'), metavar='ALERTTYPE', help='Type of the alert to automatically suppress. For all alert types, use "*".')
+suppression_reason_arg_type = CLIArgumentType(options_list=('--reason'), metavar='REASON', help='The reason for dismissing the alert.')
+suppression_expiration_date_utc_arg_type = CLIArgumentType(options_list=('--expiration-date-utc'), metavar='EXPIRATIONDATEUTC', help='Expiration date of the rule, if value is not provided or provided as null this field will default to the maximum allowed expiration date.')
+suppression_state_arg_type = CLIArgumentType(options_list=('--state'), metavar='STATE', help='Possible states of the rule. Possible values are "Enabled" and "Disabled".')
+suppression_comment_arg_type = CLIArgumentType(options_list=('--comment'), metavar='COMMENT', help='Any comment regarding the rule.')
+suppression_all_of_arg_type = CLIArgumentType(options_list=('--all-of'), metavar='ALLOF', help='The suppression conditions. Should be provided in a json array format.')
+
 # Atp
 storage_account_arg_type = CLIArgumentType(options_list=('--storage-account'), metavar='NAME', help='Name of an existing storage account.')
 
@@ -94,6 +104,7 @@ adaptive_application_controls_group_name = CLIArgumentType(option_list=('--group
 # pylint: disable=too-many-branches
 def load_arguments(self, _):
     for scope in ['alert',
+                  'alerts-suppression-rule',
                   'atp',
                   'va sql',
                   'task',
@@ -182,6 +193,42 @@ def load_arguments(self, _):
                 'status',
                 validator=validate_alert_status,
                 arg_type=alert_status_arg_type)
+
+    for scope in ['alerts-suppression-rule update']:
+        with self.argument_context('security {}'.format(scope)) as c:
+            c.argument(
+                'rule_name',
+                arg_type=suppression_rule_name_arg_type)
+            c.argument(
+                'alert_type',
+                arg_type=suppression_alert_type_arg_type)
+            c.argument(
+                'reason',
+                arg_type=suppression_reason_arg_type)
+            c.argument(
+                'expiration_date_utc',
+                arg_type=suppression_expiration_date_utc_arg_type)
+            c.argument(
+                'state',
+                arg_type=suppression_state_arg_type)
+            c.argument(
+                'comment',
+                arg_type=suppression_comment_arg_type)
+            c.argument(
+                'all_of',
+                arg_type=suppression_all_of_arg_type)
+
+    for scope in ['alerts-suppression-rule show']:
+        with self.argument_context('security {}'.format(scope)) as c:
+            c.argument(
+                'rule_name',
+                arg_type=suppression_rule_name_arg_type)
+
+    for scope in ['alerts-suppression-rule delete']:
+        with self.argument_context('security {}'.format(scope)) as c:
+            c.argument(
+                'rule_name',
+                arg_type=suppression_rule_name_arg_type)
 
     for scope in ['auto-provisioning-setting update']:
         with self.argument_context('security {}'.format(scope)) as c:

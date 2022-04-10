@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import json
 from azure.mgmt.security.models import (SecurityContact,
                                         AutoProvisioningSetting,
                                         SecurityAssessment,
@@ -17,10 +18,13 @@ from azure.mgmt.security.models import (SecurityContact,
                                         RuleResultsInput,
                                         RulesResultsInput,
                                         AlertSyncSettings,
-                                        DataExportSettings)
+                                        DataExportSettings,
+                                        AlertsSuppressionRule,
+                                        SuppressionAlertsScope,
+                                        ScopeElement)
 from azure.mgmt.security.models._security_center_enums import Enum69
 from azure.cli.core.commands.client_factory import get_subscription_id
-from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
+from azure.cli.core.azclierror import (MutuallyExclusiveArgumentError, RequiredArgumentMissingError)
 from msrestazure.tools import resource_id
 from msrestazure.azure_exceptions import CloudError
 
@@ -99,6 +103,60 @@ def update_security_alert(client, location, resource_name, status, resource_grou
             client.update_subscription_level_state_to_activate(resource_name)
         if status == "Resolve":
             client.update_subscription_level_state_to_resolve(resource_name)
+
+# --------------------------------------------------------------------------------------------
+# Security Alerts Suppression Rule
+# --------------------------------------------------------------------------------------------
+
+
+def list_security_alerts_suppression_rule(client):
+
+    return client.list()
+
+
+def show_security_alerts_suppression_rule(client, rule_name):
+
+    return client.get(alerts_suppression_rule_name=rule_name)
+
+
+def delete_security_alerts_suppression_rule(client, rule_name):
+
+    return client.delete(alerts_suppression_rule_name=rule_name)
+
+
+def update_security_alerts_suppression_rule(client,
+                                             rule_name,
+                                             alert_type,
+                                             reason,
+                                             state,
+                                             expiration_date_utc=None,
+                                             comment=None,
+                                             all_of=None):
+
+    # converting all_of json to a valid SuppressionAlertsScope value
+    json_all_of = json.loads(all_of)
+    scope_element_array = []
+    for scope_element_item in json_all_of:
+        for scope_property in scope_element_item:
+            if scope_property.lower() == "field":
+                current_scope_property_field_value = scope_element_item[scope_property]
+            else:
+                current_additional_properties = {scope_property: scope_element_item[scope_property]}
+        if current_additional_properties is None or current_scope_property_field_value is None:
+            raise RequiredArgumentMissingError("all-of require both 'field' and either 'in' or 'contains' properties.")
+        current_scope = ScopeElement(additional_properties=current_additional_properties,
+                                     field=current_scope_property_field_value)
+        scope_element_array.append(current_scope)
+
+    suppression_scope = SuppressionAlertsScope(all_of=scope_element_array)
+    suppression_rule_data = AlertsSuppressionRule(name=rule_name,
+                                                  alert_type=alert_type,
+                                                  expiration_date_utc=expiration_date_utc,
+                                                  reason=reason, state=state,
+                                                  comment=comment,
+                                                  suppression_alerts_scope=suppression_scope)
+
+    return client.update(alerts_suppression_rule_name=rule_name, alerts_suppression_rule=suppression_rule_data)
 
 
 # --------------------------------------------------------------------------------------------

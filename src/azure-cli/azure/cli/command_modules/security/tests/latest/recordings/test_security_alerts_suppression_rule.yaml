@@ -1,0 +1,202 @@
+interactions:
+- request:
+    body: '{"properties": {"alertType": "Test", "reason": "Other", "state": "Enabled",
+      "comment": "Test comment", "suppressionAlertsScope": {"allOf": [{"contains":
+      "testContains", "field": "entities.host.dnsdomain"}]}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - security alerts-suppression-rule update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '208'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --rule-name --alert-type --reason --comment --all-of
+      User-Agent:
+      - AZURECLI/2.35.0 azsdk-python-mgmt-security/2.0.0b1 Python/3.10.4 (Windows-10-10.0.22000-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/azurecli-test000001?api-version=2019-01-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/azurecli-test000001","name":"azurecli-test000001","type":"Microsoft.Security/alertsSuppressionRules","properties":{"alertType":"Test","lastModifiedUTC":"2022-04-10T19:08:32.5276602Z","expirationDateUTC":"2022-10-10T19:08:32.5276602Z","state":"Enabled","reason":"Other","comment":"Test
+        comment","suppressionAlertsScope":{"allOf":[{"contains":"testContains","field":"entities.host.dnsdomain"}]}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '505'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sun, 10 Apr 2022 19:08:31 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1197'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - security alerts-suppression-rule show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --rule-name
+      User-Agent:
+      - AZURECLI/2.35.0 azsdk-python-mgmt-security/2.0.0b1 Python/3.10.4 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/azurecli-test000001?api-version=2019-01-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/azurecli-test000001","name":"azurecli-test000001","type":"Microsoft.Security/alertsSuppressionRules","properties":{"alertType":"Test","lastModifiedUTC":"2022-04-10T19:08:32.5276602Z","expirationDateUTC":"2022-10-10T19:08:32.5276602Z","state":"Enabled","reason":"Other","comment":"Test
+        comment","suppressionAlertsScope":{"allOf":[{"contains":"testContains","field":"entities.host.dnsdomain"}]}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '505'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sun, 10 Apr 2022 19:08:33 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '749'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - security alerts-suppression-rule list
+      Connection:
+      - keep-alive
+      User-Agent:
+      - AZURECLI/2.35.0 azsdk-python-mgmt-security/2.0.0b1 Python/3.10.4 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules?api-version=2019-01-01-preview
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/TalSuppressionRule","name":"TalSuppressionRule","type":"Microsoft.Security/alertsSuppressionRules","properties":{"alertType":"SCUBA_RULE_Security-related_process_termination_detected","lastModifiedUTC":"2022-04-06T07:19:35.6452258Z","expirationDateUTC":"2022-10-06T07:19:35.6452258Z","state":"Enabled","reason":"Noise","comment":"test"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/rulkename","name":"rulkename","type":"Microsoft.Security/alertsSuppressionRules","properties":{"alertType":"alerttype","lastModifiedUTC":"2020-10-19T18:52:16.2113442Z","expirationDateUTC":"2022-01-01T00:00:00.1234567Z","state":"Expired","reason":"FalsePositive","comment":"comment","suppressionAlertsScope":{"allOf":[{"contains":"ASC_AlertTest_662jfi039N.exe","field":"entities.process.commandline"}]}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/yifattest","name":"yifattest","type":"Microsoft.Security/alertsSuppressionRules","properties":{"alertType":"*","lastModifiedUTC":"2021-01-20T17:32:57.3304721Z","expirationDateUTC":"2021-07-19T17:32:18Z","state":"Expired","reason":"Noise","suppressionAlertsScope":{"allOf":[{"in":["test"],"field":"entities.dns.domainname"}]}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/dsa","name":"dsa","type":"Microsoft.Security/alertsSuppressionRules","properties":{"alertType":"*","lastModifiedUTC":"2021-01-27T10:03:26.5488279Z","expirationDateUTC":"2021-07-24T18:42:31Z","state":"Expired","reason":"SpecificEntityFalsePositive","comment":"a","suppressionAlertsScope":{"allOf":[{"in":["sad"],"field":"entities.account.name"}]}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/Name","name":"Name","type":"Microsoft.Security/alertsSuppressionRules","properties":{"alertType":"AlertType","lastModifiedUTC":"2022-04-07T08:51:15.5754094Z","expirationDateUTC":"2022-10-07T08:51:15.5754094Z","state":"Enabled","reason":"Noise","comment":"Comment"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/RuleName","name":"RuleName","type":"Microsoft.Security/alertsSuppressionRules","properties":{"alertType":"Test","lastModifiedUTC":"2022-04-09T11:16:28.5959018Z","expirationDateUTC":"2022-10-09T11:16:28.5959018Z","state":"Enabled","reason":"Other","comment":"Test
+        comment","suppressionAlertsScope":{"allOf":[{"contains":"testContains","field":"entities.host.dnsdomain"}]}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/azurecli-testom4fnsurl7t","name":"azurecli-testom4fnsurl7t","type":"Microsoft.Security/alertsSuppressionRules","properties":{"alertType":"Test","lastModifiedUTC":"2022-04-10T18:40:01.6313308Z","expirationDateUTC":"2022-10-10T18:40:01.6313308Z","state":"Enabled","reason":"Other","comment":"Test
+        comment","suppressionAlertsScope":{"allOf":[{"contains":"testContains","field":"entities.host.dnsdomain"}]}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/azurecli-testmv6pouqq2dr","name":"azurecli-testmv6pouqq2dr","type":"Microsoft.Security/alertsSuppressionRules","properties":{"alertType":"Test","lastModifiedUTC":"2022-04-10T18:41:17.9395007Z","expirationDateUTC":"2022-10-10T18:41:17.9395007Z","state":"Enabled","reason":"Other","comment":"Test
+        comment","suppressionAlertsScope":{"allOf":[{"contains":"testContains","field":"entities.host.dnsdomain"}]}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/azurecli-testaxzklu47bry","name":"azurecli-testaxzklu47bry","type":"Microsoft.Security/alertsSuppressionRules","properties":{"alertType":"Test","lastModifiedUTC":"2022-04-10T18:41:25.3714382Z","expirationDateUTC":"2022-10-10T18:41:25.3714382Z","state":"Enabled","reason":"Other","comment":"Test
+        comment","suppressionAlertsScope":{"allOf":[{"contains":"testContains","field":"entities.host.dnsdomain"}]}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/azurecli-test7wssyf3immt","name":"azurecli-test7wssyf3immt","type":"Microsoft.Security/alertsSuppressionRules","properties":{"alertType":"Test","lastModifiedUTC":"2022-04-10T18:42:33.2199918Z","expirationDateUTC":"2022-10-10T18:42:33.2199918Z","state":"Enabled","reason":"Other","comment":"Test
+        comment","suppressionAlertsScope":{"allOf":[{"contains":"testContains","field":"entities.host.dnsdomain"}]}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/azurecli-testntpt6hiajza","name":"azurecli-testntpt6hiajza","type":"Microsoft.Security/alertsSuppressionRules","properties":{"alertType":"Test","lastModifiedUTC":"2022-04-10T18:42:41.647353Z","expirationDateUTC":"2022-10-10T18:42:41.647353Z","state":"Enabled","reason":"Other","comment":"Test
+        comment","suppressionAlertsScope":{"allOf":[{"contains":"testContains","field":"entities.host.dnsdomain"}]}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/azurecli-test6rv7r5zzsyw","name":"azurecli-test6rv7r5zzsyw","type":"Microsoft.Security/alertsSuppressionRules","properties":{"alertType":"Test","lastModifiedUTC":"2022-04-10T18:58:33.6960113Z","expirationDateUTC":"2022-10-10T18:58:33.6960113Z","state":"Enabled","reason":"Other","comment":"Test
+        comment","suppressionAlertsScope":{"allOf":[{"contains":"testContains","field":"entities.host.dnsdomain"}]}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/azurecli-test000001","name":"azurecli-test000001","type":"Microsoft.Security/alertsSuppressionRules","properties":{"alertType":"Test","lastModifiedUTC":"2022-04-10T19:08:32.5276602Z","expirationDateUTC":"2022-10-10T19:08:32.5276602Z","state":"Enabled","reason":"Other","comment":"Test
+        comment","suppressionAlertsScope":{"allOf":[{"contains":"testContains","field":"entities.host.dnsdomain"}]}}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '6333'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sun, 10 Apr 2022 19:08:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '749'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - security alerts-suppression-rule delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --rule-name
+      User-Agent:
+      - AZURECLI/2.35.0 azsdk-python-mgmt-security/2.0.0b1 Python/3.10.4 (Windows-10-10.0.22000-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/azurecli-test000001?api-version=2019-01-01-preview
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      date:
+      - Sun, 10 Apr 2022 19:08:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '248'
+    status:
+      code: 204
+      message: No Content
+version: 1
