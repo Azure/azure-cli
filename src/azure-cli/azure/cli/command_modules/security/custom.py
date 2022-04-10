@@ -33,6 +33,9 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
 from msrestazure.tools import resource_id
 from msrestazure.azure_exceptions import CloudError
+from ._utils import (
+    run_cli_cmd
+)
 
 # --------------------------------------------------------------------------------------------
 # Security Tasks
@@ -852,11 +855,19 @@ def delete_security_automation(client, resource_group_name, resource_name):
 
 def create_or_update_security_automation(client, resource_group_name, resource_name, scopes, sources, actions, location=None, etag=None, tags=None, description=None, isEnabled=None):
 
+    if location is None:
+        resourceGroup = run_cli_cmd('az group show --name {}'.format(resource_group_name))
+        location = resourceGroup['location']
+
     automation = create_security_automation_object(location, scopes, sources, actions, etag, tags, description, isEnabled)
     return client.create_or_update(resource_group_name, resource_name, automation)
 
 
-def validate_security_automation(client, resource_group_name, resource_name, location, scopes, sources, actions, etag=None, tags=None, description=None, isEnabled=None):
+def validate_security_automation(client, resource_group_name, resource_name, scopes, sources, actions, location=None, etag=None, tags=None, description=None, isEnabled=None):
+
+    if location is None:
+        resourceGroup = run_cli_cmd('az group show --name {}'.format(resource_group_name))
+        location = resourceGroup['location']
 
     automation = create_security_automation_object(location, scopes, sources, actions, etag, tags, description, isEnabled)
     return client.validate(resource_group_name, resource_name, automation)
