@@ -12,11 +12,11 @@ class SecurityCenterSecurityAutomationsTests(ScenarioTest):
     def test_security_automations(self):
 
         # Create Automation scope
-        security_automation_scope = self.cmd("az security automation-scope create --description 'this is a sample description' --scope_path '/subscriptions/03b601f1-7eca-4496-8f8d-355219eee254/'")
+        security_automation_scope = self.cmd("az security automation-scope create --description 'this is a sample description' --scope-path '/subscriptions/03b601f1-7eca-4496-8f8d-355219eee254/'")
         assert len(security_automation_scope) >= 0
 
         # Create Automation rule
-        security_automation_rule = self.cmd("az security automation-rule create --expected_value 'High' --operator 'Equals' --property_j_path 'properties.metadata.severity' --property_type 'string'")
+        security_automation_rule = self.cmd("az security automation-rule create --expected-value 'High' --operator 'Equals' --property-j-path 'properties.metadata.severity' --property-type 'string'")
         assert len(security_automation_rule) >= 0
 
         # Create Automation rule set
@@ -24,19 +24,19 @@ class SecurityCenterSecurityAutomationsTests(ScenarioTest):
         assert len(security_automation_rule_set) >= 0
 
         # Create Automation source
-        security_automation_source = self.cmd("az security automation-source create --event_source 'Assessments'")
+        security_automation_source = self.cmd("az security automation-source create --event-source 'Assessments'")
         assert len(security_automation_source) >= 0
 
         # Create Automation logic app action
-        security_automation_action_logic_app = self.cmd("az security automation-action-logic-app create --logic_app_resource_id '/subscriptions/03b601f1-7eca-4496-8f8d-355219eee254/resourceGroups/sample-rg/providers/Microsoft.Logic/workflows/LA' --uri 'https://ms.portal.azure.com/'")
+        security_automation_action_logic_app = self.cmd("az security automation-action-logic-app create --logic-app-resource_id '/subscriptions/03b601f1-7eca-4496-8f8d-355219eee254/resourceGroups/sample-rg/providers/Microsoft.Logic/workflows/LA' --uri 'https://ms.portal.azure.com/'")
         assert len(security_automation_action_logic_app) >= 0     
 
         # Create Automation event hub action
-        security_automation_action_event_hub = self.cmd("az security automation-action-event-hub create --event_hub_resource_id '/subscriptions/03b601f1-7eca-4496-8f8d-355219eee254/resourceGroups/sample-rg/providers/Microsoft.EventHub/namespaces/evenhubnamespace1/eventhubs/evenhubname1' --connection_string 'Endpoint=sb://dummy/;SharedAccessKeyName=dummy;SharedAccessKey=dummy;EntityPath=dummy' --sas_policy_name 'Send'")
+        security_automation_action_event_hub = self.cmd("az security automation-action-event-hub create --event-hub-resource-id '/subscriptions/03b601f1-7eca-4496-8f8d-355219eee254/resourceGroups/sample-rg/providers/Microsoft.EventHub/namespaces/evenhubnamespace1/eventhubs/evenhubname1' --connection-string 'Endpoint=sb://dummy/;SharedAccessKeyName=dummy;SharedAccessKey=dummy;EntityPath=dummy' --sas-policy-name 'Send'")
         assert len(security_automation_action_event_hub) >= 0     
 
         # Create Automation workspace action
-        security_automation_action_workspace = self.cmd("az security automation-action-workspace create --workspace_resource_id '/subscriptions/03b601f1-7eca-4496-8f8d-355219eee254/resourcegroups/sample-rg/providers/microsoft.operationalinsights/workspaces/sampleworkspace'")
+        security_automation_action_workspace = self.cmd("az security automation-action-workspace create --workspace-resource-id '/subscriptions/03b601f1-7eca-4496-8f8d-355219eee254/resourcegroups/sample-rg/providers/microsoft.operationalinsights/workspaces/sampleworkspace'")
         assert len(security_automation_action_workspace) >= 0        
 
         # List Automations by subscription

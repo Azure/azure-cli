@@ -475,7 +475,7 @@ def load_command_table(self, _):
     with self.command_group('security automation-action-workspace',
                             security_automations_sdk,
                             client_factory=cf_security_automations) as g:
-        g.custom_command('create', 'create_security_automation_action_workspace')                
+        g.custom_command('create', 'create_security_automation_action_workspace')
 
     with self.command_group('security'):
         pass

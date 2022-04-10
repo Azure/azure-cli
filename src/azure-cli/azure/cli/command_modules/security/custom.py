@@ -850,7 +850,7 @@ def delete_security_automation(client, resource_group_name, resource_name):
     return client.delete(resource_group_name, resource_name)
 
 
-def create_or_update_security_automation(client, resource_group_name, resource_name, location, scopes, sources, actions, etag=None, tags=None, description=None, isEnabled=None):
+def create_or_update_security_automation(client, resource_group_name, resource_name, scopes, sources, actions, location=None, etag=None, tags=None, description=None, isEnabled=None):
 
     automation = create_security_automation_object(location, scopes, sources, actions, etag, tags, description, isEnabled)
     return client.create_or_update(resource_group_name, resource_name, automation)
@@ -863,38 +863,39 @@ def validate_security_automation(client, resource_group_name, resource_name, loc
 
 
 def create_security_automation_scope(description, scope_path):
-     
+
     return AutomationScope(description=description, scope_path=scope_path)
 
 
-def create_security_automation_rule(expected_value, operator,property_j_path,property_type):
-     
+def create_security_automation_rule(expected_value, operator, property_j_path, property_type):
+
     return AutomationTriggeringRule(property_j_path=property_j_path, property_type=property_type, expected_value=expected_value, operator=operator)
- 
+
 
 def create_security_automation_rule_set(rules=None):
-     
+
     return AutomationRuleSet(rules=rules)
 
 
 def create_security_automation_source(event_source, rule_sets=None):
-     
+
     return AutomationSource(event_source=event_source, rule_sets=rule_sets)
 
 
 def create_security_automation_action_logic_app(logic_app_resource_id, uri):
-     
+
     return AutomationActionLogicApp(logic_app_resource_id=logic_app_resource_id, uri=uri)
 
 
-def create_security_automation_action_event_hub(event_hub_resource_id, connection_string,sas_policy_name=None):
-     
+def create_security_automation_action_event_hub(event_hub_resource_id, connection_string, sas_policy_name=None):
+
     automationActionEventHub = AutomationActionEventHub(event_hub_resource_id=event_hub_resource_id, connection_string=connection_string)
     automationActionEventHub.sas_policy_name = sas_policy_name
     return automationActionEventHub
 
+
 def create_security_automation_action_workspace(workspace_resource_id):
-     
+
     return AutomationActionWorkspace(workspace_resource_id=workspace_resource_id)
 
 
