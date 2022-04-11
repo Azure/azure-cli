@@ -143,7 +143,7 @@ DEPENDENCIES = [
     'distro; sys_platform == "linux"',
     'fabric~=2.4',
     'javaproperties~=0.5.1',
-    'jsondiff~=1.3.0',
+    'jsondiff~=2.0.0',
     'packaging>=20.9,<22.0',
     'PyGithub~=1.38',
     'PyNaCl~=1.4.0',
