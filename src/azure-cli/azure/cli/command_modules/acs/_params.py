@@ -312,16 +312,20 @@ def load_arguments(self, _):
                    '--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
 
     with self.argument_context('aks update') as c:
+        # nodepool paramerters
         c.argument('enable_cluster_autoscaler', options_list=[
                    "--enable-cluster-autoscaler", "-e"], action='store_true')
         c.argument('disable_cluster_autoscaler', options_list=[
                    "--disable-cluster-autoscaler", "-d"], action='store_true')
         c.argument('update_cluster_autoscaler', options_list=[
                    "--update-cluster-autoscaler", "-u"], action='store_true')
-        c.argument('cluster_autoscaler_profile', nargs='+', options_list=["--cluster-autoscaler-profile", "--ca-profile"],
-                   help="Space-separated list of key=value pairs for configuring cluster autoscaler. Pass an empty string to clear the profile.")
         c.argument('min_count', type=int, validator=validate_nodes_count)
         c.argument('max_count', type=int, validator=validate_nodes_count)
+        c.argument('nodepool_labels', nargs='*', validator=validate_nodepool_labels,
+                   help='space-separated labels: key[=value] [key[=value] ...]. See https://aka.ms/node-labels for syntax of labels.')
+        # managed cluster paramerters
+        c.argument('cluster_autoscaler_profile', nargs='+', options_list=["--cluster-autoscaler-profile", "--ca-profile"],
+                   help="Space-separated list of key=value pairs for configuring cluster autoscaler. Pass an empty string to clear the profile.")
         c.argument('uptime_sla', action='store_true')
         c.argument('no_uptime_sla', action='store_true')
         c.argument('load_balancer_managed_outbound_ip_count', type=int)
@@ -352,8 +356,6 @@ def load_arguments(self, _):
         c.argument('gmsa_root_domain_name')
         c.argument('yes', options_list=[
                    '--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
-        c.argument('nodepool_labels', nargs='*', validator=validate_nodepool_labels,
-                   help='space-separated labels: key[=value] [key[=value] ...]. See https://aka.ms/node-labels for syntax of labels.')
 
     with self.argument_context('aks disable-addons', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
         c.argument('addons', options_list=['--addons', '-a'])
@@ -457,9 +459,6 @@ def load_arguments(self, _):
         c.argument('kubelet_config')
         c.argument('linux_os_config')
 
-    with self.argument_context('aks nodepool upgrade') as c:
-        c.argument('snapshot_id', validator=validate_snapshot_id)
-
     with self.argument_context('aks nodepool update', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='agent_pools') as c:
         c.argument('enable_cluster_autoscaler', options_list=[
                    "--enable-cluster-autoscaler", "-e"], action='store_true')
@@ -470,11 +469,14 @@ def load_arguments(self, _):
         c.argument('min_count', type=int, validator=validate_nodes_count)
         c.argument('max_count', type=int, validator=validate_nodes_count)
         c.argument('scale_down_mode', arg_type=get_enum_type([CONST_SCALE_DOWN_MODE_DELETE, CONST_SCALE_DOWN_MODE_DEALLOCATE]))
+        c.argument('labels', nargs='*', validator=validate_nodepool_labels)
         c.argument('tags', tags_type)
+        c.argument('node_taints', validator=validate_taints)
         c.argument('mode', get_enum_type(node_mode_types))
         c.argument('max_surge', validator=validate_max_surge)
-        c.argument('labels', nargs='*', validator=validate_nodepool_labels)
-        c.argument('node_taints', validator=validate_taints)
+
+    with self.argument_context('aks nodepool upgrade') as c:
+        c.argument('snapshot_id', validator=validate_snapshot_id)
 
     with self.argument_context('aks command invoke') as c:
         c.argument('command_string', options_list=[
