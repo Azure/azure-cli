@@ -124,6 +124,7 @@ from msrestazure.azure_exceptions import CloudError
 
 logger = get_logger(__name__)
 
+# pylint: disable=unused-argument
 
 def which(binary):
     path_var = os.getenv('PATH')

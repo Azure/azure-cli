@@ -48,6 +48,8 @@ from azure.cli.core.commands.validators import validate_file_or_dict
 from azure.cli.core.profiles import ResourceType
 from knack.arguments import CLIArgumentType
 
+# pylint: disable=line-too-long,too-many-statements
+
 # candidates for enumeration, no longer maintained
 orchestrator_types = ["Custom", "DCOS", "Kubernetes", "Swarm", "DockerCE"]
 regions_in_preview = [
