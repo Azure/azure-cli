@@ -412,7 +412,7 @@ def load_arguments(self, _):
                    '--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
 
     with self.argument_context('aks scale', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
-        c.argument('nodepool_name', help='Node pool name, up to 12 alphanumeric characters', validator=validate_nodepool_name, help='The node pool name.')
+        c.argument('nodepool_name', validator=validate_nodepool_name, help='Node pool name, up to 12 alphanumeric characters.')
 
     with self.argument_context('aks nodepool', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
         c.argument('cluster_name', help='The cluster name.')
