@@ -378,7 +378,7 @@ def create_afd_route(cmd,
                      origin_group: str,
                      forwarding_protocol: ForwardingProtocol,
                      enabled_state: EnabledState = EnabledState.ENABLED.value,
-                     link_to_default_domain: LinkToDefaultDomain = None,
+                     link_to_default_domain: LinkToDefaultDomain = LinkToDefaultDomain.DISABLED.value,
                      is_compression_enabled: bool = False,
                      content_types_to_compress: List[str] = None,
                      enable_caching: bool = False,
@@ -444,8 +444,7 @@ def create_afd_route(cmd,
                                    rule_sets=formatted_rule_sets,
                                    enabled_state=enabled_state,
                                    cache_configuration=cache_configuration,
-                                   link_to_default_domain=LinkToDefaultDomain.enabled if link_to_default_domain else
-                                   LinkToDefaultDomain.disabled))
+                                   link_to_default_domain=link_to_default_domain))
 
 
 # pylint: disable=too-many-locals
@@ -570,7 +569,7 @@ def create_afd_rule(cmd, client: RulesOperations, resource_group_name, profile_n
                     header_name=None, header_value=None, query_parameters=None,
                     redirect_type=None, redirect_protocol=None, custom_hostname=None, custom_path=None,
                     custom_querystring=None, custom_fragment=None, source_pattern=None,
-                    destination=None, preserve_unmatched_path=None,
+                    destination=None, preserve_unmatched_path=None, origin_group=None,
                     enable_caching=None, is_compression_enabled=None, query_string_caching_behavior=None,
                     match_processing_behavior: MatchProcessingBehavior = None,
                     forwarding_protocol: ForwardingProtocol = None):
@@ -588,6 +587,7 @@ def create_afd_rule(cmd, client: RulesOperations, resource_group_name, profile_n
                            header_value, None, None if query_parameters is None else ",".join(query_parameters),
                            redirect_type, redirect_protocol, custom_hostname, custom_path, custom_querystring,
                            custom_fragment, source_pattern, destination, preserve_unmatched_path,
+                           origin_group=origin_group,
                            cmd=cmd,
                            enable_caching=enable_caching,
                            resource_group_name=resource_group_name,
