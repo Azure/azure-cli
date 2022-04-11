@@ -1,4 +1,5 @@
 import json
+import string
 
 # --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
@@ -858,7 +859,6 @@ def create_or_update_security_automation(client, resource_group_name, resource_n
     if location is None:
         resourceGroup = run_cli_cmd('az group show --name {}'.format(resource_group_name))
         location = resourceGroup['location']
-
     automation = create_security_automation_object(location, scopes, sources, actions, etag, tags, description, isEnabled)
     return client.create_or_update(resource_group_name, resource_name, automation)
 
@@ -868,7 +868,6 @@ def validate_security_automation(client, resource_group_name, resource_name, sco
     if location is None:
         resourceGroup = run_cli_cmd('az group show --name {}'.format(resource_group_name))
         location = resourceGroup['location']
-
     automation = create_security_automation_object(location, scopes, sources, actions, etag, tags, description, isEnabled)
     return client.validate(resource_group_name, resource_name, automation)
 
@@ -914,6 +913,10 @@ def create_security_automation_action_workspace(workspace_resource_id):
 
 
 def create_security_automation_object(location, scopes, sources, actions, etag=None, tags=None, description=None, isEnabled=None):
+
+    scopes = sanitize_json_as_string(scopes)
+    sources = sanitize_json_as_string(sources)
+    actions = sanitize_json_as_string(actions)
 
     scopes = json.loads(scopes)
     scopesAsObjectList = []
@@ -970,3 +973,10 @@ def get_security_automation_rules_object(rules):
         ruleAsObject = AutomationTriggeringRule(property_j_path=rule['propertyJPath'], property_type=rule['propertyType'], expected_value=rule['expectedValue'], operator=rule['operator'])
         ruleAsObjectList.append(ruleAsObject)
     return ruleAsObjectList
+
+def sanitize_json_as_string(value:string):
+    valueLength = len(value)
+    if((value[0] == '\'' and value[valueLength-1] == '\'') or (value[0] == '\"' and value[valueLength-1] == '\"')):
+        value = value[1:]
+        value = value[:-1]
+    return value
