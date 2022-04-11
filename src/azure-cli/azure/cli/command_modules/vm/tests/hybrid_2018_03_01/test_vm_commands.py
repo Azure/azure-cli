@@ -499,6 +499,7 @@ class VMAttachDisksOnCreate(ScenarioTest):
 
 class VMOSDiskSize(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_os_disk_size')
     def test_set_os_disk_size(self, resource_group):
         # test unmanaged disk
@@ -768,7 +769,7 @@ class VMExtensionScenarioTest(ScenarioTest):
         self.cmd('vm extension set -n {ext} --publisher {pub} --version 1.2  --vm-name {vm} --resource-group {rg} --protected-settings "{config}" --force-update')
         self.cmd('vm get-instance-view -n {vm} -g {rg}', checks=[
             self.check('*.extensions[0].name', ['VMAccessForLinux']),
-            self.check('*.extensions[0].typeHandlerVersion', ['1.4.7.1'])
+            self.check('*.extensions[0].typeHandlerVersion', ['1.5.11'])
         ])
         result = self.cmd('vm extension show --resource-group {rg} --vm-name {vm} --name {ext}', checks=[
             self.check('type(@)', 'object'),
@@ -928,6 +929,7 @@ class VMCreateNoneOptionsTest(ScenarioTest):  # pylint: disable=too-many-instanc
 
 class VMBootDiagnostics(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vm_diagnostics')
     @StorageAccountPreparer(name_prefix='clitestbootdiag')
     def test_vm_boot_diagnostics(self, resource_group, storage_account):
@@ -1283,6 +1285,7 @@ class VMCreateCustomDataScenarioTest(ScenarioTest):
 
 class VMSSCreateAndModify(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_and_modify')
     def test_vmss_create_and_modify(self):
 
@@ -1718,7 +1721,7 @@ class VMSSVMsScenarioTest(ScenarioTest):
             self.check('instanceId', '{id}')
         ])
         result = self.cmd('vmss list-instance-connection-info --resource-group {rg} --name {vmss}').get_output_in_json()
-        self.assertTrue(result['instance 0'].split('.')[1], '5000')
+        self.assertEqual(result['instance 0'].split(':')[1], '50000')
         self.cmd('vmss restart --resource-group {rg} --name {vmss} --instance-ids *')
         self._check_vms_power_state('PowerState/running', 'PowerState/starting')
         self.cmd('vmss stop --resource-group {rg} --name {vmss} --instance-ids *')

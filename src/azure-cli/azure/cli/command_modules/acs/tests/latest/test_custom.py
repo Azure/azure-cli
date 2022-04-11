@@ -3,41 +3,51 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import os
+import shutil
+import tempfile
+import unittest
+
 # pylint: skip-file
 from unittest import mock
-import os
-import platform
+
 import requests
-import tempfile
-import shutil
-import unittest
 import yaml
-
-from knack import CLI
-
-from azure.cli.core._config import GLOBAL_CONFIG_DIR, ENV_VAR_PREFIX
+from azure.cli.command_modules.acs._consts import (
+    CONST_AZURE_POLICY_ADDON_NAME,
+    CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME,
+    CONST_KUBE_DASHBOARD_ADDON_NAME,
+    CONST_MONITORING_ADDON_NAME,
+)
+from azure.cli.command_modules.acs._params import regions_in_preview, regions_in_prod
+from azure.cli.command_modules.acs.custom import (
+    _acs_browse_internal,
+    _add_role_assignment,
+    _get_command_context,
+    _get_default_dns_prefix,
+    _update_addons,
+    create_application,
+    k8s_install_kubectl,
+    k8s_install_kubelogin,
+    list_acs_locations,
+    merge_kubernetes_configurations,
+)
+from azure.cli.command_modules.acs.tests.latest.mocks import MockUrlretrieveUrlValidator
+from azure.cli.command_modules.acs.tests.latest.utils import create_kubelogin_zip, get_test_data_file_path
+from azure.cli.core._config import ENV_VAR_PREFIX, GLOBAL_CONFIG_DIR
 from azure.cli.core.cloud import get_active_cloud
-from azure.cli.core.profiles import get_sdk, ResourceType, supported_api_version
-
-from msrestazure.azure_exceptions import CloudError
-from azure.graphrbac.models import GraphErrorException
-from azure.cli.command_modules.acs._params import (regions_in_preview,
-                                                   regions_in_prod)
-from azure.cli.command_modules.acs.custom import (merge_kubernetes_configurations, list_acs_locations,
-                                                  _acs_browse_internal, _add_role_assignment, _get_default_dns_prefix,
-                                                  create_application, _update_addons,
-                                                  k8s_install_kubectl, k8s_install_kubelogin)
-from azure.cli.command_modules.acs.addonconfiguration import ensure_container_insights_for_monitoring
-from azure.mgmt.containerservice.models import (ContainerServiceOrchestratorTypes,
-                                                ContainerService,
-                                                ContainerServiceOrchestratorProfile)
-from azure.mgmt.containerservice.v2020_03_01.models import ManagedClusterAddonProfile
+from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.core.util import CLIError
-from azure.cli.command_modules.acs._consts import (CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME,
-                                                   CONST_MONITORING_ADDON_NAME,
-                                                   CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID,
-                                                   CONST_KUBE_DASHBOARD_ADDON_NAME,
-                                                   CONST_AZURE_POLICY_ADDON_NAME)
+from azure.graphrbac.models import GraphErrorException
+from azure.mgmt.containerservice.models import (
+    ContainerService,
+    ContainerServiceOrchestratorProfile,
+    ContainerServiceOrchestratorTypes,
+)
+from azure.mgmt.containerservice.v2020_03_01.models import ManagedClusterAddonProfile
+from knack import CLI
+from msrestazure.azure_exceptions import CloudError
+
 
 class MockCLI(CLI):
     def __init__(self):
@@ -625,7 +635,7 @@ class AcsCustomCommandTest(unittest.TestCase):
         # http_application_routing enabled
         instance = mock.MagicMock()
         instance.addon_profiles = None
-        
+
         instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
                                   'clitest000001', 'clitest000001', 'http_application_routing', enable=True)
         self.assertIn(CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME, instance.addon_profiles)
@@ -766,33 +776,6 @@ class AcsCustomCommandTest(unittest.TestCase):
         addon_profile = instance.addon_profiles['ingressApplicationGateway']
         self.assertFalse(addon_profile.enabled)
 
-    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.cf_resources', autospec=True)
-    @mock.patch('azure.cli.command_modules.acs.addonconfiguration._invoke_deployment')
-    def test_ensure_container_insights_for_monitoring(self, invoke_def, cf_resources):
-        cmd = mock.Mock()
-        addon = mock.Mock()
-        wsID = "/subscriptions/1234abcd-cad5-417b-1234-aec62ffa6fe7/resourcegroups/mbdev/providers/microsoft.operationalinsights/workspaces/mbdev"
-        subscription_id = "test_subscription_id"
-        rg_name = "test_rg_name"
-        cluster_name = "test_cluster_name"
-        location = "test_location"
-        addon.config = {
-            CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: wsID
-        }
-        self.assertTrue(ensure_container_insights_for_monitoring(cmd, addon, subscription_id, rg_name, cluster_name, location))
-        args, kwargs = invoke_def.call_args
-        self.assertEqual(args[3]['resources'][0]['type'], "Microsoft.Resources/deployments")
-        self.assertEqual(args[4]['workspaceResourceId']['value'], wsID)
-
-        # when addon config key is lower cased
-        addon.config = {
-            CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: wsID
-        }
-        self.assertTrue(ensure_container_insights_for_monitoring(cmd, addon, subscription_id, rg_name, cluster_name, location))
-        args, kwargs = invoke_def.call_args
-        self.assertEqual(args[3]['resources'][0]['type'], "Microsoft.Resources/deployments")
-        self.assertEqual(args[4]['workspaceResourceId']['value'], wsID)
-
     @mock.patch('azure.cli.command_modules.acs.custom._urlretrieve')
     @mock.patch('azure.cli.command_modules.acs.custom.logger')
     def test_k8s_install_kubectl_emit_warnings(self, logger_mock, mock_url_retrieve):
@@ -857,7 +840,7 @@ class AcsCustomCommandTest(unittest.TestCase):
             test_ver = '1.2.5'
             test_source_url = 'http://url1'
             k8s_install_kubectl(mock.MagicMock(), client_version=test_ver, install_location=test_location, source_url=test_source_url)
-            mock_url_retrieve.assert_called_with(mockUrlretrieveUrlValidator(test_source_url, test_ver), mock.ANY)
+            mock_url_retrieve.assert_called_with(MockUrlretrieveUrlValidator(test_source_url, test_ver), mock.ANY)
         finally:
             shutil.rmtree(temp_dir)
 
@@ -872,39 +855,34 @@ class AcsCustomCommandTest(unittest.TestCase):
             test_ver = '1.2.6'
             test_source_url = 'http://url2'
             k8s_install_kubelogin(mock.MagicMock(), client_version=test_ver, install_location=test_location, source_url=test_source_url)
-            mock_url_retrieve.assert_called_with(mockUrlretrieveUrlValidator(test_source_url, test_ver), mock.ANY)
+            mock_url_retrieve.assert_called_with(MockUrlretrieveUrlValidator(test_source_url, test_ver), mock.ANY)
         finally:
             shutil.rmtree(temp_dir)
 
 
-class mockUrlretrieveUrlValidator(object):
-    def __init__(self, url, version):
-        self.url = url
-        self.version = version
+class TestRunCommand(unittest.TestCase):
+    def test_get_command_context_invalid_file(self):
+        with self.assertRaises(CLIError) as cm:
+            _get_command_context([get_test_data_file_path("notexistingfile")])
+        self.assertIn('notexistingfile is not valid file, or not accessable.', str(
+            cm.exception))
 
-    def __eq__(self, other):
-        return other.startswith(self.url) and self.version in other
+    def test_get_command_context_mixed(self):
+        with self.assertRaises(CLIError) as cm:
+            _get_command_context(
+                [".", get_test_data_file_path("ns.yaml")])
+        self.assertEqual(str(
+            cm.exception), '. is used to attach current folder, not expecting other attachements.')
+
+    def test_get_command_context_empty(self):
+        context = _get_command_context([])
+        self.assertEqual(context, "")
+
+    def test_get_command_context_valid(self):
+        context = _get_command_context(
+            [get_test_data_file_path("ns.yaml"), get_test_data_file_path("dummy.json")])
+        self.assertNotEqual(context, '')
 
 
-def create_kubelogin_zip(file_url, download_path):
-    import zipfile
-    try:
-        cwd = os.getcwd()
-        temp_dir = os.path.realpath(tempfile.mkdtemp())
-        os.chdir(temp_dir)
-        bin_dir = 'bin'
-        system = platform.system()
-        if system == 'Windows':
-            bin_dir += '/windows_amd64'
-        elif system == 'Linux':
-            bin_dir += '/linux_amd64'
-        elif system == 'Darwin':
-            bin_dir += '/darwin_amd64'
-        os.makedirs(bin_dir)
-        bin_location = os.path.join(bin_dir, 'kubelogin')
-        open(bin_location, 'a').close()
-        with zipfile.ZipFile(download_path, 'w', zipfile.ZIP_DEFLATED) as outZipFile:
-            outZipFile.write(bin_location)
-    finally:
-        os.chdir(cwd)
-        shutil.rmtree(temp_dir)
+if __name__ == "__main__":
+    unittest.main()

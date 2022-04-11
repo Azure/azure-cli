@@ -10,9 +10,9 @@ from azure.mgmt.botservice.models import (
     DirectLineSite)
 
 
-def create_channel(client, channel, channel_name, resource_group_name, resource_name):
+def create_channel(client, channel, channel_name, resource_group_name, resource_name, location):
     botChannel = BotChannel(
-        location='global',
+        location=location,
         properties=channel
     )
     return client.create(
@@ -42,7 +42,8 @@ def update_channel(client, channel, channel_name, resource_group_name, resource_
     )
 
 
-def facebook_create(client, resource_group_name, resource_name, page_id, app_id, app_secret, access_token, is_disabled=None):  # pylint: disable=line-too-long
+def facebook_create(client, resource_group_name, resource_name, page_id, app_id, app_secret, access_token,
+                    is_disabled=None, location='global'):
     from azure.mgmt.botservice.models import FacebookChannel, FacebookChannelProperties, FacebookPage
     channel = FacebookChannel(
         properties=FacebookChannelProperties(
@@ -52,10 +53,11 @@ def facebook_create(client, resource_group_name, resource_name, page_id, app_id,
             is_enabled=not is_disabled
         )
     )
-    return create_channel(client, channel, 'FacebookChannel', resource_group_name, resource_name)
+    return create_channel(client, channel, 'FacebookChannel', resource_group_name, resource_name, location)
 
 
-def email_create(client, resource_group_name, resource_name, email_address, password, is_disabled=None):
+def email_create(client, resource_group_name, resource_name, email_address, password,
+                 is_disabled=None, location='global'):
     from azure.mgmt.botservice.models import EmailChannel, EmailChannelProperties
     channel = EmailChannel(
         properties=EmailChannelProperties(
@@ -64,11 +66,11 @@ def email_create(client, resource_group_name, resource_name, email_address, pass
             is_enabled=not is_disabled
         )
     )
-    return create_channel(client, channel, 'EmailChannel', resource_group_name, resource_name)
+    return create_channel(client, channel, 'EmailChannel', resource_group_name, resource_name, location)
 
 
 def msteams_create(client, resource_group_name, resource_name, is_disabled=None,
-                   enable_calling=None, calling_web_hook=None):
+                   enable_calling=None, calling_web_hook=None, location='global'):
     from azure.mgmt.botservice.models import MsTeamsChannel, MsTeamsChannelProperties
     channel = MsTeamsChannel(
         properties=MsTeamsChannelProperties(
@@ -77,12 +79,13 @@ def msteams_create(client, resource_group_name, resource_name, is_disabled=None,
             calling_web_hook=calling_web_hook
         )
     )
-    return create_channel(client, channel, 'MsTeamsChannel', resource_group_name, resource_name)
+    return create_channel(client, channel, 'MsTeamsChannel', resource_group_name, resource_name, location)
 
 
 def skype_create(client, resource_group_name, resource_name, is_disabled=None, enable_messaging=None,
                  enable_media_cards=None, enable_video=None, enable_calling=None,
-                 enable_screen_sharing=None, enable_groups=None, groups_mode=None, calling_web_hook=None):
+                 enable_screen_sharing=None, enable_groups=None, groups_mode=None, calling_web_hook=None,
+                 location='global'):
     from azure.mgmt.botservice.models import SkypeChannel, SkypeChannelProperties
     channel = SkypeChannel(
         properties=SkypeChannelProperties(
@@ -97,10 +100,11 @@ def skype_create(client, resource_group_name, resource_name, is_disabled=None, e
             calling_web_hook=calling_web_hook
         )
     )
-    return create_channel(client, channel, 'SkypeChannel', resource_group_name, resource_name)
+    return create_channel(client, channel, 'SkypeChannel', resource_group_name, resource_name, location)
 
 
-def kik_create(client, resource_group_name, resource_name, user_name, api_key, is_disabled=None, is_validated=None):
+def kik_create(client, resource_group_name, resource_name, user_name, api_key,
+               is_disabled=None, is_validated=None, location='global'):
     from azure.mgmt.botservice.models import KikChannel, KikChannelProperties
     channel = KikChannel(
         properties=KikChannelProperties(
@@ -110,12 +114,12 @@ def kik_create(client, resource_group_name, resource_name, user_name, api_key, i
             is_validated=is_validated
         )
     )
-    return create_channel(client, channel, 'KikChannel', resource_group_name, resource_name)
+    return create_channel(client, channel, 'KikChannel', resource_group_name, resource_name, location)
 
 
 def directline_create(client, resource_group_name, resource_name, is_disabled=None,
                       is_v1_disabled=None, is_v3_disabled=None, site_name='Default Site',
-                      enable_enhanced_auth=False, trusted_origins=None):
+                      enable_enhanced_auth=False, trusted_origins=None, location='global'):
     if not trusted_origins:
         trusted_origins = []
     channel = DirectLineChannel(
@@ -132,7 +136,7 @@ def directline_create(client, resource_group_name, resource_name, is_disabled=No
     )
     return create_channel(
         client, channel, 'DirectLineChannel',
-        resource_group_name, resource_name)
+        resource_group_name, resource_name, location)
 
 
 def directline_update(client, resource_group_name, resource_name, is_disabled=None,
@@ -155,7 +159,8 @@ def directline_update(client, resource_group_name, resource_name, is_disabled=No
     return update_channel(client, channel, 'DirectLineChannel', resource_group_name, resource_name)
 
 
-def telegram_create(client, resource_group_name, resource_name, access_token, is_disabled=None, is_validated=None):
+def telegram_create(client, resource_group_name, resource_name, access_token,
+                    is_disabled=None, is_validated=None, location='global'):
     from azure.mgmt.botservice.models import TelegramChannel, TelegramChannelProperties
     channel = TelegramChannel(
         properties=TelegramChannelProperties(
@@ -164,10 +169,11 @@ def telegram_create(client, resource_group_name, resource_name, access_token, is
             is_validated=is_validated
         )
     )
-    return create_channel(client, channel, 'TelegramChannel', resource_group_name, resource_name)
+    return create_channel(client, channel, 'TelegramChannel', resource_group_name, resource_name, location)
 
 
-def sms_create(client, resource_group_name, resource_name, phone, account_sid, auth_token, is_disabled=None, is_validated=None):  # pylint: disable=line-too-long
+def sms_create(client, resource_group_name, resource_name, phone, account_sid, auth_token,
+               is_disabled=None, is_validated=None, location='global'):
     from azure.mgmt.botservice.models import SmsChannel, SmsChannelProperties
     channel = SmsChannel(
         properties=SmsChannelProperties(
@@ -178,11 +184,11 @@ def sms_create(client, resource_group_name, resource_name, phone, account_sid, a
             is_validated=is_validated
         )
     )
-    return create_channel(client, channel, 'SmsChannel', resource_group_name, resource_name)
+    return create_channel(client, channel, 'SmsChannel', resource_group_name, resource_name, location)
 
 
 def slack_create(client, resource_group_name, resource_name, client_id, client_secret, verification_token,
-                 is_disabled=None, landing_page_url=None):
+                 is_disabled=None, landing_page_url=None, location='global'):
     from azure.mgmt.botservice.models import SlackChannel, SlackChannelProperties
     channel = SlackChannel(
         properties=SlackChannelProperties(
@@ -193,12 +199,13 @@ def slack_create(client, resource_group_name, resource_name, client_id, client_s
             is_enabled=not is_disabled
         )
     )
-    return create_channel(client, channel, 'SlackChannel', resource_group_name, resource_name)
+    return create_channel(client, channel, 'SlackChannel', resource_group_name, resource_name, location)
 
 
 class ChannelOperations:  # pylint: disable=too-few-public-methods
     def __init__(self):
-        for channel in ['facebook', 'email', 'msTeams', 'skype', 'kik', 'webChat', 'directLine', 'telegram', 'sms', 'slack']:  # pylint: disable=line-too-long
+        for channel in ['facebook', 'email', 'msTeams', 'skype', 'kik',
+                        'webChat', 'directLine', 'telegram', 'sms', 'slack']:
             channelName = '{}Channel'.format(channel)
             channelName = channelName[:1].upper() + channelName[1:]
 

@@ -36,9 +36,26 @@ from ._validators import (
     validate_set_secret,
     validate_retention_days,
     validate_registry_name,
-    validate_expiration_time
+    validate_expiration_time,
+    validate_manifest_id,
+    validate_repo_id,
+    validate_repository
 )
 from .scope_map import RepoScopeMapActions, GatewayScopeMapActions
+
+repo_id_type = CLIArgumentType(
+    nargs='*',
+    default=None,
+    validator=validate_repo_id,
+    help="A fully qualified repository specifier such as 'MyRegistry.azurecr.io/hello-world'."
+)
+
+manifest_id_type = CLIArgumentType(
+    nargs='*',
+    default=None,
+    validator=validate_manifest_id,
+    help="A fully qualified manifest specifier such as 'MyRegistry.azurecr.io/hello-world:latest'."
+)
 
 image_by_tag_or_digest_type = CLIArgumentType(
     options_list=['--image', '-t'],
@@ -76,7 +93,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('auth_mode', help='Auth mode of the source registry.', arg_type=get_enum_type(SourceRegistryLoginMode))
         # Overwrite default shorthand of cmd to make availability for acr usage
         c.argument('cmd', options_list=['--__cmd__'])
-        c.argument('cmd_value', help="Commands to execute.", options_list=['--cmd'])
+        c.argument('cmd_value', help="Commands to execute. This also supports additional docker run parameters or even other docker commands.", options_list=['--cmd'])
         c.argument('zone_redundancy', is_preview=True, arg_type=get_enum_type(ZoneRedundancy), help="Indicates whether or not zone redundancy should be enabled for this registry or replication. For more information, such as supported locations, please visit https://aka.ms/acr/az. Zone-redundancy cannot be updated. Defaults to 'Disabled'.")
         c.argument('allow_exports', arg_type=get_three_state_flag(), is_preview=True, help="Configure exportPolicy to allow/disallow artifacts from being exported from this registry. Artifacts can be exported via import or transfer operations. For more information, please visit https://aka.ms/acr/export-policy.")
 
@@ -134,6 +151,51 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('list_enabled', help='Indicates whether this item shows in list operation results.', arg_type=get_three_state_flag())
         c.argument('read_enabled', help='Indicates whether read operation is allowed.', arg_type=get_three_state_flag())
         c.argument('write_enabled', help='Indicates whether write or delete operation is allowed.', arg_type=get_three_state_flag())
+
+    with self.argument_context('acr manifest') as c:
+        c.argument('registry_name', options_list=['--registry', '-r'], help='The name of the container registry. You can configure the default registry name using `az configure --defaults acr=<registry name>`', completer=get_resource_name_completion_list(REGISTRY_RESOURCE_TYPE), configured_default='acr', validator=validate_registry_name)
+        c.argument('top', type=int, help='Limit the number of items in the results.')
+        c.argument('orderby', help='Order the items in the results. Default to alphabetical order of names.', arg_type=get_enum_type(['time_asc', 'time_desc']))
+        c.argument('delete_enabled', help='Indicate whether delete operation is allowed.', arg_type=get_three_state_flag())
+        c.argument('list_enabled', help='Indicate whether this item shows in list operation results.', arg_type=get_three_state_flag())
+        c.argument('read_enabled', help='Indicate whether read operation is allowed.', arg_type=get_three_state_flag())
+        c.argument('write_enabled', help='Indicate whether write or delete operation is allowed.', arg_type=get_three_state_flag())
+        c.argument('repository', help='The name of the repository.', options_list=['--name', '-n'], validator=validate_repository)
+        c.argument('manifest_spec', help="The name of the artifact. May include a tag in the format 'name:tag' or digest in the format 'name@digest'.", options_list=['--name', '-n'])
+
+    # Positional arguments must be specified on each individual command, they cannot be assigned to a command group
+    with self.argument_context('acr manifest show') as c:
+        c.positional('manifest_id', arg_type=manifest_id_type)
+        c.argument('raw_output', help='Output the raw manifest text with no formatting.', options_list=['--raw'], action='store_true')
+
+    with self.argument_context('acr manifest list') as c:
+        c.positional('repo_id', arg_type=repo_id_type)
+
+    with self.argument_context('acr manifest delete') as c:
+        c.positional('manifest_id', arg_type=manifest_id_type)
+
+    with self.argument_context('acr manifest list-referrers') as c:
+        c.positional('manifest_id', arg_type=manifest_id_type)
+        c.argument('artifact_type', help='Filter referrers based on artifact type.')
+        c.argument('recursive', help='Recursively include referrer artifacts.', action='store_true')
+
+    with self.argument_context('acr manifest show-metadata') as c:
+        c.positional('manifest_id', arg_type=manifest_id_type)
+
+    with self.argument_context('acr manifest list-metadata') as c:
+        c.positional('repo_id', arg_type=repo_id_type)
+
+    with self.argument_context('acr manifest update-metadata') as c:
+        c.positional('manifest_id', arg_type=manifest_id_type)
+
+    with self.argument_context('acr manifest metadata show') as c:
+        c.positional('manifest_id', arg_type=manifest_id_type)
+
+    with self.argument_context('acr manifest metadata list') as c:
+        c.positional('repo_id', arg_type=repo_id_type)
+
+    with self.argument_context('acr manifest metadata update') as c:
+        c.positional('manifest_id', arg_type=manifest_id_type)
 
     with self.argument_context('acr repository untag') as c:
         c.argument('image', options_list=['--image', '-t'], help="The name of the image. May include a tag in the format 'name:tag'.")
@@ -220,7 +282,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('values', help="The task values/parameters file path relative to the source context.")
 
         # common to DockerBuildStep, FileTaskStep and RunTaskStep
-        c.argument('context_path', options_list=['--context', '-c'], help="The full URL to the source code repository (Requires '.git' suffix for a github repo) or the repository of an OCI artifact in an Azure container registry (e.g., 'oci://myregistry.azurecr.io/myartifact:mytag'). If '/dev/null' is specified, the value will be set to None and ignored. This is a required argument if the task is not a system task.")
+        c.argument('context_path', options_list=['--context', '-c'], help="The full URL to the source code repository (Requires '.git' suffix for a github repo) or a remote tarball (e.g., 'http://server/context.tar.gz'), or the repository of an OCI artifact in an Azure container registry (e.g., 'oci://myregistry.azurecr.io/myartifact:mytag'). If '/dev/null' is specified, the value will be set to None and ignored. This is a required argument if the task is not a system task.")
         c.argument('arg', help="Build argument in '--arg name[=value]' format. Multiples supported by passing '--arg` multiple times.", action='append', validator=validate_arg)
         c.argument('secret_arg', help="Secret build argument in '--secret-arg name[=value]' format. Multiples supported by passing --secret-arg multiple times.", action='append', validator=validate_secret_arg)
         c.argument('set_value', options_list=['--set'], help="Task value in '--set name[=value]' format. Multiples supported by passing --set multiple times.", action='append', validator=validate_set)
@@ -355,7 +417,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    help='repository permissions. Use the format "--repository REPO [ACTION1 ACTION2 ...]" per flag. ' + repo_valid_actions)
         c.argument('gateway_actions_list', options_list=['--gateway'], nargs='+', action='append',
                    help='gateway permissions. Use the format "--gateway GATEWAY [ACTION1 ACTION2 ...]" per flag. ' + gateway_valid_actions)
-        c.argument('no_passwords', arg_type=get_three_state_flag(), help='Do not generate passwords, instead use "az acr token credential generate"')
+        c.argument('no_passwords', arg_type=get_three_state_flag(), help='Do not generate passwords during token creation. You can generate the passwords after the token is created by using `az acr token credentials generate` command.')
         c.argument('expiration_in_days', help='Number of days for which the credentials will be valid. If not specified, the expiration will default to the max value "9999-12-31T23:59:59.999999+00:00"', type=int, required=False)
 
     with self.argument_context('acr token update') as c:

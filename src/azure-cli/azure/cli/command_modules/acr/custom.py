@@ -5,10 +5,11 @@
 
 # pylint: disable=too-many-locals
 
+import re
 from knack.util import CLIError
 from knack.log import get_logger
+from azure.cli.core.azclierror import InvalidArgumentValueError
 from azure.cli.core.util import user_confirmation
-
 from ._constants import get_managed_sku, get_premium_sku
 from ._utils import (
     get_registry_by_name,
@@ -61,6 +62,9 @@ def acr_create(cmd,
 
     if sku not in get_managed_sku(cmd):
         raise CLIError("Classic SKU is no longer supported. Please select a managed SKU.")
+
+    if re.match(r'\w*[A-Z]\w*', registry_name):
+        raise InvalidArgumentValueError("argument error: Connected registry name must use only lowercase.")
 
     Registry, Sku, NetworkRuleSet = cmd.get_models('Registry', 'Sku', 'NetworkRuleSet')
     registry = Registry(location=location, sku=Sku(name=sku), admin_user_enabled=admin_enabled,
@@ -150,6 +154,11 @@ def acr_update_custom(cmd,
 def _configure_public_network_access(cmd, registry, enabled):
     PublicNetworkAccess = cmd.get_models('PublicNetworkAccess')
     registry.public_network_access = (PublicNetworkAccess.enabled if enabled else PublicNetworkAccess.disabled)
+    if enabled:
+        registry.public_network_access = PublicNetworkAccess.enabled
+    else:
+        registry.public_network_access = PublicNetworkAccess.disabled
+        logger.warning('Disabling the public endpoint overrides all firewall configurations.')
 
 
 def _handle_network_bypass(cmd, registry, allow_trusted_services):

@@ -194,6 +194,7 @@ def acr_repository_show_tags(cmd,
     return raw_result
 
 
+# This command lists manifest metadata; deprecated for manifest metadata list
 def acr_repository_show_manifests(cmd,
                                   registry_name,
                                   repository,

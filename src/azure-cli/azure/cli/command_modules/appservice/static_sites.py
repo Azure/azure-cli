@@ -7,25 +7,50 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.util import sdk_no_wait
 
 from azure.cli.core.commands import LongRunningOperation
-from azure.cli.core.azclierror import ValidationError, RequiredArgumentMissingError
-from knack.util import CLIError
+from azure.cli.core.azclierror import (ResourceNotFoundError, ValidationError, RequiredArgumentMissingError,
+                                       InvalidArgumentValueError)
 from knack.log import get_logger
 from msrestazure.tools import parse_resource_id
 
 from .utils import normalize_sku_for_staticapp, raise_missing_token_suggestion
-from .custom import show_functionapp, _build_identities_info
+from .custom import show_app, _build_identities_info
 
 
 logger = get_logger(__name__)
 
 
+# remove irrelevant attributes from staticsites printed to the user
+def _format_staticsite(site, format_site=False):
+    if format_site:
+        props_to_remove = {"allow_config_file_updates",
+                           "build_properties",
+                           "content_distribution_endpoint",
+                           "key_vault_reference_identity",
+                           "kind",
+                           "private_endpoint_connections",
+                           "repository_token",
+                           "staging_environment_policy",
+                           "template_properties"}
+        sku_props_to_remove = {"capabilities",
+                               "capacity",
+                               "family",
+                               "locations",
+                               "size",
+                               "sku_capacity"}
+        for p in sku_props_to_remove:
+            if hasattr(site.sku, p):
+                delattr(site.sku, p)
+        for p in props_to_remove:
+            if hasattr(site, p):
+                delattr(site, p)
+    return site
+
+
 def list_staticsites(cmd, resource_group_name=None):
     client = _get_staticsites_client_factory(cmd.cli_ctx)
     if resource_group_name:
-        result = list(client.get_static_sites_by_resource_group(resource_group_name))
-    else:
-        result = list(client.list())
-    return result
+        return list(client.get_static_sites_by_resource_group(resource_group_name))
+    return list(client.list())
 
 
 def show_staticsite(cmd, name, resource_group_name=None):
@@ -140,9 +165,10 @@ def show_identity(cmd, resource_group_name, name):
 
 
 def assign_identity(cmd, resource_group_name, name, assign_identities=None, role='Contributor', scope=None):
+    #  TODO : A lot of this code is duplicated, we should reuse the existing code
     ManagedServiceIdentity, ResourceIdentityType = cmd.get_models('ManagedServiceIdentity',
                                                                   'ManagedServiceIdentityType')
-    UserAssignedIdentitiesValue = cmd.get_models('Components1Jq1T4ISchemasManagedserviceidentityPropertiesUserassignedidentitiesAdditionalproperties')  # pylint: disable=line-too-long
+    UserAssignedIdentitiesValue = cmd.get_models('UserAssignedIdentity')
     _, _, external_identities, enable_local_identity = _build_identities_info(assign_identities)
 
     def getter():
@@ -338,17 +364,17 @@ def update_staticsite_users(cmd, name, roles, authentication_provider=None, user
                                           static_site_user_envelope=user_envelope)
 
 
-def create_staticsites(cmd, resource_group_name, name, location,
+def create_staticsites(cmd, resource_group_name, name, location,  # pylint: disable=too-many-locals,
                        source, branch, token=None,
-                       app_location='.', api_location='.', output_location='.github/workflows',
-                       tags=None, no_wait=False, sku='Free', login_with_github=False):
-    from azure.core.exceptions import ResourceNotFoundError
+                       app_location="/", api_location=None, output_location=None,
+                       tags=None, no_wait=False, sku='Free', login_with_github=False, format_output=True):
+    from azure.core.exceptions import ResourceNotFoundError as _ResourceNotFoundError
 
     try:
         site = show_staticsite(cmd, name, resource_group_name)
         logger.warning("Static Web App %s already exists in resource group %s", name, resource_group_name)
         return site
-    except ResourceNotFoundError:
+    except _ResourceNotFoundError:
         pass
 
     if not token and not login_with_github:
@@ -380,16 +406,20 @@ def create_staticsites(cmd, resource_group_name, name, location,
         sku=sku_def)
 
     client = _get_staticsites_client_factory(cmd.cli_ctx)
+    if not no_wait and format_output:
+        client.begin_create_or_update_static_site(resource_group_name=resource_group_name, name=name,
+                                                  static_site_envelope=staticsite_deployment_properties)
+        return show_staticsite(cmd, name, resource_group_name)
     return sdk_no_wait(no_wait, client.begin_create_or_update_static_site,
                        resource_group_name=resource_group_name, name=name,
                        static_site_envelope=staticsite_deployment_properties)
 
 
-def update_staticsite(cmd, name, source=None, branch=None, token=None,
+def update_staticsite(cmd, name, resource_group_name=None, source=None, branch=None, token=None,
                       tags=None, sku=None, no_wait=False):
-    existing_staticsite = show_staticsite(cmd, name)
+    existing_staticsite = show_staticsite(cmd, name, resource_group_name)
     if not existing_staticsite:
-        raise CLIError("No static web app found with name {0}".format(name))
+        raise ResourceNotFoundError(f"No static web app found with name {name} in group {resource_group_name}")
 
     if tags is not None:
         existing_staticsite.tags = tags
@@ -410,7 +440,8 @@ def update_staticsite(cmd, name, source=None, branch=None, token=None,
         sku=sku_def or existing_staticsite.sku)
 
     client = _get_staticsites_client_factory(cmd.cli_ctx)
-    resource_group_name = _get_resource_group_name_of_staticsite(client, name)
+    if resource_group_name is None:
+        resource_group_name = _get_resource_group_name_of_staticsite(client, name)
     return sdk_no_wait(no_wait, client.update_static_site,
                        resource_group_name=resource_group_name, name=name,
                        static_site_envelope=staticsite_deployment_properties)
@@ -427,7 +458,7 @@ def delete_staticsite(cmd, name, resource_group_name=None, no_wait=False):
 
 def _parse_pair(pair, delimiter):
     if delimiter not in pair:
-        CLIError("invalid format of pair {0}".format(pair))
+        InvalidArgumentValueError("invalid format of pair {0}".format(pair))
 
     index = pair.index(delimiter)
     return pair[:index], pair[1 + index:]
@@ -442,8 +473,8 @@ def _get_staticsite_location(client, static_site_name, resource_group_name):
                 if found_rg.lower() == resource_group_name.lower():
                     return static_site.location
 
-    raise CLIError("Static site was '{}' not found in subscription and resource group '{}'."
-                   .format(static_site_name, resource_group_name))
+    raise ResourceNotFoundError(f"Static site was '{static_site_name}' not found in subscription "
+                                f"and resource group '{resource_group_name}'.")
 
 
 def _get_resource_group_name_of_staticsite(client, static_site_name):
@@ -454,7 +485,7 @@ def _get_resource_group_name_of_staticsite(client, static_site_name):
             if resource_group:
                 return resource_group
 
-    raise CLIError("Static site was '{}' not found in subscription.".format(static_site_name))
+    raise ResourceNotFoundError(f"Static site was '{static_site_name}' not found in subscription.")
 
 
 def _parse_resource_group_from_arm_id(arm_id):
@@ -481,7 +512,7 @@ def _find_authentication_provider(client, resource_group_name, name, user_id, au
             authentication_provider = user.provider
 
     if not authentication_provider:
-        raise CLIError("user id was not found.")
+        raise ResourceNotFoundError("user id was not found.")
 
     return authentication_provider
 
@@ -499,7 +530,7 @@ def _find_user_id_and_authentication_provider(client, resource_group_name, name,
                     user_id = user.name
 
     if not user_id or not authentication_provider:
-        raise CLIError("user details and authentication provider was not found.")
+        raise ResourceNotFoundError("user details and authentication provider was not found.")
 
     return user_id, authentication_provider
 
@@ -534,9 +565,9 @@ def link_user_function(cmd, name, resource_group_name, function_resource_id, for
     parsed_rid = parse_resource_id(function_resource_id)
     function_name = parsed_rid["name"]
     function_group = parsed_rid["resource_group"]
-    function_location = show_functionapp(cmd, resource_group_name=function_group, name=function_name).location
+    function_location = show_app(cmd, resource_group_name=function_group, name=function_name).location
 
-    client = _get_staticsites_client_factory(cmd.cli_ctx, api_version="2020-12-01")
+    client = _get_staticsites_client_factory(cmd.cli_ctx)
     function = StaticSiteUserProvidedFunctionAppARMResource(function_app_resource_id=function_resource_id,
                                                             function_app_region=function_location)
 
@@ -550,7 +581,7 @@ def link_user_function(cmd, name, resource_group_name, function_resource_id, for
 
 def unlink_user_function(cmd, name, resource_group_name):
     function_name = list(get_user_function(cmd, name, resource_group_name))[0].name
-    client = _get_staticsites_client_factory(cmd.cli_ctx, api_version="2020-12-01")
+    client = _get_staticsites_client_factory(cmd.cli_ctx)
     return client.detach_user_provided_function_app_from_static_site(
         name=name,
         resource_group_name=resource_group_name,
@@ -558,5 +589,5 @@ def unlink_user_function(cmd, name, resource_group_name):
 
 
 def get_user_function(cmd, name, resource_group_name):
-    client = _get_staticsites_client_factory(cmd.cli_ctx, api_version="2020-12-01")
+    client = _get_staticsites_client_factory(cmd.cli_ctx)
     return client.get_user_provided_function_apps_for_static_site(name=name, resource_group_name=resource_group_name)

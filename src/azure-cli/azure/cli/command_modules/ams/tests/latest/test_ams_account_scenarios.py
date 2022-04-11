@@ -18,7 +18,7 @@ class AmsAccountTests(ScenarioTest):
             'location': 'centralus',
         })
 
-        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location} --mi-system-assigned', checks=[
+        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location} --mi-system-assigned --default-action Allow', checks=[
             self.check('name', '{amsname}'),
             self.check('location', 'Central US'),
             self.check('identity.type', 'SystemAssigned')
@@ -49,7 +49,7 @@ class AmsAccountTests(ScenarioTest):
             'location': 'southeastasia',
         })
 
-        account = self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}').get_output_in_json()
+        account = self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location} --mi-system-assigned --default-action Allow').get_output_in_json()
 
         self.kwargs.update({
             'storageId': account['storageAccounts'][0]['id']
@@ -71,7 +71,7 @@ class AmsAccountTests(ScenarioTest):
             'location': 'eastasia'
         })
 
-        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}', checks=[
+        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location} --mi-system-assigned --default-action Allow', checks=[
             self.check('name', '{amsname}'),
             self.check('location', 'East Asia')
         ])
@@ -80,7 +80,7 @@ class AmsAccountTests(ScenarioTest):
             'storageAccount': storage_account_for_update
         })
 
-        self.cmd('az ams account storage add -a {amsname} -g {rg} -n {storageAccount}', checks=[
+        self.cmd('az ams account storage add -a {amsname} -g {rg} -n {storageAccount} --system-assigned', checks=[
             self.check('name', '{amsname}'),
             self.check('resourceGroup', '{rg}')
         ])
@@ -105,7 +105,7 @@ class AmsAccountTests(ScenarioTest):
             'amsname3': amsname3
         })
 
-        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
+        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location} --mi-system-assigned --default-action Allow')
 
         self.cmd('az ams account check-name --location {location} -n {amsname}', checks=[
             self.check('@', 'Already in use by another account. Please try again with a name that is not likely to be in use.')

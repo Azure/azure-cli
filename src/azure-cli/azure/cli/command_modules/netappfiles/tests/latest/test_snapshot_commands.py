@@ -2,6 +2,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+
+import unittest
+
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 from azure.cli.testsdk.decorators import serial_test
 
@@ -175,3 +178,28 @@ class AzureNetAppFilesSnapshotServiceScenarioTest(ScenarioTest):
         # get snapshot from id
         snapshot_from_id = self.cmd("az netappfiles snapshot show --ids %s" % snapshot['id']).get_output_in_json()
         assert snapshot_from_id['name'] == account_name + '/' + pool_name + '/' + volume_name + '/' + snapshot_name
+
+    @unittest.skip('This test requires southcentralusstage and cannot be run with public cloud.')
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_snapshot_', additional_tags={'owner': 'cli_test'})
+    def test_restore_file(self):
+        # create volume
+        account_name = self.create_random_name(prefix='cli-acc-', length=24)
+        pool_name = self.create_random_name(prefix='cli-pool-', length=24)
+        volume_name = self.create_random_name(prefix='cli-vol-', length=24)
+        volume = self.create_volume(account_name, pool_name, volume_name)
+        assert volume['name'] == account_name + '/' + pool_name + '/' + volume_name
+
+        # create snapshot
+        snapshot_name = self.create_random_name(prefix='cli-sn-', length=24)
+        self.cmd("az netappfiles snapshot create -g {rg} -a %s -p %s -v %s -s %s -l %s" %
+                 (account_name, pool_name, volume_name, snapshot_name, LOCATION))
+
+        snapshot_file_path = "'/snap_file_path_1.txt' '/snap_file_path_2.txt'"
+
+        self.cmd("az netappfiles snapshot restore-files -g {rg} -a %s -p %s -v %s -s %s --file-paths %s" %
+                 (account_name, pool_name, volume_name, snapshot_name, snapshot_file_path))
+
+        snapshot = self.cmd("az netappfiles snapshot show -g {rg} -a %s -p %s -v %s -s %s" %
+                            (account_name, pool_name, volume_name, snapshot_name)).get_output_in_json()
+
+        assert snapshot['provisioningState'] == 'Succeeded'
