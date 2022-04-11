@@ -16,6 +16,7 @@ from azure.cli.command_modules.acs.base_decorator import (
 from azure.cli.command_modules.acs.tests.latest.mocks import MockCLI, MockCmd
 from azure.cli.core.azclierror import CLIInternalError
 from azure.cli.core.profiles import ResourceType
+from msrest.exceptions import ValidationError
 
 
 class BaseDecoratorHelperFunctionsTestCase(unittest.TestCase):
@@ -44,7 +45,19 @@ class BaseAKSModelsTestCase(unittest.TestCase):
         module = importlib.import_module(module_name)
 
         models = BaseAKSModels(self.cmd, ResourceType.MGMT_CONTAINERSERVICE)
-        self.assertEqual(models.raw_models, module)
+        self.assertEqual(models.model_module, module)
+        self.assertEqual(models.AgentPool, module.AgentPool)
+
+    def test_serialize(self):
+        models = BaseAKSModels(self.cmd, ResourceType.MGMT_CONTAINERSERVICE)
+
+        agentpool = models.AgentPool(os_disk_size_gb=2049)
+        # fail on os_disk_size_gb > 2048
+        with self.assertRaises(ValidationError):
+            models.serialize(agentpool, "AgentPool")
+
+        agentpool_upgrade_settings = models.AgentPoolUpgradeSettings()
+        self.assertEqual(models.serialize(agentpool_upgrade_settings, "AgentPoolUpgradeSettings"), {})
 
 
 class BaseAKSParamDictTestCase(unittest.TestCase):
@@ -57,8 +70,12 @@ class BaseAKSParamDictTestCase(unittest.TestCase):
         param_dict = BaseAKSParamDict({"abc": "xyz"})
         self.assertEqual(param_dict.get("abc"), "xyz")
 
-        param_dict_2 = BaseAKSParamDict({})
-        self.assertEqual(param_dict_2.get("abc", True), True)
+        param_dict_2 = BaseAKSParamDict({"a": None, "ab": False, "abc": ""})
+        self.assertEqual(param_dict_2.get("a", True), True)
+        self.assertEqual(param_dict_2.get("a", "xyz"), "xyz")
+        self.assertEqual(param_dict_2.get("ab", True), False)
+        self.assertEqual(param_dict_2.get("abc", True), "")
+        self.assertEqual(param_dict_2.get("abcd", True), True)
 
     def test_keys(self):
         param_dict = BaseAKSParamDict({"abc": "xyz"})
