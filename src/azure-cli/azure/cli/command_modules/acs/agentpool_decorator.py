@@ -3,21 +3,22 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from typing import Dict, List, Tuple, TypeVar, Union
+import os
 from math import isnan
+from typing import Dict, List, Tuple, TypeVar, Union
 
 from azure.cli.command_modules.acs._client_factory import cf_agent_pools
 from azure.cli.command_modules.acs._consts import (
     CONST_DEFAULT_NODE_OS_TYPE,
     CONST_DEFAULT_NODE_VM_SIZE,
     CONST_DEFAULT_WINDOWS_NODE_VM_SIZE,
-    CONST_SCALE_SET_PRIORITY_SPOT,
-    CONST_VIRTUAL_MACHINE_SCALE_SETS,
     CONST_NODEPOOL_MODE_SYSTEM,
     CONST_NODEPOOL_MODE_USER,
     CONST_SCALE_DOWN_MODE_DELETE,
     CONST_SCALE_SET_PRIORITY_REGULAR,
+    CONST_SCALE_SET_PRIORITY_SPOT,
     CONST_SPOT_EVICTION_POLICY_DELETE,
+    CONST_VIRTUAL_MACHINE_SCALE_SETS,
     AgentPoolDecoratorMode,
     DecoratorMode,
 )
@@ -28,7 +29,7 @@ from azure.cli.core import AzCommandsLoader
 from azure.cli.core.azclierror import CLIInternalError, InvalidArgumentValueError, RequiredArgumentMissingError
 from azure.cli.core.commands import AzCliCommand
 from azure.cli.core.profiles import ResourceType
-from azure.cli.core.util import sdk_no_wait
+from azure.cli.core.util import get_file_json, sdk_no_wait
 from knack.log import get_logger
 
 logger = get_logger(__name__)
@@ -37,6 +38,8 @@ logger = get_logger(__name__)
 AgentPool = TypeVar("AgentPool")
 AgentPoolsOperations = TypeVar("AgentPoolsOperations")
 Snapshot = TypeVar("Snapshot")
+KubeletConfig = TypeVar("KubeletConfig")
+LinuxOSConfig = TypeVar("LinuxOSConfig")
 
 # TODO:
 # 1. Add extra type checking for getter functions
@@ -880,6 +883,72 @@ class AKSAgentPoolContext(BaseAKSContext):
         # this parameter does not need validation
         return scale_down_mode
 
+    def get_kubelet_config(self) -> Union[Dict, KubeletConfig, None]:
+        """Obtain the value of kubelet_config.
+
+        :return: dictionary, KubeletConfig or None
+        """
+        # read the original value passed by the command
+        kubelet_config = None
+        kubelet_config_file_path = self.raw_param.get("kubelet_config")
+        # validate user input
+        if kubelet_config_file_path:
+            if not os.path.isfile(kubelet_config_file_path):
+                raise InvalidArgumentValueError(
+                    "{} is not valid file, or not accessable.".format(
+                        kubelet_config_file_path
+                    )
+                )
+            kubelet_config = get_file_json(kubelet_config_file_path)
+            if not isinstance(kubelet_config, dict):
+                raise InvalidArgumentValueError(
+                    "Error reading kubelet configuration from {}. "
+                    "Please see https://aka.ms/CustomNodeConfig for correct format.".format(
+                        kubelet_config_file_path
+                    )
+                )
+
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if self.agentpool and self.agentpool.kubelet_config is not None:
+            kubelet_config = self.agentpool.kubelet_config
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return kubelet_config
+
+    def get_linux_os_config(self) -> Union[Dict, LinuxOSConfig, None]:
+        """Obtain the value of linux_os_config.
+
+        :return: dictionary, LinuxOSConfig or None
+        """
+        # read the original value passed by the command
+        linux_os_config = None
+        linux_os_config_file_path = self.raw_param.get("linux_os_config")
+        # validate user input
+        if linux_os_config_file_path:
+            if not os.path.isfile(linux_os_config_file_path):
+                raise InvalidArgumentValueError(
+                    "{} is not valid file, or not accessable.".format(
+                        linux_os_config_file_path
+                    )
+                )
+            linux_os_config = get_file_json(linux_os_config_file_path)
+            if not isinstance(linux_os_config, dict):
+                raise InvalidArgumentValueError(
+                    "Error reading Linux OS configuration from {}. "
+                    "Please see https://aka.ms/CustomNodeConfig for correct format.".format(
+                        linux_os_config_file_path
+                    )
+                )
+
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if self.agentpool and self.agentpool.linux_os_config:
+            linux_os_config = self.agentpool.linux_os_config
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return linux_os_config
+
     def get_aks_custom_headers(self) -> Dict[str, str]:
         """Obtain the value of aks_custom_headers.
 
@@ -1147,6 +1216,17 @@ class AKSAgentPoolAddDecorator:
         agentpool.scale_down_mode = self.context.get_scale_down_mode()
         return agentpool
 
+    def set_up_custom_node_config(self, agentpool: AgentPool) -> AgentPool:
+        """Set up custom node config for the AgentPool object.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        agentpool.kubelet_config = self.context.get_kubelet_config()
+        agentpool.linux_os_config = self.context.get_linux_os_config()
+        return agentpool
+
     def construct_default_agentpool_profile(self) -> AgentPool:
         """The overall controller used to construct the default AgentPool profile.
 
@@ -1175,6 +1255,8 @@ class AKSAgentPoolAddDecorator:
         agentpool = self.set_up_node_network_properties(agentpool)
         # set up misc vm properties
         agentpool = self.set_up_vm_properties(agentpool)
+        # set up custom node config
+        agentpool = self.set_up_custom_node_config(agentpool)
         # restore defaults
         agentpool = self._restore_defaults_in_agentpool(agentpool)
         return agentpool
