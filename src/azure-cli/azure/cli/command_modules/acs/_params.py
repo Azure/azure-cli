@@ -3,54 +3,50 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=line-too-long,too-many-statements,no-name-in-module,import-error
-
 import os.path
 import platform
 
 from argcomplete.completers import FilesCompleter
+from azure.cli.command_modules.acs._completers import (
+    get_k8s_upgrades_completion_list, get_k8s_versions_completion_list,
+    get_vm_size_completion_list)
+from azure.cli.command_modules.acs._consts import (
+    CONST_NETWORK_PLUGIN_AZURE, CONST_NETWORK_PLUGIN_KUBENET,
+    CONST_NODE_IMAGE_UPGRADE_CHANNEL, CONST_NODEPOOL_MODE_SYSTEM,
+    CONST_NODEPOOL_MODE_USER, CONST_NONE_UPGRADE_CHANNEL,
+    CONST_OS_DISK_TYPE_EPHEMERAL, CONST_OS_DISK_TYPE_MANAGED,
+    CONST_OS_SKU_CBLMARINER, CONST_OS_SKU_UBUNTU,
+    CONST_OUTBOUND_TYPE_LOAD_BALANCER, CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY,
+    CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY,
+    CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING, CONST_PATCH_UPGRADE_CHANNEL,
+    CONST_RAPID_UPGRADE_CHANNEL, CONST_SCALE_DOWN_MODE_DEALLOCATE,
+    CONST_SCALE_DOWN_MODE_DELETE, CONST_SCALE_SET_PRIORITY_REGULAR,
+    CONST_SCALE_SET_PRIORITY_SPOT, CONST_SPOT_EVICTION_POLICY_DEALLOCATE,
+    CONST_SPOT_EVICTION_POLICY_DELETE, CONST_STABLE_UPGRADE_CHANNEL)
+from azure.cli.command_modules.acs._validators import (
+    validate_acr, validate_assign_identity, validate_assign_kubelet_identity,
+    validate_create_parameters, validate_credential_format,
+    validate_eviction_policy, validate_ip_ranges, validate_k8s_version,
+    validate_kubectl_version, validate_kubelogin_version,
+    validate_linux_host_name, validate_list_of_integers,
+    validate_load_balancer_idle_timeout,
+    validate_load_balancer_outbound_ip_prefixes,
+    validate_load_balancer_outbound_ips, validate_load_balancer_outbound_ports,
+    validate_load_balancer_sku, validate_max_surge,
+    validate_nat_gateway_idle_timeout,
+    validate_nat_gateway_managed_outbound_ip_count, validate_nodepool_id,
+    validate_nodepool_labels, validate_nodepool_name, validate_nodepool_tags,
+    validate_nodes_count, validate_pod_subnet_id, validate_ppg,
+    validate_priority, validate_snapshot_id, validate_snapshot_name,
+    validate_spot_max_price, validate_ssh_key, validate_taints,
+    validate_vm_set_type, validate_vnet_subnet_id)
 from azure.cli.core.commands.parameters import (
-    file_type, get_enum_type, get_resource_name_completion_list, get_three_state_flag, name_type, tags_type, zones_type, edge_zone_type)
+    edge_zone_type, file_type, get_enum_type,
+    get_resource_name_completion_list, get_three_state_flag, name_type,
+    tags_type, zones_type)
 from azure.cli.core.commands.validators import validate_file_or_dict
 from azure.cli.core.profiles import ResourceType
 from knack.arguments import CLIArgumentType
-
-from ._completers import (
-    get_vm_size_completion_list, get_k8s_versions_completion_list, get_k8s_upgrades_completion_list)
-from ._validators import (
-    validate_create_parameters, validate_kubectl_version, validate_kubelogin_version, validate_k8s_version, validate_linux_host_name,
-    validate_list_of_integers, validate_ssh_key, validate_nodes_count, validate_snapshot_name,
-    validate_nodepool_name, validate_vm_set_type, validate_load_balancer_sku, validate_nodepool_id, validate_snapshot_id,
-    validate_load_balancer_outbound_ips, validate_priority, validate_eviction_policy, validate_spot_max_price,
-    validate_load_balancer_outbound_ip_prefixes, validate_taints, validate_ip_ranges, validate_acr, validate_nodepool_tags,
-    validate_load_balancer_outbound_ports, validate_load_balancer_idle_timeout, validate_vnet_subnet_id, validate_pod_subnet_id,
-    validate_nodepool_labels, validate_ppg, validate_assign_identity, validate_max_surge, validate_assign_kubelet_identity,
-    validate_credential_format, validate_nat_gateway_managed_outbound_ip_count, validate_nat_gateway_idle_timeout)
-from ._consts import (
-    CONST_OUTBOUND_TYPE_LOAD_BALANCER,
-    CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
-    CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY,
-    CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY,
-    CONST_SCALE_SET_PRIORITY_REGULAR,
-    CONST_SCALE_SET_PRIORITY_SPOT,
-    CONST_SPOT_EVICTION_POLICY_DELETE,
-    CONST_SPOT_EVICTION_POLICY_DEALLOCATE,
-    CONST_SCALE_DOWN_MODE_DELETE,
-    CONST_SCALE_DOWN_MODE_DEALLOCATE,
-    CONST_OS_DISK_TYPE_MANAGED,
-    CONST_OS_DISK_TYPE_EPHEMERAL,
-    CONST_RAPID_UPGRADE_CHANNEL,
-    CONST_STABLE_UPGRADE_CHANNEL,
-    CONST_PATCH_UPGRADE_CHANNEL,
-    CONST_NODE_IMAGE_UPGRADE_CHANNEL,
-    CONST_NONE_UPGRADE_CHANNEL,
-    CONST_NODEPOOL_MODE_SYSTEM,
-    CONST_NODEPOOL_MODE_USER,
-    CONST_OS_SKU_UBUNTU,
-    CONST_OS_SKU_CBLMARINER,
-    CONST_NETWORK_PLUGIN_KUBENET,
-    CONST_NETWORK_PLUGIN_AZURE,
-)
 
 # candidates for enumeration, no longer maintained
 orchestrator_types = ["Custom", "DCOS", "Kubernetes", "Swarm", "DockerCE"]
