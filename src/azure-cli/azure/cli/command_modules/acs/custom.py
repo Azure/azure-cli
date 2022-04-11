@@ -101,6 +101,7 @@ from ._consts import (CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME,
 from ._consts import ADDONS
 from ._consts import CONST_CANIPULL_IMAGE
 from ._consts import CONST_MANAGED_IDENTITY_OPERATOR_ROLE, CONST_MANAGED_IDENTITY_OPERATOR_ROLE_ID
+from ._consts import CONST_NODEPOOL_MODE_USER
 from ._consts import DecoratorEarlyExitException
 from .addonconfiguration import (
     add_monitoring_role_assignment,
@@ -3149,7 +3150,7 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
                       kubelet_config=None,
                       linux_os_config=None,
                       max_surge=None,
-                      mode="User",
+                      mode=CONST_NODEPOOL_MODE_USER,
                       enable_encryption_at_host=False,
                       enable_ultra_ssd=False,
                       enable_fips_image=False,

@@ -5,7 +5,7 @@
 
 from enum import Enum
 
-# consts for nodepool related commands
+# consts for AgentPool
 # priority
 CONST_SCALE_SET_PRIORITY_REGULAR = "Regular"
 CONST_SCALE_SET_PRIORITY_SPOT = "Spot"
@@ -18,7 +18,7 @@ CONST_SPOT_EVICTION_POLICY_DEALLOCATE = "Deallocate"
 CONST_SCALE_DOWN_MODE_DELETE = "Delete"
 CONST_SCALE_DOWN_MODE_DEALLOCATE = "Deallocate"
 
-# node os disk type
+# os disk type
 CONST_OS_DISK_TYPE_MANAGED = "Managed"
 CONST_OS_DISK_TYPE_EPHEMERAL = "Ephemeral"
 
@@ -33,7 +33,11 @@ CONST_DEFAULT_WINDOWS_NODE_VM_SIZE = "Standard_D2s_v3"
 # os tye
 CONST_DEFAULT_NODE_OS_TYPE = "Linux"
 
-# consts for cluster related commands
+# vm set type
+CONST_VIRTUAL_MACHINE_SCALE_SETS = "VirtualMachineScaleSets"
+CONST_AVAILABILITY_SET = "AvailabilitySet"
+
+# consts for ManagedCluster
 # outbound type
 CONST_OUTBOUND_TYPE_LOAD_BALANCER = "loadBalancer"
 CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING = "userDefinedRouting"
