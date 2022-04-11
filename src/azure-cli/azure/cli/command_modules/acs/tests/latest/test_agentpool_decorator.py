@@ -45,6 +45,8 @@ from azure.cli.core.azclierror import (
     UnknownError,
 )
 from azure.cli.core.profiles import ResourceType
+from azure.cli.command_modules.acs.tests.latest.utils import get_test_data_file_path
+from azure.cli.core.util import get_file_json
 
 
 class AKSAgentPoolModelsTestCase(unittest.TestCase):
@@ -850,6 +852,92 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         ctx_1.attach_agentpool(agentpool)
         self.assertEqual(ctx_1.get_scale_down_mode(), CONST_SCALE_DOWN_MODE_DEALLOCATE)
 
+    def common_get_kubelet_config(self):
+        # default
+        ctx_1 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"kubelet_config": None}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_1.get_kubelet_config(), None)
+        agentpool_1 = self.create_initialized_agentpool_instance(
+            kubelet_config=self.models.KubeletConfig(pod_max_pids=100)
+        )
+        ctx_1.attach_agentpool(agentpool_1)
+        self.assertEqual(
+            ctx_1.get_kubelet_config(),
+            self.models.KubeletConfig(pod_max_pids=100),
+        )
+
+        # custom value
+        ctx_2 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"kubelet_config": "fake-path"}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        # fail on invalid file path
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx_2.get_kubelet_config()
+
+        # custom value
+        ctx_3 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"kubelet_config": get_test_data_file_path("invalidconfig.json")}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        # fail on invalid file content
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx_3.get_kubelet_config()
+
+    def common_get_linux_os_config(self):
+        # default
+        ctx_1 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"linux_os_config": None}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_1.get_linux_os_config(), None)
+        agentpool_1 = self.create_initialized_agentpool_instance(
+            linux_os_config=self.models.LinuxOSConfig(swap_file_size_mb=200)
+        )
+        ctx_1.attach_agentpool(agentpool_1)
+        self.assertEqual(
+            ctx_1.get_linux_os_config(),
+            self.models.LinuxOSConfig(swap_file_size_mb=200),
+        )
+
+        # custom value
+        ctx_2 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"linux_os_config": "fake-path"}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        # fail on invalid file path
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx_2.get_linux_os_config()
+
+        # custom value
+        ctx_3 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"linux_os_config": get_test_data_file_path("invalidconfig.json")}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        # fail on invalid file content
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx_3.get_linux_os_config()
+
     def common_get_aks_custom_headers(self):
         # default
         ctx_1 = AKSAgentPoolContext(
@@ -1044,6 +1132,12 @@ class AKSAgentPoolContextStandaloneModeTestCase(AKSAgentPoolContextCommonTestCas
     def test_get_scale_down_mode(self):
         self.common_get_scale_down_mode()
 
+    def test_get_kubelet_config(self):
+        self.common_get_kubelet_config()
+
+    def test_get_linux_os_config(self):
+        self.common_get_linux_os_config()
+
     def test_get_aks_custom_headers(self):
         self.common_get_aks_custom_headers()
 
@@ -1177,6 +1271,12 @@ class AKSAgentPoolContextManagedClusterModeTestCase(AKSAgentPoolContextCommonTes
 
     def test_get_scale_down_mode(self):
         self.common_get_scale_down_mode()
+
+    def test_get_kubelet_config(self):
+        self.common_get_kubelet_config()
+
+    def test_get_linux_os_config(self):
+        self.common_get_linux_os_config()
 
     def test_get_aks_custom_headers(self):
         self.common_get_aks_custom_headers()
@@ -1558,6 +1658,30 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
             ground_truth_agentpool_1.type_properties_type = "test_vm_set_type"
         self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
 
+    def common_set_up_custom_node_config(self):
+        dec_1 = AKSAgentPoolAddDecorator(
+            self.cmd,
+            self.client,
+            {
+                "kubelet_config": get_test_data_file_path("kubeletconfig.json"),
+                "linux_os_config": get_test_data_file_path("linuxosconfig.json"),
+            },
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        agentpool_1 = self.create_initialized_agentpool_instance(restore_defaults=False)
+        dec_1.context.attach_agentpool(agentpool_1)
+        dec_agentpool_1 = dec_1.set_up_custom_node_config(agentpool_1)
+        dec_agentpool_1 = self._restore_defaults_in_agentpool(dec_agentpool_1)
+
+        ground_truth_kubelet_config_1 = get_file_json(get_test_data_file_path("kubeletconfig.json"))
+        ground_truth_linux_os_config_1 = get_file_json(get_test_data_file_path("linuxosconfig.json"))
+        ground_truth_agentpool_1 = self.create_initialized_agentpool_instance(
+            kubelet_config=ground_truth_kubelet_config_1,
+            linux_os_config=ground_truth_linux_os_config_1,
+        )
+        self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
+
 
 class AKSAgentPoolAddDecoratorStandaloneModeTestCase(AKSAgentPoolAddDecoratorCommonTestCase):
     def setUp(self):
@@ -1600,6 +1724,9 @@ class AKSAgentPoolAddDecoratorStandaloneModeTestCase(AKSAgentPoolAddDecoratorCom
 
     def test_set_up_vm_properties(self):
         self.common_set_up_vm_properties()
+
+    def test_set_up_custom_node_config(self):
+        self.common_set_up_custom_node_config()
 
     def test_construct_default_agentpool(self):
         import inspect
@@ -1708,6 +1835,9 @@ class AKSAgentPoolAddDecoratorManagedClusterModeTestCase(AKSAgentPoolAddDecorato
 
     def test_set_up_vm_properties(self):
         self.common_set_up_vm_properties()
+
+    def test_set_up_custom_node_config(self):
+        self.common_set_up_custom_node_config()
 
     def test_construct_default_agentpool(self):
         import inspect
