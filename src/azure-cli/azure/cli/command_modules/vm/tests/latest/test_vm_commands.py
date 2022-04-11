@@ -6491,7 +6491,7 @@ class VMSSOrchestrationModeScenarioTest(ScenarioTest):
 
         self.cmd('ppg create -g {rg} -n {ppg}')
         self.cmd('vmss create -g {rg} -n {vmss} --orchestration-mode Flexible --single-placement-group false '
-                 '--ppg {ppg} --platform-fault-domain-count 3 --admin-username vmtest',
+                 '--ppg {ppg} --platform-fault-domain-count 3',
                  checks=[
                      self.check('vmss.singlePlacementGroup', False),
                      self.check('vmss.platformFaultDomainCount', 3)
@@ -6643,6 +6643,10 @@ class VMSSOrchestrationModeScenarioTest(ScenarioTest):
         self.kwargs.update({
             'vmss': 'vmsslongnametest',
         })
+
+        from azure.cli.core.azclierror import ArgumentUsageError
+        with self.assertRaisesRegex(ArgumentUsageError, 'please specify the --image when you want to specify the VM SKU'):
+            self.cmd('vmss create -n {vmss} -g {rg} --orchestration-mode Flexible --platform-fault-domain-count 1 --zones 1 --instance-count 3 --vm-sku Standard_D1_v2')
 
         self.cmd('vmss create -n {vmss} -g {rg} --image ubuntults --orchestration-mode flexible --admin-username vmtest')
 
