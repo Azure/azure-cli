@@ -26,16 +26,20 @@ CONST_OS_DISK_TYPE_EPHEMERAL = "Ephemeral"
 CONST_NODEPOOL_MODE_SYSTEM = "System"
 CONST_NODEPOOL_MODE_USER = "User"
 
-# vm size
-CONST_DEFAULT_NODE_VM_SIZE = "Standard_DS2_v2"
-CONST_DEFAULT_WINDOWS_NODE_VM_SIZE = "Standard_D2s_v3"
-
-# os tye
+# os type
 CONST_DEFAULT_NODE_OS_TYPE = "Linux"
+
+# os sku
+CONST_OS_SKU_UBUNTU = "Ubuntu"
+CONST_OS_SKU_CBLMARINER = "CBLMariner"
 
 # vm set type
 CONST_VIRTUAL_MACHINE_SCALE_SETS = "VirtualMachineScaleSets"
 CONST_AVAILABILITY_SET = "AvailabilitySet"
+
+# vm size
+CONST_DEFAULT_NODE_VM_SIZE = "Standard_DS2_v2"
+CONST_DEFAULT_WINDOWS_NODE_VM_SIZE = "Standard_D2s_v3"
 
 # consts for ManagedCluster
 # outbound type
@@ -58,6 +62,10 @@ CONST_STABLE_UPGRADE_CHANNEL = "stable"
 CONST_PATCH_UPGRADE_CHANNEL = "patch"
 CONST_NODE_IMAGE_UPGRADE_CHANNEL = "node-image"
 CONST_NONE_UPGRADE_CHANNEL = "none"
+
+# network plugin
+CONST_NETWORK_PLUGIN_KUBENET = "kubenet"
+CONST_NETWORK_PLUGIN_AZURE = "azure"
 
 # consts for addons
 # http application routing
