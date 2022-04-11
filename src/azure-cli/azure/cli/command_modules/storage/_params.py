@@ -682,6 +682,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='The permissions the SAS grants. Allowed values: {}. Can be combined.'.format(
                        get_permission_help_string(t_account_permissions)),
                    validator=get_permission_validator(t_account_permissions))
+        c.extra('encryption_scope', help='A predefined encryption scope used to encrypt the data on the service.')
         c.ignore('sas_token')
 
     or_policy_type = CLIArgumentType(
@@ -830,6 +831,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    validator=get_permission_validator(t_blob_permissions))
         c.argument('snapshot', help='An optional blob snapshot ID. Opaque DateTime value that, when present, '
                                     'specifies the blob snapshot to grant permission.')
+        c.extra('encryption_scope', help='A predefined encryption scope used to encrypt the data on the service.')
         c.ignore('sas_token')
 
     with self.argument_context('storage blob restore', resource_type=ResourceType.MGMT_STORAGE) as c:
@@ -1435,6 +1437,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    validator=as_user_validator,
                    help="Indicates that this command return the SAS signed with the user delegation key. "
                         "The expiry parameter and '--auth-mode login' are required if this argument is specified. ")
+        c.extra('encryption_scope', help='A predefined encryption scope used to encrypt the data on the service.')
         c.ignore('sas_token')
 
     with self.argument_context('storage container lease') as c:
