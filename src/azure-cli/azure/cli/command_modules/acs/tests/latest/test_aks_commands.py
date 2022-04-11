@@ -9,26 +9,19 @@ import subprocess
 import tempfile
 import unittest
 
-from knack.util import CLIError
-from azure.cli.core.azclierror import CLIInternalError
-
-from azure.cli.testsdk import ScenarioTest, live_only
-from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from azure.cli.testsdk.checkers import (
-    StringCheck,
-    StringContainCheck,
-    StringContainCheckIgnoreCase,
-)
+from azure.cli.command_modules.acs._consts import CONST_KUBE_DASHBOARD_ADDON_NAME
 from azure.cli.command_modules.acs._format import version_to_tuple
-from azure.cli.command_modules.acs._consts import (
-    CONST_KUBE_DASHBOARD_ADDON_NAME,
-)
-from .recording_processors import KeyReplacer
-from .custom_preparers import (
+from azure.cli.command_modules.acs.tests.latest.custom_preparers import (
     AKSCustomResourceGroupPreparer,
-    AKSCustomVirtualNetworkPreparer,
     AKSCustomRoleBasedServicePrincipalPreparer,
+    AKSCustomVirtualNetworkPreparer,
 )
+from azure.cli.command_modules.acs.tests.latest.recording_processors import KeyReplacer
+from azure.cli.core.azclierror import CLIInternalError
+from azure.cli.testsdk import ScenarioTest, live_only
+from azure.cli.testsdk.checkers import StringCheck, StringContainCheck, StringContainCheckIgnoreCase
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
+from knack.util import CLIError
 # flake8: noqa
 
 

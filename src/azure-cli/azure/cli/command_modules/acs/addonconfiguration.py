@@ -4,23 +4,8 @@
 # --------------------------------------------------------------------------------------------
 import json
 
-from azure.cli.core.azclierror import (
-    AzCLIError,
-    CLIError,
-    ClientRequestError,
-)
-from azure.cli.core.commands import LongRunningOperation
-from azure.cli.core.commands.client_factory import (
-    get_mgmt_service_client,
-)
-from azure.cli.core.profiles import ResourceType
-from azure.cli.core.util import sdk_no_wait, send_raw_request
-from azure.core.exceptions import HttpResponseError
-from knack.log import get_logger
-from msrestazure.tools import parse_resource_id, resource_id
-
-from ._client_factory import cf_resource_groups, cf_resources
-from ._consts import (
+from azure.cli.command_modules.acs._client_factory import cf_resource_groups, cf_resources
+from azure.cli.command_modules.acs._consts import (
     CONST_INGRESS_APPGW_ADDON_NAME,
     CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID,
     CONST_INGRESS_APPGW_SUBNET_CIDR,
@@ -29,8 +14,16 @@ from ._consts import (
     CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID,
     CONST_VIRTUAL_NODE_ADDON_NAME,
 )
-from ._resourcegroup import get_rg_location
-from ._roleassignments import add_role_assignment
+from azure.cli.command_modules.acs._resourcegroup import get_rg_location
+from azure.cli.command_modules.acs._roleassignments import add_role_assignment
+from azure.cli.core.azclierror import AzCLIError, ClientRequestError, CLIError
+from azure.cli.core.commands import LongRunningOperation
+from azure.cli.core.commands.client_factory import get_mgmt_service_client
+from azure.cli.core.profiles import ResourceType
+from azure.cli.core.util import sdk_no_wait, send_raw_request
+from azure.core.exceptions import HttpResponseError
+from knack.log import get_logger
+from msrestazure.tools import parse_resource_id, resource_id
 
 logger = get_logger(__name__)
 

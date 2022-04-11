@@ -4,8 +4,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.help_files import helps  # pylint: disable=import-error
-# pylint: disable=line-too-long, too-many-lines
+from knack.help_files import helps
+
 
 helps['acs'] = """
 type: group
