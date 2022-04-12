@@ -32,7 +32,6 @@ from azure.cli.command_modules.sql.custom import (
     ComputeModelType,
     ResourceIdType)
 from datetime import datetime, timedelta
-from time import sleep
 
 # Constants
 server_name_prefix = 'clitestserver'
@@ -1122,8 +1121,7 @@ class SqlManagedInstanceOperationMgmtScenarioTest(ScenarioTest):
 
         # Managed instance becomes ready before the operation is completed. For that reason, we should wait
         # for the operation to complete in order to proceed with testing.
-        if self.is_live:
-            sleep(120)
+        time.sleep(120)
 
         print('Updating MI...\n')
 
@@ -1326,7 +1324,7 @@ def _create_db_wait_for_first_backup(test, resource_group, server, database_name
     # Wait until earliestRestoreDate is in the past. When run live, this will take at least
     # 10 minutes. Unforunately there's no way to speed this up
     while db['earliestRestoreDate'] is None:
-        sleep(60)
+        time.sleep(60)
         db = test.cmd('sql db show -g {} -s {} -n {}'
                       .format(resource_group, server, database_name)).get_output_in_json()
 
@@ -1336,7 +1334,7 @@ def _create_db_wait_for_first_backup(test, resource_group, server, database_name
         print('Waiting until earliest restore date', earliest_restore_date)
 
     while datetime.utcnow() <= earliest_restore_date:
-        sleep(10)  # seconds
+        time.sleep(10)
 
     return db
 
@@ -1453,7 +1451,7 @@ class SqlServerDbRestoreDeletedScenarioTest(ScenarioTest):
             # Deleted db not found, sleep (if running live) and then poll again.
             if self.is_live:
                 self.assertTrue(datetime.now() < start_time + timeout, 'Deleted db not found before timeout expired.')
-                sleep(10)  # seconds
+                time.sleep(10)  # seconds
 
         deleted_db = deleted_dbs[0]
 
@@ -2740,8 +2738,7 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
                  .format(resource_group, server, database_name),
                  checks=[JMESPathCheck('elasticPoolName', self.pool_name)])
 
-        if self.is_live:
-            sleep(120)
+        time.sleep(120)
 
         # Move database to second pool by specifying pool name.
         # Also specify service objective just for fun.
@@ -2761,8 +2758,7 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
                  .format(resource_group, server, database_name),
                  checks=[JMESPathCheck('elasticPoolName', pool_name2)])
 
-        if self.is_live:
-            sleep(60)
+        time.sleep(60)
 
         # Remove database from pool
         self.cmd('sql db update -g {} -s {} -n {} --service-objective {}'
@@ -2774,8 +2770,7 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('requestedServiceObjectiveName', db_service_objective),
                      JMESPathCheck('status', 'Online')])
 
-        if self.is_live:
-            sleep(60)
+        time.sleep(60)
 
         # Move database back into pool by specifying pool id.
         # Note that 'elasticPoolName' is populated in transform
@@ -3410,7 +3405,7 @@ class SqlTransparentDataEncryptionScenarioTest(ScenarioTest):
         self.cmd('sql db tde set -g {} -s {} -d {} --status Disabled'
                  .format(resource_group, sn, db_name))
 
-        sleep(5)
+        time.sleep(5)
 
         self.cmd('sql db tde show -g {} -s {} -d {}'
                  .format(resource_group, sn, db_name),
@@ -3420,7 +3415,7 @@ class SqlTransparentDataEncryptionScenarioTest(ScenarioTest):
         self.cmd('sql db tde set -g {} -s {} -d {} --status Enabled'
                  .format(resource_group, sn, db_name))
 
-        sleep(5)
+        time.sleep(5)
 
         # validate encryption is enabled
         self.cmd('sql db tde show -g {} -s {} -d {}'
@@ -4478,8 +4473,7 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
 
         # Managed instance becomes ready before the operation is completed. For that reason, we should wait
         # for the operation to complete in order to proceed with testing.
-        if self.is_live:
-            sleep(120)
+        time.sleep(120)
 
         # test update sql managed_instance 1
         self.cmd('sql mi update -g {} -n {} --admin-password {} -i'
@@ -4591,8 +4585,8 @@ class SqlManagedInstanceBackupStorageRedundancyTest(ScenarioTest):
                 JMESPathCheck('resourceGroup', resource_group_1),
                 JMESPathCheck('currentBackupStorageRedundancy', self.bsr_geo),
                 JMESPathCheck('requestedBackupStorageRedundancy', self.bsr_geo)])
-        if self.is_live:
-            sleep(120)
+
+        time.sleep(120)
 
         bsr_local = "Local"
         # Test update bsr to Local
@@ -4604,8 +4598,7 @@ class SqlManagedInstanceBackupStorageRedundancyTest(ScenarioTest):
                 JMESPathCheck('currentBackupStorageRedundancy', bsr_local),
                 JMESPathCheck('requestedBackupStorageRedundancy', bsr_local)])
 
-        if self.is_live:
-            sleep(120)
+        time.sleep(120)
 
         # Test update bsr to Geo
         self.cmd('sql mi update -g {} -n {} --bsr {} --yes'
@@ -5833,7 +5826,7 @@ class SqlManagedInstanceFailoverScenarionTest(ScenarioTest):
 
         # Wait for 5 minutes so that first full backup is created
         if self.in_recording or self.is_live:
-            sleep(5 * 60)
+            time.sleep(5 * 60)
 
         # Failover managed instance primary replica
         self.cmd('sql mi failover -g {resource_group} -n {managed_instance_name}', checks=NoneCheck())
@@ -5873,7 +5866,7 @@ class SqlManagedDatabaseLogReplayScenarionTest(ScenarioTest):
             checks=NoneCheck())
 
         if self.in_recording or self.is_live:
-            sleep(10)
+            time.sleep(10)
 
         self.cmd(
             'sql midb log-replay wait -g {resource_group} --mi {managed_instance_name} -n {managed_database_name} --exists')
@@ -5884,7 +5877,7 @@ class SqlManagedDatabaseLogReplayScenarionTest(ScenarioTest):
             checks=NoneCheck())
 
         if self.in_recording or self.is_live:
-            sleep(60)
+            time.sleep(60)
 
         # Verify status is Online
         self.cmd('sql midb show -g {resource_group} --mi {managed_instance_name} -n {managed_database_name}',
@@ -5906,7 +5899,7 @@ class SqlManagedDatabaseLogReplayScenarionTest(ScenarioTest):
 
         # Wait a minute to start restoring
         if self.in_recording or self.is_live:
-            sleep(60)
+            time.sleep(60)
 
         # Cancel log replay service
         self.cmd(
@@ -5939,7 +5932,7 @@ class SqlLedgerDigestUploadsScenarioTest(ScenarioTest):
         self.cmd('sql db ledger-digest-uploads enable -g {} -s {} --name {} --endpoint {}'
                  .format(resource_group, server, db_name, endpoint))
 
-        sleep(2)
+        time.sleep(2)
 
         # validate setting through show command
         self.cmd('sql db ledger-digest-uploads show -g {} -s {} --name {}'
@@ -5951,7 +5944,7 @@ class SqlLedgerDigestUploadsScenarioTest(ScenarioTest):
         self.cmd('sql db ledger-digest-uploads disable -g {} -s {} --name {}'
                  .format(resource_group, server, db_name))
 
-        sleep(2)
+        time.sleep(2)
 
         # validate setting through show command
         self.cmd('sql db ledger-digest-uploads show -g {} -s {} --name {}'
