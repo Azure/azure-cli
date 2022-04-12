@@ -629,8 +629,8 @@ class AcsCustomCommandTest(unittest.TestCase):
             'https://docs.microsoft.com/azure/azure-resource-manager/resource-group-create-service-principal-portal' in str(context.exception))
 
     @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_rg_location', return_value='eastus')
-    @mock.patch('azure.cli.command_modules.acs.custom.cf_resource_groups', autospec=True)
-    @mock.patch('azure.cli.command_modules.acs.custom.cf_resources', autospec=True)
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.cf_resource_groups', autospec=True)
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.cf_resources', autospec=True)
     def test_update_addons(self, rg_def, cf_resource_groups, cf_resources):
         # http_application_routing enabled
         instance = mock.MagicMock()
@@ -649,19 +649,12 @@ class AcsCustomCommandTest(unittest.TestCase):
         self.assertFalse(addon_profile.enabled)
 
         # monitoring added
-        with mock.patch(
-            "azure.cli.command_modules.acs.addonconfiguration.cf_resource_groups",
-            autospec=True,
-        ), mock.patch(
-            "azure.cli.command_modules.acs.addonconfiguration.cf_resources",
-            autospec=True,
-        ):
-            instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
-                                      'clitest000001', 'clitest000001', 'monitoring', enable=True)
-            monitoring_addon_profile = instance.addon_profiles[CONST_MONITORING_ADDON_NAME]
-            self.assertTrue(monitoring_addon_profile.enabled)
-            routing_addon_profile = instance.addon_profiles[CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME]
-            self.assertFalse(routing_addon_profile.enabled)
+        instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
+                                    'clitest000001', 'clitest000001', 'monitoring', enable=True)
+        monitoring_addon_profile = instance.addon_profiles[CONST_MONITORING_ADDON_NAME]
+        self.assertTrue(monitoring_addon_profile.enabled)
+        routing_addon_profile = instance.addon_profiles[CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME]
+        self.assertFalse(routing_addon_profile.enabled)
 
         # monitoring disabled, routing enabled
         instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
@@ -731,18 +724,11 @@ class AcsCustomCommandTest(unittest.TestCase):
         # monitoring enabled and then enabled again should error
         instance = mock.Mock()
         instance.addon_profiles = None
-        with mock.patch(
-            "azure.cli.command_modules.acs.addonconfiguration.cf_resource_groups",
-            autospec=True,
-        ), mock.patch(
-            "azure.cli.command_modules.acs.addonconfiguration.cf_resources",
-            autospec=True,
-        ):
+        instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
+                                    'clitest000001', 'clitest000001', 'monitoring', enable=True)
+        with self.assertRaises(CLIError):
             instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
-                                      'clitest000001', 'clitest000001', 'monitoring', enable=True)
-            with self.assertRaises(CLIError):
-                instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
-                                          'clitest000001', 'clitest000001', 'monitoring', enable=True)
+                                        'clitest000001', 'clitest000001', 'monitoring', enable=True)
 
         # virtual-node enabled
         instance = mock.MagicMock()
