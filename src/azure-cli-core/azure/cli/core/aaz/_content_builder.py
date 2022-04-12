@@ -1,3 +1,8 @@
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
+
 from ._base import AAZBaseValue, AAZUndefined
 from ._field_value import AAZSimpleValue, AAZDict, AAZList, AAZObject
 from ._arg_browser import AAZArgBrowser

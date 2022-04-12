@@ -1,3 +1,8 @@
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
+
 from .exceptions import AAZUnknownFieldError, AAZUndefinedValueError
 from knack.help import _print_indent, REQUIRED_TAG, FIRST_LINE_PREFIX
 from knack.util import status_tag_messages
