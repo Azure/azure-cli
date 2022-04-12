@@ -1913,25 +1913,8 @@ def aks_browse(
     )
 
 
-def _trim_nodepoolname(nodepool_name):
-    if not nodepool_name:
-        return "nodepool1"
-    return nodepool_name[:12]
-
-
-def _validate_ssh_key(no_ssh_key, ssh_key_value):
-    if not no_ssh_key:
-        try:
-            if not ssh_key_value or not is_valid_ssh_rsa_public_key(ssh_key_value):
-                raise ValueError()
-        except (TypeError, ValueError):
-            shortened_key = truncate_text(ssh_key_value)
-            raise CLIError(
-                'Provided ssh key ({}) is invalid or non-existent'.format(shortened_key))
-
-
-# pylint: disable=too-many-statements,too-many-branches
-def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint: disable=too-many-locals
+# pylint: disable=too-many-locals
+def aks_create(cmd, client, resource_group_name, name, ssh_key_value,
                dns_name_prefix=None,
                location=None,
                admin_username="azureuser",
@@ -1990,7 +1973,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                zones=None,
                enable_node_public_ip=False,
                node_public_ip_prefix_id=None,
-               generate_ssh_keys=False,  # pylint: disable=unused-argument
+               generate_ssh_keys=False,
                api_server_authorized_ip_ranges=None,
                enable_private_cluster=False,
                private_dns_zone=None,
@@ -2046,6 +2029,71 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         return None
     # send request to create a real managed cluster
     return aks_create_decorator.create_mc(mc)
+
+
+def aks_update(cmd, client, resource_group_name, name,
+               enable_cluster_autoscaler=False,
+               disable_cluster_autoscaler=False,
+               update_cluster_autoscaler=False,
+               cluster_autoscaler_profile=None,
+               min_count=None, max_count=None,
+               uptime_sla=False,
+               no_uptime_sla=False,
+               load_balancer_managed_outbound_ip_count=None,
+               load_balancer_outbound_ips=None,
+               load_balancer_outbound_ip_prefixes=None,
+               load_balancer_outbound_ports=None,
+               load_balancer_idle_timeout=None,
+               nat_gateway_managed_outbound_ip_count=None,
+               nat_gateway_idle_timeout=None,
+               attach_acr=None,
+               detach_acr=None,
+               api_server_authorized_ip_ranges=None,
+               enable_aad=False,
+               aad_tenant_id=None,
+               aad_admin_group_object_ids=None,
+               enable_ahub=False,
+               disable_ahub=False,
+               windows_admin_password=None,
+               auto_upgrade_channel=None,
+               enable_managed_identity=False,
+               assign_identity=None,
+               disable_local_accounts=False,
+               enable_local_accounts=False,
+               yes=False,
+               no_wait=False,
+               enable_public_fqdn=False,
+               disable_public_fqdn=False,
+               enable_azure_rbac=False,
+               disable_azure_rbac=False,
+               enable_secret_rotation=False,
+               disable_secret_rotation=False,
+               rotation_poll_interval=None,
+               tags=None,
+               nodepool_labels=None,
+               enable_windows_gmsa=False,
+               gmsa_dns_server=None,
+               gmsa_root_domain_name=None,
+               aks_custom_headers=None):
+    # DO NOT MOVE: get all the original parameters and save them as a dictionary
+    raw_parameters = locals()
+
+    # decorator pattern
+    from azure.cli.command_modules.acs.decorator import AKSUpdateDecorator
+    aks_update_decorator = AKSUpdateDecorator(
+        cmd=cmd,
+        client=client,
+        raw_parameters=raw_parameters,
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+    )
+    try:
+        # update mc profile
+        mc = aks_update_decorator.update_default_mc_profile()
+    except DecoratorEarlyExitException:
+        # exit gracefully
+        return None
+    # send request to update the real managed cluster
+    return aks_update_decorator.update_mc(mc)
 
 
 # pylint: disable=line-too-long
@@ -2318,72 +2366,6 @@ def aks_scale(cmd, client, resource_group_name, name, node_count, nodepool_name=
             instance.aad_profile = None
             return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, name, instance)
     raise CLIError('The nodepool "{}" was not found.'.format(nodepool_name))
-
-
-# pylint: disable=inconsistent-return-statements
-def aks_update(cmd, client, resource_group_name, name,
-               enable_cluster_autoscaler=False,
-               disable_cluster_autoscaler=False,
-               update_cluster_autoscaler=False,
-               cluster_autoscaler_profile=None,
-               min_count=None, max_count=None,
-               uptime_sla=False,
-               no_uptime_sla=False,
-               load_balancer_managed_outbound_ip_count=None,
-               load_balancer_outbound_ips=None,
-               load_balancer_outbound_ip_prefixes=None,
-               load_balancer_outbound_ports=None,
-               load_balancer_idle_timeout=None,
-               nat_gateway_managed_outbound_ip_count=None,
-               nat_gateway_idle_timeout=None,
-               attach_acr=None,
-               detach_acr=None,
-               api_server_authorized_ip_ranges=None,
-               enable_aad=False,
-               aad_tenant_id=None,
-               aad_admin_group_object_ids=None,
-               enable_ahub=False,
-               disable_ahub=False,
-               windows_admin_password=None,
-               auto_upgrade_channel=None,
-               enable_managed_identity=False,
-               assign_identity=None,
-               disable_local_accounts=False,
-               enable_local_accounts=False,
-               yes=False,
-               no_wait=False,
-               enable_public_fqdn=False,
-               disable_public_fqdn=False,
-               enable_azure_rbac=False,
-               disable_azure_rbac=False,
-               enable_secret_rotation=False,
-               disable_secret_rotation=False,
-               rotation_poll_interval=None,
-               tags=None,
-               nodepool_labels=None,
-               enable_windows_gmsa=False,
-               gmsa_dns_server=None,
-               gmsa_root_domain_name=None,
-               aks_custom_headers=None):
-    # DO NOT MOVE: get all the original parameters and save them as a dictionary
-    raw_parameters = locals()
-
-    # decorator pattern
-    from azure.cli.command_modules.acs.decorator import AKSUpdateDecorator
-    aks_update_decorator = AKSUpdateDecorator(
-        cmd=cmd,
-        client=client,
-        raw_parameters=raw_parameters,
-        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-    )
-    try:
-        # update mc profile
-        mc = aks_update_decorator.update_default_mc_profile()
-    except DecoratorEarlyExitException:
-        # exit gracefully
-        return None
-    # send request to update the real managed cluster
-    return aks_update_decorator.update_mc(mc)
 
 
 # pylint: disable=unused-argument,inconsistent-return-statements,too-many-return-statements
@@ -2824,111 +2806,6 @@ def _get_azext_module(extension_name, module_name):
         raise CLIError(ie)
 
 
-def _handle_addons_args(cmd, addons_str, subscription_id, resource_group_name, addon_profiles=None,
-                        workspace_resource_id=None,
-                        enable_msi_auth_for_monitoring=False,
-                        aci_subnet_name=None,
-                        vnet_subnet_id=None,
-                        pod_subnet_id=None,
-                        appgw_name=None,
-                        appgw_subnet_cidr=None,
-                        appgw_id=None,
-                        appgw_subnet_id=None,
-                        appgw_watch_namespace=None,
-                        enable_sgxquotehelper=False,
-                        enable_secret_rotation=False,
-                        rotation_poll_interval=None,):
-    ManagedClusterAddonProfile = cmd.get_models('ManagedClusterAddonProfile',
-                                                resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                                operation_group='managed_clusters')
-    if not addon_profiles:
-        addon_profiles = {}
-    addons = addons_str.split(',') if addons_str else []
-    if 'http_application_routing' in addons:
-        addon_profiles[CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME] = ManagedClusterAddonProfile(
-            enabled=True)
-        addons.remove('http_application_routing')
-    if 'kube-dashboard' in addons:
-        addon_profiles[CONST_KUBE_DASHBOARD_ADDON_NAME] = ManagedClusterAddonProfile(
-            enabled=True)
-        addons.remove('kube-dashboard')
-    # TODO: can we help the user find a workspace resource ID?
-    if 'monitoring' in addons:
-        if not workspace_resource_id:
-            # use default workspace if exists else create default workspace
-            workspace_resource_id = ensure_default_log_analytics_workspace_for_monitoring(
-                cmd, subscription_id, resource_group_name)
-
-        workspace_resource_id = workspace_resource_id.strip()
-        if not workspace_resource_id.startswith('/'):
-            workspace_resource_id = '/' + workspace_resource_id
-        if workspace_resource_id.endswith('/'):
-            workspace_resource_id = workspace_resource_id.rstrip('/')
-        addon_profiles[CONST_MONITORING_ADDON_NAME] = ManagedClusterAddonProfile(
-            enabled=True, config={CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: workspace_resource_id,
-                                  CONST_MONITORING_USING_AAD_MSI_AUTH: enable_msi_auth_for_monitoring})
-        addons.remove('monitoring')
-    # error out if '--enable-addons=monitoring' isn't set but workspace_resource_id is
-    elif workspace_resource_id:
-        raise CLIError(
-            '"--workspace-resource-id" requires "--enable-addons monitoring".')
-    if 'azure-policy' in addons:
-        addon_profiles[CONST_AZURE_POLICY_ADDON_NAME] = ManagedClusterAddonProfile(
-            enabled=True)
-        addons.remove('azure-policy')
-    if 'virtual-node' in addons:
-        if not aci_subnet_name or not vnet_subnet_id:
-            raise CLIError(
-                '"--enable-addons virtual-node" requires "--aci-subnet-name" and "--vnet-subnet-id".')
-        # TODO: how about aciConnectorwindows, what is its addon name?
-        os_type = 'Linux'
-        addon_profiles[CONST_VIRTUAL_NODE_ADDON_NAME + os_type] = ManagedClusterAddonProfile(
-            enabled=True,
-            config={CONST_VIRTUAL_NODE_SUBNET_NAME: aci_subnet_name}
-        )
-        addons.remove('virtual-node')
-    if 'ingress-appgw' in addons:
-        addon_profile = ManagedClusterAddonProfile(enabled=True, config={})
-        if appgw_name is not None:
-            addon_profile.config[CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME] = appgw_name
-        if appgw_subnet_cidr is not None:
-            addon_profile.config[CONST_INGRESS_APPGW_SUBNET_CIDR] = appgw_subnet_cidr
-        if appgw_id is not None:
-            addon_profile.config[CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID] = appgw_id
-        if appgw_subnet_id is not None:
-            addon_profile.config[CONST_INGRESS_APPGW_SUBNET_ID] = appgw_subnet_id
-        if appgw_watch_namespace is not None:
-            addon_profile.config[CONST_INGRESS_APPGW_WATCH_NAMESPACE] = appgw_watch_namespace
-        addon_profiles[CONST_INGRESS_APPGW_ADDON_NAME] = addon_profile
-        addons.remove('ingress-appgw')
-    if 'confcom' in addons:
-        addon_profile = ManagedClusterAddonProfile(
-            enabled=True, config={CONST_ACC_SGX_QUOTE_HELPER_ENABLED: "false"})
-        if enable_sgxquotehelper:
-            addon_profile.config[CONST_ACC_SGX_QUOTE_HELPER_ENABLED] = "true"
-        addon_profiles[CONST_CONFCOM_ADDON_NAME] = addon_profile
-        addons.remove('confcom')
-    if 'open-service-mesh' in addons:
-        addon_profile = ManagedClusterAddonProfile(enabled=True, config={})
-        addon_profiles[CONST_OPEN_SERVICE_MESH_ADDON_NAME] = addon_profile
-        addons.remove('open-service-mesh')
-    if 'azure-keyvault-secrets-provider' in addons:
-        addon_profile = ManagedClusterAddonProfile(
-            enabled=True, config={CONST_SECRET_ROTATION_ENABLED: "false", CONST_ROTATION_POLL_INTERVAL: "2m"}
-        )
-        if enable_secret_rotation:
-            addon_profile.config[CONST_SECRET_ROTATION_ENABLED] = "true"
-        if rotation_poll_interval is not None:
-            addon_profile.config[CONST_ROTATION_POLL_INTERVAL] = rotation_poll_interval
-        addon_profiles[CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME] = addon_profile
-        addons.remove('azure-keyvault-secrets-provider')
-    # error out if any (unrecognized) addons remain
-    if addons:
-        raise CLIError('"{}" {} not recognized by the --enable-addons argument.'.format(
-            ",".join(addons), "are" if len(addons) > 1 else "is"))
-    return addon_profiles
-
-
 def _install_dev_spaces_extension(cmd, extension_name):
     try:
         from azure.cli.core.extension import operations
@@ -2967,127 +2844,6 @@ def _get_or_add_extension(cmd, extension_name, extension_module, update=False):
     except ExtensionNotInstalledException:
         return _install_dev_spaces_extension(cmd, extension_name)
     return True
-
-
-def _ensure_container_insights_for_monitoring(cmd, addon):
-    # Workaround for this addon key which has been seen lowercased in the wild.
-    for key in list(addon.config):
-        if (key.lower() == CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID.lower() and
-                key != CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID):
-            addon.config[CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID] = addon.config.pop(
-                key)
-
-    workspace_resource_id = addon.config[CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID]
-
-    workspace_resource_id = workspace_resource_id.strip()
-
-    if not workspace_resource_id.startswith('/'):
-        workspace_resource_id = '/' + workspace_resource_id
-
-    if workspace_resource_id.endswith('/'):
-        workspace_resource_id = workspace_resource_id.rstrip('/')
-
-    # extract subscription ID and resource group from workspace_resource_id URL
-    try:
-        subscription_id = workspace_resource_id.split('/')[2]
-        resource_group = workspace_resource_id.split('/')[4]
-    except IndexError:
-        raise CLIError(
-            'Could not locate resource group in workspace-resource-id URL.')
-
-    # region of workspace can be different from region of RG so find the location of the workspace_resource_id
-    resources = cf_resources(cmd.cli_ctx, subscription_id)
-    try:
-        resource = resources.get_by_id(
-            workspace_resource_id, '2015-11-01-preview')
-        location = resource.location
-    except CloudError as ex:
-        raise ex
-
-    unix_time_in_millis = int(
-        (datetime.datetime.utcnow() - datetime.datetime.utcfromtimestamp(0)).total_seconds() * 1000.0)
-
-    solution_deployment_name = 'ContainerInsights-{}'.format(
-        unix_time_in_millis)
-
-    # pylint: disable=line-too-long
-    template = {
-        "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-        "contentVersion": "1.0.0.0",
-        "parameters": {
-            "workspaceResourceId": {
-                "type": "string",
-                "metadata": {
-                    "description": "Azure Monitor Log Analytics Resource ID"
-                }
-            },
-            "workspaceRegion": {
-                "type": "string",
-                "metadata": {
-                    "description": "Azure Monitor Log Analytics workspace region"
-                }
-            },
-            "solutionDeploymentName": {
-                "type": "string",
-                "metadata": {
-                    "description": "Name of the solution deployment"
-                }
-            }
-        },
-        "resources": [
-            {
-                "type": "Microsoft.Resources/deployments",
-                "name": "[parameters('solutionDeploymentName')]",
-                "apiVersion": "2017-05-10",
-                "subscriptionId": "[split(parameters('workspaceResourceId'),'/')[2]]",
-                "resourceGroup": "[split(parameters('workspaceResourceId'),'/')[4]]",
-                "properties": {
-                    "mode": "Incremental",
-                    "template": {
-                        "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-                        "contentVersion": "1.0.0.0",
-                        "parameters": {},
-                        "variables": {},
-                        "resources": [
-                            {
-                                "apiVersion": "2015-11-01-preview",
-                                "type": "Microsoft.OperationsManagement/solutions",
-                                "location": "[parameters('workspaceRegion')]",
-                                "name": "[Concat('ContainerInsights', '(', split(parameters('workspaceResourceId'),'/')[8], ')')]",
-                                "properties": {
-                                    "workspaceResourceId": "[parameters('workspaceResourceId')]"
-                                },
-                                "plan": {
-                                    "name": "[Concat('ContainerInsights', '(', split(parameters('workspaceResourceId'),'/')[8], ')')]",
-                                    "product": "[Concat('OMSGallery/', 'ContainerInsights')]",
-                                    "promotionCode": "",
-                                    "publisher": "Microsoft"
-                                }
-                            }
-                        ]
-                    },
-                    "parameters": {}
-                }
-            }
-        ]
-    }
-
-    params = {
-        "workspaceResourceId": {
-            "value": workspace_resource_id
-        },
-        "workspaceRegion": {
-            "value": location
-        },
-        "solutionDeploymentName": {
-            "value": solution_deployment_name
-        }
-    }
-
-    deployment_name = 'aks-monitoring-{}'.format(unix_time_in_millis)
-    # publish the Container Insights solution to the Log Analytics workspace
-    return _invoke_deployment(cmd, resource_group, deployment_name, template, params,
-                              validate=False, no_wait=False, subscription_id=subscription_id)
 
 
 def _ensure_aks_acr(cmd,
@@ -3707,13 +3463,6 @@ def _create_client_secret():
     return client_secret
 
 
-def _get_rg_location(ctx, resource_group_name, subscription_id=None):
-    groups = cf_resource_groups(ctx, subscription_id=subscription_id)
-    # Just do the get, we don't need the result, it will error out if the group doesn't exist.
-    rg = groups.get(resource_group_name)
-    return rg.location
-
-
 def _check_cluster_autoscaler_flag(enable_cluster_autoscaler,
                                    min_count,
                                    max_count,
@@ -3837,37 +3586,6 @@ def _remove_osa_nulls(managed_clusters):
             if getattr(managed_cluster.network_profile, attr, None) is None:
                 delattr(managed_cluster.network_profile, attr)
     return managed_clusters
-
-
-def _validate_aci_location(norm_location):
-    """
-    Validate the Azure Container Instance location
-    """
-    aci_locations = [
-        "australiaeast",
-        "canadacentral",
-        "centralindia",
-        "centralus",
-        "eastasia",
-        "eastus",
-        "eastus2",
-        "eastus2euap",
-        "japaneast",
-        "northcentralus",
-        "northeurope",
-        "southcentralus",
-        "southeastasia",
-        "southindia",
-        "uksouth",
-        "westcentralus",
-        "westus",
-        "westus2",
-        "westeurope"
-    ]
-
-    if norm_location not in aci_locations:
-        raise CLIError('Azure Container Instance is not available at location "{}".'.format(norm_location) +
-                       ' The available locations are "{}"'.format(','.join(aci_locations)))
 
 
 def osa_list(cmd, client, resource_group_name=None):
