@@ -37,19 +37,20 @@ class AAZArgBrowser:
             sub_browser = AAZArgBrowser(sub_value, sub_data, parent=self)
             if len(names) == 1:
                 return sub_browser
-            else:
-                assert len(names) == 2
-                return sub_browser.get_prop(f'.{names[1]}')
+            assert len(names) == 2
+            return sub_browser.get_prop(f'.{names[1]}')
         else:
             raise NotImplementedError()
 
     def get_elements(self):
         if isinstance(self._arg_data, list):
             for idx, d in enumerate(self._arg_data):
-                yield idx, AAZArgBrowser(self._arg_value[idx], d, parent=None)  # not support to access parent from element args
+                # not support to access parent from element args
+                yield idx, AAZArgBrowser(self._arg_value[idx], d, parent=None)
         elif isinstance(self._arg_data, dict):
             for k, d in self._arg_data.items():
-                yield k, AAZArgBrowser(self._arg_value[k], d, parent=None)  # not support to access parent from element args
+                # not support to access parent from element args
+                yield k, AAZArgBrowser(self._arg_value[k], d, parent=None)
         else:
             raise NotImplementedError()
 
@@ -59,4 +60,4 @@ class AAZArgBrowser:
 
     @property
     def is_patch(self):
-        return self._arg_value._is_patch
+        return self._arg_value._is_patch    # pylint: disable=protected-access

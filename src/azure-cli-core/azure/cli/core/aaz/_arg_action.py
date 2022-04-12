@@ -3,19 +3,20 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint: disable=protected-access
+
 import os
 import re
 from argparse import Action
 from collections import OrderedDict
 
-from azure.cli.core import azclierror
 from knack.log import get_logger
 
+from azure.cli.core import azclierror
 from ._base import AAZUndefined
+from ._help import AAZShowHelp
 from ._utils import AAZShortHandSyntaxParser
 from .exceptions import AAZInvalidShorthandSyntaxError, AAZInvalidValueError
-from ._help import AAZShowHelp
-
 
 logger = get_logger(__name__)
 
@@ -34,7 +35,8 @@ class AAZArgActionOperations:
         for keys, data in self._ops:
             self._assign_data(args, data, dest, *keys)
 
-    def _assign_data(self, args, data, dest, *keys):
+    @staticmethod
+    def _assign_data(args, data, dest, *keys):
         from ._field_value import AAZList
         arg = args
         key = dest
@@ -114,20 +116,18 @@ class AAZSimpleTypeArgAction(AAZArgAction):
         if isinstance(data, str):
             if cls._schema.enum:
                 return cls._schema.enum[data]
-            else:
-                return cls._schema.DataType(data)
+            return cls._schema.DataType(data)
         elif isinstance(data, cls._schema.DataType):
             return data
         elif data is None:
             if cls._schema._nullable:
                 return data
-            else:
-                raise AAZInvalidValueError(f"is not nullable")
+            raise AAZInvalidValueError("is not nullable")
         else:
             raise AAZInvalidValueError(f"{cls._schema.DataType} type value expected, got '{data}'({type(data)})")
 
 
-class AAZCompoundTypeArgAction(AAZArgAction):
+class AAZCompoundTypeArgAction(AAZArgAction):  # pylint: disable=abstract-method
     key_pattern = re.compile(
         r'^(((\[-?[0-9]+])|(([a-zA-Z0-9_\-]+)(\[-?[0-9]+])?))(\.([a-zA-Z0-9_\-]+)(\[-?[0-9]+])?)*)=(.*)$'
     )
@@ -142,10 +142,10 @@ class AAZCompoundTypeArgAction(AAZArgAction):
             dest_ops.add(cls._schema._blank, *prefix_keys)
         else:
             assert isinstance(values, list)
-            for key, key_parts, value in cls.decode_values(values):
+            for _, key_parts, value in cls.decode_values(values):
                 schema = cls._schema
                 for k in key_parts:
-                    schema = schema[k]
+                    schema = schema[k]  # pylint: disable=unsubscriptable-object
                 action = schema._build_cmd_action()
                 data = action.format_data(value)
                 dest_ops.add(data, *prefix_keys, *key_parts)
@@ -184,13 +184,13 @@ class AAZCompoundTypeArgAction(AAZArgAction):
         return tuple(key_items)
 
     @classmethod
-    def _decode_value(cls, key, key_items, value):
+    def _decode_value(cls, key, key_items, value):  # pylint: disable=unused-variable
         from ._arg import AAZSimpleTypeArg
         from azure.cli.core.util import get_file_json, shell_safe_json_parse
 
         schema = cls._schema
         for item in key_items:
-            schema = schema[item]
+            schema = schema[item]  # pylint: disable=unsubscriptable-object
 
         if len(value) == 0:
             # the express "a=" will return the blank value of schema 'a'
@@ -229,8 +229,7 @@ class AAZObjectArgAction(AAZCompoundTypeArgAction):
         if data is None:
             if cls._schema._nullable:
                 return data
-            else:
-                raise AAZInvalidValueError(f"is not nullable")
+            raise AAZInvalidValueError("is not nullable")
         elif isinstance(data, dict):
             result = OrderedDict()
             for key, value in data.items():
@@ -251,8 +250,7 @@ class AAZDictArgAction(AAZCompoundTypeArgAction):
         if data is None:
             if cls._schema._nullable:
                 return data
-            else:
-                raise AAZInvalidValueError(f"is not nullable")
+            raise AAZInvalidValueError("is not nullable")
         elif isinstance(data, dict):
             result = OrderedDict()
             action = cls._schema.Element._build_cmd_action()
@@ -301,13 +299,13 @@ class AAZListArgAction(AAZCompoundTypeArgAction):
                 for key, key_parts, value in cls.decode_values(values):
                     schema = cls._schema
                     for k in key_parts:
-                        schema = schema[k]
+                        schema = schema[k]  # pylint: disable=unsubscriptable-object
                     action = schema._build_cmd_action()
                     data = action.format_data(value)
                     ops.append((key_parts, data))
             except AAZShowHelp as aaz_help:
                 raise aaz_help
-            except Exception as ex:
+            except Exception as ex:  # pylint: disable=broad-except
                 # This part of logic is to support Separate Elements Expression which is widely used in current command,
                 # such as:
                 #       --args val1 val2 val3.
@@ -348,8 +346,7 @@ class AAZListArgAction(AAZCompoundTypeArgAction):
         if data is None:
             if cls._schema._nullable:
                 return data
-            else:
-                raise AAZInvalidValueError(f"is not nullable")
+            raise AAZInvalidValueError("is not nullable")
         elif isinstance(data, list):
             result = []
             action = cls._schema.Element._build_cmd_action()
@@ -364,7 +361,6 @@ class AAZListArgAction(AAZCompoundTypeArgAction):
 
 
 class AAZGenericUpdateAction(Action):
-
     DEST = '_generic_update_args'
 
     def __call__(self, parser, namespace, values, option_string=None):

@@ -21,7 +21,7 @@ def register_error_format(name):
 
 
 @register_error_format("ODataV4Format")
-class AAZODataV4Format(object):
+class AAZODataV4Format:
     ERROR_LABEL = "error"
     CODE_LABEL = "code"
     MESSAGE_LABEL = "message"

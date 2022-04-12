@@ -20,7 +20,7 @@ class AAZSimpleValue(AAZBaseValue):
         return self._data == other
 
     def __ne__(self, other):
-        return not (self == other)
+        return not self == other
 
     def __bool__(self):
         return bool(self._data)
@@ -105,13 +105,13 @@ class AAZObject(AAZBaseValue):
         elif (not isinstance(other, dict)) or len(other) != len(self._data):
             return False
         else:
-            for key, v in other.items():
+            for key in other.keys():
                 if other[key] != self[key]:
                     return False
         return True
 
     def __ne__(self, other):
-        return not (self == other)
+        return not self == other
 
     def to_serialized_data(self, processor=None):
         result = {}
@@ -174,7 +174,7 @@ class AAZDict(AAZBaseValue):
         return True
 
     def __ne__(self, other):
-        return not (self == other)
+        return not self == other
 
     def clear(self):
         self._data.clear()
@@ -221,7 +221,7 @@ class AAZList(AAZBaseValue):
         if not isinstance(idx, int):
             raise IndexError(f"list indices must be integers, not {type(idx)}")
         if idx < -self._len:
-            raise IndexError(f"list index out of range")
+            raise IndexError("list index out of range")
         if idx < 0:
             idx += self._len
 
@@ -238,7 +238,7 @@ class AAZList(AAZBaseValue):
         if not isinstance(idx, int):
             raise IndexError(f"list indices must be integers, not {type(idx)}")
         if idx < -self._len:
-            raise IndexError(f"list index out of range")
+            raise IndexError("list index out of range")
         if idx < 0:
             idx += self._len
 
@@ -252,7 +252,7 @@ class AAZList(AAZBaseValue):
         if not isinstance(idx, int):
             raise IndexError(f"list indices must be integers, not {type(idx)}")
         if idx < -self._len or idx + 1 > self._len:
-            raise IndexError(f"list index out of range")
+            raise IndexError("list index out of range")
         if idx < 0:
             idx += self._len
 
@@ -288,7 +288,7 @@ class AAZList(AAZBaseValue):
         return True
 
     def __ne__(self, other):
-        return not (self == other)
+        return not self == other
 
     def append(self, data):
         self[self._len] = data

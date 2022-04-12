@@ -3,16 +3,16 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.core.configuration import Configuration
 from azure.core import PipelineClient
+from azure.core.configuration import Configuration
 from azure.core.polling.base_polling import LocationPolling, StatusCheckPolling
+
 from ._poller import AAZNoPolling, AAZBasePolling
-try:
-    from collections.abc import Iterable
-except ImportError:
-    from collections import Iterable
 
 registered_clients = {}
+
+
+# pylint: disable=too-many-instance-attributes, too-few-public-methods, protected-access
 
 
 def register_client(name):
@@ -22,12 +22,12 @@ def register_client(name):
         else:
             registered_clients[name] = cls
         return cls
+
     return decorator
 
 
 @register_client("MgmtClient")
 class AAZMgmtClient(PipelineClient):
-
     class _Configuration(Configuration):
         def __init__(self, credential, credential_scopes, **kwargs):
             if credential is None:
@@ -67,10 +67,10 @@ class AAZMgmtClient(PipelineClient):
         base_url = cli_ctx.cloud.endpoints.resource_manager
         credential_scopes = resource_to_scopes(cli_ctx.cloud.endpoints.active_directory_resource_id)
         config = self._Configuration(
-                credential=credential,
-                credential_scopes=credential_scopes,
-                **kwargs
-            )
+            credential=credential,
+            credential_scopes=credential_scopes,
+            **kwargs
+        )
 
         per_call_policies = [ARMAutoResourceProviderRegistrationPolicy()]
 
@@ -80,15 +80,15 @@ class AAZMgmtClient(PipelineClient):
             per_call_policies=per_call_policies
         )
 
-    def send_request(self, request, stream=False, **kwargs):
-        session = self._pipeline.run(request, stream=stream, **kwargs)  # pylint: disable=protected-access
+    def send_request(self, request, stream=False, **kwargs):  # pylint disable=arguments-differ
+        session = self._pipeline.run(request, stream=stream, **kwargs)
         return session
 
     def build_lro_polling(self, no_wait, initial_session, deserialization_callback, lro_options=None,
                           path_format_arguments=None):
         # TODO: handle error
         from azure.mgmt.core.polling.arm_polling import AzureAsyncOperationPolling, BodyContentPolling
-        if no_wait == True:
+        if no_wait == True:  # pylint: disable=singleton-comparison
             polling = AAZNoPolling()
         else:
             polling = AAZBasePolling(

@@ -5,6 +5,8 @@
 
 import abc
 
+# pylint: disable=protected-access, too-few-public-methods
+
 
 class _AAZUndefinedType:
 
@@ -48,8 +50,7 @@ class AAZValuePatch:
     def build(cls, schema):
         if schema._PatchDataCls:
             return cls(data=schema._PatchDataCls())
-        else:
-            return cls(data=AAZUndefined)
+        return cls(data=AAZUndefined)
 
     def __init__(self, data):
         self.data = data
@@ -86,5 +87,3 @@ class AAZBaseType:
     @abc.abstractmethod
     def process_data(self, data, **kwargs):
         raise NotImplementedError()
-
-

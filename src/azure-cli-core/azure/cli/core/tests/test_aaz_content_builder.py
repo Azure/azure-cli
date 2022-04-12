@@ -229,11 +229,12 @@ class TestAAZContentBuilder(unittest.TestCase):
                 'a2': {'name': '1'}
             },
             'b': {
-                'b1': {'name': '3'}
+                'b1': {'name': '3'},
+                'b2': {'name': '6'},
             }
         })
 
-        self.assertTrue(_value.to_serialized_data() == {'name': 'a', 'tags': {'tag_a': 'a', 'tag_b': 'b'}, 'permissions': ['read', 'write'], 'properties': {'subnets': [{'name': 'net1'}, {'name': 'net2'}], 'adds': [[{'name': '0'}], [{'name': '0'}, {'name': '1'}, {'name': '2'}], [{'name': '2'}, {'name': '3'}]], 'domains': {'a': {'name': '0'}, 'b': {'name': '1'}, 'c': {'name': '2'}}, 'conns': {'a': {'a1': {'name': '0'}, 'a2': {'name': '1'}}, 'b': {'b1': {'name': '3'}}}}})
+        self.assertTrue(_value.to_serialized_data() == {'name': 'a', 'tags': {'tag_a': 'a', 'tag_b': 'b'}, 'permissions': ['read', 'write'], 'properties': {'subnets': [{'name': 'net1'}, {'name': 'net2'}], 'adds': [[{'name': '0'}], [{'name': '0'}, {'name': '1'}, {'name': '2'}], [{'name': '2'}, {'name': '3'}]], 'domains': {'a': {'name': '0'}, 'b': {'name': '1'}, 'c': {'name': '2'}}, 'conns': {'a': {'a1': {'name': '0'}, 'a2': {'name': '1'}}, 'b': {'b1': {'name': '3'}, 'b2': {'name': '6'}}}}})
 
     def _define_instance_value(self):
         from azure.cli.core.aaz._field_type import AAZStrType, AAZObjectType, AAZListType, AAZDictType

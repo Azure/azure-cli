@@ -17,10 +17,13 @@ try:
 except ImportError:
     EXPERIMENTAL_TAG = '[Experimental]'
 
+# pylint: disable=protected-access
+
 
 class AAZShowHelp(BaseException):
 
     def __init__(self, *keys):
+        super().__init__()
         self.keys = keys
         self.schema = None
 

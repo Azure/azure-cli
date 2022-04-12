@@ -3,16 +3,17 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint: disable=too-few-public-methods, protected-access
+
 import json
 
 from azure.core.exceptions import ClientAuthenticationError, ResourceExistsError, ResourceNotFoundError, \
     HttpResponseError
 
-from ._base import AAZUndefined, AAZBaseValue, AAZBaseType
-from ._field_type import AAZSimpleType
-from ._content_builder import AAZContentBuilder
 from ._arg_browser import AAZArgBrowser
-
+from ._base import AAZUndefined, AAZBaseValue, AAZBaseType
+from ._content_builder import AAZContentBuilder
+from ._field_type import AAZSimpleType
 
 try:
     from urllib import quote  # type: ignore
@@ -44,7 +45,7 @@ class AAZHttpOperation(AAZOperation):
         if isinstance(value, AAZBaseValue):
             value = value.to_serialized_data()
 
-        if value == AAZUndefined or value == None:
+        if value == AAZUndefined or value == None:  # pylint: disable=singleton-comparison
             if required:
                 raise ValueError(f"url parameter {name} is required.")
             return {}
@@ -142,9 +143,9 @@ class AAZHttpOperation(AAZOperation):
         if isinstance(value, AAZBaseValue):
             value = value.to_serialized_data(processor=processor)
 
-        if value == AAZUndefined or value == None:
+        if value == AAZUndefined or value == None:  # pylint: disable=singleton-comparison
             if required:
-                raise ValueError(f"content is required.")
+                raise ValueError("content is required.")
             return None
         return value
 
@@ -286,6 +287,6 @@ class AAZGenericInstanceUpdateOperation(AAZOperation):
         raise NotImplementedError()
 
     @staticmethod
-    def _update_instance_by_generic(instance, args):
+    def _update_instance_by_generic(instance, args):  # pylint: disable=unused-argument
         # TODO: implement generic instance update
         return instance

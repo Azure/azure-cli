@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+import abc
 
 from azure.cli.core import azclierror
 from knack.arguments import CLICommandArgument, CaseInsensitiveList
@@ -13,11 +14,10 @@ from ._field_type import AAZObjectType, AAZStrType, AAZIntType, AAZBoolType, AAZ
     AAZSimpleType
 from ._field_value import AAZObject
 
+# pylint: disable=redefined-builtin, protected-access
+
 
 class AAZArgumentsSchema(AAZObjectType):
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
 
     def __call__(self, data=None):
         return AAZObject(
@@ -33,20 +33,16 @@ class AAZArgEnum:
         self.items = items
 
     def to_choices(self):
-        choices = [key for key in self.items]
+        choices = list(self.items)
         if not self._case_sensitive:
             choices = CaseInsensitiveList(choices)
         return choices
 
     def __getitem__(self, data):
         key = data
-        # if not self._case_sensitive:
         if isinstance(self.items, dict):
             for k, v in self.items.items():
-                if v == data:
-                    key = k
-                    break
-                elif k == data or not self._case_sensitive and k.lower() == data.lower():
+                if v == data or k == data or not self._case_sensitive and k.lower() == data.lower():
                     key = k
                     break
 
@@ -62,7 +58,7 @@ class AAZArgEnum:
                 f"unrecognized value '{data}' from choices '{self.to_choices()}' ")
 
 
-class AAZBaseArg(AAZBaseType):
+class AAZBaseArg(AAZBaseType):  # pylint: disable=too-many-instance-attributes
 
     def __init__(self, options=None, required=False, help=None, arg_group=None, is_preview=False, is_experimental=False,
                  id_part=None, default=AAZUndefined, blank=AAZUndefined, nullable=False):
@@ -104,8 +100,9 @@ class AAZBaseArg(AAZBaseType):
 
         return arg
 
+    @abc.abstractmethod
     def _build_cmd_action(self):
-        return None
+        raise NotImplementedError()
 
     @property
     def _type_in_help(self):
@@ -251,7 +248,8 @@ class AAZResourceGroupNameArg(AAZStrArg):
 
     def __init__(
             self, options=('--resource-group', '-g'), id_part='resource_group',
-            help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`",
+            help="Name of resource group. "
+                 "You can configure the default group using `az configure --defaults group=<name>`",
             **kwargs):
         super().__init__(
             options=options,

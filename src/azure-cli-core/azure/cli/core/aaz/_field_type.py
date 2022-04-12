@@ -2,11 +2,12 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
 from ._base import AAZBaseType, AAZValuePatch
 from ._field_value import AAZObject, AAZDict, AAZList, AAZSimpleValue
 from .exceptions import AAZUnknownFieldError, AAZConflictFieldDefinitionError, AAZValuePrecisionLossError, \
     AAZUndefinedValueError
+
+# pylint: disable=protected-access, too-few-public-methods
 
 
 # build in types
@@ -22,12 +23,12 @@ class AAZSimpleType(AAZBaseType):
         if data is None:
             if self._nullable:
                 return None
-            else:
-                return AAZValuePatch.build(self)
+            return AAZValuePatch.build(self)
 
         if isinstance(data, AAZSimpleValue):
             data = data._data
-        assert isinstance(data, self.DataType), f'Expect {self.DataType}, got {data} ({type(data)}'
+        assert self.DataType is not None and isinstance(data, self.DataType), \
+            f'Expect {self.DataType}, got {data} ({type(data)}'
         return data
 
 
@@ -50,8 +51,7 @@ class AAZFloatType(AAZSimpleType):
         if data is None:
             if self._nullable:
                 return None
-            else:
-                return AAZValuePatch.build(self)
+            return AAZValuePatch.build(self)
 
         if isinstance(data, AAZSimpleValue):
             data = data._data
@@ -187,8 +187,7 @@ class AAZDictType(AAZBaseType):
         if data is None:
             if self._nullable:
                 return None
-            else:
-                return AAZValuePatch.build(self)
+            return AAZValuePatch.build(self)
 
         result = {}
         value = AAZDict(schema=self, data=result)
@@ -234,8 +233,7 @@ class AAZListType(AAZBaseType):
         if data is None:
             if self._nullable:
                 return None
-            else:
-                return AAZValuePatch.build(self)
+            return AAZValuePatch.build(self)
 
         result = {}
         value = AAZList(schema=self, data=result)

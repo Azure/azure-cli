@@ -7,6 +7,8 @@ from ._base import AAZBaseValue, AAZUndefined
 from ._field_value import AAZSimpleValue, AAZDict, AAZList, AAZObject
 from ._arg_browser import AAZArgBrowser
 
+# pylint: disable=protected-access, too-many-nested-blocks
+
 
 class AAZContentBuilder:
 
@@ -48,8 +50,8 @@ class AAZContentBuilder:
         if sub_values:
             self._sub_prop_builders[prop_name] = AAZContentBuilder(sub_values, sub_args)
             return self._sub_prop_builders[prop_name]
-        else:
-            return None
+
+        return None
 
     def set_elements(self, typ, arg_key=None, typ_kwargs=None):
         sub_values = []
@@ -83,8 +85,8 @@ class AAZContentBuilder:
         if sub_values:
             self._sub_elements_builder = AAZContentBuilder(sub_values, sub_args)
             return self._sub_elements_builder
-        else:
-            return None
+
+        return None
 
     def get(self, key):
         if not key or key == '.':

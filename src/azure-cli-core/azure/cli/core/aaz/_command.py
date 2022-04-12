@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint: disable=too-few-public-methods, too-many-instance-attributes, protected-access, not-callable
 import importlib
 import os
 from functools import partial
@@ -168,7 +169,9 @@ class AAZCommand(CLICommand):
             confirmation=self.AZ_CONFIRMATION,
             arguments_loader=self._cli_arguments_loader,
             handler=True,
-            # knack use cmd.handler to check whether it is group or command, however this property will not be used in AAZCommand. So use True value for it. https://github.com/microsoft/knack/blob/e496c9590792572e680cb3ec959db175d9ba85dd/knack/parser.py#L227-L233
+            # knack use cmd.handler to check whether it is group or command,
+            # however this property will not be used in AAZCommand. So use True value for it.
+            # https://github.com/microsoft/knack/blob/e496c9590792572e680cb3ec959db175d9ba85dd/knack/parser.py#L227-L233
         )
         self.command_kwargs = {}
 
@@ -183,8 +186,10 @@ class AAZCommand(CLICommand):
 
         self.ctx = None
 
-        # help property will be assigned as help_file for command parser https://github.com/Azure/azure-cli/blob/d69eedd89bd097306b8579476ef8026b9f2ad63d/src/azure-cli-core/azure/cli/core/parser.py#L104
-        # help_file will be loaded as file_data in knack https://github.com/microsoft/knack/blob/e496c9590792572e680cb3ec959db175d9ba85dd/knack/help.py#L206-L208
+        # help property will be assigned as help_file for command parser:
+        # https://github.com/Azure/azure-cli/blob/d69eedd89bd097306b8579476ef8026b9f2ad63d/src/azure-cli-core/azure/cli/core/parser.py#L104
+        # help_file will be loaded as file_data in knack:
+        # https://github.com/microsoft/knack/blob/e496c9590792572e680cb3ec959db175d9ba85dd/knack/help.py#L206-L208
 
         # additional properties
         self.supports_no_wait = self.AZ_SUPPORT_NO_WAIT
@@ -242,7 +247,8 @@ class AAZCommand(CLICommand):
         return AAZLROPoller(polling_generator=polling_generator, result_callback=result_callback)
 
 
-def register_command_group(name, is_preview=False, is_experimental=False, hide=False, redirect=None, expiration=None):
+def register_command_group(
+        name, is_preview=False, is_experimental=False, hide=False, redirect=None, expiration=None):
     """register AAZCommandGroup"""
     if is_preview and is_experimental:
         raise CLIInternalError(
@@ -284,7 +290,8 @@ def register_command_group(name, is_preview=False, is_experimental=False, hide=F
     return decorator
 
 
-def register_command(name, is_preview=False, is_experimental=False, confirmation=None, hide=False, redirect=None, expiration=None):
+def register_command(
+        name, is_preview=False, is_experimental=False, confirmation=None, hide=False, redirect=None, expiration=None):
     """register AAZCommand"""
     if is_preview and is_experimental:
         raise CLIInternalError(
@@ -341,7 +348,7 @@ def load_aaz_command_table(loader, aaz_pkg_name, args):
 def _load_aaz_pkg(loader, pkg, parent_command_table, command_group_table, arg_str):
     cut = False  # if cut, its sub commands and sub pkgs will not be added
     command_table = {}  # the command available for this pkg and its sub pkgs
-    for key, value in pkg.__dict__.items():
+    for value in pkg.__dict__.values():
         if cut and command_table:
             # when cut and command_table is not empty, stop loading more commands.
             # the command_table should not be empty.

@@ -42,5 +42,4 @@ class AAZLROPoller(LROPoller):
         resource = super(AAZLROPoller, self).result(*args, **kwargs)
         if self._result_callback:
             return self._result_callback(resource)
-        else:
-            return resource
+        return resource
