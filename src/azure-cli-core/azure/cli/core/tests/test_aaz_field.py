@@ -1,3 +1,8 @@
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
+
 import unittest
 
 
@@ -77,7 +82,7 @@ class TestAAZField(unittest.TestCase):
         assert v.properties.height != 9 and v.properties.height > 9 and v.properties.height >= 9
         assert not (v.properties.height == 9) and not (v.properties.height < 9) and not (v.properties.height <= 9)
 
-        v.properties.height = 10    # test assign int
+        v.properties.height = 10  # test assign int
         assert str(v.properties.height) == "10.0"
 
         # test assign properties by dict
@@ -217,7 +222,7 @@ class TestAAZField(unittest.TestCase):
             assert False
 
     def test_aaz_types_with_alias(self):
-        from azure.cli.core.aaz._field_type import AAZObjectType, AAZIntType, AAZStrType, AAZBoolType, AAZFloatType, AAZDictType, AAZListType
+        from azure.cli.core.aaz._field_type import AAZObjectType, AAZStrType, AAZDictType, AAZListType
         from azure.cli.core.aaz._field_value import AAZObject
         model_schema = AAZObjectType()
         model_schema.sub_properties = AAZObjectType(options=["sub-properties"], serialized_name="subProperties")
@@ -226,7 +231,8 @@ class TestAAZField(unittest.TestCase):
         model_schema.sub_properties.sub_tags.Element = AAZStrType()
         model_schema.sub_properties.sub_nets = AAZListType(options=["sub-nets"], serialized_name="subNets")
         model_schema.sub_properties.sub_nets.Element = AAZObjectType()
-        model_schema.sub_properties.sub_nets.Element.address_id = AAZStrType(options=["address-id"], serialized_name="addressId")
+        model_schema.sub_properties.sub_nets.Element.address_id = AAZStrType(options=["address-id"],
+                                                                             serialized_name="addressId")
 
         v = AAZObject(model_schema, data={})
 

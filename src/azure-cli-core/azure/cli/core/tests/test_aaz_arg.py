@@ -1,5 +1,11 @@
-import unittest
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
+
 import json
+import unittest
+
 from azure.cli.core import azclierror
 from azure.cli.core.aaz import exceptions as aazerror
 
@@ -410,8 +416,8 @@ class TestAAZArg(unittest.TestCase):
         from azure.cli.core.aaz._arg_action import AAZCompoundTypeArgAction
         split_key = AAZCompoundTypeArgAction._split_key
         assert split_key("a.b.c") == ("a", "b", "c")
-        assert split_key("[1]") == (1, )
-        assert split_key("[-10]") == (-10, )
+        assert split_key("[1]") == (1,)
+        assert split_key("[-10]") == (-10,)
         assert split_key("a1[5].b[2].c") == ("a1", 5, "b", 2, "c")
 
         with self.assertRaises(AssertionError):
@@ -424,7 +430,7 @@ class TestAAZArg(unittest.TestCase):
             split_key("b.a.[5]")
 
     def test_aaz_str_arg(self):
-        from azure.cli.core.aaz._arg import AAZStrArg, AAZArgumentsSchema, AAZArgEnum, AAZUndefined
+        from azure.cli.core.aaz._arg import AAZStrArg, AAZArgumentsSchema
         from azure.cli.core.aaz._arg_action import AAZArgActionOperations
         schema = AAZArgumentsSchema()
         v = schema()
@@ -481,7 +487,7 @@ class TestAAZArg(unittest.TestCase):
         action.setup_operations(dest_ops, 'null')
         assert len(dest_ops._ops) == 5
         dest_ops.apply(v, "work_day")
-        assert v.work_day == None   # must use '== None', because 'is None' will not work
+        assert v.work_day == None  # must use '== None', because 'is None' will not work
 
         # blank value
         action.setup_operations(dest_ops, None)
@@ -536,7 +542,7 @@ class TestAAZArg(unittest.TestCase):
         assert v.name == " aa' l_;{]'"
 
     def test_aaz_int_arg(self):
-        from azure.cli.core.aaz._arg import AAZIntArg, AAZArgumentsSchema, AAZArgEnum, AAZUndefined
+        from azure.cli.core.aaz._arg import AAZIntArg, AAZArgumentsSchema
         from azure.cli.core.aaz._arg_action import AAZArgActionOperations
         schema = AAZArgumentsSchema()
         v = schema()
@@ -625,7 +631,7 @@ class TestAAZArg(unittest.TestCase):
             action.setup_operations(dest_ops, " ")
 
     def test_aaz_float_arg(self):
-        from azure.cli.core.aaz._arg import AAZFloatArg, AAZArgumentsSchema, AAZArgEnum
+        from azure.cli.core.aaz._arg import AAZFloatArg, AAZArgumentsSchema
         from azure.cli.core.aaz._arg_action import AAZArgActionOperations
         schema = AAZArgumentsSchema()
         v = schema()
@@ -711,7 +717,7 @@ class TestAAZArg(unittest.TestCase):
             action.setup_operations(dest_ops, " ")
 
     def test_aaz_bool_arg(self):
-        from azure.cli.core.aaz._arg import AAZBoolArg, AAZArgumentsSchema, AAZArgEnum
+        from azure.cli.core.aaz._arg import AAZBoolArg, AAZArgumentsSchema
         from azure.cli.core.aaz._arg_action import AAZArgActionOperations
         schema = AAZArgumentsSchema()
         v = schema()
@@ -973,7 +979,7 @@ class TestAAZArg(unittest.TestCase):
             action.setup_operations(dest_ops, ["{c:}"])
 
     def test_aaz_object_arg(self):
-        from azure.cli.core.aaz._arg import AAZDictArg, AAZListArg, AAZObjectArg, AAZIntArg, AAZBoolArg, AAZFloatArg,\
+        from azure.cli.core.aaz._arg import AAZDictArg, AAZListArg, AAZObjectArg, AAZIntArg, AAZBoolArg, AAZFloatArg, \
             AAZStrArg, AAZArgumentsSchema
         from azure.cli.core.aaz._arg_action import AAZArgActionOperations
         schema = AAZArgumentsSchema()
