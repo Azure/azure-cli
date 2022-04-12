@@ -55,7 +55,8 @@ def generate_sas_fs_uri(client, cmd, file_system, permission=None,
 def list_deleted_path(client, marker=None, num_results=None, path_prefix=None, timeout=None, **kwargs):
     from ..track2_util import list_generator
 
-    generator = client.list_deleted_paths(path_prefix=path_prefix, timeout=timeout, results_per_page=num_results, **kwargs)
+    generator = client.list_deleted_paths(path_prefix=path_prefix, timeout=timeout,
+                                          results_per_page=num_results, **kwargs)
 
     pages = generator.by_page(continuation_token=marker)  # BlobPropertiesPaged
     result = list_generator(pages=pages, num_results=num_results)
