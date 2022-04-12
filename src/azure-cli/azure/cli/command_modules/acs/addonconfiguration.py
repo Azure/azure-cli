@@ -249,7 +249,8 @@ def get_existing_container_insights_extension_dcr_tags(cmd, dcr_url):
                 cmd.cli_ctx, "GET", dcr_url
             )
             json_response = json.loads(resp.text)
-            tags = json_response["tags"]
+            if json_response["tags"] is not None:
+               tags = json_response["tags"]
             break
         except CLIError as e:
             if "ResourceNotFound" in str(e):
@@ -372,23 +373,14 @@ def ensure_container_insights_for_monitoring(
                 raise error
             json_response = json.loads(r.text)
             for resource in json_response["resourceTypes"]:
-                region_ids = map(
-                    lambda x: region_names_to_id[x], resource["locations"]
-                )  # map is lazy, so doing this for every region isn't slow
-                if (
-                    resource["resourceType"].lower() == "datacollectionrules" and
-                    location not in region_ids
-                ):
-                    raise ClientRequestError(
-                        f"Data Collection Rules are not supported for LA workspace region {location}"
-                    )
-                if (
-                    resource["resourceType"].lower() == "datacollectionruleassociations" and
-                    cluster_region not in region_ids
-                ):
-                    raise ClientRequestError(
-                        f"Data Collection Rule Associations are not supported for cluster region {location}"
-                    )
+                if (resource["resourceType"].lower() == "datacollectionrules"):
+                    region_ids = map(lambda x: region_names_to_id[x], resource["locations"])
+                    if (location not in region_ids):
+                        raise ClientRequestError(f"Data Collection Rules are not supported for LA workspace region {location}")
+                if (resource["resourceType"].lower() == "datacollectionruleassociations"):
+                    region_ids = map(lambda x: region_names_to_id[x], resource["locations"])
+                    if (cluster_region not in region_ids):
+                       raise ClientRequestError(f"Data Collection Rule Associations are not supported for cluster region {cluster_region}")
             dcr_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
                 f"{dcr_resource_id}?api-version=2019-11-01-preview"
             # get existing tags on the container insights extension DCR if the customer added any
