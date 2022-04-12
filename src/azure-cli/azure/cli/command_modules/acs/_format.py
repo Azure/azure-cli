@@ -4,9 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 from collections import OrderedDict
-# pylint: disable=import-error
-from jmespath import compile as compile_jmes, Options
-# pylint: disable=import-error
+
+from jmespath import Options
+from jmespath import compile as compile_jmes
 from jmespath import functions
 
 

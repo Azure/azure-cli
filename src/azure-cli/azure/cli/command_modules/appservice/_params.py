@@ -352,7 +352,7 @@ def load_arguments(self, _):
             c.argument('docker_registry_server_url', options_list=['--docker-registry-server-url', '-r'],
                        help='the container registry server url')
             c.argument('docker_custom_image_name', options_list=['--docker-custom-image-name', '-c', '-i'],
-                       help='the container custom image name and optionally the tag name')
+                       help='the container custom image name and optionally the tag name (e.g., <registry-name>/<image-name>:<tag>)')
             c.argument('docker_registry_server_user', options_list=['--docker-registry-server-user', '-u'],
                        help='the container registry server username')
             c.argument('docker_registry_server_password', options_list=['--docker-registry-server-password', '-p'],
@@ -960,11 +960,12 @@ def load_arguments(self, _):
     with self.argument_context('appservice ase create-inbound-services') as c:
         c.argument('name', options_list=['--name', '-n'], help='Name of the app service environment',
                    local_context_attribute=LocalContextAttribute(name='ase_name', actions=[LocalContextAction.GET]))
-        c.argument('subnet', help='Name or ID of existing subnet for inbound traffic to ASEv3. \
+        c.argument('subnet', help='Name or ID of existing subnet for DNS Zone link. \
                    To create vnet and/or subnet use `az network vnet [subnet] create`')
         c.argument('vnet_name', help='Name of the vNet. Mandatory if only subnet name is specified.')
         c.argument('skip_dns', arg_type=get_three_state_flag(),
-                   help='Do not create Private DNS Zone and DNS records.')
+                   help='Do not create Private DNS Zone and DNS records.',
+                   deprecate_info=c.deprecate(expiration='3.0.0'))
 
     # App Service Domain Commands
     with self.argument_context('appservice domain create') as c:

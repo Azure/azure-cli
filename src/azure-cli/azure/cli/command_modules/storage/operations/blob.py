@@ -6,7 +6,7 @@
 import os
 from datetime import datetime
 
-from azure.cli.core.profiles import ResourceType
+from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.core.util import sdk_no_wait
 from azure.cli.core.azclierror import AzureResponseError
 from azure.cli.command_modules.storage.url_quote_util import encode_for_url, make_encoded_file_url_and_params
@@ -510,12 +510,16 @@ def transform_blob_type(cmd, blob_type):
 
 # pylint: disable=protected-access
 def _adjust_block_blob_size(client, blob_type, length):
-    if not blob_type or blob_type != 'block':
+    if not blob_type or blob_type != 'block' or length is None:
         return
 
-    # increase the block size to 4000MB when the block list will contain more than
-    # 50,000 blocks(each block 100MB)
-    if length is not None and length > 50000 * 100 * 1024 * 1024:
+    # increase the block size to 100MB when the block list will contain more than 50,000 blocks(each block 4MB)
+    if length > 50000 * 4 * 1024 * 1024:
+        client._config.max_block_size = 100 * 1024 * 1024
+        client._config.max_single_put_size = 256 * 1024 * 1024
+
+    # increase the block size to 4000MB when the block list will contain more than 50,000 blocks(each block 100MB)
+    if length > 50000 * 100 * 1024 * 1024:
         client._config.max_block_size = 4000 * 1024 * 1024
         client._config.max_single_put_size = 5000 * 1024 * 1024
 
@@ -728,47 +732,78 @@ def storage_blob_delete_batch(client, source, source_container_name, pattern=Non
         logger.warning('%s of %s blobs not deleted due to "Failed Precondition"', num_failures, len(source_blobs))
 
 
-def generate_sas_blob_uri(client, container_name, blob_name, permission=None,
-                          expiry=None, start=None, id=None, ip=None,  # pylint: disable=redefined-builtin
+def generate_sas_blob_uri(cmd, client, permission=None, expiry=None, start=None, id=None, ip=None,  # pylint: disable=redefined-builtin
                           protocol=None, cache_control=None, content_disposition=None,
                           content_encoding=None, content_language=None,
-                          content_type=None, full_uri=False, as_user=False):
+                          content_type=None, full_uri=False, as_user=False, snapshot=None, **kwargs):
     from ..url_quote_util import encode_url_path
     from urllib.parse import quote
+    t_generate_blob_sas = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_BLOB,
+                                  '_shared_access_signature#generate_blob_sas')
+
+    account_name = client.account_name
+    user_delegation_key = None
+    account_key = None
     if as_user:
         user_delegation_key = client.get_user_delegation_key(
             get_datetime_from_string(start) if start else datetime.utcnow(), get_datetime_from_string(expiry))
-        sas_token = client.generate_blob_shared_access_signature(
-            container_name, blob_name, permission=permission, expiry=expiry, start=start, id=id, ip=ip,
-            protocol=protocol, cache_control=cache_control, content_disposition=content_disposition,
-            content_encoding=content_encoding, content_language=content_language, content_type=content_type,
-            user_delegation_key=user_delegation_key)
     else:
-        sas_token = client.generate_blob_shared_access_signature(
-            container_name, blob_name, permission=permission, expiry=expiry, start=start, id=id, ip=ip,
-            protocol=protocol, cache_control=cache_control, content_disposition=content_disposition,
-            content_encoding=content_encoding, content_language=content_language, content_type=content_type)
+        account_key = client.credential.account_key
+
+    blob_url = kwargs.pop('blob_url')
+    container_name = kwargs.pop('container_name')
+    blob_name = kwargs.pop('blob_name')
+    t_blob_client = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_BLOB, '_blob_client#BlobClient')
+    if blob_url:
+        if as_user:
+            credential = client.credential._credential
+        else:
+            credential = client.credential.account_key
+        blob_client = t_blob_client.from_blob_url(blob_url=blob_url, credential=credential, snapshot=snapshot)
+        container_name = blob_client.container_name
+        blob_name = blob_client.blob_name
+    else:
+        blob_client = client.get_blob_client(container=container_name, blob=blob_name, snapshot=snapshot)
+        blob_url = blob_client.url
+
+    sas_token = t_generate_blob_sas(account_name=account_name, container_name=container_name, blob_name=blob_name,
+                                    snapshot=snapshot, account_key=account_key, user_delegation_key=user_delegation_key,
+                                    permission=permission, expiry=expiry, start=start, policy_id=id, ip=ip,
+                                    protocol=protocol, cache_control=cache_control,
+                                    content_disposition=content_disposition, content_encoding=content_encoding,
+                                    content_language=content_language, content_type=content_type, **kwargs)
+
     if full_uri:
-        return encode_url_path(client.make_blob_url(container_name, blob_name, protocol=protocol,
-                                                    sas_token=quote(sas_token, safe='&%()$=\',~')))
+        blob_client = t_blob_client(account_url=client.url, container_name=container_name, blob_name=blob_name,
+                                    snapshot=snapshot, credential=sas_token)
+        return encode_url_path(blob_client.url)
     return quote(sas_token, safe='&%()$=\',~')
 
 
-def generate_container_shared_access_signature(client, container_name, permission=None,
-                                               expiry=None, start=None, id=None, ip=None,  # pylint: disable=redefined-builtin
-                                               protocol=None, cache_control=None, content_disposition=None,
-                                               content_encoding=None, content_language=None,
-                                               content_type=None, as_user=False):
+# pylint: disable=redefined-builtin
+def generate_container_shared_access_signature(cmd, client, container_name, permission=None, expiry=None,
+                                               start=None, id=None, ip=None, protocol=None, cache_control=None,
+                                               content_disposition=None, content_encoding=None, content_language=None,
+                                               content_type=None, as_user=False, **kwargs):
+
+    t_generate_container_sas = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_BLOB,
+                                       '_shared_access_signature#generate_container_sas')
+
+    account_name = client.account_name
     user_delegation_key = None
+    account_key = None
     if as_user:
         user_delegation_key = client.get_user_delegation_key(
             get_datetime_from_string(start) if start else datetime.utcnow(), get_datetime_from_string(expiry))
+    else:
+        account_key = client.credential.account_key
 
-    return client.generate_container_shared_access_signature(
-        container_name, permission=permission, expiry=expiry, start=start, id=id, ip=ip,
-        protocol=protocol, cache_control=cache_control, content_disposition=content_disposition,
-        content_encoding=content_encoding, content_language=content_language, content_type=content_type,
-        user_delegation_key=user_delegation_key)
+    return t_generate_container_sas(account_name=account_name, container_name=container_name,
+                                    account_key=account_key, user_delegation_key=user_delegation_key,
+                                    permission=permission, expiry=expiry, start=start, policy_id=id, ip=ip,
+                                    protocol=protocol, cache_control=cache_control,
+                                    content_disposition=content_disposition, content_encoding=content_encoding,
+                                    content_language=content_language, content_type=content_type, **kwargs)
 
 
 def create_blob_url(client, container_name, blob_name, protocol=None, snapshot=None):

@@ -9,26 +9,19 @@ import subprocess
 import tempfile
 import unittest
 
-from knack.util import CLIError
-from azure.cli.core.azclierror import CLIInternalError
-
-from azure.cli.testsdk import ScenarioTest, live_only
-from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from azure.cli.testsdk.checkers import (
-    StringCheck,
-    StringContainCheck,
-    StringContainCheckIgnoreCase,
-)
+from azure.cli.command_modules.acs._consts import CONST_KUBE_DASHBOARD_ADDON_NAME
 from azure.cli.command_modules.acs._format import version_to_tuple
-from azure.cli.command_modules.acs._consts import (
-    CONST_KUBE_DASHBOARD_ADDON_NAME,
-)
-from .recording_processors import KeyReplacer
-from .custom_preparers import (
+from azure.cli.command_modules.acs.tests.latest.custom_preparers import (
     AKSCustomResourceGroupPreparer,
-    AKSCustomVirtualNetworkPreparer,
     AKSCustomRoleBasedServicePrincipalPreparer,
+    AKSCustomVirtualNetworkPreparer,
 )
+from azure.cli.command_modules.acs.tests.latest.recording_processors import KeyReplacer
+from azure.cli.core.azclierror import CLIInternalError
+from azure.cli.testsdk import ScenarioTest, live_only
+from azure.cli.testsdk.checkers import StringCheck, StringContainCheck, StringContainCheckIgnoreCase
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
+from knack.util import CLIError
 # flake8: noqa
 
 
@@ -489,6 +482,41 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         check_role_assignment_cmd = 'role assignment list --scope={vnet_subnet_id}'
         self.cmd(check_role_assignment_cmd, checks=[
             self.is_empty()
+        ])
+
+    @AllowLargeResponse(8192)
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_create_and_update_with_managed_nat_gateway_outbound(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'ssh_key_value': self.generate_ssh_keys(),
+            'location': resource_group_location
+        })
+
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--vm-set-type VirtualMachineScaleSets -c 1 ' \
+                     '--outbound-type=managedNATGateway ' \
+                     '--generate-ssh-keys ' \
+                     '--nat-gateway-managed-outbound-ip-count=1 ' \
+                     '--nat-gateway-idle-timeout=4 ' \
+                     '--location={location}'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('networkProfile.outboundType', 'managedNATGateway'),
+            self.check('networkProfile.natGatewayProfile.idleTimeoutInMinutes', 4),
+            self.check('networkProfile.natGatewayProfile.managedOutboundIpProfile.count', 1),
+        ])
+
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
+                     '--nat-gateway-managed-outbound-ip-count=2 ' \
+                     '--nat-gateway-idle-timeout=30 ' 
+        self.cmd(update_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('networkProfile.outboundType', 'managedNATGateway'),
+            self.check('networkProfile.natGatewayProfile.idleTimeoutInMinutes', 30),
+            self.check('networkProfile.natGatewayProfile.managedOutboundIpProfile.count', 2),
         ])
 
     # live only due to role assignment is not mocked
@@ -6739,12 +6767,15 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'resource_group': resource_group,
             'name': aks_name,
             'kc_path': _get_test_data_file('kubeletconfig.json'),
-            'oc_path': _get_test_data_file('linuxosconfig.json')
+            'oc_path': _get_test_data_file('linuxosconfig.json'),
+            'ssh_key_value': self.generate_ssh_keys()
         })
 
         # use custom feature so it does not require subscription to regiter the feature
-        create_cmd = 'aks create --resource-group={resource_group} --name={name} --generate-ssh-keys ' \
-                     '--kubelet-config={kc_path} --linux-os-config={oc_path} -o json'
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--kubelet-config={kc_path} --linux-os-config={oc_path} ' \
+                     '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/CustomNodeConfigPreview ' \
+                     '--ssh-key-value={ssh_key_value} -o json'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('agentPoolProfiles[0].kubeletConfig.cpuManagerPolicy', 'static'),
@@ -6753,8 +6784,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
         # nodepool add
-        nodepool_cmd = 'aks nodepool add --resource-group={resource_group} --cluster-name={name} --name=nodepool2 --node-count=1 ' \
-                       '--kubelet-config={kc_path} --linux-os-config={oc_path}'
+        nodepool_cmd = 'aks nodepool add --resource-group={resource_group} --cluster-name={name} ' \
+                       '--name=nodepool2 --node-count=1 --kubelet-config={kc_path} --linux-os-config={oc_path} ' \
+                       '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/CustomNodeConfigPreview'
         self.cmd(nodepool_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('kubeletConfig.cpuCfsQuotaPeriod', '200ms'),

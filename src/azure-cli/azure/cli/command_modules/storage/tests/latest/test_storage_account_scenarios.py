@@ -780,13 +780,13 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
     def test_create_account_sas(self, resource_group, storage_account_info):
-        from azure.cli.core.azclierror import RequiredArgumentMissingError
-        with self.assertRaises(RequiredArgumentMissingError):
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        with self.assertRaises(CLIError):
             self.cmd('storage account generate-sas --resource-types o --services b --expiry 2000-01-01 '
                      '--permissions r --account-name ""')
 
         invalid_connection_string = "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;"
-        with self.assertRaises(RequiredArgumentMissingError):
+        with self.assertRaises(InvalidArgumentValueError):
             self.cmd('storage account generate-sas --resource-types o --services b --expiry 2000-01-01 '
                      '--permissions r --connection-string {}'.format(invalid_connection_string))
 

@@ -830,12 +830,6 @@ parameters:
   - name: --resource-group -g
     type: string
     short-summary: Name of the resource group for the Log Analytics and Storage Account when the name of the service instead of a full resource ID is given.
-  - name: --logs
-    type: string
-    short-summary: JSON encoded list of logs settings. Use '@{file}' to load from a file.
-  - name: --metrics
-    type: string
-    short-summary: JSON encoded list of metric settings. Use '@{file}' to load from a file.
   - name: --storage-account
     type: string
     short-summary: Name or ID of the storage account to send diagnostic logs to.
@@ -849,10 +843,10 @@ parameters:
   - name: --event-hub-rule
     short-summary: Name or ID of the event hub authorization rule.
 examples:
-  - name: Create diagnostic settings with EventHub.
+  - name: Create diagnostic settings, retention here only applies when the target is a storage account.
     text: |
         az monitor diagnostic-settings create --resource {ID} -n {name}
-           --event-hub-rule {eventHubRuleID} --storage-account {storageAccount}
+           --storage-account {storageAccount}
            --logs '[
              {
                "category": "WorkflowRuntime",

@@ -788,7 +788,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               enable_hotpatching=None, platform_fault_domain=None, security_type=None, enable_secure_boot=None,
               enable_vtpm=None, count=None, edge_zone=None, nic_delete_option=None, os_disk_delete_option=None,
               data_disk_delete_option=None, user_data=None, capacity_reservation_group=None, enable_hibernation=None,
-              v_cpus_available=None, v_cpus_per_core=None):
+              v_cpus_available=None, v_cpus_per_core=None, accept_term=None):
 
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
@@ -2846,7 +2846,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 user_data=None, network_api_version=None, enable_spot_restore=None, spot_restore_timeout=None,
                 capacity_reservation_group=None, enable_auto_update=None, patch_mode=None, enable_agent=None,
                 security_type=None, enable_secure_boot=None, enable_vtpm=None, automatic_repairs_action=None,
-                v_cpus_available=None, v_cpus_per_core=None):
+                v_cpus_available=None, v_cpus_per_core=None, accept_term=None):
 
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string

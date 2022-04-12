@@ -2,6 +2,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+
+import unittest
+
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 from azure.cli.testsdk.decorators import serial_test
 
@@ -176,6 +179,7 @@ class AzureNetAppFilesSnapshotServiceScenarioTest(ScenarioTest):
         snapshot_from_id = self.cmd("az netappfiles snapshot show --ids %s" % snapshot['id']).get_output_in_json()
         assert snapshot_from_id['name'] == account_name + '/' + pool_name + '/' + volume_name + '/' + snapshot_name
 
+    @unittest.skip('This test requires southcentralusstage and cannot be run with public cloud.')
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_snapshot_', additional_tags={'owner': 'cli_test'})
     def test_restore_file(self):
         # create volume

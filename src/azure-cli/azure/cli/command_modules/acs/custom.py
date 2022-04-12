@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import colorama
 import base64
 import binascii
 import datetime
@@ -29,92 +28,103 @@ import webbrowser
 import zipfile
 from distutils.version import StrictVersion
 from math import isnan
-from urllib.request import urlopen
 from urllib.error import URLError
+from urllib.request import urlopen
 
-# pylint: disable=import-error
-import yaml
+import colorama
 import dateutil.parser
-from dateutil.relativedelta import relativedelta
-from knack.log import get_logger
-from knack.util import CLIError
-from knack.prompting import NoTTYException, prompt_y_n
-from msrestazure.azure_exceptions import CloudError
 import requests
-
-# pylint: disable=no-name-in-module,import-error
+import yaml
 from azure.cli.command_modules.acs import acs_client, proxy
-from azure.cli.command_modules.acs._params import regions_in_preview, regions_in_prod
+from azure.cli.command_modules.acs._client_factory import (
+    cf_agent_pools,
+    cf_container_registry_service,
+    cf_container_services,
+    cf_resource_groups,
+    cf_resources,
+    get_auth_management_client,
+    get_graph_rbac_management_client,
+    get_resource_by_name,
+)
+from azure.cli.command_modules.acs._consts import (
+    ADDONS,
+    CONST_ACC_SGX_QUOTE_HELPER_ENABLED,
+    CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME,
+    CONST_AZURE_POLICY_ADDON_NAME,
+    CONST_CANIPULL_IMAGE,
+    CONST_CONFCOM_ADDON_NAME,
+    CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME,
+    CONST_INGRESS_APPGW_ADDON_NAME,
+    CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID,
+    CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME,
+    CONST_INGRESS_APPGW_SUBNET_CIDR,
+    CONST_INGRESS_APPGW_SUBNET_ID,
+    CONST_INGRESS_APPGW_WATCH_NAMESPACE,
+    CONST_KUBE_DASHBOARD_ADDON_NAME,
+    CONST_MANAGED_IDENTITY_OPERATOR_ROLE,
+    CONST_MANAGED_IDENTITY_OPERATOR_ROLE_ID,
+    CONST_MONITORING_ADDON_NAME,
+    CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID,
+    CONST_MONITORING_USING_AAD_MSI_AUTH,
+    CONST_NODEPOOL_MODE_USER,
+    CONST_OPEN_SERVICE_MESH_ADDON_NAME,
+    CONST_ROTATION_POLL_INTERVAL,
+    CONST_SCALE_DOWN_MODE_DELETE,
+    CONST_SCALE_SET_PRIORITY_REGULAR,
+    CONST_SCALE_SET_PRIORITY_SPOT,
+    CONST_SECRET_ROTATION_ENABLED,
+    CONST_SPOT_EVICTION_POLICY_DELETE,
+    CONST_VIRTUAL_NODE_ADDON_NAME,
+    CONST_VIRTUAL_NODE_SUBNET_NAME,
+    DecoratorEarlyExitException,
+)
 from azure.cli.command_modules.acs._helpers import get_snapshot_by_snapshot_id
-from azure.cli.core.api import get_config_dir
-from azure.cli.core.azclierror import (ResourceNotFoundError,
-                                       ArgumentUsageError,
-                                       InvalidArgumentValueError,
-                                       MutuallyExclusiveArgumentError,
-                                       ValidationError,
-                                       UnauthorizedError,
-                                       AzureInternalError,
-                                       FileOperationError)
+from azure.cli.command_modules.acs._params import regions_in_preview, regions_in_prod
+from azure.cli.command_modules.acs._resourcegroup import get_rg_location
+from azure.cli.command_modules.acs._validators import extract_comma_separated_string
+from azure.cli.command_modules.acs.addonconfiguration import (
+    add_ingress_appgw_addon_role_assignment,
+    add_monitoring_role_assignment,
+    add_virtual_node_role_assignment,
+    ensure_container_insights_for_monitoring,
+    ensure_default_log_analytics_workspace_for_monitoring,
+)
 from azure.cli.core._profile import Profile
-from azure.cli.core.profiles import ResourceType
+from azure.cli.core.api import get_config_dir
+from azure.cli.core.azclierror import (
+    ArgumentUsageError,
+    AzureInternalError,
+    FileOperationError,
+    InvalidArgumentValueError,
+    MutuallyExclusiveArgumentError,
+    ResourceNotFoundError,
+    UnauthorizedError,
+    ValidationError,
+)
+from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
 from azure.cli.core.keys import is_valid_ssh_rsa_public_key
-from azure.cli.core.util import get_file_json, in_cloud_console, shell_safe_json_parse, truncate_text, sdk_no_wait
-from azure.cli.core.commands import LongRunningOperation
-from azure.graphrbac.models import (ApplicationCreateParameters,
-                                    ApplicationUpdateParameters,
-                                    PasswordCredential,
-                                    KeyCredential,
-                                    ServicePrincipalCreateParameters,
-                                    GetObjectsParameters,
-                                    ResourceAccess, RequiredResourceAccess)
-
-from azure.mgmt.containerservice.models import ContainerServiceOrchestratorTypes
-
-from ._client_factory import cf_container_services
-from ._client_factory import cf_resource_groups
-from ._client_factory import get_auth_management_client
-from ._client_factory import get_graph_rbac_management_client
-from ._client_factory import cf_resources
-from ._client_factory import get_resource_by_name
-from ._client_factory import cf_container_registry_service
-from ._client_factory import cf_agent_pools
-
-from ._consts import CONST_SCALE_SET_PRIORITY_REGULAR, CONST_SCALE_SET_PRIORITY_SPOT, CONST_SPOT_EVICTION_POLICY_DELETE
-from ._consts import CONST_SCALE_DOWN_MODE_DELETE
-from ._consts import CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME
-from ._consts import CONST_MONITORING_ADDON_NAME
-from ._consts import CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID, CONST_MONITORING_USING_AAD_MSI_AUTH
-from ._consts import CONST_VIRTUAL_NODE_ADDON_NAME
-from ._consts import CONST_VIRTUAL_NODE_SUBNET_NAME
-from ._consts import CONST_KUBE_DASHBOARD_ADDON_NAME
-from ._consts import CONST_AZURE_POLICY_ADDON_NAME
-from ._consts import CONST_INGRESS_APPGW_ADDON_NAME
-from ._consts import CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID, CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME
-from ._consts import CONST_INGRESS_APPGW_SUBNET_CIDR, CONST_INGRESS_APPGW_SUBNET_ID
-from ._consts import CONST_INGRESS_APPGW_WATCH_NAMESPACE
-from ._consts import CONST_CONFCOM_ADDON_NAME, CONST_ACC_SGX_QUOTE_HELPER_ENABLED
-from ._consts import CONST_OPEN_SERVICE_MESH_ADDON_NAME
-from ._consts import (CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME,
-                      CONST_SECRET_ROTATION_ENABLED,
-                      CONST_ROTATION_POLL_INTERVAL)
-from ._consts import ADDONS
-from ._consts import CONST_CANIPULL_IMAGE
-from ._consts import CONST_MANAGED_IDENTITY_OPERATOR_ROLE, CONST_MANAGED_IDENTITY_OPERATOR_ROLE_ID
-from ._consts import DecoratorEarlyExitException
-from .addonconfiguration import (
-    add_monitoring_role_assignment,
-    add_ingress_appgw_addon_role_assignment,
-    add_virtual_node_role_assignment,
-    ensure_default_log_analytics_workspace_for_monitoring,
-    ensure_container_insights_for_monitoring,
+from azure.cli.core.profiles import ResourceType
+from azure.cli.core.util import get_file_json, in_cloud_console, sdk_no_wait, shell_safe_json_parse, truncate_text
+from azure.graphrbac.models import (
+    ApplicationCreateParameters,
+    ApplicationUpdateParameters,
+    GetObjectsParameters,
+    KeyCredential,
+    PasswordCredential,
+    RequiredResourceAccess,
+    ResourceAccess,
+    ServicePrincipalCreateParameters,
 )
-from ._resourcegroup import get_rg_location
-from ._validators import extract_comma_separated_string
+from dateutil.relativedelta import relativedelta
+from knack.log import get_logger
+from knack.prompting import NoTTYException, prompt_y_n
+from knack.util import CLIError
+from msrestazure.azure_exceptions import CloudError
 
 logger = get_logger(__name__)
 
-# pylint:disable=too-many-lines,unused-argument
+# pylint: disable=unused-argument
 
 
 def which(binary):
@@ -184,6 +194,8 @@ def acs_browse(cmd, client, resource_group_name, name, disable_browser=False, ss
 
 
 def _acs_browse_internal(cmd, client, acs_info, resource_group_name, name, disable_browser, ssh_key_file):
+    from azure.mgmt.containerservice.models import ContainerServiceOrchestratorTypes
+
     orchestrator_type = acs_info.orchestrator_profile.orchestrator_type  # pylint: disable=no-member
 
     if str(orchestrator_type).lower() == 'kubernetes' or \
@@ -1281,6 +1293,8 @@ def _mkdir_p(path):
 
 
 def update_acs(cmd, client, resource_group_name, container_service_name, new_agent_count):
+    from azure.mgmt.containerservice.models import ContainerServiceOrchestratorTypes
+
     instance = client.get(resource_group_name, container_service_name)
     instance.agent_pool_profiles[0].count = new_agent_count  # pylint: disable=no-member
 
@@ -1955,6 +1969,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                load_balancer_outbound_ip_prefixes=None,
                load_balancer_outbound_ports=None,
                load_balancer_idle_timeout=None,
+               nat_gateway_managed_outbound_ip_count=None,
+               nat_gateway_idle_timeout=None,
                outbound_type=None,
                auto_upgrade_channel=None,
                enable_addons=None,
@@ -2318,6 +2334,8 @@ def aks_update(cmd, client, resource_group_name, name,
                load_balancer_outbound_ip_prefixes=None,
                load_balancer_outbound_ports=None,
                load_balancer_idle_timeout=None,
+               nat_gateway_managed_outbound_ip_count=None,
+               nat_gateway_idle_timeout=None,
                attach_acr=None,
                detach_acr=None,
                api_server_authorized_ip_ranges=None,
@@ -3145,7 +3163,7 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
                       kubelet_config=None,
                       linux_os_config=None,
                       max_surge=None,
-                      mode="User",
+                      mode=CONST_NODEPOOL_MODE_USER,
                       enable_encryption_at_host=False,
                       enable_ultra_ssd=False,
                       enable_fips_image=False,

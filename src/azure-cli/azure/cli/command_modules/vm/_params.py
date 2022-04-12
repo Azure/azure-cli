@@ -943,6 +943,7 @@ def load_arguments(self, _):
             c.argument('assign_identity', nargs='*', arg_group='Managed Service Identity', help="accept system or user assigned identities separated by spaces. Use '[system]' to refer system assigned identity, or a resource id to refer user assigned identity. Check out help for more examples")
             c.ignore('aux_subscriptions')
             c.argument('edge_zone', edge_zone_type)
+            c.argument('accept_term', action='store_true', help="Accept the license agreement and privacy statement.")
 
         with self.argument_context(scope, arg_group='Authentication') as c:
             c.argument('generate_ssh_keys', action='store_true', help='Generate SSH public and private key files if missing. The keys will be stored in the ~/.ssh directory')
