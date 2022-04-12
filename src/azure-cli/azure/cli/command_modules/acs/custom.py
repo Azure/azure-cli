@@ -2313,9 +2313,8 @@ def aks_scale(cmd, client, resource_group_name, name, node_count, nodepool_name=
                     "Cannot scale cluster autoscaler enabled node pool.")
 
             agent_profile.count = int(node_count)  # pylint: disable=no-member
-            # null out the SP and AAD profile because otherwise validation complains
+            # null out the SP profile because otherwise validation complains
             instance.service_principal_profile = None
-            instance.aad_profile = None
             return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, name, instance)
     raise CLIError('The nodepool "{}" was not found.'.format(nodepool_name))
 
@@ -2467,9 +2466,8 @@ def aks_upgrade(cmd,
             agent_profile.orchestrator_version = kubernetes_version
             agent_profile.creation_data = None
 
-    # null out the SP and AAD profile because otherwise validation complains
+    # null out the SP profile because otherwise validation complains
     instance.service_principal_profile = None
-    instance.aad_profile = None
 
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, name, instance)
 
@@ -2804,9 +2802,8 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, name, ad
 
     instance.addon_profiles = addon_profiles
 
-    # null out the SP and AAD profile because otherwise validation complains
+    # null out the SP profile because otherwise validation complains
     instance.service_principal_profile = None
-    instance.aad_profile = None
 
     return instance
 
