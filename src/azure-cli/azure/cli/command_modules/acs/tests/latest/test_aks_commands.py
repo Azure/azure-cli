@@ -21,6 +21,7 @@ from azure.cli.core.azclierror import CLIInternalError
 from azure.cli.testsdk import ScenarioTest, live_only
 from azure.cli.testsdk.checkers import StringCheck, StringContainCheck, StringContainCheckIgnoreCase
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
+from azure.cli.command_modules.acs.tests.latest.utils import get_test_data_file_path
 from knack.util import CLIError
 # flake8: noqa
 
@@ -33,9 +34,7 @@ def _process_sp_name(sp_name):
     from azure.cli.core.util import is_guid
     return sp_name if is_guid(sp_name) else 'http://{}'.format(sp_name)
 
-def _get_test_data_file(filename):
-    curr_dir = os.path.dirname(os.path.realpath(__file__))
-    return os.path.join(curr_dir, 'data', filename)
+
 class AzureKubernetesServiceScenarioTest(ScenarioTest):
     def __init__(self, method_name):
         super(AzureKubernetesServiceScenarioTest, self).__init__(
@@ -44,24 +43,29 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @classmethod
     def generate_ssh_keys(cls):
-        # If the `--ssh-key-value` option is not specified, the validator will try to read the ssh-key from the "~/.ssh" directory,
-        # and if no key exists, it will call the method provided by azure-cli.core to generate one under the "~/.ssh" directory.
-        # In order to avoid misuse of personal ssh-key during testing and the race condition that is prone to occur when key creation
-        # is handled by azure-cli when performing test cases concurrently, we provide this function as a workround.
+        """
+        If the `--ssh-key-value` option is not specified, the validator will try to read the ssh-key from the "~/.ssh"
+        directory, and if no key exists, it will call the method provided by azure-cli.core to generate one under the
+        "~/.ssh" directory.
 
-        # In the scenario of runner and AKS check-in pipeline, a temporary ssh-key will be generated in advance under the
-        # "tests/latest/data/.ssh" sub-directory of the acs module in the cloned azure-cli repository when setting up the
-        # environment. Each test case will read the ssh-key from a pre-generated file during execution, so there will be no
-        # race conditions caused by concurrent reading and writing/creating of the same file.
+        In order to avoid misuse of personal ssh-key during testing and the race condition that is prone to occur
+        when key creation is handled by azure-cli when performing test cases concurrently, we provide this function as
+        a workround.
+
+        In the scenario of runner and AKS check-in pipeline, a temporary ssh-key will be generated in advance under the
+        "tests/latest/data/.ssh" sub-directory of the acs module in the cloned azure-cli repository when setting up the
+        environment. Each test case will read the ssh-key from a pre-generated file during execution, so there will be no
+        race conditions caused by concurrent reading and writing/creating of the same file.
+        """
         acs_base_dir = os.getenv("ACS_BASE_DIR", None)
         if acs_base_dir:
             pre_generated_ssh_key_path = os.path.join(acs_base_dir, "tests/latest/data/.ssh/id_rsa.pub")
             if os.path.exists(pre_generated_ssh_key_path):
                 return pre_generated_ssh_key_path.replace('\\', '\\\\')
 
-        # In the CLI check-in pipeline scenario, the following fake ssh-key will be used. Each test case will read the ssh-key from
-        # a different temporary file during execution, so there will be no race conditions caused by concurrent reading and
-        # writing/creating of the same file.
+        # In the CLI check-in pipeline scenario, the following fake ssh-key will be used. Each test case will read the
+        # ssh-key from a different temporary file during execution, so there will be no race conditions caused by
+        # concurrent reading and writing/creating of the same file.
         TEST_SSH_KEY_PUB = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ== test@example.com\n"  # pylint: disable=line-too-long
         fd, pathname = tempfile.mkstemp()
         try:
@@ -107,10 +111,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         identity = self.cmd('az identity create -g {} -n {}'.format(
             resource_group, identity_name)).get_output_in_json()
         return identity.get("id")
-
-    def get_test_data_file_path(self, filename):
-        curr_dir = os.path.dirname(os.path.realpath(__file__))
-        return os.path.join(curr_dir, 'data', filename)
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
@@ -5142,7 +5142,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             raise CLIInternalError("Failed to install kubectl with error: '{}'!".format(err))
 
         # create test hook file
-        hook_file_path = self.get_test_data_file_path("test_aks_browse_legacy.hook")
+        hook_file_path = get_test_data_file_path("test_aks_browse_legacy.hook")
         test_hook_data = {
             "configs": {
                 "enableTimeout": True,
@@ -5404,7 +5404,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             raise CLIInternalError("Failed to install kubectl with error: '{}'!".format(err))
 
         # create test hook file
-        hook_file_path = self.get_test_data_file_path("test_aks_create_attach_acr.hook")
+        hook_file_path = get_test_data_file_path("test_aks_create_attach_acr.hook")
         test_hook_data = {
             "configs": {
                 "returnOutput": True,
@@ -6766,8 +6766,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.kwargs.update({
             'resource_group': resource_group,
             'name': aks_name,
-            'kc_path': _get_test_data_file('kubeletconfig.json'),
-            'oc_path': _get_test_data_file('linuxosconfig.json'),
+            'kc_path': get_test_data_file_path('kubeletconfig.json'),
+            'oc_path': get_test_data_file_path('linuxosconfig.json'),
             'ssh_key_value': self.generate_ssh_keys()
         })
 
