@@ -285,7 +285,7 @@ class AKSAgentPoolContext(BaseAKSContext):
 
         # enable_cluster_autoscaler
         # read the original value passed by the command
-        enable_cluster_autoscaler = self.raw_param.get("enable_cluster_autoscaler")
+        enable_cluster_autoscaler = self.raw_param.get("enable_cluster_autoscaler", False)
         # try to read the property value corresponding to the parameter from the `agentpool` object
         if self.agentpool and self.agentpool.enable_auto_scaling is not None:
             enable_cluster_autoscaler = self.agentpool.enable_auto_scaling
@@ -909,7 +909,7 @@ class AKSAgentPoolContext(BaseAKSContext):
                     )
                 )
 
-        # try to read the property value corresponding to the parameter from the `mc` object
+        # try to read the property value corresponding to the parameter from the `agentpool` object
         if self.agentpool and self.agentpool.kubelet_config is not None:
             kubelet_config = self.agentpool.kubelet_config
 
@@ -942,7 +942,7 @@ class AKSAgentPoolContext(BaseAKSContext):
                     )
                 )
 
-        # try to read the property value corresponding to the parameter from the `mc` object
+        # try to read the property value corresponding to the parameter from the `agentpool` object
         if self.agentpool and self.agentpool.linux_os_config:
             linux_os_config = self.agentpool.linux_os_config
 
@@ -1269,7 +1269,7 @@ class AKSAgentPoolAddDecorator:
         The function "sdk_no_wait" will be called to use the ContainerServiceClient to send a reqeust to add a new agent
         pool to the cluster.
 
-        :return: the ManagedCluster object
+        :return: the AgentPool object
         """
         self._ensure_agentpool(agentpool)
 

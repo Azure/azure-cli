@@ -1788,9 +1788,9 @@ class AKSAgentPoolAddDecoratorStandaloneModeTestCase(AKSAgentPoolAddDecoratorCom
         ground_truth_agentpool_1 = self.create_initialized_agentpool_instance(
             nodepool_name="test_nodepool_name",
             upgrade_settings=ground_truth_upgrade_settings_1,
+            os_disk_size_gb=0,
             count=3,
             enable_auto_scaling=False,
-            os_disk_size_gb=0,
             os_type=CONST_DEFAULT_NODE_OS_TYPE,
             vm_size=CONST_DEFAULT_NODE_VM_SIZE,
             type_properties_type=CONST_VIRTUAL_MACHINE_SCALE_SETS,
@@ -1928,9 +1928,10 @@ class AKSAgentPoolAddDecoratorManagedClusterModeTestCase(AKSAgentPoolAddDecorato
         ground_truth_agentpool_1 = self.create_initialized_agentpool_instance(
             nodepool_name="nodepool1",
             upgrade_settings=upgrade_settings_1,
+            os_disk_size_gb=0,
             count=3,
             enable_auto_scaling=False,
-            os_disk_size_gb=0,
+            enable_node_public_ip=False,
             orchestrator_version="",
             os_type=CONST_DEFAULT_NODE_OS_TYPE,
             vm_size=CONST_DEFAULT_NODE_VM_SIZE,
@@ -1938,7 +1939,6 @@ class AKSAgentPoolAddDecoratorManagedClusterModeTestCase(AKSAgentPoolAddDecorato
             enable_encryption_at_host=False,
             enable_ultra_ssd=False,
             enable_fips=False,
-            enable_node_public_ip=False,
             mode=CONST_NODEPOOL_MODE_SYSTEM,
             scale_down_mode=CONST_SCALE_DOWN_MODE_DELETE,
         )
