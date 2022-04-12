@@ -388,9 +388,9 @@ def _deploy_arm_template_core_unmodified(cmd, resource_group_name, template_file
                        deployment)
 
 
-class JsonCTemplate:
+class JsonCTemplate(dict):
     def __init__(self, template_as_bytes):
-        self.template_as_bytes = template_as_bytes
+        super().__init__(template_as_bytes=template_as_bytes)
 
 
 class JSONSerializer(Serializer):
@@ -418,9 +418,13 @@ class JsonCTemplatePolicy(SansIOHTTPPolicy):
         if isinstance(request_data, bytes):
             return
 
+        if request_data:
+            request_data = json.loads(request_data)
+
         if request_data.get('properties', {}).get('template'):
+            http_request.data = request_data
             template = http_request.data["properties"]["template"]
-            if not isinstance(template, JsonCTemplate):
+            if not template.get('template_as_bytes'):
                 raise ValueError()
 
             del http_request.data["properties"]["template"]
@@ -429,7 +433,7 @@ class JsonCTemplatePolicy(SansIOHTTPPolicy):
                 del http_request.data["properties"]["templateLink"]
             partial_request = json.dumps(http_request.data)
 
-            http_request.data = partial_request[:-2] + ", template:" + template.template_as_bytes + r"}}"
+            http_request.data = partial_request[:-2] + ", template:" + template['template_as_bytes'] + r"}}"
             http_request.data = http_request.data.encode('utf-8')
 
 
