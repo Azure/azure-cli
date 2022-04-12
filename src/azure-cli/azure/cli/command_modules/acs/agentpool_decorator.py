@@ -707,12 +707,12 @@ class AKSAgentPoolContext(BaseAKSContext):
         return pod_subnet_id
 
     def get_enable_node_public_ip(self) -> bool:
-        """Obtain the value of enable_node_public_ip.
+        """Obtain the value of enable_node_public_ip, default value is False.
 
         :return: bool
         """
         # read the original value passed by the command
-        enable_node_public_ip = self.raw_param.get("enable_node_public_ip")
+        enable_node_public_ip = self.raw_param.get("enable_node_public_ip", False)
         # try to read the property value corresponding to the parameter from the `agentpool` object
         if self.agentpool and self.agentpool.enable_node_public_ip is not None:
             enable_node_public_ip = self.agentpool.enable_node_public_ip
@@ -976,14 +976,14 @@ class AKSAgentPoolContext(BaseAKSContext):
         return aks_custom_headers
 
     def get_no_wait(self) -> bool:
-        """Obtain the value of no_wait.
+        """Obtain the value of no_wait, default value is False.
 
         Note: no_wait will not be decorated into the `agentpool` object.
 
         :return: bool
         """
         # read the original value passed by the command
-        no_wait = self.raw_param.get("no_wait")
+        no_wait = self.raw_param.get("no_wait", False)
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation

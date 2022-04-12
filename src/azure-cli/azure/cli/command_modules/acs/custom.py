@@ -2031,7 +2031,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     raw_parameters = locals()
 
     # decorator pattern
-    from .decorator import AKSCreateDecorator
+    from azure.cli.command_modules.acs.decorator import AKSCreateDecorator
     aks_create_decorator = AKSCreateDecorator(
         cmd=cmd,
         client=client,
@@ -2369,7 +2369,7 @@ def aks_update(cmd, client, resource_group_name, name,
     raw_parameters = locals()
 
     # decorator pattern
-    from .decorator import AKSUpdateDecorator
+    from azure.cli.command_modules.acs.decorator import AKSUpdateDecorator
     aks_update_decorator = AKSUpdateDecorator(
         cmd=cmd,
         client=client,
