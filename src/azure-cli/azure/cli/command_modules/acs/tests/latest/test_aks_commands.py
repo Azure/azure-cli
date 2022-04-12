@@ -114,6 +114,367 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_create_default(self, resource_group, resource_group_location):
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+        tags = "key1=value1"
+        nodepool_labels = "label1=value1 label2=value2"
+        nodepool_tags = "tag1=tv1 tag2=tv2"
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'location': resource_group_location,
+            'tags': tags,
+            'nodepool_labels': nodepool_labels,
+            'nodepool_tags': nodepool_tags,
+            'resource_type': 'Microsoft.ContainerService/ManagedClusters',
+            'ssh_key_value': self.generate_ssh_keys(),
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--node-count=1 --ssh-key-value={ssh_key_value} ' \
+                     '--tags {tags} --nodepool-labels {nodepool_labels} --nodepool-tags {nodepool_tags}'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.exists('fqdn'),
+        ])
+
+        # show
+        self.cmd('aks show -g {resource_group} -n {name}', checks=[
+            self.check('type', '{resource_type}'),
+            self.check('resourceGroup', '{resource_group}'),
+            self.check('name', '{name}'),
+            self.exists('nodeResourceGroup'),
+            self.exists('kubernetesVersion'),
+            self.check('agentPoolProfiles[0].count', 1),
+            self.check('agentPoolProfiles[0].osType', 'Linux'),
+            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS2_v2'),
+            self.check('agentPoolProfiles[0].nodeLabels.label1', 'value1'),
+            self.check('agentPoolProfiles[0].nodeLabels.label2', 'value2'),
+            self.check('agentPoolProfiles[0].tags.tag1', 'tv1'),
+            self.check('agentPoolProfiles[0].tags.tag2', 'tv2'),
+        ])
+
+        # list
+        self.cmd('aks list -g {resource_group}', checks=[
+            self.check('[0].type', '{resource_type}'),
+            StringContainCheck(aks_name),
+            StringContainCheck(resource_group)
+        ])
+
+        # list in tabular format
+        self.cmd('aks list -g {resource_group} -o table', checks=[
+            StringContainCheck(aks_name),
+            StringContainCheck(resource_group)
+        ])
+
+        # get-credentials
+        fd, temp_path = tempfile.mkstemp()
+        self.kwargs.update({'file': temp_path})
+        try:
+            self.cmd(
+                'aks get-credentials -g {resource_group} -n {name} --file "{file}"')
+            self.assertGreater(os.path.getsize(temp_path), 0)
+        finally:
+            os.close(fd)
+            os.remove(temp_path)
+
+        # get-credentials to stdout
+        self.cmd('aks get-credentials -g {resource_group} -n {name} -f -')
+
+        # scale up
+        self.cmd('aks scale -g {resource_group} -n {name} --node-count 3', checks=[
+            self.check('agentPoolProfiles[0].count', 3)
+        ])
+
+        # show again
+        self.cmd('aks show -g {resource_group} -n {name}', checks=[
+            self.check('agentPoolProfiles[0].count', 3)
+        ])
+
+        # delete
+        self.cmd('aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    @AKSCustomRoleBasedServicePrincipalPreparer()
+    def test_aks_create_default_sp(self, resource_group, resource_group_location, sp_name, sp_password):
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+        tags = "key1=value1"
+        nodepool_labels = "label1=value1 label2=value2"
+        nodepool_tags = "tag1=tv1 tag2=tv2"
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'location': resource_group_location,
+            'tags': tags,
+            'nodepool_labels': nodepool_labels,
+            'nodepool_tags': nodepool_tags,
+            'service_principal': _process_sp_name(sp_name),
+            'client_secret': sp_password,
+            'resource_type': 'Microsoft.ContainerService/ManagedClusters',
+            'ssh_key_value': self.generate_ssh_keys(),
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--node-count=1 --ssh-key-value={ssh_key_value} ' \
+                     '--tags {tags} --nodepool-labels {nodepool_labels} --nodepool-tags {nodepool_tags} ' \
+                     '--service-principal={service_principal} --client-secret={client_secret}'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.exists('fqdn'),
+        ])
+
+        # show
+        self.cmd('aks show -g {resource_group} -n {name}', checks=[
+            self.check('type', '{resource_type}'),
+            self.check('resourceGroup', '{resource_group}'),
+            self.check('name', '{name}'),
+            self.exists('nodeResourceGroup'),
+            self.exists('kubernetesVersion'),
+            self.check('agentPoolProfiles[0].count', 1),
+            self.check('agentPoolProfiles[0].osType', 'Linux'),
+            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS2_v2'),
+            self.check('agentPoolProfiles[0].nodeLabels.label1', 'value1'),
+            self.check('agentPoolProfiles[0].nodeLabels.label2', 'value2'),
+            self.check('agentPoolProfiles[0].tags.tag1', 'tv1'),
+            self.check('agentPoolProfiles[0].tags.tag2', 'tv2'),
+        ])
+
+        # list
+        self.cmd('aks list -g {resource_group}', checks=[
+            self.check('[0].type', '{resource_type}'),
+            StringContainCheck(aks_name),
+            StringContainCheck(resource_group)
+        ])
+
+        # list in tabular format
+        self.cmd('aks list -g {resource_group} -o table', checks=[
+            StringContainCheck(aks_name),
+            StringContainCheck(resource_group)
+        ])
+
+        # get-credentials
+        fd, temp_path = tempfile.mkstemp()
+        self.kwargs.update({'file': temp_path})
+        try:
+            self.cmd(
+                'aks get-credentials -g {resource_group} -n {name} --file "{file}"')
+            self.assertGreater(os.path.getsize(temp_path), 0)
+        finally:
+            os.close(fd)
+            os.remove(temp_path)
+
+        # get-credentials to stdout
+        self.cmd('aks get-credentials -g {resource_group} -n {name} -f -')
+
+        # scale up
+        self.cmd('aks scale -g {resource_group} -n {name} --node-count 3', checks=[
+            self.check('agentPoolProfiles[0].count', 3)
+        ])
+
+        # show again
+        self.cmd('aks show -g {resource_group} -n {name}', checks=[
+            self.check('agentPoolProfiles[0].count', 3)
+        ])
+
+        # delete
+        self.cmd('aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_private_cluster(self, resource_group, resource_group_location):
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'location': resource_group_location,
+            'dns_name_prefix': self.create_random_name('cliaksdns', 16),
+            'ssh_key_value': self.generate_ssh_keys(),
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
+                     '--load-balancer-sku=standard --enable-private-cluster'
+
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('agentPoolProfiles[0].count', 1),
+            self.check('dnsPrefix', '{dns_name_prefix}'),
+            self.check('networkProfile.loadBalancerSku', 'Standard'),
+            self.check('apiServerAccessProfile.enablePrivateCluster', True),
+            self.check('networkProfile.loadBalancerProfile.managedOutboundIPs.count', 1),
+            self.exists('networkProfile.loadBalancerProfile.effectiveOutboundIPs')
+        ])
+
+        # update api-server-authorized-ip-ranges is not supported
+        with self.assertRaises(CLIError):
+            self.cmd(
+                'aks update -g {resource_group} -n {name} --api-server-authorized-ip-ranges=1.2.3.4/32')
+
+        # scale up
+        self.cmd('aks scale -g {resource_group} -n {name} --node-count 3', checks=[
+            self.check('agentPoolProfiles[0].count', 3)
+        ])
+
+        # show again
+        self.cmd('aks show -g {resource_group} -n {name}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('agentPoolProfiles[0].count', 3)
+        ])
+
+        # delete
+        self.cmd('aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_private_cluster_without_public_fqdn(self, resource_group, resource_group_location):
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'location': resource_group_location,
+            'ssh_key_value': self.generate_ssh_keys()
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--enable-private-cluster --disable-public-fqdn --node-count=1 ' \
+                     '--ssh-key-value={ssh_key_value}'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.exists('privateFqdn'),
+            self.check('fqdn', None),
+            self.check('apiServerAccessProfile.enablePrivateCluster', True),
+            self.check('apiServerAccessProfile.enablePrivateClusterPublicFqdn', False),
+        ])
+
+        # update
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} --enable-public-fqdn'
+        self.cmd(update_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.exists('privateFqdn'),
+            self.exists('fqdn'),
+            self.check('apiServerAccessProfile.enablePrivateClusterPublicFqdn', True),
+        ])
+
+        # delete
+        self.cmd('aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_api_server_authorized_ip_ranges(self, resource_group, resource_group_location):
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'location': resource_group_location,
+            'dns_name_prefix': self.create_random_name('cliaksdns', 16),
+            'ssh_key_value': self.generate_ssh_keys(),
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
+                     '--load-balancer-sku=standard --api-server-authorized-ip-ranges=1.2.3.4/32'
+
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('dnsPrefix', '{dns_name_prefix}'),
+            self.check('networkProfile.loadBalancerSku', 'Standard'),
+            self.check('apiServerAccessProfile.enablePrivateCluster', None),
+            self.check('apiServerAccessProfile.authorizedIpRanges', ['1.2.3.4/32']),
+            self.check('networkProfile.loadBalancerProfile.managedOutboundIPs.count', 1),
+            self.exists('networkProfile.loadBalancerProfile.effectiveOutboundIPs')
+        ])
+
+        # update api-server-authorized-ip-ranges
+        self.cmd('aks update -g {resource_group} -n {name} --api-server-authorized-ip-ranges=""', checks=[
+            self.check('apiServerAccessProfile.authorizedIpRanges', None)
+        ])
+
+        # scale up
+        self.cmd('aks scale -g {resource_group} -n {name} --node-count 3', checks=[
+            self.check('agentPoolProfiles[0].count', 3)
+        ])
+
+        # show again
+        self.cmd('aks show -g {resource_group} -n {name}', checks=[
+            self.check('agentPoolProfiles[0].count', 3)
+        ])
+
+        # delete
+        self.cmd('aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_private_dns_zone(self, resource_group, resource_group_location):
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+        identity_name = self.create_random_name('cliakstest', 16)
+        subdomain_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'identity_name': identity_name,
+            'subdomain_name': subdomain_name,
+            'location': resource_group_location,
+            'ssh_key_value': self.generate_ssh_keys()
+        })
+
+        # create private dns zone
+        create_private_dns_zone = 'network private-dns zone create --resource-group={resource_group} --name="privatelink.{location}.azmk8s.io"'
+        zone = self.cmd(create_private_dns_zone, checks=[
+            self.check('provisioningState', 'Succeeded')
+        ]).get_output_in_json()
+        zone_id = zone["id"]
+        assert zone_id is not None
+        self.kwargs.update({
+            'zone_id': zone_id,
+        })
+
+        # create identity
+        create_identity = 'identity create --resource-group={resource_group} --name={identity_name}'
+        identity = self.cmd(create_identity, checks=[
+            self.check('name', identity_name)
+        ]).get_output_in_json()
+        identity_id = identity["principalId"]
+        identity_resource_id = identity["id"]
+        assert identity_id is not None
+        self.kwargs.update({
+            'identity_id': identity_id,
+            'identity_resource_id': identity_resource_id,
+        })
+
+        # assign
+        from unittest import mock
+        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+            assignment = self.cmd(
+                'role assignment create --assignee-object-id={identity_id} --role "Private DNS Zone Contributor" --scope={zone_id} --assignee-principal-type ServicePrincipal').get_output_in_json()
+        assert assignment["roleDefinitionId"] is not None
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--node-count=1 --fqdn-subdomain={subdomain_name} ' \
+                     '--load-balancer-sku=standard --enable-private-cluster --private-dns-zone={zone_id} ' \
+                     '--enable-managed-identity --assign-identity {identity_resource_id} --ssh-key-value={ssh_key_value}'
+        self.cmd(create_cmd, checks=[
+            self.exists('privateFqdn'),
+            self.exists('fqdnSubdomain'),
+            self.exists('nodeResourceGroup'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('apiServerAccessProfile.privateDnsZone', zone_id),
+        ])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     @AKSCustomRoleBasedServicePrincipalPreparer()
     def test_aks_create_default_service(self, resource_group, resource_group_location, sp_name, sp_password):
         # reset the count so in replay mode the random names will start with 0
@@ -299,56 +660,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # show again and expect failure
         self.cmd('aks show -g {resource_group} -n {name}', expect_failure=True)
-
-    @AllowLargeResponse()
-    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus2euap', preserve_default_location=True)
-    def test_aks_create_edge_zone(self, resource_group, resource_group_location):
-        # reset the count so in replay mode the random names will start with 0
-        self.test_resources_count = 0
-        # kwargs for string formatting
-        aks_name = self.create_random_name('cliakstest', 16)
-        kubernetes_version = "1.20.7"
-
-        self.kwargs.update({
-            'resource_group': resource_group,
-            'edge_zone': 'microsoftrrdclab1',
-            'kubernetes_version': kubernetes_version,
-            'name': aks_name,
-            'dns_name_prefix': self.create_random_name('cliaksdns', 16),
-            'ssh_key_value': self.generate_ssh_keys(),
-            'location': resource_group_location,
-            'resource_type': 'Microsoft.ContainerService/ManagedClusters'
-        })
-
-        # create
-        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
-                     '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
-                     '--kubernetes-version {kubernetes_version} --edge-zone {edge_zone}'
-        self.cmd(create_cmd, checks=[
-            self.exists('fqdn'),
-            self.exists('nodeResourceGroup'),
-            self.check('provisioningState', 'Succeeded'),
-        ])
-
-        # show
-        self.cmd('aks show -g {resource_group} -n {name}', checks=[
-            self.check('type', '{resource_type}'),
-            self.check('name', '{name}'),
-            self.check('location', 'eastus2euap'),
-            self.check('extendedLocation.name', 'microsoftrrdclab1'),
-            self.check('extendedLocation.type', 'edgezone'),
-            self.exists('nodeResourceGroup'),
-            self.check('resourceGroup', '{resource_group}'),
-            self.check('agentPoolProfiles[0].count', 1),
-            self.check('agentPoolProfiles[0].osType', 'Linux'),
-            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS2_v2'),
-            self.check('dnsPrefix', '{dns_name_prefix}'),
-            self.check('kubernetesVersion', '{kubernetes_version}')
-        ])
-
-        # delete
-        self.cmd(
-            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     @AKSCustomRoleBasedServicePrincipalPreparer()
@@ -892,198 +1203,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.assertGreater(os.path.getsize(temp_path), 0)
         finally:
             os.remove(temp_path)
-
-        # delete
-        self.cmd(
-            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
-
-    @AllowLargeResponse()
-    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
-    @AKSCustomRoleBasedServicePrincipalPreparer()
-    def test_aks_create_private_cluster_then_update(self, resource_group, resource_group_location, sp_name, sp_password):
-        # reset the count so in replay mode the random names will start with 0
-        self.test_resources_count = 0
-        # kwargs for string formatting
-        aks_name = self.create_random_name('cliakstest', 16)
-        self.kwargs.update({
-            'resource_group': resource_group,
-            'name': aks_name,
-            'dns_name_prefix': self.create_random_name('cliaksdns', 16),
-            'ssh_key_value': self.generate_ssh_keys(),
-            'location': resource_group_location,
-            'service_principal': _process_sp_name(sp_name),
-            'client_secret': sp_password,
-            'resource_type': 'Microsoft.ContainerService/ManagedClusters'
-        })
-
-        # create
-        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
-                     '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
-                     '--service-principal={service_principal} --client-secret={client_secret} ' \
-                     '--load-balancer-sku=standard --vm-set-type=virtualmachinescalesets ' \
-                     '--enable-private-cluster --no-wait'
-
-        self.cmd(create_cmd, checks=[self.is_empty()])
-
-        # wait
-        self.cmd(
-            'aks wait -g {resource_group} -n {name} --created', checks=[self.is_empty()])
-
-        # list
-        self.cmd('aks list -g {resource_group}', checks=[
-            self.check('[0].type', '{resource_type}'),
-            StringContainCheck(aks_name),
-            StringContainCheck(resource_group)
-        ])
-
-        # list in tabular format
-        self.cmd('aks list -g {resource_group} -o table', checks=[
-            StringContainCheck(aks_name),
-            StringContainCheck(resource_group)
-        ])
-
-        # show
-        self.cmd('aks show -g {resource_group} -n {name}', checks=[
-            self.check('type', '{resource_type}'),
-            self.check('name', '{name}'),
-            self.exists('nodeResourceGroup'),
-            self.check('resourceGroup', '{resource_group}'),
-            self.check('agentPoolProfiles[0].count', 1),
-            self.check('agentPoolProfiles[0].osType', 'Linux'),
-            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS2_v2'),
-            self.check('agentPoolProfiles[0].type', 'VirtualMachineScaleSets'),
-            self.check('dnsPrefix', '{dns_name_prefix}'),
-            self.exists('kubernetesVersion'),
-            self.check('networkProfile.loadBalancerSku', 'Standard'),
-            self.check('apiServerAccessProfile.enablePrivateCluster', True),
-            self.check(
-                'networkProfile.loadBalancerProfile.managedOutboundIPs.count', 1),
-            self.exists(
-                'networkProfile.loadBalancerProfile.effectiveOutboundIPs')
-        ])
-
-        # get-credentials
-        fd, temp_path = tempfile.mkstemp()
-        self.kwargs.update({'file': temp_path})
-        try:
-            self.cmd(
-                'aks get-credentials -g {resource_group} -n {name} --file "{file}"')
-            self.assertGreater(os.path.getsize(temp_path), 0)
-        finally:
-            os.close(fd)
-            os.remove(temp_path)
-
-        # update api-server-authorized-ip-ranges is not supported
-        with self.assertRaises(CLIError) as err:
-            self.cmd(
-                'aks update -g {resource_group} -n {name} --api-server-authorized-ip-ranges=1.2.3.4/32')
-
-        # scale up
-        self.cmd('aks scale -g {resource_group} -n {name} --node-count 3', checks=[
-            self.check('agentPoolProfiles[0].count', 3)
-        ])
-
-        # show again
-        self.cmd('aks show -g {resource_group} -n {name}', checks=[
-            self.check('agentPoolProfiles[0].count', 3)
-        ])
-
-        # delete
-        self.cmd(
-            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
-
-    @AllowLargeResponse()
-    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
-    @AKSCustomRoleBasedServicePrincipalPreparer()
-    def test_aks_create_cluster_with_apiserver_authorized_ranges_then_update(self, resource_group, resource_group_location, sp_name, sp_password):
-        # reset the count so in replay mode the random names will start with 0
-        self.test_resources_count = 0
-        # kwargs for string formatting
-        aks_name = self.create_random_name('cliakstest', 16)
-        self.kwargs.update({
-            'resource_group': resource_group,
-            'name': aks_name,
-            'dns_name_prefix': self.create_random_name('cliaksdns', 16),
-            'ssh_key_value': self.generate_ssh_keys(),
-            'location': resource_group_location,
-            'service_principal': _process_sp_name(sp_name),
-            'client_secret': sp_password,
-            'resource_type': 'Microsoft.ContainerService/ManagedClusters'
-        })
-
-        # create
-        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
-                     '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
-                     '--service-principal={service_principal} --client-secret={client_secret} ' \
-                     '--load-balancer-sku=standard --vm-set-type=virtualmachinescalesets ' \
-                     '--api-server-authorized-ip-ranges=1.2.3.4/32 --no-wait'
-
-        self.cmd(create_cmd, checks=[self.is_empty()])
-
-        # wait
-        self.cmd(
-            'aks wait -g {resource_group} -n {name} --created', checks=[self.is_empty()])
-
-        # list
-        self.cmd('aks list -g {resource_group}', checks=[
-            self.check('[0].type', '{resource_type}'),
-            StringContainCheck(aks_name),
-            StringContainCheck(resource_group)
-        ])
-
-        # list in tabular format
-        self.cmd('aks list -g {resource_group} -o table', checks=[
-            StringContainCheck(aks_name),
-            StringContainCheck(resource_group)
-        ])
-
-        # show
-        self.cmd('aks show -g {resource_group} -n {name}', checks=[
-            self.check('type', '{resource_type}'),
-            self.check('name', '{name}'),
-            self.exists('nodeResourceGroup'),
-            self.check('resourceGroup', '{resource_group}'),
-            self.check('agentPoolProfiles[0].count', 1),
-            self.check('agentPoolProfiles[0].osType', 'Linux'),
-            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS2_v2'),
-            self.check('agentPoolProfiles[0].type', 'VirtualMachineScaleSets'),
-            self.check('dnsPrefix', '{dns_name_prefix}'),
-            self.exists('kubernetesVersion'),
-            self.check('networkProfile.loadBalancerSku', 'Standard'),
-            self.check('apiServerAccessProfile.enablePrivateCluster', None),
-            self.check('apiServerAccessProfile.authorizedIpRanges',
-                       ['1.2.3.4/32']),
-            self.check(
-                'networkProfile.loadBalancerProfile.managedOutboundIPs.count', 1),
-            self.exists(
-                'networkProfile.loadBalancerProfile.effectiveOutboundIPs')
-        ])
-
-        # get-credentials
-        fd, temp_path = tempfile.mkstemp()
-        self.kwargs.update({'file': temp_path})
-        try:
-            self.cmd(
-                'aks get-credentials -g {resource_group} -n {name} --file "{file}"')
-            self.assertGreater(os.path.getsize(temp_path), 0)
-        finally:
-            os.close(fd)
-            os.remove(temp_path)
-
-        # update api-server-authorized-ip-ranges
-        self.cmd('aks update -g {resource_group} -n {name} --api-server-authorized-ip-ranges=""', checks=[
-            self.check('apiServerAccessProfile.authorizedIpRanges', None)
-        ])
-
-        # scale up
-        self.cmd('aks scale -g {resource_group} -n {name} --node-count 3', checks=[
-            self.check('agentPoolProfiles[0].count', 3)
-        ])
-
-        # show again
-        self.cmd('aks show -g {resource_group} -n {name}', checks=[
-            self.check('agentPoolProfiles[0].count', 3)
-        ])
 
         # delete
         self.cmd(
@@ -3246,190 +3365,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
-    def test_aks_create_private_cluster_then_update_msi(self, resource_group, resource_group_location):
-        # reset the count so in replay mode the random names will start with 0
-        self.test_resources_count = 0
-        # kwargs for string formatting
-        aks_name = self.create_random_name('cliakstest', 16)
-        self.kwargs.update({
-            'resource_group': resource_group,
-            'name': aks_name,
-            'dns_name_prefix': self.create_random_name('cliaksdns', 16),
-            'ssh_key_value': self.generate_ssh_keys(),
-            'location': resource_group_location,
-            'resource_type': 'Microsoft.ContainerService/ManagedClusters'
-        })
-
-        # create
-        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
-                     '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
-                     '--load-balancer-sku=standard --vm-set-type=virtualmachinescalesets ' \
-                     '--enable-private-cluster --no-wait'
-
-        self.cmd(create_cmd, checks=[self.is_empty()])
-
-        # wait
-        self.cmd(
-            'aks wait -g {resource_group} -n {name} --created', checks=[self.is_empty()])
-
-        # list
-        self.cmd('aks list -g {resource_group}', checks=[
-            self.check('[0].type', '{resource_type}'),
-            StringContainCheck(aks_name),
-            StringContainCheck(resource_group)
-        ])
-
-        # list in tabular format
-        self.cmd('aks list -g {resource_group} -o table', checks=[
-            StringContainCheck(aks_name),
-            StringContainCheck(resource_group)
-        ])
-
-        # show
-        self.cmd('aks show -g {resource_group} -n {name}', checks=[
-            self.check('type', '{resource_type}'),
-            self.check('name', '{name}'),
-            self.exists('nodeResourceGroup'),
-            self.check('resourceGroup', '{resource_group}'),
-            self.check('agentPoolProfiles[0].count', 1),
-            self.check('agentPoolProfiles[0].osType', 'Linux'),
-            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS2_v2'),
-            self.check('agentPoolProfiles[0].type', 'VirtualMachineScaleSets'),
-            self.check('dnsPrefix', '{dns_name_prefix}'),
-            self.exists('kubernetesVersion'),
-            self.check('networkProfile.loadBalancerSku', 'Standard'),
-            self.check('apiServerAccessProfile.enablePrivateCluster', True),
-            self.check(
-                'networkProfile.loadBalancerProfile.managedOutboundIPs.count', 1),
-            self.exists(
-                'networkProfile.loadBalancerProfile.effectiveOutboundIPs')
-        ])
-
-        # get-credentials
-        fd, temp_path = tempfile.mkstemp()
-        self.kwargs.update({'file': temp_path})
-        try:
-            self.cmd(
-                'aks get-credentials -g {resource_group} -n {name} --file "{file}"')
-            self.assertGreater(os.path.getsize(temp_path), 0)
-        finally:
-            os.close(fd)
-            os.remove(temp_path)
-
-        # update api-server-authorized-ip-ranges is not supported
-        with self.assertRaises(CLIError) as err:
-            self.cmd(
-                'aks update -g {resource_group} -n {name} --api-server-authorized-ip-ranges=1.2.3.4/32')
-
-        # scale up
-        self.cmd('aks scale -g {resource_group} -n {name} --node-count 3', checks=[
-            self.check('agentPoolProfiles[0].count', 3)
-        ])
-
-        # show again
-        self.cmd('aks show -g {resource_group} -n {name}', checks=[
-            self.check('agentPoolProfiles[0].count', 3)
-        ])
-
-        # delete
-        self.cmd(
-            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
-
-    @AllowLargeResponse()
-    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
-    def test_aks_create_cluster_with_apiserver_authorized_ranges_then_update_msi(self, resource_group, resource_group_location):
-        # reset the count so in replay mode the random names will start with 0
-        self.test_resources_count = 0
-        # kwargs for string formatting
-        aks_name = self.create_random_name('cliakstest', 16)
-        self.kwargs.update({
-            'resource_group': resource_group,
-            'name': aks_name,
-            'dns_name_prefix': self.create_random_name('cliaksdns', 16),
-            'ssh_key_value': self.generate_ssh_keys(),
-            'location': resource_group_location,
-            'resource_type': 'Microsoft.ContainerService/ManagedClusters'
-        })
-
-        # create
-        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
-                     '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
-                     '--load-balancer-sku=standard --vm-set-type=virtualmachinescalesets ' \
-                     '--api-server-authorized-ip-ranges=1.2.3.4/32 --no-wait'
-
-        self.cmd(create_cmd, checks=[self.is_empty()])
-
-        # wait
-        self.cmd(
-            'aks wait -g {resource_group} -n {name} --created', checks=[self.is_empty()])
-
-        # list
-        self.cmd('aks list -g {resource_group}', checks=[
-            self.check('[0].type', '{resource_type}'),
-            StringContainCheck(aks_name),
-            StringContainCheck(resource_group)
-        ])
-
-        # list in tabular format
-        self.cmd('aks list -g {resource_group} -o table', checks=[
-            StringContainCheck(aks_name),
-            StringContainCheck(resource_group)
-        ])
-
-        # show
-        self.cmd('aks show -g {resource_group} -n {name}', checks=[
-            self.check('type', '{resource_type}'),
-            self.check('name', '{name}'),
-            self.exists('nodeResourceGroup'),
-            self.check('resourceGroup', '{resource_group}'),
-            self.check('agentPoolProfiles[0].count', 1),
-            self.check('agentPoolProfiles[0].osType', 'Linux'),
-            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS2_v2'),
-            self.check('agentPoolProfiles[0].type', 'VirtualMachineScaleSets'),
-            self.check('dnsPrefix', '{dns_name_prefix}'),
-            self.exists('kubernetesVersion'),
-            self.check('networkProfile.loadBalancerSku', 'Standard'),
-            self.check('apiServerAccessProfile.enablePrivateCluster', None),
-            self.check('apiServerAccessProfile.authorizedIpRanges',
-                       ['1.2.3.4/32']),
-            self.check(
-                'networkProfile.loadBalancerProfile.managedOutboundIPs.count', 1),
-            self.exists(
-                'networkProfile.loadBalancerProfile.effectiveOutboundIPs')
-        ])
-
-        # get-credentials
-        fd, temp_path = tempfile.mkstemp()
-        self.kwargs.update({'file': temp_path})
-        try:
-            self.cmd(
-                'aks get-credentials -g {resource_group} -n {name} --file "{file}"')
-            self.assertGreater(os.path.getsize(temp_path), 0)
-        finally:
-            os.close(fd)
-            os.remove(temp_path)
-
-        # update api-server-authorized-ip-ranges
-        self.cmd('aks update -g {resource_group} -n {name} --api-server-authorized-ip-ranges=""', checks=[
-            self.check('apiServerAccessProfile.authorizedIpRanges', None)
-        ])
-
-        # scale up
-        self.cmd('aks scale -g {resource_group} -n {name} --node-count 3', checks=[
-            self.check('agentPoolProfiles[0].count', 3)
-        ])
-
-        # show again
-        self.cmd('aks show -g {resource_group} -n {name}', checks=[
-            self.check('agentPoolProfiles[0].count', 3)
-        ])
-
-        # delete
-        self.cmd(
-            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
-
-    @AllowLargeResponse()
-    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_create_slb_vmss_with_default_mgd_outbound_ip_then_update_msi(self, resource_group, resource_group_location):
         # reset the count so in replay mode the random names will start with 0
         self.test_resources_count = 0
@@ -4791,68 +4726,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
-    def test_aks_create_fqdn_subdomain(self, resource_group, resource_group_location):
-        # reset the count so in replay mode the random names will start with 0
-        self.test_resources_count = 0
-        # kwargs for string formatting
-        aks_name = self.create_random_name('cliakstest', 16)
-        identity_name = self.create_random_name('cliakstest', 16)
-        subdomain_name = self.create_random_name('cliakstest', 16)
-        self.kwargs.update({
-            'resource_group': resource_group,
-            'name': aks_name,
-            'identity_name': identity_name,
-            'subdomain_name': subdomain_name,
-            'location': resource_group_location,
-            'ssh_key_value': self.generate_ssh_keys()
-        })
-
-        # create private dns zone
-        create_private_dns_zone = 'network private-dns zone create --resource-group={resource_group} --name="privatelink.{location}.azmk8s.io"'
-        zone = self.cmd(create_private_dns_zone, checks=[
-            self.check('provisioningState', 'Succeeded')
-        ]).get_output_in_json()
-        zone_id = zone["id"]
-        assert zone_id is not None
-        self.kwargs.update({
-            'zone_id': zone_id,
-        })
-
-        # create identity
-        create_identity = 'identity create --resource-group={resource_group} --name={identity_name}'
-        identity = self.cmd(create_identity, checks=[
-            self.check('name', identity_name)
-        ]).get_output_in_json()
-        identity_id = identity["principalId"]
-        identity_resource_id = identity["id"]
-        assert identity_id is not None
-        self.kwargs.update({
-            'identity_id': identity_id,
-            'identity_resource_id': identity_resource_id,
-        })
-
-        # assign
-        from unittest import mock
-        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
-            assignment = self.cmd(
-                'role assignment create --assignee-object-id={identity_id} --role "Private DNS Zone Contributor" --scope={zone_id} --assignee-principal-type ServicePrincipal').get_output_in_json()
-        assert assignment["roleDefinitionId"] is not None
-
-        # create
-        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
-                     '--node-count=1 --fqdn-subdomain={subdomain_name} ' \
-                     '--load-balancer-sku=standard --enable-private-cluster --private-dns-zone={zone_id} ' \
-                     '--enable-managed-identity --assign-identity {identity_resource_id} --ssh-key-value={ssh_key_value}'
-        self.cmd(create_cmd, checks=[
-            self.exists('privateFqdn'),
-            self.exists('fqdnSubdomain'),
-            self.exists('nodeResourceGroup'),
-            self.check('provisioningState', 'Succeeded'),
-            self.check('apiServerAccessProfile.privateDnsZone', zone_id),
-        ])
-
-    @AllowLargeResponse()
-    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     @AKSCustomRoleBasedServicePrincipalPreparer()
     def test_aks_update_with_windows_password(self, resource_group, resource_group_location, sp_name, sp_password):
         # reset the count so in replay mode the random names will start with 0
@@ -5794,80 +5667,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
-    @AllowLargeResponse()
-    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
-    def test_aks_create_private_cluster_public_fqdn(self, resource_group, resource_group_location):
-        # reset the count so in replay mode the random names will start with 0
-        self.test_resources_count = 0
-        # kwargs for string formatting
-        aks_name = self.create_random_name('cliakstest', 16)
-        self.kwargs.update({
-            'resource_group': resource_group,
-            'name': aks_name,
-            'ssh_key_value': self.generate_ssh_keys()
-        })
-
-        # create
-        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
-                     '--enable-private-cluster --node-count=1 ' \
-                     '--ssh-key-value={ssh_key_value}'
-        self.cmd(create_cmd, checks=[
-            self.exists('privateFqdn'),
-            self.exists('fqdn'),
-            self.check('provisioningState', 'Succeeded'),
-            self.check('apiServerAccessProfile.enablePrivateClusterPublicFqdn', True),
-        ])
-
-        # update
-        update_cmd = 'aks update --resource-group={resource_group} --name={name} --disable-public-fqdn'
-        self.cmd(update_cmd, checks=[
-            self.exists('privateFqdn'),
-            self.check('fqdn', None),
-            self.check('provisioningState', 'Succeeded'),
-            self.check('apiServerAccessProfile.enablePrivateClusterPublicFqdn', False),
-        ])
-
-        # delete
-        self.cmd(
-            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
-
-    @AllowLargeResponse()
-    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
-    def test_aks_create_private_cluster_disable_public_fqdn_then_update(self, resource_group, resource_group_location):
-        # reset the count so in replay mode the random names will start with 0
-        self.test_resources_count = 0
-        # kwargs for string formatting
-        aks_name = self.create_random_name('cliakstest', 16)
-        self.kwargs.update({
-            'resource_group': resource_group,
-            'name': aks_name,
-            'ssh_key_value': self.generate_ssh_keys()
-        })
-
-        # create
-        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
-                     '--enable-private-cluster --disable-public-fqdn --node-count=1 ' \
-                     '--ssh-key-value={ssh_key_value}'
-        self.cmd(create_cmd, checks=[
-            self.exists('privateFqdn'),
-            self.check('fqdn', None),
-            self.check('provisioningState', 'Succeeded'),
-            self.check('apiServerAccessProfile.enablePrivateClusterPublicFqdn', False),
-        ])
-
-        # update
-        update_cmd = 'aks update --resource-group={resource_group} --name={name} --enable-public-fqdn'
-        self.cmd(update_cmd, checks=[
-            self.exists('privateFqdn'),
-            self.exists('fqdn'),
-            self.check('provisioningState', 'Succeeded'),
-            self.check('apiServerAccessProfile.enablePrivateClusterPublicFqdn', True),
-        ])
-
-        # delete
-        self.cmd(
-            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
-
     # live only due to dependency `_add_role_assignment` is not mocked
     @live_only()
     @AllowLargeResponse()
@@ -6792,3 +6591,50 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('kubeletConfig.cpuCfsQuotaPeriod', '200ms'),
             self.check('linuxOsConfig.sysctls.netCoreSomaxconn', 163849)
         ])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus2euap', preserve_default_location=True)
+    def test_aks_create_edge_zone(self, resource_group, resource_group_location):
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+        kubernetes_version = "1.20.7"
+
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'edge_zone': 'microsoftrrdclab1',
+            'kubernetes_version': kubernetes_version,
+            'name': aks_name,
+            'dns_name_prefix': self.create_random_name('cliaksdns', 16),
+            'ssh_key_value': self.generate_ssh_keys(),
+            'location': resource_group_location,
+            'resource_type': 'Microsoft.ContainerService/ManagedClusters'
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
+                     '--kubernetes-version {kubernetes_version} --edge-zone {edge_zone}'
+        self.cmd(create_cmd, checks=[
+            self.exists('fqdn'),
+            self.exists('nodeResourceGroup'),
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        # show
+        self.cmd('aks show -g {resource_group} -n {name}', checks=[
+            self.check('type', '{resource_type}'),
+            self.check('name', '{name}'),
+            self.check('location', 'eastus2euap'),
+            self.check('extendedLocation.name', 'microsoftrrdclab1'),
+            self.check('extendedLocation.type', 'edgezone'),
+            self.exists('nodeResourceGroup'),
+            self.check('resourceGroup', '{resource_group}'),
+            self.check('agentPoolProfiles[0].count', 1),
+            self.check('agentPoolProfiles[0].osType', 'Linux'),
+            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS2_v2'),
+            self.check('dnsPrefix', '{dns_name_prefix}'),
+            self.check('kubernetesVersion', '{kubernetes_version}')
+        ])
+
+        # delete
+        self.cmd('aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
