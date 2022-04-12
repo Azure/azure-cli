@@ -101,7 +101,7 @@ from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
 from azure.cli.core.keys import is_valid_ssh_rsa_public_key
 from azure.cli.core.profiles import ResourceType
-from azure.cli.core.util import get_file_json, in_cloud_console, sdk_no_wait, shell_safe_json_parse, truncate_text
+from azure.cli.core.util import get_file_json, in_cloud_console, sdk_no_wait, shell_safe_json_parse
 from azure.graphrbac.models import (
     ApplicationCreateParameters,
     ApplicationUpdateParameters,
