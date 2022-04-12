@@ -137,7 +137,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                      '--tags {tags} --nodepool-labels {nodepool_labels} --nodepool-tags {nodepool_tags}'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
-            self.exists('fqdn'),
         ])
 
         # show
@@ -147,6 +146,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('name', '{name}'),
             self.exists('nodeResourceGroup'),
             self.exists('kubernetesVersion'),
+            self.exists('fqdn'),
             self.check('agentPoolProfiles[0].count', 1),
             self.check('agentPoolProfiles[0].osType', 'Linux'),
             self.check('agentPoolProfiles[0].vmSize', 'Standard_DS2_v2'),
@@ -225,7 +225,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                      '--service-principal={service_principal} --client-secret={client_secret}'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
-            self.exists('fqdn'),
         ])
 
         # show
@@ -235,6 +234,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('name', '{name}'),
             self.exists('nodeResourceGroup'),
             self.exists('kubernetesVersion'),
+            self.exists('fqdn'),
             self.check('agentPoolProfiles[0].count', 1),
             self.check('agentPoolProfiles[0].osType', 'Linux'),
             self.check('agentPoolProfiles[0].vmSize', 'Standard_DS2_v2'),
@@ -304,7 +304,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
-            self.check('agentPoolProfiles[0].count', 1),
+            self.exists('fqdn'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.check('networkProfile.loadBalancerSku', 'Standard'),
             self.check('apiServerAccessProfile.enablePrivateCluster', True),
@@ -454,8 +454,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         })
 
         # assign
-        from unittest import mock
-        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+        with unittest.mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
             assignment = self.cmd(
                 'role assignment create --assignee-object-id={identity_id} --role "Private DNS Zone Contributor" --scope={zone_id} --assignee-principal-type ServicePrincipal').get_output_in_json()
         assert assignment["roleDefinitionId"] is not None
@@ -466,10 +465,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                      '--load-balancer-sku=standard --enable-private-cluster --private-dns-zone={zone_id} ' \
                      '--enable-managed-identity --assign-identity {identity_resource_id} --ssh-key-value={ssh_key_value}'
         self.cmd(create_cmd, checks=[
-            self.exists('privateFqdn'),
-            self.exists('fqdnSubdomain'),
-            self.exists('nodeResourceGroup'),
             self.check('provisioningState', 'Succeeded'),
+            self.exists('privateFqdn'),
+            self.check('fqdnSubdomain', subdomain_name),
             self.check('apiServerAccessProfile.privateDnsZone', zone_id),
         ])
 
@@ -6595,6 +6593,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus2euap', preserve_default_location=True)
     def test_aks_create_edge_zone(self, resource_group, resource_group_location):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
         # kwargs for string formatting
         aks_name = self.create_random_name('cliakstest', 16)
         kubernetes_version = "1.20.7"
