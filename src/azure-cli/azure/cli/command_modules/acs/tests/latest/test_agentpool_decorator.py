@@ -1013,7 +1013,7 @@ class AKSAgentPoolContextStandaloneModeTestCase(AKSAgentPoolContextCommonTestCas
         )
         with patch(
             "azure.cli.command_modules.acs.agentpool_decorator.cf_agent_pools",
-            return_value=Mock(),
+            return_value=Mock(list=Mock(return_value=[])),
         ):
             self.assertEqual(ctx_1.get_nodepool_name(), "test_nodepool_name")
 
@@ -1021,7 +1021,7 @@ class AKSAgentPoolContextStandaloneModeTestCase(AKSAgentPoolContextCommonTestCas
         ctx_1.attach_agentpool(agentpool_1)
         with patch(
             "azure.cli.command_modules.acs.agentpool_decorator.cf_agent_pools",
-            return_value=Mock(),
+            return_value=Mock(list=Mock(return_value=[])),
         ):
             self.assertEqual(ctx_1.get_nodepool_name(), "test_ap_name")
 
@@ -1039,7 +1039,7 @@ class AKSAgentPoolContextStandaloneModeTestCase(AKSAgentPoolContextCommonTestCas
         # fail on existing nodepool name
         with patch(
             "azure.cli.command_modules.acs.agentpool_decorator.cf_agent_pools",
-            mock_agentpool_operations,
+            return_value=mock_agentpool_operations,
         ), self.assertRaises(InvalidArgumentValueError):
             ctx_2.get_nodepool_name()
 
@@ -1391,7 +1391,7 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
         )
         with patch(
             "azure.cli.command_modules.acs.agentpool_decorator.cf_agent_pools",
-            return_value=Mock(),
+            return_value=Mock(list=Mock(return_value=[])),
         ):
             dec_agentpool_1 = dec_1.init_agentpool()
         ground_truth_agentpool_1 = self.create_initialized_agentpool_instance(
@@ -1768,7 +1768,7 @@ class AKSAgentPoolAddDecoratorStandaloneModeTestCase(AKSAgentPoolAddDecoratorCom
 
         with patch(
             "azure.cli.command_modules.acs.agentpool_decorator.cf_agent_pools",
-            return_value=Mock(),
+            return_value=Mock(list=Mock(return_value=[])),
         ):
             dec_agentpool_1 = dec_1.construct_default_agentpool_profile()
 
@@ -1879,7 +1879,7 @@ class AKSAgentPoolAddDecoratorManagedClusterModeTestCase(AKSAgentPoolAddDecorato
 
         with patch(
             "azure.cli.command_modules.acs.agentpool_decorator.cf_agent_pools",
-            return_value=Mock(),
+            return_value=Mock(list=Mock(return_value=[])),
         ):
             dec_agentpool_1 = dec_1.construct_default_agentpool_profile()
 

@@ -219,7 +219,8 @@ class AKSAgentPoolContext(BaseAKSContext):
         # validation
         if enable_validation:
             if self.agentpool_decorator_mode == AgentPoolDecoratorMode.STANDALONE:
-                instances = cf_agent_pools.list(self.get_resource_group_name, self.get_cluster_name)
+                agentpool_client = cf_agent_pools(self.cmd.cli_ctx)
+                instances = agentpool_client.list(self.get_resource_group_name(), self.get_cluster_name())
                 for agentpool_profile in instances:
                     if agentpool_profile.name == nodepool_name:
                         raise InvalidArgumentValueError(
