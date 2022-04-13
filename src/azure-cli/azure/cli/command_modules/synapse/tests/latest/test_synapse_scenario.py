@@ -2984,7 +2984,7 @@ class SynapseScenarioTests(ScenarioTest):
             'az synapse sql-script show --workspace-name {workspace} --name {name}',
             expect_failure=True)
 
-    @record_only()
+    #@record_only()
     def test_link_connection(self):
         self.kwargs.update({
             'workspace_name': 'xiaoyuxingtestne',
@@ -2992,14 +2992,14 @@ class SynapseScenarioTests(ScenarioTest):
             'link_table_id': '887e9d4df0fa4afaaad0d7a2c7f42d67',
             'sas_token': '1',
             'edit_table_file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'link-connection-table.json'),
-            'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'linkconnection1.json')
+            'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'linkconnection111.json')
         })
         # create link connnection
         self.cmd(
-            'az synapse link-connection create --workspace-name {workspace_name}'
-            '--name linkconnectionwstest3 --file @"{file}" ',
+            'az synapse link-connection create --workspace-name {workspace_name} '
+            '--name linkconnection111 --file @"{file}" ',
             checks=[
-                self.check('name', 'linkconnectionwstest3')
+                self.check('name', 'linkconnection111')
             ])
 
         # get link connnection
@@ -3040,3 +3040,14 @@ class SynapseScenarioTests(ScenarioTest):
         self.cmd(
             'az synapse link-connection show --workspace-name {workspace_name} --name linkconnectionwstest3',
             expect_failure=True)
+
+         # list link tables
+        self.cmd(
+            'az synapse link-connection list-link-tables --workspace-name {workspace_name} --n {link_connection_name} ',
+            checks=[
+                self.check('[0].id', self.kwargs['link_table_id'])
+            ])
+        
+        # edit link tables
+        self.cmd(
+            'az synapse link-connection edit-link-tables --workspace-name {workspace_name} --n {link_connection_name} --file @"{edit_table_file}" ')
