@@ -1128,7 +1128,6 @@ def load_arguments(self, _):
         c.argument('link_connection_name', arg_type=name_type, help='The link connection name.')
         c.argument('max_segment_count', help='Max segment count to query table status.')
         c.argument('continuation_token', help='Continuation token to query table status.')
-
     with self.argument_context('synapse link-connection update-landing-zone-credential') as c:
         c.argument('workspace_name', arg_type=workspace_name_arg_type)
         c.argument('link_connection_name', arg_type=name_type, help='The link connection name.')
