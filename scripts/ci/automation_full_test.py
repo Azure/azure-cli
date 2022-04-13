@@ -51,8 +51,13 @@ class AutomaticScheduling(object):
                 error_flag = True
         return error_flag
 
+
 def main():
     logger.info("Start check pull request ...\n")
     AS = AutomaticScheduling()
     AS.get_all_modules()
     sys.exit(1) if AS.run_modules() else sys.exit(0)
+
+
+if __name__ == '__main__':
+    main()
