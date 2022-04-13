@@ -219,7 +219,8 @@ class AKSAgentPoolContext(BaseAKSContext):
         # validation
         if enable_validation:
             if self.agentpool_decorator_mode == AgentPoolDecoratorMode.STANDALONE:
-                instances = cf_agent_pools.list(self.get_resource_group_name, self.get_cluster_name)
+                agentpool_client = cf_agent_pools(self.cmd.cli_ctx)
+                instances = agentpool_client.list(self.get_resource_group_name(), self.get_cluster_name())
                 for agentpool_profile in instances:
                     if agentpool_profile.name == nodepool_name:
                         raise InvalidArgumentValueError(
@@ -284,7 +285,7 @@ class AKSAgentPoolContext(BaseAKSContext):
 
         # enable_cluster_autoscaler
         # read the original value passed by the command
-        enable_cluster_autoscaler = self.raw_param.get("enable_cluster_autoscaler")
+        enable_cluster_autoscaler = self.raw_param.get("enable_cluster_autoscaler", False)
         # try to read the property value corresponding to the parameter from the `agentpool` object
         if self.agentpool and self.agentpool.enable_auto_scaling is not None:
             enable_cluster_autoscaler = self.agentpool.enable_auto_scaling
@@ -706,12 +707,12 @@ class AKSAgentPoolContext(BaseAKSContext):
         return pod_subnet_id
 
     def get_enable_node_public_ip(self) -> bool:
-        """Obtain the value of enable_node_public_ip.
+        """Obtain the value of enable_node_public_ip, default value is False.
 
         :return: bool
         """
         # read the original value passed by the command
-        enable_node_public_ip = self.raw_param.get("enable_node_public_ip")
+        enable_node_public_ip = self.raw_param.get("enable_node_public_ip", False)
         # try to read the property value corresponding to the parameter from the `agentpool` object
         if self.agentpool and self.agentpool.enable_node_public_ip is not None:
             enable_node_public_ip = self.agentpool.enable_node_public_ip
@@ -908,7 +909,7 @@ class AKSAgentPoolContext(BaseAKSContext):
                     )
                 )
 
-        # try to read the property value corresponding to the parameter from the `mc` object
+        # try to read the property value corresponding to the parameter from the `agentpool` object
         if self.agentpool and self.agentpool.kubelet_config is not None:
             kubelet_config = self.agentpool.kubelet_config
 
@@ -941,7 +942,7 @@ class AKSAgentPoolContext(BaseAKSContext):
                     )
                 )
 
-        # try to read the property value corresponding to the parameter from the `mc` object
+        # try to read the property value corresponding to the parameter from the `agentpool` object
         if self.agentpool and self.agentpool.linux_os_config:
             linux_os_config = self.agentpool.linux_os_config
 
@@ -975,14 +976,14 @@ class AKSAgentPoolContext(BaseAKSContext):
         return aks_custom_headers
 
     def get_no_wait(self) -> bool:
-        """Obtain the value of no_wait.
+        """Obtain the value of no_wait, default value is False.
 
         Note: no_wait will not be decorated into the `agentpool` object.
 
         :return: bool
         """
         # read the original value passed by the command
-        no_wait = self.raw_param.get("no_wait")
+        no_wait = self.raw_param.get("no_wait", False)
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
@@ -1268,7 +1269,7 @@ class AKSAgentPoolAddDecorator:
         The function "sdk_no_wait" will be called to use the ContainerServiceClient to send a reqeust to add a new agent
         pool to the cluster.
 
-        :return: the ManagedCluster object
+        :return: the AgentPool object
         """
         self._ensure_agentpool(agentpool)
 

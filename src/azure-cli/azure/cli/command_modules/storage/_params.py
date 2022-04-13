@@ -2035,6 +2035,38 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('name_starts_with', options_list=['--prefix'],
                    help='Filter the results to return only file systems whose names begin with the specified prefix.')
 
+    for item in ['list-deleted-path', 'undelete-path']:
+        with self.argument_context('storage fs {}'.format(item)) as c:
+            c.extra('file_system_name', options_list=['--file-system', '-f'],
+                    help="File system name.", required=True)
+            c.extra('timeout', timeout_type)
+
+    with self.argument_context('storage fs list-deleted-path') as c:
+        c.argument('path_prefix', help='Filter the results to return only paths under the specified path.')
+        c.argument('num_results', type=int, help='Specify the maximum number to return.')
+        c.argument('marker', help='A string value that identifies the portion of the list of containers to be '
+                                  'returned with the next listing operation. The operation returns the NextMarker '
+                                  'value within the response body if the listing operation did not return all '
+                                  'containers remaining to be listed with the current page. If specified, this '
+                                  'generator will begin returning results from the point where the previous '
+                                  'generator stopped.')
+
+    with self.argument_context('storage fs service-properties update', resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE,
+                               min_api='2020-06-12') as c:
+        c.argument('delete_retention', arg_type=get_three_state_flag(), arg_group='Soft Delete',
+                   help='Enable soft-delete.')
+        c.argument('delete_retention_period', type=int, arg_group='Soft Delete',
+                   options_list=['--delete-retention-period', '--period'],
+                   help='Number of days that soft-deleted fs will be retained. Must be in range [1,365].')
+        c.argument('enable_static_website', options_list=['--static-website'], arg_group='Static Website',
+                   arg_type=get_three_state_flag(),
+                   help='Enable static-website.')
+        c.argument('index_document', help='Represent the name of the index document. This is commonly "index.html".',
+                   arg_group='Static Website')
+        c.argument('error_document_404_path', options_list=['--404-document'], arg_group='Static Website',
+                   help='Represent the path to the error document that should be shown when an error 404 is issued,'
+                        ' in other words, when a browser requests a page that does not exist.')
+
     for item in ['create', 'show', 'delete', 'exists', 'move', 'metadata update', 'metadata show']:
         with self.argument_context('storage fs directory {}'.format(item)) as c:
             c.extra('file_system_name', options_list=['-f', '--file-system'],

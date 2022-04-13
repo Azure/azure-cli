@@ -391,11 +391,6 @@ jobs:
          --rm -v $PYPI_FILES:/mnt/pypi python:3.8 \
          /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION.* && az self-test && az --version && sleep 5"
 
-       # echo "== Testing pip install on Python 3.9 =="
-       # docker run \
-       #   --rm -v $PYPI_FILES:/mnt/pypi python:3.9 \
-       #   /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION.* && az self-test && az --version && sleep 5"
-
        echo "== Testing pip install on Python 3.10 =="
        docker run \
          --rm -v $PYPI_FILES:/mnt/pypi python:3.10 \
@@ -414,8 +409,6 @@ jobs:
         python.version: '3.6'
       Python38:
         python.version: '3.8'
-      Python39:
-        python.version: '3.9'
       Python310:
         python.version: '3.10'
   steps:
@@ -435,8 +428,6 @@ jobs:
         python.version: '3.6'
       Python38:
         python.version: '3.8'
-      Python39:
-        python.version: '3.9'
       Python310:
         python.version: '3.10'
   steps:
@@ -459,8 +450,6 @@ jobs:
         python.version: '3.6'
       Python38:
         python.version: '3.8'
-      Python39:
-        python.version: '3.9'
       Python310:
         python.version: '3.10'
   steps:
@@ -484,8 +473,6 @@ jobs:
         python.version: '3.6'
       Python38:
         python.version: '3.8'
-      Python39:
-        python.version: '3.9'
       Python310:
         python.version: '3.10'
   steps:
@@ -505,8 +492,6 @@ jobs:
         python.version: '3.6'
       Python38:
         python.version: '3.8'
-      Python39:
-        python.version: '3.9'
       Python310:
         python.version: '3.10'
   steps:
@@ -526,8 +511,6 @@ jobs:
         python.version: '3.6'
       Python38:
         python.version: '3.8'
-      Python39:
-        python.version: '3.9'
       Python310:
         python.version: '3.10'
   steps:
@@ -547,8 +530,6 @@ jobs:
         python.version: '3.6'
       Python38:
         python.version: '3.8'
-      Python39:
-        python.version: '3.9'
       Python310:
         python.version: '3.10'
   steps:
@@ -967,8 +948,6 @@ jobs:
         python.version: '3.6'
       Python38:
         python.version: '3.8'
-      Python39:
-        python.version: '3.9'
       Python310:
         python.version: '3.10'
   pool:
