@@ -226,7 +226,10 @@ class AKSAgentPoolContext(BaseAKSContext):
         # this parameter does not need dynamic completion
         # validation
         if enable_validation:
-            if self.agentpool_decorator_mode == AgentPoolDecoratorMode.STANDALONE:
+            if (
+                self.agentpool_decorator_mode == AgentPoolDecoratorMode.STANDALONE and
+                self.decorator_mode == DecoratorMode.CREATE
+            ):
                 agentpool_client = cf_agent_pools(self.cmd.cli_ctx)
                 instances = agentpool_client.list(self.get_resource_group_name(), self.get_cluster_name())
                 for agentpool_profile in instances:
@@ -1392,6 +1395,7 @@ class AKSAgentPoolUpdateDecorator:
         client: AgentPoolsOperations,
         raw_parameters: Dict,
         resource_type: ResourceType,
+        agentpool_decorator_mode: AgentPoolDecoratorMode,
     ):
         """Internal controller of aks_agentpool_update.
 
@@ -1403,10 +1407,11 @@ class AKSAgentPoolUpdateDecorator:
         """
         self.cmd = cmd
         self.client = client
-        self.models = AKSAgentPoolModels(cmd, resource_type)
+        self.agentpool_decorator_mode = agentpool_decorator_mode
+        self.models = AKSAgentPoolModels(cmd, resource_type, agentpool_decorator_mode)
         # store the context in the process of assemble the AgentPool object
         self.context = AKSAgentPoolContext(
-            cmd, AKSAgentPoolParamDict(raw_parameters), self.models, decorator_mode=DecoratorMode.UPDATE
+            cmd, AKSAgentPoolParamDict(raw_parameters), self.models, DecoratorMode.UPDATE, agentpool_decorator_mode
         )
 
     def _ensure_agentpool(self, agentpool: AgentPool) -> None:
@@ -1523,7 +1528,7 @@ class AKSAgentPoolUpdateDecorator:
             self.client.begin_create_or_update,
             self.context.get_resource_group_name(),
             self.context.get_cluster_name(),
-            self.context.get_nodepool_name(enable_validation=False),
+            self.context.get_nodepool_name(),
             agentpool,
             headers=self.context.get_aks_custom_headers(),
         )

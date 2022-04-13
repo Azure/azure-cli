@@ -2020,7 +2020,7 @@ class AKSAgentPoolAddDecoratorStandaloneModeTestCase(AKSAgentPoolAddDecoratorCom
         )
         # fail on passing the wrong agentpool object
         with self.assertRaises(CLIInternalError):
-            dec_1.set_up_label_tag_taint(None)
+            dec_1.add_agentpool(None)
         agentpool_1 = self.create_initialized_agentpool_instance(nodepool_name="test_nodepool_name")
         dec_1.context.attach_agentpool(agentpool_1)
         with patch("azure.cli.command_modules.acs.agentpool_decorator.sdk_no_wait") as put_agentpool:
@@ -2149,8 +2149,177 @@ class AKSAgentPoolAddDecoratorManagedClusterModeTestCase(AKSAgentPoolAddDecorato
         dec_1.context.raw_param.print_usage_statistics()
 
 
-class AKSAgentPoolUpdateDecoratorTestCase(unittest.TestCase):
-    def test(self):
+class AKSAgentPoolUpdateDecoratorCommonTestCase(unittest.TestCase):
+    def _remove_defaults_in_agentpool(self, agentpool: AgentPool) -> AgentPool:
+        """Internal function to remove values from properties with default values of the `agentpool` object.
+
+        Removing default values is to prevent getters from mistakenly overwriting user provided values with default
+        values in the object.
+
+        :return: the AgentPool object
+        """
+        self.defaults_in_agentpool = {}
+        for attr_name, attr_value in vars(agentpool).items():
+            if not attr_name.startswith("_") and attr_name != "name" and attr_value is not None:
+                self.defaults_in_agentpool[attr_name] = attr_value
+                setattr(agentpool, attr_name, None)
+        return agentpool
+
+    def _restore_defaults_in_agentpool(self, agentpool: AgentPool) -> AgentPool:
+        """Internal function to restore values of properties with default values of the `agentpool` object.
+
+        Restoring default values is to keep the content of the request sent by cli consistent with that before the
+        refactoring.
+
+        :return: the AgentPool object
+        """
+        for key, value in self.defaults_in_agentpool.items():
+            if getattr(agentpool, key, None) is None:
+                setattr(agentpool, key, value)
+        return agentpool
+
+    def create_initialized_agentpool_instance(
+        self, nodepool_name="nodepool1", remove_defaults=True, restore_defaults=True, **kwargs
+    ) -> AgentPool:
+        """Helper function to create a properly initialized agentpool instance.
+
+        :return: the AgentPool object
+        """
+        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+            agentpool = self.models.UnifiedAgentPoolModel(name=nodepool_name)
+        else:
+            agentpool = self.models.UnifiedAgentPoolModel()
+            agentpool.name = nodepool_name
+
+        # remove defaults
+        if remove_defaults:
+            self._remove_defaults_in_agentpool(agentpool)
+
+        # set properties
+        for key, value in kwargs.items():
+            setattr(agentpool, key, value)
+
+        # resote defaults
+        if restore_defaults:
+            self._restore_defaults_in_agentpool(agentpool)
+        return agentpool
+
+    def common_ensure_agentpool(self):
+        dec_1 = AKSAgentPoolUpdateDecorator(
+            self.cmd,
+            self.client,
+            {},
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        # fail on passing the wrong agentpool object
+        with self.assertRaises(CLIInternalError):
+            dec_1._ensure_agentpool(None)
+        agentpool_1 = self.create_initialized_agentpool_instance()
+        # fail on inconsistent agentpool with internal context
+        with self.assertRaises(CLIInternalError):
+            dec_1._ensure_agentpool(agentpool_1)
+
+    def common_update_auto_scaler_properties(self):
+        pass
+
+    def common_update_label_tag_taint(self):
+        pass
+
+
+
+class AKSAgentPoolUpdateDecoratorStandaloneModeTestCase(AKSAgentPoolUpdateDecoratorCommonTestCase):
+    def setUp(self):
+        self.cli_ctx = MockCLI()
+        self.cmd = MockCmd(self.cli_ctx)
+        self.resource_type = ResourceType.MGMT_CONTAINERSERVICE
+        self.agentpool_decorator_mode = AgentPoolDecoratorMode.STANDALONE
+        self.models = AKSAgentPoolModels(self.cmd, self.resource_type, self.agentpool_decorator_mode)
+        self.client = MockClient()
+
+    def test_ensure_agentpool(self):
+        self.common_ensure_agentpool()
+
+    def test_fetch_agentpool(self):
+        self.client.get = Mock(return_value=self.create_initialized_agentpool_instance())
+        dec_1 = AKSAgentPoolUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "resource_group_name": "test_resource_group_name",
+                "cluster_name": "test_cluster_name",
+                "nodepool_name": "test_nodepool_name",
+            },
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        with patch(
+            "azure.cli.command_modules.acs.agentpool_decorator.cf_agent_pools",
+            return_value=Mock(list=Mock(return_value=[])),
+        ):
+            dec_agentpool_1 = dec_1.fetch_agentpool()
+        ground_truth_agentpool_1 = self.create_initialized_agentpool_instance()
+        self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
+        self.assertEqual(dec_agentpool_1, dec_1.context.agentpool)
+        self.client.get.assert_called_once_with("test_resource_group_name", "test_cluster_name", "test_nodepool_name")
+
+    def test_update_auto_scaler_properties(self):
+        self.common_update_auto_scaler_properties()
+
+    def test_update_label_tag_taint(self):
+        self.common_update_label_tag_taint()
+
+    def test_update_agentpool_profile_default(self):
+        pass
+
+    def test_update_agentpool(self):
+        dec_1 = AKSAgentPoolUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "resource_group_name": "test_resource_group_name",
+                "cluster_name": "test_cluster_name",
+                "nodepool_name": "test_nodepool_name",
+            },
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        # fail on passing the wrong agentpool object
+        with self.assertRaises(CLIInternalError):
+            dec_1.update_agentpool(None)
+        agentpool_1 = self.create_initialized_agentpool_instance(nodepool_name="test_nodepool_name")
+        dec_1.context.attach_agentpool(agentpool_1)
+        with patch("azure.cli.command_modules.acs.agentpool_decorator.sdk_no_wait") as put_agentpool:
+            dec_1.update_agentpool(agentpool_1)
+        put_agentpool.assert_called_once_with(
+            False,
+            self.client.begin_create_or_update,
+            "test_resource_group_name",
+            "test_cluster_name",
+            "test_nodepool_name",
+            agentpool_1,
+            headers={},
+        )
+
+class AKSAgentPoolUpdateDecoratorManagedClusterModeTestCase(AKSAgentPoolUpdateDecoratorCommonTestCase):
+    def setUp(self):
+        self.cli_ctx = MockCLI()
+        self.cmd = MockCmd(self.cli_ctx)
+        self.resource_type = ResourceType.MGMT_CONTAINERSERVICE
+        self.agentpool_decorator_mode = AgentPoolDecoratorMode.MANAGED_CLUSTER
+        self.models = AKSAgentPoolModels(self.cmd, self.resource_type, self.agentpool_decorator_mode)
+        self.client = MockClient()
+
+    def test_ensure_agentpool(self):
+        self.common_ensure_agentpool()
+
+    def test_update_auto_scaler_properties(self):
+        self.common_update_auto_scaler_properties()
+
+    def test_update_label_tag_taint(self):
+        self.common_update_label_tag_taint()
+
+    def test_update_agentpool_profile_default(self):
         pass
 
 
