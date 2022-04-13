@@ -387,7 +387,10 @@ def _deploy_arm_template_core_unmodified(cmd, resource_group_name, template_file
     return sdk_no_wait(no_wait, deployment_client.begin_create_or_update, resource_group_name, deployment_name,
                        deployment)
 
-
+# bc the behavrior change in azure-core:
+# https://github.com/Azure/azure-sdk-for-python/blob/77a1abaea4d2bb07e3abf20020e82dc7195a5fe3/sdk/core/azure-core/azure/core/rest/_rest_py3.py#L143-L144(new logic)
+# https://github.com/Azure/azure-sdk-for-python/blob/77a1abaea4d2bb07e3abf20020e82dc7195a5fe3/sdk/core/azure-core/azure/core/pipeline/transport/_base.py#L557-L560(old logic)
+# have to make that the class can be json serialized.
 class JsonCTemplate(dict):
     def __init__(self, template_as_bytes):
         super().__init__(template_as_bytes=template_as_bytes)
