@@ -1112,3 +1112,24 @@ def load_arguments(self, _):
         with self.argument_context('synapse link-connection '+ scope) as c:
             c.argument('workspace_name', arg_type=workspace_name_arg_type)
             c.argument('link_connection_name', arg_type=name_type, help='The link connection name.')
+
+    with self.argument_context('synapse link-connection list-link-tables') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+        c.argument('link_connection_name', arg_type=name_type, help='The link connection name.')
+    
+    with self.argument_context('synapse link-connection edit-link-tables') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+        c.argument('link_connection_name', arg_type=name_type, help='The link connection name.')
+        c.argument('definition_file',arg_type=definition_file_arg_type, options_list=['--file', '-f'], type=shell_safe_json_parse,
+                    help='The Edit link-tables file path, The file format can be viewed using --help.')
+
+    with self.argument_context('synapse link-connection get-link-tables-status') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+        c.argument('link_connection_name', arg_type=name_type, help='The link connection name.')
+        c.argument('max_segment_count', help='Max segment count to query table status.')
+        c.argument('continuation_token', help='Continuation token to query table status.')
+    
+    with self.argument_context('synapse link-connection update-landing-zone-credential') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+        c.argument('link_connection_name', arg_type=name_type, help='The link connection name.')
+        c.argument('sas_token', help='Value of secure string.')
