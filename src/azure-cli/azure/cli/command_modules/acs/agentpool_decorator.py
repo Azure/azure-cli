@@ -26,6 +26,7 @@ from azure.cli.command_modules.acs._consts import (
 from azure.cli.command_modules.acs._helpers import get_snapshot_by_snapshot_id
 from azure.cli.command_modules.acs._validators import extract_comma_separated_string
 from azure.cli.command_modules.acs.base_decorator import BaseAKSContext, BaseAKSModels, BaseAKSParamDict
+from azure.cli.command_modules.acs.decorator import safe_list_get
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core.azclierror import (
     ArgumentUsageError,
@@ -1434,16 +1435,20 @@ class AKSAgentPoolUpdateDecorator:
                 "is not the same as the `agentpool` in the context."
             )
 
-    def fetch_agentpool(self) -> AgentPool:
+    def fetch_agentpool(self, agentpools: List[AgentPool] = None) -> AgentPool:
         """Get the AgentPool object currently in use and attach it to internal context.
 
         Internally send request using Agentpool operations of ContainerServiceClient.
 
         :return: the AgentPool object
         """
-        agentpool = self.client.get(
-            self.context.get_resource_group_name(), self.context.get_cluster_name(), self.context.get_nodepool_name()
-        )
+        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+            self.context._agentpools = agentpools
+            agentpool = safe_list_get(agentpools, 0)
+        else:
+            agentpool = self.client.get(
+                self.context.get_resource_group_name(), self.context.get_cluster_name(), self.context.get_nodepool_name()
+            )
 
         # attach agentpool to AKSAgentPoolContext
         self.context.attach_agentpool(agentpool)
@@ -1497,7 +1502,7 @@ class AKSAgentPoolUpdateDecorator:
             agentpool.node_taints = node_taints
         return agentpool
 
-    def update_agentpool_profile_default(self) -> AgentPool:
+    def update_agentpool_profile_default(self, agentpools: List[AgentPool] = None) -> AgentPool:
         """The overall controller used to update AgentPool profile by default.
 
         The completely constructed AgentPool object will later be passed as a parameter to the underlying SDK
@@ -1506,7 +1511,7 @@ class AKSAgentPoolUpdateDecorator:
         :return: the AgentPool object
         """
         # fetch the Agentpool object
-        agentpool = self.fetch_agentpool()
+        agentpool = self.fetch_agentpool(agentpools)
         # update auto scaler properties
         agentpool = self.update_auto_scaler_properties(agentpool)
         # update label, tag, taint

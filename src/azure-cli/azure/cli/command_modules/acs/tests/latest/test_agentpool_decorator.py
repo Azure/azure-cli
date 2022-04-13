@@ -2221,11 +2221,89 @@ class AKSAgentPoolUpdateDecoratorCommonTestCase(unittest.TestCase):
             dec_1._ensure_agentpool(agentpool_1)
 
     def common_update_auto_scaler_properties(self):
-        pass
+        dec_1 = AKSAgentPoolUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_cluster_autoscaler": False,
+                "disable_cluster_autoscaler": False,
+                "update_cluster_autoscaler": True,
+                "min_count": 1,
+                "max_count": 5,
+            },
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        # fail on passing the wrong agentpool object
+        with self.assertRaises(CLIInternalError):
+            dec_1.update_auto_scaler_properties(None)
+        agentpool_1 = self.create_initialized_agentpool_instance(
+            enable_auto_scaling=True, node_count=3, min_count=2, max_count=4
+        )
+        dec_1.context.attach_agentpool(agentpool_1)
+        dec_agentpool_1 = dec_1.update_auto_scaler_properties(agentpool_1)
+        grond_truth_agentpool_1 = self.create_initialized_agentpool_instance(
+            enable_auto_scaling=True, node_count=3, min_count=1, max_count=5
+        )
+        self.assertEqual(dec_agentpool_1, grond_truth_agentpool_1)
+
+        dec_2 = AKSAgentPoolUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_cluster_autoscaler": False,
+                "disable_cluster_autoscaler": True,
+                "update_cluster_autoscaler": False,
+                "min_count": None,
+                "max_count": None,
+            },
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        # fail on passing the wrong agentpool object
+        with self.assertRaises(CLIInternalError):
+            dec_2.update_auto_scaler_properties(None)
+        agentpool_2 = self.create_initialized_agentpool_instance(
+            enable_auto_scaling=True, node_count=3, min_count=2, max_count=4
+        )
+        dec_2.context.attach_agentpool(agentpool_2)
+        dec_agentpool_2 = dec_2.update_auto_scaler_properties(agentpool_2)
+        grond_truth_agentpool_2 = self.create_initialized_agentpool_instance(
+            enable_auto_scaling=False, node_count=3, min_count=None, max_count=None
+        )
+        self.assertEqual(dec_agentpool_2, grond_truth_agentpool_2)
 
     def common_update_label_tag_taint(self):
-        pass
-
+        dec_1 = AKSAgentPoolUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "nodepool_labels": "test_nodepool_labels",
+                "nodepool_tags": "test_nodepool_tags",
+                "labels": "test_labels",
+                "tags": "test_tags",
+                "node_taints": "",
+            },
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        # fail on passing the wrong agentpool object
+        with self.assertRaises(CLIInternalError):
+            dec_1.update_label_tag_taint(None)
+        agentpool_1 = self.create_initialized_agentpool_instance(
+            node_labels={"abc": "xyz"}, tags={"123": "456"}, node_taints=["test_node_taints"]
+        )
+        dec_1.context.attach_agentpool(agentpool_1)
+        dec_agentpool_1 = dec_1.update_label_tag_taint(agentpool_1)
+        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+            grond_truth_agentpool_1 = self.create_initialized_agentpool_instance(
+                node_labels="test_nodepool_labels", tags="test_nodepool_tags", node_taints=[]
+            )
+        else:
+            grond_truth_agentpool_1 = self.create_initialized_agentpool_instance(
+                node_labels="test_labels", tags="test_tags", node_taints=[]
+            )
+        self.assertEqual(dec_agentpool_1, grond_truth_agentpool_1)
 
 
 class AKSAgentPoolUpdateDecoratorStandaloneModeTestCase(AKSAgentPoolUpdateDecoratorCommonTestCase):
@@ -2241,7 +2319,6 @@ class AKSAgentPoolUpdateDecoratorStandaloneModeTestCase(AKSAgentPoolUpdateDecora
         self.common_ensure_agentpool()
 
     def test_fetch_agentpool(self):
-        self.client.get = Mock(return_value=self.create_initialized_agentpool_instance())
         dec_1 = AKSAgentPoolUpdateDecorator(
             self.cmd,
             self.client,
@@ -2253,6 +2330,7 @@ class AKSAgentPoolUpdateDecoratorStandaloneModeTestCase(AKSAgentPoolUpdateDecora
             self.resource_type,
             self.agentpool_decorator_mode,
         )
+        self.client.get = Mock(return_value=self.create_initialized_agentpool_instance())
         with patch(
             "azure.cli.command_modules.acs.agentpool_decorator.cf_agent_pools",
             return_value=Mock(list=Mock(return_value=[])),
@@ -2270,7 +2348,52 @@ class AKSAgentPoolUpdateDecoratorStandaloneModeTestCase(AKSAgentPoolUpdateDecora
         self.common_update_label_tag_taint()
 
     def test_update_agentpool_profile_default(self):
-        pass
+        import inspect
+
+        from azure.cli.command_modules.acs.custom import aks_agentpool_update
+
+        optional_params = {}
+        positional_params = []
+        for _, v in inspect.signature(aks_agentpool_update).parameters.items():
+            if v.default != v.empty:
+                optional_params[v.name] = v.default
+            else:
+                positional_params.append(v.name)
+        ground_truth_positional_params = [
+            "cmd",
+            "client",
+            "resource_group_name",
+            "cluster_name",
+            "nodepool_name",
+        ]
+        self.assertEqual(positional_params, ground_truth_positional_params)
+
+        # prepare a dictionary of default parameters
+        raw_param_dict = {
+            "resource_group_name": "test_rg_name",
+            "cluster_name": "test_cluster_name",
+            "nodepool_name": "test_nodepool_name",
+        }
+        raw_param_dict.update(optional_params)
+
+        # default value in `aks_create`
+        dec_1 = AKSAgentPoolUpdateDecorator(
+            self.cmd,
+            self.client,
+            raw_param_dict,
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        self.client.get = Mock(
+            return_value=self.create_initialized_agentpool_instance(nodepool_name="test_nodepool_name")
+        )
+        dec_agentpool_1 = dec_1.update_agentpool_profile_default()
+        ground_truth_agentpool_1 = self.create_initialized_agentpool_instance(
+            nodepool_name="test_nodepool_name",
+        )
+        self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
+
+        dec_1.context.raw_param.print_usage_statistics()
 
     def test_update_agentpool(self):
         dec_1 = AKSAgentPoolUpdateDecorator(
@@ -2301,6 +2424,7 @@ class AKSAgentPoolUpdateDecoratorStandaloneModeTestCase(AKSAgentPoolUpdateDecora
             headers={},
         )
 
+
 class AKSAgentPoolUpdateDecoratorManagedClusterModeTestCase(AKSAgentPoolUpdateDecoratorCommonTestCase):
     def setUp(self):
         self.cli_ctx = MockCLI()
@@ -2313,6 +2437,27 @@ class AKSAgentPoolUpdateDecoratorManagedClusterModeTestCase(AKSAgentPoolUpdateDe
     def test_ensure_agentpool(self):
         self.common_ensure_agentpool()
 
+    def test_fetch_agentpool(self):
+        dec_1 = AKSAgentPoolUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "resource_group_name": "test_resource_group_name",
+                "name": "test_cluster_name",
+                "nodepool_name": "test_nodepool_name",
+            },
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        agentpools = [
+            self.create_initialized_agentpool_instance(nodepool_name="test_nodepool_1"),
+            self.create_initialized_agentpool_instance(nodepool_name="test_nodepool_2"),
+        ]
+        dec_agentpool_1 = dec_1.fetch_agentpool(agentpools)
+        ground_truth_agentpool_1 = self.create_initialized_agentpool_instance(nodepool_name="test_nodepool_1")
+        self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
+        self.assertEqual(dec_agentpool_1, dec_1.context.agentpool)
+
     def test_update_auto_scaler_properties(self):
         self.common_update_auto_scaler_properties()
 
@@ -2320,7 +2465,51 @@ class AKSAgentPoolUpdateDecoratorManagedClusterModeTestCase(AKSAgentPoolUpdateDe
         self.common_update_label_tag_taint()
 
     def test_update_agentpool_profile_default(self):
-        pass
+        import inspect
+
+        from azure.cli.command_modules.acs.custom import aks_update
+
+        optional_params = {}
+        positional_params = []
+        for _, v in inspect.signature(aks_update).parameters.items():
+            if v.default != v.empty:
+                optional_params[v.name] = v.default
+            else:
+                positional_params.append(v.name)
+        ground_truth_positional_params = [
+            "cmd",
+            "client",
+            "resource_group_name",
+            "name",
+        ]
+        self.assertEqual(positional_params, ground_truth_positional_params)
+
+        # prepare a dictionary of default parameters
+        raw_param_dict = {
+            "resource_group_name": "test_rg_name",
+            "name": "test_cluster_name",
+        }
+        raw_param_dict.update(optional_params)
+
+        # default value in `aks_create`
+        dec_1 = AKSAgentPoolUpdateDecorator(
+            self.cmd,
+            self.client,
+            raw_param_dict,
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        agentpools = [
+            self.create_initialized_agentpool_instance(nodepool_name="test_nodepool_1"),
+            self.create_initialized_agentpool_instance(nodepool_name="test_nodepool_2"),
+        ]
+        dec_agentpool_1 = dec_1.update_agentpool_profile_default(agentpools)
+        ground_truth_agentpool_1 = self.create_initialized_agentpool_instance(
+            nodepool_name="test_nodepool_1",
+        )
+        self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
+
+        dec_1.context.raw_param.print_usage_statistics()
 
 
 if __name__ == "__main__":
