@@ -1091,9 +1091,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
                                       settings=None,
                                       auto_upgrade_minor_version=True,
                                       enable_automatic_upgrade=None)
-        instance_name = _get_extension_instance_name(vm.instance_view, publisher, 'GuestAttestation')
         LongRunningOperation(cmd.cli_ctx)(client.virtual_machine_extensions.begin_create_or_update(resource_group_name,
-                                          vm_name, instance_name, ext))
+                                          vm_name, 'GuestAttestation', ext))
     if count:
         vm_names = [vm_name + str(i) for i in range(count)]
     else:
@@ -3211,26 +3210,15 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
         if vmss.virtual_machine_profile.storage_profile.os_disk.os_type == 'Windows':
             publisher = 'Microsoft.Azure.Security.WindowsAttestation'
         version = _normalize_extension_version(cmd.cli_ctx, publisher, 'GuestAttestation', None, vmss.location)
-        if cmd.supported_api_version(min_api='2019-07-01', operation_group='virtual_machine_scale_sets'):
-            ext = VirtualMachineScaleSetExtension(name='GuestAttestation',
-                                                  publisher=publisher,
-                                                  type_properties_type='GuestAttestation',
-                                                  protected_settings=None,
-                                                  type_handler_version=version,
-                                                  settings=None,
-                                                  auto_upgrade_minor_version=True,
-                                                  provision_after_extensions=None,
-                                                  enable_automatic_upgrade=None)
-        else:
-            ext = VirtualMachineScaleSetExtension(name='GuestAttestation',
-                                                  publisher=publisher,
-                                                  type='GuestAttestation',
-                                                  protected_settings=None,
-                                                  type_handler_version=version,
-                                                  settings=None,
-                                                  auto_upgrade_minor_version=True,
-                                                  provision_after_extensions=None,
-                                                  enable_automatic_upgrade=None)
+        ext = VirtualMachineScaleSetExtension(name='GuestAttestation',
+                                              publisher=publisher,
+                                              type_properties_type='GuestAttestation',
+                                              protected_settings=None,
+                                              type_handler_version=version,
+                                              settings=None,
+                                              auto_upgrade_minor_version=True,
+                                              provision_after_extensions=None,
+                                              enable_automatic_upgrade=None)
         if not vmss.virtual_machine_profile.extension_profile:
             vmss.virtual_machine_profile.extension_profile = VirtualMachineScaleSetExtensionProfile(extensions=[])
         vmss.virtual_machine_profile.extension_profile.extensions.append(ext)
