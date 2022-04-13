@@ -253,6 +253,149 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
             (5, True, 1, 10),
         )
 
+    def common_get_update_enable_disable_cluster_autoscaler_and_min_max_count(
+        self,
+    ):
+        # default
+        ctx_1 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict(
+                {
+                    "update_cluster_autoscaler": False,
+                    "enable_cluster_autoscaler": False,
+                    "disable_cluster_autoscaler": False,
+                    "min_count": None,
+                    "max_count": None,
+                }
+            ),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        agentpool_1 = self.create_initialized_agentpool_instance(count=3)
+        ctx_1.attach_agentpool(agentpool_1)
+        self.assertEqual(
+            ctx_1.get_update_enable_disable_cluster_autoscaler_and_min_max_count(),
+            (False, False, False, None, None),
+        )
+
+        # custom value
+        ctx_2 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict(
+                {
+                    "update_cluster_autoscaler": True,
+                    "enable_cluster_autoscaler": False,
+                    "disable_cluster_autoscaler": False,
+                    "min_count": None,
+                    "max_count": None,
+                }
+            ),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        agentpool_2 = self.create_initialized_agentpool_instance(count=3)
+        ctx_2.attach_agentpool(agentpool_2)
+        ctx_2._agentpools = [agentpool_2, agentpool_2]
+        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+            # fail on multi-agent pool
+            with self.assertRaises(ArgumentUsageError):
+                ctx_2.get_update_enable_disable_cluster_autoscaler_and_min_max_count()
+        else:
+            # fail on min count and max count not specifed
+            with self.assertRaises(RequiredArgumentMissingError):
+                ctx_2.get_update_enable_disable_cluster_autoscaler_and_min_max_count()
+
+        # custom value
+        ctx_3 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict(
+                {
+                    "update_cluster_autoscaler": False,
+                    "enable_cluster_autoscaler": True,
+                    "disable_cluster_autoscaler": True,
+                    "min_count": None,
+                    "max_count": None,
+                }
+            ),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        agentpool_3 = self.create_initialized_agentpool_instance(count=3)
+        ctx_3.attach_agentpool(agentpool_3)
+        # fail on mutually exclusive update_cluster_autoscaler, enable_cluster_autoscaler and disable_cluster_autoscaler
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            ctx_3.get_update_enable_disable_cluster_autoscaler_and_min_max_count()
+
+        # custom value
+        ctx_4 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict(
+                {
+                    "update_cluster_autoscaler": False,
+                    "enable_cluster_autoscaler": True,
+                    "disable_cluster_autoscaler": False,
+                    "min_count": 1,
+                    "max_count": 5,
+                }
+            ),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        agentpool_4 = self.create_initialized_agentpool_instance(count=3, enable_auto_scaling=True)
+        ctx_4.attach_agentpool(agentpool_4)
+        # fail on cluster autoscaler already enabled
+        with self.assertRaises(DecoratorEarlyExitException):
+            ctx_4.get_update_enable_disable_cluster_autoscaler_and_min_max_count()
+
+        # custom value
+        ctx_5 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict(
+                {
+                    "update_cluster_autoscaler": True,
+                    "enable_cluster_autoscaler": False,
+                    "disable_cluster_autoscaler": False,
+                    "min_count": 1,
+                    "max_count": 5,
+                }
+            ),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        agentpool_5 = self.create_initialized_agentpool_instance(count=3, enable_auto_scaling=False)
+        ctx_5.attach_agentpool(agentpool_5)
+        # fail on cluster autoscaler not enabled
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx_5.get_update_enable_disable_cluster_autoscaler_and_min_max_count()
+
+        # custom value
+        ctx_6 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict(
+                {
+                    "update_cluster_autoscaler": False,
+                    "enable_cluster_autoscaler": False,
+                    "disable_cluster_autoscaler": True,
+                    "min_count": None,
+                    "max_count": None,
+                }
+            ),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+
+        agentpool_6 = self.create_initialized_agentpool_instance(count=3, enable_auto_scaling=False)
+        ctx_6.attach_agentpool(agentpool_6)
+        # fail on cluster autoscaler already disabled
+        with self.assertRaises(DecoratorEarlyExitException):
+            ctx_6.get_update_enable_disable_cluster_autoscaler_and_min_max_count()
+
     def common_get_node_osdisk_size(self):
         # default
         ctx_1 = AKSAgentPoolContext(
@@ -574,6 +717,25 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         ctx_1.attach_agentpool(agentpool)
         self.assertEqual(ctx_1.get_nodepool_labels(), {"key1": "value1", "key2": "value2"})
 
+        # custom
+        ctx_2 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"nodepool_labels": "test_nodepool_labels", "labels": "test_labels"}),
+            self.models,
+            DecoratorMode.UPDATE,
+            self.agentpool_decorator_mode,
+        )
+        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+            self.assertEqual(ctx_2.get_nodepool_labels(), "test_nodepool_labels")
+        else:
+            self.assertEqual(ctx_2.get_nodepool_labels(), "test_labels")
+        agentpool_2 = self.create_initialized_agentpool_instance(node_labels={"key1": "value1", "key2": "value2"})
+        ctx_2.attach_agentpool(agentpool_2)
+        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+            self.assertEqual(ctx_2.get_nodepool_labels(), "test_nodepool_labels")
+        else:
+            self.assertEqual(ctx_2.get_nodepool_labels(), "test_labels")
+
     def common_get_nodepool_tags(self):
         # default
         ctx_1 = AKSAgentPoolContext(
@@ -591,6 +753,25 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         ctx_1.attach_agentpool(agentpool)
         self.assertEqual(ctx_1.get_nodepool_tags(), {})
 
+        # custom
+        ctx_2 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"nodepool_tags": "test_nodepool_tags", "tags": "test_tags"}),
+            self.models,
+            DecoratorMode.UPDATE,
+            self.agentpool_decorator_mode,
+        )
+        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+            self.assertEqual(ctx_2.get_nodepool_tags(), "test_nodepool_tags")
+        else:
+            self.assertEqual(ctx_2.get_nodepool_tags(), "test_tags")
+        agentpool_2 = self.create_initialized_agentpool_instance(tags={})
+        ctx_2.attach_agentpool(agentpool_2)
+        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+            self.assertEqual(ctx_2.get_nodepool_tags(), "test_nodepool_tags")
+        else:
+            self.assertEqual(ctx_2.get_nodepool_tags(), "test_tags")
+
     def common_get_node_taints(self):
         # default
         ctx_1 = AKSAgentPoolContext(
@@ -604,6 +785,19 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         agentpool = self.create_initialized_agentpool_instance(node_taints=[])
         ctx_1.attach_agentpool(agentpool)
         self.assertEqual(ctx_1.get_node_taints(), [])
+
+        # custom
+        ctx_2 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"node_taints": ""}),
+            self.models,
+            DecoratorMode.UPDATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_2.get_node_taints(), [])
+        agentpool_2 = self.create_initialized_agentpool_instance(node_taints=["abc=xyz:123", "123=456:abc"])
+        ctx_2.attach_agentpool(agentpool_2)
+        self.assertEqual(ctx_2.get_node_taints(), [])
 
     def common_get_priority(self):
         # default
@@ -1051,6 +1245,9 @@ class AKSAgentPoolContextStandaloneModeTestCase(AKSAgentPoolContextCommonTestCas
     ):
         self.common_get_node_count_and_enable_cluster_autoscaler_min_max_count()
 
+    def test_get_update_enable_disable_cluster_autoscaler_and_min_max_count(self):
+        self.common_get_update_enable_disable_cluster_autoscaler_and_min_max_count()
+
     def test_get_node_osdisk_size(self):
         self.common_get_node_osdisk_size()
 
@@ -1190,6 +1387,9 @@ class AKSAgentPoolContextManagedClusterModeTestCase(AKSAgentPoolContextCommonTes
         self,
     ):
         self.common_get_node_count_and_enable_cluster_autoscaler_min_max_count()
+
+    def test_get_update_enable_disable_cluster_autoscaler_and_min_max_count(self):
+        self.common_get_update_enable_disable_cluster_autoscaler_and_min_max_count()
 
     def test_get_node_osdisk_size(self):
         self.common_get_node_osdisk_size()
