@@ -593,3 +593,7 @@ def load_command_table(self, _):
         g.custom_command('get-status', 'get_link_connection_status')
         g.custom_command('start ', 'start_link_connection')
         g.custom_command('stop', 'stop_link_connection')
+        g.custom_command('list-link-tables', 'synapse_list_link_table')
+        g.custom_command('edit-link-tables', 'synapse_edit_link_table')
+        g.custom_command('get-link-tables-status', 'synapse_get_link_tables_status')
+        g.custom_command('update-landing-zone-credential', 'synapse_update_landing_zone_credential')

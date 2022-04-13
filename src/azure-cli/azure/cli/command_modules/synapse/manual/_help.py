@@ -2358,3 +2358,90 @@ examples:
         az synapse link-connection get-status --workspace-name testsynapseworkspace \\
           --name testlinkconnectionname
 """
+
+helps['synapse link-connection list-link-tables'] = """
+type: command
+short-summary: List the link tables of a link connection.
+examples:
+  - name: List the link tables of a link connection.
+    text: |-
+        az synapse link-connection list-link-tables --workspace-name testsynapseworkspace \\
+          --name linkconnectionname \\
+"""
+
+helps['synapse link-connection edit-link-tables'] = """
+type: command
+short-summary: Edit tables for a link connection.
+examples:
+  - name: Edit tables for a link connection.
+    text: |-
+        az synapse link-connection edit-link-tables --workspace-name testsynapseworkspace \\
+          --name linkconnectionname \\
+          --file @path/edittablerequestfile.json
+        the file pattern should be:
+        {
+          "linkTables": [
+            {
+              "id": "<linkTableId1>",
+              "source": {
+                "tableName": "<sourceTableName1>",
+                "schemaName": "<sourceSchemaName1>"
+              },
+              "target": {
+                "tableName": "<sinkTableName1>",
+                "schemaName": "<sinkSchemaName1>",
+                "distributionOptions": {
+                  "type": "<Hash|Round_RoBin|Replicate>",
+                  "distributionColumn": "<distributionColumnName>"
+                }
+              },
+              "operationType": "add"
+            },
+            {
+              "id": "<linkTableId2>",
+              "operationType": "remove"
+            },
+            {
+              "id": "<linkTableId3>",
+              "source": { 
+                "tableName": "<sourceTableName3>",
+                "schemaName": "<sourceSchemaName3>"
+              },
+              "target": {
+                "tableName": "<sinkTableName3>",
+                "schemaName": "<sinkSchemaName3>",
+                "distributionOptions": {
+                  "type": "<Hash|Round_RoBin|Replicate>",
+                  "distributionColumn": "<distributionColumnName>"
+                }
+              },
+              "operationType": "update"
+            }
+          ]
+        }
+
+"""
+
+helps['synapse link-connection get-link-tables-status'] = """
+type: command
+short-summary: Query the link table status of a link connection.
+examples:
+  - name: Query the link table status of a link connection.
+    text: |-
+        az synapse link-connection get-link-tables-status --workspace-name testsynapseworkspace \\
+          --name linkconnectionname \\
+          --max-segment-count 50 \\
+          --continuation-token token
+"""
+
+helps['synapse link-connection update-landingzone-credential'] = """
+type: command
+short-summary: Update landing zone credetial of a link connection.
+examples:
+  - name: Update landing zone credetial of a link connection.
+    text: |-
+        az synapse link-connection update-landingzone-credential --workspace-name testsynapseworkspace \\
+          --name linkconnectionname \\
+          --sas-token-type sastokentype \\
+          --sas-token-value sastokenvalue
+"""

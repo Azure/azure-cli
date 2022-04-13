@@ -10,7 +10,8 @@ from azure.synapse.artifacts.models import (LinkedService, Dataset, PipelineReso
                                             Trigger, DataFlow, BigDataPoolReference, NotebookSessionProperties,
                                             NotebookResource, SparkJobDefinition, SqlScriptResource, SqlScriptFolder,
                                             SqlScriptContent, SqlScriptMetadata, SqlScript, SqlConnection,
-                                            NotebookFolder,LinkConnectionResource)
+                                            NotebookFolder,LinkConnectionResource,LinkTableRequest,QueryTableStatusRequest,
+                                            SecureString)
 from azure.cli.core.util import sdk_no_wait, CLIError
 from azure.core.exceptions import ResourceNotFoundError
 from .._client_factory import (cf_synapse_linked_service, cf_synapse_dataset, cf_synapse_pipeline,
@@ -589,3 +590,34 @@ def start_link_connection(cmd, workspace_name, link_connection_name):
 def stop_link_connection(cmd, workspace_name, link_connection_name):
     client = cf_synapse_link_connection(cmd.cli_ctx, workspace_name)
     return client.stop(link_connection_name)
+
+
+def synapse_list_link_table(cmd, workspace_name, link_connection_name):
+    client = cf_synapse_link_connection(cmd.cli_ctx, workspace_name)
+    return client.list_link_tables(link_connection_name).value
+
+
+def synapse_edit_link_table(cmd, workspace_name, link_connection_name, definition_file):
+    client = cf_synapse_link_connection(cmd.cli_ctx, workspace_name)
+    linkTableRequset_list = []
+    for i in range(0, len(definition_file['linkTables'])):
+        linkTableRequset = LinkTableRequest.from_dict(definition_file['linkTables'][i])
+        linkTableRequset_list.append(linkTableRequset)
+    return client.edit_tables(link_connection_name, linkTableRequset_list)
+
+
+def synapse_get_link_tables_status(cmd, workspace_name, link_connection_name, max_segment_count=50, continuation_token=None):
+    client = cf_synapse_link_connection(cmd.cli_ctx, workspace_name)
+    query_table_status_request = QueryTableStatusRequest(
+        max_segment_count=max_segment_count,
+        continuation_token=continuation_token
+    )
+    return client.query_table_status(link_connection_name, query_table_status_request)
+
+
+def synapse_update_landing_zone_credential(cmd, workspace_name, link_connection_name, sas_token_type, sas_token_value):
+    client = cf_synapse_link_connection(cmd.cli_ctx, workspace_name)
+    sas_token = SecureString(
+        value = sas_token_value
+    )
+    return client.update_landing_zone_credential(link_connection_name, sas_token)
