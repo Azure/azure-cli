@@ -1740,7 +1740,7 @@ class AKSAgentPoolAddDecoratorStandaloneModeTestCase(AKSAgentPoolAddDecoratorCom
     def test_set_up_custom_node_config(self):
         self.common_set_up_custom_node_config()
 
-    def test_construct_default_agentpool(self):
+    def test_construct_agentpool_profile_default(self):
         import inspect
 
         from azure.cli.command_modules.acs.custom import aks_agentpool_add
@@ -1782,22 +1782,23 @@ class AKSAgentPoolAddDecoratorStandaloneModeTestCase(AKSAgentPoolAddDecoratorCom
             "azure.cli.command_modules.acs.agentpool_decorator.cf_agent_pools",
             return_value=Mock(list=Mock(return_value=[])),
         ):
-            dec_agentpool_1 = dec_1.construct_default_agentpool_profile()
+            dec_agentpool_1 = dec_1.construct_agentpool_profile_default()
 
         ground_truth_upgrade_settings_1 = self.models.AgentPoolUpgradeSettings()
         ground_truth_agentpool_1 = self.create_initialized_agentpool_instance(
             nodepool_name="test_nodepool_name",
             upgrade_settings=ground_truth_upgrade_settings_1,
             os_disk_size_gb=0,
-            count=3,
             enable_auto_scaling=False,
+            count=3,
             os_type=CONST_DEFAULT_NODE_OS_TYPE,
             vm_size=CONST_DEFAULT_NODE_VM_SIZE,
+            node_taints=[],
+            enable_node_public_ip=False,
             type_properties_type=CONST_VIRTUAL_MACHINE_SCALE_SETS,
             enable_encryption_at_host=False,
             enable_ultra_ssd=False,
             enable_fips=False,
-            enable_node_public_ip=False,
             mode=CONST_NODEPOOL_MODE_USER,
             scale_down_mode=CONST_SCALE_DOWN_MODE_DELETE,
         )
@@ -1880,7 +1881,7 @@ class AKSAgentPoolAddDecoratorManagedClusterModeTestCase(AKSAgentPoolAddDecorato
     def test_set_up_custom_node_config(self):
         self.common_set_up_custom_node_config()
 
-    def test_construct_default_agentpool(self):
+    def test_construct_agentpool_profile_default(self):
         import inspect
 
         from azure.cli.command_modules.acs.custom import aks_create
@@ -1922,19 +1923,20 @@ class AKSAgentPoolAddDecoratorManagedClusterModeTestCase(AKSAgentPoolAddDecorato
             "azure.cli.command_modules.acs.agentpool_decorator.cf_agent_pools",
             return_value=Mock(list=Mock(return_value=[])),
         ):
-            dec_agentpool_1 = dec_1.construct_default_agentpool_profile()
+            dec_agentpool_1 = dec_1.construct_agentpool_profile_default()
 
         upgrade_settings_1 = self.models.AgentPoolUpgradeSettings()
         ground_truth_agentpool_1 = self.create_initialized_agentpool_instance(
             nodepool_name="nodepool1",
             upgrade_settings=upgrade_settings_1,
             os_disk_size_gb=0,
-            count=3,
             enable_auto_scaling=False,
-            enable_node_public_ip=False,
+            count=3,
             orchestrator_version="",
             os_type=CONST_DEFAULT_NODE_OS_TYPE,
             vm_size=CONST_DEFAULT_NODE_VM_SIZE,
+            node_taints=[],
+            enable_node_public_ip=False,
             type=CONST_VIRTUAL_MACHINE_SCALE_SETS,
             enable_encryption_at_host=False,
             enable_ultra_ssd=False,
