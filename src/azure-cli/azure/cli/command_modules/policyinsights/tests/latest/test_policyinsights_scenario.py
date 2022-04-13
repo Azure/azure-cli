@@ -11,28 +11,38 @@ from azure.cli.testsdk.exceptions import JMESPathCheckAssertionError
 
 class PolicyInsightsTests(ScenarioTest):
 
-    # Current recording was recorded against "Azure Governance Policy UX Test" (e78961ba-36fe-4739-9212-e3031b4c8db7)
+    # Current recording was recorded against "Azure Governance Perf 24" (3593b919-b078-4cc1-902f-201232a97ac0)
     @record_only()
-    @AllowLargeResponse()
+    @AllowLargeResponse(8192)
     def test_policy_insights(self):
+        self.kwargs.update({
+            'managementGroupId': 'azgovperftest',
+            'resourceGroup': 'PSTestRG1',
+            'subscriptionId': '3593b919-b078-4cc1-902f-201232a97ac0',
+            'keyVault': 'PSTestKV',
+            'subnet': 'PSTestVN',
+            'setDefinition': 'PSTestInitiative',
+            'definition': 'PSTestDINEDefinition',
+            'assignment': 'pstestdeployassignmentsub'
+        })
         top_clause = '--top 2'
         filter_clause = '--filter "isCompliant eq false"'
         apply_clause = '--apply "groupby((policyAssignmentId, resourceId), aggregate($count as numRecords))"'
         select_clause = '--select "policyAssignmentId, resourceId, numRecords"'
         order_by_clause = '--order-by "numRecords desc"'
-        from_clause = '--from "2021-07-01T00:00:00Z"'
-        to_clause = '--to "2021-07-03T01:30:00Z"'
+        from_clause = '--from "2022-04-01T00:00:00Z"'
+        to_clause = '--to "2022-04-03T01:30:00Z"'
         scopes = [
-            '-m "azgovtest5"',
+            '-m {managementGroupId}',
             '',
-            '-g "defaultresourcegroup-eus"',
-            '--resource "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cheggpolicy/providers/microsoft.keyvault/vaults/cheggtmpkv"',
-            '--resource "cheggkv" --namespace "microsoft.keyvault" --resource-type "vaults" -g "cheggpolicy"',
-            '--resource "subnet2" --namespace "microsoft.network" --resource-type "subnets" --parent "virtualnetworks/cheggvnet" -g "cheggpolicy"',
-            '-s "1f3afdf9-d0c9-4c3d-847f-89da613e70a8"',
-            '-d "34c877ad-507e-4c82-993e-3452a6e0ad3c"',
-            '-a "4d31128e32d04a0098fd536e"',
-            '-a "f32eeddfc32345b585f9a70b" -g "cheggpolicy" '
+            '-g {resourceGroup}',
+            '--resource "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroup}/providers/microsoft.keyvault/vaults/{keyVault}"',
+            '--resource "{keyVault}" --namespace "microsoft.keyvault" --resource-type "vaults" -g "{resourceGroup}"',
+            '--resource "default" --namespace "microsoft.network" --resource-type "subnets" --parent "virtualnetworks/{subnet}" -g "{resourceGroup}"',
+            '-s {setDefinition}',
+            '-d {definition}',
+            '-a {assignment}',
+            '-a {assignment} -g {resourceGroup}'
         ]
 
         for scope in scopes:
@@ -359,17 +369,17 @@ class PolicyInsightsTests(ScenarioTest):
     # This record_only test executes a real remediation against a known non-compliant policy
     # Test setup required for running the test live:
     #    1. Create a resource group by name 'az-cli-policy-insights-test'
-    #    2. Create 2 Windows 10 Pro VMs in two different regions in above RG
-    #    3. At above RG scope, create a new policy assignment for built-in definition with name 'e0efc13a-122a-47c5-b817-2ccfe5d12615' and display name 'Deploy requirements to audit Windows VMs that do not have the specified Windows PowerShell execution policy'
+    #    2. Create 2 storage accounts in two different regions in above RG
+    #    3. At above RG scope, create a new policy assignment for built-in definition with name '361c2074-3595-4e5d-8cab-4f21dffc835c' and display name 'Deploy Advanced Threat Protection on storage accounts'
     #    4. Update the 'pan' key value in test code below with the assignment name created above
     #    5. Trigger an on-demand evaluation scan on above RG by calling triggerEvaluation API. Check https://docs.microsoft.com/en-us/azure/governance/policy/how-to/get-compliance-data#on-demand-evaluation-scan
-    #    6. After step 5 completes, you should see the two VMs listed as non-compliant resources for the above assignment
+    #    6. After step 5 completes, you should see the two storage accounts listed as non-compliant resources for the above assignment
     #    7. Now run the testcase in live mode using command 'azdev test test_policy_insights_remediation_complete --live'
     @record_only()
-    @AllowLargeResponse()
+    @AllowLargeResponse(8192)
     def test_policy_insights_remediation_complete(self):
         self.kwargs.update({
-            'pan': '98904c39668a4f70804aef09',
+            'pan': '4ecaf5f81bad4bfc86b132fb',
             'rg': 'az-cli-policy-insights-test',
             'rn': self.create_random_name('azurecli-test-remediation', 40)
         })
@@ -380,7 +390,6 @@ class PolicyInsightsTests(ScenarioTest):
         # create a remediation at resource group scope
         self.cmd('policy remediation create -n {rn} -g {rg} -a {pan}', checks=[
             self.check('name', '{rn}'),
-            self.check('provisioningState', 'Accepted'),
             self.check('resourceGroup', '{rg}'),
             self.check('policyAssignmentId', '{pid}'),
             self.check('policyDefinitionReferenceId', None),
@@ -411,7 +420,7 @@ class PolicyInsightsTests(ScenarioTest):
             self.exists('[0].lastUpdatedOn'),
             self.exists('[0].resourceLocation'),
             self.exists('[0].status'),
-            self.check("length([?contains(@.remediatedResourceId, '/resourcegroups/{rg}/providers/microsoft.compute/virtualmachines')])", 2)
+            self.check("length([?contains(@.remediatedResourceId, '/resourcegroups/{rg}/providers/microsoft.storage/storageaccounts')])", 2)
         ])
 
         # cancel the remediation
@@ -471,7 +480,7 @@ class PolicyInsightsTests(ScenarioTest):
             self.check('provisioningState', 'Cancelling')
         ])
 
-    @AllowLargeResponse()
+    @AllowLargeResponse(8192)
     def test_policy_insights_metadata(self):
         # Get all metadata resources
         all_metadata_resources = self.cmd('policy metadata list').get_output_in_json()
