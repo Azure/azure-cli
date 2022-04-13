@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import os
+from math import isnan
 from typing import Dict, List, Tuple, TypeVar, Union
 
 from azure.cli.command_modules.acs._client_factory import cf_agent_pools
@@ -10,6 +12,13 @@ from azure.cli.command_modules.acs._consts import (
     CONST_DEFAULT_NODE_OS_TYPE,
     CONST_DEFAULT_NODE_VM_SIZE,
     CONST_DEFAULT_WINDOWS_NODE_VM_SIZE,
+    CONST_NODEPOOL_MODE_SYSTEM,
+    CONST_NODEPOOL_MODE_USER,
+    CONST_SCALE_DOWN_MODE_DELETE,
+    CONST_SCALE_SET_PRIORITY_REGULAR,
+    CONST_SCALE_SET_PRIORITY_SPOT,
+    CONST_SPOT_EVICTION_POLICY_DELETE,
+    CONST_VIRTUAL_MACHINE_SCALE_SETS,
     AgentPoolDecoratorMode,
     DecoratorMode,
 )
@@ -20,7 +29,7 @@ from azure.cli.core import AzCommandsLoader
 from azure.cli.core.azclierror import CLIInternalError, InvalidArgumentValueError, RequiredArgumentMissingError
 from azure.cli.core.commands import AzCliCommand
 from azure.cli.core.profiles import ResourceType
-from azure.cli.core.util import sdk_no_wait
+from azure.cli.core.util import get_file_json, sdk_no_wait
 from knack.log import get_logger
 
 logger = get_logger(__name__)
@@ -29,6 +38,11 @@ logger = get_logger(__name__)
 AgentPool = TypeVar("AgentPool")
 AgentPoolsOperations = TypeVar("AgentPoolsOperations")
 Snapshot = TypeVar("Snapshot")
+KubeletConfig = TypeVar("KubeletConfig")
+LinuxOSConfig = TypeVar("LinuxOSConfig")
+
+# TODO:
+# 1. Add extra type checking for getter functions
 
 
 # pylint: disable=too-few-public-methods
@@ -193,7 +207,10 @@ class AKSAgentPoolContext(BaseAKSContext):
         :return: string
         """
         # read the original value passed by the command
-        nodepool_name = self.raw_param.get("nodepool_name")
+        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+            nodepool_name = self.raw_param.get("nodepool_name", "nodepool1")
+        else:
+            nodepool_name = self.raw_param.get("nodepool_name")
         # try to read the property value corresponding to the parameter from the `agentpool` object
         if self.agentpool and self.agentpool.name is not None:
             nodepool_name = self.agentpool.name
@@ -201,15 +218,17 @@ class AKSAgentPoolContext(BaseAKSContext):
         # this parameter does not need dynamic completion
         # validation
         if enable_validation:
-            instances = cf_agent_pools.list(self.get_resource_group_name, self.get_cluster_name)
-            for agentpool_profile in instances:
-                if agentpool_profile.name == nodepool_name:
-                    raise InvalidArgumentValueError(
-                        "Node pool {} already exists, please try a different name, "
-                        "use 'aks nodepool list' to get current list of node pool".format(
-                            nodepool_name
+            if self.agentpool_decorator_mode == AgentPoolDecoratorMode.STANDALONE:
+                agentpool_client = cf_agent_pools(self.cmd.cli_ctx)
+                instances = agentpool_client.list(self.get_resource_group_name(), self.get_cluster_name())
+                for agentpool_profile in instances:
+                    if agentpool_profile.name == nodepool_name:
+                        raise InvalidArgumentValueError(
+                            "Node pool {} already exists, please try a different name, "
+                            "use 'aks nodepool list' to get current list of node pool".format(
+                                nodepool_name
+                            )
                         )
-                    )
         return nodepool_name
 
     def get_nodepool_name(self) -> str:
@@ -266,7 +285,7 @@ class AKSAgentPoolContext(BaseAKSContext):
 
         # enable_cluster_autoscaler
         # read the original value passed by the command
-        enable_cluster_autoscaler = self.raw_param.get("enable_cluster_autoscaler")
+        enable_cluster_autoscaler = self.raw_param.get("enable_cluster_autoscaler", False)
         # try to read the property value corresponding to the parameter from the `agentpool` object
         if self.agentpool and self.agentpool.enable_auto_scaling is not None:
             enable_cluster_autoscaler = self.agentpool.enable_auto_scaling
@@ -312,10 +331,7 @@ class AKSAgentPoolContext(BaseAKSContext):
         if self.agentpool and self.agentpool.os_disk_size_gb is not None:
             node_osdisk_size = self.agentpool.os_disk_size_gb
 
-        # normalize
-        if node_osdisk_size:
-            node_osdisk_size = int(node_osdisk_size)
-
+        # this parameter does not need dynamic completion
         # this parameter does not need validation
         return node_osdisk_size
 
@@ -612,6 +628,328 @@ class AKSAgentPoolContext(BaseAKSContext):
         # this parameter does not need validation
         return node_taints
 
+    def get_priority(self) -> str:
+        """Obtain the value of priority, default value is CONST_SCALE_SET_PRIORITY_REGULAR.
+
+        :return: string
+        """
+        # read the original value passed by the command
+        priority = self.raw_param.get("priority", CONST_SCALE_SET_PRIORITY_REGULAR)
+        # try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.agentpool and self.agentpool.scale_set_priority is not None:
+            priority = self.agentpool.scale_set_priority
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return priority
+
+    def get_eviction_policy(self) -> str:
+        """Obtain the value of eviction_policy, default value is CONST_SPOT_EVICTION_POLICY_DELETE.
+
+        :return: string
+        """
+        # read the original value passed by the command
+        eviction_policy = self.raw_param.get("eviction_policy", CONST_SPOT_EVICTION_POLICY_DELETE)
+        # try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.agentpool and self.agentpool.scale_set_eviction_policy is not None:
+            eviction_policy = self.agentpool.scale_set_eviction_policy
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return eviction_policy
+
+    def get_spot_max_price(self) -> float:
+        """Obtain the value of spot_max_price, default value is float('nan').
+
+        :return: float
+        """
+        # read the original value passed by the command
+        spot_max_price = self.raw_param.get("spot_max_price", float('nan'))
+        # normalize
+        if isnan(spot_max_price):
+            spot_max_price = -1
+
+        # try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.agentpool and self.agentpool.spot_max_price is not None:
+            spot_max_price = self.agentpool.spot_max_price
+
+        # this parameter does not need validation
+        return spot_max_price
+
+    def get_vnet_subnet_id(self) -> Union[str, None]:
+        """Obtain the value of vnet_subnet_id.
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        vnet_subnet_id = self.raw_param.get("vnet_subnet_id")
+        # try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.agentpool and self.agentpool.vnet_subnet_id is not None:
+            vnet_subnet_id = self.agentpool.vnet_subnet_id
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return vnet_subnet_id
+
+    def get_pod_subnet_id(self) -> Union[str, None]:
+        """Obtain the value of pod_subnet_id.
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        pod_subnet_id = self.raw_param.get("pod_subnet_id")
+        # try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.agentpool and self.agentpool.pod_subnet_id is not None:
+            pod_subnet_id = self.agentpool.pod_subnet_id
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return pod_subnet_id
+
+    def get_enable_node_public_ip(self) -> bool:
+        """Obtain the value of enable_node_public_ip, default value is False.
+
+        :return: bool
+        """
+        # read the original value passed by the command
+        enable_node_public_ip = self.raw_param.get("enable_node_public_ip", False)
+        # try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.agentpool and self.agentpool.enable_node_public_ip is not None:
+            enable_node_public_ip = self.agentpool.enable_node_public_ip
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return enable_node_public_ip
+
+    def get_node_public_ip_prefix_id(self) -> Union[str, None]:
+        """Obtain the value of node_public_ip_prefix_id.
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        node_public_ip_prefix_id = self.raw_param.get("node_public_ip_prefix_id")
+        # try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.agentpool and self.agentpool.node_public_ip_prefix_id is not None:
+            node_public_ip_prefix_id = self.agentpool.node_public_ip_prefix_id
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return node_public_ip_prefix_id
+
+    def get_vm_set_type(self) -> str:
+        """Obtain the value of vm_set_type, default value is CONST_VIRTUAL_MACHINE_SCALE_SETS.
+
+        :return: string
+        """
+        # read the original value passed by the command
+        vm_set_type = self.raw_param.get("vm_set_type", CONST_VIRTUAL_MACHINE_SCALE_SETS)
+        # try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+            if self.agentpool and self.agentpool.type is not None:
+                vm_set_type = self.agentpool.type
+        else:
+            if self.agentpool and self.agentpool.type_properties_type is not None:
+                vm_set_type = self.agentpool.type_properties_type
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return vm_set_type
+
+    def get_ppg(self) -> Union[str, None]:
+        """Obtain the value of ppg (proximity_placement_group_id).
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        ppg = self.raw_param.get("ppg")
+        # try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.agentpool and self.agentpool.proximity_placement_group_id is not None:
+            ppg = self.agentpool.proximity_placement_group_id
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return ppg
+
+    def get_enable_encryption_at_host(self) -> bool:
+        """Obtain the value of enable_encryption_at_host, default value is False.
+
+        :return: bool
+        """
+        # read the original value passed by the command
+        enable_encryption_at_host = self.raw_param.get("enable_encryption_at_host", False)
+        # try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.agentpool and self.agentpool.enable_encryption_at_host is not None:
+            enable_encryption_at_host = self.agentpool.enable_encryption_at_host
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return enable_encryption_at_host
+
+    def get_enable_ultra_ssd(self) -> bool:
+        """Obtain the value of enable_ultra_ssd, default value is False.
+
+        :return: bool
+        """
+        # read the original value passed by the command
+        enable_ultra_ssd = self.raw_param.get("enable_ultra_ssd", False)
+        # try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.agentpool and self.agentpool.enable_ultra_ssd is not None:
+            enable_ultra_ssd = self.agentpool.enable_ultra_ssd
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return enable_ultra_ssd
+
+    def get_enable_fips_image(self) -> bool:
+        """Obtain the value of enable_fips_image, default value is False.
+
+        :return: bool
+        """
+        # read the original value passed by the command
+        enable_fips_image = self.raw_param.get("enable_fips_image", False)
+        # try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.agentpool and self.agentpool.enable_fips is not None:
+            enable_fips_image = self.agentpool.enable_fips
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return enable_fips_image
+
+    def get_zones(self) -> Union[List[str], None]:
+        """Obtain the value of zones.
+
+        :return: list of strings or None
+        """
+        # read the original value passed by the command
+        zones = self.raw_param.get("zones")
+        # try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.agentpool and self.agentpool.availability_zones is not None:
+            zones = self.agentpool.availability_zones
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return zones
+
+    def get_max_pods(self) -> Union[int, None]:
+        """Obtain the value of max_pods, default value is 0.
+
+        This function will normalize the parameter by default. Int 0 would be converted to None.
+
+        :return: int or None
+        """
+        # read the original value passed by the command
+        max_pods = self.raw_param.get("max_pods", 0)
+        # normalize
+        if max_pods == 0:
+            max_pods = None
+
+        # try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.agentpool and self.agentpool.max_pods is not None:
+            max_pods = self.agentpool.max_pods
+
+        # this parameter does not need validation
+        return max_pods
+
+    def get_mode(self) -> str:
+        """Obtain the value of mode, default value is CONST_NODEPOOL_MODE_SYSTEM for managed cluster mode,
+        CONST_NODEPOOL_MODE_USER for standalone mode.
+
+        :return: string
+        """
+        # read the original value passed by the command
+        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+            mode = self.raw_param.get("mode", CONST_NODEPOOL_MODE_SYSTEM)
+        else:
+            mode = self.raw_param.get("mode", CONST_NODEPOOL_MODE_USER)
+        # try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.agentpool and self.agentpool.mode is not None:
+            mode = self.agentpool.mode
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return mode
+
+    def get_scale_down_mode(self) -> str:
+        """Obtain the value of scale_down_mode, default value is CONST_SCALE_DOWN_MODE_DELETE.
+
+        :return: string
+        """
+        # read the original value passed by the command
+        scale_down_mode = self.raw_param.get("scale_down_mode", CONST_SCALE_DOWN_MODE_DELETE)
+        # try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.agentpool and self.agentpool.scale_down_mode is not None:
+            scale_down_mode = self.agentpool.scale_down_mode
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return scale_down_mode
+
+    def get_kubelet_config(self) -> Union[Dict, KubeletConfig, None]:
+        """Obtain the value of kubelet_config.
+
+        :return: dictionary, KubeletConfig or None
+        """
+        # read the original value passed by the command
+        kubelet_config = None
+        kubelet_config_file_path = self.raw_param.get("kubelet_config")
+        # validate user input
+        if kubelet_config_file_path:
+            if not os.path.isfile(kubelet_config_file_path):
+                raise InvalidArgumentValueError(
+                    "{} is not valid file, or not accessable.".format(
+                        kubelet_config_file_path
+                    )
+                )
+            kubelet_config = get_file_json(kubelet_config_file_path)
+            if not isinstance(kubelet_config, dict):
+                raise InvalidArgumentValueError(
+                    "Error reading kubelet configuration from {}. "
+                    "Please see https://aka.ms/CustomNodeConfig for correct format.".format(
+                        kubelet_config_file_path
+                    )
+                )
+
+        # try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.agentpool and self.agentpool.kubelet_config is not None:
+            kubelet_config = self.agentpool.kubelet_config
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return kubelet_config
+
+    def get_linux_os_config(self) -> Union[Dict, LinuxOSConfig, None]:
+        """Obtain the value of linux_os_config.
+
+        :return: dictionary, LinuxOSConfig or None
+        """
+        # read the original value passed by the command
+        linux_os_config = None
+        linux_os_config_file_path = self.raw_param.get("linux_os_config")
+        # validate user input
+        if linux_os_config_file_path:
+            if not os.path.isfile(linux_os_config_file_path):
+                raise InvalidArgumentValueError(
+                    "{} is not valid file, or not accessable.".format(
+                        linux_os_config_file_path
+                    )
+                )
+            linux_os_config = get_file_json(linux_os_config_file_path)
+            if not isinstance(linux_os_config, dict):
+                raise InvalidArgumentValueError(
+                    "Error reading Linux OS configuration from {}. "
+                    "Please see https://aka.ms/CustomNodeConfig for correct format.".format(
+                        linux_os_config_file_path
+                    )
+                )
+
+        # try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.agentpool and self.agentpool.linux_os_config:
+            linux_os_config = self.agentpool.linux_os_config
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return linux_os_config
+
     def get_aks_custom_headers(self) -> Dict[str, str]:
         """Obtain the value of aks_custom_headers.
 
@@ -624,8 +962,8 @@ class AKSAgentPoolContext(BaseAKSContext):
         """
         # read the original value passed by the command
         aks_custom_headers = self.raw_param.get("aks_custom_headers")
-        # normalize user-provided header
-        # usually the purpose is to enable (preview) features through AKSHTTPCustomFeatures
+        # normalize user-provided header, extract key-value pairs with comma as separator
+        # used to enable (preview) features through custom header field or AKSHTTPCustomFeatures (internal only)
         aks_custom_headers = extract_comma_separated_string(
             aks_custom_headers,
             enable_strip=True,
@@ -638,14 +976,14 @@ class AKSAgentPoolContext(BaseAKSContext):
         return aks_custom_headers
 
     def get_no_wait(self) -> bool:
-        """Obtain the value of no_wait.
+        """Obtain the value of no_wait, default value is False.
 
         Note: no_wait will not be decorated into the `agentpool` object.
 
         :return: bool
         """
         # read the original value passed by the command
-        no_wait = self.raw_param.get("no_wait")
+        no_wait = self.raw_param.get("no_wait", False)
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
@@ -698,6 +1036,40 @@ class AKSAgentPoolAddDecorator:
                 "is not the same as the `agentpool` in the context."
             )
 
+    def _remove_defaults_in_agentpool(self, agentpool: AgentPool) -> AgentPool:
+        """Internal function to remove values from properties with default values of the `agentpool` object.
+
+        Removing default values is to prevent getters from mistakenly overwriting user provided values with default
+        values in the object.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        defaults_in_agentpool = {}
+        for attr_name, attr_value in vars(agentpool).items():
+            if not attr_name.startswith("_") and attr_name != "name" and attr_value is not None:
+                defaults_in_agentpool[attr_name] = attr_value
+                setattr(agentpool, attr_name, None)
+        self.context.set_intermediate("defaults_in_agentpool", defaults_in_agentpool, overwrite_exists=True)
+        return agentpool
+
+    def _restore_defaults_in_agentpool(self, agentpool: AgentPool) -> AgentPool:
+        """Internal function to restore values of properties with default values of the `agentpool` object.
+
+        Restoring default values is to keep the content of the request sent by cli consistent with that before the
+        refactoring.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        defaults_in_agentpool = self.context.get_intermediate("defaults_in_agentpool", {})
+        for key, value in defaults_in_agentpool.items():
+            if getattr(agentpool, key, None) is None:
+                setattr(agentpool, key, value)
+        return agentpool
+
     def init_agentpool(self) -> AgentPool:
         """Initialize an AgentPool object with name and attach it to internal context.
 
@@ -705,11 +1077,11 @@ class AKSAgentPoolAddDecorator:
         """
         if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
             # Note: As a required property, name must be provided during initialization.
-            agentpool = self.models.UnifiedAgentPoolModel(name=self.context.get_nodepool_name(), os_type=None)
+            agentpool = self.models.UnifiedAgentPoolModel(name=self.context.get_nodepool_name())
         else:
             # Note: As a read only property, name would be ignored when serialized.
             # Set the name property by explicit assignment, otherwise it will be ignored by initialization.
-            agentpool = self.models.UnifiedAgentPoolModel(os_type=None)
+            agentpool = self.models.UnifiedAgentPoolModel()
             agentpool.name = self.context.get_nodepool_name()
 
         # attach agentpool to AKSAgentPoolContext
@@ -795,6 +1167,67 @@ class AKSAgentPoolAddDecorator:
         agentpool.node_taints = self.context.get_node_taints()
         return agentpool
 
+    def set_up_priority_properties(self, agentpool: AgentPool) -> AgentPool:
+        """Set up priority related properties for the AgentPool object.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        priority = self.context.get_priority()
+        agentpool.scale_set_priority = priority
+        if priority == CONST_SCALE_SET_PRIORITY_SPOT:
+            agentpool.scale_set_eviction_policy = self.context.get_eviction_policy()
+            agentpool.spot_max_price = self.context.get_spot_max_price()
+        return agentpool
+
+    def set_up_node_network_properties(self, agentpool: AgentPool) -> AgentPool:
+        """Set up priority related properties for the AgentPool object.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        agentpool.vnet_subnet_id = self.context.get_vnet_subnet_id()
+        agentpool.pod_subnet_id = self.context.get_pod_subnet_id()
+        agentpool.enable_node_public_ip = self.context.get_enable_node_public_ip()
+        agentpool.node_public_ip_prefix_id = self.context.get_node_public_ip_prefix_id()
+        return agentpool
+
+    def set_up_vm_properties(self, agentpool: AgentPool) -> AgentPool:
+        """Set up vm related properties for the AgentPool object.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+            agentpool.type = self.context.get_vm_set_type()
+        else:
+            agentpool.type_properties_type = self.context.get_vm_set_type()
+
+        agentpool.proximity_placement_group_id = self.context.get_ppg()
+        agentpool.enable_encryption_at_host = self.context.get_enable_encryption_at_host()
+        agentpool.enable_ultra_ssd = self.context.get_enable_ultra_ssd()
+        agentpool.enable_fips = self.context.get_enable_fips_image()
+        agentpool.availability_zones = self.context.get_zones()
+
+        agentpool.max_pods = self.context.get_max_pods()
+        agentpool.mode = self.context.get_mode()
+        agentpool.scale_down_mode = self.context.get_scale_down_mode()
+        return agentpool
+
+    def set_up_custom_node_config(self, agentpool: AgentPool) -> AgentPool:
+        """Set up custom node config for the AgentPool object.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        agentpool.kubelet_config = self.context.get_kubelet_config()
+        agentpool.linux_os_config = self.context.get_linux_os_config()
+        return agentpool
+
     def construct_default_agentpool_profile(self) -> AgentPool:
         """The overall controller used to construct the default AgentPool profile.
 
@@ -805,6 +1238,8 @@ class AKSAgentPoolAddDecorator:
         """
         # initialize the AgentPool object
         agentpool = self.init_agentpool()
+        # remove defaults
+        self._remove_defaults_in_agentpool(agentpool)
         # set up upgrade settings
         agentpool = self.set_up_upgrade_settings(agentpool)
         # set up osdisk properties
@@ -815,6 +1250,16 @@ class AKSAgentPoolAddDecorator:
         agentpool = self.set_up_snapshot_properties(agentpool)
         # set up label, tag, taint
         agentpool = self.set_up_label_tag_taint(agentpool)
+        # set up priority properties
+        agentpool = self.set_up_priority_properties(agentpool)
+        # set up node network properties
+        agentpool = self.set_up_node_network_properties(agentpool)
+        # set up misc vm properties
+        agentpool = self.set_up_vm_properties(agentpool)
+        # set up custom node config
+        agentpool = self.set_up_custom_node_config(agentpool)
+        # restore defaults
+        agentpool = self._restore_defaults_in_agentpool(agentpool)
         return agentpool
 
     # pylint: disable=protected-access
@@ -824,7 +1269,7 @@ class AKSAgentPoolAddDecorator:
         The function "sdk_no_wait" will be called to use the ContainerServiceClient to send a reqeust to add a new agent
         pool to the cluster.
 
-        :return: the ManagedCluster object
+        :return: the AgentPool object
         """
         self._ensure_agentpool(agentpool)
 

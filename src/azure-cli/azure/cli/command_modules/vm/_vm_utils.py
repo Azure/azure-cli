@@ -397,6 +397,34 @@ def parse_shared_gallery_image_id(image_reference):
     return image_info.group(1), image_info.group(2)
 
 
+def is_community_gallery_image_id(image_reference):
+    if not image_reference:
+        return False
+
+    community_gallery_id_pattern = re.compile(r'^/CommunityGalleries/[^/]*/Images/[^/]*/Versions/.*$', re.IGNORECASE)
+    if community_gallery_id_pattern.match(image_reference):
+        return True
+
+    return False
+
+
+def parse_community_gallery_image_id(image_reference):
+    from azure.cli.core.azclierror import InvalidArgumentValueError
+
+    if not image_reference:
+        raise InvalidArgumentValueError(
+            'Please pass in the community gallery image id through the parameter --image')
+
+    image_info = re.search(r'^/CommunityGalleries/([^/]*)/Images/([^/]*)/Versions/.*$', image_reference, re.IGNORECASE)
+    if not image_info or len(image_info.groups()) < 2:
+        raise InvalidArgumentValueError(
+            'The community gallery image id is invalid. The valid format should be '
+            '"/CommunityGalleries/{gallery_unique_name}/Images/{gallery_image_name}/Versions/{image_version}"')
+
+    # Return the gallery unique name and gallery image name parsed from community gallery image id
+    return image_info.group(1), image_info.group(2)
+
+
 class ArmTemplateBuilder20190401(ArmTemplateBuilder):
 
     def __init__(self):

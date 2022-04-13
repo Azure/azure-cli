@@ -662,7 +662,10 @@ def validate_keyvault_resource_id(entity_type):
                 raise CLIError('--hsm-name and --id are mutually exclusive.')
 
             ident = KeyVaultIdentifier(uri=identifier, collection=entity_type + 's')
-            setattr(ns, 'name', ident.name)
+            if getattr(ns, 'command', None) and 'key rotation-policy' in ns.command:
+                setattr(ns, 'key_name', ident.name)
+            else:
+                setattr(ns, 'name', ident.name)
             setattr(ns, 'vault_base_url', ident.vault)
             if ident.version and (hasattr(ns, pure_entity_type + '_version') or hasattr(ns, 'version')):
                 setattr(ns, 'version', ident.version)

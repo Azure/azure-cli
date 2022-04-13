@@ -25,6 +25,7 @@ class StorageProfile(Enum):
     ManagedCustomImage = 5
     ManagedSpecializedOSDisk = 6
     SharedGalleryImage = 7
+    CommunityGalleryImage = 8
 
 
 def build_deployment_resource(name, template, dependencies=None):
@@ -463,6 +464,19 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
                 "imageReference": {
                     'sharedGalleryImageId': image_reference
                 }
+            },
+            'CommunityGalleryImage': {
+                "osDisk": {
+                    "caching": os_caching,
+                    "managedDisk": {
+                        "storageAccountType": disk_info['os'].get('storageAccountType'),
+                    },
+                    "name": os_disk_name,
+                    "createOption": "fromImage"
+                },
+                "imageReference": {
+                    'communityGalleryImageId': image_reference
+                }
             }
         }
         if os_disk_encryption_set is not None:
@@ -473,6 +487,9 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
                 'id': os_disk_encryption_set,
             }
             storage_profiles['SharedGalleryImage']['osDisk']['managedDisk']['diskEncryptionSet'] = {
+                'id': os_disk_encryption_set,
+            }
+            storage_profiles['CommunityGalleryImage']['osDisk']['managedDisk']['diskEncryptionSet'] = {
                 'id': os_disk_encryption_set,
             }
 
@@ -953,6 +970,20 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
         }
         storage_properties['imageReference'] = {
             'sharedGalleryImageId': image
+        }
+        if os_disk_encryption_set is not None:
+            storage_properties['osDisk']['managedDisk']['diskEncryptionSet'] = {
+                'id': os_disk_encryption_set
+            }
+    if storage_profile == StorageProfile.CommunityGalleryImage:
+        storage_properties['osDisk'] = {
+            'caching': os_caching,
+            'managedDisk': {'storageAccountType': disk_info['os'].get('storageAccountType')},
+            "name": os_disk_name,
+            "createOption": "fromImage"
+        }
+        storage_properties['imageReference'] = {
+            'communityGalleryImageId': image
         }
         if os_disk_encryption_set is not None:
             storage_properties['osDisk']['managedDisk']['diskEncryptionSet'] = {

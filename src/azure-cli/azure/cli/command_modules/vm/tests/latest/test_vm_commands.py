@@ -4991,15 +4991,11 @@ class VMGalleryImage(ScenarioTest):
             self.check('storageProfile.imageReference.sharedGalleryImageId', '{shared_gallery_image_version}'),
         ])
 
-        self.cmd('vm create -g {rg} -n {vm_with_shared_gallery_version2} --image {shared_gallery_image_version} --admin-username clitest1 --generate-ssh-key --nsg-rule None --os-type linux')
+        from azure.cli.core.azclierror import ArgumentUsageError
+        with self.assertRaises(ArgumentUsageError):
+            self.cmd('vm create -g {rg} -n {vm_with_shared_gallery_version2} --image {shared_gallery_image_version} --admin-username clitest1 --generate-ssh-key --nsg-rule None --os-type windows')
 
-        self.cmd('vm show -g {rg} -n {vm_with_shared_gallery_version2}', checks=[
-            self.check('provisioningState', 'Succeeded'),
-            self.check('storageProfile.imageReference.sharedGalleryImageId', '{shared_gallery_image_version}'),
-            self.check('storageProfile.osDisk.osType', 'Linux'),
-        ])
-
-        self.cmd('vmss create -g {rg} -n {vmss_with_shared_gallery_version} --image {shared_gallery_image_version} --generate-ssh-keys --upgrade-policy-mode automatic --admin-username clitest1 ')
+        self.cmd('vmss create -g {rg} -n {vmss_with_shared_gallery_version} --image {shared_gallery_image_version} --generate-ssh-keys --admin-username clitest1 ')
 
         self.cmd('vmss show -g {rg} -n {vmss_with_shared_gallery_version}', checks=[
             self.check('provisioningState', 'Succeeded'),
