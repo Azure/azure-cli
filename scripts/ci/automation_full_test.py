@@ -23,6 +23,7 @@ class AutomaticScheduling(object):
 
     def get_all_modules(self):
         result = get_path_table()
+        # only get modules and core, ignore extensions
         self.modules = {**result['mod'], **result['core']}
 
     def run_modules(self):
@@ -55,7 +56,7 @@ class AutomaticScheduling(object):
 
 
 def main():
-    logger.info("Start check pull request ...\n")
+    logger.info("Start automation full test ...\n")
     autoschduling = AutomaticScheduling()
     autoschduling.get_all_modules()
     sys.exit(1) if autoschduling.run_modules() else sys.exit(0)
