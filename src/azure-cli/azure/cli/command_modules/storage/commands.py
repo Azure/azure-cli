@@ -846,6 +846,14 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                 transform=transform_metadata)
         g.storage_custom_command_oauth('generate-sas', 'generate_sas_fs_uri', is_preview=True,
                                        custom_command_type=get_custom_sdk('filesystem', client_factory=cf_adls_service))
+        g.storage_custom_command_oauth('list-deleted-path', 'list_deleted_path', min_api='2020-06-12')
+        g.storage_command_oauth('undelete-path', '_undelete_path', min_api='2020-06-12')
+
+    with self.command_group('storage fs service-properties', command_type=adls_service_sdk,
+                            custom_command_type=get_custom_sdk('filesystem', cf_adls_service),
+                            resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE, min_api='2020-06-12') as g:
+        g.storage_command_oauth('show', 'get_service_properties', exception_handler=show_exception_handler)
+        g.storage_custom_command_oauth('update', 'set_service_properties')
 
     with self.command_group('storage fs directory', adls_directory_sdk,
                             custom_command_type=get_custom_sdk('fs_directory', cf_adls_directory),
