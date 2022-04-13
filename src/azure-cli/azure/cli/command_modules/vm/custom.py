@@ -788,7 +788,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               enable_hotpatching=None, platform_fault_domain=None, security_type=None, enable_secure_boot=None,
               enable_vtpm=None, count=None, edge_zone=None, nic_delete_option=None, os_disk_delete_option=None,
               data_disk_delete_option=None, user_data=None, capacity_reservation_group=None, enable_hibernation=None,
-              v_cpus_available=None, v_cpus_per_core=None, accept_term=None):
+              v_cpus_available=None, v_cpus_per_core=None, accept_term=None, disable_integrity_monitoring=False):
 
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
@@ -1073,6 +1073,27 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, deployment_name, deployment)
     LongRunningOperation(cmd.cli_ctx)(client.begin_create_or_update(resource_group_name, deployment_name, deployment))
 
+    # Guest Attestation Extension and enable System Assigned MSI by default
+    if security_type and enable_vtpm and enable_secure_boot and not disable_integrity_monitoring:
+        vm = get_vm(cmd, resource_group_name, vm_name, 'instanceView')
+        client = _compute_client_factory(cmd.cli_ctx)
+        if vm.storage_profile.os_disk.os_type == 'Linux':
+            publisher = 'Microsoft.Azure.Security.LinuxAttestation'
+        if vm.storage_profile.os_disk.os_type == 'Windows':
+            publisher = 'Microsoft.Azure.Security.WindowsAttestation'
+        version = _normalize_extension_version(cmd.cli_ctx, publisher, 'GuestAttestation', None, vm.location)
+        VirtualMachineExtension = cmd.get_models('VirtualMachineExtension')
+        ext = VirtualMachineExtension(location=vm.location,
+                                      publisher=publisher,
+                                      type_properties_type='GuestAttestation',
+                                      protected_settings=None,
+                                      type_handler_version=version,
+                                      settings=None,
+                                      auto_upgrade_minor_version=True,
+                                      enable_automatic_upgrade=None)
+        instance_name = _get_extension_instance_name(vm.instance_view, publisher, 'GuestAttestation')
+        LongRunningOperation(cmd.cli_ctx)(client.virtual_machine_extensions.begin_create_or_update(resource_group_name,
+                                          vm_name, instance_name, ext))
     if count:
         vm_names = [vm_name + str(i) for i in range(count)]
     else:
@@ -2846,7 +2867,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 user_data=None, network_api_version=None, enable_spot_restore=None, spot_restore_timeout=None,
                 capacity_reservation_group=None, enable_auto_update=None, patch_mode=None, enable_agent=None,
                 security_type=None, enable_secure_boot=None, enable_vtpm=None, automatic_repairs_action=None,
-                v_cpus_available=None, v_cpus_per_core=None, accept_term=None):
+                v_cpus_available=None, v_cpus_per_core=None, accept_term=None, disable_integrity_monitoring=False):
 
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
@@ -3178,6 +3199,44 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
         deployment_result['vmss']['identity'] = _construct_identity_info(identity_scope, identity_role,
                                                                          vmss_info.identity.principal_id,
                                                                          vmss_info.identity.user_assigned_identities)
+    # Guest Attestation Extension and enable System Assigned MSI by default
+    if security_type and enable_vtpm and enable_secure_boot and not disable_integrity_monitoring:
+        client = _compute_client_factory(cmd.cli_ctx)
+        vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
+        vmss.virtual_machine_profile.storage_profile.image_reference = None
+        VirtualMachineScaleSetExtension, VirtualMachineScaleSetExtensionProfile = cmd.get_models(
+            'VirtualMachineScaleSetExtension', 'VirtualMachineScaleSetExtensionProfile')
+        if vmss.virtual_machine_profile.storage_profile.os_disk.os_type == 'Linux':
+            publisher = 'Microsoft.Azure.Security.LinuxAttestation'
+        if vmss.virtual_machine_profile.storage_profile.os_disk.os_type == 'Windows':
+            publisher = 'Microsoft.Azure.Security.WindowsAttestation'
+        version = _normalize_extension_version(cmd.cli_ctx, publisher, 'GuestAttestation', None, vmss.location)
+        if cmd.supported_api_version(min_api='2019-07-01', operation_group='virtual_machine_scale_sets'):
+            ext = VirtualMachineScaleSetExtension(name='GuestAttestation',
+                                                  publisher=publisher,
+                                                  type_properties_type='GuestAttestation',
+                                                  protected_settings=None,
+                                                  type_handler_version=version,
+                                                  settings=None,
+                                                  auto_upgrade_minor_version=True,
+                                                  provision_after_extensions=None,
+                                                  enable_automatic_upgrade=None)
+        else:
+            ext = VirtualMachineScaleSetExtension(name='GuestAttestation',
+                                                  publisher=publisher,
+                                                  type='GuestAttestation',
+                                                  protected_settings=None,
+                                                  type_handler_version=version,
+                                                  settings=None,
+                                                  auto_upgrade_minor_version=True,
+                                                  provision_after_extensions=None,
+                                                  enable_automatic_upgrade=None)
+        if not vmss.virtual_machine_profile.extension_profile:
+            vmss.virtual_machine_profile.extension_profile = VirtualMachineScaleSetExtensionProfile(extensions=[])
+        vmss.virtual_machine_profile.extension_profile.extensions.append(ext)
+
+        LongRunningOperation(cmd.cli_ctx)(client.virtual_machine_scale_sets.begin_create_or_update(resource_group_name,
+                                          vmss_name, vmss))
     return deployment_result
 
 
