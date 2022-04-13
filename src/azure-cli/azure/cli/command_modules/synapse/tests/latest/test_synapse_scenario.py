@@ -2984,7 +2984,7 @@ class SynapseScenarioTests(ScenarioTest):
             'az synapse sql-script show --workspace-name {workspace} --name {name}',
             expect_failure=True)
 
-    @record_only()
+    #@record_only()
     def test_link_connection(self):
         self.kwargs.update({
             'workspace_name': 'xiaoyuxingtestne',
