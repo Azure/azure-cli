@@ -17,7 +17,7 @@ profile = sys.argv[1]
 class AutomaticScheduling(object):
 
     def __init__(self):
-        self.modules = []
+        self.modules = {}
         self.series_modules = ['appservice', 'botservice', 'cloud', 'network', 'azure-cli-core', 'azure-cli-telemetry']
         self.profile = profile
 
@@ -25,7 +25,7 @@ class AutomaticScheduling(object):
         result = get_path_table()
         self.modules = {**result['mod'], **result['core']}
 
-    def run_modules(self, modules):
+    def run_modules(self):
         # divide all modules into parallel or serial execution
         error_flag = False
         series = []
@@ -36,14 +36,16 @@ class AutomaticScheduling(object):
             else:
                 parallers.append(k)
         if series:
-            cmd = ['azdev', 'test', '--no-exitfirst', '--verbose', '--series'] + series + ['--profile', f'{profile}', '--pytest-args', '"--durations=0"']
+            cmd = ['azdev', 'test', '--no-exitfirst', '--verbose', '--series'] + \
+                  series + ['--profile', f'{profile}', '--pytest-args', '"--durations=0"']
             logger.info(cmd)
             try:
                 subprocess.run(cmd)
             except subprocess.CalledProcessError:
                 error_flag = True
         if parallers:
-            cmd = ['azdev', 'test', '--no-exitfirst', '--verbose'] + parallers + ['--profile', f'{profile}', '--pytest-args', '"--durations=0"']
+            cmd = ['azdev', 'test', '--no-exitfirst', '--verbose'] + \
+                  parallers + ['--profile', f'{profile}', '--pytest-args', '"--durations=0"']
             logger.info(cmd)
             try:
                 subprocess.run(cmd)
@@ -54,9 +56,9 @@ class AutomaticScheduling(object):
 
 def main():
     logger.info("Start check pull request ...\n")
-    AS = AutomaticScheduling()
-    AS.get_all_modules()
-    sys.exit(1) if AS.run_modules() else sys.exit(0)
+    autoschduling = AutomaticScheduling()
+    autoschduling.get_all_modules()
+    sys.exit(1) if autoschduling.run_modules() else sys.exit(0)
 
 
 if __name__ == '__main__':
