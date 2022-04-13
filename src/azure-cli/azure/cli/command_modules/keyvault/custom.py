@@ -1069,7 +1069,7 @@ def remove_network_rule(cmd, client, resource_group_name, vault_name, ip_address
 
     if ip_address and rules.ip_rules:
         to_remove = [ip_network(x) for x in ip_address]
-        new_rules = list(filter(lambda x: all([ip_network(x.value) != i for i in to_remove]), rules.ip_rules))
+        new_rules = list(filter(lambda x: all(ip_network(x.value) != i for i in to_remove), rules.ip_rules))
         to_modify |= len(new_rules) != len(rules.ip_rules)
         if to_modify:
             rules.ip_rules = new_rules
