@@ -53,13 +53,13 @@ parameters:
   - name: --ldap-signing
     short-summary: Specifies whether or not the LDAP traffic needs to be signed
   - name: --security-operators
-    short-summary: Domain Users in the Active directory to be given SeSecurityPrivilege privilege (Needed for SMB Continuously available shares for SQL). A space seperated list of unique usernames without domain specifier
+    short-summary: Domain Users in the Active directory to be given SeSecurityPrivilege privilege (Needed for SMB Continuously available shares for SQL). A space separated list of unique usernames without domain specifier
   - name: --ldap-over-tls
     short-summary: Specifies whether or not the LDAP traffic needs to be secured via TLS
   - name: --allow-local-ldap-users
     short-summary: If enabled, NFS client local users can also (in addition to LDAP users) access the NFS volumes
   - name: --administrators
-    short-summary: Users to be added to the Built-in Administrators active directory group. A space seperated string of unique usernames without domain specifier.
+    short-summary: Users to be added to the Built-in Administrators active directory group. A space separated string of unique usernames without domain specifier.
   - name: --encrypt-dc-conn
     short-summary: If enabled, Traffic between the SMB server to Domain Controller (DC) will be encrypted
   - name: --user-dn
@@ -101,19 +101,19 @@ parameters:
   - name: --server-root-ca-cert
     short-summary: When LDAP over SSL/TLS is enabled, the LDAP client is required to have base64 encoded Active Directory Certificate Service's self-signed root CA certificate, this optional parameter is used only for dual protocol with LDAP user-mapping volumes.
   - name: --backup-operators
-    short-summary: Users to be added to the Built-in Backup Operator active directory group. A space seperated list of unique usernames without domain specifier
+    short-summary: Users to be added to the Built-in Backup Operator active directory group. A space separated list of unique usernames without domain specifier
   - name: --aes-encryption
     short-summary: If enabled, AES encryption will be enabled for SMB communication
   - name: --ldap-signing
     short-summary: Specifies whether or not the LDAP traffic needs to be signed
   - name: --security-operators
-    short-summary: Domain Users in the Active directory to be given SeSecurityPrivilege privilege (Needed for SMB Continuously available shares for SQL). A space seperated list of unique usernames without domain specifier
+    short-summary: Domain Users in the Active directory to be given SeSecurityPrivilege privilege (Needed for SMB Continuously available shares for SQL). A space separated list of unique usernames without domain specifier
   - name: --ldap-over-tls
     short-summary: Specifies whether or not the LDAP traffic needs to be secured via TLS
   - name: --allow-local-ldap-users
     short-summary: If enabled, NFS client local users can also (in addition to LDAP users) access the NFS volumes
   - name: --administrators
-    short-summary: Users to be added to the Built-in Administrators active directory group. A space seperated list of unique usernames without domain specifier.
+    short-summary: Users to be added to the Built-in Administrators active directory group. A space separated list of unique usernames without domain specifier.
   - name: --encrypt-dc-conn
     short-summary: If enabled, Traffic between the SMB server to Domain Controller (DC) will be encrypted
   - name: --user-dn
@@ -538,7 +538,7 @@ parameters:
   - name: --name --snapshot-name -n -s
     short-summary: The name of the ANF snapshot
   - name: --file-paths
-    short-summary: Required. A space seperated string of filed to be restored
+    short-summary: Required. A space separated string of filed to be restored
   - name: --destination-path
     short-summary: Destination folder where the files will be restored
 examples:
@@ -573,7 +573,7 @@ parameters:
   - name: --subnet
     short-summary: The ARM Id or name of the delegated subnet for the vnet. If omitted 'default' will be used
   - name: --protocol-types
-    short-summary: Space seperated list of protocols that the volume can use, available protocols are "NFSv4.1", "NFSv3", "CIFS"
+    short-summary: Space separated list of protocols that the volume can use, available protocols are "NFSv4.1", "NFSv3", "CIFS"
   - name: --volume-type
     short-summary: Whether the volume should be a data protection volume ("DataProtection"), empty if this is not a data protection volume
   - name: --endpoint-type

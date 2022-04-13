@@ -16,6 +16,8 @@ from azure.mgmt.netapp.models import ActiveDirectory, NetAppAccount, NetAppAccou
     BreakReplicationRequest, PoolChangeRequest, VolumeRevert, Backup, BackupPatch, LdapSearchScopeOpt, SubvolumeInfo, \
     SubvolumePatchRequest, SnapshotRestoreFiles, PlacementKeyValuePairs, VolumeGroupMetaData, VolumeGroupDetails, \
     VolumeGroupVolumeProperties
+
+from azure.cli.core.azclierror import ValidationError
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import sdk_no_wait
 from msrestazure.tools import is_valid_resource_id, parse_resource_id
@@ -545,13 +547,13 @@ def create_volume_group(cmd, client, resource_group_name, account_name, pool_nam
                         data_backup_repl_skd=None, data_backup_src_id=None, log_backup_repl_skd=None,
                         log_backup_src_id=None):
     if number_of_hots < 1 or number_of_hots > 3:
-        raise CLIError("Number of hosts must be between 1 and 3")
+        raise ValidationError("Number of hosts must be between 1 and 3")
     if memory < 1 or memory > 12000:
-        raise CLIError("Memory must be between 1 and 12000")
+        raise ValidationError("Memory must be between 1 and 12000")
     if add_snapshot_capacity < 0 or add_snapshot_capacity > 200:
-        raise CLIError("Additional capacity for snapshot must be between 0 and 200")
+        raise ValidationError("Additional capacity for snapshot must be between 0 and 200")
     if system_role == "DR" and number_of_hots != 1:
-        raise CLIError("Number of hosts must be 1 when creating a Disaster Recovery (DR) volume group")
+        raise ValidationError("Number of hosts must be 1 when creating a Disaster Recovery (DR) volume group")
 
     if prefix == "":
         if system_role == "HA":
