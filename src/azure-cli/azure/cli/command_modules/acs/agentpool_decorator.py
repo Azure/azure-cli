@@ -1435,6 +1435,7 @@ class AKSAgentPoolUpdateDecorator:
                 "is not the same as the `agentpool` in the context."
             )
 
+    # pylint: disable=protected-access
     def fetch_agentpool(self, agentpools: List[AgentPool] = None) -> AgentPool:
         """Get the AgentPool object currently in use and attach it to internal context.
 
@@ -1447,7 +1448,9 @@ class AKSAgentPoolUpdateDecorator:
             agentpool = safe_list_get(agentpools, 0)
         else:
             agentpool = self.client.get(
-                self.context.get_resource_group_name(), self.context.get_cluster_name(), self.context.get_nodepool_name()
+                self.context.get_resource_group_name(),
+                self.context.get_cluster_name(),
+                self.context.get_nodepool_name(),
             )
 
         # attach agentpool to AKSAgentPoolContext
