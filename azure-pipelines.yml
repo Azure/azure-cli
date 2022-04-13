@@ -686,12 +686,23 @@ jobs:
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
     vmImage: 'ubuntu-20.04'
+  strategy:
+    matrix:
+      1.0:
+        acr: cblmariner
+        tag: 1.0
+      2.0:
+        acr: cblmariner2preview
+        tag: 2.0
   steps:
   - task: Bash@3
     displayName: 'Build Rpm Package: Mariner'
     inputs:
       targetType: 'filePath'
       filePath: scripts/release/rpm/pipeline_mariner.sh
+    env:
+      ACR: $(acr)
+      TAG: $(tag)
 
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
     displayName: 'SBOM'
@@ -702,7 +713,7 @@ jobs:
     displayName: 'Publish Artifact: rpm-mariner'
     inputs:
       TargetPath: $(Build.ArtifactStagingDirectory)
-      ArtifactName: rpm-mariner
+      ArtifactName: rpm-mariner$(tag)
 
 
 - job: BuildRpmPackageCentOS7
