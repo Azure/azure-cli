@@ -419,6 +419,8 @@ class JsonCTemplatePolicy(SansIOHTTPPolicy):
             return
 
         if request_data:
+            # `request_data` will be serialized to json format str in SDK. so we need to convert it
+            # to dict for convenience.
             request_data = json.loads(request_data)
 
         if request_data.get('properties', {}).get('template'):
