@@ -62,6 +62,45 @@ type: group
 short-summary: Manage Azure Management Groups.
 """
 
+helps['account management-group tenant-backfill'] = """
+type: group
+short-summary: Backfill Tenant Subscription Operations for Management Groups
+"""
+
+helps['account management-group tenant-backfill get'] = """
+type: command
+short-summary: Get the backfill status for a tenant.
+long-summary: Get the backfill status for a tenant.
+examples:
+  - name: Get the backfill status for a tenant.
+    text: >
+        az account management-group tenant-backfill get
+"""
+
+helps['account management-group tenant-backfill start'] = """
+type: command
+short-summary: Start backfilling subscriptions for a tenant.
+long-summary: Start backfilling subscriptions for a tenant.
+examples:
+  - name: Start backfilling subscriptions for a tenant.
+    text: >
+        az account management-group tenant-backfill start
+"""
+
+helps['account management-group check-name-availability'] = """
+type: command
+short-summary: Check if a Management Group Name is Valid.
+long-summary: Check if a Management Group Name is Valid.
+parameters:
+  - name: --name -n
+    type: string
+    short-summary: Name of the management group.
+examples:
+  - name: Check if a Management Group Name is Valid.
+    text: >
+        az account management-group check-name-availability --name GroupName
+"""
+
 helps['account management-group create'] = """
 type: command
 short-summary: Create a new management group.
@@ -163,6 +202,52 @@ examples:
         az account management-group subscription add --name GroupName --subscription Subscription
 """
 
+helps['account management-group subscription show'] = """
+type: command
+short-summary: Show the details of a subscription under a known management group.
+long-summary: Show the details of a subscription under a known management group.
+parameters:
+  - name: --name -n
+    type: string
+    short-summary: Name of the management group.
+  - name: --subscription -s
+    type: string
+    short-summary: Subscription Id or Name
+examples:
+  - name: Show the details of a subscription under a known management group.
+    text: >
+        az account management-group subscription show --name GroupName --subscription Subscription
+"""
+
+helps['account management-group subscription show-sub-under-mg'] = """
+type: command
+short-summary: Get the subscription under a management group.
+long-summary: Get the subscription under a management group.
+parameters:
+  - name: --name -n
+    type: string
+    short-summary: Name of the management group.
+examples:
+  - name: Get the subscription under a management group.
+    text: >
+        az account management-group subscription show-sub-under-mg --name GroupName
+"""
+
+helps['account management-group entities'] = """
+type: group
+short-summary: Entity operations (Management Group and Subscriptions) for Management Groups.
+"""
+
+helps['account management-group entities list'] = """
+type: command
+short-summary: List all entities for the authenticated user.
+long-summary: List all entities for the authenticated user.
+examples:
+  - name: List all entities for the authenticated user.
+    text: >
+        az account management-group entities list
+"""
+
 helps['account management-group subscription remove'] = """
 type: command
 short-summary: Remove an existing subscription from a management group.
@@ -204,6 +289,97 @@ examples:
   - name: Update an existing management group with a specific display name and parent.
     text: >
         az account management-group update --name GroupName --display-name DisplayName --parent ParentId/ParentName
+"""
+
+helps['account management-group hierarchy-settings'] = """
+type: group
+short-summary: Provide operations for hierarchy settings defined at the management group level. Settings can only be set on the root Management Group of the hierarchy.
+"""
+
+helps['account management-group hierarchy-settings create'] = """
+type: command
+short-summary: Create hierarchy settings defined at the Management Group level.
+long-summary: Create hierarchy settings defined at the Management Group level.
+parameters:
+  - name: --name -n
+    type: string
+    short-summary: Name of the management group.
+  - name: --default-management-group -m
+    type: string
+    short-summary: Set the default Management Group under which new subscriptions get added in this tenant. Default setting is the Root Management Group.
+  - name: --require-authorization-for-group-creation -r
+    type: boolean
+    short-summary: Indicate whether RBAC access is required upon group creation under the root Management Group. True means user will require Microsoft.Management/managementGroups/write action on the root Management Group. Default setting is false.
+examples:
+  - name: Create hierarchy settings defined at the Management Group level.
+    text: >
+        az account management-group hierarchy-settings create --name GroupName
+  - name: Set the default Management Group new Subscriptions get placed under.
+    text: >
+        az account management-group hierarchy-settings create --name GroupName -m /providers/Microsoft.Management/managementGroups/DefaultGroup
+  - name: Require user to have Microsoft.Management/managementGroups/write access on the Root to create new Management Groups under the Root.
+    text: >
+        az account management-group hierarchy-settings create --name GroupName -r True
+  - name: Update both hierarchy settings.
+    text: >
+        az account management-group hierarchy-settings create --name GroupName -m /providers/Microsoft.Management/managementGroups/DefaultGroup -r True
+"""
+
+helps['account management-group hierarchy-settings list'] = """
+type: command
+short-summary: Get all the hierarchy settings defined at the Management Group level.
+long-summary: Get all the hierarchy settings defined at the Management Group level.
+parameters:
+  - name: --name -n
+    type: string
+    short-summary: Name of the management group.
+examples:
+  - name: Get all hierarchy settings defined at the Management Group level.
+    text: >
+        az account management-group hierarchy-settings list --name GroupName
+"""
+
+helps['account management-group hierarchy-settings delete'] = """
+type: command
+short-summary: Delete the hierarchy settings defined at the Management Group level.
+long-summary: Delete the hierarchy settings defined at the Management Group level.
+parameters:
+  - name: --name -n
+    type: string
+    short-summary: Name of the management group.
+examples:
+  - name: Delete all hierarchy settings defined at the Management Group level.
+    text: >
+        az account management-group hierarchy-settings delete --name GroupName
+"""
+
+helps['account management-group hierarchy-settings update'] = """
+type: command
+short-summary: Update the hierarchy settings defined at the Management Group level.
+long-summary: Update the hierarchy settings defined at the Management Group level.
+parameters:
+  - name: --name -n
+    type: string
+    short-summary: Name of the management group.
+  - name: --default-management-group -m
+    type: string
+    short-summary: Set the default Management Group under which new subscriptions get added in this tenant. Default setting is the Root Management Group.
+  - name: --require-authorization-for-group-creation -r
+    type: boolean
+    short-summary: Indicate whether RBAC access is required upon group creation under the root Management Group. True means user will require Microsoft.Management/managementGroups/write action on the root Management Group. Default setting is false.
+examples:
+  - name: Create hierarchy settings defined at the Management Group level.
+    text: >
+        az account management-group hierarchy-settings update --name GroupName
+  - name: Set the default Management Group new Subscriptions get placed under.
+    text: >
+        az account management-group hierarchy-settings update --name GroupName -m /providers/Microsoft.Management/managementGroups/DefaultGroup
+  - name: Require user to have Microsoft.Management/managementGroups/write access on the Root to create new Management Groups under the Root.
+    text: >
+        az account management-group hierarchy-settings update --name GroupName -r True
+  - name: Update both hierarchy settings.
+    text: >
+        az account management-group hierarchy-settings update --name GroupName -m /providers/Microsoft.Management/managementGroups/DefaultGroup -r True
 """
 
 helps['deployment'] = """

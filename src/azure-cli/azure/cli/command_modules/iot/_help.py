@@ -18,56 +18,6 @@ type: group
 short-summary: Manage Azure IoT Hub Device Provisioning Service.
 """
 
-helps['iot dps access-policy'] = """
-type: group
-short-summary: Manage shared access policies for an Azure IoT Hub Device Provisioning Service instance.
-"""
-
-helps['iot dps access-policy create'] = """
-type: command
-short-summary: Create a new shared access policy in an Azure IoT Hub Device Provisioning Service instance.
-examples:
-  - name: Create a new shared access policy in an Azure IoT Hub Device Provisioning Service instance with EnrollmentRead right
-    text: >
-        az iot dps access-policy create --dps-name MyDps --resource-group MyResourceGroup --name MyPolicy --rights EnrollmentRead
-"""
-
-helps['iot dps access-policy delete'] = """
-type: command
-short-summary: Delete a shared access policies in an Azure IoT Hub Device Provisioning Service instance.
-examples:
-  - name: Delete shared access policy 'MyPolicy' in the Azure IoT Hub Device Provisioning Service instance 'MyDps'
-    text: >
-        az iot dps access-policy delete --dps-name MyDps --resource-group MyResourceGroup --name MyPolicy
-"""
-
-helps['iot dps access-policy list'] = """
-type: command
-short-summary: List all shared access policies in an Azure IoT Hub Device Provisioning Service instance.
-examples:
-  - name: List all shared access policies in the Azure IoT Hub Device Provisioning Service instance 'MyDps'
-    text: >
-        az iot dps access-policy list --dps-name MyDps --resource-group MyResourceGroup
-"""
-
-helps['iot dps access-policy show'] = """
-type: command
-short-summary: Show details of a shared access policies in an Azure IoT Hub Device Provisioning Service instance.
-examples:
-  - name: Show details of shared access policy 'MyPolicy' in the Azure IoT Hub Device Provisioning Service instance 'MyDps'
-    text: >
-        az iot dps access-policy show --dps-name MyDps --resource-group MyResourceGroup --name MyPolicy
-"""
-
-helps['iot dps access-policy update'] = """
-type: command
-short-summary: Update a shared access policy in an Azure IoT Hub Device Provisioning Service instance.
-examples:
-  - name: Update shared access policy 'MyPolicy' in an Azure IoT Hub Device Provisioning Service instance with EnrollmentWrite right
-    text: >
-        az iot dps access-policy update --dps-name MyDps --resource-group MyResourceGroup --name MyPolicy --rights EnrollmentWrite
-"""
-
 helps['iot dps policy'] = """
 type: group
 short-summary: Manage shared access policies for an Azure IoT Hub Device Provisioning Service instance.
@@ -209,6 +159,9 @@ examples:
   - name: Create an Azure IoT Hub Device Provisioning Service with the standard pricing tier S1, in the 'eastus' region.
     text: >
         az iot dps create --name MyDps --resource-group MyResourceGroup --location eastus
+  - name: Create an Azure IoT Hub Device Provisioning Service with data residency enforced. This will disable cross-region disaster recovery.
+    text: >
+        az iot dps create --name MyDps --resource-group MyResourceGroup --edr
 """
 
 helps['iot dps delete'] = """
@@ -458,6 +411,9 @@ examples:
   - name: Create an IoT Hub with local authentication, device SAS keys, and module SAS keys all disabled
     text: >
         az iot hub create --resource-group MyResourceGroup --name MyIotHub --location westus --disable-local-auth --disable-device-sas --disable-module-sas
+  - name: Create an IoT Hub with data residency enforced. This will disable cross-region disaster recovery.
+    text: >
+        az iot hub create --resource-group MyResourceGroup --name MyIoTHub --edr
 """
 
 helps['iot hub delete'] = """
@@ -662,10 +618,10 @@ long-summary: Create a route to send specific data source and condition to a des
 examples:
   - name: Create a new route "R1".
     text: >
-        az iot hub route create -g MyResourceGroup --hub-name MyIotHub --endpoint-name E2 --source-type DeviceMessages --route-name R1
+        az iot hub route create -g MyResourceGroup --hub-name MyIotHub --endpoint-name E2 --source DeviceMessages --route-name R1
   - name: Create a new route "R1" with all parameters.
     text: >
-        az iot hub route create -g MyResourceGroup --hub-name MyIotHub --endpoint-name E2 --source-type DeviceMessages --route-name R1 --condition true --enabled true
+        az iot hub route create -g MyResourceGroup --hub-name MyIotHub --endpoint-name E2 --source DeviceMessages --route-name R1 --condition true --enabled true
 """
 
 helps['iot hub route delete'] = """
@@ -678,7 +634,7 @@ examples:
         az iot hub route delete -g MyResourceGroup --hub-name MyIotHub --route-name R1
   - name: Delete all the routes of source type "DeviceMessages" from "MyIotHub" IoT Hub.
     text: >
-        az iot hub route delete -g MyResourceGroup --hub-name MyIotHub --source-type DeviceMessages
+        az iot hub route delete -g MyResourceGroup --hub-name MyIotHub --source DeviceMessages
   - name: Delete all the routes from "MyIotHub" IoT Hub.
     text: >
         az iot hub route delete -g MyResourceGroup --hub-name MyIotHub
@@ -694,7 +650,7 @@ examples:
         az iot hub route list -g MyResourceGroup --hub-name MyIotHub
   - name: Get all the routes of source type "DeviceMessages" from "MyIotHub" IoT Hub.
     text: >
-        az iot hub route list -g MyResourceGroup --hub-name MyIotHub --source-type DeviceMessages
+        az iot hub route list -g MyResourceGroup --hub-name MyIotHub --source DeviceMessages
 """
 
 helps['iot hub route show'] = """
@@ -717,7 +673,7 @@ examples:
         az iot hub route test -g MyResourceGroup --hub-name MyIotHub --route-name R1
   - name: Test all the route of source type "DeviceMessages" from "MyIotHub" IoT Hub.
     text: >
-        az iot hub route test -g MyResourceGroup --hub-name MyIotHub --source-type DeviceMessages
+        az iot hub route test -g MyResourceGroup --hub-name MyIotHub --source DeviceMessages
 """
 
 helps['iot hub route update'] = """
@@ -727,7 +683,7 @@ long-summary: Updates a route in IoT Hub. You can change the source, endpoint or
 examples:
   - name: Update source type of route "R1" from "MyIotHub" IoT Hub.
     text: >
-        az iot hub route update -g MyResourceGroup --hub-name MyIotHub --source-type DeviceMessages --route-name R1
+        az iot hub route update -g MyResourceGroup --hub-name MyIotHub --source DeviceMessages --route-name R1
 """
 
 helps['iot hub routing-endpoint'] = """

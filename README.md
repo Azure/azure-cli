@@ -130,6 +130,8 @@ If you encounter any bugs with the tool please file an issue in the [Issues](htt
 
 To provide feedback from the command line, try the `az feedback` command.
 
+\[Microsoft internal] You may contact the developer team via azpycli@microsoft.com.
+
 ## Developer installation
 
 ### Docker
@@ -147,13 +149,17 @@ If you want to get the latest build from the `dev` branch, you can use our "edge
 
 You can download the latest builds by following the links below:
 
-| Package  | Link                                       |
-| :-------: | :----------------------------------------- |
-| MSI   | https://aka.ms/InstallAzureCliWindowsEdge  |
-| Homebrew Formula | https://aka.ms/InstallAzureCliHomebrewEdge |
-| Ubuntu Xenial Deb | https://aka.ms/InstallAzureCliXenialEdge |
-| Ubuntu Bionic Deb | https://aka.ms/InstallAzureCliBionicEdge |
-| RPM | https://aka.ms/InstallAzureCliRpmEdge |
+|      Package      | Link                                       |
+|:-----------------:|:-------------------------------------------|
+|        MSI        | https://aka.ms/InstallAzureCliWindowsEdge  |
+| Homebrew Formula  | https://aka.ms/InstallAzureCliHomebrewEdge |
+| Ubuntu Xenial Deb | https://aka.ms/InstallAzureCliXenialEdge   |
+| Ubuntu Bionic Deb | https://aka.ms/InstallAzureCliBionicEdge   |
+| Ubuntu Focal Deb  | https://aka.ms/InstallAzureCliFocalEdge    |
+| Ubuntu Impish Deb | https://aka.ms/InstallAzureCliImpishEdge   |
+| Ubuntu Jammy Deb  | https://aka.ms/InstallAzureCliJammyEdge    |
+|      RPM el7      | https://aka.ms/InstallAzureCliRpmEdge      |
+|      RPM el8      | https://aka.ms/InstallAzureCliRpmEl8Edge   |
 
 You can easily install the latest Homebrew edge build with the following command:
 

@@ -15,12 +15,13 @@ set -exv
 ls -Rl /mnt/artifacts
 
 WORKDIR=`cd $(dirname $0); cd ../../../; pwd`
-PYTHON_VERSION="3.6.10"
+PYTHON_VERSION="3.8.13"
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Update APT packages
 apt-get update
-apt-get install -y libssl-dev libffi-dev python3-dev debhelper zlib1g-dev
+# uuid-dev is used to build _uuid module: https://github.com/python/cpython/pull/3796
+apt-get install -y libssl-dev libffi-dev python3-dev debhelper zlib1g-dev uuid-dev
 apt-get install -y wget
 
 # Download Python source code
@@ -33,7 +34,7 @@ $PYTHON_SRC_DIR/*/configure --srcdir $PYTHON_SRC_DIR/* --prefix $WORKDIR/python_
 make
 make install
 
-$WORKDIR/python_env/bin/python3 -m pip install --upgrade pip==21.0.1
+$WORKDIR/python_env/bin/python3 -m pip install --upgrade pip
 
 export PATH=$PATH:$WORKDIR/python_env/bin
 

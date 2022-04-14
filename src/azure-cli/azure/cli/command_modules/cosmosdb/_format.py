@@ -53,3 +53,48 @@ def list_connection_strings_output(result):
     for item in result['connectionStrings']:
         table.append(item)
     return table
+
+
+def mc_cluster_status_output_table(result):
+    # iterate on dataCenters, skip connectionErrors and reaperStatus in table output
+    return mc_status_dataCenters(result['dataCenters'])
+
+
+def mc_status_dataCenters(dataCenters):
+    dataCentersTable = []
+    for dc in dataCenters:
+        nodeTable = mc_status_nodes(dc['nodes'], dc['name'])
+        for row in nodeTable:
+            dataCentersTable.append(row)
+
+    return dataCentersTable
+
+
+def mc_status_nodes(nodes, dataCenterName):
+    table = []
+    for node in nodes:
+        table.append(mc_status_node(node, dataCenterName))
+    return table
+
+
+def mc_status_node(node, dataCenterName):
+    # include dataCenterName in each formated node
+    result = OrderedDict([
+                        ('dataCenterName', dataCenterName),
+                        ('nodeAddress', node['address']),
+                        ('rack', node['rack']),
+                        ('size', node['size']),
+                        ('state', node['state']),
+                        ('status', node['status']),
+                        ('cassandraProcessStatus', node['cassandraProcessStatus']),
+                        ('load', node['load']),
+                        ('cpuUsage', node['cpuUsage']),
+                        ('diskUsedKb', node['diskUsedKb']),
+                        ('diskFreeKb', node['diskFreeKb']),
+                        ('memoryBuffersAndCachedKb', node['memoryBuffersAndCachedKb']),
+                        ('memoryUsedKb', node['memoryUsedKb']),
+                        ('memoryFreeKb', node['memoryFreeKb']),
+                        ('memoryTotalKb', node['memoryTotalKb']),
+                        ('hostId', node['hostId']),
+                        ('timestamp', node['timestamp'])])
+    return result

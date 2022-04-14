@@ -727,7 +727,11 @@ class ProviderRegistrationTest(ScenarioTest):
 
 class ProviderOperationTest(ScenarioTest):
 
+    @AllowLargeResponse(size_kb=99999)
     def test_provider_operation(self):
+        result = self.cmd('provider operation list').get_output_in_json()
+        self.assertGreater(len(result), 0)
+        
         self.cmd('provider operation show --namespace microsoft.compute', checks=[
             self.check('id', '/providers/Microsoft.Authorization/providerOperations/Microsoft.Compute'),
             self.check('type', 'Microsoft.Authorization/providerOperations')
@@ -1235,9 +1239,22 @@ class DeploymentTestAtSubscriptionScope(ScenarioTest):
         self.cmd('deployment sub export -n {dn}', checks=[
         ])
 
-        self.cmd('deployment operation sub list -n {dn}', checks=[
+        operations = self.cmd('deployment operation sub list -n {dn}', checks=[
             self.check('length([])', 5)
+        ]).get_output_in_json()
+
+        self.kwargs.update({
+            'oid1': operations[0]['operationId'],
+            'oid2': operations[1]['operationId'],
+            'oid3': operations[2]['operationId'],
+            'oid4': operations[3]['operationId'],
+            'oid5': operations[4]['operationId']
+        })
+        self.cmd('deployment operation sub show -n {dn} --operation-ids {oid1} {oid2} {oid3} {oid4} {oid5}', checks=[
+            self.check('[].properties.provisioningOperation', '[\'Create\', \'Create\', \'Create\', \'Create\', \'EvaluateDeploymentOutput\']'),
+            self.check('[].properties.provisioningState', '[\'Succeeded\', \'Succeeded\', \'Succeeded\', \'Succeeded\', \'Succeeded\']')
         ])
+        self.cmd('deployment sub delete -n {dn}')
 
         self.cmd('deployment sub create -n {dn2} --location WestUS --template-file "{tf}" --parameters @"{params}" '
                  '--parameters storageAccountName="{storage-account-name}" --no-wait')
@@ -1474,6 +1491,7 @@ class DeploymentTestAtManagementGroup(ScenarioTest):
             self.check('[].properties.provisioningOperation', '[\'Create\', \'Create\', \'Create\']'),
             self.check('[].properties.provisioningState', '[\'Succeeded\', \'Succeeded\', \'Succeeded\']')
         ])
+        self.cmd('deployment mg delete --management-group-id {mg} -n {dn}')
 
         self.cmd('deployment mg create --management-group-id {mg} --location WestUS -n {dn2} --template-file "{tf}" '
                  '--parameters @"{params}" --parameters targetMG="{mg}" --parameters nestedRG="{sub-rg}" '
@@ -1527,13 +1545,27 @@ class DeploymentTestAtTenantScope(ScenarioTest):
         self.cmd('deployment tenant export -n {dn}', checks=[
         ])
 
-        self.cmd('deployment operation tenant list -n {dn}', checks=[
+        operations = self.cmd('deployment operation tenant list -n {dn}', checks=[
             self.check('length([])', 4)
+        ]).get_output_in_json()
+
+        self.kwargs.update({
+            'oid1': operations[0]['operationId'],
+            'oid2': operations[1]['operationId'],
+            'oid3': operations[2]['operationId'],
+            'oid4': operations[3]['operationId'],
+        })
+        self.cmd('deployment operation tenant show -n {dn} --operation-ids {oid1} {oid2} {oid3} {oid4}', checks=[
+            self.check('[].properties.provisioningOperation', '[\'Create\', \'Create\', \'Create\', \'EvaluateDeploymentOutput\']'),
+            self.check('[].properties.provisioningState', '[\'Succeeded\', \'Succeeded\', \'Succeeded\', \'Succeeded\']')
         ])
+        self.cmd('deployment tenant delete -n {dn}')
 
         self.cmd('deployment tenant create --location WestUS -n {dn2} --template-file "{tf}" --parameters targetMG="{mg}" --no-wait')
 
         self.cmd('deployment tenant cancel -n {dn2}')
+
+        self.cmd('deployment tenant wait -n {dn2} --custom "provisioningState==Canceled"')
 
         self.cmd('deployment tenant show -n {dn2}', checks=[
             self.check('properties.provisioningState', 'Canceled')
@@ -3064,7 +3096,8 @@ class PolicyScenarioTest(ScenarioTest):
     def test_show_built_in_policy(self):
         # get the list of builtins, then retrieve each via show and validate the results match
         results = self.cmd('policy definition list --query "[?policyType==\'BuiltIn\']"').get_output_in_json()
-        for i, result in enumerate(results):
+        if results:
+            result = results[0]
             self.kwargs['pn'] = result['name']
             self.kwargs['dn'] = result['displayName']
             self.kwargs['desc'] = result['description']
@@ -3905,6 +3938,29 @@ class BicepScenarioTest(ScenarioTest):
         self.cmd('az bicep list-versions', checks=[
             self.greater_than('length(@)', 0)
         ])
+
+
+# Because don't want to record bicep cli binary
+class BicepBuildTest(LiveScenarioTest):
+    
+    def test_bicep_build_decompile(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        tf = os.path.join(curr_dir, 'storage_account_deploy.bicep').replace('\\', '\\\\')
+        build_path = os.path.join(curr_dir, 'test.json').replace('\\', '\\\\')
+        decompile_path = os.path.join(curr_dir, 'test.bicep').replace('\\', '\\\\')
+        self.kwargs.update({
+            'tf': tf,
+            'build_path': build_path,
+            'decompile_path': decompile_path
+        })
+
+        self.cmd('az bicep build -f {tf} --outfile {build_path}')
+        self.cmd('az bicep decompile -f {build_path}')
+
+        if os.path.exists(build_path):
+            os.remove(build_path)
+        if os.path.exists(decompile_path):
+            os.remove(decompile_path)
 
 
 class BicepInstallationTest(LiveScenarioTest):

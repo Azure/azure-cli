@@ -127,7 +127,7 @@ short-summary: Methods that show, set, add, and remove access restrictions on a 
 
 helps['functionapp config access-restriction add'] = """
 type: command
-short-summary: Adds an Access Restriction to the functionapp
+short-summary: Adds an Access Restriction to the function app
 examples:
   - name: Add Access Restriction opening (Allow) named developers for IPv4 address 130.220.0.0/27 with priority 200 to main site.
     text: az functionapp config access-restriction add -g ResourceGroup -n AppName --rule-name developers --action Allow --ip-address 130.220.0.0/27 --priority 200
@@ -705,7 +705,7 @@ short-summary: assign managed identity to the web app
 examples:
   - name: assign local identity and assign a reader role to the current resource group.
     text: >
-        az functionapp identity assign -g MyResourceGroup -n MyUniqueApp --role reader --scope /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/MyResourceGroup
+        az functionapp identity assign -g MyResourceGroup -n MyUniqueApp --role reader --scope /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourcegroups/MyResourceGroup
   - name: enable identity for the web app.
     text: >
         az functionapp identity assign -g MyResourceGroup -n MyUniqueApp
@@ -1441,7 +1441,7 @@ examples:
   - name: Create a web app with the default configuration.
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName
-  - name: Create a web app with a Java 11 runtime using '|' delimiter.
+  - name: Create a web app with a Java 11 runtime using '|' delimiter. (not recommended for powershell; use the ":" delimiter instead)
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "java|11|Java SE|11"
   - name: Create a web app with a Java 11 runtime using ':' delimiter.
@@ -1449,7 +1449,7 @@ examples:
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "java:11:Java SE:11"
   - name: Create a web app with a NodeJS 10.14 runtime and deployed from a local git repository.
     text: >
-        az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "node|10.14" --deployment-local-git
+        az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "node|12LTS" --deployment-local-git
   - name: Create a web app with an image from DockerHub.
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName -i nginx
@@ -1767,7 +1767,7 @@ short-summary: assign managed identity to the web app
 examples:
   - name: assign local identity and assign a reader role to the current resource group.
     text: >
-        az webapp identity assign -g MyResourceGroup -n MyUniqueApp --role reader --scope /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/MyResourceGroup
+        az webapp identity assign -g MyResourceGroup -n MyUniqueApp --role reader --scope /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourcegroups/MyResourceGroup
   - name: enable identity for the web app.
     text: >
         az webapp identity assign -g MyResourceGroup -n MyUniqueApp
@@ -1819,6 +1819,11 @@ short-summary: List all scaled out instances of a web app or web app slot.
 helps['webapp list-runtimes'] = """
 type: command
 short-summary: List available built-in stacks which can be used for web apps.
+"""
+
+helps['functionapp list-runtimes'] = """
+type: command
+short-summary: List available built-in stacks which can be used for function apps.
 """
 
 helps['webapp log'] = """
@@ -2010,7 +2015,7 @@ examples:
   - name: Create a web app with a specified name
     text: >
         az webapp up -n MyUniqueAppName
-  - name: Create a web app with a specified name and a Java 11 runtime using '|' delimiter
+  - name: Create a web app with a specified name and a Java 11 runtime using '|' delimiter (not recommended for powershell; use the ":" delimiter instead)
     text: >
         az webapp up -n MyUniqueAppName --runtime "java|11|Java SE|11"
   - name: Create a web app with a specified name and a Java 11 runtime using ':' delimiter
@@ -2250,7 +2255,7 @@ helps['appservice ase create'] = """
 
 helps['appservice ase create-inbound-services'] = """
     type: command
-    short-summary: Private DNS Zone for Internal ASEv2.
+    short-summary: Private DNS Zone for Internal (ILB) App Service Environments.
     examples:
     - name: Create Private DNS Zone and A records.
       text: |
@@ -2326,7 +2331,7 @@ helps['staticwebapp show'] = """
 
 helps['staticwebapp create'] = """
     type: command
-    short-summary: Create a static app with content from a GitHub repository URL and on the provided branch. If the repo is under a Github organization, please ensure that the Azure CLI Github App has access to the organization. Access can be requested in the browser when using the "--login-with-github" argument. Access must be granted by the organization's admin.
+    short-summary: Create a static app. To provide content to the static web app and integrate with a Github repo, provide the Github repository URL (--source) and a branch (--branch). If the repo is under a Github organization, please ensure that the Azure CLI Github App has access to the organization. Access can be requested in the browser when using the "--login-with-github" argument. Access must be granted by the organization's admin.
     examples:
     - name: Create static app in a subscription.
       text: az staticwebapp create -n MyStaticAppName -g MyExistingRg
@@ -2334,6 +2339,8 @@ helps['staticwebapp create'] = """
     - name: Create static app in a subscription, retrieving token interactively
       text: az staticwebapp create -n MyStaticAppName -g MyExistingRg
        -s https://github.com/JohnDoe/my-first-static-web-app -l WestUs2 -b master --login-with-github
+    - name: Create a static web app without any content and without a github integration
+      text: az staticwebapp create -n MyStaticAppName -g MyExistingRg
 """
 
 helps['staticwebapp update'] = """
@@ -2488,7 +2495,7 @@ short-summary: assign managed identity to the static web app
 examples:
   - name: assign local identity and assign a reader role to the current resource group.
     text: >
-        az staticwebapp identity assign -g MyResourceGroup -n MyUniqueApp --role reader --scope /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/MyResourceGroup
+        az staticwebapp identity assign -g MyResourceGroup -n MyUniqueApp --role reader --scope /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourcegroups/MyResourceGroup
   - name: enable identity for the web app.
     text: >
         az staticwebapp identity assign -g MyResourceGroup -n MyUniqueApp
@@ -2603,7 +2610,7 @@ helps['webapp deploy'] = """
     short-summary: Deploys a provided artifact to Azure Web Apps.
     examples:
     - name: Deploy a war file asynchronously.
-      text: az webapp deploy --resource-group ResouceGroup --name AppName --src-path SourcePath --type war --async IsAsync
+      text: az webapp deploy --resource-group ResouceGroup --name AppName --src-path SourcePath --type war --async true
     - name: Deploy a static text file to wwwroot/staticfiles/test.txt
       text: az webapp deploy --resource-group ResouceGroup --name AppName --src-path SourcePath --type static --target-path staticfiles/test.txt
 """

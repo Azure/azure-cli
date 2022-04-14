@@ -300,23 +300,33 @@ class TestActions(unittest.TestCase):
     @mock.patch('azure.cli.core.commands.client_factory.get_subscription_id', autospec=True)
     def test_validate_msi_on_create(self, mock_get_subscription, mock_resolve_role_id):
         # check throw on : az vm/vmss create --assign-identity --role reader --scope ""
+        from azure.cli.core.azclierror import ArgumentUsageError
+
         np_mock = mock.MagicMock()
         cmd = mock.MagicMock()
         cmd.cli_ctx = DummyCli()
         np_mock.assign_identity = []
         np_mock.identity_scope = None
         np_mock.identity_role = 'reader'
-
-        with self.assertRaises(CLIError) as err:
+        with self.assertRaises(ArgumentUsageError) as err:
             _validate_vm_vmss_msi(cmd, np_mock)
-        self.assertTrue("usage error: '--role reader' is not applicable as the '--scope' is "
-                        "not provided" in str(err.exception))
+        self.assertTrue("usage error: please specify both --role and --scope "
+                        "when assigning a role to the managed identity" in str(err.exception))
+
+        np_mock = mock.MagicMock()
+        np_mock.assign_identity = []
+        np_mock.identity_scope = 'foo-scope'
+        np_mock.identity_role = None
+        with self.assertRaises(ArgumentUsageError) as err:
+            _validate_vm_vmss_msi(cmd, np_mock)
+        self.assertTrue("usage error: please specify both --role and --scope "
+                        "when assigning a role to the managed identity" in str(err.exception))
 
         # check throw on : az vm/vmss create --scope "some scope"
         np_mock = mock.MagicMock()
         np_mock.assign_identity = None
         np_mock.identity_scope = 'foo-scope'
-        with self.assertRaises(CLIError) as err:
+        with self.assertRaises(ArgumentUsageError) as err:
             _validate_vm_vmss_msi(cmd, np_mock)
         self.assertTrue('usage error: --assign-identity [--scope SCOPE] [--role ROLE]' in str(err.exception))
 
@@ -324,7 +334,7 @@ class TestActions(unittest.TestCase):
         np_mock = mock.MagicMock()
         np_mock.assign_identity = None
         np_mock.identity_role = 'reader'
-        with self.assertRaises(CLIError) as err:
+        with self.assertRaises(ArgumentUsageError) as err:
             _validate_vm_vmss_msi(cmd, np_mock)
         self.assertTrue('usage error: --assign-identity [--scope SCOPE] [--role ROLE]' in str(err.exception))
 
@@ -348,10 +358,11 @@ class TestActions(unittest.TestCase):
         np_mock.identity_scope = ''
         np_mock.identity_role = 'reader'
 
-        with self.assertRaises(CLIError) as err:
-            _validate_vm_vmss_msi(cmd, np_mock, from_set_command=True)
-        self.assertTrue("usage error: '--role reader' is not applicable as the '--scope' is set to None",
-                        str(err.exception))
+        from azure.cli.core.azclierror import ArgumentUsageError
+        with self.assertRaises(ArgumentUsageError) as err:
+            _validate_vm_vmss_msi(cmd, np_mock, is_identity_assign=True)
+        self.assertTrue("usage error: please specify --scope when assigning a role to the managed identity"
+                        in str(err.exception))
 
         # check we set right role id
         np_mock = mock.MagicMock()
@@ -359,7 +370,7 @@ class TestActions(unittest.TestCase):
         np_mock.identity_role = 'reader'
         np_mock.assign_identity = []
         mock_resolve_role_id.return_value = 'foo-role-id'
-        _validate_vm_vmss_msi(cmd, np_mock, from_set_command=True)
+        _validate_vm_vmss_msi(cmd, np_mock, is_identity_assign=True)
         self.assertEqual(np_mock.identity_role_id, 'foo-role-id')
         mock_resolve_role_id.assert_called_with(cmd.cli_ctx, 'reader', 'foo-scope')
 
@@ -429,7 +440,6 @@ class TestActions(unittest.TestCase):
             'lun': 0,
             'managedDisk': {'storageAccountType': 'premium_lrs'},
             'createOption': 'empty',
-            'deleteOption': None,
             'diskSizeGB': data_disk_sizes[0]
         })
 
@@ -437,7 +447,6 @@ class TestActions(unittest.TestCase):
             'lun': 1,
             'managedDisk': {'storageAccountType': 'premium_lrs'},
             'createOption': 'empty',
-            'deleteOption': None,
             'diskSizeGB': data_disk_sizes[1]
         })
 
@@ -497,7 +506,6 @@ class TestActions(unittest.TestCase):
             'lun': 1,
             'managedDisk': {'storageAccountType': 'premium_lrs'},
             'createOption': 'empty',
-            'deleteOption': None,
             'diskSizeGB': data_disk_sizes[0]
         })
 
@@ -517,7 +525,6 @@ class TestActions(unittest.TestCase):
             'lun': 4,
             'managedDisk': {'storageAccountType': 'premium_lrs'},
             'createOption': 'empty',
-            'deleteOption': None,
             'diskSizeGB': data_disk_sizes[1]
         })
 

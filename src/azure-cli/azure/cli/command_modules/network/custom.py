@@ -1963,64 +1963,88 @@ def list_waf_managed_rule_exclusion(cmd, client, resource_group_name, policy_nam
     return waf_policy.managed_rules
 
 
-# pylint: disable=line-too-long
 # pylint: disable=too-many-nested-blocks
 def add_waf_exclusion_rule_set(cmd, client, resource_group_name, policy_name,
                                rule_set_type, rule_set_version,
                                match_variable, selector_match_operator, selector,
                                rule_group_name=None, rule_ids=None):
-    ExclusionManagedRuleSet, ExclusionManagedRuleGroup, ExclusionManagedRule = \
-        cmd.get_models('ExclusionManagedRuleSet', 'ExclusionManagedRuleGroup', 'ExclusionManagedRule')
-    waf_policy = client.get(resource_group_name, policy_name)
+    def _has_exclusion():
+        policy = client.get(resource_group_name, policy_name)
+        for e in policy.managed_rules.exclusions:
+            if e.match_variable == match_variable \
+                    and e.selector_match_operator == selector_match_operator \
+                    and e.selector == selector:
+                return True
+        return False
+
+    ExclusionManagedRuleSet, ExclusionManagedRuleGroup, ExclusionManagedRule = cmd.get_models(
+        'ExclusionManagedRuleSet', 'ExclusionManagedRuleGroup', 'ExclusionManagedRule'
+    )
     # build current rules from ids
     rules = [ExclusionManagedRule(rule_id=rule_id) for rule_id in rule_ids] if rule_ids is not None else []
     # build current rule group from rules
     curr_rule_group = None
     if rule_group_name is not None:
-        curr_rule_group = ExclusionManagedRuleGroup(rule_group_name=rule_group_name,
-                                                    rules=rules)
+        curr_rule_group = ExclusionManagedRuleGroup(rule_group_name=rule_group_name, rules=rules)
     # build current rule set from rule group
     curr_rule_set = ExclusionManagedRuleSet(rule_set_type=rule_set_type,
                                             rule_set_version=rule_set_version,
                                             rule_groups=[curr_rule_group] if curr_rule_group is not None else [])
-    for exclusion in waf_policy.managed_rules.exclusions:
-        if exclusion.match_variable == match_variable and exclusion.selector_match_operator == selector_match_operator and exclusion.selector == selector:
-            for rule_set in exclusion.exclusion_managed_rule_sets:
-                if rule_set.rule_set_type == rule_set_type and rule_set.rule_set_version == rule_set_version:
-                    for rule_group in rule_set.rule_groups:
-                        # add rules when rule group exists
-                        if rule_group.rule_group_name == rule_group_name:
-                            rule_group.rules.extend(rules)
-                            break
-                    else:
-                        # add a new rule group
-                        if curr_rule_group is not None:
-                            rule_set.rule_groups.append(curr_rule_group)
-                    break
-            else:
-                # add a new rule set
-                exclusion.exclusion_managed_rule_sets.append(curr_rule_set)
+
+    if not _has_exclusion():
+        OwaspCrsExclusionEntry = cmd.get_models('OwaspCrsExclusionEntry')
+        exclusion = OwaspCrsExclusionEntry(match_variable=match_variable,
+                                           selector_match_operator=selector_match_operator,
+                                           selector=selector,
+                                           exclusion_managed_rule_sets=[curr_rule_set])
+        waf_policy = client.get(resource_group_name, policy_name)
+        waf_policy.managed_rules.exclusions.append(exclusion)
+    else:
+        waf_policy = client.get(resource_group_name, policy_name)
+        for exclusion in waf_policy.managed_rules.exclusions:
+            if exclusion.match_variable == match_variable \
+                    and exclusion.selector_match_operator == selector_match_operator \
+                    and exclusion.selector == selector:
+                for rule_set in exclusion.exclusion_managed_rule_sets:
+                    if rule_set.rule_set_type == rule_set_type and rule_set.rule_set_version == rule_set_version:
+                        for rule_group in rule_set.rule_groups:
+                            # add rules when rule group exists
+                            if rule_group.rule_group_name == rule_group_name:
+                                rule_group.rules.extend(rules)
+                                break
+                        else:
+                            # add a new rule group
+                            if curr_rule_group is not None:
+                                rule_set.rule_groups.append(curr_rule_group)
+                        break
+                else:
+                    # add a new rule set
+                    exclusion.exclusion_managed_rule_sets.append(curr_rule_set)
+
     return client.create_or_update(resource_group_name, policy_name, waf_policy)
 
 
 # pylint: disable=line-too-long
-def remove_waf_exclusion_rule_set(cmd, client, resource_group_name, policy_name,
+def remove_waf_exclusion_rule_set(client, resource_group_name, policy_name,
                                   rule_set_type, rule_set_version,
                                   match_variable, selector_match_operator, selector,
                                   rule_group_name=None):
     waf_policy = client.get(resource_group_name, policy_name)
     to_be_deleted = None
     for exclusion in waf_policy.managed_rules.exclusions:
-        if exclusion.match_variable == match_variable and exclusion.selector_match_operator == selector_match_operator and exclusion.selector == selector:
+        if exclusion.match_variable == match_variable \
+                and exclusion.selector_match_operator == selector_match_operator \
+                and exclusion.selector == selector:
             for rule_set in exclusion.exclusion_managed_rule_sets:
-                if rule_group_name is None:
-                    to_be_deleted = rule_set
-                    break
-                rule_group = next((rule_group for rule_group in rule_set.rule_groups if rule_group.rule_group_name == rule_group_name), None)
-                if rule_group is None:
-                    err_msg = f"Rule set group [{rule_group_name}] is not found."
-                    raise ResourceNotFoundError(err_msg)
-                rule_set.rule_groups.remove(rule_group)
+                if rule_set.rule_set_type == rule_set_type or rule_set.rule_set_version == rule_set_version:
+                    if rule_group_name is None:
+                        to_be_deleted = rule_set
+                        break
+                    rule_group = next((rule_group for rule_group in rule_set.rule_groups if rule_group.rule_group_name == rule_group_name), None)
+                    if rule_group is None:
+                        err_msg = f"Rule set group [{rule_group_name}] is not found."
+                        raise ResourceNotFoundError(err_msg)
+                    rule_set.rule_groups.remove(rule_group)
             if to_be_deleted:
                 exclusion.exclusion_managed_rule_sets.remove(to_be_deleted)
     return client.create_or_update(resource_group_name, policy_name, waf_policy)
@@ -3317,7 +3341,8 @@ def update_express_route_port_link(cmd, instance, parent, express_route_port_nam
 def create_private_endpoint(cmd, resource_group_name, private_endpoint_name, subnet,
                             private_connection_resource_id, connection_name, group_ids=None,
                             virtual_network_name=None, tags=None, location=None,
-                            request_message=None, manual_request=None, edge_zone=None, custom_interface_name=None):
+                            request_message=None, manual_request=None, edge_zone=None,
+                            ip_configurations=None, application_security_groups=None, custom_interface_name=None):
     client = network_client_factory(cmd.cli_ctx).private_endpoints
     PrivateEndpoint, Subnet, PrivateLinkServiceConnection = cmd.get_models('PrivateEndpoint',
                                                                            'Subnet',
@@ -3340,8 +3365,30 @@ def create_private_endpoint(cmd, resource_group_name, private_endpoint_name, sub
     if edge_zone:
         private_endpoint.extended_location = _edge_zone_model(cmd, edge_zone)
 
-    if cmd.supported_api_version(min_api='2021-05-01') and custom_interface_name:
-        private_endpoint.custom_network_interface_name = custom_interface_name
+    if cmd.supported_api_version(min_api='2021-05-01'):
+        if ip_configurations:
+            PrivateEndpointIPConfiguration = cmd.get_models("PrivateEndpointIPConfiguration")
+            for prop in ip_configurations:
+                ip_config = PrivateEndpointIPConfiguration(
+                    name=prop['name'],
+                    group_id=prop['group_id'],
+                    member_name=prop['member_name'],
+                    private_ip_address=prop['private_ip_address']
+                )
+                try:
+                    private_endpoint.ip_configurations.append(ip_config)
+                except AttributeError:
+                    private_endpoint.ip_configurations = [ip_config]
+        if application_security_groups:
+            ApplicationSecurityGroup = cmd.get_models("ApplicationSecurityGroup")
+            for prop in application_security_groups:
+                asg = ApplicationSecurityGroup(id=prop["id"])
+                try:
+                    private_endpoint.application_security_groups.append(asg)
+                except AttributeError:
+                    private_endpoint.application_security_groups = [asg]
+        if custom_interface_name:
+            private_endpoint.custom_network_interface_name = custom_interface_name
 
     return client.begin_create_or_update(resource_group_name, private_endpoint_name, private_endpoint)
 
@@ -3702,6 +3749,16 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
 def list_load_balancer_nic(cmd, resource_group_name, load_balancer_name):
     client = network_client_factory(cmd.cli_ctx).load_balancer_network_interfaces
     return client.list(resource_group_name, load_balancer_name)
+
+
+def list_load_balancer_mapping(cmd, resource_group_name, load_balancer_name, backend_pool_name, request):
+    client = network_client_factory(cmd.cli_ctx).load_balancers
+    return client.begin_list_inbound_nat_rule_port_mappings(
+        resource_group_name,
+        load_balancer_name,
+        backend_pool_name,
+        request
+    )
 
 
 def create_lb_inbound_nat_rule(
@@ -6621,7 +6678,7 @@ def create_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endp
                                 endpoint)
 
 
-def update_traffic_manager_endpoint(instance, endpoint_type=None, endpoint_location=None,
+def update_traffic_manager_endpoint(instance, endpoint_type, endpoint_location=None,
                                     endpoint_status=None, endpoint_monitor_status=None,
                                     priority=None, target=None, target_resource_id=None,
                                     weight=None, min_child_endpoints=None, min_child_ipv4=None,
@@ -7541,7 +7598,7 @@ def create_virtual_hub(cmd, client,
                        resource_group_name,
                        virtual_hub_name,
                        hosted_subnet,
-                       public_ip_address=None,
+                       public_ip_address,
                        location=None,
                        tags=None):
     from azure.core.exceptions import HttpResponseError
@@ -7566,7 +7623,7 @@ def create_virtual_hub(cmd, client,
 
     ip_config = HubIpConfiguration(
         subnet=SubResource(id=hosted_subnet),
-        public_ip_address=SubResource(id=public_ip_address) if public_ip_address else None,
+        public_ip_address=SubResource(id=public_ip_address),
     )
     vhub_ip_config_client = network_client_factory(cmd.cli_ctx).virtual_hub_ip_configuration
     try:
@@ -8049,8 +8106,13 @@ def _get_ssh_path(ssh_command="ssh"):
 
         if not os.path.isfile(ssh_path):
             raise CLIError("Could not find " + ssh_command + ".exe. Is the OpenSSH client installed?")
+    elif platform.system() in ('Linux', 'Darwin'):
+        import shutil
+        ssh_path = shutil.which(ssh_command)
+        if not ssh_path:
+            raise UnrecognizedArgumentError(f"{ssh_command} not found in path. Is the OpenSSH client installed?")
     else:
-        raise UnrecognizedArgumentError("Platform is not supported for this command. Supported platforms: Windows")
+        raise UnrecognizedArgumentError("Platform is not supported for this command. Supported platforms: Windows, Darwin, Linux")
 
     return ssh_path
 
@@ -8136,6 +8198,8 @@ def ssh_bastion_host(cmd, auth_type, target_resource_id, resource_group_name, ba
         subprocess.call(command, shell=platform.system() == 'Windows')
     except Exception as ex:
         raise CLIInternalError(ex)
+    finally:
+        tunnel_server.cleanup()
 
 
 def rdp_bastion_host(cmd, target_resource_id, resource_group_name, bastion_host_name, resource_port=None):
@@ -8169,6 +8233,13 @@ def get_tunnel(cmd, resource_group_name, name, vm_id, resource_port, port=None):
     return tunnel_server
 
 
+def tunnel_close_handler(tunnel):
+    logger.info("Ctrl + C received. Clean up and then exit.")
+    tunnel.cleanup()
+    import sys
+    sys.exit()
+
+
 def create_bastion_tunnel(cmd, target_resource_id, resource_group_name, bastion_host_name, resource_port, port, timeout=None):
     if not is_valid_resource_id(target_resource_id):
         raise InvalidArgumentValueError("Please enter a valid Virtual Machine resource Id.")
@@ -8179,6 +8250,10 @@ def create_bastion_tunnel(cmd, target_resource_id, resource_group_name, bastion_
     logger.warning('Opening tunnel on port: %s', tunnel_server.local_port)
     logger.warning('Tunnel is ready, connect on port %s', tunnel_server.local_port)
     logger.warning('Ctrl + C to close')
+
+    import signal
+    # handle closing the tunnel with an active session still connected
+    signal.signal(signal.SIGINT, lambda signum, frame: tunnel_close_handler(tunnel_server))
 
     if timeout:
         time.sleep(int(timeout))

@@ -6,6 +6,7 @@
 import re
 import random
 import string
+
 from knack.log import get_logger
 from knack.prompting import (
     prompt,
@@ -17,10 +18,12 @@ from msrestazure.tools import (
 )
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.azclierror import (
+    ValidationError,
     InvalidArgumentValueError,
     RequiredArgumentMissingError
 )
 
+from ._utils import run_cli_cmd
 from ._resource_config import (
     CLIENT_TYPE,
     RESOURCE,
@@ -94,7 +97,6 @@ def generate_connection_name(cmd):
 def get_client_type(cmd, namespace):
     '''Infer client type from source resource
     '''
-    from ._utils import run_cli_cmd
 
     def _infer_webapp(source_id):
         value_type_map = {
@@ -191,8 +193,8 @@ def interactive_input(arg, hint):
         cmd_value = 'name={} secret={}'.format(name, '*' * len(secret))
     elif arg == 'service_principal_auth_info_secret':
         client_id = prompt('ServicePrincipal client-id (--service-principal client_id=): ')
-        object_id = prompt('ServicePrincipal object-id (--service-principal object-id=): ')
-        secret = prompt_pass('ServicePrincipal object-id (--service-principal secret=): ')
+        object_id = prompt('Enterprise Application object-id (--service-principal object-id=): ')
+        secret = prompt_pass('ServicePrincipal secret (--service-principal secret=): ')
         value = {
             'client_id': client_id,
             'object-id': object_id,
@@ -578,7 +580,7 @@ def validate_params(cmd, namespace):
     # for command: 'list'
     if cmd.name.endswith(' list'):
         _validate_and_apply(validate_list_params, apply_list_params)
-    # for command: 'add'
+    # for command: 'create'
     elif 'create' in cmd.name:
         # if --new is specified
         if getattr(namespace, 'new_addon'):
@@ -614,3 +616,25 @@ def validate_kafka_params(cmd, namespace):
 
         if getattr(namespace, 'client_type', None) is None:
             namespace.client_type = get_client_type(cmd, namespace)
+
+
+def validate_service_state(linker_parameters):
+    '''Validate whether user provided params are applicable to service state
+    '''
+    target_type = None
+    for target, resource_id in TARGET_RESOURCES.items():
+        matched = re.match(get_resource_regex(resource_id), linker_parameters.get('target_id'), re.IGNORECASE)
+        if matched:
+            target_type = target
+
+    if target_type == RESOURCE.AppConfig and linker_parameters.get('auth_info', dict()).get('auth_type') == 'secret':
+        segments = parse_resource_id(linker_parameters.get('target_id'))
+        rg = segments.get('resource_group')
+        name = segments.get('name')
+        if not rg or not name:
+            return
+
+        output = run_cli_cmd('az appconfig show -g {} -n {}'.format(rg, name))
+        if output and output.get('disableLocalAuth') is True:
+            raise ValidationError('Secret as auth type is not allowed when local auth is disabled for the '
+                                  'specified appconfig, you may use service principal or managed identity.')

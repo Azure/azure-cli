@@ -5,15 +5,13 @@
 
 import json
 import os
-import pickle
 import re
 
 from azure.cli.core._environment import get_config_dir
-from azure.cli.core.decorators import retry
-from msal import PublicClientApplication
-
 from knack.log import get_logger
 from knack.util import CLIError
+from msal import PublicClientApplication
+
 # Service principal entry properties
 from .msal_authentication import _CLIENT_ID, _TENANT, _CLIENT_SECRET, _CERTIFICATE, _CLIENT_ASSERTION, \
     _USE_CERT_SN_ISSUER
@@ -69,7 +67,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         config_dir = get_config_dir()
         self._token_cache_file = os.path.join(config_dir, "msal_token_cache")
         self._secret_file = os.path.join(config_dir, "service_principal_entries")
-        self._http_cache_file = os.path.join(config_dir, "msal_http_cache.bin")
+        self._msal_http_cache_file = os.path.join(config_dir, "msal_http_cache.bin")
 
         # We make _msal_app_instance an instance attribute, instead of a class attribute,
         # because MSAL apps can have different tenant IDs.
@@ -106,45 +104,10 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         cache = load_persisted_token_cache(self._token_cache_file, self._encrypt)
         return cache
 
-    @retry()
-    def __load_msal_http_cache(self):
-        """Load MSAL HTTP cache with retry. If it still fails at last, raise the original exception as-is."""
-        logger.debug("__load_msal_http_cache: %s", self._http_cache_file)
-        try:
-            with open(self._http_cache_file, 'rb') as f:
-                return pickle.load(f)
-        except FileNotFoundError:
-            # The cache file has not been created. This is expected.
-            logger.debug("%s not found. Using a fresh one.", self._http_cache_file)
-            return {}
-
-    def _dump_msal_http_cache(self):
-        logger.debug("_dump_msal_http_cache: %s", self._http_cache_file)
-        with open(self._http_cache_file, 'wb') as f:
-            # At this point, an empty cache file will be created. Loading this cache file will
-            # trigger EOFError. This can be simulated by adding time.sleep(30) here.
-            # So, during loading, EOFError is ignored.
-            pickle.dump(self._msal_http_cache, f)
-
     def _load_msal_http_cache(self):
-        import atexit
-
-        logger.debug("_load_msal_http_cache: %s", self._http_cache_file)
-        try:
-            persisted_http_cache = self.__load_msal_http_cache()
-        except (pickle.UnpicklingError, EOFError) as ex:
-            # We still get exception after retry:
-            # - pickle.UnpicklingError is caused by corrupted cache file, perhaps due to concurrent writes.
-            # - EOFError is caused by empty cache file created by other az instance, but hasn't been filled yet.
-            logger.debug("Failed to load MSAL HTTP cache: %s. Using a fresh one.", ex)
-            persisted_http_cache = {}  # Ignore a non-exist or corrupted http_cache
-
-        # When exiting, flush it back to the file.
-        # If 2 processes write at the same time, the cache will be corrupted,
-        # but that is fine. Subsequent runs would reach eventual consistency.
-        atexit.register(self._dump_msal_http_cache)
-
-        return persisted_http_cache
+        from .binary_cache import BinaryCache
+        http_cache = BinaryCache(self._msal_http_cache_file)
+        return http_cache
 
     @property
     def _service_principal_store(self):
@@ -159,7 +122,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
     def login_with_auth_code(self, scopes, **kwargs):
         # Emit a warning to inform that a browser is opened.
         # Only show the path part of the URL and hide the query string.
-        logger.warning("The default web browser has been opened at %s. Please continue the login in the web browser. "
+        logger.warning("A web browser has been opened at %s. Please continue the login in the web browser. "
                        "If no web browser is available or if the web browser fails to open, use device code flow "
                        "with `az login --use-device-code`.", self._msal_app.authority.authorization_endpoint)
 
@@ -236,10 +199,6 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         entry = self._service_principal_store.load_entry(client_id, self.tenant_id)
         sp_auth = ServicePrincipalAuth(entry)
         return ServicePrincipalCredential(sp_auth, **self._msal_app_kwargs)
-
-    def get_service_principal_entry(self, client_id):
-        """This method is only used by --sdk-auth. DO NOT use it elsewhere."""
-        return self._service_principal_store.load_entry(client_id, self.tenant_id)
 
     def get_managed_identity_credential(self, client_id=None):
         raise NotImplementedError
