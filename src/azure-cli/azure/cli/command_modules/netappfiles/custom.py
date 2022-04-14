@@ -417,7 +417,7 @@ def snapshot_restore_files(client, resource_group_name, account_name, pool_name,
         file_paths=file_paths,
         destination_path=destination_path
     )
-    client.begin_restore_files(resource_group_name, account_name, pool_name, volume_name, snapshot_name, body)
+    return client.begin_restore_files(resource_group_name, account_name, pool_name, volume_name, snapshot_name, body)
 
 
 # ---- SNAPSHOT POLICIES ----

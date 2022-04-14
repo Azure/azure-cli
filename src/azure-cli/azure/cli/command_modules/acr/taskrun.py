@@ -48,6 +48,7 @@ def acr_taskrun_logs(cmd,
                      client,  # cf_acr_runs
                      registry_name,
                      taskrun_name,
+                     no_format=False,
                      resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, TASKRUN_NOT_SUPPORTED)
@@ -57,4 +58,4 @@ def acr_taskrun_logs(cmd,
     response = client_taskruns.get(resource_group_name, registry_name, taskrun_name)
     run_id = response.run_result.run_id
 
-    return stream_logs(cmd, client, run_id, registry_name, resource_group_name)
+    return stream_logs(cmd, client, run_id, registry_name, resource_group_name, None, no_format, False)

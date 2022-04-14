@@ -121,6 +121,7 @@ def is_storagev2(import_prefix):
     return import_prefix.startswith('azure.multiapi.storagev2.') or import_prefix.startswith('azure.data.tables')
 
 
+# pylint: disable=too-many-branches, too-many-statements
 def validate_client_parameters(cmd, namespace):
     """ Retrieves storage connection parameters from environment variables and parses out connection string into
     account name and key """
@@ -130,7 +131,11 @@ def validate_client_parameters(cmd, namespace):
         auth_mode = n.auth_mode or get_config_value(cmd, 'storage', 'auth_mode', None)
         del n.auth_mode
         if not n.account_name:
-            n.account_name = get_config_value(cmd, 'storage', 'account', None)
+            if hasattr(n, 'account_url') and not n.account_url:
+                n.account_name = get_config_value(cmd, 'storage', 'account', None)
+                n.account_url = get_config_value(cmd, 'storage', 'account_url', None)
+            else:
+                n.account_name = get_config_value(cmd, 'storage', 'account', None)
         if auth_mode == 'login':
             prefix = cmd.command_kwargs['resource_type'].value[0]
             # is_storagv2() is used to distinguish if the command is in track2 SDK
@@ -167,7 +172,11 @@ def validate_client_parameters(cmd, namespace):
 
     # otherwise, simply try to retrieve the remaining variables from environment variables
     if not n.account_name:
-        n.account_name = get_config_value(cmd, 'storage', 'account', None)
+        if hasattr(n, 'account_url') and not n.account_url:
+            n.account_name = get_config_value(cmd, 'storage', 'account', None)
+            n.account_url = get_config_value(cmd, 'storage', 'account_url', None)
+        else:
+            n.account_name = get_config_value(cmd, 'storage', 'account', None)
     if not n.account_key and not n.sas_token:
         n.account_key = get_config_value(cmd, 'storage', 'key', None)
     if not n.sas_token:
@@ -201,6 +210,20 @@ For more information about RBAC roles in storage, visit https://docs.microsoft.c
             n.account_key = _query_account_key(cmd.cli_ctx, n.account_name)
         except Exception as ex:  # pylint: disable=broad-except
             logger.warning("\nSkip querying account key due to failure: %s", ex)
+
+    if hasattr(n, 'account_url') and n.account_url and not n.account_key and not n.sas_token:
+        message = """
+There are no credentials provided in your command and environment.
+Please provide --connection-string, --account-key or --sas-token in your command as credentials.
+        """
+
+        if 'auth_mode' in cmd.arguments:
+            message += """
+You also can add `--auth-mode login` in your command to use Azure Active Directory (Azure AD) for authorization if your login account is assigned required RBAC roles.
+For more information about RBAC roles in storage, visit https://docs.microsoft.com/azure/storage/common/storage-auth-aad-rbac-cli."
+            """
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        raise InvalidArgumentValueError(message)
 
 
 def validate_encryption_key(cmd, namespace):
@@ -813,11 +836,15 @@ def get_permission_allowed_values(permission_class):
         for i, item in enumerate(allowed_values):
             if item == 'delete_previous_version':
                 allowed_values[i] = 'x' + item
+            if item == 'permanent_delete':
+                allowed_values[i] = 'y' + item
+            if item == 'set_immutability_policy':
+                allowed_values[i] = 'i' + item
             if item == 'manage_access_control':
                 allowed_values[i] = 'permissions'
             if item == 'manage_ownership':
                 allowed_values[i] = 'ownership'
-        return allowed_values
+        return sorted(allowed_values)
     return None
 
 
@@ -1266,6 +1293,19 @@ def resource_type_type(loader):
     return impl
 
 
+def resource_type_type_v2(loader):
+    """ Returns a function which validates that resource types string contains only a combination of service,
+    container, and object. Their shorthand representations are s, c, and o. """
+
+    def impl(string):
+        t_resources = loader.get_models('_shared.models#ResourceTypes', resource_type=ResourceType.DATA_STORAGE_BLOB)
+        if set(string) - set("sco"):
+            raise ValueError
+        return t_resources.from_string(''.join(set(string)))
+
+    return impl
+
+
 def services_type(loader):
     """ Returns a function which validates that services string contains only a combination of blob, queue, table,
     and file. Their shorthand representations are b, q, t, and f. """
@@ -1275,6 +1315,18 @@ def services_type(loader):
         if set(string) - set("bqtf"):
             raise ValueError
         return t_services(_str=''.join(set(string)))
+
+    return impl
+
+
+def services_type_v2():
+    """ Returns a function which validates that services string contains only a combination of blob, queue, table,
+    and file. Their shorthand representations are b, q, t, and f. """
+
+    def impl(string):
+        if set(string) - set("bqtf"):
+            raise ValueError
+        return ''.join(set(string))
 
     return impl
 

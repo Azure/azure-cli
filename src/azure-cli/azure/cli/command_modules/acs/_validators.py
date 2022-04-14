@@ -6,7 +6,6 @@
 from __future__ import unicode_literals
 
 import os
-import os.path
 import re
 from ipaddress import ip_network
 from math import isclose, isnan
@@ -15,7 +14,6 @@ from azure.cli.core import keys
 from azure.cli.core.azclierror import InvalidArgumentValueError
 from azure.cli.core.commands.validators import validate_tag
 from azure.cli.core.util import CLIError
-# pylint: disable=no-name-in-module,import-error
 from knack.log import get_logger
 
 logger = get_logger(__name__)
@@ -211,6 +209,20 @@ def validate_load_balancer_idle_timeout(namespace):
             raise CLIError("--load-balancer-idle-timeout must be in the range [4,100]")
 
 
+def validate_nat_gateway_managed_outbound_ip_count(namespace):
+    """validate NAT gateway profile managed outbound IP count"""
+    if namespace.nat_gateway_managed_outbound_ip_count is not None:
+        if namespace.nat_gateway_managed_outbound_ip_count < 1 or namespace.nat_gateway_managed_outbound_ip_count > 16:
+            raise InvalidArgumentValueError("--nat-gateway-managed-outbound-ip-count must be in the range [1,16]")
+
+
+def validate_nat_gateway_idle_timeout(namespace):
+    """validate NAT gateway profile idle timeout"""
+    if namespace.nat_gateway_idle_timeout is not None:
+        if namespace.nat_gateway_idle_timeout < 4 or namespace.nat_gateway_idle_timeout > 120:
+            raise InvalidArgumentValueError("--nat-gateway-idle-timeout must be in the range [4,120]")
+
+
 def validate_nodes_count(namespace):
     """Validates that min_count and max_count is set between 1-100"""
     if namespace.min_count is not None:
@@ -283,12 +295,19 @@ def validate_nodepool_tags(ns):
 
 
 def validate_vnet_subnet_id(namespace):
-    if namespace.vnet_subnet_id is not None:
-        if namespace.vnet_subnet_id == '':
-            return
-        from msrestazure.tools import is_valid_resource_id
-        if not is_valid_resource_id(namespace.vnet_subnet_id):
-            raise CLIError("--vnet-subnet-id is not a valid Azure resource ID.")
+    _validate_subnet_id(namespace.vnet_subnet_id, "--vnet-subnet-id")
+
+
+def validate_pod_subnet_id(namespace):
+    _validate_subnet_id(namespace.pod_subnet_id, "--pod-subnet-id")
+
+
+def _validate_subnet_id(subnet_id, name):
+    if subnet_id is None or subnet_id == '':
+        return
+    from msrestazure.tools import is_valid_resource_id
+    if not is_valid_resource_id(subnet_id):
+        raise InvalidArgumentValueError(name + " is not a valid Azure resource ID.")
 
 
 def validate_ppg(namespace):

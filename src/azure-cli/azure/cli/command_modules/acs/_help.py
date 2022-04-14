@@ -4,8 +4,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.help_files import helps  # pylint: disable=import-error
-# pylint: disable=line-too-long, too-many-lines
+from knack.help_files import helps
+
 
 helps['acs'] = """
 type: group
@@ -311,10 +311,18 @@ parameters:
     type: int
     short-summary: Load balancer idle timeout in minutes.
     long-summary: Desired idle timeout for load balancer outbound flows, default is 30 minutes. Please specify a value in the range of [4, 100].
+  - name: --nat-gateway-managed-outbound-ip-count
+    type: int
+    short-summary: NAT gateway managed outbound IP count.
+    long-summary: Desired number of managed outbound IPs for NAT gateway outbound connection. Please specify a value in the range of [1, 16]. Valid for Standard SKU load balancer cluster with managedNATGateway outbound type only.
+  - name: --nat-gateway-idle-timeout
+    type: int
+    short-summary: NAT gateway idle timeout in minutes.
+    long-summary: Desired idle timeout for NAT gateway outbound flows, default is 4 minutes. Please specify a value in the range of [4, 120]. Valid for Standard SKU load balancer cluster with managedNATGateway outbound type only.
   - name: --outbound-type
     type: string
     short-summary: How outbound traffic will be configured for a cluster.
-    long-summary: Select between loadBalancer and userDefinedRouting. If not set, defaults to type loadBalancer. Requires --vnet-subnet-id to be provided with a preconfigured route table and --load-balancer-sku to be Standard.
+    long-summary: Select between loadBalancer, userDefinedRouting, managedNATGateway and userAssignedNATGateway. If not set, defaults to type loadBalancer. Requires --vnet-subnet-id to be provided with a preconfigured route table and --load-balancer-sku to be Standard.
   - name: --auto-upgrade-channel
     type: string
     short-summary: Specify the upgrade channel for autoupgrade.
@@ -385,6 +393,9 @@ parameters:
   - name: --vnet-subnet-id
     type: string
     short-summary: The ID of a subnet in an existing VNet into which to deploy the cluster.
+  - name: --pod-subnet-id
+    type: string
+    short-summary: The ID of a subnet in an existing VNet into which to assign pods in the cluster (requires azure network-plugin).
   - name: --ppg
     type: string
     short-summary: The ID of a PPG.
@@ -503,6 +514,12 @@ parameters:
   - name: --snapshot-id
     type: string
     short-summary: The source snapshot id used to create this cluster.
+  - name: --kubelet-config
+    type: string
+    short-summary: Path to JSON file containing Kubelet configurations for agent nodes. https://aka.ms/aks/custom-node-config
+  - name: --linux-os-config
+    type: string
+    short-summary: Path to JSON file containing OS configurations for Linux agent nodes. https://aka.ms/aks/custom-node-config
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --ssh-key-value /path/to/publickey
@@ -522,6 +539,8 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --load-balancer-outbound-ips <ip-resource-id-1,ip-resource-id-2>
   - name: Create a kubernetes cluster with standard SKU load balancer and use the provided public IP prefixes for the load balancer outbound connection usage.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --load-balancer-outbound-ip-prefixes <ip-prefix-resource-id-1,ip-prefix-resource-id-2>
+  - name: Create a kubernetes cluster with a AKS managed NAT gateway, with two outbound AKS managed IPs an idle flow timeout of 4 minutes
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --nat-gateway-managed-outbound-ip-count 2 --nat-gateway-idle-timeout 4 --outbound-type managedNATGateway --generate-ssh-keys
   - name: Create a kubernetes cluster with basic SKU load balancer and AvailabilitySet vm set type.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --load-balancer-sku basic --vm-set-type AvailabilitySet
   - name: Create a kubernetes cluster with authorized apiserver IP ranges.
@@ -594,15 +613,15 @@ parameters:
   - name: --load-balancer-managed-outbound-ip-count
     type: int
     short-summary: Load balancer managed outbound IP count.
-    long-summary: Desired number of managed outbound IPs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only. If updated, it will wipe off the existing setting on Load balancer managed outbound IP count; Load balancer outbound IP resource IDs and Load balancer outbound IP prefix resource IDs.
+    long-summary: Desired number of managed outbound IPs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only. --load-balancer-managed-outbound-ip-count, --load-balancer-outbound-ips and --load-balancer-outbound-ip-prefixes are mutually exclusive. If updated, it will wipe off the existing setting on Load balancer outbound IP resource IDs and Load balancer outbound IP prefix resource IDs. If the new value is greater than the original value, new additional outbound IPs will be created. If the value is less than the original value, existing outbound IPs will be deleted and outbound connections may fail due to configuration update.
   - name: --load-balancer-outbound-ips
     type: string
     short-summary: Load balancer outbound IP resource IDs.
-    long-summary: Comma-separated public IP resource IDs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only. If updated, it will wipe off the existing setting on Load balancer managed outbound IP count; Load balancer outbound IP resource IDs and Load balancer outbound IP prefix resource IDs.
+    long-summary: Comma-separated public IP resource IDs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only. --load-balancer-managed-outbound-ip-count, --load-balancer-outbound-ips and --load-balancer-outbound-ip-prefixes are mutually exclusive. If updated, it will wipe off the existing setting on Load balancer managed outbound IP count and Load balancer outbound IP prefix resource IDs.
   - name: --load-balancer-outbound-ip-prefixes
     type: string
     short-summary: Load balancer outbound IP prefix resource IDs.
-    long-summary: Comma-separated public IP prefix resource IDs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only. If updated, it will wipe off the existing setting on Load balancer managed outbound IP count; Load balancer outbound IP resource IDs and Load balancer outbound IP prefix resource IDs.
+    long-summary: Comma-separated public IP prefix resource IDs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only. --load-balancer-managed-outbound-ip-count, --load-balancer-outbound-ips and --load-balancer-outbound-ip-prefixes are mutually exclusive. If updated, it will wipe off the existing setting on Load balancer managed outbound IP count and Load balancer outbound IP resource IDs.
   - name: --load-balancer-outbound-ports
     type: int
     short-summary: Load balancer outbound allocated ports.
@@ -611,6 +630,14 @@ parameters:
     type: int
     short-summary: Load balancer idle timeout in minutes.
     long-summary: Desired idle timeout for load balancer outbound flows, default is 30 minutes. Please specify a value in the range of [4, 100].
+  - name: --nat-gateway-managed-outbound-ip-count
+    type: int
+    short-summary: NAT gateway managed outbound IP count.
+    long-summary: Desired number of managed outbound IPs for NAT gateway outbound connection. Please specify a value in the range of [1, 16]. Valid for Standard SKU load balancer cluster with managedNATGateway outbound type only.
+  - name: --nat-gateway-idle-timeout
+    type: int
+    short-summary: NAT gateway idle timeout in minutes.
+    long-summary: Desired idle timeout for NAT gateway outbound flows, default is 4 minutes. Please specify a value in the range of [4, 120]. Valid for Standard SKU load balancer cluster with managedNATGateway outbound type only.
   - name: --auto-upgrade-channel
     type: string
     short-summary: Specify the upgrade channel for autoupgrade.
@@ -715,6 +742,8 @@ examples:
     text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-managed-outbound-ip-count 2 --load-balancer-idle-timeout 5 --load-balancer-outbound-ports 8000
   - name: Update a kubernetes cluster with standard SKU load balancer to use the provided public IP prefixes for the load balancer outbound connection usage.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-outbound-ip-prefixes <ip-prefix-resource-id-1,ip-prefix-resource-id-2>
+  - name: Update a kubernetes cluster of managedNATGateway outbound type with two outbound AKS managed IPs an idle flow timeout of 4 minutes
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --nat-gateway-managed-outbound-ip-count 2 --nat-gateway-idle-timeout 4
   - name: Attach AKS cluster to ACR by name "acrName"
     text: az aks update -g MyResourceGroup -n MyManagedCluster --attach-acr acrName
   - name: Update a kubernetes cluster with authorized apiserver ip ranges.
@@ -937,6 +966,9 @@ parameters:
   - name: --vnet-subnet-id
     type: string
     short-summary: The ID of a subnet in an existing VNet into which to deploy the cluster.
+  - name: --pod-subnet-id
+    type: string
+    short-summary: The ID of a subnet in an existing VNet into which to assign pods in the cluster (requires azure network-plugin).
   - name: --ppg
     type: string
     short-summary: The ID of a PPG.
@@ -994,6 +1026,12 @@ parameters:
   - name: --aks-custom-headers
     type: string
     short-summary: Comma-separated key-value pairs to specify custom headers.
+  - name: --kubelet-config
+    type: string
+    short-summary: Path to JSON file containing Kubelet configurations for agent nodes. https://aka.ms/aks/custom-node-config
+  - name: --linux-os-config
+    type: string
+    short-summary: Path to JSON file containing OS configurations for Linux agent nodes. https://aka.ms/aks/custom-node-config
 examples:
   - name: Create a nodepool in an existing AKS cluster with ephemeral os enabled.
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --node-osdisk-type Ephemeral --node-osdisk-size 48

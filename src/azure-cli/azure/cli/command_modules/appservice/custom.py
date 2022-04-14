@@ -1326,11 +1326,15 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
                         vnet_route_all_enabled=None,
                         generic_configurations=None):
     configs = get_site_configs(cmd, resource_group_name, name, slot)
+    app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
+                                           'list_application_settings', slot)
     if number_of_workers is not None:
         number_of_workers = validate_range_of_int_flag('--number-of-workers', number_of_workers, min_val=0, max_val=20)
     if linux_fx_version:
         if linux_fx_version.strip().lower().startswith('docker|'):
-            update_app_settings(cmd, resource_group_name, name, ["WEBSITES_ENABLE_APP_SERVICE_STORAGE=false"])
+            if ('WEBSITES_ENABLE_APP_SERVICE_STORAGE' not in app_settings.properties or
+                    app_settings.properties['WEBSITES_ENABLE_APP_SERVICE_STORAGE'] != 'true'):
+                update_app_settings(cmd, resource_group_name, name, ["WEBSITES_ENABLE_APP_SERVICE_STORAGE=false"])
         else:
             delete_app_settings(cmd, resource_group_name, name, ["WEBSITES_ENABLE_APP_SERVICE_STORAGE"])
 
@@ -2021,8 +2025,8 @@ def create_backup(cmd, resource_group_name, webapp_name, storage_account_url,
     backup_request = BackupRequest(backup_name=backup_name,
                                    storage_account_url=storage_account_url, databases=db_setting)
     if slot:
-        return client.web_apps.backup_slot(resource_group_name, webapp_name, backup_request, slot)
-
+        return client.web_apps.backup_slot(resource_group_name=resource_group_name,
+                                           name=webapp_name, request=backup_request, slot=slot)
     return client.web_apps.backup(resource_group_name, webapp_name, backup_request)
 
 
