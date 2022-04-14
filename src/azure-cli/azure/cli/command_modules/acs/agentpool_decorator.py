@@ -265,13 +265,14 @@ class AKSAgentPoolContext(BaseAKSContext):
         """
         # read the original value passed by the command
         max_surge = self.raw_param.get("max_surge")
-        # try to read the property value corresponding to the parameter from the `agentpool` object.
-        if (
-            self.agentpool and
-            self.agentpool.upgrade_settings and
-            self.agentpool.upgrade_settings.max_surge is not None
-        ):
-            max_surge = self.agentpool.upgrade_settings.max_surge
+        # In create mode, try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.agentpool and
+                self.agentpool.upgrade_settings and
+                self.agentpool.upgrade_settings.max_surge is not None
+            ):
+                max_surge = self.agentpool.upgrade_settings.max_surge
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
@@ -961,10 +962,13 @@ class AKSAgentPoolContext(BaseAKSContext):
         :return: string
         """
         # read the original value passed by the command
-        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
-            mode = self.raw_param.get("mode", CONST_NODEPOOL_MODE_SYSTEM)
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+                mode = self.raw_param.get("mode", CONST_NODEPOOL_MODE_SYSTEM)
+            else:
+                mode = self.raw_param.get("mode", CONST_NODEPOOL_MODE_USER)
         else:
-            mode = self.raw_param.get("mode", CONST_NODEPOOL_MODE_USER)
+            mode = self.raw_param.get("mode")
         # try to read the property value corresponding to the parameter from the `agentpool` object
         if self.agentpool and self.agentpool.mode is not None:
             mode = self.agentpool.mode
@@ -979,7 +983,10 @@ class AKSAgentPoolContext(BaseAKSContext):
         :return: string
         """
         # read the original value passed by the command
-        scale_down_mode = self.raw_param.get("scale_down_mode", CONST_SCALE_DOWN_MODE_DELETE)
+        if self.decorator_mode == DecoratorMode.CREATE:
+            scale_down_mode = self.raw_param.get("scale_down_mode", CONST_SCALE_DOWN_MODE_DELETE)
+        else:
+            scale_down_mode = self.raw_param.get("scale_down_mode")
         # try to read the property value corresponding to the parameter from the `agentpool` object
         if self.agentpool and self.agentpool.scale_down_mode is not None:
             scale_down_mode = self.agentpool.scale_down_mode
@@ -1457,6 +1464,23 @@ class AKSAgentPoolUpdateDecorator:
         self.context.attach_agentpool(agentpool)
         return agentpool
 
+    def update_upgrade_settings(self, agentpool: AgentPool) -> AgentPool:
+        """Update upgrade settings for the Agentpool object.
+
+        :return: the Agentpool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        upgrade_settings = agentpool.upgrade_settings
+        if upgrade_settings is None:
+            upgrade_settings = self.models.AgentPoolUpgradeSettings()
+
+        max_surge = self.context.get_max_surge()
+        if max_surge:
+            upgrade_settings.max_surge = max_surge
+            agentpool.upgrade_settings = upgrade_settings
+        return agentpool
+
     def update_auto_scaler_properties(self, agentpool: AgentPool) -> AgentPool:
         """Update auto scaler related properties for the Agentpool object.
 
@@ -1503,6 +1527,22 @@ class AKSAgentPoolUpdateDecorator:
         node_taints = self.context.get_node_taints()
         if node_taints is not None:
             agentpool.node_taints = node_taints
+        return agentpool
+
+    def update_vm_properties(self, agentpool: AgentPool) -> AgentPool:
+        """Update vm related properties for the AgentPool object.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        scale_down_mode = self.context.get_scale_down_mode()
+        if scale_down_mode is not None:
+            agentpool.scale_down_mode = scale_down_mode
+
+        mode = self.context.get_mode()
+        if mode is not None:
+            agentpool.mode = mode
         return agentpool
 
     def update_agentpool_profile_default(self, agentpools: List[AgentPool] = None) -> AgentPool:
