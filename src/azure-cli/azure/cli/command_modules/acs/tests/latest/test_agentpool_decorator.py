@@ -34,18 +34,15 @@ from azure.cli.command_modules.acs.agentpool_decorator import (
     AKSAgentPoolUpdateDecorator,
 )
 from azure.cli.command_modules.acs.tests.latest.mocks import MockCLI, MockClient, MockCmd
+from azure.cli.command_modules.acs.tests.latest.utils import get_test_data_file_path
 from azure.cli.core.azclierror import (
     ArgumentUsageError,
-    AzCLIError,
     CLIInternalError,
     InvalidArgumentValueError,
     MutuallyExclusiveArgumentError,
-    NoTTYError,
     RequiredArgumentMissingError,
-    UnknownError,
 )
 from azure.cli.core.profiles import ResourceType
-from azure.cli.command_modules.acs.tests.latest.utils import get_test_data_file_path
 from azure.cli.core.util import get_file_json
 
 
@@ -218,6 +215,20 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         agentpool_1 = self.create_initialized_agentpool_instance(upgrade_settings=upgrade_settings_1)
         ctx_1.attach_agentpool(agentpool_1)
         self.assertEqual(ctx_1.get_max_surge(), "test_max_surge")
+
+        # custom
+        ctx_2 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"max_surge": "test_max_surge"}),
+            self.models,
+            DecoratorMode.UPDATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_2.get_max_surge(), "test_max_surge")
+        upgrade_settings_2 = self.models.AgentPoolUpgradeSettings(max_surge="test_ap_max_surge")
+        agentpool_2 = self.create_initialized_agentpool_instance(upgrade_settings=upgrade_settings_2)
+        ctx_2.attach_agentpool(agentpool_2)
+        self.assertEqual(ctx_2.get_max_surge(), "test_max_surge")
 
     def common_get_node_count_and_enable_cluster_autoscaler_min_max_count(
         self,
@@ -1023,6 +1034,19 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         ctx_1.attach_agentpool(agentpool)
         self.assertEqual(ctx_1.get_mode(), "test_mode")
 
+        # custom
+        ctx_2 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"mode": "test_mode"}),
+            self.models,
+            DecoratorMode.UPDATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_2.get_mode(), "test_mode")
+        agentpool_2 = self.create_initialized_agentpool_instance(mode="test_ap_mode")
+        ctx_2.attach_agentpool(agentpool_2)
+        self.assertEqual(ctx_2.get_mode(), "test_mode")
+
     def common_get_scale_down_mode(self):
         # default
         if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
@@ -1045,6 +1069,19 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         agentpool = self.create_initialized_agentpool_instance(scale_down_mode=CONST_SCALE_DOWN_MODE_DEALLOCATE)
         ctx_1.attach_agentpool(agentpool)
         self.assertEqual(ctx_1.get_scale_down_mode(), CONST_SCALE_DOWN_MODE_DEALLOCATE)
+
+        # custom
+        ctx_2 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"scale_down_mode": "test_scale_down_mode"}),
+            self.models,
+            DecoratorMode.UPDATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_2.get_scale_down_mode(), "test_scale_down_mode")
+        agentpool_2 = self.create_initialized_agentpool_instance(scale_down_mode="test_ap_scale_down_mode")
+        ctx_2.attach_agentpool(agentpool_2)
+        self.assertEqual(ctx_2.get_scale_down_mode(), "test_scale_down_mode")
 
     def common_get_kubelet_config(self):
         # default
@@ -2220,6 +2257,47 @@ class AKSAgentPoolUpdateDecoratorCommonTestCase(unittest.TestCase):
         with self.assertRaises(CLIInternalError):
             dec_1._ensure_agentpool(agentpool_1)
 
+    def common_update_upgrade_settings(self):
+        dec_1 = AKSAgentPoolUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "max_surge": "test_max_surge",
+            },
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        # fail on passing the wrong agentpool object
+        with self.assertRaises(CLIInternalError):
+            dec_1.update_upgrade_settings(None)
+        upgrade_settings_1 = self.models.AgentPoolUpgradeSettings(max_surge="test_ap_max_surge")
+        agentpool_1 = self.create_initialized_agentpool_instance(upgrade_settings=upgrade_settings_1)
+        dec_1.context.attach_agentpool(agentpool_1)
+        dec_agentpool_1 = dec_1.update_upgrade_settings(agentpool_1)
+        ground_truth_upgrade_settings_1 = self.models.AgentPoolUpgradeSettings(max_surge="test_max_surge")
+        grond_truth_agentpool_1 = self.create_initialized_agentpool_instance(
+            upgrade_settings=ground_truth_upgrade_settings_1
+        )
+        self.assertEqual(dec_agentpool_1, grond_truth_agentpool_1)
+
+        dec_2 = AKSAgentPoolUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "max_surge": "test_max_surge",
+            },
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        agentpool_2 = self.create_initialized_agentpool_instance()
+        dec_2.context.attach_agentpool(agentpool_2)
+        dec_agentpool_2 = dec_2.update_upgrade_settings(agentpool_2)
+        ground_truth_upgrade_settings_2 = self.models.AgentPoolUpgradeSettings(max_surge="test_max_surge")
+        grond_truth_agentpool_2 = self.create_initialized_agentpool_instance(
+            upgrade_settings=ground_truth_upgrade_settings_2
+        )
+        self.assertEqual(dec_agentpool_2, grond_truth_agentpool_2)
+
     def common_update_auto_scaler_properties(self):
         dec_1 = AKSAgentPoolUpdateDecorator(
             self.cmd,
@@ -2305,6 +2383,30 @@ class AKSAgentPoolUpdateDecoratorCommonTestCase(unittest.TestCase):
             )
         self.assertEqual(dec_agentpool_1, grond_truth_agentpool_1)
 
+    def common_update_vm_properties(self):
+        dec_1 = AKSAgentPoolUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "mode": "test_mode",
+                "scale_down_mode": "test_scale_down_mode",
+            },
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        # fail on passing the wrong agentpool object
+        with self.assertRaises(CLIInternalError):
+            dec_1.update_vm_properties(None)
+        agentpool_1 = self.create_initialized_agentpool_instance(
+            mode="test_ap_mode", scale_down_mode="test_ap_scale_down_mode"
+        )
+        dec_1.context.attach_agentpool(agentpool_1)
+        dec_agentpool_1 = dec_1.update_vm_properties(agentpool_1)
+        grond_truth_agentpool_1 = self.create_initialized_agentpool_instance(
+            mode="test_mode", scale_down_mode="test_scale_down_mode"
+        )
+        self.assertEqual(dec_agentpool_1, grond_truth_agentpool_1)
+
 
 class AKSAgentPoolUpdateDecoratorStandaloneModeTestCase(AKSAgentPoolUpdateDecoratorCommonTestCase):
     def setUp(self):
@@ -2341,11 +2443,17 @@ class AKSAgentPoolUpdateDecoratorStandaloneModeTestCase(AKSAgentPoolUpdateDecora
         self.assertEqual(dec_agentpool_1, dec_1.context.agentpool)
         self.client.get.assert_called_once_with("test_resource_group_name", "test_cluster_name", "test_nodepool_name")
 
+    def test_update_upgrade_settings(self):
+        self.common_update_upgrade_settings()
+
     def test_update_auto_scaler_properties(self):
         self.common_update_auto_scaler_properties()
 
     def test_update_label_tag_taint(self):
         self.common_update_label_tag_taint()
+
+    def test_update_vm_properties(self):
+        self.common_update_vm_properties()
 
     def test_update_agentpool_profile_default(self):
         import inspect
@@ -2458,6 +2566,9 @@ class AKSAgentPoolUpdateDecoratorManagedClusterModeTestCase(AKSAgentPoolUpdateDe
         self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
         self.assertEqual(dec_agentpool_1, dec_1.context.agentpool)
 
+    def test_update_upgrade_settings(self):
+        self.common_update_upgrade_settings()
+
     def test_update_auto_scaler_properties(self):
         self.common_update_auto_scaler_properties()
 
@@ -2510,6 +2621,9 @@ class AKSAgentPoolUpdateDecoratorManagedClusterModeTestCase(AKSAgentPoolUpdateDe
         self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
 
         dec_1.context.raw_param.print_usage_statistics()
+
+    def test_update_vm_properties(self):
+        self.common_update_vm_properties()
 
 
 if __name__ == "__main__":
