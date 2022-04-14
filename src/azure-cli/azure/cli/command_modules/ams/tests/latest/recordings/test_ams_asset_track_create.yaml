@@ -19,19 +19,70 @@ interactions:
       ParameterSetName:
       - -n -g --storage-account -l
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-mgmt-media/9.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.35.0 azsdk-python-mgmt-media/9.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003?api-version=2021-06-01
+  response:
+    body:
+      string: '{"error":{"code":"SubscriptionRequestsThrottled","message":"Number
+        of requests for subscription ''c526bbbc-c5ff-46b0-9ca8-3e8cb92a2cf5'' and
+        operation ''PUT/SUBSCRIPTIONS/RESOURCEGROUPS/PROVIDERS/MICROSOFT.MEDIA/MEDIASERVICES/''
+        exceeded the backend storage limit. Please try again after ''6'' seconds."}}'
+    headers:
+      cache-control:
+      - no-cache
+      connection:
+      - close
+      content-length:
+      - '299'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 14 Apr 2022 17:54:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 429
+      message: ''
+- request:
+    body: '{"location": "westeurope", "properties": {"storageAccounts": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002",
+      "type": "Primary"}], "keyDelivery": {"accessControl": {"defaultAction": "Allow",
+      "ipAllowList": []}}, "publicNetworkAccess": "Enabled"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ams account create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '350'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --storage-account -l
+      User-Agent:
+      - AZURECLI/2.35.0 azsdk-python-mgmt-media/9.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003?api-version=2021-06-01
   response:
     body:
       string: "{\r\n  \"name\":\"ams000003\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003\",\"type\":\"Microsoft.Media/mediaservices\",\"location\":\"West
-        Europe\",\"properties\":{\r\n    \"mediaServiceId\":\"6380f0a4-41e9-45bb-94dd-68a0d33623d0\",\"storageAccounts\":[\r\n
+        Europe\",\"properties\":{\r\n    \"mediaServiceId\":\"737e1bd4-69a0-4c72-bbb9-0ccaaec89d27\",\"storageAccounts\":[\r\n
         \     {\r\n        \"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002\",\"type\":\"Primary\"\r\n
         \     }\r\n    ],\"storageAuthentication\":\"System\",\"encryption\":{\r\n
         \     \"type\":\"SystemKey\"\r\n    },\"keyDelivery\":{\r\n      \"accessControl\":{\r\n
         \       \"defaultAction\":\"Allow\",\"ipAllowList\":[\r\n          \r\n        ]\r\n
         \     }\r\n    },\"publicNetworkAccess\":\"Enabled\"\r\n  },\"systemData\":{\r\n
-        \   \"createdBy\":\"hivyas@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2022-04-13T23:28:44.6253331Z\",\"lastModifiedBy\":\"hivyas@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2022-04-13T23:28:44.6253331Z\"\r\n
+        \   \"createdBy\":\"hivyas@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2022-04-14T17:54:20.2442128Z\",\"lastModifiedBy\":\"hivyas@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2022-04-14T17:54:20.2442128Z\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
@@ -41,7 +92,7 @@ interactions:
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Wed, 13 Apr 2022 23:28:47 GMT
+      - Thu, 14 Apr 2022 17:54:21 GMT
       expires:
       - '-1'
       odata-version:
@@ -55,7 +106,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -73,19 +124,19 @@ interactions:
       ParameterSetName:
       - -a -g -n
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-mgmt-media/9.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.35.0 azsdk-python-mgmt-media/9.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003?api-version=2021-06-01
   response:
     body:
       string: "{\r\n  \"name\":\"ams000003\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003\",\"type\":\"Microsoft.Media/mediaservices\",\"location\":\"West
-        Europe\",\"properties\":{\r\n    \"mediaServiceId\":\"6380f0a4-41e9-45bb-94dd-68a0d33623d0\",\"storageAccounts\":[\r\n
+        Europe\",\"properties\":{\r\n    \"mediaServiceId\":\"737e1bd4-69a0-4c72-bbb9-0ccaaec89d27\",\"storageAccounts\":[\r\n
         \     {\r\n        \"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002\",\"type\":\"Primary\"\r\n
         \     }\r\n    ],\"storageAuthentication\":\"System\",\"encryption\":{\r\n
         \     \"type\":\"SystemKey\"\r\n    },\"keyDelivery\":{\r\n      \"accessControl\":{\r\n
         \       \"defaultAction\":\"Allow\",\"ipAllowList\":[\r\n          \r\n        ]\r\n
         \     }\r\n    },\"publicNetworkAccess\":\"Enabled\"\r\n  },\"systemData\":{\r\n
-        \   \"createdBy\":\"hivyas@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2022-04-13T23:28:44.6253331Z\",\"lastModifiedBy\":\"hivyas@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2022-04-13T23:28:44.6253331Z\"\r\n
+        \   \"createdBy\":\"hivyas@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2022-04-14T17:54:20.2442128Z\",\"lastModifiedBy\":\"hivyas@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2022-04-14T17:54:20.2442128Z\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
@@ -95,7 +146,7 @@ interactions:
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Wed, 13 Apr 2022 23:28:47 GMT
+      - Thu, 14 Apr 2022 17:54:23 GMT
       expires:
       - '-1'
       odata-version:
@@ -136,19 +187,19 @@ interactions:
       ParameterSetName:
       - -a -g -n
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-mgmt-media/9.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.35.0 azsdk-python-mgmt-media/9.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003?api-version=2021-06-01
   response:
     body:
       string: "{\r\n  \"name\":\"ams000003\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003\",\"type\":\"Microsoft.Media/mediaservices\",\"location\":\"West
-        Europe\",\"properties\":{\r\n    \"mediaServiceId\":\"6380f0a4-41e9-45bb-94dd-68a0d33623d0\",\"storageAccounts\":[\r\n
+        Europe\",\"properties\":{\r\n    \"mediaServiceId\":\"737e1bd4-69a0-4c72-bbb9-0ccaaec89d27\",\"storageAccounts\":[\r\n
         \     {\r\n        \"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002\",\"type\":\"Primary\"\r\n
         \     }\r\n    ],\"storageAuthentication\":\"System\",\"encryption\":{\r\n
         \     \"type\":\"SystemKey\"\r\n    },\"keyDelivery\":{\r\n      \"accessControl\":{\r\n
         \       \"defaultAction\":\"Allow\",\"ipAllowList\":[\r\n          \r\n        ]\r\n
         \     }\r\n    },\"publicNetworkAccess\":\"Enabled\"\r\n  },\"systemData\":{\r\n
-        \   \"createdBy\":\"hivyas@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2022-04-13T23:28:44.6253331Z\",\"lastModifiedBy\":\"hivyas@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2022-04-13T23:28:48.2940086Z\"\r\n
+        \   \"createdBy\":\"hivyas@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2022-04-14T17:54:20.2442128Z\",\"lastModifiedBy\":\"hivyas@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2022-04-14T17:54:24.8954644Z\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
@@ -158,7 +209,7 @@ interactions:
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Wed, 13 Apr 2022 23:28:48 GMT
+      - Thu, 14 Apr 2022 17:54:25 GMT
       expires:
       - '-1'
       odata-version:
@@ -198,14 +249,14 @@ interactions:
       ParameterSetName:
       - -a -n -g --container
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-mgmt-media/9.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.35.0 azsdk-python-mgmt-media/9.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/assets/asset000006?api-version=2021-11-01
   response:
     body:
       string: "{\r\n  \"name\":\"asset000006\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/assets/asset000006\",\"type\":\"Microsoft.Media/mediaservices/assets\",\"properties\":{\r\n
-        \   \"assetId\":\"7bf2a2a2-c775-439c-946e-f22b6b3c016b\",\"created\":\"2022-04-13T23:28:50.417Z\",\"lastModified\":\"2022-04-13T23:28:50.417Z\",\"container\":\"output000004\",\"storageAccountName\":\"clitest000002\",\"storageEncryptionFormat\":\"None\"\r\n
-        \ },\"systemData\":{\r\n    \"createdBy\":\"hivyas@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2022-04-13T23:28:49.6783235Z\",\"lastModifiedBy\":\"hivyas@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2022-04-13T23:28:49.6783235Z\"\r\n
+        \   \"assetId\":\"6f3554b0-b2f5-4db0-beca-e02d54182b76\",\"created\":\"2022-04-14T17:54:27.123Z\",\"lastModified\":\"2022-04-14T17:54:27.123Z\",\"container\":\"output000004\",\"storageAccountName\":\"clitest000002\",\"storageEncryptionFormat\":\"None\"\r\n
+        \ },\"systemData\":{\r\n    \"createdBy\":\"hivyas@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2022-04-14T17:54:26.4317363Z\",\"lastModifiedBy\":\"hivyas@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2022-04-14T17:54:26.4317363Z\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
@@ -215,7 +266,7 @@ interactions:
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Wed, 13 Apr 2022 23:28:51 GMT
+      - Thu, 14 Apr 2022 17:54:27 GMT
       expires:
       - '-1'
       odata-version:
@@ -249,12 +300,12 @@ interactions:
       ParameterSetName:
       - -n -g --query
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-storage/19.1.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.35.0 azsdk-python-azure-mgmt-storage/20.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2021-08-01&$expand=kerb
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2021-09-01&$expand=kerb
   response:
     body:
-      string: '{"keys":[{"creationTime":"2022-04-13T23:28:23.5413934Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2022-04-13T23:28:23.5413934Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+      string: '{"keys":[{"creationTime":"2022-04-14T17:53:50.3527396Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2022-04-14T17:53:50.3527396Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
     headers:
       cache-control:
       - no-cache
@@ -263,7 +314,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 13 Apr 2022 23:28:51 GMT
+      - Thu, 14 Apr 2022 17:54:28 GMT
       expires:
       - '-1'
       pragma:
@@ -305,11 +356,11 @@ interactions:
       ParameterSetName:
       - --no-progress --account-name --container --file --name --account-key
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-storage-blob/12.10.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.35.0 azsdk-python-storage-blob/12.10.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
       x-ms-blob-type:
       - BlockBlob
       x-ms-date:
-      - Wed, 13 Apr 2022 23:28:51 GMT
+      - Thu, 14 Apr 2022 17:54:28 GMT
       x-ms-version:
       - '2021-04-10'
     method: PUT
@@ -323,11 +374,11 @@ interactions:
       content-md5:
       - ZTX36+KBwMrOXpQ9SUsIfQ==
       date:
-      - Wed, 13 Apr 2022 23:28:51 GMT
+      - Thu, 14 Apr 2022 17:54:28 GMT
       etag:
-      - '"0x8DA1DA55EE07068"'
+      - '"0x8DA1E3FD2733042"'
       last-modified:
-      - Wed, 13 Apr 2022 23:28:52 GMT
+      - Thu, 14 Apr 2022 17:54:28 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-content-crc64:
@@ -402,11 +453,11 @@ interactions:
       ParameterSetName:
       - --no-progress --account-name --container --file --account-key
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-storage-blob/12.10.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.35.0 azsdk-python-storage-blob/12.10.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
       x-ms-blob-type:
       - BlockBlob
       x-ms-date:
-      - Wed, 13 Apr 2022 23:28:52 GMT
+      - Thu, 14 Apr 2022 17:54:29 GMT
       x-ms-version:
       - '2021-04-10'
     method: PUT
@@ -420,11 +471,11 @@ interactions:
       content-md5:
       - tJWSCMYEMxsRWMuhB9wJjQ==
       date:
-      - Wed, 13 Apr 2022 23:28:51 GMT
+      - Thu, 14 Apr 2022 17:54:28 GMT
       etag:
-      - '"0x8DA1DA55EFBBCA1"'
+      - '"0x8DA1E3FD2916240"'
       last-modified:
-      - Wed, 13 Apr 2022 23:28:52 GMT
+      - Thu, 14 Apr 2022 17:54:29 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-content-crc64:
@@ -455,7 +506,7 @@ interactions:
       ParameterSetName:
       - -a -g --track-name --track-type --asset-name --file-name
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-mgmt-media/9.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.35.0 azsdk-python-mgmt-media/9.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/assets/asset000006/tracks/track000005?api-version=2021-11-01
   response:
@@ -472,7 +523,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 13 Apr 2022 23:28:54 GMT
+      - Thu, 14 Apr 2022 17:54:31 GMT
       expires:
       - '-1'
       pragma:
@@ -484,7 +535,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1195'
+      - '1196'
     status:
       code: 400
       message: Bad Request
@@ -507,7 +558,7 @@ interactions:
       ParameterSetName:
       - -a -g --track-name --track-type --asset-name --file-name
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-mgmt-media/9.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.35.0 azsdk-python-mgmt-media/9.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/assets/asset000006/tracks/track000005?api-version=2021-11-01
   response:
@@ -524,7 +575,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 13 Apr 2022 23:29:06 GMT
+      - Thu, 14 Apr 2022 17:54:43 GMT
       expires:
       - '-1'
       pragma:
@@ -536,7 +587,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1195'
+      - '1199'
     status:
       code: 400
       message: Bad Request
@@ -559,7 +610,7 @@ interactions:
       ParameterSetName:
       - -a -g --track-name --track-type --asset-name --file-name
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-mgmt-media/9.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.35.0 azsdk-python-mgmt-media/9.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/assets/asset000006/tracks/track000005?api-version=2021-11-01
   response:
@@ -576,7 +627,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 13 Apr 2022 23:29:28 GMT
+      - Thu, 14 Apr 2022 17:54:57 GMT
       expires:
       - '-1'
       pragma:
@@ -588,7 +639,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1193'
+      - '1199'
     status:
       code: 400
       message: Bad Request
@@ -611,7 +662,7 @@ interactions:
       ParameterSetName:
       - -a -g --track-name --track-type --asset-name --file-name
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-mgmt-media/9.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.35.0 azsdk-python-mgmt-media/9.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/assets/asset000006/tracks/track000005?api-version=2021-11-01
   response:
@@ -628,7 +679,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 13 Apr 2022 23:29:40 GMT
+      - Thu, 14 Apr 2022 17:55:09 GMT
       expires:
       - '-1'
       pragma:
@@ -663,7 +714,7 @@ interactions:
       ParameterSetName:
       - -a -g --track-name --track-type --asset-name --file-name
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-mgmt-media/9.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.35.0 azsdk-python-mgmt-media/9.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/assets/asset000006/tracks/track000005?api-version=2021-11-01
   response:
@@ -680,7 +731,59 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 13 Apr 2022 23:29:54 GMT
+      - Thu, 14 Apr 2022 17:55:22 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 400
+      message: Bad Request
+- request:
+    body: '{"properties": {"track": {"@odata.type": "#Microsoft.Media.TextTrack",
+      "fileName": "assetTrack.ttml"}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ams asset-track create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '103'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -a -g --track-name --track-type --asset-name --file-name
+      User-Agent:
+      - AZURECLI/2.35.0 azsdk-python-mgmt-media/9.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/assets/asset000006/tracks/track000005?api-version=2021-11-01
+  response:
+    body:
+      string: "{\r\n  \"error\": {\r\n    \"code\": \"BadRequest\",\r\n    \"message\":
+        \"Target resource file does not exist.\"\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-language:
+      - en-US
+      content-length:
+      - '105'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 14 Apr 2022 17:55:35 GMT
       expires:
       - '-1'
       pragma:
@@ -715,7 +818,7 @@ interactions:
       ParameterSetName:
       - -a -g --track-name --track-type --asset-name --file-name
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-mgmt-media/9.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.35.0 azsdk-python-mgmt-media/9.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/assets/asset000006/tracks/track000005?api-version=2021-11-01
   response:
@@ -732,59 +835,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 13 Apr 2022 23:30:07 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
-    status:
-      code: 400
-      message: Bad Request
-- request:
-    body: '{"properties": {"track": {"@odata.type": "#Microsoft.Media.TextTrack",
-      "fileName": "assetTrack.ttml"}}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - ams asset-track create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '103'
-      Content-Type:
-      - application/json
-      ParameterSetName:
-      - -a -g --track-name --track-type --asset-name --file-name
-      User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-mgmt-media/9.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/assets/asset000006/tracks/track000005?api-version=2021-11-01
-  response:
-    body:
-      string: "{\r\n  \"error\": {\r\n    \"code\": \"BadRequest\",\r\n    \"message\":
-        \"Target resource file does not exist.\"\r\n  }\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-language:
-      - en-US
-      content-length:
-      - '105'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 13 Apr 2022 23:30:20 GMT
+      - Thu, 14 Apr 2022 17:55:48 GMT
       expires:
       - '-1'
       pragma:
