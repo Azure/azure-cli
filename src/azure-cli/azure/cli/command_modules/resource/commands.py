@@ -16,7 +16,7 @@ from azure.cli.core.commands.arm import handle_template_based_exception
 from azure.cli.command_modules.resource._client_factory import (
     cf_resource_groups, cf_providers, cf_features, cf_feature_registrations, cf_tags, cf_deployments,
     cf_deployment_operations, cf_policy_definitions, cf_policy_set_definitions, cf_policy_exemptions, cf_resource_links,
-    cf_resource_deploymentscripts, cf_resource_managedapplications, cf_resource_managedappdefinitions, cf_management_groups, cf_management_group_subscriptions, cf_resource_templatespecs)
+    cf_resource_deploymentscripts, cf_resource_managedapplications, cf_resource_managedappdefinitions, cf_management_groups, cf_management_group_subscriptions, cf_resource_templatespecs, cf_resource_privatelinks)
 from azure.cli.command_modules.resource._validators import (
     process_deployment_create_namespace, process_ts_create_or_update_namespace, _validate_template_spec, _validate_template_spec_out,
     process_assign_identity_namespace, process_assignment_create_namespace)
@@ -181,6 +181,16 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.resource.templatespecs.operations#ResourceLinksOperations.{}',
         client_factory=cf_resource_templatespecs,
         resource_type=ResourceType.MGMT_RESOURCE_TEMPLATESPECS
+    )
+    resource_resourcemanagementprivatelink_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.resource.privatelinks.operations#PrivateLinkAssociationOperations.{}',
+        client_factory=cf_resource_privatelinks,
+        resource_type=ResourceType.MGMT_RESOURCE_PRIVATELINKS
+    )
+    resource_privatelinksassociation_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.resource.privatelinks.operations#ResourceManagementPrivateLinkOperations.{}',
+        client_factory=cf_resource_privatelinks,
+        resource_type=ResourceType.MGMT_RESOURCE_PRIVATELINKS
     )
 
     with self.command_group('account lock', resource_lock_sdk, resource_type=ResourceType.MGMT_RESOURCE_LOCKS) as g:
@@ -482,3 +492,15 @@ def load_command_table(self, _):
         g.custom_command('publish', 'publish_bicep_file')
         g.custom_command('version', 'show_bicep_cli_version')
         g.custom_command('list-versions', 'list_bicep_cli_versions')
+
+    with self.commands_group('resourcemanagement private-link', resource_resourcemanagementprivatelink_sdk, resource_type=ResourceType.MGMT_RESOURCE_PRIVATELINKS) as g:
+        g.custom_command('create', 'create_resourcemanager_privatelink')
+        g.custom_show_command('show', 'get_resourcemanager_privatelink')
+        g.custom_command('list', 'list_resourcemanager_privatelink')
+        g.custom_command('delete', 'delete_resourcemanager_privatelink')
+    
+    with self.commands_group('private-link association', resource_privatelinksassociation_sdk, resource_type=ResourceType.MGMT_RESOURCE_PRIVATELINKS) as g:
+        g.custom_command('create', 'create_private_link_association')
+        g.custom_show_command('show', 'get_private_link_association')
+        g.custom_command('list', 'list_private_link_association')
+        g.custom_command('delete', 'delete_private_link_association')

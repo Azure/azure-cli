@@ -4049,6 +4049,8 @@ class DeploymentWithBicepScenarioTest(LiveScenarioTest):
         self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', '')
         self.cmd('ts delete --template-spec {template_spec_id} --yes')
 
+class PrivateLinkTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_template_specs_list', parameter_name='resource_group_one', location='westus')
 
 if __name__ == '__main__':
     unittest.main()

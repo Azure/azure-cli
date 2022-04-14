@@ -2568,3 +2568,53 @@ helps['bicep list-versions'] = """
 type: command
 short-summary: List out all available versions of Bicep CLI.
 """
+
+helps['resourcemanagement private-link'] = """
+type: group
+short-summary: Manage resource management privatelinks at.
+"""
+
+helps['resourcemanagement private-link create'] = """
+type: command
+short-summary: Create a new resource management private link.
+examples:
+  - name: Create a template spec.
+    text: az ts create -g testRG --name TemplateSpecName -l WestUS --display-name "MyDisplayName" --description "Simple template spec" --tags key1=value1
+  - name: Create a template spec version.
+    text: az ts create -g testRG --name TemplateSpecName -v 2.0 -l WestUS --template-file templateSpec.json --version-description "Less simple template spec" --tags key1=value1 key3=value3
+  - name: Create a template spec and a version of the template spec.
+    text: az ts create -g testRG --name TemplateSpecName -v 1.0 -l WestUS --template-file templateSpec.json --display-name "MyDisplayName" --description "Simple template spec" --version-description "Version of simple template spec" --tags key1=value1 key2=value2
+"""
+helps['resourcemanagement private-link show'] = """
+type: command
+short-summary: Get resource management private.
+examples:
+  - name: Get single resource management private link.
+    text: az ts create -g testRG --name TemplateSpecName -l WestUS --display-name "MyDisplayName" --description "Simple template spec" --tags key1=value1
+  - name: Get resource management private link at resource group scope.
+    text: az ts create -g testRG --name TemplateSpecName -v 2.0 -l WestUS --template-file templateSpec.json --version-description "Less simple template spec" --tags key1=value1 key3=value3
+  - name: Create a template spec and a version of the template spec.
+    text: az ts create -g testRG --name TemplateSpecName -v 1.0 -l WestUS --template-file templateSpec.json --display-name "MyDisplayName" --description "Simple template spec" --version-description "Version of simple template spec" --tags key1=value1 key2=value2
+"""
+helps['resourcemanagement private-link list'] = """
+type: command
+short-summary: Create a template spec and or template spec version.
+examples:
+  - name: Create a template spec.
+    text: az ts create -g testRG --name TemplateSpecName -l WestUS --display-name "MyDisplayName" --description "Simple template spec" --tags key1=value1
+  - name: Create a template spec version.
+    text: az ts create -g testRG --name TemplateSpecName -v 2.0 -l WestUS --template-file templateSpec.json --version-description "Less simple template spec" --tags key1=value1 key3=value3
+  - name: Create a template spec and a version of the template spec.
+    text: az ts create -g testRG --name TemplateSpecName -v 1.0 -l WestUS --template-file templateSpec.json --display-name "MyDisplayName" --description "Simple template spec" --version-description "Version of simple template spec" --tags key1=value1 key2=value2
+"""
+helps['resourcemanagement private-link delete'] = """
+type: command
+short-summary: Create a template spec and or template spec version.
+examples:
+  - name: Create a template spec.
+    text: az ts create -g testRG --name TemplateSpecName -l WestUS --display-name "MyDisplayName" --description "Simple template spec" --tags key1=value1
+  - name: Create a template spec version.
+    text: az ts create -g testRG --name TemplateSpecName -v 2.0 -l WestUS --template-file templateSpec.json --version-description "Less simple template spec" --tags key1=value1 key3=value3
+  - name: Create a template spec and a version of the template spec.
+    text: az ts create -g testRG --name TemplateSpecName -v 1.0 -l WestUS --template-file templateSpec.json --display-name "MyDisplayName" --description "Simple template spec" --version-description "Version of simple template spec" --tags key1=value1 key2=value2
+"""

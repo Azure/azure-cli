@@ -99,7 +99,7 @@ def load_arguments(self, _):
     bicep_target_platform_type = CLIArgumentType(options_list=['--target-platform', '-t'],
                                                  arg_type=get_enum_type(["win-x64", "linux-musl-x64", "linux-x64", "osx-x64"]),
                                                  help="The platform the Bicep CLI will be running on. Set this to skip automatic platform detection if it does not work properly.")
-
+                             
     _PROVIDER_HELP_TEXT = 'the resource namespace, aka \'provider\''
 
     with self.argument_context('resource') as c:
@@ -656,3 +656,37 @@ def load_arguments(self, _):
 
     with self.argument_context('bicep upgrade') as c:
         c.argument('target_platform', arg_type=bicep_target_platform_type)
+
+    with self.argument_context('resourcemanagement private-link get') as c:
+        c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group where the template will be deployed to.')
+        c.argument('name', options_list=['--name', '-n'], help='The name of the resource management private link.')
+
+    with self.argument_context('resourcemanagement private-link list') as c:
+        c.ignore('subscription')
+    
+    with self.argument_context('resourcemanagement private-link create') as c:
+        c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group where the template will be deployed to.')
+        c.argument('name', options_list=['--name', '-n'], help='The name of the resource management private link.')
+        c.argument('location', options_list=['--location', '-l'], help='the region to create the resource management private link')
+
+    with self.argument_context('resourcemanagement private-link show') as c:
+        c.argument('subscription', arg_type=subscription_type)
+        c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group where the template will be deployed to.')
+        c.argument('name', options_list=['--name', '-n'], help='The name of the resource management private link.')
+
+    with self.argument_context('resourcemanagement private-link delete') as c:
+        c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group where the template will be deployed to.')
+        c.argument('name', options_list=['--name', '-n'], help='The name of the resource management private link.')
+
+    with self.argument_context('private-link association create') as c:
+        c.argument('management_group', arg_type=management_group_name_type)
+        c.argument('name', options_list=['--name', '-n'], help='The name of the private link association')
+        c.argument('private_link', options_list=['-privatelink'], help='The name of the private link')
+        c.argument('public_network_access', arg_type=get_enum_type(['enabled', 'disabled']), help='restrict traffic to private link')
+
+    with self.argument_context('private-link association show') as c:
+        c.argument('management_group', arg_type=management_group_name_type)
+
+    with self.argument_context('private-link association delete') as c:
+        c.argument('management_group', arg_type=management_group_name_type)
+        c.argument('name', options_list=['--name', '-n'], help='The name of the private link association')
