@@ -11,6 +11,10 @@ import sys
 from azdev.utilities import get_path_table
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+logger.addHandler(ch)
 profile = sys.argv[1]
 
 
