@@ -67,7 +67,7 @@ jobs = {
             'monitor': 66,
             'natgateway': 22,
             'netappfiles': 48,
-            'network': 322,  # series
+            'network': 364,  # series
             # 'network': 182,  # paraller
             'policyinsights': 20,
             'privatedns': 29,
@@ -89,7 +89,7 @@ jobs = {
             'storage': 108,
             'synapse': 45,
             'util': 18,
-            'vm': 271,
+            'vm': 313,
             'azure-cli': 16,
             'azure-cli-core': 26,
             'azure-cli-telemetry': 18,
