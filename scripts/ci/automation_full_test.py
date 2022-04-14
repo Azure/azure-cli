@@ -11,10 +11,13 @@ import sys
 from azdev.utilities import get_path_table
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+logger.addHandler(ch)
 
-part, part_idx = [int(i) for i in sys.argv[1].split('_')]
-parallel, para_idx = [int(i) for i in sys.argv[2].split('_')]
-profile = sys.argv[3]
+parallel, para_idx = [int(i) for i in sys.argv[1].split('_')]
+profile = sys.argv[2]
 
 jobs = {
             'acr': 45,
@@ -23,18 +26,18 @@ jobs = {
             'ams': 136,
             'apim': 30,
             'appconfig': 41,
-            # 'appservice': 150,  # series
-            'appservice': 157,  # paraller
+            'appservice': 150,  # series
+            # 'appservice': 157,  # paraller
             'aro': 33,
             'backup': 76,
             'batch': 21,
             'batchai': 24,
             'billing': 21,
-            # 'botservice': 25,  # series
-            'botservice': 28,  # paraller
+            'botservice': 25,  # series
+            # 'botservice': 28,  # paraller
             'cdn': 36,
-            # 'cloud': 18,  # series
-            'cloud': 22,  # paraller
+            'cloud': 18,  # series
+            # 'cloud': 22,  # paraller
             'cognitiveservices': 24,
             'config': 21,
             'configure': 17,
@@ -64,8 +67,8 @@ jobs = {
             'monitor': 66,
             'natgateway': 22,
             'netappfiles': 48,
-            # 'network': 322,  # paraller
-            'network': 182,  # series
+            'network': 322,  # series
+            # 'network': 182,  # paraller
             'policyinsights': 20,
             'privatedns': 29,
             'profile': 20,
@@ -98,21 +101,19 @@ class AutomaticScheduling(object):
 
     def __init__(self):
         self.jobs = []
-        self.modules = []
-        self.series_modules = []
-        # series_modules = ['appservice', 'botservice', 'cloud', 'network']
+        self.modules = {}
+        self.series_modules = ['appservice', 'botservice', 'cloud', 'network', 'azure-cli-core', 'azure-cli-telemetry']
         self.works = []
         for i in range(parallel):
             worker = {}
             self.works.append(worker)
-        self.part = part
-        self.part_idx = part_idx
         self.parallel = parallel
-        self.para_idx = part_idx
+        self.para_idx = para_idx
         self.profile = profile
 
     def get_all_modules(self):
         result = get_path_table()
+        # only get modules and core, ignore extensions
         self.modules = {**result['mod'], **result['core']}
 
     def append_new_modules(self):
@@ -122,14 +123,6 @@ class AutomaticScheduling(object):
             if module not in jobs.keys():
                 jobs[module] = avg_cost
         self.jobs = sorted(jobs.items(), key=lambda item: -item[1])
-
-    def get_part_modules(self):
-        part_modules = []
-        self.part_idx -= 1
-        while self.part_idx < len(self.jobs):
-            part_modules.append(self.jobs[self.part_idx])
-            self.part_idx += self.part
-        return part_modules
 
     def get_worker(self):
         # distribute jobs equally to each worker
@@ -143,8 +136,8 @@ class AutomaticScheduling(object):
                 worker_num = idx
         return worker_num
 
-    def get_paraller_modules(self, part_modules):
-        for k, v in part_modules:
+    def get_paraller_modules(self):
+        for k, v in self.jobs:
             idx = self.get_worker()
             self.works[idx][k] = v
         # para_idx: 1~n, python list index: 0~n-1
@@ -153,6 +146,7 @@ class AutomaticScheduling(object):
 
     def run_paraller_modules(self, paraller_modules):
         # divide all modules into parallel or serial execution
+        error_flag = False
         series = []
         parallers = []
         for k, v in paraller_modules.items():
@@ -161,114 +155,32 @@ class AutomaticScheduling(object):
             else:
                 parallers.append(k)
         if series:
-            cmd = ['azdev', 'test', '--no-exitfirst', '--verbose', '--series'] + series + ['--profile', f'{profile}', '--pytest-args', '"--durations=0"']
+            cmd = ['azdev', 'test', '--no-exitfirst', '--verbose', '--series'] + \
+                  series + ['--profile', f'{profile}', '--pytest-args', '"--durations=0"']
             logger.info(cmd)
-            subprocess.call(cmd)
+            try:
+                subprocess.run(cmd)
+            except subprocess.CalledProcessError:
+                error_flag = True
         if parallers:
-            cmd = ['azdev', 'test', '--no-exitfirst', '--verbose'] + parallers + ['--profile', f'{profile}', '--pytest-args', '"--durations=0"']
+            cmd = ['azdev', 'test', '--no-exitfirst', '--verbose'] + \
+                  parallers + ['--profile', f'{profile}', '--pytest-args', '"--durations=0"']
             logger.info(cmd)
-            subprocess.call(cmd)
+            try:
+                subprocess.run(cmd)
+            except subprocess.CalledProcessError:
+                error_flag = True
+        return error_flag
 
 
-AS = AutomaticScheduling()
-AS.get_all_modules()
-AS.append_new_modules()
-part_modules = AS.get_part_modules()
-para_modules = AS.get_paraller_modules(part_modules)
-AS.run_paraller_modules(para_modules)
+def main():
+    logger.info("Start automation full test ...\n")
+    autoschduling = AutomaticScheduling()
+    autoschduling.get_all_modules()
+    autoschduling.append_new_modules()
+    para_modules = autoschduling.get_paraller_modules()
+    sys.exit(1) if autoschduling.run_paraller_modules(para_modules) else sys.exit(0)
 
 
 if __name__ == '__main__':
-    pass
-    # works = []
-    # for i in range(8):
-    #     worker = {}
-    #     works.append(worker)
-    # part, part_idx = [int(i) for i in '1_1'.split('_')]
-    # parallel, para_idx = [int(i) for i in '8_1'.split('_')]
-    # profile = 'latest'
-    # part_modules = get_part_modules(part, part_idx)
-    # para_modules = get_paraller_modules(part_modules, para_idx)
-    # pprint(works)
-    # run_paraller_modules(para_modules, profile)
-    # works = []
-    # for i in range(8):
-    #     worker = {}
-    #     works.append(worker)
-    # part, part_idx = [int(i) for i in '4_1'.split('_')]
-    # parallel, para_idx = [int(i) for i in '8_2'.split('_')]
-    # profile = 'latest'
-    # part_modules = get_part_modules(part, part_idx)
-    # para_modules = get_paraller_modules(part_modules, para_idx)
-    # run_paraller_modules(para_modules, profile)
-    # works = []
-    # for i in range(8):
-    #     worker = {}
-    #     works.append(worker)
-    # part, part_idx = [int(i) for i in '4_1'.split('_')]
-    # parallel, para_idx = [int(i) for i in '8_3'.split('_')]
-    # profile = 'latest'
-    # part_modules = get_part_modules(part, part_idx)
-    # para_modules = get_paraller_modules(part_modules, para_idx)
-    # run_paraller_modules(para_modules, profile)
-    # works = []
-    # for i in range(8):
-    #     worker = {}
-    #     works.append(worker)
-    # part, part_idx = [int(i) for i in '4_1'.split('_')]
-    # parallel, para_idx = [int(i) for i in '8_4'.split('_')]
-    # profile = 'latest'
-    # part_modules = get_part_modules(part, part_idx)
-    # para_modules = get_paraller_modules(part_modules, para_idx)
-    # run_paraller_modules(para_modules, profile)
-    # works = []
-    # for i in range(8):
-    #     worker = {}
-    #     works.append(worker)
-    # part, part_idx = [int(i) for i in '4_1'.split('_')]
-    # parallel, para_idx = [int(i) for i in '8_5'.split('_')]
-    # profile = 'latest'
-    # part_modules = get_part_modules(part, part_idx)
-    # para_modules = get_paraller_modules(part_modules, para_idx)
-    # run_paraller_modules(para_modules, profile)
-    # works = []
-    # for i in range(8):
-    #     worker = {}
-    #     works.append(worker)
-    # part, part_idx = [int(i) for i in '4_1'.split('_')]
-    # parallel, para_idx = [int(i) for i in '8_6'.split('_')]
-    # profile = 'latest'
-    # part_modules = get_part_modules(part, part_idx)
-    # para_modules = get_paraller_modules(part_modules, para_idx)
-    # run_paraller_modules(para_modules, profile)
-    # works = []
-    # for i in range(8):
-    #     worker = {}
-    #     works.append(worker)
-    # part, part_idx = [int(i) for i in '4_1'.split('_')]
-    # parallel, para_idx = [int(i) for i in '8_7'.split('_')]
-    # profile = 'latest'
-    # part_modules = get_part_modules(part, part_idx)
-    # para_modules = get_paraller_modules(part_modules, para_idx)
-    # run_paraller_modules(para_modules, profile)
-    # works = []
-    # for i in range(8):
-    #     worker = {}
-    #     works.append(worker)
-    # part, part_idx = [int(i) for i in '4_1'.split('_')]
-    # parallel, para_idx = [int(i) for i in '8_8'.split('_')]
-    # profile = 'latest'
-    # part_modules = get_part_modules(part, part_idx)
-    # para_modules = get_paraller_modules(part_modules, para_idx)
-    # run_paraller_modules(para_modules, profile)
-
-    # part, part_idx = [int(i) for i in '4_1'.split('_')]
-    # part_modules = get_part(part, part_idx)
-    # part, part_idx = [int(i) for i in '4_2'.split('_')]
-    # part_modules = get_part(part, part_idx)
-    # part, part_idx = [int(i) for i in '4_3'.split('_')]
-    # part_modules = get_part(part, part_idx)
-    # part, part_idx = [int(i) for i in '4_4'.split('_')]
-    # part_modules = get_part(part, part_idx)
-
-
+    main()
