@@ -16,13 +16,14 @@ ch = logging.StreamHandler()
 ch.setLevel(logging.DEBUG)
 logger.addHandler(ch)
 profile = sys.argv[1]
+serial_modules = sys.argv[2].split()
 
 
 class AutomaticScheduling(object):
 
     def __init__(self):
         self.modules = {}
-        self.series_modules = ['appservice', 'botservice', 'cloud', 'network', 'azure-cli-core', 'azure-cli-telemetry']
+        self.serial_modules = serial_modules
         self.profile = profile
 
     def get_all_modules(self):
@@ -33,24 +34,24 @@ class AutomaticScheduling(object):
     def run_modules(self):
         # divide all modules into parallel or serial execution
         error_flag = False
-        series = []
-        parallers = []
+        serial_tests = []
+        parallel_tests = []
         for k, v in self.modules.items():
-            if k in self.series_modules:
-                series.append(k)
+            if k in self.serial_modules:
+                serial_tests.append(k)
             else:
-                parallers.append(k)
-        if series:
+                parallel_tests.append(k)
+        if serial_tests:
             cmd = ['azdev', 'test', '--no-exitfirst', '--verbose', '--series'] + \
-                  series + ['--profile', f'{profile}', '--pytest-args', '"--durations=0"']
+                  serial_tests + ['--profile', f'{profile}', '--pytest-args', '"--durations=0"']
             logger.info(cmd)
             try:
                 subprocess.run(cmd)
             except subprocess.CalledProcessError:
                 error_flag = True
-        if parallers:
+        if parallel_tests:
             cmd = ['azdev', 'test', '--no-exitfirst', '--verbose'] + \
-                  parallers + ['--profile', f'{profile}', '--pytest-args', '"--durations=0"']
+                  parallel_tests + ['--profile', f'{profile}', '--pytest-args', '"--durations=0"']
             logger.info(cmd)
             try:
                 subprocess.run(cmd)
