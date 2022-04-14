@@ -4,6 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 import base64
+
+from dateutil import parser
 from knack.log import get_logger
 from knack.util import todict, to_camel_case
 from .track2_util import _encode_bytes
@@ -319,4 +321,48 @@ def transform_blob_upload_output(result):
     if "last_modified" in result:
         result["lastModified"] = result["last_modified"]
         del result["last_modified"]
+    return result
+
+
+def transform_queue_stats_output(result):
+    if isinstance(result, dict):
+        new_result = {}
+        from azure.cli.core.commands.arm import make_camel_case
+        for key in result.keys():
+            new_key = make_camel_case(key)
+            new_result[new_key] = transform_queue_stats_output(result[key])
+        return new_result
+    return result
+
+
+def transform_message_list_output(result):
+    for i, item in enumerate(result):
+        result[i] = transform_message_output(item)
+    return list(result)
+
+
+def transform_message_output(result):
+    result = todict(result)
+    new_result = {'expirationTime': result.pop('expiresOn', None),
+                  'insertionTime': result.pop('insertedOn', None),
+                  'timeNextVisible': result.pop('nextVisibleOn', None)}
+    from azure.cli.core.commands.arm import make_camel_case
+    for key in sorted(result.keys()):
+        new_result[make_camel_case(key)] = result[key]
+    return new_result
+
+
+def transform_queue_policy_json_output(result):
+    new_result = {}
+    for policy in sorted(result.keys()):
+        new_result[policy] = transform_queue_policy_output(result[policy])
+    return new_result
+
+
+def transform_queue_policy_output(result):
+    result = todict(result)
+    if result['start']:
+        result['start'] = parser.parse(result['start'])
+    if result['expiry']:
+        result['expiry'] = parser.parse(result['expiry'])
     return result

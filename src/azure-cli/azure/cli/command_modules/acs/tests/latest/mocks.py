@@ -22,6 +22,9 @@ class MockClient:
     def get(self):
         pass
 
+    def begin_create_or_update(self):
+        pass
+
 
 class MockCLI(CLI):
     def __init__(self):

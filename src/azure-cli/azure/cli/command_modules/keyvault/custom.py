@@ -1473,7 +1473,7 @@ def get_policy_template():
     return policy
 
 
-def update_key_rotation_policy(cmd, client, value, name=None):
+def update_key_rotation_policy(cmd, client, value, key_name=None):
     from azure.cli.core.util import read_file_content, get_json_object
     if os.path.exists(value):
         value = read_file_content(value)
@@ -1484,6 +1484,8 @@ def update_key_rotation_policy(cmd, client, value, name=None):
 
     KeyRotationLifetimeAction = cmd.loader.get_sdk('KeyRotationLifetimeAction', mod='_models',
                                                    resource_type=ResourceType.DATA_KEYVAULT_KEYS)
+    KeyRotationPolicy = cmd.loader.get_sdk('KeyRotationPolicy', mod='_models',
+                                           resource_type=ResourceType.DATA_KEYVAULT_KEYS)
     lifetime_actions = []
     if policy.get('lifetime_actions', None):
         for action in policy['lifetime_actions']:
@@ -1502,7 +1504,9 @@ def update_key_rotation_policy(cmd, client, value, name=None):
     expires_in = policy.get('expires_in', None) or policy.get('expiry_time', None)
     if policy.get('attributes', None):
         expires_in = policy['attributes'].get('expires_in', None) or policy['attributes'].get('expiry_time', None)
-    return client.update_key_rotation_policy(name=name, lifetime_actions=lifetime_actions, expires_in=expires_in)
+    return client.update_key_rotation_policy(key_name=key_name,
+                                             policy=KeyRotationPolicy(lifetime_actions=lifetime_actions,
+                                                                      expires_in=expires_in))
 # endregion
 
 
