@@ -993,7 +993,7 @@ def load_arguments(self, _):
                        help='Specify the behavior of the managed disk when the VM gets deleted i.e whether the managed disk is deleted or detached.')
             c.argument('data_disk_delete_option', options_list=['--data-disk-delete-option', self.deprecate(target='--data-delete-option', redirect='--data-disk-delete-option', hide=True)],
                        nargs='+', min_api='2021-03-01',
-                       help='Specify whether data disk should be deleted or detached upon VM deletion.')
+                       help='Specify whether data disk should be deleted or detached upon VM deletion. If a single data disk is attached, the allowed values are Delete and Detach. For multiple data disks are attached, please use "<data_disk>=Delete <data_disk2>=Detach" to configure each disk')
 
         with self.argument_context(scope, arg_group='Network') as c:
             c.argument('vnet_name', help='Name of the virtual network when creating a new one or referencing an existing one.')
