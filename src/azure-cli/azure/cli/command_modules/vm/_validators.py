@@ -1288,11 +1288,10 @@ def _validate_vm_vmss_msi(cmd, namespace, is_identity_assign=False):
     if hasattr(namespace, 'security_type') and hasattr(namespace, 'enable_vtpm') and\
             hasattr(namespace, 'enable_secure_boot'):
         if namespace.security_type and namespace.enable_vtpm and namespace.enable_secure_boot:
-            if hasattr(namespace, 'assign_identity'):
-                if namespace.assign_identity is None:
-                    namespace.assign_identity = ['[system]']
-                elif '[system]' not in namespace.assign_identity:
-                    namespace.assign_identity.append('[system]')
+            if namespace.assign_identity is None:
+                namespace.assign_identity = ['[system]']
+            elif '[system]' not in namespace.assign_identity:
+                namespace.assign_identity.append('[system]')
 
 
 def _validate_vm_vmss_set_applications(cmd, namespace):  # pylint: disable=unused-argument
