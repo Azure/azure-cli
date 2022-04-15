@@ -16,141 +16,32 @@ CLIENT_SECRET = 'AZURE_CLIENT_SECRET'
 
 
 def get_mariadb_management_client(cli_ctx, **_):
-    from os import getenv
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.rdbms.mariadb import MariaDBManagementClient
-
-    # Allow overriding resource manager URI using environment variable
-    # for testing purposes. Subscription id is also determined by environment
-    # variable.
-    rm_uri_override = getenv(RM_URI_OVERRIDE)
-    if rm_uri_override:
-        client_id = getenv(CLIENT_ID)
-        if client_id:
-            from azure.identity import ClientSecretCredential
-            credentials = ClientSecretCredential(
-                client_id=client_id,
-                client_secret=getenv(CLIENT_SECRET),
-                tenant_id=getenv(TENANT_ID))
-        else:
-            from msrest.authentication import Authentication  # pylint: disable=import-error
-            credentials = Authentication()
-
-        return MariaDBManagementClient(
-            subscription_id=getenv(SUB_ID_OVERRIDE),
-            base_url=rm_uri_override,
-            credential=credentials)
-    # Normal production scenario.
     return get_mgmt_service_client(cli_ctx, MariaDBManagementClient)
 
 
 def get_mysql_management_client(cli_ctx, **_):
-    from os import getenv
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.rdbms.mysql import MySQLManagementClient
-
-    # Allow overriding resource manager URI using environment variable
-    # for testing purposes. Subscription id is also determined by environment
-    # variable.
-    rm_uri_override = getenv(RM_URI_OVERRIDE)
-    if rm_uri_override:
-        client_id = getenv(CLIENT_ID)
-        if client_id:
-            from azure.identity import ClientSecretCredential
-            credentials = ClientSecretCredential(
-                client_id=client_id,
-                client_secret=getenv(CLIENT_SECRET),
-                tenant_id=getenv(TENANT_ID))
-        else:
-            from msrest.authentication import Authentication  # pylint: disable=import-error
-            credentials = Authentication()
-
-        return MySQLManagementClient(
-            subscription_id=getenv(SUB_ID_OVERRIDE),
-            base_url=rm_uri_override,
-            credential=credentials)
-    # Normal production scenario.
     return get_mgmt_service_client(cli_ctx, MySQLManagementClient)
 
 
 def get_mysql_flexible_management_client(cli_ctx, **_):
-    from os import getenv
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.rdbms.mysql_flexibleservers import MySQLManagementClient
-
-    # Allow overriding resource manager URI using environment variable
-    # for testing purposes. Subscription id is also determined by environment
-    # variable.
-    rm_uri_override = getenv(RM_URI_OVERRIDE)
-    if rm_uri_override:
-        client_id = getenv(CLIENT_ID)
-        if client_id:
-            from azure.identity import ClientSecretCredential
-            credentials = ClientSecretCredential(
-                client_id=client_id,
-                client_secret=getenv(CLIENT_SECRET),
-                tenant_id=getenv(TENANT_ID))
-        else:
-            from msrest.authentication import Authentication  # pylint: disable=import-error
-            credentials = Authentication()
-
-        return MySQLManagementClient(
-            subscription_id=getenv(SUB_ID_OVERRIDE),
-            base_url=rm_uri_override,
-            credential=credentials)
-    # Normal production scenario.
     return get_mgmt_service_client(cli_ctx, MySQLManagementClient)
 
 
 def get_postgresql_management_client(cli_ctx, **_):
-    from os import getenv
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.rdbms.postgresql import PostgreSQLManagementClient
-
-    # Allow overriding resource manager URI using environment variable
-    # for testing purposes. Subscription id is also determined by environment
-    # variable.
-    rm_uri_override = getenv(RM_URI_OVERRIDE)
-    if rm_uri_override:
-        client_id = getenv(CLIENT_ID)
-        if client_id:
-            from azure.identity import ClientSecretCredential
-            credentials = ClientSecretCredential(
-                client_id=client_id,
-                client_secret=getenv(CLIENT_SECRET),
-                tenant_id=getenv(TENANT_ID))
-        else:
-            from msrest.authentication import Authentication  # pylint: disable=import-error
-            credentials = Authentication()
-
-        return PostgreSQLManagementClient(
-            subscription_id=getenv(SUB_ID_OVERRIDE),
-            base_url=rm_uri_override,
-            credential=credentials)
-    # Normal production scenario.
     return get_mgmt_service_client(cli_ctx, PostgreSQLManagementClient)
 
 
 def get_postgresql_flexible_management_client(cli_ctx, **_):
-    from os import getenv
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.rdbms.postgresql_flexibleservers import PostgreSQLManagementClient
-    # Allow overriding resource manager URI using environment variable
-    # for testing purposes. Subscription id is also determined by environment
-    # variable.
-    rm_uri_override = getenv(RM_URI_OVERRIDE)
-    if rm_uri_override:
-        client_id = getenv(CLIENT_ID)
-        if client_id:
-            from azure.identity import ClientSecretCredential
-            credentials = ClientSecretCredential(
-                client_id=client_id,
-                client_secret=getenv(CLIENT_SECRET),
-                tenant_id=getenv(TENANT_ID))
-        else:
-            from msrest.authentication import Authentication  # pylint: disable=import-error
-            credentials = Authentication()
-
-        return PostgreSQLManagementClient(
-            subscription_id=getenv(SUB_ID_OVERRIDE),
-            base_url=rm_uri_override,
-            credential=credentials)
-    # Normal production scenario.
     return get_mgmt_service_client(cli_ctx, PostgreSQLManagementClient)
 
 
