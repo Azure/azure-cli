@@ -4433,6 +4433,7 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
         tls1_2 = "1.2"
         tls1_1 = "1.1"
         user = admin_login
+        service_principal_type = "SystemAssigned"
 
         # test show sql managed instance 1
         subnet = ManagedInstancePreparer.subnet
@@ -4563,6 +4564,14 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('name', managed_instance_name_1),
                      JMESPathCheck('resourceGroup', resource_group_1),
                      JMESPathCheck('subnetId', subnet)])
+
+        # test Service Principal update
+        self.cmd('sql mi update -g {} -n {} --service-principal-type {}'
+            .format(resource_group_1, managed_instance_name_1, service_principal_type),
+                checks=[
+                     JMESPathCheck('name', managed_instance_name_1),
+                     JMESPathCheck('resourceGroup', resource_group_1),
+                     JMESPathCheck('servicePrincipal.type', service_principal_type)])
 
         # test list sql managed_instance in the subscription should be at least 1
         self.cmd('sql mi list', checks=[JMESPathCheckGreaterThan('length(@)', 0)])
