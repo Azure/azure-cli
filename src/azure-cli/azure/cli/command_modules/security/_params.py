@@ -90,6 +90,29 @@ adaptive_network_hardenings_resource_adaptive_network_hardenings_resource_name =
 # Adaptive Application Controls
 adaptive_application_controls_group_name = CLIArgumentType(option_list=('--group-name'), metave='GROUPNAME', help='Name of an application control VM/server group')
 
+# Automations
+automation_scopes_arg_type = CLIArgumentType(options_list=('--scopes'), metavar='SCOPES', help='A collection of scopes on which the security automations logic is applied')
+automation_sources_arg_type = CLIArgumentType(options_list=('--sources'), metavar='SOURCES', help='A collection of the source event types which evaluate the security automation set of rules')
+automation_actions_arg_type = CLIArgumentType(options_list=('--actions'), metavar='ACTIONS', help='A collection of the actions which are triggered if all the configured rules evaluations, within at least one rule set, are true')
+automation_etag_arg_type = CLIArgumentType(options_list=('--etag'), metavar='ETAG', help='Entity tag is used for comparing two or more entities from the same requested resource')
+automation_tags_arg_type = CLIArgumentType(options_list=('--tags'), metavar='TAGS', help='A list of key value pairs that describe the resource')
+automation_description_arg_type = CLIArgumentType(options_list=('--description'), metavar='DESCRIPTION', help='The security automation description')
+automation_isEnabled_arg_type = CLIArgumentType(options_list=('--isEnabled'), metavar='ISENABLED', help='Indicates whether the security automation is enabled')
+automation_scope_description = CLIArgumentType(options_list=('--description'), metavar='DESCRIPTION', help='The resources scope description')
+automation_scope_path = CLIArgumentType(options_list=('--scope_path'), metavar='SCOPEPATH', help='The resources scope path. Can be the subscription on which the automation is defined on or a resource group under that subscription (fully qualified Azure resource IDs)')
+automation_rule_expected_value = CLIArgumentType(options_list=('--expected_value'), metavar='EXPECTEDVALUE', help='The expected value')
+automation_rule_operator = CLIArgumentType(options_list=('--operator'), metavar='OPERATOR', help='A valid comparer operator to use. A case-insensitive comparison will be applied for String PropertyType')
+automation_rule_property_j_path = CLIArgumentType(options_list=('--property_j_path'), metavar='PROPERTYJPATH', help='The JPath of the entity model property that should be checked')
+automation_rule_property_type = CLIArgumentType(options_list=('--property_type'), metavar='PROPERTYTYPE', help='The data type of the compared operands (string, integer, floating point number or a boolean [true/false]]')
+automation_rule_set_rules = CLIArgumentType(options_list=('--rules'), metavar='RULES', help='A rule which is evaluated upon event interception. The rule is configured by comparing a specific value from the event model to an expected value. This comparison is done by using one of the supported operators set')
+automation_source_event_source = CLIArgumentType(options_list=('--event_source'), metavar='EVENTSOURCE', help='A valid event source type')
+automation_source_rule_sets = CLIArgumentType(options_list=('--rule_sets'), metavar='RULESETS', help='A set of rules which evaluate upon event interception. A logical disjunction is applied between defined rule sets (logical 'or').')
+automation_action_logic_app_resource_id = CLIArgumentType(options_list=('--logic_app_resource_id'), metavar='LOGICAPPRESOURCEID', help='The triggered Logic App Azure Resource ID. This can also reside on other subscriptions, given that you have permissions to trigger the Logic App')
+automation_action_logic_app_uri = CLIArgumentType(options_list=('--uri'), metavar='URI', help='The Logic App trigger URI endpoint (it will not be included in any response)')
+automation_action_event_hub_connection_string = CLIArgumentType(options_list=('--connection_string'), metavar='', help='The target Event Hub connection string (it will not be included in any response)')
+automation_action_event_hub_resource_id = CLIArgumentType(options_list=('--event_hub_resource_id'), metavar='EVENTHUBRESOURCEID', help='The target Event Hub Azure Resource ID')
+automation_action_event_hub_sas_policy_name = CLIArgumentType(options_list=('--sas_policy_name'), metavar='SASPOLICYNAME', help='The target Event Hub SAS policy name')
+automation_action_workspace_resource_id = CLIArgumentType(options_list=('--workspace_resource_id'), metavar='WORKSPACERESOURCEID', help='The fully qualified Log Analytics Workspace Azure Resource ID')
 
 # pylint: disable=too-many-branches
 def load_arguments(self, _):
@@ -123,7 +146,8 @@ def load_arguments(self, _):
                   'secure-scores',
                   'secure-score-controls',
                   'secure-score-control-definitions',
-                  'setting'
+                  'setting',
+                  'automation'
                   ]:
         with self.argument_context('security {}'.format(scope)) as c:
             c.argument(
@@ -348,3 +372,87 @@ def load_arguments(self, _):
         with self.argument_context('security {}'.format(scope)) as c:
             c.argument('setting_name', options_list=['--name', '-n'], help='The name of the setting', arg_type=get_enum_type(Enum69))
             c.argument('enabled', help='Enable or disable the setting status.', arg_type=get_three_state_flag())
+
+    for scope in ['automation create_or_update', 'automation validate']:
+        with self.argument_context('security {}'.format(scope)) as c:
+            c.argument(
+                'scopes',
+                arg_type=automation_scopes_arg_type)
+            c.argument(
+                'sources',
+                arg_type=automation_sources_arg_type)
+            c.argument(
+                'actions',
+                arg_type=automation_actions_arg_type)
+            c.argument(
+                'etag',
+                arg_type=automation_etag_arg_type)
+            c.argument(
+                'tags',
+                arg_type=automation_tags_arg_type)
+            c.argument(
+                'description',
+                arg_type=automation_description_arg_type)
+            c.argument(
+                'isEnabled',
+                arg_type=automation_isEnabled_arg_type)
+    for scope in ['automation-scope create']:
+        with self.argument_context('security {}'.format(scope)) as c:
+            c.argument(
+                'scope_path',
+                arg_type=automation_scope_path)
+            c.argument(
+                'description',
+                arg_type=automation_scope_description)
+    for scope in ['automation-rule create']:
+        with self.argument_context('security {}'.format(scope)) as c:
+            c.argument(
+                'expected_value',
+                arg_type=automation_rule_expected_value)
+            c.argument(
+                'operator',
+                arg_type=automation_rule_operator)
+            c.argument(
+                'property_j_path',
+                arg_type=automation_rule_property_j_path)
+            c.argument(
+                'property_type',
+                arg_type=automation_rule_property_type)
+    for scope in ['automation-rule-set create']:
+        with self.argument_context('security {}'.format(scope)) as c:
+            c.argument(
+                'rules',
+                arg_type=automation_rule_set_rules)
+    for scope in ['automation-source create']:
+        with self.argument_context('security {}'.format(scope)) as c:
+            c.argument(
+                'event_source',
+                arg_type=automation_source_event_source)
+            c.argument(
+                'rule_sets',
+                arg_type=automation_source_rule_sets)
+    for scope in ['automation-action-logic-app create']:
+        with self.argument_context('security {}'.format(scope)) as c:
+            c.argument(
+                'logic_app_resource_id',
+                arg_type=automation_action_logic_app_resource_id)
+            c.argument(
+                'uri',
+                arg_type=automation_action_logic_app_uri)
+    for scope in ['automation-action-event-hub create']:
+        with self.argument_context('security {}'.format(scope)) as c:
+            c.argument(
+                'event_hub_resource_id',
+                arg_type=automation_action_event_hub_resource_id)
+            c.argument(
+                'connection_string',
+                arg_type=automation_action_event_hub_connection_string)
+            c.argument(
+                'sas_policy_name',
+                arg_type=automation_action_event_hub_sas_policy_name)
+    for scope in ['automation-action-workspace create']:
+        with self.argument_context('security {}'.format(scope)) as c:
+            c.argument(
+                'workspace_resource_id',
+                arg_type=automation_action_workspace_resource_id)
+               
