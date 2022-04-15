@@ -676,6 +676,7 @@ def validate_entity(namespace):
     """ Converts a list of key value pairs into a dictionary. Ensures that required
     RowKey and PartitionKey are converted to the correct case and included. """
     values = dict(x.split('=', 1) for x in namespace.entity)
+    edm_types = {}
     keys = values.keys()
     for key in list(keys):
         if key.lower() == 'rowkey':
@@ -686,6 +687,12 @@ def validate_entity(namespace):
             val = values[key]
             del values[key]
             values['PartitionKey'] = val
+        elif key.endswith('@odata.type'):
+            val = values[key]
+            del values[key]
+            real_key = key[0: key.index('@odata.type')]
+            edm_types[real_key] = val
+
     keys = values.keys()
     missing_keys = 'RowKey ' if 'RowKey' not in keys else ''
     missing_keys = '{}PartitionKey'.format(missing_keys) \
@@ -708,8 +715,12 @@ def validate_entity(namespace):
 
         return try_cast(int) or try_cast(float) or val
 
-    # ensure numbers are converted from strings so querying will work correctly
-    values = {key: cast_val(key, val) for key, val in values.items()}
+    for key, val in values.items():
+        if edm_types.get(key, None):
+            values[key] = (val, edm_types[key])
+        else:
+            # ensure numbers are converted from strings so querying will work correctly
+            values[key] = cast_val(key, val)
     namespace.entity = values
 
 
