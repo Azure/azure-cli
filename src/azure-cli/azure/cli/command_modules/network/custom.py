@@ -6352,6 +6352,16 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
                      allocation_method=None, dns_name=None,
                      idle_timeout=4, reverse_fqdn=None, version=None, sku=None, tier=None, zone=None, ip_tags=None,
                      public_ip_prefix=None, edge_zone=None, ip_address=None):
+
+    # In the latest profile, the default public IP will be expected to be changed from Basic to Standard.
+    # In order to avoid breaking change which has a big impact to users,
+    # we use the hint to guide users to use Standard sku to create public IP.
+    if sku is None and cmd.cli_ctx.cloud.profile == 'latest':
+        logger.warning(
+            'It is recommended to use parameter "--sku Standard" to create new public IP. '
+            'Please note that the default public IP used for creation will be changed from Basic to Standard '
+            'in the future.')
+
     IPAllocationMethod, PublicIPAddress, PublicIPAddressDnsSettings, SubResource = cmd.get_models(
         'IPAllocationMethod', 'PublicIPAddress', 'PublicIPAddressDnsSettings', 'SubResource')
     client = network_client_factory(cmd.cli_ctx).public_ip_addresses
