@@ -1756,12 +1756,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                 options_list='--services', required=False)
 
     with self.argument_context('storage cors add') as c:
+        t_cors_rule_allowed_methods = self.get_models('CorsRuleAllowedMethodsItem',
+                                                      resource_type=ResourceType.MGMT_STORAGE)
         c.extra('services', validator=get_char_options_validator('bfqt', 'services'), required=True,
                 options_list='--services')
         c.argument('max_age')
         c.argument('origins', nargs='+')
         c.argument('methods', nargs='+',
-                   arg_type=get_enum_type(['DELETE', 'GET', 'HEAD', 'MERGE', 'POST', 'OPTIONS', 'PUT']))
+                   arg_type=get_enum_type(t_cors_rule_allowed_methods))
         c.argument('allowed_headers', nargs='+')
         c.argument('exposed_headers', nargs='+')
 
