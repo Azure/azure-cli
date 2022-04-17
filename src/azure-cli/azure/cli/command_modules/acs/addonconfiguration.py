@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+import datetime
 import json
 
 from azure.cli.core.azclierror import (
@@ -249,7 +250,7 @@ def get_existing_container_insights_extension_dcr_tags(cmd, dcr_url):
                 cmd.cli_ctx, "GET", dcr_url
             )
             json_response = json.loads(resp.text)
-            if json_response["tags"] is not None:
+            if ("tags" in json_response) and (json_response["tags"] is not None):
                tags = json_response["tags"]
             break
         except CLIError as e:
@@ -374,13 +375,17 @@ def ensure_container_insights_for_monitoring(
             json_response = json.loads(r.text)
             for resource in json_response["resourceTypes"]:
                 if (resource["resourceType"].lower() == "datacollectionrules"):
-                    region_ids = map(lambda x: region_names_to_id[x], resource["locations"])
+                    region_ids = map(
+                        lambda x: region_names_to_id[x], resource["locations"])
                     if (location not in region_ids):
-                        raise ClientRequestError(f"Data Collection Rules are not supported for LA workspace region {location}")
+                        raise ClientRequestError(
+                            f"Data Collection Rules are not supported for LA workspace region {location}")
                 if (resource["resourceType"].lower() == "datacollectionruleassociations"):
-                    region_ids = map(lambda x: region_names_to_id[x], resource["locations"])
+                    region_ids = map(
+                        lambda x: region_names_to_id[x], resource["locations"])
                     if (cluster_region not in region_ids):
-                       raise ClientRequestError(f"Data Collection Rule Associations are not supported for cluster region {cluster_region}")
+                       raise ClientRequestError(
+                           f"Data Collection Rule Associations are not supported for cluster region {cluster_region}")
             dcr_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
                 f"{dcr_resource_id}?api-version=2019-11-01-preview"
             # get existing tags on the container insights extension DCR if the customer added any
@@ -483,7 +488,121 @@ def ensure_container_insights_for_monitoring(
                     error = e
             else:
                 raise error
+        if not _is_container_insights_solution_exists(cmd, workspace_resource_id):
+            unix_time_in_millis = int(
+                (
+                    datetime.datetime.utcnow() -
+                    datetime.datetime.utcfromtimestamp(0)
+                ).total_seconds() * 1000.0
+            )
 
+            solution_deployment_name = "ContainerInsights-{}".format(
+                unix_time_in_millis
+            )
+
+            # pylint: disable=line-too-long
+            template = {
+                "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                    "workspaceResourceId": {
+                        "type": "string",
+                        "metadata": {
+                            "description": "Azure Monitor Log Analytics Resource ID"
+                        },
+                    },
+                    "workspaceRegion": {
+                        "type": "string",
+                        "metadata": {
+                            "description": "Azure Monitor Log Analytics workspace region"
+                        },
+                    },
+                    "solutionDeploymentName": {
+                        "type": "string",
+                        "metadata": {
+                            "description": "Name of the solution deployment"
+                        },
+                    },
+                },
+                "resources": [
+                    {
+                        "type": "Microsoft.Resources/deployments",
+                        "name": "[parameters('solutionDeploymentName')]",
+                        "apiVersion": "2017-05-10",
+                        "subscriptionId": "[split(parameters('workspaceResourceId'),'/')[2]]",
+                        "resourceGroup": "[split(parameters('workspaceResourceId'),'/')[4]]",
+                        "properties": {
+                            "mode": "Incremental",
+                            "template": {
+                                "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                                "contentVersion": "1.0.0.0",
+                                "parameters": {},
+                                "variables": {},
+                                "resources": [
+                                    {
+                                        "apiVersion": "2015-11-01-preview",
+                                        "type": "Microsoft.OperationsManagement/solutions",
+                                        "location": "[parameters('workspaceRegion')]",
+                                        "name": "[Concat('ContainerInsights', '(', split(parameters('workspaceResourceId'),'/')[8], ')')]",
+                                        "properties": {
+                                            "workspaceResourceId": "[parameters('workspaceResourceId')]"
+                                        },
+                                        "plan": {
+                                            "name": "[Concat('ContainerInsights', '(', split(parameters('workspaceResourceId'),'/')[8], ')')]",
+                                            "product": "[Concat('OMSGallery/', 'ContainerInsights')]",
+                                            "promotionCode": "",
+                                            "publisher": "Microsoft",
+                                        },
+                                    }
+                                ],
+                            },
+                            "parameters": {},
+                        },
+                    }
+                ],
+            }
+
+            params = {
+                "workspaceResourceId": {"value": workspace_resource_id},
+                "workspaceRegion": {"value": location},
+                "solutionDeploymentName": {"value": solution_deployment_name},
+            }
+
+            deployment_name = "aks-monitoring-{}".format(unix_time_in_millis)
+            # publish the Container Insights solution to the Log Analytics workspace
+            return _invoke_deployment(
+                cmd,
+                resource_group,
+                deployment_name,
+                template,
+                params,
+                validate=False,
+                no_wait=False,
+                subscription_id=subscription_id,)
+
+
+def _is_container_insights_solution_exists(cmd, workspace_resource_id):
+    # extract subscription ID and resource group from workspace_resource_id URL
+    is_exists = False
+    _MAX_RETRY_TIMES = 3
+    parsed = parse_resource_id(workspace_resource_id)
+    subscription_id, resource_group, workspace_name = parsed[
+        "subscription"], parsed["resource_group"], parsed["name"]
+    solution_resource_id = "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.OperationsManagement/solutions/ContainerInsights({2})".format(
+        subscription_id, resource_group, workspace_name)
+    resources = cf_resources(cmd.cli_ctx, subscription_id)
+    for retry_count in range(0, _MAX_RETRY_TIMES):
+        try:
+            resources.get_by_id(solution_resource_id, '2015-11-01-preview')
+            is_exists = True
+            break
+        except HttpResponseError as ex:
+            if ex.status_code == 404:
+                is_exists = False
+                break
+            if retry_count >= (_MAX_RETRY_TIMES - 1):
+                raise ex
+    return is_exists
 
 def _invoke_deployment(
     cmd,
