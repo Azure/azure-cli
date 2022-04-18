@@ -1092,11 +1092,11 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
                                       settings=None,
                                       auto_upgrade_minor_version=True,
                                       enable_automatic_upgrade=None)
-        guest_attestation_extension = LongRunningOperation(cmd.cli_ctx)\
-            (client.virtual_machine_extensions.begin_create_or_update(resource_group_name,
-                                                                      vm_name,
-                                                                      'GuestAttestation',
-                                                                      ext))
+        guest_attestation_extension = LongRunningOperation(cmd.cli_ctx)(
+            client.virtual_machine_extensions.begin_create_or_update(resource_group_name,
+                                                                     vm_name,
+                                                                     'GuestAttestation',
+                                                                     ext))
         if guest_attestation_extension.provisioning_state == 'Succeeded':
             logger.info('Guest Attestation Extension has been successfully installed by default')
         else:
