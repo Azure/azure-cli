@@ -1289,11 +1289,12 @@ def _validate_vm_vmss_msi(cmd, namespace, is_identity_assign=False):
             hasattr(namespace, 'enable_secure_boot'):
         if namespace.security_type and namespace.security_type.lower() == 'trustedlaunch' and namespace.enable_vtpm and\
                 namespace.enable_secure_boot:
+            from ._vm_utils import MSI_LOCAL_ID
             logger.info('The MSI is enabled by default when Trusted Launch configuration is met')
             if namespace.assign_identity is None:
-                namespace.assign_identity = ['[system]']
+                namespace.assign_identity = MSI_LOCAL_ID
             elif '[system]' not in namespace.assign_identity:
-                namespace.assign_identity.append('[system]')
+                namespace.assign_identity.append(MSI_LOCAL_ID)
 
 
 def _validate_vm_vmss_set_applications(cmd, namespace):  # pylint: disable=unused-argument
