@@ -664,36 +664,35 @@ def load_arguments(self, _):
     with self.argument_context('bicep upgrade') as c:
         c.argument('target_platform', arg_type=bicep_target_platform_type)
 
-    with self.argument_context('resourcemanagement private-link get') as c:
-        c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group where the template will be deployed to.')
+    with self.argument_context('resourcemanagement private-link create') as c:
+        c.argument('resource_group', arg_type=resource_group_name_type, help='The name of the resource group.')
+        c.argument('name', options_list=['--name', '-n'], help='The name of the resource management private link.')
+        c.argument('location', options_list=['--location', '-l'], help='the region to create the resource management private link')
+    
+    with self.argument_context('resourcemanagement private-link show') as c:
+        c.argument('resource_group', arg_type=resource_group_name_type, help='The name of the resource group.')
         c.argument('name', options_list=['--name', '-n'], help='The name of the resource management private link.')
 
     with self.argument_context('resourcemanagement private-link list') as c:
-        c.ignore('subscription')
-    
-    with self.argument_context('resourcemanagement private-link create') as c:
-        c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group where the template will be deployed to.')
-        c.argument('name', options_list=['--name', '-n'], help='The name of the resource management private link.')
-        c.argument('location', options_list=['--location', '-l'], help='the region to create the resource management private link')
-
-    with self.argument_context('resourcemanagement private-link show') as c:
-        c.argument('subscription', arg_type=subscription_type)
-        c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group where the template will be deployed to.')
-        c.argument('name', options_list=['--name', '-n'], help='The name of the resource management private link.')
+        c.argument('resource_group', arg_type=resource_group_name_type, help='The name of the resource group.')
 
     with self.argument_context('resourcemanagement private-link delete') as c:
-        c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group where the template will be deployed to.')
+        c.argument('resource_group', arg_type=resource_group_name_type, help='The name of the resource group.')
         c.argument('name', options_list=['--name', '-n'], help='The name of the resource management private link.')
 
     with self.argument_context('private-link association create') as c:
-        c.argument('management_group', arg_type=management_group_name_type)
+        c.argument('management_group_id', arg_type=management_group_id_type)
         c.argument('name', options_list=['--name', '-n'], help='The name of the private link association')
         c.argument('private_link', options_list=['-privatelink'], help='The name of the private link')
-        c.argument('public_network_access', arg_type=get_enum_type(['enabled', 'disabled']), help='restrict traffic to private link')
+        c.argument('public_network_access', options_list=['--public-network-access', '-p'], arg_type=get_enum_type(['enabled', 'disabled']), help='restrict traffic to private link')
 
     with self.argument_context('private-link association show') as c:
-        c.argument('management_group', arg_type=management_group_name_type)
+        c.argument('management_group_id', arg_type=management_group_id_type)
+        c.argument('name', options_list=['--name', '-n'], help='The name of the private link association')
+
+    with self.argument_context('private-link association list') as c:
+        c.argument('management_group_id', arg_type=management_group_id_type)
 
     with self.argument_context('private-link association delete') as c:
-        c.argument('management_group', arg_type=management_group_name_type)
+        c.argument('management_group_id', arg_type=management_group_id_type)
         c.argument('name', options_list=['--name', '-n'], help='The name of the private link association')

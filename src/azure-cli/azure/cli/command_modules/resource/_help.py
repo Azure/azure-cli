@@ -2745,52 +2745,61 @@ type: command
 short-summary: List out all available versions of Bicep CLI.
 """
 
-helps['resourcemanagement private-link'] = """
-type: group
-short-summary: Manage resource management privatelinks at.
-"""
-
 helps['resourcemanagement private-link create'] = """
 type: command
-short-summary: Create a new resource management private link.
+short-summary: Create a resource management group private link.
 examples:
-  - name: Create a template spec.
-    text: az ts create -g testRG --name TemplateSpecName -l WestUS --display-name "MyDisplayName" --description "Simple template spec" --tags key1=value1
-  - name: Create a template spec version.
-    text: az ts create -g testRG --name TemplateSpecName -v 2.0 -l WestUS --template-file templateSpec.json --version-description "Less simple template spec" --tags key1=value1 key3=value3
-  - name: Create a template spec and a version of the template spec.
-    text: az ts create -g testRG --name TemplateSpecName -v 1.0 -l WestUS --template-file templateSpec.json --display-name "MyDisplayName" --description "Simple template spec" --version-description "Version of simple template spec" --tags key1=value1 key2=value2
+  - name: Create a resource management group private link.
+    text: az resourcemanagement private-link create -resource_group testRG --name TestRMPL --location WestUS
 """
 helps['resourcemanagement private-link show'] = """
 type: command
 short-summary: Get resource management private.
 examples:
   - name: Get single resource management private link.
-    text: az ts create -g testRG --name TemplateSpecName -l WestUS --display-name "MyDisplayName" --description "Simple template spec" --tags key1=value1
-  - name: Get resource management private link at resource group scope.
-    text: az ts create -g testRG --name TemplateSpecName -v 2.0 -l WestUS --template-file templateSpec.json --version-description "Less simple template spec" --tags key1=value1 key3=value3
-  - name: Create a template spec and a version of the template spec.
-    text: az ts create -g testRG --name TemplateSpecName -v 1.0 -l WestUS --template-file templateSpec.json --display-name "MyDisplayName" --description "Simple template spec" --version-description "Version of simple template spec" --tags key1=value1 key2=value2
+    text: az resourcemanagement private-link show -resource_group testRG --name TestRMPL
 """
 helps['resourcemanagement private-link list'] = """
 type: command
-short-summary: Create a template spec and or template spec version.
+short-summary: Get all the resource management private links at scope.
 examples:
-  - name: Create a template spec.
-    text: az ts create -g testRG --name TemplateSpecName -l WestUS --display-name "MyDisplayName" --description "Simple template spec" --tags key1=value1
-  - name: Create a template spec version.
-    text: az ts create -g testRG --name TemplateSpecName -v 2.0 -l WestUS --template-file templateSpec.json --version-description "Less simple template spec" --tags key1=value1 key3=value3
-  - name: Create a template spec and a version of the template spec.
-    text: az ts create -g testRG --name TemplateSpecName -v 1.0 -l WestUS --template-file templateSpec.json --display-name "MyDisplayName" --description "Simple template spec" --version-description "Version of simple template spec" --tags key1=value1 key2=value2
+  - name: List all resource management private links in a subscription.
+    text: az resourcemanagement private-link list
+  - name: List all resource management private links in a resource group.
+    text: az resourcemanagement private-link list -resource_group testRG
 """
 helps['resourcemanagement private-link delete'] = """
 type: command
-short-summary: Create a template spec and or template spec version.
+short-summary: Delete a resource management private link.
 examples:
-  - name: Create a template spec.
-    text: az ts create -g testRG --name TemplateSpecName -l WestUS --display-name "MyDisplayName" --description "Simple template spec" --tags key1=value1
-  - name: Create a template spec version.
-    text: az ts create -g testRG --name TemplateSpecName -v 2.0 -l WestUS --template-file templateSpec.json --version-description "Less simple template spec" --tags key1=value1 key3=value3
-  - name: Create a template spec and a version of the template spec.
-    text: az ts create -g testRG --name TemplateSpecName -v 1.0 -l WestUS --template-file templateSpec.json --display-name "MyDisplayName" --description "Simple template spec" --version-description "Version of simple template spec" --tags key1=value1 key2=value2
+  - name: Delete a resource management private link.
+    text: az resourcemanagement private-link delete -resource_group TestRG --name testRMPL
+"""
+helps['private-link association create'] = """
+type: command
+short-summary: Create a PrivateLinkAssociation.
+examples:
+  - name: Create a PrivateLinkAssociation.
+    text: az private-link association create --management-group-id TestMG --name testPLA -privateLink testPL --public-network-access enabled
+"""
+helps['private-link association show'] = """
+type: command
+short-summary: Get a private link association.
+examples:
+  - name: Get a single private link association.
+    text: az private-link association show --management-group-id TestMG --name testPLA
+"""
+helps['private-link association list'] = """
+type: command
+short-summary: Get a private link association for a management group scope.
+examples:
+  - name: Get a private link association for a management group scope.
+    text: az private-link association list --management-group-id TestMG
+"""
+helps['private-link association delete'] = """
+type: command
+short-summary: Delete a PrivateLinkAssociation.
+examples:
+  - name: Delete a PrivateLinkAssociation.
+    text: az private-link association delete --management-group-id TestMG --name testPLA
 """

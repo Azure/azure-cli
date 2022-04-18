@@ -207,12 +207,12 @@ def load_command_table(self, _):
         resource_type=ResourceType.MGMT_RESOURCE_TEMPLATESPECS
     )
     resource_resourcemanagementprivatelink_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.resource.privatelinks.operations#PrivateLinkAssociationOperations.{}',
+        operations_tmpl='azure.mgmt.resource.privatelinks.operations#ResourceManagementPrivateLinkOperations.{}',
         client_factory=cf_resource_privatelinks,
         resource_type=ResourceType.MGMT_RESOURCE_PRIVATELINKS
     )
     resource_privatelinksassociation_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.resource.privatelinks.operations#ResourceManagementPrivateLinkOperations.{}',
+        operations_tmpl='azure.mgmt.resource.privatelinks.operations#PrivateLinkAssociationOperations.{}',
         client_factory=cf_resource_privatelinks,
         resource_type=ResourceType.MGMT_RESOURCE_PRIVATELINKS
     )
