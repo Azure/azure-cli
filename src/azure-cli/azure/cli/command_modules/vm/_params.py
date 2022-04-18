@@ -1471,6 +1471,6 @@ def load_arguments(self, _):
     with self.argument_context('restore-point collection show') as c:
         c.argument('expand', help='The expand expression to apply on the operation.',
                    deprecate_info=c.deprecate(hide=True))
-        c.argument('restore_points', action='store_true', help='Show all contained restore points in the restorePointCollection.')
+        c.argument('restore_points', action='store_true', help='Show all contained restore points in the restore point collection.')
 
     # endRegion
