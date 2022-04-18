@@ -6957,13 +6957,16 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
         self.kwargs.update({
             'vm1': self.create_random_name('vm', 10),
             'vm2': self.create_random_name('vm', 10),
+            'vm3': self.create_random_name('vm', 10),
+            'id1': self.create_random_name('id', 10),
             'vmss1': self.create_random_name('vmss', 10),
             'vmss2': self.create_random_name('vmss', 10),
 
         })
-        self.cmd('vm create --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --security-type TrustedLaunch --admin-username azureuser -g {rg} -n {vm1} --enable-secure-boot --enable-vtpm')
+        self.cmd('identity create -g {rg} -n {id1}')
+        self.cmd('vm create --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --security-type TrustedLaunch --assign-identity {id1} [system] --admin-username azureuser -g {rg} -n {vm1} --enable-secure-boot --enable-vtpm')
         self.cmd('vm show -g {rg} -n {vm1}', checks=[
-            self.check('identity.type', 'SystemAssigned'),
+            self.check('identity.type', 'SystemAssigned, UserAssigned'),
             self.check('resources[0].name', 'GuestAttestation'),
             self.check('resources[0].publisher', 'Microsoft.Azure.Security.LinuxAttestation'),
             self.check('securityProfile.securityType', 'TrustedLaunch'),
@@ -6977,6 +6980,16 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('securityProfile.securityType', 'TrustedLaunch'),
             self.check('securityProfile.uefiSettings.secureBootEnabled', True),
             self.check('securityProfile.uefiSettings.vTpmEnabled', True)
+        ])
+        self.cmd('vm create --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --security-type TrustedLaunch --assign-identity {id1} --admin-username azureuser -g {rg} -n {vm3} --enable-secure-boot --enable-vtpm')
+        self.cmd('vm show -g {rg} -n {vm3}', checks=[
+            self.check('identity.type', 'SystemAssigned, UserAssigned'),
+            self.check('resources[0].name', 'GuestAttestation'),
+            self.check('resources[0].publisher', 'Microsoft.Azure.Security.LinuxAttestation'),
+            self.check('securityProfile.securityType', 'TrustedLaunch'),
+            self.check('securityProfile.uefiSettings.secureBootEnabled', True),
+            self.check('securityProfile.uefiSettings.vTpmEnabled', True)
+
         ])
         self.cmd('vmss create -g {rg} -n {vmss1} --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --admin-username azureuser --security-type TrustedLaunch --enable-secure-boot --enable-vtpm')
         self.cmd('vmss show -g {rg} -n {vmss1}', checks=[
