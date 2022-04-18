@@ -1439,10 +1439,14 @@ def load_arguments(self, _):
         c.argument('exclude_disks', nargs='+', help='List of disk resource ids that the '
                    'customer wishes to exclude from the restore point. If no disks are specified, all disks will be '
                    'included.')
+        c.argument('source_restore_point', help='Resource Id of the source restore point from which a copy needs to be created')
 
     with self.argument_context('restore-point show') as c:
         c.argument('restore_point_name', options_list=['--name', '-n', '--restore-point-name'],
                    help='The name of the restore point.')
+        c.argument('expand', help='The expand expression to apply on the operation.',
+                   deprecate_info=c.deprecate(hide=True))
+        c.argument('instance_view', action='store_true', help='Show the instance view of a restore point.')
 
     with self.argument_context('restore-point delete') as c:
         c.argument('restore_point_name', options_list=['--name', '-n', '--restore-point-name'],
@@ -1463,5 +1467,10 @@ def load_arguments(self, _):
 
     with self.argument_context('restore-point collection update') as c:
         c.argument('tags', tags_type)
+
+    with self.argument_context('restore-point collection show') as c:
+        c.argument('expand', help='The expand expression to apply on the operation.',
+                   deprecate_info=c.deprecate(hide=True))
+        c.argument('restore_points', action='store_true', help='Show all contained restore points in the restore point collection.')
 
     # endRegion

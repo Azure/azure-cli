@@ -7544,8 +7544,8 @@ class RestorePointScenarioTest(ScenarioTest):
             'vm_id': vm['id']
         })
 
-        self.cmd('restore-point collection create -g {rg} --collection-name {collection_name} --source-id {vm_id}', checks=[
-            self.check('location', 'westus'),
+        self.cmd('restore-point collection create -g {rg} --collection-name {collection_name} --source-id {vm_id} -l eastus', checks=[
+            self.check('location', 'eastus'),
             self.check('name', '{collection_name}'),
             self.check('resourceGroup', '{rg}')
         ])
@@ -7559,14 +7559,15 @@ class RestorePointScenarioTest(ScenarioTest):
             'point_id': point['id']
         })
 
-        self.cmd('restore-point show -g {rg} -n {point_name} --collection-name {collection_name}', checks=[
+        self.cmd('restore-point show -g {rg} -n {point_name} --collection-name {collection_name} --instance-view', checks=[
             self.check('id', '{point_id}'),
             self.check('name', '{point_name}'),
-            self.check('resourceGroup', '{rg}')
+            self.check('resourceGroup', '{rg}'),
+            self.check('instanceView.diskRestorePoints[0].replicationStatus.status.code', 'ReplicationState/replicating')
         ])
 
-        self.cmd('restore-point collection show -g {rg} --collection-name {collection_name}', checks=[
-            self.check('location', 'westus'),
+        self.cmd('restore-point collection show -g {rg} --collection-name {collection_name} --restore-points', checks=[
+            self.check('location', 'eastus'),
             self.check('name', '{collection_name}'),
             self.check('restorePoints[0].id', '{point_id}'),
             self.check('restorePoints[0].name', '{point_name}'),
@@ -7626,6 +7627,42 @@ class RestorePointScenarioTest(ScenarioTest):
         ])
 
         self.cmd('restore-point collection delete -g {rg} --collection-name {collection_name} -y')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_copy_vm_restore_point', location='westus')
+    def test_copy_vm_restore_point(self, resource_group):
+        self.kwargs.update({
+            'rg': resource_group,
+            'collection_name': self.create_random_name('collection_', 20),
+            'collection_name1': self.create_random_name('collection_', 20),
+            'point_name': self.create_random_name('point_', 15),
+            'point_name1': self.create_random_name('point_', 15),
+            'vm_name': self.create_random_name('vm_', 15)
+        })
+
+        vm = self.cmd('vm create -n {vm_name} -g {rg} --image UbuntuLTS --admin-username vmtest').get_output_in_json()
+        self.kwargs.update({
+            'vm_id': vm['id']
+        })
+
+        collection = self.cmd('restore-point collection create -g {rg} --collection-name {collection_name} --source-id {vm_id}').get_output_in_json()
+        self.kwargs.update({
+            'collection_id': collection['id']
+        })
+
+        self.cmd('restore-point collection create -g {rg} --collection-name {collection_name1} --source-id {collection_id} -l eastus', checks=[
+            self.check('location', 'eastus'),
+            self.check('source.id', '{collection_id}'),
+            self.check('source.location', 'westus')
+        ])
+
+        point = self.cmd('restore-point create -g {rg} -n {point_name} --collection-name {collection_name}').get_output_in_json()
+        self.kwargs.update({
+            'point_id': point['id']
+        })
+
+        self.cmd('restore-point create -g {rg} -n {point_name1} --collection-name {collection_name1} --source-restore-point {point_id}', checks=[
+            self.check('sourceRestorePoint.id', '{point_id}')
+        ])
 
 
 class ArchitectureScenarioTest(ScenarioTest):
