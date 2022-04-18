@@ -391,11 +391,6 @@ jobs:
          --rm -v $PYPI_FILES:/mnt/pypi python:3.8 \
          /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION.* && az self-test && az --version && sleep 5"
 
-       # echo "== Testing pip install on Python 3.9 =="
-       # docker run \
-       #   --rm -v $PYPI_FILES:/mnt/pypi python:3.9 \
-       #   /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION.* && az self-test && az --version && sleep 5"
-
        echo "== Testing pip install on Python 3.10 =="
        docker run \
          --rm -v $PYPI_FILES:/mnt/pypi python:3.10 \
@@ -414,8 +409,6 @@ jobs:
         python.version: '3.6'
       Python38:
         python.version: '3.8'
-      Python39:
-        python.version: '3.9'
       Python310:
         python.version: '3.10'
   steps:
@@ -435,8 +428,6 @@ jobs:
         python.version: '3.6'
       Python38:
         python.version: '3.8'
-      Python39:
-        python.version: '3.9'
       Python310:
         python.version: '3.10'
   steps:
@@ -459,8 +450,6 @@ jobs:
         python.version: '3.6'
       Python38:
         python.version: '3.8'
-      Python39:
-        python.version: '3.9'
       Python310:
         python.version: '3.10'
   steps:
@@ -484,8 +473,6 @@ jobs:
         python.version: '3.6'
       Python38:
         python.version: '3.8'
-      Python39:
-        python.version: '3.9'
       Python310:
         python.version: '3.10'
   steps:
@@ -505,8 +492,6 @@ jobs:
         python.version: '3.6'
       Python38:
         python.version: '3.8'
-      Python39:
-        python.version: '3.9'
       Python310:
         python.version: '3.10'
   steps:
@@ -526,8 +511,6 @@ jobs:
         python.version: '3.6'
       Python38:
         python.version: '3.8'
-      Python39:
-        python.version: '3.9'
       Python310:
         python.version: '3.10'
   steps:
@@ -547,8 +530,6 @@ jobs:
         python.version: '3.6'
       Python38:
         python.version: '3.8'
-      Python39:
-        python.version: '3.9'
       Python310:
         python.version: '3.10'
   steps:
@@ -560,14 +541,14 @@ jobs:
 - job: TestExtensionsLoading
   displayName: Test Extensions Loading
   condition: succeeded()
-  timeoutInMinutes: 20
+  timeoutInMinutes: 40
 
   pool:
     vmImage: 'ubuntu-20.04'
   strategy:
     matrix:
-      Python38:
-        python.version: '3.8'
+      Python310:
+        python.version: '3.10'
   steps:
     - task: UsePythonVersion@0
       displayName: 'Use Python $(python.version)'
@@ -705,12 +686,23 @@ jobs:
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
     vmImage: 'ubuntu-20.04'
+  strategy:
+    matrix:
+      1.0:
+        acr: cblmariner
+        tag: 1.0
+      2.0:
+        acr: cblmariner2preview
+        tag: 2.0
   steps:
   - task: Bash@3
     displayName: 'Build Rpm Package: Mariner'
     inputs:
       targetType: 'filePath'
       filePath: scripts/release/rpm/pipeline_mariner.sh
+    env:
+      ACR: $(acr)
+      TAG: $(tag)
 
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
     displayName: 'SBOM'
@@ -721,7 +713,7 @@ jobs:
     displayName: 'Publish Artifact: rpm-mariner'
     inputs:
       TargetPath: $(Build.ArtifactStagingDirectory)
-      ArtifactName: rpm-mariner
+      ArtifactName: rpm-mariner$(tag)
 
 
 - job: BuildRpmPackageCentOS7
@@ -816,8 +808,6 @@ jobs:
 
 - job: BuildDebPackages
   displayName: Build Deb Packages
-
-  dependsOn: BuildPythonWheel
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
     vmImage: 'ubuntu-20.04'
@@ -840,6 +830,10 @@ jobs:
         # 21.10
         deb_system: ubuntu
         distro: impish
+      Jammy:
+        # 22.04
+        deb_system: ubuntu
+        distro: jammy
 
       # https://wiki.debian.org/DebianReleases
       Stretch:
@@ -855,12 +849,6 @@ jobs:
         deb_system: debian
         distro: bullseye
   steps:
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Build Artifacts'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
-      artifactName: pypi
-
   - task: Bash@3
     displayName: 'Build $(deb_system) $(distro) Package'
     inputs:
@@ -883,7 +871,6 @@ jobs:
 
 - job: TestDebPackages
   displayName: Test Deb Packages
-
   dependsOn:
    - BuildDebPackages
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
@@ -892,9 +879,15 @@ jobs:
       Focal:
         deb_system: ubuntu
         distro: focal
+      Jammy:
+        deb_system: ubuntu
+        distro: jammy
       Buster:
         deb_system: debian
         distro: buster
+      Bullseye:
+        deb_system: debian
+        distro: bullseye
   pool:
     vmImage: 'ubuntu-20.04'
   steps:
@@ -966,8 +959,6 @@ jobs:
         python.version: '3.6'
       Python38:
         python.version: '3.8'
-      Python39:
-        python.version: '3.9'
       Python310:
         python.version: '3.10'
   pool:

@@ -10,7 +10,7 @@ from azure.cli.core.commands.parameters import (tags_type, file_type, get_locati
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction, ALL
 
 from ._validators import (get_datetime_type, validate_metadata, get_permission_validator, get_permission_help_string,
-                          resource_type_type, services_type, validate_entity, validate_select, validate_blob_type,
+                          resource_type_type, services_type, validate_select, validate_blob_type,
                           validate_included_datasets, validate_custom_domain, validate_container_public_access,
                           validate_table_payload_format, add_progress_callback, process_resource_group,
                           storage_account_key_options, process_file_download_namespace, process_metric_update_namespace,
@@ -19,6 +19,7 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           validate_azcopy_remove_arguments, as_user_validator, parse_storage_account,
                           validator_delete_retention_days, validate_delete_retention_days,
                           validate_fs_public_access)
+from ._validators_azure_stack import validate_entity
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines

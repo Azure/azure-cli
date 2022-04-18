@@ -3,16 +3,17 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from typing import Any, TypeVar
+from types import ModuleType
+from typing import Any, Dict, Type, TypeVar
 
 from azure.cli.command_modules.acs._consts import DecoratorMode
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core.azclierror import CLIInternalError
-from azure.cli.core.commands import AzCliCommand
+from azure.cli.core.commands import AzCliCommand, LongRunningOperation
 from azure.cli.core.profiles import ResourceType
-from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.util import sdk_no_wait
 from knack.log import get_logger
+from msrest import Serializer
 
 logger = get_logger(__name__)
 
@@ -47,27 +48,54 @@ class BaseAKSModels:
         resource_type: ResourceType,
     ):
         self.__cmd = cmd
-        self.__raw_models = None
+        self.__model_module = None
+        self.__model_dict = None
+        self.__serializer = None
         self.resource_type = resource_type
         self.__set_up_base_aks_models()
 
     @property
-    def raw_models(self):
+    def model_module(self) -> ModuleType:
         """Load the module that stores all aks models.
+
+        :return: the models module in SDK
         """
-        if self.__raw_models is None:
-            self.__raw_models = self.__cmd.get_models(
+        if self.__model_module is None:
+            self.__model_module = self.__cmd.get_models(
                 resource_type=self.resource_type,
                 operation_group="managed_clusters",
             ).models
-        return self.__raw_models
+        return self.__model_module
 
-    def __set_up_base_aks_models(self):
+    @property
+    def models_dict(self) -> Dict[str, Type]:
+        """Filter out aks models from the model module and store it as a dictionary with the model name-class as
+        the key-value pair.
+
+        :return: dictionary
+        """
+        if self.__model_dict is None:
+            self.__model_dict = {}
+            for k, v in vars(self.model_module).items():
+                if isinstance(v, type):
+                    self.__model_dict[k] = v
+        return self.__model_dict
+
+    def __set_up_base_aks_models(self) -> None:
         """Expose all aks models as properties of the class.
         """
-        for model_name, model_class in vars(self.raw_models).items():
-            if not model_name.startswith('_'):
-                setattr(self, model_name, model_class)
+        for model_name, model_class in self.models_dict.items():
+            setattr(self, model_name, model_class)
+
+    def serialize(self, data: Any, model_type: str) -> Dict:
+        """Serialize the data according to the provided model type.
+
+        :return: dictionary
+        """
+        if self.__serializer is None:
+            self.__serializer = Serializer(self.models_dict)
+        # will also perfrom client side validation
+        return self.__serializer.body(data, model_type)
 
 
 class BaseAKSParamDict:
@@ -90,7 +118,10 @@ class BaseAKSParamDict:
 
     def get(self, key, default=None):
         self.__increase(key)
-        return self.__store.get(key, default)
+        value = self.__store.get(key)
+        if value is None:
+            return default
+        return value
 
     def keys(self):
         return self.__store.keys()

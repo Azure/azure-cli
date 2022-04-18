@@ -3096,7 +3096,8 @@ class PolicyScenarioTest(ScenarioTest):
     def test_show_built_in_policy(self):
         # get the list of builtins, then retrieve each via show and validate the results match
         results = self.cmd('policy definition list --query "[?policyType==\'BuiltIn\']"').get_output_in_json()
-        for i, result in enumerate(results):
+        if results:
+            result = results[0]
             self.kwargs['pn'] = result['name']
             self.kwargs['dn'] = result['displayName']
             self.kwargs['desc'] = result['description']

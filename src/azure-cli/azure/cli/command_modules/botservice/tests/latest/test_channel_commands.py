@@ -9,20 +9,21 @@ import uuid
 
 class ChannelTests(ScenarioTest):
 
-    def create_bot(self, resource_group):
+    def create_bot(self, resource_group, location='global'):
         self.kwargs.update({
             'botname': self.create_random_name(prefix='cli', length=10),
             'endpoint': 'https://www.google.com/api/messages',
             'app_id': str(uuid.uuid4()),
             'setting_name': self.create_random_name(prefix='auth', length=10),
             'clientid': 'clientid',
-            'password': str(uuid.uuid4())
+            'password': str(uuid.uuid4()),
+            'location': location
         })
 
-        self.cmd('az bot create -k registration -g {rg} -n {botname} -e {endpoint} --appid {app_id} -p {password}', checks=[
+        self.cmd('az bot create -k registration -g {rg} -n {botname} -e {endpoint} --appid {app_id} -p {password} -l {location}', checks=[
             self.check('name', '{botname}'),
             self.check('resourceGroup', '{rg}'),
-            self.check('location', 'global')
+            self.check('location', '{location}')
         ])
 
     @ResourceGroupPreparer(random_name_length=20)
@@ -38,6 +39,8 @@ class ChannelTests(ScenarioTest):
         self.cmd('az bot webchat show -g {rg} -n {botname} --with-secrets', checks=[
             self.check('properties.channelName', 'WebChatChannel'),
         ])
+
+        self.cmd('az bot delete -g {rg} -n {botname}')
 
     @ResourceGroupPreparer(random_name_length=20)
     def test_skype_channel(self, resource_group):
@@ -62,6 +65,8 @@ class ChannelTests(ScenarioTest):
 
         self.cmd('az bot skype delete -g {rg} -n {botname}')
 
+        self.cmd('az bot delete -g {rg} -n {botname}')
+
     @ResourceGroupPreparer(random_name_length=20)
     def test_msteams_channel(self, resource_group):
         self.create_bot(resource_group)
@@ -81,6 +86,8 @@ class ChannelTests(ScenarioTest):
         ])
 
         self.cmd('az bot msteams delete -g {rg} -n {botname}')
+
+        self.cmd('az bot delete -g {rg} -n {botname}')
 
     @ResourceGroupPreparer(random_name_length=20)
     def test_directline_channel(self, resource_group):
@@ -103,6 +110,8 @@ class ChannelTests(ScenarioTest):
 
         self.cmd('az bot directline delete -g {rg} -n {botname}')
 
+        self.cmd('az bot delete -g {rg} -n {botname}')
+
     @ResourceGroupPreparer(random_name_length=20)
     def test_botservice_update_directline(self, resource_group):
         self.create_bot(resource_group)
@@ -119,3 +128,21 @@ class ChannelTests(ScenarioTest):
             self.check('properties.properties.sites[0].trustedOrigins[0]', 'https://mybotsite1.azurewebsites.net'),
             self.check('properties.properties.sites[0].isSecureSiteEnabled', True)
         ])
+
+        self.cmd('az bot delete -g {rg} -n {botname}')
+
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_botservice_create_channel_specific_location(self, resource_group):
+        locations = ['global', 'westus', 'westeurope']
+        for location in locations:
+            self.create_bot(resource_group, location)
+
+            self.cmd('az bot msteams create -g {rg} -n {botname} -l {location}', checks=[
+                self.check('location', '{location}')
+            ])
+
+            self.cmd('az bot directline create -g {rg} -n {botname} -l {location}', checks=[
+                self.check('location', '{location}')
+            ])
+
+            self.cmd('az bot delete -g {rg} -n {botname}')

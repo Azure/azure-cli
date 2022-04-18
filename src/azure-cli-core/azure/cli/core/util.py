@@ -1281,6 +1281,10 @@ def rmtree_with_retry(path):
             import shutil
             shutil.rmtree(path)
             return
+        except FileNotFoundError:
+            # The folder has already been deleted. No further retry is needed.
+            # errno: 2, winerror: 3, strerror: 'The system cannot find the path specified'
+            return
         except OSError as err:
             if retry_num > 0:
                 logger.warning("Failed to delete '%s': %s. Retrying ...", path, err)

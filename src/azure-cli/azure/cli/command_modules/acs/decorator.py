@@ -7,10 +7,13 @@ import os
 import re
 import time
 from distutils.version import StrictVersion
+from types import SimpleNamespace
 from typing import Any, Dict, List, Tuple, TypeVar, Union
 
 from azure.cli.command_modules.acs._consts import (
     CONST_OUTBOUND_TYPE_LOAD_BALANCER,
+    CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY,
+    CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY,
     CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
     CONST_PRIVATE_DNS_ZONE_NONE,
     CONST_PRIVATE_DNS_ZONE_SYSTEM,
@@ -23,6 +26,13 @@ from azure.cli.command_modules.acs._helpers import (
 )
 from azure.cli.command_modules.acs._loadbalancer import create_load_balancer_profile, set_load_balancer_sku
 from azure.cli.command_modules.acs._loadbalancer import update_load_balancer_profile as _update_load_balancer_profile
+from azure.cli.command_modules.acs._natgateway import (
+    create_nat_gateway_profile,
+    is_nat_gateway_profile_provided,
+)
+from azure.cli.command_modules.acs._natgateway import (
+    update_nat_gateway_profile as _update_nat_gateway_profile,
+)
 from azure.cli.command_modules.acs._resourcegroup import get_rg_location
 from azure.cli.command_modules.acs._validators import extract_comma_separated_string
 from azure.cli.command_modules.acs.addonconfiguration import (
@@ -289,6 +299,8 @@ class AKSModels:
         )
         # init load balancer models
         self.init_lb_models()
+        # holder for nat gateway related models
+        self.__nat_gateway_models = None
 
     def init_lb_models(self) -> None:
         """Initialize models used by load balancer.
@@ -333,6 +345,30 @@ class AKSModels:
         # Note: Uncomment the followings to add these models as class attributes.
         # for model_name, model_type in lb_models.items():
         #     setattr(self, model_name, model_type)
+
+    @property
+    def nat_gateway_models(self) -> SimpleNamespace:
+        """Get nat gateway related models.
+
+        The models are stored in a SimpleNamespace object, could be accessed by the dot operator like
+        `nat_gateway_models.ManagedClusterNATGatewayProfile`.
+
+        :return: SimpleNamespace
+        """
+        if self.__nat_gateway_models is None:
+            nat_gateway_models = {}
+            nat_gateway_models["ManagedClusterNATGatewayProfile"] = self.__cmd.get_models(
+                "ManagedClusterNATGatewayProfile",
+                resource_type=self.resource_type,
+                operation_group="managed_clusters",
+            )
+            nat_gateway_models["ManagedClusterManagedOutboundIPProfile"] = self.__cmd.get_models(
+                "ManagedClusterManagedOutboundIPProfile",
+                resource_type=self.resource_type,
+                operation_group="managed_clusters",
+            )
+            self.__nat_gateway_models = SimpleNamespace(**nat_gateway_models)
+        return self.__nat_gateway_models
 
 
 class AKSParamDict:
@@ -691,6 +727,57 @@ class AKSContext:
         # this parameter does not need dynamic completion
         # this parameter does not need validation
         return name
+
+    def get_nat_gateway_managed_outbound_ip_count(self) -> Union[int, None]:
+        """Obtain the value of nat_gateway_managed_outbound_ip_count.
+
+        Note: SDK provides default value 1 and performs the following validation {'maximum': 16, 'minimum': 1}.
+
+        :return: int or None
+        """
+        # read the original value passed by the command
+        nat_gateway_managed_outbound_ip_count = self.raw_param.get("nat_gateway_managed_outbound_ip_count")
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.network_profile and
+                self.mc.network_profile.nat_gateway_profile and
+                self.mc.network_profile.nat_gateway_profile.managed_outbound_ip_profile and
+                self.mc.network_profile.nat_gateway_profile.managed_outbound_ip_profile.count is not None
+            ):
+                nat_gateway_managed_outbound_ip_count = (
+                    self.mc.network_profile.nat_gateway_profile.managed_outbound_ip_profile.count
+                )
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return nat_gateway_managed_outbound_ip_count
+
+    def get_nat_gateway_idle_timeout(self) -> Union[int, None]:
+        """Obtain the value of nat_gateway_idle_timeout.
+
+        Note: SDK provides default value 4 and performs the following validation {'maximum': 120, 'minimum': 4}.
+
+        :return: int or None
+        """
+        # read the original value passed by the command
+        nat_gateway_idle_timeout = self.raw_param.get("nat_gateway_idle_timeout")
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.network_profile and
+                self.mc.network_profile.nat_gateway_profile and
+                self.mc.network_profile.nat_gateway_profile.idle_timeout_in_minutes is not None
+            ):
+                nat_gateway_idle_timeout = (
+                    self.mc.network_profile.nat_gateway_profile.idle_timeout_in_minutes
+                )
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return nat_gateway_idle_timeout
 
     def _get_location(self, read_only: bool = False) -> Union[str, None]:
         """Internal function to dynamically obtain the value of location according to the context.
@@ -2618,6 +2705,7 @@ class AKSContext:
         CONST_OUTBOUND_TYPE_LOAD_BALANCER.
 
         This function supports the option of enable_validation. When enabled, if the value of outbound_type is
+        CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY, CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY or
         CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING, the following checks will be performed. If load_balancer_sku is set
         to basic, an InvalidArgumentValueError will be raised. If vnet_subnet_id is not assigned,
         a RequiredArgumentMissingError will be raised. If any of load_balancer_managed_outbound_ip_count,
@@ -2646,13 +2734,22 @@ class AKSContext:
             return outbound_type
 
         # dynamic completion
-        if not read_from_mc and outbound_type != CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING:
+        if (
+            not read_from_mc and
+            outbound_type != CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY and
+            outbound_type != CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY and
+            outbound_type != CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING
+        ):
             outbound_type = CONST_OUTBOUND_TYPE_LOAD_BALANCER
 
         # validation
         # Note: The parameters involved in the validation are not verified in their own getters.
         if enable_validation:
-            if outbound_type == CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING:
+            if outbound_type in [
+                CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
+                CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY,
+                CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY,
+            ]:
                 # Should not enable read_only for get_load_balancer_sku, since its default value is None, and it has
                 # not been decorated into the mc object at this time, only the value after dynamic completion is
                 # meaningful here.
@@ -2661,30 +2758,37 @@ class AKSContext:
                         "userDefinedRouting doesn't support basic load balancer sku"
                     )
 
-                if self.get_vnet_subnet_id() in ["", None]:
-                    raise RequiredArgumentMissingError(
-                        "--vnet-subnet-id must be specified for userDefinedRouting and it must "
-                        "be pre-configured with a route table with egress rules"
-                    )
+                if outbound_type in [
+                    CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
+                    CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY,
+                ]:
+                    if self.get_vnet_subnet_id() in ["", None]:
+                        raise RequiredArgumentMissingError(
+                            "--vnet-subnet-id must be specified for userDefinedRouting and it must "
+                            "be pre-configured with a route table with egress rules"
+                        )
 
-                if load_balancer_profile:
-                    if (
-                        load_balancer_profile.managed_outbound_i_ps or
-                        load_balancer_profile.outbound_i_ps or
-                        load_balancer_profile.outbound_ip_prefixes
-                    ):
-                        raise MutuallyExclusiveArgumentError(
-                            "userDefinedRouting doesn't support customizing a standard load balancer with IP addresses"
-                        )
-                else:
-                    if (
-                        self.get_load_balancer_managed_outbound_ip_count() or
-                        self.get_load_balancer_outbound_ips() or
-                        self.get_load_balancer_outbound_ip_prefixes()
-                    ):
-                        raise MutuallyExclusiveArgumentError(
-                            "userDefinedRouting doesn't support customizing a standard load balancer with IP addresses"
-                        )
+                if outbound_type == CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING:
+                    if load_balancer_profile:
+                        if (
+                            load_balancer_profile.managed_outbound_i_ps or
+                            load_balancer_profile.outbound_i_ps or
+                            load_balancer_profile.outbound_ip_prefixes
+                        ):
+                            raise MutuallyExclusiveArgumentError(
+                                "userDefinedRouting doesn't support customizing \
+                                a standard load balancer with IP addresses"
+                            )
+                    else:
+                        if (
+                            self.get_load_balancer_managed_outbound_ip_count() or
+                            self.get_load_balancer_outbound_ips() or
+                            self.get_load_balancer_outbound_ip_prefixes()
+                        ):
+                            raise MutuallyExclusiveArgumentError(
+                                "userDefinedRouting doesn't support customizing \
+                                a standard load balancer with IP addresses"
+                            )
 
         return outbound_type
 
@@ -5260,6 +5364,16 @@ class AKSCreateDecorator:
                 network_profile = self.models.ContainerServiceNetworkProfile(
                     load_balancer_sku=load_balancer_sku,
                 )
+
+        # build nat gateway profile, which is part of the network profile
+        nat_gateway_profile = create_nat_gateway_profile(
+            self.context.get_nat_gateway_managed_outbound_ip_count(),
+            self.context.get_nat_gateway_idle_timeout(),
+            models=self.models.nat_gateway_models,
+        )
+        load_balancer_sku = self.context.get_load_balancer_sku()
+        if load_balancer_sku != "basic":
+            network_profile.nat_gateway_profile = nat_gateway_profile
         mc.network_profile = network_profile
         return mc
 
@@ -5917,6 +6031,8 @@ class AKSUpdateDecorator:
                 '"--load-balancer-outbound-ip-prefixes" or '
                 '"--load-balancer-outbound-ports" or '
                 '"--load-balancer-idle-timeout" or '
+                '"--nat-gateway-managed-outbound-ip-count" or '
+                '"--nat-gateway-idle-timeout" or '
                 '"--auto-upgrade-channel" or '
                 '"--attach-acr" or "--detach-acr" or '
                 '"--uptime-sla" or '
@@ -6100,6 +6216,29 @@ class AKSUpdateDecorator:
             idle_timeout=load_balancer_idle_timeout,
             profile=mc.network_profile.load_balancer_profile,
             models=self.models.lb_models)
+        return mc
+
+    def update_nat_gateway_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update nat gateway profile for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        nat_gateway_managed_outbound_ip_count = self.context.get_nat_gateway_managed_outbound_ip_count()
+        nat_gateway_idle_timeout = self.context.get_nat_gateway_idle_timeout()
+        if is_nat_gateway_profile_provided(nat_gateway_managed_outbound_ip_count, nat_gateway_idle_timeout):
+            if not mc.network_profile:
+                raise UnknownError(
+                    "Unexpectedly get an empty network profile in the process of updating nat gateway profile."
+                )
+
+            mc.network_profile.nat_gateway_profile = _update_nat_gateway_profile(
+                nat_gateway_managed_outbound_ip_count,
+                nat_gateway_idle_timeout,
+                mc.network_profile.nat_gateway_profile,
+                models=self.models.nat_gateway_models,
+            )
         return mc
 
     def update_disable_local_accounts(self, mc: ManagedCluster) -> ManagedCluster:
@@ -6400,6 +6539,8 @@ class AKSUpdateDecorator:
         mc = self.update_sku(mc)
         # update load balancer profile
         mc = self.update_load_balancer_profile(mc)
+        # update nat gateway profile
+        mc = self.update_nat_gateway_profile(mc)
         # update disable/enable local accounts
         mc = self.update_disable_local_accounts(mc)
         # update api server access profile

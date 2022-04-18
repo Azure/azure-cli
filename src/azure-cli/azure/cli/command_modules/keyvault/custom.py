@@ -1068,7 +1068,8 @@ def remove_network_rule(cmd, client, resource_group_name, vault_name, ip_address
             rules.virtual_network_rules = new_rules
 
     if ip_address and rules.ip_rules:
-        new_rules = [x for x in rules.ip_rules if ip_network(x.value) != ip_network(ip_address)]
+        to_remove = [ip_network(x) for x in ip_address]
+        new_rules = list(filter(lambda x: all(ip_network(x.value) != i for i in to_remove), rules.ip_rules))
         to_modify |= len(new_rules) != len(rules.ip_rules)
         if to_modify:
             rules.ip_rules = new_rules
@@ -1473,7 +1474,7 @@ def get_policy_template():
     return policy
 
 
-def update_key_rotation_policy(cmd, client, value, name=None):
+def update_key_rotation_policy(cmd, client, value, key_name=None):
     from azure.cli.core.util import read_file_content, get_json_object
     if os.path.exists(value):
         value = read_file_content(value)
@@ -1484,6 +1485,8 @@ def update_key_rotation_policy(cmd, client, value, name=None):
 
     KeyRotationLifetimeAction = cmd.loader.get_sdk('KeyRotationLifetimeAction', mod='_models',
                                                    resource_type=ResourceType.DATA_KEYVAULT_KEYS)
+    KeyRotationPolicy = cmd.loader.get_sdk('KeyRotationPolicy', mod='_models',
+                                           resource_type=ResourceType.DATA_KEYVAULT_KEYS)
     lifetime_actions = []
     if policy.get('lifetime_actions', None):
         for action in policy['lifetime_actions']:
@@ -1502,7 +1505,9 @@ def update_key_rotation_policy(cmd, client, value, name=None):
     expires_in = policy.get('expires_in', None) or policy.get('expiry_time', None)
     if policy.get('attributes', None):
         expires_in = policy['attributes'].get('expires_in', None) or policy['attributes'].get('expiry_time', None)
-    return client.update_key_rotation_policy(name=name, lifetime_actions=lifetime_actions, expires_in=expires_in)
+    return client.update_key_rotation_policy(key_name=key_name,
+                                             policy=KeyRotationPolicy(lifetime_actions=lifetime_actions,
+                                                                      expires_in=expires_in))
 # endregion
 
 

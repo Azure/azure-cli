@@ -362,7 +362,7 @@ def _get_storage_profile_description(profile):
 def _validate_location(cmd, namespace, zone_info, size_info):
     if not namespace.location:
         get_default_location_from_resource_group(cmd, namespace)
-        if zone_info:
+        if zone_info and size_info:
             sku_infos = list_sku_info(cmd.cli_ctx, namespace.location)
             temp = next((x for x in sku_infos if x.name.lower() == size_info.lower()), None)
             # For Stack (compute - 2017-03-30), Resource_sku doesn't implement location_info property
@@ -1546,6 +1546,9 @@ def process_vmss_create_namespace(cmd, namespace):
         for param, value in banned_params.items():
             if value is not None:
                 raise ArgumentUsageError(f'usage error: {param} is not supported for Flex mode')
+
+        if namespace.vm_sku and not namespace.image:
+            raise ArgumentUsageError('usage error: please specify the --image when you want to specify the VM SKU')
 
         if namespace.image:
 
