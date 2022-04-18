@@ -66,6 +66,18 @@ def load_arguments(self, _):
         nargs='*',
         validator=validate_identity
     )
+    store_name_arg_type = CLIArgumentType(
+        options_list=['--store-name', '-s'],
+        type=str,
+        help='Name of the App Configuration. You can configure the default name using `az configure --defaults app_configuration_store=<name>`.',
+        configured_default='app_configuration_store'
+    )
+    replica_name_arg_type = CLIArgumentType(
+        options_list=['--name', '-n'],
+        type=str,
+        help='Name of the replica of the App Configuration.',
+        configured_default=None
+    )
 
     with self.argument_context('appconfig') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type)
@@ -298,3 +310,11 @@ def load_arguments(self, _):
         c.argument('feature', help='Name of the feature whose filters you want to be displayed. If the feature flag key is different from the default key, provide the `--key` argument instead.')
         c.argument('label', help="If no label specified, display filters from the feature flag with null label by default.")
         c.argument('all_', help="List all filters associated with a feature flag.")
+
+    with self.argument_context('appconfig replica') as c:
+        c.argument('store_name', arg_type=store_name_arg_type)
+        c.argument('name', arg_type=replica_name_arg_type)
+        c.argument('location', arg_type=get_location_type(self.cli_ctx))
+
+    with self.argument_context('appconfig replica create') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), help='Location at which to create the replica.')

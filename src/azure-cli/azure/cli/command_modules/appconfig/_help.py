@@ -298,6 +298,43 @@ examples:
     text: az appconfig revision list --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --fields key value last_modified
 """
 
+helps['appconfig replica'] = """
+type: group
+short-summary: Manage replicas of an App Configuration.
+"""
+
+helps['appconfig replica list'] = """
+type: command
+short-summary: List replicas of an App Configuration.
+examples:
+  - name: List replicas of an App Configuration.
+    text: az appconfig replica list --store-name MyAppConfiguration
+"""
+
+helps['appconfig replica show'] = """
+type: command
+short-summary: Show details of a replica of an App Configuration.
+examples:
+  - name: Show details of a replica of an App Configuration.
+    text: az appconfig replica show --store-name MyAppConfiguration --name MyReplicaName
+"""
+
+helps['appconfig replica create'] = """
+type: command
+short-summary: Create a new replica of an App Configuration.
+examples:
+  - name: Create a new replica of an App Configuration at a location.
+    text: az appconfig replica create --store-name MyAppConfiguration --name MyReplicaName --location westus
+"""
+
+helps['appconfig replica delete'] = """
+type: command
+short-summary: Delete a replica of an App Configuration.
+examples:
+  - name: Delete a replica of an App Configuration.
+    text: az appconfig replica delete --store-name MyAppConfiguration --name MyReplicaName
+"""
+
 helps['appconfig show'] = """
 type: command
 short-summary: Show properties of an App Configuration.

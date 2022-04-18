@@ -38,6 +38,10 @@ def featurefilter_entry_format(result):
     return _output_format(result, _featurefilter_entry_format_group)
 
 
+def configstore_replica_output_format(result):
+    return _output_format(result, _configstore_replica_format_group)
+
+
 def _output_format(result, format_group):
     if 'value' in result and isinstance(result['value'], list):
         result = result['value']
@@ -74,6 +78,17 @@ def _deleted_configstore_format_group(item):
         ('NAME', _get_value(item, 'name')),
         ('PURGE PROTECTION', 'ENABLED' if _get_value(item, 'purgeProtectionEnabled').lower() == 'true' else 'DISABLED'),
         ('SCHEDULED PURGE DATE', _format_datetime(_get_value(item, 'scheduledPurgeDate')))
+    ])
+
+
+def _configstore_replica_format_group(item):
+    return OrderedDict([
+        ('CREATION DATE', _format_datetime(_get_value(item, 'systemData', 'createdAt'))),
+        ('ENDPOINT', _get_value(item, 'endpoint')),
+        ('LOCATION', _get_value(item, 'location')),
+        ('NAME', _get_value(item, 'name')),
+        ('PROVISIONING STATE', _get_value(item, 'provisioningState')),
+        ('RESOURCE GROUP', _get_value(item, 'resourceGroup'))
     ])
 
 
