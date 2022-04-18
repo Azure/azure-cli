@@ -3670,6 +3670,14 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
     from azure.cli.command_modules.network._template_builder import (
         build_load_balancer_resource, build_public_ip_resource, build_vnet_resource)
 
+    # In the latest profile, the default public IP will be expected to be changed from Basic to Standard.
+    # In order to avoid breaking change which has a big impact to users,
+    # we use the hint to guide users to use Standard sku to create lb.
+    if cmd.cli_ctx.cloud.profile == 'latest':
+        logger.warning(
+            'Please note that the default public IP used for lb creation will be changed from Basic to Standard '
+            'in the future.')
+
     DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
     IPAllocationMethod = cmd.get_models('IPAllocationMethod')
 
@@ -3884,6 +3892,15 @@ def create_lb_frontend_ip_configuration(
         cmd, resource_group_name, load_balancer_name, item_name, public_ip_address=None,
         public_ip_prefix=None, subnet=None, virtual_network_name=None, private_ip_address=None,
         private_ip_address_version=None, private_ip_address_allocation=None, zone=None):
+
+    # In the latest profile, the default public IP will be expected to be changed from Basic to Standard.
+    # In order to avoid breaking change which has a big impact to users,
+    # we use the hint to guide users to use Standard sku to create lb frontend ip.
+    if cmd.cli_ctx.cloud.profile == 'latest':
+        logger.warning(
+            'Please note that the default public IP used for lb frontend ip creation will be changed from Basic to Standard '
+            'in the future.')
+
     FrontendIPConfiguration, SubResource, Subnet = cmd.get_models(
         'FrontendIPConfiguration', 'SubResource', 'Subnet')
     ncf = network_client_factory(cmd.cli_ctx)
