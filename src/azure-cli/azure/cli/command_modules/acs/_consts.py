@@ -123,6 +123,7 @@ ADDONS = {
 CONST_CANIPULL_IMAGE = "mcr.microsoft.com/aks/canipull:0.0.4-alpha"
 
 
+
 # consts for decorator pattern
 class DecoratorMode(Enum):
     """Enumerations used to distinguish whether to handle creation or update.
