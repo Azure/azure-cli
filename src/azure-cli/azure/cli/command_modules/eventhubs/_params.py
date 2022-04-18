@@ -250,3 +250,18 @@ def load_arguments_eh(self, _):
     for scope in ['eventhubs namespace encryption add', 'eventhubs namespace identity remove']:
         with self.argument_context(scope, resource_type=ResourceType.MGMT_EVENTHUB) as c:
             c.argument('encryption_config', action=AlertAddEncryption, nargs='+', help='List of KeyVaultProperties objects.')
+
+#Schema Registry
+    with self.argument_context('eventhubs namespace schema-registry list') as c:
+        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
+
+    with self.argument_context('eventhubs namespace schema-registry') as c:
+        c.argument('namespace_name', arg_type=namespace_name_arg_type, options_list=['--namespace-name'], help='name of Namespace')
+        c.argument('schema_group_name', arg_type=name_type, id_part='child_name_1', help='name of schema group')
+
+    for scope in ['eventhubs namespace schema-registry create', 'eventhubs namespace schema-registry update']:
+        with self.argument_context(scope) as c:
+            c.argument('schema_compatibility', options_list=['--schema-compatibility'], arg_type=get_enum_type(['None','Backward','Forward']), help='Compatibility of Schema')
+            c.argument('schema_type', options_list=['--schema-type'], arg_type=get_enum_type(['Avro']), help='Type of Schema')
+            c.argument('tags', options_list=['--group-properties'], arg_type=tags_type,
+                       help='Type of Schema')
