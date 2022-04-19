@@ -107,8 +107,11 @@ class AutomaticScheduling(object):
         self.works: Record which modules each worker needs to test
         self.matrix_cnt:
         The total number of concurrent automation full test pipeline job with specify python version
-        Best practice is to keep the number of concurrent tasks below 50, so we set matrix_cnt = 10
-        Total concurrent number: AutomationTest20200901 * 3 + AutomationTest20190301 * 3 + AutomationTest20180301 * 3 + AutomationFullTest * 10 * 3 (python_version) = 39
+        Because we share the vm pool with azure-sdk team, so we can't set the number of concurrency arbitrarily
+        Best practice is to keep the number of concurrent tasks below 50
+        If you set a larger number of concurrency, it will cause many jobs to be in the waiting state
+        And the network module has the largest number of test cases and can only be tested serially for now, so setting matrix_cnt = 8 is sufficient
+        Total concurrent number: AutomationTest20200901 * 3 + AutomationTest20190301 * 3 + AutomationTest20180301 * 3 + AutomationFullTest * 8 * 3 (python_version) = 33
         self.matrix_idx:
         The index of concurrent automation full test pipeline job with specify python version
         """
