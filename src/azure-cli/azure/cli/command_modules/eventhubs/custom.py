@@ -562,9 +562,10 @@ def cli_remove_encryption(client, resource_group_name, namespace_name, encryptio
 
     return get_namespace
 
+
 def cli_schemaregistry_createupdate(cmd, client, resource_group_name, namespace_name, schema_group_name,
                                     schema_compatibility, schema_type, tags=None):
     SchemaGroup = cmd.get_models('SchemaGroup', resource_type=ResourceType.MGMT_EVENTHUB)
     ehSchemaGroup = SchemaGroup(schema_compatibility=schema_compatibility, schema_type=schema_type, group_properties=tags)
 
-    return client.create_or_update(resource_group_name, namespace_name, schema_group_name, ehSchemaGroup);
+    return client.create_or_update(resource_group_name, namespace_name, schema_group_name, ehSchemaGroup)
