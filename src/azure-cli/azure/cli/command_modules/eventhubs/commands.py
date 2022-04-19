@@ -177,4 +177,3 @@ def load_command_table(self, _):
         g.command('list', 'list_by_namespace')
         g.show_command('show', 'get')
         g.command('delete', 'delete')
-        g.generic_update_command('update', custom_func_name='cli_schemaregistry_update', custom_func_type=eventhubs_custom)
