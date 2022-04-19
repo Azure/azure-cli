@@ -198,7 +198,7 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
     # if NFSv4 is specified then the export policy must reflect this
     # the RP ordinarily only creates a default setting NFSv3.
     if protocol_types is not None and any(x in ['NFSv3', 'NFSv4.1'] for x in protocol_types) \
-            and not (protocol_types == 'NFSv3' and rule_index is None):
+            and not (protocol_types == ['NFSv3'] and rule_index is None):
         rules = []
         isNfs41 = False
         isNfs3 = False
