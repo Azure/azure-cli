@@ -206,10 +206,16 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'vm1': vm1,
             'vm2': vm2,
             'policy5': self.create_random_name('clitest-policy5', 24),
+            'enhpolicy': self.create_random_name('clitest-enhpolicy', 24),
         })
 
         self.kwargs['policy1_json'] = self.cmd('backup policy show -g {rg} -v {vault} -n {policy1}', checks=[
             self.check('name', '{policy1}'),
+            self.check('resourceGroup', '{rg}')
+        ]).get_output_in_json()
+
+        self.kwargs['enhpolicy_json'] = self.cmd('backup policy show -g {rg} -v {vault} -n {enhanced}', checks=[
+            self.check('name', '{enhanced}'),
             self.check('resourceGroup', '{rg}')
         ]).get_output_in_json()
 
@@ -236,7 +242,15 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['policy5_json'] = json.dumps(self.kwargs['policy1_json'])
         self.cmd("backup policy create --backup-management-type {backup-management-type} -g {rg} -v {vault} -n {policy5} --policy '{policy5_json}'")
 
+        self.kwargs['enhpolicy_json']['name'] = self.kwargs['enhpolicy']
+        self.kwargs['backup-management-type'] = self.kwargs['enhpolicy_json']['properties']['backupManagementType']
+        self.kwargs['enhpolicy_json'] = json.dumps(self.kwargs['enhpolicy_json'])
+        self.cmd("backup policy create --backup-management-type {backup-management-type} -g {rg} -v {vault} -n {enhpolicy} --policy '{enhpolicy_json}'", checks=[
+            self.check('properties.schedulePolicy.scheduleRunFrequency', 'Hourly')
+        ])
+
         self.cmd('backup policy delete -g {rg} -v {vault} -n {policy5}')
+        self.cmd('backup policy delete -g {rg} -v {vault} -n {enhpolicy}')
 
         self.kwargs['policy1_json']['name'] = self.kwargs['policy3']
         if 'instantRpDetails' in self.kwargs['policy1_json']['properties']:
