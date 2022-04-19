@@ -92,6 +92,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                   using_webapp_up=False, language=None, assign_identities=None,
                   role='Contributor', scope=None, vnet=None, subnet=None, https_only=False):
     from azure.mgmt.web.models import Site
+    from azure.core.exceptions import ResourceNotFoundError as _ResourceNotFoundError
     SiteConfig, SkuDescription, NameValuePair = cmd.get_models(
         'SiteConfig', 'SkuDescription', 'NameValuePair')
 
@@ -101,14 +102,26 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     docker_registry_server_url = parse_docker_image_name(deployment_container_image_name)
 
     client = web_client_factory(cmd.cli_ctx)
+    plan_info = None
     if is_valid_resource_id(plan):
         parse_result = parse_resource_id(plan)
         plan_info = client.app_service_plans.get(parse_result['resource_group'], parse_result['name'])
     else:
-        plan_info = client.app_service_plans.get(name=plan, resource_group_name=resource_group_name)
+        try:
+            plan_info = client.app_service_plans.get(name=plan, resource_group_name=resource_group_name)
+        except _ResourceNotFoundError:
+            plan_info = None
+        if not plan_info:
+            plans = list(client.app_service_plans.list(detailed=True))
+            for user_plan in plans:
+                if user_plan.name.lower() == plan.lower():
+                    if plan_info:
+                        raise InvalidArgumentValueError("There are multiple plans with name {}.".format(plan),
+                                                        "Try using the plan resource ID instead.")
+                    parse_result = parse_resource_id(user_plan.id)
+                    plan_info = client.app_service_plans.get(parse_result['resource_group'], parse_result['name'])
     if not plan_info:
-        raise ResourceNotFoundError("The plan '{}' doesn't exist in the resource group '{}".format(plan,
-                                                                                                   resource_group_name))
+        raise ResourceNotFoundError("The plan '{}' doesn't exist.".format(plan))
     is_linux = plan_info.reserved
     helper = _StackRuntimeHelper(cmd, linux=is_linux, windows=not is_linux)
     location = plan_info.location
@@ -698,7 +711,7 @@ def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
 
     blob_uri = block_blob_service.make_blob_url(container_name, blob_name, sas_token=blob_token)
     website_run_from_setting = "WEBSITE_RUN_FROM_PACKAGE={}".format(blob_uri)
-    update_app_settings(cmd, resource_group_name, name, settings=[website_run_from_setting])
+    update_app_settings(cmd, resource_group_name, name, settings=[website_run_from_setting], slot=slot)
     client = web_client_factory(cmd.cli_ctx)
 
     try:
@@ -1313,11 +1326,15 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
                         vnet_route_all_enabled=None,
                         generic_configurations=None):
     configs = get_site_configs(cmd, resource_group_name, name, slot)
+    app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
+                                           'list_application_settings', slot)
     if number_of_workers is not None:
         number_of_workers = validate_range_of_int_flag('--number-of-workers', number_of_workers, min_val=0, max_val=20)
     if linux_fx_version:
         if linux_fx_version.strip().lower().startswith('docker|'):
-            update_app_settings(cmd, resource_group_name, name, ["WEBSITES_ENABLE_APP_SERVICE_STORAGE=false"])
+            if ('WEBSITES_ENABLE_APP_SERVICE_STORAGE' not in app_settings.properties or
+                    app_settings.properties['WEBSITES_ENABLE_APP_SERVICE_STORAGE'] != 'true'):
+                update_app_settings(cmd, resource_group_name, name, ["WEBSITES_ENABLE_APP_SERVICE_STORAGE=false"])
         else:
             delete_app_settings(cmd, resource_group_name, name, ["WEBSITES_ENABLE_APP_SERVICE_STORAGE"])
 
@@ -2008,8 +2025,8 @@ def create_backup(cmd, resource_group_name, webapp_name, storage_account_url,
     backup_request = BackupRequest(backup_name=backup_name,
                                    storage_account_url=storage_account_url, databases=db_setting)
     if slot:
-        return client.web_apps.backup_slot(resource_group_name, webapp_name, backup_request, slot)
-
+        return client.web_apps.backup_slot(resource_group_name=resource_group_name,
+                                           name=webapp_name, request=backup_request, slot=slot)
     return client.web_apps.backup(resource_group_name, webapp_name, backup_request)
 
 
@@ -3285,13 +3302,13 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
                     linux_settings = minor_version.stack_settings.linux_runtime_settings
                     windows_settings = minor_version.stack_settings.windows_runtime_settings
 
-                    if linux_settings is not None:
+                    if linux_settings is not None and not linux_settings.is_hidden:
                         self._parse_minor_version(runtime_settings=linux_settings,
                                                   major_version_name=runtime.name,
                                                   minor_version_name=runtime_version,
                                                   runtime_to_version=runtime_to_version_linux)
 
-                    if windows_settings is not None:
+                    if windows_settings is not None and not windows_settings.is_hidden:
                         self._parse_minor_version(runtime_settings=windows_settings,
                                                   major_version_name=runtime.name,
                                                   minor_version_name=runtime_version,
@@ -4964,6 +4981,7 @@ def delete_function_key(cmd, resource_group_name, name, key_name, function_name=
 
 def add_github_actions(cmd, resource_group, name, repo, runtime=None, token=None, slot=None,  # pylint: disable=too-many-statements,too-many-branches
                        branch='master', login_with_github=False, force=False):
+    runtime = _StackRuntimeHelper(cmd).remove_delimiters(runtime)  # normalize "runtime:version"
     if not token and not login_with_github:
         raise_missing_token_suggestion()
     elif not token:

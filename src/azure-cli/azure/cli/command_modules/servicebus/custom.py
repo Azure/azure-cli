@@ -15,7 +15,7 @@ from azure.cli.core.profiles import ResourceType
 
 # Namespace Region
 def cli_namespace_create(cmd, client, resource_group_name, namespace_name, location=None, tags=None, sku='Standard',
-                         capacity=None, default_action=None, mi_system_assigned=None, mi_user_assigned=None, encryption_config=None):
+                         capacity=None, zone_redundant=None, default_action=None, mi_system_assigned=None, mi_user_assigned=None, encryption_config=None):
 
     SBSku = cmd.get_models('SBSku', resource_type=ResourceType.MGMT_SERVICEBUS)
     SBNamespace = cmd.get_models('SBNamespace', resource_type=ResourceType.MGMT_SERVICEBUS)
@@ -28,6 +28,9 @@ def cli_namespace_create(cmd, client, resource_group_name, namespace_name, locat
 
     parameter.tags = tags
     parameter.sku = SBSku(name=sku, tier=sku, capacity=capacity)
+
+    if zone_redundant is not None:
+        parameter.zone_redundant = zone_redundant
 
     if mi_system_assigned:
         parameter.identity = Identity(type=IdentityType.SYSTEM_ASSIGNED)
@@ -396,33 +399,43 @@ def cli_rules_create(cmd, client, resource_group_name, namespace_name, topic_nam
                      action_sql_expression=None, action_compatibility_level=None, action_requires_preprocessing=None,
                      filter_sql_expression=None, filter_requires_preprocessing=None, correlation_id=None,
                      message_id=None, to=None, reply_to=None, label=None, session_id=None, reply_to_session_id=None,
-                     content_type=None, requires_preprocessing=None):
+                     content_type=None, requires_preprocessing=None, filter_type=None):
 
     Rule = cmd.get_models('Rule', resource_type=ResourceType.MGMT_SERVICEBUS)
     Action = cmd.get_models('Action', resource_type=ResourceType.MGMT_SERVICEBUS)
     SqlFilter = cmd.get_models('SqlFilter', resource_type=ResourceType.MGMT_SERVICEBUS)
     CorrelationFilter = cmd.get_models('CorrelationFilter', resource_type=ResourceType.MGMT_SERVICEBUS)
     parameters = Rule()
-    parameters.action = Action(
-        sql_expression=action_sql_expression,
-        compatibility_level=action_compatibility_level,
-        requires_preprocessing=action_requires_preprocessing
-    )
-    parameters.sql_filter = SqlFilter(
-        sql_expression=filter_sql_expression,
-        requires_preprocessing=filter_requires_preprocessing
-    )
-    parameters.correlation_filter = CorrelationFilter(
-        correlation_id=correlation_id,
-        to=to,
-        message_id=message_id,
-        reply_to=reply_to,
-        label=label,
-        session_id=session_id,
-        reply_to_session_id=reply_to_session_id,
-        content_type=content_type,
-        requires_preprocessing=requires_preprocessing
-    )
+
+    if filter_type:
+        parameters.filter_type = filter_type
+
+    if filter_type == 'SqlFilter' or filter_type is None:
+        parameters.sql_filter = SqlFilter(
+            sql_expression=filter_sql_expression,
+            requires_preprocessing=filter_requires_preprocessing
+        )
+
+    if filter_type == 'CorrelationFilter':
+        parameters.correlation_filter = CorrelationFilter(
+            correlation_id=correlation_id,
+            to=to,
+            message_id=message_id,
+            reply_to=reply_to,
+            label=label,
+            session_id=session_id,
+            reply_to_session_id=reply_to_session_id,
+            content_type=content_type,
+            requires_preprocessing=requires_preprocessing
+        )
+
+    if action_sql_expression or action_compatibility_level or action_requires_preprocessing:
+        parameters.action = Action(
+            sql_expression=action_sql_expression,
+            compatibility_level=action_compatibility_level,
+            requires_preprocessing=action_requires_preprocessing
+        )
+
     return client.create_or_update(
         resource_group_name=resource_group_name,
         namespace_name=namespace_name,

@@ -179,6 +179,15 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('artifact_type', help='Filter referrers based on artifact type.')
         c.argument('recursive', help='Recursively include referrer artifacts.', action='store_true')
 
+    with self.argument_context('acr manifest show-metadata') as c:
+        c.positional('manifest_id', arg_type=manifest_id_type)
+
+    with self.argument_context('acr manifest list-metadata') as c:
+        c.positional('repo_id', arg_type=repo_id_type)
+
+    with self.argument_context('acr manifest update-metadata') as c:
+        c.positional('manifest_id', arg_type=manifest_id_type)
+
     with self.argument_context('acr manifest metadata show') as c:
         c.positional('manifest_id', arg_type=manifest_id_type)
 
@@ -273,7 +282,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('values', help="The task values/parameters file path relative to the source context.")
 
         # common to DockerBuildStep, FileTaskStep and RunTaskStep
-        c.argument('context_path', options_list=['--context', '-c'], help="The full URL to the source code repository (Requires '.git' suffix for a github repo) or the repository of an OCI artifact in an Azure container registry (e.g., 'oci://myregistry.azurecr.io/myartifact:mytag'). If '/dev/null' is specified, the value will be set to None and ignored. This is a required argument if the task is not a system task.")
+        c.argument('context_path', options_list=['--context', '-c'], help="The full URL to the source code repository (Requires '.git' suffix for a github repo) or a remote tarball (e.g., 'http://server/context.tar.gz'), or the repository of an OCI artifact in an Azure container registry (e.g., 'oci://myregistry.azurecr.io/myartifact:mytag'). If '/dev/null' is specified, the value will be set to None and ignored. This is a required argument if the task is not a system task.")
         c.argument('arg', help="Build argument in '--arg name[=value]' format. Multiples supported by passing '--arg` multiple times.", action='append', validator=validate_arg)
         c.argument('secret_arg', help="Secret build argument in '--secret-arg name[=value]' format. Multiples supported by passing --secret-arg multiple times.", action='append', validator=validate_secret_arg)
         c.argument('set_value', options_list=['--set'], help="Task value in '--set name[=value]' format. Multiples supported by passing --set multiple times.", action='append', validator=validate_set)

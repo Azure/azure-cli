@@ -29,7 +29,7 @@ from azure.cli.command_modules.vm._validators import (
     process_vm_create_namespace, process_vmss_create_namespace, process_image_create_namespace,
     process_disk_or_snapshot_create_namespace, process_disk_encryption_namespace, process_assign_identity_namespace,
     process_remove_identity_namespace, process_vm_secret_format, process_vm_vmss_stop, validate_vmss_update_namespace,
-    process_vm_update_namespace, process_set_applications_namespace)
+    process_vm_update_namespace, process_set_applications_namespace, process_vm_disk_attach_namespace)
 
 from azure.cli.command_modules.vm._image_builder import (
     process_image_template_create_namespace, process_img_tmpl_output_add_namespace,
@@ -361,7 +361,7 @@ def load_command_table(self, _):
         g.custom_command('get-default-config', 'show_default_diagnostics_configuration')
 
     with self.command_group('vm disk', compute_vm_sdk, min_api='2017-03-30') as g:
-        g.custom_command('attach', 'attach_managed_data_disk')
+        g.custom_command('attach', 'attach_managed_data_disk', validator=process_vm_disk_attach_namespace)
         g.custom_command('detach', 'detach_data_disk')
 
     with self.command_group('vm encryption', custom_command_type=compute_disk_encryption_custom) as g:
@@ -641,7 +641,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_capacity_reservation')
 
     with self.command_group('restore-point', restore_point, client_factory=cf_restore_point, min_api='2021-03-01') as g:
-        g.show_command('show', 'get')
+        g.custom_show_command('show', 'restore_point_show')
         g.custom_command('create', 'restore_point_create', supports_no_wait=True)
         g.command('delete', 'begin_delete', supports_no_wait=True, confirmation=True)
         g.wait_command('wait')

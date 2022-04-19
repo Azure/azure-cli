@@ -32,21 +32,31 @@ steps:
       echo fullTest: ${{ parameters.fullTest }}
       echo module: ${{ parameters.module }}
       echo Build.Reason: $(Build.Reason)
+      serial_modules="appservice botservice cloud network azure-cli-core azure-cli-telemetry"
 
       # Test specific module
       module="${{ parameters.module }}"
       if [[ -n $module ]]; then
         echo "Running test for module '$module'"
-        azdev test --no-exitfirst --verbose --series $module
+        # Determine whether the module belongs to serial_modules
+        if [[ "$serial_modules" =~ "$module" ]]; then
+          echo "Running in series"
+          azdev test --no-exitfirst --verbose --series $module --pytest-args "--durations=0"
+        else
+          echo "Running in parallels"
+          azdev test --no-exitfirst --verbose $module --pytest-args "--durations=0"
+        fi
         exit 0
       fi
 
       if [[ "$(Build.Reason)" == "PullRequest" && "${{ parameters.fullTest }}" == 'False' ]]; then
         echo "Running incremental test"
-        azdev test --no-exitfirst --repo=./ --src=HEAD --tgt=origin/$(System.PullRequest.TargetBranch) --cli-ci --profile ${{ parameters.profile }} --verbose --series
+        # If CI is set to shallow fetch, target branch should be expilictly fetched.
+        git fetch origin --depth=1 $(System.PullRequest.TargetBranch)
+        azdev test --no-exitfirst --repo=./ --src=HEAD --tgt=origin/$(System.PullRequest.TargetBranch) --cli-ci --profile ${{ parameters.profile }} --verbose --series --pytest-args "--durations=0"
       else
         echo "Running full test"
-        azdev test --no-exitfirst --profile ${{ parameters.profile }} --verbose --series
+        python scripts/ci/automation_full_test.py "${{ parameters.profile }}" "$serial_modules"
       fi
     displayName: "azdev test"
     env:

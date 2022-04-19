@@ -19,7 +19,7 @@ from azure.cli.command_modules.vm._actions import _resource_not_exists
 from azure.cli.command_modules.vm._completers import (
     get_urn_aliases_completion_list, get_vm_size_completion_list, get_vm_run_command_completion_list)
 from azure.cli.command_modules.vm._validators import (
-    validate_nsg_name, validate_vm_nics, validate_vm_nic, validate_vm_disk, validate_vmss_disk,
+    validate_nsg_name, validate_vm_nics, validate_vm_nic, validate_vmss_disk,
     validate_asg_names_or_ids, validate_keyvault, _validate_proximity_placement_group,
     process_gallery_image_version_namespace, validate_vm_name_for_monitor_metrics)
 
@@ -166,7 +166,7 @@ def load_arguments(self, _):
     # endregion
 
     # region Disks
-    with self.argument_context('disk') as c:
+    with self.argument_context('disk', resource_type=ResourceType.MGMT_COMPUTE, operation_group='disks') as c:
         c.argument('zone', zone_type, min_api='2017-03-30', options_list=['--zone'])  # TODO: --size-gb currently has claimed -z. We can do a breaking change later if we want to.
         c.argument('disk_name', existing_disk_name, completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
         c.argument('name', arg_type=name_arg_type)
@@ -188,6 +188,7 @@ def load_arguments(self, _):
         c.argument('edge_zone', edge_zone_type)
         c.argument('security_type', choices=['TrustedLaunch'], help='The security type of the VM. Applicable for OS disks only.', min_api='2020-12-01')
         c.argument('support_hibernation', arg_type=get_three_state_flag(), help='Indicate the OS on a disk supports hibernation.', min_api='2020-12-01')
+        c.argument('architecture', arg_type=get_enum_type(self.get_models('Architecture', operation_group='disks')), min_api='2021-12-01', help='CPU architecture.')
     # endregion
 
     # region Snapshots
@@ -200,6 +201,7 @@ def load_arguments(self, _):
         c.argument('edge_zone', edge_zone_type)
         c.argument('copy_start', arg_type=get_three_state_flag(), min_api='2021-04-01',
                    help='Create snapshot by using a deep copy process, where the resource creation is considered complete only after all data has been copied from the source.')
+        c.argument('architecture', arg_type=get_enum_type(self.get_models('Architecture', operation_group='snapshots')), min_api='2021-12-01', help='CPU architecture.')
     # endregion
 
     # region Images
@@ -465,14 +467,17 @@ def load_arguments(self, _):
     with self.argument_context('vm disk attach') as c:
         c.argument('enable_write_accelerator', min_api='2017-12-01', action='store_true', help='enable write accelerator')
         c.argument('disk', options_list=['--name', '-n', c.deprecate(target='--disk', redirect='--name', hide=True)],
-                   help="The name or ID of the managed disk", validator=validate_vm_disk, id_part='name',
+                   help="The name or ID of the managed disk", id_part='name',
                    completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
+        c.argument('disks', nargs='*', help="One or more names or IDs of the managed disk (space-delimited).",
+                   completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
+        c.argument('ids', deprecate_info=c.deprecate(target='--ids', redirect='--disks', hide=True))
 
     with self.argument_context('vm disk detach') as c:
         c.argument('disk_name', arg_type=name_arg_type, help='The data disk name.')
 
     with self.argument_context('vm encryption enable') as c:
-        c.argument('encrypt_format_all', action='store_true', help='Encrypts-formats data disks instead of encrypting them. Encrypt-formatting is a lot faster than in-place encryption but wipes out the partition getting encrypt-formatted.')
+        c.argument('encrypt_format_all', action='store_true', help='Encrypts-formats data disks instead of encrypting them. Encrypt-formatting is a lot faster than in-place encryption but wipes out the partition getting encrypt-formatted. (Only supported for Linux virtual machines.)')
         # Place aad arguments in their own group
         aad_arguments = 'Azure Active Directory'
         c.argument('aad_client_id', arg_group=aad_arguments)
@@ -938,6 +943,7 @@ def load_arguments(self, _):
             c.argument('assign_identity', nargs='*', arg_group='Managed Service Identity', help="accept system or user assigned identities separated by spaces. Use '[system]' to refer system assigned identity, or a resource id to refer user assigned identity. Check out help for more examples")
             c.ignore('aux_subscriptions')
             c.argument('edge_zone', edge_zone_type)
+            c.argument('accept_term', action='store_true', help="Accept the license agreement and privacy statement.")
 
         with self.argument_context(scope, arg_group='Authentication') as c:
             c.argument('generate_ssh_keys', action='store_true', help='Generate SSH public and private key files if missing. The keys will be stored in the ~/.ssh directory')
@@ -987,7 +993,7 @@ def load_arguments(self, _):
                        help='Specify the behavior of the managed disk when the VM gets deleted i.e whether the managed disk is deleted or detached.')
             c.argument('data_disk_delete_option', options_list=['--data-disk-delete-option', self.deprecate(target='--data-delete-option', redirect='--data-disk-delete-option', hide=True)],
                        nargs='+', min_api='2021-03-01',
-                       help='Specify whether data disk should be deleted or detached upon VM deletion.')
+                       help='Specify whether data disk should be deleted or detached upon VM deletion. If a single data disk is attached, the allowed values are Delete and Detach. For multiple data disks are attached, please use "<data_disk>=Delete <data_disk2>=Detach" to configure each disk')
 
         with self.argument_context(scope, arg_group='Network') as c:
             c.argument('vnet_name', help='Name of the virtual network when creating a new one or referencing an existing one.')
@@ -1017,15 +1023,14 @@ def load_arguments(self, _):
     for scope in ['vm create', 'vmss create', 'vm identity assign', 'vmss identity assign']:
         with self.argument_context(scope) as c:
             arg_group = 'Managed Service Identity' if scope.split()[-1] == 'create' else None
-            c.argument('identity_scope', options_list=['--scope'], arg_group=arg_group, help="Scope that the system assigned identity can access")
+            c.argument('identity_scope', options_list=['--scope'], arg_group=arg_group,
+                       help="Scope that the system assigned identity can access. ")
             c.ignore('identity_role_id')
 
     for scope in ['vm create', 'vmss create']:
         with self.argument_context(scope) as c:
             c.argument('identity_role', options_list=['--role'], arg_group='Managed Service Identity',
-                       help='Role name or id the system assigned identity will have. '
-                            'Please note that the default value "Contributor" will be removed in the future version 2.35.0, '
-                            "so please specify '--role' and '--scope' at the same time when assigning a role to the managed identity")
+                       help='Role name or id the system assigned identity will have. ')
 
     for scope in ['vm identity assign', 'vmss identity assign']:
         with self.argument_context(scope) as c:
@@ -1166,6 +1171,7 @@ def load_arguments(self, _):
         c.argument('end_of_life_date', help="the end of life date, e.g. '2020-12-31'")
         c.argument('disallowed_disk_types', nargs='*', help='disk types which would not work with the image, e.g., Standard_LRS')
         c.argument('features', help='A list of gallery image features. E.g. "IsSecureBootSupported=true IsMeasuredBootSupported=false"')
+        c.argument('architecture', arg_type=get_enum_type(self.get_models('Architecture', operation_group='gallery_images')), min_api='2021-10-01', help='CPU architecture.')
 
     with self.argument_context('sig image-definition list-shared') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
@@ -1433,10 +1439,14 @@ def load_arguments(self, _):
         c.argument('exclude_disks', nargs='+', help='List of disk resource ids that the '
                    'customer wishes to exclude from the restore point. If no disks are specified, all disks will be '
                    'included.')
+        c.argument('source_restore_point', help='Resource Id of the source restore point from which a copy needs to be created')
 
     with self.argument_context('restore-point show') as c:
         c.argument('restore_point_name', options_list=['--name', '-n', '--restore-point-name'],
                    help='The name of the restore point.')
+        c.argument('expand', help='The expand expression to apply on the operation.',
+                   deprecate_info=c.deprecate(hide=True))
+        c.argument('instance_view', action='store_true', help='Show the instance view of a restore point.')
 
     with self.argument_context('restore-point delete') as c:
         c.argument('restore_point_name', options_list=['--name', '-n', '--restore-point-name'],
@@ -1457,5 +1467,10 @@ def load_arguments(self, _):
 
     with self.argument_context('restore-point collection update') as c:
         c.argument('tags', tags_type)
+
+    with self.argument_context('restore-point collection show') as c:
+        c.argument('expand', help='The expand expression to apply on the operation.',
+                   deprecate_info=c.deprecate(hide=True))
+        c.argument('restore_points', action='store_true', help='Show all contained restore points in the restore point collection.')
 
     # endRegion

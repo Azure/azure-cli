@@ -20,14 +20,12 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
         # upload test files to storage account
         self.storage_cmd('storage blob upload-batch -s "{}" -d {} --max-connections 3', storage_account_info,
                          test_dir, src_container)
-        from azure.cli.core.azclierror import AzureResponseError
-        with self.assertRaises(AzureResponseError):
-            self.storage_cmd('storage blob upload-batch -s "{}" -d {} --max-connections 3', storage_account_info,
-                                 test_dir, src_container)
+
+        # test upload-batch with & without --overwrite
+        self.storage_cmd('storage blob upload-batch -s "{}" -d {} --max-connections 3', storage_account_info,
+                         test_dir, src_container).assert_with_checks(JMESPathCheck('length(@)', 0))
         self.storage_cmd('storage blob upload-batch -s "{}" -d {} --max-connections 3 --overwrite', storage_account_info,
-                         test_dir, src_container)
-        self.storage_cmd('storage blob list -c {}', storage_account_info, src_container).assert_with_checks(
-            JMESPathCheck('length(@)', 41))
+                         test_dir, src_container).assert_with_checks(JMESPathCheck('length(@)', 41))
 
         # download recursively without pattern
         local_folder = self.create_temp_dir()
@@ -56,6 +54,12 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
         self.storage_cmd('storage blob download-batch -s {} -d "{}" --pattern {}', storage_account_info, src_container,
                          local_folder, '*/file_0')
         self.assertEqual(4, sum(len(f) for r, d, f in os.walk(local_folder)))
+
+        # download blob without wild cards
+        local_folder = self.create_temp_dir()
+        self.storage_cmd('storage blob download-batch -s {} -d "{}" --pattern {}', storage_account_info, src_container,
+                         local_folder, 'apple/file_0')
+        self.assertEqual(1, sum(len(f) for r, d, f in os.walk(local_folder)))
 
         # upload blobs with names that start with path separator
         local_file = self.create_temp_file(1)
@@ -124,6 +128,8 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
         self.storage_cmd('storage blob list -c {} --prefix some_dir',
                          storage_account_info, container).assert_with_checks(JMESPathCheck('length(@)', 4))
 
+        # upload-batch with preconditon
+        container = self.create_container(storage_account_info)
         self.storage_cmd('storage blob upload-batch -d {} -s "{}"',
                                   storage_account_info, container, test_dir)
         import time
@@ -141,6 +147,19 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
                                   storage_account_info,
                                   container, test_dir, current).get_output_in_json()
         self.assertEqual(len(result), 41)
+
+        #check result url
+        container = self.create_container(storage_account_info)
+        result = self.storage_cmd('storage blob upload-batch -s "{}" -d {}', storage_account_info,
+                         test_dir, container).get_output_in_json()
+        if result and result[0]:
+            res = result[0]
+            self.assertRegex(res['Blob'], '^.*[^\/]+$')
+            base_url = res['Blob'].split('/')[:3]
+            container = res['Blob'].split('/')[3]
+            blob_name = '/'.join(res['Blob'].split('/')[4:])
+            self.storage_cmd('storage blob show -c {} -n {}', storage_account_info,
+                             container, blob_name)
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer()

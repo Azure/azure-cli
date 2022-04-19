@@ -3,26 +3,28 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=no-name-in-module,import-error
+from azure.cli.command_modules.acs._client_factory import (
+    cf_agent_pools,
+    cf_container_services,
+    cf_managed_clusters,
+    cf_openshift_managed_clusters,
+    cf_snapshots,
+)
+from azure.cli.command_modules.acs._format import (
+    aks_agentpool_list_table_format,
+    aks_agentpool_show_table_format,
+    aks_list_nodepool_snapshot_table_format,
+    aks_list_table_format,
+    aks_run_command_result_format,
+    aks_show_nodepool_snapshot_table_format,
+    aks_show_table_format,
+    aks_upgrades_table_format,
+    aks_versions_table_format,
+    osa_list_table_format,
+)
 from azure.cli.core.commands import CliCommandType
 from azure.cli.core.commands.arm import deployment_validate_table_format
 from azure.cli.core.profiles import ResourceType
-
-from ._client_factory import cf_container_services
-from ._client_factory import cf_managed_clusters
-from ._client_factory import cf_agent_pools
-from ._client_factory import cf_openshift_managed_clusters
-from ._client_factory import cf_snapshots
-from ._format import aks_list_table_format
-from ._format import aks_show_table_format
-from ._format import aks_agentpool_show_table_format
-from ._format import aks_agentpool_list_table_format
-from ._format import osa_list_table_format
-from ._format import aks_upgrades_table_format
-from ._format import aks_versions_table_format
-from ._format import aks_run_command_result_format
-from ._format import aks_show_snapshot_table_format
-from ._format import aks_list_snapshot_table_format
 
 
 # pylint: disable=too-many-statements
@@ -45,15 +47,18 @@ def load_command_table(self, _):
     )
 
     agent_pools_sdk = CliCommandType(
-        operations_tmpl='azext_aks_preview.vendored_sdks.azure_mgmt_preview_aks.'
-                        'operations._agent_pools_operations#AgentPoolsOperations.{}',
+        operations_tmpl='azure.mgmt.containerservice.operations.'
+                        '_agent_pools_operations#AgentPoolsOperations.{}',
+        operation_group='agent_pools',
         resource_type=ResourceType.MGMT_CONTAINERSERVICE,
         client_factory=cf_managed_clusters
     )
 
     snapshot_sdk = CliCommandType(
-        operations_tmpl='azext_aks_preview.vendored_sdks.azure_mgmt_preview_aks.'
-                        'operations._snapshots_operations#SnapshotsOperations.{}',
+        operations_tmpl='azure.mgmt.containerservice.operations.'
+                        '_snapshots_operations#SnapshotsOperations.{}',
+        operation_group='snapshots',
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
         client_factory=cf_snapshots
     )
 
@@ -150,6 +155,7 @@ def load_command_table(self, _):
         g.custom_command('delete', 'aks_agentpool_delete',
                          supports_no_wait=True)
         g.custom_command('get-upgrades', 'aks_agentpool_get_upgrade_profile')
+        g.wait_command('wait')
 
     with self.command_group('aks command', managed_clusters_sdk, client_factory=cf_managed_clusters) as g:
         g.custom_command('invoke', 'aks_runcommand', supports_no_wait=True,
@@ -157,12 +163,35 @@ def load_command_table(self, _):
         g.custom_command('result', 'aks_command_result',
                          supports_no_wait=False, table_transformer=aks_run_command_result_format)
 
-    # AKS snapshot commands
-    with self.command_group('aks snapshot', snapshot_sdk, client_factory=cf_snapshots) as g:
-        g.custom_command('list', 'aks_snapshot_list', table_transformer=aks_list_snapshot_table_format)
-        g.custom_show_command('show', 'aks_snapshot_show', table_transformer=aks_show_snapshot_table_format)
-        g.custom_command('create', 'aks_snapshot_create', supports_no_wait=True)
-        g.custom_command('delete', 'aks_snapshot_delete', supports_no_wait=True)
+    # AKS nodepool snapshot commands
+    with self.command_group('aks snapshot',
+                            snapshot_sdk,
+                            client_factory=cf_snapshots,
+                            deprecate_info=self.deprecate(redirect='aks nodepool snapshot', hide=True),
+                            min_api='2021-08-01') as g:
+        g.custom_command('list', 'aks_nodepool_snapshot_list',
+                         deprecate_info=g.deprecate(redirect='aks nodepool snapshot list'),
+                         table_transformer=aks_list_nodepool_snapshot_table_format)
+        g.custom_show_command('show', 'aks_nodepool_snapshot_show',
+                              deprecate_info=g.deprecate(redirect='aks nodepool snapshot show'),
+                              table_transformer=aks_show_nodepool_snapshot_table_format)
+        g.custom_command('create', 'aks_nodepool_snapshot_create',
+                         deprecate_info=g.deprecate(redirect='aks nodepool snapshot create'), supports_no_wait=True)
+        g.custom_command('delete', 'aks_nodepool_snapshot_delete',
+                         deprecate_info=g.deprecate(redirect='aks nodepool snapshot delete'), supports_no_wait=True)
+        g.wait_command('wait', deprecate_info=g.deprecate(redirect='aks nodepool snapshot wait'))
+
+    with self.command_group('aks nodepool snapshot',
+                            snapshot_sdk,
+                            client_factory=cf_snapshots,
+                            min_api='2021-08-01') as g:
+        g.custom_command('list', 'aks_nodepool_snapshot_list',
+                         table_transformer=aks_list_nodepool_snapshot_table_format)
+        g.custom_show_command('show', 'aks_nodepool_snapshot_show',
+                              table_transformer=aks_show_nodepool_snapshot_table_format)
+        g.custom_command('create', 'aks_nodepool_snapshot_create', supports_no_wait=True)
+        g.custom_command('delete', 'aks_nodepool_snapshot_delete', supports_no_wait=True)
+        g.wait_command('wait')
 
     # OSA commands
     with self.command_group('openshift', openshift_managed_clusters_sdk,

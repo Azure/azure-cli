@@ -35,7 +35,7 @@ from azure.mgmt.apimanagement.models import (ApiManagementServiceResource, ApiMa
                                              OpenIdAuthenticationSettingsContract, ProductContract, ProductState,
                                              NamedValueCreateContract, VersioningScheme, ApiVersionSetContract,
                                              OperationContract, ApiManagementServiceCheckNameAvailabilityParameters,
-                                             ApiReleaseContract)
+                                             ApiReleaseContract, SchemaContract)
 
 
 # Helpers
@@ -179,7 +179,7 @@ def apim_restore(client, resource_group_name, name, backup_name, storage_account
 
 
 def apim_apply_network_configuration_updates(client, resource_group_name, name, location=None):
-    """Updates the Microsoft.ApiManagement resource running in the Virtual network to pick the updated DNS changes. """
+    """Update the Microsoft.ApiManagement resource running in the Virtual network to pick the updated DNS changes. """
     properties = {}
     if location is not None:
         properties['location'] = location
@@ -187,8 +187,78 @@ def apim_apply_network_configuration_updates(client, resource_group_name, name, 
     return client.api_management_service.apply_network_configuration_updates(resource_group_name, name, properties)
 
 
-# API Operations
+# Schema operations
 
+
+def apim_api_schema_create(client, resource_group_name, service_name, api_id, schema_id, schema_type,
+                           schema_name=None, schema_path=None, schema_content=None,
+                           resource_type=None, no_wait=False):
+    """creates or updates an API Schema. """
+
+    if schema_path is not None and schema_content is None:
+        api_file = open(schema_path, 'r')
+        content_value = api_file.read()
+        value = content_value
+    elif schema_content is not None and schema_path is None:
+        value = schema_content
+    elif schema_path is not None and schema_content is not None:
+        raise MutuallyExclusiveArgumentError(
+            "Can't specify schema_path and schema_content at the same time.")
+    else:
+        raise RequiredArgumentMissingError(
+            "Please either specify schema_path or schema_content.")
+
+    parameters = SchemaContract(
+        id=schema_id,
+        name=schema_name,
+        type=resource_type,
+        content_type=schema_type,
+        value=value
+    )
+
+    return sdk_no_wait(no_wait, client.api_schema.begin_create_or_update,
+                       resource_group_name=resource_group_name,
+                       service_name=service_name, api_id=api_id, schema_id=schema_id, parameters=parameters)
+
+
+def apim_api_schema_delete(client, resource_group_name, service_name, api_id, schema_id, if_match=None, no_wait=False):
+    """Deletes an API Schema. """
+    return sdk_no_wait(no_wait, client.api_schema.delete,
+                       resource_group_name=resource_group_name,
+                       service_name=service_name, api_id=api_id, schema_id=schema_id,
+                       if_match="*" if if_match is None else if_match)
+
+
+def apim_api_schema_get(client, resource_group_name, service_name, api_id, schema_id):
+    """Shows details of an API Schema. """
+
+    return client.api_schema.get(resource_group_name=resource_group_name,
+                                 service_name=service_name,
+                                 api_id=api_id,
+                                 schema_id=schema_id)
+
+
+def apim_api_schema_entity(client, resource_group_name, service_name, api_id, schema_id):
+    """Shows details of an API Schema. """
+
+    return client.api_schema.get_entity_tag(resource_group_name=resource_group_name,
+                                            service_name=service_name,
+                                            api_id=api_id,
+                                            schema_id=schema_id)
+
+
+def apim_api_schema_list(client, resource_group_name, api_id, service_name,
+                         filter_display_name=None,
+                         top=None, skip=None):
+    """Get the schema configuration at the API level. """
+
+    return client.api_schema.list_by_api(resource_group_name,
+                                         service_name, api_id,
+                                         filter=filter_display_name,
+                                         skip=skip, top=top)
+
+
+# API Operations
 def apim_api_create(client, resource_group_name, service_name, api_id, description=None,
                     subscription_key_header_name=None, subscription_key_query_param_name=None,
                     open_id_provider_id=None, bearer_token_sending_methods=None,

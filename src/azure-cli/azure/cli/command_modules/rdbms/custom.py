@@ -782,8 +782,7 @@ def create_postgresql_connection_string(server_name, host, user, password):
 def check_server_name_availability(check_name_client, parameters):
     server_availability = check_name_client.execute(parameters)
     if not server_availability.name_available:
-        raise CLIError("The server name '{}' already exists.Please re-run command with some "
-                       "other server name.".format(parameters.name))
+        raise CLIError(server_availability.message)
     return True
 
 

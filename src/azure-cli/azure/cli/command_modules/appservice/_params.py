@@ -352,7 +352,7 @@ def load_arguments(self, _):
             c.argument('docker_registry_server_url', options_list=['--docker-registry-server-url', '-r'],
                        help='the container registry server url')
             c.argument('docker_custom_image_name', options_list=['--docker-custom-image-name', '-c', '-i'],
-                       help='the container custom image name and optionally the tag name')
+                       help='the container custom image name and optionally the tag name (e.g., <registry-name>/<image-name>:<tag>)')
             c.argument('docker_registry_server_user', options_list=['--docker-registry-server-user', '-u'],
                        help='the container registry server username')
             c.argument('docker_registry_server_password', options_list=['--docker-registry-server-password', '-p'],
@@ -960,11 +960,12 @@ def load_arguments(self, _):
     with self.argument_context('appservice ase create-inbound-services') as c:
         c.argument('name', options_list=['--name', '-n'], help='Name of the app service environment',
                    local_context_attribute=LocalContextAttribute(name='ase_name', actions=[LocalContextAction.GET]))
-        c.argument('subnet', help='Name or ID of existing subnet for inbound traffic to ASEv3. \
+        c.argument('subnet', help='Name or ID of existing subnet for DNS Zone link. \
                    To create vnet and/or subnet use `az network vnet [subnet] create`')
         c.argument('vnet_name', help='Name of the vNet. Mandatory if only subnet name is specified.')
         c.argument('skip_dns', arg_type=get_three_state_flag(),
-                   help='Do not create Private DNS Zone and DNS records.')
+                   help='Do not create Private DNS Zone and DNS records.',
+                   deprecate_info=c.deprecate(expiration='3.0.0'))
 
     # App Service Domain Commands
     with self.argument_context('appservice domain create') as c:
@@ -985,16 +986,16 @@ def load_arguments(self, _):
         c.argument('hostname', options_list=['--hostname', '-n'], help='Name of the custom domain')
 
     with self.argument_context('staticwebapp', validator=validate_public_cloud) as c:
-        c.ignore('format_output')
-        c.argument('name', options_list=['--name', '-n'], metavar='NAME', help="Name of the static site")
-        c.argument('source', options_list=['--source', '-s'], help="URL for the repository of the static site.")
-        c.argument('token', options_list=['--token', '-t'],
+        c.argument('source', options_list=['--source', '-s'], help="URL for the repository of the static site.", arg_group="Github")
+        c.argument('token', options_list=['--token', '-t'], arg_group="Github",
                    help="A user's github repository token. This is used to setup the Github Actions workflow file and "
                         "API secrets. If you need to create a Github Personal Access Token, "
                         "please run with the '--login-with-github' flag or follow the steps found at the following link:\n"
                         "https://help.github.com/en/articles/creating-a-personal-access-token-for-the-command-line")
-        c.argument('login_with_github', help="Interactively log in with Github to retrieve the Personal Access Token")
-        c.argument('branch', options_list=['--branch', '-b'], help="The target branch in the repository.")
+        c.argument('login_with_github', help="Interactively log in with Github to retrieve the Personal Access Token", arg_group="Github")
+        c.argument('branch', options_list=['--branch', '-b'], help="The target branch in the repository.", arg_group="Github")
+        c.ignore('format_output')
+        c.argument('name', options_list=['--name', '-n'], metavar='NAME', help="Name of the static site")
     with self.argument_context('staticwebapp environment') as c:
         c.argument('environment_name',
                    options_list=['--environment-name'], help="Name of the environment of static site")

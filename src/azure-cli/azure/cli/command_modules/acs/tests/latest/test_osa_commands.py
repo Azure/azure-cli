@@ -3,17 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import os
-import tempfile
-import unittest
-
-from knack.util import CLIError
-
-from azure.cli.testsdk import (
-    ResourceGroupPreparer, ManagedApplicationPreparer, ScenarioTest, live_only)
-from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from azure.cli.testsdk.checkers import (StringContainCheck, StringContainCheckIgnoreCase)
-
+from azure.cli.testsdk import ManagedApplicationPreparer, ResourceGroupPreparer, ScenarioTest, live_only
 # flake8: noqa
 
 

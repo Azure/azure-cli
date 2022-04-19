@@ -35,6 +35,9 @@ def load_arguments_sb(self, _):
         c.argument('tags', arg_type=tags_type)
         c.argument('sku', arg_type=get_enum_type(SkuName), help='Namespace SKU.')
         c.argument('capacity', type=int, choices=[1, 2, 4, 8, 16], help='Number of message units. This property is only applicable to namespaces of Premium SKU', validator=validate_premiumsku_capacity)
+        c.argument('zone_redundant', options_list=['--zone-redundant'], is_preview=True,
+                   arg_type=get_three_state_flag(),
+                   help='Enabling this property creates a Standard Service Bus Namespace in regions supported availability zones')
         c.argument('mi_system_assigned', arg_group='Managed Identity',
                    arg_type=get_three_state_flag(),
                    help='Enable System Assigned Identity')

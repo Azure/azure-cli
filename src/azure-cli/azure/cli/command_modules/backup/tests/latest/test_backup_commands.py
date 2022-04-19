@@ -143,6 +143,14 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('properties.storageModelType', new_storage_model)
         ])
 
+        self.cmd('backup vault backup-properties set -g {rg} -n {vault1} --hybrid-backup-security-features Disable', checks=[
+            self.check("properties.enhancedSecurityState", 'Disabled'),
+        ])
+
+        self.cmd('backup vault backup-properties set -g {rg} -n {vault1} --hybrid-backup-security-features Enable', checks=[
+            self.check("properties.enhancedSecurityState", 'Enabled'),
+        ])
+
         self.cmd('backup vault delete -n {vault4} -g {rg} -y')
 
         self.cmd('backup vault list', checks=[

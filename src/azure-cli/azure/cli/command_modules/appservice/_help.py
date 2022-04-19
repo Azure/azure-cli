@@ -705,7 +705,7 @@ short-summary: assign managed identity to the web app
 examples:
   - name: assign local identity and assign a reader role to the current resource group.
     text: >
-        az functionapp identity assign -g MyResourceGroup -n MyUniqueApp --role reader --scope /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/MyResourceGroup
+        az functionapp identity assign -g MyResourceGroup -n MyUniqueApp --role reader --scope /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourcegroups/MyResourceGroup
   - name: enable identity for the web app.
     text: >
         az functionapp identity assign -g MyResourceGroup -n MyUniqueApp
@@ -1767,7 +1767,7 @@ short-summary: assign managed identity to the web app
 examples:
   - name: assign local identity and assign a reader role to the current resource group.
     text: >
-        az webapp identity assign -g MyResourceGroup -n MyUniqueApp --role reader --scope /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/MyResourceGroup
+        az webapp identity assign -g MyResourceGroup -n MyUniqueApp --role reader --scope /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourcegroups/MyResourceGroup
   - name: enable identity for the web app.
     text: >
         az webapp identity assign -g MyResourceGroup -n MyUniqueApp
@@ -2255,7 +2255,7 @@ helps['appservice ase create'] = """
 
 helps['appservice ase create-inbound-services'] = """
     type: command
-    short-summary: Private DNS Zone for Internal ASEv2.
+    short-summary: Private DNS Zone for Internal (ILB) App Service Environments.
     examples:
     - name: Create Private DNS Zone and A records.
       text: |
@@ -2331,7 +2331,7 @@ helps['staticwebapp show'] = """
 
 helps['staticwebapp create'] = """
     type: command
-    short-summary: Create a static app with content from a GitHub repository URL and on the provided branch. If the repo is under a Github organization, please ensure that the Azure CLI Github App has access to the organization. Access can be requested in the browser when using the "--login-with-github" argument. Access must be granted by the organization's admin.
+    short-summary: Create a static app. To provide content to the static web app and integrate with a Github repo, provide the Github repository URL (--source) and a branch (--branch). If the repo is under a Github organization, please ensure that the Azure CLI Github App has access to the organization. Access can be requested in the browser when using the "--login-with-github" argument. Access must be granted by the organization's admin.
     examples:
     - name: Create static app in a subscription.
       text: az staticwebapp create -n MyStaticAppName -g MyExistingRg
@@ -2339,6 +2339,8 @@ helps['staticwebapp create'] = """
     - name: Create static app in a subscription, retrieving token interactively
       text: az staticwebapp create -n MyStaticAppName -g MyExistingRg
        -s https://github.com/JohnDoe/my-first-static-web-app -l WestUs2 -b master --login-with-github
+    - name: Create a static web app without any content and without a github integration
+      text: az staticwebapp create -n MyStaticAppName -g MyExistingRg
 """
 
 helps['staticwebapp update'] = """
@@ -2493,7 +2495,7 @@ short-summary: assign managed identity to the static web app
 examples:
   - name: assign local identity and assign a reader role to the current resource group.
     text: >
-        az staticwebapp identity assign -g MyResourceGroup -n MyUniqueApp --role reader --scope /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/MyResourceGroup
+        az staticwebapp identity assign -g MyResourceGroup -n MyUniqueApp --role reader --scope /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourcegroups/MyResourceGroup
   - name: enable identity for the web app.
     text: >
         az staticwebapp identity assign -g MyResourceGroup -n MyUniqueApp

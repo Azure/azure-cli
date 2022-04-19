@@ -856,6 +856,7 @@ def acr_task_run(cmd,  # pylint: disable=too-many-locals
                  secret_arg=None,
                  target=None,
                  update_trigger_token=None,
+                 no_format=False,
                  no_logs=False,
                  no_wait=False,
                  resource_group_name=None,
@@ -915,7 +916,7 @@ def acr_task_run(cmd,  # pylint: disable=too-many-locals
         from ._run_polling import get_run_with_polling
         return get_run_with_polling(cmd, client, run_id, registry_name, resource_group_name)
 
-    return stream_logs(cmd, client, run_id, registry_name, resource_group_name, timeout, True)
+    return stream_logs(cmd, client, run_id, registry_name, resource_group_name, timeout, no_format, True)
 
 
 def acr_task_show_run(cmd,
@@ -984,6 +985,7 @@ def acr_task_logs(cmd,
                   run_id=None,
                   task_name=None,
                   image=None,
+                  no_format=False,
                   resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
@@ -1007,7 +1009,7 @@ def acr_task_logs(cmd,
                                                   task_name=task_name,
                                                   image=image))
 
-    return stream_logs(cmd, client, run_id, registry_name, resource_group_name)
+    return stream_logs(cmd, client, run_id, registry_name, resource_group_name, None, no_format, False)
 
 
 def _get_list_runs_message(base_message, task_name=None, image=None):

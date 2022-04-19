@@ -3,13 +3,17 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import os
 import re
 import time
 from distutils.version import StrictVersion
+from types import SimpleNamespace
 from typing import Any, Dict, List, Tuple, TypeVar, Union
 
 from azure.cli.command_modules.acs._consts import (
     CONST_OUTBOUND_TYPE_LOAD_BALANCER,
+    CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY,
+    CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY,
     CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
     CONST_PRIVATE_DNS_ZONE_NONE,
     CONST_PRIVATE_DNS_ZONE_SYSTEM,
@@ -22,6 +26,13 @@ from azure.cli.command_modules.acs._helpers import (
 )
 from azure.cli.command_modules.acs._loadbalancer import create_load_balancer_profile, set_load_balancer_sku
 from azure.cli.command_modules.acs._loadbalancer import update_load_balancer_profile as _update_load_balancer_profile
+from azure.cli.command_modules.acs._natgateway import (
+    create_nat_gateway_profile,
+    is_nat_gateway_profile_provided,
+)
+from azure.cli.command_modules.acs._natgateway import (
+    update_nat_gateway_profile as _update_nat_gateway_profile,
+)
 from azure.cli.command_modules.acs._resourcegroup import get_rg_location
 from azure.cli.command_modules.acs._validators import extract_comma_separated_string
 from azure.cli.command_modules.acs.addonconfiguration import (
@@ -51,7 +62,7 @@ from azure.cli.core.azclierror import (
 from azure.cli.core.commands import AzCliCommand
 from azure.cli.core.keys import is_valid_ssh_rsa_public_key
 from azure.cli.core.profiles import ResourceType
-from azure.cli.core.util import truncate_text
+from azure.cli.core.util import truncate_text, get_file_json
 from azure.core.exceptions import HttpResponseError
 from knack.log import get_logger
 from knack.prompting import NoTTYException, prompt, prompt_pass, prompt_y_n
@@ -69,6 +80,8 @@ ManagedClusterPropertiesAutoScalerProfile = TypeVar("ManagedClusterPropertiesAut
 ResourceReference = TypeVar("ResourceReference")
 ManagedClusterAddonProfile = TypeVar("ManagedClusterAddonProfile")
 Snapshot = TypeVar("Snapshot")
+KubeletConfig = TypeVar("KubeletConfig")
+LinuxOSConfig = TypeVar("LinuxOSConfig")
 
 # TODO
 # add validation for all/some of the parameters involved in the getter of outbound_type/enable_addons
@@ -274,8 +287,20 @@ class AKSModels:
             resource_type=self.resource_type,
             operation_group="managed_clusters",
         )
+        self.KubeletConfig = self.__cmd.get_models(
+            "KubeletConfig",
+            resource_type=self.resource_type,
+            operation_group="managed_clusters",
+        )
+        self.LinuxOSConfig = self.__cmd.get_models(
+            "LinuxOSConfig",
+            resource_type=self.resource_type,
+            operation_group="managed_clusters",
+        )
         # init load balancer models
         self.init_lb_models()
+        # holder for nat gateway related models
+        self.__nat_gateway_models = None
 
     def init_lb_models(self) -> None:
         """Initialize models used by load balancer.
@@ -320,6 +345,30 @@ class AKSModels:
         # Note: Uncomment the followings to add these models as class attributes.
         # for model_name, model_type in lb_models.items():
         #     setattr(self, model_name, model_type)
+
+    @property
+    def nat_gateway_models(self) -> SimpleNamespace:
+        """Get nat gateway related models.
+
+        The models are stored in a SimpleNamespace object, could be accessed by the dot operator like
+        `nat_gateway_models.ManagedClusterNATGatewayProfile`.
+
+        :return: SimpleNamespace
+        """
+        if self.__nat_gateway_models is None:
+            nat_gateway_models = {}
+            nat_gateway_models["ManagedClusterNATGatewayProfile"] = self.__cmd.get_models(
+                "ManagedClusterNATGatewayProfile",
+                resource_type=self.resource_type,
+                operation_group="managed_clusters",
+            )
+            nat_gateway_models["ManagedClusterManagedOutboundIPProfile"] = self.__cmd.get_models(
+                "ManagedClusterManagedOutboundIPProfile",
+                resource_type=self.resource_type,
+                operation_group="managed_clusters",
+            )
+            self.__nat_gateway_models = SimpleNamespace(**nat_gateway_models)
+        return self.__nat_gateway_models
 
 
 class AKSParamDict:
@@ -678,6 +727,57 @@ class AKSContext:
         # this parameter does not need dynamic completion
         # this parameter does not need validation
         return name
+
+    def get_nat_gateway_managed_outbound_ip_count(self) -> Union[int, None]:
+        """Obtain the value of nat_gateway_managed_outbound_ip_count.
+
+        Note: SDK provides default value 1 and performs the following validation {'maximum': 16, 'minimum': 1}.
+
+        :return: int or None
+        """
+        # read the original value passed by the command
+        nat_gateway_managed_outbound_ip_count = self.raw_param.get("nat_gateway_managed_outbound_ip_count")
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.network_profile and
+                self.mc.network_profile.nat_gateway_profile and
+                self.mc.network_profile.nat_gateway_profile.managed_outbound_ip_profile and
+                self.mc.network_profile.nat_gateway_profile.managed_outbound_ip_profile.count is not None
+            ):
+                nat_gateway_managed_outbound_ip_count = (
+                    self.mc.network_profile.nat_gateway_profile.managed_outbound_ip_profile.count
+                )
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return nat_gateway_managed_outbound_ip_count
+
+    def get_nat_gateway_idle_timeout(self) -> Union[int, None]:
+        """Obtain the value of nat_gateway_idle_timeout.
+
+        Note: SDK provides default value 4 and performs the following validation {'maximum': 120, 'minimum': 4}.
+
+        :return: int or None
+        """
+        # read the original value passed by the command
+        nat_gateway_idle_timeout = self.raw_param.get("nat_gateway_idle_timeout")
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.network_profile and
+                self.mc.network_profile.nat_gateway_profile and
+                self.mc.network_profile.nat_gateway_profile.idle_timeout_in_minutes is not None
+            ):
+                nat_gateway_idle_timeout = (
+                    self.mc.network_profile.nat_gateway_profile.idle_timeout_in_minutes
+                )
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return nat_gateway_idle_timeout
 
     def _get_location(self, read_only: bool = False) -> Union[str, None]:
         """Internal function to dynamically obtain the value of location according to the context.
@@ -2605,6 +2705,7 @@ class AKSContext:
         CONST_OUTBOUND_TYPE_LOAD_BALANCER.
 
         This function supports the option of enable_validation. When enabled, if the value of outbound_type is
+        CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY, CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY or
         CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING, the following checks will be performed. If load_balancer_sku is set
         to basic, an InvalidArgumentValueError will be raised. If vnet_subnet_id is not assigned,
         a RequiredArgumentMissingError will be raised. If any of load_balancer_managed_outbound_ip_count,
@@ -2633,13 +2734,22 @@ class AKSContext:
             return outbound_type
 
         # dynamic completion
-        if not read_from_mc and outbound_type != CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING:
+        if (
+            not read_from_mc and
+            outbound_type != CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY and
+            outbound_type != CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY and
+            outbound_type != CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING
+        ):
             outbound_type = CONST_OUTBOUND_TYPE_LOAD_BALANCER
 
         # validation
         # Note: The parameters involved in the validation are not verified in their own getters.
         if enable_validation:
-            if outbound_type == CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING:
+            if outbound_type in [
+                CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
+                CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY,
+                CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY,
+            ]:
                 # Should not enable read_only for get_load_balancer_sku, since its default value is None, and it has
                 # not been decorated into the mc object at this time, only the value after dynamic completion is
                 # meaningful here.
@@ -2648,30 +2758,37 @@ class AKSContext:
                         "userDefinedRouting doesn't support basic load balancer sku"
                     )
 
-                if self.get_vnet_subnet_id() in ["", None]:
-                    raise RequiredArgumentMissingError(
-                        "--vnet-subnet-id must be specified for userDefinedRouting and it must "
-                        "be pre-configured with a route table with egress rules"
-                    )
+                if outbound_type in [
+                    CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
+                    CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY,
+                ]:
+                    if self.get_vnet_subnet_id() in ["", None]:
+                        raise RequiredArgumentMissingError(
+                            "--vnet-subnet-id must be specified for userDefinedRouting and it must "
+                            "be pre-configured with a route table with egress rules"
+                        )
 
-                if load_balancer_profile:
-                    if (
-                        load_balancer_profile.managed_outbound_i_ps or
-                        load_balancer_profile.outbound_i_ps or
-                        load_balancer_profile.outbound_ip_prefixes
-                    ):
-                        raise MutuallyExclusiveArgumentError(
-                            "userDefinedRouting doesn't support customizing a standard load balancer with IP addresses"
-                        )
-                else:
-                    if (
-                        self.get_load_balancer_managed_outbound_ip_count() or
-                        self.get_load_balancer_outbound_ips() or
-                        self.get_load_balancer_outbound_ip_prefixes()
-                    ):
-                        raise MutuallyExclusiveArgumentError(
-                            "userDefinedRouting doesn't support customizing a standard load balancer with IP addresses"
-                        )
+                if outbound_type == CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING:
+                    if load_balancer_profile:
+                        if (
+                            load_balancer_profile.managed_outbound_i_ps or
+                            load_balancer_profile.outbound_i_ps or
+                            load_balancer_profile.outbound_ip_prefixes
+                        ):
+                            raise MutuallyExclusiveArgumentError(
+                                "userDefinedRouting doesn't support customizing \
+                                a standard load balancer with IP addresses"
+                            )
+                    else:
+                        if (
+                            self.get_load_balancer_managed_outbound_ip_count() or
+                            self.get_load_balancer_outbound_ips() or
+                            self.get_load_balancer_outbound_ip_prefixes()
+                        ):
+                            raise MutuallyExclusiveArgumentError(
+                                "userDefinedRouting doesn't support customizing \
+                                a standard load balancer with IP addresses"
+                            )
 
         return outbound_type
 
@@ -2917,6 +3034,7 @@ class AKSContext:
             CONST_INGRESS_APPGW_WATCH_NAMESPACE,
             CONST_KUBE_DASHBOARD_ADDON_NAME, CONST_MONITORING_ADDON_NAME,
             CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID,
+            CONST_MONITORING_USING_AAD_MSI_AUTH,
             CONST_OPEN_SERVICE_MESH_ADDON_NAME, CONST_ROTATION_POLL_INTERVAL,
             CONST_SECRET_ROTATION_ENABLED, CONST_VIRTUAL_NODE_ADDON_NAME,
             CONST_VIRTUAL_NODE_SUBNET_NAME)
@@ -2979,6 +3097,9 @@ class AKSContext:
             "CONST_ROTATION_POLL_INTERVAL"
         ] = CONST_ROTATION_POLL_INTERVAL
 
+        addon_consts[
+            "CONST_MONITORING_USING_AAD_MSI_AUTH"
+        ] = CONST_MONITORING_USING_AAD_MSI_AUTH
         return addon_consts
 
     def _get_enable_addons(self, enable_validation: bool = False) -> List[str]:
@@ -3217,6 +3338,38 @@ class AKSContext:
         # this parameter does not need dynamic completion
         # this parameter does not need validation
         return appgw_name
+
+    def get_enable_msi_auth_for_monitoring(self) -> Union[bool, None]:
+        """Obtain the value of enable_msi_auth_for_monitoring.
+
+        Note: The arg type of this parameter supports three states (True, False or None), but the corresponding default
+        value in entry function is not None.
+
+        :return: bool or None
+        """
+        # determine the value of constants
+        addon_consts = self.get_addon_consts()
+        CONST_MONITORING_ADDON_NAME = addon_consts.get("CONST_MONITORING_ADDON_NAME")
+        CONST_MONITORING_USING_AAD_MSI_AUTH = addon_consts.get("CONST_MONITORING_USING_AAD_MSI_AUTH")
+
+        # read the original value passed by the command
+        enable_msi_auth_for_monitoring = self.raw_param.get("enable_msi_auth_for_monitoring")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if (
+            self.mc and
+            self.mc.addon_profiles and
+            CONST_MONITORING_ADDON_NAME in self.mc.addon_profiles and
+            self.mc.addon_profiles.get(
+                CONST_MONITORING_ADDON_NAME
+            ).config.get(CONST_MONITORING_USING_AAD_MSI_AUTH) is not None
+        ):
+            enable_msi_auth_for_monitoring = self.mc.addon_profiles.get(
+                CONST_MONITORING_ADDON_NAME
+            ).config.get(CONST_MONITORING_USING_AAD_MSI_AUTH)
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return enable_msi_auth_for_monitoring
 
     def get_appgw_subnet_cidr(self) -> Union[str, None]:
         """Obtain the value of appgw_subnet_cidr.
@@ -4617,6 +4770,7 @@ class AKSContext:
             enable_strip=True,
             extract_kv=True,
             default_value={},
+            allow_appending_values_to_same_key=True,
         )
 
         # In create mode, add AAD session key to header.
@@ -4733,6 +4887,86 @@ class AKSContext:
             raise UnknownError('Cannot get the AKS cluster\'s service principal.')
         return assignee, is_service_principal
 
+    def get_kubelet_config(self) -> Union[dict, KubeletConfig, None]:
+        """Obtain the value of kubelet_config.
+
+        :return: dict, KubeletConfig or None
+        """
+        # read the original value passed by the command
+        kubelet_config = None
+        kubelet_config_file_path = self.raw_param.get("kubelet_config")
+        # validate user input
+        if kubelet_config_file_path:
+            if not os.path.isfile(kubelet_config_file_path):
+                raise InvalidArgumentValueError(
+                    "{} is not valid file, or not accessable.".format(
+                        kubelet_config_file_path
+                    )
+                )
+            kubelet_config = get_file_json(kubelet_config_file_path)
+            if not isinstance(kubelet_config, dict):
+                raise InvalidArgumentValueError(
+                    "Error reading kubelet configuration from {}. "
+                    "Please see https://aka.ms/CustomNodeConfig for correct format.".format(
+                        kubelet_config_file_path
+                    )
+                )
+
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if self.mc and self.mc.agent_pool_profiles:
+            agent_pool_profile = safe_list_get(
+                self.mc.agent_pool_profiles, 0, None
+            )
+            if (
+                agent_pool_profile and
+                agent_pool_profile.kubelet_config is not None
+            ):
+                kubelet_config = agent_pool_profile.kubelet_config
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return kubelet_config
+
+    def get_linux_os_config(self) -> Union[dict, LinuxOSConfig, None]:
+        """Obtain the value of linux_os_config.
+
+        :return: dict, LinuxOSConfig or None
+        """
+        # read the original value passed by the command
+        linux_os_config = None
+        linux_os_config_file_path = self.raw_param.get("linux_os_config")
+        # validate user input
+        if linux_os_config_file_path:
+            if not os.path.isfile(linux_os_config_file_path):
+                raise InvalidArgumentValueError(
+                    "{} is not valid file, or not accessable.".format(
+                        linux_os_config_file_path
+                    )
+                )
+            linux_os_config = get_file_json(linux_os_config_file_path)
+            if not isinstance(linux_os_config, dict):
+                raise InvalidArgumentValueError(
+                    "Error reading Linux OS configuration from {}. "
+                    "Please see https://aka.ms/CustomNodeConfig for correct format.".format(
+                        linux_os_config_file_path
+                    )
+                )
+
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if self.mc and self.mc.agent_pool_profiles:
+            agent_pool_profile = safe_list_get(
+                self.mc.agent_pool_profiles, 0, None
+            )
+            if (
+                agent_pool_profile and
+                agent_pool_profile.linux_os_config is not None
+            ):
+                linux_os_config = agent_pool_profile.linux_os_config
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return linux_os_config
+
 
 class AKSCreateDecorator:
     def __init__(
@@ -4823,6 +5057,8 @@ class AKSCreateDecorator:
             max_count=max_count,
             enable_auto_scaling=enable_auto_scaling,
             enable_fips=self.context.get_enable_fips_image(),
+            kubelet_config=self.context.get_kubelet_config(),
+            linux_os_config=self.context.get_linux_os_config(),
         )
 
         # snapshot creation data
@@ -5128,6 +5364,16 @@ class AKSCreateDecorator:
                 network_profile = self.models.ContainerServiceNetworkProfile(
                     load_balancer_sku=load_balancer_sku,
                 )
+
+        # build nat gateway profile, which is part of the network profile
+        nat_gateway_profile = create_nat_gateway_profile(
+            self.context.get_nat_gateway_managed_outbound_ip_count(),
+            self.context.get_nat_gateway_idle_timeout(),
+            models=self.models.nat_gateway_models,
+        )
+        load_balancer_sku = self.context.get_load_balancer_sku()
+        if load_balancer_sku != "basic":
+            network_profile.nat_gateway_profile = nat_gateway_profile
         mc.network_profile = network_profile
         return mc
 
@@ -5166,12 +5412,16 @@ class AKSCreateDecorator:
         CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID = addon_consts.get(
             "CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID"
         )
+        CONST_MONITORING_USING_AAD_MSI_AUTH = addon_consts.get(
+            "CONST_MONITORING_USING_AAD_MSI_AUTH"
+        )
 
         # TODO: can we help the user find a workspace resource ID?
         monitoring_addon_profile = self.models.ManagedClusterAddonProfile(
             enabled=True,
             config={
-                CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: self.context.get_workspace_resource_id()
+                CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: self.context.get_workspace_resource_id(),
+                CONST_MONITORING_USING_AAD_MSI_AUTH: self.context.get_enable_msi_auth_for_monitoring(),
             },
         )
         # post-process, create a deployment
@@ -5181,7 +5431,10 @@ class AKSCreateDecorator:
             self.context.get_resource_group_name(),
             self.context.get_name(),
             self.context.get_location(),
-            aad_route=False,
+            remove_monitoring=False,
+            aad_route=self.context.get_enable_msi_auth_for_monitoring(),
+            create_dcr=True,
+            create_dcra=False,
         )
         # set intermediate
         self.context.set_intermediate("monitoring", True, overwrite_exists=True)
@@ -5674,7 +5927,8 @@ class AKSCreateDecorator:
                     self.context.get_resource_group_name(),
                     self.context.get_name(),
                     mc,
-                    self.context.get_intermediate("monitoring", default_value=False),
+                    self.context.get_intermediate("monitoring", default_value=False) and
+                    not self.context.get_enable_msi_auth_for_monitoring(),
                     self.context.get_intermediate("ingress_appgw_addon_enabled", default_value=False),
                     self.context.get_intermediate("enable_virtual_node", default_value=False),
                     self.context.get_intermediate("need_post_creation_vnet_permission_granting", default_value=False),
@@ -5683,6 +5937,22 @@ class AKSCreateDecorator:
                     self.context.get_attach_acr(),
                     self.context.get_aks_custom_headers(),
                     self.context.get_no_wait())
+                if self.context.get_intermediate("monitoring") and self.context.get_enable_msi_auth_for_monitoring():
+                    # Create the DCR Association here
+                    addon_consts = self.context.get_addon_consts()
+                    CONST_MONITORING_ADDON_NAME = addon_consts.get("CONST_MONITORING_ADDON_NAME")
+                    ensure_container_insights_for_monitoring(
+                        self.cmd,
+                        mc.addon_profiles[CONST_MONITORING_ADDON_NAME],
+                        self.context.get_subscription_id(),
+                        self.context.get_resource_group_name(),
+                        self.context.get_name(),
+                        self.context.get_location(),
+                        remove_monitoring=False,
+                        aad_route=self.context.get_enable_msi_auth_for_monitoring(),
+                        create_dcr=False,
+                        create_dcra=True,
+                    )
                 return created_cluster
             # CloudError was raised before, but since the adoption of track 2 SDK,
             # HttpResponseError would be raised instead
@@ -5761,6 +6031,8 @@ class AKSUpdateDecorator:
                 '"--load-balancer-outbound-ip-prefixes" or '
                 '"--load-balancer-outbound-ports" or '
                 '"--load-balancer-idle-timeout" or '
+                '"--nat-gateway-managed-outbound-ip-count" or '
+                '"--nat-gateway-idle-timeout" or '
                 '"--auto-upgrade-channel" or '
                 '"--attach-acr" or "--detach-acr" or '
                 '"--uptime-sla" or '
@@ -5944,6 +6216,29 @@ class AKSUpdateDecorator:
             idle_timeout=load_balancer_idle_timeout,
             profile=mc.network_profile.load_balancer_profile,
             models=self.models.lb_models)
+        return mc
+
+    def update_nat_gateway_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update nat gateway profile for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        nat_gateway_managed_outbound_ip_count = self.context.get_nat_gateway_managed_outbound_ip_count()
+        nat_gateway_idle_timeout = self.context.get_nat_gateway_idle_timeout()
+        if is_nat_gateway_profile_provided(nat_gateway_managed_outbound_ip_count, nat_gateway_idle_timeout):
+            if not mc.network_profile:
+                raise UnknownError(
+                    "Unexpectedly get an empty network profile in the process of updating nat gateway profile."
+                )
+
+            mc.network_profile.nat_gateway_profile = _update_nat_gateway_profile(
+                nat_gateway_managed_outbound_ip_count,
+                nat_gateway_idle_timeout,
+                mc.network_profile.nat_gateway_profile,
+                models=self.models.nat_gateway_models,
+            )
         return mc
 
     def update_disable_local_accounts(self, mc: ManagedCluster) -> ManagedCluster:
@@ -6244,6 +6539,8 @@ class AKSUpdateDecorator:
         mc = self.update_sku(mc)
         # update load balancer profile
         mc = self.update_load_balancer_profile(mc)
+        # update nat gateway profile
+        mc = self.update_nat_gateway_profile(mc)
         # update disable/enable local accounts
         mc = self.update_disable_local_accounts(mc)
         # update api server access profile
@@ -6280,7 +6577,8 @@ class AKSUpdateDecorator:
             self.context.get_resource_group_name(),
             self.context.get_name(),
             mc,
-            self.context.get_intermediate("monitoring", default_value=False),
+            self.context.get_intermediate("monitoring", default_value=False) and
+            not self.context.get_enable_msi_auth_for_monitoring(),
             self.context.get_intermediate("ingress_appgw_addon_enabled", default_value=False),
             self.context.get_intermediate("enable_virtual_node", default_value=False),
             False,
@@ -6288,5 +6586,5 @@ class AKSUpdateDecorator:
             check_is_msi_cluster(mc),
             self.context.get_attach_acr(),
             self.context.get_aks_custom_headers(),
-            self.context.get_no_wait()
+            self.context.get_no_wait(),
         )

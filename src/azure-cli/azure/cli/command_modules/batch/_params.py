@@ -95,8 +95,10 @@ def load_arguments(self, _):
         c.argument('show', action='store_true', help='Display the credential information for the Batch account.')
 
     with self.argument_context('batch application set') as c:
-        c.argument('application_name', options_list=('--application-name',), help="The name of the application.")
-        c.argument('allow_updates', options_list=('--allow-updates',), help="Specify to indicate whether packages within the application may be overwritten using the same version string. Specify either 'true' or 'false' to update the property.")
+        c.argument('application_name', help="The name of the application.")
+        c.argument('allow_updates', help="Specify to indicate whether packages within the application may be overwritten using the same version string. Specify either 'true' or 'false' to update the property.")
+        c.argument('default_version', help="Specify which package to use if a client requests the application but does not specify a version.")
+        c.argument('display_name', help="Specify the display name for the application.")
 
     with self.argument_context('batch application create') as c:
         c.argument('allow_updates', options_list=('--allow-updates',), action="store_true", help="Specify to indicate whether packages within the application may be overwritten using the same version string. True if flag present.")
@@ -104,8 +106,8 @@ def load_arguments(self, _):
     for command in ['create', 'activate']:
         with self.argument_context(f'batch application package {command}') as c:
             c.argument('package_file', type=file_type, help='The path of the application package in zip format', completer=FilesCompleter())
-            c.argument('application_name', options_list=('--application-name',), help="The name of the application.")
-            c.argument('version_name', options_list=('--version-name',), help="The version name of the application.")
+            c.argument('application_name', help="The name of the application.")
+            c.argument('version_name', help="The version name of the application.")
             c.argument('f_ormat', options_list=('--format',), help="The format of the application package binary file.")
 
     with self.argument_context('batch location quotas show') as c:
@@ -143,6 +145,14 @@ def load_arguments(self, _):
                    help='The maximum number of times the task may be retried.')
         c.argument('start_task_environment_settings', nargs='+', type=environment_setting_format, arg_group='Pool: Start Task',
                    help='A list of environment variable settings for the start task. Space-separated values in \'key=value\' format.')
+
+    with self.argument_context('batch private-endpoint-connection show') as c:
+        c.argument('private_endpoint_connection_name', options_list=['--name', '-n'],
+                   help='The private endpoint connection name. This must be unique within the account.')
+
+    with self.argument_context('batch private-link-resource show') as c:
+        c.argument('private_link_resource_name', options_list=['--name', '-n'],
+                   help='The private link resource name. This must be unique within the account.')
 
     with self.argument_context('batch job list') as c:
         c.argument('filter', help=' An OData $filter clause.', arg_group='Pre-condition and Query')

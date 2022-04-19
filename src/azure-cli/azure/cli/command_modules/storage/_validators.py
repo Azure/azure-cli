@@ -121,6 +121,7 @@ def is_storagev2(import_prefix):
     return import_prefix.startswith('azure.multiapi.storagev2.') or import_prefix.startswith('azure.data.tables')
 
 
+# pylint: disable=too-many-branches, too-many-statements
 def validate_client_parameters(cmd, namespace):
     """ Retrieves storage connection parameters from environment variables and parses out connection string into
     account name and key """
@@ -130,7 +131,11 @@ def validate_client_parameters(cmd, namespace):
         auth_mode = n.auth_mode or get_config_value(cmd, 'storage', 'auth_mode', None)
         del n.auth_mode
         if not n.account_name:
-            n.account_name = get_config_value(cmd, 'storage', 'account', None)
+            if hasattr(n, 'account_url') and not n.account_url:
+                n.account_name = get_config_value(cmd, 'storage', 'account', None)
+                n.account_url = get_config_value(cmd, 'storage', 'account_url', None)
+            else:
+                n.account_name = get_config_value(cmd, 'storage', 'account', None)
         if auth_mode == 'login':
             prefix = cmd.command_kwargs['resource_type'].value[0]
             # is_storagv2() is used to distinguish if the command is in track2 SDK
@@ -167,7 +172,11 @@ def validate_client_parameters(cmd, namespace):
 
     # otherwise, simply try to retrieve the remaining variables from environment variables
     if not n.account_name:
-        n.account_name = get_config_value(cmd, 'storage', 'account', None)
+        if hasattr(n, 'account_url') and not n.account_url:
+            n.account_name = get_config_value(cmd, 'storage', 'account', None)
+            n.account_url = get_config_value(cmd, 'storage', 'account_url', None)
+        else:
+            n.account_name = get_config_value(cmd, 'storage', 'account', None)
     if not n.account_key and not n.sas_token:
         n.account_key = get_config_value(cmd, 'storage', 'key', None)
     if not n.sas_token:
@@ -201,6 +210,20 @@ For more information about RBAC roles in storage, visit https://docs.microsoft.c
             n.account_key = _query_account_key(cmd.cli_ctx, n.account_name)
         except Exception as ex:  # pylint: disable=broad-except
             logger.warning("\nSkip querying account key due to failure: %s", ex)
+
+    if hasattr(n, 'account_url') and n.account_url and not n.account_key and not n.sas_token:
+        message = """
+There are no credentials provided in your command and environment.
+Please provide --connection-string, --account-key or --sas-token in your command as credentials.
+        """
+
+        if 'auth_mode' in cmd.arguments:
+            message += """
+You also can add `--auth-mode login` in your command to use Azure Active Directory (Azure AD) for authorization if your login account is assigned required RBAC roles.
+For more information about RBAC roles in storage, visit https://docs.microsoft.com/azure/storage/common/storage-auth-aad-rbac-cli."
+            """
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        raise InvalidArgumentValueError(message)
 
 
 def validate_encryption_key(cmd, namespace):
@@ -653,6 +676,7 @@ def validate_entity(namespace):
     """ Converts a list of key value pairs into a dictionary. Ensures that required
     RowKey and PartitionKey are converted to the correct case and included. """
     values = dict(x.split('=', 1) for x in namespace.entity)
+    edm_types = {}
     keys = values.keys()
     for key in list(keys):
         if key.lower() == 'rowkey':
@@ -663,6 +687,12 @@ def validate_entity(namespace):
             val = values[key]
             del values[key]
             values['PartitionKey'] = val
+        elif key.endswith('@odata.type'):
+            val = values[key]
+            del values[key]
+            real_key = key[0: key.index('@odata.type')]
+            edm_types[real_key] = val
+
     keys = values.keys()
     missing_keys = 'RowKey ' if 'RowKey' not in keys else ''
     missing_keys = '{}PartitionKey'.format(missing_keys) \
@@ -674,7 +704,7 @@ def validate_entity(namespace):
     def cast_val(key, val):
         """ Attempts to cast numeric values (except RowKey and PartitionKey) to numbers so they
         can be queried correctly. """
-        if key in ['PartitionKey', 'RowKey']:
+        if key in ['PartitionKey', 'RowKey', 'DisplayVersion']:
             return val
 
         def try_cast(to_type):
@@ -685,8 +715,12 @@ def validate_entity(namespace):
 
         return try_cast(int) or try_cast(float) or val
 
-    # ensure numbers are converted from strings so querying will work correctly
-    values = {key: cast_val(key, val) for key, val in values.items()}
+    for key, val in values.items():
+        if edm_types.get(key, None):
+            values[key] = (val, edm_types[key])
+        else:
+            # ensure numbers are converted from strings so querying will work correctly
+            values[key] = cast_val(key, val)
     namespace.entity = values
 
 
@@ -813,11 +847,15 @@ def get_permission_allowed_values(permission_class):
         for i, item in enumerate(allowed_values):
             if item == 'delete_previous_version':
                 allowed_values[i] = 'x' + item
+            if item == 'permanent_delete':
+                allowed_values[i] = 'y' + item
+            if item == 'set_immutability_policy':
+                allowed_values[i] = 'i' + item
             if item == 'manage_access_control':
                 allowed_values[i] = 'permissions'
             if item == 'manage_ownership':
                 allowed_values[i] = 'ownership'
-        return allowed_values
+        return sorted(allowed_values)
     return None
 
 
@@ -1025,15 +1063,16 @@ def process_container_delete_parameters(cmd, namespace):
 
 def process_blob_download_batch_parameters(cmd, namespace):
     """Process the parameters for storage blob download command"""
+    from azure.cli.core.azclierror import InvalidArgumentValueError
     # 1. quick check
     if not os.path.exists(namespace.destination) or not os.path.isdir(namespace.destination):
-        raise ValueError('incorrect usage: destination must be an existing directory')
+        raise InvalidArgumentValueError('incorrect usage: destination must be an existing directory')
 
     # 2. try to extract account name and container name from source string
     _process_blob_batch_container_parameters(cmd, namespace)
 
     # 3. Call validators
-    add_progress_callback(cmd, namespace)
+    add_download_progress_callback(cmd, namespace)
 
 
 def process_blob_upload_batch_parameters(cmd, namespace):
@@ -1265,6 +1304,19 @@ def resource_type_type(loader):
     return impl
 
 
+def resource_type_type_v2(loader):
+    """ Returns a function which validates that resource types string contains only a combination of service,
+    container, and object. Their shorthand representations are s, c, and o. """
+
+    def impl(string):
+        t_resources = loader.get_models('_shared.models#ResourceTypes', resource_type=ResourceType.DATA_STORAGE_BLOB)
+        if set(string) - set("sco"):
+            raise ValueError
+        return t_resources.from_string(''.join(set(string)))
+
+    return impl
+
+
 def services_type(loader):
     """ Returns a function which validates that services string contains only a combination of blob, queue, table,
     and file. Their shorthand representations are b, q, t, and f. """
@@ -1274,6 +1326,18 @@ def services_type(loader):
         if set(string) - set("bqtf"):
             raise ValueError
         return t_services(_str=''.join(set(string)))
+
+    return impl
+
+
+def services_type_v2():
+    """ Returns a function which validates that services string contains only a combination of blob, queue, table,
+    and file. Their shorthand representations are b, q, t, and f. """
+
+    def impl(string):
+        if set(string) - set("bqtf"):
+            raise ValueError
+        return ''.join(set(string))
 
     return impl
 
@@ -2018,6 +2082,29 @@ def add_upload_progress_callback(cmd, namespace):
         message = getattr(_update_progress, 'message', 'Alive')
         reuse = getattr(_update_progress, 'reuse', False)
         current = response.context['upload_stream_current']
+        total = response.context['data_stream_total']
+
+        if total:
+            hook.add(message=message, value=current, total_val=total)
+            if total == current and not reuse:
+                hook.end()
+
+    hook = cmd.cli_ctx.get_progress_controller(det=True)
+    _update_progress.hook = hook
+
+    if not namespace.no_progress:
+        namespace.progress_callback = _update_progress
+    del namespace.no_progress
+
+
+def add_download_progress_callback(cmd, namespace):
+    def _update_progress(response):
+        if response.http_response.status_code not in [200, 201, 206]:
+            return
+
+        message = getattr(_update_progress, 'message', 'Alive')
+        reuse = getattr(_update_progress, 'reuse', False)
+        current = response.context['download_stream_current']
         total = response.context['data_stream_total']
 
         if total:
