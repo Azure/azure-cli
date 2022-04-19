@@ -9,12 +9,6 @@ import time
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, live_only)
 from knack.util import CLIError
 
-import time
-import urllib
-import hmac
-import hashlib
-import base64
-
 # pylint: disable=line-too-long
 # pylint: disable=too-many-lines
 
