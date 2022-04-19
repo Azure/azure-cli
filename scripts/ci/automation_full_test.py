@@ -16,7 +16,7 @@ ch = logging.StreamHandler()
 ch.setLevel(logging.DEBUG)
 logger.addHandler(ch)
 
-matrix_cnt, matrix_idx = [int(i) for i in sys.argv[1].split('_')]
+instance_cnt, instance_idx = [int(i) for i in sys.argv[1].split('_')]
 profile = sys.argv[2]
 serial_modules = sys.argv[3].split()
 jobs = {
@@ -105,23 +105,23 @@ class AutomaticScheduling(object):
         self.modules: All modules and core, ignore extensions
         self.serial_modules: All modules which need to execute in serial mode
         self.works: Record which modules each worker needs to test
-        self.matrix_cnt:
-        The total number of concurrent automation full test pipeline job with specify python version
+        self.instance_cnt:
+        The total number of concurrent automation full test pipeline instance with specify python version
         Because we share the vm pool with azure-sdk team, so we can't set the number of concurrency arbitrarily
         Best practice is to keep the number of concurrent tasks below 50
-        If you set a larger number of concurrency, it will cause many jobs to be in the waiting state
-        And the network module has the largest number of test cases and can only be tested serially for now, so setting matrix_cnt = 8 is sufficient
+        If you set a larger number of concurrency, it will cause many instances to be in the waiting state
+        And the network module has the largest number of test cases and can only be tested serially for now, so setting instance_cnt = 8 is sufficient
         Total concurrent number: AutomationTest20200901 * 3 + AutomationTest20190301 * 3 + AutomationTest20180301 * 3 + AutomationFullTest * 8 * 3 (python_version) = 33
-        self.matrix_idx:
-        The index of concurrent automation full test pipeline job with specify python version
+        self.instance_idx:
+        The index of concurrent automation full test pipeline instance with specify python version
         """
         self.jobs = []
         self.modules = {}
         self.serial_modules = serial_modules
         self.works = []
-        self.matrix_cnt = matrix_cnt
-        self.matrix_idx = matrix_idx
-        for i in range(self.matrix_cnt):
+        self.instance_cnt = instance_cnt
+        self.instance_idx = instance_idx
+        for i in range(self.instance_cnt):
             worker = {}
             self.works.append(worker)
         self.profile = profile
@@ -156,21 +156,21 @@ class AutomaticScheduling(object):
                 worker_num = idx
         return worker_num
 
-    def get_matrix_modules(self):
-        # get modules which need to execute in the pipeline with specific matrix index
+    def get_instance_modules(self):
+        # get modules which need to execute in the pipeline instance with specific index
         for k, v in self.jobs:
             idx = self.get_worker()
             self.works[idx][k] = v
-        # matrix_idx: 1~n, python list index: 0~n-1
-        self.matrix_idx -= 1
-        return self.works[self.matrix_idx]
+        # instance_idx: 1~n, python list index: 0~n-1
+        self.instance_idx -= 1
+        return self.works[self.instance_idx]
 
-    def run_matrix_modules(self, parallel_modules):
-        # divide matrix modules into parallel or serial execution
+    def run_instance_modules(self, instance_modules):
+        # divide the modules that the current instance needs to execute into parallel or serial execution
         error_flag = False
         serial_tests = []
         parallel_tests = []
-        for k, v in parallel_modules.items():
+        for k, v in instance_modules.items():
             if k in self.serial_modules:
                 serial_tests.append(k)
             else:
@@ -199,8 +199,8 @@ def main():
     autoschduling = AutomaticScheduling()
     autoschduling.get_all_modules()
     autoschduling.append_new_modules()
-    parallel_modules = autoschduling.get_matrix_modules()
-    sys.exit(1) if autoschduling.run_matrix_modules(parallel_modules) else sys.exit(0)
+    instance_modules = autoschduling.get_instance_modules()
+    sys.exit(1) if autoschduling.run_instance_modules(instance_modules) else sys.exit(0)
 
 
 if __name__ == '__main__':

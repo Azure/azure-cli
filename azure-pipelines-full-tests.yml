@@ -80,21 +80,21 @@ jobs:
     maxParallel: 8
     matrix:
       8_1:
-        Target: 8_1
+        Instance: 8_1
       8_2:
-        Target: 8_2
+        Instance: 8_2
       8_3:
-        Target: 8_3
+        Instance: 8_3
       8_4:
-        Target: 8_4
+        Instance: 8_4
       8_5:
-        Target: 8_5
+        Instance: 8_5
       8_6:
-        Target: 8_6
+        Instance: 8_6
       8_7:
-        Target: 8_7
+        Instance: 8_7
       8_8:
-        Target: 8_8
+        Instance: 8_8
   pool:
     vmImage: 'ubuntu-20.04'
   steps:
@@ -102,7 +102,7 @@ jobs:
       parameters:
         pythonVersion: '3.6'
         profile: 'latest'
-        parallel: $(Target)
+        instance: $(Instance)
         fullTest: true
 
 - job: AutomationFullTestPython38ProfileLatest
@@ -112,21 +112,21 @@ jobs:
     maxParallel: 8
     matrix:
       8_1:
-        Target: 8_1
+        Instance: 8_1
       8_2:
-        Target: 8_2
+        Instance: 8_2
       8_3:
-        Target: 8_3
+        Instance: 8_3
       8_4:
-        Target: 8_4
+        Instance: 8_4
       8_5:
-        Target: 8_5
+        Instance: 8_5
       8_6:
-        Target: 8_6
+        Instance: 8_6
       8_7:
-        Target: 8_7
+        Instance: 8_7
       8_8:
-        Target: 8_8
+        Instance: 8_8
   pool:
     vmImage: 'ubuntu-20.04'
   steps:
@@ -134,7 +134,7 @@ jobs:
       parameters:
         pythonVersion: '3.8'
         profile: 'latest'
-        parallel: $(Target)
+        instance: $(Instance)
         fullTest: true
 
 - job: AutomationFullTestPython310ProfileLatest
@@ -144,21 +144,21 @@ jobs:
     maxParallel: 8
     matrix:
       8_1:
-        Target: 8_1
+        Instance: 8_1
       8_2:
-        Target: 8_2
+        Instance: 8_2
       8_3:
-        Target: 8_3
+        Instance: 8_3
       8_4:
-        Target: 8_4
+        Instance: 8_4
       8_5:
-        Target: 8_5
+        Instance: 8_5
       8_6:
-        Target: 8_6
+        Instance: 8_6
       8_7:
-        Target: 8_7
+        Instance: 8_7
       8_8:
-        Target: 8_8
+        Instance: 8_8
   pool:
     vmImage: 'ubuntu-20.04'
   steps:
@@ -166,5 +166,5 @@ jobs:
       parameters:
         pythonVersion: '3.10'
         profile: 'latest'
-        parallel: $(Target)
+        instance: $(Instance)
         fullTest: true
