@@ -117,12 +117,12 @@ def cli_namespaceautho_update(instance, rights):
     return instance
 
 
-def cli_keys_renew(client, resource_group_name, namespace_name, name, key_type):
+def cli_keys_renew(client, resource_group_name, namespace_name, name, key_type, key_value = None):
     return client.regenerate_keys(
         resource_group_name=resource_group_name,
         namespace_name=namespace_name,
         authorization_rule_name=name,
-        parameters={'key_type': key_type}
+        parameters={'key_type': key_type, 'key': key_value}
     )
 
 

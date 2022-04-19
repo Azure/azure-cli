@@ -9,13 +9,18 @@ import time
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, live_only)
 from knack.util import CLIError
 
+import time
+import urllib
+import hmac
+import hashlib
+import base64
 
 # pylint: disable=line-too-long
 # pylint: disable=too-many-lines
 
-
 class SBNamespaceCRUDScenarioTest(ScenarioTest):
     from azure.cli.testsdk.scenario_tests import AllowLargeResponse
+
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_sb_namespace')
@@ -93,8 +98,22 @@ class SBNamespaceCRUDScenarioTest(ScenarioTest):
             checks=[self.check('name', self.kwargs['defaultauthorizationrule'])])
 
         # Get Authorization Rule Listkeys
-        self.cmd(
-            'servicebus namespace authorization-rule keys list --resource-group {rg} --namespace-name {namespacename} --name {authoname}')
+        old_keys = self.cmd(
+            'servicebus namespace authorization-rule keys list --resource-group {rg} --namespace-name {namespacename} --name {authoname}').get_output_in_json()
+
+        new_keys = self.cmd(
+            'servicebus namespace authorization-rule keys renew --resource-group {rg} --namespace-name {namespacename} --name {authoname} --key {primary}').get_output_in_json()
+
+        self.assertNotEqual(old_keys['primaryKey'], new_keys['primaryKey'])
+        self.assertEqual(old_keys['secondaryKey'], new_keys['secondaryKey'])
+
+        old_keys = new_keys
+
+        new_keys = self.cmd(
+            'servicebus namespace authorization-rule keys renew --resource-group {rg} --namespace-name {namespacename} --name {authoname} --key {secondary}').get_output_in_json()
+
+        self.assertEqual(old_keys['primaryKey'], new_keys['primaryKey'])
+        self.assertNotEqual(old_keys['secondaryKey'], new_keys['secondaryKey'])
 
         # Regeneratekeys - Primary
         self.cmd(
