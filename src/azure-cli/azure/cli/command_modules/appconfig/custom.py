@@ -6,6 +6,7 @@
 # pylint: disable=line-too-long
 from knack.util import CLIError
 from knack.log import get_logger
+from azure.core.exceptions import ResourceNotFoundError
 from azure.mgmt.appconfiguration.models import (ConfigurationStoreUpdateParameters,
                                                 ConfigurationStore,
                                                 Sku,
@@ -253,8 +254,11 @@ def list_replica(cmd, client, store_name, resource_group_name=None):
 def show_replica(cmd, client, store_name, name, resource_group_name=None):
     if resource_group_name is None:
         resource_group_name, _ = resolve_store_metadata(cmd, store_name)
-
-    return client.get(resource_group_name=resource_group_name, config_store_name=store_name, replica_name=name)
+    try:
+        return client.get(resource_group_name=resource_group_name, config_store_name=store_name, replica_name=name)
+    except ResourceNotFoundError:
+        # Show a meaningful error message than the one coming from the server.
+        raise ResourceNotFoundError("The replica '{}' for App Configuration '{}' not found.".format(name, store_name))
 
 
 def create_replica(cmd, client, store_name, name, location, resource_group_name=None):
