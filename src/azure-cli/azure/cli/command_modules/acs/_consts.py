@@ -120,7 +120,7 @@ ADDONS = {
 }
 
 # consts for check-acr command
-CONST_CANIPULL_IMAGE = "mcr.microsoft.com/aks/canipull:0.0.3-alpha"
+CONST_CANIPULL_IMAGE = "mcr.microsoft.com/aks/canipull:0.0.4-alpha"
 
 
 # consts for decorator pattern
