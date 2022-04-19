@@ -1284,6 +1284,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.ignore('output_config')
 
     with self.argument_context('storage blob sync') as c:
+        from .sdkutil import get_blob_sync_delete_destination_types
         c.extra('destination_container', options_list=['--container', '-c'], required=True,
                 help='The sync destination container.')
         c.extra('destination_path', options_list=['--destination', '-d'],
@@ -1292,6 +1293,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('source', options_list=['--source', '-s'],
                    help='The source file path to sync from.')
         c.ignore('destination')
+        c.argument('delete_destination', arg_type=get_enum_type(get_blob_sync_delete_destination_types()),
+                   arg_group='Additional Flags', help='Defines whether to delete extra files from the destination that '
+                   'are not present at the source. Could be set to true, false, or prompt. If set to prompt, the user '
+                   'will be asked a question before scheduling files and blobs for deletion. ')
         c.argument('exclude_pattern', exclude_pattern_type)
         c.argument('include_pattern', include_pattern_type)
         c.argument('exclude_path', exclude_path_type)
@@ -1756,12 +1761,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                 options_list='--services', required=False)
 
     with self.argument_context('storage cors add') as c:
+        t_cors_rule_allowed_methods = self.get_models('CorsRuleAllowedMethodsItem',
+                                                      resource_type=ResourceType.MGMT_STORAGE)
         c.extra('services', validator=get_char_options_validator('bfqt', 'services'), required=True,
                 options_list='--services')
         c.argument('max_age')
         c.argument('origins', nargs='+')
         c.argument('methods', nargs='+',
-                   arg_type=get_enum_type(['DELETE', 'GET', 'HEAD', 'MERGE', 'POST', 'OPTIONS', 'PUT']))
+                   arg_type=get_enum_type(t_cors_rule_allowed_methods))
         c.argument('allowed_headers', nargs='+')
         c.argument('exposed_headers', nargs='+')
 
