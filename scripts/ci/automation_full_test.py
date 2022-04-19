@@ -16,9 +16,9 @@ ch = logging.StreamHandler()
 ch.setLevel(logging.DEBUG)
 logger.addHandler(ch)
 
-parallel, para_idx = [int(i) for i in sys.argv[1].split('_')]
+matrix_cnt, matrix_idx = [int(i) for i in sys.argv[1].split('_')]
 profile = sys.argv[2]
-
+serial_modules = sys.argv[3].split()
 jobs = {
             'acr': 45,
             'acs': 62,
@@ -27,17 +27,17 @@ jobs = {
             'apim': 30,
             'appconfig': 41,
             'appservice': 150,  # series
-            # 'appservice': 157,  # paraller
+            # 'appservice': 157,  # parallel
             'aro': 33,
             'backup': 76,
             'batch': 21,
             'batchai': 24,
             'billing': 21,
             'botservice': 25,  # series
-            # 'botservice': 28,  # paraller
+            # 'botservice': 28,  # parallel
             'cdn': 36,
             'cloud': 18,  # series
-            # 'cloud': 22,  # paraller
+            # 'cloud': 22,  # parallel
             'cognitiveservices': 24,
             'config': 21,
             'configure': 17,
@@ -68,7 +68,7 @@ jobs = {
             'natgateway': 22,
             'netappfiles': 48,
             'network': 364,  # series
-            # 'network': 182,  # paraller
+            # 'network': 182,  # parallel
             'policyinsights': 20,
             'privatedns': 29,
             'profile': 20,
@@ -100,15 +100,27 @@ jobs = {
 class AutomaticScheduling(object):
 
     def __init__(self):
+        """
+        self.jobs: Record the test time of each module
+        self.modules: All modules and core, ignore extensions
+        self.serial_modules: All modules which need to execute in serial mode
+        self.works: Record which modules each worker needs to test
+        self.matrix_cnt:
+        The total number of concurrent automation full test pipeline job with specify python version
+        Best practice is to keep the number of concurrent tasks below 50, so we set matrix_cnt = 10
+        Total concurrent number: AutomationTest20200901 * 3 + AutomationTest20190301 * 3 + AutomationTest20180301 * 3 + AutomationFullTest * 10 * 3 (python_version) = 39
+        self.matrix_idx:
+        The index of concurrent automation full test pipeline job with specify python version
+        """
         self.jobs = []
         self.modules = {}
-        self.series_modules = ['appservice', 'botservice', 'cloud', 'network', 'azure-cli-core', 'azure-cli-telemetry']
+        self.serial_modules = serial_modules
         self.works = []
-        for i in range(parallel):
+        self.matrix_cnt = matrix_cnt
+        self.matrix_idx = matrix_idx
+        for i in range(self.matrix_cnt):
             worker = {}
             self.works.append(worker)
-        self.parallel = parallel
-        self.para_idx = para_idx
         self.profile = profile
 
     def get_all_modules(self):
@@ -117,15 +129,20 @@ class AutomaticScheduling(object):
         self.modules = {**result['mod'], **result['core']}
 
     def append_new_modules(self):
-        # if add a new module, use average test time
+        # If add a new module, use average test time
         avg_cost = int(sum(jobs.values()) / len(jobs.values()))
         for module in self.modules:
             if module not in jobs.keys():
                 jobs[module] = avg_cost
+        # sort jobs by time cost (desc)
         self.jobs = sorted(jobs.items(), key=lambda item: -item[1])
 
     def get_worker(self):
-        # distribute jobs equally to each worker
+        """
+        Use greedy algorithm distribute jobs to each worker
+        For each job, we assign it to the worker with the fewest jobs currently
+        :return worker number
+        """
         for idx, worker in enumerate(self.works):
             tmp_time = sum(worker.values()) if sum(worker.values()) else 0
             if idx == 0:
@@ -136,35 +153,36 @@ class AutomaticScheduling(object):
                 worker_num = idx
         return worker_num
 
-    def get_paraller_modules(self):
+    def get_matrix_modules(self):
+        # get modules which need to execute in the pipeline with specific matrix index
         for k, v in self.jobs:
             idx = self.get_worker()
             self.works[idx][k] = v
-        # para_idx: 1~n, python list index: 0~n-1
-        self.para_idx -= 1
-        return self.works[self.para_idx]
+        # matrix_idx: 1~n, python list index: 0~n-1
+        self.matrix_idx -= 1
+        return self.works[self.matrix_idx]
 
-    def run_paraller_modules(self, paraller_modules):
-        # divide all modules into parallel or serial execution
+    def run_matrix_modules(self, parallel_modules):
+        # divide matrix modules into parallel or serial execution
         error_flag = False
-        series = []
-        parallers = []
-        for k, v in paraller_modules.items():
-            if k in self.series_modules:
-                series.append(k)
+        serial_tests = []
+        parallel_tests = []
+        for k, v in parallel_modules.items():
+            if k in self.serial_modules:
+                serial_tests.append(k)
             else:
-                parallers.append(k)
-        if series:
+                parallel_tests.append(k)
+        if serial_tests:
             cmd = ['azdev', 'test', '--no-exitfirst', '--verbose', '--series'] + \
-                  series + ['--profile', f'{profile}', '--pytest-args', '"--durations=0"']
+                  serial_tests + ['--profile', f'{profile}', '--pytest-args', '"--durations=0"']
             logger.info(cmd)
             try:
                 subprocess.run(cmd)
             except subprocess.CalledProcessError:
                 error_flag = True
-        if parallers:
+        if parallel_tests:
             cmd = ['azdev', 'test', '--no-exitfirst', '--verbose'] + \
-                  parallers + ['--profile', f'{profile}', '--pytest-args', '"--durations=0"']
+                  parallel_tests + ['--profile', f'{profile}', '--pytest-args', '"--durations=0"']
             logger.info(cmd)
             try:
                 subprocess.run(cmd)
@@ -178,8 +196,8 @@ def main():
     autoschduling = AutomaticScheduling()
     autoschduling.get_all_modules()
     autoschduling.append_new_modules()
-    para_modules = autoschduling.get_paraller_modules()
-    sys.exit(1) if autoschduling.run_paraller_modules(para_modules) else sys.exit(0)
+    parallel_modules = autoschduling.get_matrix_modules()
+    sys.exit(1) if autoschduling.run_matrix_modules(parallel_modules) else sys.exit(0)
 
 
 if __name__ == '__main__':

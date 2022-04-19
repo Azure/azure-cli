@@ -35,14 +35,14 @@ steps:
       echo fullTest: ${{ parameters.fullTest }}
       echo module: ${{ parameters.module }}
       echo Build.Reason: $(Build.Reason)
-      series_modules="appservice botservice cloud network azure-cli-core azure-cli-telemetry"
+      serial_modules="appservice botservice cloud network azure-cli-core azure-cli-telemetry"
 
       # Test specific module
       module="${{ parameters.module }}"
       if [[ -n $module ]]; then
         echo "Running test for module '$module'"
-        # Determine whether the module belongs to series_modules
-        if [[ "$series_modules" =~ "$module" ]]; then
+        # Determine whether the module belongs to serial_modules
+        if [[ "$serial_modules" =~ "$module" ]]; then
           echo "Running in series"
           azdev test --no-exitfirst --verbose --series $module --pytest-args "--durations=0"
         else
@@ -59,7 +59,7 @@ steps:
         azdev test --no-exitfirst --repo=./ --src=HEAD --tgt=origin/$(System.PullRequest.TargetBranch) --cli-ci --profile ${{ parameters.profile }} --verbose --series --pytest-args "--durations=0"
       else
         echo "Running full test"
-        python scripts/ci/automation_full_test.py "${{ parameters.parallel }}" "${{ parameters.profile }}"
+        python scripts/ci/automation_full_test.py "${{ parameters.parallel }}" "${{ parameters.profile }}" "$serial_modules"
       fi
     displayName: "azdev test"
     env:
