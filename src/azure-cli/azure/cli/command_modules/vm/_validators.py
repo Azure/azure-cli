@@ -1285,7 +1285,7 @@ def _validate_vm_vmss_msi(cmd, namespace, is_identity_assign=False):
         raise ArgumentUsageError('usage error: --assign-identity [--scope SCOPE] [--role ROLE]')
 
     # Enable system assigned msi by default when Trusted Launch configuration is met
-    if not namespace.disable_integrity_monitoring:
+    if hasattr(namespace, 'disable_integrity_monitoring') and not namespace.disable_integrity_monitoring:
         if hasattr(namespace, 'security_type') and hasattr(namespace, 'enable_vtpm') \
                 and hasattr(namespace, 'enable_secure_boot'):
             if namespace.security_type and namespace.security_type.lower() == 'trustedlaunch' and\
