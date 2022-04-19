@@ -4983,8 +4983,7 @@ def _handle_asg_property(kwargs, key, asgs):
     if asgs:
         kwargs[key] = asgs
         if kwargs[prefix + 'address_prefix']:
-           kwargs[prefix + 'address_prefix'] = ''
-
+            kwargs[prefix + 'address_prefix'] = ''
 
 
 def create_nsg_rule_2017_06_01(cmd, resource_group_name, network_security_group_name, security_rule_name,
