@@ -4982,8 +4982,9 @@ def _handle_asg_property(kwargs, key, asgs):
     prefix = key.split('_', 1)[0] + '_'
     if asgs:
         kwargs[key] = asgs
-        if kwargs[prefix + 'address_prefix'].is_default:
-            kwargs[prefix + 'address_prefix'] = ''
+        if kwargs[prefix + 'address_prefix']:
+           kwargs[prefix + 'address_prefix'] = ''
+
 
 
 def create_nsg_rule_2017_06_01(cmd, resource_group_name, network_security_group_name, security_rule_name,
