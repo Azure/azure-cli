@@ -993,7 +993,7 @@ def load_arguments(self, _):
                        help='Specify the behavior of the managed disk when the VM gets deleted i.e whether the managed disk is deleted or detached.')
             c.argument('data_disk_delete_option', options_list=['--data-disk-delete-option', self.deprecate(target='--data-delete-option', redirect='--data-disk-delete-option', hide=True)],
                        nargs='+', min_api='2021-03-01',
-                       help='Specify whether data disk should be deleted or detached upon VM deletion.')
+                       help='Specify whether data disk should be deleted or detached upon VM deletion. If a single data disk is attached, the allowed values are Delete and Detach. For multiple data disks are attached, please use "<data_disk>=Delete <data_disk2>=Detach" to configure each disk')
 
         with self.argument_context(scope, arg_group='Network') as c:
             c.argument('vnet_name', help='Name of the virtual network when creating a new one or referencing an existing one.')
@@ -1439,10 +1439,14 @@ def load_arguments(self, _):
         c.argument('exclude_disks', nargs='+', help='List of disk resource ids that the '
                    'customer wishes to exclude from the restore point. If no disks are specified, all disks will be '
                    'included.')
+        c.argument('source_restore_point', help='Resource Id of the source restore point from which a copy needs to be created')
 
     with self.argument_context('restore-point show') as c:
         c.argument('restore_point_name', options_list=['--name', '-n', '--restore-point-name'],
                    help='The name of the restore point.')
+        c.argument('expand', help='The expand expression to apply on the operation.',
+                   deprecate_info=c.deprecate(hide=True))
+        c.argument('instance_view', action='store_true', help='Show the instance view of a restore point.')
 
     with self.argument_context('restore-point delete') as c:
         c.argument('restore_point_name', options_list=['--name', '-n', '--restore-point-name'],
@@ -1463,5 +1467,10 @@ def load_arguments(self, _):
 
     with self.argument_context('restore-point collection update') as c:
         c.argument('tags', tags_type)
+
+    with self.argument_context('restore-point collection show') as c:
+        c.argument('expand', help='The expand expression to apply on the operation.',
+                   deprecate_info=c.deprecate(hide=True))
+        c.argument('restore_points', action='store_true', help='Show all contained restore points in the restore point collection.')
 
     # endRegion

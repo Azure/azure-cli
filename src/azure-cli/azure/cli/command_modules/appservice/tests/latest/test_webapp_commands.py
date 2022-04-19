@@ -328,6 +328,18 @@ class BackupWithName(ScenarioTest):
             JMESPathCheck('[0].namePropertiesName', backup_name)
         ])
 
+        slot_name = "slot"
+        slot_backup_name = self.create_random_name(prefix='sbn-', length=24)
+        self.cmd(f"webapp deployment slot create -g {resource_group} -n {webapp} -s {slot_name}")
+        self.cmd(f"webapp config backup create -g {resource_group} --webapp-name {webapp} --backup-name {slot_backup_name} --container-url {sasurl} -s {slot_name}", checks=[
+            JMESPathCheck('blobName', slot_backup_name)
+        ])
+        self.cmd(f"webapp config backup list -g {resource_group} --webapp-name {webapp} -s {slot_name}", checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].namePropertiesName', slot_backup_name)
+        ])
+
+
 
 # Test Framework is not able to handle binary file format, hence, only run live
 class AppServiceLogTest(ScenarioTest):

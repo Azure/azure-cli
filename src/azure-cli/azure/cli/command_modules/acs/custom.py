@@ -1911,33 +1911,17 @@ def aks_browse(
 
 # pylint: disable=too-many-locals
 def aks_create(cmd, client, resource_group_name, name, ssh_key_value,
-               dns_name_prefix=None,
                location=None,
-               admin_username="azureuser",
-               windows_admin_username=None,
-               windows_admin_password=None,
-               enable_ahub=False,
                kubernetes_version='',
-               node_vm_size=None,
-               node_osdisk_type=None,
-               node_osdisk_size=0,
-               node_osdisk_diskencryptionset_id=None,
-               node_count=3,
-               nodepool_name="nodepool1",
-               nodepool_tags=None,
-               nodepool_labels=None,
-               service_principal=None, client_secret=None,
+               admin_username="azureuser",
+               generate_ssh_keys=False,  # pylint: disable=unused-argument
                no_ssh_key=False,
+               edge_zone=None,
+               node_osdisk_diskencryptionset_id=None,
+               disable_local_accounts=False,
                disable_rbac=None,
                enable_rbac=None,
-               vm_set_type=None,
-               skip_subnet_role_assignment=False,
-               os_sku=None,
-               enable_cluster_autoscaler=False,
-               cluster_autoscaler_profile=None,
-               network_plugin=None,
-               network_policy=None,
-               uptime_sla=False,
+               tags=None,
                pod_cidr=None,
                service_cidr=None,
                dns_service_ip=None,
@@ -1951,35 +1935,40 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,
                nat_gateway_managed_outbound_ip_count=None,
                nat_gateway_idle_timeout=None,
                outbound_type=None,
+               network_plugin=None,
+               network_policy=None,
                auto_upgrade_channel=None,
-               enable_addons=None,
-               workspace_resource_id=None,
-               enable_msi_auth_for_monitoring=False,
-               vnet_subnet_id=None,
-               pod_subnet_id=None,
-               ppg=None,
-               max_pods=0,
-               min_count=None,
-               max_count=None,
+               cluster_autoscaler_profile=None,
+               uptime_sla=False,
+               dns_name_prefix=None,
+               fqdn_subdomain=None,
+               api_server_authorized_ip_ranges=None,
+               enable_private_cluster=False,
+               private_dns_zone=None,
+               disable_public_fqdn=False,
+               service_principal=None,
+               client_secret=None,
+               enable_managed_identity=True,
+               assign_identity=None,
+               assign_kubelet_identity=None,
+               enable_aad=False,
+               enable_azure_rbac=False,
+               aad_admin_group_object_ids=None,
                aad_client_app_id=None,
                aad_server_app_id=None,
                aad_server_app_secret=None,
                aad_tenant_id=None,
-               tags=None,
-               zones=None,
-               enable_node_public_ip=False,
-               node_public_ip_prefix_id=None,
-               generate_ssh_keys=False,
-               api_server_authorized_ip_ranges=None,
-               enable_private_cluster=False,
-               private_dns_zone=None,
-               fqdn_subdomain=None,
-               disable_public_fqdn=False,
-               enable_managed_identity=True,
-               assign_identity=None,
+               windows_admin_username=None,
+               windows_admin_password=None,
+               enable_ahub=False,
+               enable_windows_gmsa=False,
+               gmsa_dns_server=None,
+               gmsa_root_domain_name=None,
                attach_acr=None,
-               enable_aad=False,
-               aad_admin_group_object_ids=None,
+               skip_subnet_role_assignment=False,
+               enable_addons=None,
+               workspace_resource_id=None,
+               enable_msi_auth_for_monitoring=False,
                aci_subnet_name=None,
                appgw_name=None,
                appgw_subnet_cidr=None,
@@ -1987,24 +1976,36 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,
                appgw_subnet_id=None,
                appgw_watch_namespace=None,
                enable_sgxquotehelper=False,
-               enable_encryption_at_host=False,
                enable_secret_rotation=False,
                rotation_poll_interval=None,
-               assign_kubelet_identity=None,
+               nodepool_name="nodepool1",
+               node_vm_size=None,
+               os_sku=None,
+               vnet_subnet_id=None,
+               pod_subnet_id=None,
+               enable_node_public_ip=False,
+               node_public_ip_prefix_id=None,
+               enable_cluster_autoscaler=False,
+               min_count=None,
+               max_count=None,
+               node_count=3,
+               nodepool_tags=None,
+               nodepool_labels=None,
+               node_osdisk_type=None,
+               node_osdisk_size=0,
+               vm_set_type=None,
+               zones=None,
+               ppg=None,
+               max_pods=0,
+               enable_encryption_at_host=False,
                enable_ultra_ssd=False,
-               edge_zone=None,
-               disable_local_accounts=False,
                enable_fips_image=False,
-               no_wait=False,
-               yes=False,
-               enable_azure_rbac=False,
-               aks_custom_headers=None,
-               enable_windows_gmsa=False,
-               gmsa_dns_server=None,
-               gmsa_root_domain_name=None,
                snapshot_id=None,
                kubelet_config=None,
                linux_os_config=None,
+               no_wait=False,
+               yes=False,
+               aks_custom_headers=None,
                ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -2886,37 +2887,37 @@ def aks_agentpool_list(cmd, client, resource_group_name, cluster_name):
 
 def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_name,
                       kubernetes_version=None,
-                      zones=None,
-                      enable_node_public_ip=False,
-                      node_public_ip_prefix_id=None,
                       node_vm_size=None,
-                      node_osdisk_type=None,
-                      node_osdisk_size=0,
-                      node_count=3,
-                      vnet_subnet_id=None,
-                      pod_subnet_id=None,
-                      ppg=None,
-                      max_pods=0,
                       os_type=None,
                       os_sku=None,
+                      vnet_subnet_id=None,
+                      pod_subnet_id=None,
+                      enable_node_public_ip=False,
+                      node_public_ip_prefix_id=None,
+                      enable_cluster_autoscaler=False,
                       min_count=None,
                       max_count=None,
-                      enable_cluster_autoscaler=False,
-                      scale_down_mode=CONST_SCALE_DOWN_MODE_DELETE,
-                      node_taints=None,
+                      node_count=3,
                       priority=CONST_SCALE_SET_PRIORITY_REGULAR,
                       eviction_policy=CONST_SPOT_EVICTION_POLICY_DELETE,
                       spot_max_price=float('nan'),
-                      tags=None,
                       labels=None,
-                      kubelet_config=None,
-                      linux_os_config=None,
-                      max_surge=None,
+                      tags=None,
+                      node_taints=None,
+                      node_osdisk_type=None,
+                      node_osdisk_size=0,
                       mode=CONST_NODEPOOL_MODE_USER,
+                      scale_down_mode=CONST_SCALE_DOWN_MODE_DELETE,
+                      max_surge=None,
+                      max_pods=0,
+                      zones=None,
+                      ppg=None,
                       enable_encryption_at_host=False,
                       enable_ultra_ssd=False,
                       enable_fips_image=False,
                       snapshot_id=None,
+                      kubelet_config=None,
+                      linux_os_config=None,
                       no_wait=False,
                       aks_custom_headers=None):
     AgentPool = cmd.get_models('AgentPool',
@@ -3042,116 +3043,19 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
     )
 
 
-def aks_agentpool_scale(cmd, client, resource_group_name, cluster_name,
-                        nodepool_name,
-                        node_count=3,
-                        no_wait=False):
-    instance = client.get(resource_group_name, cluster_name, nodepool_name)
-    new_node_count = int(node_count)
-    if instance.enable_auto_scaling:
-        raise CLIError("Cannot scale cluster autoscaler enabled node pool.")
-    if new_node_count == instance.count:
-        raise CLIError(
-            "The new node count is the same as the current node count.")
-    instance.count = new_node_count  # pylint: disable=no-member
-    return sdk_no_wait(
-        no_wait,
-        client.begin_create_or_update,
-        resource_group_name,
-        cluster_name,
-        nodepool_name,
-        instance,
-    )
-
-
-def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
-                          nodepool_name,
-                          kubernetes_version='',
-                          node_image_only=False,
-                          max_surge=None,
-                          no_wait=False,
-                          aks_custom_headers=None,
-                          snapshot_id=None):
-    AgentPoolUpgradeSettings = cmd.get_models('AgentPoolUpgradeSettings', operation_group='agent_pools')
-    if kubernetes_version != '' and node_image_only:
-        raise CLIError(
-            'Conflicting flags. Upgrading the Kubernetes version will also '
-            'upgrade node image version. If you only want to upgrade the '
-            'node version please use the "--node-image-only" option only.'
-        )
-
-    # Note: we exclude this option because node image upgrade can't accept nodepool put fields like max surge
-    if max_surge and node_image_only:
-        raise MutuallyExclusiveArgumentError(
-            'Conflicting flags. Unable to specify max-surge with node-image-only.'
-            'If you want to use max-surge with a node image upgrade, please first '
-            'update max-surge using "az aks nodepool update --max-surge".'
-        )
-
-    if node_image_only:
-        return _upgrade_single_nodepool_image_version(no_wait,
-                                                      client,
-                                                      resource_group_name,
-                                                      cluster_name,
-                                                      nodepool_name,
-                                                      snapshot_id)
-
-    # load model CreationData
-    from azure.cli.command_modules.acs.decorator import AKSModels
-    CreationData = AKSModels(cmd, ResourceType.MGMT_CONTAINERSERVICE).CreationData
-
-    creationData = None
-    if snapshot_id:
-        snapshot = get_snapshot_by_snapshot_id(cmd.cli_ctx, snapshot_id)
-        if not kubernetes_version and not node_image_only:
-            kubernetes_version = snapshot.kubernetes_version
-
-        creationData = CreationData(
-            source_resource_id=snapshot_id
-        )
-
-    instance = client.get(resource_group_name, cluster_name, nodepool_name)
-    instance.orchestrator_version = kubernetes_version
-    instance.creation_data = creationData
-
-    if not instance.upgrade_settings:
-        instance.upgrade_settings = AgentPoolUpgradeSettings()
-
-    if max_surge:
-        instance.upgrade_settings.max_surge = max_surge
-
-    # custom headers
-    aks_custom_headers = extract_comma_separated_string(
-        aks_custom_headers,
-        enable_strip=True,
-        extract_kv=True,
-        default_value={},
-        allow_appending_values_to_same_key=True,
-    )
-
-    return sdk_no_wait(
-        no_wait,
-        client.begin_create_or_update,
-        resource_group_name,
-        cluster_name,
-        nodepool_name,
-        instance,
-        headers=aks_custom_headers,
-    )
-
-
 # pylint: disable=too-many-boolean-expressions
 def aks_agentpool_update(cmd, client, resource_group_name, cluster_name, nodepool_name,
                          enable_cluster_autoscaler=False,
                          disable_cluster_autoscaler=False,
                          update_cluster_autoscaler=False,
-                         scale_down_mode=None,
-                         min_count=None, max_count=None,
-                         tags=None,
-                         max_surge=None,
-                         mode=None,
+                         min_count=None,
+                         max_count=None,
                          labels=None,
+                         tags=None,
                          node_taints=None,
+                         mode=None,
+                         scale_down_mode=None,
+                         max_surge=None,
                          no_wait=False,
                          aks_custom_headers=None):
     AgentPoolUpgradeSettings = cmd.get_models('AgentPoolUpgradeSettings',
@@ -3233,6 +3137,104 @@ def aks_agentpool_update(cmd, client, resource_group_name, cluster_name, nodepoo
                     raise InvalidArgumentValueError(
                         'Taint does not match allowed values. Expect value such as "special=true:NoSchedule".')
         instance.node_taints = taints_array
+
+    # custom headers
+    aks_custom_headers = extract_comma_separated_string(
+        aks_custom_headers,
+        enable_strip=True,
+        extract_kv=True,
+        default_value={},
+        allow_appending_values_to_same_key=True,
+    )
+
+    return sdk_no_wait(
+        no_wait,
+        client.begin_create_or_update,
+        resource_group_name,
+        cluster_name,
+        nodepool_name,
+        instance,
+        headers=aks_custom_headers,
+    )
+
+
+def aks_agentpool_scale(cmd, client, resource_group_name, cluster_name,
+                        nodepool_name,
+                        node_count=3,
+                        no_wait=False):
+    instance = client.get(resource_group_name, cluster_name, nodepool_name)
+    new_node_count = int(node_count)
+    if instance.enable_auto_scaling:
+        raise CLIError("Cannot scale cluster autoscaler enabled node pool.")
+    if new_node_count == instance.count:
+        raise CLIError(
+            "The new node count is the same as the current node count.")
+    instance.count = new_node_count  # pylint: disable=no-member
+    return sdk_no_wait(
+        no_wait,
+        client.begin_create_or_update,
+        resource_group_name,
+        cluster_name,
+        nodepool_name,
+        instance,
+    )
+
+
+def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
+                          nodepool_name,
+                          kubernetes_version='',
+                          node_image_only=False,
+                          max_surge=None,
+                          no_wait=False,
+                          aks_custom_headers=None,
+                          snapshot_id=None):
+    AgentPoolUpgradeSettings = cmd.get_models('AgentPoolUpgradeSettings', operation_group='agent_pools')
+    if kubernetes_version != '' and node_image_only:
+        raise CLIError(
+            'Conflicting flags. Upgrading the Kubernetes version will also '
+            'upgrade node image version. If you only want to upgrade the '
+            'node version please use the "--node-image-only" option only.'
+        )
+
+    # Note: we exclude this option because node image upgrade can't accept nodepool put fields like max surge
+    if max_surge and node_image_only:
+        raise MutuallyExclusiveArgumentError(
+            'Conflicting flags. Unable to specify max-surge with node-image-only.'
+            'If you want to use max-surge with a node image upgrade, please first '
+            'update max-surge using "az aks nodepool update --max-surge".'
+        )
+
+    if node_image_only:
+        return _upgrade_single_nodepool_image_version(no_wait,
+                                                      client,
+                                                      resource_group_name,
+                                                      cluster_name,
+                                                      nodepool_name,
+                                                      snapshot_id)
+
+    # load model CreationData
+    from azure.cli.command_modules.acs.decorator import AKSModels
+    CreationData = AKSModels(cmd, ResourceType.MGMT_CONTAINERSERVICE).CreationData
+
+    creationData = None
+    if snapshot_id:
+        snapshot = get_snapshot_by_snapshot_id(cmd.cli_ctx, snapshot_id)
+        if not kubernetes_version and not node_image_only:
+            kubernetes_version = snapshot.kubernetes_version
+
+        creationData = CreationData(
+            source_resource_id=snapshot_id
+        )
+
+    instance = client.get(resource_group_name, cluster_name, nodepool_name)
+    instance.orchestrator_version = kubernetes_version
+    instance.creation_data = creationData
+
+    if not instance.upgrade_settings:
+        instance.upgrade_settings = AgentPoolUpgradeSettings()
+
+    if max_surge:
+        instance.upgrade_settings.max_surge = max_surge
 
     # custom headers
     aks_custom_headers = extract_comma_separated_string(
