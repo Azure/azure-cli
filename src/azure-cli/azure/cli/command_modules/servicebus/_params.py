@@ -112,7 +112,7 @@ def load_arguments_sb(self, _):
     with self.argument_context('servicebus queue authorization-rule keys renew') as c:
         c.argument('name', arg_type=name_type, help='Name of Queue Authorization Rule')
         c.argument('key_type', arg_type=key_arg_type)
-        c.argument('key', arg_type=keyvalue_arg_type)
+        c.argument('key', arg_type=keyvalue_arg_type, help='Self generated SAS token')
 
     with self.argument_context('servicebus queue authorization-rule keys list') as c:
         c.argument('authorization_rule_name', arg_type=name_type, id_part=None, help='Name of Queue Authorization Rule')
