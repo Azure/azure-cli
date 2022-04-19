@@ -397,26 +397,26 @@ class TestExtensionCommands(unittest.TestCase):
             self.assertIsInstance(res, list)
             self.assertEqual(len(res), 0)
 
-    def test_add_extension_install_setup_extras(self):
+    def test_add_extension_install_extras(self):
         """
-        Tests extension addition while specifying --install-setup-extras parameter.
+        Tests extension addition while specifying --install-extras parameter.
         :return:
         """
         setup_extras = ['BAR', 'FOO']
 
         # Without mocking extension should not be added
         with self.assertRaises(CLIError):
-            add_extension(cmd=self.cmd, source=MY_EXT_SOURCE, install_setup_extras=setup_extras)
+            add_extension(cmd=self.cmd, source=MY_EXT_SOURCE, install_extras=setup_extras)
 
         # Mock so the first extension is valid. Extension will still not be added
         with mock.patch("azure.cli.core.extension.operations.WheelExtension.get_metadata_extras", return_value=setup_extras[:1]), \
                 self.assertRaises(CLIError):
-            add_extension(cmd=self.cmd, source=MY_EXT_SOURCE, install_setup_extras=setup_extras)
+            add_extension(cmd=self.cmd, source=MY_EXT_SOURCE, install_extras=setup_extras)
 
         # Mock so the both extensions are valid. Extension will be added
         with mock.patch("azure.cli.core.extension.operations.WheelExtension.get_metadata_extras", return_value=setup_extras[:]), \
                 mock.patch("azure.cli.core.extension.operations._run_pip", wraps=_run_pip) as check_output:
-            add_extension(cmd=self.cmd, source=MY_EXT_SOURCE, install_setup_extras=setup_extras)
+            add_extension(cmd=self.cmd, source=MY_EXT_SOURCE, install_extras=setup_extras)
             pip_file = check_output.call_args[0][0][3]
             assert pip_file.endswith('[BAR,FOO]')
 
@@ -428,9 +428,9 @@ class TestExtensionCommands(unittest.TestCase):
             num_exts = len(list_extensions())
             self.assertEqual(num_exts, 0)
 
-    def test_update_extension_install_setup_extras(self):
+    def test_update_extension_install_extras(self):
         """
-        Tests extension update while specifying --install-setup-extras parameter.
+        Tests extension update while specifying --install-extras parameter.
         :return:
         """
         setup_extras = ['BAR', 'FOO']
@@ -444,17 +444,17 @@ class TestExtensionCommands(unittest.TestCase):
         with mock.patch('azure.cli.core.extension.operations.resolve_from_index', return_value=(newer_extension, computed_extension_sha256)):
             # Without mocking extension should not be added
             with self.assertRaises(CLIError):
-                update_extension(self.cmd, MY_EXT_NAME, install_setup_extras=setup_extras)
+                update_extension(self.cmd, MY_EXT_NAME, install_extras=setup_extras)
 
             # Mock so the first extension is valid. Extension will still not be added
             with mock.patch("azure.cli.core.extension.operations.WheelExtension.get_metadata_extras", return_value=setup_extras[:1]), \
                     self.assertRaises(CLIError):
-                update_extension(self.cmd, MY_EXT_NAME, install_setup_extras=setup_extras)
+                update_extension(self.cmd, MY_EXT_NAME, install_extras=setup_extras)
 
             # Mock so the both extensions are valid. Extension will be added
             with mock.patch("azure.cli.core.extension.operations.WheelExtension.get_metadata_extras", return_value=setup_extras[:]), \
                     mock.patch("azure.cli.core.extension.operations._run_pip", wraps=_run_pip) as check_output:
-                update_extension(self.cmd, MY_EXT_NAME, install_setup_extras=setup_extras)
+                update_extension(self.cmd, MY_EXT_NAME, install_extras=setup_extras)
                 pip_file = check_output.call_args[0][0][3]
                 assert pip_file.endswith('[BAR,FOO]')
         ext = show_extension(MY_EXT_NAME)

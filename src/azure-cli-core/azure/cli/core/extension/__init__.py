@@ -187,7 +187,7 @@ class WheelExtension(Extension):
     @staticmethod
     def get_metadata_extras(ext_file):
         metadata_extras = []
-        extra_const = "; extra == "
+        extra_const = " extra == "
         try:
             if ext_file.endswith('.whl'):
                 ext_whl_metadata = pkginfo.Wheel(ext_file)
