@@ -4853,7 +4853,7 @@ class VMGalleryImage(ScenarioTest):
                      self.check('storageProfile.dataDiskImages[1].lun', 1)])
 
     @ResourceGroupPreparer(random_name_length=15, location='CentralUSEUAP')
-    @KeyVaultPreparer(name_prefix='vault-', name_len=20, key='vault', location='eastus2',
+    @KeyVaultPreparer(name_prefix='vault-', name_len=20, key='vault', location='CentralUSEUAP',
                       additional_params='--enable-purge-protection true --enable-soft-delete true')
     def test_create_image_version_with_region_encryption(self, resource_group, resource_group_location, key_vault):
         self.kwargs.update({
@@ -4864,21 +4864,18 @@ class VMGalleryImage(ScenarioTest):
             'captured': 'managedImage1',
             'location': resource_group_location,
             'key': self.create_random_name(prefix='key-', length=20),
+            'disk1': self.create_random_name(prefix='disk', length=20),
+            'snapshot1': self.create_random_name(prefix='snp', length=20),
             'des1': self.create_random_name(prefix='des1-', length=20),
         })
 
         self.cmd('sig create -g {rg} --gallery-name {gallery}', checks=self.check('name', self.kwargs['gallery']))
-        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type linux -p publisher1 -f offer1 -s sku1 --features SecurityType=ConfidentialVm --hyper-v-generation v2', checks=[
+        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type windows -p publisher1 -f offer1 -s sku1 --os-state Specialized --features SecurityType=ConfidentialVm --hyper-v-generation v2', checks=[
             self.check('name', self.kwargs['image']),
             self.check('features[0].name', 'SecurityType'),
             self.check('features[0].value', 'ConfidentialVM'),
             self.check('hyperVGeneration', 'V2')
         ])
-
-        self.cmd('vm create -g {rg} -n {vm} --image ubuntults --data-disk-sizes-gb 10 --admin-username clitest1 --generate-ssh-key --nsg-rule NONE')
-        self.cmd('vm deallocate -g {rg} -n {vm}')
-        self.cmd('vm generalize -g {rg} -n {vm}')
-        self.cmd('image create -g {rg} -n {captured} --source {vm}')
 
         # Create disk encryption set
         vault_id = self.cmd('keyvault show -g {rg} -n {vault}').get_output_in_json()['id']
@@ -4904,9 +4901,10 @@ class VMGalleryImage(ScenarioTest):
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
             self.cmd('role assignment create --assignee {des1_sp_id} --role Reader --scope {vault_id}')
 
-        # Test --target-region-encryption
-        self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --target-regions {location}=1 --target-region-encryption {des1},0,{des1} --target-region-cvm-encryption EncryptedVMGuestStateOnlyWithPmk,{des1} --managed-image {captured} --replica-count 1', checks=[
-            self.check('publishingProfile.targetRegions[0].name', 'East US 2'),
+        self.cmd('disk create -g {rg} -n {disk1} --image-reference MicrosoftWindowsServer:WindowsServer:2022-datacenter-smalldisk-g2:latest --hyper-v-generation V2  --security-type ConfidentialVM_VMGuestStateOnlyEncryptedWithPlatformKey --disk-encryption-set {des1_id}')
+        self.cmd('snapshot create -g {rg} -n {snapshot1} --source {disk1}')
+        self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --target-regions {location}=1 --target-region-encryption {des1},0,{des1} --target-region-cvm-encryption EncryptedVMGuestStateOnlyWithPmk, --os-snapshot {snapshot1} --replica-count 1', checks=[
+            self.check('publishingProfile.targetRegions[0].name', 'Central US EUAP'),
             self.check('publishingProfile.targetRegions[0].regionalReplicaCount', 1),
             self.check('publishingProfile.targetRegions[0].encryption.osDiskImage.diskEncryptionSetId', '{des1_id}'),
             self.check('publishingProfile.targetRegions[0].encryption.dataDiskImages[0].lun', 0),
