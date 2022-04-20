@@ -422,7 +422,7 @@ examples:
 helps['deployment validate'] = """
 type: command
 short-summary: Validate whether a template is valid at subscription scope.
-long-summary: Validate whether a template is valid at subscription scope. Please specify only one of --template-file FILE | --template-uri URI | --template-spec.
+long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
@@ -448,7 +448,7 @@ examples:
 helps['deployment create'] = """
 type: command
 short-summary: Start a deployment at subscription scope.
-long-summary: Start a deployment at subscription scope. Please specify only one of --template-file FILE | --template-uri URI | --template-spec.
+long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
@@ -563,7 +563,7 @@ examples:
 helps['deployment sub validate'] = """
 type: command
 short-summary: Validate whether a template is valid at subscription scope.
-long-summary: Validate whether a template is valid at subscription scope. Please specify only one of --template-file FILE | --template-uri URI | --template-spec.
+long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
@@ -592,7 +592,7 @@ examples:
 helps['deployment sub create'] = """
 type: command
 short-summary: Start a deployment at subscription scope.
-long-summary: Start a deployment at subscription scope. Please specify only one of --template-file FILE | --template-uri URI | --template-spec.
+long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
@@ -629,7 +629,7 @@ examples:
 helps['deployment sub what-if'] = """
 type: command
 short-summary: Execute a deployment What-If operation at subscription scope.
-long-summary: Execute a deployment What-If operation at subscription scope. Please specify only one of --template-file FILE | --template-uri URI | --template-spec.
+long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
@@ -738,7 +738,7 @@ examples:
 helps['deployment group validate'] = """
 type: command
 short-summary: Validate whether a template is valid at resource group.
-long-summary: Validate whether a template is valid at resource group. Please specify only one of --template-file FILE | --template-uri URI | --template-spec.
+long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
@@ -769,7 +769,7 @@ examples:
 helps['deployment group create'] = """
 type: command
 short-summary: Start a deployment at resource group.
-long-summary: Start a deployment at resource group. Please specify only one of --template-file FILE | --template-uri URI | --template-spec.
+long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
@@ -816,7 +816,7 @@ examples:
 helps['deployment group what-if'] = """
 type: command
 short-summary: Execute a deployment What-If operation at resource group scope.
-long-summary: Execute a deployment What-If operation at resource group scope. Please specify only one of --template-file FILE | --template-uri URI | --template-spec.
+long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
@@ -927,7 +927,7 @@ examples:
 helps['deployment mg validate'] = """
 type: command
 short-summary: Validate whether a template is valid at management group.
-long-summary: Validate whether a template is valid at management group. Please specify only one of --template-file FILE | --template-uri URI | --template-spec.
+long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
@@ -958,7 +958,7 @@ examples:
 helps['deployment mg what-if'] = """
 type: command
 short-summary: Execute a deployment What-If operation at management group scope.
-long-summary: Execute a deployment What-If operation at management group scope. Please specify only one of --template-file FILE | --template-uri URI | --template-spec.
+long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
@@ -994,7 +994,7 @@ examples:
 helps['deployment mg create'] = """
 type: command
 short-summary: Start a deployment at management group.
-long-summary: Start a deployment at management group. Please specify only one of --template-file FILE | --template-uri URI | --template-spec.
+long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
@@ -1100,7 +1100,7 @@ examples:
 helps['deployment tenant validate'] = """
 type: command
 short-summary: Validate whether a template is valid at tenant scope.
-long-summary: Validate whether a template is valid at tenant scope. Please specify only one of --template-file FILE | --template-uri URI | --template-spec.
+long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
@@ -1129,7 +1129,7 @@ examples:
 helps['deployment tenant what-if'] = """
 type: command
 short-summary: Execute a deployment What-If operation at tenant scope.
-long-summary: Execute a deployment What-If operation at tenant scope. Please specify only one of --template-file FILE | --template-uri URI | --template-spec.
+long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
@@ -1163,7 +1163,7 @@ examples:
 helps['deployment tenant create'] = """
 type: command
 short-summary: Start a deployment at tenant scope.
-long-summary: Start a deployment at tenant scope. Please specify only one of --template-file FILE | --template-uri URI | --template-spec.
+long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
