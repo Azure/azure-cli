@@ -199,11 +199,11 @@ class AutomaticScheduling(object):
 
 def main():
     logger.info("Start automation full test ...\n")
-    autoschduling = AutomaticScheduling()
-    autoschduling.get_all_modules()
-    autoschduling.append_new_modules()
-    instance_modules = autoschduling.get_instance_modules()
-    sys.exit(1) if autoschduling.run_instance_modules(instance_modules) else sys.exit(0)
+    autoscheduling = AutomaticScheduling()
+    autoscheduling.get_all_modules()
+    autoscheduling.append_new_modules()
+    instance_modules = autoscheduling.get_instance_modules()
+    sys.exit(1) if autoscheduling.run_instance_modules(instance_modules) else sys.exit(0)
 
 
 if __name__ == '__main__':
