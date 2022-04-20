@@ -520,7 +520,7 @@ def _populate_sql_container_definition(sql_container_resource,
                                        conflict_resolution_policy,
                                        analytical_storage_ttl):
     if all(arg is None for arg in
-           [partition_key_path, partition_key_version, default_ttl, indexing_policy, unique_key_policy, conflict_resolution_policy]):
+           [partition_key_path, partition_key_version, default_ttl, indexing_policy, unique_key_policy, conflict_resolution_policy, analytical_storage_ttl]):
         return False
 
     if partition_key_path is not None:
