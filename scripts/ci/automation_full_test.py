@@ -115,7 +115,7 @@ class AutomaticScheduling(object):
         self.instance_idx:
         The index of concurrent automation full test pipeline instance with specify python version
         For example:
-        8_3 means we have 8 instances totaly, and now we are scheduling modules on third instance
+        8_3 means we have 8 instances totally, and now we are scheduling modules on third instance
         1_1 means we only have 1 instance, so we don't need to schedule modules
         """
         self.jobs = []
