@@ -41,7 +41,7 @@ def load_arguments(self, _):
     OrchestrationServiceNames, OrchestrationServiceStateAction = self.get_models('OrchestrationServiceNames', 'OrchestrationServiceStateAction', operation_group='virtual_machine_scale_sets')
     RebootSetting, VMGuestPatchClassificationWindows, VMGuestPatchClassificationLinux = self.get_models('VMGuestPatchRebootSetting', 'VMGuestPatchClassificationWindows', 'VMGuestPatchClassificationLinux')
     GallerySharingPermissionTypes = self.get_models('GallerySharingPermissionTypes', operation_group='shared_galleries')
-    ReplicationMode, ConfidentialVMEncryptionType = self.get_models('ReplicationMode', 'ConfidentialVMEncryptionType', operation_group='gallery_image_versions')
+    ReplicationMode = self.get_models('ReplicationMode', operation_group='gallery_image_versions')
 
     # REUSABLE ARGUMENT DEFINITIONS
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
