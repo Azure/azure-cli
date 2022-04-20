@@ -101,6 +101,8 @@ class SBNamespaceCRUDScenarioTest(ScenarioTest):
         self.assertNotEqual(old_keys['primaryKey'], new_keys['primaryKey'])
         self.assertEqual(old_keys['secondaryKey'], new_keys['secondaryKey'])
 
+        original_keys = old_keys
+        self.kwargs.update({'pkvalue':original_keys['primaryKey'], 'skvalue':original_keys['secondaryKey']})
         old_keys = new_keys
 
         new_keys = self.cmd(
@@ -108,6 +110,18 @@ class SBNamespaceCRUDScenarioTest(ScenarioTest):
 
         self.assertEqual(old_keys['primaryKey'], new_keys['primaryKey'])
         self.assertNotEqual(old_keys['secondaryKey'], new_keys['secondaryKey'])
+
+        new_keys2 = self.cmd(
+            'servicebus namespace authorization-rule keys renew --resource-group {rg} --namespace-name {namespacename} --name {authoname} --key {primary} --key-value {pkvalue}').get_output_in_json()
+
+        self.assertEqual(new_keys2['primaryKey'], original_keys['primaryKey'])
+        self.assertEqual(new_keys2['secondaryKey'], new_keys['secondaryKey'])
+
+        new_keys3 = self.cmd(
+            'servicebus namespace authorization-rule keys renew --resource-group {rg} --namespace-name {namespacename} --name {authoname} --key {secondary} --key-value {skvalue}').get_output_in_json()
+
+        self.assertEqual(new_keys3['primaryKey'], original_keys['primaryKey'])
+        self.assertEqual(new_keys3['secondaryKey'], original_keys['secondaryKey'])
 
         # Regeneratekeys - Primary
         self.cmd(
