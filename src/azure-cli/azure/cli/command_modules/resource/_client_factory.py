@@ -156,5 +156,10 @@ def cf_hierarchy_settings(cli_ctx, _):
 def cf_resource_templatespecs(cli_ctx, _):
     return _resource_templatespecs_client_factory(cli_ctx).template_specs
 
-def cf_resource_privatelinks(cli_ctx, _):
-    return _resource_privatelinks_client_factory(cli_ctx).private_links
+
+def cf_resource_privatelinkassociations(cli_ctx, _):
+    return _resource_privatelinks_client_factory(cli_ctx).private_link_association
+
+
+def cf_resource_resourcemanagementprivatelinks(cli_ctx, _):
+    return _resource_privatelinks_client_factory(cli_ctx).resource_management_private_link

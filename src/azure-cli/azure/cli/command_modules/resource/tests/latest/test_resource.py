@@ -4105,8 +4105,29 @@ class DeploymentWithBicepScenarioTest(LiveScenarioTest):
         self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', '')
         self.cmd('ts delete --template-spec {template_spec_id} --yes')
 
+
 class PrivateLinkTest(ScenarioTest):
-    @ResourceGroupPreparer(name_prefix='cli_test_template_specs_list', parameter_name='resource_group_one', location='westus')
+    #@ResourceGroupPreparer(name_prefix='cli_test_template_specs_list', parameter_name='resource_group_one', location='westus')
+    def test_get_resourcemanagementprivatelink(self):
+        self.kwargs.update({
+            'loc': 'centralus',
+            'g': 'PrivateLinkTestRG',
+            'n': 'NewPL'
+        })
+        self.cmd('resourcemanagement private-link show -g PrivateLinkTestRG -n NewPL', checks=[
+            self.check('Name', '{n}').
+            self.check('Location', '{loc}')
+        ])
+    def test_get_privatelinkassociation(self):
+        self.kwargs.update({
+            'loc': 'centralus',
+            'mg': '24f15700-370c-45bc-86a7-aee1b0c4eb8a',
+            'n': '1d7942d1-288b-48de-8d0f-2d2aa8e03ad4'
+        })
+        self.cmd('private-link association show -m {mg} -n {n}', checks=[
+            self.check('[0].Type', 'Microsoft.Authorization/privateLinkAssociations').
+            self.check('properties.PrivateLink', '{n}')
+        ])
 
 if __name__ == '__main__':
     unittest.main()
