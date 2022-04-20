@@ -9,7 +9,7 @@ import azure.cli.command_modules.backup.custom_help as helper
 
 import azure.cli.command_modules.backup.custom_common as common
 
-from azure.mgmt.recoveryservicesbackup.models import ProtectedItemResource, \
+from azure.mgmt.recoveryservicesbackup.activestamp.models import ProtectedItemResource, \
     RestoreRequestResource, BackupRequestResource, RestoreFileSpecs, \
     AzureFileShareBackupRequest, AzureFileshareProtectedItem, AzureFileShareRestoreRequest, \
     TargetAFSRestoreInfo, ProtectionState, ProtectionContainerResource, AzureStorageContainer

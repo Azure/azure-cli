@@ -7,7 +7,7 @@ import os
 from azure.cli.testsdk import (LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer,
                                JMESPathCheck, live_only)
 from ..storage_test_util import StorageScenarioMixin
-
+from knack.util import CLIError
 
 class StorageSASScenario(StorageScenarioMixin, LiveScenarioTest):
     @ResourceGroupPreparer()
@@ -73,26 +73,31 @@ class StorageSASScenario(StorageScenarioMixin, LiveScenarioTest):
         container = self.create_container(account_info)
         local_file = self.create_temp_file(128, full_random=False)
         blob_name = self.create_random_name('blob', 16)
+        scope_name = self.create_random_name('scope', 16)
 
         self.kwargs.update({
             'expiry': expiry,
             'account': storage_account,
             'container': container,
             'local_file': local_file,
-            'blob': blob_name
+            'blob': blob_name,
+            'scope_name': scope_name
         })
 
         # account key
         # test sas-token for a container
-        sas = self.storage_cmd('storage container generate-sas -n {} --https-only --permissions dlrw --expiry {} -otsv',
-                               account_info, container, expiry).output.strip()
+        self.cmd('storage account encryption-scope create -n {scope_name} --account-name {account}')
+        sas = self.storage_cmd('storage container generate-sas -n {} --https-only --permissions dlrw --expiry {} '
+                               '--encryption-scope {} -otsv',
+                               account_info, container, expiry, scope_name).output.strip()
         self.kwargs['container_sas'] = sas
         self.cmd('storage blob upload -c {container} -f "{local_file}" -n {blob} '
                  '--account-name {account} --sas-token "{container_sas}"')
 
         # test sas-token for a file
         sas = self.storage_cmd('storage blob generate-sas -c {} -n {} --https-only --permissions acdrw --expiry {} '
-                               '-otsv', account_info, container, blob_name, expiry).output.strip()
+                               '--encryption-scope {}'
+                               '-otsv', account_info, container, blob_name, expiry, scope_name).output.strip()
         self.kwargs['blob_sas'] = sas
         self.cmd('storage blob show -c {container} -n {blob} --account-name {account} --sas-token {blob_sas}') \
             .assert_with_checks(JMESPathCheck('name', blob_name))
@@ -102,21 +107,29 @@ class StorageSASScenario(StorageScenarioMixin, LiveScenarioTest):
                                   '-otsv').output.strip()
         self.kwargs['con_str'] = connection_str
         # test sas-token for a container
-        sas = self.cmd('storage container generate-sas -n {container} --https-only --permissions dlrw '
+        sas = self.cmd('storage container generate-sas -n {container} --https-only --permissions racwdxyltfmei '
                        '--connection-string {con_str} --expiry {expiry} -otsv').output.strip()
         self.kwargs['container_sas'] = sas
+        self.assertIn('sig=', sas, 'SAS token {} does not contain sig segment'.format(sas))
+        self.assertIn('se=', sas, 'SAS token {} does not contain se(expiry) segment'.format(sas))
+        self.assertIn('sp=racwdxyltfmei', sas, 'SAS token {} does not contain permission segment'.format(sas))
+        self.assertIn('spr=https', sas, 'SAS token {} does not contain https segment'.format(sas))
         self.cmd('storage blob upload -c {container} -f "{local_file}" -n {blob} '
-                 '--account-name {account} --sas-token "{container_sas}"')
+                 '--account-name {account} --sas-token "{container_sas}" --overwrite')
 
         # test sas-token for a blob
         sas = self.cmd('storage blob generate-sas -c {container} -n {blob} --account-name {account} --https-only '
-                       '--permissions acdrw --expiry {expiry} -otsv').output.strip()
+                       '--permissions racwdxytmei --expiry {expiry} -otsv').output.strip()
         self.kwargs['blob_sas'] = sas
+        self.assertIn('sig=', sas, 'SAS token {} does not contain sig segment'.format(sas))
+        self.assertIn('se=', sas, 'SAS token {} does not contain se(expiry) segment'.format(sas))
+        self.assertIn('sp=racwdxytmei', sas, 'SAS token {} does not contain permission segment'.format(sas))
+        self.assertIn('spr=https', sas, 'SAS token {} does not contain https segment'.format(sas))
         self.cmd('storage blob show -c {container} -n {blob} --account-name {account} --sas-token {blob_sas}') \
             .assert_with_checks(JMESPathCheck('name', blob_name))
 
-    @ResourceGroupPreparer()
-    @StorageAccountPreparer()
+    @ResourceGroupPreparer(name_prefix='clitest')
+    @StorageAccountPreparer(name_prefix='queuesas', kind='StorageV2', location='eastus2', sku='Standard_RAGRS')
     def test_storage_queue_sas_scenario(self, resource_group, storage_account):
         from datetime import datetime, timedelta
         expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
@@ -132,6 +145,14 @@ class StorageSASScenario(StorageScenarioMixin, LiveScenarioTest):
 
         self.cmd('storage queue exists -n {} --account-name {} --sas-token {}'.format(queue, storage_account, sas),
                  checks=JMESPathCheck('exists', True))
+        self.storage_cmd('storage queue policy create -n testqp -q {} --permissions r --expiry {}',
+                         account_info, queue, expiry)
+
+        sas2 = self.storage_cmd('storage queue generate-sas -n {} --policy-name testqp', account_info, queue).output
+        self.assertIn('sig', sas2, 'The sig segment is not in the sas {}'.format(sas2))
+
+        self.cmd('storage queue exists -n {} --account-name {} --sas-token {}'.format(queue, storage_account, sas2),
+                 checks=JMESPathCheck('exists', True))
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
@@ -139,9 +160,18 @@ class StorageSASScenario(StorageScenarioMixin, LiveScenarioTest):
         from datetime import datetime, timedelta
         expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
         connection_str = self.cmd('storage account show-connection-string -n {} -otsv'.format(storage_account)).output
+        scope_name = self.create_random_name('scope', 16)
+
+        self.kwargs.update({
+            'account': storage_account,
+            'scope_name': scope_name
+        })
+        self.cmd('storage account encryption-scope create -n {scope_name} --account-name {account}')
         sas = self.cmd('storage account generate-sas --resource-types co --services b '
-                       '--expiry {} --permissions r --https-only --connection-string {}'
-                       .format(expiry, connection_str)).output.strip()
+                       '--expiry {} --permissions r --https-only --connection-string {} '
+                       '--encryption-scope {}'
+                       .format(expiry, connection_str, scope_name)).output.strip()
+
         self.assertIn('sig=', sas, 'SAS token {} does not contain sig segment'.format(sas))
         self.assertIn('se=', sas, 'SAS token {} does not contain se segment'.format(sas))
 
@@ -151,6 +181,26 @@ class StorageSASScenario(StorageScenarioMixin, LiveScenarioTest):
         self.cmd('storage blob exists -c {} -n {} --account-name {} --sas-token {}'
                  .format(container, blob_name, storage_account, sas),
                  checks=JMESPathCheck('exists', False))
+
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        with self.assertRaises(CLIError):
+            self.cmd('storage account generate-sas --resource-types o --services b --expiry 2000-01-01 '
+                     '--permissions r --account-name ""')
+
+        invalid_connection_string = "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;"
+        with self.assertRaises(InvalidArgumentValueError):
+            self.cmd('storage account generate-sas --resource-types o --services b --expiry 2000-01-01 '
+                     '--permissions r --connection-string {}'.format(invalid_connection_string))
+
+        sas = self.storage_cmd('storage account generate-sas --resource-types sco --services bqtf '
+                               '--expiry 2046-12-31T08:23Z --permissions rwdxylacupfti --https-only ',
+                               account_info).output
+        self.assertIn('sig=', sas, 'SAS token {} does not contain sig segment'.format(sas))
+        self.assertIn('se=', sas, 'SAS token {} does not contain se(expiry) segment'.format(sas))
+        self.assertIn('sp=rwdxylacupfti', sas, 'SAS token {} does not contain permission segment'.format(sas))
+        self.assertIn('spr=https', sas, 'SAS token {} does not contain https segment'.format(sas))
+        self.assertRegex(sas, '.*ss=[bqtf]{4}.*', 'SAS token {} does not contain services segment'.format(sas))
+        self.assertRegex(sas, '.*srt=[sco]{3}.*', 'SAS token {} does not contain resource type segment'.format(sas))
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(hns=True, kind='StorageV2')

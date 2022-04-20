@@ -91,18 +91,12 @@ class MonitorTests(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='test_metrics_alert_metric_name_with_special_characters')
     @StorageAccountPreparer()
-    def test_metrics_alert_metric_name_with_special_characters(self, resource_group):
+    def test_metrics_alert_metric_name_with_special_characters(self, resource_group, storage_account):
         self.kwargs.update({
             'alert_name': 'MS-ERRORCODE-SU001',
-            'rg': resource_group
-        })
-
-        storage_account = self.cmd('storage account show -n {sa}').get_output_in_json()
-        storage_account_id = storage_account['id']
-        storage_location = storage_account['location']
-        self.kwargs.update({
-            'storage_account_id': storage_account_id,
-            'storage_location': storage_location
+            'rg': resource_group,
+            'storage_account_id': f"/subscriptions/{self.get_subscription_id()}/resourceGroups/{resource_group}/providers/Microsoft.Storage/storageAccounts/{storage_account}",
+            'storage_location': 'westus'
         })
 
         from azure.core.exceptions import HttpResponseError

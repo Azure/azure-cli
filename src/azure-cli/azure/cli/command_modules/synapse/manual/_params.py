@@ -950,8 +950,14 @@ def load_arguments(self, _):
         c.argument('workspace_name', arg_type=workspace_name_arg_type)
 
     with self.argument_context('synapse managed-private-endpoints create') as c:
-        c.argument('private_Link_Resource_Id', options_list=['--resource-id'], help='The ARM resource ID of the resource to which the managed private endpoint is created. Ex - /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}')
-        c.argument('group_Id', help='The groupId to which the managed private endpoint is created')
+        c.argument('private_Link_Resource_Id',
+                   options_list=['--resource-id'],
+                   help='The ARM resource ID of the resource to which the managed private endpoint is created. Ex - /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}',
+                   deprecate_info=c.deprecate(hide=True))
+        c.argument('group_Id',
+                   help='The groupId to which the managed private endpoint is created',
+                   deprecate_info=c.deprecate(hide=True))
+        c.argument('definition_file', arg_type=definition_file_arg_type)
 
     # synapse artifacts spark job definition
     with self.argument_context('synapse spark-job-definition list') as c:

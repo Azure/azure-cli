@@ -2,14 +2,12 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
+import time
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer,
-                               JMESPathCheck, NoneCheck, api_version_constraint)
-from azure.cli.core.profiles import ResourceType
+                               JMESPathCheck, NoneCheck)
 from ..storage_test_util import StorageScenarioMixin
 
 
-@api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2016-12-01')
 class StorageTableScenarioTests(StorageScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer(sku='Standard_RAGRS')
@@ -44,45 +42,45 @@ class StorageTableScenarioTests(StorageScenarioMixin, ScenarioTest):
 
         # status may not be available immediately after the storage account is created in live testing. so retry a few
         # times
+        time.sleep(300)
         table_status = self.storage_cmd('storage table stats', account_info).get_output_in_json()
         self.assertIn(table_status['geoReplication']['status'], ('live', 'unavailable'))
 
     def verify_entity_operations(self, account_info, table_name):
         self.storage_cmd(
             'storage entity insert -t {} -e rowkey=001 partitionkey=001 name=test value=something '
-            'binaryProperty=AAECAwQF binaryProperty@odata.type=Edm.Binary',
+            'sizeInBytes=86222504922 sizeInBytes@odata.type=Edm.Int64',
             account_info, table_name)
         self.storage_cmd('storage entity show -t {} --row-key 001 --partition-key 001',
                          account_info, table_name) \
             .assert_with_checks(JMESPathCheck('name', 'test'),
                                 JMESPathCheck('value', 'something'),
-                                JMESPathCheck('binaryProperty.value', 'AAECAwQF'))
+                                JMESPathCheck('sizeInBytes.value', '86222504922'))
         self.storage_cmd(
             'storage entity show -t {} --row-key 001 --partition-key 001 --select name',
             account_info, table_name).assert_with_checks(JMESPathCheck('name', 'test'),
                                                          JMESPathCheck('value', None),
-                                                         JMESPathCheck('binaryProperty.value', None))
+                                                         JMESPathCheck('binaryProperty', None))
         self.storage_cmd('storage entity merge -t {} -e rowkey=001 partitionkey=001 name=test value=newval',
                          account_info, table_name)
         self.storage_cmd('storage entity show -t {} --row-key 001 --partition-key 001',
                          account_info, table_name) \
             .assert_with_checks(JMESPathCheck('name', 'test'),
                                 JMESPathCheck('value', 'newval'),
-                                JMESPathCheck('binaryProperty.value', 'AAECAwQF'))
+                                JMESPathCheck('sizeInBytes.value', '86222504922'))
 
         self.storage_cmd('storage entity replace -t {} -e rowkey=001 partitionkey=001 cat=hat',
                          account_info, table_name)
         self.storage_cmd('storage entity show -t {} --row-key 001 --partition-key 001',
                          account_info, table_name) \
             .assert_with_checks(JMESPathCheck('cat', 'hat'), JMESPathCheck('name', None),
-                                JMESPathCheck('value', None), JMESPathCheck('binaryProperty.value', None))
+                                JMESPathCheck('value', None), JMESPathCheck('sizeInBytes', None))
 
         self.storage_cmd('storage entity delete -t {} --row-key 001 --partition-key 001',
                          account_info, table_name)
         self.storage_cmd_negative('storage entity show -t {} --row-key 001 --partition-key 001',
                                   account_info, table_name)
-        self.storage_cmd('storage entity insert -t {} -e rowkey=001 partitionkey=001 name=test value=something '
-                         'binaryProperty=AAECAwQF binaryProperty@odata.type=Edm.Binary',
+        self.storage_cmd('storage entity insert -t {} -e rowkey=001 partitionkey=001 name=test value=something',
                          account_info, table_name)
         self.storage_cmd('storage entity insert -t {} -e rowkey=002 partitionkey=002 name=test2 value=something2',
                          account_info, table_name)

@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 import time
-import unittest
 LOCATION = "southcentralusstage"
 VNET_LOCATION = "southcentralus"
 

@@ -8,10 +8,10 @@ import os
 import re
 
 from azure.cli.core._environment import get_config_dir
-from msal import PublicClientApplication
-
 from knack.log import get_logger
 from knack.util import CLIError
+from msal import PublicClientApplication
+
 # Service principal entry properties
 from .msal_authentication import _CLIENT_ID, _TENANT, _CLIENT_SECRET, _CERTIFICATE, _CLIENT_ASSERTION, \
     _USE_CERT_SN_ISSUER
@@ -45,7 +45,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
     # It follows singleton pattern so that _secret_file is read only once.
     _service_principal_store_instance = None
 
-    def __init__(self, authority, tenant_id=None, client_id=None, encrypt=False):
+    def __init__(self, authority, tenant_id=None, client_id=None, encrypt=False, use_msal_http_cache=True):
         """
         :param authority: Authentication authority endpoint. For example,
             - AAD: https://login.microsoftonline.com
@@ -58,7 +58,8 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         self.authority = authority
         self.tenant_id = tenant_id
         self.client_id = client_id or AZURE_CLI_CLIENT_ID
-        self.encrypt = encrypt
+        self._encrypt = encrypt
+        self._use_msal_http_cache = use_msal_http_cache
 
         # Build the authority in MSAL style
         self._msal_authority, self._is_adfs = _get_authority_url(authority, tenant_id)
@@ -66,7 +67,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         config_dir = get_config_dir()
         self._token_cache_file = os.path.join(config_dir, "msal_token_cache")
         self._secret_file = os.path.join(config_dir, "service_principal_entries")
-        self._http_cache_file = os.path.join(config_dir, "msal_http_cache.bin")
+        self._msal_http_cache_file = os.path.join(config_dir, "msal_http_cache.bin")
 
         # We make _msal_app_instance an instance attribute, instead of a class attribute,
         # because MSAL apps can have different tenant IDs.
@@ -80,7 +81,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         if not Identity._msal_token_cache:
             Identity._msal_token_cache = self._load_msal_token_cache()
 
-        if not Identity._msal_http_cache:
+        if self._use_msal_http_cache and not Identity._msal_http_cache:
             Identity._msal_http_cache = self._load_msal_http_cache()
 
         return {
@@ -100,27 +101,13 @@ class Identity:  # pylint: disable=too-many-instance-attributes
 
     def _load_msal_token_cache(self):
         # Store for user token persistence
-        cache = load_persisted_token_cache(self._token_cache_file, self.encrypt)
+        cache = load_persisted_token_cache(self._token_cache_file, self._encrypt)
         return cache
 
     def _load_msal_http_cache(self):
-        import atexit
-        import pickle
-
-        logger.debug("_load_msal_http_cache: %s", self._http_cache_file)
-        try:
-            with open(self._http_cache_file, 'rb') as f:
-                persisted_http_cache = pickle.load(f)
-        except (pickle.UnpicklingError, FileNotFoundError) as ex:
-            logger.debug("Failed to load MSAL HTTP cache: %s", ex)
-            persisted_http_cache = {}  # Ignore a non-exist or corrupted http_cache
-        atexit.register(lambda: pickle.dump(
-            # When exit, flush it back to the file.
-            # If 2 processes write at the same time, the cache will be corrupted,
-            # but that is fine. Subsequent runs would reach eventual consistency.
-            persisted_http_cache, open(self._http_cache_file, 'wb')))
-
-        return persisted_http_cache
+        from .binary_cache import BinaryCache
+        http_cache = BinaryCache(self._msal_http_cache_file)
+        return http_cache
 
     @property
     def _service_principal_store(self):
@@ -128,14 +115,14 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         The instance is lazily created.
         """
         if not Identity._service_principal_store_instance:
-            store = load_secret_store(self._secret_file, self.encrypt)
+            store = load_secret_store(self._secret_file, self._encrypt)
             Identity._service_principal_store_instance = ServicePrincipalStore(store)
         return Identity._service_principal_store_instance
 
     def login_with_auth_code(self, scopes, **kwargs):
         # Emit a warning to inform that a browser is opened.
         # Only show the path part of the URL and hide the query string.
-        logger.warning("The default web browser has been opened at %s. Please continue the login in the web browser. "
+        logger.warning("A web browser has been opened at %s. Please continue the login in the web browser. "
                        "If no web browser is available or if the web browser fails to open, use device code flow "
                        "with `az login --use-device-code`.", self._msal_app.authority.authorization_endpoint)
 
@@ -213,10 +200,6 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         sp_auth = ServicePrincipalAuth(entry)
         return ServicePrincipalCredential(sp_auth, **self._msal_app_kwargs)
 
-    def get_service_principal_entry(self, client_id):
-        """This method is only used by --sdk-auth. DO NOT use it elsewhere."""
-        return self._service_principal_store.load_entry(client_id, self.tenant_id)
-
     def get_managed_identity_credential(self, client_id=None):
         raise NotImplementedError
 
@@ -263,8 +246,9 @@ class ServicePrincipalAuth:
         """
         entry = {}
         if secret_or_certificate:
-            if os.path.isfile(secret_or_certificate):
-                entry[_CERTIFICATE] = secret_or_certificate
+            user_expanded = os.path.expanduser(secret_or_certificate)
+            if os.path.isfile(user_expanded):
+                entry[_CERTIFICATE] = user_expanded
                 if use_cert_sn_issuer:
                     entry[_USE_CERT_SN_ISSUER] = use_cert_sn_issuer
             else:

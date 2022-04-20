@@ -15,11 +15,14 @@ MOCK_CLI_CONFIG_DIR = tempfile.mkdtemp()
 MOCK_CLI_ENV_VAR_PREFIX = "MOCK_" + ENV_VAR_PREFIX
 
 
-class MockClient(object):
+class MockClient:
     def __init__(self):
         pass
 
     def get(self):
+        pass
+
+    def begin_create_or_update(self):
         pass
 
 
@@ -33,7 +36,7 @@ class MockCLI(CLI):
         self.cloud = get_active_cloud(self)
 
 
-class MockCmd(object):
+class MockCmd:
     def __init__(self, cli_ctx):
         self.cli_ctx = cli_ctx
         self.cmd = AzCliCommand(AzCommandsLoader(cli_ctx), "mock-cmd", None)
@@ -56,3 +59,12 @@ class MockCmd(object):
 
     def get_models(self, *attr_args, **kwargs):
         return self.cmd.get_models(*attr_args, **kwargs)
+
+
+class MockUrlretrieveUrlValidator(object):
+    def __init__(self, url, version):
+        self.url = url
+        self.version = version
+
+    def __eq__(self, other):
+        return other.startswith(self.url) and self.version in other

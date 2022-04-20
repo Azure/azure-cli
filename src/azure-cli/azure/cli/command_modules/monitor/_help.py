@@ -55,6 +55,9 @@ parameters:
         Azure Function:
             Format:     --action azurefunction NAME FUNCTION_APP_RESOURCE_ID FUNCTION_NAME HTTP_TRIGGER_URL [usecommonalertschema]
             Example:    --action azurefunction test_function test_rsrc test_func http://trigger usecommonalertschema
+        Event Hub:
+            Format:     --action eventhub NAME SUBSCRIPTION_ID EVENT_HUB_NAME_SPACE EVENT_HUB_NAME [usecommonalertschema]
+            Example:    --action eventhub test_eventhub 5def922a-3ed4-49c1-b9fd-05ec533819a3 eventhubNameSpace testEventHubName usecommonalertschema
         Multiple actions can be specified by using more than one `--add-action` argument.
         'useaadauth', 'isglobalrunbook' and 'usecommonalertschema' are optional arguements that only need to be passed to set the respective parameter to True.
         If the 'useaadauth' argument is passed, then the OBJECT_ID and IDENTIFIER_URI values are required as well.
@@ -128,6 +131,9 @@ parameters:
         Azure Function:
             Format:     --add-action azurefunction NAME FUNCTION_APP_RESOURCE_ID FUNCTION_NAME HTTP_TRIGGER_URL [usecommonalertschema]
             Example:    --add-action azurefunction test_function test_rsrc test_func http://trigger usecommonalertschema
+        Event Hub:
+            Format:     --action eventhub NAME SUBSCRIPTION_ID EVENT_HUB_NAME_SPACE EVENT_HUB_NAME [usecommonalertschema]
+            Example:    --action eventhub test_eventhub 5def922a-3ed4-49c1-b9fd-05ec533819a3 eventhubNameSpace testEventHubName usecommonalertschema
         Multiple actions can be specified by using more than one `--add-action` argument.
         'useaadauth', 'isglobalrunbook' and 'usecommonalertschema' are optional arguements that only need to be passed to set the respective parameter to True.
         If the 'useaadauth' argument is passed, then the OBJECT_ID and IDENTIFIER_URI values are required as well.
@@ -824,12 +830,6 @@ parameters:
   - name: --resource-group -g
     type: string
     short-summary: Name of the resource group for the Log Analytics and Storage Account when the name of the service instead of a full resource ID is given.
-  - name: --logs
-    type: string
-    short-summary: JSON encoded list of logs settings. Use '@{file}' to load from a file.
-  - name: --metrics
-    type: string
-    short-summary: JSON encoded list of metric settings. Use '@{file}' to load from a file.
   - name: --storage-account
     type: string
     short-summary: Name or ID of the storage account to send diagnostic logs to.
@@ -843,10 +843,10 @@ parameters:
   - name: --event-hub-rule
     short-summary: Name or ID of the event hub authorization rule.
 examples:
-  - name: Create diagnostic settings with EventHub.
+  - name: Create diagnostic settings, retention here only applies when the target is a storage account.
     text: |
         az monitor diagnostic-settings create --resource {ID} -n {name}
-           --event-hub-rule {eventHubRuleID} --storage-account {storageAccount}
+           --storage-account {storageAccount}
            --logs '[
              {
                "category": "WorkflowRuntime",
@@ -1107,13 +1107,77 @@ examples:
         az monitor log-analytics workspace table show --resource-group MyResourceGroup --workspace-name MyWorkspace -n MyTable
 """
 
+helps['monitor log-analytics workspace table create'] = """
+type: command
+short-summary: Create a Log Analytics workspace microsoft/custom log table. The table name needs to end with '_CL'.
+examples:
+  - name: Create a Log Analytics workspace custom log table.
+    text: |
+        az monitor log-analytics workspace table create --resource-group MyResourceGroup --workspace-name MyWorkspace -n MyTable_CL --retention-time 45 --columns MyColumn1=string TimeGenerated=datetime
+"""
+
+helps['monitor log-analytics workspace table migrate'] = """
+type: command
+short-summary: Migrate a Log Analytics table from support of the Data Collector API and Custom Fields features to support of Data Collection Rule-based Custom Logs.
+examples:
+  - name: Migrate a Log Analytics workspace table.
+    text: |
+        az monitor log-analytics workspace table migrate --resource-group MyResourceGroup --workspace-name MyWorkspace -n MyTable_CL
+"""
+
+helps['monitor log-analytics workspace table search-job'] = """
+type: group
+short-summary: Manage tables for log analytics workspace search results table.
+"""
+
+helps['monitor log-analytics workspace table search-job create'] = """
+type: command
+short-summary: Create a Log Analytics workspace search results table. The table name needs to end with '_SRCH'.
+examples:
+  - name: Create a Log Analytics workspace search result table.
+    text: |
+        az monitor log-analytics workspace table search-job create --resource-group MyResourceGroup --workspace-name MyWorkspace -n MyTable_SRCH --retention-time 45 --search-query "Heartbeat | where SourceSystem != '' | project SourceSystem" --limit 1000 --start-search-time "Sat, 28 Aug 2021 05:29:18 GMT" --end-search-time "Sat, 28 Aug 2021 08:29:18 GMT"
+"""
+
+helps['monitor log-analytics workspace table restore'] = """
+type: group
+short-summary: Manage tables for log analytics workspace restore logs table.
+"""
+
+helps['monitor log-analytics workspace table restore create'] = """
+type: command
+short-summary: Create a Log Analytics workspace restore logs table. The table name needs to end with '_RST'.
+examples:
+  - name: Create a Log Analytics workspace restore logs table.
+    text: |
+        az monitor log-analytics workspace table restore create --resource-group MyResourceGroup --workspace-name MyWorkspace -n MyTable_RST --start-restore-time "Sat, 28 Aug 2021 05:29:18 GMT" --end-restore-time "Sat, 28 Aug 2021 08:29:18 GMT" --restore-source-table MyTable
+"""
+
+
 helps['monitor log-analytics workspace table update'] = """
 type: command
-short-summary: Update the properties of a Log Analytics workspace table, currently only support updating retention time.
+short-summary: Update the properties of a Log Analytics workspace table.
 examples:
-  - name: Update the retention time of a Log Analytics workspace table
+  - name: Update the properties of a Log Analytics workspace table.
     text: |
         az monitor log-analytics workspace table update --resource-group MyResourceGroup --workspace-name MyWorkspace -n MyTable --retention-time 30
+"""
+
+helps['monitor log-analytics workspace table delete'] = """
+type: command
+short-summary: Delete a Log Analytics workspace table.
+examples:
+  - name: Delete a Log Analytics workspace table.
+    text: |
+        az monitor log-analytics workspace table delete --resource-group MyResourceGroup --workspace-name MyWorkspace -n MyTable
+"""
+
+helps['monitor log-analytics workspace table wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the workspace table is met.
+examples:
+  - name: Pause executing next line of CLI script until the workspace table is successfully provisioned.
+    text: az monitor log-analytics workspace table wait -n MyTable -g MyResourceGroup --workspace-name MyWorkspace --created
 """
 
 helps['monitor log-analytics workspace pack'] = """
@@ -1164,6 +1228,9 @@ examples:
     text: |
         az monitor log-analytics workspace update --resource-group myresourcegroup --retention-time 30 --workspace-name myworkspace
     crafted: true
+  - name: Update the defaultDataCollectionRuleResourceId of the workspace
+    text: |
+        az monitor log-analytics workspace update --resource-group myresourcegroup --workspace-name myworkspace --data-collection-rule "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/dataCollectionRules/{dcrName}".
 """
 
 helps['monitor log-analytics workspace linked-service'] = """

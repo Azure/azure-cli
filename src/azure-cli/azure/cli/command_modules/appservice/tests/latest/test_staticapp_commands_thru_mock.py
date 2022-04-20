@@ -4,9 +4,10 @@
 # --------------------------------------------------------------------------------------------
 import unittest
 from unittest import mock
+from knack.util import CLIError
 
 from azure.cli.command_modules.appservice.static_sites import \
-    list_staticsites, show_staticsite, delete_staticsite, create_staticsites, CLIError, disconnect_staticsite, \
+    list_staticsites, show_staticsite, delete_staticsite, create_staticsites, disconnect_staticsite, \
     reconnect_staticsite, list_staticsite_environments, show_staticsite_environment, list_staticsite_domains, \
     set_staticsite_domain, delete_staticsite_domain, list_staticsite_functions, list_staticsite_app_settings, \
     set_staticsite_app_settings, delete_staticsite_app_settings, list_staticsite_users, \
@@ -95,7 +96,7 @@ class TestStaticAppCommands(unittest.TestCase):
         output_location = '/.git/'
         tags = {'key1': 'value1'}
 
-        with mock.patch("azure.cli.command_modules.appservice.static_sites.show_staticsite", side_effect=ResourceNotFoundError("msg")):
+        with mock.patch("azure.cli.command_modules.appservice.static_sites.show_staticsite", side_effect=[ResourceNotFoundError("msg"), None]):
             create_staticsites(
                 self.mock_cmd, self.rg1, self.name1, self.location1,
                 self.source1, self.branch1, self.token1,
@@ -128,7 +129,7 @@ class TestStaticAppCommands(unittest.TestCase):
         from azure.mgmt.web.models import StaticSiteARMResource, StaticSiteBuildProperties, SkuDescription
         self.mock_cmd.get_models.return_value = StaticSiteARMResource, StaticSiteBuildProperties, SkuDescription
 
-        with mock.patch("azure.cli.command_modules.appservice.static_sites.show_staticsite", side_effect=ResourceNotFoundError("msg")):
+        with mock.patch("azure.cli.command_modules.appservice.static_sites.show_staticsite", side_effect=[ResourceNotFoundError("msg"), None]):
             create_staticsites(
                 self.mock_cmd, self.rg1, self.name1, self.location1,
                 self.source1, self.branch1, self.token1, sku='standard')
@@ -159,7 +160,7 @@ class TestStaticAppCommands(unittest.TestCase):
         tags = {'key1': 'value1'}
         sku = 'Standard'
 
-        update_staticsite(self.mock_cmd, self.name1, self.source2, self.branch2, self.token2, tags=tags, sku=sku)
+        update_staticsite(cmd=self.mock_cmd, name=self.name1, source=self.source2, branch=self.branch2, token=self.token2, tags=tags, sku=sku)
 
         self.staticapp_client.update_static_site.assert_called_once()
         arg_list = self.staticapp_client.update_static_site.call_args[1]
@@ -590,7 +591,7 @@ class TestStaticAppCommands(unittest.TestCase):
         reset_envelope = literal_eval(self.staticapp_client.reset_static_site_api_key.call_args[1]["reset_properties_envelope"].__str__())
         self.assertEqual(reset_envelope["repository_token"], self.token1)
 
-    @mock.patch("azure.cli.command_modules.appservice.static_sites.show_functionapp")
+    @mock.patch("azure.cli.command_modules.appservice.static_sites.show_app")
     def test_functions_link(self, *args, **kwargs):
         functionapp_name = "functionapp"
         functionapp_resource_id = "/subscriptions/sub/resourceGroups/{}/providers/Microsoft.Web/sites/{}".format(

@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import colorama
 import base64
 import binascii
 import datetime
@@ -29,91 +28,99 @@ import webbrowser
 import zipfile
 from distutils.version import StrictVersion
 from math import isnan
-from urllib.request import urlopen
 from urllib.error import URLError
+from urllib.request import urlopen
 
-# pylint: disable=import-error
-import yaml
+import colorama
 import dateutil.parser
-from dateutil.relativedelta import relativedelta
-from knack.log import get_logger
-from knack.util import CLIError
-from knack.prompting import NoTTYException, prompt_y_n
-from msrestazure.azure_exceptions import CloudError
 import requests
-
-# pylint: disable=no-name-in-module,import-error
+import yaml
 from azure.cli.command_modules.acs import acs_client, proxy
+from azure.cli.command_modules.acs._client_factory import (
+    cf_agent_pools,
+    cf_container_registry_service,
+    cf_container_services,
+    get_auth_management_client,
+    get_graph_rbac_management_client,
+    get_resource_by_name,
+)
+from azure.cli.command_modules.acs._consts import (
+    ADDONS,
+    CONST_ACC_SGX_QUOTE_HELPER_ENABLED,
+    CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME,
+    CONST_CANIPULL_IMAGE,
+    CONST_CONFCOM_ADDON_NAME,
+    CONST_INGRESS_APPGW_ADDON_NAME,
+    CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID,
+    CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME,
+    CONST_INGRESS_APPGW_SUBNET_CIDR,
+    CONST_INGRESS_APPGW_SUBNET_ID,
+    CONST_INGRESS_APPGW_WATCH_NAMESPACE,
+    CONST_KUBE_DASHBOARD_ADDON_NAME,
+    CONST_MANAGED_IDENTITY_OPERATOR_ROLE,
+    CONST_MANAGED_IDENTITY_OPERATOR_ROLE_ID,
+    CONST_MONITORING_ADDON_NAME,
+    CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID,
+    CONST_MONITORING_USING_AAD_MSI_AUTH,
+    CONST_NODEPOOL_MODE_USER,
+    CONST_OPEN_SERVICE_MESH_ADDON_NAME,
+    CONST_ROTATION_POLL_INTERVAL,
+    CONST_SCALE_DOWN_MODE_DELETE,
+    CONST_SCALE_SET_PRIORITY_REGULAR,
+    CONST_SCALE_SET_PRIORITY_SPOT,
+    CONST_SECRET_ROTATION_ENABLED,
+    CONST_SPOT_EVICTION_POLICY_DELETE,
+    CONST_VIRTUAL_NODE_ADDON_NAME,
+    CONST_VIRTUAL_NODE_SUBNET_NAME,
+    DecoratorEarlyExitException,
+)
+from azure.cli.command_modules.acs._helpers import get_snapshot_by_snapshot_id
 from azure.cli.command_modules.acs._params import regions_in_preview, regions_in_prod
-from azure.cli.core.api import get_config_dir
-from azure.cli.core.azclierror import (ResourceNotFoundError,
-                                       ClientRequestError,
-                                       ArgumentUsageError,
-                                       InvalidArgumentValueError,
-                                       MutuallyExclusiveArgumentError,
-                                       ValidationError,
-                                       UnauthorizedError,
-                                       AzureInternalError,
-                                       FileOperationError)
+from azure.cli.command_modules.acs._resourcegroup import get_rg_location
+from azure.cli.command_modules.acs._validators import extract_comma_separated_string
+from azure.cli.command_modules.acs.addonconfiguration import (
+    add_ingress_appgw_addon_role_assignment,
+    add_monitoring_role_assignment,
+    add_virtual_node_role_assignment,
+    ensure_container_insights_for_monitoring,
+    ensure_default_log_analytics_workspace_for_monitoring,
+)
 from azure.cli.core._profile import Profile
-from azure.cli.core.profiles import ResourceType
+from azure.cli.core.api import get_config_dir
+from azure.cli.core.azclierror import (
+    ArgumentUsageError,
+    AzureInternalError,
+    FileOperationError,
+    InvalidArgumentValueError,
+    MutuallyExclusiveArgumentError,
+    ResourceNotFoundError,
+    UnauthorizedError,
+    ValidationError,
+)
+from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
 from azure.cli.core.keys import is_valid_ssh_rsa_public_key
-from azure.cli.core.util import in_cloud_console, shell_safe_json_parse, truncate_text, sdk_no_wait
-from azure.cli.core.commands import LongRunningOperation
-from azure.graphrbac.models import (ApplicationCreateParameters,
-                                    ApplicationUpdateParameters,
-                                    PasswordCredential,
-                                    KeyCredential,
-                                    ServicePrincipalCreateParameters,
-                                    GetObjectsParameters,
-                                    ResourceAccess, RequiredResourceAccess)
-
-from azure.mgmt.containerservice.models import ContainerServiceOrchestratorTypes
-
-from ._client_factory import cf_container_services
-from ._client_factory import cf_resource_groups
-from ._client_factory import get_auth_management_client
-from ._client_factory import get_graph_rbac_management_client
-from ._client_factory import cf_resources
-from ._client_factory import get_resource_by_name
-from ._client_factory import cf_container_registry_service
-from ._client_factory import cf_agent_pools
-from ._client_factory import get_msi_client
-
-from ._consts import CONST_SCALE_SET_PRIORITY_REGULAR, CONST_SCALE_SET_PRIORITY_SPOT, CONST_SPOT_EVICTION_POLICY_DELETE
-from ._consts import CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME
-from ._consts import CONST_MONITORING_ADDON_NAME
-from ._consts import CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID
-from ._consts import CONST_VIRTUAL_NODE_ADDON_NAME
-from ._consts import CONST_VIRTUAL_NODE_SUBNET_NAME
-from ._consts import CONST_KUBE_DASHBOARD_ADDON_NAME
-from ._consts import CONST_AZURE_POLICY_ADDON_NAME
-from ._consts import CONST_INGRESS_APPGW_ADDON_NAME
-from ._consts import CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID, CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME
-from ._consts import CONST_INGRESS_APPGW_SUBNET_CIDR, CONST_INGRESS_APPGW_SUBNET_ID
-from ._consts import CONST_INGRESS_APPGW_WATCH_NAMESPACE
-from ._consts import CONST_CONFCOM_ADDON_NAME, CONST_ACC_SGX_QUOTE_HELPER_ENABLED
-from ._consts import CONST_OPEN_SERVICE_MESH_ADDON_NAME
-from ._consts import (CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME,
-                      CONST_SECRET_ROTATION_ENABLED,
-                      CONST_ROTATION_POLL_INTERVAL)
-from ._consts import ADDONS
-from ._consts import CONST_CANIPULL_IMAGE
-from ._consts import CONST_MANAGED_IDENTITY_OPERATOR_ROLE, CONST_MANAGED_IDENTITY_OPERATOR_ROLE_ID
-from ._consts import DecoratorEarlyExitException
-from .addonconfiguration import (
-    add_monitoring_role_assignment,
-    add_ingress_appgw_addon_role_assignment,
-    add_virtual_node_role_assignment,
-    ensure_default_log_analytics_workspace_for_monitoring,
-    ensure_container_insights_for_monitoring,
+from azure.cli.core.profiles import ResourceType
+from azure.cli.core.util import get_file_json, in_cloud_console, sdk_no_wait, shell_safe_json_parse
+from azure.graphrbac.models import (
+    ApplicationCreateParameters,
+    ApplicationUpdateParameters,
+    GetObjectsParameters,
+    KeyCredential,
+    PasswordCredential,
+    RequiredResourceAccess,
+    ResourceAccess,
+    ServicePrincipalCreateParameters,
 )
-from ._resourcegroup import get_rg_location
+from dateutil.relativedelta import relativedelta
+from knack.log import get_logger
+from knack.prompting import NoTTYException, prompt_y_n
+from knack.util import CLIError
+from msrestazure.azure_exceptions import CloudError
 
 logger = get_logger(__name__)
 
-# pylint:disable=too-many-lines,unused-argument
+# pylint: disable=unused-argument
 
 
 def which(binary):
@@ -183,6 +190,8 @@ def acs_browse(cmd, client, resource_group_name, name, disable_browser=False, ss
 
 
 def _acs_browse_internal(cmd, client, acs_info, resource_group_name, name, disable_browser, ssh_key_file):
+    from azure.mgmt.containerservice.models import ContainerServiceOrchestratorTypes
+
     orchestrator_type = acs_info.orchestrator_profile.orchestrator_type  # pylint: disable=no-member
 
     if str(orchestrator_type).lower() == 'kubernetes' or \
@@ -814,41 +823,6 @@ def _generate_properties(api_version, orchestrator_type, orchestrator_version, m
     return properties
 
 
-def _get_user_assigned_identity_resource_id_regular_expression():
-    return re.compile(
-        r'/subscriptions/(.*?)/resourcegroups/(.*?)/providers/microsoft.managedidentity/userassignedidentities/(.*)',
-        flags=re.IGNORECASE)
-
-
-def _get_user_assigned_identity(cli_ctx, resource_id):
-    resource_id = resource_id.lower()
-    _re_user_assigned_identity_resource_id = _get_user_assigned_identity_resource_id_regular_expression()
-    match = _re_user_assigned_identity_resource_id.search(resource_id)
-    if match:
-        subscription_id = match.group(1)
-        resource_group_name = match.group(2)
-        identity_name = match.group(3)
-        msi_client = get_msi_client(cli_ctx, subscription_id)
-        try:
-            identity = msi_client.user_assigned_identities.get(resource_group_name=resource_group_name,
-                                                               resource_name=identity_name)
-        except CloudError as ex:
-            if 'was not found' in ex.message:
-                raise ResourceNotFoundError("Identity {} not found.".format(resource_id))
-            raise ClientRequestError(ex.message)
-        return identity
-    raise InvalidArgumentValueError(
-        "Cannot parse identity name from provided resource id {}.".format(resource_id))
-
-
-def _get_user_assigned_identity_client_id(cli_ctx, resource_id):
-    return _get_user_assigned_identity(cli_ctx, resource_id).client_id
-
-
-def _get_user_assigned_identity_object_id(cli_ctx, resource_id):
-    return _get_user_assigned_identity(cli_ctx, resource_id).principal_id
-
-
 # pylint: disable=too-many-locals
 def acs_create(cmd, client, resource_group_name, deployment_name, name, ssh_key_value, dns_name_prefix=None,
                location=None, admin_username="azureuser", api_version=None, master_profile=None,
@@ -1315,6 +1289,8 @@ def _mkdir_p(path):
 
 
 def update_acs(cmd, client, resource_group_name, container_service_name, new_agent_count):
+    from azure.mgmt.containerservice.models import ContainerServiceOrchestratorTypes
+
     instance = client.get(resource_group_name, container_service_name)
     instance.agent_pool_profiles[0].count = new_agent_count  # pylint: disable=no-member
 
@@ -1603,103 +1579,111 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr):
     if not which("kubectl"):
         raise ValidationError("Can not find kubectl executable in PATH")
 
-    _, browse_path = tempfile.mkstemp()
-    aks_get_credentials(
-        cmd, client, resource_group_name, name, admin=False, path=browse_path
-    )
-
-    # Get kubectl minor version
-    kubectl_minor_version = -1
+    return_msg = None
+    fd, browse_path = tempfile.mkstemp()
     try:
-        cmd = f"kubectl version -o json --kubeconfig {browse_path}"
-        output = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
-        jsonS, _ = output.communicate()
-        kubectl_version = json.loads(jsonS)
-        # Remove any non-numeric characters like + from minor version
-        kubectl_minor_version = int(re.sub(r"\D", "", kubectl_version["clientVersion"]["minor"]))
-        kubectl_server_minor_version = int(
-            kubectl_version["serverVersion"]["minor"])
-        kubectl_server_patch = int(
-            kubectl_version["serverVersion"]["gitVersion"].split(".")[-1])
-        if kubectl_server_minor_version < 17 or (kubectl_server_minor_version == 17 and kubectl_server_patch < 14):
-            logger.warning('There is a known issue for Kubernetes versions < 1.17.14 when connecting to '
-                           'ACR using MSI. See https://github.com/kubernetes/kubernetes/pull/96355 for'
-                           'more information.')
-    except subprocess.CalledProcessError as err:
-        raise ValidationError(
-            "Could not find kubectl minor version: {}".format(err))
-    if kubectl_minor_version == -1:
-        raise ValidationError("Failed to get kubectl version")
-
-    podName = "canipull-" + str(uuid.uuid4())
-    overrides = {
-        "spec": {
-            "restartPolicy": "Never",
-            "hostNetwork": True,
-            "containers": [
-                {
-                    "securityContext": {"runAsUser": 0},
-                    "name": podName,
-                    "image": CONST_CANIPULL_IMAGE,
-                    "args": ["-v6", acr],
-                    "stdin": True,
-                    "stdinOnce": True,
-                    "tty": True,
-                    "volumeMounts": [
-                        {"name": "azurejson", "mountPath": "/etc/kubernetes"},
-                        {"name": "sslcerts", "mountPath": "/etc/ssl/certs"},
-                    ],
-                }
-            ],
-            "tolerations": [
-                {"key": "CriticalAddonsOnly", "operator": "Exists"},
-                {"effect": "NoExecute", "operator": "Exists"},
-            ],
-            "volumes": [
-                {"name": "azurejson", "hostPath": {"path": "/etc/kubernetes"}},
-                {"name": "sslcerts", "hostPath": {"path": "/etc/ssl/certs"}},
-            ],
-            "nodeSelector": {"kubernetes.io/os": "linux"},
-        }
-    }
-
-    try:
-        cmd = [
-            "kubectl",
-            "run",
-            "--kubeconfig",
-            browse_path,
-            "--rm",
-            "--quiet",
-            "--image",
-            CONST_CANIPULL_IMAGE,
-            "--overrides",
-            json.dumps(overrides),
-            "-it",
-            podName,
-            "--namespace=default",
-        ]
-
-        # Support kubectl versons < 1.18
-        if kubectl_minor_version < 18:
-            cmd += ["--generator=run-pod/v1"]
-
-        output = subprocess.check_output(
-            cmd,
-            universal_newlines=True,
-            stderr=subprocess.STDOUT,
+        aks_get_credentials(
+            cmd, client, resource_group_name, name, admin=False, path=browse_path
         )
-    except subprocess.CalledProcessError as err:
-        raise AzureInternalError("Failed to check the ACR: {} Command output: {}".format(err, err.output))
-    if output:
-        print(output)
-        test_hook_data = get_cmd_test_hook_data("test_aks_create_attach_acr.hook")
-        if test_hook_data:
-            test_configs = test_hook_data.get("configs", None)
-            if test_configs and test_configs.get("returnOutput", False):
-                return output
-    else:
-        raise AzureInternalError("Failed to check the ACR.")
+
+        # Get kubectl minor version
+        kubectl_minor_version = -1
+        try:
+            cmd = f"kubectl version -o json --kubeconfig {browse_path}"
+            output = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
+            jsonS, _ = output.communicate()
+            kubectl_version = json.loads(jsonS)
+            # Remove any non-numeric characters like + from minor version
+            kubectl_minor_version = int(re.sub(r"\D", "", kubectl_version["clientVersion"]["minor"]))
+            kubectl_server_minor_version = int(
+                kubectl_version["serverVersion"]["minor"])
+            kubectl_server_patch = int(
+                kubectl_version["serverVersion"]["gitVersion"].split(".")[-1])
+            if kubectl_server_minor_version < 17 or (kubectl_server_minor_version == 17 and kubectl_server_patch < 14):
+                logger.warning(
+                    "There is a known issue for Kubernetes versions < 1.17.14 when connecting to "
+                    "ACR using MSI. See https://github.com/kubernetes/kubernetes/pull/96355 for"
+                    "more information."
+                )
+        except subprocess.CalledProcessError as err:
+            raise ValidationError(
+                "Could not find kubectl minor version: {}".format(err))
+        if kubectl_minor_version == -1:
+            raise ValidationError("Failed to get kubectl version")
+
+        podName = "canipull-" + str(uuid.uuid4())
+        overrides = {
+            "spec": {
+                "restartPolicy": "Never",
+                "hostNetwork": True,
+                "containers": [
+                    {
+                        "securityContext": {"runAsUser": 0},
+                        "name": podName,
+                        "image": CONST_CANIPULL_IMAGE,
+                        "args": ["-v6", acr],
+                        "stdin": True,
+                        "stdinOnce": True,
+                        "tty": True,
+                        "volumeMounts": [
+                            {"name": "azurejson", "mountPath": "/etc/kubernetes"},
+                            {"name": "sslcerts", "mountPath": "/etc/ssl/certs"},
+                        ],
+                    }
+                ],
+                "tolerations": [
+                    {"key": "CriticalAddonsOnly", "operator": "Exists"},
+                    {"effect": "NoExecute", "operator": "Exists"},
+                ],
+                "volumes": [
+                    {"name": "azurejson", "hostPath": {"path": "/etc/kubernetes"}},
+                    {"name": "sslcerts", "hostPath": {"path": "/etc/ssl/certs"}},
+                ],
+                "nodeSelector": {"kubernetes.io/os": "linux"},
+            }
+        }
+
+        try:
+            cmd = [
+                "kubectl",
+                "run",
+                "--kubeconfig",
+                browse_path,
+                "--rm",
+                "--quiet",
+                "--image",
+                CONST_CANIPULL_IMAGE,
+                "--overrides",
+                json.dumps(overrides),
+                "-it",
+                podName,
+                "--namespace=default",
+            ]
+
+            # Support kubectl versons < 1.18
+            if kubectl_minor_version < 18:
+                cmd += ["--generator=run-pod/v1"]
+
+            output = subprocess.check_output(
+                cmd,
+                universal_newlines=True,
+                stderr=subprocess.STDOUT,
+            )
+        except subprocess.CalledProcessError as err:
+            raise AzureInternalError("Failed to check the ACR: {} Command output: {}".format(err, err.output))
+        if output:
+            print(output)
+            # only return the output in test case "test_aks_create_attach_acr"
+            test_hook_data = get_cmd_test_hook_data("test_aks_create_attach_acr.hook")
+            if test_hook_data:
+                test_configs = test_hook_data.get("configs", None)
+                if test_configs and test_configs.get("returnOutput", False):
+                    return_msg = output
+        else:
+            raise AzureInternalError("Failed to check the ACR.")
+    finally:
+        os.close(fd)
+    return return_msg
 
 
 # pylint: disable=too-many-statements,too-many-branches
@@ -1750,121 +1734,155 @@ def _aks_browse(
     if not which('kubectl'):
         raise FileOperationError('Can not find kubectl executable in PATH')
 
-    _, browse_path = tempfile.mkstemp()
-    aks_get_credentials(cmd, client, resource_group_name,
-                        name, admin=False, path=browse_path)
-
-    # find the dashboard pod's name
+    fd, browse_path = tempfile.mkstemp()
     try:
-        dashboard_pod = subprocess.check_output(
-            ["kubectl", "get", "pods", "--kubeconfig", browse_path, "--namespace", "kube-system",
-             "--output", "name", "--selector", "k8s-app=kubernetes-dashboard"],
-            universal_newlines=True,
-            stderr=subprocess.STDOUT,
-        )
-    except subprocess.CalledProcessError as err:
-        raise ResourceNotFoundError('Could not find dashboard pod: {} Command output: {}'.format(err, err.output))
-    if dashboard_pod:
-        # remove any "pods/" or "pod/" prefix from the name
-        dashboard_pod = str(dashboard_pod).split('/')[-1].strip()
-    else:
-        raise ResourceNotFoundError("Couldn't find the Kubernetes dashboard pod.")
+        aks_get_credentials(cmd, client, resource_group_name,
+                            name, admin=False, path=browse_path)
 
-    # find the port
-    try:
-        dashboard_port = subprocess.check_output(
-            ["kubectl", "get", "pods", "--kubeconfig", browse_path, "--namespace", "kube-system",
-             "--selector", "k8s-app=kubernetes-dashboard",
-             "--output", "jsonpath='{.items[0].spec.containers[0].ports[0].containerPort}'"],
-            universal_newlines=True,
-            stderr=subprocess.STDOUT,
-        )
-        # output format: "'{port}'"
-        dashboard_port = int((dashboard_port.replace("'", "")))
-    except subprocess.CalledProcessError as err:
-        raise ResourceNotFoundError('Could not find dashboard port: {} Command output: {}'.format(err, err.output))
-
-    # use https if dashboard container is using https
-    if dashboard_port == 8443:
-        protocol = 'https'
-    else:
-        protocol = 'http'
-
-    proxy_url = 'http://{0}:{1}/'.format(listen_address, listen_port)
-    dashboardURL = '{0}/api/v1/namespaces/kube-system/services/{1}:kubernetes-dashboard:/proxy/'.format(proxy_url,
-                                                                                                        protocol)
-    # launch kubectl port-forward locally to access the remote dashboard
-    if in_cloud_console():
-        # TODO: better error handling here.
-        response = requests.post(
-            'http://localhost:8888/openport/{0}'.format(listen_port))
-        result = json.loads(response.text)
-        dashboardURL = '{0}api/v1/namespaces/kube-system/services/{1}:kubernetes-dashboard:/proxy/'.format(
-            result['url'], protocol)
-        term_id = os.environ.get('ACC_TERM_ID')
-        if term_id:
-            response = requests.post('http://localhost:8888/openLink/{0}'.format(term_id),
-                                     json={"url": dashboardURL})
-        logger.warning(
-            'To view the console, please open %s in a new tab', dashboardURL)
-    else:
-        logger.warning('Proxy running on %s', proxy_url)
-
-    timeout = None
-    test_hook_data = get_cmd_test_hook_data("test_aks_browse_legacy.hook")
-    if test_hook_data:
-        test_configs = test_hook_data.get("configs", None)
-        if test_configs and test_configs.get("enableTimeout", False):
-            timeout = test_configs.get("timeoutInterval", None)
-    logger.warning('Press CTRL+C to close the tunnel...')
-    if not disable_browser:
-        wait_then_open_async(dashboardURL)
-    try:
+        # find the dashboard pod's name
         try:
-            subprocess.check_output(
-                ["kubectl", "--kubeconfig", browse_path, "proxy", "--address",
-                 listen_address, "--port", listen_port],
+            dashboard_pod = subprocess.check_output(
+                [
+                    "kubectl",
+                    "get",
+                    "pods",
+                    "--kubeconfig",
+                    browse_path,
+                    "--namespace",
+                    "kube-system",
+                    "--output",
+                    "name",
+                    "--selector",
+                    "k8s-app=kubernetes-dashboard",
+                ],
                 universal_newlines=True,
                 stderr=subprocess.STDOUT,
-                timeout=timeout,
             )
         except subprocess.CalledProcessError as err:
-            if err.output.find('unknown flag: --address'):
-                return_msg = "Test Invalid Address! "
-                if listen_address != '127.0.0.1':
-                    logger.warning(
-                        '"--address" is only supported in kubectl v1.13 and later.')
-                    logger.warning(
-                        'The "--listen-address" argument will be ignored.')
-                try:
-                    subprocess.call(["kubectl", "--kubeconfig",
-                                    browse_path, "proxy", "--port", listen_port], timeout=timeout)
-                except subprocess.TimeoutExpired:
-                    logger.warning("Currently in a test environment, the proxy is closed due to a preset timeout!")
-                    return_msg = return_msg if return_msg else ""
-                    return_msg += "Test Passed!"
-                except subprocess.CalledProcessError as new_err:
+            raise ResourceNotFoundError('Could not find dashboard pod: {} Command output: {}'.format(err, err.output))
+        if dashboard_pod:
+            # remove any "pods/" or "pod/" prefix from the name
+            dashboard_pod = str(dashboard_pod).split('/')[-1].strip()
+        else:
+            raise ResourceNotFoundError("Couldn't find the Kubernetes dashboard pod.")
+
+        # find the port
+        try:
+            dashboard_port = subprocess.check_output(
+                [
+                    "kubectl",
+                    "get",
+                    "pods",
+                    "--kubeconfig",
+                    browse_path,
+                    "--namespace",
+                    "kube-system",
+                    "--selector",
+                    "k8s-app=kubernetes-dashboard",
+                    "--output",
+                    "jsonpath='{.items[0].spec.containers[0].ports[0].containerPort}'",
+                ],
+                universal_newlines=True,
+                stderr=subprocess.STDOUT,
+            )
+            # output format: "'{port}'"
+            dashboard_port = int((dashboard_port.replace("'", "")))
+        except subprocess.CalledProcessError as err:
+            raise ResourceNotFoundError('Could not find dashboard port: {} Command output: {}'.format(err, err.output))
+
+        # use https if dashboard container is using https
+        if dashboard_port == 8443:
+            protocol = 'https'
+        else:
+            protocol = 'http'
+
+        proxy_url = 'http://{0}:{1}/'.format(listen_address, listen_port)
+        dashboardURL = '{0}/api/v1/namespaces/kube-system/services/{1}:kubernetes-dashboard:/proxy/'.format(proxy_url,
+                                                                                                            protocol)
+        # launch kubectl port-forward locally to access the remote dashboard
+        if in_cloud_console():
+            # TODO: better error handling here.
+            response = requests.post(
+                'http://localhost:8888/openport/{0}'.format(listen_port))
+            result = json.loads(response.text)
+            dashboardURL = '{0}api/v1/namespaces/kube-system/services/{1}:kubernetes-dashboard:/proxy/'.format(
+                result['url'], protocol)
+            term_id = os.environ.get('ACC_TERM_ID')
+            if term_id:
+                response = requests.post(
+                    "http://localhost:8888/openLink/{0}".format(term_id),
+                    json={"url": dashboardURL},
+                )
+            logger.warning(
+                'To view the console, please open %s in a new tab', dashboardURL)
+        else:
+            logger.warning('Proxy running on %s', proxy_url)
+
+        timeout = None
+        test_hook_data = get_cmd_test_hook_data("test_aks_browse_legacy.hook")
+        if test_hook_data:
+            test_configs = test_hook_data.get("configs", None)
+            if test_configs and test_configs.get("enableTimeout", False):
+                timeout = test_configs.get("timeoutInterval", None)
+        logger.warning('Press CTRL+C to close the tunnel...')
+        if not disable_browser:
+            wait_then_open_async(dashboardURL)
+        try:
+            try:
+                subprocess.check_output(
+                    [
+                        "kubectl",
+                        "--kubeconfig",
+                        browse_path,
+                        "proxy",
+                        "--address",
+                        listen_address,
+                        "--port",
+                        listen_port,
+                    ],
+                    universal_newlines=True,
+                    stderr=subprocess.STDOUT,
+                    timeout=timeout,
+                )
+            except subprocess.CalledProcessError as err:
+                if err.output.find('unknown flag: --address'):
+                    return_msg = "Test Invalid Address! "
+                    if listen_address != '127.0.0.1':
+                        logger.warning(
+                            '"--address" is only supported in kubectl v1.13 and later.')
+                        logger.warning(
+                            'The "--listen-address" argument will be ignored.')
+                    try:
+                        subprocess.call(["kubectl", "--kubeconfig",
+                                        browse_path, "proxy", "--port", listen_port], timeout=timeout)
+                    except subprocess.TimeoutExpired:
+                        logger.warning("Currently in a test environment, the proxy is closed due to a preset timeout!")
+                        return_msg = return_msg if return_msg else ""
+                        return_msg += "Test Passed!"
+                    except subprocess.CalledProcessError as new_err:
+                        raise AzureInternalError(
+                            "Could not open proxy: {} Command output: {}".format(
+                                new_err, new_err.output
+                            )
+                        )
+                else:
                     raise AzureInternalError(
                         "Could not open proxy: {} Command output: {}".format(
-                            new_err, new_err.output
+                            err, err.output
                         )
                     )
-            else:
-                raise AzureInternalError(
-                    "Could not open proxy: {} Command output: {}".format(
-                        err, err.output
-                    )
-                )
-        except subprocess.TimeoutExpired:
-            logger.warning("Currently in a test environment, the proxy is closed due to a preset timeout!")
-            return_msg = return_msg if return_msg else ""
-            return_msg += "Test Passed!"
-    except KeyboardInterrupt:
-        # Let command processing finish gracefully after the user presses [Ctrl+C]
-        pass
+            except subprocess.TimeoutExpired:
+                logger.warning("Currently in a test environment, the proxy is closed due to a preset timeout!")
+                return_msg = return_msg if return_msg else ""
+                return_msg += "Test Passed!"
+        except KeyboardInterrupt:
+            # Let command processing finish gracefully after the user presses [Ctrl+C]
+            pass
+        finally:
+            if in_cloud_console():
+                requests.post('http://localhost:8888/closeport/8001')
     finally:
-        if in_cloud_console():
-            requests.post('http://localhost:8888/closeport/8001')
+        os.close(fd)
     return return_msg
 
 
@@ -1891,52 +1909,19 @@ def aks_browse(
     )
 
 
-def _trim_nodepoolname(nodepool_name):
-    if not nodepool_name:
-        return "nodepool1"
-    return nodepool_name[:12]
-
-
-def _validate_ssh_key(no_ssh_key, ssh_key_value):
-    if not no_ssh_key:
-        try:
-            if not ssh_key_value or not is_valid_ssh_rsa_public_key(ssh_key_value):
-                raise ValueError()
-        except (TypeError, ValueError):
-            shortened_key = truncate_text(ssh_key_value)
-            raise CLIError(
-                'Provided ssh key ({}) is invalid or non-existent'.format(shortened_key))
-
-
-# pylint: disable=too-many-statements,too-many-branches
-def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint: disable=too-many-locals
-               dns_name_prefix=None,
+# pylint: disable=too-many-locals
+def aks_create(cmd, client, resource_group_name, name, ssh_key_value,
                location=None,
-               admin_username="azureuser",
-               windows_admin_username=None,
-               windows_admin_password=None,
-               enable_ahub=False,
                kubernetes_version='',
-               node_vm_size="Standard_DS2_v2",
-               node_osdisk_type=None,
-               node_osdisk_size=0,
-               node_osdisk_diskencryptionset_id=None,
-               node_count=3,
-               nodepool_name="nodepool1",
-               nodepool_tags=None,
-               nodepool_labels=None,
-               service_principal=None, client_secret=None,
+               admin_username="azureuser",
+               generate_ssh_keys=False,  # pylint: disable=unused-argument
                no_ssh_key=False,
+               edge_zone=None,
+               node_osdisk_diskencryptionset_id=None,
+               disable_local_accounts=False,
                disable_rbac=None,
                enable_rbac=None,
-               vm_set_type=None,
-               skip_subnet_role_assignment=False,
-               os_sku=None,
-               enable_cluster_autoscaler=False,
-               cluster_autoscaler_profile=None,
-               network_plugin=None,
-               network_policy=None,
-               uptime_sla=False,
+               tags=None,
                pod_cidr=None,
                service_cidr=None,
                dns_service_ip=None,
@@ -1947,34 +1932,43 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                load_balancer_outbound_ip_prefixes=None,
                load_balancer_outbound_ports=None,
                load_balancer_idle_timeout=None,
+               nat_gateway_managed_outbound_ip_count=None,
+               nat_gateway_idle_timeout=None,
                outbound_type=None,
+               network_plugin=None,
+               network_policy=None,
                auto_upgrade_channel=None,
-               enable_addons=None,
-               workspace_resource_id=None,
-               vnet_subnet_id=None,
-               ppg=None,
-               max_pods=0,
-               min_count=None,
-               max_count=None,
+               cluster_autoscaler_profile=None,
+               uptime_sla=False,
+               dns_name_prefix=None,
+               fqdn_subdomain=None,
+               api_server_authorized_ip_ranges=None,
+               enable_private_cluster=False,
+               private_dns_zone=None,
+               disable_public_fqdn=False,
+               service_principal=None,
+               client_secret=None,
+               enable_managed_identity=True,
+               assign_identity=None,
+               assign_kubelet_identity=None,
+               enable_aad=False,
+               enable_azure_rbac=False,
+               aad_admin_group_object_ids=None,
                aad_client_app_id=None,
                aad_server_app_id=None,
                aad_server_app_secret=None,
                aad_tenant_id=None,
-               tags=None,
-               zones=None,
-               enable_node_public_ip=False,
-               node_public_ip_prefix_id=None,
-               generate_ssh_keys=False,  # pylint: disable=unused-argument
-               api_server_authorized_ip_ranges=None,
-               enable_private_cluster=False,
-               private_dns_zone=None,
-               fqdn_subdomain=None,
-               disable_public_fqdn=False,
-               enable_managed_identity=True,
-               assign_identity=None,
+               windows_admin_username=None,
+               windows_admin_password=None,
+               enable_ahub=False,
+               enable_windows_gmsa=False,
+               gmsa_dns_server=None,
+               gmsa_root_domain_name=None,
                attach_acr=None,
-               enable_aad=False,
-               aad_admin_group_object_ids=None,
+               skip_subnet_role_assignment=False,
+               enable_addons=None,
+               workspace_resource_id=None,
+               enable_msi_auth_for_monitoring=False,
                aci_subnet_name=None,
                appgw_name=None,
                appgw_subnet_cidr=None,
@@ -1982,23 +1976,42 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                appgw_subnet_id=None,
                appgw_watch_namespace=None,
                enable_sgxquotehelper=False,
-               enable_encryption_at_host=False,
                enable_secret_rotation=False,
                rotation_poll_interval=None,
-               assign_kubelet_identity=None,
+               nodepool_name="nodepool1",
+               node_vm_size=None,
+               os_sku=None,
+               vnet_subnet_id=None,
+               pod_subnet_id=None,
+               enable_node_public_ip=False,
+               node_public_ip_prefix_id=None,
+               enable_cluster_autoscaler=False,
+               min_count=None,
+               max_count=None,
+               node_count=3,
+               nodepool_tags=None,
+               nodepool_labels=None,
+               node_osdisk_type=None,
+               node_osdisk_size=0,
+               vm_set_type=None,
+               zones=None,
+               ppg=None,
+               max_pods=0,
+               enable_encryption_at_host=False,
                enable_ultra_ssd=False,
-               edge_zone=None,
-               disable_local_accounts=False,
                enable_fips_image=False,
+               snapshot_id=None,
+               kubelet_config=None,
+               linux_os_config=None,
                no_wait=False,
                yes=False,
-               enable_azure_rbac=False,
-               aks_custom_headers=None):
-    # get all the original parameters and save them as a dictionary
+               aks_custom_headers=None,
+               ):
+    # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
 
     # decorator pattern
-    from .decorator import AKSCreateDecorator
+    from azure.cli.command_modules.acs.decorator import AKSCreateDecorator
     aks_create_decorator = AKSCreateDecorator(
         cmd=cmd,
         client=client,
@@ -2015,9 +2028,95 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     return aks_create_decorator.create_mc(mc)
 
 
+def aks_update(cmd, client, resource_group_name, name,
+               enable_cluster_autoscaler=False,
+               disable_cluster_autoscaler=False,
+               update_cluster_autoscaler=False,
+               cluster_autoscaler_profile=None,
+               min_count=None, max_count=None,
+               uptime_sla=False,
+               no_uptime_sla=False,
+               load_balancer_managed_outbound_ip_count=None,
+               load_balancer_outbound_ips=None,
+               load_balancer_outbound_ip_prefixes=None,
+               load_balancer_outbound_ports=None,
+               load_balancer_idle_timeout=None,
+               nat_gateway_managed_outbound_ip_count=None,
+               nat_gateway_idle_timeout=None,
+               attach_acr=None,
+               detach_acr=None,
+               api_server_authorized_ip_ranges=None,
+               enable_aad=False,
+               aad_tenant_id=None,
+               aad_admin_group_object_ids=None,
+               enable_ahub=False,
+               disable_ahub=False,
+               windows_admin_password=None,
+               auto_upgrade_channel=None,
+               enable_managed_identity=False,
+               assign_identity=None,
+               disable_local_accounts=False,
+               enable_local_accounts=False,
+               yes=False,
+               no_wait=False,
+               enable_public_fqdn=False,
+               disable_public_fqdn=False,
+               enable_azure_rbac=False,
+               disable_azure_rbac=False,
+               enable_secret_rotation=False,
+               disable_secret_rotation=False,
+               rotation_poll_interval=None,
+               tags=None,
+               nodepool_labels=None,
+               enable_windows_gmsa=False,
+               gmsa_dns_server=None,
+               gmsa_root_domain_name=None,
+               aks_custom_headers=None):
+    # DO NOT MOVE: get all the original parameters and save them as a dictionary
+    raw_parameters = locals()
+
+    # decorator pattern
+    from azure.cli.command_modules.acs.decorator import AKSUpdateDecorator
+    aks_update_decorator = AKSUpdateDecorator(
+        cmd=cmd,
+        client=client,
+        raw_parameters=raw_parameters,
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+    )
+    try:
+        # update mc profile
+        mc = aks_update_decorator.update_default_mc_profile()
+    except DecoratorEarlyExitException:
+        # exit gracefully
+        return None
+    # send request to update the real managed cluster
+    return aks_update_decorator.update_mc(mc)
+
+
+# pylint: disable=line-too-long
 def aks_disable_addons(cmd, client, resource_group_name, name, addons, no_wait=False):
     instance = client.get(resource_group_name, name)
     subscription_id = get_subscription_id(cmd.cli_ctx)
+    try:
+        if addons == "monitoring" and CONST_MONITORING_ADDON_NAME in instance.addon_profiles and \
+                instance.addon_profiles[CONST_MONITORING_ADDON_NAME].enabled and \
+                CONST_MONITORING_USING_AAD_MSI_AUTH in instance.addon_profiles[CONST_MONITORING_ADDON_NAME].config and \
+                str(instance.addon_profiles[CONST_MONITORING_ADDON_NAME].config[CONST_MONITORING_USING_AAD_MSI_AUTH]).lower() == 'true':
+            # remove the DCR association because otherwise the DCR can't be deleted
+            ensure_container_insights_for_monitoring(
+                cmd,
+                instance.addon_profiles[CONST_MONITORING_ADDON_NAME],
+                subscription_id,
+                resource_group_name,
+                name,
+                instance.location,
+                remove_monitoring=True,
+                aad_route=True,
+                create_dcr=False,
+                create_dcra=True
+            )
+    except TypeError:
+        pass
 
     instance = _update_addons(
         cmd,
@@ -2034,6 +2133,7 @@ def aks_disable_addons(cmd, client, resource_group_name, name, addons, no_wait=F
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, name, instance)
 
 
+# pylint: disable=line-too-long
 def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                       workspace_resource_id=None,
                       subnet_name=None,
@@ -2045,12 +2145,17 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                       enable_sgxquotehelper=False,
                       enable_secret_rotation=False,
                       rotation_poll_interval=None,
-                      no_wait=False):
+                      no_wait=False,
+                      enable_msi_auth_for_monitoring=False):
     instance = client.get(resource_group_name, name)
+    msi_auth = False
+    if instance.service_principal_profile.client_id == "msi":
+        msi_auth = True
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
     instance = _update_addons(cmd, instance, subscription_id, resource_group_name, name, addons, enable=True,
                               workspace_resource_id=workspace_resource_id,
+                              enable_msi_auth_for_monitoring=enable_msi_auth_for_monitoring,
                               subnet_name=subnet_name,
                               appgw_name=appgw_name,
                               appgw_subnet_cidr=appgw_subnet_cidr,
@@ -2076,21 +2181,33 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
 
     if need_pull_for_result:
         if enable_monitoring:
-            ensure_container_insights_for_monitoring(
-                cmd,
-                instance.addon_profiles[CONST_MONITORING_ADDON_NAME],
-                subscription_id,
-                resource_group_name,
-                name,
-                instance.location,
-                aad_route=False,
-            )
+            if CONST_MONITORING_USING_AAD_MSI_AUTH in instance.addon_profiles[CONST_MONITORING_ADDON_NAME].config and \
+               str(instance.addon_profiles[CONST_MONITORING_ADDON_NAME].config[CONST_MONITORING_USING_AAD_MSI_AUTH]).lower() == 'true':
+                if msi_auth:
+                    # create a Data Collection Rule (DCR) and associate it with the cluster
+                    ensure_container_insights_for_monitoring(
+                        cmd, instance.addon_profiles[CONST_MONITORING_ADDON_NAME],
+                        subscription_id,
+                        resource_group_name,
+                        name,
+                        instance.location,
+                        aad_route=True,
+                        create_dcr=True,
+                        create_dcra=True)
+                else:
+                    raise ArgumentUsageError(
+                        "--enable-msi-auth-for-monitoring can not be used on clusters with service principal auth.")
+            else:
+                # monitoring addon will use legacy path
+                ensure_container_insights_for_monitoring(
+                    cmd, instance.addon_profiles[CONST_MONITORING_ADDON_NAME], subscription_id, resource_group_name, name, instance.location, aad_route=False)
 
         # adding a wait here since we rely on the result for role assignment
         result = LongRunningOperation(cmd.cli_ctx)(
             client.begin_create_or_update(resource_group_name, name, instance))
 
-        if enable_monitoring:
+        # For monitoring addon, Metrics role assignement doesnt require in case of MSI auth
+        if enable_monitoring and not enable_msi_auth_for_monitoring:
             cloud_name = cmd.cli_ctx.cloud.name
             # mdm metrics supported only in Azure Public cloud so add the role assignment only in this cloud
             if cloud_name.lower() == 'azurecloud':
@@ -2129,25 +2246,30 @@ def aks_get_versions(cmd, client, location):
 def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
                         path=os.path.join(os.path.expanduser(
                             '~'), '.kube', 'config'),
-                        overwrite_existing=False, context_name=None, public_fqdn=False):
+                        overwrite_existing=False, context_name=None, public_fqdn=False,
+                        credential_format=None):
     credentialResults = None
     serverType = None
     if public_fqdn:
         serverType = 'public'
+    if credential_format:
+        credential_format = credential_format.lower()
+        if admin:
+            raise InvalidArgumentValueError("--format can only be specified when requesting clusterUser credential.")
     if admin:
-        if serverType is None:
-            credentialResults = client.list_cluster_admin_credentials(
-                resource_group_name, name)
-        else:
+        if cmd.cli_ctx.cloud.profile == "latest":
             credentialResults = client.list_cluster_admin_credentials(
                 resource_group_name, name, serverType)
+        else:
+            credentialResults = client.list_cluster_admin_credentials(
+                resource_group_name, name)
     else:
-        if serverType is None:
+        if cmd.cli_ctx.cloud.profile == "latest":
             credentialResults = client.list_cluster_user_credentials(
-                resource_group_name, name)
+                resource_group_name, name, serverType, credential_format)
         else:
             credentialResults = client.list_cluster_user_credentials(
-                resource_group_name, name, serverType)
+                resource_group_name, name)
 
     # Check if KUBECONFIG environmental variable is set
     # If path is different than default then that means -f/--file is passed
@@ -2236,72 +2358,10 @@ def aks_scale(cmd, client, resource_group_name, name, node_count, nodepool_name=
                     "Cannot scale cluster autoscaler enabled node pool.")
 
             agent_profile.count = int(node_count)  # pylint: disable=no-member
-            # null out the SP and AAD profile because otherwise validation complains
+            # null out the SP profile because otherwise validation complains
             instance.service_principal_profile = None
-            instance.aad_profile = None
             return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, name, instance)
     raise CLIError('The nodepool "{}" was not found.'.format(nodepool_name))
-
-
-# pylint: disable=inconsistent-return-statements
-def aks_update(cmd, client, resource_group_name, name,
-               enable_cluster_autoscaler=False,
-               disable_cluster_autoscaler=False,
-               update_cluster_autoscaler=False,
-               cluster_autoscaler_profile=None,
-               min_count=None, max_count=None,
-               uptime_sla=False,
-               no_uptime_sla=False,
-               load_balancer_managed_outbound_ip_count=None,
-               load_balancer_outbound_ips=None,
-               load_balancer_outbound_ip_prefixes=None,
-               load_balancer_outbound_ports=None,
-               load_balancer_idle_timeout=None,
-               attach_acr=None,
-               detach_acr=None,
-               api_server_authorized_ip_ranges=None,
-               enable_aad=False,
-               aad_tenant_id=None,
-               aad_admin_group_object_ids=None,
-               enable_ahub=False,
-               disable_ahub=False,
-               windows_admin_password=None,
-               auto_upgrade_channel=None,
-               enable_managed_identity=False,
-               assign_identity=None,
-               disable_local_accounts=False,
-               enable_local_accounts=False,
-               yes=False,
-               no_wait=False,
-               enable_public_fqdn=False,
-               disable_public_fqdn=False,
-               enable_azure_rbac=False,
-               disable_azure_rbac=False,
-               enable_secret_rotation=False,
-               disable_secret_rotation=False,
-               rotation_poll_interval=None,
-               tags=None,
-               nodepool_labels=None,
-               aks_custom_headers=None):
-    # get all the original parameters and save them as a dictionary
-    raw_parameters = locals()
-
-    # decorator pattern
-    from .decorator import AKSUpdateDecorator
-    aks_update_decorator = AKSUpdateDecorator(
-        cmd=cmd,
-        client=client,
-        raw_parameters=raw_parameters,
-        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-    )
-    try:
-        # construct mc profile
-        mc = aks_update_decorator.update_default_mc_profile()
-    except DecoratorEarlyExitException:
-        # exit gracefully
-        return None
-    # send request to create a real managed cluster
-    return aks_update_decorator.update_mc(mc)
 
 
 # pylint: disable=unused-argument,inconsistent-return-statements,too-many-return-statements
@@ -2383,22 +2443,27 @@ def aks_upgrade(cmd,
     if upgrade_all:
         for agent_profile in instance.agent_pool_profiles:
             agent_profile.orchestrator_version = kubernetes_version
+            agent_profile.creation_data = None
 
-    # null out the SP and AAD profile because otherwise validation complains
+    # null out the SP profile because otherwise validation complains
     instance.service_principal_profile = None
-    instance.aad_profile = None
 
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, name, instance)
 
 
-def _upgrade_single_nodepool_image_version(no_wait, client, resource_group_name, cluster_name, nodepool_name):
+def _upgrade_single_nodepool_image_version(no_wait, client, resource_group_name, cluster_name, nodepool_name,
+                                           snapshot_id=None):
+    headers = {}
+    if snapshot_id:
+        headers["AKSSnapshotId"] = snapshot_id
+
     return sdk_no_wait(
         no_wait,
         client.begin_upgrade_node_image_version,
         resource_group_name,
         cluster_name,
         nodepool_name,
-    )
+        headers=headers)
 
 
 def aks_runcommand(cmd, client, resource_group_name, name, command_string="", command_files=None):
@@ -2579,6 +2644,7 @@ def aks_rotate_certs(cmd, client, resource_group_name, name, no_wait=True):
 
 def _update_addons(cmd, instance, subscription_id, resource_group_name, name, addons, enable,
                    workspace_resource_id=None,
+                   enable_msi_auth_for_monitoring=False,
                    subnet_name=None,
                    appgw_name=None,
                    appgw_subnet_cidr=None,
@@ -2636,6 +2702,7 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, name, ad
                     workspace_resource_id = workspace_resource_id.rstrip('/')
                 addon_profile.config = {
                     CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: workspace_resource_id}
+                addon_profile.config[CONST_MONITORING_USING_AAD_MSI_AUTH] = enable_msi_auth_for_monitoring
             elif addon == (CONST_VIRTUAL_NODE_ADDON_NAME + os_type):
                 if addon_profile.enabled:
                     raise CLIError('The virtual-node addon is already enabled for this managed cluster.\n'
@@ -2714,9 +2781,8 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, name, ad
 
     instance.addon_profiles = addon_profiles
 
-    # null out the SP and AAD profile because otherwise validation complains
+    # null out the SP profile because otherwise validation complains
     instance.service_principal_profile = None
-    instance.aad_profile = None
 
     return instance
 
@@ -2732,108 +2798,6 @@ def _get_azext_module(extension_name, module_name):
         return azext_custom
     except ImportError as ie:
         raise CLIError(ie)
-
-
-def _handle_addons_args(cmd, addons_str, subscription_id, resource_group_name, addon_profiles=None,
-                        workspace_resource_id=None,
-                        aci_subnet_name=None,
-                        vnet_subnet_id=None,
-                        appgw_name=None,
-                        appgw_subnet_cidr=None,
-                        appgw_id=None,
-                        appgw_subnet_id=None,
-                        appgw_watch_namespace=None,
-                        enable_sgxquotehelper=False,
-                        enable_secret_rotation=False,
-                        rotation_poll_interval=None,):
-    ManagedClusterAddonProfile = cmd.get_models('ManagedClusterAddonProfile',
-                                                resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                                operation_group='managed_clusters')
-    if not addon_profiles:
-        addon_profiles = {}
-    addons = addons_str.split(',') if addons_str else []
-    if 'http_application_routing' in addons:
-        addon_profiles[CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME] = ManagedClusterAddonProfile(
-            enabled=True)
-        addons.remove('http_application_routing')
-    if 'kube-dashboard' in addons:
-        addon_profiles[CONST_KUBE_DASHBOARD_ADDON_NAME] = ManagedClusterAddonProfile(
-            enabled=True)
-        addons.remove('kube-dashboard')
-    # TODO: can we help the user find a workspace resource ID?
-    if 'monitoring' in addons:
-        if not workspace_resource_id:
-            # use default workspace if exists else create default workspace
-            workspace_resource_id = ensure_default_log_analytics_workspace_for_monitoring(
-                cmd, subscription_id, resource_group_name)
-
-        workspace_resource_id = workspace_resource_id.strip()
-        if not workspace_resource_id.startswith('/'):
-            workspace_resource_id = '/' + workspace_resource_id
-        if workspace_resource_id.endswith('/'):
-            workspace_resource_id = workspace_resource_id.rstrip('/')
-        addon_profiles[CONST_MONITORING_ADDON_NAME] = ManagedClusterAddonProfile(
-            enabled=True, config={CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: workspace_resource_id})
-        addons.remove('monitoring')
-    # error out if '--enable-addons=monitoring' isn't set but workspace_resource_id is
-    elif workspace_resource_id:
-        raise CLIError(
-            '"--workspace-resource-id" requires "--enable-addons monitoring".')
-    if 'azure-policy' in addons:
-        addon_profiles[CONST_AZURE_POLICY_ADDON_NAME] = ManagedClusterAddonProfile(
-            enabled=True)
-        addons.remove('azure-policy')
-    if 'virtual-node' in addons:
-        if not aci_subnet_name or not vnet_subnet_id:
-            raise CLIError(
-                '"--enable-addons virtual-node" requires "--aci-subnet-name" and "--vnet-subnet-id".')
-        # TODO: how about aciConnectorwindows, what is its addon name?
-        os_type = 'Linux'
-        addon_profiles[CONST_VIRTUAL_NODE_ADDON_NAME + os_type] = ManagedClusterAddonProfile(
-            enabled=True,
-            config={CONST_VIRTUAL_NODE_SUBNET_NAME: aci_subnet_name}
-        )
-        addons.remove('virtual-node')
-    if 'ingress-appgw' in addons:
-        addon_profile = ManagedClusterAddonProfile(enabled=True, config={})
-        if appgw_name is not None:
-            addon_profile.config[CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME] = appgw_name
-        if appgw_subnet_cidr is not None:
-            addon_profile.config[CONST_INGRESS_APPGW_SUBNET_CIDR] = appgw_subnet_cidr
-        if appgw_id is not None:
-            addon_profile.config[CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID] = appgw_id
-        if appgw_subnet_id is not None:
-            addon_profile.config[CONST_INGRESS_APPGW_SUBNET_ID] = appgw_subnet_id
-        if appgw_watch_namespace is not None:
-            addon_profile.config[CONST_INGRESS_APPGW_WATCH_NAMESPACE] = appgw_watch_namespace
-        addon_profiles[CONST_INGRESS_APPGW_ADDON_NAME] = addon_profile
-        addons.remove('ingress-appgw')
-    if 'confcom' in addons:
-        addon_profile = ManagedClusterAddonProfile(
-            enabled=True, config={CONST_ACC_SGX_QUOTE_HELPER_ENABLED: "false"})
-        if enable_sgxquotehelper:
-            addon_profile.config[CONST_ACC_SGX_QUOTE_HELPER_ENABLED] = "true"
-        addon_profiles[CONST_CONFCOM_ADDON_NAME] = addon_profile
-        addons.remove('confcom')
-    if 'open-service-mesh' in addons:
-        addon_profile = ManagedClusterAddonProfile(enabled=True, config={})
-        addon_profiles[CONST_OPEN_SERVICE_MESH_ADDON_NAME] = addon_profile
-        addons.remove('open-service-mesh')
-    if 'azure-keyvault-secrets-provider' in addons:
-        addon_profile = ManagedClusterAddonProfile(
-            enabled=True, config={CONST_SECRET_ROTATION_ENABLED: "false", CONST_ROTATION_POLL_INTERVAL: "2m"}
-        )
-        if enable_secret_rotation:
-            addon_profile.config[CONST_SECRET_ROTATION_ENABLED] = "true"
-        if rotation_poll_interval is not None:
-            addon_profile.config[CONST_ROTATION_POLL_INTERVAL] = rotation_poll_interval
-        addon_profiles[CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME] = addon_profile
-        addons.remove('azure-keyvault-secrets-provider')
-    # error out if any (unrecognized) addons remain
-    if addons:
-        raise CLIError('"{}" {} not recognized by the --enable-addons argument.'.format(
-            ",".join(addons), "are" if len(addons) > 1 else "is"))
-    return addon_profiles
 
 
 def _install_dev_spaces_extension(cmd, extension_name):
@@ -2874,127 +2838,6 @@ def _get_or_add_extension(cmd, extension_name, extension_module, update=False):
     except ExtensionNotInstalledException:
         return _install_dev_spaces_extension(cmd, extension_name)
     return True
-
-
-def _ensure_container_insights_for_monitoring(cmd, addon):
-    # Workaround for this addon key which has been seen lowercased in the wild.
-    for key in list(addon.config):
-        if (key.lower() == CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID.lower() and
-                key != CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID):
-            addon.config[CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID] = addon.config.pop(
-                key)
-
-    workspace_resource_id = addon.config[CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID]
-
-    workspace_resource_id = workspace_resource_id.strip()
-
-    if not workspace_resource_id.startswith('/'):
-        workspace_resource_id = '/' + workspace_resource_id
-
-    if workspace_resource_id.endswith('/'):
-        workspace_resource_id = workspace_resource_id.rstrip('/')
-
-    # extract subscription ID and resource group from workspace_resource_id URL
-    try:
-        subscription_id = workspace_resource_id.split('/')[2]
-        resource_group = workspace_resource_id.split('/')[4]
-    except IndexError:
-        raise CLIError(
-            'Could not locate resource group in workspace-resource-id URL.')
-
-    # region of workspace can be different from region of RG so find the location of the workspace_resource_id
-    resources = cf_resources(cmd.cli_ctx, subscription_id)
-    try:
-        resource = resources.get_by_id(
-            workspace_resource_id, '2015-11-01-preview')
-        location = resource.location
-    except CloudError as ex:
-        raise ex
-
-    unix_time_in_millis = int(
-        (datetime.datetime.utcnow() - datetime.datetime.utcfromtimestamp(0)).total_seconds() * 1000.0)
-
-    solution_deployment_name = 'ContainerInsights-{}'.format(
-        unix_time_in_millis)
-
-    # pylint: disable=line-too-long
-    template = {
-        "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-        "contentVersion": "1.0.0.0",
-        "parameters": {
-            "workspaceResourceId": {
-                "type": "string",
-                "metadata": {
-                    "description": "Azure Monitor Log Analytics Resource ID"
-                }
-            },
-            "workspaceRegion": {
-                "type": "string",
-                "metadata": {
-                    "description": "Azure Monitor Log Analytics workspace region"
-                }
-            },
-            "solutionDeploymentName": {
-                "type": "string",
-                "metadata": {
-                    "description": "Name of the solution deployment"
-                }
-            }
-        },
-        "resources": [
-            {
-                "type": "Microsoft.Resources/deployments",
-                "name": "[parameters('solutionDeploymentName')]",
-                "apiVersion": "2017-05-10",
-                "subscriptionId": "[split(parameters('workspaceResourceId'),'/')[2]]",
-                "resourceGroup": "[split(parameters('workspaceResourceId'),'/')[4]]",
-                "properties": {
-                    "mode": "Incremental",
-                    "template": {
-                        "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-                        "contentVersion": "1.0.0.0",
-                        "parameters": {},
-                        "variables": {},
-                        "resources": [
-                            {
-                                "apiVersion": "2015-11-01-preview",
-                                "type": "Microsoft.OperationsManagement/solutions",
-                                "location": "[parameters('workspaceRegion')]",
-                                "name": "[Concat('ContainerInsights', '(', split(parameters('workspaceResourceId'),'/')[8], ')')]",
-                                "properties": {
-                                    "workspaceResourceId": "[parameters('workspaceResourceId')]"
-                                },
-                                "plan": {
-                                    "name": "[Concat('ContainerInsights', '(', split(parameters('workspaceResourceId'),'/')[8], ')')]",
-                                    "product": "[Concat('OMSGallery/', 'ContainerInsights')]",
-                                    "promotionCode": "",
-                                    "publisher": "Microsoft"
-                                }
-                            }
-                        ]
-                    },
-                    "parameters": {}
-                }
-            }
-        ]
-    }
-
-    params = {
-        "workspaceResourceId": {
-            "value": workspace_resource_id
-        },
-        "workspaceRegion": {
-            "value": location
-        },
-        "solutionDeploymentName": {
-            "value": solution_deployment_name
-        }
-    }
-
-    deployment_name = 'aks-monitoring-{}'.format(unix_time_in_millis)
-    # publish the Container Insights solution to the Log Analytics workspace
-    return _invoke_deployment(cmd, resource_group, deployment_name, template, params,
-                              validate=False, no_wait=False, subscription_id=subscription_id)
 
 
 def _ensure_aks_acr(cmd,
@@ -3044,33 +2887,39 @@ def aks_agentpool_list(cmd, client, resource_group_name, cluster_name):
 
 def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_name,
                       kubernetes_version=None,
-                      zones=None,
+                      node_vm_size=None,
+                      os_type=None,
+                      os_sku=None,
+                      vnet_subnet_id=None,
+                      pod_subnet_id=None,
                       enable_node_public_ip=False,
                       node_public_ip_prefix_id=None,
-                      node_vm_size=None,
-                      node_osdisk_type=None,
-                      node_osdisk_size=0,
-                      node_count=3,
-                      vnet_subnet_id=None,
-                      ppg=None,
-                      max_pods=0,
-                      os_type="Linux",
-                      os_sku=None,
+                      enable_cluster_autoscaler=False,
                       min_count=None,
                       max_count=None,
-                      enable_cluster_autoscaler=False,
-                      node_taints=None,
+                      node_count=3,
                       priority=CONST_SCALE_SET_PRIORITY_REGULAR,
                       eviction_policy=CONST_SPOT_EVICTION_POLICY_DELETE,
                       spot_max_price=float('nan'),
-                      tags=None,
                       labels=None,
+                      tags=None,
+                      node_taints=None,
+                      node_osdisk_type=None,
+                      node_osdisk_size=0,
+                      mode=CONST_NODEPOOL_MODE_USER,
+                      scale_down_mode=CONST_SCALE_DOWN_MODE_DELETE,
                       max_surge=None,
-                      mode="User",
+                      max_pods=0,
+                      zones=None,
+                      ppg=None,
                       enable_encryption_at_host=False,
                       enable_ultra_ssd=False,
                       enable_fips_image=False,
-                      no_wait=False):
+                      snapshot_id=None,
+                      kubelet_config=None,
+                      linux_os_config=None,
+                      no_wait=False,
+                      aks_custom_headers=None):
     AgentPool = cmd.get_models('AgentPool',
                                resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                operation_group='agent_pools')
@@ -3085,6 +2934,27 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
 
     upgradeSettings = AgentPoolUpgradeSettings()
     taints_array = []
+    creationData = None
+    # load model CreationData
+    from azure.cli.command_modules.acs.decorator import AKSModels
+    CreationData = AKSModels(cmd, ResourceType.MGMT_CONTAINERSERVICE).CreationData
+    if snapshot_id:
+        snapshot = get_snapshot_by_snapshot_id(cmd.cli_ctx, snapshot_id)
+        if not kubernetes_version:
+            kubernetes_version = snapshot.kubernetes_version
+        if not os_type:
+            os_type = snapshot.os_type
+        if not os_sku:
+            os_sku = snapshot.os_sku
+        if not node_vm_size:
+            node_vm_size = snapshot.vm_size
+
+        creationData = CreationData(
+            source_resource_id=snapshot_id
+        )
+
+    if not os_type:
+        os_type = "Linux"
 
     if node_taints is not None:
         for taint in node_taints.split(','):
@@ -3113,12 +2983,14 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
         os_type=os_type,
         os_sku=os_sku,
         vnet_subnet_id=vnet_subnet_id,
+        pod_subnet_id=pod_subnet_id,
         proximity_placement_group_id=ppg,
         agent_pool_type="VirtualMachineScaleSets",
         max_pods=int(max_pods) if max_pods else None,
         orchestrator_version=kubernetes_version,
         availability_zones=zones,
         scale_set_priority=priority,
+        scale_down_mode=scale_down_mode,
         enable_node_public_ip=enable_node_public_ip,
         node_public_ip_prefix_id=node_public_ip_prefix_id,
         node_taints=taints_array,
@@ -3126,7 +2998,8 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
         enable_encryption_at_host=enable_encryption_at_host,
         enable_ultra_ssd=enable_ultra_ssd,
         mode=mode,
-        enable_fips=enable_fips_image
+        enable_fips=enable_fips_image,
+        creation_data=creationData
     )
 
     if priority == CONST_SCALE_SET_PRIORITY_SPOT:
@@ -3144,6 +3017,21 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
     if node_osdisk_type:
         agent_pool.os_disk_type = node_osdisk_type
 
+    if kubelet_config:
+        agent_pool.kubelet_config = _get_kubelet_config(kubelet_config)
+
+    if linux_os_config:
+        agent_pool.linux_os_config = _get_linux_os_config(linux_os_config)
+
+    # custom headers
+    aks_custom_headers = extract_comma_separated_string(
+        aks_custom_headers,
+        enable_strip=True,
+        extract_kv=True,
+        default_value={},
+        allow_appending_values_to_same_key=True,
+    )
+
     return sdk_no_wait(
         no_wait,
         client.begin_create_or_update,
@@ -3151,89 +3039,25 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
         cluster_name,
         nodepool_name,
         agent_pool,
+        headers=aks_custom_headers,
     )
 
 
-def aks_agentpool_scale(cmd, client, resource_group_name, cluster_name,
-                        nodepool_name,
-                        node_count=3,
-                        no_wait=False):
-    instance = client.get(resource_group_name, cluster_name, nodepool_name)
-    new_node_count = int(node_count)
-    if instance.enable_auto_scaling:
-        raise CLIError("Cannot scale cluster autoscaler enabled node pool.")
-    if new_node_count == instance.count:
-        raise CLIError(
-            "The new node count is the same as the current node count.")
-    instance.count = new_node_count  # pylint: disable=no-member
-    return sdk_no_wait(
-        no_wait,
-        client.begin_create_or_update,
-        resource_group_name,
-        cluster_name,
-        nodepool_name,
-        instance,
-    )
-
-
-def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
-                          nodepool_name,
-                          kubernetes_version='',
-                          node_image_only=False,
-                          max_surge=None,
-                          no_wait=False):
-    AgentPoolUpgradeSettings = cmd.get_models('AgentPoolUpgradeSettings', operation_group='agent_pools')
-    if kubernetes_version != '' and node_image_only:
-        raise CLIError(
-            'Conflicting flags. Upgrading the Kubernetes version will also '
-            'upgrade node image version. If you only want to upgrade the '
-            'node version please use the "--node-image-only" option only.'
-        )
-
-    # Note: we exclude this option because node image upgrade can't accept nodepool put fields like max surge
-    if max_surge and node_image_only:
-        raise MutuallyExclusiveArgumentError(
-            'Conflicting flags. Unable to specify max-surge with node-image-only.'
-            'If you want to use max-surge with a node image upgrade, please first '
-            'update max-surge using "az aks nodepool update --max-surge".'
-        )
-
-    if node_image_only:
-        return _upgrade_single_nodepool_image_version(no_wait,
-                                                      client,
-                                                      resource_group_name,
-                                                      cluster_name,
-                                                      nodepool_name)
-
-    instance = client.get(resource_group_name, cluster_name, nodepool_name)
-    instance.orchestrator_version = kubernetes_version
-
-    if not instance.upgrade_settings:
-        instance.upgrade_settings = AgentPoolUpgradeSettings()
-
-    if max_surge:
-        instance.upgrade_settings.max_surge = max_surge
-
-    return sdk_no_wait(
-        no_wait,
-        client.begin_create_or_update,
-        resource_group_name,
-        cluster_name,
-        nodepool_name,
-        instance,
-    )
-
-
+# pylint: disable=too-many-boolean-expressions
 def aks_agentpool_update(cmd, client, resource_group_name, cluster_name, nodepool_name,
                          enable_cluster_autoscaler=False,
                          disable_cluster_autoscaler=False,
                          update_cluster_autoscaler=False,
-                         min_count=None, max_count=None,
-                         tags=None,
-                         max_surge=None,
-                         mode=None,
+                         min_count=None,
+                         max_count=None,
                          labels=None,
-                         no_wait=False):
+                         tags=None,
+                         node_taints=None,
+                         mode=None,
+                         scale_down_mode=None,
+                         max_surge=None,
+                         no_wait=False,
+                         aks_custom_headers=None):
     AgentPoolUpgradeSettings = cmd.get_models('AgentPoolUpgradeSettings',
                                               resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                               operation_group='agent_pools')
@@ -3245,11 +3069,13 @@ def aks_agentpool_update(cmd, client, resource_group_name, cluster_name, nodepoo
                        '"--disable-cluster-autoscaler" or '
                        '"--update-cluster-autoscaler"')
 
-    if (update_autoscaler == 0 and not tags and not mode and not max_surge and not labels):
+    if (update_autoscaler == 0 and not tags and not scale_down_mode and not mode and not max_surge and
+            labels is None and node_taints is None):
         raise CLIError('Please specify one or more of "--enable-cluster-autoscaler" or '
                        '"--disable-cluster-autoscaler" or '
                        '"--update-cluster-autoscaler" or '
-                       '"--tags" or "--mode" or "--max-surge" or "--labels"')
+                       '"--tags" or "--mode" or "--max-surge" or "--scale-down-mode or '
+                       '"--labels"or "--node-taints"')
 
     instance = client.get(resource_group_name, cluster_name, nodepool_name)
 
@@ -3291,11 +3117,35 @@ def aks_agentpool_update(cmd, client, resource_group_name, cluster_name, nodepoo
 
     instance.tags = tags
 
+    if scale_down_mode is not None:
+        instance.scale_down_mode = scale_down_mode
+
     if mode is not None:
         instance.mode = mode
 
     if labels is not None:
         instance.node_labels = labels
+
+    if node_taints is not None:
+        taints_array = []
+        if node_taints != '':
+            for taint in node_taints.split(','):
+                try:
+                    taint = taint.strip()
+                    taints_array.append(taint)
+                except ValueError:
+                    raise InvalidArgumentValueError(
+                        'Taint does not match allowed values. Expect value such as "special=true:NoSchedule".')
+        instance.node_taints = taints_array
+
+    # custom headers
+    aks_custom_headers = extract_comma_separated_string(
+        aks_custom_headers,
+        enable_strip=True,
+        extract_kv=True,
+        default_value={},
+        allow_appending_values_to_same_key=True,
+    )
 
     return sdk_no_wait(
         no_wait,
@@ -3304,6 +3154,105 @@ def aks_agentpool_update(cmd, client, resource_group_name, cluster_name, nodepoo
         cluster_name,
         nodepool_name,
         instance,
+        headers=aks_custom_headers,
+    )
+
+
+def aks_agentpool_scale(cmd, client, resource_group_name, cluster_name,
+                        nodepool_name,
+                        node_count=3,
+                        no_wait=False):
+    instance = client.get(resource_group_name, cluster_name, nodepool_name)
+    new_node_count = int(node_count)
+    if instance.enable_auto_scaling:
+        raise CLIError("Cannot scale cluster autoscaler enabled node pool.")
+    if new_node_count == instance.count:
+        raise CLIError(
+            "The new node count is the same as the current node count.")
+    instance.count = new_node_count  # pylint: disable=no-member
+    return sdk_no_wait(
+        no_wait,
+        client.begin_create_or_update,
+        resource_group_name,
+        cluster_name,
+        nodepool_name,
+        instance,
+    )
+
+
+def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
+                          nodepool_name,
+                          kubernetes_version='',
+                          node_image_only=False,
+                          max_surge=None,
+                          no_wait=False,
+                          aks_custom_headers=None,
+                          snapshot_id=None):
+    AgentPoolUpgradeSettings = cmd.get_models('AgentPoolUpgradeSettings', operation_group='agent_pools')
+    if kubernetes_version != '' and node_image_only:
+        raise CLIError(
+            'Conflicting flags. Upgrading the Kubernetes version will also '
+            'upgrade node image version. If you only want to upgrade the '
+            'node version please use the "--node-image-only" option only.'
+        )
+
+    # Note: we exclude this option because node image upgrade can't accept nodepool put fields like max surge
+    if max_surge and node_image_only:
+        raise MutuallyExclusiveArgumentError(
+            'Conflicting flags. Unable to specify max-surge with node-image-only.'
+            'If you want to use max-surge with a node image upgrade, please first '
+            'update max-surge using "az aks nodepool update --max-surge".'
+        )
+
+    if node_image_only:
+        return _upgrade_single_nodepool_image_version(no_wait,
+                                                      client,
+                                                      resource_group_name,
+                                                      cluster_name,
+                                                      nodepool_name,
+                                                      snapshot_id)
+
+    # load model CreationData
+    from azure.cli.command_modules.acs.decorator import AKSModels
+    CreationData = AKSModels(cmd, ResourceType.MGMT_CONTAINERSERVICE).CreationData
+
+    creationData = None
+    if snapshot_id:
+        snapshot = get_snapshot_by_snapshot_id(cmd.cli_ctx, snapshot_id)
+        if not kubernetes_version and not node_image_only:
+            kubernetes_version = snapshot.kubernetes_version
+
+        creationData = CreationData(
+            source_resource_id=snapshot_id
+        )
+
+    instance = client.get(resource_group_name, cluster_name, nodepool_name)
+    instance.orchestrator_version = kubernetes_version
+    instance.creation_data = creationData
+
+    if not instance.upgrade_settings:
+        instance.upgrade_settings = AgentPoolUpgradeSettings()
+
+    if max_surge:
+        instance.upgrade_settings.max_surge = max_surge
+
+    # custom headers
+    aks_custom_headers = extract_comma_separated_string(
+        aks_custom_headers,
+        enable_strip=True,
+        extract_kv=True,
+        default_value={},
+        allow_appending_values_to_same_key=True,
+    )
+
+    return sdk_no_wait(
+        no_wait,
+        client.begin_create_or_update,
+        resource_group_name,
+        cluster_name,
+        nodepool_name,
+        instance,
+        headers=aks_custom_headers,
     )
 
 
@@ -3509,13 +3458,6 @@ def _create_client_secret():
     return client_secret
 
 
-def _get_rg_location(ctx, resource_group_name, subscription_id=None):
-    groups = cf_resource_groups(ctx, subscription_id=subscription_id)
-    # Just do the get, we don't need the result, it will error out if the group doesn't exist.
-    rg = groups.get(resource_group_name)
-    return rg.location
-
-
 def _check_cluster_autoscaler_flag(enable_cluster_autoscaler,
                                    min_count,
                                    max_count,
@@ -3639,37 +3581,6 @@ def _remove_osa_nulls(managed_clusters):
             if getattr(managed_cluster.network_profile, attr, None) is None:
                 delattr(managed_cluster.network_profile, attr)
     return managed_clusters
-
-
-def _validate_aci_location(norm_location):
-    """
-    Validate the Azure Container Instance location
-    """
-    aci_locations = [
-        "australiaeast",
-        "canadacentral",
-        "centralindia",
-        "centralus",
-        "eastasia",
-        "eastus",
-        "eastus2",
-        "eastus2euap",
-        "japaneast",
-        "northcentralus",
-        "northeurope",
-        "southcentralus",
-        "southeastasia",
-        "southindia",
-        "uksouth",
-        "westcentralus",
-        "westus",
-        "westus2",
-        "westeurope"
-    ]
-
-    if norm_location not in aci_locations:
-        raise CLIError('Azure Container Instance is not available at location "{}".'.format(norm_location) +
-                       ' The available locations are "{}"'.format(','.join(aci_locations)))
 
 
 def osa_list(cmd, client, resource_group_name=None):
@@ -3896,12 +3807,6 @@ def openshift_monitor_disable(cmd, client, resource_group_name, name, no_wait=Fa
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, name, instance)
 
 
-def _is_msi_cluster(managed_cluster):
-    return (managed_cluster and managed_cluster.identity and
-            (managed_cluster.identity.type.casefold() == "systemassigned" or
-             managed_cluster.identity.type.casefold() == "userassigned"))
-
-
 def _put_managed_cluster_ensuring_permission(
         cmd,     # pylint: disable=too-many-locals,too-many-statements,too-many-branches
         client,
@@ -3926,12 +3831,24 @@ def _put_managed_cluster_ensuring_permission(
                                           virtual_node_addon_enabled or
                                           need_grant_vnet_permission_to_cluster_identity)
     if need_post_creation_role_assignment:
-        # adding a wait here since we rely on the result for role assignment
-        cluster = LongRunningOperation(cmd.cli_ctx)(client.begin_create_or_update(
+        poller = client.begin_create_or_update(
             resource_group_name=resource_group_name,
             resource_name=name,
             parameters=managed_cluster,
-            headers=headers))
+            headers=headers)
+        # Grant vnet permission to system assigned identity RIGHT AFTER
+        # the cluster is put, this operation can reduce latency for the
+        # role assignment take effect
+        if need_grant_vnet_permission_to_cluster_identity:
+            instant_cluster = client.get(resource_group_name, name)
+            if not _add_role_assignment(cmd, 'Network Contributor',
+                                        instant_cluster.identity.principal_id, scope=vnet_subnet_id,
+                                        is_service_principal=False):
+                logger.warning('Could not create a role assignment for subnet. '
+                               'Are you an Owner on this subscription?')
+
+        # adding a wait here since we rely on the result for role assignment
+        cluster = LongRunningOperation(cmd.cli_ctx)(poller)
         cloud_name = cmd.cli_ctx.cloud.name
         # add cluster spn/msi Monitoring Metrics Publisher role assignment to publish metrics to MDM
         # mdm metrics is supported only in azure public cloud, so add the role assignment only in this cloud
@@ -3948,12 +3865,6 @@ def _put_managed_cluster_ensuring_permission(
             add_ingress_appgw_addon_role_assignment(cluster, cmd)
         if virtual_node_addon_enabled:
             add_virtual_node_role_assignment(cmd, cluster, vnet_subnet_id)
-        if need_grant_vnet_permission_to_cluster_identity:
-            if not _create_role_assignment(cmd, 'Network Contributor',
-                                           cluster.identity.principal_id, scope=vnet_subnet_id,
-                                           resolve_assignee=False):
-                logger.warning('Could not create a role assignment for subnet. '
-                               'Are you an Owner on this subscription?')
 
         if enable_managed_identity and attach_acr:
             # Attach ACR to cluster enabled managed identity
@@ -3998,3 +3909,91 @@ def _ensure_cluster_identity_permission_on_kubelet_identity(cmd, cluster_identit
                                 is_service_principal=False, scope=scope):
         raise UnauthorizedError('Could not grant Managed Identity Operator '
                                 'permission to cluster identity at scope {}'.format(scope))
+
+
+def aks_nodepool_snapshot_create(cmd,    # pylint: disable=too-many-locals,too-many-statements,too-many-branches
+                                 client,
+                                 resource_group_name,
+                                 snapshot_name,
+                                 nodepool_id,
+                                 location=None,
+                                 tags=None,
+                                 aks_custom_headers=None,
+                                 no_wait=False):
+
+    rg_location = get_rg_location(cmd.cli_ctx, resource_group_name)
+    if location is None:
+        location = rg_location
+
+    # load model CreationData, Snapshot
+    from azure.cli.command_modules.acs.decorator import AKSModels
+    CreationData = AKSModels(cmd, ResourceType.MGMT_CONTAINERSERVICE).CreationData
+    Snapshot = AKSModels(cmd, ResourceType.MGMT_CONTAINERSERVICE).Snapshot
+
+    creationData = CreationData(
+        source_resource_id=nodepool_id
+    )
+
+    snapshot = Snapshot(
+        name=snapshot_name,
+        tags=tags,
+        location=location,
+        creation_data=creationData
+    )
+
+    # custom headers
+    aks_custom_headers = extract_comma_separated_string(
+        aks_custom_headers,
+        enable_strip=True,
+        extract_kv=True,
+        default_value={},
+        allow_appending_values_to_same_key=True,
+    )
+    return client.create_or_update(resource_group_name, snapshot_name, snapshot, headers=aks_custom_headers)
+
+
+def aks_nodepool_snapshot_show(cmd, client, resource_group_name, snapshot_name):   # pylint: disable=unused-argument
+    snapshot = client.get(resource_group_name, snapshot_name)
+    return snapshot
+
+
+def aks_nodepool_snapshot_delete(cmd,    # pylint: disable=unused-argument
+                                 client,
+                                 resource_group_name,
+                                 snapshot_name,
+                                 no_wait=False,
+                                 yes=False):
+
+    msg = 'This will delete the snapshot "{}" in resource group "{}", Are you sure?'.format(snapshot_name, resource_group_name)
+    if not yes and not prompt_y_n(msg, default="n"):
+        return None
+
+    return client.delete(resource_group_name, snapshot_name)
+
+
+def aks_nodepool_snapshot_list(cmd, client, resource_group_name=None):  # pylint: disable=unused-argument
+    if resource_group_name is None or resource_group_name == '':
+        return client.list()
+
+    return client.list_by_resource_group(resource_group_name)
+
+
+def _get_kubelet_config(file_path):
+    if not os.path.isfile(file_path):
+        raise InvalidArgumentValueError("{} is not valid file, or not accessable.".format(file_path))
+    kubelet_config = get_file_json(file_path)
+    if not isinstance(kubelet_config, dict):
+        msg = "Error reading kubelet configuration at {}. Please see https://aka.ms/CustomNodeConfig for proper format."
+        raise InvalidArgumentValueError(msg.format(file_path))
+    return kubelet_config
+
+
+def _get_linux_os_config(file_path):
+    if not os.path.isfile(file_path):
+        raise InvalidArgumentValueError("{} is not valid file, or not accessable.".format(file_path))
+    os_config = get_file_json(file_path)
+    if not isinstance(os_config, dict):
+        msg = "Error reading Linux OS configuration at {}. \
+            Please see https://aka.ms/CustomNodeConfig for proper format."
+        raise InvalidArgumentValueError(msg.format(file_path))
+    return os_config

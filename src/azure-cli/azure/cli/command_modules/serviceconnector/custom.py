@@ -20,10 +20,14 @@ from ._resource_config import (
 )
 from ._validators import (
     get_source_resource_name,
-    get_target_resource_name
+    get_target_resource_name,
+    validate_service_state
 )
 from ._addon_factory import AddonFactory
-from ._utils import set_user_token_header
+from ._utils import (
+    set_user_token_header,
+    auto_register
+)
 # pylint: disable=unused-argument
 
 
@@ -34,11 +38,12 @@ err_msg = 'Required argument is missing, please provide the arguments: {}'
 def connection_list(client,
                     source_resource_group=None,
                     source_id=None,
+                    cluster=None,
                     site=None,
-                    spring=None, app=None, deployment=None):
+                    spring=None, app=None, deployment='default'):
     if not source_id:
         raise RequiredArgumentMissingError(err_msg.format('--source-id'))
-    return client.list(resource_uri=source_id)
+    return auto_register(client.list, resource_uri=source_id)
 
 
 def connection_list_support_types(cmd, client,
@@ -77,12 +82,12 @@ def connection_show(client,
                     source_resource_group=None,
                     source_id=None,
                     indentifier=None,
+                    cluster=None,
                     site=None,
-                    spring=None, app=None, deployment=None):
+                    spring=None, app=None, deployment='default'):
     if not source_id or not connection_name:
         raise RequiredArgumentMissingError(err_msg.format('--source-id, --connection'))
-    return client.get(resource_uri=source_id,
-                      linker_name=connection_name)
+    return auto_register(client.get, resource_uri=source_id, linker_name=connection_name)
 
 
 def connection_delete(client,
@@ -90,16 +95,17 @@ def connection_delete(client,
                       source_resource_group=None,
                       source_id=None,
                       indentifier=None,
+                      cluster=None,
                       site=None,
-                      spring=None, app=None, deployment=None,
+                      spring=None, app=None, deployment='default',
                       no_wait=False):
     if not source_id or not connection_name:
         raise RequiredArgumentMissingError(err_msg.format('--source-id, --connection'))
 
-    return sdk_no_wait(no_wait,
-                       client.begin_delete,
-                       resource_uri=source_id,
-                       linker_name=connection_name)
+    return auto_register(sdk_no_wait, no_wait,
+                         client.begin_delete,
+                         resource_uri=source_id,
+                         linker_name=connection_name)
 
 
 def connection_list_configuration(client,
@@ -107,12 +113,14 @@ def connection_list_configuration(client,
                                   source_resource_group=None,
                                   source_id=None,
                                   indentifier=None,
+                                  cluster=None,
                                   site=None,
-                                  spring=None, app=None, deployment=None):
+                                  spring=None, app=None, deployment='default'):
     if not source_id or not connection_name:
         raise RequiredArgumentMissingError(err_msg.format('--source-id, --connection'))
-    return client.list_configurations(resource_uri=source_id,
-                                      linker_name=connection_name)
+    return auto_register(client.list_configurations,
+                         resource_uri=source_id,
+                         linker_name=connection_name)
 
 
 def connection_validate(cmd, client,
@@ -120,8 +128,9 @@ def connection_validate(cmd, client,
                         source_resource_group=None,
                         source_id=None,
                         indentifier=None,
+                        cluster=None,
                         site=None,
-                        spring=None, app=None, deployment=None):
+                        spring=None, app=None, deployment='default'):
     import re
     from ._validators import get_resource_regex
 
@@ -137,8 +146,7 @@ def connection_validate(cmd, client,
         if matched and resource_type in TARGET_RESOURCES_USERTOKEN:
             client = set_user_token_header(client, cmd.cli_ctx)
 
-    return client.begin_validate(resource_uri=source_id,
-                                 linker_name=connection_name)
+    return auto_register(client.begin_validate, resource_uri=source_id, linker_name=connection_name)
 
 
 def connection_create(cmd, client,  # pylint: disable=too-many-locals
@@ -148,15 +156,19 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals
                       secret_auth_info=None, secret_auth_info_auto=None,
                       user_identity_auth_info=None, system_identity_auth_info=None,
                       service_principal_auth_info_secret=None,
+                      key_vault_id=None,
+                      service_endpoint=None,
                       new_addon=False, no_wait=False,
+                      cluster=None,
                       site=None,                                             # Resource.WebApp
-                      spring=None, app=None, deployment=None,                # Resource.SpringCloud
+                      spring=None, app=None, deployment='default',           # Resource.SpringCloud
                       server=None, database=None,                            # Resource.*Postgres, Resource.*Sql*
                       vault=None,                                            # Resource.KeyVault
                       account=None,                                          # Resource.Storage*
                       key_space=None, graph=None, table=None,                # Resource.Cosmos*,
-                      # config_store=None,                                   # Resource.AppConfig
-                      # namespace=None,                                      # Resource.EventHub
+                      config_store=None,                                     # Resource.AppConfig
+                      namespace=None,                                        # Resource.EventHub
+                      webpubsub=None,                                        # Resource.WebPubSub
                       signalr=None):                                         # Resource.SignalR
 
     if not source_id:
@@ -182,6 +194,9 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals
     parameters = {
         'target_id': target_id,
         'auth_info': auth_info,
+        'secret_store': {
+            'key_vault_id': key_vault_id,
+        },
         'client_type': client_type
     }
 
@@ -189,6 +204,17 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals
     target_type = get_target_resource_name(cmd)
     if target_type in TARGET_RESOURCES_USERTOKEN:
         client = set_user_token_header(client, cmd.cli_ctx)
+
+    if key_vault_id:
+        client = set_user_token_header(client, cmd.cli_ctx)
+        from ._utils import create_key_vault_reference_connection_if_not_exist
+        create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, key_vault_id)
+
+    if service_endpoint:
+        client = set_user_token_header(client, cmd.cli_ctx)
+        parameters['v_net_solution'] = {
+            'type': 'serviceEndpoint'
+        }
 
     if new_addon:
         addon = AddonFactory.get(target_type)(cmd, source_id)
@@ -208,22 +234,26 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals
             raise AzureResponseError('{}. Provision failed, please create the target resource '
                                      'manually and then create the connection.'.format(str(e)))
 
-    return sdk_no_wait(no_wait,
-                       client.begin_create_or_update,
-                       resource_uri=source_id,
-                       linker_name=connection_name,
-                       parameters=parameters)
+    validate_service_state(parameters)
+    return auto_register(sdk_no_wait, no_wait,
+                         client.begin_create_or_update,
+                         resource_uri=source_id,
+                         linker_name=connection_name,
+                         parameters=parameters)
 
 
-def connection_update(cmd, client,
+def connection_update(cmd, client,  # pylint: disable=too-many-locals
                       connection_name=None, client_type=None,
                       source_resource_group=None, source_id=None, indentifier=None,
                       secret_auth_info=None, secret_auth_info_auto=None,
                       user_identity_auth_info=None, system_identity_auth_info=None,
                       service_principal_auth_info_secret=None,
+                      key_vault_id=None,
+                      service_endpoint=None,
                       no_wait=False,
+                      cluster=None,
                       site=None,                                              # Resource.WebApp
-                      deployment=None,
+                      deployment='default',
                       spring=None, app=None):                                 # Resource.SpringCloud
 
     linker = todict(client.get(resource_uri=source_id, linker_name=connection_name))
@@ -257,10 +287,16 @@ def connection_update(cmd, client,
     if client_type is None and not all_auth_info:
         raise ValidationError('Either client type or auth info should be specified to update')
 
+    if linker.get('secretStore') and linker.get('secretStore').get('keyVaultId'):
+        key_vault_id = key_vault_id or linker.get('secretStore').get('keyVaultId')
+
     parameters = {
         'target_id': linker.get('targetId'),
         'auth_info': auth_info,
-        'client_type': client_type or linker.get('clienType'),
+        'secret_store': {
+            'key_vault_id': key_vault_id,
+        },
+        'client_type': client_type or linker.get('clientType'),
     }
 
     # HACK: set user token to work around OBO
@@ -268,11 +304,24 @@ def connection_update(cmd, client,
     if target_type in TARGET_RESOURCES_USERTOKEN:
         client = set_user_token_header(client, cmd.cli_ctx)
 
-    return sdk_no_wait(no_wait,
-                       client.begin_create_or_update,
-                       resource_uri=source_id,
-                       linker_name=connection_name,
-                       parameters=parameters)
+    if key_vault_id:
+        client = set_user_token_header(client, cmd.cli_ctx)
+        from ._utils import create_key_vault_reference_connection_if_not_exist
+        create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, key_vault_id)
+
+    parameters['v_net_solution'] = linker.get('vNetSolution')
+    if service_endpoint:
+        parameters['v_net_solution'] = {
+            'type': 'serviceEndpoint'
+        }
+    elif service_endpoint is False and linker.get('vNetSolution').get('type') == 'serviceEndpoint':
+        parameters['v_net_solution'] = None
+
+    return auto_register(sdk_no_wait, no_wait,
+                         client.begin_create_or_update,
+                         resource_uri=source_id,
+                         linker_name=connection_name,
+                         parameters=parameters)
 
 
 def connection_create_kafka(cmd, client,  # pylint: disable=too-many-locals
@@ -282,12 +331,14 @@ def connection_create_kafka(cmd, client,  # pylint: disable=too-many-locals
                             schema_registry,
                             schema_key,
                             schema_secret,
+                            key_vault_id=None,
                             connection_name=None,
                             client_type=None,
                             source_resource_group=None,
                             source_id=None,
+                            cluster=None,
                             site=None,                         # Resource.WebApp
-                            deployment=None,
+                            deployment='default',
                             spring=None, app=None):            # Resource.SpringCloud
 
     from ._transformers import transform_linker_properties
@@ -297,6 +348,11 @@ def connection_create_kafka(cmd, client,  # pylint: disable=too-many-locals
     if 'azure.confluent.cloud' not in schema_registry.lower():
         raise InvalidArgumentValueError('Schema registry url is invalid: {}'.format(schema_registry))
 
+    if key_vault_id:
+        client = set_user_token_header(client, cmd.cli_ctx)
+        from ._utils import create_key_vault_reference_connection_if_not_exist
+        create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, key_vault_id)
+
     # create bootstrap-server
     parameters = {
         'target_id': bootstrap_server,
@@ -304,6 +360,9 @@ def connection_create_kafka(cmd, client,  # pylint: disable=too-many-locals
             'name': kafka_key,
             'secret': kafka_secret,
             'auth_type': 'secret'
+        },
+        'secret_store': {
+            'key_vault_id': key_vault_id,
         },
         'client_type': client_type,
     }
@@ -322,6 +381,9 @@ def connection_create_kafka(cmd, client,  # pylint: disable=too-many-locals
             'name': schema_key,
             'secret': schema_secret,
             'auth_type': 'secret'
+        },
+        'secret_store': {
+            'key_vault_id': key_vault_id,
         },
         'client_type': client_type,
     }
@@ -347,11 +409,13 @@ def connection_update_kafka(cmd, client,  # pylint: disable=too-many-locals
                             schema_registry=None,
                             schema_key=None,
                             schema_secret=None,
+                            key_vault_id=None,
                             client_type=None,
                             source_resource_group=None,
                             source_id=None,
+                            cluster=None,
                             site=None,                         # Resource.WebApp
-                            deployment=None,
+                            deployment='default',
                             spring=None, app=None):            # Resource.SpringCloud
 
     # use the suffix to decide the connection type
@@ -362,12 +426,22 @@ def connection_update_kafka(cmd, client,  # pylint: disable=too-many-locals
             raise ValidationError("The available parameters to update a schema registry connection are:"
                                   " ['--schema-registry', '--schema-key', '--schema-secret', '--client-type']")
         server_linker = todict(client.get(resource_uri=source_id, linker_name=connection_name))
+
+        if server_linker.get('secretStore') and server_linker.get('secretStore').get('keyVaultId'):
+            key_vault_id = key_vault_id or server_linker.get('secretStore').get('keyVaultId')
+        if key_vault_id:
+            client = set_user_token_header(client, cmd.cli_ctx)
+            from ._utils import create_key_vault_reference_connection_if_not_exist
+            create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, key_vault_id)
         parameters = {
             'target_id': schema_registry or server_linker.get('targetId'),
             'auth_info': {
                 'name': schema_key or server_linker.get('authInfo').get('name'),
                 'secret': schema_secret,
                 'auth_type': 'secret'
+            },
+            'secret_store': {
+                'key_vault_id': key_vault_id,
             },
             'client_type': client_type or server_linker.get('clientType'),
         }
@@ -378,12 +452,22 @@ def connection_update_kafka(cmd, client,  # pylint: disable=too-many-locals
             raise ValidationError("The available parameters to update a bootstrap server connection are:"
                                   " ['--bootstrap-server', '--kafka-key', '--skafka-secret', '--client-type']")
         schema_linker = todict(client.get(resource_uri=source_id, linker_name=connection_name))
+
+        if schema_linker.get('secretStore') and schema_linker.get('secretStore').get('keyVaultId'):
+            key_vault_id = key_vault_id or schema_linker.get('secretStore').get('keyVaultId')
+        if key_vault_id:
+            client = set_user_token_header(client, cmd.cli_ctx)
+            from ._utils import create_key_vault_reference_connection_if_not_exist
+            create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, key_vault_id)
         parameters = {
             'target_id': bootstrap_server or schema_linker.get('targetId'),
             'auth_info': {
                 'name': kafka_key or schema_linker.get('authInfo').get('name'),
                 'secret': kafka_secret,
                 'auth_type': 'secret'
+            },
+            'secret_store': {
+                'key_vault_id': key_vault_id,
             },
             'client_type': client_type or schema_linker.get('clientType'),
         }

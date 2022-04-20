@@ -5,7 +5,7 @@
 
 from enum import Enum
 
-# consts for nodepool related commands
+# consts for AgentPool
 # priority
 CONST_SCALE_SET_PRIORITY_REGULAR = "Regular"
 CONST_SCALE_SET_PRIORITY_SPOT = "Spot"
@@ -14,7 +14,11 @@ CONST_SCALE_SET_PRIORITY_SPOT = "Spot"
 CONST_SPOT_EVICTION_POLICY_DELETE = "Delete"
 CONST_SPOT_EVICTION_POLICY_DEALLOCATE = "Deallocate"
 
-# node os disk type
+# Scale Down Mode
+CONST_SCALE_DOWN_MODE_DELETE = "Delete"
+CONST_SCALE_DOWN_MODE_DEALLOCATE = "Deallocate"
+
+# os disk type
 CONST_OS_DISK_TYPE_MANAGED = "Managed"
 CONST_OS_DISK_TYPE_EPHEMERAL = "Ephemeral"
 
@@ -22,10 +26,27 @@ CONST_OS_DISK_TYPE_EPHEMERAL = "Ephemeral"
 CONST_NODEPOOL_MODE_SYSTEM = "System"
 CONST_NODEPOOL_MODE_USER = "User"
 
-# consts for cluster related commands
+# os type
+CONST_DEFAULT_NODE_OS_TYPE = "Linux"
+
+# os sku
+CONST_OS_SKU_UBUNTU = "Ubuntu"
+CONST_OS_SKU_CBLMARINER = "CBLMariner"
+
+# vm set type
+CONST_VIRTUAL_MACHINE_SCALE_SETS = "VirtualMachineScaleSets"
+CONST_AVAILABILITY_SET = "AvailabilitySet"
+
+# vm size
+CONST_DEFAULT_NODE_VM_SIZE = "Standard_DS2_v2"
+CONST_DEFAULT_WINDOWS_NODE_VM_SIZE = "Standard_D2s_v3"
+
+# consts for ManagedCluster
 # outbound type
 CONST_OUTBOUND_TYPE_LOAD_BALANCER = "loadBalancer"
 CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING = "userDefinedRouting"
+CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY = "managedNATGateway"
+CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY = "userAssignedNATGateway"
 
 # private dns zone mode
 CONST_PRIVATE_DNS_ZONE_SYSTEM = "system"
@@ -42,6 +63,10 @@ CONST_PATCH_UPGRADE_CHANNEL = "patch"
 CONST_NODE_IMAGE_UPGRADE_CHANNEL = "node-image"
 CONST_NONE_UPGRADE_CHANNEL = "none"
 
+# network plugin
+CONST_NETWORK_PLUGIN_KUBENET = "kubenet"
+CONST_NETWORK_PLUGIN_AZURE = "azure"
+
 # consts for addons
 # http application routing
 CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME = "httpApplicationRouting"
@@ -49,6 +74,7 @@ CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME = "httpApplicationRouting"
 # monitoring
 CONST_MONITORING_ADDON_NAME = "omsagent"
 CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID = "logAnalyticsWorkspaceResourceID"
+CONST_MONITORING_USING_AAD_MSI_AUTH = "useAADAuth"
 
 # virtual node
 CONST_VIRTUAL_NODE_ADDON_NAME = "aciConnector"
@@ -94,14 +120,23 @@ ADDONS = {
 }
 
 # consts for check-acr command
-CONST_CANIPULL_IMAGE = "mcr.microsoft.com/aks/canipull:0.0.3-alpha"
+CONST_CANIPULL_IMAGE = "mcr.microsoft.com/aks/canipull:0.0.4-alpha"
 
 
 # consts for decorator pattern
-# decorator mode
 class DecoratorMode(Enum):
+    """Enumerations used to distinguish whether to handle creation or update.
+    """
     CREATE = 1
     UPDATE = 2
+
+
+class AgentPoolDecoratorMode(Enum):
+    """Enumerations used to distinguish whether to deal with the default system agentpool in the context of the cluster
+    or any specific agentpool.
+    """
+    MANAGED_CLUSTER = 1
+    STANDALONE = 2
 
 
 # custom exception for decorator pattern, used for gracefully exit

@@ -4,10 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
-
 from knack.log import get_logger
 from knack.util import CLIError
-from azure.mgmt.netapp.models import ActiveDirectory, NetAppAccount, NetAppAccountPatch, CapacityPool, CapacityPoolPatch, Volume, VolumePatch, VolumePropertiesExportPolicy, ExportPolicyRule, Snapshot, ReplicationObject, VolumePropertiesDataProtection, SnapshotPolicy, SnapshotPolicyPatch, HourlySchedule, DailySchedule, WeeklySchedule, MonthlySchedule, VolumeSnapshotProperties, VolumeBackupProperties, BackupPolicy, BackupPolicyPatch, VolumePatchPropertiesDataProtection, AccountEncryption, AuthorizeRequest, BreakReplicationRequest, PoolChangeRequest, VolumeRevert, Backup, BackupPatch
+from azure.mgmt.netapp.models import ActiveDirectory, NetAppAccount, NetAppAccountPatch, CapacityPool, CapacityPoolPatch, Volume, VolumePatch, VolumePropertiesExportPolicy, ExportPolicyRule, Snapshot, ReplicationObject, VolumePropertiesDataProtection, SnapshotPolicy, SnapshotPolicyPatch, HourlySchedule, DailySchedule, WeeklySchedule, MonthlySchedule, VolumeSnapshotProperties, VolumeBackupProperties, BackupPolicy, BackupPolicyPatch, VolumePatchPropertiesDataProtection, AccountEncryption, AuthorizeRequest, BreakReplicationRequest, PoolChangeRequest, VolumeRevert, Backup, BackupPatch, LdapSearchScopeOpt, SubvolumeInfo, SubvolumePatchRequest, SnapshotRestoreFiles
 from azure.cli.core.commands.client_factory import get_subscription_id
 from msrestazure.tools import is_valid_resource_id, parse_resource_id
 
@@ -28,20 +27,25 @@ def _update_mapper(existing, new, keys):
 # ---- ACCOUNT ----
 # pylint: disable=unused-argument
 # account update - active_directory is amended with subgroup commands
-def create_account(client, account_name, resource_group_name, location, tags=None, encryption=None):
+def create_account(client, account_name, resource_group_name, location=None, tags=None, encryption=None):
+    if location is None:
+        location = client.resource_groups.get(resource_group_name).location
     account_encryption = AccountEncryption(key_source=encryption) if encryption is not None else None
     body = NetAppAccount(location=location, tags=tags, encryption=account_encryption)
     return client.begin_create_or_update(resource_group_name, account_name, body)
 
 
-# pylint: disable=unused-argument
+# pylint: disable=unused-argument, disable=too-many-locals
 # add an active directory to the netapp account
 # current limitation is 1 AD/subscription
 def add_active_directory(instance, account_name, resource_group_name, username, password, domain, dns,
                          smb_server_name, organizational_unit=None, kdc_ip=None, ad_name=None,
                          server_root_ca_cert=None, backup_operators=None, aes_encryption=None, ldap_signing=None,
-                         security_operators=None, ldap_over_tls=None, allow_local_ldap_users=None, tags=None,
-                         administrators=None):
+                         security_operators=None, ldap_over_tls=None, allow_local_ldap_users=None,
+                         administrators=None, encrypt_dc_conn=None, user_dn=None, group_dn=None, group_filter=None):
+    ldap_search_scope = LdapSearchScopeOpt(user_dn=user_dn,
+                                           group_dn=group_dn,
+                                           group_membership_filter=group_filter)
     active_directories = []
     active_directory = ActiveDirectory(username=username, password=password, domain=domain, dns=dns,
                                        smb_server_name=smb_server_name, organizational_unit=organizational_unit,
@@ -50,9 +54,45 @@ def add_active_directory(instance, account_name, resource_group_name, username, 
                                        ldap_signing=ldap_signing, security_operators=security_operators,
                                        ldap_over_tls=ldap_over_tls,
                                        allow_local_nfs_users_with_ldap=allow_local_ldap_users,
-                                       administrators=administrators)
+                                       administrators=administrators, encrypt_dc_connections=encrypt_dc_conn,
+                                       ldap_search_scope=ldap_search_scope)
     active_directories.append(active_directory)
     body = NetAppAccountPatch(active_directories=active_directories)
+    _update_mapper(instance, body, ['active_directories'])
+    return body
+
+
+# pylint: disable=unused-argument, disable=too-many-locals, disable=too-many-statements
+# update an active directory on the netapp account
+# current limitation is 1 AD/subscription
+def update_active_directory(instance, account_name, resource_group_name, active_directory_id, username, password, domain,
+                            dns, smb_server_name, organizational_unit=None, kdc_ip=None, ad_name=None,
+                            server_root_ca_cert=None, backup_operators=None, aes_encryption=None, ldap_signing=None,
+                            security_operators=None, ldap_over_tls=None, allow_local_ldap_users=None,
+                            administrators=None, encrypt_dc_conn=None, user_dn=None, group_dn=None, group_filter=None):
+    ad_list = instance.active_directories
+
+    ldap_search_scope = LdapSearchScopeOpt(user_dn=user_dn,
+                                           group_dn=group_dn,
+                                           group_membership_filter=group_filter)
+
+    active_directory = ActiveDirectory(active_directory_id=active_directory_id, username=username, password=password,
+                                       domain=domain, dns=dns, smb_server_name=smb_server_name,
+                                       organizational_unit=organizational_unit, kdc_ip=kdc_ip, ad_name=ad_name,
+                                       backup_operators=backup_operators, server_root_ca_certificate=server_root_ca_cert,
+                                       aes_encryption=aes_encryption, ldap_signing=ldap_signing,
+                                       security_operators=security_operators, ldap_over_tls=ldap_over_tls,
+                                       allow_local_nfs_users_with_ldap=allow_local_ldap_users,
+                                       administrators=administrators, encrypt_dc_connections=encrypt_dc_conn,
+                                       ldap_search_scope=ldap_search_scope)
+
+    for ad in ad_list:
+        if ad.active_directory_id == active_directory_id:
+            instance.active_directories.remove(ad)
+
+    instance.active_directories.append(active_directory)
+
+    body = NetAppAccountPatch(active_directories=ad_list)
     _update_mapper(instance, body, ['active_directories'])
     return body
 
@@ -85,7 +125,7 @@ def remove_active_directory(client, account_name, resource_group_name, active_di
 def patch_account(instance, account_name, resource_group_name, tags=None, encryption=None):
     account_encryption = AccountEncryption(key_source=encryption)
     body = NetAppAccountPatch(tags=tags, encryption=account_encryption)
-    _update_mapper(instance, body, ['tags'])
+    _update_mapper(instance, body, ['tags', 'encryption'])
     return body
 
 
@@ -97,8 +137,11 @@ def list_accounts(client, resource_group_name=None):
 
 
 # ---- POOL ----
-def create_pool(client, account_name, pool_name, resource_group_name, service_level, location, size, tags=None,
+# pylint: disable=no-required-location-param
+def create_pool(client, account_name, pool_name, resource_group_name, service_level, size, location=None, tags=None,
                 qos_type=None, cool_access=None, encryption_type=None):
+    if location is None:
+        location = client.resource_groups.get(resource_group_name).location
     body = CapacityPool(service_level=service_level,
                         size=int(size) * tib_scale,
                         location=location,
@@ -119,9 +162,9 @@ def patch_pool(instance, size=None, qos_type=None, tags=None):
 
 
 # ---- VOLUME ----
-# pylint: disable=too-many-locals
-def create_volume(cmd, client, account_name, pool_name, volume_name, resource_group_name, location, file_path,
-                  usage_threshold, vnet, subnet='default', service_level=None, protocol_types=None, volume_type=None,
+# pylint: disable=too-many-locals, disable=no-required-location-param
+def create_volume(cmd, client, account_name, pool_name, volume_name, resource_group_name, file_path, usage_threshold,
+                  vnet, location=None, subnet='default', service_level=None, protocol_types=None, volume_type=None,
                   endpoint_type=None, replication_schedule=None, remote_volume_resource_id=None, tags=None,
                   snapshot_id=None, snapshot_policy_id=None, backup_policy_id=None, backup_enabled=None, backup_id=None,
                   policy_enforced=None, vault_id=None, kerberos_enabled=None, security_style=None, throughput_mibps=None,
@@ -132,7 +175,9 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
                   rule_index=None, unix_read_only=None, unix_read_write=None, cifs=None,
                   allowed_clients=None, ldap_enabled=None, chown_mode=None, cool_access=None, coolness_period=None,
                   unix_permissions=None, is_def_quota_enabled=None, default_user_quota=None,
-                  default_group_quota=None, avs_data_store=None, network_features=None):
+                  default_group_quota=None, avs_data_store=None, network_features=None, enable_subvolumes=None):
+    if location is None:
+        location = client.resource_groups.get(resource_group_name).location
     subs_id = get_subscription_id(cmd.cli_ctx)
 
     # default the resource group of the subnet to the volume's rg unless the subnet is specified by id
@@ -152,7 +197,8 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
 
     # if NFSv4 is specified then the export policy must reflect this
     # the RP ordinarily only creates a default setting NFSv3.
-    if protocol_types is not None:
+    if protocol_types is not None and any(x in ['NFSv3', 'NFSv4.1'] for x in protocol_types) \
+            and not (protocol_types == 'NFSv3' and rule_index is None):
         rules = []
         isNfs41 = False
         isNfs3 = False
@@ -165,16 +211,18 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
                 raise CLIError("Parameter rule-index needs to be set when protocol-type is NFSv4.1")
         if "NFSv3" in protocol_types:
             isNfs3 = True
+        if "CIFS" in protocol_types:
+            cifs = True
 
         export_policy = ExportPolicyRule(rule_index=rule_index, unix_read_only=unix_read_only,
                                          unix_read_write=unix_read_write, cifs=cifs,
                                          nfsv3=isNfs3, nfsv41=isNfs41, allowed_clients=allowed_clients,
                                          kerberos5_read_only=kerberos5_r,
                                          kerberos5_read_write=kerberos5_rw,
-                                         kerberos5i_read_only=kerberos5i_r,
-                                         kerberos5i_read_write=kerberos5i_rw,
-                                         kerberos5p_read_only=kerberos5p_r,
-                                         kerberos5p_read_write=kerberos5p_rw,
+                                         kerberos5_i_read_only=kerberos5i_r,
+                                         kerberos5_i_read_write=kerberos5i_rw,
+                                         kerberos5_p_read_only=kerberos5p_r,
+                                         kerberos5_p_read_write=kerberos5p_rw,
                                          has_root_access=has_root_access,
                                          chown_mode=chown_mode)
         rules.append(export_policy)
@@ -232,7 +280,8 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
         default_user_quota_in_ki_bs=default_user_quota,
         default_group_quota_in_ki_bs=default_group_quota,
         avs_data_store=avs_data_store,
-        network_features=network_features)
+        network_features=network_features,
+        enable_subvolumes=enable_subvolumes)
 
     return client.begin_create_or_update(resource_group_name, account_name, pool_name, volume_name, body)
 
@@ -240,7 +289,7 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
 # -- volume update
 def patch_volume(instance, usage_threshold=None, service_level=None, tags=None, vault_id=None, backup_enabled=False,
                  backup_policy_id=None, policy_enforced=False, throughput_mibps=None, snapshot_policy_id=None,
-                 is_def_quota_enabled=None, default_user_quota=None, default_group_quota=None):
+                 is_def_quota_enabled=None, default_user_quota=None, default_group_quota=None, unix_permissions=None):
     data_protection = None
     backup = None
     snapshot = None
@@ -260,7 +309,8 @@ def patch_volume(instance, usage_threshold=None, service_level=None, tags=None, 
         tags=tags,
         is_default_quota_enabled=is_def_quota_enabled,
         default_user_quota_in_ki_bs=default_user_quota,
-        default_group_quota_in_ki_bs=default_group_quota)
+        default_group_quota_in_ki_bs=default_group_quota,
+        unix_permissions=unix_permissions)
     if throughput_mibps is not None:
         params.throughput_mibps = throughput_mibps
     _update_mapper(instance, params, ['service_level', 'usage_threshold', 'tags', 'data_protection'])
@@ -292,10 +342,22 @@ def break_replication(client, resource_group_name, account_name, pool_name, volu
 
 # ---- VOLUME EXPORT POLICY ----
 # add new rule to policy
-def add_export_policy_rule(instance, allowed_clients, rule_index, unix_read_only, unix_read_write, cifs, nfsv3, nfsv41):
+def add_export_policy_rule(instance, allowed_clients, rule_index, unix_read_only, unix_read_write, cifs, nfsv3, nfsv41,
+                           kerberos5_r=None, kerberos5_rw=None, kerberos5i_r=None, kerberos5i_rw=None,
+                           kerberos5p_r=None, kerberos5p_rw=None, has_root_access=None, chown_mode=None):
     rules = []
 
-    export_policy = ExportPolicyRule(rule_index=rule_index, unix_read_only=unix_read_only, unix_read_write=unix_read_write, cifs=cifs, nfsv3=nfsv3, nfsv41=nfsv41, allowed_clients=allowed_clients)
+    export_policy = ExportPolicyRule(rule_index=rule_index, unix_read_only=unix_read_only,
+                                     unix_read_write=unix_read_write, cifs=cifs,
+                                     nfsv3=nfsv3, nfsv41=nfsv41, allowed_clients=allowed_clients,
+                                     kerberos5_read_only=kerberos5_r,
+                                     kerberos5_read_write=kerberos5_rw,
+                                     kerberos5_i_read_only=kerberos5i_r,
+                                     kerberos5_i_read_write=kerberos5i_rw,
+                                     kerberos5_p_read_only=kerberos5p_r,
+                                     kerberos5_p_read_write=kerberos5p_rw,
+                                     has_root_access=has_root_access,
+                                     chown_mode=chown_mode)
 
     rules.append(export_policy)
     for rule in instance.export_policy.rules:
@@ -342,18 +404,31 @@ def remove_export_policy_rule(instance, rule_index):
 
 
 # ---- SNAPSHOTS ----
-def create_snapshot(client, resource_group_name, account_name, pool_name, volume_name, snapshot_name, location):
+def create_snapshot(client, resource_group_name, account_name, pool_name, volume_name, snapshot_name, location=None):
+    if location is None:
+        location = client.resource_groups.get(resource_group_name).location
     body = Snapshot(location=location)
     return client.begin_create(resource_group_name, account_name, pool_name, volume_name, snapshot_name, body)
 
 
+def snapshot_restore_files(client, resource_group_name, account_name, pool_name, volume_name, snapshot_name, file_paths,
+                           destination_path=None):
+    body = SnapshotRestoreFiles(
+        file_paths=file_paths,
+        destination_path=destination_path
+    )
+    return client.begin_restore_files(resource_group_name, account_name, pool_name, volume_name, snapshot_name, body)
+
+
 # ---- SNAPSHOT POLICIES ----
-def create_snapshot_policy(client, resource_group_name, account_name, snapshot_policy_name, location,
+def create_snapshot_policy(client, resource_group_name, account_name, snapshot_policy_name, location=None,
                            hourly_snapshots=None, hourly_minute=None,
                            daily_snapshots=None, daily_minute=None, daily_hour=None,
                            weekly_snapshots=None, weekly_minute=None, weekly_hour=None, weekly_day=None,
                            monthly_snapshots=None, monthly_minute=None, monthly_hour=None, monthly_days=None,
                            enabled=False, tags=None):
+    if location is None:
+        location = client.resource_groups.get(resource_group_name).location
     body = SnapshotPolicy(
         location=location,
         hourly_schedule=HourlySchedule(snapshots_to_keep=hourly_snapshots, minute=hourly_minute),
@@ -367,12 +442,14 @@ def create_snapshot_policy(client, resource_group_name, account_name, snapshot_p
     return client.create(resource_group_name, account_name, snapshot_policy_name, body)
 
 
-def patch_snapshot_policy(client, resource_group_name, account_name, snapshot_policy_name, location,
+def patch_snapshot_policy(client, resource_group_name, account_name, snapshot_policy_name, location=None,
                           hourly_snapshots=None, hourly_minute=None,
                           daily_snapshots=None, daily_minute=None, daily_hour=None,
                           weekly_snapshots=None, weekly_minute=None, weekly_hour=None, weekly_day=None,
                           monthly_snapshots=None, monthly_minute=None, monthly_hour=None, monthly_days=None,
                           enabled=False):
+    if location is None:
+        location = client.resource_groups.get(resource_group_name).location
     body = SnapshotPolicyPatch(
         location=location,
         hourly_schedule=HourlySchedule(snapshots_to_keep=hourly_snapshots, minute=hourly_minute),
@@ -386,8 +463,10 @@ def patch_snapshot_policy(client, resource_group_name, account_name, snapshot_po
 
 
 # ---- VOLUME BACKUPS ----
-def create_backup(client, resource_group_name, account_name, pool_name, volume_name, backup_name, location,
+def create_backup(client, resource_group_name, account_name, pool_name, volume_name, backup_name, location=None,
                   use_existing_snapshot=None):
+    if location is None:
+        location = client.resource_groups.get(resource_group_name).location
     body = Backup(location=location, use_existing_snapshot=use_existing_snapshot)
     return client.begin_create(resource_group_name, account_name, pool_name, volume_name, backup_name, body)
 
@@ -399,8 +478,10 @@ def update_backup(client, resource_group_name, account_name, pool_name, volume_n
 
 
 # ---- BACKUP POLICIES ----
-def create_backup_policy(client, resource_group_name, account_name, backup_policy_name, location,
+def create_backup_policy(client, resource_group_name, account_name, backup_policy_name, location=None,
                          daily_backups=None, weekly_backups=None, monthly_backups=None, enabled=False, tags=None):
+    if location is None:
+        location = client.resource_groups.get(resource_group_name).location
     body = BackupPolicy(
         location=location,
         daily_backups_to_keep=daily_backups,
@@ -421,3 +502,23 @@ def patch_backup_policy(client, resource_group_name, account_name, backup_policy
         enabled=enabled,
         tags=tags)
     return client.begin_update(resource_group_name, account_name, backup_policy_name, body)
+
+
+# ---- SUBVOLUME ----
+def create_subvolume(client, resource_group_name, account_name, pool_name, volume_name, subvolume_name, path=None,
+                     size=None, parent_path=None):
+    body = SubvolumeInfo(
+        path=path,
+        size=size,
+        parent_path=parent_path
+    )
+    return client.begin_create(resource_group_name, account_name, pool_name, volume_name, subvolume_name, body)
+
+
+def patch_subvolume(client, resource_group_name, account_name, pool_name, volume_name, subvolume_name, path=None,
+                    size=None):
+    body = SubvolumePatchRequest(
+        path=path,
+        size=size
+    )
+    return client.begin_update(resource_group_name, account_name, pool_name, volume_name, subvolume_name, body)

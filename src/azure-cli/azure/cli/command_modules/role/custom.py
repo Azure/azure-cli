@@ -1401,9 +1401,12 @@ def create_service_principal_for_rbac(
         show_auth_for_sdk=None, skip_assignment=False, keyvault=None):
     import time
 
+    if role and not scopes or not role and scopes:
+        from azure.cli.core.azclierror import ArgumentUsageError
+        raise ArgumentUsageError("Usage error: To create role assignments, specify both --role and --scopes.")
+
     graph_client = _graph_client_factory(cmd.cli_ctx)
-    role_client = _auth_client_factory(cmd.cli_ctx).role_assignments
-    scopes = scopes or ['/subscriptions/' + role_client.config.subscription_id]
+
     years = years or 1
     _RETRY_TIMES = 36
     existing_sps = None
@@ -1531,22 +1534,30 @@ def _create_self_signed_cert(start_date, end_date):  # pylint: disable=too-many-
     from OpenSSL import crypto
     from datetime import timedelta
 
-    _, cert_file = tempfile.mkstemp()
-    _, key_file = tempfile.mkstemp()
+    # Create a PEM file ~/tmpxxxxxxxx.pem with both PRIVATE KEY & CERTIFICATE so users can use to log in.
+    # The PEM file looks like
+    # -----BEGIN PRIVATE KEY-----
+    # MIIEv...
+    # -----END PRIVATE KEY-----
+    # -----BEGIN CERTIFICATE-----
+    # MIICo...
+    # -----END CERTIFICATE-----
 
-    # create a file with both cert & key so users can use to login
-    # leverage tempfile ot produce a random file name
-    _, temp_file = tempfile.mkstemp()
-    creds_file = path.join(path.expanduser("~"), path.basename(temp_file) + '.pem')
+    # Leverage tempfile to produce a random file name. The temp file itself is automatically deleted.
+    # There doesn't seem to be a good way to create a random file name without creating the file itself:
+    # https://stackoverflow.com/questions/26541416/generate-temporary-file-names-without-creating-actual-file-in-python
+    with tempfile.NamedTemporaryFile() as f:
+        temp_file_name = f.name
+    creds_file = path.join(path.expanduser("~"), path.basename(temp_file_name) + '.pem')
 
-    # create a key pair
+    # Create a key pair
     k = crypto.PKey()
     k.generate_key(crypto.TYPE_RSA, 2048)
 
-    # create a self-signed cert
+    # Create a self-signed cert
     cert = crypto.X509()
     subject = cert.get_subject()
-    # as long it works, we skip fileds C, ST, L, O, OU, which we have no reasonable defaults for
+    # As long as it works, we skip fields C, ST, L, O, OU, which we have no reasonable defaults for
     subject.CN = 'CLI-Login'
     cert.set_serial_number(1000)
     asn1_format = '%Y%m%d%H%M%SZ'
@@ -1558,23 +1569,16 @@ def _create_self_signed_cert(start_date, end_date):  # pylint: disable=too-many-
     cert.set_pubkey(k)
     cert.sign(k, 'sha1')
 
-    with open(cert_file, "wt") as f:
-        f.write(crypto.dump_certificate(crypto.FILETYPE_PEM, cert).decode())
-    with open(key_file, "wt") as f:
-        f.write(crypto.dump_privatekey(crypto.FILETYPE_PEM, k).decode())
+    cert_string = crypto.dump_certificate(crypto.FILETYPE_PEM, cert).decode()
+    key_string = crypto.dump_privatekey(crypto.FILETYPE_PEM, k).decode()
 
-    cert_string = None
-    with open(creds_file, 'wt') as cf:
-        with open(key_file, 'rt') as f:
-            cf.write(f.read())
-        with open(cert_file, "rt") as f:
-            cert_string = f.read()
-            cf.write(cert_string)
-    os.chmod(creds_file, 0o600)  # make the file readable/writable only for current user
+    with os.fdopen(_open(creds_file), 'w+') as cf:
+        cf.write(key_string)
+        cf.write(cert_string)
 
-    # get rid of the header and tails for upload to AAD: ----BEGIN CERT....----
-    cert_string = re.sub(r'\-+[A-z\s]+\-+', '', cert_string).strip()
-    return (cert_string, creds_file, cert_start_date, cert_end_date)
+    # Get rid of the header and tail for uploading to AAD: -----BEGIN CERTIFICATE-----, -----END CERTIFICATE-----
+    cert_string = re.sub(r'-+[A-z\s]+-+', '', cert_string).strip()
+    return cert_string, creds_file, cert_start_date, cert_end_date
 
 
 def _create_self_signed_cert_with_keyvault(cli_ctx, years, keyvault, keyvault_cert_name):  # pylint: disable=too-many-locals
@@ -1612,7 +1616,7 @@ def _create_self_signed_cert_with_keyvault(cli_ctx, years, keyvault, keyvault_ce
                 'keyCertSign'
             ],
             'subject': 'CN=KeyVault Generated',
-            'validity_in_months': int((years * 12) + 1)
+            'validity_in_months': int(years * 12)
         }
     }
     vault_base_url = 'https://{}{}/'.format(keyvault, cli_ctx.cloud.suffixes.keyvault_dns)
@@ -1869,9 +1873,7 @@ def _random_password(length):
     return password
 
 
-def list_user_assigned_identities(cmd, resource_group_name=None):
-    from azure.cli.command_modules.role._client_factory import _msi_client_factory
-    client = _msi_client_factory(cmd.cli_ctx)
-    if resource_group_name:
-        return client.user_assigned_identities.list_by_resource_group(resource_group_name)
-    return client.user_assigned_identities.list_by_subscription()
+def _open(location):
+    """Open a file that only the current user can access."""
+    # The 600 seems no-op on Windows, and that is fine.
+    return os.open(location, os.O_RDWR | os.O_CREAT | os.O_TRUNC, 0o600)

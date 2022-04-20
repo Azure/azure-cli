@@ -7,6 +7,7 @@ from azure.cli.core.commands import LongRunningOperation, CliCommandType
 from ._client_factory import iot_hub_service_factory
 from ._client_factory import iot_service_provisioning_factory
 from ._client_factory import iot_central_service_factory
+from ._utils import _dps_certificate_response_transform
 
 CS_DEPRECATION_INFO = 'IoT Extension (azure-iot) connection-string command (az iot hub connection-string show)'
 
@@ -59,14 +60,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.generic_update_command('update', getter_name='iot_dps_get', setter_name='iot_dps_update',
                                  command_type=update_custom_util)
 
-    # iot dps access-policy commands
-    with self.command_group('iot dps access-policy', client_factory=iot_service_provisioning_factory) as g:
-        g.custom_command('list', 'iot_dps_access_policy_list')
-        g.custom_show_command('show', 'iot_dps_access_policy_get')
-        g.custom_command('create', 'iot_dps_access_policy_create', supports_no_wait=True)
-        g.custom_command('update', 'iot_dps_access_policy_update', supports_no_wait=True)
-        g.custom_command('delete', 'iot_dps_access_policy_delete', supports_no_wait=True)
-
     # iot dps linked-hub commands
     with self.command_group('iot dps linked-hub', client_factory=iot_service_provisioning_factory) as g:
         g.custom_command('list', 'iot_dps_linked_hub_list')
@@ -76,7 +69,9 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.custom_command('delete', 'iot_dps_linked_hub_delete', supports_no_wait=True)
 
     # iot dps certificate commands
-    with self.command_group('iot dps certificate', client_factory=iot_service_provisioning_factory) as g:
+    with self.command_group('iot dps certificate',
+                            client_factory=iot_service_provisioning_factory,
+                            transform=_dps_certificate_response_transform) as g:
         g.custom_command('list', 'iot_dps_certificate_list')
         g.custom_show_command('show', 'iot_dps_certificate_get')
         g.custom_command('create', 'iot_dps_certificate_create')
@@ -84,6 +79,14 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.custom_command('generate-verification-code', 'iot_dps_certificate_gen_code')
         g.custom_command('verify', 'iot_dps_certificate_verify')
         g.custom_command('update', 'iot_dps_certificate_update')
+
+    # iot dps policy commands
+    with self.command_group('iot dps policy', client_factory=iot_service_provisioning_factory) as g:
+        g.custom_command('list', 'iot_dps_policy_list')
+        g.custom_show_command('show', 'iot_dps_policy_get')
+        g.custom_command('create', 'iot_dps_policy_create', supports_no_wait=True)
+        g.custom_command('update', 'iot_dps_policy_update', supports_no_wait=True)
+        g.custom_command('delete', 'iot_dps_policy_delete', supports_no_wait=True)
 
     # iot hub certificate commands
     with self.command_group('iot hub certificate', client_factory=iot_hub_service_factory) as g:
@@ -169,3 +172,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.generic_update_command('update', getter_name='iot_central_app_get',
                                  setter_name='iot_central_app_update', command_type=update_custom_util)
         g.custom_command('delete', 'iot_central_app_delete', confirmation=True, supports_no_wait=True)
+        g.custom_command('identity assign', 'iot_central_app_assign_identity')
+        g.custom_command('identity remove', 'iot_central_app_remove_identity')
+        g.custom_show_command('identity show', 'iot_central_app_show_identity')

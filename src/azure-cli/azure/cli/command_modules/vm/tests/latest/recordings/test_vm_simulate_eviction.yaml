@@ -9,9 +9,9 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python-requests/2.25.1
+      - python-requests/2.26.0
     method: GET
-    uri: https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json
+    uri: https://raw.githubusercontent.com/Azure/azure-rest-api-specs/main/arm-compute/quickstart-templates/aliases.json
   response:
     body:
       string: "{\n  \"$schema\": \"http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json\",\n
@@ -25,16 +25,19 @@ interactions:
         \         },\n          \"Flatcar\": {\n            \"publisher\": \"kinvolk\",\n
         \           \"offer\": \"flatcar-container-linux-free\",\n            \"sku\":
         \"stable\",\n            \"version\": \"latest\"\n          },\n          \"openSUSE-Leap\":
-        {\n            \"publisher\": \"SUSE\",\n            \"offer\": \"openSUSE-Leap\",\n
-        \           \"sku\": \"42.3\",\n            \"version\": \"latest\"\n          },\n
+        {\n            \"publisher\": \"SUSE\",\n            \"offer\": \"opensuse-leap-15-3\",\n
+        \           \"sku\": \"gen2\",\n            \"version\": \"latest\"\n          },\n
         \         \"RHEL\": {\n            \"publisher\": \"RedHat\",\n            \"offer\":
         \"RHEL\",\n            \"sku\": \"7-LVM\",\n            \"version\": \"latest\"\n
         \         },\n          \"SLES\": {\n            \"publisher\": \"SUSE\",\n
-        \           \"offer\": \"SLES\",\n            \"sku\": \"15\",\n            \"version\":
-        \"latest\"\n          },\n          \"UbuntuLTS\": {\n            \"publisher\":
-        \"Canonical\",\n            \"offer\": \"UbuntuServer\",\n            \"sku\":
-        \"18.04-LTS\",\n            \"version\": \"latest\"\n          }\n        },\n
-        \       \"Windows\": {\n          \"Win2019Datacenter\": {\n            \"publisher\":
+        \           \"offer\": \"sles-15-sp3\",\n            \"sku\": \"gen2\",\n
+        \           \"version\": \"latest\"\n          },\n          \"UbuntuLTS\":
+        {\n            \"publisher\": \"Canonical\",\n            \"offer\": \"UbuntuServer\",\n
+        \           \"sku\": \"18.04-LTS\",\n            \"version\": \"latest\"\n
+        \         }\n        },\n        \"Windows\": {\n          \"Win2022Datacenter\":
+        {\n            \"publisher\": \"MicrosoftWindowsServer\",\n            \"offer\":
+        \"WindowsServer\",\n            \"sku\": \"2022-Datacenter\",\n            \"version\":
+        \"latest\"\n          },\n          \"Win2019Datacenter\": {\n            \"publisher\":
         \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\",\n            \"sku\":
         \"2019-Datacenter\",\n            \"version\": \"latest\"\n          },\n
         \         \"Win2016Datacenter\": {\n            \"publisher\": \"MicrosoftWindowsServer\",\n
@@ -59,23 +62,23 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '2525'
+      - '2744'
       content-security-policy:
       - default-src 'none'; style-src 'unsafe-inline'; sandbox
       content-type:
       - text/plain; charset=utf-8
       date:
-      - Fri, 03 Sep 2021 08:41:06 GMT
+      - Thu, 17 Mar 2022 06:29:29 GMT
       etag:
-      - W/"54bceef15b892f2aa7f4c2145a49f1b5e33608722acdbb47933d7b6cbebbd7f4"
+      - W/"d5acead0b38a79d988c245a7a15ec01f999da9244c97bbdc1fa2ec70d9e433f5"
       expires:
-      - Fri, 03 Sep 2021 08:46:06 GMT
+      - Thu, 17 Mar 2022 06:34:29 GMT
       source-age:
-      - '7'
+      - '281'
       strict-transport-security:
       - max-age=31536000
       vary:
-      - Authorization,Accept-Encoding
+      - Authorization,Accept-Encoding,Origin
       via:
       - 1.1 varnish
       x-cache:
@@ -85,17 +88,126 @@ interactions:
       x-content-type-options:
       - nosniff
       x-fastly-request-id:
-      - fe7169982f2db01ecced330b9f6a462620ea5d30
+      - 02f4cfbaab4301547dd2bd209c665b5f0e3af405
       x-frame-options:
       - deny
       x-github-request-id:
-      - 9374:68D6:5BEC89:744216:6131540B
+      - 2570:063C:1995B2:2734C1:62329D55
       x-served-by:
-      - cache-qpg1250-QPG
+      - cache-qpg1266-QPG
       x-timer:
-      - S1630658467.571874,VS0,VE1
+      - S1647498569.358108,VS0,VE1
       x-xss-protection:
       - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --admin-username --admin-password --authentication-type
+        --location --image --priority --nsg-rule
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/publishers/OpenLogic/artifacttypes/vmimage/offers/CentOS/skus/7.5/versions?$top=1&$orderby=name%20desc&api-version=2021-11-01
+  response:
+    body:
+      string: "[\r\n  {\r\n    \"location\": \"eastus\",\r\n    \"name\": \"7.5.201808150\",\r\n
+        \   \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/eastus/Publishers/OpenLogic/ArtifactTypes/VMImage/Offers/CentOS/Skus/7.5/Versions/7.5.201808150\"\r\n
+        \ }\r\n]"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '270'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Mar 2022 06:29:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/ListVMImagesVersionsFromLocation3Min;15999,Microsoft.Compute/ListVMImagesVersionsFromLocation30Min;43999
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --admin-username --admin-password --authentication-type
+        --location --image --priority --nsg-rule
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/publishers/OpenLogic/artifacttypes/vmimage/offers/CentOS/skus/7.5/versions/7.5.201808150?api-version=2021-11-01
+  response:
+    body:
+      string: "{\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n    \"architecture\":
+        \"x64\",\r\n    \"replicaType\": \"Unmanaged\",\r\n    \"disallowed\": {\r\n
+        \     \"vmDiskType\": \"None\"\r\n    },\r\n    \"automaticOSUpgradeProperties\":
+        {\r\n      \"automaticOSUpgradeSupported\": true\r\n    },\r\n    \"imageDeprecationStatus\":
+        {\r\n      \"imageState\": \"Active\"\r\n    },\r\n    \"osDiskImage\": {\r\n
+        \     \"operatingSystem\": \"Linux\",\r\n      \"sizeInGb\": 30,\r\n      \"sizeInBytes\":
+        32212255232\r\n    },\r\n    \"dataDiskImages\": []\r\n  },\r\n  \"location\":
+        \"eastus\",\r\n  \"name\": \"7.5.201808150\",\r\n  \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/eastus/Publishers/OpenLogic/ArtifactTypes/VMImage/Offers/CentOS/Skus/7.5/Versions/7.5.201808150\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '737'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Mar 2022 06:29:31 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetVMImageFromLocation3Min;12999,Microsoft.Compute/GetVMImageFromLocation30Min;73999
     status:
       code: 200
       message: OK
@@ -114,7 +226,7 @@ interactions:
       - --resource-group --name --admin-username --admin-password --authentication-type
         --location --image --priority --nsg-rule
       User-Agent:
-      - AZURECLI/2.27.2 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-network/19.3.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/virtualNetworks?api-version=2018-01-01
   response:
@@ -128,7 +240,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 03 Sep 2021 08:41:06 GMT
+      - Thu, 17 Mar 2022 06:29:31 GMT
       expires:
       - '-1'
       pragma:
@@ -162,7 +274,7 @@ interactions:
       "properties": {"privateIPAllocationMethod": "Dynamic", "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/virtualNetworks/vm-simualte-eviction1VNET/subnets/vm-simualte-eviction1Subnet"},
       "publicIPAddress": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/publicIPAddresses/vm-simualte-eviction1PublicIP"}}}],
       "networkSecurityGroup": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkSecurityGroups/vm-simualte-eviction1NSG"}}},
-      {"apiVersion": "2021-07-01", "type": "Microsoft.Compute/virtualMachines", "name":
+      {"apiVersion": "2021-11-01", "type": "Microsoft.Compute/virtualMachines", "name":
       "vm-simualte-eviction1", "location": "eastus", "tags": {}, "dependsOn": ["Microsoft.Network/networkInterfaces/vm-simualte-eviction1VMNic"],
       "properties": {"hardwareProfile": {"vmSize": "Standard_DS1_v2"}, "networkProfile":
       {"networkInterfaces": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkInterfaces/vm-simualte-eviction1VMNic",
@@ -183,30 +295,30 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '3391'
+      - '3231'
       Content-Type:
       - application/json
       ParameterSetName:
       - --resource-group --name --admin-username --admin-password --authentication-type
         --location --image --priority --nsg-rule
       User-Agent:
-      - AZURECLI/2.27.2 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Resources/deployments/vm_deploy_KAEVDj3ZWGfW2yv36Fl4v5LFeyTygzfp","name":"vm_deploy_KAEVDj3ZWGfW2yv36Fl4v5LFeyTygzfp","type":"Microsoft.Resources/deployments","properties":{"templateHash":"18042920654061935254","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2021-09-03T08:41:10.9191457Z","duration":"PT2.29898S","correlationId":"d747c1a3-0876-4416-836b-45a3e4768cd4","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["eastus"]},{"resourceType":"networkSecurityGroups","locations":["eastus"]},{"resourceType":"publicIPAddresses","locations":["eastus"]},{"resourceType":"networkInterfaces","locations":["eastus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["eastus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/virtualNetworks/vm-simualte-eviction1VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vm-simualte-eviction1VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkSecurityGroups/vm-simualte-eviction1NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"vm-simualte-eviction1NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/publicIPAddresses/vm-simualte-eviction1PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vm-simualte-eviction1PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkInterfaces/vm-simualte-eviction1VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-simualte-eviction1VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkInterfaces/vm-simualte-eviction1VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-simualte-eviction1VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Compute/virtualMachines/vm-simualte-eviction1","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"vm-simualte-eviction1"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Resources/deployments/vm_deploy_C1Y9rnmbGLjdbq1c8yJeuw89RgDtVOjY","name":"vm_deploy_C1Y9rnmbGLjdbq1c8yJeuw89RgDtVOjY","type":"Microsoft.Resources/deployments","properties":{"templateHash":"515389183721545898","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2022-03-17T06:29:36.7176347Z","duration":"PT0.0009495S","correlationId":"631b7339-31f9-4e3f-9018-5b8e207acd93","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["eastus"]},{"resourceType":"networkSecurityGroups","locations":["eastus"]},{"resourceType":"publicIPAddresses","locations":["eastus"]},{"resourceType":"networkInterfaces","locations":["eastus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["eastus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/virtualNetworks/vm-simualte-eviction1VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vm-simualte-eviction1VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkSecurityGroups/vm-simualte-eviction1NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"vm-simualte-eviction1NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/publicIPAddresses/vm-simualte-eviction1PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vm-simualte-eviction1PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkInterfaces/vm-simualte-eviction1VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-simualte-eviction1VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkInterfaces/vm-simualte-eviction1VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-simualte-eviction1VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Compute/virtualMachines/vm-simualte-eviction1","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"vm-simualte-eviction1"}]}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Resources/deployments/vm_deploy_KAEVDj3ZWGfW2yv36Fl4v5LFeyTygzfp/operationStatuses/08585709484168574694?api-version=2021-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Resources/deployments/vm_deploy_C1Y9rnmbGLjdbq1c8yJeuw89RgDtVOjY/operationStatuses/08585541083117227458?api-version=2021-04-01
       cache-control:
       - no-cache
       content-length:
-      - '2996'
+      - '2716'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 03 Sep 2021 08:41:11 GMT
+      - Thu, 17 Mar 2022 06:29:37 GMT
       expires:
       - '-1'
       pragma:
@@ -216,7 +328,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1194'
+      - '1195'
     status:
       code: 201
       message: Created
@@ -235,9 +347,9 @@ interactions:
       - --resource-group --name --admin-username --admin-password --authentication-type
         --location --image --priority --nsg-rule
       User-Agent:
-      - AZURECLI/2.27.2 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585709484168574694?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585541083117227458?api-version=2021-04-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -249,7 +361,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 03 Sep 2021 08:41:42 GMT
+      - Thu, 17 Mar 2022 06:30:07 GMT
       expires:
       - '-1'
       pragma:
@@ -278,9 +390,9 @@ interactions:
       - --resource-group --name --admin-username --admin-password --authentication-type
         --location --image --priority --nsg-rule
       User-Agent:
-      - AZURECLI/2.27.2 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585709484168574694?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585541083117227458?api-version=2021-04-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -292,7 +404,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 03 Sep 2021 08:42:12 GMT
+      - Thu, 17 Mar 2022 06:30:39 GMT
       expires:
       - '-1'
       pragma:
@@ -321,52 +433,9 @@ interactions:
       - --resource-group --name --admin-username --admin-password --authentication-type
         --location --image --priority --nsg-rule
       User-Agent:
-      - AZURECLI/2.27.2 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585709484168574694?api-version=2021-04-01
-  response:
-    body:
-      string: '{"status":"Running"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '20'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 03 Sep 2021 08:42:42 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - vm create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --resource-group --name --admin-username --admin-password --authentication-type
-        --location --image --priority --nsg-rule
-      User-Agent:
-      - AZURECLI/2.27.2 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585709484168574694?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585541083117227458?api-version=2021-04-01
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -378,7 +447,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 03 Sep 2021 08:43:13 GMT
+      - Thu, 17 Mar 2022 06:31:09 GMT
       expires:
       - '-1'
       pragma:
@@ -407,21 +476,21 @@ interactions:
       - --resource-group --name --admin-username --admin-password --authentication-type
         --location --image --priority --nsg-rule
       User-Agent:
-      - AZURECLI/2.27.2 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Resources/deployments/vm_deploy_KAEVDj3ZWGfW2yv36Fl4v5LFeyTygzfp","name":"vm_deploy_KAEVDj3ZWGfW2yv36Fl4v5LFeyTygzfp","type":"Microsoft.Resources/deployments","properties":{"templateHash":"18042920654061935254","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2021-09-03T08:42:50.4659346Z","duration":"PT1M41.8457689S","correlationId":"d747c1a3-0876-4416-836b-45a3e4768cd4","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["eastus"]},{"resourceType":"networkSecurityGroups","locations":["eastus"]},{"resourceType":"publicIPAddresses","locations":["eastus"]},{"resourceType":"networkInterfaces","locations":["eastus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["eastus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/virtualNetworks/vm-simualte-eviction1VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vm-simualte-eviction1VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkSecurityGroups/vm-simualte-eviction1NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"vm-simualte-eviction1NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/publicIPAddresses/vm-simualte-eviction1PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vm-simualte-eviction1PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkInterfaces/vm-simualte-eviction1VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-simualte-eviction1VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkInterfaces/vm-simualte-eviction1VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-simualte-eviction1VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Compute/virtualMachines/vm-simualte-eviction1","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"vm-simualte-eviction1"}],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Compute/virtualMachines/vm-simualte-eviction1"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkInterfaces/vm-simualte-eviction1VMNic"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkSecurityGroups/vm-simualte-eviction1NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/publicIPAddresses/vm-simualte-eviction1PublicIP"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/virtualNetworks/vm-simualte-eviction1VNET"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Resources/deployments/vm_deploy_C1Y9rnmbGLjdbq1c8yJeuw89RgDtVOjY","name":"vm_deploy_C1Y9rnmbGLjdbq1c8yJeuw89RgDtVOjY","type":"Microsoft.Resources/deployments","properties":{"templateHash":"515389183721545898","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2022-03-17T06:31:07.3517534Z","duration":"PT1M30.6350682S","correlationId":"631b7339-31f9-4e3f-9018-5b8e207acd93","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["eastus"]},{"resourceType":"networkSecurityGroups","locations":["eastus"]},{"resourceType":"publicIPAddresses","locations":["eastus"]},{"resourceType":"networkInterfaces","locations":["eastus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["eastus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/virtualNetworks/vm-simualte-eviction1VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vm-simualte-eviction1VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkSecurityGroups/vm-simualte-eviction1NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"vm-simualte-eviction1NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/publicIPAddresses/vm-simualte-eviction1PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vm-simualte-eviction1PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkInterfaces/vm-simualte-eviction1VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-simualte-eviction1VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkInterfaces/vm-simualte-eviction1VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-simualte-eviction1VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Compute/virtualMachines/vm-simualte-eviction1","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"vm-simualte-eviction1"}],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Compute/virtualMachines/vm-simualte-eviction1"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkInterfaces/vm-simualte-eviction1VMNic"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkSecurityGroups/vm-simualte-eviction1NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/publicIPAddresses/vm-simualte-eviction1PublicIP"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/virtualNetworks/vm-simualte-eviction1VNET"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '4155'
+      - '3673'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 03 Sep 2021 08:43:14 GMT
+      - Thu, 17 Mar 2022 06:31:09 GMT
       expires:
       - '-1'
       pragma:
@@ -450,23 +519,23 @@ interactions:
       - --resource-group --name --admin-username --admin-password --authentication-type
         --location --image --priority --nsg-rule
       User-Agent:
-      - AZURECLI/2.27.2 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Compute/virtualMachines/vm-simualte-eviction1?$expand=instanceView&api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Compute/virtualMachines/vm-simualte-eviction1?$expand=instanceView&api-version=2021-11-01
   response:
     body:
       string: "{\r\n  \"name\": \"vm-simualte-eviction1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Compute/virtualMachines/vm-simualte-eviction1\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"eastus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"9e659ffa-3cfd-45ff-9c5b-0331648de2c9\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"90c66d48-8bfe-4b69-bae8-f24b473148ec\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"OpenLogic\",\r\n        \"offer\": \"CentOS\",\r\n        \"sku\": \"7.5\",\r\n
         \       \"version\": \"latest\",\r\n        \"exactVersion\": \"7.5.201808150\"\r\n
         \     },\r\n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"name\":
-        \"vm-simualte-eviction1_OsDisk_1_cdf57e416a5d4d86867f1d210cc3eebc\",\r\n        \"createOption\":
+        \"vm-simualte-eviction1_OsDisk_1_91b2e21a466245c28376d52fd1304ca2\",\r\n        \"createOption\":
         \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n        \"managedDisk\":
         {\r\n          \"storageAccountType\": \"Premium_LRS\",\r\n          \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Compute/disks/vm-simualte-eviction1_OsDisk_1_cdf57e416a5d4d86867f1d210cc3eebc\"\r\n
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Compute/disks/vm-simualte-eviction1_OsDisk_1_91b2e21a466245c28376d52fd1304ca2\"\r\n
         \       },\r\n        \"deleteOption\": \"Detach\",\r\n        \"diskSizeGB\":
         30\r\n      },\r\n      \"dataDisks\": []\r\n    },\r\n    \"osProfile\":
         {\r\n      \"computerName\": \"vm-simualte-eviction1\",\r\n      \"adminUsername\":
@@ -479,31 +548,32 @@ interactions:
         \   \"provisioningState\": \"Succeeded\",\r\n    \"priority\": \"Regular\",\r\n
         \   \"instanceView\": {\r\n      \"computerName\": \"vm-simualte-eviction1\",\r\n
         \     \"osName\": \"centos\",\r\n      \"osVersion\": \"7.5.1804\",\r\n      \"vmAgent\":
-        {\r\n        \"vmAgentVersion\": \"2.4.0.2\",\r\n        \"statuses\": [\r\n
+        {\r\n        \"vmAgentVersion\": \"2.7.0.6\",\r\n        \"statuses\": [\r\n
         \         {\r\n            \"code\": \"ProvisioningState/succeeded\",\r\n
         \           \"level\": \"Info\",\r\n            \"displayStatus\": \"Ready\",\r\n
         \           \"message\": \"Guest Agent is running\",\r\n            \"time\":
-        \"2021-09-03T08:42:48+00:00\"\r\n          }\r\n        ],\r\n        \"extensionHandlers\":
-        []\r\n      },\r\n      \"disks\": [\r\n        {\r\n          \"name\": \"vm-simualte-eviction1_OsDisk_1_cdf57e416a5d4d86867f1d210cc3eebc\",\r\n
+        \"2022-03-17T06:31:05+00:00\"\r\n          }\r\n        ],\r\n        \"extensionHandlers\":
+        []\r\n      },\r\n      \"disks\": [\r\n        {\r\n          \"name\": \"vm-simualte-eviction1_OsDisk_1_91b2e21a466245c28376d52fd1304ca2\",\r\n
         \         \"statuses\": [\r\n            {\r\n              \"code\": \"ProvisioningState/succeeded\",\r\n
         \             \"level\": \"Info\",\r\n              \"displayStatus\": \"Provisioning
-        succeeded\",\r\n              \"time\": \"2021-09-03T08:41:39.6308359+00:00\"\r\n
+        succeeded\",\r\n              \"time\": \"2022-03-17T06:30:03.9351074+00:00\"\r\n
         \           }\r\n          ]\r\n        }\r\n      ],\r\n      \"hyperVGeneration\":
         \"V1\",\r\n      \"statuses\": [\r\n        {\r\n          \"code\": \"ProvisioningState/succeeded\",\r\n
         \         \"level\": \"Info\",\r\n          \"displayStatus\": \"Provisioning
-        succeeded\",\r\n          \"time\": \"2021-09-03T08:42:46.2719416+00:00\"\r\n
+        succeeded\",\r\n          \"time\": \"2022-03-17T06:31:02.0448309+00:00\"\r\n
         \       },\r\n        {\r\n          \"code\": \"PowerState/running\",\r\n
         \         \"level\": \"Info\",\r\n          \"displayStatus\": \"VM running\"\r\n
-        \       }\r\n      ]\r\n    }\r\n  }\r\n}"
+        \       }\r\n      ]\r\n    },\r\n    \"timeCreated\": \"2022-03-17T06:29:57.2944439+00:00\"\r\n
+        \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '3502'
+      - '3439'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 03 Sep 2021 08:43:15 GMT
+      - Thu, 17 Mar 2022 06:31:10 GMT
       expires:
       - '-1'
       pragma:
@@ -520,7 +590,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3977,Microsoft.Compute/LowCostGet30Min;31923
+      - Microsoft.Compute/LowCostGet3Min;3971,Microsoft.Compute/LowCostGet30Min;31794
     status:
       code: 200
       message: OK
@@ -539,18 +609,18 @@ interactions:
       - --resource-group --name --admin-username --admin-password --authentication-type
         --location --image --priority --nsg-rule
       User-Agent:
-      - AZURECLI/2.27.2 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-network/19.3.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkInterfaces/vm-simualte-eviction1VMNic?api-version=2018-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"vm-simualte-eviction1VMNic\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkInterfaces/vm-simualte-eviction1VMNic\",\r\n
-        \ \"etag\": \"W/\\\"f5eb4c3a-bfa4-4a26-a5d9-52d2e1f73fb6\\\"\",\r\n  \"location\":
+        \ \"etag\": \"W/\\\"8cac0d5a-078d-4e2a-b4cb-10f93a81e3b0\\\"\",\r\n  \"location\":
         \"eastus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"resourceGuid\": \"2d704701-2f0e-471d-b241-1bb260599a38\",\r\n
+        \"Succeeded\",\r\n    \"resourceGuid\": \"fc1eec26-1fef-4e36-8b23-135e02c2ea72\",\r\n
         \   \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfigvm-simualte-eviction1\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkInterfaces/vm-simualte-eviction1VMNic/ipConfigurations/ipconfigvm-simualte-eviction1\",\r\n
-        \       \"etag\": \"W/\\\"f5eb4c3a-bfa4-4a26-a5d9-52d2e1f73fb6\\\"\",\r\n
+        \       \"etag\": \"W/\\\"8cac0d5a-078d-4e2a-b4cb-10f93a81e3b0\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
@@ -559,8 +629,8 @@ interactions:
         \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
         \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
         [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
-        \"mqynoo5tdq1utaatjck0tt4qwb.bx.internal.cloudapp.net\"\r\n    },\r\n    \"macAddress\":
-        \"00-0D-3A-15-73-01\",\r\n    \"enableAcceleratedNetworking\": false,\r\n
+        \"zv35iv4qhkhuzdxgwbhhzkqp1c.bx.internal.cloudapp.net\"\r\n    },\r\n    \"macAddress\":
+        \"00-0D-3A-9D-79-6D\",\r\n    \"enableAcceleratedNetworking\": false,\r\n
         \   \"enableIPForwarding\": false,\r\n    \"networkSecurityGroup\": {\r\n
         \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkSecurityGroups/vm-simualte-eviction1NSG\"\r\n
         \   },\r\n    \"primary\": true,\r\n    \"virtualMachine\": {\r\n      \"id\":
@@ -570,13 +640,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '2748'
+      - '2508'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 03 Sep 2021 08:43:15 GMT
+      - Thu, 17 Mar 2022 06:31:10 GMT
       etag:
-      - W/"f5eb4c3a-bfa4-4a26-a5d9-52d2e1f73fb6"
+      - W/"8cac0d5a-078d-4e2a-b4cb-10f93a81e3b0"
       expires:
       - '-1'
       pragma:
@@ -593,7 +663,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - f9e82796-2e00-41e5-b43f-bfb296ecf845
+      - 7e275bc3-24aa-45b1-bfed-c552c595da10
     status:
       code: 200
       message: OK
@@ -612,16 +682,16 @@ interactions:
       - --resource-group --name --admin-username --admin-password --authentication-type
         --location --image --priority --nsg-rule
       User-Agent:
-      - AZURECLI/2.27.2 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-network/19.3.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/publicIPAddresses/vm-simualte-eviction1PublicIP?api-version=2018-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"vm-simualte-eviction1PublicIP\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/publicIPAddresses/vm-simualte-eviction1PublicIP\",\r\n
-        \ \"etag\": \"W/\\\"8380cc66-dd26-4bc4-882a-3593c1f0aac0\\\"\",\r\n  \"location\":
+        \ \"etag\": \"W/\\\"177295fe-6051-4c9a-ae8b-2061807a11d2\\\"\",\r\n  \"location\":
         \"eastus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"resourceGuid\": \"ccbabe41-5a96-4cab-8f5d-37b02840fe4e\",\r\n
-        \   \"ipAddress\": \"40.117.84.221\",\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n
+        \"Succeeded\",\r\n    \"resourceGuid\": \"07821b57-f949-44da-91e5-81b07126219f\",\r\n
+        \   \"ipAddress\": \"20.127.78.249\",\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n
         \   \"publicIPAllocationMethod\": \"Dynamic\",\r\n    \"idleTimeoutInMinutes\":
         4,\r\n    \"ipTags\": [],\r\n    \"ipConfiguration\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkInterfaces/vm-simualte-eviction1VMNic/ipConfigurations/ipconfigvm-simualte-eviction1\"\r\n
         \   }\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n
@@ -630,13 +700,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1069'
+      - '989'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 03 Sep 2021 08:43:16 GMT
+      - Thu, 17 Mar 2022 06:31:11 GMT
       etag:
-      - W/"8380cc66-dd26-4bc4-882a-3593c1f0aac0"
+      - W/"177295fe-6051-4c9a-ae8b-2061807a11d2"
       expires:
       - '-1'
       pragma:
@@ -653,7 +723,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 2613189f-a869-4faf-83f4-9fc2c8fc0648
+      - 4fc6973d-2b94-4382-bf45-13568413e770
     status:
       code: 200
       message: OK
@@ -661,7 +731,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - '*/*'
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -673,9 +743,9 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.27.2 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Compute/virtualMachines/vm-simualte-eviction1/simulateEviction?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Compute/virtualMachines/vm-simualte-eviction1/simulateEviction?api-version=2021-11-01
   response:
     body:
       string: "{\r\n  \"error\": {\r\n    \"code\": \"OperationNotAllowed\",\r\n    \"message\":
@@ -689,7 +759,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 03 Sep 2021 08:43:17 GMT
+      - Thu, 17 Mar 2022 06:31:13 GMT
       expires:
       - '-1'
       pragma:
@@ -702,7 +772,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/DeleteVM3Min;237,Microsoft.Compute/DeleteVM30Min;1191
+      - Microsoft.Compute/DeleteVM3Min;237,Microsoft.Compute/DeleteVM30Min;1197
       x-ms-ratelimit-remaining-subscription-writes:
       - '1198'
     status:
@@ -718,9 +788,9 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python-requests/2.25.1
+      - python-requests/2.26.0
     method: GET
-    uri: https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json
+    uri: https://raw.githubusercontent.com/Azure/azure-rest-api-specs/main/arm-compute/quickstart-templates/aliases.json
   response:
     body:
       string: "{\n  \"$schema\": \"http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json\",\n
@@ -734,16 +804,19 @@ interactions:
         \         },\n          \"Flatcar\": {\n            \"publisher\": \"kinvolk\",\n
         \           \"offer\": \"flatcar-container-linux-free\",\n            \"sku\":
         \"stable\",\n            \"version\": \"latest\"\n          },\n          \"openSUSE-Leap\":
-        {\n            \"publisher\": \"SUSE\",\n            \"offer\": \"openSUSE-Leap\",\n
-        \           \"sku\": \"42.3\",\n            \"version\": \"latest\"\n          },\n
+        {\n            \"publisher\": \"SUSE\",\n            \"offer\": \"opensuse-leap-15-3\",\n
+        \           \"sku\": \"gen2\",\n            \"version\": \"latest\"\n          },\n
         \         \"RHEL\": {\n            \"publisher\": \"RedHat\",\n            \"offer\":
         \"RHEL\",\n            \"sku\": \"7-LVM\",\n            \"version\": \"latest\"\n
         \         },\n          \"SLES\": {\n            \"publisher\": \"SUSE\",\n
-        \           \"offer\": \"SLES\",\n            \"sku\": \"15\",\n            \"version\":
-        \"latest\"\n          },\n          \"UbuntuLTS\": {\n            \"publisher\":
-        \"Canonical\",\n            \"offer\": \"UbuntuServer\",\n            \"sku\":
-        \"18.04-LTS\",\n            \"version\": \"latest\"\n          }\n        },\n
-        \       \"Windows\": {\n          \"Win2019Datacenter\": {\n            \"publisher\":
+        \           \"offer\": \"sles-15-sp3\",\n            \"sku\": \"gen2\",\n
+        \           \"version\": \"latest\"\n          },\n          \"UbuntuLTS\":
+        {\n            \"publisher\": \"Canonical\",\n            \"offer\": \"UbuntuServer\",\n
+        \           \"sku\": \"18.04-LTS\",\n            \"version\": \"latest\"\n
+        \         }\n        },\n        \"Windows\": {\n          \"Win2022Datacenter\":
+        {\n            \"publisher\": \"MicrosoftWindowsServer\",\n            \"offer\":
+        \"WindowsServer\",\n            \"sku\": \"2022-Datacenter\",\n            \"version\":
+        \"latest\"\n          },\n          \"Win2019Datacenter\": {\n            \"publisher\":
         \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\",\n            \"sku\":
         \"2019-Datacenter\",\n            \"version\": \"latest\"\n          },\n
         \         \"Win2016Datacenter\": {\n            \"publisher\": \"MicrosoftWindowsServer\",\n
@@ -768,43 +841,152 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '2525'
+      - '2744'
       content-security-policy:
       - default-src 'none'; style-src 'unsafe-inline'; sandbox
       content-type:
       - text/plain; charset=utf-8
       date:
-      - Fri, 03 Sep 2021 08:43:18 GMT
+      - Thu, 17 Mar 2022 06:31:13 GMT
       etag:
-      - W/"54bceef15b892f2aa7f4c2145a49f1b5e33608722acdbb47933d7b6cbebbd7f4"
+      - W/"d5acead0b38a79d988c245a7a15ec01f999da9244c97bbdc1fa2ec70d9e433f5"
       expires:
-      - Fri, 03 Sep 2021 08:48:18 GMT
+      - Thu, 17 Mar 2022 06:36:13 GMT
       source-age:
-      - '139'
+      - '58'
       strict-transport-security:
       - max-age=31536000
       vary:
-      - Authorization,Accept-Encoding
+      - Authorization,Accept-Encoding,Origin
       via:
       - 1.1 varnish
       x-cache:
       - HIT
       x-cache-hits:
-      - '3'
+      - '1'
       x-content-type-options:
       - nosniff
       x-fastly-request-id:
-      - b09311da88184124533cbd9a085e980b92288f78
+      - e21375006bf84b996bc1cc4bf86fa5676eeea10a
       x-frame-options:
       - deny
       x-github-request-id:
-      - 9374:68D6:5BEC89:744216:6131540B
+      - 2570:063C:1995B2:2734C1:62329D55
       x-served-by:
-      - cache-qpg1248-QPG
+      - cache-qpg1229-QPG
       x-timer:
-      - S1630658598.451584,VS0,VE0
+      - S1647498674.885568,VS0,VE0
       x-xss-protection:
       - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --admin-username --admin-password --authentication-type
+        --location --image --priority --eviction-policy --nsg-rule
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/publishers/OpenLogic/artifacttypes/vmimage/offers/CentOS/skus/7.5/versions?$top=1&$orderby=name%20desc&api-version=2021-11-01
+  response:
+    body:
+      string: "[\r\n  {\r\n    \"location\": \"eastus\",\r\n    \"name\": \"7.5.201808150\",\r\n
+        \   \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/eastus/Publishers/OpenLogic/ArtifactTypes/VMImage/Offers/CentOS/Skus/7.5/Versions/7.5.201808150\"\r\n
+        \ }\r\n]"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '270'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Mar 2022 06:31:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/ListVMImagesVersionsFromLocation3Min;15996,Microsoft.Compute/ListVMImagesVersionsFromLocation30Min;43996
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --admin-username --admin-password --authentication-type
+        --location --image --priority --eviction-policy --nsg-rule
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/publishers/OpenLogic/artifacttypes/vmimage/offers/CentOS/skus/7.5/versions/7.5.201808150?api-version=2021-11-01
+  response:
+    body:
+      string: "{\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n    \"architecture\":
+        \"x64\",\r\n    \"replicaType\": \"Unmanaged\",\r\n    \"disallowed\": {\r\n
+        \     \"vmDiskType\": \"None\"\r\n    },\r\n    \"automaticOSUpgradeProperties\":
+        {\r\n      \"automaticOSUpgradeSupported\": true\r\n    },\r\n    \"imageDeprecationStatus\":
+        {\r\n      \"imageState\": \"Active\"\r\n    },\r\n    \"osDiskImage\": {\r\n
+        \     \"operatingSystem\": \"Linux\",\r\n      \"sizeInGb\": 30,\r\n      \"sizeInBytes\":
+        32212255232\r\n    },\r\n    \"dataDiskImages\": []\r\n  },\r\n  \"location\":
+        \"eastus\",\r\n  \"name\": \"7.5.201808150\",\r\n  \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/eastus/Publishers/OpenLogic/ArtifactTypes/VMImage/Offers/CentOS/Skus/7.5/Versions/7.5.201808150\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '737'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Mar 2022 06:31:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetVMImageFromLocation3Min;12997,Microsoft.Compute/GetVMImageFromLocation30Min;73997
     status:
       code: 200
       message: OK
@@ -823,21 +1005,21 @@ interactions:
       - --resource-group --name --admin-username --admin-password --authentication-type
         --location --image --priority --eviction-policy --nsg-rule
       User-Agent:
-      - AZURECLI/2.27.2 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-network/19.3.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/virtualNetworks?api-version=2018-01-01
   response:
     body:
       string: "{\r\n  \"value\": [\r\n    {\r\n      \"name\": \"vm-simualte-eviction1VNET\",\r\n
         \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/virtualNetworks/vm-simualte-eviction1VNET\",\r\n
-        \     \"etag\": \"W/\\\"46e4ccb1-e840-4d84-90a7-26a19a25e64a\\\"\",\r\n      \"type\":
+        \     \"etag\": \"W/\\\"548ade7d-f0c9-4387-a0b7-f872d0f7986f\\\"\",\r\n      \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n      \"location\": \"eastus\",\r\n
         \     \"tags\": {},\r\n      \"properties\": {\r\n        \"provisioningState\":
-        \"Succeeded\",\r\n        \"resourceGuid\": \"3bd73064-1cf3-4937-8013-4895a9cfd0b1\",\r\n
+        \"Succeeded\",\r\n        \"resourceGuid\": \"57f47bcd-3ad0-4c8f-8ee6-b04e7caa0fda\",\r\n
         \       \"addressSpace\": {\r\n          \"addressPrefixes\": [\r\n            \"10.0.0.0/16\"\r\n
         \         ]\r\n        },\r\n        \"subnets\": [\r\n          {\r\n            \"name\":
         \"vm-simualte-eviction1Subnet\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/virtualNetworks/vm-simualte-eviction1VNET/subnets/vm-simualte-eviction1Subnet\",\r\n
-        \           \"etag\": \"W/\\\"46e4ccb1-e840-4d84-90a7-26a19a25e64a\\\"\",\r\n
+        \           \"etag\": \"W/\\\"548ade7d-f0c9-4387-a0b7-f872d0f7986f\\\"\",\r\n
         \           \"properties\": {\r\n              \"provisioningState\": \"Succeeded\",\r\n
         \             \"addressPrefix\": \"10.0.0.0/24\",\r\n              \"ipConfigurations\":
         [\r\n                {\r\n                  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkInterfaces/vm-simualte-eviction1VMNic/ipConfigurations/ipconfigvm-simualte-eviction1\"\r\n
@@ -849,11 +1031,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1838'
+      - '1718'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 03 Sep 2021 08:43:18 GMT
+      - Thu, 17 Mar 2022 06:31:16 GMT
       expires:
       - '-1'
       pragma:
@@ -870,7 +1052,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 1337ab46-3d5f-4985-a444-78a576cb5a82
+      - e6e42fec-5156-4d57-abd2-e790a647daf5
     status:
       code: 200
       message: OK
@@ -890,7 +1072,7 @@ interactions:
       {"privateIPAllocationMethod": "Dynamic", "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/virtualNetworks/vm-simualte-eviction1VNET/subnets/vm-simualte-eviction1Subnet"},
       "publicIPAddress": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/publicIPAddresses/vm-simulate-eviction2PublicIP"}}}],
       "networkSecurityGroup": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkSecurityGroups/vm-simulate-eviction2NSG"}}},
-      {"apiVersion": "2021-07-01", "type": "Microsoft.Compute/virtualMachines", "name":
+      {"apiVersion": "2021-11-01", "type": "Microsoft.Compute/virtualMachines", "name":
       "vm-simulate-eviction2", "location": "eastus", "tags": {}, "dependsOn": ["Microsoft.Network/networkInterfaces/vm-simulate-eviction2VMNic"],
       "properties": {"hardwareProfile": {"vmSize": "Standard_DS1_v2"}, "networkProfile":
       {"networkInterfaces": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkInterfaces/vm-simulate-eviction2VMNic",
@@ -911,30 +1093,30 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '3022'
+      - '2862'
       Content-Type:
       - application/json
       ParameterSetName:
       - --resource-group --name --admin-username --admin-password --authentication-type
         --location --image --priority --eviction-policy --nsg-rule
       User-Agent:
-      - AZURECLI/2.27.2 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Resources/deployments/vm_deploy_7rvaAtIa0xTXQWQRzWlLWqil1vcWDykw","name":"vm_deploy_7rvaAtIa0xTXQWQRzWlLWqil1vcWDykw","type":"Microsoft.Resources/deployments","properties":{"templateHash":"11528810600872136227","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2021-09-03T08:43:23.1000269Z","duration":"PT2.8250548S","correlationId":"dce8e412-18f3-4853-b742-84ee0dad980a","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"networkSecurityGroups","locations":["eastus"]},{"resourceType":"publicIPAddresses","locations":["eastus"]},{"resourceType":"networkInterfaces","locations":["eastus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["eastus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkSecurityGroups/vm-simulate-eviction2NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"vm-simulate-eviction2NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/publicIPAddresses/vm-simulate-eviction2PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vm-simulate-eviction2PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkInterfaces/vm-simulate-eviction2VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-simulate-eviction2VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkInterfaces/vm-simulate-eviction2VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-simulate-eviction2VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Compute/virtualMachines/vm-simulate-eviction2","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"vm-simulate-eviction2"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Resources/deployments/vm_deploy_ymYpCp8jblSdd6S54v6oNpuxe4HIwgmz","name":"vm_deploy_ymYpCp8jblSdd6S54v6oNpuxe4HIwgmz","type":"Microsoft.Resources/deployments","properties":{"templateHash":"16134331811142989996","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2022-03-17T06:31:21.1306097Z","duration":"PT0.0001382S","correlationId":"c7e0b562-3f98-483d-a937-251aa5abffac","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"networkSecurityGroups","locations":["eastus"]},{"resourceType":"publicIPAddresses","locations":["eastus"]},{"resourceType":"networkInterfaces","locations":["eastus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["eastus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkSecurityGroups/vm-simulate-eviction2NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"vm-simulate-eviction2NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/publicIPAddresses/vm-simulate-eviction2PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vm-simulate-eviction2PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkInterfaces/vm-simulate-eviction2VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-simulate-eviction2VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkInterfaces/vm-simulate-eviction2VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-simulate-eviction2VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Compute/virtualMachines/vm-simulate-eviction2","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"vm-simulate-eviction2"}]}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Resources/deployments/vm_deploy_7rvaAtIa0xTXQWQRzWlLWqil1vcWDykw/operationStatuses/08585709482852026733?api-version=2021-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Resources/deployments/vm_deploy_ymYpCp8jblSdd6S54v6oNpuxe4HIwgmz/operationStatuses/08585541082064774513?api-version=2021-04-01
       cache-control:
       - no-cache
       content-length:
-      - '2624'
+      - '2384'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 03 Sep 2021 08:43:24 GMT
+      - Thu, 17 Mar 2022 06:31:22 GMT
       expires:
       - '-1'
       pragma:
@@ -963,9 +1145,9 @@ interactions:
       - --resource-group --name --admin-username --admin-password --authentication-type
         --location --image --priority --eviction-policy --nsg-rule
       User-Agent:
-      - AZURECLI/2.27.2 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585709482852026733?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585541082064774513?api-version=2021-04-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -977,7 +1159,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 03 Sep 2021 08:43:54 GMT
+      - Thu, 17 Mar 2022 06:31:52 GMT
       expires:
       - '-1'
       pragma:
@@ -1006,9 +1188,9 @@ interactions:
       - --resource-group --name --admin-username --admin-password --authentication-type
         --location --image --priority --eviction-policy --nsg-rule
       User-Agent:
-      - AZURECLI/2.27.2 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585709482852026733?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585541082064774513?api-version=2021-04-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1020,7 +1202,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 03 Sep 2021 08:44:24 GMT
+      - Thu, 17 Mar 2022 06:32:23 GMT
       expires:
       - '-1'
       pragma:
@@ -1049,9 +1231,9 @@ interactions:
       - --resource-group --name --admin-username --admin-password --authentication-type
         --location --image --priority --eviction-policy --nsg-rule
       User-Agent:
-      - AZURECLI/2.27.2 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585709482852026733?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585541082064774513?api-version=2021-04-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1063,7 +1245,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 03 Sep 2021 08:44:55 GMT
+      - Thu, 17 Mar 2022 06:32:53 GMT
       expires:
       - '-1'
       pragma:
@@ -1092,9 +1274,9 @@ interactions:
       - --resource-group --name --admin-username --admin-password --authentication-type
         --location --image --priority --eviction-policy --nsg-rule
       User-Agent:
-      - AZURECLI/2.27.2 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585709482852026733?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585541082064774513?api-version=2021-04-01
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -1106,7 +1288,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 03 Sep 2021 08:45:26 GMT
+      - Thu, 17 Mar 2022 06:33:23 GMT
       expires:
       - '-1'
       pragma:
@@ -1135,21 +1317,21 @@ interactions:
       - --resource-group --name --admin-username --admin-password --authentication-type
         --location --image --priority --eviction-policy --nsg-rule
       User-Agent:
-      - AZURECLI/2.27.2 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Resources/deployments/vm_deploy_7rvaAtIa0xTXQWQRzWlLWqil1vcWDykw","name":"vm_deploy_7rvaAtIa0xTXQWQRzWlLWqil1vcWDykw","type":"Microsoft.Resources/deployments","properties":{"templateHash":"11528810600872136227","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2021-09-03T08:45:12.5111447Z","duration":"PT1M52.2361726S","correlationId":"dce8e412-18f3-4853-b742-84ee0dad980a","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"networkSecurityGroups","locations":["eastus"]},{"resourceType":"publicIPAddresses","locations":["eastus"]},{"resourceType":"networkInterfaces","locations":["eastus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["eastus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkSecurityGroups/vm-simulate-eviction2NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"vm-simulate-eviction2NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/publicIPAddresses/vm-simulate-eviction2PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vm-simulate-eviction2PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkInterfaces/vm-simulate-eviction2VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-simulate-eviction2VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkInterfaces/vm-simulate-eviction2VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-simulate-eviction2VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Compute/virtualMachines/vm-simulate-eviction2","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"vm-simulate-eviction2"}],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Compute/virtualMachines/vm-simulate-eviction2"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkInterfaces/vm-simulate-eviction2VMNic"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkSecurityGroups/vm-simulate-eviction2NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/publicIPAddresses/vm-simulate-eviction2PublicIP"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Resources/deployments/vm_deploy_ymYpCp8jblSdd6S54v6oNpuxe4HIwgmz","name":"vm_deploy_ymYpCp8jblSdd6S54v6oNpuxe4HIwgmz","type":"Microsoft.Resources/deployments","properties":{"templateHash":"16134331811142989996","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2022-03-17T06:32:57.114742Z","duration":"PT1M35.9842705S","correlationId":"c7e0b562-3f98-483d-a937-251aa5abffac","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"networkSecurityGroups","locations":["eastus"]},{"resourceType":"publicIPAddresses","locations":["eastus"]},{"resourceType":"networkInterfaces","locations":["eastus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["eastus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkSecurityGroups/vm-simulate-eviction2NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"vm-simulate-eviction2NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/publicIPAddresses/vm-simulate-eviction2PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vm-simulate-eviction2PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkInterfaces/vm-simulate-eviction2VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-simulate-eviction2VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkInterfaces/vm-simulate-eviction2VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-simulate-eviction2VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Compute/virtualMachines/vm-simulate-eviction2","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"vm-simulate-eviction2"}],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Compute/virtualMachines/vm-simulate-eviction2"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkInterfaces/vm-simulate-eviction2VMNic"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkSecurityGroups/vm-simulate-eviction2NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/publicIPAddresses/vm-simulate-eviction2PublicIP"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '3559'
+      - '3158'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 03 Sep 2021 08:45:26 GMT
+      - Thu, 17 Mar 2022 06:33:24 GMT
       expires:
       - '-1'
       pragma:
@@ -1178,23 +1360,23 @@ interactions:
       - --resource-group --name --admin-username --admin-password --authentication-type
         --location --image --priority --eviction-policy --nsg-rule
       User-Agent:
-      - AZURECLI/2.27.2 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Compute/virtualMachines/vm-simulate-eviction2?$expand=instanceView&api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Compute/virtualMachines/vm-simulate-eviction2?$expand=instanceView&api-version=2021-11-01
   response:
     body:
       string: "{\r\n  \"name\": \"vm-simulate-eviction2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Compute/virtualMachines/vm-simulate-eviction2\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"eastus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"8d0e1a5e-5e58-41b1-9bdc-ff3c31f05875\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"864e053a-1902-43d2-9270-0e2afcd70d5f\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"OpenLogic\",\r\n        \"offer\": \"CentOS\",\r\n        \"sku\": \"7.5\",\r\n
         \       \"version\": \"latest\",\r\n        \"exactVersion\": \"7.5.201808150\"\r\n
         \     },\r\n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"name\":
-        \"vm-simulate-eviction2_OsDisk_1_e4e8fb15a05a477e8549c633eec41e0f\",\r\n        \"createOption\":
+        \"vm-simulate-eviction2_OsDisk_1_05748b7f420e4bc4a681a11749220ad7\",\r\n        \"createOption\":
         \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n        \"managedDisk\":
         {\r\n          \"storageAccountType\": \"Premium_LRS\",\r\n          \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Compute/disks/vm-simulate-eviction2_OsDisk_1_e4e8fb15a05a477e8549c633eec41e0f\"\r\n
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Compute/disks/vm-simulate-eviction2_OsDisk_1_05748b7f420e4bc4a681a11749220ad7\"\r\n
         \       },\r\n        \"deleteOption\": \"Detach\",\r\n        \"diskSizeGB\":
         30\r\n      },\r\n      \"dataDisks\": []\r\n    },\r\n    \"osProfile\":
         {\r\n      \"computerName\": \"vm-simulate-eviction2\",\r\n      \"adminUsername\":
@@ -1208,31 +1390,32 @@ interactions:
         \   \"evictionPolicy\": \"Deallocate\",\r\n    \"billingProfile\": {\r\n      \"maxPrice\":
         -1.0\r\n    },\r\n    \"instanceView\": {\r\n      \"computerName\": \"vm-simulate-eviction2\",\r\n
         \     \"osName\": \"centos\",\r\n      \"osVersion\": \"7.5.1804\",\r\n      \"vmAgent\":
-        {\r\n        \"vmAgentVersion\": \"2.4.0.2\",\r\n        \"statuses\": [\r\n
+        {\r\n        \"vmAgentVersion\": \"2.7.0.6\",\r\n        \"statuses\": [\r\n
         \         {\r\n            \"code\": \"ProvisioningState/succeeded\",\r\n
         \           \"level\": \"Info\",\r\n            \"displayStatus\": \"Ready\",\r\n
         \           \"message\": \"Guest Agent is running\",\r\n            \"time\":
-        \"2021-09-03T08:45:09+00:00\"\r\n          }\r\n        ],\r\n        \"extensionHandlers\":
-        []\r\n      },\r\n      \"disks\": [\r\n        {\r\n          \"name\": \"vm-simulate-eviction2_OsDisk_1_e4e8fb15a05a477e8549c633eec41e0f\",\r\n
+        \"2022-03-17T06:32:55+00:00\"\r\n          }\r\n        ],\r\n        \"extensionHandlers\":
+        []\r\n      },\r\n      \"disks\": [\r\n        {\r\n          \"name\": \"vm-simulate-eviction2_OsDisk_1_05748b7f420e4bc4a681a11749220ad7\",\r\n
         \         \"statuses\": [\r\n            {\r\n              \"code\": \"ProvisioningState/succeeded\",\r\n
         \             \"level\": \"Info\",\r\n              \"displayStatus\": \"Provisioning
-        succeeded\",\r\n              \"time\": \"2021-09-03T08:43:47.1318219+00:00\"\r\n
+        succeeded\",\r\n              \"time\": \"2022-03-17T06:31:43.1073013+00:00\"\r\n
         \           }\r\n          ]\r\n        }\r\n      ],\r\n      \"hyperVGeneration\":
         \"V1\",\r\n      \"statuses\": [\r\n        {\r\n          \"code\": \"ProvisioningState/succeeded\",\r\n
         \         \"level\": \"Info\",\r\n          \"displayStatus\": \"Provisioning
-        succeeded\",\r\n          \"time\": \"2021-09-03T08:45:09.2887329+00:00\"\r\n
+        succeeded\",\r\n          \"time\": \"2022-03-17T06:32:52.1858427+00:00\"\r\n
         \       },\r\n        {\r\n          \"code\": \"PowerState/running\",\r\n
         \         \"level\": \"Info\",\r\n          \"displayStatus\": \"VM running\"\r\n
-        \       }\r\n      ]\r\n    }\r\n  }\r\n}"
+        \       }\r\n      ]\r\n    },\r\n    \"timeCreated\": \"2022-03-17T06:31:36.6698129+00:00\"\r\n
+        \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '3593'
+      - '3530'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 03 Sep 2021 08:45:27 GMT
+      - Thu, 17 Mar 2022 06:33:26 GMT
       expires:
       - '-1'
       pragma:
@@ -1249,7 +1432,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3985,Microsoft.Compute/LowCostGet30Min;31913
+      - Microsoft.Compute/LowCostGet3Min;3965,Microsoft.Compute/LowCostGet30Min;31769
     status:
       code: 200
       message: OK
@@ -1268,18 +1451,18 @@ interactions:
       - --resource-group --name --admin-username --admin-password --authentication-type
         --location --image --priority --eviction-policy --nsg-rule
       User-Agent:
-      - AZURECLI/2.27.2 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-network/19.3.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkInterfaces/vm-simulate-eviction2VMNic?api-version=2018-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"vm-simulate-eviction2VMNic\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkInterfaces/vm-simulate-eviction2VMNic\",\r\n
-        \ \"etag\": \"W/\\\"47cc4b9e-c7c7-43e8-a650-638112693f37\\\"\",\r\n  \"location\":
+        \ \"etag\": \"W/\\\"1a5cd8ce-72bf-472e-b2cf-d66287a76bae\\\"\",\r\n  \"location\":
         \"eastus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"resourceGuid\": \"6daa9bff-fc1c-4898-b242-2a70930eedd8\",\r\n
+        \"Succeeded\",\r\n    \"resourceGuid\": \"33a99889-e046-4c47-9170-65da7d0e4e29\",\r\n
         \   \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfigvm-simulate-eviction2\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkInterfaces/vm-simulate-eviction2VMNic/ipConfigurations/ipconfigvm-simulate-eviction2\",\r\n
-        \       \"etag\": \"W/\\\"47cc4b9e-c7c7-43e8-a650-638112693f37\\\"\",\r\n
+        \       \"etag\": \"W/\\\"1a5cd8ce-72bf-472e-b2cf-d66287a76bae\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateIPAddress\": \"10.0.0.5\",\r\n          \"privateIPAllocationMethod\":
@@ -1288,8 +1471,8 @@ interactions:
         \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
         \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
         [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
-        \"mqynoo5tdq1utaatjck0tt4qwb.bx.internal.cloudapp.net\"\r\n    },\r\n    \"macAddress\":
-        \"00-0D-3A-16-B8-B6\",\r\n    \"enableAcceleratedNetworking\": false,\r\n
+        \"zv35iv4qhkhuzdxgwbhhzkqp1c.bx.internal.cloudapp.net\"\r\n    },\r\n    \"macAddress\":
+        \"00-22-48-1D-0D-B3\",\r\n    \"enableAcceleratedNetworking\": false,\r\n
         \   \"enableIPForwarding\": false,\r\n    \"networkSecurityGroup\": {\r\n
         \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkSecurityGroups/vm-simulate-eviction2NSG\"\r\n
         \   },\r\n    \"primary\": true,\r\n    \"virtualMachine\": {\r\n      \"id\":
@@ -1299,13 +1482,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '2748'
+      - '2508'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 03 Sep 2021 08:45:28 GMT
+      - Thu, 17 Mar 2022 06:33:26 GMT
       etag:
-      - W/"47cc4b9e-c7c7-43e8-a650-638112693f37"
+      - W/"1a5cd8ce-72bf-472e-b2cf-d66287a76bae"
       expires:
       - '-1'
       pragma:
@@ -1322,7 +1505,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 3f92b595-c240-43a5-9868-4cfdc79605b7
+      - d032b3ca-b7b0-4b8e-bf18-4eae887c3352
     status:
       code: 200
       message: OK
@@ -1341,16 +1524,16 @@ interactions:
       - --resource-group --name --admin-username --admin-password --authentication-type
         --location --image --priority --eviction-policy --nsg-rule
       User-Agent:
-      - AZURECLI/2.27.2 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-network/19.3.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/publicIPAddresses/vm-simulate-eviction2PublicIP?api-version=2018-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"vm-simulate-eviction2PublicIP\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/publicIPAddresses/vm-simulate-eviction2PublicIP\",\r\n
-        \ \"etag\": \"W/\\\"6cdefcbd-2ab0-46b0-9ded-7a88fccd44f3\\\"\",\r\n  \"location\":
+        \ \"etag\": \"W/\\\"0c033e64-4d73-4270-bee2-00047e9548a1\\\"\",\r\n  \"location\":
         \"eastus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"resourceGuid\": \"86e08c30-335b-4ae0-8c21-bca0a0107926\",\r\n
-        \   \"ipAddress\": \"40.117.77.101\",\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n
+        \"Succeeded\",\r\n    \"resourceGuid\": \"2289d2da-dadd-4b31-961e-0da8b9c3ad60\",\r\n
+        \   \"ipAddress\": \"20.124.114.14\",\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n
         \   \"publicIPAllocationMethod\": \"Dynamic\",\r\n    \"idleTimeoutInMinutes\":
         4,\r\n    \"ipTags\": [],\r\n    \"ipConfiguration\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkInterfaces/vm-simulate-eviction2VMNic/ipConfigurations/ipconfigvm-simulate-eviction2\"\r\n
         \   }\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n
@@ -1359,13 +1542,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1069'
+      - '989'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 03 Sep 2021 08:45:28 GMT
+      - Thu, 17 Mar 2022 06:33:26 GMT
       etag:
-      - W/"6cdefcbd-2ab0-46b0-9ded-7a88fccd44f3"
+      - W/"0c033e64-4d73-4270-bee2-00047e9548a1"
       expires:
       - '-1'
       pragma:
@@ -1382,7 +1565,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 96922965-b791-48db-ba89-74694832d526
+      - a85db933-f11f-4deb-bfc2-560e4cd508fb
     status:
       code: 200
       message: OK
@@ -1390,7 +1573,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - '*/*'
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -1402,9 +1585,9 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.27.2 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Compute/virtualMachines/vm-simulate-eviction2/simulateEviction?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Compute/virtualMachines/vm-simulate-eviction2/simulateEviction?api-version=2021-11-01
   response:
     body:
       string: ''
@@ -1412,7 +1595,7 @@ interactions:
       cache-control:
       - no-cache
       date:
-      - Fri, 03 Sep 2021 08:45:29 GMT
+      - Thu, 17 Mar 2022 06:33:27 GMT
       expires:
       - '-1'
       pragma:
@@ -1425,9 +1608,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/DeleteVM3Min;237,Microsoft.Compute/DeleteVM30Min;1190
+      - Microsoft.Compute/DeleteVM3Min;237,Microsoft.Compute/DeleteVM30Min;1196
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1199'
     status:
       code: 204
       message: No Content
@@ -1445,22 +1628,22 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.27.2 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Compute/virtualMachines/vm-simulate-eviction2?$expand=instanceView&api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Compute/virtualMachines/vm-simulate-eviction2?$expand=instanceView&api-version=2021-11-01
   response:
     body:
       string: "{\r\n  \"name\": \"vm-simulate-eviction2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Compute/virtualMachines/vm-simulate-eviction2\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"eastus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"8d0e1a5e-5e58-41b1-9bdc-ff3c31f05875\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"864e053a-1902-43d2-9270-0e2afcd70d5f\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"OpenLogic\",\r\n        \"offer\": \"CentOS\",\r\n        \"sku\": \"7.5\",\r\n
         \       \"version\": \"latest\",\r\n        \"exactVersion\": \"7.5.201808150\"\r\n
         \     },\r\n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"name\":
-        \"vm-simulate-eviction2_OsDisk_1_e4e8fb15a05a477e8549c633eec41e0f\",\r\n        \"createOption\":
+        \"vm-simulate-eviction2_OsDisk_1_05748b7f420e4bc4a681a11749220ad7\",\r\n        \"createOption\":
         \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n        \"managedDisk\":
-        {\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Compute/disks/vm-simulate-eviction2_OsDisk_1_e4e8fb15a05a477e8549c633eec41e0f\"\r\n
+        {\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Compute/disks/vm-simulate-eviction2_OsDisk_1_05748b7f420e4bc4a681a11749220ad7\"\r\n
         \       },\r\n        \"deleteOption\": \"Detach\"\r\n      },\r\n      \"dataDisks\":
         []\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"vm-simulate-eviction2\",\r\n
         \     \"adminUsername\": \"azureuser\",\r\n      \"linuxConfiguration\": {\r\n
@@ -1472,26 +1655,27 @@ interactions:
         \   \"provisioningState\": \"Succeeded\",\r\n    \"priority\": \"Spot\",\r\n
         \   \"evictionPolicy\": \"Deallocate\",\r\n    \"billingProfile\": {\r\n      \"maxPrice\":
         -1.0\r\n    },\r\n    \"instanceView\": {\r\n      \"disks\": [\r\n        {\r\n
-        \         \"name\": \"vm-simulate-eviction2_OsDisk_1_e4e8fb15a05a477e8549c633eec41e0f\",\r\n
+        \         \"name\": \"vm-simulate-eviction2_OsDisk_1_05748b7f420e4bc4a681a11749220ad7\",\r\n
         \         \"statuses\": [\r\n            {\r\n              \"code\": \"ProvisioningState/succeeded\",\r\n
         \             \"level\": \"Info\",\r\n              \"displayStatus\": \"Provisioning
-        succeeded\",\r\n              \"time\": \"2021-09-03T08:46:00.4297568+00:00\"\r\n
+        succeeded\",\r\n              \"time\": \"2022-03-17T06:34:42.9052621+00:00\"\r\n
         \           }\r\n          ]\r\n        }\r\n      ],\r\n      \"hyperVGeneration\":
         \"V1\",\r\n      \"statuses\": [\r\n        {\r\n          \"code\": \"ProvisioningState/succeeded\",\r\n
         \         \"level\": \"Info\",\r\n          \"displayStatus\": \"Provisioning
-        succeeded\",\r\n          \"time\": \"2021-09-03T08:46:00.4453698+00:00\"\r\n
+        succeeded\",\r\n          \"time\": \"2022-03-17T06:34:42.9208739+00:00\"\r\n
         \       },\r\n        {\r\n          \"code\": \"PowerState/deallocated\",\r\n
         \         \"level\": \"Info\",\r\n          \"displayStatus\": \"VM deallocated\"\r\n
-        \       }\r\n      ]\r\n    }\r\n  }\r\n}"
+        \       }\r\n      ]\r\n    },\r\n    \"timeCreated\": \"2022-03-17T06:31:36.6698129+00:00\"\r\n
+        \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '3037'
+      - '2974'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 03 Sep 2021 08:48:29 GMT
+      - Thu, 17 Mar 2022 06:36:28 GMT
       expires:
       - '-1'
       pragma:
@@ -1508,7 +1692,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3985,Microsoft.Compute/LowCostGet30Min;31900
+      - Microsoft.Compute/LowCostGet3Min;3979,Microsoft.Compute/LowCostGet30Min;31780
     status:
       code: 200
       message: OK
@@ -1522,9 +1706,9 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python-requests/2.25.1
+      - python-requests/2.26.0
     method: GET
-    uri: https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json
+    uri: https://raw.githubusercontent.com/Azure/azure-rest-api-specs/main/arm-compute/quickstart-templates/aliases.json
   response:
     body:
       string: "{\n  \"$schema\": \"http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json\",\n
@@ -1538,16 +1722,19 @@ interactions:
         \         },\n          \"Flatcar\": {\n            \"publisher\": \"kinvolk\",\n
         \           \"offer\": \"flatcar-container-linux-free\",\n            \"sku\":
         \"stable\",\n            \"version\": \"latest\"\n          },\n          \"openSUSE-Leap\":
-        {\n            \"publisher\": \"SUSE\",\n            \"offer\": \"openSUSE-Leap\",\n
-        \           \"sku\": \"42.3\",\n            \"version\": \"latest\"\n          },\n
+        {\n            \"publisher\": \"SUSE\",\n            \"offer\": \"opensuse-leap-15-3\",\n
+        \           \"sku\": \"gen2\",\n            \"version\": \"latest\"\n          },\n
         \         \"RHEL\": {\n            \"publisher\": \"RedHat\",\n            \"offer\":
         \"RHEL\",\n            \"sku\": \"7-LVM\",\n            \"version\": \"latest\"\n
         \         },\n          \"SLES\": {\n            \"publisher\": \"SUSE\",\n
-        \           \"offer\": \"SLES\",\n            \"sku\": \"15\",\n            \"version\":
-        \"latest\"\n          },\n          \"UbuntuLTS\": {\n            \"publisher\":
-        \"Canonical\",\n            \"offer\": \"UbuntuServer\",\n            \"sku\":
-        \"18.04-LTS\",\n            \"version\": \"latest\"\n          }\n        },\n
-        \       \"Windows\": {\n          \"Win2019Datacenter\": {\n            \"publisher\":
+        \           \"offer\": \"sles-15-sp3\",\n            \"sku\": \"gen2\",\n
+        \           \"version\": \"latest\"\n          },\n          \"UbuntuLTS\":
+        {\n            \"publisher\": \"Canonical\",\n            \"offer\": \"UbuntuServer\",\n
+        \           \"sku\": \"18.04-LTS\",\n            \"version\": \"latest\"\n
+        \         }\n        },\n        \"Windows\": {\n          \"Win2022Datacenter\":
+        {\n            \"publisher\": \"MicrosoftWindowsServer\",\n            \"offer\":
+        \"WindowsServer\",\n            \"sku\": \"2022-Datacenter\",\n            \"version\":
+        \"latest\"\n          },\n          \"Win2019Datacenter\": {\n            \"publisher\":
         \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\",\n            \"sku\":
         \"2019-Datacenter\",\n            \"version\": \"latest\"\n          },\n
         \         \"Win2016Datacenter\": {\n            \"publisher\": \"MicrosoftWindowsServer\",\n
@@ -1572,23 +1759,23 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '2525'
+      - '2744'
       content-security-policy:
       - default-src 'none'; style-src 'unsafe-inline'; sandbox
       content-type:
       - text/plain; charset=utf-8
       date:
-      - Fri, 03 Sep 2021 08:48:30 GMT
+      - Thu, 17 Mar 2022 06:36:29 GMT
       etag:
-      - W/"54bceef15b892f2aa7f4c2145a49f1b5e33608722acdbb47933d7b6cbebbd7f4"
+      - W/"d5acead0b38a79d988c245a7a15ec01f999da9244c97bbdc1fa2ec70d9e433f5"
       expires:
-      - Fri, 03 Sep 2021 08:53:30 GMT
+      - Thu, 17 Mar 2022 06:41:29 GMT
       source-age:
-      - '141'
+      - '70'
       strict-transport-security:
       - max-age=31536000
       vary:
-      - Authorization,Accept-Encoding
+      - Authorization,Accept-Encoding,Origin
       via:
       - 1.1 varnish
       x-cache:
@@ -1598,17 +1785,126 @@ interactions:
       x-content-type-options:
       - nosniff
       x-fastly-request-id:
-      - aadc7af46d2b62c38b4bcce2860b943db09054f0
+      - 9bfbd385f3af89888bd20bcca0595256ba3b60ad
       x-frame-options:
       - deny
       x-github-request-id:
-      - 9374:68D6:5BEC89:744216:6131540B
+      - 2570:063C:1995B2:2734C1:62329D55
       x-served-by:
       - cache-qpg1246-QPG
       x-timer:
-      - S1630658911.805100,VS0,VE1
+      - S1647498990.722906,VS0,VE1
       x-xss-protection:
       - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --admin-username --admin-password --authentication-type
+        --location --image --priority --eviction-policy --nsg-rule
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/publishers/OpenLogic/artifacttypes/vmimage/offers/CentOS/skus/7.5/versions?$top=1&$orderby=name%20desc&api-version=2021-11-01
+  response:
+    body:
+      string: "[\r\n  {\r\n    \"location\": \"eastus\",\r\n    \"name\": \"7.5.201808150\",\r\n
+        \   \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/eastus/Publishers/OpenLogic/ArtifactTypes/VMImage/Offers/CentOS/Skus/7.5/Versions/7.5.201808150\"\r\n
+        \ }\r\n]"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '270'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Mar 2022 06:36:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/ListVMImagesVersionsFromLocation3Min;15999,Microsoft.Compute/ListVMImagesVersionsFromLocation30Min;43994
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --admin-username --admin-password --authentication-type
+        --location --image --priority --eviction-policy --nsg-rule
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/publishers/OpenLogic/artifacttypes/vmimage/offers/CentOS/skus/7.5/versions/7.5.201808150?api-version=2021-11-01
+  response:
+    body:
+      string: "{\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n    \"architecture\":
+        \"x64\",\r\n    \"replicaType\": \"Unmanaged\",\r\n    \"disallowed\": {\r\n
+        \     \"vmDiskType\": \"None\"\r\n    },\r\n    \"automaticOSUpgradeProperties\":
+        {\r\n      \"automaticOSUpgradeSupported\": true\r\n    },\r\n    \"imageDeprecationStatus\":
+        {\r\n      \"imageState\": \"Active\"\r\n    },\r\n    \"osDiskImage\": {\r\n
+        \     \"operatingSystem\": \"Linux\",\r\n      \"sizeInGb\": 30,\r\n      \"sizeInBytes\":
+        32212255232\r\n    },\r\n    \"dataDiskImages\": []\r\n  },\r\n  \"location\":
+        \"eastus\",\r\n  \"name\": \"7.5.201808150\",\r\n  \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/eastus/Publishers/OpenLogic/ArtifactTypes/VMImage/Offers/CentOS/Skus/7.5/Versions/7.5.201808150\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '737'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Mar 2022 06:36:32 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetVMImageFromLocation3Min;12999,Microsoft.Compute/GetVMImageFromLocation30Min;73996
     status:
       code: 200
       message: OK
@@ -1627,21 +1923,21 @@ interactions:
       - --resource-group --name --admin-username --admin-password --authentication-type
         --location --image --priority --eviction-policy --nsg-rule
       User-Agent:
-      - AZURECLI/2.27.2 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-network/19.3.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/virtualNetworks?api-version=2018-01-01
   response:
     body:
       string: "{\r\n  \"value\": [\r\n    {\r\n      \"name\": \"vm-simualte-eviction1VNET\",\r\n
         \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/virtualNetworks/vm-simualte-eviction1VNET\",\r\n
-        \     \"etag\": \"W/\\\"b44faef0-84a9-4c28-8ef4-d49ed96cd565\\\"\",\r\n      \"type\":
+        \     \"etag\": \"W/\\\"821c6f8f-bbff-44ef-b6d8-360f8f89c01f\\\"\",\r\n      \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n      \"location\": \"eastus\",\r\n
         \     \"tags\": {},\r\n      \"properties\": {\r\n        \"provisioningState\":
-        \"Succeeded\",\r\n        \"resourceGuid\": \"3bd73064-1cf3-4937-8013-4895a9cfd0b1\",\r\n
+        \"Succeeded\",\r\n        \"resourceGuid\": \"57f47bcd-3ad0-4c8f-8ee6-b04e7caa0fda\",\r\n
         \       \"addressSpace\": {\r\n          \"addressPrefixes\": [\r\n            \"10.0.0.0/16\"\r\n
         \         ]\r\n        },\r\n        \"subnets\": [\r\n          {\r\n            \"name\":
         \"vm-simualte-eviction1Subnet\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/virtualNetworks/vm-simualte-eviction1VNET/subnets/vm-simualte-eviction1Subnet\",\r\n
-        \           \"etag\": \"W/\\\"b44faef0-84a9-4c28-8ef4-d49ed96cd565\\\"\",\r\n
+        \           \"etag\": \"W/\\\"821c6f8f-bbff-44ef-b6d8-360f8f89c01f\\\"\",\r\n
         \           \"properties\": {\r\n              \"provisioningState\": \"Succeeded\",\r\n
         \             \"addressPrefix\": \"10.0.0.0/24\",\r\n              \"ipConfigurations\":
         [\r\n                {\r\n                  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkInterfaces/vm-simualte-eviction1VMNic/ipConfigurations/ipconfigvm-simualte-eviction1\"\r\n
@@ -1654,11 +1950,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '2167'
+      - '2007'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 03 Sep 2021 08:48:30 GMT
+      - Thu, 17 Mar 2022 06:36:33 GMT
       expires:
       - '-1'
       pragma:
@@ -1675,7 +1971,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - ede2b8a7-9f19-4ca4-923b-6419d35a44e3
+      - e124ae90-52a8-401a-b821-fa9d4c41ce01
     status:
       code: 200
       message: OK
@@ -1695,7 +1991,7 @@ interactions:
       {"privateIPAllocationMethod": "Dynamic", "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/virtualNetworks/vm-simualte-eviction1VNET/subnets/vm-simualte-eviction1Subnet"},
       "publicIPAddress": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/publicIPAddresses/vm-simulate-eviction3PublicIP"}}}],
       "networkSecurityGroup": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkSecurityGroups/vm-simulate-eviction3NSG"}}},
-      {"apiVersion": "2021-07-01", "type": "Microsoft.Compute/virtualMachines", "name":
+      {"apiVersion": "2021-11-01", "type": "Microsoft.Compute/virtualMachines", "name":
       "vm-simulate-eviction3", "location": "eastus", "tags": {}, "dependsOn": ["Microsoft.Network/networkInterfaces/vm-simulate-eviction3VMNic"],
       "properties": {"hardwareProfile": {"vmSize": "Standard_DS1_v2"}, "networkProfile":
       {"networkInterfaces": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkInterfaces/vm-simulate-eviction3VMNic",
@@ -1716,30 +2012,30 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '3018'
+      - '2858'
       Content-Type:
       - application/json
       ParameterSetName:
       - --resource-group --name --admin-username --admin-password --authentication-type
         --location --image --priority --eviction-policy --nsg-rule
       User-Agent:
-      - AZURECLI/2.27.2 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Resources/deployments/vm_deploy_vEOuqfGFdZCJIqBLXu0akRRksUlT68gx","name":"vm_deploy_vEOuqfGFdZCJIqBLXu0akRRksUlT68gx","type":"Microsoft.Resources/deployments","properties":{"templateHash":"10701035843833078167","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2021-09-03T08:48:34.9857102Z","duration":"PT2.4116614S","correlationId":"c86636a1-137f-42b0-81b0-076d99690968","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"networkSecurityGroups","locations":["eastus"]},{"resourceType":"publicIPAddresses","locations":["eastus"]},{"resourceType":"networkInterfaces","locations":["eastus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["eastus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkSecurityGroups/vm-simulate-eviction3NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"vm-simulate-eviction3NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/publicIPAddresses/vm-simulate-eviction3PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vm-simulate-eviction3PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkInterfaces/vm-simulate-eviction3VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-simulate-eviction3VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkInterfaces/vm-simulate-eviction3VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-simulate-eviction3VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Compute/virtualMachines/vm-simulate-eviction3","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"vm-simulate-eviction3"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Resources/deployments/vm_deploy_lCGm3KB3BxraE8HPCDsxMpzQ1Atw2MCr","name":"vm_deploy_lCGm3KB3BxraE8HPCDsxMpzQ1Atw2MCr","type":"Microsoft.Resources/deployments","properties":{"templateHash":"4312131531797101312","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2022-03-17T06:36:40.0193411Z","duration":"PT0.0002446S","correlationId":"1490ddcf-e436-49b6-8a1e-ad3ca8df1224","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"networkSecurityGroups","locations":["eastus"]},{"resourceType":"publicIPAddresses","locations":["eastus"]},{"resourceType":"networkInterfaces","locations":["eastus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["eastus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkSecurityGroups/vm-simulate-eviction3NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"vm-simulate-eviction3NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/publicIPAddresses/vm-simulate-eviction3PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vm-simulate-eviction3PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkInterfaces/vm-simulate-eviction3VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-simulate-eviction3VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkInterfaces/vm-simulate-eviction3VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-simulate-eviction3VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Compute/virtualMachines/vm-simulate-eviction3","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"vm-simulate-eviction3"}]}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Resources/deployments/vm_deploy_vEOuqfGFdZCJIqBLXu0akRRksUlT68gx/operationStatuses/08585709479729035894?api-version=2021-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Resources/deployments/vm_deploy_lCGm3KB3BxraE8HPCDsxMpzQ1Atw2MCr/operationStatuses/08585541078884528480?api-version=2021-04-01
       cache-control:
       - no-cache
       content-length:
-      - '2624'
+      - '2383'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 03 Sep 2021 08:48:35 GMT
+      - Thu, 17 Mar 2022 06:36:41 GMT
       expires:
       - '-1'
       pragma:
@@ -1749,7 +2045,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1193'
+      - '1197'
     status:
       code: 201
       message: Created
@@ -1768,9 +2064,9 @@ interactions:
       - --resource-group --name --admin-username --admin-password --authentication-type
         --location --image --priority --eviction-policy --nsg-rule
       User-Agent:
-      - AZURECLI/2.27.2 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585709479729035894?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585541078884528480?api-version=2021-04-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1782,7 +2078,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 03 Sep 2021 08:49:06 GMT
+      - Thu, 17 Mar 2022 06:37:11 GMT
       expires:
       - '-1'
       pragma:
@@ -1811,9 +2107,9 @@ interactions:
       - --resource-group --name --admin-username --admin-password --authentication-type
         --location --image --priority --eviction-policy --nsg-rule
       User-Agent:
-      - AZURECLI/2.27.2 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585709479729035894?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585541078884528480?api-version=2021-04-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1825,7 +2121,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 03 Sep 2021 08:49:36 GMT
+      - Thu, 17 Mar 2022 06:37:42 GMT
       expires:
       - '-1'
       pragma:
@@ -1854,9 +2150,9 @@ interactions:
       - --resource-group --name --admin-username --admin-password --authentication-type
         --location --image --priority --eviction-policy --nsg-rule
       User-Agent:
-      - AZURECLI/2.27.2 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585709479729035894?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585541078884528480?api-version=2021-04-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1868,7 +2164,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 03 Sep 2021 08:50:07 GMT
+      - Thu, 17 Mar 2022 06:38:12 GMT
       expires:
       - '-1'
       pragma:
@@ -1897,9 +2193,9 @@ interactions:
       - --resource-group --name --admin-username --admin-password --authentication-type
         --location --image --priority --eviction-policy --nsg-rule
       User-Agent:
-      - AZURECLI/2.27.2 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585709479729035894?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585541078884528480?api-version=2021-04-01
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -1911,7 +2207,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 03 Sep 2021 08:50:37 GMT
+      - Thu, 17 Mar 2022 06:38:43 GMT
       expires:
       - '-1'
       pragma:
@@ -1940,21 +2236,21 @@ interactions:
       - --resource-group --name --admin-username --admin-password --authentication-type
         --location --image --priority --eviction-policy --nsg-rule
       User-Agent:
-      - AZURECLI/2.27.2 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Resources/deployments/vm_deploy_vEOuqfGFdZCJIqBLXu0akRRksUlT68gx","name":"vm_deploy_vEOuqfGFdZCJIqBLXu0akRRksUlT68gx","type":"Microsoft.Resources/deployments","properties":{"templateHash":"10701035843833078167","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2021-09-03T08:50:11.7500298Z","duration":"PT1M39.175981S","correlationId":"c86636a1-137f-42b0-81b0-076d99690968","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"networkSecurityGroups","locations":["eastus"]},{"resourceType":"publicIPAddresses","locations":["eastus"]},{"resourceType":"networkInterfaces","locations":["eastus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["eastus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkSecurityGroups/vm-simulate-eviction3NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"vm-simulate-eviction3NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/publicIPAddresses/vm-simulate-eviction3PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vm-simulate-eviction3PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkInterfaces/vm-simulate-eviction3VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-simulate-eviction3VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkInterfaces/vm-simulate-eviction3VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-simulate-eviction3VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Compute/virtualMachines/vm-simulate-eviction3","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"vm-simulate-eviction3"}],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Compute/virtualMachines/vm-simulate-eviction3"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkInterfaces/vm-simulate-eviction3VMNic"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkSecurityGroups/vm-simulate-eviction3NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/publicIPAddresses/vm-simulate-eviction3PublicIP"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Resources/deployments/vm_deploy_lCGm3KB3BxraE8HPCDsxMpzQ1Atw2MCr","name":"vm_deploy_lCGm3KB3BxraE8HPCDsxMpzQ1Atw2MCr","type":"Microsoft.Resources/deployments","properties":{"templateHash":"4312131531797101312","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2022-03-17T06:38:15.0622396Z","duration":"PT1M35.0431431S","correlationId":"1490ddcf-e436-49b6-8a1e-ad3ca8df1224","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"networkSecurityGroups","locations":["eastus"]},{"resourceType":"publicIPAddresses","locations":["eastus"]},{"resourceType":"networkInterfaces","locations":["eastus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["eastus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkSecurityGroups/vm-simulate-eviction3NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"vm-simulate-eviction3NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/publicIPAddresses/vm-simulate-eviction3PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vm-simulate-eviction3PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkInterfaces/vm-simulate-eviction3VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-simulate-eviction3VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkInterfaces/vm-simulate-eviction3VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-simulate-eviction3VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Compute/virtualMachines/vm-simulate-eviction3","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"vm-simulate-eviction3"}],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Compute/virtualMachines/vm-simulate-eviction3"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkInterfaces/vm-simulate-eviction3VMNic"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkSecurityGroups/vm-simulate-eviction3NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/publicIPAddresses/vm-simulate-eviction3PublicIP"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '3558'
+      - '3158'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 03 Sep 2021 08:50:37 GMT
+      - Thu, 17 Mar 2022 06:38:43 GMT
       expires:
       - '-1'
       pragma:
@@ -1983,23 +2279,23 @@ interactions:
       - --resource-group --name --admin-username --admin-password --authentication-type
         --location --image --priority --eviction-policy --nsg-rule
       User-Agent:
-      - AZURECLI/2.27.2 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Compute/virtualMachines/vm-simulate-eviction3?$expand=instanceView&api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Compute/virtualMachines/vm-simulate-eviction3?$expand=instanceView&api-version=2021-11-01
   response:
     body:
       string: "{\r\n  \"name\": \"vm-simulate-eviction3\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Compute/virtualMachines/vm-simulate-eviction3\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"eastus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"574c08ac-aed7-44ae-9beb-eb36ad77a1eb\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"522ca734-b52e-45ae-97b6-de7acb24aae2\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"OpenLogic\",\r\n        \"offer\": \"CentOS\",\r\n        \"sku\": \"7.5\",\r\n
         \       \"version\": \"latest\",\r\n        \"exactVersion\": \"7.5.201808150\"\r\n
         \     },\r\n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"name\":
-        \"vm-simulate-eviction3_OsDisk_1_0e27b68c9b5f417c87b5ba5c516d7661\",\r\n        \"createOption\":
+        \"vm-simulate-eviction3_OsDisk_1_5c86039bfaf7448084ec3d59371100ba\",\r\n        \"createOption\":
         \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n        \"managedDisk\":
         {\r\n          \"storageAccountType\": \"Premium_LRS\",\r\n          \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Compute/disks/vm-simulate-eviction3_OsDisk_1_0e27b68c9b5f417c87b5ba5c516d7661\"\r\n
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Compute/disks/vm-simulate-eviction3_OsDisk_1_5c86039bfaf7448084ec3d59371100ba\"\r\n
         \       },\r\n        \"deleteOption\": \"Detach\",\r\n        \"diskSizeGB\":
         30\r\n      },\r\n      \"dataDisks\": []\r\n    },\r\n    \"osProfile\":
         {\r\n      \"computerName\": \"vm-simulate-eviction3\",\r\n      \"adminUsername\":
@@ -2013,31 +2309,32 @@ interactions:
         \   \"evictionPolicy\": \"Delete\",\r\n    \"billingProfile\": {\r\n      \"maxPrice\":
         -1.0\r\n    },\r\n    \"instanceView\": {\r\n      \"computerName\": \"vm-simulate-eviction3\",\r\n
         \     \"osName\": \"centos\",\r\n      \"osVersion\": \"7.5.1804\",\r\n      \"vmAgent\":
-        {\r\n        \"vmAgentVersion\": \"2.4.0.2\",\r\n        \"statuses\": [\r\n
+        {\r\n        \"vmAgentVersion\": \"2.7.0.6\",\r\n        \"statuses\": [\r\n
         \         {\r\n            \"code\": \"ProvisioningState/succeeded\",\r\n
         \           \"level\": \"Info\",\r\n            \"displayStatus\": \"Ready\",\r\n
         \           \"message\": \"Guest Agent is running\",\r\n            \"time\":
-        \"2021-09-03T08:50:12+00:00\"\r\n          }\r\n        ],\r\n        \"extensionHandlers\":
-        []\r\n      },\r\n      \"disks\": [\r\n        {\r\n          \"name\": \"vm-simulate-eviction3_OsDisk_1_0e27b68c9b5f417c87b5ba5c516d7661\",\r\n
+        \"2022-03-17T06:38:11+00:00\"\r\n          }\r\n        ],\r\n        \"extensionHandlers\":
+        []\r\n      },\r\n      \"disks\": [\r\n        {\r\n          \"name\": \"vm-simulate-eviction3_OsDisk_1_5c86039bfaf7448084ec3d59371100ba\",\r\n
         \         \"statuses\": [\r\n            {\r\n              \"code\": \"ProvisioningState/succeeded\",\r\n
         \             \"level\": \"Info\",\r\n              \"displayStatus\": \"Provisioning
-        succeeded\",\r\n              \"time\": \"2021-09-03T08:49:07.7436071+00:00\"\r\n
+        succeeded\",\r\n              \"time\": \"2022-03-17T06:37:06.0623397+00:00\"\r\n
         \           }\r\n          ]\r\n        }\r\n      ],\r\n      \"hyperVGeneration\":
         \"V1\",\r\n      \"statuses\": [\r\n        {\r\n          \"code\": \"ProvisioningState/succeeded\",\r\n
         \         \"level\": \"Info\",\r\n          \"displayStatus\": \"Provisioning
-        succeeded\",\r\n          \"time\": \"2021-09-03T08:50:09.7909813+00:00\"\r\n
+        succeeded\",\r\n          \"time\": \"2022-03-17T06:38:08.4220816+00:00\"\r\n
         \       },\r\n        {\r\n          \"code\": \"PowerState/running\",\r\n
         \         \"level\": \"Info\",\r\n          \"displayStatus\": \"VM running\"\r\n
-        \       }\r\n      ]\r\n    }\r\n  }\r\n}"
+        \       }\r\n      ]\r\n    },\r\n    \"timeCreated\": \"2022-03-17T06:36:58.5623032+00:00\"\r\n
+        \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '3589'
+      - '3526'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 03 Sep 2021 08:50:39 GMT
+      - Thu, 17 Mar 2022 06:38:44 GMT
       expires:
       - '-1'
       pragma:
@@ -2054,7 +2351,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3978,Microsoft.Compute/LowCostGet30Min;31885
+      - Microsoft.Compute/LowCostGet3Min;3978,Microsoft.Compute/LowCostGet30Min;31765
     status:
       code: 200
       message: OK
@@ -2073,18 +2370,18 @@ interactions:
       - --resource-group --name --admin-username --admin-password --authentication-type
         --location --image --priority --eviction-policy --nsg-rule
       User-Agent:
-      - AZURECLI/2.27.2 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-network/19.3.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkInterfaces/vm-simulate-eviction3VMNic?api-version=2018-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"vm-simulate-eviction3VMNic\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkInterfaces/vm-simulate-eviction3VMNic\",\r\n
-        \ \"etag\": \"W/\\\"fc10294d-246a-4958-8edf-25dfeb1f00bb\\\"\",\r\n  \"location\":
+        \ \"etag\": \"W/\\\"f6f584ea-c52a-45e0-8b3c-354f2aa6b6aa\\\"\",\r\n  \"location\":
         \"eastus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"resourceGuid\": \"7b405f32-87b9-4b3e-9227-399e3f3f82f4\",\r\n
+        \"Succeeded\",\r\n    \"resourceGuid\": \"97221dae-31cf-47ea-b2ef-17b5caca0f14\",\r\n
         \   \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfigvm-simulate-eviction3\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkInterfaces/vm-simulate-eviction3VMNic/ipConfigurations/ipconfigvm-simulate-eviction3\",\r\n
-        \       \"etag\": \"W/\\\"fc10294d-246a-4958-8edf-25dfeb1f00bb\\\"\",\r\n
+        \       \"etag\": \"W/\\\"f6f584ea-c52a-45e0-8b3c-354f2aa6b6aa\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateIPAddress\": \"10.0.0.6\",\r\n          \"privateIPAllocationMethod\":
@@ -2093,8 +2390,8 @@ interactions:
         \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
         \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
         [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
-        \"mqynoo5tdq1utaatjck0tt4qwb.bx.internal.cloudapp.net\"\r\n    },\r\n    \"macAddress\":
-        \"00-0D-3A-10-4B-08\",\r\n    \"enableAcceleratedNetworking\": false,\r\n
+        \"zv35iv4qhkhuzdxgwbhhzkqp1c.bx.internal.cloudapp.net\"\r\n    },\r\n    \"macAddress\":
+        \"00-22-48-22-F7-9F\",\r\n    \"enableAcceleratedNetworking\": false,\r\n
         \   \"enableIPForwarding\": false,\r\n    \"networkSecurityGroup\": {\r\n
         \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkSecurityGroups/vm-simulate-eviction3NSG\"\r\n
         \   },\r\n    \"primary\": true,\r\n    \"virtualMachine\": {\r\n      \"id\":
@@ -2104,13 +2401,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '2748'
+      - '2508'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 03 Sep 2021 08:50:40 GMT
+      - Thu, 17 Mar 2022 06:38:45 GMT
       etag:
-      - W/"fc10294d-246a-4958-8edf-25dfeb1f00bb"
+      - W/"f6f584ea-c52a-45e0-8b3c-354f2aa6b6aa"
       expires:
       - '-1'
       pragma:
@@ -2127,7 +2424,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 57236533-8b23-4b39-977b-d8abcae691e4
+      - 8eb214ea-b16f-4ca9-87da-56313ce0f98b
     status:
       code: 200
       message: OK
@@ -2146,16 +2443,16 @@ interactions:
       - --resource-group --name --admin-username --admin-password --authentication-type
         --location --image --priority --eviction-policy --nsg-rule
       User-Agent:
-      - AZURECLI/2.27.2 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-network/19.3.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/publicIPAddresses/vm-simulate-eviction3PublicIP?api-version=2018-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"vm-simulate-eviction3PublicIP\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/publicIPAddresses/vm-simulate-eviction3PublicIP\",\r\n
-        \ \"etag\": \"W/\\\"ef8622f6-08e0-4bbf-a8b6-9ea5cbcd168c\\\"\",\r\n  \"location\":
+        \ \"etag\": \"W/\\\"d834cf58-73e3-4691-9df6-8d3a47e6057b\\\"\",\r\n  \"location\":
         \"eastus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"resourceGuid\": \"e57cac07-4815-4126-a4c4-e4e075cfeb35\",\r\n
-        \   \"ipAddress\": \"40.121.60.132\",\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n
+        \"Succeeded\",\r\n    \"resourceGuid\": \"dae4bd22-ee98-4ed7-8b84-30d395c4f48b\",\r\n
+        \   \"ipAddress\": \"20.25.56.47\",\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n
         \   \"publicIPAllocationMethod\": \"Dynamic\",\r\n    \"idleTimeoutInMinutes\":
         4,\r\n    \"ipTags\": [],\r\n    \"ipConfiguration\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkInterfaces/vm-simulate-eviction3VMNic/ipConfigurations/ipconfigvm-simulate-eviction3\"\r\n
         \   }\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n
@@ -2164,13 +2461,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1069'
+      - '987'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 03 Sep 2021 08:50:40 GMT
+      - Thu, 17 Mar 2022 06:38:45 GMT
       etag:
-      - W/"ef8622f6-08e0-4bbf-a8b6-9ea5cbcd168c"
+      - W/"d834cf58-73e3-4691-9df6-8d3a47e6057b"
       expires:
       - '-1'
       pragma:
@@ -2187,7 +2484,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 238239b5-1539-45f0-810d-cc6370dd8cd4
+      - 879de2a9-84bc-4610-9c9b-3864a8456b97
     status:
       code: 200
       message: OK
@@ -2195,7 +2492,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - '*/*'
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -2207,9 +2504,9 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.27.2 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Compute/virtualMachines/vm-simulate-eviction3/simulateEviction?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Compute/virtualMachines/vm-simulate-eviction3/simulateEviction?api-version=2021-11-01
   response:
     body:
       string: ''
@@ -2217,7 +2514,7 @@ interactions:
       cache-control:
       - no-cache
       date:
-      - Fri, 03 Sep 2021 08:50:41 GMT
+      - Thu, 17 Mar 2022 06:38:46 GMT
       expires:
       - '-1'
       pragma:
@@ -2230,9 +2527,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/DeleteVM3Min;239,Microsoft.Compute/DeleteVM30Min;1189
+      - Microsoft.Compute/DeleteVM3Min;239,Microsoft.Compute/DeleteVM30Min;1195
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1199'
     status:
       code: 204
       message: No Content
@@ -2250,25 +2547,25 @@ interactions:
       ParameterSetName:
       - --resource-group
       User-Agent:
-      - AZURECLI/2.27.2 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Compute/virtualMachines?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Compute/virtualMachines?api-version=2021-11-01
   response:
     body:
       string: "{\r\n  \"value\": [\r\n    {\r\n      \"name\": \"vm-simualte-eviction1\",\r\n
         \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Compute/virtualMachines/vm-simualte-eviction1\",\r\n
         \     \"type\": \"Microsoft.Compute/virtualMachines\",\r\n      \"location\":
         \"eastus\",\r\n      \"tags\": {},\r\n      \"properties\": {\r\n        \"vmId\":
-        \"9e659ffa-3cfd-45ff-9c5b-0331648de2c9\",\r\n        \"hardwareProfile\":
+        \"90c66d48-8bfe-4b69-bae8-f24b473148ec\",\r\n        \"hardwareProfile\":
         {\r\n          \"vmSize\": \"Standard_DS1_v2\"\r\n        },\r\n        \"storageProfile\":
         {\r\n          \"imageReference\": {\r\n            \"publisher\": \"OpenLogic\",\r\n
         \           \"offer\": \"CentOS\",\r\n            \"sku\": \"7.5\",\r\n            \"version\":
         \"latest\",\r\n            \"exactVersion\": \"7.5.201808150\"\r\n          },\r\n
         \         \"osDisk\": {\r\n            \"osType\": \"Linux\",\r\n            \"name\":
-        \"vm-simualte-eviction1_OsDisk_1_cdf57e416a5d4d86867f1d210cc3eebc\",\r\n            \"createOption\":
+        \"vm-simualte-eviction1_OsDisk_1_91b2e21a466245c28376d52fd1304ca2\",\r\n            \"createOption\":
         \"FromImage\",\r\n            \"caching\": \"ReadWrite\",\r\n            \"managedDisk\":
         {\r\n              \"storageAccountType\": \"Premium_LRS\",\r\n              \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Compute/disks/vm-simualte-eviction1_OsDisk_1_cdf57e416a5d4d86867f1d210cc3eebc\"\r\n
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Compute/disks/vm-simualte-eviction1_OsDisk_1_91b2e21a466245c28376d52fd1304ca2\"\r\n
         \           },\r\n            \"deleteOption\": \"Detach\",\r\n            \"diskSizeGB\":
         30\r\n          },\r\n          \"dataDisks\": []\r\n        },\r\n        \"osProfile\":
         {\r\n          \"computerName\": \"vm-simualte-eviction1\",\r\n          \"adminUsername\":
@@ -2278,20 +2575,21 @@ interactions:
         \"ImageDefault\"\r\n            }\r\n          },\r\n          \"secrets\":
         [],\r\n          \"allowExtensionOperations\": true,\r\n          \"requireGuestProvisionSignal\":
         true\r\n        },\r\n        \"networkProfile\": {\"networkInterfaces\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkInterfaces/vm-simualte-eviction1VMNic\"}]},\r\n
-        \       \"provisioningState\": \"Succeeded\",\r\n        \"priority\": \"Regular\"\r\n
-        \     }\r\n    },\r\n    {\r\n      \"name\": \"vm-simulate-eviction2\",\r\n
-        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Compute/virtualMachines/vm-simulate-eviction2\",\r\n
+        \       \"provisioningState\": \"Succeeded\",\r\n        \"priority\": \"Regular\",\r\n
+        \       \"timeCreated\": \"2022-03-17T06:29:57.2944439+00:00\"\r\n      }\r\n
+        \   },\r\n    {\r\n      \"name\": \"vm-simulate-eviction2\",\r\n      \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Compute/virtualMachines/vm-simulate-eviction2\",\r\n
         \     \"type\": \"Microsoft.Compute/virtualMachines\",\r\n      \"location\":
         \"eastus\",\r\n      \"tags\": {},\r\n      \"properties\": {\r\n        \"vmId\":
-        \"8d0e1a5e-5e58-41b1-9bdc-ff3c31f05875\",\r\n        \"hardwareProfile\":
+        \"864e053a-1902-43d2-9270-0e2afcd70d5f\",\r\n        \"hardwareProfile\":
         {\r\n          \"vmSize\": \"Standard_DS1_v2\"\r\n        },\r\n        \"storageProfile\":
         {\r\n          \"imageReference\": {\r\n            \"publisher\": \"OpenLogic\",\r\n
         \           \"offer\": \"CentOS\",\r\n            \"sku\": \"7.5\",\r\n            \"version\":
         \"latest\",\r\n            \"exactVersion\": \"7.5.201808150\"\r\n          },\r\n
         \         \"osDisk\": {\r\n            \"osType\": \"Linux\",\r\n            \"name\":
-        \"vm-simulate-eviction2_OsDisk_1_e4e8fb15a05a477e8549c633eec41e0f\",\r\n            \"createOption\":
+        \"vm-simulate-eviction2_OsDisk_1_05748b7f420e4bc4a681a11749220ad7\",\r\n            \"createOption\":
         \"FromImage\",\r\n            \"caching\": \"ReadWrite\",\r\n            \"managedDisk\":
-        {\r\n              \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Compute/disks/vm-simulate-eviction2_OsDisk_1_e4e8fb15a05a477e8549c633eec41e0f\"\r\n
+        {\r\n              \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Compute/disks/vm-simulate-eviction2_OsDisk_1_05748b7f420e4bc4a681a11749220ad7\"\r\n
         \           },\r\n            \"deleteOption\": \"Detach\"\r\n          },\r\n
         \         \"dataDisks\": []\r\n        },\r\n        \"osProfile\": {\r\n
         \         \"computerName\": \"vm-simulate-eviction2\",\r\n          \"adminUsername\":
@@ -2303,16 +2601,17 @@ interactions:
         true\r\n        },\r\n        \"networkProfile\": {\"networkInterfaces\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Network/networkInterfaces/vm-simulate-eviction2VMNic\"}]},\r\n
         \       \"provisioningState\": \"Succeeded\",\r\n        \"priority\": \"Spot\",\r\n
         \       \"evictionPolicy\": \"Deallocate\",\r\n        \"billingProfile\":
-        {\r\n          \"maxPrice\": -1.0\r\n        }\r\n      }\r\n    }\r\n  ]\r\n}"
+        {\r\n          \"maxPrice\": -1.0\r\n        },\r\n        \"timeCreated\":
+        \"2022-03-17T06:31:36.6698129+00:00\"\r\n      }\r\n    }\r\n  ]\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '4816'
+      - '4698'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 03 Sep 2021 08:53:42 GMT
+      - Thu, 17 Mar 2022 06:41:47 GMT
       expires:
       - '-1'
       pragma:
@@ -2347,9 +2646,9 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.27.2 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Compute/virtualMachines/vm-simulate-eviction3?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_simulate_eviction000001/providers/Microsoft.Compute/virtualMachines/vm-simulate-eviction3?api-version=2021-11-01
   response:
     body:
       string: "{\r\n  \"error\": {\r\n    \"code\": \"NotFound\",\r\n    \"message\":
@@ -2362,7 +2661,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 03 Sep 2021 08:53:43 GMT
+      - Thu, 17 Mar 2022 06:41:48 GMT
       expires:
       - '-1'
       pragma:
@@ -2375,7 +2674,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3984,Microsoft.Compute/LowCostGet30Min;31870
+      - Microsoft.Compute/LowCostGet3Min;3976,Microsoft.Compute/LowCostGet30Min;31777
     status:
       code: 404
       message: Not Found

@@ -7,26 +7,54 @@
 # pylint: disable=too-many-lines
 # pylint: disable=inconsistent-return-statements
 # pylint: disable=unused-variable
+# pylint: disable=too-many-locals
 
 import re
+from azure.cli.core.profiles import ResourceType
 
 
 # Namespace Region
-def cli_namespace_create(client, resource_group_name, namespace_name, location=None, tags=None, sku='Standard',
-                         capacity=None, default_action=None):
+def cli_namespace_create(cmd, client, resource_group_name, namespace_name, location=None, tags=None, sku='Standard',
+                         capacity=None, zone_redundant=None, default_action=None, mi_system_assigned=None, mi_user_assigned=None, encryption_config=None):
 
-    from azure.mgmt.servicebus.models import SBNamespace, SBSku
+    SBSku = cmd.get_models('SBSku', resource_type=ResourceType.MGMT_SERVICEBUS)
+    SBNamespace = cmd.get_models('SBNamespace', resource_type=ResourceType.MGMT_SERVICEBUS)
+    Identity = cmd.get_models('Identity', resource_type=ResourceType.MGMT_SERVICEBUS)
+    IdentityType = cmd.get_models('ManagedServiceIdentityType', resource_type=ResourceType.MGMT_SERVICEBUS)
+    UserAssignedIdentity = cmd.get_models('UserAssignedIdentity', resource_type=ResourceType.MGMT_SERVICEBUS)
+    Encryption = cmd.get_models('Encryption', resource_type=ResourceType.MGMT_SERVICEBUS)
+
+    parameter = SBNamespace(location=location)
+
+    parameter.tags = tags
+    parameter.sku = SBSku(name=sku, tier=sku, capacity=capacity)
+
+    if zone_redundant is not None:
+        parameter.zone_redundant = zone_redundant
+
+    if mi_system_assigned:
+        parameter.identity = Identity(type=IdentityType.SYSTEM_ASSIGNED)
+
+    if mi_user_assigned:
+        if parameter.identity:
+            if parameter.identity.type == IdentityType.SYSTEM_ASSIGNED:
+                parameter.identity.type = IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED
+            else:
+                parameter.identity.type = IdentityType.USER_ASSIGNED
+        else:
+            parameter.identity = Identity(type=IdentityType.USER_ASSIGNED)
+
+        default_user_identity = UserAssignedIdentity()
+        parameter.identity.user_assigned_identities = dict.fromkeys(mi_user_assigned, default_user_identity)
+
+    if encryption_config:
+        parameter.encryption = Encryption()
+        parameter.encryption.key_vault_properties = encryption_config
+
     client.begin_create_or_update(
         resource_group_name=resource_group_name,
         namespace_name=namespace_name,
-        parameters=SBNamespace(
-            location=location,
-            tags=tags,
-            sku=SBSku(
-                name=sku,
-                tier=sku,
-                capacity=capacity)
-        )
+        parameters=parameter
     ).result()
 
     if default_action:
@@ -106,7 +134,7 @@ def cli_sbqueue_create(cmd, client, resource_group_name, namespace_name, queue_n
                        auto_delete_on_idle=None, enable_partitioning=None, enable_express=None,
                        forward_to=None, forward_dead_lettered_messages_to=None, enable_batched_operations=None):
 
-    from azure.mgmt.servicebus.models import SBQueue
+    SBQueue = cmd.get_models('SBQueue', resource_type=ResourceType.MGMT_SERVICEBUS)
 
     if max_size_in_megabytes:
         cli_returnnsdetails(cmd, resource_group_name, namespace_name, max_size_in_megabytes)
@@ -215,7 +243,7 @@ def cli_sbtopic_create(cmd, client, resource_group_name, namespace_name, topic_n
                        duplicate_detection_history_time_window=None,
                        enable_batched_operations=None, status=None, support_ordering=None, auto_delete_on_idle=None,
                        enable_partitioning=None, enable_express=None):
-    from azure.mgmt.servicebus.models import SBTopic
+    SBTopic = cmd.get_models('SBTopic', resource_type=ResourceType.MGMT_SERVICEBUS)
 
     if max_size_in_megabytes:
         cli_returnnsdetails(cmd, resource_group_name, namespace_name, max_size_in_megabytes)
@@ -299,12 +327,12 @@ def cli_topicauthokey_renew(client, resource_group_name, namespace_name, topic_n
 
 
 # Subscription Region
-def cli_sbsubscription_create(client, resource_group_name, namespace_name, topic_name, subscription_name, lock_duration=None,
+def cli_sbsubscription_create(cmd, client, resource_group_name, namespace_name, topic_name, subscription_name, lock_duration=None,
                               requires_session=None, default_message_time_to_live=None, dead_lettering_on_message_expiration=None,
                               max_delivery_count=None, status=None, enable_batched_operations=None,
                               auto_delete_on_idle=None, forward_to=None, forward_dead_lettered_messages_to=None, dead_lettering_on_filter_evaluation_exceptions=None):
 
-    from azure.mgmt.servicebus.models import SBSubscription
+    SBSubscription = cmd.get_models('SBSubscription', resource_type=ResourceType.MGMT_SERVICEBUS)
     subscription_params = SBSubscription(
         lock_duration=return_valid_duration_create(lock_duration),
         requires_session=requires_session,
@@ -367,34 +395,47 @@ def cli_sbsubscription_update(instance, lock_duration=None,
 
 
 # Rule Region
-def cli_rules_create(client, resource_group_name, namespace_name, topic_name, subscription_name, rule_name,
+def cli_rules_create(cmd, client, resource_group_name, namespace_name, topic_name, subscription_name, rule_name,
                      action_sql_expression=None, action_compatibility_level=None, action_requires_preprocessing=None,
                      filter_sql_expression=None, filter_requires_preprocessing=None, correlation_id=None,
                      message_id=None, to=None, reply_to=None, label=None, session_id=None, reply_to_session_id=None,
-                     content_type=None, requires_preprocessing=None):
+                     content_type=None, requires_preprocessing=None, filter_type=None):
 
-    from azure.mgmt.servicebus.models import Rule, Action, SqlFilter, CorrelationFilter
+    Rule = cmd.get_models('Rule', resource_type=ResourceType.MGMT_SERVICEBUS)
+    Action = cmd.get_models('Action', resource_type=ResourceType.MGMT_SERVICEBUS)
+    SqlFilter = cmd.get_models('SqlFilter', resource_type=ResourceType.MGMT_SERVICEBUS)
+    CorrelationFilter = cmd.get_models('CorrelationFilter', resource_type=ResourceType.MGMT_SERVICEBUS)
     parameters = Rule()
-    parameters.action = Action(
-        sql_expression=action_sql_expression,
-        compatibility_level=action_compatibility_level,
-        requires_preprocessing=action_requires_preprocessing
-    )
-    parameters.sql_filter = SqlFilter(
-        sql_expression=filter_sql_expression,
-        requires_preprocessing=filter_requires_preprocessing
-    )
-    parameters.correlation_filter = CorrelationFilter(
-        correlation_id=correlation_id,
-        to=to,
-        message_id=message_id,
-        reply_to=reply_to,
-        label=label,
-        session_id=session_id,
-        reply_to_session_id=reply_to_session_id,
-        content_type=content_type,
-        requires_preprocessing=requires_preprocessing
-    )
+
+    if filter_type:
+        parameters.filter_type = filter_type
+
+    if filter_type == 'SqlFilter' or filter_type is None:
+        parameters.sql_filter = SqlFilter(
+            sql_expression=filter_sql_expression,
+            requires_preprocessing=filter_requires_preprocessing
+        )
+
+    if filter_type == 'CorrelationFilter':
+        parameters.correlation_filter = CorrelationFilter(
+            correlation_id=correlation_id,
+            to=to,
+            message_id=message_id,
+            reply_to=reply_to,
+            label=label,
+            session_id=session_id,
+            reply_to_session_id=reply_to_session_id,
+            content_type=content_type,
+            requires_preprocessing=requires_preprocessing
+        )
+
+    if action_sql_expression or action_compatibility_level or action_requires_preprocessing:
+        parameters.action = Action(
+            sql_expression=action_sql_expression,
+            compatibility_level=action_compatibility_level,
+            requires_preprocessing=action_requires_preprocessing
+        )
+
     return client.create_or_update(
         resource_group_name=resource_group_name,
         namespace_name=namespace_name,
@@ -560,8 +601,11 @@ def return_valid_duration_create(update_value):
 
 
 # NetwrokRuleSet Region
-def cli_networkrule_createupdate(client, resource_group_name, namespace_name, subnet=None, ip_mask=None, ignore_missing_vnet_service_endpoint=False, action='Allow'):
-    from azure.mgmt.servicebus.models import NWRuleSetVirtualNetworkRules, Subnet, NWRuleSetIpRules
+def cli_networkrule_createupdate(cmd, client, resource_group_name, namespace_name, subnet=None, ip_mask=None, ignore_missing_vnet_service_endpoint=False, action='Allow'):
+
+    NWRuleSetVirtualNetworkRules = cmd.get_models('NWRuleSetVirtualNetworkRules', resource_type=ResourceType.MGMT_SERVICEBUS)
+    Subnet = cmd.get_models('Subnet', resource_type=ResourceType.MGMT_SERVICEBUS)
+    NWRuleSetIpRules = cmd.get_models('NWRuleSetIpRules', resource_type=ResourceType.MGMT_SERVICEBUS)
     netwrokruleset = client.get_network_rule_set(resource_group_name, namespace_name)
 
     if netwrokruleset.virtual_network_rules is None:
@@ -580,8 +624,10 @@ def cli_networkrule_createupdate(client, resource_group_name, namespace_name, su
     return client.create_or_update_network_rule_set(resource_group_name, namespace_name, netwrokruleset)
 
 
-def cli_networkrule_delete(client, resource_group_name, namespace_name, subnet=None, ip_mask=None):
-    from azure.mgmt.servicebus.models import NWRuleSetVirtualNetworkRules, NWRuleSetIpRules
+def cli_networkrule_delete(cmd, client, resource_group_name, namespace_name, subnet=None, ip_mask=None):
+    NWRuleSetVirtualNetworkRules = cmd.get_models('NWRuleSetVirtualNetworkRules', resource_type=ResourceType.MGMT_SERVICEBUS)
+    NWRuleSetIpRules = cmd.get_models('NWRuleSetIpRules', resource_type=ResourceType.MGMT_SERVICEBUS)
+
     netwrokruleset = client.get_network_rule_set(resource_group_name, namespace_name)
 
     if subnet:
@@ -618,3 +664,138 @@ def cli_returnnsdetails(cmd, resource_group_name, namespace_name, max_size_in_me
                                                                             40960, 81920]:
         raise CLIError(
             '--max-size on Premium sku namespace only supports upto [1024, 2048, 3072, 4096, 5120, 10240, 20480, 40960, 81920] GB')
+
+
+def cli_add_identity(cmd, client, resource_group_name, namespace_name, system_assigned=None, user_assigned=None):
+    namespace = client.get(resource_group_name, namespace_name)
+    IdentityType = cmd.get_models('ManagedServiceIdentityType', resource_type=ResourceType.MGMT_SERVICEBUS)
+    Identity = cmd.get_models('Identity', resource_type=ResourceType.MGMT_SERVICEBUS)
+    UserAssignedIdentity = cmd.get_models('UserAssignedIdentity', resource_type=ResourceType.MGMT_SERVICEBUS)
+
+    identity_id = {}
+
+    if namespace.identity is None:
+        namespace.identity = Identity()
+
+    if system_assigned:
+        if namespace.identity.type == IdentityType.USER_ASSIGNED:
+            namespace.identity.type = IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED
+
+        elif namespace.identity.type == IdentityType.NONE or namespace.identity.type is None:
+            namespace.identity.type = IdentityType.SYSTEM_ASSIGNED
+
+    if user_assigned:
+        default_user_identity = UserAssignedIdentity()
+        identity_id.update(dict.fromkeys(user_assigned, default_user_identity))
+
+        if namespace.identity.user_assigned_identities is None:
+            namespace.identity.user_assigned_identities = identity_id
+        else:
+            namespace.identity.user_assigned_identities.update(identity_id)
+
+        if namespace.identity.type == IdentityType.SYSTEM_ASSIGNED:
+            namespace.identity.type = IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED
+
+        elif namespace.identity.type == IdentityType.NONE or namespace.identity.type is None:
+            namespace.identity.type = IdentityType.USER_ASSIGNED
+
+    client.begin_create_or_update(
+        resource_group_name=resource_group_name,
+        namespace_name=namespace_name,
+        parameters=namespace).result()
+
+    get_namespace = client.get(resource_group_name, namespace_name)
+
+    return get_namespace
+
+
+def cli_remove_identity(cmd, client, resource_group_name, namespace_name, system_assigned=None, user_assigned=None):
+    namespace = client.get(resource_group_name, namespace_name)
+    IdentityType = cmd.get_models('ManagedServiceIdentityType', resource_type=ResourceType.MGMT_SERVICEBUS)
+
+    from azure.cli.core import CLIError
+
+    if namespace.identity is None:
+        raise CLIError('The namespace does not have identity enabled')
+
+    if system_assigned:
+        if namespace.identity.type == IdentityType.SYSTEM_ASSIGNED:
+            namespace.identity.type = IdentityType.NONE
+
+        if namespace.identity.type == IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED:
+            namespace.identity.type = IdentityType.USER_ASSIGNED
+
+    if user_assigned:
+        if namespace.identity.type == IdentityType.USER_ASSIGNED:
+            if namespace.identity.user_assigned_identities:
+                for x in user_assigned:
+                    namespace.identity.user_assigned_identities.pop(x)
+                # if all identities are popped off of the dictionary, we disable user assigned identity
+                if len(namespace.identity.user_assigned_identities) == 0:
+                    namespace.identity.type = IdentityType.NONE
+                    namespace.identity.user_assigned_identities = None
+
+        if namespace.identity.type == IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED:
+            if namespace.identity.user_assigned_identities:
+                for x in user_assigned:
+                    namespace.identity.user_assigned_identities.pop(x)
+                # if all identities are popped off of the dictionary, we disable user assigned identity
+                if len(namespace.identity.user_assigned_identities) == 0:
+                    namespace.identity.type = IdentityType.SYSTEM_ASSIGNED
+                    namespace.identity.user_assigned_identities = None
+
+    client.begin_create_or_update(
+        resource_group_name=resource_group_name,
+        namespace_name=namespace_name,
+        parameters=namespace).result()
+
+    get_namespace = client.get(resource_group_name, namespace_name)
+
+    return get_namespace
+
+
+def cli_add_encryption(cmd, client, resource_group_name, namespace_name, encryption_config):
+    namespace = client.get(resource_group_name, namespace_name)
+    Encryption = cmd.get_models('Encryption', resource_type=ResourceType.MGMT_SERVICEBUS)
+
+    if namespace.encryption:
+        if namespace.encryption.key_vault_properties:
+            namespace.encryption.key_vault_properties.extend(encryption_config)
+        else:
+            namespace.encryption.key_vault_properties = encryption_config
+
+    else:
+        namespace.encryption = Encryption()
+        namespace.encryption.key_vault_properties = encryption_config
+
+    client.begin_create_or_update(
+        resource_group_name=resource_group_name,
+        namespace_name=namespace_name,
+        parameters=namespace).result()
+
+    get_namespace = client.get(resource_group_name, namespace_name)
+
+    return get_namespace
+
+
+def cli_remove_encryption(client, resource_group_name, namespace_name, encryption_config):
+    namespace = client.get(resource_group_name, namespace_name)
+
+    from azure.cli.core import CLIError
+
+    if namespace.encryption is None:
+        raise CLIError('The namespace does not have encryption enabled')
+
+    if namespace.encryption.key_vault_properties:
+        for encryption_property in encryption_config:
+            if encryption_property in namespace.encryption.key_vault_properties:
+                namespace.encryption.key_vault_properties.remove(encryption_property)
+
+    client.begin_create_or_update(
+        resource_group_name=resource_group_name,
+        namespace_name=namespace_name,
+        parameters=namespace).result()
+
+    get_namespace = client.get(resource_group_name, namespace_name)
+
+    return get_namespace

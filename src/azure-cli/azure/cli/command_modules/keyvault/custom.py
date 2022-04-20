@@ -254,7 +254,11 @@ def list_deleted_vault_or_hsm(cmd, client, resource_type=None):
         return client.list_deleted()
 
     if resource_type is None:
-        return client.list_deleted()
+        hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
+        resources = []
+        resources.extend(client.list_deleted())
+        resources.extend(hsm_client.list_deleted())
+        return resources
 
     if resource_type == 'hsm':
         hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
@@ -633,7 +637,7 @@ def wait_hsm(client, hsm_name, resource_group_name):
     return client.get(resource_group_name=resource_group_name, name=hsm_name)
 
 
-def create_vault(cmd, client,  # pylint: disable=too-many-locals
+def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-statements
                  resource_group_name, vault_name, location=None, sku=None,
                  enabled_for_deployment=None,
                  enabled_for_disk_encryption=None,
@@ -696,48 +700,55 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals
     if no_self_perms or enable_rbac_authorization:
         access_policies = []
     else:
-        permissions = Permissions(keys=[KeyPermissions.get,
-                                        KeyPermissions.create,
-                                        KeyPermissions.delete,
-                                        KeyPermissions.list,
-                                        KeyPermissions.update,
-                                        KeyPermissions.import_enum,
-                                        KeyPermissions.backup,
-                                        KeyPermissions.restore,
-                                        KeyPermissions.recover],
-                                  secrets=[
-                                      SecretPermissions.get,
-                                      SecretPermissions.list,
-                                      SecretPermissions.set,
-                                      SecretPermissions.delete,
-                                      SecretPermissions.backup,
-                                      SecretPermissions.restore,
-                                      SecretPermissions.recover],
-                                  certificates=[
-                                      CertificatePermissions.get,
-                                      CertificatePermissions.list,
-                                      CertificatePermissions.delete,
-                                      CertificatePermissions.create,
-                                      CertificatePermissions.import_enum,
-                                      CertificatePermissions.update,
-                                      CertificatePermissions.managecontacts,
-                                      CertificatePermissions.getissuers,
-                                      CertificatePermissions.listissuers,
-                                      CertificatePermissions.setissuers,
-                                      CertificatePermissions.deleteissuers,
-                                      CertificatePermissions.manageissuers,
-                                      CertificatePermissions.recover],
-                                  storage=[
-                                      StoragePermissions.get,
-                                      StoragePermissions.list,
-                                      StoragePermissions.delete,
-                                      StoragePermissions.set,
-                                      StoragePermissions.update,
-                                      StoragePermissions.regeneratekey,
-                                      StoragePermissions.setsas,
-                                      StoragePermissions.listsas,
-                                      StoragePermissions.getsas,
-                                      StoragePermissions.deletesas])
+        if cmd.supported_api_version(resource_type=ResourceType.MGMT_KEYVAULT, min_api='2019-09-01'):
+            permissions = Permissions(keys=[KeyPermissions.all],
+                                      secrets=[SecretPermissions.all],
+                                      certificates=[CertificatePermissions.all],
+                                      storage=[StoragePermissions.all])
+        else:
+            permissions = Permissions(keys=[KeyPermissions.get,
+                                            KeyPermissions.create,
+                                            KeyPermissions.delete,
+                                            KeyPermissions.list,
+                                            KeyPermissions.update,
+                                            KeyPermissions.import_enum,
+                                            KeyPermissions.backup,
+                                            KeyPermissions.restore,
+                                            KeyPermissions.recover],
+                                      secrets=[
+                                          SecretPermissions.get,
+                                          SecretPermissions.list,
+                                          SecretPermissions.set,
+                                          SecretPermissions.delete,
+                                          SecretPermissions.backup,
+                                          SecretPermissions.restore,
+                                          SecretPermissions.recover],
+                                      certificates=[
+                                          CertificatePermissions.get,
+                                          CertificatePermissions.list,
+                                          CertificatePermissions.delete,
+                                          CertificatePermissions.create,
+                                          CertificatePermissions.import_enum,
+                                          CertificatePermissions.update,
+                                          CertificatePermissions.managecontacts,
+                                          CertificatePermissions.getissuers,
+                                          CertificatePermissions.listissuers,
+                                          CertificatePermissions.setissuers,
+                                          CertificatePermissions.deleteissuers,
+                                          CertificatePermissions.manageissuers,
+                                          CertificatePermissions.recover],
+                                      storage=[
+                                          StoragePermissions.get,
+                                          StoragePermissions.list,
+                                          StoragePermissions.delete,
+                                          StoragePermissions.set,
+                                          StoragePermissions.update,
+                                          StoragePermissions.regeneratekey,
+                                          StoragePermissions.setsas,
+                                          StoragePermissions.listsas,
+                                          StoragePermissions.getsas,
+                                          StoragePermissions.deletesas])
+
         try:
             object_id = _get_current_user_object_id(graph_client)
         except GraphErrorException:
@@ -795,6 +806,7 @@ def update_vault_setter(cmd, client, parameters, resource_group_name, vault_name
                                 vault_name=vault_name,
                                 parameters=VaultCreateOrUpdateParameters(
                                     location=parameters.location,
+                                    tags=parameters.tags,
                                     properties=parameters.properties),
                                 no_wait=no_wait)
 
@@ -1056,7 +1068,8 @@ def remove_network_rule(cmd, client, resource_group_name, vault_name, ip_address
             rules.virtual_network_rules = new_rules
 
     if ip_address and rules.ip_rules:
-        new_rules = [x for x in rules.ip_rules if x.value != ip_address]
+        to_remove = [ip_network(x) for x in ip_address]
+        new_rules = list(filter(lambda x: all(ip_network(x.value) != i for i in to_remove), rules.ip_rules))
         to_modify |= len(new_rules) != len(rules.ip_rules)
         if to_modify:
             rules.ip_rules = new_rules
@@ -1144,7 +1157,7 @@ def encrypt_key(cmd, client, algorithm, value, iv=None, aad=None, name=None, ver
     EncryptionAlgorithm = cmd.loader.get_sdk('EncryptionAlgorithm', mod='crypto._enums',
                                              resource_type=ResourceType.DATA_KEYVAULT_KEYS)
     import binascii
-    crypto_client = client.get_cryptography_client(name, version=version)
+    crypto_client = client.get_cryptography_client(name, key_version=version)
     return crypto_client.encrypt(EncryptionAlgorithm(algorithm), value,
                                  iv=binascii.unhexlify(iv) if iv else None,
                                  additional_authenticated_data=binascii.unhexlify(aad) if aad else None)
@@ -1155,7 +1168,7 @@ def decrypt_key(cmd, client, algorithm, value, iv=None, tag=None, aad=None,
     EncryptionAlgorithm = cmd.loader.get_sdk('EncryptionAlgorithm', mod='crypto._enums',
                                              resource_type=ResourceType.DATA_KEYVAULT_KEYS)
     import binascii
-    crypto_client = client.get_cryptography_client(name, version=version)
+    crypto_client = client.get_cryptography_client(name, key_version=version)
     return crypto_client.decrypt(EncryptionAlgorithm(algorithm), value,
                                  iv=binascii.unhexlify(iv) if iv else None,
                                  authentication_tag=binascii.unhexlify(tag) if tag else None,
@@ -1461,7 +1474,7 @@ def get_policy_template():
     return policy
 
 
-def update_key_rotation_policy(cmd, client, value, name=None):
+def update_key_rotation_policy(cmd, client, value, key_name=None):
     from azure.cli.core.util import read_file_content, get_json_object
     if os.path.exists(value):
         value = read_file_content(value)
@@ -1472,6 +1485,8 @@ def update_key_rotation_policy(cmd, client, value, name=None):
 
     KeyRotationLifetimeAction = cmd.loader.get_sdk('KeyRotationLifetimeAction', mod='_models',
                                                    resource_type=ResourceType.DATA_KEYVAULT_KEYS)
+    KeyRotationPolicy = cmd.loader.get_sdk('KeyRotationPolicy', mod='_models',
+                                           resource_type=ResourceType.DATA_KEYVAULT_KEYS)
     lifetime_actions = []
     if policy.get('lifetime_actions', None):
         for action in policy['lifetime_actions']:
@@ -1490,7 +1505,9 @@ def update_key_rotation_policy(cmd, client, value, name=None):
     expires_in = policy.get('expires_in', None) or policy.get('expiry_time', None)
     if policy.get('attributes', None):
         expires_in = policy['attributes'].get('expires_in', None) or policy['attributes'].get('expiry_time', None)
-    return client.update_key_rotation_policy(name=name, lifetime_actions=lifetime_actions, expires_in=expires_in)
+    return client.update_key_rotation_policy(key_name=key_name,
+                                             policy=KeyRotationPolicy(lifetime_actions=lifetime_actions,
+                                                                      expires_in=expires_in))
 # endregion
 
 

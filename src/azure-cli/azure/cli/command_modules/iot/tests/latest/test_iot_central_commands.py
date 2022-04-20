@@ -13,6 +13,7 @@ class IoTCentralTest(ScenarioTest):
         app_name = self.create_random_name(prefix='iotc-cli-test', length=24)
         template_app_name = app_name + '-template'
         template_app_display_name = "My Custom App Display Name"
+        managed_identity_app_name = app_name + "-mi"
         rg = resource_group
         location = resource_group_location
         template = 'iotc-pnp-preview@1.0.0'
@@ -35,6 +36,16 @@ class IoTCentralTest(ScenarioTest):
                      self.check('displayName', template_app_display_name),
                      self.check('sku.name', 'ST1'),
                      self.check('template', template)])
+
+        # Test 'az iot central app create with system-assigned managed identity'
+        self.cmd('iot central app create -n {0} -g {1} --subdomain {2} --sku {3} --mi-system-assigned'
+                .format(managed_identity_app_name, rg, managed_identity_app_name, 'ST2'), checks=[
+                    self.check('resourceGroup', rg),
+                    self.check('location', location),
+                    self.check('subdomain', managed_identity_app_name),
+                    self.check('displayName', managed_identity_app_name),
+                    self.check('sku.name', 'ST2'),
+                    self.check('identity.type', 'SystemAssigned')])
 
         # Test 'az iot central app update'
         self.cmd('iot central app update -n {0} -g {1} --set displayName={2} subdomain={3} sku.name={4}'
@@ -62,8 +73,32 @@ class IoTCentralTest(ScenarioTest):
             self.check('sku.name', 'ST2'),
             self.check('template', template)])
 
+        # Test 'az iot central identity show with no managed identity'
+        self.cmd('iot central app identity show -n {0} -g {1}'
+                .format(app_name, rg), checks=[
+                    self.check('type', 'None')])
+
+        # Test 'az iot central identity assign with system-assigned identity'
+        self.cmd('iot central app identity assign -n {0} -g {1} --system-assigned'
+                .format(managed_identity_app_name, rg), checks=[
+                    self.check('type', 'SystemAssigned')])
+
+        # Test 'az iot central identity show with system-assigned identity'
+        self.cmd('iot central app identity show -n {0} -g {1}'
+                .format(managed_identity_app_name, rg), checks=[
+                    self.check('type', 'SystemAssigned')])
+
+        # Test 'az iot central identity remove with system-assigned identity'
+        self.cmd('iot central app identity remove -n {0} -g {1} --system-assigned'
+                .format(managed_identity_app_name, rg), checks=[
+                    self.check('type', 'None')])
+
         # Test 'az iot central app delete with template and display name'
         self.cmd('iot central app delete -n {0} -g {1} --yes'.format(template_app_name, rg), checks=[
+            self.is_empty()])
+
+        # Test 'az iot central app delete with system-assigned identity'
+        self.cmd('iot central app delete -n {0} -g {1} --yes'.format(managed_identity_app_name, rg), checks=[
             self.is_empty()])
 
         # Test 'az iot central app list'

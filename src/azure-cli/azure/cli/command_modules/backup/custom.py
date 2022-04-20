@@ -13,13 +13,14 @@ from azure.mgmt.core.tools import is_valid_resource_id
 
 from azure.mgmt.recoveryservices.models import Vault, VaultProperties, Sku, SkuName, PatchVault, IdentityData, \
     CmkKeyVaultProperties, CmkKekIdentity, VaultPropertiesEncryption, UserIdentity
-from azure.mgmt.recoveryservicesbackup.models import ProtectedItemResource, AzureIaaSComputeVMProtectedItem, \
-    AzureIaaSClassicComputeVMProtectedItem, ProtectionState, IaasVMBackupRequest, BackupRequestResource, \
-    IaasVMRestoreRequest, RestoreRequestResource, BackupManagementType, WorkloadType, \
+from azure.mgmt.recoveryservicesbackup.activestamp.models import ProtectedItemResource, \
+    AzureIaaSComputeVMProtectedItem, AzureIaaSClassicComputeVMProtectedItem, ProtectionState, IaasVMBackupRequest, \
+    BackupRequestResource, IaasVMRestoreRequest, RestoreRequestResource, BackupManagementType, WorkloadType, \
     ILRRequestResource, IaasVMILRRegistrationRequest, BackupResourceConfig, BackupResourceConfigResource, \
     BackupResourceVaultConfig, BackupResourceVaultConfigResource, DiskExclusionProperties, ExtendedProperties, \
     MoveRPAcrossTiersRequest, RecoveryPointRehydrationInfo, IaasVMRestoreWithRehydrationRequest, IdentityInfo, \
-    CrossRegionRestoreRequest, BackupStatusRequest, CrrJobRequest, ListRecoveryPointsRecommendedForMoveRequest
+    BackupStatusRequest, ListRecoveryPointsRecommendedForMoveRequest, IdentityBasedRestoreDetails, ScheduleRunType
+from azure.mgmt.recoveryservicesbackup.passivestamp.models import CrrJobRequest, CrossRegionRestoreRequest
 
 import azure.cli.command_modules.backup._validators as validators
 from azure.cli.core.util import CLIError
@@ -32,7 +33,7 @@ from azure.cli.command_modules.backup._client_factory import (
     protected_items_cf, backup_resource_vault_config_cf, recovery_points_crr_cf, aad_properties_cf,
     cross_region_restore_cf, backup_crr_job_details_cf, backup_crr_jobs_cf, backup_protected_items_crr_cf,
     _backup_client_factory, recovery_points_recommended_cf, backup_resource_encryption_config_cf, backup_status_cf,
-    backup_storage_configs_non_crr_cf)
+    backup_storage_configs_non_crr_cf, recovery_points_passive_cf)
 
 import azure.cli.command_modules.backup.custom_common as common
 import azure.cli.command_modules.backup.custom_help as cust_help
@@ -383,17 +384,20 @@ def show_encryption(client, resource_group_name, vault_name):
 
 
 def set_backup_properties(cmd, client, vault_name, resource_group_name, backup_storage_redundancy=None,
-                          soft_delete_feature_state=None, cross_region_restore_flag=None):
-    if soft_delete_feature_state:
+                          soft_delete_feature_state=None, cross_region_restore_flag=None,
+                          hybrid_backup_security_features=None):
+    if soft_delete_feature_state or hybrid_backup_security_features:
         logger.warning("""
         --backup-storage-redundancy and --cross-region-restore-flag parameters will be ignored if provided.
         """)
-        soft_delete_feature_state += "d"
         vault_config_client = backup_resource_vault_config_cf(cmd.cli_ctx)
         vault_config_response = vault_config_client.get(vault_name, resource_group_name)
-        enhanced_security_state = vault_config_response.properties.enhanced_security_state
+        soft_delete_feature_state = vault_config_response.properties.soft_delete_feature_state if (
+            soft_delete_feature_state is None) else soft_delete_feature_state + "d"
+        hybrid_backup_security_features = vault_config_response.properties.enhanced_security_state if (
+            hybrid_backup_security_features is None) else hybrid_backup_security_features + "d"
         vault_config = BackupResourceVaultConfig(soft_delete_feature_state=soft_delete_feature_state,
-                                                 enhanced_security_state=enhanced_security_state)
+                                                 enhanced_security_state=hybrid_backup_security_features)
         vault_config_resource = BackupResourceVaultConfigResource(properties=vault_config)
         return vault_config_client.update(vault_name, resource_group_name, vault_config_resource)
 
@@ -443,33 +447,24 @@ def set_policy(client, resource_group_name, vault_name, policy, policy_name):
     schedule_run_frequency = policy_object.properties.schedule_policy.schedule_run_frequency
 
     # Validating range of days input
-    if schedule_run_frequency == 'Weekly' and retention_range_in_days != 5:
-        raise CLIError(
-            """
-            Retention policy range must be equal to 5.
-            """)
-    if schedule_run_frequency == 'Daily' and (retention_range_in_days > 5 or retention_range_in_days < 1):
-        raise CLIError(
-            """
-            Retention policy range must be between 1 to 5.
-            """)
-
-    error_message = "For SnapshotRetentionRangeInDays, the minimum value is 1 and"\
-                    "maximum is 5. For weekly backup policies, the only allowed value is 5 "\
-                    ". Please set the value accordingly."
-
-    if policy_object.properties.schedule_policy.schedule_run_frequency == "Weekly":
-        if policy_object.properties.instant_rp_retention_range_in_days is not None:
-            if policy_object.properties.instant_rp_retention_range_in_days != 5:
-                logger.error(error_message)
-        else:
-            policy_object.properties.instant_rp_retention_range_in_days = 5
+    if policy_object.properties.policy_type != 'V2':
+        if schedule_run_frequency == ScheduleRunType.weekly and retention_range_in_days != 5:
+            raise InvalidArgumentValueError(
+                """
+                Retention policy range must be equal to 5.
+                """)
+        if schedule_run_frequency == ScheduleRunType.daily and (retention_range_in_days > 5 or
+                                                                retention_range_in_days < 1):
+            raise InvalidArgumentValueError(
+                """
+                Retention policy range must be between 1 to 5.
+                """)
     else:
-        if policy_object.properties.instant_rp_retention_range_in_days is not None:
-            if not 1 <= policy_object.properties.instant_rp_retention_range_in_days <= 5:
-                logger.error(error_message)
-        else:
-            policy_object.properties.instant_rp_retention_range_in_days = 2
+        if (retention_range_in_days > 30 or retention_range_in_days < 1):
+            raise InvalidArgumentValueError(
+                """
+                Retention policy range must be between 1 to 30.
+                """)
     if policy_name is None:
         policy_name = policy_object.name
 
@@ -482,6 +477,7 @@ def set_policy(client, resource_group_name, vault_name, policy, policy_name):
 
 def create_policy(client, resource_group_name, vault_name, name, policy):
     policy_object = cust_help.get_policy_from_json(client, policy)
+
     policy_object.name = name
     policy_object.properties.backup_management_type = "AzureIaasVM"
 
@@ -543,6 +539,16 @@ def enable_protection_for_vm(cmd, client, resource_group_name, vault_name, vm, p
             The policy type should match with the workload being protected.
             Use the relevant get-default policy command and use it to protect the workload.
             """)
+
+    if (hasattr(vm, 'security_profile') and hasattr(vm.security_profile, 'security_type') and
+            vm.security_profile.security_type is not None and
+            vm.security_profile.security_type.lower() == 'trustedlaunch'):
+        if policy.properties.policy_type != 'V2':
+            raise InvalidArgumentValueError(
+                """
+                Trusted VM can only be protected using Enhanced Policy. Please provide a valid IaasVM Enhanced Policy
+                in --policy-name argument.
+                """)
 
     # Get protectable item.
     protectable_item = _get_protectable_item_for_vm(cmd.cli_ctx, vault_name, resource_group_name, vm_name, vm_rg)
@@ -843,7 +849,7 @@ def _get_trigger_restore_properties(rp_name, vault_location, storage_account_id,
                                     use_original_storage_account, restore_disk_lun_list,
                                     rehydration_duration, rehydration_priority, tier, disk_encryption_set_id,
                                     encryption, recovery_point, use_secondary_region, mi_system_assigned,
-                                    mi_user_assigned):
+                                    mi_user_assigned, restore_mode):
 
     if disk_encryption_set_id is not None:
         if not(encryption.properties.encryption_at_rest_type == "CustomerManaged" and
@@ -852,12 +858,17 @@ def _get_trigger_restore_properties(rp_name, vault_location, storage_account_id,
             raise InvalidArgumentValueError("disk_encryption_set_id can't be specified")
 
     identity_info = None
+    identity_based_restore_details = None
+    target_storage_account_id = storage_account_id
     if mi_system_assigned or mi_user_assigned:
         if not recovery_point.properties.is_managed_virtual_machine:
             raise InvalidArgumentValueError("MI based restore is not supported for unmanaged VMs.")
         identity_info = IdentityInfo(
             is_system_assigned_identity=mi_system_assigned is not None,
             managed_identity_resource_id=mi_user_assigned)
+        identity_based_restore_details = IdentityBasedRestoreDetails(
+            target_storage_account_id=target_storage_account_id)
+        target_storage_account_id = None
 
     if tier == 'VaultArchive':
         rehyd_duration = 'P' + str(rehydration_duration) + 'D'
@@ -865,34 +876,83 @@ def _get_trigger_restore_properties(rp_name, vault_location, storage_account_id,
                                                         rehydration_priority=rehydration_priority)
 
         trigger_restore_properties = IaasVMRestoreWithRehydrationRequest(
-            create_new_cloud_service=True,
+            create_new_cloud_service=False,
             recovery_point_id=rp_name,
-            recovery_type='RestoreDisks',
+            recovery_type=restore_mode,
             region=vault_location,
-            storage_account_id=storage_account_id,
+            storage_account_id=target_storage_account_id,
             source_resource_id=source_resource_id,
             target_resource_group_id=target_rg_id,
             original_storage_account_option=use_original_storage_account,
             restore_disk_lun_list=restore_disk_lun_list,
             recovery_point_rehydration_info=rehydration_info,
             disk_encryption_set_id=disk_encryption_set_id,
-            identity_info=identity_info)
+            identity_info=identity_info,
+            identity_based_restore_details=identity_based_restore_details)
 
     else:
         trigger_restore_properties = IaasVMRestoreRequest(
-            create_new_cloud_service=True,
+            create_new_cloud_service=False,
             recovery_point_id=rp_name,
-            recovery_type='RestoreDisks',
+            recovery_type=restore_mode,
             region=vault_location,
-            storage_account_id=storage_account_id,
+            storage_account_id=target_storage_account_id,
             source_resource_id=source_resource_id,
             target_resource_group_id=target_rg_id,
             original_storage_account_option=use_original_storage_account,
             restore_disk_lun_list=restore_disk_lun_list,
             disk_encryption_set_id=disk_encryption_set_id,
-            identity_info=identity_info)
+            identity_info=identity_info,
+            identity_based_restore_details=identity_based_restore_details)
 
     return trigger_restore_properties
+
+
+def _set_trigger_restore_properties(cmd, trigger_restore_properties, target_virtual_machine_name, virtual_network_name,
+                                    target_vnet_resource_group, subnet_name, vault_name, resource_group_name,
+                                    recovery_point, target_zone, target_rg_id, source_resource_id, restore_mode):
+    if restore_mode == "AlternateLocation":
+        virtual_network = _get_vnet_object(cmd.cli_ctx, virtual_network_name, target_vnet_resource_group)
+        subnet_id = None
+        for subnet in virtual_network.properties['subnets']:
+            if subnet_name.lower() == subnet['name'].lower():
+                subnet_id = subnet['id']
+                break
+        if subnet_id is None:
+            raise InvalidArgumentValueError(
+                """
+                --target-subnet-name provided does not exist in the virtual network specified. Please check the
+                combination and try again.
+                """)
+        trigger_restore_properties.target_virtual_machine_id = (target_rg_id + '/' +
+                                                                '/'.join(source_resource_id.split('/')[-4:-1]) + '/' +
+                                                                target_virtual_machine_name)
+        trigger_restore_properties.virtual_network_id = virtual_network.id
+        trigger_restore_properties.subnet_id = subnet_id
+    if target_zone:
+        backup_config_response = backup_storage_configs_non_crr_cf(cmd.cli_ctx).get(vault_name, resource_group_name)
+        validators.validate_czr(backup_config_response, recovery_point)
+        trigger_restore_properties.zones = [target_zone]
+
+
+def _get_alr_restore_mode(target_vm_name, target_vnet_name, target_vnet_resource_group, target_subnet_name,
+                          target_resource_group):
+    if (target_vm_name is None and target_vnet_name is None and target_vnet_resource_group is None and
+            target_subnet_name is None):
+        return 'RestoreDisks'
+    if not (target_vm_name is None or target_vnet_name is None or target_vnet_resource_group is None or
+            target_subnet_name is None):
+        if target_resource_group is None:
+            raise RequiredArgumentMissingError(
+                """
+                --target-resource-group is required for ALR. Please specify a valid --target-resource-group.
+                """)
+        return 'AlternateLocation'
+    raise RequiredArgumentMissingError(
+        """
+        Target VM details are not specified completely. Please make sure all these parameters are specified:
+        --target-vm-name, --target-vnet-name, --target-vnet-resource-group, --target-subnet-name.
+        """)
 
 
 # pylint: disable=too-many-locals
@@ -900,7 +960,8 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
                   target_resource_group=None, restore_to_staging_storage_account=None, restore_only_osdisk=None,
                   diskslist=None, restore_as_unmanaged_disks=None, use_secondary_region=None, rehydration_duration=15,
                   rehydration_priority=None, disk_encryption_set_id=None, mi_system_assigned=None,
-                  mi_user_assigned=None, target_zone=None):
+                  mi_user_assigned=None, target_zone=None, restore_mode='AlternateLocation', target_vm_name=None,
+                  target_vnet_name=None, target_vnet_resource_group=None, target_subnet_name=None):
 
     item = show_item(cmd, backup_protected_items_cf(cmd.cli_ctx), resource_group_name, vault_name, container_name,
                      item_name, "AzureIaasVM", "VM", use_secondary_region)
@@ -942,25 +1003,29 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
     _source_resource_id = item.properties.source_resource_id
     target_rg_id = None
 
-    if restore_as_unmanaged_disks and target_resource_group is not None:
-        raise CLIError(
-            """
-            Both restore_as_unmanaged_disks and target_resource_group can't be spceified.
-            Please give Only one parameter and retry.
-            """)
+    if restore_mode == "AlternateLocation":
+        restore_mode = _get_alr_restore_mode(target_vm_name, target_vnet_name, target_vnet_resource_group,
+                                             target_subnet_name, target_resource_group)
 
-    if recovery_point.properties.is_managed_virtual_machine:
-        if target_resource_group is not None:
-            target_rg_id = '/'.join(_source_resource_id.split('/')[:4]) + "/" + target_resource_group
-        if not restore_as_unmanaged_disks and target_resource_group is None:
-            logger.warning(
+        if restore_as_unmanaged_disks and target_resource_group is not None:
+            raise MutuallyExclusiveArgumentError(
                 """
-                The disks of the managed VM will be restored as unmanaged since targetRG parameter is not provided.
-                This will NOT leverage the instant restore functionality.
-                Hence it can be significantly slow based on given storage account.
-                To leverage instant restore, provide the target RG parameter.
-                Otherwise, provide the intent next time by passing the --restore-as-unmanaged-disks parameter
+                Both restore_as_unmanaged_disks and target_resource_group can't be spceified.
+                Please give Only one parameter and retry.
                 """)
+
+        if recovery_point.properties.is_managed_virtual_machine:
+            if target_resource_group is not None:
+                target_rg_id = '/'.join(_source_resource_id.split('/')[:4]) + "/" + target_resource_group
+            if not restore_as_unmanaged_disks and target_resource_group is None:
+                logger.warning(
+                    """
+                    The disks of the managed VM will be restored as unmanaged since targetRG parameter is not provided.
+                    This will NOT leverage the instant restore functionality.
+                    Hence it can be significantly slow based on given storage account.
+                    To leverage instant restore, provide the target RG parameter.
+                    Otherwise, provide the intent next time by passing the --restore-as-unmanaged-disks parameter
+                    """)
 
     _validate_restore_disk_parameters(restore_only_osdisk, diskslist)
     restore_disk_lun_list = None
@@ -980,12 +1045,11 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
                                                                  properties.recovery_point_tier_details is None else
                                                                  recovery_point.tier_type, disk_encryption_set_id,
                                                                  encryption, recovery_point, use_secondary_region,
-                                                                 mi_system_assigned, mi_user_assigned)
+                                                                 mi_system_assigned, mi_user_assigned, restore_mode)
 
-    if target_zone:
-        backup_config_response = backup_storage_configs_non_crr_cf(cmd.cli_ctx).get(vault_name, resource_group_name)
-        validators.validate_czr(backup_config_response, recovery_point)
-        trigger_restore_properties.zones = [target_zone]
+    _set_trigger_restore_properties(cmd, trigger_restore_properties, target_vm_name, target_vnet_name,
+                                    target_vnet_resource_group, target_subnet_name, vault_name, resource_group_name,
+                                    recovery_point, target_zone, target_rg_id, _source_resource_id, restore_mode)
 
     trigger_restore_request = RestoreRequestResource(properties=trigger_restore_properties)
 
@@ -1228,11 +1292,22 @@ def _get_backup_request(workload_type, retain_until):
 def _get_crr_access_token(cmd, azure_region, vault_name, resource_group_name, container_uri, item_uri, rp_name):
     aad_client = aad_properties_cf(cmd.cli_ctx)
     aad_result = aad_client.get(azure_region)
-    rp_client = recovery_points_cf(cmd.cli_ctx)
+    rp_client = recovery_points_passive_cf(cmd.cli_ctx)
     crr_access_token = rp_client.get_access_token(vault_name, resource_group_name, fabric_name, container_uri,
                                                   item_uri, rp_name, aad_result).properties
     crr_access_token.object_type = "CrrAccessToken"
     return crr_access_token
+
+
+def _get_vnet_object(cli_ctx, vnet_name, vnet_resource_group):
+    resources_client = resources_cf(cli_ctx)
+    vnet_resource_namespace = 'Microsoft.Network'
+    parent_resource_path = 'virtualNetworks'
+    resource_type = ''
+    api_version = '2019-11-01'
+
+    return resources_client.get(vnet_resource_group, vnet_resource_namespace, parent_resource_path, resource_type,
+                                vnet_name, api_version)
 
 
 def _get_storage_account_id(cli_ctx, storage_account_name, storage_account_rg):

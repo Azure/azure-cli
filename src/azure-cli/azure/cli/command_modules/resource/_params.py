@@ -195,7 +195,6 @@ def load_arguments(self, _):
         c.argument('name', options_list=['--name', '-n'], help='Name of the new policy definition.')
 
     with self.argument_context('policy assignment', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
-        c.ignore('_subscription')
         c.argument('name', options_list=['--name', '-n'], completer=get_policy_assignment_completion_list, help='Name of the policy assignment.')
         c.argument('scope', help='Scope to which this policy assignment applies.')
         c.argument('disable_scope_strict_match', action='store_true', help='Include policy assignments either inherited from parent scope or at child scope.')
@@ -590,6 +589,14 @@ def load_arguments(self, _):
     with self.argument_context('account management-group update') as c:
         c.argument('display_name', options_list=['--display-name', '-d'])
         c.argument('parent_id', options_list=['--parent', '-p'])
+
+    with self.argument_context('account management-group hierarchy-settings create') as c:
+        c.argument('default_management_group', options_list=['--default-management-group', '-m'])
+        c.argument('require_authorization_for_group_creation', options_list=['--require-authorization-for-group-creation', '-r'])
+
+    with self.argument_context('account management-group hierarchy-settings update') as c:
+        c.argument('default_management_group', options_list=['--default-management-group', '-m'])
+        c.argument('require_authorization_for_group_creation', options_list=['--require-authorization-for-group-creation', '-r'])
 
     with self.argument_context('ts') as c:
         c.argument('name', options_list=['--name', '-n'], help='The name of the template spec.')

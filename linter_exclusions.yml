@@ -28,6 +28,56 @@ acr helm show:
     chart:
       rule_exclusions:
       - no_positional_parameters
+acr manifest delete:
+  parameters:
+    manifest_id:
+      rule_exclusions:
+      - no_positional_parameters
+acr manifest list:
+  parameters:
+    repo_id:
+      rule_exclusions:
+      - no_positional_parameters
+acr manifest list-referrers:
+  parameters:
+    manifest_id:
+      rule_exclusions:
+      - no_positional_parameters
+acr manifest list-metadata:
+  parameters:
+    repo_id:
+      rule_exclusions:
+      - no_positional_parameters
+acr manifest metadata list:
+  parameters:
+    repo_id:
+      rule_exclusions:
+      - no_positional_parameters
+acr manifest metadata show:
+  parameters:
+    manifest_id:
+      rule_exclusions:
+      - no_positional_parameters
+acr manifest metadata update:
+  parameters:
+    manifest_id:
+      rule_exclusions:
+      - no_positional_parameters
+acr manifest show:
+  parameters:
+    manifest_id:
+      rule_exclusions:
+      - no_positional_parameters
+acr manifest show-metadata:
+  parameters:
+    manifest_id:
+      rule_exclusions:
+      - no_positional_parameters
+acr manifest update-metadata:
+  parameters:
+    manifest_id:
+      rule_exclusions:
+      - no_positional_parameters
 acr pack build:
   parameters:
     source_location:
@@ -121,6 +171,9 @@ acs create:
       rule_exclusions:
       - option_length_too_long
     master_vnet_subnet_id:
+      rule_exclusions:
+      - option_length_too_long
+    master_pod_subnet_id:
       rule_exclusions:
       - option_length_too_long
 acs kubernetes install-cli:
@@ -256,18 +309,24 @@ aks create:
     workspace_resource_id:
       rule_exclusions:
       - option_length_too_long
+    enable_msi_auth_for_monitoring:
+      rule_exclusions:
+      - option_length_too_long
     node_osdisk_diskencryptionset_id:
       rule_exclusions:
       - option_length_too_long
     enable_encryption_at_host:
       rule_exclusions:
-      - option_length_too_long  
+      - option_length_too_long
     assign_kubelet_identity:
       rule_exclusions:
       - option_length_too_long
 aks enable-addons:
   parameters:
     workspace_resource_id:
+      rule_exclusions:
+      - option_length_too_long
+    enable_msi_auth_for_monitoring:
       rule_exclusions:
       - option_length_too_long
 aks install-cli:
@@ -808,6 +867,9 @@ backup restore restore-disks:
     restore_to_staging_storage_account:
       rule_exclusions:
       - option_length_too_long
+    target_vnet_resource_group:
+      rule_exclusions:
+      - option_length_too_long
 backup vault backup-properties set:
   parameters:
     backup_storage_redundancy:
@@ -817,6 +879,9 @@ backup vault backup-properties set:
       rule_exclusions:
       - option_length_too_long
     cross_region_restore_flag:
+      rule_exclusions:
+      - option_length_too_long
+    hybrid_backup_security_features:
       rule_exclusions:
       - option_length_too_long
 backup vault encryption update:
@@ -2009,6 +2074,9 @@ iot dps linked-hub create:
     apply_allocation_policy:
       rule_exclusions:
       - option_length_too_long
+    hub_resource_group:
+      rule_exclusions:
+      - parameter_should_not_end_in_resource_group
 iot dps linked-hub update:
   parameters:
     apply_allocation_policy:
@@ -2029,6 +2097,11 @@ iot hub policy list:
 iot hub route list:
   rule_exclusions:
   - no_ids_for_list_commands
+iot hub routing-endpoint create:
+  parameters:
+    endpoint_resource_group:
+      rule_exclusions:
+      - parameter_should_not_end_in_resource_group
 iot hub routing-endpoint list:
   rule_exclusions:
   - no_ids_for_list_commands
@@ -3624,6 +3697,9 @@ vmss create:
     automatic_repairs_grace_period:
       rule_exclusions:
       - option_length_too_long
+    automatic_repairs_action:
+      rule_exclusions:
+      - option_length_too_long
     data_disk_encryption_sets:
       rule_exclusions:
       - option_length_too_long
@@ -3679,6 +3755,9 @@ vmss update:
       rule_exclusions:
       - option_length_too_long
     enable_automatic_repairs:
+      rule_exclusions:
+      - option_length_too_long
+    automatic_repairs_action:
       rule_exclusions:
       - option_length_too_long
     enable_terminate_notification:

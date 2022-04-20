@@ -22,6 +22,7 @@ class SBNamespaceCRUDScenarioTest(ScenarioTest):
     def test_sb_namespace(self, resource_group):
         self.kwargs.update({
             'namespacename': self.create_random_name(prefix='sb-nscli', length=20),
+            'namespacename2': self.create_random_name(prefix='sb-nscli2', length=20),
             'tags': {'tag1=value1'},
             'tags2': {'tag2=value2'},
             'sku': 'Standard',
@@ -37,6 +38,17 @@ class SBNamespaceCRUDScenarioTest(ScenarioTest):
         # Check for the NameSpace name Availability
         self.cmd('servicebus namespace exists --name {namespacename}',
                  checks=[self.check('nameAvailable', True)])
+
+        # Check for the NameSpace name Availability
+        self.cmd('servicebus namespace exists --name {namespacename2}',
+                 checks=[self.check('nameAvailable', True)])
+
+        # Create Namespace
+        namespace = self.cmd(
+            'servicebus namespace create --resource-group {rg} --name {namespacename2} --tags {tags} --sku Premium --location eastus2 --zone-redundant',
+            checks=[self.check('sku.name', 'Premium')]).get_output_in_json()
+
+        self.assertEqual(namespace['zoneRedundant'], True)
 
         # Create Namespace
         self.cmd(

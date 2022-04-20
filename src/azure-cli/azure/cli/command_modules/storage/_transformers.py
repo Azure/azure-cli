@@ -4,8 +4,10 @@
 # --------------------------------------------------------------------------------------------
 
 import base64
+
+from dateutil import parser
 from knack.log import get_logger
-from knack.util import todict
+from knack.util import todict, to_camel_case
 from .track2_util import _encode_bytes
 from .url_quote_util import encode_url_path
 
@@ -50,6 +52,15 @@ def transform_cors_list_output(result):
     return new_result
 
 
+def transform_table_stats_output(result):
+    if not isinstance(result, dict):
+        return result
+    output = {}
+    for key, value in result.items():
+        output[to_camel_case(key)] = transform_table_stats_output(value)
+    return output
+
+
 def transform_entity_query_output(result):
     from collections import OrderedDict
     new_results = []
@@ -66,7 +77,8 @@ def transform_entity_query_output(result):
 
 
 def transform_entities_result(result):
-    for entity in result.items:
+    items = result['items'] if isinstance(result, dict) else result.items
+    for entity in items:
         transform_entity_result(entity)
     return result
 
@@ -76,6 +88,11 @@ def transform_entity_result(entity):
         entity_property = entity[key]
         if hasattr(entity_property, 'value') and isinstance(entity_property.value, bytes):
             entity_property.value = base64.b64encode(entity_property.value).decode()
+        if isinstance(entity_property, bytes):
+            entity[key] = base64.b64encode(entity_property).decode()
+    if hasattr(entity, 'metadata'):
+        entity['Timestamp'] = entity.metadata['timestamp']
+        entity['etag'] = entity.metadata['etag']
     return entity
 
 
@@ -297,4 +314,55 @@ def transform_container_list_output(result):
             result[i] = transform_container_json_output(item)
         except KeyError:  # Deal with BlobPrefix object when there is delimiter specified
             result[i] = {"name": item.name}
+    return result
+
+
+def transform_blob_upload_output(result):
+    if "last_modified" in result:
+        result["lastModified"] = result["last_modified"]
+        del result["last_modified"]
+    return result
+
+
+def transform_queue_stats_output(result):
+    if isinstance(result, dict):
+        new_result = {}
+        from azure.cli.core.commands.arm import make_camel_case
+        for key in result.keys():
+            new_key = make_camel_case(key)
+            new_result[new_key] = transform_queue_stats_output(result[key])
+        return new_result
+    return result
+
+
+def transform_message_list_output(result):
+    for i, item in enumerate(result):
+        result[i] = transform_message_output(item)
+    return list(result)
+
+
+def transform_message_output(result):
+    result = todict(result)
+    new_result = {'expirationTime': result.pop('expiresOn', None),
+                  'insertionTime': result.pop('insertedOn', None),
+                  'timeNextVisible': result.pop('nextVisibleOn', None)}
+    from azure.cli.core.commands.arm import make_camel_case
+    for key in sorted(result.keys()):
+        new_result[make_camel_case(key)] = result[key]
+    return new_result
+
+
+def transform_queue_policy_json_output(result):
+    new_result = {}
+    for policy in sorted(result.keys()):
+        new_result[policy] = transform_queue_policy_output(result[policy])
+    return new_result
+
+
+def transform_queue_policy_output(result):
+    result = todict(result)
+    if result['start']:
+        result['start'] = parser.parse(result['start'])
+    if result['expiry']:
+        result['expiry'] = parser.parse(result['expiry'])
     return result
