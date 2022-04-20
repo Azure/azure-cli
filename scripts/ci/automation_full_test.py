@@ -16,6 +16,7 @@ ch = logging.StreamHandler()
 ch.setLevel(logging.DEBUG)
 logger.addHandler(ch)
 
+# sys.argv is passed by .azure-pipelines/templates/automation_test.yml in section `Running full test`
 instance_cnt, instance_idx = [int(i) for i in sys.argv[1].split('_')]
 profile = sys.argv[2]
 serial_modules = sys.argv[3].split()
