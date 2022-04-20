@@ -6977,6 +6977,7 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
         self.cmd('vm create --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --security-type TrustedLaunch --admin-username azureuser -g {rg} -n {vm2} --enable-secure-boot --enable-vtpm --disable-integrity-monitoring')
         self.cmd('vm show -g {rg} -n {vm2}', checks=[
             self.check('resources', None),
+            self.check('identity', None),
             self.check('securityProfile.securityType', 'TrustedLaunch'),
             self.check('securityProfile.uefiSettings.secureBootEnabled', True),
             self.check('securityProfile.uefiSettings.vTpmEnabled', True)
@@ -7002,6 +7003,8 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
         ])
         self.cmd('vmss create -g {rg} -n {vmss2} --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --admin-username azureuser --security-type TrustedLaunch --enable-secure-boot --enable-vtpm --disable-integrity-monitoring')
         self.cmd('vmss show -g {rg} -n {vmss2}', checks=[
+            self.check('identity', None),
+            self.check('virtualMachineProfile.extensionProfile', 'None'),
             self.check('virtualMachineProfile.securityProfile.securityType', 'TrustedLaunch'),
             self.check('virtualMachineProfile.securityProfile.uefiSettings.secureBootEnabled', True),
             self.check('virtualMachineProfile.securityProfile.uefiSettings.vTpmEnabled', True)

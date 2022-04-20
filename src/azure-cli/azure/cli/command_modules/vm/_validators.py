@@ -1293,7 +1293,7 @@ def _validate_vm_vmss_msi(cmd, namespace, is_identity_assign=False):
                 from ._vm_utils import MSI_LOCAL_ID
                 logger.info('The MSI is enabled by default when Trusted Launch configuration is met')
                 if namespace.assign_identity is None:
-                    namespace.assign_identity = MSI_LOCAL_ID
+                    namespace.assign_identity = [MSI_LOCAL_ID]
                 elif '[system]' not in namespace.assign_identity:
                     namespace.assign_identity.append(MSI_LOCAL_ID)
 
