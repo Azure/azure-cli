@@ -445,12 +445,9 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         from azure.cli.command_modules.storage._transformers import (transform_storage_list_output,
                                                                      transform_container_permission_output,
                                                                      transform_acl_list_output)
-        from azure.cli.command_modules.storage._format import (transform_container_list, transform_boolean_for_table,
-                                                               transform_container_show)
+        from azure.cli.command_modules.storage._format import (transform_boolean_for_table, transform_container_show)
         from ._validators import process_container_delete_parameters, validate_client_auth_parameter
 
-        g.storage_command_oauth('list', 'list_containers', transform=transform_storage_list_output,
-                                table_transformer=transform_container_list)
         g.storage_custom_command_oauth('delete', 'delete_container', validator=process_container_delete_parameters,
                                        transform=create_boolean_result_output_transformer(
                                            'deleted'),
