@@ -7,11 +7,14 @@ parameters:
 - name: profile
   type: string
   default: latest
-- name: instance
+- name: instance_cnt
   type: string
-  default: '1_1'
-  # 8_3 means we have 8 instances totally, and now we are scheduling modules on third instance
-  # 1_1 means we only have 1 instance, so we don't need to schedule modules
+  default: '1'
+- name: instance_idx
+  type: string
+  default: '1'
+  # instance_cnt = 8, instance_idx = 3: means we have 8 instances totally, and now we are scheduling modules on third instance
+  # instance_cnt = 1, instance_idx = 1: means we only have 1 instance, so we don't need to schedule modules
 - name: fullTest
   displayName: Run full test?
   type: boolean
@@ -61,7 +64,7 @@ steps:
         azdev test --no-exitfirst --repo=./ --src=HEAD --tgt=origin/$(System.PullRequest.TargetBranch) --cli-ci --profile ${{ parameters.profile }} --verbose --series --pytest-args "--durations=0"
       else
         echo "Running full test"
-        python scripts/ci/automation_full_test.py "${{ parameters.instance }}" "${{ parameters.profile }}" "$serial_modules"
+        python scripts/ci/automation_full_test.py "${{ parameters.instance_cnt }}" "${{ parameters.instance_idx }}" "${{ parameters.profile }}" "$serial_modules"
       fi
     displayName: "azdev test"
     env:

@@ -17,9 +17,10 @@ ch.setLevel(logging.DEBUG)
 logger.addHandler(ch)
 
 # sys.argv is passed by .azure-pipelines/templates/automation_test.yml in section `Running full test`
-instance_cnt, instance_idx = [int(i) for i in sys.argv[1].split('_')]
-profile = sys.argv[2]
-serial_modules = sys.argv[3].split()
+instance_cnt = int(sys.argv[1])
+instance_idx = int(sys.argv[2])
+profile = sys.argv[3]
+serial_modules = sys.argv[4].split()
 jobs = {
             'acr': 45,
             'acs': 62,
@@ -116,8 +117,8 @@ class AutomaticScheduling(object):
         self.instance_idx:
         The index of concurrent automation full test pipeline instance with specify python version
         For example:
-        8_3 means we have 8 instances totally, and now we are scheduling modules on third instance
-        1_1 means we only have 1 instance, so we don't need to schedule modules
+        instance_cnt = 8, instance_idx = 3: means we have 8 instances totally, and now we are scheduling modules on third instance
+        instance_cnt = 1, instance_idx = 1: means we only have 1 instance, so we don't need to schedule modules
         """
         self.jobs = []
         self.modules = {}
