@@ -26,7 +26,8 @@ from azure.cli.core.azclierror import (
     CLIInternalError,
     ResourceNotFoundError,
     ValidationError,
-    RequiredArgumentMissingError
+    RequiredArgumentMissingError,
+    ArgumentUsageError
 )
 
 from azure.cli.command_modules.vm._validators import _get_resource_group_from_vault_name
@@ -4115,8 +4116,7 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                          os_snapshot=None, data_snapshots=None, managed_image=None, data_snapshot_luns=None,
                          target_region_encryption=None, os_vhd_uri=None, os_vhd_storage_account=None,
                          data_vhds_uris=None, data_vhds_luns=None, data_vhds_storage_accounts=None,
-                         replication_mode=None):
-    # print(target_regions)
+                         replication_mode=None, target_region_cvm_encryption=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -4150,7 +4150,7 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
         profile.replication_mode = replication_mode
     if cmd.supported_api_version(min_api='2019-07-01', operation_group='gallery_image_versions'):
         if managed_image is None and os_snapshot is None and os_vhd_uri is None:
-            raise CLIError('usage error: Please provide --managed-image or --os-snapshot or --vhd')
+            raise RequiredArgumentMissingError('usage error: Please provide --managed-image or --os-snapshot or --vhd')
         GalleryImageVersionStorageProfile = cmd.get_models('GalleryImageVersionStorageProfile')
         GalleryArtifactVersionSource = cmd.get_models('GalleryArtifactVersionSource')
         GalleryOSDiskImage = cmd.get_models('GalleryOSDiskImage')
@@ -4161,10 +4161,11 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
         if os_snapshot is not None:
             os_disk_image = GalleryOSDiskImage(source=GalleryArtifactVersionSource(id=os_snapshot))
         if data_snapshot_luns and not data_snapshots:
-            raise CLIError('usage error: --data-snapshot-luns must be used together with --data-snapshots')
+            raise ArgumentUsageError('usage error: --data-snapshot-luns must be used together with --data-snapshots')
         if data_snapshots:
             if data_snapshot_luns and len(data_snapshots) != len(data_snapshot_luns):
-                raise CLIError('usage error: Length of --data-snapshots and --data-snapshot-luns should be equal.')
+                raise ArgumentUsageError('usage error: Length of --data-snapshots and '
+                                         '--data-snapshot-luns should be equal.')
             if not data_snapshot_luns:
                 data_snapshot_luns = list(range(len(data_snapshots)))
             data_disk_images = []
@@ -4175,7 +4176,7 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
         if cmd.supported_api_version(min_api='2020-09-30', operation_group='gallery_image_versions'):
             # OS disk
             if os_vhd_uri and os_vhd_storage_account is None or os_vhd_uri is None and os_vhd_storage_account:
-                raise ValidationError('--os-vhd-uri and --os-vhd-storage-account should be used together.')
+                raise ArgumentUsageError('--os-vhd-uri and --os-vhd-storage-account should be used together.')
             if os_vhd_uri and os_vhd_storage_account:
                 if not is_valid_resource_id(os_vhd_storage_account):
                     os_vhd_storage_account = resource_id(
@@ -4187,9 +4188,9 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
             # Data disks
             if data_vhds_uris and data_vhds_storage_accounts is None or \
                     data_vhds_uris is None and data_vhds_storage_accounts:
-                raise ValidationError('--data-vhds-uris and --data-vhds-storage-accounts should be used together.')
+                raise ArgumentUsageError('--data-vhds-uris and --data-vhds-storage-accounts should be used together.')
             if data_vhds_luns and data_vhds_uris is None:
-                raise ValidationError('--data-vhds-luns must be used together with --data-vhds-uris')
+                raise ArgumentUsageError('--data-vhds-luns must be used together with --data-vhds-uris')
             if data_vhds_uris:
                 # Generate LUNs
                 if data_vhds_luns is None:
@@ -4200,8 +4201,8 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                 len_data_vhds_luns = len(data_vhds_luns)
                 len_data_vhds_storage_accounts = len(data_vhds_storage_accounts)
                 if len_data_vhds_uris != len_data_vhds_luns or len_data_vhds_uris != len_data_vhds_storage_accounts:
-                    raise ValidationError('Length of --data-vhds-uris, --data-vhds-luns, --data-vhds-storage-accounts '
-                                          'must be same.')
+                    raise ArgumentUsageError(
+                        'Length of --data-vhds-uris, --data-vhds-luns, --data-vhds-storage-accounts must be same.')
                 # Generate full storage account ID
                 for i, storage_account in enumerate(data_vhds_storage_accounts):
                     if not is_valid_resource_id(storage_account):
@@ -4220,7 +4221,7 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                                      storage_profile=storage_profile)
     else:
         if managed_image is None:
-            raise CLIError('usage error: Please provide --managed-image')
+            raise RequiredArgumentMissingError('usage error: Please provide --managed-image')
         image_version = ImageVersion(publishing_profile=profile, location=location, tags=(tags or {}))
 
     return client.gallery_image_versions.begin_create_or_update(
