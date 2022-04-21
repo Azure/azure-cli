@@ -30,7 +30,7 @@ from azure.cli.core.azclierror import (
     ArgumentUsageError
 )
 
-from azure.cli.command_modules.vm._validators import _get_resource_group_from_vault_name
+from azure.cli.command_modules.vm._validators import _get_resource_group_from_vault_name, DEDICATED_HOST_NONE
 from azure.cli.core.commands.validators import validate_file_or_dict
 
 from azure.cli.core.commands import LongRunningOperation, DeploymentOutputLongRunningOperation
@@ -1466,12 +1466,13 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
         capacity_reservation = CapacityReservationProfile(capacity_reservation_group=sub_resource)
         vm.capacity_reservation = capacity_reservation
 
-    if dedicated_host is not None:
+    if dedicated_host == DEDICATED_HOST_NONE:
+        vm.host = {}
+        vm.host_group = None
+    elif dedicated_host is not None:
         if vm.host is None:
             DedicatedHost = cmd.get_models('SubResource')
             vm.host = DedicatedHost(additional_properties={}, id=dedicated_host)
-        elif dedicated_host == "":
-            vm.host = {}
         else:
             vm.host.id = dedicated_host
         if vm.host_group is not None:

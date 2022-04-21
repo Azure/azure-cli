@@ -31,6 +31,9 @@ from ._actions import _get_latest_image_version
 logger = get_logger(__name__)
 
 
+DEDICATED_HOST_NONE = 'NONE'
+
+
 def validate_asg_names_or_ids(cmd, namespace):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.profiles import ResourceType
@@ -699,7 +702,7 @@ def _validate_vm_create_dedicated_host(cmd, namespace):
     if namespace.dedicated_host and namespace.dedicated_host_group:
         raise CLIError('usage error: User cannot specify both --host and --host-group properties.')
 
-    if namespace.dedicated_host and not is_valid_resource_id(namespace.dedicated_host):
+    if namespace.dedicated_host and not is_valid_resource_id(namespace.dedicated_host) and namespace.dedicated_host != DEDICATED_HOST_NONE:
         raise CLIError('usage error: --host is not a valid resource ID.')
 
     if namespace.dedicated_host_group:
