@@ -26,8 +26,12 @@ class MSIAuthenticationWrapper(MSIAuthentication):
             if in_cloud_console():
                 import msal
                 from .util import check_result, build_sdk_access_token
-                app = msal.PublicClientApplication(None)
-                result = app.acquire_token_silent(scopes, account=msal.application.CLOUD_SHELL_ACCOUNT,
+                app = msal.PublicClientApplication(
+                    "placeholder",  # It needs a string placeholder
+                    #token_cache=...,  # TODO: This PoC does not currently maintain a token cache
+                    )
+                result = app.acquire_token_silent(list(scopes),
+                                                  app.get_accounts(username=msal.CURRENT_USER)[0],
                                                   data=kwargs['data'])
                 check_result(result)
                 return build_sdk_access_token(result)
