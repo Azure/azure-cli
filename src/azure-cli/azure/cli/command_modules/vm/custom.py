@@ -1470,6 +1470,8 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
         if vm.host is None:
             DedicatedHost = cmd.get_models('SubResource')
             vm.host = DedicatedHost(additional_properties={}, id=dedicated_host)
+        elif dedicated_host == "":
+            vm.host = {}
         else:
             vm.host.id = dedicated_host
         if vm.host_group is not None:
