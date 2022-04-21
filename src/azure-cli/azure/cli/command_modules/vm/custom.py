@@ -763,7 +763,7 @@ def capture_vm(cmd, resource_group_name, vm_name, vhd_name_prefix,
     print(json.dumps(output, indent=2))  # pylint: disable=no-member
 
 
-# pylint: disable=too-many-locals, unused-argument, too-many-statements, too-many-branches
+# pylint: disable=too-many-locals, unused-argument, too-many-statements, too-many-branches, broad-except
 def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_v2', location=None, tags=None,
               no_wait=False, authentication_type=None, admin_password=None, computer_name=None,
               admin_username=None, ssh_dest_key_path=None, ssh_key_value=None, generate_ssh_keys=False,
@@ -1092,16 +1092,13 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
                                       settings=None,
                                       auto_upgrade_minor_version=True,
                                       enable_automatic_upgrade=None)
-        guest_attestation_extension = LongRunningOperation(cmd.cli_ctx)(
-            client.virtual_machine_extensions.begin_create_or_update(resource_group_name,
-                                                                     vm_name,
-                                                                     'GuestAttestation',
-                                                                     ext))
-        if guest_attestation_extension.provisioning_state == 'Succeeded':
+        try:
+            LongRunningOperation(cmd.cli_ctx)(client.virtual_machine_extensions.begin_create_or_update(
+                resource_group_name, vm_name, 'GuestAttestation', ext))
             logger.info('Guest Attestation Extension has been successfully installed by default '
                         'when Trusted Launch configuration is met')
-        else:
-            logger.error('Failed to install Guest Attestation Extension for Trusted Launch')
+        except Exception as e:
+            logger.error('Failed to install Guest Attestation Extension for Trusted Launch. %s', e)
     if count:
         vm_names = [vm_name + str(i) for i in range(count)]
     else:
@@ -3232,13 +3229,13 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
         if not vmss.virtual_machine_profile.extension_profile:
             vmss.virtual_machine_profile.extension_profile = VirtualMachineScaleSetExtensionProfile(extensions=[])
         vmss.virtual_machine_profile.extension_profile.extensions.append(ext)
-        guest_attestation_extension = LongRunningOperation(cmd.cli_ctx)(
-            client.virtual_machine_scale_sets.begin_create_or_update(resource_group_name, vmss_name, vmss))
-        if guest_attestation_extension.provisioning_state == 'Succeeded':
+        try:
+            LongRunningOperation(cmd.cli_ctx)(client.virtual_machine_scale_sets.begin_create_or_update(
+                resource_group_name, vmss_name, vmss))
             logger.info('Guest Attestation Extension has been successfully installed by default'
                         'when Trusted Launch configuration is met')
-        else:
-            logger.error('Failed to install Guest Attestation Extension for Trusted Launch')
+        except Exception as e:
+            logger.error('Failed to install Guest Attestation Extension for Trusted Launch. %s', e)
 
     return deployment_result
 

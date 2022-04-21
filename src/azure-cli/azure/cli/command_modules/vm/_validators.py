@@ -1285,17 +1285,20 @@ def _validate_vm_vmss_msi(cmd, namespace, is_identity_assign=False):
         raise ArgumentUsageError('usage error: --assign-identity [--scope SCOPE] [--role ROLE]')
 
     # Enable system assigned msi by default when Trusted Launch configuration is met
-    if hasattr(namespace, 'disable_integrity_monitoring') and not namespace.disable_integrity_monitoring:
-        if hasattr(namespace, 'security_type') and hasattr(namespace, 'enable_vtpm') \
-                and hasattr(namespace, 'enable_secure_boot'):
-            if namespace.security_type and namespace.security_type.lower() == 'trustedlaunch' and\
-                    namespace.enable_vtpm and namespace.enable_secure_boot:
-                from ._vm_utils import MSI_LOCAL_ID
-                logger.info('The MSI is enabled by default when Trusted Launch configuration is met')
-                if namespace.assign_identity is None:
-                    namespace.assign_identity = [MSI_LOCAL_ID]
-                elif '[system]' not in namespace.assign_identity:
-                    namespace.assign_identity.append(MSI_LOCAL_ID)
+    if not is_identity_assign:
+        _validate_vm_vmss_trusted_launch(namespace)
+
+
+def _validate_vm_vmss_trusted_launch(namespace):
+    is_trusted_launch = namespace.security_type and namespace.security_type.lower() == 'trustedlaunch' \
+        and namespace.enable_vtpm and namespace.enable_secure_boot
+    if is_trusted_launch and not namespace.disable_integrity_monitoring:
+        from ._vm_utils import MSI_LOCAL_ID
+        logger.info('The MSI is enabled by default when Trusted Launch configuration is met')
+        if namespace.assign_identity is None:
+            namespace.assign_identity = [MSI_LOCAL_ID]
+        elif '[system]' not in namespace.assign_identity:
+            namespace.assign_identity.append(MSI_LOCAL_ID)
 
 
 def _validate_vm_vmss_set_applications(cmd, namespace):  # pylint: disable=unused-argument
