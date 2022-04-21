@@ -4855,7 +4855,7 @@ class VMGalleryImage(ScenarioTest):
     @ResourceGroupPreparer(random_name_length=15, location='CentralUSEUAP')
     @KeyVaultPreparer(name_prefix='vault-', name_len=20, key='vault', location='CentralUSEUAP',
                       additional_params='--enable-purge-protection true --enable-soft-delete true')
-    def test_create_image_version_with_region_encryption(self, resource_group, resource_group_location, key_vault):
+    def test_create_image_version_with_region_cvm_encryptio(self, resource_group, resource_group_location, key_vault):
         self.kwargs.update({
             'vm': 'vm1',
             'gallery': self.create_random_name(prefix='gallery_', length=20),
