@@ -1074,8 +1074,9 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
     LongRunningOperation(cmd.cli_ctx)(client.begin_create_or_update(resource_group_name, deployment_name, deployment))
 
     # Guest Attestation Extension and enable System Assigned MSI by default
-    if security_type and security_type.lower() == 'trustedlaunch' and enable_vtpm and\
-            enable_secure_boot and not disable_integrity_monitoring:
+    is_trusted_launch = security_type and security_type.lower() == 'trustedlaunch' and\
+        enable_vtpm and enable_secure_boot
+    if is_trusted_launch and not disable_integrity_monitoring:
         vm = get_vm(cmd, resource_group_name, vm_name, 'instanceView')
         client = _compute_client_factory(cmd.cli_ctx)
         if vm.storage_profile.os_disk.os_type == 'Linux':
@@ -3205,8 +3206,9 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                                                                          vmss_info.identity.principal_id,
                                                                          vmss_info.identity.user_assigned_identities)
     # Guest Attestation Extension and enable System Assigned MSI by default
-    if security_type and security_type.lower() == 'trustedlaunch' and enable_vtpm and\
-            enable_secure_boot and not disable_integrity_monitoring:
+    is_trusted_launch = security_type and security_type.lower() == 'trustedlaunch' and\
+        enable_vtpm and enable_secure_boot
+    if is_trusted_launch and not disable_integrity_monitoring:
         client = _compute_client_factory(cmd.cli_ctx)
         vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
         vmss.virtual_machine_profile.storage_profile.image_reference = None
