@@ -1284,6 +1284,22 @@ def _validate_vm_vmss_msi(cmd, namespace, is_identity_assign=False):
     elif namespace.identity_scope or namespace.identity_role:
         raise ArgumentUsageError('usage error: --assign-identity [--scope SCOPE] [--role ROLE]')
 
+    if not is_identity_assign:
+        _enable_msi_for_trusted_launch(namespace)
+
+
+def _enable_msi_for_trusted_launch(namespace):
+    # Enable system assigned msi by default when Trusted Launch configuration is met
+    is_trusted_launch = namespace.security_type and namespace.security_type.lower() == 'trustedlaunch' \
+        and namespace.enable_vtpm and namespace.enable_secure_boot
+    if is_trusted_launch and not namespace.disable_integrity_monitoring:
+        from ._vm_utils import MSI_LOCAL_ID
+        logger.info('The MSI is enabled by default when Trusted Launch configuration is met')
+        if namespace.assign_identity is None:
+            namespace.assign_identity = [MSI_LOCAL_ID]
+        elif '[system]' not in namespace.assign_identity:
+            namespace.assign_identity.append(MSI_LOCAL_ID)
+
 
 def _validate_vm_vmss_set_applications(cmd, namespace):  # pylint: disable=unused-argument
     if namespace.application_configuration_overrides and \
