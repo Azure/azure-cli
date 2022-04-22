@@ -40,6 +40,8 @@ parameters:
     short-summary: NetBIOS name of the SMB server. This name will be registered as a computer account in the AD and used to mount volumes. Must be 10 characters or less
   - name: --organizational-unit
     short-summary: The Organizational Unit (OU) within the Windows Active Directory
+  - name: --site
+    short-summary: The Active Directory site the service will limit Domain Controller discovery to
   - name: --kdc-ip
     short-summary: kdc server IP addresses for the active directory machine. This optional parameter is used only while creating kerberos volume
   - name: --ad-name
@@ -94,6 +96,8 @@ parameters:
     short-summary: NetBIOS name of the SMB server. This name will be registered as a computer account in the AD and used to mount volumes. Must be 10 characters or less
   - name: --organizational-unit
     short-summary: The Organizational Unit (OU) within the Windows Active Directory
+  - name: --site
+    short-summary: The Active Directory site the service will limit Domain Controller discovery to
   - name: --kdc-ip
     short-summary: kdc server IP addresses for the active directory machine. This optional parameter is used only while creating kerberos volume
   - name: --ad-name
