@@ -674,6 +674,36 @@ class CosmosDBTests(ScenarioTest):
         container_list = self.cmd('az cosmosdb sql container list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
         assert len(container_list) == 0
 
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_sql_container_update_analytical_store_migration')
+    def test_cosmosdb_sql_container_update_analytical_store_migration(self, resource_group):
+        db_name = self.create_random_name(prefix='cli', length=15)
+        ctn_name = self.create_random_name(prefix='cli', length=15)
+        partition_key = "/thePartitionKey"
+        analyticalStorageTtlOnCollectionCreate = None
+        analyticalStorageTtlOnCollectionUpdate = -1
+        self.kwargs.update({
+            'acc': self.create_random_name(prefix='cli', length=15),
+            'db_name': db_name,
+            'ctn_name': ctn_name,
+            'part': partition_key,
+            'analyticalStorageTtlOnCollectionCreate': analyticalStorageTtlOnCollectionCreate,
+            'analyticalStorageTtlOnCollectionUpdate': analyticalStorageTtlOnCollectionUpdate})
+
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --enable-analytical-storage true')
+        self.cmd('az cosmosdb sql database create -g {rg} -a {acc} -n {db_name}')
+
+        container_create = self.cmd('az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {ctn_name} -p {part}').get_output_in_json()
+
+        assert container_create["resource"]["analyticalStorageTtl"] == analyticalStorageTtlOnCollectionCreate
+
+        container_update = self.cmd('az cosmosdb sql container update -g {rg} -a {acc} -d {db_name} -n {ctn_name} --analytical-storage-ttl {analyticalStorageTtlOnCollectionUpdate}').get_output_in_json()
+
+        assert container_update["resource"]["analyticalStorageTtl"] == analyticalStorageTtlOnCollectionUpdate
+
+        self.cmd('az cosmosdb sql container delete -g {rg} -a {acc} -d {db_name} -n {ctn_name} --yes')
+        container_list = self.cmd('az cosmosdb sql container list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
+        assert len(container_list) == 0
+
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_sql_stored_procedure')
     def test_cosmosdb_sql_stored_procedure(self, resource_group):
         db_name = self.create_random_name(prefix='cli', length=15)
