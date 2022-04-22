@@ -869,6 +869,10 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command_oauth('metadata update', 'set_metadata')
         g.storage_command_oauth('metadata show', 'get_directory_properties', exception_handler=show_exception_handler,
                                 transform=transform_metadata)
+        g.storage_custom_command_oauth('generate-sas', 'generate_sas_directory_uri',
+                                       custom_command_type=get_custom_sdk('fs_directory',
+                                                                          client_factory=cf_adls_service),
+                                       min_api='2020-02-10')
 
     with self.command_group('storage fs directory', custom_command_type=get_custom_sdk('azcopy', None))as g:
         g.storage_custom_command('upload', 'storage_fs_directory_copy', is_preview=True)
