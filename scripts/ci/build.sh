@@ -171,9 +171,7 @@ cat >>$testsrc_dir/setup.py <<EOL
                        '**/*.txt',
                        '**/*.txt',
                        '**/*.xml',
-                       'data/*.whl',
-                       'data/*.yaml',
-                       'data/*.zip',
+                       'data/*',
                        'recordings/*.yaml']},
     install_requires=DEPENDENCIES
 )
