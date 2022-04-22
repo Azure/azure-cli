@@ -193,7 +193,7 @@ def build_nic_resource(_, name, location, tags, vm_name, subnet_id, private_ip_a
     return nic
 
 
-def build_nsg_resource(_, name, location, tags, nsg_rule):
+def build_nsg_resource(cmd, name, location, tags, nsg_rule):
     nsg = {
         'type': 'Microsoft.Network/networkSecurityGroups',
         'name': name,
@@ -203,7 +203,7 @@ def build_nsg_resource(_, name, location, tags, nsg_rule):
         'dependsOn': []
     }
 
-    if nsg_rule != 'NONE':
+    if nsg_rule != 'NONE' and not cmd.cli_ctx.config.getboolean('vm', 'disable_nsg_rule', fallback=False):
         rule_name = 'rdp' if nsg_rule == 'RDP' else 'default-allow-ssh'
         rule_dest_port = '3389' if nsg_rule == 'RDP' else '22'
 

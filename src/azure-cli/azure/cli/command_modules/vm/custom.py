@@ -3016,7 +3016,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             if load_balancer_sku and load_balancer_sku.lower() == 'standard' and nsg is None and os_type:
                 nsg_name = '{}NSG'.format(vmss_name)
                 master_template.add_resource(build_nsg_resource(
-                    None, nsg_name, location, tags, 'rdp' if os_type.lower() == 'windows' else 'ssh'))
+                    cmd, nsg_name, location, tags, 'rdp' if os_type.lower() == 'windows' else 'ssh'))
                 nsg = "[resourceId('Microsoft.Network/networkSecurityGroups', '{}')]".format(nsg_name)
                 vmss_dependencies.append('Microsoft.Network/networkSecurityGroups/{}'.format(nsg_name))
 
