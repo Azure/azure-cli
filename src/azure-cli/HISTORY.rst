@@ -20,7 +20,13 @@ Release History
 
 **AMS**
 
-* Update AMS Module to 9.0 Python sdk (#22056)
+* `az ams asset-track create`: Add command to create an asset track (#22056)
+* `az ams asset-track show`: Add command to show an asset track (#22056)
+* `az ams asset-track list`: Add command to list all tracks under an asset (#22056)
+* `az ams asset-track update`: Add command to update the parameters of a track (#22056)
+* `az ams asset-track update-data`: Add update-data command to refresh the server in case track file was updated (#22056)
+* `az ams asset-track delete`: Add command to delete track (#22056)
+* `az ams streaming-endpoint get-skus`: Add command to get skus under a streaming endpoint (#22056)
 
 **App Config**
 
