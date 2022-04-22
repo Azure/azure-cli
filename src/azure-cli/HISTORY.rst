@@ -14,7 +14,8 @@ Release History
 
 **AKS**
 
-* `az aks create`: Add `--nat-gateway-managed-outbound-ip-count` and `--nat-gateway-idle-timeout` and Add `managedNATGateway` and `userAssignedNATGateway` to supported outbound type (#21623)
+* `az aks create`: Add `--nat-gateway-managed-outbound-ip-count` and `--nat-gateway-idle-timeout` to support nat gateway integration (#21623)
+* `az aks create`: Add `managedNATGateway` and `userAssignedNATGateway` to supported outbound type (#21623)
 * `az aks check-acr`: Bump canipull to 0.0.4-alpha to skip location check if cname returns only privatelink (#22092)
 
 **AMS**
@@ -23,7 +24,7 @@ Release History
 
 **App Config**
 
-* Fix #14012055: Fix feature flag import for missing description when using 'appconfig/kvset' profile. (#21941)
+* Fix feature flag import for missing description when using 'appconfig/kvset' profile (#21941)
 
 **App Service**
 
@@ -36,12 +37,12 @@ Release History
 
 **Bot Service**
 
-* ``az bot directline/email/facebook/kik/msteams/skype/slack/sms/telegram create``: Add ``--location`` argument as specified by user to channel creation for regionality/EUDB (#21908)
+* `az bot directline/email/facebook/kik/msteams/skype/slack/sms/telegram create`: Add `--location` argument as specified by user to channel creation for regionality/EUDB (#21908)
 
 **CDN**
 
 * `az afd rule create`: Fix rule creation failure with action type RouteConfigurationOverride (#21975)
-* `az afd route create`: Fix route creation issue with disabled --link-to-default-domain option (#21975)
+* `az afd route create`: Fix route creation issue with disabled `--link-to-default-domain option` (#21975)
 * Fix #22066: `az cdn name-exists` missing type argument (#22139)
 
 **Compute**
@@ -61,7 +62,7 @@ Release History
 **Key Vault**
 
 * `az keyvault key`: GA SKR and keyvault key rotation (#21989)
-* Fix #20520 `az keyvault network-rule`: Support removing multiple IP (#22025)
+* Fix #20520: `az keyvault network-rule`: Support removing multiple IP (#22025)
 
 **NetAppFiles**
 
@@ -76,7 +77,9 @@ Release History
 
 **Packaging**
 
-* Add Ubuntu 22.04 Jammy Jellyfish support (#21948)
+* Release DEB package for Ubuntu 22.04 Jammy Jellyfish (#21948)
+* Release RPM package for RHEL 8, CentOS Stream 8 (#21655)
+* Release RPM package for Mariner 1.0, 2.0 preview (#22034)
 
 **RDBMS**
 
