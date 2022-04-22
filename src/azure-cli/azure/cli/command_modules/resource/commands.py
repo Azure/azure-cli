@@ -549,10 +549,10 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_resourcemanager_privatelink')
         g.custom_show_command('show', 'get_resourcemanager_privatelink')
         g.custom_command('list', 'list_resourcemanager_privatelink')
-        g.custom_command('delete', 'delete_resourcemanager_privatelink')
+        g.custom_command('delete', 'delete_resourcemanager_privatelink', confirmation=True)
 
     with self.command_group('private-link association', resource_privatelinksassociation_sdk, resource_type=ResourceType.MGMT_RESOURCE_PRIVATELINKS) as g:
         g.custom_command('create', 'create_private_link_association')
         g.custom_show_command('show', 'get_private_link_association')
         g.custom_command('list', 'list_private_link_association')
-        g.custom_command('delete', 'delete_private_link_association')
+        g.custom_command('delete', 'delete_private_link_association', confirmation=True)
