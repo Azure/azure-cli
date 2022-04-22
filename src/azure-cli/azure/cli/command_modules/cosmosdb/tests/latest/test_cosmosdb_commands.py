@@ -636,16 +636,16 @@ class CosmosDBTests(ScenarioTest):
 
         assert container_create["resource"]["analyticalStorageTtl"] == analyticalStorageTtlOnCollectionCreate
 
-        self.cmd('az cosmosdb sql container update -g {rg} -a {acc} -d {db_name} -n {ctn_name} --analytical-storage-ttl {analyticalStorageTtlOnCollectionUpdate}').get_output_in_json()
+        container_update = self.cmd('az cosmosdb sql container update -g {rg} -a {acc} -d {db_name} -n {ctn_name} --analytical-storage-ttl {analyticalStorageTtlOnCollectionUpdate}').get_output_in_json()
 
-        assert container_create["resource"]["analyticalStorageTtl"] == analyticalStorageTtlOnCollectionUpdate
+        assert container_update["resource"]["analyticalStorageTtl"] == analyticalStorageTtlOnCollectionUpdate
 
         self.cmd('az cosmosdb sql container delete -g {rg} -a {acc} -d {db_name} -n {ctn_name} --yes')
         container_list = self.cmd('az cosmosdb sql container list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
         assert len(container_list) == 0
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_sql_container_update_disable_analytics')
-    def test_cosmosdb_sql_container_update_analytical_ttl(self, resource_group):
+    def test_cosmosdb_sql_container_update_disable_analytics(self, resource_group):
         db_name = self.create_random_name(prefix='cli', length=15)
         ctn_name = self.create_random_name(prefix='cli', length=15)
         partition_key = "/thePartitionKey"
@@ -666,9 +666,9 @@ class CosmosDBTests(ScenarioTest):
 
         assert container_create["resource"]["analyticalStorageTtl"] == analyticalStorageTtlOnCollectionCreate
 
-        self.cmd('az cosmosdb sql container update -g {rg} -a {acc} -d {db_name} -n {ctn_name} --analytical-storage-ttl {analyticalStorageTtlOnCollectionUpdate}').get_output_in_json()
+        container_update = self.cmd('az cosmosdb sql container update -g {rg} -a {acc} -d {db_name} -n {ctn_name} --analytical-storage-ttl {analyticalStorageTtlOnCollectionUpdate}').get_output_in_json()
 
-        assert container_create["resource"]["analyticalStorageTtl"] == analyticalStorageTtlOnCollectionUpdate
+        assert container_update["resource"]["analyticalStorageTtl"] == analyticalStorageTtlOnCollectionUpdate
 
         self.cmd('az cosmosdb sql container delete -g {rg} -a {acc} -d {db_name} -n {ctn_name} --yes')
         container_list = self.cmd('az cosmosdb sql container list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
