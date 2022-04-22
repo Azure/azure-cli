@@ -107,7 +107,7 @@ Release History
 * Fix #21914: `az storage blob upload`: Make block size larger (100MB) for large files (>200GB) (#21971)
 * `az storage account/container/blob generate-sas`: Add `--encryption-scope` (#21990)
 * Fix #21920: `az storage copy`&`az storage remove`: Hide credentials in warning message (#21980)
-* Add `--blob-endpoint`/`--file-endpoint`/`--table-endpoint`/`--queue-endpoint` for data service commands to support customized service endpoint (#21782)
+* Add `--blob-endpoint/--file-endpoint/--table-endpoint/--queue-endpoint` for data service commands to support customized service endpoint (#21782)
 * GA storage file datalake soft delete (#22037)
 * `az storage cors add`: Allow `PATCH` for `--methods` (#22045)
 * `az storage entity`: Support specifying `EdmType` for `--entity` (#22060)
