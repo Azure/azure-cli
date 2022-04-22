@@ -1369,9 +1369,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage container set-permission') as c:
         c.ignore('signed_identifiers')
 
-    with self.argument_context('storage container lease') as c:
-        c.argument('container_name', container_name_type)
-
     with self.argument_context('storage container') as c:
         c.argument('account_name', completer=get_resource_name_completion_list('Microsoft.Storage/storageAccounts'))
         c.argument('resource_group_name', required=False, validator=process_resource_group)
@@ -1445,9 +1442,39 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.extra('encryption_scope', help='A predefined encryption scope used to encrypt the data on the service.')
         c.ignore('sas_token')
 
-    with self.argument_context('storage container lease') as c:
-        c.argument('lease_duration', type=int)
-        c.argument('lease_break_period', type=int)
+    for cmd in ['acquire', 'renew', 'break', 'change', 'release']:
+        with self.argument_context(f'storage container lease {cmd}') as c:
+            c.register_precondition_options()
+            c.register_container_arguments()
+            c.argument('container_name', required=True, options_list=['--container-name', '-c'])
+
+    with self.argument_context('storage container lease acquire') as c:
+        c.argument('lease_duration',
+                   help='Specify the duration of the lease, in seconds, or negative one (-1) for a lease that never'
+                        ' expires. A non-infinite lease can be between 15 and 60 seconds. A lease duration cannot '
+                        'be changed using renew or change. Default is -1 (infinite lease)', type=int)
+        c.extra('lease_id', options_list='--proposed-lease-id',
+                help='Proposed lease ID, in a GUID string format. The Blob service returns 400 (Invalid request) '
+                     'if the proposed lease ID is not in the correct format.')
+
+    for cmd in ['renew', 'change', 'release']:
+        with self.argument_context(f'storage container lease {cmd}') as c:
+            c.extra('lease_id', help='Lease ID for active lease.', required=True)
+
+    with self.argument_context('storage container lease break') as c:
+        c.extra('lease_break_period', help='This is the proposed duration of seconds that the lease should continue '
+                                           'before it is broken, between 0 and 60 seconds. This break period is only '
+                                           'used if it is shorter than the time remaining on the lease. If longer, the'
+                                           ' time remaining on the lease is used. A new lease will not be available '
+                                           'before the break period has expired, but the lease may be held for longer '
+                                           'than the break period. If this header does not appear with a break '
+                                           'operation, a fixed-duration lease breaks after the remaining lease period '
+                                           'elapses, and an infinite lease breaks immediately.')
+
+    with self.argument_context('storage container lease change') as c:
+        c.extra('proposed_lease_id', help='Proposed lease ID, in a GUID string format. The Blob service returns 400'
+                                          ' (Invalid request) if the proposed lease ID is not in the correct format.',
+                required=True)
 
     with self.argument_context('storage container list', resource_type=ResourceType.DATA_STORAGE_BLOB) as c:
         c.extra('timeout', timeout_type)
