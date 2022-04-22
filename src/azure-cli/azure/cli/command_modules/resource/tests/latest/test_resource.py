@@ -4166,11 +4166,13 @@ class PrivateLinkAssociationTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_resourcemanager_privatelink_get', location='westus')
     def test_get_privatelinkassociation(self, resource_group, resource_group_location):
+        account = self.cmd("account show").get_output_in_json()
+        tenant_id = account["tenantId"]
         self.kwargs.update({
             'loc': resource_group_location,
             'n': self.create_random_name('privatelink', 30),
-            'mg': self.create_random_name('azure-cli-management-group', 40),
-            'pla': self.create_guid,
+            'mg': tenant_id,
+            'pla': self.create_guid(),
             'sub': self.get_subscription_id()
         })
 
@@ -4178,32 +4180,32 @@ class PrivateLinkAssociationTest(ScenarioTest):
             self.check('name', '{n}'),
             self.check('location', '{loc}')
         ])            
-        self.kwargs['pl'] = 'subscriptions/{sub}/resourceGroup/{rg}/providers/Microsoft.Authorization/resourceManagementPrivateLinks/{n}'.format(
+        self.kwargs['pl'] = '/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Authorization/resourceManagementPrivateLinks/{n}'.format(
             **self.kwargs)
 
-        self.cmd('account management-group create --name {mg}', checks=[])
 
-        self.cmd('private-link association create -m {mg} -n {pla} -privatelink {pl} -public-network-access enabled', checks=[])
+        self.cmd('private-link association create -m {mg} -n {pla} -privatelink {pl} --public-network-access enabled', checks=[])
         
         self.cmd('private-link association show -m {mg} -n {pla}', checks=[
-            self.check('[0].name', '{pla}'),
-            self.check('properties.PublicNetworkAccess', 'enabled'),
-            self.check('properties.PrivateLink', '{pl}')
+            self.check('name', '{pla}'),
+            self.check('properties.publicNetworkAccess', 'Enabled'),
+            self.check('properties.privateLink', '{pl}')
         ])
 
         # clean
-        self.cmd('resourcemanagement private-link delete -g {rg} -n {name1}', checks=self.is_empty())
-        self.cmd('private-link association delete -m {mg} -n {pla}', self.is_empty())
-        self.cmd('account management-group delete -n {mg}')
+        self.cmd('resourcemanagement private-link delete -g {rg} -n {n} --yes', checks=self.is_empty())
+        self.cmd('private-link association delete -m {mg} -n {pla} --yes', self.is_empty())
 
 
     @ResourceGroupPreparer(name_prefix='cli_test_resourcemanager_privatelink_create', location='westus')
-    def test_get_privatelinkassociation(self, resource_group, resource_group_location):
+    def test_create_privatelinkassociation(self, resource_group, resource_group_location):
+        account = self.cmd("account show").get_output_in_json()
+        tenant_id = account["tenantId"]
         self.kwargs.update({
             'loc': resource_group_location,
             'n': self.create_random_name('privatelink', 30),
-            'mg': self.create_random_name('azure-cli-management-group', 40),
-            'pla': self.create_guid,
+            'mg': tenant_id,
+            'pla': self.create_guid(),
             'sub': self.get_subscription_id()
         })
 
@@ -4211,29 +4213,29 @@ class PrivateLinkAssociationTest(ScenarioTest):
             self.check('name', '{n}'),
             self.check('location', '{loc}')
         ])            
-        self.kwargs['pl'] = 'subscriptions/{sub}/resourceGroup/{rg}/providers/Microsoft.Authorization/resourceManagementPrivateLinks/{n}'.format(
+        self.kwargs['pl'] = '/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Authorization/resourceManagementPrivateLinks/{n}'.format(
             **self.kwargs)
 
-        self.cmd('account management-group create --name {mg}', checks=[])
-
-        self.cmd('private-link association create -m {mg} -n {pla} -privatelink {pl} -public-network-access enabled', checks=[
-            self.check('[0].name', '{pla}'),
-            self.check('properties.PublicNetworkAccess', 'enabled'),
-            self.check('properties.PrivateLink', '{pl}')
+        self.cmd('private-link association create -m {mg} -n {pla} -privatelink {pl} --public-network-access enabled', checks=[
+            self.check('name', '{pla}'),
+            self.check('properties.publicNetworkAccess', 'Enabled'),
+            self.check('properties.privateLink', '{pl}')
         ])
 
+
         # clean
-        self.cmd('resourcemanagement private-link delete -g {rg} -n {name1}', checks=self.is_empty())
-        self.cmd('private-link association delete -m {mg} -n {pla}', self.is_empty())
-        self.cmd('account management-group delete -n {mg}')
+        self.cmd('resourcemanagement private-link delete -g {rg} -n {n} --yes', checks=self.is_empty())
+        self.cmd('private-link association delete -m {mg} -n {pla} --yes', self.is_empty())
 
     @ResourceGroupPreparer(name_prefix='cli_test_resourcemanager_privatelink_delete', location='westus')
-    def test_get_privatelinkassociation(self, resource_group, resource_group_location):
+    def test_delete_privatelinkassociation(self, resource_group, resource_group_location):
+        account = self.cmd("account show").get_output_in_json()
+        tenant_id = account["tenantId"]
         self.kwargs.update({
             'loc': resource_group_location,
             'n': self.create_random_name('privatelink', 30),
-            'mg': self.create_random_name('azure-cli-management-group', 40),
-            'pla': self.create_guid,
+            'mg': tenant_id,
+            'pla': self.create_guid(),
             'sub': self.get_subscription_id()
         })
 
@@ -4241,29 +4243,30 @@ class PrivateLinkAssociationTest(ScenarioTest):
             self.check('name', '{n}'),
             self.check('location', '{loc}')
         ])            
-        self.kwargs['pl'] = 'subscriptions/{sub}/resourceGroup/{rg}/providers/Microsoft.Authorization/resourceManagementPrivateLinks/{n}'.format(
+        self.kwargs['pl'] = '/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Authorization/resourceManagementPrivateLinks/{n}'.format(
             **self.kwargs)
 
-        self.cmd('account management-group create --name {mg}', checks=[])
 
-        self.cmd('private-link association create -m {mg} -n {pla} -privatelink {pl} -public-network-access enabled', checks=[
-            self.check('[0].name', '{pla}'),
-            self.check('properties.PublicNetworkAccess', 'enabled'),
-            self.check('properties.PrivateLink', '{pl}')
+        self.cmd('private-link association create -m {mg} -n {pla} -privatelink {pl} --public-network-access enabled', checks=[
+            self.check('name', '{pla}'),
+            self.check('properties.publicNetworkAccess', 'Enabled'),
+            self.check('properties.privateLink', '{pl}')
         ])
-        self.cmd('resourcemanagement private-link delete -g {rg} -n {name1}', checks=self.is_empty())
+
+        self.cmd('resourcemanagement private-link delete -g {rg} -n {n} --yes', checks=self.is_empty())
 
         # clean
-        self.cmd('private-link association delete -m {mg} -n {pla}', self.is_empty())
-        self.cmd('account management-group delete -n {mg}')
+        self.cmd('private-link association delete -m {mg} -n {pla} --yes', self.is_empty())
    
     @ResourceGroupPreparer(name_prefix='cli_test_resourcemanager_privatelink_list', location='westus')
-    def test_get_privatelinkassociation(self, resource_group, resource_group_location):
+    def test_list_privatelinkassociation(self, resource_group, resource_group_location):
+        account = self.cmd("account show").get_output_in_json()
+        tenant_id = account["tenantId"]
         self.kwargs.update({
             'loc': resource_group_location,
             'n': self.create_random_name('privatelink', 30),
-            'mg': self.create_random_name('azure-cli-management-group', 40),
-            'pla': self.create_guid,
+            'mg': tenant_id,
+            'pla': self.create_guid(),
             'sub': self.get_subscription_id()
         })
 
@@ -4271,23 +4274,21 @@ class PrivateLinkAssociationTest(ScenarioTest):
             self.check('name', '{n}'),
             self.check('location', '{loc}')
         ])            
-        self.kwargs['pl'] = 'subscriptions/{sub}/resourceGroup/{rg}/providers/Microsoft.Authorization/resourceManagementPrivateLinks/{n}'.format(
+        self.kwargs['pl'] = '/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Authorization/resourceManagementPrivateLinks/{n}'.format(
             **self.kwargs)
 
-        self.cmd('account management-group create --name {mg}', checks=[])
-
-        self.cmd('private-link association create -m {mg} -n {pla} -privatelink {pl} -public-network-access enabled', checks=[])
+        self.cmd('private-link association create -m {mg} -n {pla} -privatelink {pl} --public-network-access enabled', checks=[])
         
         self.cmd('private-link association list -m {mg}', checks=[
-            self.check('[0].name', '{pla}'),
-            self.check('properties.PublicNetworkAccess', 'enabled'),
-            self.check('properties.PrivateLink', '{pl}')
+            self.check('value[5].name', '{pla}'),
+            self.check('value[5].properties.publicNetworkAccess', 'Enabled'),
+            self.check('value[5].properties.privateLink', '{pl}')
         ])
 
+
         # clean
-        self.cmd('resourcemanagement private-link delete -g {rg} -n {name1}', checks=self.is_empty())
-        self.cmd('private-link association delete -m {mg} -n {pla}', self.is_empty())
-        self.cmd('account management-group delete -n {mg}')
+        self.cmd('resourcemanagement private-link delete -g {rg} -n {n} --yes', checks=self.is_empty())
+        self.cmd('private-link association delete -m {mg} -n {pla} --yes', self.is_empty())
 
 if __name__ == '__main__':
     unittest.main()
