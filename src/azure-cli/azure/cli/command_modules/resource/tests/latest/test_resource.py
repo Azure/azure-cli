@@ -4115,10 +4115,10 @@ class ResourceManagementPrivateLinkTest(ScenarioTest):
         })
         self.cmd('resourcemanagement private-link create -g {rg} -n {n} -l {loc}')
         self.cmd('resourcemanagement private-link show -g {rg} -n {n}', checks=[
-            self.check('Name', '{n}'),
-            self.check('Location', '{loc}')
+            self.check('name', '{n}'),
+            self.check('location', '{loc}')
         ])
-        self.cmd('resourcemanagement private-link delete -g {rg} -n {n}', checks=self.is_empty())
+        self.cmd('resourcemanagement private-link delete -g {rg} -n {n} --yes', checks=self.is_empty())
 
     @ResourceGroupPreparer(name_prefix='cli_test_resourcemanager_privatelink_create', location='westus')
     def test_create_resourcemanagementprivatelink(self, resource_group, resource_group_location):
@@ -4127,10 +4127,10 @@ class ResourceManagementPrivateLinkTest(ScenarioTest):
             'n': self.create_random_name('privatelink', 30)
         })
         self.cmd('resourcemanagement private-link create -g {rg} -n {n} -l {loc}', checks=[
-            self.check('Name', '{n}'),
-            self.check('Location', '{loc}')
+            self.check('name', '{n}'),
+            self.check('location', '{loc}')
         ])
-        self.cmd('resourcemanagement private-link delete -g {rg} -n {n}', checks=self.is_empty())
+        self.cmd('resourcemanagement private-link delete -g {rg} -n {n} --yes', checks=self.is_empty())
 
     @ResourceGroupPreparer(name_prefix='cli_test_resourcemanager_privatelink_delete', location='westus')
     def test_delete_resourcemanagementprivatelink(self, resource_group, resource_group_location):
@@ -4139,10 +4139,10 @@ class ResourceManagementPrivateLinkTest(ScenarioTest):
             'n': self.create_random_name('privatelink', 30)
         })
         self.cmd('resourcemanagement private-link create -g {rg} -n {n} -l {loc}', checks=[
-            self.check('Name', '{n}'),
-            self.check('Location', '{loc}')
+            self.check('name', '{n}'),
+            self.check('location', '{loc}')
         ])
-        self.cmd('resourcemanagement private-link delete -g {rg} -n {n}', checks=self.is_empty())
+        self.cmd('resourcemanagement private-link delete -g {rg} -n {n} --yes', checks=self.is_empty())
 
     @ResourceGroupPreparer(name_prefix='cli_test_resourcemanager_privatelink_list', location='westus')
     def test_list_resourcemanagementprivatelink(self, resource_group, resource_group_location):
@@ -4154,13 +4154,13 @@ class ResourceManagementPrivateLinkTest(ScenarioTest):
         self.cmd('resourcemanagement private-link create -g {rg} -n {name1} -l {loc}')
         self.cmd('resourcemanagement private-link create -g {rg} -n {name2} -l {loc}')
         self.cmd('resourcemanagement private-link list -g {rg}', checks=[
-            self.check('[0].Name', '{name1}'),
-            self.check('[1].Name', '{name2}'),
-            self.check('[0].Location', '{loc}'),
-            self.check('[1].Location', '{loc}')
+            self.check('value[0].name', '{name1}'),
+            self.check('value[1].name', '{name2}'),
+            self.check('value[0].location', '{loc}'),
+            self.check('value[1].location', '{loc}')
         ])
-        self.cmd('resourcemanagement private-link delete -g {rg} -n {name1}', checks=self.is_empty())
-        self.cmd('resourcemanagement private-link delete -g {rg} -n {name2}', checks=self.is_empty())
+        self.cmd('resourcemanagement private-link delete -g {rg} -n {name1} --yes', checks=self.is_empty())
+        self.cmd('resourcemanagement private-link delete -g {rg} -n {name2} --yes', checks=self.is_empty())
 
 class PrivateLinkAssociationTest(ScenarioTest):    
 
@@ -4175,8 +4175,8 @@ class PrivateLinkAssociationTest(ScenarioTest):
         })
 
         self.cmd('resourcemanagement private-link create -g {rg} -n {n} -l {loc}', checks=[
-            self.check('Name', '{n}'),
-            self.check('Location', '{loc}')
+            self.check('name', '{n}'),
+            self.check('location', '{loc}')
         ])            
         self.kwargs['pl'] = 'subscriptions/{sub}/resourceGroup/{rg}/providers/Microsoft.Authorization/resourceManagementPrivateLinks/{n}'.format(
             **self.kwargs)
@@ -4186,7 +4186,7 @@ class PrivateLinkAssociationTest(ScenarioTest):
         self.cmd('private-link association create -m {mg} -n {pla} -privatelink {pl} -public-network-access enabled', checks=[])
         
         self.cmd('private-link association show -m {mg} -n {pla}', checks=[
-            self.check('[0].Name', '{pla}'),
+            self.check('[0].name', '{pla}'),
             self.check('properties.PublicNetworkAccess', 'enabled'),
             self.check('properties.PrivateLink', '{pl}')
         ])
@@ -4208,8 +4208,8 @@ class PrivateLinkAssociationTest(ScenarioTest):
         })
 
         self.cmd('resourcemanagement private-link create -g {rg} -n {n} -l {loc}', checks=[
-            self.check('Name', '{n}'),
-            self.check('Location', '{loc}')
+            self.check('name', '{n}'),
+            self.check('location', '{loc}')
         ])            
         self.kwargs['pl'] = 'subscriptions/{sub}/resourceGroup/{rg}/providers/Microsoft.Authorization/resourceManagementPrivateLinks/{n}'.format(
             **self.kwargs)
@@ -4217,7 +4217,7 @@ class PrivateLinkAssociationTest(ScenarioTest):
         self.cmd('account management-group create --name {mg}', checks=[])
 
         self.cmd('private-link association create -m {mg} -n {pla} -privatelink {pl} -public-network-access enabled', checks=[
-            self.check('[0].Name', '{pla}'),
+            self.check('[0].name', '{pla}'),
             self.check('properties.PublicNetworkAccess', 'enabled'),
             self.check('properties.PrivateLink', '{pl}')
         ])
@@ -4238,8 +4238,8 @@ class PrivateLinkAssociationTest(ScenarioTest):
         })
 
         self.cmd('resourcemanagement private-link create -g {rg} -n {n} -l {loc}', checks=[
-            self.check('Name', '{n}'),
-            self.check('Location', '{loc}')
+            self.check('name', '{n}'),
+            self.check('location', '{loc}')
         ])            
         self.kwargs['pl'] = 'subscriptions/{sub}/resourceGroup/{rg}/providers/Microsoft.Authorization/resourceManagementPrivateLinks/{n}'.format(
             **self.kwargs)
@@ -4247,7 +4247,7 @@ class PrivateLinkAssociationTest(ScenarioTest):
         self.cmd('account management-group create --name {mg}', checks=[])
 
         self.cmd('private-link association create -m {mg} -n {pla} -privatelink {pl} -public-network-access enabled', checks=[
-            self.check('[0].Name', '{pla}'),
+            self.check('[0].name', '{pla}'),
             self.check('properties.PublicNetworkAccess', 'enabled'),
             self.check('properties.PrivateLink', '{pl}')
         ])
@@ -4268,8 +4268,8 @@ class PrivateLinkAssociationTest(ScenarioTest):
         })
 
         self.cmd('resourcemanagement private-link create -g {rg} -n {n} -l {loc}', checks=[
-            self.check('Name', '{n}'),
-            self.check('Location', '{loc}')
+            self.check('name', '{n}'),
+            self.check('location', '{loc}')
         ])            
         self.kwargs['pl'] = 'subscriptions/{sub}/resourceGroup/{rg}/providers/Microsoft.Authorization/resourceManagementPrivateLinks/{n}'.format(
             **self.kwargs)
@@ -4279,7 +4279,7 @@ class PrivateLinkAssociationTest(ScenarioTest):
         self.cmd('private-link association create -m {mg} -n {pla} -privatelink {pl} -public-network-access enabled', checks=[])
         
         self.cmd('private-link association list -m {mg}', checks=[
-            self.check('[0].Name', '{pla}'),
+            self.check('[0].name', '{pla}'),
             self.check('properties.PublicNetworkAccess', 'enabled'),
             self.check('properties.PrivateLink', '{pl}')
         ])
