@@ -16,6 +16,7 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
         vm_create_cmd_tpl = 'vm create -g {rg} --name {vm} ' \
                             '--image UbuntuLTS ' \
                             '--nsg {vm} ' \
+                            '--generate-ssh-keys '\
                             '--nsg-rule None '
         vm_info = self.cmd(vm_create_cmd_tpl.format(rg=resource_group, vm=vm)).get_output_in_json()
 
