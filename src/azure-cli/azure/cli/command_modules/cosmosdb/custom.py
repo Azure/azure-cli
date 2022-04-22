@@ -1434,7 +1434,7 @@ def cli_cosmosdb_table_throughput_migrate(client,
 
 
 def _get_throughput_settings_update_parameters(throughput=None, max_throughput=None):
-
+    throughput_resource = None
     if throughput and max_throughput:
         raise CLIError("Please provide max-throughput if your resource is autoscale enabled otherwise provide throughput.")
     if throughput:
