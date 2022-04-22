@@ -4982,7 +4982,7 @@ def _handle_asg_property(kwargs, key, asgs):
     prefix = key.split('_', 1)[0] + '_'
     if asgs:
         kwargs[key] = asgs
-        if kwargs[prefix + 'address_prefix'].is_default:
+        if kwargs[prefix + 'address_prefix']:
             kwargs[prefix + 'address_prefix'] = ''
 
 
