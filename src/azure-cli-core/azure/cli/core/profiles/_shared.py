@@ -156,7 +156,7 @@ AZURE_API_PROFILES = {
             'snapshots': '2021-12-01',
             'galleries': '2021-07-01',
             'gallery_images': '2021-10-01',
-            'gallery_image_versions': '2021-07-01',
+            'gallery_image_versions': '2021-10-01',
             'gallery_applications': '2021-07-01',
             'gallery_application_versions': '2021-07-01',
             'shared_galleries': '2020-09-30',
@@ -241,7 +241,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_ARO: '2020-04-30',
         ResourceType.MGMT_DATABOXEDGE: '2021-02-01-preview',
         ResourceType.MGMT_CUSTOMLOCATION: '2021-03-15-preview',
-        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2022-02-01', {
+        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2022-03-01', {
             'container_services': '2017-07-01',
             'open_shift_managed_clusters': '2019-09-30-preview'
         }),

@@ -85,3 +85,7 @@ def get_account_filters_client(cli_ctx, *_):
 
 def get_asset_filters_client(cli_ctx, *_):
     return cf_media(cli_ctx).asset_filters
+
+
+def get_asset_tracks_client(cli_ctx, *_):
+    return cf_media(cli_ctx).tracks

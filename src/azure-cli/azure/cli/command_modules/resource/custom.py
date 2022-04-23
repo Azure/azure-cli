@@ -411,6 +411,7 @@ class JsonCTemplate:
     def __init__(self, template_string):
         self.template_string = template_string
 
+        
 class JSONSerializer(Serializer):
     def body(self, data, data_type, **kwargs):
         if data_type in ('Deployment', 'ScopedDeployment', 'DeploymentWhatIf', 'ScopedDeploymentWhatIf'):

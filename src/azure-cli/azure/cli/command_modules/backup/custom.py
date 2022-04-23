@@ -446,12 +446,6 @@ def set_policy(client, resource_group_name, vault_name, policy, policy_name):
     retention_range_in_days = policy_object.properties.instant_rp_retention_range_in_days
     schedule_run_frequency = policy_object.properties.schedule_policy.schedule_run_frequency
 
-    if schedule_run_frequency == ScheduleRunType.hourly:
-        raise InvalidArgumentValueError(
-            """
-            Hourly IaasVM backups are not allowed from CLI currently. Please try using portal experience for the same.
-            """)
-
     # Validating range of days input
     if policy_object.properties.policy_type != 'V2':
         if schedule_run_frequency == ScheduleRunType.weekly and retention_range_in_days != 5:
@@ -483,11 +477,7 @@ def set_policy(client, resource_group_name, vault_name, policy, policy_name):
 
 def create_policy(client, resource_group_name, vault_name, name, policy):
     policy_object = cust_help.get_policy_from_json(client, policy)
-    if policy_object.properties.schedule_policy.schedule_run_frequency == ScheduleRunType.hourly:
-        raise InvalidArgumentValueError(
-            """
-            Hourly IaasVM backups are not allowed from CLI currently. Please try using portal experience for the same.
-            """)
+
     policy_object.name = name
     policy_object.properties.backup_management_type = "AzureIaasVM"
 
