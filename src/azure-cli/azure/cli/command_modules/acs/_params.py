@@ -22,7 +22,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_RAPID_UPGRADE_CHANNEL, CONST_SCALE_DOWN_MODE_DEALLOCATE,
     CONST_SCALE_DOWN_MODE_DELETE, CONST_SCALE_SET_PRIORITY_REGULAR,
     CONST_SCALE_SET_PRIORITY_SPOT, CONST_SPOT_EVICTION_POLICY_DEALLOCATE,
-    CONST_SPOT_EVICTION_POLICY_DELETE, CONST_STABLE_UPGRADE_CHANNEL)
+    CONST_SPOT_EVICTION_POLICY_DELETE, CONST_STABLE_UPGRADE_CHANNEL, CONST_LOAD_BALANCER_SKU_BASIC, CONST_LOAD_BALANCER_SKU_STANDARD)
 from azure.cli.command_modules.acs._validators import (
     validate_acr, validate_assign_identity, validate_assign_kubelet_identity,
     validate_create_parameters, validate_credential_format,
@@ -93,6 +93,7 @@ node_mode_types = [CONST_NODEPOOL_MODE_SYSTEM, CONST_NODEPOOL_MODE_USER]
 node_os_skus = [CONST_OS_SKU_UBUNTU, CONST_OS_SKU_CBLMARINER]
 
 # consts for ManagedCluster
+load_balancer_skus = [CONST_LOAD_BALANCER_SKU_BASIC, CONST_LOAD_BALANCER_SKU_STANDARD]
 network_plugins = [CONST_NETWORK_PLUGIN_KUBENET, CONST_NETWORK_PLUGIN_AZURE]
 outbound_types = [CONST_OUTBOUND_TYPE_LOAD_BALANCER, CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING, CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY, CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY]
 auto_upgrade_channels = [
@@ -211,6 +212,13 @@ def load_arguments(self, _):
         c.argument('name', validator=validate_linux_host_name)
         c.argument('kubernetes_version',
                    completer=get_k8s_versions_completion_list)
+        c.argument('dns_name_prefix', options_list=['--dns-name-prefix', '-p'])
+        c.argument('node_osdisk_diskencryptionset_id', options_list=['--node-osdisk-diskencryptionset-id', '-d'])
+        c.argument('disable_local_accounts', action='store_true')
+        c.argument('disable_rbac', action='store_true')
+        c.argument('enable_rbac', action='store_true', options_list=['--enable-rbac', '-r'],
+                   deprecate_info=c.deprecate(redirect="--disable-rbac", hide="2.0.45"))
+        c.argument('edge_zone', edge_zone_type)
         c.argument('admin_username', options_list=[
                    '--admin-username', '-u'], default='azureuser')
         c.argument('generate_ssh_keys', action='store_true',
@@ -218,17 +226,11 @@ def load_arguments(self, _):
         c.argument('ssh_key_value', required=False, type=file_type, default=os.path.join('~', '.ssh', 'id_rsa.pub'),
                    completer=FilesCompleter(), validator=validate_ssh_key)
         c.argument('no_ssh_key', options_list=['--no-ssh-key', '-x'])
-        c.argument('edge_zone', edge_zone_type)
-        c.argument('node_osdisk_diskencryptionset_id', options_list=['--node-osdisk-diskencryptionset-id', '-d'])
-        c.argument('disable_local_accounts', action='store_true')
-        c.argument('disable_rbac', action='store_true')
-        c.argument('enable_rbac', action='store_true', options_list=['--enable-rbac', '-r'],
-                   deprecate_info=c.deprecate(redirect="--disable-rbac", hide="2.0.45"))
         c.argument('dns_service_ip')
         c.argument('docker_bridge_address')
         c.argument('pod_cidr')
         c.argument('service_cidr')
-        c.argument('load_balancer_sku', validator=validate_load_balancer_sku)
+        c.argument('load_balancer_sku', arg_type=get_enum_type(load_balancer_skus), validator=validate_load_balancer_sku)
         c.argument('load_balancer_managed_outbound_ip_count', type=int)
         c.argument('load_balancer_outbound_ips', validator=validate_load_balancer_outbound_ips)
         c.argument('load_balancer_outbound_ip_prefixes', validator=validate_load_balancer_outbound_ip_prefixes)
@@ -245,7 +247,6 @@ def load_arguments(self, _):
         c.argument('cluster_autoscaler_profile', nargs='+', options_list=["--cluster-autoscaler-profile", "--ca-profile"],
                    help="Space-separated list of key=value pairs for configuring cluster autoscaler. Pass an empty string to clear the profile.")
         c.argument('uptime_sla', action='store_true')
-        c.argument('dns_name_prefix', options_list=['--dns-name-prefix', '-p'])
         c.argument('fqdn_subdomain')
         c.argument('api_server_authorized_ip_ranges', validator=validate_ip_ranges)
         c.argument('enable_private_cluster', action='store_true')

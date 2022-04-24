@@ -101,6 +101,9 @@ class AKSAgentPoolContext(BaseAKSContext):
         super().__init__(cmd, raw_parameters, models, decorator_mode)
         self.agentpool_decorator_mode = agentpool_decorator_mode
         self.agentpool = None
+        # used to store origin agentpool in update mode
+        self.__existing_agentpool = None
+        # used to store all the agentpools in mc mode
         self._agentpools = []
 
     # pylint: disable=no-self-use
@@ -157,6 +160,9 @@ class AKSAgentPoolContext(BaseAKSContext):
 
         :return: None
         """
+        if self.decorator_mode == DecoratorMode.UPDATE:
+            self.attach_existing_agentpool(agentpool)
+
         if self.agentpool is None:
             self.agentpool = agentpool
         else:
@@ -166,6 +172,33 @@ class AKSAgentPoolContext(BaseAKSContext):
                     msg
                 )
             )
+
+    def attach_existing_agentpool(self, agentpool: AgentPool) -> None:
+        if self.__existing_agentpool is None:
+            self.__existing_agentpool = agentpool
+        else:
+            msg = "the same" if self.__existing_agentpool == agentpool else "different"
+            raise CLIInternalError(
+                "Attempting to attach the existing `agentpool` object again, the two objects are {}.".format(
+                    msg
+                )
+            )
+
+    @property
+    def existing_agentpool(self) -> AgentPool:
+        return self.__existing_agentpool
+
+    def attach_agentpools(self, agentpools: List[AgentPool]) -> None:
+        if self._agentpools == []:
+            self._agentpools = agentpools
+        else:
+            msg = "the same" if self._agentpools == agentpools else "different"
+            raise CLIInternalError(
+                "Attempting to attach the `agentpools` object again, the two objects are {}.".format(
+                    msg
+                )
+            )
+        self._agentpools = agentpools
 
     def get_resource_group_name(self) -> str:
         """Obtain the value of resource_group_name.
@@ -979,12 +1012,12 @@ class AKSAgentPoolContext(BaseAKSContext):
         return mode
 
     def get_scale_down_mode(self) -> str:
-        """Obtain the value of scale_down_mode, default value is CONST_SCALE_DOWN_MODE_DELETE.
+        """Obtain the value of scale_down_mode, default value is CONST_SCALE_DOWN_MODE_DELETE for standalone mode.
 
         :return: string
         """
         # read the original value passed by the command
-        if self.decorator_mode == DecoratorMode.CREATE:
+        if self.decorator_mode == DecoratorMode.CREATE and self.agentpool_decorator_mode == AgentPoolDecoratorMode.STANDALONE:
             scale_down_mode = self.raw_param.get("scale_down_mode", CONST_SCALE_DOWN_MODE_DELETE)
         else:
             scale_down_mode = self.raw_param.get("scale_down_mode")
@@ -1444,7 +1477,6 @@ class AKSAgentPoolUpdateDecorator:
                 "is not the same as the `agentpool` in the context."
             )
 
-    # pylint: disable=protected-access
     def fetch_agentpool(self, agentpools: List[AgentPool] = None) -> AgentPool:
         """Get the AgentPool object currently in use and attach it to internal context.
 
@@ -1453,7 +1485,7 @@ class AKSAgentPoolUpdateDecorator:
         :return: the AgentPool object
         """
         if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
-            self.context._agentpools = agentpools
+            self.context.attach_agentpools(agentpools)
             agentpool = safe_list_get(agentpools, 0)
         else:
             agentpool = self.client.get(

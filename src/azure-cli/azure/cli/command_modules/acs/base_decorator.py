@@ -19,6 +19,7 @@ logger = get_logger(__name__)
 
 # type variables
 ContainerServiceClient = TypeVar("ContainerServiceClient")
+ManagedCluster = TypeVar("ManagedCluster")
 
 
 def validate_decorator_mode(decorator_mode) -> bool:
@@ -246,8 +247,6 @@ class BaseAKSManagedClusterDecorator:
         """
         self.cmd = cmd
         self.client = client
-        self.models = self.init_models()
-        self.context = self.init_context()
 
     def init_models(self):
         raise NotImplementedError()
@@ -255,35 +254,18 @@ class BaseAKSManagedClusterDecorator:
     def init_context(self):
         raise NotImplementedError()
 
-    def check_is_postprocessing_required(self):
+    # pylint: disable=unused-argument
+    def check_is_postprocessing_required(self, mc: ManagedCluster) -> bool:
         raise NotImplementedError()
 
-    def pre_process_of_put_mc(self):
+    # pylint: disable=unused-argument
+    def immediate_processing_after_request(self, mc: ManagedCluster) -> None:
         raise NotImplementedError()
 
-    def post_process_of_put_mc(self):
+    # pylint: disable=unused-argument
+    def postprocessing_after_mc_created(self, cluster: ManagedCluster) -> None:
         raise NotImplementedError()
 
-    def put_mc(self, mc):
-        if self.check_is_postprocessing_required(self):
-            # send request
-            poller = self.client.begin_create_or_update(
-                resource_group_name=self.context.get_resource_group_name(),
-                resource_name=self.context.get_name(),
-                parameters=mc,
-                headers=self.context.get_aks_custom_headers(),
-            )
-            self.pre_process_of_put_mc()
-            # poll until the result is returned
-            cluster = LongRunningOperation(self.cmd.cli_ctx)(poller)
-            self.post_process_of_put_mc()
-        else:
-            cluster = sdk_no_wait(
-                self.context.get_no_wait(),
-                self.client.begin_create_or_update,
-                resource_group_name=self.context.get_resource_group_name(),
-                resource_name=self.context.get_name(),
-                parameters=mc,
-                headers=self.context.get_aks_custom_headers(),
-            )
-        return cluster
+    # pylint: disable=unused-argument
+    def put_mc(self, mc: ManagedCluster) -> ManagedCluster:
+        raise NotImplementedError()
