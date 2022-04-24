@@ -5411,6 +5411,12 @@ def _create_nw_connection_monitor_v2(cmd,
                                                              [test_config],
                                                              [src_endpoint],
                                                              [dst_endpoint])
+
+    # If 'workspace_ids' option is specified but 'output_type' is not then still it should be implicit that 'output-type' is 'Workspace'
+    # since only supported value for output_type is 'Workspace' currently.
+    if workspace_ids and not output_type:
+        output_type = 'Workspace'
+
     if output_type:
         outputs = []
         if workspace_ids:
