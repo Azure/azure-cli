@@ -1384,10 +1384,10 @@ short-summary: Manage blob storage container leases.
 
 helps['storage container lease acquire'] = """
 type: command
-short-summary: Request a new lease. 
+short-summary: Request a new lease.
 long-summary: If the container does not have an active lease, the Blob service creates a lease on the container and returns a new lease ID.
 examples:
-  - name: Request a new lease. 
+  - name: Request a new lease.
     text: az storage container lease acquire --container-name mycontainer --account-name mystorageaccount --account-key 0000-0000
 """
 
@@ -1413,7 +1413,7 @@ long-summary: Once a lease is broken, it cannot be renewed. Any authorized reque
         response indicates the interval in seconds until a new lease can be acquired.
 examples:
   - name: Break the lease.
-    text: az storage container lease break -c mycontainer --lease-id "32fe23cd-4779-4919-adb3-357e76c9b1bb" --lease-break-period 10 --account-name mystorageaccount --account-key 0000-0000
+    text: az storage container lease break -c mycontainer --lease-break-period 10 --account-name mystorageaccount --account-key 0000-0000
 """
 
 helps['storage container lease change'] = """
