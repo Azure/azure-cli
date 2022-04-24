@@ -98,6 +98,7 @@ LinuxOSConfig = TypeVar("LinuxOSConfig")
 # TODO
 # add validation for all/some of the parameters involved in the getter of outbound_type/enable_addons
 
+
 # pylint: disable=too-few-public-methods
 class AKSManagedClusterModels(AKSAgentPoolModels):
     """Store the models used in aks series of commands.
@@ -575,7 +576,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         # this parameter does not need dynamic completion
         # this parameter does not need validation
         return node_osdisk_diskencryptionset_id
-    
+
     def get_ssh_key_value_and_no_ssh_key(self) -> Tuple[str, bool]:
         """Obtain the value of ssh_key_value and no_ssh_key.
 
@@ -3064,8 +3065,8 @@ class AKSManagedClusterContext(BaseAKSContext):
             if self.decorator_mode == DecoratorMode.CREATE:
                 if api_server_authorized_ip_ranges:
                     if (
-                        safe_lower(self._get_load_balancer_sku(enable_validation=False))
-                        == CONST_LOAD_BALANCER_SKU_BASIC
+                        safe_lower(self._get_load_balancer_sku(enable_validation=False)) ==
+                        CONST_LOAD_BALANCER_SKU_BASIC
                     ):
                         raise InvalidArgumentValueError(
                             "--api-server-authorized-ip-ranges can only be used with standard load balancer"
@@ -3086,7 +3087,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         """Obtain the value of api_server_authorized_ip_ranges.
 
         This function will verify the parameter by default. When api_server_authorized_ip_ranges is assigned, if
-        load_balancer_sku equals to CONST_LOAD_BALANCER_SKU_BASIC, raise an InvalidArgumentValueError; if 
+        load_balancer_sku equals to CONST_LOAD_BALANCER_SKU_BASIC, raise an InvalidArgumentValueError; if
         enable_private_cluster is specified, raise a MutuallyExclusiveArgumentError.
         This function will normalize the parameter by default. It will split the string into a list with "," as the
         delimiter.
@@ -3180,8 +3181,8 @@ class AKSManagedClusterContext(BaseAKSContext):
             if self.decorator_mode == DecoratorMode.CREATE:
                 if enable_private_cluster:
                     if (
-                        safe_lower(self._get_load_balancer_sku(enable_validation=False))
-                        == CONST_LOAD_BALANCER_SKU_BASIC
+                        safe_lower(self._get_load_balancer_sku(enable_validation=False)) ==
+                        CONST_LOAD_BALANCER_SKU_BASIC
                     ):
                         raise InvalidArgumentValueError(
                             "Please use standard load balancer for private cluster"
@@ -3778,14 +3779,14 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         self.init_context()
         self.agentpool_decorator_mode = AgentPoolDecoratorMode.MANAGED_CLUSTER
         self.init_agentpool_decorator_context()
-        
+
     def init_models(self) -> None:
         """Initialize an AKSManagedClusterModels object to store the models.
 
         :return: None
         """
         self.models = AKSManagedClusterModels(self.cmd, self.resource_type)
-        
+
     def init_context(self) -> None:
         """Initialize an AKSManagedClusterContext object to store the context in the process of assemble the
         ManagedCluster object.
@@ -3861,12 +3862,12 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         """
         self._ensure_mc(mc)
 
-        mc.tags=self.context.get_tags()
-        mc.kubernetes_version=self.context.get_kubernetes_version()
-        mc.dns_prefix=self.context.get_dns_name_prefix()
-        mc.disk_encryption_set_id=self.context.get_node_osdisk_diskencryptionset_id()
-        mc.disable_local_accounts=self.context.get_disable_local_accounts()
-        mc.enable_rbac=not self.context.get_disable_rbac()
+        mc.tags = self.context.get_tags()
+        mc.kubernetes_version = self.context.get_kubernetes_version()
+        mc.dns_prefix = self.context.get_dns_name_prefix()
+        mc.disk_encryption_set_id = self.context.get_node_osdisk_diskencryptionset_id()
+        mc.disable_local_accounts = self.context.get_disable_local_accounts()
+        mc.enable_rbac = not self.context.get_disable_rbac()
         return mc
 
     def set_up_linux_profile(self, mc: ManagedCluster) -> ManagedCluster:
@@ -4847,7 +4848,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         self.init_context()
         self.agentpool_decorator_mode = AgentPoolDecoratorMode.MANAGED_CLUSTER
         self.init_agentpool_decorator_context()
-        
+
     def init_models(self) -> None:
         """Initialize an AKSManagedClusterModels object to store the models.
 
@@ -4987,7 +4988,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 "Encounter an unexpected error while getting agent pool profiles from the cluster in the process of "
                 "updating agentpool profile."
             )
-        
+
         agentpool_profile = self.agentpool_decorator.update_agentpool_profile_default(mc.agent_pool_profiles)
         mc.agent_pool_profiles[0] = agentpool_profile
 
@@ -5559,7 +5560,6 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 headers=self.context.get_aks_custom_headers(),
             )
         return cluster
-
 
     def update_mc(self, mc: ManagedCluster) -> ManagedCluster:
         """Send request to update the existing managed cluster.
