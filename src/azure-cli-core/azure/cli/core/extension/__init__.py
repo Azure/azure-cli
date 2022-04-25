@@ -189,15 +189,15 @@ class WheelExtension(Extension):
         metadata_extras = []
         extra_const = " extra == "
         try:
-            if ext_file.endswith('.whl'):
-                ext_whl_metadata = pkginfo.Wheel(ext_file)
-            else:
-                raise ValueError()
+            ext_whl_metadata = pkginfo.Wheel(ext_file)
             # Parse out the extras for readability
-            for ext in ext_whl_metadata.requires_dist:
-                if extra_const in ext:
-                    key = ext[ext.find(extra_const) + len(extra_const) + 1: ext.rfind("'")]
-                    metadata_extras.append(key)
+            if len(ext_whl_metadata.provides_extras) > 0:
+                metadata_extras = ext_whl_metadata.provides_extras
+            else:
+                for ext in ext_whl_metadata.requires_dist:
+                    if extra_const in ext:
+                        key = ext[ext.find(extra_const) + len(extra_const) + 1: ext.rfind("'")]
+                        metadata_extras.append(key)
         except ValueError:
             logger.warning('Could not parse metadata to get setup extras. Will install without extras.')
         return metadata_extras
