@@ -43,8 +43,6 @@ from knack.log import get_logger
 from knack.prompting import prompt, prompt_pass, prompt_t_f, prompt_choice_list, prompt_int, NoTTYException
 from knack.util import CLIError
 
-from msrest.serialization import Serializer
-
 from ._validators import MSI_LOCAL_ID
 from ._formatters import format_what_if_operation_result
 from ._bicep import (
@@ -351,12 +349,8 @@ def _deploy_arm_template_core_unmodified(cmd, resource_group_name, template_file
     deployment_client = smc.deployments  # This solves the multi-api for you
 
     if not template_uri:
-        # pylint: disable=protected-access
-        deployment_client._serialize = JSONSerializer(
-            deployment_client._serialize.dependencies
-        )
-
         # Plug this as default HTTP pipeline
+        # pylint: disable=protected-access
         from azure.core.pipeline import Pipeline
         smc._client._pipeline._impl_policies.append(JsonCTemplatePolicy())
         # Because JsonCTemplatePolicy needs to be wrapped as _SansIOHTTPPolicyRunner, so a new Pipeline is built
@@ -388,27 +382,9 @@ def _deploy_arm_template_core_unmodified(cmd, resource_group_name, template_file
                        deployment)
 
 
-# class JsonCTemplate:
-#     def __init__(self, template_string):
-#         self.template_string = template_string
-
-
-class JSONSerializer(Serializer):
-    def body(self, data, data_type, **kwargs):
-        if data_type in ('Deployment', 'ScopedDeployment', 'DeploymentWhatIf', 'ScopedDeploymentWhatIf'):
-            # Be sure to pass a DeploymentProperties
-            template = data.properties.template
-            if template:
-                data_as_dict = data.serialize()
-                # data_as_dict["properties"]["template"] = JsonCTemplate(template)
-
-                return data_as_dict
-        return super(JSONSerializer, self).body(data, data_type, **kwargs)
-
-
 class JsonCTemplatePolicy(SansIOHTTPPolicy):
 
-    # Obtain the template data from JsonCTemplate object, and then splice it with other properties into the JSONC format
+    # Obtain the template data and then splice it with other properties into the JSONC format
     def on_request(self, request):
         http_request = request.http_request
         request_data = getattr(http_request, 'data', {}) or {}
@@ -427,8 +403,6 @@ class JsonCTemplatePolicy(SansIOHTTPPolicy):
 
         if http_request.data.get('properties', {}).get('template'):
             template = http_request.data["properties"]["template"]
-            # if not isinstance(template, str):
-            #     raise ValueError()
             del http_request.data["properties"]["template"]
 
             # templateLink nad template cannot exist at the same time in deployment_dry_run mode
@@ -1050,10 +1024,6 @@ def _get_deployment_management_client(cli_ctx, aux_subscriptions=None, aux_tenan
 
     if not plug_pipeline:
         return deployment_client
-
-    deployment_client._serialize = JSONSerializer(
-        deployment_client._serialize.dependencies
-    )
 
     # Plug this as default HTTP pipeline
     from azure.core.pipeline import Pipeline
