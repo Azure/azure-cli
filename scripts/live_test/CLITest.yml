@@ -26,8 +26,8 @@ jobs:
   strategy:
     maxParallel: 5
     matrix:
-#      rdbms:
-#        Target: rdbms
+      rdbms:
+        Target: rdbms
       vm:
         Target: vm
       synapse:
@@ -826,54 +826,54 @@ jobs:
         ArtifactName: '$(Target).report.parallel.html'
         publishLocation: 'Container'
 
-#- job: SendEmail
-#  displayName: Send email
-#  timeoutInMinutes: 180
-#  dependsOn:
-#  - LiveTestPython38
-#  - LiveTestPython38part2
-#  - LiveTestPython38part3
-#  - LiveTestPython38part4
-#  condition: succeededOrFailed()
-#  steps:
-#    - task: UsePythonVersion@0
-#      inputs:
-#        versionSpec: '3.8'
-#        addToPath: true
-#        architecture: 'x64'
-#    - task: DownloadBuildArtifacts@0
-#      inputs:
-#        buildType: 'current'
-#        downloadType: 'specific'
-#        downloadPath: '$(System.ArtifactsDirectory)'
-#    - bash: |
-#        set -o errexit
-#        echo "ArtifastsDirectory: $(System.ArtifactsDirectory)"
-#        ls $(System.ArtifactsDirectory)
-#        pwd
-#        commit_id=`git ls-remote https://github.com/Azure/azure-cli.git HEAD`
-#        pip install sendgrid
-#        pip install mysql-connector-python
-#        pip install requests
-#        # pip install certifi
-#        # Send notification
-#        az -v
-#        echo "login to user azureclilivetest"
-#        az login -u azureclilivetest@azuresdkteam.onmicrosoft.com -p $(AZURECLITESTPASSWORD)
-#        echo "set account"
-#        az account set -s 0b1f6471-1bf0-4dda-aec3-cb9272f09590
-#        echo "send email to grid"
-#        python /home/vsts/work/1/s/scripts/live_test/sendemail.py "$(SENDGRID_KEY)" "$(Build.BuildId)" "$(USER_REPO)" "$(USER_BRANCH)" "$(USER_TARGET)" "$(USER_LIVE)" "$(System.ArtifactsDirectory)" "$(Build.RequestedForEmail)" "$(ACCOUNT_KEY)" "$commit_id" "$(DB_PWD)"
-#        # python /home/vsts/work/1/s/scripts/live_test/upload.py "$(System.ArtifactsDirectory)" "$(ACCOUNT_KEY)" "$(USER_LIVE)"
-#        # Clean resources
-#        if [[ "$(USER_LIVE)" == "--live" && "$(USER_TARGET)" == "" ]]; then
-#          python /home/vsts/work/1/s/scripts/live_test/clean.py
-#        fi
-#    - task: AzureCLI@2
-#      inputs:
-#        azureSubscription: 'AzureSDKTest(0b1f6471-1bf0-4dda-aec3-cb9272f09590)'
-#        scriptType: 'bash'
-#        scriptLocation: 'inlineScript'
-#        inlineScript: |
-#          az storage container create -n `date +%Y%m%d%H%M%S` --account-name clitestresultstac --account-key $(ACCOUNT_KEY)
-#          #az storage blob upload -f -c -n
+- job: SendEmail
+  displayName: Send email
+  timeoutInMinutes: 180
+  dependsOn:
+  - LiveTestPython38
+  - LiveTestPython38part2
+  - LiveTestPython38part3
+  - LiveTestPython38part4
+  condition: succeededOrFailed()
+  steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.8'
+        addToPath: true
+        architecture: 'x64'
+    - task: DownloadBuildArtifacts@0
+      inputs:
+        buildType: 'current'
+        downloadType: 'specific'
+        downloadPath: '$(System.ArtifactsDirectory)'
+    - bash: |
+        set -o errexit
+        echo "ArtifastsDirectory: $(System.ArtifactsDirectory)"
+        ls $(System.ArtifactsDirectory)
+        pwd
+        commit_id=`git ls-remote https://github.com/Azure/azure-cli.git HEAD`
+        pip install sendgrid
+        pip install mysql-connector-python
+        pip install requests
+        # pip install certifi
+        # Send notification
+        az -v
+        echo "login to user azureclilivetest"
+        az login -u azureclilivetest@azuresdkteam.onmicrosoft.com -p $(AZURECLITESTPASSWORD)
+        echo "set account"
+        az account set -s 0b1f6471-1bf0-4dda-aec3-cb9272f09590
+        echo "send email to grid"
+        # python /home/vsts/work/1/s/scripts/live_test/sendemail.py "$(SENDGRID_KEY)" "$(Build.BuildId)" "$(USER_REPO)" "$(USER_BRANCH)" "$(USER_TARGET)" "$(USER_LIVE)" "$(System.ArtifactsDirectory)" "$(Build.RequestedForEmail)" "$(ACCOUNT_KEY)" "$commit_id" "$(DB_PWD)"
+        python /home/vsts/work/1/s/scripts/live_test/upload.py "$(System.ArtifactsDirectory)" "$(ACCOUNT_KEY)" "$(USER_LIVE)"
+        # Clean resources
+        if [[ "$(USER_LIVE)" == "--live" && "$(USER_TARGET)" == "" ]]; then
+          python /home/vsts/work/1/s/scripts/live_test/clean.py
+        fi
+    - task: AzureCLI@2
+      inputs:
+        azureSubscription: 'AzureSDKTest(0b1f6471-1bf0-4dda-aec3-cb9272f09590)'
+        scriptType: 'bash'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          az storage container create -n `date +%Y%m%d%H%M%S` --account-name clitestresultstac --account-key $(ACCOUNT_KEY)
+          #az storage blob upload -f -c -n
