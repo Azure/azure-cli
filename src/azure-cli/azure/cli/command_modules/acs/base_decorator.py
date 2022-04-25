@@ -9,9 +9,8 @@ from typing import Any, Dict, Type, TypeVar
 from azure.cli.command_modules.acs._consts import DecoratorMode
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core.azclierror import CLIInternalError
-from azure.cli.core.commands import AzCliCommand, LongRunningOperation
+from azure.cli.core.commands import AzCliCommand
 from azure.cli.core.profiles import ResourceType
-from azure.cli.core.util import sdk_no_wait
 from knack.log import get_logger
 from msrest import Serializer
 

@@ -66,7 +66,9 @@ def configure_load_balancer_profile(managed_outbound_ip_count, outbound_ips, out
         profile.outbound_ip_prefixes = None
         if managed_outbound_ip_count:
             if isinstance(models, SimpleNamespace):
-                ManagedClusterLoadBalancerProfileManagedOutboundIPs = models.ManagedClusterLoadBalancerProfileManagedOutboundIPs
+                ManagedClusterLoadBalancerProfileManagedOutboundIPs = (
+                    models.ManagedClusterLoadBalancerProfileManagedOutboundIPs
+                )
             else:
                 ManagedClusterLoadBalancerProfileManagedOutboundIPs = models.get(
                     "ManagedClusterLoadBalancerProfileManagedOutboundIPs"
@@ -89,7 +91,9 @@ def configure_load_balancer_profile(managed_outbound_ip_count, outbound_ips, out
             )
         if outbound_ip_prefix_resources:
             if isinstance(models, SimpleNamespace):
-                ManagedClusterLoadBalancerProfileOutboundIPPrefixes = models.ManagedClusterLoadBalancerProfileOutboundIPPrefixes
+                ManagedClusterLoadBalancerProfileOutboundIPPrefixes = (
+                    models.ManagedClusterLoadBalancerProfileOutboundIPPrefixes
+                )
             else:
                 ManagedClusterLoadBalancerProfileOutboundIPPrefixes = models.get(
                     "ManagedClusterLoadBalancerProfileOutboundIPPrefixes"

@@ -1017,7 +1017,10 @@ class AKSAgentPoolContext(BaseAKSContext):
         :return: string
         """
         # read the original value passed by the command
-        if self.decorator_mode == DecoratorMode.CREATE and self.agentpool_decorator_mode == AgentPoolDecoratorMode.STANDALONE:
+        if (
+            self.decorator_mode == DecoratorMode.CREATE and
+            self.agentpool_decorator_mode == AgentPoolDecoratorMode.STANDALONE
+        ):
             scale_down_mode = self.raw_param.get("scale_down_mode", CONST_SCALE_DOWN_MODE_DELETE)
         else:
             scale_down_mode = self.raw_param.get("scale_down_mode")

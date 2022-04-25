@@ -4655,7 +4655,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.set_up_extended_location(mc)
         return mc
 
-    # pylint: disable=unused-argument
+    # pylint: disable=unused-argument,too-many-boolean-expressions
     def check_is_postprocessing_required(self, mc: ManagedCluster) -> bool:
         """Helper function to check if postprocessing is required after sending a PUT request to create the cluster.
 

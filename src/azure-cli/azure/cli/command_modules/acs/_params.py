@@ -11,6 +11,7 @@ from azure.cli.command_modules.acs._completers import (
     get_k8s_upgrades_completion_list, get_k8s_versions_completion_list,
     get_vm_size_completion_list)
 from azure.cli.command_modules.acs._consts import (
+    CONST_LOAD_BALANCER_SKU_BASIC, CONST_LOAD_BALANCER_SKU_STANDARD,
     CONST_NETWORK_PLUGIN_AZURE, CONST_NETWORK_PLUGIN_KUBENET,
     CONST_NODE_IMAGE_UPGRADE_CHANNEL, CONST_NODEPOOL_MODE_SYSTEM,
     CONST_NODEPOOL_MODE_USER, CONST_NONE_UPGRADE_CHANNEL,
@@ -22,7 +23,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_RAPID_UPGRADE_CHANNEL, CONST_SCALE_DOWN_MODE_DEALLOCATE,
     CONST_SCALE_DOWN_MODE_DELETE, CONST_SCALE_SET_PRIORITY_REGULAR,
     CONST_SCALE_SET_PRIORITY_SPOT, CONST_SPOT_EVICTION_POLICY_DEALLOCATE,
-    CONST_SPOT_EVICTION_POLICY_DELETE, CONST_STABLE_UPGRADE_CHANNEL, CONST_LOAD_BALANCER_SKU_BASIC, CONST_LOAD_BALANCER_SKU_STANDARD)
+    CONST_SPOT_EVICTION_POLICY_DELETE, CONST_STABLE_UPGRADE_CHANNEL)
 from azure.cli.command_modules.acs._validators import (
     validate_acr, validate_assign_identity, validate_assign_kubelet_identity,
     validate_create_parameters, validate_credential_format,
