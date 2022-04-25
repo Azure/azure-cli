@@ -2209,6 +2209,16 @@ helps['storage fs directory download'] = """
           text: az storage fs directory download -f myfilesystem --account-name mystorageaccount -s "path/to/subdirectory" -d "<local-path>" --recursive
 """
 
+helps['storage fs directory generate-sas'] = """
+type: command
+short-summary: Generate a SAS token for directory in ADLS Gen2 account.
+examples:
+  - name: Generate a sas token for directory and use it to upload files.
+    text: |
+        end=`date -u -d "30 minutes" '+%Y-%m-%dT%H:%MZ'`
+        az storage fs directory generate-sas --name dir/ --file-system myfilesystem --https-only --permissions dlrw --expiry $end -o tsv
+"""
+
 helps['storage fs file'] = """
 type: group
 short-summary: Manage files in Azure Data Lake Storage Gen2 account.
