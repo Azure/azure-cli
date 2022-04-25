@@ -132,7 +132,7 @@ def validate_assessment(namespace):
     assessment_start_time_local = namespace.assessment_start_time_local
 
     is_assessment_schedule_provided = False
-    if (assessment_weekly_interval is not None or 
+    if (assessment_weekly_interval is not None or
         assessment_weekly_interval is not None or assessment_monthly_occurrence is not None or
         assessment_day_of_week is not None or assessment_start_time_local is not None):
         is_assessment_schedule_provided = True
@@ -146,14 +146,14 @@ def validate_assessment(namespace):
         raise CLIError("Assessment schedule settings cannot be provided while enable-assessment is False")
 
     # Validate necessary fields for Assessment schedule
-    if (is_assessment_schedule_provided):
+    if is_assessment_schedule_provided:
         if (assessment_weekly_interval is not None and assessment_monthly_occurrence is not None):
             raise CLIError("Both assessment-weekly-interval and assessment-montly-occurrence cannot be provided at the same time for Assessment schedule")
         if (assessment_weekly_interval is None and assessment_monthly_occurrence is None):
             raise CLIError("Either assessment-weekly-interval and assessment-montly-occurrence must be provided for Assessment schedule")
-        if (assessment_day_of_week is None):
+        if assessment_day_of_week is None:
             raise CLIError("assessment-day-of-week must be provided for Assessment schedule")
-        if (assessment_start_time_local is None):
+        if assessment_start_time_local is None:
             raise CLIError("assessment-start-time-local must be provided for Assessment schedule")
 
 # pylint: disable=too-many-statements,line-too-long

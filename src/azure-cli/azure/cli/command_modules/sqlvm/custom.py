@@ -379,8 +379,8 @@ def sqlvm_update(instance, sql_server_license_type=None, sql_image_sku=None, ena
             instance.server_configurations_management_settings.additional_features_server_configurations is None):
         instance.server_configurations_management_settings = None
 
-    # If assessment.schedule settings are provided but enable schedule is skipped, ensure schedule is enabled 
-    if (enable_assessment_schedule is None and 
+    # If assessment.schedule settings are provided but enable schedule is skipped, ensure schedule is enabled
+    if (enable_assessment_schedule is None and
         (assessment_weekly_interval is not None or assessment_monthly_occurrence or assessment_day_of_week or assessment_start_time_local)):
         enable_assessment_schedule = True
 
