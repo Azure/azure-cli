@@ -90,7 +90,7 @@ THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 EOM
 
-# TODO: Instead of "_ssl.cpython-38-x86_64-linux-gnu.so" only, find all .so files with "find debian/azure-cli/opt/az -type f -name '*.so'"
+# TODO: Instead of "_ssl.cpython-39-x86_64-linux-gnu.so" only, find all .so files with "find debian/azure-cli/opt/az -type f -name '*.so'"
 
 cat > $debian_dir/rules << EOM
 #!/usr/bin/make -f
@@ -110,7 +110,7 @@ ${TAB}echo "\043!/usr/bin/env bash\nbin_dir=\140cd \"\044(dirname \"\044BASH_SOU
 ${TAB}chmod 0755 debian/azure-cli/usr/bin/az
 ${TAB}mkdir -p debian/azure-cli/etc/bash_completion.d/
 ${TAB}cat ${completion_script} > debian/azure-cli/etc/bash_completion.d/azure-cli
-${TAB}dpkg-shlibdeps -v --warnings=7 -Tdebian/azure-cli.substvars -dDepends -edebian/azure-cli/opt/az/bin/python3 debian/azure-cli/opt/az/lib/python3.8/lib-dynload/_ssl.cpython-38-x86_64-linux-gnu.so
+${TAB}dpkg-shlibdeps -v --warnings=7 -Tdebian/azure-cli.substvars -dDepends -edebian/azure-cli/opt/az/bin/python3 debian/azure-cli/opt/az/lib/python3.9/lib-dynload/_ssl.cpython-39-x86_64-linux-gnu.so
 
 
 override_dh_strip:
