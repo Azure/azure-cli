@@ -156,8 +156,8 @@ def add_role_assignment(cmd, role, service_principal_msi_id, is_service_principa
             if ex.message == 'The role assignment already exists.':
                 break
             logger.info(ex.message)
-        except:  # pylint: disable=bare-except
-            pass
+        except Exception as ex:     # pylint: disable=broad-except
+            logger.error(str(ex))
         time.sleep(delay + delay * x)
     else:
         return False

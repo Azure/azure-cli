@@ -140,6 +140,31 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         # fail on attach again
         with self.assertRaises(CLIInternalError):
             ctx_1.attach_agentpool(agentpool)
+        self.assertEqual(ctx_1.existing_agentpool, None)
+
+    def common_attach_existing_agentpool(self):
+        ctx_1 = AKSAgentPoolContext(
+            self.cmd, AKSAgentPoolParamDict({}), self.models, DecoratorMode.UPDATE, self.agentpool_decorator_mode
+        )
+        agentpool = self.create_initialized_agentpool_instance()
+        ctx_1.attach_agentpool(agentpool)
+        self.assertEqual(ctx_1.existing_agentpool, agentpool)
+        # fail on attach again
+        with self.assertRaises(CLIInternalError):
+            ctx_1.attach_existing_agentpool(agentpool)
+
+    def common_attach_agentpools(self):
+        ctx_1 = AKSAgentPoolContext(
+            self.cmd, AKSAgentPoolParamDict({}), self.models, DecoratorMode.CREATE, self.agentpool_decorator_mode
+        )
+        agentpool_1 = self.create_initialized_agentpool_instance()
+        agentpool_2 = self.create_initialized_agentpool_instance()
+        agentpools = [agentpool_1, agentpool_2]
+        ctx_1.attach_agentpools(agentpools)
+        self.assertEqual(ctx_1._agentpools, agentpools)
+        # fail on attach again
+        with self.assertRaises(CLIInternalError):
+            ctx_1.attach_agentpools(agentpools)
 
     def common_validate_counts_in_autoscaler(self):
         ctx = AKSAgentPoolContext(
@@ -1057,6 +1082,7 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
                 DecoratorMode.CREATE,
                 self.agentpool_decorator_mode,
             )
+            self.assertEqual(ctx_1.get_scale_down_mode(), None)
         else:
             ctx_1 = AKSAgentPoolContext(
                 self.cmd,
@@ -1065,7 +1091,7 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
                 DecoratorMode.CREATE,
                 self.agentpool_decorator_mode,
             )
-        self.assertEqual(ctx_1.get_scale_down_mode(), CONST_SCALE_DOWN_MODE_DELETE)
+            self.assertEqual(ctx_1.get_scale_down_mode(), CONST_SCALE_DOWN_MODE_DELETE)
         agentpool = self.create_initialized_agentpool_instance(scale_down_mode=CONST_SCALE_DOWN_MODE_DEALLOCATE)
         ctx_1.attach_agentpool(agentpool)
         self.assertEqual(ctx_1.get_scale_down_mode(), CONST_SCALE_DOWN_MODE_DEALLOCATE)
@@ -1223,6 +1249,12 @@ class AKSAgentPoolContextStandaloneModeTestCase(AKSAgentPoolContextCommonTestCas
 
     def test_attach_agentpool(self):
         self.common_attach_agentpool()
+
+    def test_attach_existing_agentpool(self):
+        self.common_attach_existing_agentpool()
+
+    def test_attach_agentpools(self):
+        self.common_attach_agentpools()
 
     def test_validate_counts_in_autoscaler(self):
         self.common_validate_counts_in_autoscaler()
@@ -1392,6 +1424,12 @@ class AKSAgentPoolContextManagedClusterModeTestCase(AKSAgentPoolContextCommonTes
 
     def test_attach_agentpool(self):
         self.common_attach_agentpool()
+
+    def test_attach_existing_agentpool(self):
+        self.common_attach_existing_agentpool()
+
+    def test_attach_agentpools(self):
+        self.common_attach_agentpools()
 
     def test_validate_counts_in_autoscaler(self):
         self.common_validate_counts_in_autoscaler()
@@ -2179,7 +2217,6 @@ class AKSAgentPoolAddDecoratorManagedClusterModeTestCase(AKSAgentPoolAddDecorato
             enable_ultra_ssd=False,
             enable_fips=False,
             mode=CONST_NODEPOOL_MODE_SYSTEM,
-            scale_down_mode=CONST_SCALE_DOWN_MODE_DELETE,
         )
         self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
 
