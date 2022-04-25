@@ -218,8 +218,6 @@ def load_arguments(self, _):
         c.argument('node_osdisk_diskencryptionset_id', options_list=['--node-osdisk-diskencryptionset-id', '-d'])
         c.argument('disable_local_accounts', action='store_true')
         c.argument('disable_rbac', action='store_true')
-        c.argument('enable_rbac', action='store_true', options_list=['--enable-rbac', '-r'],
-                   deprecate_info=c.deprecate(redirect="--disable-rbac", hide="2.0.45"))
         c.argument('edge_zone', edge_zone_type)
         c.argument('admin_username', options_list=[
                    '--admin-username', '-u'], default='azureuser')

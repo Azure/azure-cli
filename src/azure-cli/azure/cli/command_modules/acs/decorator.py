@@ -83,6 +83,9 @@ Snapshot = TypeVar("Snapshot")
 KubeletConfig = TypeVar("KubeletConfig")
 LinuxOSConfig = TypeVar("LinuxOSConfig")
 
+# NOTE
+# The implementation is deprecated, would be deleted in June cli release. Use managed_cluster_decorator.py instead.
+
 # TODO
 # add validation for all/some of the parameters involved in the getter of outbound_type/enable_addons
 

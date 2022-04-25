@@ -96,7 +96,8 @@ KubeletConfig = TypeVar("KubeletConfig")
 LinuxOSConfig = TypeVar("LinuxOSConfig")
 
 # TODO
-# add validation for all/some of the parameters involved in the getter of outbound_type/enable_addons
+# 1. remove enable_rbac related implementation
+# 2. add validation for all/some of the parameters involved in the getter of outbound_type/enable_addons
 
 
 # pylint: disable=too-few-public-methods
