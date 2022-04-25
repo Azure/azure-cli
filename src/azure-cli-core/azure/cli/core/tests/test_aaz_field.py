@@ -286,3 +286,191 @@ class TestAAZField(unittest.TestCase):
         model_schema.sub_properties.err_sub_tags = AAZDictType()
         with self.assertRaises(AssertionError):
             model_schema.sub_properties.err_sub_tags.Element = AAZStrType(options=["bbb"])
+
+    def test_aaz_object_with_polymorphism_support(self):
+        from azure.cli.core.aaz._field_type import AAZObjectType, AAZListType, AAZStrType, AAZIntType
+        from azure.cli.core.aaz._field_value import AAZObject
+        from azure.cli.core.aaz.exceptions import AAZUnknownFieldError
+        from azure.cli.core.aaz._command import AAZCommand
+
+        model_schema = AAZObjectType()
+        v = AAZObject(model_schema, data={})
+
+        model_schema.display_name = AAZStrType()
+        model_schema.actions = AAZListType()
+
+        element = model_schema.actions.Element = AAZObjectType()
+
+        element.action_type = AAZStrType()
+        element.order = AAZIntType()
+        disc_modify_properties = element.set_discriminator('action_type', 'ModifyProperties')
+        action_configuration = disc_modify_properties.action_configuration = AAZObjectType(
+            flags={"client_flatten": True})
+        action_configuration.classification = AAZStrType()
+        action_configuration.classification_comment = AAZStrType()
+        action_configuration.severity = AAZStrType()
+
+        disc_run_playbook = element.set_discriminator('action_type', 'RunPlaybook')
+        disc_run_playbook.logic_app_resource_id = AAZStrType()
+        disc_run_playbook.tenant_id = AAZStrType()
+
+        v.actions = [
+            {
+                "action_type": "ModifyProperties",
+                "order": 0,
+                "action_configuration": {
+                    "classification": "BenignPositive",
+                    "classification_comment": "comments 1",
+                    "severity": "High",
+                }
+            },
+            {
+                "action_type": "RunPlaybook",
+                "order": 1,
+                "logic_app_resource_id": "123333",
+                "tenant_id": "111111",
+            }
+        ]
+
+        self.assertTrue(v.to_serialized_data() == {
+            "actions": [
+                {
+                    "action_type": "ModifyProperties",
+                    "order": 0,
+                    "action_configuration": {
+                        "classification": "BenignPositive",
+                        "classification_comment": "comments 1",
+                        "severity": "High",
+                    }
+                },
+                {
+                    "action_type": "RunPlaybook",
+                    "order": 1,
+                    "logic_app_resource_id": "123333",
+                    "tenant_id": "111111",
+                }
+            ]
+        })
+
+        v.actions[2] = {
+            "action_type": "ModifyProperties",
+        }
+
+        v.actions[2].order = 2
+        with self.assertRaises(AAZUnknownFieldError):
+            v.actions[2].logic_app_resource_id = "6666"
+        self.assertTrue(v.actions[2].action_configuration.classification._is_patch)
+        v.actions[2].action_configuration.classification = "FalsePositive"
+
+        self.assertTrue(v.to_serialized_data() == {
+            "actions": [
+                {
+                    "action_type": "ModifyProperties",
+                    "order": 0,
+                    "action_configuration": {
+                        "classification": "BenignPositive",
+                        "classification_comment": "comments 1",
+                        "severity": "High",
+                    }
+                },
+                {
+                    "action_type": "RunPlaybook",
+                    "order": 1,
+                    "logic_app_resource_id": "123333",
+                    "tenant_id": "111111",
+                },
+                {
+                    "action_type": "ModifyProperties",
+                    "order": 2,
+                    "action_configuration": {
+                        "classification": "FalsePositive"
+                    }
+                }
+            ]
+        })
+
+        # change the action_type will disable the access to previous discriminator, event though the data still in _data
+        v.actions[2].action_type = "RunPlaybook"
+        with self.assertRaises(AAZUnknownFieldError):
+            v.actions[2].action_configuration
+        self.assertTrue(v.actions[2].logic_app_resource_id._is_patch)
+        v.actions[2].logic_app_resource_id = "678"
+
+        # will not serialize action_configuration
+        self.assertTrue(v.to_serialized_data() == {
+            "actions": [
+                {
+                    "action_type": "ModifyProperties",
+                    "order": 0,
+                    "action_configuration": {
+                        "classification": "BenignPositive",
+                        "classification_comment": "comments 1",
+                        "severity": "High",
+                    }
+                },
+                {
+                    "action_type": "RunPlaybook",
+                    "order": 1,
+                    "logic_app_resource_id": "123333",
+                    "tenant_id": "111111",
+                },
+                {
+                    "action_type": "RunPlaybook",
+                    "order": 2,
+                    "logic_app_resource_id": "678",
+                }
+            ]
+        })
+
+        # change back the action_type, action_configuration show again
+        v.actions[2].action_type = "ModifyProperties"
+        self.assertTrue(v.to_serialized_data() == {
+            "actions": [
+                {
+                    "action_type": "ModifyProperties",
+                    "order": 0,
+                    "action_configuration": {
+                        "classification": "BenignPositive",
+                        "classification_comment": "comments 1",
+                        "severity": "High",
+                    }
+                },
+                {
+                    "action_type": "RunPlaybook",
+                    "order": 1,
+                    "logic_app_resource_id": "123333",
+                    "tenant_id": "111111",
+                },
+                {
+                    "action_type": "ModifyProperties",
+                    "order": 2,
+                    "action_configuration": {
+                        "classification": "FalsePositive"
+                    }
+                }
+            ]
+        })
+
+        # test client flatten
+        self.assertTrue(AAZCommand.deserialize_output(v, client_flatten=True) == {
+            "actions": [
+                {
+                    "action_type": "ModifyProperties",
+                    "order": 0,
+                    "classification": "BenignPositive",
+                    "classification_comment": "comments 1",
+                    "severity": "High",
+                },
+                {
+                    "action_type": "RunPlaybook",
+                    "order": 1,
+                    "logic_app_resource_id": "123333",
+                    "tenant_id": "111111",
+                },
+                {
+                    "action_type": "ModifyProperties",
+                    "order": 2,
+                    "classification": "FalsePositive"
+                }
+            ]
+        })

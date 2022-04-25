@@ -23,6 +23,7 @@ from ._field_type import AAZObjectType
 from ._field_value import AAZObject
 from ._poller import AAZLROPoller
 from ._utils import _get_profile_pkg
+from .exceptions import AAZUnknownFieldError
 
 _DOC_EXAMPLE_FLAG = ':example:'
 
@@ -226,16 +227,24 @@ class AAZCommand(CLICommand):
             if result == AAZUndefined:
                 return result
             if client_flatten and isinstance(schema, AAZObjectType):
+                disc_schema = schema.get_discriminator(result)
                 new_result = {}
                 for k, v in result.items():
-                    k_schema = schema[k]
+                    try:
+                        k_schema = schema[k]
+                    except AAZUnknownFieldError as err:
+                        if not disc_schema:
+                            raise err
+                        k_schema = disc_schema[k]
                     if k_schema._flags.get('client_flatten', False):
                         assert isinstance(k_schema, AAZObjectType) and isinstance(v, dict)
                         for sub_k, sub_v in v.items():
-                            assert sub_k not in new_result
+                            if sub_k in new_result:
+                                raise KeyError(f"Conflict key when apply client flatten: {sub_k} in {result}")
                             new_result[sub_k] = sub_v
                     else:
-                        assert k not in new_result
+                        if k in new_result:
+                            raise KeyError(f"Conflict key when apply client flatten: {k} in {result}")
                         new_result[k] = v
                 result = new_result
             return result

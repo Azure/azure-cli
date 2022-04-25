@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from ._base import AAZBaseValue, AAZValuePatch, AAZUndefined
+from .exceptions import AAZUnknownFieldError
 
 
 class AAZSimpleValue(AAZBaseValue):
@@ -59,8 +60,8 @@ class AAZObject(AAZBaseValue):
         assert isinstance(self._data, dict) or self._data is None
 
     def __getitem__(self, key):
-        attr_schema = self._schema[key]
-        name = self._schema.get_attr_name(key)
+        attr_schema, name = self._get_attr_schema_and_name(key)
+
         if name not in self._data:
             # is key is not set before, then create a patch, and value updated in patch will be partial updated
             self._data[name] = AAZValuePatch.build(attr_schema)
@@ -68,15 +69,16 @@ class AAZObject(AAZBaseValue):
 
     def __setitem__(self, key, data):
         assert not key.startswith('_')
-        attr_schema = self._schema[key]
-        name = self._schema.get_attr_name(key)
+        attr_schema, name = self._get_attr_schema_and_name(key)
+
         if name is None:
             # ignore undefined key
             return
         self._data[name] = attr_schema.process_data(data, key=name)
 
     def __delitem__(self, key):
-        name = self._schema.get_attr_name(key)
+        _, name = self._get_attr_schema_and_name(key)
+
         if name in self._data:
             del self._data[name]
         elif name is None:
@@ -115,18 +117,37 @@ class AAZObject(AAZBaseValue):
 
     def to_serialized_data(self, processor=None):
         result = {}
-        for name, field_schema in self._schema._fields.items():
-            v = self[name].to_serialized_data(processor=processor)
-            if v == AAZUndefined:
-                continue
-            if field_schema._serialized_name:
-                name = field_schema._serialized_name
-            result[name] = v
+        schemas = [self._schema]
+        disc_schema = self._schema.get_discriminator(self._data)
+        if disc_schema:
+            schemas.append(disc_schema)
+        for schema in schemas:
+            for name, field_schema in schema._fields.items():
+                v = self[name].to_serialized_data(processor=processor)
+                if v == AAZUndefined:
+                    continue
+                if field_schema._serialized_name:
+                    name = field_schema._serialized_name
+                result[name] = v
+
         if not result and self._is_patch:
             return AAZUndefined
         if processor:
             result = processor(self._schema, result)
         return result
+
+    def _get_attr_schema_and_name(self, key):
+        disc_schema = self._schema.get_discriminator(self._data)
+        try:
+            attr_schema = self._schema[key]
+            schema = self._schema
+        except AAZUnknownFieldError as err:
+            if disc_schema is None:
+                raise err
+            attr_schema = disc_schema[key]
+            schema = disc_schema
+        name = schema.get_attr_name(key)
+        return attr_schema, name
 
 
 class AAZDict(AAZBaseValue):

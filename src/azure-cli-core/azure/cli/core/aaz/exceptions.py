@@ -18,11 +18,19 @@ class AAZUnknownFieldError(KeyError):
         )
 
 
+class AAZInvalidFieldError(KeyError, AttributeError):
+
+    def __init__(self, model, name, msg):
+        super().__init__(
+            f"Model '{model.__class__.__name__}' has invalid field named '{name}': {msg}"
+        )
+
+
 class AAZConflictFieldDefinitionError(KeyError, AttributeError):
 
-    def __init__(self, name):
+    def __init__(self, model, name, msg):
         super().__init__(
-            f"Model has conflict defined field '{name}'"
+            f"Model '{model.__class__.__name__}' has conflict defined field '{name}': {msg}"
         )
 
 
