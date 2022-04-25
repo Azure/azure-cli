@@ -606,6 +606,7 @@ def load_arguments(self, _):
         c.argument('platform_fault_domain_count', options_list=["--platform-fault-domain-count", "-c"], type=int,
                    help="Number of fault domains that the host group can span.")
         c.argument('zones', zone_type)
+        c.argument('ultra_ssd_enabled', arg_type=ultra_ssd_enabled_type)
 
     for scope in ["vm host", "vm host group"]:
         with self.argument_context("{} create".format(scope)) as c:

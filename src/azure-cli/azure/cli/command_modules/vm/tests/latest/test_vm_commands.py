@@ -5386,7 +5386,8 @@ class DedicatedHostScenarioTest(ScenarioTest):
     def test_vm_host_management(self, resource_group):
         self.kwargs.update({
             'host-group': 'my-host-group',
-            'host': 'my-host'
+            'host': 'my-host',
+            'host-group2': self.create_random_name('hg-', 10)
         })
 
         self.cmd('vm host group create -n {host-group} -c 3 -g {rg}')
@@ -5406,9 +5407,13 @@ class DedicatedHostScenarioTest(ScenarioTest):
         self.cmd('vm host update -n {host} --host-group {host-group} -g {rg} --set tags.foo="bar"', checks=[
             self.check('tags.foo', 'bar')
         ])
+        self.cmd('vm host group create -n {host} --host-group {host-group2} -g {rg} --ultra-ssd-enabled true', checks=[
+            self.check('properties.additionalCapabilities.ultraSSDEnabled', True)
+        ])
 
         self.cmd('vm host delete -n {host} --host-group {host-group} -g {rg} --yes')
         self.cmd('vm host group delete -n {host-group} -g {rg} --yes')
+        self.cmd('vm host group delete -n {host-group2} -g {rg} --yes')
 
     @ResourceGroupPreparer(name_prefix='cli_test_dedicated_host_', location='westeurope')
     @ResourceGroupPreparer(name_prefix='cli_test_dedicated_host2_', location='centraluseuap', key='rg2')
