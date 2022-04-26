@@ -2075,18 +2075,10 @@ def validate_upload_blob(namespace):
 
 
 def add_upload_progress_callback(cmd, namespace):
-    def _update_progress(response):
-        if response.http_response.status_code not in [200, 201]:
-            return
-
-        message = getattr(_update_progress, 'message', 'Alive')
-        reuse = getattr(_update_progress, 'reuse', False)
-        current = response.context['upload_stream_current']
-        total = response.context['data_stream_total']
-
+    def _update_progress(current, total):
         if total:
-            hook.add(message=message, value=current, total_val=total)
-            if total == current and not reuse:
+            hook.add(message='Alive', value=current, total_val=total)
+            if total == current:
                 hook.end()
 
     hook = cmd.cli_ctx.get_progress_controller(det=True)

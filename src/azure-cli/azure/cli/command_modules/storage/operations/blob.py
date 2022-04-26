@@ -551,7 +551,7 @@ def upload_blob(cmd, client, file_path=None, container_name=None, blob_name=None
         upload_args['validate_content'] = validate_content
 
     if progress_callback:
-        upload_args['raw_response_hook'] = progress_callback
+        upload_args['progress_hook'] = progress_callback
 
     check_blob_args = {
         'if_modified_since': if_modified_since,
