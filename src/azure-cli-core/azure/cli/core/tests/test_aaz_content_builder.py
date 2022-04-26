@@ -50,6 +50,22 @@ class TestAAZContentBuilder(unittest.TestCase):
         _schema.conns = AAZDictArg()
         _schema.conns.Element = AAZDictArg()
         _schema.conns.Element.Element = AAZStrArg()
+
+        _schema.actions = AAZListArg()
+        element = _schema.actions.Element = AAZObjectArg()
+        element.name = AAZStrArg()
+
+        element.action_a = AAZObjectArg()
+        element.action_a.web = AAZStrArg()
+        element.action_a.author = AAZStrArg()
+
+        element.action_b = AAZObjectArg()
+        element.action_b.machine = AAZStrArg()
+        element.action_b.country = AAZStrArg()
+
+        element.action_c = AAZStrArg()
+        element.action_d = AAZStrArg()
+
         return _schema
 
     def test_aaz_content_builder_for_create(self):
@@ -477,3 +493,153 @@ class TestAAZContentBuilder(unittest.TestCase):
                           'd': {'d': {'name': 'd'}}}
             }
         })
+
+    def test_aaz_content_builder_for_polymorphism(self):
+        from azure.cli.core.aaz._content_builder import AAZContentBuilder
+        from azure.cli.core.aaz._arg_browser import AAZArgBrowser
+        from azure.cli.core.aaz._field_type import AAZStrType, AAZObjectType, AAZListType, AAZDictType
+
+        _args_schema = self._define_args_schema()
+        arg_value = _args_schema(data={
+            "name": "a",
+            "actions": [
+                {
+                    "name": "A 1",
+                    "action_a": {
+                        "web": "Web 1",
+                        "author": "Author 1"
+                    }
+                },
+                {
+                    "name": "B 1",
+                    "action_b": {
+                        "machine": "Machine 1",
+                        "country": "Country 1",
+                    }
+                },
+                {
+                    "name": "A 2",
+                    "action_a": {
+                        "web": "Web 2",
+                        "author": "Author 2"
+                    }
+                },
+                {
+                    "name": "B 2",
+                    "action_b": {
+                        "machine": "Machine 2",
+                        "country": "Country 2",
+                    }
+                },
+                {
+                    "name": "C 1",
+                    "action_c": "Str C"
+                }
+            ]
+        })
+        arg_data = arg_value.to_serialized_data()
+        schema = AAZObjectType()
+        _value = AAZObjectType._ValueCls(
+            schema=schema,
+            data=schema.process_data(None)
+        )
+
+        _builder = AAZContentBuilder(
+            values=[_value],
+            args=[AAZArgBrowser(arg_value=arg_value, arg_data=arg_data)]
+        )
+
+        _builder.set_prop("name", AAZStrType, '.name')
+        self.assertTrue(
+            _value.to_serialized_data()['name'] == 'a'
+        )
+
+        _builder.set_prop('actions', AAZListType, '.actions')
+
+        actions = _builder.get('.actions')
+        if actions:
+            actions.set_elements(AAZObjectType, '.')
+
+        elements = _builder.get('.actions[]')
+        if elements:
+            elements.set_prop('name', AAZStrType, '.name')
+            elements.set_const('type', 'A', AAZStrType, '.action_a')
+            elements.set_const('type', 'B', AAZStrType, '.action_b')
+            elements.set_const('type', 'C', AAZStrType, '.action_c')
+            elements.set_const('type', 'D', AAZStrType, '.action_d')
+            elements.set_const('default', 'Default', AAZStrType)
+
+            elements.discriminate_by('type', 'A')
+            elements.discriminate_by('type', 'B')
+            elements.discriminate_by('type', 'C')
+            elements.discriminate_by('type', 'D')
+
+        self.assertTrue(_value.to_serialized_data()['actions'] == [
+            {'name': 'A 1', 'type': 'A', 'default': 'Default'},
+            {'name': 'B 1', 'type': 'B', 'default': 'Default'},
+            {'name': 'A 2', 'type': 'A', 'default': 'Default'},
+            {'name': 'B 2', 'type': 'B', 'default': 'Default'},
+            {'name': 'C 1', 'type': 'C', 'default': 'Default'},
+        ])
+
+        disc_a = _builder.get('.actions[]{type:A}')
+        if disc_a:
+            disc_a.set_prop("web", AAZStrType, '.action_a.web')
+            disc_a.set_prop("author", AAZStrType, '.action_a.author')
+
+        disc_b = _builder.get('.actions[]{type:B}')
+        if disc_b:
+            disc_b.set_prop("machine", AAZStrType, '.action_b.machine')
+            disc_b.set_prop("country", AAZStrType, '.action_b.country')
+
+        disc_c = _builder.get('.actions[]{type:C}')
+        if disc_c:
+            disc_c.set_prop("kind", AAZStrType, '.action_c')
+
+        disc_d = _builder.get('.actions[]{type:D}')
+        if disc_d:
+            disc_d.set_prop("people", AAZStrType, '.action_d')
+
+        self.assertTrue(_value.to_serialized_data()['actions'] == [
+            {'name': 'A 1', 'type': 'A', 'default': 'Default', 'web': 'Web 1', 'author': 'Author 1'},
+            {'name': 'B 1', 'type': 'B', 'default': 'Default', 'machine': 'Machine 1', 'country': 'Country 1'},
+            {'name': 'A 2', 'type': 'A', 'default': 'Default', 'web': 'Web 2', 'author': 'Author 2'},
+            {'name': 'B 2', 'type': 'B', 'default': 'Default', 'machine': 'Machine 2', 'country': 'Country 2'},
+            {'name': 'C 1', 'type': 'C', 'default': 'Default', 'kind': 'Str C'}
+        ])
+
+        self.assertTrue(_value.actions[0].web == "Web 1")
+        element_schema = _value.actions._schema.Element
+
+        self.assertTrue(element_schema.get_attr_name("name") is not None)
+        self.assertTrue(element_schema.get_attr_name("type") is not None)
+
+        self.assertTrue(element_schema._discriminator_field_name == "type")
+
+        self.assertTrue(element_schema._discriminators['A'].get_attr_name('web') is not None)
+        self.assertTrue(element_schema._discriminators['A'].get_attr_name('author') is not None)
+        self.assertTrue(element_schema._discriminators['A'].get_attr_name('machine') is None)
+        self.assertTrue(element_schema._discriminators['A'].get_attr_name('country') is None)
+        self.assertTrue(element_schema._discriminators['A'].get_attr_name('kind') is None)
+        self.assertTrue(element_schema._discriminators['A'].get_attr_name('people') is None)
+
+        self.assertTrue(element_schema._discriminators['B'].get_attr_name('web') is None)
+        self.assertTrue(element_schema._discriminators['B'].get_attr_name('author') is None)
+        self.assertTrue(element_schema._discriminators['B'].get_attr_name('machine') is not None)
+        self.assertTrue(element_schema._discriminators['B'].get_attr_name('country') is not None)
+        self.assertTrue(element_schema._discriminators['B'].get_attr_name('kind') is None)
+        self.assertTrue(element_schema._discriminators['B'].get_attr_name('people') is None)
+
+        self.assertTrue(element_schema._discriminators['C'].get_attr_name('web') is None)
+        self.assertTrue(element_schema._discriminators['C'].get_attr_name('author') is None)
+        self.assertTrue(element_schema._discriminators['C'].get_attr_name('machine') is None)
+        self.assertTrue(element_schema._discriminators['C'].get_attr_name('country') is None)
+        self.assertTrue(element_schema._discriminators['C'].get_attr_name('kind') is not None)
+        self.assertTrue(element_schema._discriminators['C'].get_attr_name('people') is None)
+
+        self.assertTrue(element_schema._discriminators['D'].get_attr_name('web') is None)
+        self.assertTrue(element_schema._discriminators['D'].get_attr_name('author') is None)
+        self.assertTrue(element_schema._discriminators['D'].get_attr_name('machine') is None)
+        self.assertTrue(element_schema._discriminators['D'].get_attr_name('country') is None)
+        self.assertTrue(element_schema._discriminators['D'].get_attr_name('kind') is None)
+        self.assertTrue(element_schema._discriminators['D'].get_attr_name('people') is None)

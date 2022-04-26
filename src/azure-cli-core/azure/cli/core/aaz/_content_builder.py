@@ -5,6 +5,7 @@
 
 from ._base import AAZBaseValue, AAZUndefined
 from ._field_value import AAZSimpleValue, AAZDict, AAZList, AAZObject
+from ._field_type import AAZObjectType
 from ._arg_browser import AAZArgBrowser
 
 # pylint: disable=protected-access, too-many-nested-blocks
@@ -12,7 +13,7 @@ from ._arg_browser import AAZArgBrowser
 
 class AAZContentBuilder:
 
-    def __init__(self, values, args):
+    def __init__(self, values, args, is_discriminated=False):
         assert len(args) > 0
         for arg in args:
             assert isinstance(arg, AAZArgBrowser)
@@ -21,14 +22,39 @@ class AAZContentBuilder:
             assert isinstance(value, AAZBaseValue)
         self._values = values
         self._args = args
+        self._is_discriminated = is_discriminated
+
         self._sub_prop_builders = {}
         self._sub_elements_builder = None
+        self._discriminator_prop_name = None
+        self._discriminator_builders = {}
+
+    def set_const(self, prop_name, prop_value, typ, arg_key=None, typ_kwargs=None):
+        for value, arg in zip(self._values, self._args):
+            schema = value._schema
+            if self._is_discriminated:
+                assert isinstance(schema, AAZObjectType)
+                # use discriminator schema
+                schema = schema.get_discriminator(value)
+
+            sub_arg = arg.get_prop(arg_key)
+            if sub_arg is not None and sub_arg.data != AAZUndefined:
+                if schema.get_attr_name(prop_name) is None:
+                    schema[prop_name] = typ(**typ_kwargs) if typ_kwargs else typ()
+                else:
+                    assert isinstance(schema[prop_name], typ)
+                value[prop_name] = prop_value
 
     def set_prop(self, prop_name, typ, arg_key=None, typ_kwargs=None):
         sub_values = []
         sub_args = []
         for value, arg in zip(self._values, self._args):
             schema = value._schema
+            if self._is_discriminated:
+                assert isinstance(schema, AAZObjectType)
+                # use discriminator schema
+                schema = schema.get_discriminator(value)
+
             sub_arg = arg.get_prop(arg_key)
             if sub_arg is not None and sub_arg.data != AAZUndefined:
                 if schema.get_attr_name(prop_name) is None:
@@ -88,6 +114,28 @@ class AAZContentBuilder:
 
         return None
 
+    def discriminate_by(self, prop_name, prop_value):
+        if self._discriminator_prop_name is None:
+            self._discriminator_prop_name = prop_name
+        if self._discriminator_prop_name != prop_name:
+            raise KeyError(f"Conflict discriminator key: {self._discriminator_prop_name} and {prop_name}")
+        disc_values = []
+        disc_args = []
+        for value, arg in zip(self._values, self._args):
+            if not isinstance(value, (AAZObject,)):
+                raise NotImplementedError()
+            schema = value._schema
+            schema.discriminate_by(prop_name, prop_value)
+            if value[prop_name] == prop_value:
+                disc_values.append(value)
+                disc_args.append(arg)
+        if disc_values:
+            self._discriminator_builders[prop_value] = AAZContentBuilder(disc_values, disc_args, is_discriminated=True)
+        else:
+            self._discriminator_builders[prop_value] = None
+
+        return self._discriminator_builders[prop_value]
+
     def get(self, key):
         if not key or key == '.':
             return self
@@ -108,6 +156,14 @@ class AAZContentBuilder:
             if not self._sub_elements_builder:
                 return None
             sub_builder = self._sub_elements_builder
+        elif key_parts[0].startswith('{'):
+            # discriminator
+            key, value = key_parts[0][1:-1].split(":")
+            if key != self._discriminator_prop_name:
+                return None
+            sub_builder = self._discriminator_builders.get(value, None)
+            if not sub_builder:
+                return None
         else:
             if key_parts[0] not in self._sub_prop_builders:
                 return None

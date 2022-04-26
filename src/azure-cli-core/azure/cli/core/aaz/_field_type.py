@@ -70,7 +70,7 @@ class AAZObjectType(AAZBaseType):
         "get_attr_name",
         "process_data",
         "to_serialized_data",
-        "set_discriminator",
+        "discriminate_by",
         "get_discriminator"
     )
 
@@ -174,7 +174,7 @@ class AAZObjectType(AAZBaseType):
         return result
 
     # Polymorphism support
-    def set_discriminator(self, key, data, schema=None):
+    def discriminate_by(self, key, data, schema=None):
         name = self.get_attr_name(key)
         if name not in self._fields:
             raise AAZUnknownFieldError(self, key)
@@ -196,6 +196,8 @@ class AAZObjectType(AAZBaseType):
             return None
         if data == AAZUndefined or not data:
             return None
+        if isinstance(data, AAZObject):
+            data = data._data
         assert isinstance(data, dict)
         if self._discriminator_field_name not in data:
             return None

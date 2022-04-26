@@ -303,14 +303,14 @@ class TestAAZField(unittest.TestCase):
 
         element.action_type = AAZStrType()
         element.order = AAZIntType()
-        disc_modify_properties = element.set_discriminator('action_type', 'ModifyProperties')
+        disc_modify_properties = element.discriminate_by('action_type', 'ModifyProperties')
         action_configuration = disc_modify_properties.action_configuration = AAZObjectType(
             flags={"client_flatten": True})
         action_configuration.classification = AAZStrType()
         action_configuration.classification_comment = AAZStrType()
         action_configuration.severity = AAZStrType()
 
-        disc_run_playbook = element.set_discriminator('action_type', 'RunPlaybook')
+        disc_run_playbook = element.discriminate_by('action_type', 'RunPlaybook')
         disc_run_playbook.logic_app_resource_id = AAZStrType()
         disc_run_playbook.tenant_id = AAZStrType()
 
