@@ -5109,19 +5109,23 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         detach_acr = self.context.get_detach_acr()
 
         if attach_acr:
-            self.context.external_functions.ensure_aks_acr(self.cmd,
-                            assignee=assignee,
-                            acr_name_or_id=attach_acr,
-                            subscription_id=subscription_id,
-                            is_service_principal=is_service_principal)
+            self.context.external_functions.ensure_aks_acr(
+                self.cmd,
+                assignee=assignee,
+                acr_name_or_id=attach_acr,
+                subscription_id=subscription_id,
+                is_service_principal=is_service_principal,
+            )
 
         if detach_acr:
-            self.context.external_functions.ensure_aks_acr(self.cmd,
-                            assignee=assignee,
-                            acr_name_or_id=detach_acr,
-                            subscription_id=subscription_id,
-                            detach=True,
-                            is_service_principal=is_service_principal)
+            self.context.external_functions.ensure_aks_acr(
+                self.cmd,
+                assignee=assignee,
+                acr_name_or_id=detach_acr,
+                subscription_id=subscription_id,
+                detach=True,
+                is_service_principal=is_service_principal,
+            )
 
     def update_sku(self, mc: ManagedCluster) -> ManagedCluster:
         """Update sku (uptime sla) for the ManagedCluster object.
