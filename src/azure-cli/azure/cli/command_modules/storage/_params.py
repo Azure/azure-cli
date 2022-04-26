@@ -1462,14 +1462,16 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
             c.extra('lease_id', help='Lease ID for active lease.', required=True)
 
     with self.argument_context('storage container lease break') as c:
-        c.extra('lease_break_period', help='This is the proposed duration of seconds that the lease should continue '
-                                           'before it is broken, between 0 and 60 seconds. This break period is only '
-                                           'used if it is shorter than the time remaining on the lease. If longer, the'
-                                           ' time remaining on the lease is used. A new lease will not be available '
-                                           'before the break period has expired, but the lease may be held for longer '
-                                           'than the break period. If this header does not appear with a break '
-                                           'operation, a fixed-duration lease breaks after the remaining lease period '
-                                           'elapses, and an infinite lease breaks immediately.')
+        c.extra('lease_break_period', type='int', help='This is the proposed duration of seconds that the lease should '
+                                                       'continue before it is broken, between 0 and 60 seconds. '
+                                                       'This break period is only used if it is shorter than the time '
+                                                       'remaining on the lease. If longer, the time remaining on the '
+                                                       'lease is used. A new lease will not be available before the '
+                                                       'break period has expired, but the lease may be held for longer '
+                                                       'than the break period. If this header does not appear with a '
+                                                       'break operation, a fixed-duration lease breaks after the '
+                                                       'remaining lease period elapses, and an infinite lease breaks '
+                                                       'immediately.')
 
     with self.argument_context('storage container lease change') as c:
         c.extra('proposed_lease_id', help='Proposed lease ID, in a GUID string format. The Blob service returns 400'
