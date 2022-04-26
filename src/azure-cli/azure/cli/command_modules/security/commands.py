@@ -273,6 +273,8 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'show_security_alerts_suppression_rule')
         g.custom_command('delete', 'delete_security_alerts_suppression_rule')
         g.custom_command('update', 'update_security_alerts_suppression_rule')
+        g.custom_command('upsert_scope', 'upsert_security_alerts_suppression_rule_scope')
+        g.custom_command('delete_scope', 'delete_security_alerts_suppression_rule_scope')
 
     with self.command_group('security atp storage',
                             security_advanced_threat_protection_sdk,

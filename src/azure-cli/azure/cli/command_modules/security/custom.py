@@ -130,33 +130,71 @@ def update_security_alerts_suppression_rule(client,
                                              reason,
                                              state,
                                              expiration_date_utc=None,
-                                             comment=None,
-                                             all_of=None):
+                                             comment=None):
 
-    # converting all_of json to a valid SuppressionAlertsScope value
-    json_all_of = json.loads(all_of)
-    scope_element_array = []
-    for scope_element_item in json_all_of:
-        for scope_property in scope_element_item:
-            if scope_property.lower() == "field":
-                current_scope_property_field_value = scope_element_item[scope_property]
-            else:
-                current_additional_properties = {scope_property: scope_element_item[scope_property]}
-        if current_additional_properties is None or current_scope_property_field_value is None:
-            raise RequiredArgumentMissingError("all-of require both 'field' and either 'in' or 'contains' properties.")
-        current_scope = ScopeElement(additional_properties=current_additional_properties,
-                                     field=current_scope_property_field_value)
-        scope_element_array.append(current_scope)
+    current_rule = None
+    try:    
+        current_rule = client.get(alerts_suppression_rule_name=rule_name)
+    except:
+        suppression_alerts_scope = None
 
-    suppression_scope = SuppressionAlertsScope(all_of=scope_element_array)
+    if current_rule is not None:
+        suppression_alerts_scope = current_rule.suppression_alerts_scope
+
     suppression_rule_data = AlertsSuppressionRule(name=rule_name,
                                                   alert_type=alert_type,
                                                   expiration_date_utc=expiration_date_utc,
                                                   reason=reason, state=state,
                                                   comment=comment,
-                                                  suppression_alerts_scope=suppression_scope)
+                                                  suppression_alerts_scope=suppression_alerts_scope)
 
     return client.update(alerts_suppression_rule_name=rule_name, alerts_suppression_rule=suppression_rule_data)
+
+
+def upsert_security_alerts_suppression_rule_scope(client, rule_name, field, contains_substring=None, any_of=None):
+    from azure.cli.core.commands import upsert_to_collection
+
+    # get the parent object
+    parent_object = client.get(alerts_suppression_rule_name=rule_name)
+
+    if contains_substring is not None:
+        current_additional_properties = {'contains': contains_substring}
+    else:
+        current_additional_properties = {'in': any_of}
+    scope = ScopeElement(additional_properties=current_additional_properties, field=field)
+
+    if parent_object.suppression_alerts_scope is None:
+        parent_object.suppression_alerts_scope = SuppressionAlertsScope(all_of=[scope])
+    else:
+        # add the new child to the parent collection
+        upsert_to_collection(parent_object.suppression_alerts_scope, 'all_of', scope, 'field')
+
+    # update the parent object
+    result = client.update(alerts_suppression_rule_name=rule_name, alerts_suppression_rule=parent_object)
+
+    # return the child object
+    return next((x for x in result.suppression_alerts_scope.all_of if x.field.lower() == field.lower()), None)
+
+
+def delete_security_alerts_suppression_rule_scope(client, rule_name, field):
+    from azure.cli.core.azclierror import InvalidArgumentValueError
+    err_msg_field_not_found = 'The specified --field was not found in scope'
+
+    # get the parent object
+    parent_object = client.get(alerts_suppression_rule_name=rule_name)
+
+    if parent_object.suppression_alerts_scope is None:
+        raise InvalidArgumentValueError(err_msg_field_not_found)
+
+    item_to_remove = next((x for x in parent_object.suppression_alerts_scope.all_of if x.field.lower() == field.lower()), None)
+    if item_to_remove is None:
+        raise InvalidArgumentValueError(err_msg_field_not_found)
+
+    parent_object.suppression_alerts_scope.all_of.remove(item_to_remove)
+    if len(parent_object.suppression_alerts_scope.all_of) == 0:
+        parent_object.suppression_alerts_scope = None
+
+    return client.update(alerts_suppression_rule_name=rule_name, alerts_suppression_rule=parent_object)
 
 
 # --------------------------------------------------------------------------------------------
