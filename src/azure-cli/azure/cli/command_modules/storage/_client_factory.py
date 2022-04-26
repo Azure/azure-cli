@@ -275,6 +275,12 @@ def cf_container_client(cli_ctx, kwargs):
     return cf_blob_service(cli_ctx, kwargs).get_container_client(container=kwargs.pop('container_name', None))
 
 
+def cf_container_lease_client(cli_ctx, kwargs):
+    t_lease_service = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_BLOB, '_lease#BlobLeaseClient')
+    container_client = cf_container_client(cli_ctx, kwargs)
+    return t_lease_service(client=container_client, lease_id=kwargs.pop('lease_id', None))
+
+
 def cf_adls_service(cli_ctx, kwargs):
     client_kwargs = prepare_client_kwargs_track2(cli_ctx)
     client_kwargs = _config_location_mode(kwargs, client_kwargs)
