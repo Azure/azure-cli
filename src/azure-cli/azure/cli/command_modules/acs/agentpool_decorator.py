@@ -1397,7 +1397,7 @@ class AKSAgentPoolAddDecorator:
         agentpool.linux_os_config = self.context.get_linux_os_config()
         return agentpool
 
-    def construct_agentpool_profile_default(self) -> AgentPool:
+    def construct_agentpool_profile_default(self, bypass_restore_defaults: bool = False) -> AgentPool:
         """The overall controller used to construct the AgentPool profile by default.
 
         The completely constructed AgentPool object will later be passed as a parameter to the underlying SDK
@@ -1428,7 +1428,8 @@ class AKSAgentPoolAddDecorator:
         # set up custom node config
         agentpool = self.set_up_custom_node_config(agentpool)
         # restore defaults
-        agentpool = self._restore_defaults_in_agentpool(agentpool)
+        if not bypass_restore_defaults:
+            agentpool = self._restore_defaults_in_agentpool(agentpool)
         return agentpool
 
     # pylint: disable=protected-access
