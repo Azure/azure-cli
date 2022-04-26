@@ -4982,7 +4982,7 @@ def _handle_asg_property(kwargs, key, asgs):
     prefix = key.split('_', 1)[0] + '_'
     if asgs:
         kwargs[key] = asgs
-        if kwargs[prefix + 'address_prefix'].is_default:
+        if kwargs[prefix + 'address_prefix']:
             kwargs[prefix + 'address_prefix'] = ''
 
 
@@ -6352,6 +6352,16 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
                      allocation_method=None, dns_name=None,
                      idle_timeout=4, reverse_fqdn=None, version=None, sku=None, tier=None, zone=None, ip_tags=None,
                      public_ip_prefix=None, edge_zone=None, ip_address=None):
+
+    # In the latest profile, the default public IP will be expected to be changed from Basic to Standard.
+    # In order to avoid breaking change which has a big impact to users,
+    # we use the hint to guide users to use Standard sku to create public IP.
+    if sku is None and cmd.cli_ctx.cloud.profile == 'latest':
+        logger.warning(
+            'It is recommended to use parameter "--sku Standard" to create new public IP. '
+            'Please note that the default public IP used for creation will be changed from Basic to Standard '
+            'in the future.')
+
     IPAllocationMethod, PublicIPAddress, PublicIPAddressDnsSettings, SubResource = cmd.get_models(
         'IPAllocationMethod', 'PublicIPAddress', 'PublicIPAddressDnsSettings', 'SubResource')
     client = network_client_factory(cmd.cli_ctx).public_ip_addresses
@@ -6678,7 +6688,7 @@ def create_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endp
                                 endpoint)
 
 
-def update_traffic_manager_endpoint(instance, endpoint_type=None, endpoint_location=None,
+def update_traffic_manager_endpoint(instance, endpoint_type, endpoint_location=None,
                                     endpoint_status=None, endpoint_monitor_status=None,
                                     priority=None, target=None, target_resource_id=None,
                                     weight=None, min_child_endpoints=None, min_child_ipv4=None,
@@ -7598,7 +7608,7 @@ def create_virtual_hub(cmd, client,
                        resource_group_name,
                        virtual_hub_name,
                        hosted_subnet,
-                       public_ip_address=None,
+                       public_ip_address,
                        location=None,
                        tags=None):
     from azure.core.exceptions import HttpResponseError
@@ -7623,7 +7633,7 @@ def create_virtual_hub(cmd, client,
 
     ip_config = HubIpConfiguration(
         subnet=SubResource(id=hosted_subnet),
-        public_ip_address=SubResource(id=public_ip_address) if public_ip_address else None,
+        public_ip_address=SubResource(id=public_ip_address),
     )
     vhub_ip_config_client = network_client_factory(cmd.cli_ctx).virtual_hub_ip_configuration
     try:

@@ -3,26 +3,28 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=no-name-in-module,import-error
+from azure.cli.command_modules.acs._client_factory import (
+    cf_agent_pools,
+    cf_container_services,
+    cf_managed_clusters,
+    cf_openshift_managed_clusters,
+    cf_snapshots,
+)
+from azure.cli.command_modules.acs._format import (
+    aks_agentpool_list_table_format,
+    aks_agentpool_show_table_format,
+    aks_list_nodepool_snapshot_table_format,
+    aks_list_table_format,
+    aks_run_command_result_format,
+    aks_show_nodepool_snapshot_table_format,
+    aks_show_table_format,
+    aks_upgrades_table_format,
+    aks_versions_table_format,
+    osa_list_table_format,
+)
 from azure.cli.core.commands import CliCommandType
 from azure.cli.core.commands.arm import deployment_validate_table_format
 from azure.cli.core.profiles import ResourceType
-
-from ._client_factory import cf_container_services
-from ._client_factory import cf_managed_clusters
-from ._client_factory import cf_agent_pools
-from ._client_factory import cf_openshift_managed_clusters
-from ._client_factory import cf_snapshots
-from ._format import aks_list_table_format
-from ._format import aks_show_table_format
-from ._format import aks_agentpool_show_table_format
-from ._format import aks_agentpool_list_table_format
-from ._format import osa_list_table_format
-from ._format import aks_upgrades_table_format
-from ._format import aks_versions_table_format
-from ._format import aks_run_command_result_format
-from ._format import aks_show_nodepool_snapshot_table_format
-from ._format import aks_list_nodepool_snapshot_table_format
 
 
 # pylint: disable=too-many-statements

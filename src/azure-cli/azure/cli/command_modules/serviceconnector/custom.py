@@ -168,6 +168,7 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals
                       key_space=None, graph=None, table=None,                # Resource.Cosmos*,
                       config_store=None,                                     # Resource.AppConfig
                       namespace=None,                                        # Resource.EventHub
+                      webpubsub=None,                                        # Resource.WebPubSub
                       signalr=None):                                         # Resource.SignalR
 
     if not source_id:

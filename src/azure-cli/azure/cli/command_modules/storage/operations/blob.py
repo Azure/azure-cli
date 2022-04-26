@@ -510,12 +510,16 @@ def transform_blob_type(cmd, blob_type):
 
 # pylint: disable=protected-access
 def _adjust_block_blob_size(client, blob_type, length):
-    if not blob_type or blob_type != 'block':
+    if not blob_type or blob_type != 'block' or length is None:
         return
 
-    # increase the block size to 4000MB when the block list will contain more than
-    # 50,000 blocks(each block 100MB)
-    if length is not None and length > 50000 * 100 * 1024 * 1024:
+    # increase the block size to 100MB when the block list will contain more than 50,000 blocks(each block 4MB)
+    if length > 50000 * 4 * 1024 * 1024:
+        client._config.max_block_size = 100 * 1024 * 1024
+        client._config.max_single_put_size = 256 * 1024 * 1024
+
+    # increase the block size to 4000MB when the block list will contain more than 50,000 blocks(each block 100MB)
+    if length > 50000 * 100 * 1024 * 1024:
         client._config.max_block_size = 4000 * 1024 * 1024
         client._config.max_single_put_size = 5000 * 1024 * 1024
 

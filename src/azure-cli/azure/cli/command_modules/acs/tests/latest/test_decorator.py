@@ -1077,6 +1077,56 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_1.attach_mc(mc)
         self.assertEqual(ctx_1.get_enable_fips_image(), True)
 
+    def test_get_nat_gateway_managed_outbound_ip_count(self):
+        # default
+        ctx_1 = AKSContext(
+            self.cmd,
+            {"nat_gateway_managed_outbound_ip_count": None},
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(
+            ctx_1.get_nat_gateway_managed_outbound_ip_count(), None
+        )
+        nat_gateway_profile = self.models.nat_gateway_models.ManagedClusterNATGatewayProfile(
+            managed_outbound_ip_profile=self.models.nat_gateway_models.ManagedClusterManagedOutboundIPProfile(
+                count=10
+            )
+        )
+        network_profile = self.models.ContainerServiceNetworkProfile(
+            nat_gateway_profile=nat_gateway_profile
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=network_profile,
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(ctx_1.get_nat_gateway_managed_outbound_ip_count(), 10)
+
+    def test_get_nat_gateway_idle_timeout(self):
+        # default
+        ctx_1 = AKSContext(
+            self.cmd,
+            {"nat_gateway_idle_timeout": None},
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_1.get_nat_gateway_idle_timeout(), None)
+        nat_gateway_profile = (
+            self.models.nat_gateway_models.ManagedClusterNATGatewayProfile(
+                idle_timeout_in_minutes=20,
+            )
+        )
+        network_profile = self.models.ContainerServiceNetworkProfile(
+            nat_gateway_profile=nat_gateway_profile
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=network_profile,
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(ctx_1.get_nat_gateway_idle_timeout(), 20)
+
     def test_get_enable_encryption_at_host(self):
         # default
         ctx_1 = AKSContext(

@@ -182,11 +182,10 @@ def load_command_table(self, _):
 
     if not is_azure_stack_profile(self):
         with self.command_group('keyvault key', data_key_entity.command_type) as g:
-            g.keyvault_command('random', 'get_random_bytes', is_preview=True, transform=transform_key_random_output)
-            g.keyvault_command('rotate', 'rotate_key', transform=transform_key_output, is_preview=True)
+            g.keyvault_command('random', 'get_random_bytes', transform=transform_key_random_output)
+            g.keyvault_command('rotate', 'rotate_key', transform=transform_key_output)
 
-        with self.command_group('keyvault key rotation-policy', data_key_entity.command_type,
-                                is_preview=True) as g:
+        with self.command_group('keyvault key rotation-policy', data_key_entity.command_type) as g:
             g.keyvault_command('show', 'get_key_rotation_policy', )
             g.keyvault_custom('update', 'update_key_rotation_policy')
 

@@ -4,10 +4,22 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
+from enum import Enum
+
 from knack.log import get_logger
 from knack.util import CLIError
-from azure.mgmt.netapp.models import ActiveDirectory, NetAppAccount, NetAppAccountPatch, CapacityPool, CapacityPoolPatch, Volume, VolumePatch, VolumePropertiesExportPolicy, ExportPolicyRule, Snapshot, ReplicationObject, VolumePropertiesDataProtection, SnapshotPolicy, SnapshotPolicyPatch, HourlySchedule, DailySchedule, WeeklySchedule, MonthlySchedule, VolumeSnapshotProperties, VolumeBackupProperties, BackupPolicy, BackupPolicyPatch, VolumePatchPropertiesDataProtection, AccountEncryption, AuthorizeRequest, BreakReplicationRequest, PoolChangeRequest, VolumeRevert, Backup, BackupPatch, LdapSearchScopeOpt, SubvolumeInfo, SubvolumePatchRequest, SnapshotRestoreFiles
+from azure.mgmt.netapp.models import ActiveDirectory, NetAppAccount, NetAppAccountPatch, CapacityPool, \
+    CapacityPoolPatch, Volume, VolumePatch, VolumePropertiesExportPolicy, ExportPolicyRule, Snapshot, \
+    ReplicationObject, VolumePropertiesDataProtection, SnapshotPolicy, SnapshotPolicyPatch, HourlySchedule, \
+    DailySchedule, WeeklySchedule, MonthlySchedule, VolumeSnapshotProperties, VolumeBackupProperties, BackupPolicy, \
+    BackupPolicyPatch, VolumePatchPropertiesDataProtection, AccountEncryption, AuthorizeRequest, \
+    BreakReplicationRequest, PoolChangeRequest, VolumeRevert, Backup, BackupPatch, LdapSearchScopeOpt, SubvolumeInfo, \
+    SubvolumePatchRequest, SnapshotRestoreFiles, PlacementKeyValuePairs, VolumeGroupMetaData, VolumeGroupDetails, \
+    VolumeGroupVolumeProperties
+
+from azure.cli.core.azclierror import ValidationError
 from azure.cli.core.commands.client_factory import get_subscription_id
+from azure.cli.core.util import sdk_no_wait
 from msrestazure.tools import is_valid_resource_id, parse_resource_id
 
 logger = get_logger(__name__)
@@ -65,8 +77,8 @@ def add_active_directory(instance, account_name, resource_group_name, username, 
 # pylint: disable=unused-argument, disable=too-many-locals, disable=too-many-statements
 # update an active directory on the netapp account
 # current limitation is 1 AD/subscription
-def update_active_directory(instance, account_name, resource_group_name, active_directory_id, username, password, domain,
-                            dns, smb_server_name, organizational_unit=None, kdc_ip=None, ad_name=None,
+def update_active_directory(instance, account_name, resource_group_name, active_directory_id, username, password,
+                            domain, dns, smb_server_name, organizational_unit=None, kdc_ip=None, ad_name=None,
                             server_root_ca_cert=None, backup_operators=None, aes_encryption=None, ldap_signing=None,
                             security_operators=None, ldap_over_tls=None, allow_local_ldap_users=None,
                             administrators=None, encrypt_dc_conn=None, user_dn=None, group_dn=None, group_filter=None):
@@ -198,7 +210,7 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
     # if NFSv4 is specified then the export policy must reflect this
     # the RP ordinarily only creates a default setting NFSv3.
     if protocol_types is not None and any(x in ['NFSv3', 'NFSv4.1'] for x in protocol_types) \
-            and not (protocol_types == 'NFSv3' and rule_index is None):
+            and not (protocol_types == ['NFSv3'] and rule_index is None):
         rules = []
         isNfs41 = False
         isNfs3 = False
@@ -417,7 +429,7 @@ def snapshot_restore_files(client, resource_group_name, account_name, pool_name,
         file_paths=file_paths,
         destination_path=destination_path
     )
-    client.begin_restore_files(resource_group_name, account_name, pool_name, volume_name, snapshot_name, body)
+    return client.begin_restore_files(resource_group_name, account_name, pool_name, volume_name, snapshot_name, body)
 
 
 # ---- SNAPSHOT POLICIES ----
@@ -522,3 +534,343 @@ def patch_subvolume(client, resource_group_name, account_name, pool_name, volume
         size=size
     )
     return client.begin_update(resource_group_name, account_name, pool_name, volume_name, subvolume_name, body)
+
+
+# ---- VOLUME GROUPS ----
+def create_volume_group(cmd, client, resource_group_name, account_name, pool_name, volume_group_name, vnet, ppg,
+                        sap_sid, subnet='default', location=None, tags=None, gp_rules=None, memory=100,
+                        add_snapshot_capacity=50, start_host_id=1, number_of_hots=1, prefix="", system_role="PRIMARY",
+                        data_size=None, data_throughput=None, log_size=None, log_throughput=None, shared_size=None,
+                        shared_throughput=None, data_backup_size=None, data_backup_throughput=None,
+                        log_backup_size=None, log_backup_throughput=None, backup_nfsv3=False, no_wait=False,
+                        data_repl_skd=None, data_src_id=None, shared_repl_skd=None, shared_src_id=None,
+                        data_backup_repl_skd=None, data_backup_src_id=None, log_backup_repl_skd=None,
+                        log_backup_src_id=None):
+    if number_of_hots < 1 or number_of_hots > 3:
+        raise ValidationError("Number of hosts must be between 1 and 3")
+    if memory < 1 or memory > 12000:
+        raise ValidationError("Memory must be between 1 and 12000")
+    if add_snapshot_capacity < 0 or add_snapshot_capacity > 200:
+        raise ValidationError("Additional capacity for snapshot must be between 0 and 200")
+    if system_role == "DR" and number_of_hots != 1:
+        raise ValidationError("Number of hosts must be 1 when creating a Disaster Recovery (DR) volume group")
+
+    if prefix == "":
+        if system_role == "HA":
+            prefix = "HA-"
+        if system_role == "DR":
+            prefix = "DR-"
+    else:
+        prefix = prefix + "-"
+
+    if location is None:
+        location = client.resource_groups.get(resource_group_name).location
+    rules = []
+    if gp_rules is not None:
+        for rule in gp_rules:
+            rule = rule.split("=")
+            rules.append(PlacementKeyValuePairs(key=rule[0], value=rule[1]))
+
+    group_meta_data = VolumeGroupMetaData(
+        group_description="Primary for " + volume_group_name,
+        application_type="SAP-HANA",
+        application_identifier="DEV",
+        global_placement_rules=rules,
+        deployment_spec_id="20542149-bfca-5618-1879-9863dc6767f1"
+    )
+
+    # default the resource group of the subnet to the volume's rg unless the subnet is specified by id
+    subnet_rg = resource_group_name
+
+    # determine vnet - supplied value can be name or ARM resource Id
+    if is_valid_resource_id(vnet):
+        resource_parts = parse_resource_id(vnet)
+        vnet = resource_parts['resource_name']
+        subnet_rg = resource_parts['resource_group']
+
+    # determine subnet - supplied value can be name or ARM reource Id
+    if is_valid_resource_id(subnet):
+        resource_parts = parse_resource_id(subnet)
+        subnet = resource_parts['resource_name']
+        subnet_rg = resource_parts['resource_group']
+
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    subnet_id = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/virtualNetworks/%s/subnets/%s" % \
+                (subscription_id, subnet_rg, vnet, subnet)
+    pool_id = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.NetApp/netAppAccounts/%s/capacityPools/%s" % \
+              (subscription_id, subnet_rg, account_name, pool_name)
+
+    # Create data volume(s)
+    data_volumes = []
+    for i in range(start_host_id, start_host_id + number_of_hots):
+        data_volumes.append(create_data_volume_properties(subnet_id, sap_sid, pool_id, ppg, memory,
+                                                          add_snapshot_capacity, str(i), data_size, data_throughput,
+                                                          prefix, data_repl_skd, data_src_id))
+    # Create log volume(s)
+    log_volumes = []
+    for i in range(start_host_id, start_host_id + number_of_hots):
+        log_volumes.append(create_log_volume_properties(subnet_id, sap_sid, pool_id, ppg, memory, str(i), log_size,
+                                                        log_throughput, prefix))
+    total_data_volume_size = sum(int(vol.usage_threshold) for vol in data_volumes)
+    total_log_volume_size = sum(int(vol.usage_threshold) for vol in log_volumes)
+
+    # Combine volumes and create shared and backup volumes
+    volumes = []
+    volumes.extend(data_volumes)
+    volumes.extend(log_volumes)
+
+    volumes.append(create_shared_volume_properties(subnet_id, sap_sid, pool_id, ppg, memory, shared_size,
+                                                   shared_throughput, number_of_hots, prefix, shared_repl_skd, shared_src_id))
+    volumes.append(create_data_backup_volume_properties(subnet_id, sap_sid, pool_id, ppg, memory, data_backup_size,
+                                                        data_backup_throughput, total_data_volume_size,
+                                                        total_log_volume_size, prefix, backup_nfsv3,
+                                                        data_backup_repl_skd, data_backup_src_id))
+    volumes.append(create_log_backup_volume_properties(subnet_id, sap_sid, pool_id, ppg, memory, log_backup_size,
+                                                       log_backup_throughput, prefix, backup_nfsv3, log_backup_repl_skd,
+                                                       log_backup_src_id))
+
+    body = VolumeGroupDetails(
+        location=location,
+        tags=tags,
+        group_meta_data=group_meta_data,
+        volumes=volumes
+    )
+    return sdk_no_wait(no_wait, client.begin_create, resource_group_name, account_name, volume_group_name, body)
+
+
+def create_data_volume_properties(subnet_id, sap_sid, pool_id, ppg, memory, add_snap_capacity, host_id,
+                                  data_size, data_throughput, prefix, data_repl_skd=None, data_src_id=None):
+    name = prefix + sap_sid + "-" + VolumeType.DATA.value + "-mnt" + (host_id.rjust(5, '0'))
+
+    if data_size is None:
+        size = calculate_usage_threshold(memory, VolumeType.DATA, add_snap_capacity=add_snap_capacity)
+    else:
+        size = data_size * gib_scale
+
+    throughput = data_throughput
+    if throughput is None:
+        throughput = calculate_throughput(memory, VolumeType.DATA)
+
+    data_protection = None
+    if data_repl_skd is not None and data_src_id is not None:
+        replication = ReplicationObject(replication_schedule=data_repl_skd,
+                                        remote_volume_resource_id=data_src_id)
+        data_protection = VolumePropertiesDataProtection(replication=replication)
+
+    data_volume = VolumeGroupVolumeProperties(
+        subnet_id=subnet_id,
+        creation_token=name,
+        capacity_pool_resource_id=pool_id,
+        proximity_placement_group=ppg,
+        volume_spec_name=VolumeType.DATA.value,
+        protocol_types=["NFSv4.1"],
+        name=name,
+        usage_threshold=size,
+        throughput_mibps=throughput,
+        export_policy=create_default_export_policy_for_vg(),
+        data_protection=data_protection
+    )
+
+    return data_volume
+
+
+def create_log_volume_properties(subnet_id, sap_sid, pool_id, ppg, memory, host_id, log_size,
+                                 log_throughput, prefix):
+    name = prefix + sap_sid + "-" + VolumeType.LOG.value + "-mnt" + (host_id.rjust(5, '0'))
+
+    if log_size is None:
+        size = calculate_usage_threshold(memory, VolumeType.LOG)
+    else:
+        size = log_size * gib_scale
+
+    if log_throughput is None:
+        log_throughput = calculate_throughput(memory, VolumeType.LOG)
+
+    log_volume = VolumeGroupVolumeProperties(
+        subnet_id=subnet_id,
+        creation_token=name,
+        capacity_pool_resource_id=pool_id,
+        proximity_placement_group=ppg,
+        volume_spec_name=VolumeType.LOG.value,
+        protocol_types=["NFSv4.1"],
+        name=name,
+        usage_threshold=size,
+        throughput_mibps=log_throughput,
+        export_policy=create_default_export_policy_for_vg()
+    )
+
+    return log_volume
+
+
+def create_shared_volume_properties(subnet_id, sap_sid, pool_id, ppg, memory, shared_size,
+                                    shared_throughput, number_of_hosts, prefix, shared_repl_skd=None, shared_src_id=None):
+    name = prefix + sap_sid + "-" + VolumeType.SHARED.value
+
+    if shared_size is None:
+        size = calculate_usage_threshold(memory, VolumeType.SHARED, total_host_count=number_of_hosts)
+    else:
+        size = shared_size * gib_scale
+
+    if shared_throughput is None:
+        shared_throughput = calculate_throughput(memory, VolumeType.SHARED)
+
+    data_protection = None
+    if shared_repl_skd is not None and shared_src_id is not None:
+        replication = ReplicationObject(replication_schedule=shared_repl_skd,
+                                        remote_volume_resource_id=shared_src_id)
+        data_protection = VolumePropertiesDataProtection(replication=replication)
+
+    shared_volume = VolumeGroupVolumeProperties(
+        subnet_id=subnet_id,
+        creation_token=name,
+        capacity_pool_resource_id=pool_id,
+        proximity_placement_group=ppg,
+        volume_spec_name=VolumeType.SHARED.value,
+        protocol_types=["NFSv4.1"],
+        name=name,
+        usage_threshold=size,
+        throughput_mibps=shared_throughput,
+        export_policy=create_default_export_policy_for_vg(),
+        data_protection=data_protection
+    )
+
+    return shared_volume
+
+
+def create_data_backup_volume_properties(subnet_id, sap_sid, pool_id, ppg, memory, data_backup_size,
+                                         data_backup_throughput, total_data_volume_size, total_log_volume_size,
+                                         prefix, backup_nfsv3, data_backup_repl_skd, data_backup_src_id):
+    name = prefix + sap_sid + "-" + VolumeType.DATA_BACKUP.value
+
+    if data_backup_size is None:
+        size = calculate_usage_threshold(memory, VolumeType.DATA_BACKUP, data_size=total_data_volume_size,
+                                         log_size=total_log_volume_size)
+    else:
+        size = data_backup_size * gib_scale
+
+    if data_backup_throughput is None:
+        data_backup_throughput = calculate_throughput(memory, VolumeType.DATA_BACKUP)
+
+    data_protection = None
+    if data_backup_repl_skd is not None and data_backup_src_id is not None:
+        replication = ReplicationObject(replication_schedule=data_backup_repl_skd,
+                                        remote_volume_resource_id=data_backup_src_id)
+        data_protection = VolumePropertiesDataProtection(replication=replication)
+
+    data_backup_volume = VolumeGroupVolumeProperties(
+        subnet_id=subnet_id,
+        creation_token=name,
+        capacity_pool_resource_id=pool_id,
+        proximity_placement_group=ppg,
+        volume_spec_name=VolumeType.DATA_BACKUP.value,
+        protocol_types=['NFSv4.1'] if not backup_nfsv3 else ['NFSv3'],
+        name=name,
+        usage_threshold=size,
+        throughput_mibps=data_backup_throughput,
+        export_policy=create_default_export_policy_for_vg(backup_nfsv3),
+        data_protection=data_protection
+    )
+
+    return data_backup_volume
+
+
+def create_log_backup_volume_properties(subnet_id, sap_sid, pool_id, ppg, memory, log_backup_size,
+                                        log_backup_throughput, prefix, backup_nfsv3, log_backup_repl_skd,
+                                        log_backup_src_id):
+    name = prefix + sap_sid + "-" + VolumeType.LOG_BACKUP.value
+
+    if log_backup_size is None:
+        size = calculate_usage_threshold(memory, VolumeType.LOG_BACKUP)
+    else:
+        size = log_backup_size * gib_scale
+
+    if log_backup_throughput is None:
+        log_backup_throughput = calculate_throughput(memory, VolumeType.LOG_BACKUP)
+
+    data_protection = None
+    if log_backup_repl_skd is not None and log_backup_src_id is not None:
+        replication = ReplicationObject(replication_schedule=log_backup_repl_skd,
+                                        remote_volume_resource_id=log_backup_src_id)
+        data_protection = VolumePropertiesDataProtection(replication=replication)
+
+    log_backup = VolumeGroupVolumeProperties(
+        subnet_id=subnet_id,
+        creation_token=name,
+        capacity_pool_resource_id=pool_id,
+        proximity_placement_group=ppg,
+        volume_spec_name=VolumeType.LOG_BACKUP.value,
+        protocol_types=['NFSv4.1'] if not backup_nfsv3 else ['NFSv3'],
+        name=name,
+        usage_threshold=size,
+        throughput_mibps=log_backup_throughput,
+        export_policy=create_default_export_policy_for_vg(backup_nfsv3),
+        data_protection=data_protection
+    )
+
+    return log_backup
+
+
+# Memory should be sent in as GiB and additional snapshot capacity as percentage (0-200). Usage is returned in bytes.
+def calculate_usage_threshold(memory, volume_type, add_snap_capacity=50, total_host_count=1, data_size=50, log_size=50):
+    if volume_type == VolumeType.DATA:
+        usage = ((add_snap_capacity / 100) * memory + memory)
+        return int(usage) * gib_scale if usage > 100 else 100 * gib_scale  # MIN 100 GiB
+    if volume_type == VolumeType.LOG:
+        if memory < 512:
+            usage = memory * 0.5  # 50%
+            return int(usage) * gib_scale if usage > 100 else 100 * gib_scale  # MIN 100 GiB
+        return 512 * gib_scale
+    if volume_type == VolumeType.SHARED:
+        usage = ((total_host_count + 3) / 4) * memory
+        return int(usage) * gib_scale if usage > 1024 else 1024 * gib_scale  # MIN 1 TiB
+    if volume_type == VolumeType.DATA_BACKUP:
+        usage = (data_size / gib_scale) + (log_size / gib_scale)
+        return int(usage) * gib_scale if usage > 100 else 100 * gib_scale  # MIN 100 GiB
+    if volume_type == VolumeType.LOG_BACKUP:
+        return 512 * gib_scale
+
+
+# Memory should be sent in in GiB. Returns throughput in MiB/s.
+# pylint: disable=too-many-return-statements
+def calculate_throughput(memory, volume_type):
+    if volume_type == VolumeType.DATA:
+        if memory <= 1024:
+            return 400
+        if memory <= 2048:
+            return 600
+        if memory <= 4096:
+            return 800
+        if memory <= 6144:
+            return 1000
+        if memory <= 8192:
+            return 1200
+        if memory <= 10248:
+            return 1400
+        return 1500
+    if volume_type == VolumeType.LOG:
+        if memory <= 4096:
+            return 250
+        return 500
+    if volume_type == VolumeType.SHARED:
+        return 64
+    if volume_type == VolumeType.DATA_BACKUP:
+        return 128
+    if volume_type == VolumeType.LOG_BACKUP:
+        return 250
+
+
+def create_default_export_policy_for_vg(nfsv3=False):
+    rules = []
+    export_policy = ExportPolicyRule(rule_index=1, unix_read_only=False, unix_read_write=True, nfsv3=nfsv3,
+                                     nfsv41=not nfsv3, allowed_clients="0.0.0.0/0")
+    rules.append(export_policy)
+    volume_export_policy = VolumePropertiesExportPolicy(rules=rules)
+    return volume_export_policy
+
+
+class VolumeType(Enum):
+    DATA = "data"
+    LOG = "log"
+    SHARED = "shared"
+    DATA_BACKUP = "data-backup"
+    LOG_BACKUP = "log-backup"

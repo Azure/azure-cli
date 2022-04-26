@@ -2051,6 +2051,48 @@ examples:
       crafted: true
 """
 
+helps['storage fs list-deleted-path'] = """
+type: command
+short-summary: List the deleted (file or directory) paths under the specified file system.
+examples:
+  - name: List the deleted (file or directory) paths under the specified file system..
+    text: |
+        az storage fs list-deleted-path -f myfilesystem --account-name mystorageccount --account-key 00000000
+"""
+
+helps['storage fs undelete-path'] = """
+type: command
+short-summary: Restore soft-deleted path.
+long-summary: Operation will only be successful if used within the specified number of days set in the delete retention policy.
+examples:
+  - name: Restore soft-deleted path.
+    text: |
+        az storage fs undelete-path -f myfilesystem --deleted-path-name dir --deletion-id 0000 --account-name mystorageccount --account-key 00000000
+"""
+
+helps['storage fs service-properties'] = """
+type: group
+short-summary: Manage storage datalake service properties.
+"""
+
+helps['storage fs service-properties show'] = """
+type: command
+short-summary: Show the properties of a storage account's datalake service, including Azure Storage Analytics.
+examples:
+  - name: Show the properties of a storage account's datalake service
+    text: |
+        az storage fs service-properties show --account-name mystorageccount --account-key 00000000
+"""
+
+helps['storage fs service-properties update'] = """
+type: command
+short-summary: Update the properties of a storage account's datalake service, including Azure Storage Analytics.
+examples:
+  - name: Update the properties of a storage account's datalake service
+    text: |
+        az storage fs service-properties update --delete-retention --delete-retention-period 7 --account-name mystorageccount --account-key 00000000
+"""
+
 helps['storage fs directory'] = """
 type: group
 short-summary: Manage directories in Azure Data Lake Storage Gen2 account.
@@ -2399,6 +2441,120 @@ examples:
 helps['storage queue'] = """
 type: group
 short-summary: Manage storage queues.
+"""
+
+helps['storage queue stats'] = """
+    type: command
+    short-summary: >
+        Retrieve statistics related to replication for the Queue service.
+        It is only available when read-access geo-redundant replication is enabled for the storage account.
+    examples:
+        - name: Show statistics related to replication for the Queue service.
+          text: az storage queue stats --account-name mystorageaccount
+"""
+
+helps['storage queue exists'] = """
+    type: command
+    short-summary: Return a boolean indicating whether the queue exists.
+    examples:
+        - name: Check whether the queue exists.
+          text: az storage queue exists -n myqueue --account-name mystorageaccount
+"""
+
+helps['storage queue generate-sas'] = """
+    type: command
+    short-summary: Generate a shared access signature for the queue.Use the returned signature with the sas_token parameter of QueueService.
+    examples:
+        - name: Generate a sas token for the queue with read-only permissions.
+          text: |
+              end=`date -u -d "30 minutes" '+%Y-%m-%dT%H:%MZ'`
+              az storage queue generate-sas -n myqueue --account-name mystorageaccount --permissions r --expiry $end --https-only
+        - name: Generate a sas token for the queue with ip range specified.
+          text: |
+              end=`date -u -d "30 minutes" '+%Y-%m-%dT%H:%MZ'`
+              az storage queue generate-sas -n myqueue --account-name mystorageaccount --ip "176.134.171.0-176.134.171.255" --permissions r --expiry $end --https-only
+"""
+
+helps['storage queue create'] = """
+    type: command
+    short-summary:  Create a queue under the given account.
+    examples:
+        - name: Create a queue under the given account with metadata.
+          text: az storage queue create -n myqueue --metadata key1=value1 key2=value2 --account-name mystorageaccount
+"""
+
+helps['storage queue delete'] = """
+    type: command
+    short-summary:  Delete the specified queue and any messages it contains.
+    examples:
+        - name: Delete the specified queue, throw an exception if the queue doesn't exist.
+          text: az storage queue delete -n myqueue --fail-not-exist --account-name mystorageaccount
+"""
+
+helps['storage queue metadata show'] = """
+    type: command
+    short-summary:  Return all user-defined metadata for the specified queue.
+    examples:
+        - name: Return all user-defined metadata for the specified queue.
+          text: az storage queue metadata show -n myqueue --account-name mystorageaccount
+"""
+
+helps['storage queue metadata update'] = """
+    type: command
+    short-summary:  Set user-defined metadata on the specified queue.
+    examples:
+        - name: Set user-defined metadata on the specified queue.
+          text: az storage queue metadata update -n myqueue --metadata a=b c=d --account-name mystorageaccount
+"""
+
+helps['storage message put'] = """
+    type: command
+    short-summary:  Add a new message to the back of the message queue.
+    examples:
+        - name: Add a new message which will live one day.
+          text: az storage message put -q myqueue --content mymessagecontent --time-to-live 86400 --account-name mystorageaccount
+"""
+
+helps['storage message peek'] = """
+    type: command
+    short-summary:  Retrieve one or more messages from the front of the queue, but do not alter the visibility of the message.
+    examples:
+        - name: Retrieve 5 messages from the front of the queue (do not alter the visibility of the message).
+          text: az storage message peek -q myqueue --num-messages 5 --account-name mystorageaccount
+"""
+
+helps['storage message get'] = """
+    type: command
+    short-summary:  Retrieve one or more messages from the front of the queue.
+    examples:
+        - name: Retrieve one message from the front of the queue and reset the visibility timeout to 5 minutes later.
+          text: az storage message get -q myqueue --visibility-timeout 300 --account-name mystorageaccount
+"""
+
+helps['storage message update'] = """
+    type: command
+    short-summary:  Update the visibility timeout of a message.
+    examples:
+        - name: Update the visibility timeout and content of a message.
+          text: |
+              az storage message update --id messageid --pop-receipt popreceiptreturned -q myqueue
+              --visibility-timeout 3600 --content newmessagecontent --account-name mystorageaccount
+"""
+
+helps['storage message delete'] = """
+    type: command
+    short-summary:  Delete the specified message.
+    examples:
+        - name: Delete the specified message.
+          text: az storage message delete --id messageid --pop-receipt popreceiptreturned -q myqueue --account-name mystorageaccount
+"""
+
+helps['storage message clear'] = """
+    type: command
+    short-summary:  Delete all messages from the specified queue.
+    examples:
+        - name: Delete all messages from the specified queue.
+          text: az storage message clear -q myqueue --account-name mystorageaccount
 """
 
 helps['storage queue list'] = """

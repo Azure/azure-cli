@@ -39,7 +39,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     t_base_blob_service = self.get_sdk('blob.baseblobservice#BaseBlobService')
     t_file_service = self.get_sdk('file#FileService')
-    t_queue_service = self.get_sdk('queue#QueueService')
+    t_queue_service = self.get_sdk('_queue_service_client#QueueServiceClient',
+                                   resource_type=ResourceType.DATA_STORAGE_QUEUE)
     t_table_service = get_table_data_type(self.cli_ctx, 'table', 'TableService')
 
     storage_account_type = CLIArgumentType(options_list='--storage-account',
@@ -681,6 +682,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='The permissions the SAS grants. Allowed values: {}. Can be combined.'.format(
                        get_permission_help_string(t_account_permissions)),
                    validator=get_permission_validator(t_account_permissions))
+        c.extra('encryption_scope', help='A predefined encryption scope used to encrypt the data on the service.')
         c.ignore('sas_token')
 
     or_policy_type = CLIArgumentType(
@@ -829,6 +831,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    validator=get_permission_validator(t_blob_permissions))
         c.argument('snapshot', help='An optional blob snapshot ID. Opaque DateTime value that, when present, '
                                     'specifies the blob snapshot to grant permission.')
+        c.extra('encryption_scope', help='A predefined encryption scope used to encrypt the data on the service.')
         c.ignore('sas_token')
 
     with self.argument_context('storage blob restore', resource_type=ResourceType.MGMT_STORAGE) as c:
@@ -1281,6 +1284,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.ignore('output_config')
 
     with self.argument_context('storage blob sync') as c:
+        from .sdkutil import get_blob_sync_delete_destination_types
         c.extra('destination_container', options_list=['--container', '-c'], required=True,
                 help='The sync destination container.')
         c.extra('destination_path', options_list=['--destination', '-d'],
@@ -1289,6 +1293,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('source', options_list=['--source', '-s'],
                    help='The source file path to sync from.')
         c.ignore('destination')
+        c.argument('delete_destination', arg_type=get_enum_type(get_blob_sync_delete_destination_types()),
+                   arg_group='Additional Flags', help='Defines whether to delete extra files from the destination that '
+                   'are not present at the source. Could be set to true, false, or prompt. If set to prompt, the user '
+                   'will be asked a question before scheduling files and blobs for deletion. ')
         c.argument('exclude_pattern', exclude_pattern_type)
         c.argument('include_pattern', include_pattern_type)
         c.argument('exclude_path', exclude_path_type)
@@ -1434,6 +1442,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    validator=as_user_validator,
                    help="Indicates that this command return the SAS signed with the user delegation key. "
                         "The expiry parameter and '--auth-mode login' are required if this argument is specified. ")
+        c.extra('encryption_scope', help='A predefined encryption scope used to encrypt the data on the service.')
         c.ignore('sas_token')
 
     with self.argument_context('storage container lease') as c:
@@ -1752,12 +1761,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                 options_list='--services', required=False)
 
     with self.argument_context('storage cors add') as c:
+        t_cors_rule_allowed_methods = self.get_models('CorsRuleAllowedMethodsItem',
+                                                      resource_type=ResourceType.MGMT_STORAGE)
         c.extra('services', validator=get_char_options_validator('bfqt', 'services'), required=True,
                 options_list='--services')
         c.argument('max_age')
         c.argument('origins', nargs='+')
         c.argument('methods', nargs='+',
-                   arg_type=get_enum_type(['DELETE', 'GET', 'HEAD', 'MERGE', 'POST', 'OPTIONS', 'PUT']))
+                   arg_type=get_enum_type(t_cors_rule_allowed_methods))
         c.argument('allowed_headers', nargs='+')
         c.argument('exposed_headers', nargs='+')
 
@@ -1765,24 +1776,29 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.extra('services', validator=get_char_options_validator('bfqt', 'services'), required=True,
                 options_list='--services')
 
+    for item in ['stats', 'exists', 'metadata show', 'metadata update']:
+        with self.argument_context('storage queue {}'.format(item)) as c:
+            c.extra('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
+
+    for item in ['exists', 'generate-sas', 'create', 'delete', 'metadata show', 'metadata update']:
+        with self.argument_context('storage queue {}'.format(item)) as c:
+            c.extra('queue_name', queue_name_type, options_list=('--name', '-n'), required=True)
+
     with self.argument_context('storage queue generate-sas') as c:
         from .completers import get_storage_acl_name_completion_list
 
-        t_queue_permissions = self.get_sdk('queue.models#QueuePermissions')
+        t_queue_permissions = self.get_sdk('_models#QueueSasPermissions', resource_type=ResourceType.DATA_STORAGE_QUEUE)
 
         c.register_sas_arguments()
 
-        c.argument('id', options_list='--policy-name',
+        c.argument('policy_id', options_list='--policy-name',
                    help='The name of a stored access policy within the share\'s ACL.',
-                   completer=get_storage_acl_name_completion_list(t_queue_permissions, 'queue_name', 'get_queue_acl'))
+                   completer=get_storage_acl_name_completion_list(t_queue_service, 'container_name',
+                                                                  'get_queue_access_policy'))
         c.argument('permission', options_list='--permissions',
                    help=sas_help.format(get_permission_help_string(t_queue_permissions)),
                    validator=get_permission_validator(t_queue_permissions))
         c.ignore('sas_token')
-        c.ignore('auth_mode')
-
-    with self.argument_context('storage queue') as c:
-        c.argument('queue_name', queue_name_type, options_list=('--name', '-n'))
 
     with self.argument_context('storage queue list') as c:
         c.argument('include_metadata', help='Specify that queue metadata be returned in the response.')
@@ -1795,16 +1811,24 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.extra('timeout', help='Request timeout in seconds. Apply to each call to the service.', type=int)
 
     with self.argument_context('storage queue create') as c:
-        c.argument('queue_name', queue_name_type, options_list=('--name', '-n'), completer=None)
+        c.argument('fail_on_exist', help='Specify whether to throw an exception if the queue already exists.')
+
+    with self.argument_context('storage queue delete') as c:
+        c.argument('fail_not_exist', help='Specify whether to throw an exception if the queue doesn\'t exist.')
+
+    for item in ['create', 'delete', 'show', 'list', 'update']:
+        with self.argument_context('storage queue policy {}'.format(item)) as c:
+            c.extra('queue_name', queue_name_type, required=True)
 
     with self.argument_context('storage queue policy') as c:
         from .completers import get_storage_acl_name_completion_list
 
-        t_queue_permissions = self.get_sdk('queue.models#QueuePermissions')
+        t_queue_permissions = self.get_sdk('_models#QueueSasPermissions', resource_type=ResourceType.DATA_STORAGE_QUEUE)
 
         c.argument('container_name', queue_name_type)
         c.argument('policy_name', options_list=('--name', '-n'), help='The stored access policy name.',
-                   completer=get_storage_acl_name_completion_list(t_queue_service, 'container_name', 'get_queue_acl'))
+                   completer=get_storage_acl_name_completion_list(t_queue_service, 'container_name',
+                                                                  'get_queue_access_policy'))
 
         help_str = 'Allowed values: {}. Can be combined'.format(get_permission_help_string(t_queue_permissions))
         c.argument('permission', options_list='--permissions', help=help_str,
@@ -1815,10 +1839,55 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('expiry', type=get_datetime_type(True), help='expiration UTC datetime in (Y-m-d\'T\'H:M:S\'Z\')')
         c.ignore('auth_mode')
 
-    with self.argument_context('storage message') as c:
-        c.argument('queue_name', queue_name_type)
-        c.argument('message_id', options_list='--id')
-        c.argument('content', type=str, help='Message content, up to 64KB in size.')
+    from six import u as unicode_string
+    for item in ['get', 'peek', 'put', 'update', 'delete', 'clear']:
+        with self.argument_context('storage message {}'.format(item)) as c:
+            c.extra('queue_name', queue_name_type, required=True)
+            c.extra('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
+
+    for item in ['update', 'delete']:
+        with self.argument_context('storage message {}'.format(item)) as c:
+            c.argument('message', options_list='--id', required=True,
+                       help='The message id identifying the message to delete.')
+            c.argument('pop_receipt', required=True,
+                       help='A valid pop receipt value returned from an earlier call to '
+                            'the :func:`~get_messages` or :func:`~update_message` operation.')
+
+    with self.argument_context('storage message put') as c:
+        c.argument('content', type=unicode_string, help='Message content, up to 64KB in size.')
+        c.extra('time_to_live', type=int,
+                help='Specify the time-to-live interval for the message, in seconds. '
+                     'The time-to-live may be any positive number or -1 for infinity. '
+                     'If this parameter is omitted, the default time-to-live is 7 days.')
+        c.extra('visibility_timeout', type=int,
+                help='If not specified, the default value is 0. Specify the new visibility timeout value, '
+                     'in seconds, relative to server time. The value must be larger than or equal to 0, '
+                     'and cannot be larger than 7 days. The visibility timeout of a message cannot be set '
+                     'to a value later than the expiry time. visibility_timeout should be set to a value '
+                     'smaller than the time_to_live value.')
+
+    with self.argument_context('storage message get') as c:
+        c.extra('messages_per_page', options_list='--num-messages', type=int, default=1,
+                help='A nonzero integer value that specifies the number of messages to retrieve from the queue, '
+                     'up to a maximum of 32. If fewer are visible, the visible messages are returned. '
+                     'By default, a single message is retrieved from the queue with this operation.')
+        c.extra('visibility_timeout', type=int,
+                help='Specify the new visibility timeout value, in seconds, relative to server time. '
+                     'The new value must be larger than or equal to 1 second, and cannot be larger than 7 days. '
+                     'The visibility timeout of a message can be set to a value later than the expiry time.')
+
+    with self.argument_context('storage message peek') as c:
+        c.extra('max_messages', options_list='--num-messages', type=int,
+                help='A nonzero integer value that specifies the number of messages to peek from the queue, up to '
+                     'a maximum of 32. By default, a single message is peeked from the queue with this operation.')
+
+    with self.argument_context('storage message update') as c:
+        c.argument('content', type=unicode_string, help='Message content, up to 64KB in size.')
+        c.extra('visibility_timeout', type=int,
+                help='If not specified, the default value is 0. Specify the new visibility timeout value, in seconds, '
+                     'relative to server time. The new value must be larger than or equal to 0, and cannot be larger '
+                     'than 7 days. The visibility timeout of a message cannot be set to a value later than the expiry '
+                     'time. A message can be updated until it has been deleted or has expired.')
 
     with self.argument_context('storage remove') as c:
         from .completers import file_path_completer
@@ -1972,6 +2041,38 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Specify that file system metadata be returned in the response. The default value is "False".')
         c.argument('name_starts_with', options_list=['--prefix'],
                    help='Filter the results to return only file systems whose names begin with the specified prefix.')
+
+    for item in ['list-deleted-path', 'undelete-path']:
+        with self.argument_context('storage fs {}'.format(item)) as c:
+            c.extra('file_system_name', options_list=['--file-system', '-f'],
+                    help="File system name.", required=True)
+            c.extra('timeout', timeout_type)
+
+    with self.argument_context('storage fs list-deleted-path') as c:
+        c.argument('path_prefix', help='Filter the results to return only paths under the specified path.')
+        c.argument('num_results', type=int, help='Specify the maximum number to return.')
+        c.argument('marker', help='A string value that identifies the portion of the list of containers to be '
+                                  'returned with the next listing operation. The operation returns the NextMarker '
+                                  'value within the response body if the listing operation did not return all '
+                                  'containers remaining to be listed with the current page. If specified, this '
+                                  'generator will begin returning results from the point where the previous '
+                                  'generator stopped.')
+
+    with self.argument_context('storage fs service-properties update', resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE,
+                               min_api='2020-06-12') as c:
+        c.argument('delete_retention', arg_type=get_three_state_flag(), arg_group='Soft Delete',
+                   help='Enable soft-delete.')
+        c.argument('delete_retention_period', type=int, arg_group='Soft Delete',
+                   options_list=['--delete-retention-period', '--period'],
+                   help='Number of days that soft-deleted fs will be retained. Must be in range [1,365].')
+        c.argument('enable_static_website', options_list=['--static-website'], arg_group='Static Website',
+                   arg_type=get_three_state_flag(),
+                   help='Enable static-website.')
+        c.argument('index_document', help='Represent the name of the index document. This is commonly "index.html".',
+                   arg_group='Static Website')
+        c.argument('error_document_404_path', options_list=['--404-document'], arg_group='Static Website',
+                   help='Represent the path to the error document that should be shown when an error 404 is issued,'
+                        ' in other words, when a browser requests a page that does not exist.')
 
     for item in ['create', 'show', 'delete', 'exists', 'move', 'metadata update', 'metadata show']:
         with self.argument_context('storage fs directory {}'.format(item)) as c:

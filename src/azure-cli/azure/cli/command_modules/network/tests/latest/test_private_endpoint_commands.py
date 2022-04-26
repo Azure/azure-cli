@@ -3064,5 +3064,68 @@ class NetworkPrivateLinkRecoveryServicesScenarioTest(ScenarioTest):
         self.cmd('vault delete --name {vault} --resource-group {rg}')
 
 
+class NetworkPrivateLinkPrivateLinkServicesScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_private_endpoint_pls', location='centralus')
+    def test_private_endpoint_pls(self):
+        self.kwargs.update({
+            'vnet': self.create_random_name('cli-test-vnet-', 20),
+            'subnet1': self.create_random_name('cli-test-subnet-', 20),
+            'subnet2': self.create_random_name('cli-test-subnet-', 20),
+            'lb': self.create_random_name('cli-test-lb-', 20),
+            'ip': self.create_random_name('cli-test-ip-', 20),
+            'pls': self.create_random_name('cli-test-pls-', 20),
+            'endpoint1': self.create_random_name('cli-test-endpoint-', 25),
+            'endpoint2': self.create_random_name('cli-test-endpoint-', 25),
+            'connection1': self.create_random_name('cli-test-conn-', 20),
+            'connection2': self.create_random_name('cli-test-conn-', 20),
+            'type': 'Microsoft.Network/privateLinkServices'
+        })
+
+        # create private link service
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet2}')
+        self.cmd('network vnet subnet update -g {rg} -n {subnet2} --vnet-name {vnet} --disable-private-link-service-network-policies')
+        self.cmd('network lb create -g {rg} -n {lb} --public-ip-address {ip} --sku Standard')
+        self.kwargs['pls_id'] = self.cmd('network private-link-service create -g {rg} -n {pls} --vnet-name {vnet} --subnet {subnet2} --lb-name {lb} --lb-frontend-ip-configs LoadBalancerFrontEnd').get_output_in_json()['id']
+
+        # create subnet with disabled endpoint network policies
+        self.cmd('network vnet subnet create -g {rg} -n {subnet1} --vnet-name {vnet} --address-prefixes 10.0.2.0/24')
+        self.cmd('network vnet subnet update -g {rg} -n {subnet1} --vnet-name {vnet} --disable-private-endpoint-network-policies')
+
+        # add an endpoint and approve it
+        self.cmd('network private-endpoint create -g {rg} -n {endpoint1} --vnet-name {vnet} --subnet {subnet1} --private-connection-resource-id {pls_id} --connection-name {connection1}')
+        self.kwargs['request1'] = self.cmd('network private-endpoint-connection list -g {rg} -n {pls} --type {type}').get_output_in_json()[0]['name']
+        self.cmd(
+            'network private-endpoint-connection approve -n {request1} -g {rg} --resource-name {pls} --type {type} --description Approved',
+            checks=[
+                self.check('properties.privateLinkServiceConnectionState.status', 'Approved'),
+                self.check('properties.privateLinkServiceConnectionState.description', 'Approved')
+            ]
+        )
+
+        # add an endpoint and then reject it
+        self.cmd('network private-endpoint create -g {rg} -n {endpoint2} --vnet-name {vnet} --subnet {subnet1} --private-connection-resource-id {pls_id} --connection-name {connection2}')
+        self.kwargs['request2'] = self.cmd('network private-endpoint-connection list -g {rg} -n {pls} --type {type}').get_output_in_json()[1]['name']
+        self.cmd(
+            'network private-endpoint-connection reject -n {request2} -g {rg} --resource-name {pls} --type {type} --description Rejected',
+            checks=[
+                self.check('properties.privateLinkServiceConnectionState.status', 'Rejected'),
+                self.check('properties.privateLinkServiceConnectionState.description', 'Rejected')
+            ]
+        )
+
+        # remove endpoints
+        self.cmd('network private-endpoint-connection delete -g {rg} --resource-name {pls} -n {request2} --type {type} --yes')
+        time.sleep(30)
+        self.cmd(
+            'network private-endpoint-connection show -g {rg} --resource-name {pls} -n {request1} --type {type}',
+            checks=[
+                self.check('properties.privateLinkServiceConnectionState.status', 'Approved'),
+                self.check('properties.privateLinkServiceConnectionState.description', 'Approved'),
+                self.check('name', '{request1}')
+            ]
+        )
+        self.cmd('network private-endpoint-connection delete -g {rg} --resource-name {pls} -n {request1} --type {type} --yes')
+
+
 if __name__ == '__main__':
     unittest.main()
