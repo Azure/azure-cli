@@ -189,7 +189,7 @@ def load_arguments(self, _):
         c.argument('security_type', arg_type=get_enum_type(self.get_models('DiskSecurityTypes', operation_group='disks')), help='The security type of the VM. Applicable for OS disks only.', min_api='2020-12-01')
         c.argument('support_hibernation', arg_type=get_three_state_flag(), help='Indicate the OS on a disk supports hibernation.', min_api='2020-12-01')
         c.argument('architecture', arg_type=get_enum_type(self.get_models('Architecture', operation_group='disks')), min_api='2021-12-01', help='CPU architecture.')
-        c.argument('data_access_auth_mode', arg_type=get_enum_type(['AzureActiveDirectory', None]), min_api='2021-12-01', help='Additional authentication requirements when exporting or uploading to a disk or snapshot.')
+        c.argument('data_access_auth_mode', arg_type=get_enum_type(['AzureActiveDirectory', 'None']), min_api='2021-12-01', help='Additional authentication requirements when exporting or uploading to a disk or snapshot.')
     # endregion
 
     # region Snapshots
