@@ -232,10 +232,10 @@ class AKSManagedClusterContext(BaseAKSContext):
             external_functions[
                 "ensure_default_log_analytics_workspace_for_monitoring"
             ] = ensure_default_log_analytics_workspace_for_monitoring
-            external_functions["_ensure_aks_acr"] = _ensure_aks_acr
-            external_functions["_ensure_aks_service_principal"] = _ensure_aks_service_principal
+            external_functions["ensure_aks_acr"] = _ensure_aks_acr
+            external_functions["ensure_aks_service_principal"] = _ensure_aks_service_principal
             external_functions[
-                "_ensure_cluster_identity_permission_on_kubelet_identity"
+                "ensure_cluster_identity_permission_on_kubelet_identity"
             ] = _ensure_cluster_identity_permission_on_kubelet_identity
             external_functions["subnet_role_assignment_exists"] = subnet_role_assignment_exists
             self.__external_functions = SimpleNamespace(**external_functions)
@@ -991,7 +991,7 @@ class AKSManagedClusterContext(BaseAKSContext):
             not secret_read_from_mc
         )
         if dynamic_completion:
-            principal_obj = self.external_functions._ensure_aks_service_principal(
+            principal_obj = self.external_functions.ensure_aks_service_principal(
                 cli_ctx=self.cmd.cli_ctx,
                 service_principal=service_principal,
                 client_secret=client_secret,
@@ -3853,6 +3853,40 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                 "is not the same as the `mc` in the context."
             )
 
+    def _remove_defaults_in_mc(self, mc: ManagedCluster) -> ManagedCluster:
+        """Internal function to remove values from properties with default values of the `mc` object.
+
+        Removing default values is to prevent getters from mistakenly overwriting user provided values with default
+        values in the object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        defaults_in_mc = {}
+        for attr_name, attr_value in vars(mc).items():
+            if not attr_name.startswith("_") and attr_name != "location" and attr_value is not None:
+                defaults_in_mc[attr_name] = attr_value
+                setattr(mc, attr_name, None)
+        self.context.set_intermediate("defaults_in_mc", defaults_in_mc, overwrite_exists=True)
+        return mc
+
+    def _restore_defaults_in_mc(self, mc: ManagedCluster) -> ManagedCluster:
+        """Internal function to restore values of properties with default values of the `mc` object.
+
+        Restoring default values is to keep the content of the request sent by cli consistent with that before the
+        refactoring.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        defaults_in_mc = self.context.get_intermediate("defaults_in_mc", {})
+        for key, value in defaults_in_mc.items():
+            if getattr(mc, key, None) is None:
+                setattr(mc, key, value)
+        return mc
+
     def init_mc(self) -> ManagedCluster:
         """Initialize a ManagedCluster object with required parameter location and attach it to internal context.
 
@@ -4082,7 +4116,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             # If enable_managed_identity, attach acr operation will be handled after the cluster is created
             if not self.context.get_enable_managed_identity():
                 service_principal_profile = mc.service_principal_profile
-                self.context.external_functions._ensure_aks_acr(
+                self.context.external_functions.ensure_aks_acr(
                     self.cmd,
                     assignee=service_principal_profile.client_id,
                     acr_name_or_id=attach_acr,
@@ -4574,7 +4608,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             }
             cluster_identity_object_id = self.context.get_user_assigned_identity_object_id()
             # ensure the cluster identity has "Managed Identity Operator" role at the scope of kubelet identity
-            self.context.external_functions._ensure_cluster_identity_permission_on_kubelet_identity(
+            self.context.external_functions.ensure_cluster_identity_permission_on_kubelet_identity(
                 self.cmd,
                 cluster_identity_object_id,
                 assign_kubelet_identity)
@@ -4635,7 +4669,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             )
         return mc
 
-    def construct_mc_profile_default(self) -> ManagedCluster:
+    def construct_mc_profile_default(self, bypass_restore_defaults: bool = False) -> ManagedCluster:
         """The overall controller used to construct the default ManagedCluster profile.
 
         The completely constructed ManagedCluster object will later be passed as a parameter to the underlying SDK
@@ -4645,6 +4679,8 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         """
         # initialize the ManagedCluster object
         mc = self.init_mc()
+        # remove defaults
+        self._remove_defaults_in_mc(mc)
         # set up agentpool profile
         mc = self.set_up_agentpool_profile(mc)
         # set up misc direct mc properties
@@ -4679,6 +4715,9 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.set_up_sku(mc)
         # set up extended location
         mc = self.set_up_extended_location(mc)
+        # restore defaults
+        if not bypass_restore_defaults:
+            mc = self._restore_defaults_in_mc(mc)
         return mc
 
     # pylint: disable=unused-argument,too-many-boolean-expressions
@@ -4756,7 +4795,9 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                         type="managedClusters",
                         name=self.context.get_name(),
                     )
-                    self.context.external_functions.add_monitoring_role_assignment(cluster, cluster_resource_id, self.cmd)
+                    self.context.external_functions.add_monitoring_role_assignment(
+                        cluster, cluster_resource_id, self.cmd
+                    )
             else:
                 # Create the DCR Association here
                 addon_consts = self.context.get_addon_consts()
@@ -4782,7 +4823,9 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         # virtual node addon
         virtual_node_addon_enabled = self.context.get_intermediate("virtual_node_addon_enabled", default_value=False)
         if virtual_node_addon_enabled:
-            self.context.external_functions.add_virtual_node_role_assignment(self.cmd, cluster, self.context.get_vnet_subnet_id())
+            self.context.external_functions.add_virtual_node_role_assignment(
+                self.cmd, cluster, self.context.get_vnet_subnet_id()
+            )
 
         # attach acr
         enable_managed_identity = self.context.get_enable_managed_identity()
@@ -4798,7 +4841,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                 )
             else:
                 kubelet_identity_object_id = cluster.identity_profile["kubeletidentity"].object_id
-                self.context.external_functions._ensure_aks_acr(
+                self.context.external_functions.ensure_aks_acr(
                     self.cmd,
                     assignee=kubelet_identity_object_id,
                     acr_name_or_id=attach_acr,
@@ -5066,14 +5109,14 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         detach_acr = self.context.get_detach_acr()
 
         if attach_acr:
-            self.context.external_functions._ensure_aks_acr(self.cmd,
+            self.context.external_functions.ensure_aks_acr(self.cmd,
                             assignee=assignee,
                             acr_name_or_id=attach_acr,
                             subscription_id=subscription_id,
                             is_service_principal=is_service_principal)
 
         if detach_acr:
-            self.context.external_functions._ensure_aks_acr(self.cmd,
+            self.context.external_functions.ensure_aks_acr(self.cmd,
                             assignee=assignee,
                             acr_name_or_id=detach_acr,
                             subscription_id=subscription_id,
@@ -5513,7 +5556,9 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                         type="managedClusters",
                         name=self.context.get_name(),
                     )
-                    self.context.external_functions.add_monitoring_role_assignment(cluster, cluster_resource_id, self.cmd)
+                    self.context.external_functions.add_monitoring_role_assignment(
+                        cluster, cluster_resource_id, self.cmd
+                    )
             else:
                 # Create the DCR Association here
                 addon_consts = self.context.get_addon_consts()
@@ -5539,7 +5584,9 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         # virtual node addon
         virtual_node_addon_enabled = self.context.get_intermediate("virtual_node_addon_enabled", default_value=False)
         if virtual_node_addon_enabled:
-            self.context.external_functions.add_virtual_node_role_assignment(self.cmd, cluster, self.context.get_vnet_subnet_id())
+            self.context.external_functions.add_virtual_node_role_assignment(
+                self.cmd, cluster, self.context.get_vnet_subnet_id()
+            )
 
         # attach acr
         enable_managed_identity = check_is_msi_cluster(cluster)
@@ -5555,7 +5602,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 )
             else:
                 kubelet_identity_object_id = cluster.identity_profile["kubeletidentity"].object_id
-                self.context.external_functions._ensure_aks_acr(
+                self.context.external_functions.ensure_aks_acr(
                     self.cmd,
                     assignee=kubelet_identity_object_id,
                     acr_name_or_id=attach_acr,

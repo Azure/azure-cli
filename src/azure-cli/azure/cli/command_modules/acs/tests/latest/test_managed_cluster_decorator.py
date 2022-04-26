@@ -3860,6 +3860,31 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         with self.assertRaises(CLIInternalError):
             dec_1._ensure_mc(mc_1)
 
+    def test_remove_restore_defaults_in_mc(self):
+        dec_1 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        # fail on passing the wrong mc object
+        with self.assertRaises(CLIInternalError):
+            dec_1._remove_defaults_in_mc(None)
+        # fail on passing the wrong mc object
+        with self.assertRaises(CLIInternalError):
+            dec_1._restore_defaults_in_mc(None)
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1._remove_defaults_in_mc(mc_1)
+        ground_truth_mc_1 = self.models.ManagedCluster(location="test_location")
+        ground_truth_mc_1.additional_properties = None
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+        self.assertEqual(dec_1.context.get_intermediate("defaults_in_mc"), {"additional_properties": {}})
+
+        dec_mc_2 = dec_1._restore_defaults_in_mc(dec_mc_1)
+        ground_truth_mc_2 = self.models.ManagedCluster(location="test_location")
+        self.assertEqual(dec_mc_2, ground_truth_mc_2)
+
     def test_init_mc(self):
         dec_1 = AKSManagedClusterCreateDecorator(
             self.cmd,
