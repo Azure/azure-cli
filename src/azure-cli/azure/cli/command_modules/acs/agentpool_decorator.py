@@ -5,6 +5,7 @@
 
 import os
 from math import isnan
+from types import SimpleNamespace
 from typing import Dict, List, Tuple, TypeVar, Union
 
 from azure.cli.command_modules.acs._client_factory import cf_agent_pools
@@ -23,10 +24,9 @@ from azure.cli.command_modules.acs._consts import (
     DecoratorEarlyExitException,
     DecoratorMode,
 )
-from azure.cli.command_modules.acs._helpers import get_snapshot_by_snapshot_id
+from azure.cli.command_modules.acs._helpers import get_snapshot_by_snapshot_id, safe_list_get
 from azure.cli.command_modules.acs._validators import extract_comma_separated_string
 from azure.cli.command_modules.acs.base_decorator import BaseAKSContext, BaseAKSModels, BaseAKSParamDict
-from azure.cli.command_modules.acs.decorator import safe_list_get
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core.azclierror import (
     ArgumentUsageError,
@@ -105,6 +105,64 @@ class AKSAgentPoolContext(BaseAKSContext):
         self.__existing_agentpool = None
         # used to store all the agentpools in mc mode
         self._agentpools = []
+        # used to store external functions
+        self.__external_functions = None
+
+    @property
+    def existing_agentpool(self) -> AgentPool:
+        return self.__existing_agentpool
+
+    @property
+    def external_functions(self) -> SimpleNamespace:
+        if self.__external_functions is None:
+            external_functions = {}
+            external_functions["cf_agent_pools"] = cf_agent_pools
+            external_functions["get_snapshot_by_snapshot_id"] = get_snapshot_by_snapshot_id
+            self.__external_functions = SimpleNamespace(**external_functions)
+        return self.__external_functions
+
+    def attach_agentpool(self, agentpool: AgentPool) -> None:
+        """Attach the AgentPool object to the context.
+
+        The `agentpool` object is only allowed to be attached once, and attaching again will raise a CLIInternalError.
+
+        :return: None
+        """
+        if self.decorator_mode == DecoratorMode.UPDATE:
+            self.attach_existing_agentpool(agentpool)
+
+        if self.agentpool is None:
+            self.agentpool = agentpool
+        else:
+            msg = "the same" if self.agentpool == agentpool else "different"
+            raise CLIInternalError(
+                "Attempting to attach the `agentpool` object again, the two objects are {}.".format(
+                    msg
+                )
+            )
+
+    def attach_existing_agentpool(self, agentpool: AgentPool) -> None:
+        if self.__existing_agentpool is None:
+            self.__existing_agentpool = agentpool
+        else:
+            msg = "the same" if self.__existing_agentpool == agentpool else "different"
+            raise CLIInternalError(
+                "Attempting to attach the existing `agentpool` object again, the two objects are {}.".format(
+                    msg
+                )
+            )
+
+    def attach_agentpools(self, agentpools: List[AgentPool]) -> None:
+        if self._agentpools == []:
+            self._agentpools = agentpools
+        else:
+            msg = "the same" if self._agentpools == agentpools else "different"
+            raise CLIInternalError(
+                "Attempting to attach the `agentpools` object again, the two objects are {}.".format(
+                    msg
+                )
+            )
+        self._agentpools = agentpools
 
     # pylint: disable=no-self-use
     def __validate_counts_in_autoscaler(
@@ -152,53 +210,6 @@ class AKSAgentPoolContext(BaseAKSContext):
                         option_name
                     )
                 )
-
-    def attach_agentpool(self, agentpool: AgentPool) -> None:
-        """Attach the AgentPool object to the context.
-
-        The `agentpool` object is only allowed to be attached once, and attaching again will raise a CLIInternalError.
-
-        :return: None
-        """
-        if self.decorator_mode == DecoratorMode.UPDATE:
-            self.attach_existing_agentpool(agentpool)
-
-        if self.agentpool is None:
-            self.agentpool = agentpool
-        else:
-            msg = "the same" if self.agentpool == agentpool else "different"
-            raise CLIInternalError(
-                "Attempting to attach the `agentpool` object again, the two objects are {}.".format(
-                    msg
-                )
-            )
-
-    def attach_existing_agentpool(self, agentpool: AgentPool) -> None:
-        if self.__existing_agentpool is None:
-            self.__existing_agentpool = agentpool
-        else:
-            msg = "the same" if self.__existing_agentpool == agentpool else "different"
-            raise CLIInternalError(
-                "Attempting to attach the existing `agentpool` object again, the two objects are {}.".format(
-                    msg
-                )
-            )
-
-    @property
-    def existing_agentpool(self) -> AgentPool:
-        return self.__existing_agentpool
-
-    def attach_agentpools(self, agentpools: List[AgentPool]) -> None:
-        if self._agentpools == []:
-            self._agentpools = agentpools
-        else:
-            msg = "the same" if self._agentpools == agentpools else "different"
-            raise CLIInternalError(
-                "Attempting to attach the `agentpools` object again, the two objects are {}.".format(
-                    msg
-                )
-            )
-        self._agentpools = agentpools
 
     def get_resource_group_name(self) -> str:
         """Obtain the value of resource_group_name.
@@ -264,7 +275,7 @@ class AKSAgentPoolContext(BaseAKSContext):
                 self.agentpool_decorator_mode == AgentPoolDecoratorMode.STANDALONE and
                 self.decorator_mode == DecoratorMode.CREATE
             ):
-                agentpool_client = cf_agent_pools(self.cmd.cli_ctx)
+                agentpool_client = self.external_functions.cf_agent_pools(self.cmd.cli_ctx)
                 instances = agentpool_client.list(self.get_resource_group_name(), self.get_cluster_name())
                 for agentpool_profile in instances:
                     if agentpool_profile.name == nodepool_name:
@@ -519,7 +530,7 @@ class AKSAgentPoolContext(BaseAKSContext):
 
         snapshot_id = self.get_snapshot_id()
         if snapshot_id:
-            snapshot = get_snapshot_by_snapshot_id(self.cmd.cli_ctx, snapshot_id)
+            snapshot = self.external_functions.get_snapshot_by_snapshot_id(self.cmd.cli_ctx, snapshot_id)
             self.set_intermediate("snapshot", snapshot, overwrite_exists=True)
         return snapshot
 
