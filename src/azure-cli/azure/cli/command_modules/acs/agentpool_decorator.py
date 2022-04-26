@@ -1158,11 +1158,31 @@ class AKSAgentPoolAddDecorator:
         """
         self.cmd = cmd
         self.client = client
+        self.__raw_parameters = raw_parameters
+        self.resource_type = resource_type
         self.agentpool_decorator_mode = agentpool_decorator_mode
-        self.models = AKSAgentPoolModels(cmd, resource_type, agentpool_decorator_mode)
-        # store the context in the process of assemble the AgentPool object
+        self.init_models()
+        self.init_context()
+
+    def init_models(self) -> None:
+        """Initialize an AKSAgentPoolModels object to store the models.
+
+        :return: None
+        """
+        self.models = AKSAgentPoolModels(self.cmd, self.resource_type, self.agentpool_decorator_mode)
+
+    def init_context(self) -> None:
+        """Initialize an AKSManagedClusterContext object to store the context in the process of assemble the
+        AgentPool object.
+
+        :return: None
+        """
         self.context = AKSAgentPoolContext(
-            cmd, AKSAgentPoolParamDict(raw_parameters), self.models, DecoratorMode.CREATE, agentpool_decorator_mode
+            self.cmd,
+            AKSAgentPoolParamDict(self.__raw_parameters),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
         )
 
     def _ensure_agentpool(self, agentpool: AgentPool) -> None:
@@ -1453,11 +1473,31 @@ class AKSAgentPoolUpdateDecorator:
         """
         self.cmd = cmd
         self.client = client
+        self.__raw_parameters = raw_parameters
+        self.resource_type = resource_type
         self.agentpool_decorator_mode = agentpool_decorator_mode
-        self.models = AKSAgentPoolModels(cmd, resource_type, agentpool_decorator_mode)
-        # store the context in the process of assemble the AgentPool object
+        self.init_models()
+        self.init_context()
+
+    def init_models(self) -> None:
+        """Initialize an AKSAgentPoolModels object to store the models.
+
+        :return: None
+        """
+        self.models = AKSAgentPoolModels(self.cmd, self.resource_type, self.agentpool_decorator_mode)
+
+    def init_context(self) -> None:
+        """Initialize an AKSManagedClusterContext object to store the context in the process of assemble the
+        AgentPool object.
+
+        :return: None
+        """
         self.context = AKSAgentPoolContext(
-            cmd, AKSAgentPoolParamDict(raw_parameters), self.models, DecoratorMode.UPDATE, agentpool_decorator_mode
+            self.cmd,
+            AKSAgentPoolParamDict(self.__raw_parameters),
+            self.models,
+            DecoratorMode.UPDATE,
+            self.agentpool_decorator_mode,
         )
 
     def _ensure_agentpool(self, agentpool: AgentPool) -> None:
@@ -1592,10 +1632,14 @@ class AKSAgentPoolUpdateDecorator:
         """
         # fetch the Agentpool object
         agentpool = self.fetch_agentpool(agentpools)
+        # update upgrade settings
+        agentpool = self.update_upgrade_settings(agentpool)
         # update auto scaler properties
         agentpool = self.update_auto_scaler_properties(agentpool)
         # update label, tag, taint
         agentpool = self.update_label_tag_taint(agentpool)
+        # update misc vm properties
+        agentpool = self.update_vm_properties(agentpool)
         return agentpool
 
     def update_agentpool(self, agentpool: AgentPool) -> AgentPool:
