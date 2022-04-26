@@ -90,6 +90,15 @@ examples:
              --storage-account-key Ay2ZbdxLnD4OJPT29F6jLPkB6KynOzx85YCObhrw==
 """
 
+helps['apim apply-network-updates'] = """
+type: command
+short-summary: Updates the API Management resource running in the virtual network to pick the updated network settings.
+examples:
+  - name: Updates the virtual network settings of the API Management service instance
+    text: |-
+        az apim apply-network-updates --name MyApim -g MyResourceGroup
+"""
+
 helps['apim create'] = """
 type: command
 short-summary: Create an API Management service instance.
