@@ -1942,7 +1942,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         addon_profiles_1 = {
             CONST_MONITORING_ADDON_NAME: self.models.ManagedClusterAddonProfile(
                 enabled=True,
-                config={CONST_MONITORING_USING_AAD_MSI_AUTH: True},
+                config={CONST_MONITORING_USING_AAD_MSI_AUTH: "True"},
             )
         }
         mc = self.models.ManagedCluster(location="test_location", addon_profiles=addon_profiles_1)
@@ -4594,7 +4594,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
                 "location": "test_location",
                 "enable_addons": "monitoring",
                 "workspace_resource_id": "test_workspace_resource_id",
-                "enable-msi-auth-for-monitoring": False,
+                "enable_msi_auth_for_monitoring": False,
             },
             ResourceType.MGMT_CONTAINERSERVICE,
         )
@@ -4613,7 +4613,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
                 enabled=True,
                 config={
                     CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: "/test_workspace_resource_id",
-                    CONST_MONITORING_USING_AAD_MSI_AUTH: None,
+                    CONST_MONITORING_USING_AAD_MSI_AUTH: "False",
                 },
             )
             self.assertEqual(monitoring_addon_profile, ground_truth_monitoring_addon_profile)
@@ -4820,6 +4820,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             {
                 "enable_addons": None,
                 "workspace_resource_id": None,
+                "enable_msi_auth_for_monitoring": None,
                 "aci_subnet_name": None,
                 "appgw_name": None,
                 "appgw_subnet_cidr": None,
@@ -4829,7 +4830,6 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
                 "enable_sgxquotehelper": False,
                 "enable_secret_rotation": False,
                 "rotation_poll_interval": None,
-                "enable-msi-auth-for-monitoring": None,
             },
             ResourceType.MGMT_CONTAINERSERVICE,
         )
@@ -4855,6 +4855,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
                 "vnet_subnet_id": "test_vnet_subnet_id",
                 "enable_addons": "http_application_routing,monitoring,virtual-node,kube-dashboard,azure-policy,ingress-appgw,confcom,open-service-mesh,azure-keyvault-secrets-provider",
                 "workspace_resource_id": "test_workspace_resource_id",
+                "enable_msi_auth_for_monitoring": False,
                 "aci_subnet_name": "test_aci_subnet_name",
                 "appgw_name": "test_appgw_name",
                 "appgw_subnet_cidr": "test_appgw_subnet_cidr",
@@ -4864,7 +4865,6 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
                 "enable_sgxquotehelper": True,
                 "enable_secret_rotation": True,
                 "rotation_poll_interval": "30m",
-                "enable-msi-auth-for-monitoring": False,
             },
             ResourceType.MGMT_CONTAINERSERVICE,
         )
@@ -4888,7 +4888,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
                 enabled=True,
                 config={
                     CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: "/test_workspace_resource_id",
-                    CONST_MONITORING_USING_AAD_MSI_AUTH: None,
+                    CONST_MONITORING_USING_AAD_MSI_AUTH: "False",
                 },
             ),
             CONST_VIRTUAL_NODE_ADDON_NAME
