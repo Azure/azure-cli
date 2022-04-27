@@ -6,15 +6,13 @@
 import time
 import uuid
 
+from azure.cli.command_modules.acs._client_factory import get_auth_management_client, get_graph_rbac_management_client
 from azure.cli.core.azclierror import AzCLIError
 from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.core.exceptions import HttpResponseError
 from azure.graphrbac.models import GetObjectsParameters
 from knack.log import get_logger
 from msrestazure.azure_exceptions import CloudError
-
-from ._client_factory import (get_auth_management_client,
-                              get_graph_rbac_management_client)
 
 logger = get_logger(__name__)
 
@@ -158,8 +156,8 @@ def add_role_assignment(cmd, role, service_principal_msi_id, is_service_principa
             if ex.message == 'The role assignment already exists.':
                 break
             logger.info(ex.message)
-        except:  # pylint: disable=bare-except
-            pass
+        except Exception as ex:     # pylint: disable=broad-except
+            logger.error(str(ex))
         time.sleep(delay + delay * x)
     else:
         return False

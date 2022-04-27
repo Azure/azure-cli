@@ -27,6 +27,9 @@ vmss create:
         prioritize_unhealthy_instances:
             rule_exclusions:
             - option_length_too_long
+        disable_integrity_monitoring:
+            rule_exclusions:
+            - option_length_too_long
 vmss update:
     parameters:
         enable_cross_zone_upgrade:
@@ -57,6 +60,9 @@ vm create:
         public_ip_address_allocation:
             rule_exclusions:
             - missing_parameter_help
+        disable_integrity_monitoring:
+            rule_exclusions:
+                - option_length_too_long
 vm unmanaged-disk attach:
     parameters:
         size_gb:
@@ -99,4 +105,9 @@ snapshot update:
         sku:
             rule_exclusions:
             - missing_parameter_help
+sig image-version create:
+    parameters:
+        target_region_cvm_encryption:
+            rule_exclusions:
+            - option_length_too_long
 ...

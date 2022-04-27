@@ -9,19 +9,19 @@ import time
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, live_only)
 from knack.util import CLIError
 
-
 # pylint: disable=line-too-long
 # pylint: disable=too-many-lines
 
-
 class SBNamespaceCRUDScenarioTest(ScenarioTest):
     from azure.cli.testsdk.scenario_tests import AllowLargeResponse
+
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_sb_namespace')
     def test_sb_namespace(self, resource_group):
         self.kwargs.update({
             'namespacename': self.create_random_name(prefix='sb-nscli', length=20),
+            'namespacename2': self.create_random_name(prefix='sb-nscli2', length=20),
             'tags': {'tag1=value1'},
             'tags2': {'tag2=value2'},
             'sku': 'Standard',
@@ -37,6 +37,17 @@ class SBNamespaceCRUDScenarioTest(ScenarioTest):
         # Check for the NameSpace name Availability
         self.cmd('servicebus namespace exists --name {namespacename}',
                  checks=[self.check('nameAvailable', True)])
+
+        # Check for the NameSpace name Availability
+        self.cmd('servicebus namespace exists --name {namespacename2}',
+                 checks=[self.check('nameAvailable', True)])
+
+        # Create Namespace
+        namespace = self.cmd(
+            'servicebus namespace create --resource-group {rg} --name {namespacename2} --tags {tags} --sku Premium --location eastus2 --zone-redundant',
+            checks=[self.check('sku.name', 'Premium')]).get_output_in_json()
+
+        self.assertEqual(namespace['zoneRedundant'], True)
 
         # Create Namespace
         self.cmd(
@@ -81,8 +92,36 @@ class SBNamespaceCRUDScenarioTest(ScenarioTest):
             checks=[self.check('name', self.kwargs['defaultauthorizationrule'])])
 
         # Get Authorization Rule Listkeys
-        self.cmd(
-            'servicebus namespace authorization-rule keys list --resource-group {rg} --namespace-name {namespacename} --name {authoname}')
+        old_keys = self.cmd(
+            'servicebus namespace authorization-rule keys list --resource-group {rg} --namespace-name {namespacename} --name {authoname}').get_output_in_json()
+
+        new_keys = self.cmd(
+            'servicebus namespace authorization-rule keys renew --resource-group {rg} --namespace-name {namespacename} --name {authoname} --key {primary}').get_output_in_json()
+
+        self.assertNotEqual(old_keys['primaryKey'], new_keys['primaryKey'])
+        self.assertEqual(old_keys['secondaryKey'], new_keys['secondaryKey'])
+
+        original_keys = old_keys
+        self.kwargs.update({'pkvalue':original_keys['primaryKey'], 'skvalue':original_keys['secondaryKey']})
+        old_keys = new_keys
+
+        new_keys = self.cmd(
+            'servicebus namespace authorization-rule keys renew --resource-group {rg} --namespace-name {namespacename} --name {authoname} --key {secondary}').get_output_in_json()
+
+        self.assertEqual(old_keys['primaryKey'], new_keys['primaryKey'])
+        self.assertNotEqual(old_keys['secondaryKey'], new_keys['secondaryKey'])
+
+        new_keys2 = self.cmd(
+            'servicebus namespace authorization-rule keys renew --resource-group {rg} --namespace-name {namespacename} --name {authoname} --key {primary} --key-value {pkvalue}').get_output_in_json()
+
+        self.assertEqual(new_keys2['primaryKey'], original_keys['primaryKey'])
+        self.assertEqual(new_keys2['secondaryKey'], new_keys['secondaryKey'])
+
+        new_keys3 = self.cmd(
+            'servicebus namespace authorization-rule keys renew --resource-group {rg} --namespace-name {namespacename} --name {authoname} --key {secondary} --key-value {skvalue}').get_output_in_json()
+
+        self.assertEqual(new_keys3['primaryKey'], original_keys['primaryKey'])
+        self.assertEqual(new_keys3['secondaryKey'], original_keys['secondaryKey'])
 
         # Regeneratekeys - Primary
         self.cmd(
