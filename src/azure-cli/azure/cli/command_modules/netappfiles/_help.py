@@ -97,7 +97,7 @@ parameters:
   - name: --organizational-unit
     short-summary: The Organizational Unit (OU) within the Windows Active Directory
   - name: --site
-    short-summary: The Active Directory site the service will limit Domain Controller discovery to
+    short-summary: The Active Directory site the service will limit Domain Controller discovery to.
   - name: --kdc-ip
     short-summary: kdc server IP addresses for the active directory machine. This optional parameter is used only while creating kerberos volume
   - name: --ad-name
