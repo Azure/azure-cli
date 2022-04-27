@@ -504,6 +504,7 @@ class AKSAgentPoolContext(BaseAKSContext):
         # try to read the property value corresponding to the parameter from the `agentpool` object
         if (
             self.agentpool and
+            hasattr(self.agentpool, "creation_data") and    # backward compatibility
             self.agentpool.creation_data and
             self.agentpool.creation_data.source_resource_id is not None
         ):
@@ -640,7 +641,7 @@ class AKSAgentPoolContext(BaseAKSContext):
         raw_value = self.raw_param.get("os_sku")
         # try to read the property value corresponding to the parameter from the `agentpool` object
         value_obtained_from_agentpool = None
-        if self.agentpool:
+        if self.agentpool and hasattr(self.agentpool, "os_sku"):    # backward compatibility
             value_obtained_from_agentpool = self.agentpool.os_sku
         # try to retrieve the value from snapshot
         value_obtained_from_snapshot = None
@@ -879,7 +880,11 @@ class AKSAgentPoolContext(BaseAKSContext):
         # read the original value passed by the command
         node_public_ip_prefix_id = self.raw_param.get("node_public_ip_prefix_id")
         # try to read the property value corresponding to the parameter from the `agentpool` object
-        if self.agentpool and self.agentpool.node_public_ip_prefix_id is not None:
+        if (
+            self.agentpool and
+            hasattr(self.agentpool, "node_public_ip_prefix_id") and     # backward compatibility
+            self.agentpool.node_public_ip_prefix_id is not None
+        ):
             node_public_ip_prefix_id = self.agentpool.node_public_ip_prefix_id
 
         # this parameter does not need dynamic completion
@@ -934,7 +939,11 @@ class AKSAgentPoolContext(BaseAKSContext):
         # read the original value passed by the command
         enable_encryption_at_host = self.raw_param.get("enable_encryption_at_host", False)
         # try to read the property value corresponding to the parameter from the `agentpool` object
-        if self.agentpool and self.agentpool.enable_encryption_at_host is not None:
+        if (
+            self.agentpool and
+            hasattr(self.agentpool, "enable_encryption_at_host") and     # backward compatibility
+            self.agentpool.enable_encryption_at_host is not None
+        ):
             enable_encryption_at_host = self.agentpool.enable_encryption_at_host
 
         # this parameter does not need dynamic completion
@@ -949,7 +958,11 @@ class AKSAgentPoolContext(BaseAKSContext):
         # read the original value passed by the command
         enable_ultra_ssd = self.raw_param.get("enable_ultra_ssd", False)
         # try to read the property value corresponding to the parameter from the `agentpool` object
-        if self.agentpool and self.agentpool.enable_ultra_ssd is not None:
+        if (
+            self.agentpool and
+            hasattr(self.agentpool, "enable_ultra_ssd") and     # backward compatibility
+            self.agentpool.enable_ultra_ssd is not None
+        ):
             enable_ultra_ssd = self.agentpool.enable_ultra_ssd
 
         # this parameter does not need dynamic completion
@@ -964,7 +977,11 @@ class AKSAgentPoolContext(BaseAKSContext):
         # read the original value passed by the command
         enable_fips_image = self.raw_param.get("enable_fips_image", False)
         # try to read the property value corresponding to the parameter from the `agentpool` object
-        if self.agentpool and self.agentpool.enable_fips is not None:
+        if (
+            self.agentpool and
+            hasattr(self.agentpool, "enable_fips") and      # backward compatibility
+            self.agentpool.enable_fips is not None
+        ):
             enable_fips_image = self.agentpool.enable_fips
 
         # this parameter does not need dynamic completion
@@ -1044,7 +1061,11 @@ class AKSAgentPoolContext(BaseAKSContext):
             scale_down_mode = self.raw_param.get("scale_down_mode")
         # In create mode, try to read the property value corresponding to the parameter from the `agentpool` object
         if self.decorator_mode == DecoratorMode.CREATE:
-            if self.agentpool and self.agentpool.scale_down_mode is not None:
+            if (
+                self.agentpool and
+                hasattr(self.agentpool, "scale_down_mode") and      # backward compatibility
+                self.agentpool.scale_down_mode is not None
+            ):
                 scale_down_mode = self.agentpool.scale_down_mode
 
         # this parameter does not need dynamic completion
