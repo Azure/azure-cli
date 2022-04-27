@@ -207,6 +207,39 @@ class AKSManagedClusterContext(BaseAKSContext):
         self.__existing_mc = None
         # store the context, and used later to get agentpool related properties
         self.agentpool_context = None
+        # used to store external functions
+        self.__external_functions = None
+
+    @property
+    def existing_mc(self) -> ManagedCluster:
+        """Get the existing ManagedCluster object in update mode.
+
+        :return: ManagedCluster
+        """
+        return self.__existing_mc
+
+    @property
+    def external_functions(self) -> SimpleNamespace:
+        if self.__external_functions is None:
+            external_functions = {}
+            external_functions["get_user_assigned_identity_by_resource_id"] = get_user_assigned_identity_by_resource_id
+            external_functions["get_rg_location"] = get_rg_location
+            external_functions["add_role_assignment"] = add_role_assignment
+            external_functions["add_ingress_appgw_addon_role_assignment"] = add_ingress_appgw_addon_role_assignment
+            external_functions["add_monitoring_role_assignment"] = add_monitoring_role_assignment
+            external_functions["add_virtual_node_role_assignment"] = add_virtual_node_role_assignment
+            external_functions["ensure_container_insights_for_monitoring"] = ensure_container_insights_for_monitoring
+            external_functions[
+                "ensure_default_log_analytics_workspace_for_monitoring"
+            ] = ensure_default_log_analytics_workspace_for_monitoring
+            external_functions["ensure_aks_acr"] = _ensure_aks_acr
+            external_functions["ensure_aks_service_principal"] = _ensure_aks_service_principal
+            external_functions[
+                "ensure_cluster_identity_permission_on_kubelet_identity"
+            ] = _ensure_cluster_identity_permission_on_kubelet_identity
+            external_functions["subnet_role_assignment_exists"] = subnet_role_assignment_exists
+            self.__external_functions = SimpleNamespace(**external_functions)
+        return self.__external_functions
 
     def attach_mc(self, mc: ManagedCluster) -> None:
         """Attach the ManagedCluster object to the context.
@@ -244,14 +277,6 @@ class AKSManagedClusterContext(BaseAKSContext):
                     msg
                 )
             )
-
-    @property
-    def existing_mc(self) -> ManagedCluster:
-        """Get the existing ManagedCluster object in update mode.
-
-        :return: ManagedCluster
-        """
-        return self.__existing_mc
 
     def attach_agentpool_context(self, agentpool_context: AKSAgentPoolContext) -> None:
         """Attach the AKSAgentPoolContext object to the context.
@@ -437,7 +462,7 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         # dynamic completion
         if not read_from_mc and location is None:
-            location = get_rg_location(
+            location = self.external_functions.get_rg_location(
                 self.cmd.cli_ctx, self.get_resource_group_name()
             )
             self.set_intermediate("location", location, overwrite_exists=True)
@@ -966,7 +991,7 @@ class AKSManagedClusterContext(BaseAKSContext):
             not secret_read_from_mc
         )
         if dynamic_completion:
-            principal_obj = _ensure_aks_service_principal(
+            principal_obj = self.external_functions.ensure_aks_service_principal(
                 cli_ctx=self.cmd.cli_ctx,
                 service_principal=service_principal,
                 client_secret=client_secret,
@@ -1141,7 +1166,7 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         :return: string
         """
-        return get_user_assigned_identity_by_resource_id(self.cmd.cli_ctx, assigned_identity)
+        return self.external_functions.get_user_assigned_identity_by_resource_id(self.cmd.cli_ctx, assigned_identity)
 
     def get_user_assigned_identity_client_id(self) -> str:
         """Helper function to obtain the client_id of user assigned identity.
@@ -2122,7 +2147,7 @@ class AKSManagedClusterContext(BaseAKSContext):
             if workspace_resource_id is None:
                 # use default workspace if exists else create default workspace
                 workspace_resource_id = (
-                    ensure_default_log_analytics_workspace_for_monitoring(
+                    self.external_functions.ensure_default_log_analytics_workspace_for_monitoring(
                         self.cmd,
                         self.get_subscription_id(),
                         self.get_resource_group_name(),
@@ -2176,9 +2201,13 @@ class AKSManagedClusterContext(BaseAKSContext):
                 CONST_MONITORING_ADDON_NAME
             ).config.get(CONST_MONITORING_USING_AAD_MSI_AUTH) is not None
         ):
-            enable_msi_auth_for_monitoring = self.mc.addon_profiles.get(
-                CONST_MONITORING_ADDON_NAME
-            ).config.get(CONST_MONITORING_USING_AAD_MSI_AUTH)
+            enable_msi_auth_for_monitoring = (
+                safe_lower(
+                    self.mc.addon_profiles.get(CONST_MONITORING_ADDON_NAME).config.get(
+                        CONST_MONITORING_USING_AAD_MSI_AUTH
+                    )
+                ) == "true"
+            )
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
@@ -3828,6 +3857,40 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                 "is not the same as the `mc` in the context."
             )
 
+    def _remove_defaults_in_mc(self, mc: ManagedCluster) -> ManagedCluster:
+        """Internal function to remove values from properties with default values of the `mc` object.
+
+        Removing default values is to prevent getters from mistakenly overwriting user provided values with default
+        values in the object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        defaults_in_mc = {}
+        for attr_name, attr_value in vars(mc).items():
+            if not attr_name.startswith("_") and attr_name != "location" and attr_value is not None:
+                defaults_in_mc[attr_name] = attr_value
+                setattr(mc, attr_name, None)
+        self.context.set_intermediate("defaults_in_mc", defaults_in_mc, overwrite_exists=True)
+        return mc
+
+    def _restore_defaults_in_mc(self, mc: ManagedCluster) -> ManagedCluster:
+        """Internal function to restore values of properties with default values of the `mc` object.
+
+        Restoring default values is to keep the content of the request sent by cli consistent with that before the
+        refactoring.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        defaults_in_mc = self.context.get_intermediate("defaults_in_mc", {})
+        for key, value in defaults_in_mc.items():
+            if getattr(mc, key, None) is None:
+                setattr(mc, key, value)
+        return mc
+
     def init_mc(self) -> ManagedCluster:
         """Initialize a ManagedCluster object with required parameter location and attach it to internal context.
 
@@ -3990,7 +4053,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         if (
             vnet_subnet_id and
             not skip_subnet_role_assignment and
-            not subnet_role_assignment_exists(self.cmd, vnet_subnet_id)
+            not self.context.external_functions.subnet_role_assignment_exists(self.cmd, vnet_subnet_id)
         ):
             # if service_principal_profile is None, then this cluster is an MSI cluster,
             # and the service principal does not exist. Two cases:
@@ -4026,7 +4089,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                     )
                 else:
                     identity_client_id = service_principal_profile.client_id
-                if not add_role_assignment(
+                if not self.context.external_functions.add_role_assignment(
                     self.cmd,
                     "Network Contributor",
                     identity_client_id,
@@ -4057,7 +4120,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             # If enable_managed_identity, attach acr operation will be handled after the cluster is created
             if not self.context.get_enable_managed_identity():
                 service_principal_profile = mc.service_principal_profile
-                _ensure_aks_acr(
+                self.context.external_functions.ensure_aks_acr(
                     self.cmd,
                     assignee=service_principal_profile.client_id,
                     acr_name_or_id=attach_acr,
@@ -4201,11 +4264,13 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             enabled=True,
             config={
                 CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: self.context.get_workspace_resource_id(),
-                CONST_MONITORING_USING_AAD_MSI_AUTH: self.context.get_enable_msi_auth_for_monitoring(),
+                CONST_MONITORING_USING_AAD_MSI_AUTH: "True"
+                if self.context.get_enable_msi_auth_for_monitoring()
+                else "False",
             },
         )
         # post-process, create a deployment
-        ensure_container_insights_for_monitoring(
+        self.context.external_functions.ensure_container_insights_for_monitoring(
             self.cmd, monitoring_addon_profile,
             self.context.get_subscription_id(),
             self.context.get_resource_group_name(),
@@ -4549,7 +4614,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             }
             cluster_identity_object_id = self.context.get_user_assigned_identity_object_id()
             # ensure the cluster identity has "Managed Identity Operator" role at the scope of kubelet identity
-            _ensure_cluster_identity_permission_on_kubelet_identity(
+            self.context.external_functions.ensure_cluster_identity_permission_on_kubelet_identity(
                 self.cmd,
                 cluster_identity_object_id,
                 assign_kubelet_identity)
@@ -4610,7 +4675,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             )
         return mc
 
-    def construct_mc_profile_default(self) -> ManagedCluster:
+    def construct_mc_profile_default(self, bypass_restore_defaults: bool = False) -> ManagedCluster:
         """The overall controller used to construct the default ManagedCluster profile.
 
         The completely constructed ManagedCluster object will later be passed as a parameter to the underlying SDK
@@ -4620,6 +4685,8 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         """
         # initialize the ManagedCluster object
         mc = self.init_mc()
+        # remove defaults
+        self._remove_defaults_in_mc(mc)
         # set up agentpool profile
         mc = self.set_up_agentpool_profile(mc)
         # set up misc direct mc properties
@@ -4654,6 +4721,9 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.set_up_sku(mc)
         # set up extended location
         mc = self.set_up_extended_location(mc)
+        # restore defaults
+        if not bypass_restore_defaults:
+            mc = self._restore_defaults_in_mc(mc)
         return mc
 
     # pylint: disable=unused-argument,too-many-boolean-expressions
@@ -4697,7 +4767,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             # Grant vnet permission to system assigned identity RIGHT AFTER the cluster is put, this operation can
             # reduce latency for the role assignment take effect
             instant_cluster = self.client.get(self.context.get_resource_group_name(), self.context.get_name())
-            if not add_role_assignment(
+            if not self.context.external_functions.add_role_assignment(
                 self.cmd,
                 "Network Contributor",
                 instant_cluster.identity.principal_id,
@@ -4731,12 +4801,14 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                         type="managedClusters",
                         name=self.context.get_name(),
                     )
-                    add_monitoring_role_assignment(cluster, cluster_resource_id, self.cmd)
+                    self.context.external_functions.add_monitoring_role_assignment(
+                        cluster, cluster_resource_id, self.cmd
+                    )
             else:
                 # Create the DCR Association here
                 addon_consts = self.context.get_addon_consts()
                 CONST_MONITORING_ADDON_NAME = addon_consts.get("CONST_MONITORING_ADDON_NAME")
-                ensure_container_insights_for_monitoring(
+                self.context.external_functions.ensure_container_insights_for_monitoring(
                     self.cmd,
                     cluster.addon_profiles[CONST_MONITORING_ADDON_NAME],
                     self.context.get_subscription_id(),
@@ -4752,12 +4824,14 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         # ingress appgw addon
         ingress_appgw_addon_enabled = self.context.get_intermediate("ingress_appgw_addon_enabled", default_value=False)
         if ingress_appgw_addon_enabled:
-            add_ingress_appgw_addon_role_assignment(cluster, self.cmd)
+            self.context.external_functions.add_ingress_appgw_addon_role_assignment(cluster, self.cmd)
 
         # virtual node addon
         virtual_node_addon_enabled = self.context.get_intermediate("virtual_node_addon_enabled", default_value=False)
         if virtual_node_addon_enabled:
-            add_virtual_node_role_assignment(self.cmd, cluster, self.context.get_vnet_subnet_id())
+            self.context.external_functions.add_virtual_node_role_assignment(
+                self.cmd, cluster, self.context.get_vnet_subnet_id()
+            )
 
         # attach acr
         enable_managed_identity = self.context.get_enable_managed_identity()
@@ -4773,7 +4847,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                 )
             else:
                 kubelet_identity_object_id = cluster.identity_profile["kubeletidentity"].object_id
-                _ensure_aks_acr(
+                self.context.external_functions.ensure_aks_acr(
                     self.cmd,
                     assignee=kubelet_identity_object_id,
                     acr_name_or_id=attach_acr,
@@ -5041,19 +5115,23 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         detach_acr = self.context.get_detach_acr()
 
         if attach_acr:
-            _ensure_aks_acr(self.cmd,
-                            assignee=assignee,
-                            acr_name_or_id=attach_acr,
-                            subscription_id=subscription_id,
-                            is_service_principal=is_service_principal)
+            self.context.external_functions.ensure_aks_acr(
+                self.cmd,
+                assignee=assignee,
+                acr_name_or_id=attach_acr,
+                subscription_id=subscription_id,
+                is_service_principal=is_service_principal,
+            )
 
         if detach_acr:
-            _ensure_aks_acr(self.cmd,
-                            assignee=assignee,
-                            acr_name_or_id=detach_acr,
-                            subscription_id=subscription_id,
-                            detach=True,
-                            is_service_principal=is_service_principal)
+            self.context.external_functions.ensure_aks_acr(
+                self.cmd,
+                assignee=assignee,
+                acr_name_or_id=detach_acr,
+                subscription_id=subscription_id,
+                detach=True,
+                is_service_principal=is_service_principal,
+            )
 
     def update_sku(self, mc: ManagedCluster) -> ManagedCluster:
         """Update sku (uptime sla) for the ManagedCluster object.
@@ -5488,12 +5566,14 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                         type="managedClusters",
                         name=self.context.get_name(),
                     )
-                    add_monitoring_role_assignment(cluster, cluster_resource_id, self.cmd)
+                    self.context.external_functions.add_monitoring_role_assignment(
+                        cluster, cluster_resource_id, self.cmd
+                    )
             else:
                 # Create the DCR Association here
                 addon_consts = self.context.get_addon_consts()
                 CONST_MONITORING_ADDON_NAME = addon_consts.get("CONST_MONITORING_ADDON_NAME")
-                ensure_container_insights_for_monitoring(
+                self.context.external_functions.ensure_container_insights_for_monitoring(
                     self.cmd,
                     cluster.addon_profiles[CONST_MONITORING_ADDON_NAME],
                     self.context.get_subscription_id(),
@@ -5509,12 +5589,14 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         # ingress appgw addon
         ingress_appgw_addon_enabled = self.context.get_intermediate("ingress_appgw_addon_enabled", default_value=False)
         if ingress_appgw_addon_enabled:
-            add_ingress_appgw_addon_role_assignment(cluster, self.cmd)
+            self.context.external_functions.add_ingress_appgw_addon_role_assignment(cluster, self.cmd)
 
         # virtual node addon
         virtual_node_addon_enabled = self.context.get_intermediate("virtual_node_addon_enabled", default_value=False)
         if virtual_node_addon_enabled:
-            add_virtual_node_role_assignment(self.cmd, cluster, self.context.get_vnet_subnet_id())
+            self.context.external_functions.add_virtual_node_role_assignment(
+                self.cmd, cluster, self.context.get_vnet_subnet_id()
+            )
 
         # attach acr
         enable_managed_identity = check_is_msi_cluster(cluster)
@@ -5530,7 +5612,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 )
             else:
                 kubelet_identity_object_id = cluster.identity_profile["kubeletidentity"].object_id
-                _ensure_aks_acr(
+                self.context.external_functions.ensure_aks_acr(
                     self.cmd,
                     assignee=kubelet_identity_object_id,
                     acr_name_or_id=attach_acr,
