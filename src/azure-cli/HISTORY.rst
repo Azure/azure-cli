@@ -87,6 +87,11 @@ Release History
 * Release RPM package for RHEL 8, CentOS Stream 8 (#21655)
 * Release RPM package for Mariner 1.0, 2.0 preview (#22034)
 
+**Reservations**
+
+* Upgrading SDK Version to 2.0.0
+* `az reservations catalog show`: Add three optional parameters: `--publisher-id`, `--offer-id`, `--plan-id` to support 3pp VM RI.
+
 **RDBMS**
 
 * `az postgres server create`: Fix error message for invalid server names (#22019)
