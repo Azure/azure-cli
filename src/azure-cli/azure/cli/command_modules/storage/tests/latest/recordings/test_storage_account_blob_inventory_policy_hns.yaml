@@ -1,0 +1,158 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account keys list
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n -g --query -o
+      User-Agent:
+      - AZURECLI/2.35.0 azsdk-python-azure-mgmt-storage/20.0.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_blob_inventory_hns000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2021-09-01&$expand=kerb
+  response:
+    body:
+      string: '{"keys":[{"creationTime":"2022-04-18T04:12:58.2125160Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2022-04-18T04:12:58.2125160Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '260'
+      content-type:
+      - application/json
+      date:
+      - Mon, 18 Apr 2022 04:13:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11999'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      User-Agent:
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.9.6; Windows 10) AZURECLI/2.35.0
+      x-ms-date:
+      - Mon, 18 Apr 2022 04:13:21 GMT
+      x-ms-version:
+      - '2018-11-09'
+    method: PUT
+    uri: https://clitest000002.blob.core.windows.net/mycontainer?restype=container
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      date:
+      - Mon, 18 Apr 2022 04:13:21 GMT
+      etag:
+      - '"0x8DA20F1C6E871DB"'
+      last-modified:
+      - Mon, 18 Apr 2022 04:13:22 GMT
+      server:
+      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-version:
+      - '2018-11-09'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: '{"properties": {"policy": {"enabled": true, "type": "Inventory", "rules":
+      [{"enabled": true, "name": "newfieldsblob", "destination": "mycontainer", "definition":
+      {"filters": {"prefixMatch": ["abc"], "excludePrefix": ["ac"], "blobTypes": ["blockBlob",
+      "appendBlob"], "includeSnapshots": true, "includeDeleted": true}, "format":
+      "Csv", "schedule": "Daily", "objectType": "Blob", "schemaFields": ["Name", "Creation-Time",
+      "Last-Modified", "ETag", "Content-Length", "Content-Type", "Content-Encoding",
+      "Content-Language", "Content-CRC64", "Content-MD5", "Cache-Control", "Content-Disposition",
+      "BlobType", "AccessTier", "AccessTierChangeTime", "AccessTierInferred", "LeaseStatus",
+      "LeaseState", "LeaseDuration", "ServerEncrypted", "CustomerProvidedKeySha256",
+      "RehydratePriority", "ArchiveStatus", "EncryptionScope", "IncrementalCopy",
+      "Snapshot", "Metadata", "DeletionId", "Deleted", "DeletedTime", "RemainingRetentionDays",
+      "Expiry-Time", "hdi_isfolder", "Owner", "Group", "Permissions", "Acl", "CopyId",
+      "CopyStatus", "CopySource", "CopyProgress", "CopyCompletionTime", "CopyStatusDescription",
+      "ImmutabilityPolicyUntilDate", "ImmutabilityPolicyMode", "LegalHold", "LastAccessTime"]}},
+      {"enabled": true, "name": "newfieldscontainer", "destination": "mycontainer",
+      "definition": {"filters": {"prefixMatch": ["abc"], "includeDeleted": true},
+      "format": "Csv", "schedule": "Daily", "objectType": "Container", "schemaFields":
+      ["Name", "Last-Modified", "ETag", "LeaseStatus", "LeaseState", "LeaseDuration",
+      "PublicAccess", "DefaultEncryptionScope", "DenyEncryptionScopeOverride", "ImmutableStorageWithVersioningEnabled",
+      "HasImmutabilityPolicy", "HasLegalHold", "Deleted", "DeletedTime", "RemainingRetentionDays",
+      "Version", "Metadata"]}}]}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account blob-inventory-policy create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1735'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --account-name -g --policy
+      User-Agent:
+      - AZURECLI/2.35.0 azsdk-python-azure-mgmt-storage/20.0.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_blob_inventory_hns000001/providers/Microsoft.Storage/storageAccounts/clitest000002/inventoryPolicies/default?api-version=2021-09-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_blob_inventory_hns000001/providers/Microsoft.Storage/storageAccounts/clitest000002/inventoryPolicies/default","name":"DefaultInventoryPolicy","type":"Microsoft.Storage/storageAccounts/inventoryPolicies","properties":{"lastModifiedTime":"2022-04-18T04:13:24.0407755Z","policy":{"enabled":true,"type":"Inventory","rules":[{"destination":"mycontainer","enabled":true,"name":"newfieldsblob","definition":{"format":"Csv","schedule":"Daily","objectType":"Blob","schemaFields":["Name","Creation-Time","Last-Modified","ETag","Content-Length","Content-Type","Content-Encoding","Content-Language","Content-CRC64","Content-MD5","Cache-Control","Content-Disposition","BlobType","AccessTier","AccessTierChangeTime","AccessTierInferred","LeaseStatus","LeaseState","LeaseDuration","ServerEncrypted","CustomerProvidedKeySha256","RehydratePriority","ArchiveStatus","EncryptionScope","IncrementalCopy","Snapshot","Metadata","DeletionId","Deleted","DeletedTime","RemainingRetentionDays","Expiry-Time","hdi_isfolder","Owner","Group","Permissions","Acl","CopyId","CopyStatus","CopySource","CopyProgress","CopyCompletionTime","CopyStatusDescription","ImmutabilityPolicyUntilDate","ImmutabilityPolicyMode","LegalHold","LastAccessTime"],"filters":{"includeDeleted":true,"excludePrefix":["ac"],"blobTypes":["blockBlob","appendBlob"],"prefixMatch":["abc"],"includeSnapshots":true}}},{"destination":"mycontainer","enabled":true,"name":"newfieldscontainer","definition":{"format":"Csv","schedule":"Daily","objectType":"Container","schemaFields":["Name","Last-Modified","ETag","LeaseStatus","LeaseState","LeaseDuration","PublicAccess","DefaultEncryptionScope","DenyEncryptionScopeOverride","ImmutableStorageWithVersioningEnabled","HasImmutabilityPolicy","HasLegalHold","Deleted","DeletedTime","RemainingRetentionDays","Version","Metadata"],"filters":{"includeDeleted":true,"prefixMatch":["abc"]}}}]}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1955'
+      content-type:
+      - application/json
+      date:
+      - Mon, 18 Apr 2022 04:13:23 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+version: 1

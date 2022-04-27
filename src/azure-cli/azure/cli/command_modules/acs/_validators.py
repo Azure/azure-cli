@@ -6,7 +6,6 @@
 from __future__ import unicode_literals
 
 import os
-import os.path
 import re
 from ipaddress import ip_network
 from math import isclose, isnan
@@ -15,7 +14,6 @@ from azure.cli.core import keys
 from azure.cli.core.azclierror import InvalidArgumentValueError
 from azure.cli.core.commands.validators import validate_tag
 from azure.cli.core.util import CLIError
-# pylint: disable=no-name-in-module,import-error
 from knack.log import get_logger
 
 logger = get_logger(__name__)

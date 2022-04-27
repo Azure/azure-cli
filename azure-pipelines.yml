@@ -386,15 +386,10 @@ jobs:
          --rm -v $PYPI_FILES:/mnt/pypi python:3.7 \
          /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION.* && az self-test && az --version && sleep 5"
 
-       echo "== Testing pip install on Python 3.8 =="
+       echo "== Testing pip install on Python 3.9 =="
        docker run \
-         --rm -v $PYPI_FILES:/mnt/pypi python:3.8 \
+         --rm -v $PYPI_FILES:/mnt/pypi python:3.9 \
          /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION.* && az self-test && az --version && sleep 5"
-
-       # echo "== Testing pip install on Python 3.9 =="
-       # docker run \
-       #   --rm -v $PYPI_FILES:/mnt/pypi python:3.9 \
-       #   /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION.* && az self-test && az --version && sleep 5"
 
        echo "== Testing pip install on Python 3.10 =="
        docker run \
@@ -412,8 +407,6 @@ jobs:
     matrix:
       Python36:
         python.version: '3.6'
-      Python38:
-        python.version: '3.8'
       Python39:
         python.version: '3.9'
       Python310:
@@ -433,8 +426,6 @@ jobs:
     matrix:
       Python36:
         python.version: '3.6'
-      Python38:
-        python.version: '3.8'
       Python39:
         python.version: '3.9'
       Python310:
@@ -457,8 +448,6 @@ jobs:
     matrix:
       Python36:
         python.version: '3.6'
-      Python38:
-        python.version: '3.8'
       Python39:
         python.version: '3.9'
       Python310:
@@ -482,8 +471,6 @@ jobs:
     matrix:
       Python36:
         python.version: '3.6'
-      Python38:
-        python.version: '3.8'
       Python39:
         python.version: '3.9'
       Python310:
@@ -503,8 +490,6 @@ jobs:
     matrix:
       Python36:
         python.version: '3.6'
-      Python38:
-        python.version: '3.8'
       Python39:
         python.version: '3.9'
       Python310:
@@ -524,8 +509,6 @@ jobs:
     matrix:
       Python36:
         python.version: '3.6'
-      Python38:
-        python.version: '3.8'
       Python39:
         python.version: '3.9'
       Python310:
@@ -545,8 +528,6 @@ jobs:
     matrix:
       Python36:
         python.version: '3.6'
-      Python38:
-        python.version: '3.8'
       Python39:
         python.version: '3.9'
       Python310:
@@ -705,12 +686,23 @@ jobs:
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
     vmImage: 'ubuntu-20.04'
+  strategy:
+    matrix:
+      1.0:
+        acr: cblmariner
+        tag: 1.0
+      2.0:
+        acr: cblmariner2preview
+        tag: 2.0
   steps:
   - task: Bash@3
     displayName: 'Build Rpm Package: Mariner'
     inputs:
       targetType: 'filePath'
       filePath: scripts/release/rpm/pipeline_mariner.sh
+    env:
+      ACR: $(acr)
+      TAG: $(tag)
 
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
     displayName: 'SBOM'
@@ -721,7 +713,7 @@ jobs:
     displayName: 'Publish Artifact: rpm-mariner'
     inputs:
       TargetPath: $(Build.ArtifactStagingDirectory)
-      ArtifactName: rpm-mariner
+      ArtifactName: rpm-mariner$(tag)
 
 
 - job: BuildRpmPackageCentOS7
@@ -822,10 +814,6 @@ jobs:
   strategy:
     matrix:
       # https://wiki.ubuntu.com/Releases
-      Xenial:
-        # 16.04
-        deb_system: ubuntu
-        distro: xenial
       Bionic:
         # 18.04
         deb_system: ubuntu
@@ -844,10 +832,6 @@ jobs:
         distro: jammy
 
       # https://wiki.debian.org/DebianReleases
-      Stretch:
-        # 9
-        deb_system: debian
-        distro: stretch
       Buster:
         # 10
         deb_system: debian
@@ -965,8 +949,6 @@ jobs:
     matrix:
       Python36:
         python.version: '3.6'
-      Python38:
-        python.version: '3.8'
       Python39:
         python.version: '3.9'
       Python310:

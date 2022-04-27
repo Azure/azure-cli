@@ -213,6 +213,7 @@ def cf_blob_service(cli_ctx, kwargs):
                              '_blob_service_client#BlobServiceClient')
     connection_string = kwargs.pop('connection_string', None)
     account_name = kwargs.pop('account_name', None)
+    account_url = kwargs.pop('account_url', None)
     account_key = kwargs.pop('account_key', None)
     token_credential = kwargs.pop('token_credential', None)
     sas_token = kwargs.pop('sas_token', None)
@@ -226,8 +227,8 @@ def cf_blob_service(cli_ctx, kwargs):
                                             .format(connection_string, str(err)),
                                             recommendation='Try `az storage account show-connection-string` '
                                                            'to get a valid connection string')
-
-    account_url = get_account_url(cli_ctx, account_name=account_name, service='blob')
+    if not account_url:
+        account_url = get_account_url(cli_ctx, account_name=account_name, service='blob')
     credential = account_key or sas_token or token_credential
 
     return t_blob_service(account_url=account_url, credential=credential, **client_kwargs)
@@ -249,6 +250,7 @@ def cf_blob_client(cli_ctx, kwargs):
         # del unused kwargs
         kwargs.pop('connection_string')
         kwargs.pop('account_name')
+        kwargs.pop('account_url')
         kwargs.pop('container_name')
         kwargs.pop('blob_name')
         return t_blob_client.from_blob_url(blob_url=kwargs.pop('blob_url'),
@@ -273,6 +275,12 @@ def cf_container_client(cli_ctx, kwargs):
     return cf_blob_service(cli_ctx, kwargs).get_container_client(container=kwargs.pop('container_name', None))
 
 
+def cf_container_lease_client(cli_ctx, kwargs):
+    t_lease_service = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_BLOB, '_lease#BlobLeaseClient')
+    container_client = cf_container_client(cli_ctx, kwargs)
+    return t_lease_service(client=container_client, lease_id=kwargs.pop('lease_id', None))
+
+
 def cf_adls_service(cli_ctx, kwargs):
     client_kwargs = prepare_client_kwargs_track2(cli_ctx)
     client_kwargs = _config_location_mode(kwargs, client_kwargs)
@@ -280,6 +288,7 @@ def cf_adls_service(cli_ctx, kwargs):
                              '_data_lake_service_client#DataLakeServiceClient')
     connection_string = kwargs.pop('connection_string', None)
     account_name = kwargs.pop('account_name', None)
+    account_url = kwargs.pop('account_url', None)
     account_key = kwargs.pop('account_key', None)
     token_credential = kwargs.pop('token_credential', None)
     sas_token = kwargs.pop('sas_token', None)
@@ -290,8 +299,8 @@ def cf_adls_service(cli_ctx, kwargs):
 
     if connection_string:
         return t_adls_service.from_connection_string(conn_str=connection_string, **client_kwargs)
-
-    account_url = get_account_url(cli_ctx, account_name=account_name, service='dfs')
+    if not account_url:
+        account_url = get_account_url(cli_ctx, account_name=account_name, service='dfs')
     credential = account_key or sas_token or token_credential
 
     return t_adls_service(account_url=account_url, credential=credential, **client_kwargs)
@@ -320,14 +329,15 @@ def cf_queue_service(cli_ctx, kwargs):
     t_queue_service = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_QUEUE, '_queue_service_client#QueueServiceClient')
     connection_string = kwargs.pop('connection_string', None)
     account_name = kwargs.pop('account_name', None)
+    account_url = kwargs.pop('account_url', None)
     account_key = kwargs.pop('account_key', None)
     token_credential = kwargs.pop('token_credential', None)
     sas_token = kwargs.pop('sas_token', None)
 
     if connection_string:
         return t_queue_service.from_connection_string(conn_str=connection_string, **client_kwargs)
-
-    account_url = get_account_url(cli_ctx, account_name=account_name, service='queue')
+    if not account_url:
+        account_url = get_account_url(cli_ctx, account_name=account_name, service='queue')
     credential = account_key or sas_token or token_credential
 
     return t_queue_service(account_url=account_url, credential=credential, **client_kwargs)
@@ -343,14 +353,15 @@ def cf_table_service(cli_ctx, kwargs):
     client_kwargs = _config_location_mode(kwargs, client_kwargs)
     connection_string = kwargs.pop('connection_string', None)
     account_name = kwargs.pop('account_name', None)
+    account_url = kwargs.pop('account_url', None)
     account_key = kwargs.pop('account_key', None)
     token_credential = kwargs.pop('token_credential', None)
     sas_token = kwargs.pop('sas_token', None)
 
     if connection_string:
         return TableServiceClient.from_connection_string(conn_str=connection_string, **client_kwargs)
-
-    account_url = get_account_url(cli_ctx, account_name=account_name, service='table')
+    if not account_url:
+        account_url = get_account_url(cli_ctx, account_name=account_name, service='table')
     if account_key:
         from azure.core.credentials import AzureNamedKeyCredential
         credential = AzureNamedKeyCredential(name=account_name, key=account_key)

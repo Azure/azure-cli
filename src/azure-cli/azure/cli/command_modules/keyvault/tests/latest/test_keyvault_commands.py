@@ -2733,6 +2733,10 @@ class KeyVaultNetworkRuleScenarioTest(ScenarioTest):
             self.check('length(properties.networkAcls.ipRules)', 4)
         ])
 
+        # Remove multiple ip addresses
+        self.cmd('keyvault network-rule remove --ip-address {ip} {ip2} {ip3} --name {kv} --resource-group {rg}',
+                 checks=[self.check('length(properties.networkAcls.ipRules)', 1)])
+
 class KeyVaultPublicNetworkAccessScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_pna')
     def test_keyvault_public_network_access(self, resource_group):

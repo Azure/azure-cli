@@ -434,3 +434,19 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         assert volume['ldapEnabled'] == ldap_enabled
         assert volume['isDefaultQuotaEnabled'] == is_default_quota_enabled
         assert volume['avsDataStore'] == avs_data_store
+
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_', additional_tags={'owner': 'cli_test'})
+    def test_nfsv3_with_no_export_policy_provided_is_successful(self):
+        vnet_name = self.create_random_name(prefix='cli-vnet-', length=24)
+        subnet_name = self.create_random_name(prefix='cli-subnet-', length=16)
+        account_name = self.create_random_name(prefix='cli-acc-', length=24)
+        pool_name = self.create_random_name(prefix='cli-pool-', length=24)
+        volume_name = self.create_random_name(prefix='cli-vol-', length=24)
+        self.prepare_for_volume_creation('{rg}', account_name, pool_name, vnet_name, subnet_name)
+        volume = self.cmd("az netappfiles volume create --resource-group {rg} --account-name %s --pool-name %s "
+                          "--volume-name %s -l %s %s --file-path %s --vnet %s --subnet %s --protocol-types NFSv3" %
+                          (account_name, pool_name, volume_name, RG_LOCATION, VOLUME_DEFAULT, volume_name, vnet_name,
+                           subnet_name)).get_output_in_json()
+        assert volume['name'] == account_name + '/' + pool_name + '/' + volume_name
+        assert len(volume['exportPolicy']['rules']) == 1
+        assert volume['exportPolicy']['rules'][0]['nfsv3']

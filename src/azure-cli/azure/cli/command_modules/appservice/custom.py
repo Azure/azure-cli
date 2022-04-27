@@ -2025,8 +2025,8 @@ def create_backup(cmd, resource_group_name, webapp_name, storage_account_url,
     backup_request = BackupRequest(backup_name=backup_name,
                                    storage_account_url=storage_account_url, databases=db_setting)
     if slot:
-        return client.web_apps.backup_slot(resource_group_name, webapp_name, backup_request, slot)
-
+        return client.web_apps.backup_slot(resource_group_name=resource_group_name,
+                                           name=webapp_name, request=backup_request, slot=slot)
     return client.web_apps.backup(resource_group_name, webapp_name, backup_request)
 
 
