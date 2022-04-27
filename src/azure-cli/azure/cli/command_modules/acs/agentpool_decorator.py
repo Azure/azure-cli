@@ -907,7 +907,7 @@ class AKSAgentPoolContext(BaseAKSContext):
         elif vm_set_type.lower() == CONST_AVAILABILITY_SET.lower():
             vm_set_type = CONST_AVAILABILITY_SET
         else:
-            raise InvalidArgumentValueError("'{}' --vm-set-type can only be VirtualMachineScaleSets or AvailabilitySet".format(vm_set_type))
+            raise InvalidArgumentValueError("--vm-set-type can only be VirtualMachineScaleSets or AvailabilitySet")
         # this parameter does not need validation
         return vm_set_type
 
