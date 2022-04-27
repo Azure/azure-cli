@@ -15,7 +15,7 @@ from azure.cli.core.profiles import ResourceType
 
 # Namespace Region
 def cli_namespace_create(cmd, client, resource_group_name, namespace_name, location=None, tags=None, sku='Standard',
-                         capacity=None, default_action=None, mi_system_assigned=None, mi_user_assigned=None, encryption_config=None):
+                         capacity=None, zone_redundant=None, default_action=None, mi_system_assigned=None, mi_user_assigned=None, encryption_config=None):
 
     SBSku = cmd.get_models('SBSku', resource_type=ResourceType.MGMT_SERVICEBUS)
     SBNamespace = cmd.get_models('SBNamespace', resource_type=ResourceType.MGMT_SERVICEBUS)
@@ -28,6 +28,9 @@ def cli_namespace_create(cmd, client, resource_group_name, namespace_name, locat
 
     parameter.tags = tags
     parameter.sku = SBSku(name=sku, tier=sku, capacity=capacity)
+
+    if zone_redundant is not None:
+        parameter.zone_redundant = zone_redundant
 
     if mi_system_assigned:
         parameter.identity = Identity(type=IdentityType.SYSTEM_ASSIGNED)
@@ -114,12 +117,12 @@ def cli_namespaceautho_update(instance, rights):
     return instance
 
 
-def cli_keys_renew(client, resource_group_name, namespace_name, name, key_type):
+def cli_keys_renew(client, resource_group_name, namespace_name, name, key_type, key=None):
     return client.regenerate_keys(
         resource_group_name=resource_group_name,
         namespace_name=namespace_name,
         authorization_rule_name=name,
-        parameters={'key_type': key_type}
+        parameters={'key_type': key_type, 'key': key}
     )
 
 

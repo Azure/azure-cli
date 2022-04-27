@@ -42,6 +42,10 @@ CONST_DEFAULT_NODE_VM_SIZE = "Standard_DS2_v2"
 CONST_DEFAULT_WINDOWS_NODE_VM_SIZE = "Standard_D2s_v3"
 
 # consts for ManagedCluster
+# load balancer sku
+CONST_LOAD_BALANCER_SKU_BASIC = "basic"
+CONST_LOAD_BALANCER_SKU_STANDARD = "standard"
+
 # outbound type
 CONST_OUTBOUND_TYPE_LOAD_BALANCER = "loadBalancer"
 CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING = "userDefinedRouting"
@@ -120,7 +124,7 @@ ADDONS = {
 }
 
 # consts for check-acr command
-CONST_CANIPULL_IMAGE = "mcr.microsoft.com/aks/canipull:0.0.3-alpha"
+CONST_CANIPULL_IMAGE = "mcr.microsoft.com/aks/canipull:0.0.4-alpha"
 
 
 # consts for decorator pattern

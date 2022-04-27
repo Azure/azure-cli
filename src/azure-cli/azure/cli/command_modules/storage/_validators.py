@@ -121,6 +121,7 @@ def is_storagev2(import_prefix):
     return import_prefix.startswith('azure.multiapi.storagev2.') or import_prefix.startswith('azure.data.tables')
 
 
+# pylint: disable=too-many-branches, too-many-statements
 def validate_client_parameters(cmd, namespace):
     """ Retrieves storage connection parameters from environment variables and parses out connection string into
     account name and key """
@@ -130,7 +131,11 @@ def validate_client_parameters(cmd, namespace):
         auth_mode = n.auth_mode or get_config_value(cmd, 'storage', 'auth_mode', None)
         del n.auth_mode
         if not n.account_name:
-            n.account_name = get_config_value(cmd, 'storage', 'account', None)
+            if hasattr(n, 'account_url') and not n.account_url:
+                n.account_name = get_config_value(cmd, 'storage', 'account', None)
+                n.account_url = get_config_value(cmd, 'storage', 'account_url', None)
+            else:
+                n.account_name = get_config_value(cmd, 'storage', 'account', None)
         if auth_mode == 'login':
             prefix = cmd.command_kwargs['resource_type'].value[0]
             # is_storagv2() is used to distinguish if the command is in track2 SDK
@@ -167,7 +172,11 @@ def validate_client_parameters(cmd, namespace):
 
     # otherwise, simply try to retrieve the remaining variables from environment variables
     if not n.account_name:
-        n.account_name = get_config_value(cmd, 'storage', 'account', None)
+        if hasattr(n, 'account_url') and not n.account_url:
+            n.account_name = get_config_value(cmd, 'storage', 'account', None)
+            n.account_url = get_config_value(cmd, 'storage', 'account_url', None)
+        else:
+            n.account_name = get_config_value(cmd, 'storage', 'account', None)
     if not n.account_key and not n.sas_token:
         n.account_key = get_config_value(cmd, 'storage', 'key', None)
     if not n.sas_token:
@@ -201,6 +210,20 @@ For more information about RBAC roles in storage, visit https://docs.microsoft.c
             n.account_key = _query_account_key(cmd.cli_ctx, n.account_name)
         except Exception as ex:  # pylint: disable=broad-except
             logger.warning("\nSkip querying account key due to failure: %s", ex)
+
+    if hasattr(n, 'account_url') and n.account_url and not n.account_key and not n.sas_token:
+        message = """
+There are no credentials provided in your command and environment.
+Please provide --connection-string, --account-key or --sas-token in your command as credentials.
+        """
+
+        if 'auth_mode' in cmd.arguments:
+            message += """
+You also can add `--auth-mode login` in your command to use Azure Active Directory (Azure AD) for authorization if your login account is assigned required RBAC roles.
+For more information about RBAC roles in storage, visit https://docs.microsoft.com/azure/storage/common/storage-auth-aad-rbac-cli."
+            """
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        raise InvalidArgumentValueError(message)
 
 
 def validate_encryption_key(cmd, namespace):
@@ -653,6 +676,7 @@ def validate_entity(namespace):
     """ Converts a list of key value pairs into a dictionary. Ensures that required
     RowKey and PartitionKey are converted to the correct case and included. """
     values = dict(x.split('=', 1) for x in namespace.entity)
+    edm_types = {}
     keys = values.keys()
     for key in list(keys):
         if key.lower() == 'rowkey':
@@ -663,6 +687,12 @@ def validate_entity(namespace):
             val = values[key]
             del values[key]
             values['PartitionKey'] = val
+        elif key.endswith('@odata.type'):
+            val = values[key]
+            del values[key]
+            real_key = key[0: key.index('@odata.type')]
+            edm_types[real_key] = val
+
     keys = values.keys()
     missing_keys = 'RowKey ' if 'RowKey' not in keys else ''
     missing_keys = '{}PartitionKey'.format(missing_keys) \
@@ -685,8 +715,12 @@ def validate_entity(namespace):
 
         return try_cast(int) or try_cast(float) or val
 
-    # ensure numbers are converted from strings so querying will work correctly
-    values = {key: cast_val(key, val) for key, val in values.items()}
+    for key, val in values.items():
+        if edm_types.get(key, None):
+            values[key] = (val, edm_types[key])
+        else:
+            # ensure numbers are converted from strings so querying will work correctly
+            values[key] = cast_val(key, val)
     namespace.entity = values
 
 

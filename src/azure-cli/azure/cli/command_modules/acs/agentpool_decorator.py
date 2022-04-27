@@ -5,10 +5,12 @@
 
 import os
 from math import isnan
+from types import SimpleNamespace
 from typing import Dict, List, Tuple, TypeVar, Union
 
 from azure.cli.command_modules.acs._client_factory import cf_agent_pools
 from azure.cli.command_modules.acs._consts import (
+    CONST_AVAILABILITY_SET,
     CONST_DEFAULT_NODE_OS_TYPE,
     CONST_DEFAULT_NODE_VM_SIZE,
     CONST_DEFAULT_WINDOWS_NODE_VM_SIZE,
@@ -20,13 +22,20 @@ from azure.cli.command_modules.acs._consts import (
     CONST_SPOT_EVICTION_POLICY_DELETE,
     CONST_VIRTUAL_MACHINE_SCALE_SETS,
     AgentPoolDecoratorMode,
+    DecoratorEarlyExitException,
     DecoratorMode,
 )
-from azure.cli.command_modules.acs._helpers import get_snapshot_by_snapshot_id
+from azure.cli.command_modules.acs._helpers import get_snapshot_by_snapshot_id, safe_list_get
 from azure.cli.command_modules.acs._validators import extract_comma_separated_string
 from azure.cli.command_modules.acs.base_decorator import BaseAKSContext, BaseAKSModels, BaseAKSParamDict
 from azure.cli.core import AzCommandsLoader
-from azure.cli.core.azclierror import CLIInternalError, InvalidArgumentValueError, RequiredArgumentMissingError
+from azure.cli.core.azclierror import (
+    ArgumentUsageError,
+    CLIInternalError,
+    InvalidArgumentValueError,
+    MutuallyExclusiveArgumentError,
+    RequiredArgumentMissingError,
+)
 from azure.cli.core.commands import AzCliCommand
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import get_file_json, sdk_no_wait
@@ -93,6 +102,68 @@ class AKSAgentPoolContext(BaseAKSContext):
         super().__init__(cmd, raw_parameters, models, decorator_mode)
         self.agentpool_decorator_mode = agentpool_decorator_mode
         self.agentpool = None
+        # used to store origin agentpool in update mode
+        self.__existing_agentpool = None
+        # used to store all the agentpools in mc mode
+        self._agentpools = []
+        # used to store external functions
+        self.__external_functions = None
+
+    @property
+    def existing_agentpool(self) -> AgentPool:
+        return self.__existing_agentpool
+
+    @property
+    def external_functions(self) -> SimpleNamespace:
+        if self.__external_functions is None:
+            external_functions = {}
+            external_functions["cf_agent_pools"] = cf_agent_pools
+            external_functions["get_snapshot_by_snapshot_id"] = get_snapshot_by_snapshot_id
+            self.__external_functions = SimpleNamespace(**external_functions)
+        return self.__external_functions
+
+    def attach_agentpool(self, agentpool: AgentPool) -> None:
+        """Attach the AgentPool object to the context.
+
+        The `agentpool` object is only allowed to be attached once, and attaching again will raise a CLIInternalError.
+
+        :return: None
+        """
+        if self.decorator_mode == DecoratorMode.UPDATE:
+            self.attach_existing_agentpool(agentpool)
+
+        if self.agentpool is None:
+            self.agentpool = agentpool
+        else:
+            msg = "the same" if self.agentpool == agentpool else "different"
+            raise CLIInternalError(
+                "Attempting to attach the `agentpool` object again, the two objects are {}.".format(
+                    msg
+                )
+            )
+
+    def attach_existing_agentpool(self, agentpool: AgentPool) -> None:
+        if self.__existing_agentpool is None:
+            self.__existing_agentpool = agentpool
+        else:
+            msg = "the same" if self.__existing_agentpool == agentpool else "different"
+            raise CLIInternalError(
+                "Attempting to attach the existing `agentpool` object again, the two objects are {}.".format(
+                    msg
+                )
+            )
+
+    def attach_agentpools(self, agentpools: List[AgentPool]) -> None:
+        if self._agentpools == []:
+            self._agentpools = agentpools
+        else:
+            msg = "the same" if self._agentpools == agentpools else "different"
+            raise CLIInternalError(
+                "Attempting to attach the `agentpools` object again, the two objects are {}.".format(
+                    msg
+                )
+            )
+        self._agentpools = agentpools
 
     # pylint: disable=no-self-use
     def __validate_counts_in_autoscaler(
@@ -140,23 +211,6 @@ class AKSAgentPoolContext(BaseAKSContext):
                         option_name
                     )
                 )
-
-    def attach_agentpool(self, agentpool: AgentPool) -> None:
-        """Attach the AgentPool object to the context.
-
-        The `agentpool` object is only allowed to be attached once, and attaching again will raise a CLIInternalError.
-
-        :return: None
-        """
-        if self.agentpool is None:
-            self.agentpool = agentpool
-        else:
-            msg = "the same" if self.agentpool == agentpool else "different"
-            raise CLIInternalError(
-                "Attempting to attach the `agentpool` object again, the two objects are {}.".format(
-                    msg
-                )
-            )
 
     def get_resource_group_name(self) -> str:
         """Obtain the value of resource_group_name.
@@ -218,8 +272,12 @@ class AKSAgentPoolContext(BaseAKSContext):
         # this parameter does not need dynamic completion
         # validation
         if enable_validation:
-            if self.agentpool_decorator_mode == AgentPoolDecoratorMode.STANDALONE:
-                instances = cf_agent_pools.list(self.get_resource_group_name, self.get_cluster_name)
+            if (
+                self.agentpool_decorator_mode == AgentPoolDecoratorMode.STANDALONE and
+                self.decorator_mode == DecoratorMode.CREATE
+            ):
+                agentpool_client = self.external_functions.cf_agent_pools(self.cmd.cli_ctx)
+                instances = agentpool_client.list(self.get_resource_group_name(), self.get_cluster_name())
                 for agentpool_profile in instances:
                     if agentpool_profile.name == nodepool_name:
                         raise InvalidArgumentValueError(
@@ -252,19 +310,19 @@ class AKSAgentPoolContext(BaseAKSContext):
         """
         # read the original value passed by the command
         max_surge = self.raw_param.get("max_surge")
-        # try to read the property value corresponding to the parameter from the `agentpool` object.
-        if (
-            self.agentpool and
-            self.agentpool.upgrade_settings and
-            self.agentpool.upgrade_settings.max_surge is not None
-        ):
-            max_surge = self.agentpool.upgrade_settings.max_surge
+        # In create mode, try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.agentpool and
+                self.agentpool.upgrade_settings and
+                self.agentpool.upgrade_settings.max_surge is not None
+            ):
+                max_surge = self.agentpool.upgrade_settings.max_surge
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
         return max_surge
 
-    # pylint: disable=too-many-branches
     def get_node_count_and_enable_cluster_autoscaler_min_max_count(
         self,
     ) -> Tuple[int, bool, Union[int, None], Union[int, None]]:
@@ -284,7 +342,7 @@ class AKSAgentPoolContext(BaseAKSContext):
 
         # enable_cluster_autoscaler
         # read the original value passed by the command
-        enable_cluster_autoscaler = self.raw_param.get("enable_cluster_autoscaler")
+        enable_cluster_autoscaler = self.raw_param.get("enable_cluster_autoscaler", False)
         # try to read the property value corresponding to the parameter from the `agentpool` object
         if self.agentpool and self.agentpool.enable_auto_scaling is not None:
             enable_cluster_autoscaler = self.agentpool.enable_auto_scaling
@@ -314,6 +372,93 @@ class AKSAgentPoolContext(BaseAKSContext):
             decorator_mode=DecoratorMode.CREATE,
         )
         return node_count, enable_cluster_autoscaler, min_count, max_count
+
+    def get_update_enable_disable_cluster_autoscaler_and_min_max_count(
+        self,
+    ) -> Tuple[bool, bool, bool, Union[int, None], Union[int, None]]:
+        """Obtain the value of update_cluster_autoscaler, enable_cluster_autoscaler, disable_cluster_autoscaler,
+        min_count and max_count.
+
+        This function will verify the parameters through function "__validate_counts_in_autoscaler" by default. Besides
+        if both enable_cluster_autoscaler and update_cluster_autoscaler are specified, a MutuallyExclusiveArgumentError
+        will be raised. If enable_cluster_autoscaler or update_cluster_autoscaler is specified and there are multiple
+        agent pool profiles, an ArgumentUsageError will be raised. If enable_cluster_autoscaler is specified and
+        autoscaler is already enabled in `mc`, it will output warning messages and exit with code 0. If
+        update_cluster_autoscaler is specified and autoscaler is not enabled in `mc`, it will raise an
+        InvalidArgumentValueError. If disable_cluster_autoscaler is specified and autoscaler is not enabled in `mc`,
+        it will output warning messages and exit with code 0.
+
+        :return: a tuple containing four elements: update_cluster_autoscaler of bool type, enable_cluster_autoscaler
+        of bool type, disable_cluster_autoscaler of bool type, min_count of int type or None and max_count of int type
+        or None
+        """
+        # update_cluster_autoscaler
+        # read the original value passed by the command
+        update_cluster_autoscaler = self.raw_param.get("update_cluster_autoscaler", False)
+
+        # enable_cluster_autoscaler
+        # read the original value passed by the command
+        enable_cluster_autoscaler = self.raw_param.get("enable_cluster_autoscaler", False)
+
+        # disable_cluster_autoscaler
+        # read the original value passed by the command
+        disable_cluster_autoscaler = self.raw_param.get("disable_cluster_autoscaler", False)
+
+        # min_count
+        # read the original value passed by the command
+        min_count = self.raw_param.get("min_count")
+
+        # max_count
+        # read the original value passed by the command
+        max_count = self.raw_param.get("max_count")
+
+        # these parameters do not need dynamic completion
+
+        # validation
+        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+            # For multi-agent pool, use the az aks nodepool command
+            if (enable_cluster_autoscaler or update_cluster_autoscaler) and len(self._agentpools) > 1:
+                raise ArgumentUsageError(
+                    'There are more than one node pool in the cluster. Please use "az aks nodepool" command '
+                    "to update per node pool auto scaler settings"
+                )
+
+        if enable_cluster_autoscaler + update_cluster_autoscaler + disable_cluster_autoscaler > 1:
+            raise MutuallyExclusiveArgumentError(
+                "Can only specify one of --enable-cluster-autoscaler, --update-cluster-autoscaler and "
+                "--disable-cluster-autoscaler"
+            )
+
+        self.__validate_counts_in_autoscaler(
+            None,
+            enable_cluster_autoscaler or update_cluster_autoscaler,
+            min_count,
+            max_count,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+
+        if enable_cluster_autoscaler and self.agentpool.enable_auto_scaling:
+            logger.warning(
+                "Cluster autoscaler is already enabled for this node pool.\n"
+                'Please run "az aks --update-cluster-autoscaler" '
+                "if you want to update min-count or max-count."
+            )
+            raise DecoratorEarlyExitException()
+
+        if update_cluster_autoscaler and not self.agentpool.enable_auto_scaling:
+            raise InvalidArgumentValueError(
+                "Cluster autoscaler is not enabled for this node pool.\n"
+                'Run "az aks nodepool update --enable-cluster-autoscaler" '
+                "to enable cluster with min-count and max-count."
+            )
+
+        if disable_cluster_autoscaler and not self.agentpool.enable_auto_scaling:
+            logger.warning(
+                "Cluster autoscaler is already disabled for this node pool."
+            )
+            raise DecoratorEarlyExitException()
+
+        return update_cluster_autoscaler, enable_cluster_autoscaler, disable_cluster_autoscaler, min_count, max_count
 
     def get_node_osdisk_size(self) -> Union[int, None]:
         """Obtain the value of node_osdisk_size.
@@ -386,7 +531,7 @@ class AKSAgentPoolContext(BaseAKSContext):
 
         snapshot_id = self.get_snapshot_id()
         if snapshot_id:
-            snapshot = get_snapshot_by_snapshot_id(self.cmd.cli_ctx, snapshot_id)
+            snapshot = self.external_functions.get_snapshot_by_snapshot_id(self.cmd.cli_ctx, snapshot_id)
             self.set_intermediate("snapshot", snapshot, overwrite_exists=True)
         return snapshot
 
@@ -582,9 +727,10 @@ class AKSAgentPoolContext(BaseAKSContext):
         else:
             nodepool_labels = self.raw_param.get("labels")
 
-        # try to read the property value corresponding to the parameter from the `agentpool` object
-        if self.agentpool and self.agentpool.node_labels is not None:
-            nodepool_labels = self.agentpool.node_labels
+        # In create mode, try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if self.agentpool and self.agentpool.node_labels is not None:
+                nodepool_labels = self.agentpool.node_labels
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
@@ -601,9 +747,10 @@ class AKSAgentPoolContext(BaseAKSContext):
         else:
             nodepool_tags = self.raw_param.get("tags")
 
-        # try to read the property value corresponding to the parameter from the `agentpool` object
-        if self.agentpool and self.agentpool.tags is not None:
-            nodepool_tags = self.agentpool.tags
+        # In create mode, try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if self.agentpool and self.agentpool.tags is not None:
+                nodepool_tags = self.agentpool.tags
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
@@ -616,13 +763,17 @@ class AKSAgentPoolContext(BaseAKSContext):
         """
         # read the original value passed by the command
         node_taints = self.raw_param.get("node_taints")
-        # normalize, keep None as None
+        # normalize, default is an empty list
         if node_taints is not None:
             node_taints = [x.strip() for x in (node_taints.split(",") if node_taints else [])]
+        # keep None as None for update mode
+        if node_taints is None and self.decorator_mode == DecoratorMode.CREATE:
+            node_taints = []
 
-        # try to read the property value corresponding to the parameter from the `agentpool` object
-        if self.agentpool and self.agentpool.node_taints is not None:
-            node_taints = self.agentpool.node_taints
+        # In create mode, try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if self.agentpool and self.agentpool.node_taints is not None:
+                node_taints = self.agentpool.node_taints
 
         # this parameter does not need validation
         return node_taints
@@ -706,12 +857,12 @@ class AKSAgentPoolContext(BaseAKSContext):
         return pod_subnet_id
 
     def get_enable_node_public_ip(self) -> bool:
-        """Obtain the value of enable_node_public_ip.
+        """Obtain the value of enable_node_public_ip, default value is False.
 
         :return: bool
         """
         # read the original value passed by the command
-        enable_node_public_ip = self.raw_param.get("enable_node_public_ip")
+        enable_node_public_ip = self.raw_param.get("enable_node_public_ip", False)
         # try to read the property value corresponding to the parameter from the `agentpool` object
         if self.agentpool and self.agentpool.enable_node_public_ip is not None:
             enable_node_public_ip = self.agentpool.enable_node_public_ip
@@ -750,7 +901,13 @@ class AKSAgentPoolContext(BaseAKSContext):
             if self.agentpool and self.agentpool.type_properties_type is not None:
                 vm_set_type = self.agentpool.type_properties_type
 
-        # this parameter does not need dynamic completion
+        # normalize
+        if vm_set_type.lower() == CONST_VIRTUAL_MACHINE_SCALE_SETS.lower():
+            vm_set_type = CONST_VIRTUAL_MACHINE_SCALE_SETS
+        elif vm_set_type.lower() == CONST_AVAILABILITY_SET.lower():
+            vm_set_type = CONST_AVAILABILITY_SET
+        else:
+            raise InvalidArgumentValueError("--vm-set-type can only be VirtualMachineScaleSets or AvailabilitySet")
         # this parameter does not need validation
         return vm_set_type
 
@@ -856,28 +1013,39 @@ class AKSAgentPoolContext(BaseAKSContext):
         :return: string
         """
         # read the original value passed by the command
-        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
-            mode = self.raw_param.get("mode", CONST_NODEPOOL_MODE_SYSTEM)
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+                mode = self.raw_param.get("mode", CONST_NODEPOOL_MODE_SYSTEM)
+            else:
+                mode = self.raw_param.get("mode", CONST_NODEPOOL_MODE_USER)
         else:
-            mode = self.raw_param.get("mode", CONST_NODEPOOL_MODE_USER)
-        # try to read the property value corresponding to the parameter from the `agentpool` object
-        if self.agentpool and self.agentpool.mode is not None:
-            mode = self.agentpool.mode
+            mode = self.raw_param.get("mode")
+        # In create mode, try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if self.agentpool and self.agentpool.mode is not None:
+                mode = self.agentpool.mode
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
         return mode
 
     def get_scale_down_mode(self) -> str:
-        """Obtain the value of scale_down_mode, default value is CONST_SCALE_DOWN_MODE_DELETE.
+        """Obtain the value of scale_down_mode, default value is CONST_SCALE_DOWN_MODE_DELETE for standalone mode.
 
         :return: string
         """
         # read the original value passed by the command
-        scale_down_mode = self.raw_param.get("scale_down_mode", CONST_SCALE_DOWN_MODE_DELETE)
-        # try to read the property value corresponding to the parameter from the `agentpool` object
-        if self.agentpool and self.agentpool.scale_down_mode is not None:
-            scale_down_mode = self.agentpool.scale_down_mode
+        if (
+            self.decorator_mode == DecoratorMode.CREATE and
+            self.agentpool_decorator_mode == AgentPoolDecoratorMode.STANDALONE
+        ):
+            scale_down_mode = self.raw_param.get("scale_down_mode", CONST_SCALE_DOWN_MODE_DELETE)
+        else:
+            scale_down_mode = self.raw_param.get("scale_down_mode")
+        # In create mode, try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if self.agentpool and self.agentpool.scale_down_mode is not None:
+                scale_down_mode = self.agentpool.scale_down_mode
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
@@ -908,7 +1076,7 @@ class AKSAgentPoolContext(BaseAKSContext):
                     )
                 )
 
-        # try to read the property value corresponding to the parameter from the `mc` object
+        # try to read the property value corresponding to the parameter from the `agentpool` object
         if self.agentpool and self.agentpool.kubelet_config is not None:
             kubelet_config = self.agentpool.kubelet_config
 
@@ -941,7 +1109,7 @@ class AKSAgentPoolContext(BaseAKSContext):
                     )
                 )
 
-        # try to read the property value corresponding to the parameter from the `mc` object
+        # try to read the property value corresponding to the parameter from the `agentpool` object
         if self.agentpool and self.agentpool.linux_os_config:
             linux_os_config = self.agentpool.linux_os_config
 
@@ -975,14 +1143,14 @@ class AKSAgentPoolContext(BaseAKSContext):
         return aks_custom_headers
 
     def get_no_wait(self) -> bool:
-        """Obtain the value of no_wait.
+        """Obtain the value of no_wait, default value is False.
 
         Note: no_wait will not be decorated into the `agentpool` object.
 
         :return: bool
         """
         # read the original value passed by the command
-        no_wait = self.raw_param.get("no_wait")
+        no_wait = self.raw_param.get("no_wait", False)
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
@@ -1008,11 +1176,31 @@ class AKSAgentPoolAddDecorator:
         """
         self.cmd = cmd
         self.client = client
+        self.__raw_parameters = raw_parameters
+        self.resource_type = resource_type
         self.agentpool_decorator_mode = agentpool_decorator_mode
-        self.models = AKSAgentPoolModels(cmd, resource_type, agentpool_decorator_mode)
-        # store the context in the process of assemble the AgentPool object
+        self.init_models()
+        self.init_context()
+
+    def init_models(self) -> None:
+        """Initialize an AKSAgentPoolModels object to store the models.
+
+        :return: None
+        """
+        self.models = AKSAgentPoolModels(self.cmd, self.resource_type, self.agentpool_decorator_mode)
+
+    def init_context(self) -> None:
+        """Initialize an AKSManagedClusterContext object to store the context in the process of assemble the
+        AgentPool object.
+
+        :return: None
+        """
         self.context = AKSAgentPoolContext(
-            cmd, AKSAgentPoolParamDict(raw_parameters), self.models, DecoratorMode.CREATE, agentpool_decorator_mode
+            self.cmd,
+            AKSAgentPoolParamDict(self.__raw_parameters),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
         )
 
     def _ensure_agentpool(self, agentpool: AgentPool) -> None:
@@ -1227,8 +1415,8 @@ class AKSAgentPoolAddDecorator:
         agentpool.linux_os_config = self.context.get_linux_os_config()
         return agentpool
 
-    def construct_default_agentpool_profile(self) -> AgentPool:
-        """The overall controller used to construct the default AgentPool profile.
+    def construct_agentpool_profile_default(self, bypass_restore_defaults: bool = False) -> AgentPool:
+        """The overall controller used to construct the AgentPool profile by default.
 
         The completely constructed AgentPool object will later be passed as a parameter to the underlying SDK
         (mgmt-containerservice) to send the actual request.
@@ -1258,17 +1446,18 @@ class AKSAgentPoolAddDecorator:
         # set up custom node config
         agentpool = self.set_up_custom_node_config(agentpool)
         # restore defaults
-        agentpool = self._restore_defaults_in_agentpool(agentpool)
+        if not bypass_restore_defaults:
+            agentpool = self._restore_defaults_in_agentpool(agentpool)
         return agentpool
 
     # pylint: disable=protected-access
     def add_agentpool(self, agentpool: AgentPool) -> AgentPool:
         """Send request to add a new agentpool.
 
-        The function "sdk_no_wait" will be called to use the ContainerServiceClient to send a reqeust to add a new agent
-        pool to the cluster.
+        The function "sdk_no_wait" will be called to use the Agentpool operations of ContainerServiceClient to send a
+        reqeust to add a new agent pool to the cluster.
 
-        :return: the ManagedCluster object
+        :return: the AgentPool object
         """
         self._ensure_agentpool(agentpool)
 
@@ -1291,6 +1480,7 @@ class AKSAgentPoolUpdateDecorator:
         client: AgentPoolsOperations,
         raw_parameters: Dict,
         resource_type: ResourceType,
+        agentpool_decorator_mode: AgentPoolDecoratorMode,
     ):
         """Internal controller of aks_agentpool_update.
 
@@ -1302,8 +1492,191 @@ class AKSAgentPoolUpdateDecorator:
         """
         self.cmd = cmd
         self.client = client
-        self.models = AKSAgentPoolModels(cmd, resource_type)
-        # store the context in the process of assemble the AgentPool object
+        self.__raw_parameters = raw_parameters
+        self.resource_type = resource_type
+        self.agentpool_decorator_mode = agentpool_decorator_mode
+        self.init_models()
+        self.init_context()
+
+    def init_models(self) -> None:
+        """Initialize an AKSAgentPoolModels object to store the models.
+
+        :return: None
+        """
+        self.models = AKSAgentPoolModels(self.cmd, self.resource_type, self.agentpool_decorator_mode)
+
+    def init_context(self) -> None:
+        """Initialize an AKSManagedClusterContext object to store the context in the process of assemble the
+        AgentPool object.
+
+        :return: None
+        """
         self.context = AKSAgentPoolContext(
-            cmd, AKSAgentPoolParamDict(raw_parameters), self.models, decorator_mode=DecoratorMode.UPDATE
+            self.cmd,
+            AKSAgentPoolParamDict(self.__raw_parameters),
+            self.models,
+            DecoratorMode.UPDATE,
+            self.agentpool_decorator_mode,
+        )
+
+    def _ensure_agentpool(self, agentpool: AgentPool) -> None:
+        """Internal function to ensure that the incoming `agentpool` object is valid and the same as the attached
+        `agentpool` object in the context.
+
+        If the incoming `agentpool` is not valid or is inconsistent with the `agentpool` in the context, raise a
+        CLIInternalError.
+
+        :return: None
+        """
+        if not isinstance(agentpool, self.models.UnifiedAgentPoolModel):
+            raise CLIInternalError(
+                "Unexpected agentpool object with type '{}'.".format(type(agentpool))
+            )
+
+        if self.context.agentpool != agentpool:
+            raise CLIInternalError(
+                "Inconsistent state detected. The incoming `agentpool` "
+                "is not the same as the `agentpool` in the context."
+            )
+
+    def fetch_agentpool(self, agentpools: List[AgentPool] = None) -> AgentPool:
+        """Get the AgentPool object currently in use and attach it to internal context.
+
+        Internally send request using Agentpool operations of ContainerServiceClient.
+
+        :return: the AgentPool object
+        """
+        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+            self.context.attach_agentpools(agentpools)
+            agentpool = safe_list_get(agentpools, 0)
+        else:
+            agentpool = self.client.get(
+                self.context.get_resource_group_name(),
+                self.context.get_cluster_name(),
+                self.context.get_nodepool_name(),
+            )
+
+        # attach agentpool to AKSAgentPoolContext
+        self.context.attach_agentpool(agentpool)
+        return agentpool
+
+    def update_upgrade_settings(self, agentpool: AgentPool) -> AgentPool:
+        """Update upgrade settings for the Agentpool object.
+
+        :return: the Agentpool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        upgrade_settings = agentpool.upgrade_settings
+        if upgrade_settings is None:
+            upgrade_settings = self.models.AgentPoolUpgradeSettings()
+
+        max_surge = self.context.get_max_surge()
+        if max_surge:
+            upgrade_settings.max_surge = max_surge
+            agentpool.upgrade_settings = upgrade_settings
+        return agentpool
+
+    def update_auto_scaler_properties(self, agentpool: AgentPool) -> AgentPool:
+        """Update auto scaler related properties for the Agentpool object.
+
+        :return: the Agentpool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        (
+            update_cluster_autoscaler,
+            enable_cluster_autoscaler,
+            disable_cluster_autoscaler,
+            min_count,
+            max_count,
+        ) = (
+            self.context.get_update_enable_disable_cluster_autoscaler_and_min_max_count()
+        )
+
+        if update_cluster_autoscaler or enable_cluster_autoscaler:
+            agentpool.enable_auto_scaling = True
+            agentpool.min_count = min_count
+            agentpool.max_count = max_count
+
+        if disable_cluster_autoscaler:
+            agentpool.enable_auto_scaling = False
+            agentpool.min_count = None
+            agentpool.max_count = None
+        return agentpool
+
+    def update_label_tag_taint(self, agentpool: AgentPool) -> AgentPool:
+        """Set up label, tag, taint for the AgentPool object.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        labels = self.context.get_nodepool_labels()
+        if labels is not None:
+            agentpool.node_labels = labels
+
+        tags = self.context.get_nodepool_tags()
+        if tags is not None:
+            agentpool.tags = tags
+
+        node_taints = self.context.get_node_taints()
+        if node_taints is not None:
+            agentpool.node_taints = node_taints
+        return agentpool
+
+    def update_vm_properties(self, agentpool: AgentPool) -> AgentPool:
+        """Update vm related properties for the AgentPool object.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        scale_down_mode = self.context.get_scale_down_mode()
+        if scale_down_mode is not None:
+            agentpool.scale_down_mode = scale_down_mode
+
+        mode = self.context.get_mode()
+        if mode is not None:
+            agentpool.mode = mode
+        return agentpool
+
+    def update_agentpool_profile_default(self, agentpools: List[AgentPool] = None) -> AgentPool:
+        """The overall controller used to update AgentPool profile by default.
+
+        The completely constructed AgentPool object will later be passed as a parameter to the underlying SDK
+        (mgmt-containerservice) to send the actual request.
+
+        :return: the AgentPool object
+        """
+        # fetch the Agentpool object
+        agentpool = self.fetch_agentpool(agentpools)
+        # update upgrade settings
+        agentpool = self.update_upgrade_settings(agentpool)
+        # update auto scaler properties
+        agentpool = self.update_auto_scaler_properties(agentpool)
+        # update label, tag, taint
+        agentpool = self.update_label_tag_taint(agentpool)
+        # update misc vm properties
+        agentpool = self.update_vm_properties(agentpool)
+        return agentpool
+
+    def update_agentpool(self, agentpool: AgentPool) -> AgentPool:
+        """Send request to add a new agentpool.
+
+        The function "sdk_no_wait" will be called to use the Agentpool operations of ContainerServiceClient to send a
+        reqeust to update an existing agent pool of the cluster.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        return sdk_no_wait(
+            self.context.get_no_wait(),
+            self.client.begin_create_or_update,
+            self.context.get_resource_group_name(),
+            self.context.get_cluster_name(),
+            self.context.get_nodepool_name(),
+            agentpool,
+            headers=self.context.get_aks_custom_headers(),
         )
