@@ -558,7 +558,7 @@ def export_sql_script(cmd, workspace_name, output_folder, sql_script_name=None):
 
 def list_link_connection(cmd, workspace_name):
     client = cf_synapse_link_connection(cmd.cli_ctx, workspace_name)
-    return client.get_link_connections_by_workspace()
+    return client.list_link_connections_by_workspace()
 
 
 def get_link_connection(cmd, workspace_name, link_connection_name):
@@ -568,7 +568,16 @@ def get_link_connection(cmd, workspace_name, link_connection_name):
 
 def create_or_update_link_connection(cmd, workspace_name, link_connection_name, definition_file):
     client = cf_synapse_link_connection(cmd.cli_ctx, workspace_name)
-    properties = LinkConnectionResource.from_dict(definition_file['properties'])
+    info = definition_file['properties']
+    properties_file = {}
+    properties_file['sourceDatabase'] = info['sourceDatabase']
+    properties_file['targetDatabase'] = info['targetDatabase']
+    properties_file['compute'] = info['compute']
+    try:    
+        properties_file['landingZone'] = info['landingZone']
+    except:
+        pass
+    properties = LinkConnectionResource(properties=properties_file)
     return client.create_or_update_link_connection(link_connection_name, properties)
 
 
