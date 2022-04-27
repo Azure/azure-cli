@@ -520,6 +520,8 @@ examples:
     text: az sql elastic-pool create -g mygroup -s myserver -n mydb -e Standard -c 100
   - name: Create an elastic pool with GeneralPurpose edition, Gen4 hardware and 1 vcore.
     text: az sql elastic-pool create -g mygroup -s myserver -n mydb -e GeneralPurpose -f Gen4 -c 1
+  - name: Create an elastic pool with Hyperscale edition, Gen5 hardware, 4 vcore and 2 high availability replicas.
+    text: az sql elastic-pool create -g mygroup -s myserver -n mydb -e Hyperscale -f Gen5 -c 4 --ha-replicas 2
 """
 
 helps['sql elastic-pool list-editions'] = """
@@ -557,6 +559,8 @@ examples:
     text: az sql elastic-pool update -g mygroup -s myserver -n mypool -z
   - name: Update elastic pool with zone redundancy explicitly disabled
     text: az sql elastic-pool update -g mygroup -s myserver -n mypool -z false
+  - name: Update elastic pool with 2 high availability replicas
+    text: az sql elastic-pool update -g mygroup -s myserver -n mypool --ha-replicas 2
 """
 
 helps['sql failover-group'] = """
