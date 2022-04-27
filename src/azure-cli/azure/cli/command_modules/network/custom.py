@@ -2285,9 +2285,8 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):
         record_data = getattr(record_set, _type_to_property_name(record_type), None)
 
         # ignore empty record sets
-        if not record_data:
-            continue
-
+        # if not record_data:
+        #     continue
         if not isinstance(record_data, list):
             record_data = [record_data]
 
@@ -2295,7 +2294,9 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):
             zone_obj[record_set_name] = OrderedDict()
 
         for record in record_data:
-
+            if record is None:
+                record_data = []
+                break
             record_obj = {'ttl': record_set.ttl}
 
             if record_type not in zone_obj[record_set_name]:
@@ -2331,7 +2332,18 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):
                 record_obj.update({'txt': ''.join(record.value)})
 
             zone_obj[record_set_name][record_type].append(record_obj)
-
+        if 0 == len(record_data):
+            record_obj = {'ttl': record_set.ttl}
+            if record_type not in zone_obj[record_set_name]:
+                zone_obj[record_set_name][record_type] = []
+            if record_type == 'aaaa':
+                record_obj.update({'ip': ''})
+            elif record_type == 'a':
+                record_obj.update({'ip': ''})
+            elif record_type == 'cname':
+                record_obj.update({'alias': ''})
+                record_obj.update({'alias': ''})
+            zone_obj[record_set_name][record_type].append(record_obj)
     zone_file_content = make_zone_file(zone_obj)
     print(zone_file_content)
     if file_name:
