@@ -2201,11 +2201,13 @@ class AKSManagedClusterContext(BaseAKSContext):
                 CONST_MONITORING_ADDON_NAME
             ).config.get(CONST_MONITORING_USING_AAD_MSI_AUTH) is not None
         ):
-            safe_lower(
-                enable_msi_auth_for_monitoring=self.mc.addon_profiles.get(CONST_MONITORING_ADDON_NAME).config.get(
-                    CONST_MONITORING_USING_AAD_MSI_AUTH
-                )
-            ) == "true"
+            enable_msi_auth_for_monitoring = (
+                safe_lower(
+                    self.mc.addon_profiles.get(CONST_MONITORING_ADDON_NAME).config.get(
+                        CONST_MONITORING_USING_AAD_MSI_AUTH
+                    )
+                ) == "true"
+            )
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
