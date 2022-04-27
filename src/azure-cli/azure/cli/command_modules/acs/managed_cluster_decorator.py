@@ -2201,9 +2201,11 @@ class AKSManagedClusterContext(BaseAKSContext):
                 CONST_MONITORING_ADDON_NAME
             ).config.get(CONST_MONITORING_USING_AAD_MSI_AUTH) is not None
         ):
-            enable_msi_auth_for_monitoring = self.mc.addon_profiles.get(
-                CONST_MONITORING_ADDON_NAME
-            ).config.get(CONST_MONITORING_USING_AAD_MSI_AUTH)
+            safe_lower(
+                enable_msi_auth_for_monitoring=self.mc.addon_profiles.get(CONST_MONITORING_ADDON_NAME).config.get(
+                    CONST_MONITORING_USING_AAD_MSI_AUTH
+                )
+            ) == "true"
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
@@ -4260,7 +4262,9 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             enabled=True,
             config={
                 CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: self.context.get_workspace_resource_id(),
-                CONST_MONITORING_USING_AAD_MSI_AUTH: self.context.get_enable_msi_auth_for_monitoring(),
+                CONST_MONITORING_USING_AAD_MSI_AUTH: "True"
+                if self.context.get_enable_msi_auth_for_monitoring()
+                else "False",
             },
         )
         # post-process, create a deployment
