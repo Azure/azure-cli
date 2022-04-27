@@ -26,7 +26,6 @@ from azure.cli.command_modules.acs._consts import (
     DecoratorMode,
 )
 from azure.cli.command_modules.acs.agentpool_decorator import (
-    AgentPool,
     AKSAgentPoolAddDecorator,
     AKSAgentPoolContext,
     AKSAgentPoolModels,
@@ -68,14 +67,7 @@ class AKSAgentPoolModelsTestCase(unittest.TestCase):
 
 
 class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
-    def _remove_defaults_in_agentpool(self, agentpool: AgentPool) -> AgentPool:
-        """Internal function to remove values from properties with default values of the `agentpool` object.
-
-        Removing default values is to prevent getters from mistakenly overwriting user provided values with default
-        values in the object.
-
-        :return: the AgentPool object
-        """
+    def _remove_defaults_in_agentpool(self, agentpool):
         self.defaults_in_agentpool = {}
         for attr_name, attr_value in vars(agentpool).items():
             if not attr_name.startswith("_") and attr_name != "name" and attr_value is not None:
@@ -83,14 +75,7 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
                 setattr(agentpool, attr_name, None)
         return agentpool
 
-    def _restore_defaults_in_agentpool(self, agentpool: AgentPool) -> AgentPool:
-        """Internal function to restore values of properties with default values of the `agentpool` object.
-
-        Restoring default values is to keep the content of the request sent by cli consistent with that before the
-        refactoring.
-
-        :return: the AgentPool object
-        """
+    def _restore_defaults_in_agentpool(self, agentpool):
         for key, value in self.defaults_in_agentpool.items():
             if getattr(agentpool, key, None) is None:
                 setattr(agentpool, key, value)
@@ -98,7 +83,7 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
 
     def create_initialized_agentpool_instance(
         self, nodepool_name="nodepool1", remove_defaults=True, restore_defaults=True, **kwargs
-    ) -> AgentPool:
+    ):
         """Helper function to create a properly initialized agentpool instance.
 
         :return: the AgentPool object
@@ -949,6 +934,18 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         ctx_1.attach_agentpool(agentpool)
         self.assertEqual(ctx_1.get_vm_set_type(), CONST_AVAILABILITY_SET)
 
+        # custom
+        ctx_2 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"vm_set_type": "test_vm_set_type"}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        # fail on invalid vm_set_type
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx_2.get_vm_set_type()
+
     def common_get_ppg(self):
         # default
         ctx_1 = AKSAgentPoolContext(
@@ -1561,14 +1558,7 @@ class AKSAgentPoolContextManagedClusterModeTestCase(AKSAgentPoolContextCommonTes
 
 
 class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
-    def _remove_defaults_in_agentpool(self, agentpool: AgentPool) -> AgentPool:
-        """Internal function to remove values from properties with default values of the `agentpool` object.
-
-        Removing default values is to prevent getters from mistakenly overwriting user provided values with default
-        values in the object.
-
-        :return: the AgentPool object
-        """
+    def _remove_defaults_in_agentpool(self, agentpool):
         self.defaults_in_agentpool = {}
         for attr_name, attr_value in vars(agentpool).items():
             if not attr_name.startswith("_") and attr_name != "name" and attr_value is not None:
@@ -1576,14 +1566,7 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
                 setattr(agentpool, attr_name, None)
         return agentpool
 
-    def _restore_defaults_in_agentpool(self, agentpool: AgentPool) -> AgentPool:
-        """Internal function to restore values of properties with default values of the `agentpool` object.
-
-        Restoring default values is to keep the content of the request sent by cli consistent with that before the
-        refactoring.
-
-        :return: the AgentPool object
-        """
+    def _restore_defaults_in_agentpool(self, agentpool):
         for key, value in self.defaults_in_agentpool.items():
             if getattr(agentpool, key, None) is None:
                 setattr(agentpool, key, value)
@@ -1591,7 +1574,7 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
 
     def create_initialized_agentpool_instance(
         self, nodepool_name="nodepool1", remove_defaults=True, restore_defaults=True, **kwargs
-    ) -> AgentPool:
+    ):
         """Helper function to create a properly initialized agentpool instance.
 
         :return: the AgentPool object
@@ -1905,7 +1888,7 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
             self.cmd,
             self.client,
             {
-                "vm_set_type": "test_vm_set_type",
+                "vm_set_type": CONST_VIRTUAL_MACHINE_SCALE_SETS.lower(),
                 "ppg": "test_ppg",
                 "enable_encryption_at_host": True,
                 "enable_ultra_ssd": True,
@@ -1937,9 +1920,9 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
             scale_down_mode="test_scale_down_mode",
         )
         if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
-            ground_truth_agentpool_1.type = "test_vm_set_type"
+            ground_truth_agentpool_1.type = CONST_VIRTUAL_MACHINE_SCALE_SETS
         else:
-            ground_truth_agentpool_1.type_properties_type = "test_vm_set_type"
+            ground_truth_agentpool_1.type_properties_type = CONST_VIRTUAL_MACHINE_SCALE_SETS
         self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
 
     def common_set_up_custom_node_config(self):
@@ -2224,14 +2207,7 @@ class AKSAgentPoolAddDecoratorManagedClusterModeTestCase(AKSAgentPoolAddDecorato
 
 
 class AKSAgentPoolUpdateDecoratorCommonTestCase(unittest.TestCase):
-    def _remove_defaults_in_agentpool(self, agentpool: AgentPool) -> AgentPool:
-        """Internal function to remove values from properties with default values of the `agentpool` object.
-
-        Removing default values is to prevent getters from mistakenly overwriting user provided values with default
-        values in the object.
-
-        :return: the AgentPool object
-        """
+    def _remove_defaults_in_agentpool(self, agentpool):
         self.defaults_in_agentpool = {}
         for attr_name, attr_value in vars(agentpool).items():
             if not attr_name.startswith("_") and attr_name != "name" and attr_value is not None:
@@ -2239,14 +2215,7 @@ class AKSAgentPoolUpdateDecoratorCommonTestCase(unittest.TestCase):
                 setattr(agentpool, attr_name, None)
         return agentpool
 
-    def _restore_defaults_in_agentpool(self, agentpool: AgentPool) -> AgentPool:
-        """Internal function to restore values of properties with default values of the `agentpool` object.
-
-        Restoring default values is to keep the content of the request sent by cli consistent with that before the
-        refactoring.
-
-        :return: the AgentPool object
-        """
+    def _restore_defaults_in_agentpool(self, agentpool):
         for key, value in self.defaults_in_agentpool.items():
             if getattr(agentpool, key, None) is None:
                 setattr(agentpool, key, value)
@@ -2254,7 +2223,7 @@ class AKSAgentPoolUpdateDecoratorCommonTestCase(unittest.TestCase):
 
     def create_initialized_agentpool_instance(
         self, nodepool_name="nodepool1", remove_defaults=True, restore_defaults=True, **kwargs
-    ) -> AgentPool:
+    ):
         """Helper function to create a properly initialized agentpool instance.
 
         :return: the AgentPool object
