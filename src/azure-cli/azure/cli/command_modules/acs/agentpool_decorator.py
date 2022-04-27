@@ -10,6 +10,7 @@ from typing import Dict, List, Tuple, TypeVar, Union
 
 from azure.cli.command_modules.acs._client_factory import cf_agent_pools
 from azure.cli.command_modules.acs._consts import (
+    CONST_AVAILABILITY_SET,
     CONST_DEFAULT_NODE_OS_TYPE,
     CONST_DEFAULT_NODE_VM_SIZE,
     CONST_DEFAULT_WINDOWS_NODE_VM_SIZE,
@@ -900,7 +901,13 @@ class AKSAgentPoolContext(BaseAKSContext):
             if self.agentpool and self.agentpool.type_properties_type is not None:
                 vm_set_type = self.agentpool.type_properties_type
 
-        # this parameter does not need dynamic completion
+        # normalize
+        if vm_set_type.lower() == CONST_VIRTUAL_MACHINE_SCALE_SETS.lower():
+            vm_set_type = CONST_VIRTUAL_MACHINE_SCALE_SETS
+        elif vm_set_type.lower() == CONST_AVAILABILITY_SET.lower():
+            vm_set_type = CONST_AVAILABILITY_SET
+        else:
+            raise InvalidArgumentValueError("'{}' --vm-set-type can only be VirtualMachineScaleSets or AvailabilitySet".format(vm_set_type))
         # this parameter does not need validation
         return vm_set_type
 
