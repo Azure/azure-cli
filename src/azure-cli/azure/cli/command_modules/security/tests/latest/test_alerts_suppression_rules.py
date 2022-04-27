@@ -15,8 +15,23 @@ class SecurityCenterAlertsSuppressionRuleTests(ScenarioTest):
                 'rule_name': self.create_random_name(prefix='azurecli-test', length=24)
             })
 
-            azure_cli_new_suppression_rule = self.cmd('az security alerts-suppression-rule update --rule-name {rule_name} --alert-type "Test" --reason "Other" --comment "Test comment" --state "Enabled" --all-of "[{{\\"contains\\": \\"testContains\\", \\"field\\": \\"entities.host.dnsdomain\\"}}]"').get_output_in_json()
+            azure_cli_new_suppression_rule = self.cmd('az security alerts-suppression-rule update --rule-name {rule_name} --alert-type "Test" --reason "Other" --comment "Test comment" --state "Enabled"').get_output_in_json()
             assert len(azure_cli_new_suppression_rule) > 0
+
+            azure_cli_new_suppression_rule = self.cmd('az security alerts-suppression-rule update --rule-name {rule_name} --alert-type "Test2" --reason "Other" --comment "Test comment" --state "Enabled"').get_output_in_json()
+            assert len(azure_cli_new_suppression_rule) > 0
+
+            azure_cli_new_suppression_rule_scope = self.cmd('az security alerts-suppression-rule upsert_scope --rule-name {rule_name} --field "entities.process.commandline" --contains-substring "example"').get_output_in_json()
+            assert len(azure_cli_new_suppression_rule_scope) > 0
+
+            azure_cli_new_suppression_rule_scope = self.cmd('az security alerts-suppression-rule upsert_scope --rule-name {rule_name} --field "entities.account.name" --contains-substring "example"').get_output_in_json()
+            assert len(azure_cli_new_suppression_rule_scope) > 0
+
+            azure_cli_new_suppression_rule_scope = self.cmd('az security alerts-suppression-rule delete_scope --rule-name {rule_name} --field "entities.process.commandline"').get_output_in_json()
+            assert len(azure_cli_new_suppression_rule_scope) > 0
+
+            azure_cli_new_suppression_rule_scope = self.cmd('az security alerts-suppression-rule delete_scope --rule-name {rule_name} --field "entities.account.name"').get_output_in_json()
+            assert len(azure_cli_new_suppression_rule_scope) > 0
 
             azure_cli_get_suppression_rule = self.cmd('az security alerts-suppression-rule show --rule-name {rule_name}').get_output_in_json()
             assert len(azure_cli_get_suppression_rule) > 0

@@ -1,8 +1,53 @@
 interactions:
 - request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - security alerts-suppression-rule update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --rule-name --alert-type --reason --comment --state
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-security/2.0.0b1 Python/3.10.4 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/azurecli-test000001?api-version=2019-01-01-preview
+  response:
+    body:
+      string: '{"HttpStatusCode":404,"ErrorCode":"Not Found","Message":"The following
+        auto dismiss rule: ''azurecli-test000001'' for subscription 487bb485-b5b0-471e-9c0d-10717612f869
+        was not found","Data":{},"InnerException":null,"StackTrace":null,"HelpLink":null,"Source":null,"HResult":-2146233088}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '283'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 27 Apr 2022 07:44:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '749'
+    status:
+      code: 404
+      message: Not Found
+- request:
     body: '{"properties": {"alertType": "Test", "reason": "Other", "state": "Enabled",
-      "comment": "Test comment", "suppressionAlertsScope": {"allOf": [{"contains":
-      "testContains", "field": "entities.host.dnsdomain"}]}}}'
+      "comment": "Test comment"}}'
     headers:
       Accept:
       - application/json
@@ -13,28 +58,28 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '208'
+      - '103'
       Content-Type:
       - application/json
       ParameterSetName:
-      - --rule-name --alert-type --reason --comment --all-of
+      - --rule-name --alert-type --reason --comment --state
       User-Agent:
-      - AZURECLI/2.35.0 azsdk-python-mgmt-security/2.0.0b1 Python/3.10.4 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.36.0 azsdk-python-mgmt-security/2.0.0b1 Python/3.10.4 (Windows-10-10.0.22000-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/azurecli-test000001?api-version=2019-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/azurecli-test000001","name":"azurecli-test000001","type":"Microsoft.Security/alertsSuppressionRules","properties":{"alertType":"Test","lastModifiedUTC":"2022-04-10T19:08:32.5276602Z","expirationDateUTC":"2022-10-10T19:08:32.5276602Z","state":"Enabled","reason":"Other","comment":"Test
-        comment","suppressionAlertsScope":{"allOf":[{"contains":"testContains","field":"entities.host.dnsdomain"}]}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/azurecli-test000001","name":"azurecli-test000001","type":"Microsoft.Security/alertsSuppressionRules","properties":{"alertType":"Test","lastModifiedUTC":"2022-04-27T07:44:12.2040745Z","expirationDateUTC":"2022-10-27T07:44:12.2040745Z","state":"Enabled","reason":"Other","comment":"Test
+        comment"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '505'
+      - '406'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 10 Apr 2022 19:08:31 GMT
+      - Wed, 27 Apr 2022 07:44:11 GMT
       expires:
       - '-1'
       pragma:
@@ -62,28 +107,547 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
+      - security alerts-suppression-rule update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --rule-name --alert-type --reason --comment --state
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-security/2.0.0b1 Python/3.10.4 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/azurecli-test000001?api-version=2019-01-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/azurecli-test000001","name":"azurecli-test000001","type":"Microsoft.Security/alertsSuppressionRules","properties":{"alertType":"Test","lastModifiedUTC":"2022-04-27T07:44:12.2040745Z","expirationDateUTC":"2022-10-27T07:44:12.2040745Z","state":"Enabled","reason":"Other","comment":"Test
+        comment"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '406'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 27 Apr 2022 07:44:13 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '749'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"alertType": "Test2", "reason": "Other", "state": "Enabled",
+      "comment": "Test comment"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - security alerts-suppression-rule update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '104'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --rule-name --alert-type --reason --comment --state
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-security/2.0.0b1 Python/3.10.4 (Windows-10-10.0.22000-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/azurecli-test000001?api-version=2019-01-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/azurecli-test000001","name":"azurecli-test000001","type":"Microsoft.Security/alertsSuppressionRules","properties":{"alertType":"Test2","lastModifiedUTC":"2022-04-27T07:44:14.4447196Z","expirationDateUTC":"2022-10-27T07:44:14.4447196Z","state":"Enabled","reason":"Other","comment":"Test
+        comment"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '407'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 27 Apr 2022 07:44:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - security alerts-suppression-rule upsert_scope
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --rule-name --field --contains-substring
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-security/2.0.0b1 Python/3.10.4 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/azurecli-test000001?api-version=2019-01-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/azurecli-test000001","name":"azurecli-test000001","type":"Microsoft.Security/alertsSuppressionRules","properties":{"alertType":"Test2","lastModifiedUTC":"2022-04-27T07:44:14.4447196Z","expirationDateUTC":"2022-10-27T07:44:14.4447196Z","state":"Enabled","reason":"Other","comment":"Test
+        comment"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '407'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 27 Apr 2022 07:44:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '749'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"alertType": "Test2", "reason": "Other", "state": "Enabled",
+      "comment": "Test comment", "suppressionAlertsScope": {"allOf": [{"contains":
+      "example", "field": "entities.process.commandline"}]}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - security alerts-suppression-rule upsert_scope
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '209'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --rule-name --field --contains-substring
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-security/2.0.0b1 Python/3.10.4 (Windows-10-10.0.22000-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/azurecli-test000001?api-version=2019-01-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/azurecli-test000001","name":"azurecli-test000001","type":"Microsoft.Security/alertsSuppressionRules","properties":{"alertType":"Test2","lastModifiedUTC":"2022-04-27T07:44:16.7377372Z","expirationDateUTC":"2022-10-27T07:44:16.7377372Z","state":"Enabled","reason":"Other","comment":"Test
+        comment","suppressionAlertsScope":{"allOf":[{"contains":"example","field":"entities.process.commandline"}]}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '506'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 27 Apr 2022 07:44:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - security alerts-suppression-rule upsert_scope
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --rule-name --field --contains-substring
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-security/2.0.0b1 Python/3.10.4 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/azurecli-test000001?api-version=2019-01-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/azurecli-test000001","name":"azurecli-test000001","type":"Microsoft.Security/alertsSuppressionRules","properties":{"alertType":"Test2","lastModifiedUTC":"2022-04-27T07:44:16.7377372Z","expirationDateUTC":"2022-10-27T07:44:16.7377372Z","state":"Enabled","reason":"Other","comment":"Test
+        comment","suppressionAlertsScope":{"allOf":[{"contains":"example","field":"entities.process.commandline"}]}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '506'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 27 Apr 2022 07:44:17 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '749'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"alertType": "Test2", "reason": "Other", "state": "Enabled",
+      "comment": "Test comment", "suppressionAlertsScope": {"allOf": [{"contains":
+      "example", "field": "entities.process.commandline"}, {"contains": "example",
+      "field": "entities.account.name"}]}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - security alerts-suppression-rule upsert_scope
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '268'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --rule-name --field --contains-substring
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-security/2.0.0b1 Python/3.10.4 (Windows-10-10.0.22000-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/azurecli-test000001?api-version=2019-01-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/azurecli-test000001","name":"azurecli-test000001","type":"Microsoft.Security/alertsSuppressionRules","properties":{"alertType":"Test2","lastModifiedUTC":"2022-04-27T07:44:18.6767098Z","expirationDateUTC":"2022-10-27T07:44:18.6767098Z","state":"Enabled","reason":"Other","comment":"Test
+        comment","suppressionAlertsScope":{"allOf":[{"contains":"example","field":"entities.process.commandline"},{"contains":"example","field":"entities.account.name"}]}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '561'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 27 Apr 2022 07:44:17 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - security alerts-suppression-rule delete_scope
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --rule-name --field
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-security/2.0.0b1 Python/3.10.4 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/azurecli-test000001?api-version=2019-01-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/azurecli-test000001","name":"azurecli-test000001","type":"Microsoft.Security/alertsSuppressionRules","properties":{"alertType":"Test2","lastModifiedUTC":"2022-04-27T07:44:18.6767098Z","expirationDateUTC":"2022-10-27T07:44:18.6767098Z","state":"Enabled","reason":"Other","comment":"Test
+        comment","suppressionAlertsScope":{"allOf":[{"contains":"example","field":"entities.process.commandline"},{"contains":"example","field":"entities.account.name"}]}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '561'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 27 Apr 2022 07:44:19 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '749'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"alertType": "Test2", "reason": "Other", "state": "Enabled",
+      "comment": "Test comment", "suppressionAlertsScope": {"allOf": [{"contains":
+      "example", "field": "entities.account.name"}]}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - security alerts-suppression-rule delete_scope
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '202'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --rule-name --field
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-security/2.0.0b1 Python/3.10.4 (Windows-10-10.0.22000-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/azurecli-test000001?api-version=2019-01-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/azurecli-test000001","name":"azurecli-test000001","type":"Microsoft.Security/alertsSuppressionRules","properties":{"alertType":"Test2","lastModifiedUTC":"2022-04-27T07:44:20.9550024Z","expirationDateUTC":"2022-10-27T07:44:20.9550024Z","state":"Enabled","reason":"Other","comment":"Test
+        comment","suppressionAlertsScope":{"allOf":[{"contains":"example","field":"entities.account.name"}]}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '499'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 27 Apr 2022 07:44:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - security alerts-suppression-rule delete_scope
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --rule-name --field
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-security/2.0.0b1 Python/3.10.4 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/azurecli-test000001?api-version=2019-01-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/azurecli-test000001","name":"azurecli-test000001","type":"Microsoft.Security/alertsSuppressionRules","properties":{"alertType":"Test2","lastModifiedUTC":"2022-04-27T07:44:20.9550024Z","expirationDateUTC":"2022-10-27T07:44:20.9550024Z","state":"Enabled","reason":"Other","comment":"Test
+        comment","suppressionAlertsScope":{"allOf":[{"contains":"example","field":"entities.account.name"}]}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '499'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 27 Apr 2022 07:44:22 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '749'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"alertType": "Test2", "reason": "Other", "state": "Enabled",
+      "comment": "Test comment"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - security alerts-suppression-rule delete_scope
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '104'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --rule-name --field
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-security/2.0.0b1 Python/3.10.4 (Windows-10-10.0.22000-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/azurecli-test000001?api-version=2019-01-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/azurecli-test000001","name":"azurecli-test000001","type":"Microsoft.Security/alertsSuppressionRules","properties":{"alertType":"Test2","lastModifiedUTC":"2022-04-27T07:44:23.2729225Z","expirationDateUTC":"2022-10-27T07:44:23.2729225Z","state":"Enabled","reason":"Other","comment":"Test
+        comment"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '407'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 27 Apr 2022 07:44:23 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
       - security alerts-suppression-rule show
       Connection:
       - keep-alive
       ParameterSetName:
       - --rule-name
       User-Agent:
-      - AZURECLI/2.35.0 azsdk-python-mgmt-security/2.0.0b1 Python/3.10.4 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.36.0 azsdk-python-mgmt-security/2.0.0b1 Python/3.10.4 (Windows-10-10.0.22000-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/azurecli-test000001?api-version=2019-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/azurecli-test000001","name":"azurecli-test000001","type":"Microsoft.Security/alertsSuppressionRules","properties":{"alertType":"Test","lastModifiedUTC":"2022-04-10T19:08:32.5276602Z","expirationDateUTC":"2022-10-10T19:08:32.5276602Z","state":"Enabled","reason":"Other","comment":"Test
-        comment","suppressionAlertsScope":{"allOf":[{"contains":"testContains","field":"entities.host.dnsdomain"}]}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/azurecli-test000001","name":"azurecli-test000001","type":"Microsoft.Security/alertsSuppressionRules","properties":{"alertType":"Test2","lastModifiedUTC":"2022-04-27T07:44:23.2729225Z","expirationDateUTC":"2022-10-27T07:44:23.2729225Z","state":"Enabled","reason":"Other","comment":"Test
+        comment"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '505'
+      - '407'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 10 Apr 2022 19:08:33 GMT
+      - Wed, 27 Apr 2022 07:44:24 GMT
       expires:
       - '-1'
       pragma:
@@ -115,29 +679,24 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - AZURECLI/2.35.0 azsdk-python-mgmt-security/2.0.0b1 Python/3.10.4 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.36.0 azsdk-python-mgmt-security/2.0.0b1 Python/3.10.4 (Windows-10-10.0.22000-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules?api-version=2019-01-01-preview
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/TalSuppressionRule","name":"TalSuppressionRule","type":"Microsoft.Security/alertsSuppressionRules","properties":{"alertType":"SCUBA_RULE_Security-related_process_termination_detected","lastModifiedUTC":"2022-04-06T07:19:35.6452258Z","expirationDateUTC":"2022-10-06T07:19:35.6452258Z","state":"Enabled","reason":"Noise","comment":"test"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/rulkename","name":"rulkename","type":"Microsoft.Security/alertsSuppressionRules","properties":{"alertType":"alerttype","lastModifiedUTC":"2020-10-19T18:52:16.2113442Z","expirationDateUTC":"2022-01-01T00:00:00.1234567Z","state":"Expired","reason":"FalsePositive","comment":"comment","suppressionAlertsScope":{"allOf":[{"contains":"ASC_AlertTest_662jfi039N.exe","field":"entities.process.commandline"}]}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/yifattest","name":"yifattest","type":"Microsoft.Security/alertsSuppressionRules","properties":{"alertType":"*","lastModifiedUTC":"2021-01-20T17:32:57.3304721Z","expirationDateUTC":"2021-07-19T17:32:18Z","state":"Expired","reason":"Noise","suppressionAlertsScope":{"allOf":[{"in":["test"],"field":"entities.dns.domainname"}]}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/dsa","name":"dsa","type":"Microsoft.Security/alertsSuppressionRules","properties":{"alertType":"*","lastModifiedUTC":"2021-01-27T10:03:26.5488279Z","expirationDateUTC":"2021-07-24T18:42:31Z","state":"Expired","reason":"SpecificEntityFalsePositive","comment":"a","suppressionAlertsScope":{"allOf":[{"in":["sad"],"field":"entities.account.name"}]}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/Name","name":"Name","type":"Microsoft.Security/alertsSuppressionRules","properties":{"alertType":"AlertType","lastModifiedUTC":"2022-04-07T08:51:15.5754094Z","expirationDateUTC":"2022-10-07T08:51:15.5754094Z","state":"Enabled","reason":"Noise","comment":"Comment"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/RuleName","name":"RuleName","type":"Microsoft.Security/alertsSuppressionRules","properties":{"alertType":"Test","lastModifiedUTC":"2022-04-09T11:16:28.5959018Z","expirationDateUTC":"2022-10-09T11:16:28.5959018Z","state":"Enabled","reason":"Other","comment":"Test
-        comment","suppressionAlertsScope":{"allOf":[{"contains":"testContains","field":"entities.host.dnsdomain"}]}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/azurecli-testom4fnsurl7t","name":"azurecli-testom4fnsurl7t","type":"Microsoft.Security/alertsSuppressionRules","properties":{"alertType":"Test","lastModifiedUTC":"2022-04-10T18:40:01.6313308Z","expirationDateUTC":"2022-10-10T18:40:01.6313308Z","state":"Enabled","reason":"Other","comment":"Test
-        comment","suppressionAlertsScope":{"allOf":[{"contains":"testContains","field":"entities.host.dnsdomain"}]}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/azurecli-testmv6pouqq2dr","name":"azurecli-testmv6pouqq2dr","type":"Microsoft.Security/alertsSuppressionRules","properties":{"alertType":"Test","lastModifiedUTC":"2022-04-10T18:41:17.9395007Z","expirationDateUTC":"2022-10-10T18:41:17.9395007Z","state":"Enabled","reason":"Other","comment":"Test
-        comment","suppressionAlertsScope":{"allOf":[{"contains":"testContains","field":"entities.host.dnsdomain"}]}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/azurecli-testaxzklu47bry","name":"azurecli-testaxzklu47bry","type":"Microsoft.Security/alertsSuppressionRules","properties":{"alertType":"Test","lastModifiedUTC":"2022-04-10T18:41:25.3714382Z","expirationDateUTC":"2022-10-10T18:41:25.3714382Z","state":"Enabled","reason":"Other","comment":"Test
-        comment","suppressionAlertsScope":{"allOf":[{"contains":"testContains","field":"entities.host.dnsdomain"}]}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/azurecli-test7wssyf3immt","name":"azurecli-test7wssyf3immt","type":"Microsoft.Security/alertsSuppressionRules","properties":{"alertType":"Test","lastModifiedUTC":"2022-04-10T18:42:33.2199918Z","expirationDateUTC":"2022-10-10T18:42:33.2199918Z","state":"Enabled","reason":"Other","comment":"Test
-        comment","suppressionAlertsScope":{"allOf":[{"contains":"testContains","field":"entities.host.dnsdomain"}]}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/azurecli-testntpt6hiajza","name":"azurecli-testntpt6hiajza","type":"Microsoft.Security/alertsSuppressionRules","properties":{"alertType":"Test","lastModifiedUTC":"2022-04-10T18:42:41.647353Z","expirationDateUTC":"2022-10-10T18:42:41.647353Z","state":"Enabled","reason":"Other","comment":"Test
-        comment","suppressionAlertsScope":{"allOf":[{"contains":"testContains","field":"entities.host.dnsdomain"}]}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/azurecli-test6rv7r5zzsyw","name":"azurecli-test6rv7r5zzsyw","type":"Microsoft.Security/alertsSuppressionRules","properties":{"alertType":"Test","lastModifiedUTC":"2022-04-10T18:58:33.6960113Z","expirationDateUTC":"2022-10-10T18:58:33.6960113Z","state":"Enabled","reason":"Other","comment":"Test
-        comment","suppressionAlertsScope":{"allOf":[{"contains":"testContains","field":"entities.host.dnsdomain"}]}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/azurecli-test000001","name":"azurecli-test000001","type":"Microsoft.Security/alertsSuppressionRules","properties":{"alertType":"Test","lastModifiedUTC":"2022-04-10T19:08:32.5276602Z","expirationDateUTC":"2022-10-10T19:08:32.5276602Z","state":"Enabled","reason":"Other","comment":"Test
-        comment","suppressionAlertsScope":{"allOf":[{"contains":"testContains","field":"entities.host.dnsdomain"}]}}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/SDK_Test1","name":"SDK_Test1","type":"Microsoft.Security/alertsSuppressionRules","properties":{"alertType":"Storage.Blob_ApplicationAnomaly","lastModifiedUTC":"2021-12-05T16:41:05.6018728Z","expirationDateUTC":"2032-10-18T16:32:12Z","state":"Enabled","reason":"Other","comment":"Test
+        Rule ","suppressionAlertsScope":{"allOf":[]}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/2a71184ea21e42a1947330e47d442b80","name":"2a71184ea21e42a1947330e47d442b80","type":"Microsoft.Security/alertsSuppressionRules","properties":{"alertType":"SKDAlertType","lastModifiedUTC":"2021-12-05T16:42:57.9624898Z","expirationDateUTC":"2022-06-05T16:42:57.9624898Z","state":"Enabled","reason":"Other"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/85a979d9847c45bba607dc250fddaec0","name":"85a979d9847c45bba607dc250fddaec0","type":"Microsoft.Security/alertsSuppressionRules","properties":{"alertType":"SKDAlertType","lastModifiedUTC":"2021-12-07T11:24:25.2968931Z","expirationDateUTC":"2022-06-07T11:24:25.2968931Z","state":"Enabled","reason":"Other"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/TestSub","name":"TestSub","type":"Microsoft.Security/alertsSuppressionRules","properties":{"alertType":"IoT.Devices_HostScansDetection","lastModifiedUTC":"2022-04-14T09:17:06.6182595Z","expirationDateUTC":"2022-10-13T09:13:50Z","state":"Enabled","reason":"SpecificEntityFalsePositive","suppressionAlertsScope":{"allOf":[]}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/azurecli-test7l44puw6a5u","name":"azurecli-test7l44puw6a5u","type":"Microsoft.Security/alertsSuppressionRules","properties":{"alertType":"Test2","lastModifiedUTC":"2022-04-27T07:29:38.6496769Z","expirationDateUTC":"2022-10-27T07:29:38.6496769Z","state":"Enabled","reason":"Other","comment":"Test
+        comment"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/azurecli-test000001","name":"azurecli-test000001","type":"Microsoft.Security/alertsSuppressionRules","properties":{"alertType":"Test2","lastModifiedUTC":"2022-04-27T07:44:23.2729225Z","expirationDateUTC":"2022-10-27T07:44:23.2729225Z","state":"Enabled","reason":"Other","comment":"Test
+        comment"}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '6333'
+      - '2547'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 10 Apr 2022 19:08:34 GMT
+      - Wed, 27 Apr 2022 07:44:25 GMT
       expires:
       - '-1'
       pragma:
@@ -173,7 +732,7 @@ interactions:
       ParameterSetName:
       - --rule-name
       User-Agent:
-      - AZURECLI/2.35.0 azsdk-python-mgmt-security/2.0.0b1 Python/3.10.4 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.36.0 azsdk-python-mgmt-security/2.0.0b1 Python/3.10.4 (Windows-10-10.0.22000-SP0)
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/alertsSuppressionRules/azurecli-test000001?api-version=2019-01-01-preview
   response:
@@ -183,7 +742,7 @@ interactions:
       cache-control:
       - no-cache
       date:
-      - Sun, 10 Apr 2022 19:08:36 GMT
+      - Wed, 27 Apr 2022 07:44:27 GMT
       expires:
       - '-1'
       pragma:
@@ -195,7 +754,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '248'
+      - '249'
     status:
       code: 204
       message: No Content
