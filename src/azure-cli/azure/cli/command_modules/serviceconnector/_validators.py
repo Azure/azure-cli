@@ -187,7 +187,10 @@ def interactive_input(arg, hint):
         secret = prompt_pass('Password of database (--secret secret=): ')
         value = {
             'name': name,
-            'secret': secret,
+            'secret_info': {
+                'secret_type': 'rawValue',
+                'value': secret
+            },
             'auth_type': 'secret'
         }
         cmd_value = 'name={} secret={}'.format(name, '*' * len(secret))
@@ -386,6 +389,14 @@ def get_missing_auth_args(cmd, namespace):
     source = get_source_resource_name(cmd)
     target = get_target_resource_name(cmd)
     missing_args = dict()
+
+    # when keyvault csi is enabled, auth_type is userIdentity without subs_id and client_id
+    if source == RESOURCE.KubernetesCluster and target == RESOURCE.KeyVault\
+            and getattr(namespace, 'enable_csi', None):
+        setattr(namespace, 'user_identity_auth_info', {
+            'auth_type': 'userAssignedIdentity'
+        })
+        return missing_args
 
     # check if there are auth_info related params
     auth_param_exist = False
@@ -622,13 +633,14 @@ def validate_service_state(linker_parameters):
     '''Validate whether user provided params are applicable to service state
     '''
     target_type = None
+    target_id = linker_parameters.get('target_service', dict()).get('id')
     for target, resource_id in TARGET_RESOURCES.items():
-        matched = re.match(get_resource_regex(resource_id), linker_parameters.get('target_id'), re.IGNORECASE)
+        matched = re.match(get_resource_regex(resource_id), target_id, re.IGNORECASE)
         if matched:
             target_type = target
 
     if target_type == RESOURCE.AppConfig and linker_parameters.get('auth_info', dict()).get('auth_type') == 'secret':
-        segments = parse_resource_id(linker_parameters.get('target_id'))
+        segments = parse_resource_id(target_id)
         rg = segments.get('resource_group')
         name = segments.get('name')
         if not rg or not name:

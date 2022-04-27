@@ -140,7 +140,7 @@ def connection_validate(cmd, client,
     # HACK: get linker first to infer target resource type so that user token can be
     # set to work around OBO
     linker = todict(client.get(resource_uri=source_id, linker_name=connection_name))
-    target_id = linker.get('targetId')
+    target_id = linker.get('targetService', dict()).get('id', '')
     for resource_type, resource_id in TARGET_RESOURCES.items():
         matched = re.match(get_resource_regex(resource_id), target_id, re.IGNORECASE)
         if matched and resource_type in TARGET_RESOURCES_USERTOKEN:
@@ -159,7 +159,7 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals
                       key_vault_id=None,
                       service_endpoint=None,
                       new_addon=False, no_wait=False,
-                      cluster=None,
+                      cluster=None, scope=None, enable_csi=False,            # Resource.KubernetesCluster
                       site=None,                                             # Resource.WebApp
                       spring=None, app=None, deployment='default',           # Resource.SpringCloud
                       server=None, database=None,                            # Resource.*Postgres, Resource.*Sql*
@@ -192,12 +192,16 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals
     auth_info = all_auth_info[0] if len(all_auth_info) == 1 else None
 
     parameters = {
-        'target_id': target_id,
+        'target_service': {
+            "type": "AzureResource",
+            "id": target_id
+        },
         'auth_info': auth_info,
         'secret_store': {
             'key_vault_id': key_vault_id,
         },
-        'client_type': client_type
+        'client_type': client_type,
+        'scope': scope
     }
 
     # HACK: set user token to work around OBO
@@ -216,10 +220,19 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals
             'type': 'serviceEndpoint'
         }
 
+    if enable_csi:
+        parameters['target_service']['resource_properties'] = {
+            'type': 'KeyVault',
+            'connect_as_kubernetes_csi_driver': enable_csi,
+        }
+
     if new_addon:
         addon = AddonFactory.get(target_type)(cmd, source_id)
         target_id, auth_info = addon.provision()
-        parameters['target_id'] = target_id
+        parameters['target_service'] = {
+            "type": "AzureResource",
+            "id": target_id
+        }
         parameters['auth_info'] = auth_info
         logger.warning('Start creating the connection')
 
@@ -251,10 +264,9 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals
                       key_vault_id=None,
                       service_endpoint=None,
                       no_wait=False,
-                      cluster=None,
+                      cluster=None, enable_csi=False,                         # Resource.Kubernetes
                       site=None,                                              # Resource.WebApp
-                      deployment='default',
-                      spring=None, app=None):                                 # Resource.SpringCloud
+                      spring=None, app=None, deployment='default'):           # Resource.SpringCloud
 
     linker = todict(client.get(resource_uri=source_id, linker_name=connection_name))
 
@@ -291,12 +303,14 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals
         key_vault_id = key_vault_id or linker.get('secretStore').get('keyVaultId')
 
     parameters = {
-        'target_id': linker.get('targetId'),
+        'target_service': linker.get('targetService'),
         'auth_info': auth_info,
         'secret_store': {
             'key_vault_id': key_vault_id,
         },
         'client_type': client_type or linker.get('clientType'),
+        # scope does not support update due to aks solution's limitation
+        'scope': linker.get('scope')
     }
 
     # HACK: set user token to work around OBO
@@ -336,7 +350,7 @@ def connection_create_kafka(cmd, client,  # pylint: disable=too-many-locals
                             client_type=None,
                             source_resource_group=None,
                             source_id=None,
-                            cluster=None,
+                            cluster=None, scope=None,          # Resource.Kubernetes
                             site=None,                         # Resource.WebApp
                             deployment='default',
                             spring=None, app=None):            # Resource.SpringCloud
@@ -355,16 +369,23 @@ def connection_create_kafka(cmd, client,  # pylint: disable=too-many-locals
 
     # create bootstrap-server
     parameters = {
-        'target_id': bootstrap_server,
+        'target_service': {
+            "type": "ConfluentBootstrapServer",
+            "endpoint": bootstrap_server
+        },
         'auth_info': {
             'name': kafka_key,
-            'secret': kafka_secret,
+            'secret_info': {
+                'secret_type': 'rawValue',
+                'value': kafka_secret
+            },
             'auth_type': 'secret'
         },
         'secret_store': {
             'key_vault_id': key_vault_id,
         },
         'client_type': client_type,
+        'scope': scope
     }
     logger.warning('Start creating a connection for bootstrap server ...')
     server_linker = client.begin_create_or_update(resource_uri=source_id,
@@ -376,16 +397,23 @@ def connection_create_kafka(cmd, client,  # pylint: disable=too-many-locals
 
     # create schema registry
     parameters = {
-        'target_id': schema_registry,
+        'target_service': {
+            "type": "ConfluentSchemaRegistry",
+            "endpoint": schema_registry
+        },
         'auth_info': {
             'name': schema_key,
-            'secret': schema_secret,
+            'secret_info': {
+                'secret_type': 'rawValue',
+                'value': schema_secret
+            },
             'auth_type': 'secret'
         },
         'secret_store': {
             'key_vault_id': key_vault_id,
         },
         'client_type': client_type,
+        'scope': scope
     }
     logger.warning('Start creating a connection for schema registry ...')
     registry_linker = client.begin_create_or_update(resource_uri=source_id,
@@ -434,7 +462,7 @@ def connection_update_kafka(cmd, client,  # pylint: disable=too-many-locals
             from ._utils import create_key_vault_reference_connection_if_not_exist
             create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, key_vault_id)
         parameters = {
-            'target_id': schema_registry or server_linker.get('targetId'),
+            'targetService': server_linker.get('targetService'),
             'auth_info': {
                 'name': schema_key or server_linker.get('authInfo').get('name'),
                 'secret': schema_secret,
@@ -444,7 +472,14 @@ def connection_update_kafka(cmd, client,  # pylint: disable=too-many-locals
                 'key_vault_id': key_vault_id,
             },
             'client_type': client_type or server_linker.get('clientType'),
+            # scope does not support update due to aks solution's limitation
+            'scope': server_linker.get('scope')
         }
+        if schema_registry:
+            parameters['targetService'] = {
+                "type": "ConfluentSchemaRegistry",
+                "endpoint": schema_registry
+            }
     else:  # the bootstrap server connection
         if kafka_secret is None:
             raise ValidationError("'--kafka-secret' is required to update a bootstrap server connection")
@@ -460,7 +495,7 @@ def connection_update_kafka(cmd, client,  # pylint: disable=too-many-locals
             from ._utils import create_key_vault_reference_connection_if_not_exist
             create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, key_vault_id)
         parameters = {
-            'target_id': bootstrap_server or schema_linker.get('targetId'),
+            'targetService': schema_linker.get('targetService'),
             'auth_info': {
                 'name': kafka_key or schema_linker.get('authInfo').get('name'),
                 'secret': kafka_secret,
@@ -471,6 +506,11 @@ def connection_update_kafka(cmd, client,  # pylint: disable=too-many-locals
             },
             'client_type': client_type or schema_linker.get('clientType'),
         }
+        if bootstrap_server:
+            parameters['targetService'] = {
+                "type": "ConfluentBootstrapServer",
+                "endpoint": bootstrap_server
+            }
 
     return client.begin_create_or_update(resource_uri=source_id,
                                          linker_name=connection_name,

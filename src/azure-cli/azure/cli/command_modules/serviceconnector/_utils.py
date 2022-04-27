@@ -178,10 +178,10 @@ def create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, k
     logger = get_logger(__name__)
 
     logger.warning('get valid key vualt reference connection')
-    all_connections = todict(client.list(resource_uri=source_id))
     key_vault_connections = []
-    for connection in all_connections:  # pylint: disable=not-an-iterable
-        if connection.get('targetId') == key_vault_id:
+    for connection in client.list(resource_uri=source_id):
+        connection = todict(connection)
+        if connection.get('targetService', dict()).get('id') == key_vault_id:
             key_vault_connections.append(connection)
 
     source_name = get_source_resource_name(cmd)
@@ -192,14 +192,26 @@ def create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, k
     # No Valid Key Vault Connection, Create
     logger.warning('no valid key vault connection found. Creating...')
 
-    from ._resource_config import CLIENT_TYPE
+    from ._resource_config import (
+        RESOURCE,
+        CLIENT_TYPE
+    )
 
     connection_name = generate_random_string(prefix='keyvault_')
     parameters = {
-        'target_id': key_vault_id,
+        'target_service': {
+            "type": "AzureResource",
+            "id": key_vault_id
+        },
         'auth_info': auth_info,
         'client_type': CLIENT_TYPE.Dotnet,  # Key Vault Configuration are same across all client types
     }
+
+    if source_name == RESOURCE.KubernetesCluster:
+        parameters['target_service']['resource_properties'] = {
+            'type': 'KeyVault',
+            'connect_as_kubernetes_csi_driver': True,
+        }
 
     return auto_register(client.begin_create_or_update,
                          resource_uri=source_id,
@@ -253,6 +265,15 @@ def get_auth_if_no_valid_key_vault_connection(logger, source_name, source_id, ke
                     if connection.get('authInfo').get('authType') == auth_type:
                         logger.warning('key vualt reference connection: %s', connection.get('id'))
                         return
+
+        # any connection with csi enabled is a valid connection
+        elif source_name == RESOURCE.KubernetesCluster:
+            for connection in key_vault_connections:
+                if connection.get('target_service', dict()).get(
+                        'resource_properties', dict()).get('connect_as_kubernetes_csi_driver'):
+                    return
+            return {'authType': 'userAssignedIdentity'}
+
         else:
             logger.warning('key vualt reference connection: %s', key_vault_connections[0].get('id'))
             return
