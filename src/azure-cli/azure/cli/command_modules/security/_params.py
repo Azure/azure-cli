@@ -254,7 +254,7 @@ def load_arguments(self, _):
             c.argument(
                 'rule_name',
                 arg_type=suppression_rule_name_arg_type)
-    
+
     for scope in ['alerts-suppression-rule upsert_scope']:
         with self.argument_context('security {}'.format(scope)) as c:
             c.argument(
@@ -269,7 +269,7 @@ def load_arguments(self, _):
             c.argument(
                 'any_of',
                 arg_type=suppression_rule_scope_any_of_arg_type)
-    
+
     for scope in ['alerts-suppression-rule delete_scope']:
         with self.argument_context('security {}'.format(scope)) as c:
             c.argument(

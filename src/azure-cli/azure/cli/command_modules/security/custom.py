@@ -6,7 +6,6 @@ import string
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import json
 from azure.mgmt.security.models import (SecurityContact,
                                         AutoProvisioningSetting,
                                         SecurityAssessment,
@@ -35,7 +34,7 @@ from azure.mgmt.security.models import (SecurityContact,
                                         AutomationTriggeringRule)
 from azure.mgmt.security.models._security_center_enums import Enum69
 from azure.cli.core.commands.client_factory import get_subscription_id
-from azure.cli.core.azclierror import (MutuallyExclusiveArgumentError, RequiredArgumentMissingError)
+from azure.cli.core.azclierror import (MutuallyExclusiveArgumentError)
 from msrestazure.tools import resource_id
 from msrestazure.azure_exceptions import CloudError
 from ._utils import (
@@ -139,17 +138,19 @@ def delete_security_alerts_suppression_rule(client, rule_name):
 
 
 def update_security_alerts_suppression_rule(client,
-                                             rule_name,
-                                             alert_type,
-                                             reason,
-                                             state,
-                                             expiration_date_utc=None,
-                                             comment=None):
+                                            rule_name,
+                                            alert_type,
+                                            reason,
+                                            state,
+                                            expiration_date_utc=None,
+                                            comment=None):
+
+    from azure.core.exceptions import ResourceNotFoundError
 
     current_rule = None
-    try:    
+    try:
         current_rule = client.get(alerts_suppression_rule_name=rule_name)
-    except:
+    except ResourceNotFoundError:
         suppression_alerts_scope = None
 
     if current_rule is not None:
@@ -200,7 +201,9 @@ def delete_security_alerts_suppression_rule_scope(client, rule_name, field):
     if parent_object.suppression_alerts_scope is None:
         raise InvalidArgumentValueError(err_msg_field_not_found)
 
-    item_to_remove = next((x for x in parent_object.suppression_alerts_scope.all_of if x.field.lower() == field.lower()), None)
+    item_to_remove = next((x for x in
+                           parent_object.suppression_alerts_scope.all_of if x.field.lower() == field.lower()), None)
+
     if item_to_remove is None:
         raise InvalidArgumentValueError(err_msg_field_not_found)
 
