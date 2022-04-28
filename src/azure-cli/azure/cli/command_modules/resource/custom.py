@@ -27,7 +27,7 @@ from azure.mgmt.resource.resources.models import GenericResource, DeploymentMode
 from azure.cli.core.azclierror import ArgumentUsageError, InvalidArgumentValueError, RequiredArgumentMissingError
 from azure.cli.core.parser import IncorrectUsageError
 from azure.cli.core.util import get_file_json, read_file_content, shell_safe_json_parse, sdk_no_wait
-from azure.cli.core.commands import LongRunningOperation, parameters
+from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.arm import raise_subdivision_deployment_error
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
 from azure.cli.core.profiles import ResourceType, get_sdk, get_api_version, AZURE_API_PROFILES
@@ -96,8 +96,7 @@ def _process_parameters(template_param_defs, parameter_lists):  # pylint: disabl
                 parsed = _remove_comments_from_json(content, False, file_path)
                 return parsed.get('parameters', parsed)
             except Exception as ex:
-                raise CLIError(
-                    "Failed to parse {} with exception:\n    {}".format(file_path, ex))
+                raise CLIError("Failed to parse {} with exception:\n    {}".format(file_path, ex))
         return None
 
     def _try_load_uri(uri):
@@ -137,8 +136,7 @@ def _process_parameters(template_param_defs, parameter_lists):  # pylint: disabl
         elif param_type == 'int':
             parameters[key] = {'value': int(value)}
         else:
-            logger.warning(
-                "Unrecognized type '%s' for parameter '%s'. Interpretting as string.", param_type, key)
+            logger.warning("Unrecognized type '%s' for parameter '%s'. Interpretting as string.", param_type, key)
             parameters[key] = {'value': value}
 
         return True
@@ -193,13 +191,11 @@ def _prompt_for_parameters(missing_parameters, fail_on_no_tty=True):  # pylint: 
             description = metadata.get('description', description)
         allowed_values = param.get('allowedValues', None)
 
-        prompt_str = "Please provide {} value for '{}' (? for help): ".format(
-            param_type, param_name)
+        prompt_str = "Please provide {} value for '{}' (? for help): ".format(param_type, param_name)
         while True:
             if allowed_values is not None:
                 try:
-                    ix = prompt_choice_list(
-                        prompt_str, allowed_values, help_string=description)
+                    ix = prompt_choice_list(prompt_str, allowed_values, help_string=description)
                     result[param_name] = allowed_values[ix]
                 except NoTTYException:
                     result[param_name] = None
@@ -248,8 +244,7 @@ def _prompt_for_parameters(missing_parameters, fail_on_no_tty=True):  # pylint: 
                 break
 
             try:
-                result[param_name] = prompt(
-                    prompt_str, help_string=description)
+                result[param_name] = prompt(prompt_str, help_string=description)
             except NoTTYException:
                 result[param_name] = None
                 no_tty = True
@@ -264,8 +259,7 @@ def _get_missing_parameters(parameters, template, prompt_fn, no_prompt=False):
     missing = _find_missing_parameters(parameters, template)
     if missing:
         if no_prompt is True:
-            logger.warning("Missing input parameters: %s ",
-                           ', '.join(sorted(missing.keys())))
+            logger.warning("Missing input parameters: %s ", ', '.join(sorted(missing.keys())))
         else:
             try:
                 prompt_parameters = prompt_fn(missing)
@@ -274,8 +268,7 @@ def _get_missing_parameters(parameters, template, prompt_fn, no_prompt=False):
                         "value": prompt_parameters[param_name]
                     }
             except NoTTYException:
-                raise CLIError("Missing input parameters: {}".format(
-                    ', '.join(sorted(missing.keys()))))
+                raise CLIError("Missing input parameters: {}".format(', '.join(sorted(missing.keys()))))
     return parameters
 
 
@@ -301,22 +294,18 @@ def _remove_comments_from_json(template, preserve_order=True, file_path=None):
     # When commenting at the bottom of all elements in a JSON object, jsmin has a bug that will wrap lines.
     # It will affect the subsequent multi-line processing logic, so remove those comments in advance here.
     # Related issue: https://github.com/Azure/azure-cli/issues/11995, the sample is in the additional context of it.
-    template = re.sub(
-        r'(^[\t ]*//[\s\S]*?\n)|(^[\t ]*/\*{1,2}[\s\S]*?\*/)', '', template, flags=re.M)
+    template = re.sub(r'(^[\t ]*//[\s\S]*?\n)|(^[\t ]*/\*{1,2}[\s\S]*?\*/)', '', template, flags=re.M)
 
     # In order to solve the package conflict introduced by jsmin, the jsmin code is referenced into json_min
     minified = json_min(template)
     try:
-        # use strict=False to allow multiline strings
-        return shell_safe_json_parse(minified, preserve_order, strict=False)
+        return shell_safe_json_parse(minified, preserve_order, strict=False)  # use strict=False to allow multiline strings
     except CLIError:
         # Because the processing of removing comments and compression will lead to misplacement of error location,
         # so the error message should be wrapped.
         if file_path:
-            raise CLIError(
-                "Failed to parse '{}', please check whether it is a valid JSON format".format(file_path))
-        raise CLIError(
-            "Failed to parse the JSON data, please check whether it is a valid JSON format")
+            raise CLIError("Failed to parse '{}', please check whether it is a valid JSON format".format(file_path))
+        raise CLIError("Failed to parse the JSON data, please check whether it is a valid JSON format")
 
 
 # pylint: disable=too-many-locals, too-many-statements, too-few-public-methods
@@ -332,28 +321,24 @@ def _deploy_arm_template_core_unmodified(cmd, resource_group_name, template_file
     template_content = None
     if template_uri:
         template_link = TemplateLink(uri=template_uri)
-        template_obj = _remove_comments_from_json(_urlretrieve(
-            template_uri).decode('utf-8'), file_path=template_uri)
+        template_obj = _remove_comments_from_json(_urlretrieve(template_uri).decode('utf-8'), file_path=template_uri)
     else:
         template_content = (
             run_bicep_command(["build", "--stdout", template_file])
             if is_bicep_file(template_file)
             else read_file_content(template_file)
         )
-        template_obj = _remove_comments_from_json(
-            template_content, file_path=template_file)
+        template_obj = _remove_comments_from_json(template_content, file_path=template_file)
 
     if rollback_on_error == '':
         on_error_deployment = OnErrorDeployment(type='LastSuccessful')
     elif rollback_on_error:
-        on_error_deployment = OnErrorDeployment(
-            type='SpecificDeployment', deployment_name=rollback_on_error)
+        on_error_deployment = OnErrorDeployment(type='SpecificDeployment', deployment_name=rollback_on_error)
 
     template_param_defs = template_obj.get('parameters', {})
     template_obj['resources'] = template_obj.get('resources', [])
     parameters = _process_parameters(template_param_defs, parameters) or {}
-    parameters = _get_missing_parameters(
-        parameters, template_obj, _prompt_for_parameters, no_prompt)
+    parameters = _get_missing_parameters(parameters, template_obj, _prompt_for_parameters, no_prompt)
 
     parameters = json.loads(json.dumps(parameters))
 
@@ -385,17 +370,13 @@ def _deploy_arm_template_core_unmodified(cmd, resource_group_name, template_file
     deployment = Deployment(properties=properties)
     if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
         try:
-            validation_poller = deployment_client.begin_validate(
-                resource_group_name, deployment_name, deployment)
+            validation_poller = deployment_client.begin_validate(resource_group_name, deployment_name, deployment)
         except HttpResponseError as err:
             err_message = _build_http_response_error_message(err)
-            raise_subdivision_deployment_error(
-                err_message, err.error.code if err.error else None)
-        validation_result = LongRunningOperation(
-            cmd.cli_ctx)(validation_poller)
+            raise_subdivision_deployment_error(err_message, err.error.code if err.error else None)
+        validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
     else:
-        validation_result = deployment_client.validate(
-            resource_group_name, deployment_name, deployment)
+        validation_result = deployment_client.validate(resource_group_name, deployment_name, deployment)
 
     if validation_result and validation_result.error:
         err_message = _build_preflight_error_message(validation_result.error)
@@ -419,8 +400,7 @@ class JSONSerializer(Serializer):
             template = data.properties.template
             if template:
                 data_as_dict = data.serialize()
-                data_as_dict["properties"]["template"] = JsonCTemplate(
-                    template)
+                data_as_dict["properties"]["template"] = JsonCTemplate(template)
 
                 return data_as_dict
         return super(JSONSerializer, self).body(data, data_type, **kwargs)
@@ -428,7 +408,6 @@ class JSONSerializer(Serializer):
 
 class JsonCTemplatePolicy(SansIOHTTPPolicy):
 
-    # Obtain the template data from JsonCTemplate object, and then splice it with other properties into the JSONC format
     def on_request(self, request):
         http_request = request.http_request
         request_data = getattr(http_request, 'data', {}) or {}
@@ -480,8 +459,7 @@ def deploy_arm_template_at_subscription_scope(cmd,
             return None
 
         ChangeType = cmd.get_models('ChangeType')
-        has_change = any(change.change_type not in [
-                         ChangeType.no_change, ChangeType.ignore] for change in what_if_result.changes)
+        has_change = any(change.change_type not in [ChangeType.no_change, ChangeType.ignore] for change in what_if_result.changes)
 
         if not proceed_if_no_change or has_change:
             from knack.prompting import prompt_y_n
@@ -519,26 +497,20 @@ def _deploy_arm_template_at_subscription_scope(cmd,
                                                                       no_prompt=no_prompt,
                                                                       template_spec=template_spec, query_string=query_string)
 
-    mgmt_client = _get_deployment_management_client(
-        cmd.cli_ctx, plug_pipeline=(template_uri is None and template_spec is None))
+    mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(template_uri is None and template_spec is None))
 
     from azure.core.exceptions import HttpResponseError
     Deployment = cmd.get_models('Deployment')
-    deployment = Deployment(
-        properties=deployment_properties, location=deployment_location)
+    deployment = Deployment(properties=deployment_properties, location=deployment_location)
     if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
         try:
-            validation_poller = mgmt_client.begin_validate_at_subscription_scope(
-                deployment_name, deployment)
+            validation_poller = mgmt_client.begin_validate_at_subscription_scope(deployment_name, deployment)
         except HttpResponseError as err:
             err_message = _build_http_response_error_message(err)
-            raise_subdivision_deployment_error(
-                err_message, err.error.code if err.error else None)
-        validation_result = LongRunningOperation(
-            cmd.cli_ctx)(validation_poller)
+            raise_subdivision_deployment_error(err_message, err.error.code if err.error else None)
+        validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
     else:
-        validation_result = mgmt_client.validate_at_subscription_scope(
-            deployment_name, deployment)
+        validation_result = mgmt_client.validate_at_subscription_scope(deployment_name, deployment)
 
     if validation_result and validation_result.error:
         err_message = _build_preflight_error_message(validation_result.error)
@@ -572,8 +544,7 @@ def deploy_arm_template_at_resource_group(cmd,
             return None
 
         ChangeType = cmd.get_models('ChangeType')
-        has_change = any(change.change_type not in [
-                         ChangeType.no_change, ChangeType.ignore] for change in what_if_result.changes)
+        has_change = any(change.change_type not in [ChangeType.no_change, ChangeType.ignore] for change in what_if_result.changes)
 
         if not proceed_if_no_change or has_change:
             from knack.prompting import prompt_y_n
@@ -624,17 +595,13 @@ def _deploy_arm_template_at_resource_group(cmd,
     deployment = Deployment(properties=deployment_properties)
     if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
         try:
-            validation_poller = mgmt_client.begin_validate(
-                resource_group_name, deployment_name, deployment)
+            validation_poller = mgmt_client.begin_validate(resource_group_name, deployment_name, deployment)
         except HttpResponseError as err:
             err_message = _build_http_response_error_message(err)
-            raise_subdivision_deployment_error(
-                err_message, err.error.code if err.error else None)
-        validation_result = LongRunningOperation(
-            cmd.cli_ctx)(validation_poller)
+            raise_subdivision_deployment_error(err_message, err.error.code if err.error else None)
+        validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
     else:
-        validation_result = mgmt_client.validate(
-            resource_group_name, deployment_name, deployment)
+        validation_result = mgmt_client.validate(resource_group_name, deployment_name, deployment)
 
     if validation_result and validation_result.error:
         err_message = _build_preflight_error_message(validation_result.error)
@@ -668,8 +635,7 @@ def deploy_arm_template_at_management_group(cmd,
             return None
 
         ChangeType = cmd.get_models('ChangeType')
-        has_change = any(change.change_type not in [
-                         ChangeType.no_change, ChangeType.ignore] for change in what_if_result.changes)
+        has_change = any(change.change_type not in [ChangeType.no_change, ChangeType.ignore] for change in what_if_result.changes)
 
         if not proceed_if_no_change or has_change:
             from knack.prompting import prompt_y_n
@@ -710,23 +676,19 @@ def _deploy_arm_template_at_management_group(cmd,
                                                                       parameters=parameters, mode='Incremental',
                                                                       no_prompt=no_prompt, template_spec=template_spec, query_string=query_string)
 
-    mgmt_client = _get_deployment_management_client(
-        cmd.cli_ctx, plug_pipeline=(template_uri is None and template_spec is None))
+    mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(template_uri is None and template_spec is None))
 
     from azure.core.exceptions import HttpResponseError
     ScopedDeployment = cmd.get_models('ScopedDeployment')
-    deployment = ScopedDeployment(
-        properties=deployment_properties, location=deployment_location)
+    deployment = ScopedDeployment(properties=deployment_properties, location=deployment_location)
     if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
         try:
             validation_poller = mgmt_client.begin_validate_at_management_group_scope(management_group_id,
                                                                                      deployment_name, deployment)
         except HttpResponseError as err:
             err_message = _build_http_response_error_message(err)
-            raise_subdivision_deployment_error(
-                err_message, err.error.code if err.error else None)
-        validation_result = LongRunningOperation(
-            cmd.cli_ctx)(validation_poller)
+            raise_subdivision_deployment_error(err_message, err.error.code if err.error else None)
+        validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
     else:
         validation_result = mgmt_client.validate_at_management_group_scope(management_group_id, deployment_name,
                                                                            deployment)
@@ -762,8 +724,7 @@ def deploy_arm_template_at_tenant_scope(cmd,
             return None
 
         ChangeType = cmd.get_models('ChangeType')
-        has_change = any(change.change_type not in [
-                         ChangeType.no_change, ChangeType.ignore] for change in what_if_result.changes)
+        has_change = any(change.change_type not in [ChangeType.no_change, ChangeType.ignore] for change in what_if_result.changes)
 
         if not proceed_if_no_change or has_change:
             from knack.prompting import prompt_y_n
@@ -799,23 +760,19 @@ def _deploy_arm_template_at_tenant_scope(cmd,
                                                                       parameters=parameters, mode='Incremental',
                                                                       no_prompt=no_prompt, template_spec=template_spec, query_string=query_string,)
 
-    mgmt_client = _get_deployment_management_client(
-        cmd.cli_ctx, plug_pipeline=(template_uri is None and template_spec is None))
+    mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(template_uri is None and template_spec is None))
 
     from azure.core.exceptions import HttpResponseError
     ScopedDeployment = cmd.get_models('ScopedDeployment')
-    deployment = ScopedDeployment(
-        properties=deployment_properties, location=deployment_location)
+    deployment = ScopedDeployment(properties=deployment_properties, location=deployment_location)
     if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
         try:
             validation_poller = mgmt_client.begin_validate_at_tenant_scope(deployment_name=deployment_name,
                                                                            parameters=deployment)
         except HttpResponseError as err:
             err_message = _build_http_response_error_message(err)
-            raise_subdivision_deployment_error(
-                err_message, err.error.code if err.error else None)
-        validation_result = LongRunningOperation(
-            cmd.cli_ctx)(validation_poller)
+            raise_subdivision_deployment_error(err_message, err.error.code if err.error else None)
+        validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
     else:
         validation_result = mgmt_client.validate_at_tenant_scope(deployment_name=deployment_name,
                                                                  parameters=deployment)
@@ -858,8 +815,7 @@ def _what_if_deploy_arm_template_at_resource_group_core(cmd, resource_group_name
     deployment_what_if = DeploymentWhatIf(properties=what_if_properties)
     what_if_poller = mgmt_client.begin_what_if(resource_group_name, deployment_name,
                                                parameters=deployment_what_if)
-    what_if_result = _what_if_deploy_arm_template_core(
-        cmd.cli_ctx, what_if_poller, no_pretty_print, exclude_change_types)
+    what_if_result = _what_if_deploy_arm_template_core(cmd.cli_ctx, what_if_poller, no_pretty_print, exclude_change_types)
 
     return what_if_result if no_pretty_print or return_result else None
 
@@ -884,15 +840,12 @@ def _what_if_deploy_arm_template_at_subscription_scope_core(cmd,
                                                             return_result=None):
     what_if_properties = _prepare_deployment_what_if_properties(cmd, 'subscription', template_file, template_uri, parameters,
                                                                 DeploymentMode.incremental, result_format, no_prompt, template_spec, query_string)
-    mgmt_client = _get_deployment_management_client(
-        cmd.cli_ctx, plug_pipeline=(template_uri is None and template_spec is None))
+    mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(template_uri is None and template_spec is None))
     ScopedDeploymentWhatIf = cmd.get_models('ScopedDeploymentWhatIf')
-    scoped_deployment_what_if = ScopedDeploymentWhatIf(
-        location=deployment_location, properties=what_if_properties)
+    scoped_deployment_what_if = ScopedDeploymentWhatIf(location=deployment_location, properties=what_if_properties)
     what_if_poller = mgmt_client.begin_what_if_at_subscription_scope(deployment_name,
                                                                      parameters=scoped_deployment_what_if)
-    what_if_result = _what_if_deploy_arm_template_core(
-        cmd.cli_ctx, what_if_poller, no_pretty_print, exclude_change_types)
+    what_if_result = _what_if_deploy_arm_template_core(cmd.cli_ctx, what_if_poller, no_pretty_print, exclude_change_types)
 
     return what_if_result if no_pretty_print or return_result else None
 
@@ -917,15 +870,12 @@ def _what_if_deploy_arm_template_at_management_group_core(cmd, management_group_
                                                           return_result=None):
     what_if_properties = _prepare_deployment_what_if_properties(cmd, 'managementGroup', template_file, template_uri, parameters,
                                                                 DeploymentMode.incremental, result_format, no_prompt, template_spec=template_spec, query_string=query_string)
-    mgmt_client = _get_deployment_management_client(
-        cmd.cli_ctx, plug_pipeline=(template_uri is None and template_spec is None))
+    mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(template_uri is None and template_spec is None))
     ScopedDeploymentWhatIf = cmd.get_models('ScopedDeploymentWhatIf')
-    scoped_deployment_what_if = ScopedDeploymentWhatIf(
-        location=deployment_location, properties=what_if_properties)
+    scoped_deployment_what_if = ScopedDeploymentWhatIf(location=deployment_location, properties=what_if_properties)
     what_if_poller = mgmt_client.begin_what_if_at_management_group_scope(management_group_id, deployment_name,
                                                                          parameters=scoped_deployment_what_if)
-    what_if_result = _what_if_deploy_arm_template_core(
-        cmd.cli_ctx, what_if_poller, no_pretty_print, exclude_change_types)
+    what_if_result = _what_if_deploy_arm_template_core(cmd.cli_ctx, what_if_poller, no_pretty_print, exclude_change_types)
 
     return what_if_result if no_pretty_print or return_result else None
 
@@ -950,15 +900,11 @@ def _what_if_deploy_arm_template_at_tenant_scope_core(cmd,
                                                       return_result=None):
     what_if_properties = _prepare_deployment_what_if_properties(cmd, 'tenant', template_file, template_uri, parameters,
                                                                 DeploymentMode.incremental, result_format, no_prompt, template_spec, query_string)
-    mgmt_client = _get_deployment_management_client(
-        cmd.cli_ctx, plug_pipeline=(template_uri is None and template_spec is None))
+    mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(template_uri is None and template_spec is None))
     ScopedDeploymentWhatIf = cmd.get_models('ScopedDeploymentWhatIf')
-    scoped_deployment_what_if = ScopedDeploymentWhatIf(
-        location=deployment_location, properties=what_if_properties)
-    what_if_poller = mgmt_client.begin_what_if_at_tenant_scope(
-        deployment_name, parameters=scoped_deployment_what_if)
-    what_if_result = _what_if_deploy_arm_template_core(
-        cmd.cli_ctx, what_if_poller, no_pretty_print, exclude_change_types)
+    scoped_deployment_what_if = ScopedDeploymentWhatIf(location=deployment_location, properties=what_if_properties)
+    what_if_poller = mgmt_client.begin_what_if_at_tenant_scope(deployment_name, parameters=scoped_deployment_what_if)
+    what_if_result = _what_if_deploy_arm_template_core(cmd.cli_ctx, what_if_poller, no_pretty_print, exclude_change_types)
 
     return what_if_result if no_pretty_print or return_result else None
 
@@ -974,11 +920,9 @@ def _what_if_deploy_arm_template_core(cli_ctx, what_if_poller, no_pretty_print, 
         raise CLIError(err_message)
 
     if exclude_change_types:
-        exclude_change_types = set(
-            map(lambda x: x.lower(), exclude_change_types))
+        exclude_change_types = set(map(lambda x: x.lower(), exclude_change_types))
         what_if_result.changes = list(
-            filter(lambda x: x.change_type.lower()
-                   not in exclude_change_types, what_if_result.changes)
+            filter(lambda x: x.change_type.lower() not in exclude_change_types, what_if_result.changes)
         )
 
     if no_pretty_print:
@@ -996,8 +940,7 @@ def _what_if_deploy_arm_template_core(cli_ctx, what_if_poller, no_pretty_print, 
                 from ._win_vt import enable_vt_mode
                 enable_vt_mode()
 
-        print(format_what_if_operation_result(
-            what_if_result, cli_ctx.enable_color))
+        print(format_what_if_operation_result(what_if_result, cli_ctx.enable_color))
     finally:
         if cli_ctx.enable_color:
             from colorama import init
@@ -1010,15 +953,13 @@ def _prepare_template_uri_with_query_string(template_uri, input_query_string):
     from urllib.parse import urlencode, parse_qs, urlsplit, urlunsplit
 
     try:
-        scheme, netloc, path, query_string, fragment = urlsplit(
-            template_uri)  # pylint: disable=unused-variable
+        scheme, netloc, path, query_string, fragment = urlsplit(template_uri)  # pylint: disable=unused-variable
         query_params = parse_qs(input_query_string)
         new_query_string = urlencode(query_params, doseq=True)
 
         return urlunsplit((scheme, netloc, path, new_query_string, fragment))
     except Exception:  # pylint: disable=broad-except
-        raise InvalidArgumentValueError(
-            'Unable to parse parameter: {} .Make sure the value is formed correctly.'.format(input_query_string))
+        raise InvalidArgumentValueError('Unable to parse parameter: {} .Make sure the value is formed correctly.'.format(input_query_string))
 
 
 def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_file=None, template_uri=None, parameters=None,
@@ -1033,36 +974,29 @@ def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_fi
     template_content = None
 
     if query_string and not template_uri:
-        raise IncorrectUsageError(
-            'please provide --template-uri if --query-string is specified')
+        raise IncorrectUsageError('please provide --template-uri if --query-string is specified')
 
     if template_uri:
         if query_string:
-            template_link = TemplateLink(
-                uri=template_uri, query_string=query_string)
-            template_uri = _prepare_template_uri_with_query_string(
-                template_uri=template_uri, input_query_string=query_string)
+            template_link = TemplateLink(uri=template_uri, query_string=query_string)
+            template_uri = _prepare_template_uri_with_query_string(template_uri=template_uri, input_query_string=query_string)
         else:
             template_link = TemplateLink(uri=template_uri)
-        template_obj = _remove_comments_from_json(_urlretrieve(
-            template_uri).decode('utf-8'), file_path=template_uri)
+        template_obj = _remove_comments_from_json(_urlretrieve(template_uri).decode('utf-8'), file_path=template_uri)
     elif template_spec:
         template_link = TemplateLink(id=template_spec, mode="Incremental")
         # The api-version for ResourceType.MGMT_RESOURCE_RESOURCES may get updated and point to another (newer) version of the api version for
         # ResourceType.MGMT_RESOURCE_TEMPLATESPECS than our designated version. This ensures the api-version of all the rest requests for
         # template_spec are consistent in the same profile:
-        api_version = get_api_version(
-            cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS)
-        template_obj = show_resource(cmd=cmd, resource_ids=[
-                                     template_spec], api_version=api_version).properties['mainTemplate']
+        api_version = get_api_version(cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS)
+        template_obj = show_resource(cmd=cmd, resource_ids=[template_spec], api_version=api_version).properties['mainTemplate']
     else:
         template_content = (
             run_bicep_command(["build", "--stdout", template_file])
             if is_bicep_file(template_file)
             else read_file_content(template_file)
         )
-        template_obj = _remove_comments_from_json(
-            template_content, file_path=template_file)
+        template_obj = _remove_comments_from_json(template_content, file_path=template_file)
 
         if is_bicep_file(template_file):
             template_schema = template_obj.get('$schema', '')
@@ -1071,14 +1005,12 @@ def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_fi
     if rollback_on_error == '':
         on_error_deployment = OnErrorDeployment(type='LastSuccessful')
     elif rollback_on_error:
-        on_error_deployment = OnErrorDeployment(
-            type='SpecificDeployment', deployment_name=rollback_on_error)
+        on_error_deployment = OnErrorDeployment(type='SpecificDeployment', deployment_name=rollback_on_error)
 
     template_param_defs = template_obj.get('parameters', {})
     template_obj['resources'] = template_obj.get('resources', [])
     parameters = _process_parameters(template_param_defs, parameters) or {}
-    parameters = _get_missing_parameters(
-        parameters, template_obj, _prompt_for_parameters, no_prompt)
+    parameters = _get_missing_parameters(parameters, template_obj, _prompt_for_parameters, no_prompt)
     parameters = json.loads(json.dumps(parameters))
 
     properties = DeploymentProperties(template=template_content, template_link=template_link,
@@ -1136,14 +1068,11 @@ def _list_resources_odata_filter_builder(resource_group_name=None, resource_prov
             raise IncorrectUsageError('you cannot use \'--tag\' with \'--resource-group\''
                                       '(If the default value for resource group is set, please use \'az configure --defaults group=""\' command to clear it first)')
         if resource_provider_namespace:
-            raise IncorrectUsageError(
-                'you cannot use \'--tag\' with \'--namespace\'')
+            raise IncorrectUsageError('you cannot use \'--tag\' with \'--namespace\'')
         if resource_type:
-            raise IncorrectUsageError(
-                'you cannot use \'--tag\' with \'--resource-type\'')
+            raise IncorrectUsageError('you cannot use \'--tag\' with \'--resource-type\'')
         if name:
-            raise IncorrectUsageError(
-                'you cannot use \'--tag\' with \'--name\'')
+            raise IncorrectUsageError('you cannot use \'--tag\' with \'--name\'')
         if location:
             raise IncorrectUsageError('you cannot use \'--tag\' with \'--location\''
                                       '(If the default value for location is set, please use \'az configure --defaults location=""\' command to clear it first)')
@@ -1189,8 +1118,7 @@ def _list_resources_odata_filter_builder(resource_group_name=None, resource_prov
 
 def _get_auth_provider_latest_api_version(cli_ctx):
     rcf = _resource_client_factory(cli_ctx)
-    api_version = _ResourceUtils.resolve_api_version(
-        rcf, 'Microsoft.Authorization', None, 'providerOperations')
+    api_version = _ResourceUtils.resolve_api_version(rcf, 'Microsoft.Authorization', None, 'providerOperations')
     return api_version
 
 
@@ -1225,8 +1153,7 @@ def _update_provider(cmd, namespace, registering, wait, properties=None, mg_id=N
         if is_rpaas and accept_terms and registering and mg_id is None:
             # call accept term API
             from azure.cli.core.util import send_raw_request
-            send_raw_request(cmd.cli_ctx, 'put', RPAAS_APIS[namespace.lower(
-            )], body=json.dumps({"properties": {"accepted": True}}))
+            send_raw_request(cmd.cli_ctx, 'put', RPAAS_APIS[namespace.lower()], body=json.dumps({"properties": {"accepted": True}}))
     else:
         action = 'Registering' if registering else 'Unregistering'
         msg_template = '%s is still on-going. You can monitor using \'az provider show -n %s\''
@@ -1253,8 +1180,7 @@ def _resolve_policy_id(cmd, policy, policy_set_definition, client):
             policy_def = _get_custom_or_builtin_policy(cmd, client, policy)
             policy_id = policy_def.id
         else:
-            policy_set_def = _get_custom_or_builtin_policy(
-                cmd, client, policy_set_definition, None, None, True)
+            policy_set_def = _get_custom_or_builtin_policy(cmd, client, policy_set_definition, None, None, True)
             policy_id = policy_set_def.id
     return policy_id
 
@@ -1282,22 +1208,19 @@ def _get_custom_or_builtin_policy(cmd, client, name, subscription=None, manageme
     if cmd.supported_api_version(min_api='2018-03-01'):
         enforce_mutually_exclusive(subscription, management_group)
         if subscription:
-            subscription_id = _get_subscription_id_from_subscription(
-                cmd.cli_ctx, subscription)
+            subscription_id = _get_subscription_id_from_subscription(cmd.cli_ctx, subscription)
             client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_POLICY,
                                              subscription_id=subscription_id)
             policy_operations = client.policy_set_definitions if for_policy_set else client.policy_definitions
     try:
         if cmd.supported_api_version(min_api='2018-03-01'):
             if not management_group:
-                management_group, name = _parse_management_group_reference(
-                    name)
+                management_group, name = _parse_management_group_reference(name)
             if management_group:
                 return policy_operations.get_at_management_group(name, management_group)
         return policy_operations.get(name)
     except (HttpResponseError) as ex:
-        status_code = ex.status_code if isinstance(
-            ex, HttpResponseError) else ex.response.status_code
+        status_code = ex.status_code if isinstance(ex, HttpResponseError) else ex.response.status_code
         if status_code == 404:
             try:
                 return policy_operations.get_built_in(name)
@@ -1306,8 +1229,7 @@ def _get_custom_or_builtin_policy(cmd, client, name, subscription=None, manageme
                 # an exception of "AuthorizationFailed" will be reported to mislead customers.
                 # So we need to modify the exception information thrown here.
                 if ex2.status_code == 403 and ex2.error and ex2.error.code == 'AuthorizationFailed':
-                    raise IncorrectUsageError(
-                        '\'--policy\' should be a valid name or id of the policy definition')
+                    raise IncorrectUsageError('\'--policy\' should be a valid name or id of the policy definition')
                 raise ex2
         raise
 
@@ -1448,14 +1370,12 @@ def export_group_as_template(
             if is_valid_resource_id(i):
                 resources.append(i)
             else:
-                raise CLIError(
-                    'az resource: error: argument --resource-ids: invalid ResourceId value: \'%s\'' % i)
+                raise CLIError('az resource: error: argument --resource-ids: invalid ResourceId value: \'%s\'' % i)
 
     options = ','.join(export_options) if export_options else None
 
     ExportTemplateRequest = cmd.get_models('ExportTemplateRequest')
-    export_template_request = ExportTemplateRequest(
-        resources=resources, options=options)
+    export_template_request = ExportTemplateRequest(resources=resources, options=options)
 
     # Exporting a resource group as a template is async since API version 2019-08-01.
     if cmd.supported_api_version(min_api='2019-08-01'):
@@ -1511,15 +1431,13 @@ def create_application(cmd, resource_group_name,
         if managedapp_definition_id:
             application.application_definition_id = managedapp_definition_id
         else:
-            raise CLIError(
-                '--managedapp-definition-id is required if kind is ServiceCatalog')
+            raise CLIError('--managedapp-definition-id is required if kind is ServiceCatalog')
     elif kind.lower() == 'marketplace':
         if (plan_name is None and plan_product is None and
                 plan_publisher is None and plan_version is None):
             raise CLIError('--plan-name, --plan-product, --plan-publisher and \
             --plan-version are all required if kind is MarketPlace')
-        application.plan = Plan(
-            name=plan_name, publisher=plan_publisher, product=plan_product, version=plan_version)
+        application.plan = Plan(name=plan_name, publisher=plan_publisher, product=plan_product, version=plan_version)
 
     applicationParameters = None
 
@@ -1570,16 +1488,13 @@ def create_or_update_applicationdefinition(cmd, resource_group_name,
     """
     from azure.mgmt.resource.managedapplications.models import ApplicationDefinition, ApplicationProviderAuthorization
     if not package_file_uri and not create_ui_definition and not main_template:
-        raise CLIError(
-            'usage error: --package-file-uri <url> | --create-ui-definition --main-template')
+        raise CLIError('usage error: --package-file-uri <url> | --create-ui-definition --main-template')
     if package_file_uri:
         if create_ui_definition or main_template:
-            raise CLIError(
-                'usage error: must not specify --create-ui-definition --main-template')
+            raise CLIError('usage error: must not specify --create-ui-definition --main-template')
     if not package_file_uri:
         if not create_ui_definition or not main_template:
-            raise CLIError(
-                'usage error: must specify --create-ui-definition --main-template')
+            raise CLIError('usage error: must specify --create-ui-definition --main-template')
     racf = _resource_managedapps_client_factory(cmd.cli_ctx)
     rcf = _resource_client_factory(cmd.cli_ctx)
     if not location:
@@ -1614,8 +1529,7 @@ def list_applications(cmd, resource_group_name=None):
     racf = _resource_managedapps_client_factory(cmd.cli_ctx)
 
     if resource_group_name:
-        applications = racf.applications.list_by_resource_group(
-            resource_group_name)
+        applications = racf.applications.list_by_resource_group(resource_group_name)
     else:
         applications = racf.applications.list_by_subscription()
     return list(applications)
@@ -1726,24 +1640,21 @@ def validate_arm_template(cmd, resource_group_name, template_file=None, template
 
 def export_template_at_subscription_scope(cmd, deployment_name):
     rcf = _resource_client_factory(cmd.cli_ctx)
-    result = rcf.deployments.export_template_at_subscription_scope(
-        deployment_name)
+    result = rcf.deployments.export_template_at_subscription_scope(deployment_name)
 
     print(json.dumps(result.template, indent=2))  # pylint: disable=no-member
 
 
 def export_template_at_resource_group(cmd, resource_group_name, deployment_name):
     rcf = _resource_client_factory(cmd.cli_ctx)
-    result = rcf.deployments.export_template(
-        resource_group_name, deployment_name)
+    result = rcf.deployments.export_template(resource_group_name, deployment_name)
 
     print(json.dumps(result.template, indent=2))  # pylint: disable=no-member
 
 
 def export_template_at_management_group(cmd, management_group_id, deployment_name):
     rcf = _resource_client_factory(cmd.cli_ctx)
-    result = rcf.deployments.export_template_at_management_group_scope(
-        management_group_id, deployment_name)
+    result = rcf.deployments.export_template_at_management_group_scope(management_group_id, deployment_name)
 
     print(json.dumps(result.template, indent=2))  # pylint: disable=no-member
 
@@ -1757,8 +1668,7 @@ def export_template_at_tenant_scope(cmd, deployment_name):
 
 def export_deployment_as_template(cmd, resource_group_name, deployment_name):
     smc = _resource_client_factory(cmd.cli_ctx)
-    result = smc.deployments.export_template(
-        resource_group_name, deployment_name)
+    result = smc.deployments.export_template(resource_group_name, deployment_name)
     print(json.dumps(result.template, indent=2))  # pylint: disable=no-member
 
 
@@ -1782,8 +1692,7 @@ def _get_parsed_resource_ids(resource_ids):
 
     for rid in resource_ids:
         if not is_valid_resource_id(rid):
-            raise CLIError(
-                'az resource: error: argument --ids: invalid ResourceId value: \'%s\'' % rid)
+            raise CLIError('az resource: error: argument --ids: invalid ResourceId value: \'%s\'' % rid)
 
     return ({'resource_id': rid} for rid in resource_ids)
 
@@ -1882,12 +1791,10 @@ def delete_resource(cmd, resource_ids=None, resource_group_name=None,
             results.append(operation.result())
 
     if to_be_deleted:
-        error_msg_builder = [
-            'Some resources failed to be deleted (run with `--verbose` for more information):']
+        error_msg_builder = ['Some resources failed to be deleted (run with `--verbose` for more information):']
         for _, id_dict in to_be_deleted:
             logger.info(id_dict['exception'])
-            resource_id = _build_resource_id(
-                **id_dict) or id_dict['resource_id']
+            resource_id = _build_resource_id(**id_dict) or id_dict['resource_id']
             error_msg_builder.append(resource_id)
         raise CLIError(os.linesep.join(error_msg_builder))
 
@@ -1972,8 +1879,7 @@ def get_deployment_operations_at_resource_group(client, resource_group_name, dep
 def get_deployment_operations_at_management_group(client, management_group_id, deployment_name, operation_ids):
     result = []
     for op_id in operation_ids:
-        dep = client.get_at_management_group_scope(
-            management_group_id, deployment_name, op_id)
+        dep = client.get_at_management_group_scope(management_group_id, deployment_name, op_id)
         result.append(dep)
     return result
 
@@ -2019,8 +1925,7 @@ def get_template_spec(cmd, resource_group_name=None, name=None, version=None, te
     rcf = _resource_templatespecs_client_factory(cmd.cli_ctx)
     if version:
         return rcf.template_spec_versions.get(resource_group_name, name, version)
-    retrieved_template = rcf.template_specs.get(
-        resource_group_name, name, expand="versions")
+    retrieved_template = rcf.template_specs.get(resource_group_name, name, expand="versions")
     version_names = list(retrieved_template.versions.keys())
     retrieved_template.versions = version_names
     return retrieved_template
@@ -2034,19 +1939,16 @@ def create_template_spec(cmd, resource_group_name, name, template_file=None, loc
     rcf = _resource_templatespecs_client_factory(cmd.cli_ctx)
 
     if template_file and not version:
-        raise IncorrectUsageError(
-            'please provide --version if --template-file is specified')
+        raise IncorrectUsageError('please provide --version if --template-file is specified')
 
     if version:
         input_template, artifacts, input_ui_form_definition = None, None, None
         exists = False
         if no_prompt is False:
             try:  # Check if child template spec already exists.
-                rcf.template_spec_versions.get(
-                    resource_group_name=resource_group_name, template_spec_name=name, template_spec_version=version)
+                rcf.template_spec_versions.get(resource_group_name=resource_group_name, template_spec_name=name, template_spec_version=version)
                 from knack.prompting import prompt_y_n
-                confirmation = prompt_y_n(
-                    "This will override template spec {} version {}. Proceed?".format(name, version))
+                confirmation = prompt_y_n("This will override template spec {} version {}. Proceed?".format(name, version))
                 if not confirmation:
                     return None
                 exists = True
@@ -2054,13 +1956,10 @@ def create_template_spec(cmd, resource_group_name, name, template_file=None, loc
                 pass
 
         if template_file:
-            from azure.cli.command_modules.resource._packing_engine import (
-                pack)
+            from azure.cli.command_modules.resource._packing_engine import (pack)
             if is_bicep_file(template_file):
-                template_content = run_bicep_command(
-                    ["build", "--stdout", template_file])
-                input_content = _remove_comments_from_json(
-                    template_content, file_path=template_file)
+                template_content = run_bicep_command(["build", "--stdout", template_file])
+                input_content = _remove_comments_from_json(template_content, file_path=template_file)
                 input_template = json.loads(json.dumps(input_content))
                 artifacts = []
             else:
@@ -2069,37 +1968,27 @@ def create_template_spec(cmd, resource_group_name, name, template_file=None, loc
                 artifacts = getattr(packed_template, 'Artifacts')
 
         if ui_form_definition_file:
-            ui_form_definition_content = _remove_comments_from_json(
-                read_file_content(ui_form_definition_file))
-            input_ui_form_definition = json.loads(
-                json.dumps(ui_form_definition_content))
+            ui_form_definition_content = _remove_comments_from_json(read_file_content(ui_form_definition_file))
+            input_ui_form_definition = json.loads(json.dumps(ui_form_definition_content))
 
         if not exists:
             try:  # Check if parent template spec already exists.
-                existing_parent = rcf.template_specs.get(
-                    resource_group_name=resource_group_name, template_spec_name=name)
+                existing_parent = rcf.template_specs.get(resource_group_name=resource_group_name, template_spec_name=name)
                 if tags is None:  # New version should inherit tags from parent if none are provided.
                     tags = getattr(existing_parent, 'tags')
             except Exception:  # pylint: disable=broad-except
                 tags = tags or {}
-                TemplateSpec = get_sdk(
-                    cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS, 'TemplateSpec', mod='models')
-                template_spec_parent = TemplateSpec(
-                    location=location, description=description, display_name=display_name, tags=tags)
-                rcf.template_specs.create_or_update(
-                    resource_group_name, name, template_spec_parent)
+                TemplateSpec = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS, 'TemplateSpec', mod='models')
+                template_spec_parent = TemplateSpec(location=location, description=description, display_name=display_name, tags=tags)
+                rcf.template_specs.create_or_update(resource_group_name, name, template_spec_parent)
 
-        TemplateSpecVersion = get_sdk(
-            cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS, 'TemplateSpecVersion', mod='models')
-        template_spec_version = TemplateSpecVersion(location=location, linked_templates=artifacts, description=version_description,
-                                                    main_template=input_template, tags=tags, ui_form_definition=input_ui_form_definition)
+        TemplateSpecVersion = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS, 'TemplateSpecVersion', mod='models')
+        template_spec_version = TemplateSpecVersion(location=location, linked_templates=artifacts, description=version_description, main_template=input_template, tags=tags, ui_form_definition=input_ui_form_definition)
         return rcf.template_spec_versions.create_or_update(resource_group_name, name, version, template_spec_version)
 
     tags = tags or {}
-    TemplateSpec = get_sdk(
-        cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS, 'TemplateSpec', mod='models')
-    template_spec_parent = TemplateSpec(
-        location=location, description=description, display_name=display_name, tags=tags)
+    TemplateSpec = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS, 'TemplateSpec', mod='models')
+    template_spec_parent = TemplateSpec(location=location, description=description, display_name=display_name, tags=tags)
     return rcf.template_specs.create_or_update(resource_group_name, name, template_spec_parent)
 
 
@@ -2119,10 +2008,8 @@ def update_template_spec(cmd, resource_group_name=None, name=None, template_spec
     if template_file:
         from azure.cli.command_modules.resource._packing_engine import (pack)
         if is_bicep_file(template_file):
-            template_content = run_bicep_command(
-                ["build", "--stdout", template_file])
-            input_content = _remove_comments_from_json(
-                template_content, file_path=template_file)
+            template_content = run_bicep_command(["build", "--stdout", template_file])
+            input_content = _remove_comments_from_json(template_content, file_path=template_file)
             input_template = json.loads(json.dumps(input_content))
             artifacts = []
         else:
@@ -2131,14 +2018,11 @@ def update_template_spec(cmd, resource_group_name=None, name=None, template_spec
             artifacts = getattr(packed_template, 'Artifacts')
 
     if ui_form_definition_file:
-        ui_form_definition_content = _remove_comments_from_json(
-            read_file_content(ui_form_definition_file))
-        input_ui_form_definition = json.loads(
-            json.dumps(ui_form_definition_content))
+        ui_form_definition_content = _remove_comments_from_json(read_file_content(ui_form_definition_file))
+        input_ui_form_definition = json.loads(json.dumps(ui_form_definition_content))
 
     if version:
-        existing_template = rcf.template_spec_versions.get(
-            resource_group_name=resource_group_name, template_spec_name=name, template_spec_version=version)
+        existing_template = rcf.template_spec_versions.get(resource_group_name=resource_group_name, template_spec_name=name, template_spec_version=version)
 
         location = getattr(existing_template, 'location')
 
@@ -2150,17 +2034,13 @@ def update_template_spec(cmd, resource_group_name=None, name=None, template_spec
         if template_file is None:
             input_template = getattr(existing_template, 'main_template')
         if ui_form_definition_file is None:
-            input_ui_form_definition = getattr(
-                existing_template, 'ui_form_definition')
-        TemplateSpecVersion = get_sdk(
-            cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS, 'TemplateSpecVersion', mod='models')
+            input_ui_form_definition = getattr(existing_template, 'ui_form_definition')
+        TemplateSpecVersion = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS, 'TemplateSpecVersion', mod='models')
 
-        updated_template_spec = TemplateSpecVersion(location=location, linked_templates=artifacts, description=version_description,
-                                                    main_template=input_template, tags=tags, ui_form_definition=input_ui_form_definition)
+        updated_template_spec = TemplateSpecVersion(location=location, linked_templates=artifacts, description=version_description, main_template=input_template, tags=tags, ui_form_definition=input_ui_form_definition)
         return rcf.template_spec_versions.create_or_update(resource_group_name, name, version, updated_template_spec)
 
-    existing_template = rcf.template_specs.get(
-        resource_group_name=resource_group_name, template_spec_name=name)
+    existing_template = rcf.template_specs.get(resource_group_name=resource_group_name, template_spec_name=name)
 
     location = getattr(existing_template, 'location')
     # Do not remove tags if not explicitly empty.
@@ -2171,11 +2051,9 @@ def update_template_spec(cmd, resource_group_name=None, name=None, template_spec
     if description is None:
         description = getattr(existing_template, 'description')
 
-    TemplateSpec = get_sdk(
-        cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS, 'TemplateSpec', mod='models')
+    TemplateSpec = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS, 'TemplateSpec', mod='models')
 
-    root_template = TemplateSpec(
-        location=location, description=description, display_name=display_name, tags=tags)
+    root_template = TemplateSpec(location=location, description=description, display_name=display_name, tags=tags)
     return rcf.template_specs.create_or_update(resource_group_name, name, root_template)
 
 
@@ -2189,10 +2067,8 @@ def export_template_spec(cmd, output_folder, resource_group_name=None, name=None
         if version == name:
             version = None
     if not version:
-        raise IncorrectUsageError(
-            'Please specify the template spec version for export')
-    exported_template = rcf.template_spec_versions.get(
-        resource_group_name, name, version)
+        raise IncorrectUsageError('Please specify the template spec version for export')
+    exported_template = rcf.template_spec_versions.get(resource_group_name, name, version)
     from azure.cli.command_modules.resource._packing_engine import (unpack)
     return unpack(cmd, exported_template, output_folder, (str(name) + '.JSON'))
 
@@ -2280,17 +2156,13 @@ def list_resources(cmd, resource_group_name=None,
 def register_provider(cmd, resource_provider_namespace, consent_to_permissions=False, mg=None, wait=False, accept_terms=None):
     properties = None
     if cmd.supported_api_version(min_api='2021-04-01') and consent_to_permissions:
-        ProviderRegistrationRequest, ProviderConsentDefinition = cmd.get_models(
-            'ProviderRegistrationRequest', 'ProviderConsentDefinition')
-        properties = ProviderRegistrationRequest(third_party_provider_consent=ProviderConsentDefinition(
-            consent_to_authorization=consent_to_permissions))
-    _update_provider(cmd, resource_provider_namespace, registering=True,
-                     wait=wait, properties=properties, mg_id=mg, accept_terms=accept_terms)
+        ProviderRegistrationRequest, ProviderConsentDefinition = cmd.get_models('ProviderRegistrationRequest', 'ProviderConsentDefinition')
+        properties = ProviderRegistrationRequest(third_party_provider_consent=ProviderConsentDefinition(consent_to_authorization=consent_to_permissions))
+    _update_provider(cmd, resource_provider_namespace, registering=True, wait=wait, properties=properties, mg_id=mg, accept_terms=accept_terms)
 
 
 def unregister_provider(cmd, resource_provider_namespace, wait=False):
-    _update_provider(cmd, resource_provider_namespace,
-                     registering=False, wait=wait)
+    _update_provider(cmd, resource_provider_namespace, registering=False, wait=wait)
 
 
 def list_provider_operations(cmd):
@@ -2304,8 +2176,7 @@ def list_provider_permissions(cmd, resource_provider_namespace):
 
 
 def show_provider_operations(cmd, resource_provider_namespace):
-    version = getattr(get_api_version(
-        cmd.cli_ctx, ResourceType.MGMT_AUTHORIZATION), 'provider_operations_metadata')
+    version = getattr(get_api_version(cmd.cli_ctx, ResourceType.MGMT_AUTHORIZATION), 'provider_operations_metadata')
     auth_client = _authorization_management_client(cmd.cli_ctx)
     if version == '2015-07-01':
         return auth_client.provider_operations_metadata.get(resource_provider_namespace, version)
@@ -2325,8 +2196,7 @@ def move_resource(cmd, ids, destination_group, destination_subscription_id=None)
         if is_valid_resource_id(i):
             resources.append(parse_resource_id(i))
         else:
-            raise CLIError(
-                'Invalid id "{}", as it has no group or subscription field'.format(i))
+            raise CLIError('Invalid id "{}", as it has no group or subscription field'.format(i))
 
     if len({r['subscription'] for r in resources}) > 1:
         raise CLIError('All resources should be under the same subscription')
@@ -2339,8 +2209,7 @@ def move_resource(cmd, ids, destination_group, destination_subscription_id=None)
                                 resource_group=destination_group)
 
     ResourcesMoveInfo = cmd.get_models('ResourcesMoveInfo')
-    resources_move_info = ResourcesMoveInfo(
-        resources=ids, target_resource_group=target)
+    resources_move_info = ResourcesMoveInfo(resources=ids, target_resource_group=target)
     return rcf.resources.begin_move_resources(resources[0]['resource_group'], parameters=resources_move_info)
 
 
@@ -2393,13 +2262,11 @@ def create_policy_assignment(cmd, policy=None, policy_set_definition=None,
     policy_client = _resource_policy_client_factory(cmd.cli_ctx)
     subscription_id = get_subscription_id(cmd.cli_ctx)
     scope = _build_policy_scope(subscription_id, resource_group_name, scope)
-    policy_id = _resolve_policy_id(
-        cmd, policy, policy_set_definition, policy_client)
+    policy_id = _resolve_policy_id(cmd, policy, policy_set_definition, policy_client)
     params = _load_file_string_or_uri(params, 'params', False)
 
     PolicyAssignment = cmd.get_models('PolicyAssignment')
-    assignment = PolicyAssignment(display_name=display_name, policy_definition_id=policy_id,
-                                  scope=scope, enforcement_mode=enforcement_mode, description=description)
+    assignment = PolicyAssignment(display_name=display_name, policy_definition_id=policy_id, scope=scope, enforcement_mode=enforcement_mode, description=description)
     assignment.parameters = params if params else None
 
     if cmd.supported_api_version(min_api='2017-06-01-preview'):
@@ -2410,8 +2277,7 @@ def create_policy_assignment(cmd, policy=None, policy_set_definition=None,
                 if id_parts.get('subscription') or _is_management_group_scope(id_arg):
                     kwargs_list.append(id_arg)
                 else:
-                    raise InvalidArgumentValueError(
-                        "Invalid resource ID value in --not-scopes: '%s'" % id_arg)
+                    raise InvalidArgumentValueError("Invalid resource ID value in --not-scopes: '%s'" % id_arg)
             assignment.not_scopes = kwargs_list
 
     identities = None
@@ -2425,21 +2291,18 @@ def create_policy_assignment(cmd, policy=None, policy_set_definition=None,
 
         identity = None
         if identities is not None:
-            identity = _build_identities_info(
-                cmd, identities, resource_group_name)
+            identity = _build_identities_info(cmd, identities, resource_group_name)
         assignment.identity = identity
 
     if name is None:
         name = (base64.urlsafe_b64encode(uuid.uuid4().bytes).decode())[:-2]
 
-    createdAssignment = policy_client.policy_assignments.create(
-        scope, name, assignment)
+    createdAssignment = policy_client.policy_assignments.create(scope, name, assignment)
 
     # Create the identity's role assignment if requested
     if identities is not None and identity_scope:
         from azure.cli.core.commands.arm import assign_identity as _assign_identity_helper
-        _assign_identity_helper(cmd.cli_ctx, lambda: createdAssignment,
-                                lambda resource: createdAssignment, identity_role, identity_scope)
+        _assign_identity_helper(cmd.cli_ctx, lambda: createdAssignment, lambda resource: createdAssignment, identity_role, identity_scope)
 
     return createdAssignment
 
@@ -2474,8 +2337,7 @@ def _build_identities_info(cmd, identities, resourceGroupName):
         msiId = _get_resource_id(cmd.cli_ctx, user_assigned_identities[0], resourceGroupName,
                                  'userAssignedIdentities', 'Microsoft.ManagedIdentity')
 
-        UserAssignedIdentitiesValue = cmd.get_models(
-            'UserAssignedIdentitiesValue')
+        UserAssignedIdentitiesValue = cmd.get_models('UserAssignedIdentitiesValue')
         userAssignedIdentity = {msiId: UserAssignedIdentitiesValue()}
         return ResourceIdentity(type=ResourceIdentityType.user_assigned, user_assigned_identities=userAssignedIdentity)
 
@@ -2513,8 +2375,7 @@ def update_policy_assignment(cmd, name=None, display_name=None, params=None,
                 if id_parts.get('subscription') or _is_management_group_scope(id_arg):
                     kwargs_list.append(id_arg)
                 else:
-                    raise InvalidArgumentValueError(
-                        "Invalid resource ID value in --not-scopes: '%s'" % id_arg)
+                    raise InvalidArgumentValueError("Invalid resource ID value in --not-scopes: '%s'" % id_arg)
         assignment.not_scopes = kwargs_list
 
     if cmd.supported_api_version(min_api='2018-05-01'):
@@ -2553,30 +2414,24 @@ def list_policy_assignment(cmd, disable_scope_strict_match=None, resource_group_
     management_group = _parse_management_group_id(scope)
 
     if management_group:
-        result = policy_client.policy_assignments.list_for_management_group(
-            management_group_id=management_group, filter='atScope()')
+        result = policy_client.policy_assignments.list_for_management_group(management_group_id=management_group, filter='atScope()')
     elif all([resource_type, resource_group, subscription]):
         namespace = id_parts.get('namespace')
-        parent_resource_path = '' if not id_parts.get(
-            'child_name_1') else (id_parts['type'] + '/' + id_parts['name'])
+        parent_resource_path = '' if not id_parts.get('child_name_1') else (id_parts['type'] + '/' + id_parts['name'])
         result = policy_client.policy_assignments.list_for_resource(
             resource_group, namespace,
             parent_resource_path, resource_type, resource_name)
     elif resource_group:
-        result = policy_client.policy_assignments.list_for_resource_group(
-            resource_group)
+        result = policy_client.policy_assignments.list_for_resource_group(resource_group)
     elif subscription:
         result = policy_client.policy_assignments.list()
     elif scope:
-        raise InvalidArgumentValueError(
-            'usage error `--scope`: must be a fully qualified ARM ID.')
+        raise InvalidArgumentValueError('usage error `--scope`: must be a fully qualified ARM ID.')
     else:
-        raise ArgumentUsageError(
-            'usage error: --scope ARM_ID | --resource-group NAME')
+        raise ArgumentUsageError('usage error: --scope ARM_ID | --resource-group NAME')
 
     if not disable_scope_strict_match:
-        result = [i for i in result if _scope.lower().strip('/') ==
-                  i.scope.lower().strip('/')]
+        result = [i for i in result if _scope.lower().strip('/') == i.scope.lower().strip('/')]
 
     return result
 
@@ -2597,8 +2452,7 @@ def create_policy_non_compliance_message(cmd, name, message, scope=None, resourc
     assignment = policy_client.policy_assignments.get(scope, name)
 
     NonComplianceMessage = cmd.get_models('NonComplianceMessage')
-    created_message = NonComplianceMessage(
-        message=message, policy_definition_reference_id=policy_definition_reference_id)
+    created_message = NonComplianceMessage(message=message, policy_definition_reference_id=policy_definition_reference_id)
     if not assignment.non_compliance_messages:
         assignment.non_compliance_messages = []
     assignment.non_compliance_messages.append(created_message)
@@ -2615,11 +2469,9 @@ def delete_policy_non_compliance_message(cmd, name, message, scope=None, resourc
     assignment = policy_client.policy_assignments.get(scope, name)
 
     NonComplianceMessage = cmd.get_models('NonComplianceMessage')
-    message_to_remove = NonComplianceMessage(
-        message=message, policy_definition_reference_id=policy_definition_reference_id)
+    message_to_remove = NonComplianceMessage(message=message, policy_definition_reference_id=policy_definition_reference_id)
     if assignment.non_compliance_messages:
-        assignment.non_compliance_messages = [
-            existingMessage for existingMessage in assignment.non_compliance_messages if not _is_non_compliance_message_equivalent(existingMessage, message_to_remove)]
+        assignment.non_compliance_messages = [existingMessage for existingMessage in assignment.non_compliance_messages if not _is_non_compliance_message_equivalent(existingMessage, message_to_remove)]
 
     return policy_client.policy_assignments.create(scope, name, assignment).non_compliance_messages
 
@@ -2650,13 +2502,11 @@ def set_identity(cmd, name, scope=None, resource_group_name=None,
         return policy_client.policy_assignments.get(scope, name)
 
     def setter(policyAssignment):
-        policyAssignment.identity = _build_identities_info(
-            cmd, identities, resource_group_name)
+        policyAssignment.identity = _build_identities_info(cmd, identities, resource_group_name)
         return policy_client.policy_assignments.create(scope, name, policyAssignment)
 
     from azure.cli.core.commands.arm import assign_identity as _assign_identity_helper
-    updatedAssignment = _assign_identity_helper(
-        cmd.cli_ctx, getter, setter, identity_role, identity_scope)
+    updatedAssignment = _assign_identity_helper(cmd.cli_ctx, getter, setter, identity_role, identity_scope)
     return updatedAssignment.identity
 
 
@@ -2675,17 +2525,14 @@ def remove_identity(cmd, name, scope=None, resource_group_name=None):
 
     ResourceIdentityType = cmd.get_models('ResourceIdentityType')
     ResourceIdentity = cmd.get_models('Identity')
-    policyAssignment.identity = ResourceIdentity(
-        type=ResourceIdentityType.none)
-    policyAssignment = policy_client.policy_assignments.create(
-        scope, name, policyAssignment)
+    policyAssignment.identity = ResourceIdentity(type=ResourceIdentityType.none)
+    policyAssignment = policy_client.policy_assignments.create(scope, name, policyAssignment)
     return policyAssignment.identity
 
 
 def enforce_mutually_exclusive(subscription, management_group):
     if subscription and management_group:
-        raise IncorrectUsageError(
-            'cannot provide both --subscription and --management-group')
+        raise IncorrectUsageError('cannot provide both --subscription and --management-group')
 
 
 def create_policy_definition(cmd, name, rules=None, params=None, display_name=None, description=None, mode=None,
@@ -2706,8 +2553,7 @@ def create_policy_definition(cmd, name, rules=None, params=None, display_name=No
             policy_client = _resource_policy_client_factory(cmd.cli_ctx)
             return policy_client.policy_definitions.create_or_update_at_management_group(name, management_group, parameters)
         if subscription:
-            subscription_id = _get_subscription_id_from_subscription(
-                cmd.cli_ctx, subscription)
+            subscription_id = _get_subscription_id_from_subscription(cmd.cli_ctx, subscription)
             policy_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_POLICY,
                                                     subscription_id=subscription_id)
             return policy_client.policy_definitions.create_or_update(name, parameters)
@@ -2721,8 +2567,7 @@ def create_policy_setdefinition(cmd, name, definitions, params=None, display_nam
 
     definitions = _load_file_string_or_uri(definitions, 'definitions')
     params = _load_file_string_or_uri(params, 'params', False)
-    definition_groups = _load_file_string_or_uri(
-        definition_groups, 'definition_groups', False)
+    definition_groups = _load_file_string_or_uri(definition_groups, 'definition_groups', False)
 
     PolicySetDefinition = cmd.get_models('PolicySetDefinition')
     parameters = PolicySetDefinition(policy_definitions=definitions, parameters=params, description=description,
@@ -2736,8 +2581,7 @@ def create_policy_setdefinition(cmd, name, definitions, params=None, display_nam
             policy_client = _resource_policy_client_factory(cmd.cli_ctx)
             return policy_client.policy_set_definitions.create_or_update_at_management_group(name, management_group, parameters)
         if subscription:
-            subscription_id = _get_subscription_id_from_subscription(
-                cmd.cli_ctx, subscription)
+            subscription_id = _get_subscription_id_from_subscription(cmd.cli_ctx, subscription)
             policy_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_POLICY,
                                                     subscription_id=subscription_id)
             return policy_client.policy_set_definitions.create_or_update(name, parameters)
@@ -2764,8 +2608,7 @@ def list_policy_definition(cmd, subscription=None, management_group=None):
             policy_client = _resource_policy_client_factory(cmd.cli_ctx)
             return policy_client.policy_definitions.list_by_management_group(management_group)
         if subscription:
-            subscription_id = _get_subscription_id_from_subscription(
-                cmd.cli_ctx, subscription)
+            subscription_id = _get_subscription_id_from_subscription(cmd.cli_ctx, subscription)
             policy_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_POLICY,
                                                     subscription_id=subscription_id)
             return policy_client.policy_definitions.list()
@@ -2781,8 +2624,7 @@ def list_policy_setdefinition(cmd, subscription=None, management_group=None):
             policy_client = _resource_policy_client_factory(cmd.cli_ctx)
             return policy_client.policy_set_definitions.list_by_management_group(management_group)
         if subscription:
-            subscription_id = _get_subscription_id_from_subscription(
-                cmd.cli_ctx, subscription)
+            subscription_id = _get_subscription_id_from_subscription(cmd.cli_ctx, subscription)
             policy_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_POLICY,
                                                     subscription_id=subscription_id)
             return policy_client.policy_set_definitions.list()
@@ -2798,8 +2640,7 @@ def delete_policy_definition(cmd, policy_definition_name, subscription=None, man
             policy_client = _resource_policy_client_factory(cmd.cli_ctx)
             return policy_client.policy_definitions.delete_at_management_group(policy_definition_name, management_group)
         if subscription:
-            subscription_id = _get_subscription_id_from_subscription(
-                cmd.cli_ctx, subscription)
+            subscription_id = _get_subscription_id_from_subscription(cmd.cli_ctx, subscription)
             policy_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_POLICY,
                                                     subscription_id=subscription_id)
             return policy_client.policy_definitions.delete(policy_definition_name)
@@ -2816,8 +2657,7 @@ def delete_policy_setdefinition(cmd, policy_set_definition_name, subscription=No
             return policy_client.policy_set_definitions.delete_at_management_group(policy_set_definition_name,
                                                                                    management_group)
         if subscription:
-            subscription_id = _get_subscription_id_from_subscription(
-                cmd.cli_ctx, subscription)
+            subscription_id = _get_subscription_id_from_subscription(cmd.cli_ctx, subscription)
             policy_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_POLICY,
                                                     subscription_id=subscription_id)
             return policy_client.policy_set_definitions.delete(policy_set_definition_name)
@@ -2834,8 +2674,7 @@ def update_policy_definition(cmd, policy_definition_name, rules=None, params=Non
     params = _load_file_string_or_uri(params, 'params', False)
 
     policy_client = _resource_policy_client_factory(cmd.cli_ctx)
-    definition = _get_custom_or_builtin_policy(
-        cmd, policy_client, policy_definition_name, subscription, management_group)
+    definition = _get_custom_or_builtin_policy(cmd, policy_client, policy_definition_name, subscription, management_group)
     # pylint: disable=line-too-long,no-member
 
     PolicyDefinition = cmd.get_models('PolicyDefinition')
@@ -2853,8 +2692,7 @@ def update_policy_definition(cmd, policy_definition_name, rules=None, params=Non
         if management_group:
             return policy_client.policy_definitions.create_or_update_at_management_group(policy_definition_name, management_group, parameters)
         if subscription:
-            subscription_id = _get_subscription_id_from_subscription(
-                cmd.cli_ctx, subscription)
+            subscription_id = _get_subscription_id_from_subscription(cmd.cli_ctx, subscription)
             policy_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_POLICY,
                                                     subscription_id=subscription_id)
             return policy_client.policy_definitions.create_or_update(policy_definition_name, parameters)
@@ -2868,12 +2706,10 @@ def update_policy_setdefinition(cmd, policy_set_definition_name, definitions=Non
 
     definitions = _load_file_string_or_uri(definitions, 'definitions', False)
     params = _load_file_string_or_uri(params, 'params', False)
-    definition_groups = _load_file_string_or_uri(
-        definition_groups, 'definition_groups', False)
+    definition_groups = _load_file_string_or_uri(definition_groups, 'definition_groups', False)
 
     policy_client = _resource_policy_client_factory(cmd.cli_ctx)
-    definition = _get_custom_or_builtin_policy(
-        cmd, policy_client, policy_set_definition_name, subscription, management_group, True)
+    definition = _get_custom_or_builtin_policy(cmd, policy_client, policy_set_definition_name, subscription, management_group, True)
     # pylint: disable=line-too-long,no-member
     PolicySetDefinition = cmd.get_models('PolicySetDefinition')
     parameters = PolicySetDefinition(
@@ -2889,8 +2725,7 @@ def update_policy_setdefinition(cmd, policy_set_definition_name, definitions=Non
         if management_group:
             return policy_client.policy_set_definitions.create_or_update_at_management_group(policy_set_definition_name, management_group, parameters)
         if subscription:
-            subscription_id = _get_subscription_id_from_subscription(
-                cmd.cli_ctx, subscription)
+            subscription_id = _get_subscription_id_from_subscription(cmd.cli_ctx, subscription)
             policy_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_POLICY,
                                                     subscription_id=subscription_id)
             return policy_client.policy_set_definitions.create_or_update(policy_set_definition_name, parameters)
@@ -2914,8 +2749,7 @@ def create_policy_exemption(cmd, name, policy_assignment=None, exemption_categor
     exemption = PolicyExemption(policy_assignment_id=policy_assignment, policy_definition_reference_ids=policy_definition_reference_ids,
                                 exemption_category=exemption_category, expires_on=expires_on,
                                 display_name=display_name, description=description, metadata=metadata)
-    createdExemption = policy_client.policy_exemptions.create_or_update(
-        scope, name, exemption)
+    createdExemption = policy_client.policy_exemptions.create_or_update(scope, name, exemption)
     return createdExemption
 
 
@@ -2936,8 +2770,7 @@ def update_policy_exemption(cmd, name, exemption_category=None,
         display_name=display_name if display_name is not None else exemption.display_name,
         description=description if description is not None else exemption.description,
         metadata=metadata if metadata is not None else exemption.metadata)
-    updatedExemption = policy_client.policy_exemptions.create_or_update(
-        scope, name, parameters)
+    updatedExemption = policy_client.policy_exemptions.create_or_update(scope, name, parameters)
     return updatedExemption
 
 
@@ -2967,30 +2800,24 @@ def list_policy_exemption(cmd, disable_scope_strict_match=None, resource_group_n
     management_group = _parse_management_group_id(scope)
 
     if management_group:
-        result = policy_client.policy_exemptions.list_for_management_group(
-            management_group_id=management_group, filter='atScope()')
+        result = policy_client.policy_exemptions.list_for_management_group(management_group_id=management_group, filter='atScope()')
     elif all([resource_type, resource_group, subscription]):
         namespace = id_parts.get('namespace')
-        parent_resource_path = '' if not id_parts.get(
-            'child_name_1') else (id_parts['type'] + '/' + id_parts['name'])
+        parent_resource_path = '' if not id_parts.get('child_name_1') else (id_parts['type'] + '/' + id_parts['name'])
         result = policy_client.policy_exemptions.list_for_resource(
             resource_group, namespace,
             parent_resource_path, resource_type, resource_name)
     elif resource_group:
-        result = policy_client.policy_exemptions.list_for_resource_group(
-            resource_group)
+        result = policy_client.policy_exemptions.list_for_resource_group(resource_group)
     elif subscription:
         result = policy_client.policy_exemptions.list()
     elif scope:
-        raise InvalidArgumentValueError(
-            'usage error `--scope`: must be a fully qualified ARM ID.')
+        raise InvalidArgumentValueError('usage error `--scope`: must be a fully qualified ARM ID.')
     else:
-        raise ArgumentUsageError(
-            'usage error: --scope ARM_ID | --resource-group NAME')
+        raise ArgumentUsageError('usage error: --scope ARM_ID | --resource-group NAME')
 
     if not disable_scope_strict_match:
-        result = [i for i in result if i.id.lower().strip(
-            '/').startswith(_scope.lower().strip('/') + "/providers/microsoft.authorization/policyexemptions")]
+        result = [i for i in result if i.id.lower().strip('/').startswith(_scope.lower().strip('/') + "/providers/microsoft.authorization/policyexemptions")]
 
     return result
 
@@ -3044,8 +2871,7 @@ def cli_managementgroups_start_tenant_backfill(
 
 def cli_managementgroups_get_name_availability(cmd, client, group_name):
     from azure.mgmt.managementgroups.models import CheckNameAvailabilityRequest
-    checkNameAvailabilityRequest = CheckNameAvailabilityRequest(
-        name=group_name)
+    checkNameAvailabilityRequest = CheckNameAvailabilityRequest(name=group_name)
     return client.check_name_availability(checkNameAvailabilityRequest)
 
 
@@ -3082,8 +2908,7 @@ def cli_managementgroups_group_create(
     from azure.mgmt.managementgroups.models import (
         CreateManagementGroupRequest, CreateManagementGroupDetails, CreateParentGroupInfo)
     create_parent_grp_info = CreateParentGroupInfo(id=parent_id)
-    create_mgmt_grp_details = CreateManagementGroupDetails(
-        parent=create_parent_grp_info)
+    create_mgmt_grp_details = CreateManagementGroupDetails(parent=create_parent_grp_info)
     create_mgmt_grp_request = CreateManagementGroupRequest(
         name=group_name,
         display_name=display_name,
@@ -3103,8 +2928,7 @@ def cli_managementgroups_group_update_custom_func(
 
 def cli_managementgroups_group_update_get():
     from azure.mgmt.managementgroups.models import PatchManagementGroupRequest
-    update_parameters = PatchManagementGroupRequest(
-        display_name=None, parent_group_id=None)
+    update_parameters = PatchManagementGroupRequest(display_name=None, parent_group_id=None)
     return update_parameters
 
 
@@ -3131,8 +2955,7 @@ def cli_managementgroups_subscription_show(
         client,
         group_name,
         subscription):
-    subscription_id = _get_subscription_id_from_subscription(
-        cmd.cli_ctx, subscription)
+    subscription_id = _get_subscription_id_from_subscription(cmd.cli_ctx, subscription)
     return client.get_subscription(group_name, subscription_id)
 
 
@@ -3170,8 +2993,7 @@ def cli_hierarchy_settings_create(
         require_authorization_for_group_creation=None,
         default_management_group=None):
     from azure.mgmt.managementgroups.models import CreateOrUpdateSettingsRequest
-    create_or_update_parameters = CreateOrUpdateSettingsRequest(
-        require_authorization_for_group_creation=require_authorization_for_group_creation, default_management_group=default_management_group)
+    create_or_update_parameters = CreateOrUpdateSettingsRequest(require_authorization_for_group_creation=require_authorization_for_group_creation, default_management_group=default_management_group)
     return client.create_or_update(group_name, create_or_update_parameters)
 
 
@@ -3193,8 +3015,7 @@ def cli_hierarchysettings_group_update_custom_func(
 
 def cli_hierarchysettings_group_update_get():
     from azure.mgmt.managementgroups.models import CreateOrUpdateSettingsRequest
-    update_parameters = CreateOrUpdateSettingsRequest(
-        require_authorization_for_group_creation=None, default_management_group=None)
+    update_parameters = CreateOrUpdateSettingsRequest(require_authorization_for_group_creation=None, default_management_group=None)
     return update_parameters
 
 
@@ -3315,8 +3136,7 @@ def get_lock(cmd, lock_name=None, resource_group=None, resource_provider_namespa
             try:
                 kwargs_list.append(_parse_lock_id(id_arg))
             except AttributeError:
-                logger.error(
-                    'az lock show: error: argument --ids: invalid ResourceId value: \'%s\'', id_arg)
+                logger.error('az lock show: error: argument --ids: invalid ResourceId value: \'%s\'', id_arg)
                 return
         results = [get_lock(cmd, **kwargs) for kwargs in kwargs_list]
         return results[0] if len(results) == 1 else results
@@ -3369,8 +3189,7 @@ def delete_lock(cmd, lock_name=None, resource_group=None, resource_provider_name
             try:
                 kwargs_list.append(_parse_lock_id(id_arg))
             except AttributeError:
-                logger.error(
-                    'az lock delete: error: argument --ids: invalid ResourceId value: \'%s\'', id_arg)
+                logger.error('az lock delete: error: argument --ids: invalid ResourceId value: \'%s\'', id_arg)
                 return
         results = [delete_lock(cmd, **kwargs) for kwargs in kwargs_list]
         return results[0] if len(results) == 1 else results
@@ -3414,8 +3233,7 @@ def create_lock(cmd, lock_name, level,
     :param notes: Notes about this lock.
     :type notes: str
     """
-    ManagementLockObject = get_sdk(
-        cmd.cli_ctx, ResourceType.MGMT_RESOURCE_LOCKS, 'ManagementLockObject', mod='models')
+    ManagementLockObject = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_LOCKS, 'ManagementLockObject', mod='models')
     parameters = ManagementLockObject(level=level, notes=notes, name=lock_name)
 
     lock_client = _resource_lock_client_factory(cmd.cli_ctx)
@@ -3450,11 +3268,9 @@ def update_lock(cmd, lock_name=None, resource_group=None, resource_provider_name
             try:
                 kwargs_list.append(_parse_lock_id(id_arg))
             except AttributeError:
-                logger.error(
-                    'az lock update: error: argument --ids: invalid ResourceId value: \'%s\'', id_arg)
+                logger.error('az lock update: error: argument --ids: invalid ResourceId value: \'%s\'', id_arg)
                 return
-        results = [update_lock(cmd, level=level, notes=notes, **kwargs)
-                   for kwargs in kwargs_list]
+        results = [update_lock(cmd, level=level, notes=notes, **kwargs) for kwargs in kwargs_list]
         return results[0] if len(results) == 1 else results
 
     lock_client = _resource_lock_client_factory(cmd.cli_ctx)
@@ -3475,8 +3291,7 @@ def update_lock(cmd, lock_name=None, resource_group=None, resource_provider_name
         _update_lock_parameters(params, level, notes)
         return lock_client.management_locks.create_or_update_at_subscription_level(lock_name, params)
     if resource_name is None:
-        params = lock_client.management_locks.get_at_resource_group_level(
-            resource_group, lock_name)
+        params = lock_client.management_locks.get_at_resource_group_level(resource_group, lock_name)
         _update_lock_parameters(params, level, notes)
         return lock_client.management_locks.create_or_update_at_resource_group_level(
             resource_group, lock_name, params)
@@ -3609,14 +3424,12 @@ class _ResourceUtils:  # pylint: disable=too-many-instance-attributes
         try:
             res = json.loads(properties)
         except json.decoder.JSONDecodeError as ex:
-            raise CLIError(
-                'Error parsing JSON.\n{}\n{}'.format(properties, ex))
+            raise CLIError('Error parsing JSON.\n{}\n{}'.format(properties, ex))
 
         if not is_full_object:
             if not location:
                 if self.resource_id:
-                    rg_name = parse_resource_id(self.resource_id)[
-                        'resource_group']
+                    rg_name = parse_resource_id(self.resource_id)['resource_group']
                 else:
                     rg_name = self.resource_group_name
                 location = self.rcf.resource_groups.get(rg_name).location
@@ -3656,8 +3469,7 @@ class _ResourceUtils:  # pylint: disable=too-many-instance-attributes
             cls = add_response_body
 
         if self.resource_id:
-            resource = self.rcf.resources.get_by_id(
-                self.resource_id, self.api_version, cls=cls)
+            resource = self.rcf.resources.get_by_id(self.resource_id, self.api_version, cls=cls)
         else:
             resource = self.rcf.resources.get(self.resource_group_name,
                                               self.resource_provider_namespace,
@@ -3697,8 +3509,7 @@ class _ResourceUtils:  # pylint: disable=too-many-instance-attributes
 
         if is_incremental is True:
             if not tags:
-                raise CLIError(
-                    "When modifying tag incrementally, the parameters of tag must have specific values.")
+                raise CLIError("When modifying tag incrementally, the parameters of tag must have specific values.")
             if resource.tags:
                 resource.tags.update(tags)
                 tags = resource.tags
@@ -3773,17 +3584,14 @@ class _ResourceUtils:  # pylint: disable=too-many-instance-attributes
                     "resource_provider_namespace", self.resource_provider_namespace, 'str'),
                 parentResourcePath=serialize.url(
                     "parent_resource_path", self.parent_resource_path, 'str', skip_quote=True),
-                resourceType=serialize.url(
-                    "resource_type", self.resource_type, 'str', skip_quote=True),
-                resourceName=serialize.url(
-                    "resource_name", self.resource_name, 'str'),
+                resourceType=serialize.url("resource_type", self.resource_type, 'str', skip_quote=True),
+                resourceName=serialize.url("resource_name", self.resource_name, 'str'),
                 subscriptionId=serialize.url(
                     "self._config.subscription_id", self.rcf.resources._config.subscription_id, 'str'),
                 action=serialize.url("action", action, 'str'))
 
         # Construct parameters
-        query_parameters['api-version'] = serialize.query(
-            "api_version", self.api_version, 'str')
+        query_parameters['api-version'] = serialize.query("api_version", self.api_version, 'str')
 
         # Construct headers
         header_parameters = {}
@@ -3792,19 +3600,16 @@ class _ResourceUtils:  # pylint: disable=too-many-instance-attributes
         header_parameters['accept-language'] = 'en-US'
 
         body_content_kwargs = {}
-        body_content_kwargs['content'] = json.loads(
-            request_body) if request_body else None
+        body_content_kwargs['content'] = json.loads(request_body) if request_body else None
 
         # Construct and send request
         def long_running_send():
-            request = client.post(url, query_parameters,
-                                  header_parameters, **body_content_kwargs)
+            request = client.post(url, query_parameters, header_parameters, **body_content_kwargs)
             pipeline_response = client._pipeline.run(request, stream=False)
             return pipeline_response.http_response.internal_response
 
         def get_long_running_status(status_link, headers=None):
-            request = client.get(
-                status_link, query_parameters, header_parameters)
+            request = client.get(status_link, query_parameters, header_parameters)
             if headers:
                 request.headers.update(headers)
             pipeline_response = client._pipeline.run(request, stream=False)
@@ -3826,14 +3631,12 @@ class _ResourceUtils:  # pylint: disable=too-many-instance-attributes
         provider = rcf.providers.get(resource_provider_namespace)
 
         # If available, we will use parent resource's api-version
-        resource_type_str = (parent_resource_path.split(
-            '/')[0] if parent_resource_path else resource_type)
+        resource_type_str = (parent_resource_path.split('/')[0] if parent_resource_path else resource_type)
 
         rt = [t for t in provider.resource_types
               if t.resource_type.lower() == resource_type_str.lower()]
         if not rt:
-            raise IncorrectUsageError(
-                'Resource type {} not found.'.format(resource_type_str))
+            raise IncorrectUsageError('Resource type {} not found.'.format(resource_type_str))
         if len(rt) == 1 and rt[0].api_versions:
             # If latest_include_preview is true,
             # the last api-version will be taken regardless of whether it is preview version or not
@@ -3855,8 +3658,7 @@ class _ResourceUtils:  # pylint: disable=too-many-instance-attributes
             return AZURE_API_PROFILES['latest'][ResourceType.MGMT_RESOURCE_RESOURCES]
 
         if 'namespace' not in parts:
-            raise CLIError(
-                'The type of value entered by --ids parameter is not supported.')
+            raise CLIError('The type of value entered by --ids parameter is not supported.')
 
         namespace = parts.get('child_namespace_1', parts['namespace'])
         if parts.get('child_type_2'):
@@ -3881,8 +3683,7 @@ class _ResourceUtils:  # pylint: disable=too-many-instance-attributes
 
 def install_bicep_cli(cmd, version=None, target_platform=None):
     # The parameter version is actually a git tag here.
-    ensure_bicep_installation(
-        release_tag=version, target_platform=target_platform)
+    ensure_bicep_installation(release_tag=version, target_platform=target_platform)
 
 
 def uninstall_bicep_cli(cmd):
@@ -3891,8 +3692,7 @@ def uninstall_bicep_cli(cmd):
 
 def upgrade_bicep_cli(cmd, target_platform=None):
     latest_release_tag = get_bicep_latest_release_tag()
-    ensure_bicep_installation(
-        release_tag=latest_release_tag, target_platform=target_platform)
+    ensure_bicep_installation(release_tag=latest_release_tag, target_platform=target_platform)
 
 
 def build_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None):
@@ -3912,8 +3712,7 @@ def publish_bicep_file(cmd, file, target):
     if supports_bicep_publish():
         run_bicep_command(["publish", file, "--target", target])
     else:
-        logger.error(
-            "az bicep publish could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v0.4.1008 or later.")
+        logger.error("az bicep publish could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v0.4.1008 or later.")
 
 
 def decompile_bicep_file(cmd, file):
@@ -3927,49 +3726,39 @@ def show_bicep_cli_version(cmd):
 def list_bicep_cli_versions(cmd):
     return get_bicep_available_release_tags()
 
-
 def create_resourcemanager_privatelink(
-        cmd, resource_group, name, location):
+    cmd, resource_group, name, location):
     rcf = _resource_privatelinks_client_factory(cmd.cli_ctx)
-    ResourceManagementPrivateLinkLocation = cmd.get_models(
-        'ResourceManagementPrivateLinkLocation')
-    loc = ResourceManagementPrivateLinkLocation(location=location)
-    return rcf.resource_management_private_link.put(resource_group_name=resource_group, rmpl_name=name, parameters=loc)
-
+    return rcf.resource_management_private_link.put(resource_group, name, location)
 
 def get_resourcemanager_privatelink(cmd, resource_group, name):
     rcf = _resource_privatelinks_client_factory(cmd.cli_ctx)
-    return rcf.resource_management_private_link.get(resource_group, name)
-
+    return rcf.resource_management_private_link.get(resource_group, name)    
 
 def list_resourcemanager_privatelink(cmd, resource_group=None):
     rcf = _resource_privatelinks_client_factory(cmd.cli_ctx)
-    return rcf.resource_management_private_link.list_by_resource_group(resource_group) if resource_group else rcf.resource_management_private_link.list()
-
-
+    if resource_group:
+        return rcf.resource_management_private_link.list_by_resource_group(resource_group)
+    else:    
+        return rcf.resource_management_private_link.list()
+    
 def delete_resourcemanager_privatelink(cmd, resource_group, name):
     rcf = _resource_privatelinks_client_factory(cmd.cli_ctx)
     return rcf.resource_management_private_link.delete(resource_group, name)
 
-
 def create_private_link_association(cmd, management_group_id, name, private_link, public_network_access):
     rcf = _resource_privatelinks_client_factory(cmd.cli_ctx)
-    PrivateLinkProperties, PrivateLinkObject = cmd.get_models(
-        'PrivateLinkAssociationProperties', 'PrivateLinkAssociationObject')
-    pl = PrivateLinkObject(properties=PrivateLinkProperties(
-        private_link=private_link, public_network_access=public_network_access))
+    PrivateLinkProperties, PrivateLinkObject = cmd.get_models('PrivateLinkAssociationProperties', 'PrivateLinkAssociationObject')
+    pl = PrivateLinkObject(properties=PrivateLinkProperties(private_link=private_link, public_network_access=public_network_access))
     return rcf.private_link_association.put(group_id=management_group_id, pla_id=name, parameters=pl)
-
 
 def get_private_link_association(cmd, management_group_id, name):
     rcf = _resource_privatelinks_client_factory(cmd.cli_ctx)
     return rcf.private_link_association.get(group_id=management_group_id, pla_id=name)
 
-
 def delete_private_link_association(cmd, management_group_id, name):
     rcf = _resource_privatelinks_client_factory(cmd.cli_ctx)
-    return rcf.private_link_association.delete(group_id=management_group_id, pla_id=name)
-
+    return rcf.private_link_association.put(group_id=management_group_id, pla_id=name)
 
 def list_private_link_association(cmd, management_group_id):
     rcf = _resource_privatelinks_client_factory(cmd.cli_ctx)

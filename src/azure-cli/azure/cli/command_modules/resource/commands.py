@@ -44,21 +44,8 @@ resource_managementgroups_entities_sdk = CliCommandType(
     exception_handler=managementgroups_exception_handler
 )
 
-resource_resourcemanagementprivatelink_sdk = CliCommandType(
-    operations_tmpl='azure.mgmt.resource.privatelinks.operations#ResourceManagementPrivateLinkOperations.{}',
-    client_factory=cf_resource_resourcemanagementprivatelinks,
-    resource_type=ResourceType.MGMT_RESOURCE_PRIVATELINKS
-)
-
-resource_privatelinksassociation_sdk = CliCommandType(
-    operations_tmpl='azure.mgmt.resource.privatelinks.operations#PrivateLinkAssociationOperations.{}',
-    client_factory=cf_resource_privatelinkassociations,
-    resource_type=ResourceType.MGMT_RESOURCE_PRIVATELINKS
-)
 
 # Resource group commands
-
-
 def transform_resource_group_list(result):
     return [OrderedDict([
         ('Name', r['name']), ('Location', r['location']), ('Status', r['properties']['provisioningState'])]) for r in result]
@@ -67,8 +54,7 @@ def transform_resource_group_list(result):
 def transform_resource_list(result):
     transformed = []
     for r in result:
-        res = OrderedDict([('Name', r['name']), ('ResourceGroup', r['resourceGroup']),
-                          ('Location', r['location']), ('Type', r['type'])])
+        res = OrderedDict([('Name', r['name']), ('ResourceGroup', r['resourceGroup']), ('Location', r['location']), ('Type', r['type'])])
         try:
             res['Status'] = r['properties']['provisioningStatus']
         except TypeError:
@@ -80,8 +66,7 @@ def transform_resource_list(result):
 def transform_deployment(result):
     r = result
     format_result = OrderedDict([('Name', r['name']),
-                                 ('State', r['properties']
-                                  ['provisioningState']),
+                                 ('State', r['properties']['provisioningState']),
                                  ('Timestamp', r['properties']['timestamp']),
                                  ('Mode', r['properties']['mode'])])
 
@@ -93,8 +78,7 @@ def transform_deployment(result):
 
 
 def transform_deployments_list(result):
-    sort_list = sorted(
-        result, key=lambda deployment: deployment['properties']['timestamp'])
+    sort_list = sorted(result, key=lambda deployment: deployment['properties']['timestamp'])
     return [transform_deployment(r) for r in sort_list]
 
 
@@ -102,8 +86,7 @@ def transform_deployments_list(result):
 def load_command_table(self, _):
     from azure.cli.core.commands.arm import deployment_validate_table_format
 
-    resource_custom = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.resource.custom#{}')
+    resource_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.resource.custom#{}')
 
     resource_group_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.resource.resources.operations#ResourceGroupsOperations.{}',
@@ -224,6 +207,18 @@ def load_command_table(self, _):
         resource_type=ResourceType.MGMT_RESOURCE_TEMPLATESPECS
     )
 
+    resource_resourcemanagementprivatelink_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.resource.privatelinks.operations#ResourceManagementPrivateLinkOperations.{}',
+        client_factory=cf_resource_resourcemanagementprivatelinks,
+        resource_type=ResourceType.MGMT_RESOURCE_PRIVATELINKS
+    )
+
+    resource_privatelinksassociation_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.resource.privatelinks.operations#PrivateLinkAssociationOperations.{}',
+        client_factory=cf_resource_privatelinkassociations,
+        resource_type=ResourceType.MGMT_RESOURCE_PRIVATELINKS
+    )
+
     with self.command_group('account lock', resource_lock_sdk, resource_type=ResourceType.MGMT_RESOURCE_LOCKS) as g:
         g.custom_command('create', 'create_lock')
         g.custom_command('delete', 'delete_lock')
@@ -232,16 +227,13 @@ def load_command_table(self, _):
         g.custom_command('update', 'update_lock')
 
     with self.command_group('group', resource_group_sdk, resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
-        g.command('delete', 'begin_delete',
-                  supports_no_wait=True, confirmation=True)
+        g.command('delete', 'begin_delete', supports_no_wait=True, confirmation=True)
         g.show_command('show', 'get')
         g.command('exists', 'check_existence')
-        g.custom_command('list', 'list_resource_groups',
-                         table_transformer=transform_resource_group_list)
+        g.custom_command('list', 'list_resource_groups', table_transformer=transform_resource_group_list)
         g.custom_command('create', 'create_resource_group')
         g.custom_command('export', 'export_group_as_template')
-        g.generic_update_command(
-            'update', custom_func_name='update_resource_group', custom_func_type=resource_custom)
+        g.generic_update_command('update', custom_func_name='update_resource_group', custom_func_type=resource_custom)
         g.wait_command('wait')
 
     with self.command_group('group lock', resource_type=ResourceType.MGMT_RESOURCE_LOCKS) as g:
@@ -255,12 +247,10 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_resource')
         g.custom_command('delete', 'delete_resource')
         g.custom_show_command('show', 'show_resource')
-        g.custom_command('list', 'list_resources',
-                         table_transformer=transform_resource_list)
+        g.custom_command('list', 'list_resources', table_transformer=transform_resource_list)
         g.custom_command('tag', 'tag_resource')
         g.custom_command('move', 'move_resource')
-        g.custom_command('invoke-action', 'invoke_resource_action',
-                         transform=DeploymentOutputLongRunningOperation(self.cli_ctx))
+        g.custom_command('invoke-action', 'invoke_resource_action', transform=DeploymentOutputLongRunningOperation(self.cli_ctx))
         g.generic_update_command('update', getter_name='show_resource', setter_name='update_resource',
                                  client_factory=None)
         g.wait_command('wait', getter_name='show_resource')
@@ -286,23 +276,18 @@ def load_command_table(self, _):
     with self.command_group('feature', resource_feature_sdk, client_factory=cf_features, resource_type=PROFILE_TYPE,
                             min_api='2019-03-02-hybrid') as g:
         feature_table_transform = '{Name:name, RegistrationState:properties.state}'
-        g.custom_command('list', 'list_features',
-                         table_transformer='[].' + feature_table_transform)
-        g.show_command(
-            'show', 'get', table_transformer=feature_table_transform)
+        g.custom_command('list', 'list_features', table_transformer='[].' + feature_table_transform)
+        g.show_command('show', 'get', table_transformer=feature_table_transform)
         g.custom_command('register', 'register_feature')
         g.custom_command('unregister', 'unregister_feature')
 
     with self.command_group('feature registration', resource_feature_registration_sdk, client_factory=cf_feature_registrations, resource_type=PROFILE_TYPE,
                             min_api='2021-07-01') as g:
         feature_table_transform = '{Name:name, RegistrationState:properties.state}'
-        g.custom_command('list', 'list_feature_registrations',
-                         table_transformer='[].' + feature_table_transform)
-        g.show_command(
-            'show', 'get', table_transformer=feature_table_transform)
+        g.custom_command('list', 'list_feature_registrations', table_transformer='[].' + feature_table_transform)
+        g.show_command('show', 'get', table_transformer=feature_table_transform)
         g.custom_command('create', 'create_feature_registration')
-        g.custom_command(
-            'delete ', 'delete_feature_registration', confirmation=True)
+        g.custom_command('delete ', 'delete_feature_registration', confirmation=True)
 
     # Tag commands
     with self.command_group('tag', resource_tag_sdk, resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
@@ -317,42 +302,32 @@ def load_command_table(self, _):
     with self.command_group('group deployment', resource_deployment_sdk, deprecate_info=self.deprecate(redirect='deployment group', hide=True)) as g:
         g.custom_command('create', 'deploy_arm_template', supports_no_wait=True, validator=process_deployment_create_namespace,
                          table_transformer=transform_deployment, exception_handler=handle_template_based_exception)
-        g.command('list', 'list_by_resource_group',
-                  table_transformer=transform_deployments_list, min_api='2017-05-10')
-        g.command(
-            'list', 'list', table_transformer=transform_deployments_list, max_api='2016-09-01')
+        g.command('list', 'list_by_resource_group', table_transformer=transform_deployments_list, min_api='2017-05-10')
+        g.command('list', 'list', table_transformer=transform_deployments_list, max_api='2016-09-01')
         g.show_command('show', 'get', table_transformer=transform_deployment)
         g.command('delete', 'begin_delete', supports_no_wait=True)
-        g.custom_command('validate', 'validate_arm_template', table_transformer=deployment_validate_table_format,
-                         exception_handler=handle_template_based_exception)
+        g.custom_command('validate', 'validate_arm_template', table_transformer=deployment_validate_table_format, exception_handler=handle_template_based_exception)
         g.custom_command('export', 'export_deployment_as_template')
         g.wait_command('wait')
         g.command('cancel', 'cancel')
 
     with self.command_group('group deployment operation', resource_deployment_operation_sdk, deprecate_info=self.deprecate(redirect='deployment operation group', hide=True)) as g:
         g.command('list', 'list')
-        g.custom_show_command(
-            'show', 'get_deployment_operations', client_factory=cf_deployment_operations)
+        g.custom_show_command('show', 'get_deployment_operations', client_factory=cf_deployment_operations)
 
     # az deployment
     with self.command_group('deployment', resource_deployment_sdk, min_api='2018-05-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
-        g.custom_command('list', 'list_deployments_at_subscription_scope', table_transformer=transform_deployments_list,
-                         deprecate_info=g.deprecate(redirect='deployment sub list', hide=True))
-        g.custom_show_command('show', 'get_deployment_at_subscription_scope',
-                              deprecate_info=g.deprecate(redirect='deployment sub show', hide=True))
-        g.custom_command('delete', 'delete_deployment_at_subscription_scope', supports_no_wait=True,
-                         deprecate_info=g.deprecate(redirect='deployment sub delete', hide=True))
+        g.custom_command('list', 'list_deployments_at_subscription_scope', table_transformer=transform_deployments_list, deprecate_info=g.deprecate(redirect='deployment sub list', hide=True))
+        g.custom_show_command('show', 'get_deployment_at_subscription_scope', deprecate_info=g.deprecate(redirect='deployment sub show', hide=True))
+        g.custom_command('delete', 'delete_deployment_at_subscription_scope', supports_no_wait=True, deprecate_info=g.deprecate(redirect='deployment sub delete', hide=True))
         g.custom_command('validate', 'validate_arm_template_at_subscription_scope', validator=process_deployment_create_namespace,
                          table_transformer=deployment_validate_table_format, exception_handler=handle_template_based_exception,
                          deprecate_info=g.deprecate(redirect='deployment sub validate', hide=True))
         g.custom_command('create', 'deploy_arm_template_at_subscription_scope', supports_no_wait=True, validator=process_deployment_create_namespace,
                          exception_handler=handle_template_based_exception, deprecate_info=g.deprecate(redirect='deployment sub create', hide=True))
-        g.custom_command('export', 'export_template_at_subscription_scope',
-                         deprecate_info=g.deprecate(redirect='deployment sub export', hide=True))
-        g.custom_wait_command('wait', 'get_deployment_at_subscription_scope',
-                              deprecate_info=g.deprecate(redirect='deployment sub wait', hide=True))
-        g.custom_command('cancel', 'cancel_deployment_at_subscription_scope',
-                         deprecate_info=g.deprecate(redirect='deployment sub cancel', hide=True))
+        g.custom_command('export', 'export_template_at_subscription_scope', deprecate_info=g.deprecate(redirect='deployment sub export', hide=True))
+        g.custom_wait_command('wait', 'get_deployment_at_subscription_scope', deprecate_info=g.deprecate(redirect='deployment sub wait', hide=True))
+        g.custom_command('cancel', 'cancel_deployment_at_subscription_scope', deprecate_info=g.deprecate(redirect='deployment sub cancel', hide=True))
 
     with self.command_group('deployment operation', resource_deployment_operation_sdk, min_api='2018-05-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
         g.custom_command('list', 'list_deployment_operations_at_subscription_scope',
@@ -362,12 +337,9 @@ def load_command_table(self, _):
 
     # az deployment sub
     with self.command_group('deployment sub', resource_deployment_sdk, min_api='2018-05-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
-        g.custom_command('list', 'list_deployments_at_subscription_scope',
-                         table_transformer=transform_deployments_list)
-        g.custom_show_command(
-            'show', 'get_deployment_at_subscription_scope', table_transformer=transform_deployment)
-        g.custom_command(
-            'delete', 'delete_deployment_at_subscription_scope', supports_no_wait=True)
+        g.custom_command('list', 'list_deployments_at_subscription_scope', table_transformer=transform_deployments_list)
+        g.custom_show_command('show', 'get_deployment_at_subscription_scope', table_transformer=transform_deployment)
+        g.custom_command('delete', 'delete_deployment_at_subscription_scope', supports_no_wait=True)
         g.custom_command('validate', 'validate_arm_template_at_subscription_scope', validator=process_deployment_create_namespace,
                          table_transformer=deployment_validate_table_format, exception_handler=handle_template_based_exception)
         g.custom_command('create', 'deploy_arm_template_at_subscription_scope', supports_no_wait=True, validator=process_deployment_create_namespace,
@@ -379,39 +351,28 @@ def load_command_table(self, _):
         g.custom_command('cancel', 'cancel_deployment_at_subscription_scope')
 
     with self.command_group('deployment operation sub', resource_deployment_operation_sdk, min_api='2018-05-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
-        g.custom_command(
-            'list', 'list_deployment_operations_at_subscription_scope')
-        g.custom_show_command(
-            'show', 'get_deployment_operations_at_subscription_scope', client_factory=cf_deployment_operations)
+        g.custom_command('list', 'list_deployment_operations_at_subscription_scope')
+        g.custom_show_command('show', 'get_deployment_operations_at_subscription_scope', client_factory=cf_deployment_operations)
 
     with self.command_group('deployment-scripts', resource_deploymentscripts_sdk, resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTSCRIPTS) as g:
         g.custom_command('list', 'list_deployment_scripts')
         g.custom_show_command('show', 'get_deployment_script')
         g.custom_command('show-log', 'get_deployment_script_logs')
-        g.custom_command('delete', 'delete_deployment_script',
-                         confirmation=True)
+        g.custom_command('delete', 'delete_deployment_script', confirmation=True)
 
     with self.command_group('ts', resource_templatespecs_sdk, resource_type=ResourceType.MGMT_RESOURCE_TEMPLATESPECS, min_api='2019-06-01-preview') as g:
-        g.custom_command('create', 'create_template_spec',
-                         validator=process_ts_create_or_update_namespace)
-        g.custom_command('update', 'update_template_spec',
-                         validator=process_ts_create_or_update_namespace, confirmation=True)
-        g.custom_command('export', 'export_template_spec',
-                         validator=_validate_template_spec_out)
-        g.custom_show_command('show', 'get_template_spec',
-                              validator=_validate_template_spec)
+        g.custom_command('create', 'create_template_spec', validator=process_ts_create_or_update_namespace)
+        g.custom_command('update', 'update_template_spec', validator=process_ts_create_or_update_namespace, confirmation=True)
+        g.custom_command('export', 'export_template_spec', validator=_validate_template_spec_out)
+        g.custom_show_command('show', 'get_template_spec', validator=_validate_template_spec)
         g.custom_command('list', 'list_template_specs')
-        g.custom_command('delete', 'delete_template_spec',
-                         validator=_validate_template_spec, confirmation=True)
+        g.custom_command('delete', 'delete_template_spec', validator=_validate_template_spec, confirmation=True)
 
     # az deployment group
     with self.command_group('deployment group', resource_deployment_sdk, resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
-        g.custom_command('list', 'list_deployments_at_resource_group',
-                         table_transformer=transform_deployments_list)
-        g.custom_show_command(
-            'show', 'get_deployment_at_resource_group', table_transformer=transform_deployment)
-        g.custom_command(
-            'delete', 'delete_deployment_at_resource_group', supports_no_wait=True)
+        g.custom_command('list', 'list_deployments_at_resource_group', table_transformer=transform_deployments_list)
+        g.custom_show_command('show', 'get_deployment_at_resource_group', table_transformer=transform_deployment)
+        g.custom_command('delete', 'delete_deployment_at_resource_group', supports_no_wait=True)
         g.custom_command('validate', 'validate_arm_template_at_resource_group', validator=process_deployment_create_namespace,
                          table_transformer=deployment_validate_table_format, exception_handler=handle_template_based_exception)
         g.custom_command('create', 'deploy_arm_template_at_resource_group', supports_no_wait=True, validator=process_deployment_create_namespace,
@@ -423,19 +384,14 @@ def load_command_table(self, _):
         g.custom_command('cancel', 'cancel_deployment_at_resource_group')
 
     with self.command_group('deployment operation group', resource_deployment_operation_sdk, resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
-        g.custom_command(
-            'list', 'list_deployment_operations_at_resource_group')
-        g.custom_show_command(
-            'show', 'get_deployment_operations_at_resource_group', client_factory=cf_deployment_operations)
+        g.custom_command('list', 'list_deployment_operations_at_resource_group')
+        g.custom_show_command('show', 'get_deployment_operations_at_resource_group', client_factory=cf_deployment_operations)
 
     # az deployment mg
     with self.command_group('deployment mg', resource_deployment_sdk, min_api='2019-07-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
-        g.custom_command('list', 'list_deployments_at_management_group',
-                         table_transformer=transform_deployments_list)
-        g.custom_show_command(
-            'show', 'get_deployment_at_management_group', table_transformer=transform_deployment)
-        g.custom_command(
-            'delete', 'delete_deployment_at_management_group', supports_no_wait=True)
+        g.custom_command('list', 'list_deployments_at_management_group', table_transformer=transform_deployments_list)
+        g.custom_show_command('show', 'get_deployment_at_management_group', table_transformer=transform_deployment)
+        g.custom_command('delete', 'delete_deployment_at_management_group', supports_no_wait=True)
         g.custom_command('validate', 'validate_arm_template_at_management_group', validator=process_deployment_create_namespace,
                          table_transformer=deployment_validate_table_format, exception_handler=handle_template_based_exception)
         g.custom_command('create', 'deploy_arm_template_at_management_group', supports_no_wait=True, validator=process_deployment_create_namespace,
@@ -447,19 +403,14 @@ def load_command_table(self, _):
         g.custom_command('cancel', 'cancel_deployment_at_management_group')
 
     with self.command_group('deployment operation mg', resource_deployment_operation_sdk, min_api='2019-07-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
-        g.custom_command(
-            'list', 'list_deployment_operations_at_management_group')
-        g.custom_show_command(
-            'show', 'get_deployment_operations_at_management_group', client_factory=cf_deployment_operations)
+        g.custom_command('list', 'list_deployment_operations_at_management_group')
+        g.custom_show_command('show', 'get_deployment_operations_at_management_group', client_factory=cf_deployment_operations)
 
     # az deployment tenant
     with self.command_group('deployment tenant', resource_deployment_sdk, min_api='2019-07-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
-        g.custom_command('list', 'list_deployments_at_tenant_scope',
-                         table_transformer=transform_deployments_list)
-        g.custom_show_command(
-            'show', 'get_deployment_at_tenant_scope', table_transformer=transform_deployment)
-        g.custom_command(
-            'delete', 'delete_deployment_at_tenant_scope', supports_no_wait=True)
+        g.custom_command('list', 'list_deployments_at_tenant_scope', table_transformer=transform_deployments_list)
+        g.custom_show_command('show', 'get_deployment_at_tenant_scope', table_transformer=transform_deployment)
+        g.custom_command('delete', 'delete_deployment_at_tenant_scope', supports_no_wait=True)
         g.custom_command('validate', 'validate_arm_template_at_tenant_scope', validator=process_deployment_create_namespace,
                          table_transformer=deployment_validate_table_format, exception_handler=handle_template_based_exception)
         g.custom_command('create', 'deploy_arm_template_at_tenant_scope', supports_no_wait=True, validator=process_deployment_create_namespace,
@@ -472,20 +423,17 @@ def load_command_table(self, _):
 
     with self.command_group('deployment operation tenant', resource_deployment_operation_sdk, min_api='2019-07-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
         g.custom_command('list', 'list_deployment_operations_at_tenant_scope')
-        g.custom_show_command(
-            'show', 'get_deployment_operations_at_tenant_scope', client_factory=cf_deployment_operations)
+        g.custom_show_command('show', 'get_deployment_operations_at_tenant_scope', client_factory=cf_deployment_operations)
 
     with self.command_group('policy assignment', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as g:
-        g.custom_command('create', 'create_policy_assignment',
-                         validator=process_assignment_create_namespace)
+        g.custom_command('create', 'create_policy_assignment', validator=process_assignment_create_namespace)
         g.custom_command('delete', 'delete_policy_assignment')
         g.custom_command('list', 'list_policy_assignment')
         g.custom_show_command('show', 'show_policy_assignment')
         g.custom_command('update', 'update_policy_assignment')
 
     with self.command_group('policy assignment identity', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2018-05-01') as g:
-        g.custom_command('assign', 'set_identity',
-                         validator=process_assign_identity_namespace, min_api='2021-06-01')
+        g.custom_command('assign', 'set_identity', validator=process_assign_identity_namespace, min_api='2021-06-01')
         g.custom_show_command('show', 'show_identity')
         g.custom_command('remove', 'remove_identity')
 
@@ -540,17 +488,14 @@ def load_command_table(self, _):
         g.custom_command('update', 'create_or_update_applicationdefinition')
         g.command('delete', 'begin_delete')
         g.custom_show_command('show', 'show_applicationdefinition')
-        g.command('list', 'list_by_resource_group',
-                  exception_handler=empty_on_404)
+        g.command('list', 'list_by_resource_group', exception_handler=empty_on_404)
 
     with self.command_group('account management-group tenant-backfill', resource_managementgroups_mixin_sdk, client_factory=cf_management_groups_mixin) as g:
-        g.custom_command(
-            'get', 'cli_managementgroups_get_tenant_backfill_status')
+        g.custom_command('get', 'cli_managementgroups_get_tenant_backfill_status')
         g.custom_command('start', 'cli_managementgroups_start_tenant_backfill')
 
     with self.command_group('account management-group', resource_managementgroups_mixin_sdk, client_factory=cf_management_groups_mixin) as g:
-        g.custom_command('check-name-availability',
-                         'cli_managementgroups_get_name_availability')
+        g.custom_command('check-name-availability', 'cli_managementgroups_get_name_availability')
 
     with self.command_group('account management-group', resource_managementgroups_sdk, client_factory=cf_management_groups) as g:
         g.custom_command('list', 'cli_managementgroups_group_list')
@@ -570,8 +515,7 @@ def load_command_table(self, _):
     with self.command_group('account management-group subscription', resource_managementgroups_subscriptions_sdk, client_factory=cf_management_group_subscriptions) as g:
         g.custom_command('add', 'cli_managementgroups_subscription_add')
         g.custom_show_command('show', 'cli_managementgroups_subscription_show')
-        g.custom_command('show-sub-under-mg',
-                         'cli_managementgroups_subscription_show_sub_under_mg')
+        g.custom_command('show-sub-under-mg', 'cli_managementgroups_subscription_show_sub_under_mg')
         g.custom_command('remove', 'cli_managementgroups_subscription_remove')
 
     with self.command_group('account management-group entities', resource_managementgroups_entities_sdk, client_factory=cf_management_group_entities) as g:
@@ -580,8 +524,7 @@ def load_command_table(self, _):
     with self.command_group('account management-group hierarchy-settings', resource_hierarchy_settings_sdk, client_factory=cf_hierarchy_settings) as g:
         g.custom_command('list', 'cli_hierarchy_settings_list')
         g.custom_command('create', 'cli_hierarchy_settings_create')
-        g.custom_command(
-            'delete', 'cli_hierarchy_settings_delete', confirmation=True)
+        g.custom_command('delete', 'cli_hierarchy_settings_delete', confirmation=True)
         g.generic_update_command(
             'update',
             getter_name='cli_hierarchysettings_group_update_get',
@@ -606,12 +549,10 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_resourcemanager_privatelink')
         g.custom_show_command('show', 'get_resourcemanager_privatelink')
         g.custom_command('list', 'list_resourcemanager_privatelink')
-        g.custom_command(
-            'delete', 'delete_resourcemanager_privatelink', confirmation=True)
+        g.custom_command('delete', 'delete_resourcemanager_privatelink', confirmation=True)
 
     with self.command_group('private-link association', resource_privatelinksassociation_sdk, resource_type=ResourceType.MGMT_RESOURCE_PRIVATELINKS) as g:
         g.custom_command('create', 'create_private_link_association')
         g.custom_show_command('show', 'get_private_link_association')
         g.custom_command('list', 'list_private_link_association')
-        g.custom_command(
-            'delete', 'delete_private_link_association', confirmation=True)
+        g.custom_command('delete', 'delete_private_link_association', confirmation=True)
