@@ -1655,7 +1655,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                             'using this shared access signature.')
         c.argument('content_type', help='Response header value for Content-Type when resource is accessed using this '
                                         'shared access signature.')
-        c.argument('id', options_list='--policy-name',
+        c.argument('policy_id', options_list='--policy-name',
                    help='The name of a stored access policy within the share\'s ACL.',
                    completer=get_storage_acl_name_completion_list(t_share_service, 'share_name',
                                                                   'get_share_access_policy'))
