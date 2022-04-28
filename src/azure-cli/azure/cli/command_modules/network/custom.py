@@ -2295,13 +2295,11 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):
         if record_set_name not in zone_obj:
             zone_obj[record_set_name] = OrderedDict()
 
+        record_obj = {'ttl': record_set.ttl}
+        if record_type not in zone_obj[record_set_name]:
+            zone_obj[record_set_name][record_type] = []
+
         for record in record_data:
-
-            record_obj = {'ttl': record_set.ttl}
-
-            if record_type not in zone_obj[record_set_name]:
-                zone_obj[record_set_name][record_type] = []
-
             if record_type == 'aaaa':
                 record_obj.update({'ip': record.ipv6_address})
             elif record_type == 'a':
@@ -2332,16 +2330,11 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):
                 record_obj.update({'txt': ''.join(record.value)})
 
             zone_obj[record_set_name][record_type].append(record_obj)
+
         if len(record_data) == 0:
-            record_obj = {'ttl': record_set.ttl}
-            if record_type not in zone_obj[record_set_name]:
-                zone_obj[record_set_name][record_type] = []
-            if record_type == 'aaaa':
-                record_obj.update({'ip': ''})
-            elif record_type == 'a':
+            if record_type == 'aaaa' or record_type == 'a':
                 record_obj.update({'ip': ''})
             elif record_type == 'cname':
-                record_obj.update({'alias': ''})
                 record_obj.update({'alias': ''})
             zone_obj[record_set_name][record_type].append(record_obj)
     zone_file_content = make_zone_file(zone_obj)
