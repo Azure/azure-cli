@@ -2287,6 +2287,8 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):
         # ignore empty record sets
         # if not record_data:
         #     continue
+        if not record_data:
+            record_data = []
         if not isinstance(record_data, list):
             record_data = [record_data]
 
@@ -2294,9 +2296,7 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):
             zone_obj[record_set_name] = OrderedDict()
 
         for record in record_data:
-            if record is None:
-                record_data = []
-                break
+
             record_obj = {'ttl': record_set.ttl}
 
             if record_type not in zone_obj[record_set_name]:
@@ -2332,7 +2332,7 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):
                 record_obj.update({'txt': ''.join(record.value)})
 
             zone_obj[record_set_name][record_type].append(record_obj)
-        if 0 == len(record_data):
+        if len(record_data) == 0:
             record_obj = {'ttl': record_set.ttl}
             if record_type not in zone_obj[record_set_name]:
                 zone_obj[record_set_name][record_type] = []
