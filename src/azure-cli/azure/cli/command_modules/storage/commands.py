@@ -17,7 +17,7 @@ from azure.cli.command_modules.storage._client_factory import (cf_sa, cf_blob_co
                                                                cf_or_policy, cf_container_client,
                                                                cf_queue_service, cf_table_service, cf_table_client,
                                                                cf_sa_blob_inventory, cf_blob_service, cf_queue_client,
-                                                               cf_share_client, cf_share_service)
+                                                               cf_share_client, cf_share_service,cf_container_lease_client)
 
 from azure.cli.core.commands import CliCommandType
 from azure.cli.core.commands.arm import show_exception_handler
@@ -471,11 +471,21 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command_oauth(
             'metadata show', 'get_container_metadata', exception_handler=show_exception_handler)
 
-        g.storage_command_oauth('lease acquire', 'acquire_container_lease')
-        g.storage_command_oauth('lease renew', 'renew_container_lease')
-        g.storage_command_oauth('lease release', 'release_container_lease')
-        g.storage_command_oauth('lease change', 'change_container_lease')
-        g.storage_command_oauth('lease break', 'break_container_lease')
+    container_lease_client_sdk = CliCommandType(
+        operations_tmpl='azure.multiapi.storagev2.blob._lease#BlobLeaseClient.{}',
+        client_factory=cf_container_lease_client,
+        resource_type=ResourceType.DATA_STORAGE_BLOB
+    )
+
+    with self.command_group('storage container lease', container_lease_client_sdk,
+                            resource_type=ResourceType.DATA_STORAGE_BLOB,
+                            custom_command_type=get_custom_sdk('blob', client_factory=cf_container_lease_client,
+                                                               resource_type=ResourceType.DATA_STORAGE_BLOB)) as g:
+        g.storage_custom_command_oauth('acquire', 'acquire_blob_lease')
+        g.storage_custom_command_oauth('renew', 'renew_blob_lease')
+        g.storage_command_oauth('break', 'break_lease')
+        g.storage_command_oauth('change', 'change')
+        g.storage_command_oauth('release', 'release')
 
     with self.command_group('storage container', custom_command_type=blob_service_custom_sdk,
                             resource_type=ResourceType.DATA_STORAGE_BLOB,
@@ -888,6 +898,10 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command_oauth('metadata update', 'set_metadata')
         g.storage_command_oauth('metadata show', 'get_directory_properties', exception_handler=show_exception_handler,
                                 transform=transform_metadata)
+        g.storage_custom_command_oauth('generate-sas', 'generate_sas_directory_uri',
+                                       custom_command_type=get_custom_sdk('fs_directory',
+                                                                          client_factory=cf_adls_service),
+                                       min_api='2020-02-10')
 
     with self.command_group('storage fs directory', custom_command_type=get_custom_sdk('azcopy', None))as g:
         g.storage_custom_command('upload', 'storage_fs_directory_copy', is_preview=True)

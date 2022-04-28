@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.35.0"
+VERSION = "2.36.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -59,7 +59,6 @@ DEPENDENCIES = [
     'azure-data-tables==12.2.0',
     'azure-datalake-store~=0.0.49',
     'azure-graphrbac~=0.60.0',
-    'azure-identity',
     'azure-keyvault-administration==4.0.0b3',
     'azure-keyvault-keys==4.5.1',
     'azure-keyvault~=1.1.0',
@@ -103,7 +102,7 @@ DEPENDENCIES = [
     'azure-mgmt-managementgroups~=1.0.0',
     'azure-mgmt-maps~=2.0.0',
     'azure-mgmt-marketplaceordering==1.1.0',
-    'azure-mgmt-media~=8.0',
+    'azure-mgmt-media~=9.0',
     'azure-mgmt-monitor~=3.0.0',
     'azure-mgmt-msi~=6.0.0',
     'azure-mgmt-netapp~=7.0.0',
@@ -117,7 +116,7 @@ DEPENDENCIES = [
     'azure-mgmt-redis~=13.1.0',
     'azure-mgmt-relay~=0.1.0',
     'azure-mgmt-reservations==0.6.0',  # TODO: Use requirements.txt instead of '==' #9781
-    'azure-mgmt-resource==20.0.0',
+    'azure-mgmt-resource==21.1.0b1',
     'azure-mgmt-search~=8.0',
     'azure-mgmt-security==2.0.0b1',
     'azure-mgmt-servicebus~=7.1.0',
@@ -146,7 +145,7 @@ DEPENDENCIES = [
     'jsondiff~=1.3.0',
     'packaging>=20.9,<22.0',
     'PyGithub~=1.38',
-    'PyNaCl~=1.4.0',
+    'PyNaCl~=1.5.0',
     'scp~=0.13.2',
     'semver==2.13.0',
     'six>=1.10.0',  # six is still used by countless extensions
