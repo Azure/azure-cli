@@ -1577,13 +1577,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('protocol', arg_type=get_enum_type(['http', 'https'], 'https'), help='Protocol to use.')
 
     with self.argument_context('storage share list') as c:
-        c.extra('num_results', arg_type=num_results_type)
+        c.argument('num_results', arg_type=num_results_type)
         c.extra('marker', help='An opaque continuation token. This value can be retrieved from the next_marker field '
                                'of a previous generator object if num_results was specified and that generator has '
                                'finished enumerating results. If specified, this generator will begin returning '
                                'results from the point where the previous generator stopped.')
         c.extra('timeout', timeout_type)
         c.argument('include_snapshots', help='Specifies that share snapshots be returned in the response.')
+        c.argument('include_metadata', help='Specifies that share metadata be returned in the response.')
         c.extra('prefix',
                 help='Filter the results to return only blobs whose name begins with the specified prefix.')
         c.ignore('name_starts_with')
