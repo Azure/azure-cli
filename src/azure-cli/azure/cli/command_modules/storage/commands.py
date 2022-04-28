@@ -17,7 +17,8 @@ from azure.cli.command_modules.storage._client_factory import (cf_sa, cf_blob_co
                                                                cf_or_policy, cf_container_client,
                                                                cf_queue_service, cf_table_service, cf_table_client,
                                                                cf_sa_blob_inventory, cf_blob_service, cf_queue_client,
-                                                               cf_share_client, cf_share_service, cf_container_lease_client)
+                                                               cf_share_client, cf_share_service,
+                                                               cf_container_lease_client)
 
 from azure.cli.core.commands import CliCommandType
 from azure.cli.core.commands.arm import show_exception_handler
