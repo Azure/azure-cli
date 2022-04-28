@@ -13,26 +13,6 @@ pr:
       - '*'
 
 jobs:
-- job: AutomationTest
-  displayName: Automation Test (Profile Latest)
-  timeoutInMinutes: 120
-  pool:
-    vmImage: 'ubuntu-20.04'
-  strategy:
-    matrix:
-      Python36:
-        python.version: '3.6'
-      Python38:
-        python.version: '3.8'
-      Python310:
-        python.version: '3.10'
-  steps:
-    - template: .azure-pipelines/templates/automation_test.yml
-      parameters:
-        pythonVersion: '$(python.version)'
-        profile: 'latest'
-        fullTest: true
-
 - job: AutomationTest20200901
   displayName: Automation Test (Profile 2020-09-01)
   timeoutInMinutes: 120
@@ -42,8 +22,8 @@ jobs:
     matrix:
       Python36:
         python.version: '3.6'
-      Python38:
-        python.version: '3.8'
+      Python39:
+        python.version: '3.9'
       Python310:
         python.version: '3.10'
   steps:
@@ -62,8 +42,8 @@ jobs:
     matrix:
       Python36:
         python.version: '3.6'
-      Python38:
-        python.version: '3.8'
+      Python39:
+        python.version: '3.9'
       Python310:
         python.version: '3.10'
   steps:
@@ -82,8 +62,8 @@ jobs:
     matrix:
       Python36:
         python.version: '3.6'
-      Python38:
-        python.version: '3.8'
+      Python39:
+        python.version: '3.9'
       Python310:
         python.version: '3.10'
   steps:
@@ -91,4 +71,103 @@ jobs:
       parameters:
         pythonVersion: '$(python.version)'
         profile: '2018-03-01-hybrid'
+        fullTest: true
+
+- job: AutomationFullTestPython36ProfileLatest
+  displayName: Automation Full Test Python36 Profile Latest
+  timeoutInMinutes: 9999
+  strategy:
+    maxParallel: 8
+    matrix:
+      instance1:
+        Instance_idx: 1
+      instance2:
+        Instance_idx: 2
+      instance3:
+        Instance_idx: 3
+      instance4:
+        Instance_idx: 4
+      instance5:
+        Instance_idx: 5
+      instance6:
+        Instance_idx: 6
+      instance7:
+        Instance_idx: 7
+      instance8:
+        Instance_idx: 8
+  pool:
+    vmImage: 'ubuntu-20.04'
+  steps:
+    - template: .azure-pipelines/templates/automation_test.yml
+      parameters:
+        pythonVersion: '3.6'
+        profile: 'latest'
+        instance_cnt: '8'
+        instance_idx: '$(Instance_idx)'
+        fullTest: true
+
+- job: AutomationFullTestPython39ProfileLatest
+  displayName: Automation Full Test Python39 Profile Latest
+  timeoutInMinutes: 9999
+  strategy:
+    maxParallel: 8
+    matrix:
+      instance1:
+        Instance_idx: 1
+      instance2:
+        Instance_idx: 2
+      instance3:
+        Instance_idx: 3
+      instance4:
+        Instance_idx: 4
+      instance5:
+        Instance_idx: 5
+      instance6:
+        Instance_idx: 6
+      instance7:
+        Instance_idx: 7
+      instance8:
+        Instance_idx: 8
+  pool:
+    vmImage: 'ubuntu-20.04'
+  steps:
+    - template: .azure-pipelines/templates/automation_test.yml
+      parameters:
+        pythonVersion: '3.9'
+        profile: 'latest'
+        instance_cnt: '8'
+        instance_idx: '$(Instance_idx)'
+        fullTest: true
+
+- job: AutomationFullTestPython310ProfileLatest
+  displayName: Automation Full Test Python310 Profile Latest
+  timeoutInMinutes: 9999
+  strategy:
+    maxParallel: 8
+    matrix:
+      instance1:
+        Instance_idx: 1
+      instance2:
+        Instance_idx: 2
+      instance3:
+        Instance_idx: 3
+      instance4:
+        Instance_idx: 4
+      instance5:
+        Instance_idx: 5
+      instance6:
+        Instance_idx: 6
+      instance7:
+        Instance_idx: 7
+      instance8:
+        Instance_idx: 8
+  pool:
+    vmImage: 'ubuntu-20.04'
+  steps:
+    - template: .azure-pipelines/templates/automation_test.yml
+      parameters:
+        pythonVersion: '3.10'
+        profile: 'latest'
+        instance_cnt: '8'
+        instance_idx: '$(Instance_idx)'
         fullTest: true

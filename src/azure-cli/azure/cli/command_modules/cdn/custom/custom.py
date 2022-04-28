@@ -39,7 +39,7 @@ from azure.mgmt.cdn.models import (Endpoint, SkuName, EndpointUpdateParameters, 
                                    DeliveryRuleServerPortCondition, ServerPortMatchConditionParameters,
                                    DeliveryRuleHostNameCondition, HostNameMatchConditionParameters,
                                    DeliveryRuleSslProtocolCondition, SslProtocolMatchConditionParameters,
-                                   SslProtocol)
+                                   SslProtocol, ResourceType)
 
 from azure.mgmt.cdn.models._cdn_management_client_enums import CacheType
 from azure.mgmt.cdn.operations import (OriginsOperations, OriginGroupsOperations)
@@ -153,7 +153,7 @@ def check_name_availability(client, name):
     :type name: str
     """
 
-    validate_input = CheckNameAvailabilityInput(name=name)
+    validate_input = CheckNameAvailabilityInput(name=name, type=ResourceType.MICROSOFT_CDN_PROFILES_ENDPOINTS.value)
 
     return client.check_name_availability(validate_input)
 
