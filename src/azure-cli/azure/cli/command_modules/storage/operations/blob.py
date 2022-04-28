@@ -775,7 +775,7 @@ def generate_sas_blob_uri(cmd, client, permission=None, expiry=None, start=None,
 
     if full_uri:
         blob_client = t_blob_client(account_url=client.url, container_name=container_name, blob_name=blob_name,
-                                    snapshot=snapshot, credential=sas_token)
+                                    snapshot=snapshot, credential=quote(sas_token, safe='&%()$=\',~'))
         return encode_url_path(blob_client.url)
     return quote(sas_token, safe='&%()$=\',~')
 
