@@ -23,6 +23,7 @@ from knack.log import get_logger
 from knack.util import CLIError
 from .._transformers import transform_response_with_bytearray
 from ..util import get_datetime_from_string
+from ..url_quote_util import encode_url_path
 
 logger = get_logger(__name__)
 
@@ -736,7 +737,6 @@ def generate_sas_blob_uri(cmd, client, permission=None, expiry=None, start=None,
                           protocol=None, cache_control=None, content_disposition=None,
                           content_encoding=None, content_language=None,
                           content_type=None, full_uri=False, as_user=False, snapshot=None, **kwargs):
-    from ..url_quote_util import encode_url_path
     from urllib.parse import quote
     t_generate_blob_sas = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_BLOB,
                                   '_shared_access_signature#generate_blob_sas')
@@ -806,9 +806,10 @@ def generate_container_shared_access_signature(cmd, client, container_name, perm
                                     content_language=content_language, content_type=content_type, **kwargs)
 
 
-def create_blob_url(client, container_name, blob_name, protocol=None, snapshot=None):
-    return client.make_blob_url(
-        container_name, blob_name, protocol=protocol, snapshot=snapshot, sas_token=client.sas_token)
+def create_blob_url(client, protocol='https'):
+    if protocol=='http':
+        return encode_url_path(client.url.replace('https', 'http', 1))
+    return encode_url_path(client.url)
 
 
 def _copy_blob_to_blob_container(blob_service, source_blob_service, destination_container, destination_path,
