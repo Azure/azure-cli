@@ -71,6 +71,9 @@ class CLIENT_TYPE(Enum):
 # The source resources released as CLI extensions
 SOURCE_RESOURCES_IN_EXTENSION = [RESOURCE.SpringCloud]
 
+# The source resources using user token
+SOURCE_RESOURCES_USERTOKEN = [RESOURCE.KubernetesCluster]
+
 # The target resources using user token
 TARGET_RESOURCES_USERTOKEN = [RESOURCE.PostgresFlexible, RESOURCE.MysqlFlexible, RESOURCE.KeyVault]
 

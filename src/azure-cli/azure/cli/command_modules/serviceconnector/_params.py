@@ -64,6 +64,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                                   "If specified, AuthType Arguments are not needed.")
         else:
             context.ignore('scope')
+            context.ignore('enable_csi')
 
     def add_auth_block(context, source, target):
         support_auth_types = SUPPORTED_AUTH_TYPE.get(source, {}).get(target, [])

@@ -10,6 +10,10 @@ from azure.cli.core.azclierror import (
     ValidationError,
     CLIInternalError
 )
+from ._resource_config import (
+    SOURCE_RESOURCES_USERTOKEN,
+    TARGET_RESOURCES_USERTOKEN
+)
 
 
 def should_load_source(source):
@@ -90,6 +94,13 @@ def set_user_token_header(client, cli_ctx):
     # HACK: hide token header
     client._config.logging_policy.headers_to_redact.append('x-ms-serviceconnector-user-token')
 
+    return client
+
+
+def set_user_token_by_source_and_target(client, cli_ctx, source, target):
+    '''Set user token header to work around OBO according to source and target'''
+    if source in SOURCE_RESOURCES_USERTOKEN or target in TARGET_RESOURCES_USERTOKEN:
+        return set_user_token_header(client, cli_ctx)
     return client
 
 

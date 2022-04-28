@@ -63,6 +63,20 @@ def get_target_resource_name(cmd):
     return target
 
 
+def get_resource_type_by_id(resource_id):
+    '''Get source or target resource type by resource id
+    '''
+    target_type = None
+    all_resources = dict()
+    all_resources.update(SOURCE_RESOURCES)
+    all_resources.update(TARGET_RESOURCES)
+    for _type, _id in all_resources.items():
+        matched = re.match(get_resource_regex(_id), resource_id, re.IGNORECASE)
+        if matched:
+            target_type = _type
+    return target_type
+
+
 def get_resource_regex(resource):
     '''Replace '{...}' with '[^/]*' for regex matching
     '''
