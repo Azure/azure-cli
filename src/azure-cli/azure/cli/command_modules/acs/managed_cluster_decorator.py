@@ -150,8 +150,14 @@ class AKSManagedClusterModels(AKSAgentPoolModels):
         """
         if self.__nat_gateway_models is None:
             nat_gateway_models = {}
-            nat_gateway_models["ManagedClusterNATGatewayProfile"] = self.ManagedClusterNATGatewayProfile
-            nat_gateway_models["ManagedClusterManagedOutboundIPProfile"] = self.ManagedClusterManagedOutboundIPProfile
+            nat_gateway_models["ManagedClusterNATGatewayProfile"] = (
+                self.ManagedClusterNATGatewayProfile if hasattr(self, "ManagedClusterNATGatewayProfile") else None
+            )  # backward compatibility
+            nat_gateway_models["ManagedClusterManagedOutboundIPProfile"] = (
+                self.ManagedClusterManagedOutboundIPProfile
+                if hasattr(self, "ManagedClusterManagedOutboundIPProfile")
+                else None
+            )   # backward compatibility
             self.__nat_gateway_models = SimpleNamespace(**nat_gateway_models)
         return self.__nat_gateway_models
 
@@ -3651,7 +3657,11 @@ class AKSManagedClusterContext(BaseAKSContext):
         disable_local_accounts = self.raw_param.get("disable_local_accounts")
         # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
         if self.decorator_mode == DecoratorMode.CREATE:
-            if self.mc and self.mc.disable_local_accounts is not None:
+            if (
+                self.mc and
+                hasattr(self.mc, "disable_local_accounts") and      # backward compatibility
+                self.mc.disable_local_accounts is not None
+            ):
                 disable_local_accounts = self.mc.disable_local_accounts
 
         # this parameter does not need dynamic completion
