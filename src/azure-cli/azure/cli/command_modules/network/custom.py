@@ -2296,8 +2296,7 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):
             zone_obj[record_set_name] = OrderedDict()
 
         record_obj = {'ttl': record_set.ttl}
-        if record_type not in zone_obj[record_set_name]:
-            zone_obj[record_set_name][record_type] = []
+        zone_obj[record_set_name][record_type] = []
 
         for record in record_data:
             if record_type == 'aaaa':
