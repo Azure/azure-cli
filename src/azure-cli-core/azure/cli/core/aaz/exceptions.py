@@ -10,7 +10,7 @@ class AAZUndefinedValueError(AttributeError, KeyError):
         super().__init__(f"'{model.__class__.__name__}' has no value for field '{name}'.")
 
 
-class AAZUnknownFieldError(KeyError):
+class AAZUnknownFieldError(AttributeError, KeyError):
 
     def __init__(self, model, name):
         super().__init__(

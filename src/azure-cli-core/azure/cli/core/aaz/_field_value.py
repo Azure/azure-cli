@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 from ._base import AAZBaseValue, AAZValuePatch, AAZUndefined
-from .exceptions import AAZUnknownFieldError
 
 
 class AAZSimpleValue(AAZBaseValue):
@@ -70,10 +69,10 @@ class AAZObject(AAZBaseValue):
     def __setitem__(self, key, data):
         assert not key.startswith('_')
         attr_schema, name = self._get_attr_schema_and_name(key)
-
         if name is None:
             # ignore undefined key
             return
+
         self._data[name] = attr_schema.process_data(data, key=name)
 
     def __delitem__(self, key):
@@ -138,14 +137,12 @@ class AAZObject(AAZBaseValue):
 
     def _get_attr_schema_and_name(self, key):
         disc_schema = self._schema.get_discriminator(self._data)
-        try:
-            attr_schema = self._schema[key]
-            schema = self._schema
-        except AAZUnknownFieldError as err:
-            if disc_schema is None:
-                raise err
+        if not hasattr(self._schema, key) and disc_schema is not None:
             attr_schema = disc_schema[key]
             schema = disc_schema
+        else:
+            attr_schema = self._schema[key]
+            schema = self._schema
         name = schema.get_attr_name(key)
         return attr_schema, name
 
@@ -165,7 +162,11 @@ class AAZDict(AAZBaseValue):
         return item_schema._ValueCls(item_schema, self._data[key])
 
     def __setitem__(self, key, data):
-        item_schema = self._schema.Element
+        try:
+            item_schema = self._schema.Element
+        except AttributeError:
+            # ignore undefined element
+            return
         self._data[key] = item_schema.process_data(data, key=key)
 
     def __delitem__(self, key):
@@ -263,8 +264,13 @@ class AAZList(AAZBaseValue):
         if idx < 0:
             idx += self._len
 
-        schema = self._schema.Element
-        self._data[idx] = schema.process_data(data, key=idx)
+        try:
+            item_schema = self._schema.Element
+        except AttributeError:
+            # ignore undefined element
+            return
+
+        self._data[idx] = item_schema.process_data(data, key=idx)
 
         if idx + 1 > self._len:
             self._len = idx + 1

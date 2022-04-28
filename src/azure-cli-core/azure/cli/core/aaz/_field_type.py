@@ -89,6 +89,7 @@ class AAZObjectType(AAZBaseType):
     def __getitem__(self, key):
         name = self.get_attr_name(key)
         if name not in self._fields:
+            # must raise AttributeError to support hasattr check
             raise AAZUnknownFieldError(self, key)
         return self._fields[name]
 
@@ -96,7 +97,7 @@ class AAZObjectType(AAZBaseType):
         assert not key.startswith('_')
 
         if isinstance(value, AAZBaseType):
-            if self.get_attr_name(key):
+            if hasattr(self, key):
                 # key should not be defined before
                 raise AAZConflictFieldDefinitionError(
                     self, key, "Key already been defined before")
@@ -158,6 +159,9 @@ class AAZObjectType(AAZBaseType):
                         break
 
             for key in data._data.keys():
+                if not hasattr(value, key):
+                    # ignore undefined key
+                    continue
                 value[key] = data[key]
         else:
             assert isinstance(data, (dict,))
@@ -170,6 +174,9 @@ class AAZObjectType(AAZBaseType):
                         break
 
             for key, sub_data in data.items():
+                if not hasattr(value, key):
+                    # ignore undefined key
+                    continue
                 value[key] = sub_data
         return result
 
