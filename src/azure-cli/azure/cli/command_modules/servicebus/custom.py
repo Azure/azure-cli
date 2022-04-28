@@ -15,8 +15,7 @@ from azure.cli.core.profiles import ResourceType
 
 # Namespace Region
 def cli_namespace_create(cmd, client, resource_group_name, namespace_name, location=None, tags=None, sku='Standard',
-                         capacity=None, default_action=None, mi_system_assigned=None, mi_user_assigned=None, encryption_config=None,
-                         zone_redundant=None):
+                         capacity=None, default_action=None, mi_system_assigned=None, mi_user_assigned=None, encryption_config=None):
 
     SBSku = cmd.get_models('SBSku', resource_type=ResourceType.MGMT_SERVICEBUS)
     SBNamespace = cmd.get_models('SBNamespace', resource_type=ResourceType.MGMT_SERVICEBUS)
@@ -29,7 +28,6 @@ def cli_namespace_create(cmd, client, resource_group_name, namespace_name, locat
 
     parameter.tags = tags
     parameter.sku = SBSku(name=sku, tier=sku, capacity=capacity)
-    parameter.zone_redundant = zone_redundant
 
     if mi_system_assigned:
         parameter.identity = Identity(type=IdentityType.SYSTEM_ASSIGNED)
