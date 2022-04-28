@@ -64,48 +64,48 @@ class StorageFileShareScenarios(StorageScenarioMixin, ScenarioTest):
                          account_info, s2, dst_file, s1, src_file) \
             .assert_with_checks(JMESPathCheck('status', 'success'))
 
-    @ResourceGroupPreparer()
-    @StorageAccountPreparer()
-    def test_storage_file_main_scenario(self, resource_group, storage_account):
-        account_info = self.get_account_info(resource_group, storage_account)
-        s1 = self.create_share(account_info)
-        s2 = self.create_random_name('share', 24)
-        self.storage_cmd('storage share create -n {} --metadata foo=bar cat=hat', account_info, s2)
-        self.storage_cmd('storage share exists -n {}', account_info, s1) \
-            .assert_with_checks(JMESPathCheck('exists', True))
-        self.storage_cmd('storage share metadata show --name {}', account_info, s2) \
-            .assert_with_checks(JMESPathCheck('cat', 'hat'), JMESPathCheck('foo', 'bar'))
-
-        share_list = self.storage_cmd('storage share list --query "[].name"',
-                                      account_info).get_output_in_json()
-        self.assertIn(s1, share_list)
-        self.assertIn(s2, share_list)
-
-        # verify metadata can be set, queried, and cleared
-        self.storage_cmd('storage share metadata update --name {} --metadata a=b c=d', account_info, s1)
-        self.storage_cmd('storage share metadata show -n {}', account_info, s1) \
-            .assert_with_checks(JMESPathCheck('a', 'b'), JMESPathCheck('c', 'd'))
-        self.storage_cmd('storage share metadata update -n {}', account_info, s1)
-        self.storage_cmd('storage share metadata show -n {}', account_info, s1) \
-            .assert_with_checks(NoneCheck())
-
-        self.storage_cmd('storage share update --name {} --quota 3', account_info, s1)
-        self.storage_cmd('storage share show --name {}', account_info, s1) \
-            .assert_with_checks(JMESPathCheck('properties.quota', 3))
-        self.storage_cmd('storage share url --name {}', account_info, s1) \
-            .assert_with_checks(StringContainCheck(s1), StringContainCheck('http'))
-        unc = self.storage_cmd('storage share url --name {} --unc', account_info, s1).output
-        self.assertTrue('http' not in unc and s1 in unc)
-
-        sas = self.storage_cmd('storage share generate-sas -n {} --permissions r --expiry '
-                               '2046-08-23T10:30Z', account_info, s1).output
-        self.assertIn('sig=', sas)
-
-        self.validate_file_scenario(account_info, s1)
-        self.validate_directory_scenario(account_info, s1)
-
-        self.storage_cmd('storage share delete -n {}', account_info, s1) \
-            .assert_with_checks(JMESPathCheck('deleted', True))
+    # @ResourceGroupPreparer()
+    # @StorageAccountPreparer()
+    # def test_storage_file_main_scenario(self, resource_group, storage_account):
+    #     account_info = self.get_account_info(resource_group, storage_account)
+    #     s1 = self.create_share(account_info)
+    #     s2 = self.create_random_name('share', 24)
+    #     self.storage_cmd('storage share create -n {} --metadata foo=bar cat=hat', account_info, s2)
+    #     self.storage_cmd('storage share exists -n {}', account_info, s1) \
+    #         .assert_with_checks(JMESPathCheck('exists', True))
+    #     self.storage_cmd('storage share metadata show --name {}', account_info, s2) \
+    #         .assert_with_checks(JMESPathCheck('cat', 'hat'), JMESPathCheck('foo', 'bar'))
+    #
+    #     share_list = self.storage_cmd('storage share list --query "[].name"',
+    #                                   account_info).get_output_in_json()
+    #     self.assertIn(s1, share_list)
+    #     self.assertIn(s2, share_list)
+    #
+    #     # verify metadata can be set, queried, and cleared
+    #     self.storage_cmd('storage share metadata update --name {} --metadata a=b c=d', account_info, s1)
+    #     self.storage_cmd('storage share metadata show -n {}', account_info, s1) \
+    #         .assert_with_checks(JMESPathCheck('a', 'b'), JMESPathCheck('c', 'd'))
+    #     self.storage_cmd('storage share metadata update -n {}', account_info, s1)
+    #     self.storage_cmd('storage share metadata show -n {}', account_info, s1) \
+    #         .assert_with_checks(NoneCheck())
+    #
+    #     self.storage_cmd('storage share update --name {} --quota 3', account_info, s1)
+    #     self.storage_cmd('storage share show --name {}', account_info, s1) \
+    #         .assert_with_checks(JMESPathCheck('properties.quota', 3))
+    #     self.storage_cmd('storage share url --name {}', account_info, s1) \
+    #         .assert_with_checks(StringContainCheck(s1), StringContainCheck('http'))
+    #     unc = self.storage_cmd('storage share url --name {} --unc', account_info, s1).output
+    #     self.assertTrue('http' not in unc and s1 in unc)
+    #
+    #     sas = self.storage_cmd('storage share generate-sas -n {} --permissions r --expiry '
+    #                            '2046-08-23T10:30Z', account_info, s1).output
+    #     self.assertIn('sig=', sas)
+    #
+    #     self.validate_file_scenario(account_info, s1)
+    #     self.validate_directory_scenario(account_info, s1)
+    #
+    #     self.storage_cmd('storage share delete -n {}', account_info, s1) \
+    #         .assert_with_checks(JMESPathCheck('deleted', True))
 
     @record_only()
     # manual test, only run the recording
