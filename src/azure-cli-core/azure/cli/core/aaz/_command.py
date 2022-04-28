@@ -155,11 +155,12 @@ class AAZCommand(CLICommand):
                 options=['--no-wait'],
                 help='Do not wait for the long-running operation to finish.'
             )
-        if cls.AZ_SUPPORT_GENERIC_UPDATE:
-            schema.generic_update_add = AAZGenericUpdateAddArg()
-            schema.generic_update_set = AAZGenericUpdateSetArg()
-            schema.generic_update_remove = AAZGenericUpdateRemoveArg()
-            schema.generic_update_force_string = AAZGenericUpdateForceString()
+        # TODO: Implement Generic Update
+        # if cls.AZ_SUPPORT_GENERIC_UPDATE:
+        #     schema.generic_update_add = AAZGenericUpdateAddArg()
+        #     schema.generic_update_set = AAZGenericUpdateSetArg()
+        #     schema.generic_update_remove = AAZGenericUpdateRemoveArg()
+        #     schema.generic_update_force_string = AAZGenericUpdateForceString()
         return schema
 
     def __init__(self, loader):
