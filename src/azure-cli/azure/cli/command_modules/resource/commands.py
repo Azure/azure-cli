@@ -556,3 +556,4 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'get_private_link_association')
         g.custom_command('list', 'list_private_link_association')
         g.custom_command('delete', 'delete_private_link_association', confirmation=True)
+        
