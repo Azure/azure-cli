@@ -1865,7 +1865,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('source_share')
 
     with self.argument_context('storage cors list') as c:
-        c.extra('services', validator=get_char_options_validator('bfqt', 'services'), default='bqft',
+        c.extra('services', validator=get_char_options_validator('bfqt', 'services'), default='bfqt',
                 options_list='--services', required=False)
 
     with self.argument_context('storage cors add') as c:
