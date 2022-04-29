@@ -69,6 +69,7 @@ def _resource_privatelinks_client_factory(cli_ctx, **_):
     from azure.cli.core.profiles import ResourceType
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_PRIVATELINKS)
 
+
 def cf_resource_groups(cli_ctx, _):
     return _resource_client_factory(cli_ctx).resource_groups
 

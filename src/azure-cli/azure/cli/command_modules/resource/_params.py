@@ -12,6 +12,7 @@ def load_arguments(self, _):
     from azure.mgmt.resource.locks.models import LockLevel
     from azure.mgmt.resource.managedapplications.models import ApplicationLockLevel
     from azure.mgmt.resource.policy.models import (ExemptionCategory, EnforcementMode)
+    from azure.cli.core.commands.validators import get_default_location_from_resource_group
 
     from azure.cli.core.api import get_subscription_id_list
     from azure.cli.core.commands.parameters import (
@@ -97,9 +98,10 @@ def load_arguments(self, _):
                                                    help="A path to a uiFormDefinition file in the file system")
 
     bicep_target_platform_type = CLIArgumentType(options_list=['--target-platform', '-t'],
-                                                 arg_type=get_enum_type(["win-x64", "linux-musl-x64", "linux-x64", "osx-x64"]),
+                                                 arg_type=get_enum_type(
+                                                     ["win-x64", "linux-musl-x64", "linux-x64", "osx-x64"]),
                                                  help="The platform the Bicep CLI will be running on. Set this to skip automatic platform detection if it does not work properly.")
-                             
+
     _PROVIDER_HELP_TEXT = 'the resource namespace, aka \'provider\''
 
     with self.argument_context('resource') as c:
@@ -665,34 +667,47 @@ def load_arguments(self, _):
         c.argument('target_platform', arg_type=bicep_target_platform_type)
 
     with self.argument_context('resourcemanagement private-link create') as c:
-        c.argument('resource_group', arg_type=resource_group_name_type, help='The name of the resource group.')
-        c.argument('name', options_list=['--name', '-n'], help='The name of the resource management private link.')
-        c.argument('location', arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group, help='the region to create the resource management private link')
-    
+        c.argument('resource_group', arg_type=resource_group_name_type,
+                   help='The name of the resource group.')
+        c.argument('name', options_list=[
+                   '--name', '-n'], help='The name of the resource management private link.')
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group,
+                   help='the region to create the resource management private link')
+
     with self.argument_context('resourcemanagement private-link show') as c:
-        c.argument('resource_group', arg_type=resource_group_name_type, help='The name of the resource group.')
-        c.argument('name', options_list=['--name', '-n'], help='The name of the resource management private link.')
+        c.argument('resource_group', arg_type=resource_group_name_type,
+                   help='The name of the resource group.')
+        c.argument('name', options_list=[
+                   '--name', '-n'], help='The name of the resource management private link.')
 
     with self.argument_context('resourcemanagement private-link list') as c:
-        c.argument('resource_group', arg_type=resource_group_name_type, help='The name of the resource group.')
+        c.argument('resource_group', arg_type=resource_group_name_type,
+                   help='The name of the resource group.')
 
     with self.argument_context('resourcemanagement private-link delete') as c:
-        c.argument('resource_group', arg_type=resource_group_name_type, help='The name of the resource group.')
-        c.argument('name', options_list=['--name', '-n'], help='The name of the resource management private link.')
+        c.argument('resource_group', arg_type=resource_group_name_type,
+                   help='The name of the resource group.')
+        c.argument('name', options_list=[
+                   '--name', '-n'], help='The name of the resource management private link.')
 
     with self.argument_context('private-link association create') as c:
         c.argument('management_group_id', arg_type=management_group_id_type)
-        c.argument('name', options_list=['--name', '-n'], help='The name of the private link association')
-        c.argument('private_link', options_list=['-privatelink'], help='The name of the private link')
-        c.argument('public_network_access', options_list=['--public-network-access', '-p'], arg_type=get_enum_type(['enabled', 'disabled']), help='restrict traffic to private link')
+        c.argument('name', options_list=[
+                   '--name', '-n'], help='The name of the private link association')
+        c.argument('private_link', options_list=[
+                   '-privatelink'], help='The name of the private link')
+        c.argument('public_network_access', options_list=['--public-network-access', '-p'], arg_type=get_enum_type(
+            ['enabled', 'disabled']), help='restrict traffic to private link')
 
     with self.argument_context('private-link association show') as c:
         c.argument('management_group_id', arg_type=management_group_id_type)
-        c.argument('name', options_list=['--name', '-n'], help='The name of the private link association')
+        c.argument('name', options_list=[
+                   '--name', '-n'], help='The name of the private link association')
 
     with self.argument_context('private-link association list') as c:
         c.argument('management_group_id', arg_type=management_group_id_type)
 
     with self.argument_context('private-link association delete') as c:
         c.argument('management_group_id', arg_type=management_group_id_type)
-        c.argument('name', options_list=['--name', '-n'], help='The name of the private link association')
+        c.argument('name', options_list=[
+                   '--name', '-n'], help='The name of the private link association')

@@ -3703,41 +3703,53 @@ def show_bicep_cli_version(cmd):
 def list_bicep_cli_versions(cmd):
     return get_bicep_available_release_tags()
 
+
 def create_resourcemanager_privatelink(
-    cmd, resource_group, name, location):
+        cmd, resource_group, name, location):
     rcf = _resource_privatelinks_client_factory(cmd.cli_ctx)
-    ResourceManagementPrivateLinkLocation = cmd.get_models('ResourceManagementPrivateLinkLocation')
-    resource_management_private_link_location = ResourceManagementPrivateLinkLocation(location=location)
+    ResourceManagementPrivateLinkLocation = cmd.get_models(
+        'ResourceManagementPrivateLinkLocation')
+    resource_management_private_link_location = ResourceManagementPrivateLinkLocation(
+        location=location)
     return rcf.resource_management_private_link.put(resource_group, name, resource_management_private_link_location)
+
 
 def get_resourcemanager_privatelink(cmd, resource_group, name):
     rcf = _resource_privatelinks_client_factory(cmd.cli_ctx)
-    return rcf.resource_management_private_link.get(resource_group, name)    
+    return rcf.resource_management_private_link.get(resource_group, name)
+
 
 def list_resourcemanager_privatelink(cmd, resource_group=None):
     rcf = _resource_privatelinks_client_factory(cmd.cli_ctx)
     if resource_group:
         return rcf.resource_management_private_link.list_by_resource_group(resource_group)
-    else:    
+    else:
         return rcf.resource_management_private_link.list()
-    
+
+
 def delete_resourcemanager_privatelink(cmd, resource_group, name):
     rcf = _resource_privatelinks_client_factory(cmd.cli_ctx)
     return rcf.resource_management_private_link.delete(resource_group, name)
 
+
 def create_private_link_association(cmd, management_group_id, name, private_link, public_network_access):
     rcf = _resource_privatelinks_client_factory(cmd.cli_ctx)
-    PrivateLinkProperties, PrivateLinkObject = cmd.get_models('PrivateLinkAssociationProperties', 'PrivateLinkAssociationObject')
-    pl = PrivateLinkObject(properties=PrivateLinkProperties(private_link=private_link, public_network_access=public_network_access))
+    PrivateLinkProperties, PrivateLinkObject = cmd.get_models(
+        'PrivateLinkAssociationProperties', 'PrivateLinkAssociationObject')
+    pl = PrivateLinkObject(properties=PrivateLinkProperties(
+        private_link=private_link, public_network_access=public_network_access))
     return rcf.private_link_association.put(group_id=management_group_id, pla_id=name, parameters=pl)
+
 
 def get_private_link_association(cmd, management_group_id, name):
     rcf = _resource_privatelinks_client_factory(cmd.cli_ctx)
     return rcf.private_link_association.get(group_id=management_group_id, pla_id=name)
 
+
 def delete_private_link_association(cmd, management_group_id, name):
     rcf = _resource_privatelinks_client_factory(cmd.cli_ctx)
     return rcf.private_link_association.put(group_id=management_group_id, pla_id=name)
+
 
 def list_private_link_association(cmd, management_group_id):
     rcf = _resource_privatelinks_client_factory(cmd.cli_ctx)
