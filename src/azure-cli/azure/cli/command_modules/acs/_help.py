@@ -289,7 +289,7 @@ parameters:
     long-summary: This address must not be in any Subnet IP ranges, or the Kubernetes service address range. For example, 172.17.0.1/16.
   - name: --load-balancer-sku
     type: string
-    short-summary: Azure Load Balancer SKU selection for your cluster. basic or standard. Defaults to 'Standard'
+    short-summary: Azure Load Balancer SKU selection for your cluster. basic or standard. Defaults to 'standard'
     long-summary: Select between Basic or Standard Azure Load Balancer SKU for your AKS cluster.
   - name: --load-balancer-managed-outbound-ip-count
     type: int
