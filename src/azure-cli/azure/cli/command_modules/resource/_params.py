@@ -667,7 +667,7 @@ def load_arguments(self, _):
     with self.argument_context('resourcemanagement private-link create') as c:
         c.argument('resource_group', arg_type=resource_group_name_type, help='The name of the resource group.')
         c.argument('name', options_list=['--name', '-n'], help='The name of the resource management private link.')
-        c.argument('location', options_list=['--location', '-l'], help='the region to create the resource management private link')
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group, help='the region to create the resource management private link')
     
     with self.argument_context('resourcemanagement private-link show') as c:
         c.argument('resource_group', arg_type=resource_group_name_type, help='The name of the resource group.')
