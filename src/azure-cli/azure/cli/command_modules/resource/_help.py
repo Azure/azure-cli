@@ -2781,7 +2781,7 @@ type: command
 short-summary: Create a resource management group private link.
 examples:
   - name: Create a resource management group private link.
-    text: az resourcemanagement private-link create --resource_group testRG --name TestRMPL --location WestUS
+    text: az resourcemanagement private-link create --resource-group testRG --name TestRMPL --location WestUS
 """
 helps['resourcemanagement private-link show'] = """
 type: command
@@ -2797,21 +2797,21 @@ examples:
   - name: List all resource management private links in a subscription.
     text: az resourcemanagement private-link list
   - name: List all resource management private links in a resource group.
-    text: az resourcemanagement private-link list --resource_group testRG
+    text: az resourcemanagement private-link list --resource-group testRG
 """
 helps['resourcemanagement private-link delete'] = """
 type: command
 short-summary: Delete a resource management private link.
 examples:
   - name: Delete a resource management private link.
-    text: az resourcemanagement private-link delete --resource_group TestRG --name testRMPL
+    text: az resourcemanagement private-link delete --resource-group TestRG --name testRMPL
 """
 helps['private-link association create'] = """
 type: command
 short-summary: Create a PrivateLinkAssociation.
 examples:
   - name: Create a PrivateLinkAssociation.
-    text: az private-link association create --management-group-id TestMG --name testPLA -privatelink testPL --public-network-access enabled
+    text: az private-link association create --management-group-id TestMG --name testPLA --privatelink testPL --public-network-access enabled
 """
 helps['private-link association show'] = """
 type: command

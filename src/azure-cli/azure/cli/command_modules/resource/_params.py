@@ -695,7 +695,7 @@ def load_arguments(self, _):
         c.argument('name', options_list=[
                    '--name', '-n'], help='The name of the private link association')
         c.argument('privatelink', options_list=[
-                   '-privatelink'], help='The name of the private link')
+                   '--privatelink', '-p'], help='The name of the private link')
         c.argument('public_network_access', options_list=['--public-network-access', '-p'], arg_type=get_enum_type(
             ['enabled', 'disabled']), help='restrict traffic to private link')
 

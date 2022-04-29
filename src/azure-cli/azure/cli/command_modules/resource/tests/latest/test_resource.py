@@ -4184,7 +4184,7 @@ class PrivateLinkAssociationTest(ScenarioTest):
             **self.kwargs)
 
 
-        self.cmd('private-link association create -m {mg} -n {pla} -privatelink {pl} --public-network-access enabled', checks=[])
+        self.cmd('private-link association create -m {mg} -n {pla} --privatelink {pl} --public-network-access enabled', checks=[])
         
         self.cmd('private-link association show -m {mg} -n {pla}', checks=[
             self.check('name', '{pla}'),
@@ -4216,7 +4216,7 @@ class PrivateLinkAssociationTest(ScenarioTest):
         self.kwargs['pl'] = '/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Authorization/resourceManagementPrivateLinks/{n}'.format(
             **self.kwargs)
 
-        self.cmd('private-link association create -m {mg} -n {pla} -privatelink {pl} --public-network-access enabled', checks=[
+        self.cmd('private-link association create -m {mg} -n {pla} --privatelink {pl} --public-network-access enabled', checks=[
             self.check('name', '{pla}'),
             self.check('properties.publicNetworkAccess', 'Enabled'),
             self.check('properties.privateLink', '{pl}')
@@ -4247,7 +4247,7 @@ class PrivateLinkAssociationTest(ScenarioTest):
             **self.kwargs)
 
 
-        self.cmd('private-link association create -m {mg} -n {pla} -privatelink {pl} --public-network-access enabled', checks=[
+        self.cmd('private-link association create -m {mg} -n {pla} --privatelink {pl} --public-network-access enabled', checks=[
             self.check('name', '{pla}'),
             self.check('properties.publicNetworkAccess', 'Enabled'),
             self.check('properties.privateLink', '{pl}')
@@ -4277,7 +4277,7 @@ class PrivateLinkAssociationTest(ScenarioTest):
         self.kwargs['pl'] = '/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Authorization/resourceManagementPrivateLinks/{n}'.format(
             **self.kwargs)
 
-        self.cmd('private-link association create -m {mg} -n {pla} -privatelink {pl} --public-network-access enabled', checks=[])
+        self.cmd('private-link association create -m {mg} -n {pla} --privatelink {pl} --public-network-access enabled', checks=[])
         
         self.cmd('private-link association list -m {mg}', checks=[
             self.check('value[5].name', '{pla}'),
