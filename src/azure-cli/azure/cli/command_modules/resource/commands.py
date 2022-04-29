@@ -44,6 +44,18 @@ resource_managementgroups_entities_sdk = CliCommandType(
     exception_handler=managementgroups_exception_handler
 )
 
+resource_resourcemanagementprivatelink_sdk = CliCommandType(
+    operations_tmpl='azure.mgmt.resource.privatelinks.operations#ResourceManagementPrivateLinkOperations.{}',
+    client_factory=cf_resource_resourcemanagementprivatelinks,
+    resource_type=ResourceType.MGMT_RESOURCE_PRIVATELINKS
+)
+
+resource_privatelinksassociation_sdk = CliCommandType(
+    operations_tmpl='azure.mgmt.resource.privatelinks.operations#PrivateLinkAssociationOperations.{}',
+    client_factory=cf_resource_privatelinkassociations,
+    resource_type=ResourceType.MGMT_RESOURCE_PRIVATELINKS
+)
+
 
 # Resource group commands
 def transform_resource_group_list(result):
@@ -205,18 +217,6 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.resource.templatespecs.operations#ResourceLinksOperations.{}',
         client_factory=cf_resource_templatespecs,
         resource_type=ResourceType.MGMT_RESOURCE_TEMPLATESPECS
-    )
-
-    resource_resourcemanagementprivatelink_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.resource.privatelinks.operations#ResourceManagementPrivateLinkOperations.{}',
-        client_factory=cf_resource_resourcemanagementprivatelinks,
-        resource_type=ResourceType.MGMT_RESOURCE_PRIVATELINKS
-    )
-
-    resource_privatelinksassociation_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.resource.privatelinks.operations#PrivateLinkAssociationOperations.{}',
-        client_factory=cf_resource_privatelinkassociations,
-        resource_type=ResourceType.MGMT_RESOURCE_PRIVATELINKS
     )
 
     with self.command_group('account lock', resource_lock_sdk, resource_type=ResourceType.MGMT_RESOURCE_LOCKS) as g:

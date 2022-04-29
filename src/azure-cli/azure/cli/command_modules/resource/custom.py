@@ -3723,8 +3723,7 @@ def list_resourcemanager_privatelink(cmd, resource_group=None):
     rcf = _resource_privatelinks_client_factory(cmd.cli_ctx)
     if resource_group:
         return rcf.resource_management_private_link.list_by_resource_group(resource_group)
-    else:
-        return rcf.resource_management_private_link.list()
+    return rcf.resource_management_private_link.list()
 
 
 def delete_resourcemanager_privatelink(cmd, resource_group, name):
@@ -3732,12 +3731,12 @@ def delete_resourcemanager_privatelink(cmd, resource_group, name):
     return rcf.resource_management_private_link.delete(resource_group, name)
 
 
-def create_private_link_association(cmd, management_group_id, name, private_link, public_network_access):
+def create_private_link_association(cmd, management_group_id, name, privatelink, public_network_access):
     rcf = _resource_privatelinks_client_factory(cmd.cli_ctx)
     PrivateLinkProperties, PrivateLinkObject = cmd.get_models(
         'PrivateLinkAssociationProperties', 'PrivateLinkAssociationObject')
     pl = PrivateLinkObject(properties=PrivateLinkProperties(
-        private_link=private_link, public_network_access=public_network_access))
+        private_link=privatelink, public_network_access=public_network_access))
     return rcf.private_link_association.put(group_id=management_group_id, pla_id=name, parameters=pl)
 
 
