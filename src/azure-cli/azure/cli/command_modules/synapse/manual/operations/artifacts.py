@@ -10,8 +10,8 @@ from azure.synapse.artifacts.models import (LinkedService, Dataset, PipelineReso
                                             Trigger, DataFlow, BigDataPoolReference, NotebookSessionProperties,
                                             NotebookResource, SparkJobDefinition, SqlScriptResource, SqlScriptFolder,
                                             SqlScriptContent, SqlScriptMetadata, SqlScript, SqlConnection,
-                                            NotebookFolder,LinkConnectionResource,LinkTableRequest,QueryTableStatusRequest,
-                                            SecureString)
+                                            NotebookFolder,LinkConnectionResource,LinkTableRequest,
+                                            QueryTableStatusRequest,SecureString)
 from azure.cli.core.util import sdk_no_wait, CLIError
 from azure.core.exceptions import ResourceNotFoundError
 from .._client_factory import (cf_synapse_linked_service, cf_synapse_dataset, cf_synapse_pipeline,
@@ -573,7 +573,7 @@ def create_or_update_link_connection(cmd, workspace_name, link_connection_name, 
     properties_file['sourceDatabase'] = info['sourceDatabase']
     properties_file['targetDatabase'] = info['targetDatabase']
     properties_file['compute'] = info['compute']
-    try:    
+    try:
         properties_file['landingZone'] = info['landingZone']
     except:
         pass
@@ -615,7 +615,8 @@ def synapse_edit_link_table(cmd, workspace_name, link_connection_name, definitio
     return client.edit_tables(link_connection_name, linkTableRequset_list)
 
 
-def synapse_get_link_tables_status(cmd, workspace_name, link_connection_name, max_segment_count=50, continuation_token=None):
+def synapse_get_link_tables_status(cmd, workspace_name, link_connection_name, max_segment_count=50,
+                                   continuation_token=None):
     client = cf_synapse_link_connection(cmd.cli_ctx, workspace_name)
     query_table_status_request = QueryTableStatusRequest(
         max_segment_count=max_segment_count,
@@ -624,9 +625,7 @@ def synapse_get_link_tables_status(cmd, workspace_name, link_connection_name, ma
     return client.query_table_status(link_connection_name, query_table_status_request)
 
 
-def synapse_update_landing_zone_credential(cmd, workspace_name, link_connection_name, sas_token_type, sas_token_value):
+def synapse_update_landing_zone_credential(cmd, workspace_name, link_connection_name, sas_token):
     client = cf_synapse_link_connection(cmd.cli_ctx, workspace_name)
-    sas_token = SecureString(
-        value = sas_token_value
-    )
+    sas_token = SecureString(value = sas_token)
     return client.update_landing_zone_credential(link_connection_name, sas_token)

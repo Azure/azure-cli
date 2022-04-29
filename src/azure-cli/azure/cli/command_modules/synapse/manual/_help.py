@@ -2442,6 +2442,5 @@ examples:
     text: |-
         az synapse link-connection update-landingzone-credential --workspace-name testsynapseworkspace \\
           --name linkconnectionname \\
-          --sas-token-type sastokentype \\
-          --sas-token-value sastokenvalue
+          --sas-token sastoken
 """
