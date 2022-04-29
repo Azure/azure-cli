@@ -11,6 +11,9 @@ from knack.log import get_logger
 
 from azure.mgmt.core.tools import is_valid_resource_id
 
+from azure.mgmt.recoveryservicesbackup.activestamp import RecoveryServicesBackupClient
+from azure.cli.core.commands.client_factory import get_mgmt_service_client
+
 from azure.mgmt.recoveryservices.models import Vault, VaultProperties, Sku, SkuName, PatchVault, IdentityData, \
     CmkKeyVaultProperties, CmkKekIdentity, VaultPropertiesEncryption, UserIdentity
 from azure.mgmt.recoveryservicesbackup.activestamp.models import ProtectedItemResource, \
@@ -19,14 +22,15 @@ from azure.mgmt.recoveryservicesbackup.activestamp.models import ProtectedItemRe
     ILRRequestResource, IaasVMILRRegistrationRequest, BackupResourceConfig, BackupResourceConfigResource, \
     BackupResourceVaultConfig, BackupResourceVaultConfigResource, DiskExclusionProperties, ExtendedProperties, \
     MoveRPAcrossTiersRequest, RecoveryPointRehydrationInfo, IaasVMRestoreWithRehydrationRequest, IdentityInfo, \
-    BackupStatusRequest, ListRecoveryPointsRecommendedForMoveRequest, IdentityBasedRestoreDetails, ScheduleRunType
+    BackupStatusRequest, ListRecoveryPointsRecommendedForMoveRequest, IdentityBasedRestoreDetails, ScheduleRunType, \
+    UnlockDeleteRequest
 from azure.mgmt.recoveryservicesbackup.passivestamp.models import CrrJobRequest, CrossRegionRestoreRequest
 
 import azure.cli.command_modules.backup._validators as validators
 from azure.cli.core.util import CLIError
 from azure.core.exceptions import HttpResponseError
 from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError, \
-    MutuallyExclusiveArgumentError, ArgumentUsageError, ValidationError
+    MutuallyExclusiveArgumentError, ArgumentUsageError, ValidationError, ResourceNotFoundError
 from azure.cli.command_modules.backup._client_factory import (
     vaults_cf, backup_protected_items_cf, protection_policies_cf, virtual_machines_cf, recovery_points_cf,
     protection_containers_cf, backup_protectable_items_cf, resources_cf, backup_protection_containers_cf,
@@ -96,6 +100,7 @@ secondary_region_map = {"eastasia": "southeastasia",
 
 fabric_name = "Azure"
 default_policy_name = "DefaultPolicy"
+default_resource_guard = "VaultProxy"
 os_windows = 'Windows'
 os_linux = 'Linux'
 password_offset = 33
@@ -434,6 +439,39 @@ def get_default_policy_for_vm(client, resource_group_name, vault_name):
 
 def show_policy(client, resource_group_name, vault_name, name):
     return client.get(vault_name, resource_group_name, name)
+
+
+def create_resource_guard_proxy(client, resource_group_name, vault_name, resource_guard_id, tenant_id=None):
+    # Authorization for cross tenant
+    return client.put(vault_name, resource_group_name, default_resource_guard)
+
+
+def update_resource_guard_proxy(client, resource_group_name, vault_name, resource_guard_id, tenant_id=None):
+    # Authorization for cross tenant
+    # unlock delete
+    return
+
+
+def show_resource_guard_proxy(client, resource_group_name, vault_name):
+    return client.get(vault_name, resource_group_name, default_resource_guard)
+
+
+def delete_resource_guard_proxy(cmd, client, resource_group_name, vault_name, tenant_id=None):
+    try:
+        resource_guard_proxy = client.get(vault_name, resource_group_name, default_resource_guard)
+    except HttpResponseError as ex:
+        raise ResourceNotFoundError("Error while fetching Resource Guard Proxy: " + ex.message)
+    # For Cross Tenant Scenario
+    if tenant_id is not None:
+        client = get_mgmt_service_client(cmd.cli_ctx, RecoveryServicesBackupClient, aux_tenants=[tenant_id]).resource_guard_proxy
+
+    # unlock delete
+    operation_request = ""
+    for operation_detail in resource_guard_proxy.properties.resource_guard_operation_details:
+        if operation_detail.vault_critical_operation == "Microsoft.RecoveryServices/vaults/backupResourceGuardProxies/delete":
+            operation_request = operation_detail.default_resource_request
+    client.unlock_delete(vault_name, resource_group_name, default_resource_guard, UnlockDeleteRequest(resource_guard_operation_requests=[operation_request]))
+    return client.delete(vault_name, resource_group_name, default_resource_guard)
 
 
 def list_policies(client, resource_group_name, vault_name):

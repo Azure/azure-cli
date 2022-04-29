@@ -421,3 +421,15 @@ def load_arguments(self, _):
 
     with self.argument_context('backup job wait') as c:
         c.argument('timeout', type=int, help='Maximum time, in seconds, to wait before aborting.')
+
+    #ResourceGuardProxy
+    with self.argument_context('backup resourceguardproxy') as c:
+        c.argument('vault_name', vault_name_type)
+
+    with self.argument_context('backup resourceguardproxy delete') as c:
+        c.argument('tenant_id', help='ID of the tenant where the Resource Guard exists in Cross-Tenant scenarios.')
+
+    for command in ['create', 'update']:
+        with self.argument_context('backup resourceguardproxy ' + command) as c:
+            c.argument('resource_guard_id', help='ARM ID of the Resource Guard to be associated with the vault.')
+            c.argument('tenant_id', help='ID of the tenant where the Resource Guard exists in Cross-Tenant scenarios.')

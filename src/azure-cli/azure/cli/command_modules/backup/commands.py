@@ -8,7 +8,7 @@ from azure.cli.command_modules.backup._client_factory import vaults_cf, backup_p
     protection_policies_cf, backup_policies_cf, protected_items_cf, backups_cf, backup_jobs_cf, \
     job_details_cf, job_cancellations_cf, recovery_points_cf, restores_cf, backup_storage_configs_non_crr_cf, \
     item_level_recovery_connections_cf, backup_protected_items_cf, backup_protectable_items_cf, \
-    protection_containers_cf, protection_intent_cf, backup_resource_encryption_config_cf  # pylint: disable=unused-variable
+    protection_containers_cf, protection_intent_cf, backup_resource_encryption_config_cf, resource_guard_proxy_cf  # pylint: disable=unused-variable
 from azure.cli.command_modules.backup._exception_handler import backup_exception_handler
 from azure.cli.command_modules.backup._format import (
     transform_container_list, transform_policy_list, transform_item_list, transform_job_list,
@@ -112,3 +112,9 @@ def load_command_table(self, _):
 
     with self.command_group('backup recoveryconfig', backup_custom_base, client_factory=recovery_points_cf, exception_handler=backup_exception_handler) as g:
         g.show_command('show', 'show_recovery_config')
+
+    with self.command_group('backup resourceguardproxy', backup_custom, client_factory=resource_guard_proxy_cf, exception_handler=backup_exception_handler) as g:
+        g.show_command('create', 'create_resource_guard_proxy')
+        g.show_command('update', 'update_resource_guard_proxy')
+        g.show_command('show', 'show_resource_guard_proxy')
+        g.show_command('delete', 'delete_resource_guard_proxy')
