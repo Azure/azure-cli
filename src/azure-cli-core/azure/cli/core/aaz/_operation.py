@@ -29,7 +29,6 @@ class AAZOperation:
 
 class AAZHttpOperation(AAZOperation):
     CLIENT_TYPE = None
-    ERROR_FORMAT = None
 
     def __init__(self, ctx):
         super().__init__(ctx)
@@ -221,15 +220,27 @@ class AAZHttpOperation(AAZOperation):
 
     @property
     def error_format(self):
-        if self.ERROR_FORMAT:
-            return self.ctx.get_error_format(self.ERROR_FORMAT)
         return None
 
     def make_request(self):
-        if self.method in ("GET", "DELETE", "MERGE", "OPTIONS"):
+        if self.method in ("GET", ):
+            # support making request for next link
+            if self.ctx.next_link:
+                url = self.ctx.next_link
+                query_parameters = {}
+            else:
+                url = self.url
+                query_parameters = self.query_parameters
+
+            request = self.client._request(
+                self.method, url, query_parameters, self.header_parameters,
+                self.content, self.form_content, None)
+
+        elif self.method in ("DELETE", "MERGE", "OPTIONS"):
             request = self.client._request(
                 self.method, self.url, self.query_parameters, self.header_parameters,
                 self.content, self.form_content, None)
+
         elif self.method in ("PUT", "POST", "HEAD", "PATCH",):
             request = self.client._request(
                 self.method, self.url, self.query_parameters, self.header_parameters,
@@ -246,7 +257,8 @@ class AAZHttpOperation(AAZOperation):
         error_type = self.error_map.get(response.status_code)
         if error_type:
             raise error_type(response=response)
-        raise HttpResponseError(response=response, error_format=self.error_format)
+        error_format = self.ctx.get_error_format(self.error_format)
+        raise HttpResponseError(response=response, error_format=error_format)
 
 
 class AAZJsonInstanceUpdateOperation(AAZOperation):

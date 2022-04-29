@@ -15,13 +15,13 @@ from knack.deprecation import Deprecated
 from knack.experimental import ExperimentalItem
 from knack.preview import PreviewItem
 
-from ._arg import AAZArgumentsSchema, AAZGenericUpdateAddArg, AAZGenericUpdateSetArg, AAZGenericUpdateRemoveArg, \
-    AAZGenericUpdateForceString, AAZBoolArg
+from ._arg import AAZArgumentsSchema, AAZBoolArg
 from ._arg_action import AAZArgActionOperations, AAZGenericUpdateAction
 from ._base import AAZUndefined, AAZBaseValue
 from ._field_type import AAZObjectType
 from ._field_value import AAZObject
 from ._poller import AAZLROPoller
+from ._paging import AAZPaged
 from ._utils import _get_profile_pkg
 from .exceptions import AAZUnknownFieldError
 
@@ -73,6 +73,8 @@ class AAZCommandCtx:
         self.vars = AAZObject(schema=self._vars_schema, data={})
         self.generic_update_args = command_args.get(AAZGenericUpdateAction.DEST, None)
 
+        # self.next_link = AAZUndefined  # support paging
+
     def format_args(self):
         # TODO: apply format for argument values
         pass
@@ -108,6 +110,8 @@ class AAZCommandCtx:
 
     @staticmethod
     def get_error_format(name):
+        if name is None:
+            return None
         from ._error_format import registered_error_formats
         return registered_error_formats[name]
 
@@ -253,8 +257,15 @@ class AAZCommand(CLICommand):
         return value.to_serialized_data(processor=processor)
 
     @staticmethod
-    def build_lro_poller(polling_generator, result_callback):
-        return AAZLROPoller(polling_generator=polling_generator, result_callback=result_callback)
+    def build_lro_poller(executor, extract_result):
+        # TODO:
+        return AAZLROPoller(polling_generator=executor(), result_callback=extract_result)
+
+    def build_paging(self, executor, extract_result):
+        def executor_wrapper(next_link):
+            self.ctx.next_link = next_link
+            executor()
+        return AAZPaged(executor=executor_wrapper, extract_result=extract_result)
 
 
 def register_command_group(

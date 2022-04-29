@@ -1140,7 +1140,8 @@ def _is_paged(obj):
             and not isinstance(obj, dict):
         from msrest.paging import Paged
         from azure.core.paging import ItemPaged as AzureCorePaged
-        return isinstance(obj, (AzureCorePaged, Paged))
+        from azure.cli.core.aaz._paging import AAZPaged
+        return isinstance(obj, (AzureCorePaged, Paged, AAZPaged))
     return False
 
 
