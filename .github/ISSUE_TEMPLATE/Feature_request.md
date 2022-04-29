@@ -8,7 +8,7 @@ assignees: ''
 ---
 
 **Related command**
-<!--- Please provide the related command with `az {command}`, azure-cli bot will analyse command and route to related team --->
+<!--- Please provide the related command with az {command} if you can, so that we can quickly route to the related team for help. --->
 
 **Is your feature request related to a problem? Please describe.**
 <!--- A clear and concise description of what the problem is. Ex. I'm always frustrated when [...] --->

@@ -9,7 +9,7 @@ assignees: ''
 ---
 
 **Related command**
-<!--- Please provide the related command with `az {command}`, azure-cli bot will analyse command and route to related team --->
+<!--- Please provide the related command with az {command} if you can, so that we can quickly route to the related team for help. --->
 
 **Resource Provider**
 <!--- What is the Azure resource provider your feature is part of? --->
