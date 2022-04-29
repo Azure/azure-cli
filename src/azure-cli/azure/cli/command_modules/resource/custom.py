@@ -3706,7 +3706,9 @@ def list_bicep_cli_versions(cmd):
 def create_resourcemanager_privatelink(
     cmd, resource_group, name, location):
     rcf = _resource_privatelinks_client_factory(cmd.cli_ctx)
-    return rcf.resource_management_private_link.put(resource_group, name, location)
+    ResourceManagementPrivateLinkLocation = cmd.get_models('ResourceManagementPrivateLinkLocation')
+    resource_management_private_link_location = ResourceManagementPrivateLinkLocation(location=location)
+    return rcf.resource_management_private_link.put(resource_group, name, resource_management_private_link_location)
 
 def get_resourcemanager_privatelink(cmd, resource_group, name):
     rcf = _resource_privatelinks_client_factory(cmd.cli_ctx)
