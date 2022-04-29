@@ -2788,7 +2788,7 @@ type: command
 short-summary: Get resource management private.
 examples:
   - name: Get single resource management private link.
-    text: az resourcemanagement private-link show --resource_group testRG --name TestRMPL
+    text: az resourcemanagement private-link show --resource-group testRG --name TestRMPL
 """
 helps['resourcemanagement private-link list'] = """
 type: command
