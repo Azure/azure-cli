@@ -7,7 +7,7 @@ import logging
 import threading
 import uuid
 
-from azure.core.exceptions import AzureError
+from azure.core.exceptions import AzureError, HttpResponseError
 from azure.core.polling import NoPolling
 from azure.core.polling.base_polling import LROBasePolling
 from azure.core.tracing.common import with_current_context
@@ -21,7 +21,32 @@ class AAZNoPolling(NoPolling):
 
 
 class AAZBasePolling(LROBasePolling):
-    pass
+
+    def __init__(self, http_response_error_callback=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._http_response_error_callback = http_response_error_callback
+
+    def initialize(self, client, initial_response, deserialization_callback):
+        try:
+            super().initialize(client, initial_response, deserialization_callback)
+        except HttpResponseError as err:
+            if self._http_response_error_callback:
+                # the HttpResponseError raise by LROBasePolling missing detailed error message
+                # _http_response_error_callback will build HttpResponseError with detailed error message
+                self._http_response_error_callback(err.response)
+            else:
+                raise err
+
+    def run(self):
+        try:
+            super().run()
+        except HttpResponseError as err:
+            if self._http_response_error_callback:
+                # the HttpResponseError raise by LROBasePolling missing detailed message
+                # _http_response_error_callback will build HttpResponseError with detailed error message
+                self._http_response_error_callback(err.response)
+            else:
+                raise err
 
 
 class AAZLROPoller:

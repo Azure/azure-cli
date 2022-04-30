@@ -84,9 +84,8 @@ class AAZMgmtClient(PipelineClient):
         session = self._pipeline.run(request, stream=stream, **kwargs)
         return session
 
-    def build_lro_polling(self, no_wait, initial_session, deserialization_callback, lro_options=None,
-                          path_format_arguments=None):
-        # TODO: handle error
+    def build_lro_polling(self, no_wait, initial_session, deserialization_callback, error_callback,
+                          lro_options=None, path_format_arguments=None):
         from azure.mgmt.core.polling.arm_polling import AzureAsyncOperationPolling, BodyContentPolling
         if no_wait == True:  # pylint: disable=singleton-comparison
             polling = AAZNoPolling()
@@ -100,6 +99,7 @@ class AAZMgmtClient(PipelineClient):
                     StatusCheckPolling(),
                 ],
                 path_format_arguments=path_format_arguments,
+                http_response_error_callback=error_callback,
             )
 
         polling.initialize(

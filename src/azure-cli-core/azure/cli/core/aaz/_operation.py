@@ -252,8 +252,7 @@ class AAZHttpOperation(AAZOperation):
     def __call__(self, *args, **kwargs):
         raise NotImplementedError()
 
-    def on_error(self, session):
-        response = session.http_response
+    def on_error(self, response):
         error_type = self.error_map.get(response.status_code)
         if error_type:
             raise error_type(response=response)
