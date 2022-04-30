@@ -3,12 +3,17 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import logging
 import threading
 import uuid
 
-from azure.core.polling import NoPolling, LROPoller
+from azure.core.exceptions import AzureError
+from azure.core.polling import NoPolling
 from azure.core.polling.base_polling import LROBasePolling
 from azure.core.tracing.common import with_current_context
+from azure.core.tracing.decorator import distributed_trace
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class AAZNoPolling(NoPolling):
@@ -19,27 +24,88 @@ class AAZBasePolling(LROBasePolling):
     pass
 
 
-class AAZLROPoller(LROPoller):
+class AAZLROPoller:
 
     def __init__(self, polling_generator, result_callback):
-        # TODO: handle generator with multi pollings
         self._callbacks = []
-        self._polling_method = next(polling_generator)
+        self._polling_generator = polling_generator
         self._result_callback = result_callback
 
+        # Prepare thread execution
         self._thread = None
         self._done = None
         self._exception = None
-        if not self._polling_method.finished():
-            self._done = threading.Event()
-            self._thread = threading.Thread(
-                target=with_current_context(self._start),
-                name="LROPoller({})".format(uuid.uuid4()))
-            self._thread.daemon = True
-            self._thread.start()
 
-    def result(self, *args, **kwargs):
-        resource = super(AAZLROPoller, self).result(*args, **kwargs)
+        self._done = threading.Event()
+        self._thread = threading.Thread(
+            target=with_current_context(self._start),
+            name="AAZLROPoller({})".format(uuid.uuid4()))
+        self._thread.daemon = True
+        self._thread.start()
+
+    def _start(self):
+        """Start the long running operation.
+        On completion, runs any callbacks.
+
+        :param callable update_cmd: The API request to check the status of
+         the operation.
+        """
+        try:
+            for polling_method in self._polling_generator():
+                self._polling_method = polling_method
+                try:
+                    self._polling_method.run()
+                except AzureError as error:
+                    if not error.continuation_token:
+                        try:
+                            error.continuation_token = self._polling_method.get_continuation_token()
+                        except Exception as err:  # pylint: disable=broad-except
+                            _LOGGER.warning("Unable to retrieve continuation token: %s", err)
+                            error.continuation_token = None
+                    raise error
+        except Exception as error:  # pylint: disable=broad-except
+            self._exception = error
+        finally:
+            self._done.set()
+
+    def result(self, timeout=None):
+        """Return the result of the long running operation, or
+        the result available after the specified timeout.
+
+        :returns: The deserialized resource of the long running operation,
+         if one is available.
+        :raises ~azure.core.exceptions.HttpResponseError: Server problem with the query.
+        """
+        self.wait(timeout)
+        resource = self._polling_method.resource()
         if self._result_callback:
             return self._result_callback(resource)
         return resource
+
+    @distributed_trace
+    def wait(self, timeout=None):
+        """Wait on the long running operation for a specified length
+        of time. You can check if this call as ended with timeout with the
+        "done()" method.
+
+        :param float timeout: Period of time to wait for the long running
+         operation to complete (in seconds).
+        :raises ~azure.core.exceptions.HttpResponseError: Server problem with the query.
+        """
+        if self._thread is None:
+            return
+        self._thread.join(timeout=timeout)
+        try:
+            # Let's handle possible None in forgiveness here
+            # https://github.com/python/mypy/issues/8165
+            raise self._exception  # type: ignore
+        except TypeError:  # Was None
+            pass
+
+    def done(self):
+        """Check status of the long running operation.
+
+        :returns: 'True' if the process has completed, else 'False'.
+        :rtype: bool
+        """
+        return self._thread is None or not self._thread.is_alive()

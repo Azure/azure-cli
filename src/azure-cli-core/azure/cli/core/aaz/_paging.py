@@ -4,15 +4,13 @@
 # --------------------------------------------------------------------------------------------
 
 import itertools
-from typing import Iterator, TypeVar
+from typing import Iterator
 import logging
 
 _LOGGER = logging.getLogger(__name__)
 
-ReturnType = TypeVar("ReturnType")
 
-
-class AAZPageIterator(Iterator[Iterator[ReturnType]]):
+class AAZPageIterator(Iterator[Iterator]):
     def __init__(self, executor, extract_result):
         self._executor = executor
         self._extract_result = extract_result
@@ -31,7 +29,7 @@ class AAZPageIterator(Iterator[Iterator[ReturnType]]):
         return iter(result)
 
 
-class AAZPaged(Iterator[ReturnType]):
+class AAZPaged(Iterator):
 
     def __init__(self, executor, extract_result):
         self._page_iterator = itertools.chain.from_iterable(

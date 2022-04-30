@@ -73,7 +73,7 @@ class AAZCommandCtx:
         self.vars = AAZObject(schema=self._vars_schema, data={})
         self.generic_update_args = command_args.get(AAZGenericUpdateAction.DEST, None)
 
-        # self.next_link = AAZUndefined  # support paging
+        self.next_link = AAZUndefined  # support paging
 
     def format_args(self):
         # TODO: apply format for argument values
@@ -258,8 +258,7 @@ class AAZCommand(CLICommand):
 
     @staticmethod
     def build_lro_poller(executor, extract_result):
-        # TODO:
-        return AAZLROPoller(polling_generator=executor(), result_callback=extract_result)
+        return AAZLROPoller(polling_generator=executor, result_callback=extract_result)
 
     def build_paging(self, executor, extract_result):
         def executor_wrapper(next_link):
