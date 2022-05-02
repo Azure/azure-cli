@@ -454,14 +454,16 @@ def get_user_confirmation(message, yes=False):
         raise CLIError(
             'Unable to prompt for confirmation as no tty available. Use --yes.')
 
+
 def replace_memory_optimized_tier(result):
     result = _get_list_from_paged_response(result)
     for capability_idx, capability in enumerate(result):
         for edition_idx, edition in enumerate(capability.supported_flexible_server_editions):
             if edition.name == 'MemoryOptimized':
                 result[capability_idx].supported_flexible_server_editions[edition_idx].name = 'BusinessCritical'
-    
+
     return result
+
 
 def _is_resource_name(resource):
     if len(resource.split('/')) == 1:

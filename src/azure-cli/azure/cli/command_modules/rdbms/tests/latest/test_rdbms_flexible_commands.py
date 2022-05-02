@@ -161,7 +161,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
             tier = 'Burstable'
             sku_name = 'Standard_B1ms'
         elif database_engine == 'mysql':
-            tier = 'BusinessCritical'
+            tier = 'MemoryOptimized'
             sku_name = 'Standard_E2ds_v4'
         self.cmd('{} flexible-server update -g {} -n {} --tier {} --sku-name {}'
                  .format(database_engine, resource_group, server_name, tier, sku_name),
