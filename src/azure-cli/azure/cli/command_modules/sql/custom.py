@@ -3340,12 +3340,12 @@ def elastic_pool_update(
     if zone_redundant is not None:
         instance.zone_redundant = zone_redundant
 
-    if high_availability_replica_count:
-        instance.high_availability_replica_count = high_availability_replica_count
-
     instance.maintenance_configuration_id = _complete_maintenance_configuration_id(
         cmd.cli_ctx,
         maintenance_configuration_id)
+
+    if high_availability_replica_count:
+        instance.high_availability_replica_count = high_availability_replica_count
 
     return instance
 
