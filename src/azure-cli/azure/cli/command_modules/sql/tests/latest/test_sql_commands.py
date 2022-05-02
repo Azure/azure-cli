@@ -2949,6 +2949,85 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('databaseDtuMin', None),
                      JMESPathCheck('databaseDtuMax', None)])
 
+    @ResourceGroupPreparer(name_prefix='clitest-HSEP', location='northeurope')
+    @SqlServerPreparer(name_prefix='clitest-HSEP', location='northeurope')
+    @AllowLargeResponse()
+    def test_sql_elastic_pools_hyperscale_mgmt(self, resource_group, resource_group_location, server):
+        pool_name = "cliautomationpool1"
+
+        # Create pool with hyperscale edition
+        vcore_edition = 'Hyperscale'
+        self.cmd('sql elastic-pool create -g {} --server {} --name {} --edition {}'
+                 .format(resource_group, server, pool_name, vcore_edition),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', pool_name),
+                     JMESPathCheck('edition', vcore_edition),
+                     JMESPathCheck('sku.tier', vcore_edition),
+                     JMESPathCheck('highAvailabilityReplicaCount', 1)])
+
+        self.cmd('sql elastic-pool show -g {} --server {} --name {}'
+                 .format(resource_group, server, pool_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', pool_name),
+                     JMESPathCheck('edition', vcore_edition),
+                     JMESPathCheck('sku.tier', vcore_edition),
+                     JMESPathCheck('highAvailabilityReplicaCount', 1)])
+
+        # Update only high availability replica count to 2
+        replica_count_updated = 2
+        self.cmd('sql elastic-pool update -g {} --server {} --name {} --ha-replicas {}'
+                 .format(resource_group, server, pool_name, replica_count_updated),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', pool_name),
+                     JMESPathCheck('edition', vcore_edition),
+                     JMESPathCheck('sku.tier', vcore_edition),
+                     JMESPathCheck('highAvailabilityReplicaCount', replica_count_updated)])
+
+        # Create pool with hyperscale edition and 2 high availability replicas
+        vcore_edition = 'Hyperscale'
+        pool_name = "cliautomationpool2"
+        replica_count = 2
+        self.cmd('sql elastic-pool create -g {} --server {} --name {} --edition {} --ha-replicas {}'
+                 .format(resource_group, server, pool_name, vcore_edition, replica_count),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', pool_name),
+                     JMESPathCheck('edition', vcore_edition),
+                     JMESPathCheck('sku.tier', vcore_edition),
+                     JMESPathCheck('highAvailabilityReplicaCount', replica_count)])
+
+        # Create a database inside the hyperscale elastic pool.
+        database_name = "cliautomationdb01"
+        self.cmd('sql db create -g {} --server {} --name {} '
+                 '--elastic-pool {}'
+                 .format(resource_group, server, database_name, pool_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('requestedServiceObjectiveName', 'ElasticPool'),
+                     JMESPathCheck('status', 'Online'),
+                     JMESPathCheck('highAvailabilityReplicaCount', replica_count)]) #Verify its the same as pool
+
+        self.cmd('sql db show -g {} --server {} --name {}'
+                 .format(resource_group, server, database_name),
+                 checks=[
+                     JMESPathCheck('elasticPoolName', pool_name),
+                     JMESPathCheck('highAvailabilityReplicaCount', replica_count)])
+
+        # Remove database from pool
+        db_service_objective = 'HS_Gen5_4'
+        self.cmd('sql db update -g {} -s {} -n {} --service-objective {}'
+                 .format(resource_group, server, database_name, db_service_objective),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('elasticPoolId', None),
+                     JMESPathCheck('requestedServiceObjectiveName', db_service_objective),
+                     JMESPathCheck('status', 'Online'),
+                     JMESPathCheck('highAvailabilityReplicaCount', replica_count)]) #Verify its the same as pool
 
 class SqlElasticPoolOperationMgmtScenarioTest(ScenarioTest):
     def __init__(self, method_name):
