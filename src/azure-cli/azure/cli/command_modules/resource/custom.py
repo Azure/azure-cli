@@ -3747,7 +3747,7 @@ def get_private_link_association(cmd, management_group_id, name):
 
 def delete_private_link_association(cmd, management_group_id, name):
     rcf = _resource_privatelinks_client_factory(cmd.cli_ctx)
-    return rcf.private_link_association.put(group_id=management_group_id, pla_id=name)
+    return rcf.private_link_association.delete(group_id=management_group_id, pla_id=name)
 
 
 def list_private_link_association(cmd, management_group_id):
