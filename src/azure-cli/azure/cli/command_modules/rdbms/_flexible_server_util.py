@@ -170,16 +170,16 @@ def get_postgres_tiers(sku_info):
 def get_postgres_list_skus_info(cmd, location):
     list_skus_client = cf_postgres_flexible_location_capabilities(cmd.cli_ctx, '_')
     list_skus_result = list_skus_client.execute(location)
-    return _postgres_parse_list_skus(list_skus_result, 'postgres')
+    return _postgres_parse_list_skus(list_skus_result)
 
 
 def get_mysql_list_skus_info(cmd, location):
     list_skus_client = cf_mysql_flexible_location_capabilities(cmd.cli_ctx, '_')
     list_skus_result = list_skus_client.list(location)
-    return _mysql_parse_list_skus(list_skus_result, 'mysql')
+    return _mysql_parse_list_skus(list_skus_result)
 
 
-def _postgres_parse_list_skus(result, database_engine):
+def _postgres_parse_list_skus(result):
     result = _get_list_from_paged_response(result)
 
     if not result:
@@ -213,7 +213,7 @@ def _postgres_parse_list_skus(result, database_engine):
             'single_az': single_az}
 
 
-def _mysql_parse_list_skus(result, database_engine):
+def _mysql_parse_list_skus(result):
     result = _get_list_from_paged_response(result)
     if not result:
         raise InvalidArgumentValueError("No available SKUs in this location")
@@ -454,6 +454,14 @@ def get_user_confirmation(message, yes=False):
         raise CLIError(
             'Unable to prompt for confirmation as no tty available. Use --yes.')
 
+def replace_memory_optimized_tier(result):
+    result = _get_list_from_paged_response(result)
+    for capability_idx, capability in enumerate(result):
+        for edition_idx, edition in enumerate(capability.supported_flexible_server_editions):
+            if edition.name == 'MemoryOptimized':
+                result[capability_idx].supported_flexible_server_editions[edition_idx].name = 'BusinessCritical'
+    
+    return result
 
 def _is_resource_name(resource):
     if len(resource.split('/')) == 1:
