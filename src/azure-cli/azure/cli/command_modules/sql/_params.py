@@ -1194,7 +1194,7 @@ def load_arguments(self, _):
                    arg_type=maintenance_configuration_id_param_type)
 
         c.argument('high_availability_replica_count',
-                     arg_type=read_replicas_param_type)
+                   arg_type=read_replicas_param_type)
 
     with self.argument_context('sql elastic-pool create') as c:
         # Create args that will be used to build up the ElasticPool object
