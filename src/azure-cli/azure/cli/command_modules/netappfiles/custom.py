@@ -357,7 +357,7 @@ def add_export_policy_rule(instance, allowed_clients, unix_read_only, unix_read_
                            rule_index=None, kerberos5_r=None, kerberos5_rw=None, kerberos5i_r=None, kerberos5i_rw=None,
                            kerberos5p_r=None, kerberos5p_rw=None, has_root_access=None, chown_mode=None):
     if rule_index is None:
-        rule_index = 0 if len(instance.export_policy.rules) < 1 else max(rule.rule_index for rule in instance.export_policy.rules) + 1
+        rule_index = 1 if len(instance.export_policy.rules) < 1 else max(rule.rule_index for rule in instance.export_policy.rules) + 1
 
     rules = []
 
