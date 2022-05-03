@@ -388,8 +388,8 @@ def cli_sbsubscription_create(cmd, client, resource_group_name, namespace_name, 
     if default_message_time_to_live:
         subscription_params.default_message_time_to_live = return_valid_duration(update_value = default_message_time_to_live)
 
-    if duplicate_detection_history_time_window:
-        subscription_params.duplicate_detection_history_time_window = return_valid_duration(update_value = duplicate_detection_history_time_window)
+    if lock_duration:
+        subscription_params.lock_duration = return_valid_duration(update_value = lock_duration)
 
     if auto_delete_on_idle:
         subscription_params.auto_delete_on_idle = return_valid_duration(update_value = auto_delete_on_idle)
