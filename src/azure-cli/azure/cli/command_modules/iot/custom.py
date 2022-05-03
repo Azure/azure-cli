@@ -283,9 +283,9 @@ def iot_dps_linked_hub_create(
 
     dps = iot_dps_get(client, dps_name, resource_group_name)
     dps.properties.iot_hubs.append(IotHubDefinitionDescription(connection_string=connection_string,
-                                                       location=location,
-                                                       apply_allocation_policy=apply_allocation_policy,
-                                                       allocation_weight=allocation_weight))
+                                                               location=location,
+                                                               apply_allocation_policy=apply_allocation_policy,
+                                                               allocation_weight=allocation_weight))
 
     if no_wait:
         return client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps)
