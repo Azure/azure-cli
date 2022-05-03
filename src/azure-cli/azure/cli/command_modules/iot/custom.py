@@ -166,14 +166,11 @@ def iot_dps_policy_create(
     access_policy_rights = _convert_rights_to_access_rights(rights)
     dps_access_policies.append(SharedAccessSignatureAuthorizationRuleAccessRightsDescription(
         key_name=access_policy_name, rights=access_policy_rights, primary_key=primary_key, secondary_key=secondary_key))
-    dps_property = IotDpsPropertiesDescription(iot_hubs=dps.properties.iot_hubs,
-                                               allocation_policy=dps.properties.allocation_policy,
-                                               authorization_policies=dps_access_policies)
-    dps_description = ProvisioningServiceDescription(location=dps.location, properties=dps_property, sku=dps.sku)
+    dps.properties.authorization_policies = dps_access_policies
 
     if no_wait:
-        return client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps_description)
-    LongRunningOperation(cmd.cli_ctx)(client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps_description))
+        return client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps)
+    LongRunningOperation(cmd.cli_ctx)(client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps))
     return iot_dps_policy_get(client, dps_name, access_policy_name, resource_group_name)
 
 
@@ -205,14 +202,11 @@ def iot_dps_policy_update(
                 policy.rights = _convert_rights_to_access_rights(rights)
 
     dps = iot_dps_get(client, dps_name, resource_group_name)
-    dps_property = IotDpsPropertiesDescription(iot_hubs=dps.properties.iot_hubs,
-                                               allocation_policy=dps.properties.allocation_policy,
-                                               authorization_policies=dps_access_policies)
-    dps_description = ProvisioningServiceDescription(location=dps.location, properties=dps_property, sku=dps.sku)
+    dps.properties.authorization_policies = dps_access_policies
 
     if no_wait:
-        return client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps_description)
-    LongRunningOperation(cmd.cli_ctx)(client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps_description))
+        return client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps)
+    LongRunningOperation(cmd.cli_ctx)(client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps))
     return iot_dps_policy_get(client, dps_name, access_policy_name, resource_group_name)
 
 
@@ -226,14 +220,11 @@ def iot_dps_policy_delete(cmd, client, dps_name, access_policy_name, resource_gr
     updated_policies = [p for p in dps_access_policies if p.key_name.lower() != access_policy_name.lower()]
 
     dps = iot_dps_get(client, dps_name, resource_group_name)
-    dps_property = IotDpsPropertiesDescription(iot_hubs=dps.properties.iot_hubs,
-                                               allocation_policy=dps.properties.allocation_policy,
-                                               authorization_policies=updated_policies)
-    dps_description = ProvisioningServiceDescription(location=dps.location, properties=dps_property, sku=dps.sku)
+    dps.properties.authorization_policies = updated_policies
 
     if no_wait:
-        return client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps_description)
-    LongRunningOperation(cmd.cli_ctx)(client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps_description))
+        return client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps)
+    LongRunningOperation(cmd.cli_ctx)(client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps))
     return iot_dps_policy_list(client, dps_name, resource_group_name)
 
 
@@ -289,23 +280,16 @@ def iot_dps_linked_hub_create(
         location = iot_hub_get(cmd, hub_client, hub_name=hub_name, resource_group_name=hub_resource_group).location
 
     resource_group_name = _ensure_dps_resource_group_name(client, resource_group_name, dps_name)
-    dps_linked_hubs = []
-    dps_linked_hubs.extend(iot_dps_linked_hub_list(client, dps_name, resource_group_name))
 
-    dps_linked_hubs.append(IotHubDefinitionDescription(connection_string=connection_string,
+    dps = iot_dps_get(client, dps_name, resource_group_name)
+    dps.properties.iot_hubs.append(IotHubDefinitionDescription(connection_string=connection_string,
                                                        location=location,
                                                        apply_allocation_policy=apply_allocation_policy,
                                                        allocation_weight=allocation_weight))
 
-    dps = iot_dps_get(client, dps_name, resource_group_name)
-    dps_property = IotDpsPropertiesDescription(iot_hubs=dps_linked_hubs,
-                                               allocation_policy=dps.properties.allocation_policy,
-                                               authorization_policies=dps.properties.authorization_policies)
-    dps_description = ProvisioningServiceDescription(location=dps.location, properties=dps_property, sku=dps.sku)
-
     if no_wait:
-        return client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps_description)
-    LongRunningOperation(cmd.cli_ctx)(client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps_description))
+        return client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps)
+    LongRunningOperation(cmd.cli_ctx)(client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps))
     return iot_dps_linked_hub_list(client, dps_name, resource_group_name)
 
 
@@ -329,14 +313,11 @@ def iot_dps_linked_hub_update(cmd, client, dps_name, linked_hub, resource_group_
                 hub.allocation_weight = allocation_weight
 
     dps = iot_dps_get(client, dps_name, resource_group_name)
-    dps_property = IotDpsPropertiesDescription(iot_hubs=dps_linked_hubs,
-                                               allocation_policy=dps.properties.allocation_policy,
-                                               authorization_policies=dps.properties.authorization_policies)
-    dps_description = ProvisioningServiceDescription(location=dps.location, properties=dps_property, sku=dps.sku)
+    dps.properties.iot_hubs = dps_linked_hubs
 
     if no_wait:
-        return client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps_description)
-    LongRunningOperation(cmd.cli_ctx)(client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps_description))
+        return client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps)
+    LongRunningOperation(cmd.cli_ctx)(client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps))
     return iot_dps_linked_hub_get(cmd, client, dps_name, linked_hub, resource_group_name)
 
 
@@ -350,17 +331,14 @@ def iot_dps_linked_hub_delete(cmd, client, dps_name, linked_hub, resource_group_
     dps_linked_hubs.extend(iot_dps_linked_hub_list(client, dps_name, resource_group_name))
     if not _is_linked_hub_existed(dps_linked_hubs, linked_hub):
         raise ResourceNotFoundError("Linked hub {0} doesn't exist.".format(linked_hub))
-    updated_hub = [p for p in dps_linked_hubs if p.name.lower() != linked_hub.lower()]
+    updated_hubs = [p for p in dps_linked_hubs if p.name.lower() != linked_hub.lower()]
 
     dps = iot_dps_get(client, dps_name, resource_group_name)
-    dps_property = IotDpsPropertiesDescription(iot_hubs=updated_hub,
-                                               allocation_policy=dps.properties.allocation_policy,
-                                               authorization_policies=dps.properties.authorization_policies)
-    dps_description = ProvisioningServiceDescription(location=dps.location, properties=dps_property, sku=dps.sku)
+    dps.properties.iot_hubs = updated_hubs
 
     if no_wait:
-        return client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps_description)
-    LongRunningOperation(cmd.cli_ctx)(client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps_description))
+        return client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps)
+    LongRunningOperation(cmd.cli_ctx)(client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps))
     return iot_dps_linked_hub_list(client, dps_name, resource_group_name)
 
 
