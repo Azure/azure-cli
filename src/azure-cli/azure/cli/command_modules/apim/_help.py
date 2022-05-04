@@ -91,7 +91,7 @@ examples:
 """
 
 helps['apim apply-network-updates'] = """
-type: command 
+type: command
 short-summary: Updates the API Management resource running in the virtual network to pick the updated network settings.
 examples:
   - name: Updates the virtual network settings of the API Management service instance
