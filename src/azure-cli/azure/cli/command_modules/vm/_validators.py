@@ -334,7 +334,7 @@ def _get_image_plan_info_if_exists(cmd, namespace):
 
         # pylint: disable=no-member
         return image.plan
-    except CloudError as ex:
+    except ResourceNotFoundError as ex:
         logger.warning("Querying the image of '%s' failed for an error '%s'. Configuring plan settings "
                        "will be skipped", namespace.image, ex.message)
 
