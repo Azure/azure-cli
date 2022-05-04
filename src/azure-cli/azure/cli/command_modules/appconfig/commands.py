@@ -71,10 +71,10 @@ def load_command_table(self, _):
         g.show_command('show-deleted', 'show_deleted_configstore', is_preview=True, table_transformer=deleted_configstore_output_format)
 
     with self.command_group('appconfig replica', configstore_replica_util, is_preview=True) as g:
-        g.command('list', 'list_replica', table_transformer=configstore_replica_output_format)
+        g.command('list', 'list_replica')
         g.command('create', 'create_replica')
         g.command('delete', 'delete_replica')
-        g.show_command('show', 'show_replica', table_transformer=configstore_replica_output_format)
+        g.show_command('show', 'show_replica')
 
     with self.command_group('appconfig credential', configstore_credential_util) as g:
         g.command('list', 'list_credential')
