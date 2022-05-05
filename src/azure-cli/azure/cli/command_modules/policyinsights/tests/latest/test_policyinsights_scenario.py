@@ -312,12 +312,16 @@ class PolicyInsightsTests(ScenarioTest):
         self.kwargs.update({
             'pan': self.create_random_name('cli-test-pa', 23),
             'rn': self.create_random_name('cli-test-remediation', 30),
-            'mg': self.create_random_name('cli-test-mg', 30),
+            'mg': 'cli-test-mg',
             'bip': '06a78e20-9358-41c9-923c-fb736d382a4d'
         })
 
         # create a management group we can assign policy to
-        management_group = self.cmd('account management-group create -n {mg}').get_output_in_json()
+        self.cmd('account management-group create -n {mg}')
+        time.sleep(20)
+        management_group = self.cmd(
+            'account management-group show --name cli-test-mg').get_output_in_json()
+        
 
         try:
             # create a policy assignment that we can trigger remediations on
@@ -379,7 +383,7 @@ class PolicyInsightsTests(ScenarioTest):
     @AllowLargeResponse(8192)
     def test_policy_insights_remediation_complete(self):
         self.kwargs.update({
-            'pan': '4ecaf5f81bad4bfc86b132fb',
+            'pan': '9cc2d1c17e62430ba322b704',
             'rg': 'az-cli-policy-insights-test',
             'rn': self.create_random_name('azurecli-test-remediation', 40)
         })
