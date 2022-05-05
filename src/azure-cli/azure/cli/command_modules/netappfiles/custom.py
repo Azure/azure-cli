@@ -50,7 +50,7 @@ def create_account(client, account_name, resource_group_name, location=None, tag
 # add an active directory to the netapp account
 # current limitation is 1 AD/subscription
 def add_active_directory(instance, account_name, resource_group_name, username, password, domain, dns,
-                         smb_server_name, organizational_unit=None, kdc_ip=None, ad_name=None,
+                         smb_server_name, organizational_unit=None, kdc_ip=None, ad_name=None, site=None,
                          server_root_ca_cert=None, backup_operators=None, aes_encryption=None, ldap_signing=None,
                          security_operators=None, ldap_over_tls=None, allow_local_ldap_users=None,
                          administrators=None, encrypt_dc_conn=None, user_dn=None, group_dn=None, group_filter=None):
@@ -58,7 +58,7 @@ def add_active_directory(instance, account_name, resource_group_name, username, 
                                            group_dn=group_dn,
                                            group_membership_filter=group_filter)
     active_directories = []
-    active_directory = ActiveDirectory(username=username, password=password, domain=domain, dns=dns,
+    active_directory = ActiveDirectory(username=username, password=password, domain=domain, dns=dns, site=site,
                                        smb_server_name=smb_server_name, organizational_unit=organizational_unit,
                                        kdc_ip=kdc_ip, ad_name=ad_name, backup_operators=backup_operators,
                                        server_root_ca_certificate=server_root_ca_cert, aes_encryption=aes_encryption,
@@ -79,7 +79,7 @@ def add_active_directory(instance, account_name, resource_group_name, username, 
 def update_active_directory(instance, account_name, resource_group_name, active_directory_id, username, password,
                             domain, dns, smb_server_name, organizational_unit=None, kdc_ip=None, ad_name=None,
                             server_root_ca_cert=None, backup_operators=None, aes_encryption=None, ldap_signing=None,
-                            security_operators=None, ldap_over_tls=None, allow_local_ldap_users=None,
+                            security_operators=None, ldap_over_tls=None, allow_local_ldap_users=None, site=None,
                             administrators=None, encrypt_dc_conn=None, user_dn=None, group_dn=None, group_filter=None):
     ad_list = instance.active_directories
 
@@ -88,7 +88,7 @@ def update_active_directory(instance, account_name, resource_group_name, active_
                                            group_membership_filter=group_filter)
 
     active_directory = ActiveDirectory(active_directory_id=active_directory_id, username=username, password=password,
-                                       domain=domain, dns=dns, smb_server_name=smb_server_name,
+                                       domain=domain, dns=dns, smb_server_name=smb_server_name, site=site,
                                        organizational_unit=organizational_unit, kdc_ip=kdc_ip, ad_name=ad_name,
                                        backup_operators=backup_operators, server_root_ca_certificate=server_root_ca_cert,
                                        aes_encryption=aes_encryption, ldap_signing=ldap_signing,
