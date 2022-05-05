@@ -30,7 +30,7 @@ def load_command_table(self, _):
         # only when the extension is installed
         if should_load_source(source):
             with self.command_group('{} connection'.format(source.value), connection_type,
-                                    client_factory=cf_linker, is_preview=True) as og:
+                                    client_factory=cf_linker) as og:
                 og.custom_command('list', 'connection_list')
                 og.custom_show_command('show', 'connection_show', transform=transform_linker_properties)
                 og.custom_command('delete', 'connection_delete', confirmation=True, supports_no_wait=True)
