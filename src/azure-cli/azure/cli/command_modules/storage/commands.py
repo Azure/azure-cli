@@ -346,8 +346,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_custom_command_oauth('download-batch', 'storage_blob_download_batch', client_factory=cf_blob_service,
                                        validator=process_blob_download_batch_parameters,
                                        exception_handler=file_related_exception_handler)
-        g.storage_custom_command_oauth(
-            'url', 'create_blob_url', transform=transform_url)
+        g.storage_custom_command_oauth('url', 'create_blob_url', client_factory=cf_blob_service,
+                                       transform=transform_url)
 
     blob_service_custom_sdk = get_custom_sdk('blob', client_factory=cf_blob_service,
                                              resource_type=ResourceType.DATA_STORAGE_BLOB)

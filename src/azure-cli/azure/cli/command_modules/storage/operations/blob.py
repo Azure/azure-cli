@@ -806,10 +806,16 @@ def generate_container_shared_access_signature(cmd, client, container_name, perm
                                     content_language=content_language, content_type=content_type, **kwargs)
 
 
-def create_blob_url(client, protocol='https'):
+def create_blob_url(client, container_name, blob_name, snapshot, protocol='https'):
+    if blob_name:
+        blob_client = client.get_blob_client(container=container_name, blob=blob_name, snapshot=snapshot)
+        url = blob_client.url
+    else:
+        container_client = client.get_container_client(container=container_name)
+        url = container_client.url+'/'
     if protocol=='http':
-        return encode_url_path(client.url.replace('https', 'http', 1))
-    return encode_url_path(client.url)
+        return url.replace('https', 'http', 1)
+    return url
 
 
 def _copy_blob_to_blob_container(blob_service, source_blob_service, destination_container, destination_path,

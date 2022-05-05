@@ -147,7 +147,8 @@ def transform_url(result):
     import re
     result = re.sub('//', '/', result)
     result = re.sub('/', '//', result, count=1)
-    return encode_url_path(result)
+    result = encode_url_path(result)
+    return result
 
 
 def transform_fs_access_output(result):
