@@ -96,11 +96,15 @@ def update_spark_pool(cmd, client, resource_group_name, workspace_name, spark_po
 
     if package_action and package:
         if package_action == "Add":
+            import datetime
             if existing_spark_pool.custom_libraries is None:
                 existing_spark_pool.custom_libraries = []
             for item in package:
                 package_get = get_workspace_package(cmd, workspace_name, item)
-                library = LibraryInfo(name=package_get.name, type=package_get.properties.type, path=package_get.properties.path, container_name=package_get.properties.container_name)
+                uploadtime = datetime.datetime.now()
+                library = LibraryInfo(name=package_get.name, type=package_get.properties.type,
+                                      path=package_get.properties.path, container_name=package_get.properties.container_name,
+                                      uploaded_timestamp=uploadtime)
                 existing_spark_pool.custom_libraries.append(library)
         if package_action == "Remove":
             existing_spark_pool.custom_libraries = [library for library in existing_spark_pool.custom_libraries if library.name not in package]
