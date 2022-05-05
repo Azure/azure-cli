@@ -4,6 +4,7 @@
 # license information.
 # --------------------------------------------------------------------------
 
+import unittest
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.testsdk import (
     ScenarioTest,
@@ -17,6 +18,7 @@ from azure.cli.command_modules.serviceconnector._resource_config import (
 from ._test_utils import CredentialReplacer
 
 
+@unittest.skip('Hide until AKS support is ready.')
 class KubernetesConnectionScenarioTest(ScenarioTest):
 
     def __init__(self, method_name):
