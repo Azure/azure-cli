@@ -21,7 +21,7 @@ except ImportError:
 from knack.util import CLIError
 from knack.log import get_logger
 
-from msrestazure.azure_exceptions import CloudError
+from azure.core.exceptions import HttpResponseError
 from msrestazure.tools import is_valid_resource_id, resource_id, parse_resource_id
 
 from azure.cli.core.commands import cached_get, cached_put
@@ -281,7 +281,7 @@ def process_image_template_create_namespace(cmd, namespace):  # pylint: disable=
             }
 
             logger.info("%s, looks like a managed image name. Using resource ID: %s", image_name, namespace.source)  # pylint: disable=line-too-long
-        except CloudError:
+        except HttpResponseError:
             pass
 
     if not source:
