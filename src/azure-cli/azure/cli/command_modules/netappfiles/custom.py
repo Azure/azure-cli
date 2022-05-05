@@ -7,7 +7,6 @@
 from enum import Enum
 
 from knack.log import get_logger
-from knack.util import CLIError
 from azure.mgmt.netapp.models import ActiveDirectory, NetAppAccount, NetAppAccountPatch, CapacityPool, \
     CapacityPoolPatch, Volume, VolumePatch, VolumePropertiesExportPolicy, ExportPolicyRule, Snapshot, \
     ReplicationObject, VolumePropertiesDataProtection, SnapshotPolicy, SnapshotPolicyPatch, HourlySchedule, \
@@ -218,9 +217,9 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
         if "NFSv4.1" in protocol_types:
             isNfs41 = True
             if allowed_clients is None:
-                raise CLIError("Parameter allowed-clients needs to be set when protocol-type is NFSv4.1")
+                raise ValidationError("Parameter allowed-clients needs to be set when protocol-type is NFSv4.1")
             if rule_index is None:
-                raise CLIError("Parameter rule-index needs to be set when protocol-type is NFSv4.1")
+                raise ValidationError("Parameter rule-index needs to be set when protocol-type is NFSv4.1")
         if "NFSv3" in protocol_types:
             isNfs3 = True
         if "CIFS" in protocol_types:
@@ -354,9 +353,12 @@ def break_replication(client, resource_group_name, account_name, pool_name, volu
 
 # ---- VOLUME EXPORT POLICY ----
 # add new rule to policy
-def add_export_policy_rule(instance, allowed_clients, rule_index, unix_read_only, unix_read_write, cifs, nfsv3, nfsv41,
-                           kerberos5_r=None, kerberos5_rw=None, kerberos5i_r=None, kerberos5i_rw=None,
+def add_export_policy_rule(instance, allowed_clients, unix_read_only, unix_read_write, cifs, nfsv3, nfsv41,
+                           rule_index=None, kerberos5_r=None, kerberos5_rw=None, kerberos5i_r=None, kerberos5i_rw=None,
                            kerberos5p_r=None, kerberos5p_rw=None, has_root_access=None, chown_mode=None):
+    if rule_index is None:
+        rule_index = 1 if len(instance.export_policy.rules) < 1 else max(rule.rule_index for rule in instance.export_policy.rules) + 1
+
     rules = []
 
     export_policy = ExportPolicyRule(rule_index=rule_index, unix_read_only=unix_read_only,
@@ -373,6 +375,8 @@ def add_export_policy_rule(instance, allowed_clients, rule_index, unix_read_only
 
     rules.append(export_policy)
     for rule in instance.export_policy.rules:
+        if int(rule_index) == rule.rule_index:
+            raise ValidationError("Rule index %s already exist" % rule_index)
         rules.append(rule)
 
     volume_export_policy = VolumePropertiesExportPolicy(rules=rules)
