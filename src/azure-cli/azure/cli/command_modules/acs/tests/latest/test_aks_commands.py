@@ -501,7 +501,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                      '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
                      '--service-principal={service_principal} --client-secret={client_secret} --tags {tags} ' \
                      '--nodepool-labels {nodepool_labels} --nodepool-tags {nodepool_tags} ' \
-                     '--max-pods=100 --enable-rbac --admin-username=adminuser'
+                     '--max-pods=100 --admin-username=adminuser'
         self.cmd(create_cmd, checks=[
             self.exists('fqdn'),
             self.exists('nodeResourceGroup'),
