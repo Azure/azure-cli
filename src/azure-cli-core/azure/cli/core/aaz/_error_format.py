@@ -97,6 +97,7 @@ class AAZODataV4Format:
         return error_str
 
 
+# pylint: disable=too-few-public-methods
 class TypedErrorInfo:
     """Additional info class defined in ARM specification.
 

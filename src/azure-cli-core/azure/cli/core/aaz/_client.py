@@ -80,14 +80,14 @@ class AAZMgmtClient(PipelineClient):
             per_call_policies=per_call_policies
         )
 
-    def send_request(self, request, stream=False, **kwargs):  # pylint disable=arguments-differ
+    def send_request(self, request, stream=False, **kwargs):  # pylint: disable=arguments-differ
         session = self._pipeline.run(request, stream=stream, **kwargs)
         return session
 
     def build_lro_polling(self, no_wait, initial_session, deserialization_callback, error_callback,
                           lro_options=None, path_format_arguments=None):
         from azure.mgmt.core.polling.arm_polling import AzureAsyncOperationPolling, BodyContentPolling
-        if no_wait == True:  # pylint: disable=singleton-comparison
+        if no_wait == True:  # noqa: E712, pylint: disable=singleton-comparison
             polling = AAZNoPolling()
         else:
             polling = AAZBasePolling(

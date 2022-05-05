@@ -7,7 +7,7 @@ from ._field_value import AAZObject, AAZDict, AAZList, AAZSimpleValue
 from .exceptions import AAZUnknownFieldError, AAZConflictFieldDefinitionError, AAZValuePrecisionLossError, \
     AAZInvalidFieldError
 
-# pylint: disable=protected-access, too-few-public-methods
+# pylint: disable=protected-access, too-few-public-methods, isinstance-second-argument-not-valid-type
 
 
 # build in types
@@ -136,7 +136,7 @@ class AAZObjectType(AAZBaseType):
     def get_attr_name(self, key):
         if key in self._fields:
             return key
-        elif key in self._fields_alias_map:
+        if key in self._fields_alias_map:
             return self._fields_alias_map[key]
         return None
 
@@ -144,8 +144,7 @@ class AAZObjectType(AAZBaseType):
         if data is None:
             if self._nullable:
                 return None
-            else:
-                return AAZValuePatch.build(self)
+            return AAZValuePatch.build(self)
 
         result = {}
         value = AAZObject(schema=self, data=result)

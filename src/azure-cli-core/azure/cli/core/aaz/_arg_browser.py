@@ -27,7 +27,8 @@ class AAZArgBrowser:
             if self._parent is None:
                 raise ValueError(f"Invalid Key: '{key}' : parent is None")
             return self._parent.get(key[1:])
-        elif key.startswith('.'):
+
+        if key.startswith('.'):
             names = key[1:].split('.', maxsplit=1)
             prop_name = names[0]
             if prop_name not in self._arg_data:
@@ -39,8 +40,8 @@ class AAZArgBrowser:
                 return sub_browser
             assert len(names) == 2
             return sub_browser.get_prop(f'.{names[1]}')
-        else:
-            raise NotImplementedError()
+
+        raise NotImplementedError()
 
     def get_elements(self):
         if isinstance(self._arg_data, list):

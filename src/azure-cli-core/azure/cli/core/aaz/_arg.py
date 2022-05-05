@@ -49,10 +49,9 @@ class AAZArgEnum:
         if key in self.items:
             if isinstance(self.items, (list, tuple, set)):
                 return key
-            elif isinstance(self.items, dict):
+            if isinstance(self.items, dict):
                 return self.items[key]
-            else:
-                raise NotImplementedError()
+            raise NotImplementedError()
         else:
             raise azclierror.InvalidArgumentValueError(
                 f"unrecognized value '{data}' from choices '{self.to_choices()}' ")
@@ -338,6 +337,10 @@ class AAZGenericUpdateArg(AAZBaseArg, AAZListType):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.Element = AAZStrType()
+
+    @abc.abstractmethod
+    def _build_cmd_action(self):
+        raise NotImplementedError()
 
 
 class AAZGenericUpdateSetArg(AAZGenericUpdateArg):

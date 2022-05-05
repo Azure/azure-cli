@@ -117,14 +117,16 @@ class AAZSimpleTypeArgAction(AAZArgAction):
             if cls._schema.enum:
                 return cls._schema.enum[data]
             return cls._schema.DataType(data)
-        elif isinstance(data, cls._schema.DataType):
+
+        if isinstance(data, cls._schema.DataType):
             return data
-        elif data is None:
+
+        if data is None:
             if cls._schema._nullable:
                 return data
             raise AAZInvalidValueError("is not nullable")
-        else:
-            raise AAZInvalidValueError(f"{cls._schema.DataType} type value expected, got '{data}'({type(data)})")
+
+        raise AAZInvalidValueError(f"{cls._schema.DataType} type value expected, got '{data}'({type(data)})")
 
 
 class AAZCompoundTypeArgAction(AAZArgAction):  # pylint: disable=abstract-method
@@ -184,7 +186,7 @@ class AAZCompoundTypeArgAction(AAZArgAction):  # pylint: disable=abstract-method
         return tuple(key_items)
 
     @classmethod
-    def _decode_value(cls, key, key_items, value):  # pylint: disable=unused-variable
+    def _decode_value(cls, key, key_items, value):  # pylint: disable=unused-argument
         from ._arg import AAZSimpleTypeArg
         from azure.cli.core.util import get_file_json, shell_safe_json_parse
 
@@ -230,17 +232,18 @@ class AAZObjectArgAction(AAZCompoundTypeArgAction):
             if cls._schema._nullable:
                 return data
             raise AAZInvalidValueError("is not nullable")
-        elif isinstance(data, dict):
+
+        if isinstance(data, dict):
             result = OrderedDict()
             for key, value in data.items():
-                action = cls._schema[key]._build_cmd_action()
+                action = cls._schema[key]._build_cmd_action()  # pylint: disable=unsubscriptable-object
                 try:
                     result[key] = action.format_data(value)
                 except AAZInvalidValueError as ex:
                     raise AAZInvalidValueError(f"Invalid '{key}' : {ex}") from ex
             return result
-        else:
-            raise AAZInvalidValueError(f"dict type value expected, got '{data}'({type(data)})")
+
+        raise AAZInvalidValueError(f"dict type value expected, got '{data}'({type(data)})")
 
 
 class AAZDictArgAction(AAZCompoundTypeArgAction):
@@ -251,7 +254,8 @@ class AAZDictArgAction(AAZCompoundTypeArgAction):
             if cls._schema._nullable:
                 return data
             raise AAZInvalidValueError("is not nullable")
-        elif isinstance(data, dict):
+
+        if isinstance(data, dict):
             result = OrderedDict()
             action = cls._schema.Element._build_cmd_action()
             for key, value in data.items():
@@ -260,8 +264,8 @@ class AAZDictArgAction(AAZCompoundTypeArgAction):
                 except AAZInvalidValueError as ex:
                     raise AAZInvalidValueError(f"Invalid '{key}' : {ex}") from ex
             return result
-        else:
-            raise AAZInvalidValueError(f"dict type value expected, got '{data}'({type(data)})")
+
+        raise AAZInvalidValueError(f"dict type value expected, got '{data}'({type(data)})")
 
 
 class AAZListArgAction(AAZCompoundTypeArgAction):
@@ -347,7 +351,8 @@ class AAZListArgAction(AAZCompoundTypeArgAction):
             if cls._schema._nullable:
                 return data
             raise AAZInvalidValueError("is not nullable")
-        elif isinstance(data, list):
+
+        if isinstance(data, list):
             result = []
             action = cls._schema.Element._build_cmd_action()
             for idx, value in enumerate(data):
@@ -356,8 +361,8 @@ class AAZListArgAction(AAZCompoundTypeArgAction):
                 except AAZInvalidValueError as ex:
                     raise AAZInvalidValueError(f"Invalid at [{idx}] : {ex}") from ex
             return result
-        else:
-            raise AAZInvalidValueError(f"list type value expected, got '{data}'({type(data)})")
+
+        raise AAZInvalidValueError(f"list type value expected, got '{data}'({type(data)})")
 
 
 class AAZGenericUpdateAction(Action):

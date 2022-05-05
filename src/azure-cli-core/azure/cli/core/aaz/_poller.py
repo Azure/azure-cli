@@ -22,7 +22,7 @@ class AAZNoPolling(NoPolling):
 
 class AAZBasePolling(LROBasePolling):
 
-    def __init__(self, http_response_error_callback=None, *args, **kwargs):
+    def __init__(self, *args, http_response_error_callback=None, **kwargs):
         super().__init__(*args, **kwargs)
         self._http_response_error_callback = http_response_error_callback
 
@@ -54,6 +54,7 @@ class AAZLROPoller:
     def __init__(self, polling_generator, result_callback):
         self._callbacks = []
         self._polling_generator = polling_generator
+        self._polling_method = None
         self._result_callback = result_callback
 
         # Prepare thread execution

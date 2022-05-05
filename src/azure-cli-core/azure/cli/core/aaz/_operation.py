@@ -40,11 +40,11 @@ class AAZHttpOperation(AAZOperation):
         }
 
     @staticmethod
-    def serialize_url_param(name, value, required=True, skip_quote=False, **kwargs):
+    def serialize_url_param(name, value, required=True, skip_quote=False, **kwargs):  # pylint: disable=unused-argument
         if isinstance(value, AAZBaseValue):
             value = value.to_serialized_data()
 
-        if value == AAZUndefined or value == None:  # pylint: disable=singleton-comparison
+        if value == AAZUndefined or value == None:  # noqa: E711, pylint: disable=singleton-comparison
             if required:
                 raise ValueError(f"url parameter {name} is required.")
             return {}
@@ -106,7 +106,7 @@ class AAZHttpOperation(AAZOperation):
         return {name: value}
 
     @staticmethod
-    def serialize_header_param(name, value, required=False, **kwargs):
+    def serialize_header_param(name, value, required=False, **kwargs):  # pylint: disable=unused-argument
         if isinstance(value, AAZBaseValue):
             value = value.to_serialized_data()
 
@@ -142,7 +142,7 @@ class AAZHttpOperation(AAZOperation):
         if isinstance(value, AAZBaseValue):
             value = value.to_serialized_data(processor=processor)
 
-        if value == AAZUndefined or value == None:  # pylint: disable=singleton-comparison
+        if value == AAZUndefined or value == None:  # noqa: E711, pylint: disable=singleton-comparison
             if required:
                 raise ValueError("content is required.")
             return None
@@ -153,11 +153,10 @@ class AAZHttpOperation(AAZOperation):
         from azure.core.pipeline.policies import ContentDecodePolicy
         if ContentDecodePolicy.CONTEXT_NAME in session.context:
             return session.context[ContentDecodePolicy.CONTEXT_NAME]
-        elif session.context.options['stream']:
+        if session.context.options['stream']:
             # Cannot handle stream response now
             raise NotImplementedError()
-        else:
-            raise ValueError("This pipeline didn't have the ContentDecode Policy; can't deserialize")
+        raise ValueError("This pipeline didn't have the ContentDecode Policy; can't deserialize")
 
     @staticmethod
     def new_content_builder(arg_value, value=None, typ=None, typ_kwargs=None):

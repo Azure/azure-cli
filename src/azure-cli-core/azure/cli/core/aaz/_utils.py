@@ -49,10 +49,11 @@ class AAZShortHandSyntaxParser:
     def parse_shorthand_value(self, remain):
         if remain.startswith('{'):
             return self.parse_shorthand_dict(remain)
-        elif remain.startswith('['):
+
+        if remain.startswith('['):
             return self.parse_shorthand_list(remain)
-        else:
-            return self.parse_shorthand_string(remain)
+
+        return self.parse_shorthand_string(remain)
 
     def parse_shorthand_dict(self, remain):
         result = OrderedDict()
@@ -172,12 +173,16 @@ class AAZShortHandSyntaxParser:
                 raise AAZInvalidShorthandSyntaxError(
                     remain, idx, 1, f"Please wrap {remain[idx]} character in single quotes")
             idx += 1
+
         if idx == 0:
             raise AAZInvalidShorthandSyntaxError(remain, idx, 1, "Cannot parse empty")
-        elif remain[:idx] in self.NULL_EXPRESSIONS:
+
+        if remain[:idx] in self.NULL_EXPRESSIONS:
             return None, idx
-        elif remain[:idx] in self.HELP_EXPRESSIONS:
+
+        if remain[:idx] in self.HELP_EXPRESSIONS:
             raise AAZShowHelp()
+
         return remain[:idx], idx
 
     def parse_shorthand_quote_string(self, remain):
@@ -215,9 +220,8 @@ class AAZShortHandSyntaxParser:
             raise AAZInvalidShorthandSyntaxError(remain, 0, 1, f"Invalid escape character: {remain}")
         if remain[1] == "'":
             return "'", 2
-        elif remain[1] == '/':
+        if remain[1] == '/':
             return '/', 2
-        elif remain[1] == '\\':
+        if remain[1] == '\\':
             return '\\', 2
-        else:
-            raise AAZInvalidShorthandSyntaxError(remain, 0, 2, f"Invalid escape character: {remain[:2]}")
+        raise AAZInvalidShorthandSyntaxError(remain, 0, 2, f"Invalid escape character: {remain[:2]}")

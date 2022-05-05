@@ -103,12 +103,12 @@ class AAZObject(AAZBaseValue):
             other = other._data
         if other is None:
             return self._data is None
-        elif (not isinstance(other, dict)) or len(other) != len(self._data):
+        if (not isinstance(other, dict)) or len(other) != len(self._data):
             return False
-        else:
-            for key in other.keys():
-                if other[key] != self[key]:
-                    return False
+
+        for key in other.keys():
+            if other[key] != self[key]:
+                return False
         return True
 
     def __ne__(self, other):
@@ -125,8 +125,8 @@ class AAZObject(AAZBaseValue):
                 v = self[name].to_serialized_data(processor=processor)
                 if v == AAZUndefined:
                     continue
-                if field_schema._serialized_name:
-                    name = field_schema._serialized_name
+                if field_schema._serialized_name:   # pylint: disable=protected-access
+                    name = field_schema._serialized_name  # pylint: disable=protected-access
                 result[name] = v
 
         if not result and self._is_patch:
@@ -187,12 +187,13 @@ class AAZDict(AAZBaseValue):
             other = other._data
         if other is None:
             return self._data is None
-        elif (not isinstance(other, dict)) or len(other) != len(self._data):
+
+        if (not isinstance(other, dict)) or len(other) != len(self._data):
             return False
-        else:
-            for key, v in other.items():
-                if other[key] != self[key]:
-                    return False
+
+        for key, _ in other.items():
+            if other[key] != self[key]:
+                return False
         return True
 
     def __ne__(self, other):
@@ -306,12 +307,13 @@ class AAZList(AAZBaseValue):
 
         if other is None:
             return self._data is None
-        elif (not isinstance(other, list)) or len(other) != self._len:
+
+        if (not isinstance(other, list)) or len(other) != self._len:
             return False
-        else:
-            for idx, v in enumerate(other):
-                if self[idx] != v:
-                    return False
+
+        for idx, v in enumerate(other):
+            if self[idx] != v:
+                return False
         return True
 
     def __ne__(self, other):

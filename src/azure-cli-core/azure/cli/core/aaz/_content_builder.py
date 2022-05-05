@@ -8,7 +8,7 @@ from ._field_value import AAZSimpleValue, AAZDict, AAZList, AAZObject
 from ._field_type import AAZObjectType
 from ._arg_browser import AAZArgBrowser
 
-# pylint: disable=protected-access, too-many-nested-blocks
+# pylint: disable=protected-access, too-many-nested-blocks, too-many-return-statements
 
 
 class AAZContentBuilder:
