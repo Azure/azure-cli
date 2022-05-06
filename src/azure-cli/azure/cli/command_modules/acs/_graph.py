@@ -49,6 +49,26 @@ def resolve_object_id(cli_ctx, assignee):
     return result[0].object_id
 
 
+def create_service_principal(cli_ctx, identifier, resolve_app=True, rbac_client=None):
+    if rbac_client is None:
+        rbac_client = get_graph_rbac_management_client(cli_ctx)
+
+    if resolve_app:
+        try:
+            uuid.UUID(identifier)
+            result = list(rbac_client.applications.list(filter="appId eq '{}'".format(identifier)))
+        except ValueError:
+            result = list(rbac_client.applications.list(filter="identifierUris/any(s:s eq '{}')".format(identifier)))
+
+        if not result:  # assume we get an object id
+            result = [rbac_client.applications.get(identifier)]
+        app_id = result[0].app_id
+    else:
+        app_id = identifier
+
+    return rbac_client.service_principals.create(ServicePrincipalCreateParameters(app_id=app_id, account_enabled=True))
+
+
 def _build_application_creds(
     password=None, key_value=None, key_type=None, key_usage=None, start_date=None, end_date=None
 ):
@@ -127,26 +147,6 @@ def create_application(
                 "For how to configure, please refer '{}'. Original error: {}".format(link, ex)
             )
         raise
-
-
-def create_service_principal(cli_ctx, identifier, resolve_app=True, rbac_client=None):
-    if rbac_client is None:
-        rbac_client = get_graph_rbac_management_client(cli_ctx)
-
-    if resolve_app:
-        try:
-            uuid.UUID(identifier)
-            result = list(rbac_client.applications.list(filter="appId eq '{}'".format(identifier)))
-        except ValueError:
-            result = list(rbac_client.applications.list(filter="identifierUris/any(s:s eq '{}')".format(identifier)))
-
-        if not result:  # assume we get an object id
-            result = [rbac_client.applications.get(identifier)]
-        app_id = result[0].app_id
-    else:
-        app_id = identifier
-
-    return rbac_client.service_principals.create(ServicePrincipalCreateParameters(app_id=app_id, account_enabled=True))
 
 
 def build_service_principal(rbac_client, cli_ctx, name, url, client_secret):
