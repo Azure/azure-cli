@@ -54,9 +54,8 @@ from azure.cli.command_modules.acs.base_decorator import (
     BaseAKSManagedClusterDecorator,
     BaseAKSParamDict,
 )
-from azure.cli.command_modules.acs._roleassignments import ensure_cluster_identity_permission_on_kubelet_identity, subnet_role_assignment_exists
+from azure.cli.command_modules.acs._roleassignments import ensure_cluster_identity_permission_on_kubelet_identity, subnet_role_assignment_exists, ensure_aks_acr
 from azure.cli.command_modules.acs.custom import (
-    _ensure_aks_acr,
     _ensure_aks_service_principal,
 )
 from azure.cli.core import AzCommandsLoader
@@ -237,7 +236,7 @@ class AKSManagedClusterContext(BaseAKSContext):
             external_functions[
                 "ensure_default_log_analytics_workspace_for_monitoring"
             ] = ensure_default_log_analytics_workspace_for_monitoring
-            external_functions["ensure_aks_acr"] = _ensure_aks_acr
+            external_functions["ensure_aks_acr"] = ensure_aks_acr
             external_functions["ensure_aks_service_principal"] = _ensure_aks_service_principal
             external_functions[
                 "ensure_cluster_identity_permission_on_kubelet_identity"
@@ -4117,7 +4116,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
     def process_attach_acr(self, mc: ManagedCluster) -> None:
         """Attach acr for the cluster.
 
-        The function "_ensure_aks_acr" will be called to create an AcrPull role assignment for the acr, which
+        The function "ensure_aks_acr" will be called to create an AcrPull role assignment for the acr, which
         internally used AuthorizationManagementClient to send the request.
 
         :return: None
@@ -5111,7 +5110,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
     def process_attach_detach_acr(self, mc: ManagedCluster) -> None:
         """Attach or detach acr for the cluster.
 
-        The function "_ensure_aks_acr" will be called to create or delete an AcrPull role assignment for the acr, which
+        The function "ensure_aks_acr" will be called to create or delete an AcrPull role assignment for the acr, which
         internally used AuthorizationManagementClient to send the request.
 
         :return: None

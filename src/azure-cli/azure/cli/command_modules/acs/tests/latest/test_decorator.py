@@ -5376,10 +5376,10 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         )
         registry = Mock(id="test_registry_id")
         with patch(
-            "azure.cli.command_modules.acs.custom.get_resource_by_name",
+            "azure.cli.command_modules.acs._roleassignments.get_resource_by_name",
             return_value=registry,
         ), patch(
-            "azure.cli.command_modules.acs.custom._ensure_aks_acr_role_assignment"
+            "azure.cli.command_modules.acs._roleassignments.ensure_aks_acr_role_assignment"
         ) as ensure_assignment:
             dec_3.process_attach_acr(mc_3)
         ensure_assignment.assert_called_once_with(
@@ -7057,7 +7057,7 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
             "subscription_id", "test_subscription_id"
         )
         with patch(
-            "azure.cli.command_modules.acs.decorator._ensure_aks_acr"
+            "azure.cli.command_modules.acs.decorator.ensure_aks_acr"
         ) as ensure_acr:
             dec_2.process_attach_detach_acr(mc_2)
             ensure_acr.assert_has_calls(
