@@ -614,7 +614,7 @@ def download_blob(client, file_path, open_mode='wb', start_range=None, end_range
         offset = start_range
         length = end_range - start_range + 1
     if progress_callback:
-        kwargs['raw_response_hook'] = progress_callback
+        kwargs['progress_hook'] = progress_callback
     download_stream = client.download_blob(offset=offset, length=length, **kwargs)
     with open(file_path, open_mode) as stream:
         download_stream.readinto(stream)
