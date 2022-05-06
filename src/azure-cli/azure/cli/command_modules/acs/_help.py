@@ -289,7 +289,7 @@ parameters:
     long-summary: This address must not be in any Subnet IP ranges, or the Kubernetes service address range. For example, 172.17.0.1/16.
   - name: --load-balancer-sku
     type: string
-    short-summary: Azure Load Balancer SKU selection for your cluster. basic or standard.
+    short-summary: Azure Load Balancer SKU selection for your cluster. basic or standard. Defaults to 'standard'
     long-summary: Select between Basic or Standard Azure Load Balancer SKU for your AKS cluster.
   - name: --load-balancer-managed-outbound-ip-count
     type: int
@@ -338,7 +338,7 @@ parameters:
     short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 1000].
   - name: --vm-set-type
     type: string
-    short-summary: Agent pool vm set type. VirtualMachineScaleSets or AvailabilitySet.
+    short-summary: Agent pool vm set type. VirtualMachineScaleSets or AvailabilitySet. Defaults to 'VirtualMachineScaleSets'
   - name: --enable-addons -a
     type: string
     short-summary: Enable the Kubernetes addons in a comma-separated list.
