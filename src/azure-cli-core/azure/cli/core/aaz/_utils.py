@@ -55,7 +55,7 @@ class AAZShortHandSyntaxParser:
 
         return self.parse_shorthand_string(remain)
 
-    def parse_shorthand_dict(self, remain):
+    def parse_shorthand_dict(self, remain):  # pylint: disable=too-many-statements
         result = OrderedDict()
         assert remain.startswith('{')
         idx = 1
@@ -166,12 +166,13 @@ class AAZShortHandSyntaxParser:
         while idx < len(remain):
             if remain[idx] in (',', ':', ']', '}'):
                 break
-            elif remain[idx].strip() == '':
+            if remain[idx].strip() == '':
                 raise AAZInvalidShorthandSyntaxError(
                     remain, idx, 1, "Please wrap whitespace character in single quotes")
-            elif remain[idx] in ('"', "'"):
+            if remain[idx] in ('"', "'"):
                 raise AAZInvalidShorthandSyntaxError(
                     remain, idx, 1, f"Please wrap {remain[idx]} character in single quotes")
+
             idx += 1
 
         if idx == 0:

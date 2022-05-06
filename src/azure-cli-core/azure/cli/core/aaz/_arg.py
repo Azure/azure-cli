@@ -52,9 +52,8 @@ class AAZArgEnum:
             if isinstance(self.items, dict):
                 return self.items[key]
             raise NotImplementedError()
-        else:
-            raise azclierror.InvalidArgumentValueError(
-                f"unrecognized value '{data}' from choices '{self.to_choices()}' ")
+        raise azclierror.InvalidArgumentValueError(
+            f"unrecognized value '{data}' from choices '{self.to_choices()}' ")
 
 
 class AAZBaseArg(AAZBaseType):  # pylint: disable=too-many-instance-attributes
