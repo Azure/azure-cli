@@ -14,7 +14,6 @@ from azure.cli.core._profile import (Profile, SubscriptionFinder, _attach_token_
                                      _transform_subscription_for_multiapi)
 from azure.cli.core.auth.util import AccessToken
 from azure.cli.core.mock import DummyCli
-from azure.identity import AuthenticationRecord
 from azure.mgmt.resource.subscriptions.models import \
     (Subscription, SubscriptionPolicies, SpendingLimit, ManagedByTenant)
 
@@ -94,9 +93,6 @@ class TestProfile(unittest.TestCase):
         cls.display_name1 = 'foo account'
         cls.home_account_id = "00000003-0000-0000-0000-000000000000.00000003-0000-0000-0000-000000000000"
         cls.client_id = "00000003-0000-0000-0000-000000000000"
-        cls.authentication_record = AuthenticationRecord(cls.tenant_id, cls.client_id,
-                                                         "https://login.microsoftonline.com", cls.home_account_id,
-                                                         cls.user1)
         cls.state1 = 'Enabled'
         cls.managed_by_tenants = [ManagedByTenantStub('00000003-0000-0000-0000-000000000000'),
                                   ManagedByTenantStub('00000004-0000-0000-0000-000000000000')]

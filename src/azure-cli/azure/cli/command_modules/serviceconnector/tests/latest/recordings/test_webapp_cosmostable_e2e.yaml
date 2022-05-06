@@ -1,7 +1,8 @@
 interactions:
 - request:
-    body: '{"properties": {"targetId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.DocumentDB/databaseAccounts/servicelinker-table-cosmos2/tables/MyItem",
-      "authInfo": {"authType": "systemAssignedIdentity"}, "clientType": "python"}}'
+    body: '{"properties": {"targetService": {"type": "AzureResource", "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.DocumentDB/databaseAccounts/servicelinker-table-cosmos/tables/MyItem"},
+      "authInfo": {"authType": "systemAssignedIdentity"}, "clientType": "python",
+      "secretStore": {}}}'
     headers:
       Accept:
       - application/json
@@ -12,40 +13,43 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '293'
+      - '349'
       Content-Type:
       - application/json
       ParameterSetName:
       - --connection --source-id --target-id --system-identity --client-type
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.35.0 azsdk-python-mgmt-servicelinker/1.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.Web/sites/servicelinker-table-cosmos-asp-app2/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2021-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.Web/sites/servicelinker-table-cosmos-asp-app/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2022-05-01
   response:
     body:
-      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.Web/sites/servicelinker-table-cosmos-asp-app2/providers/Microsoft.ServiceLinker/linkers/testconn",
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.Web/sites/servicelinker-table-cosmos-asp-app/providers/Microsoft.ServiceLinker/linkers/testconn",
         "name": "testconn", "type": "microsoft.servicelinker/linkers", "systemData":
         {"createdBy": "honc@microsoft.com", "createdByType": "User", "createdAt":
-        "2021-10-28T07:24:34.0592646Z", "lastModifiedBy": "honc@microsoft.com", "lastModifiedByType":
-        "User", "lastModifiedAt": "2021-10-28T07:24:34.0592646Z"}, "properties": {"targetId":
-        "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.DocumentDB/databaseAccounts/servicelinker-table-cosmos2/tables/MyItem",
-        "authInfo": {"authType": "systemAssignedIdentity"}, "clientType": "python",
-        "provisioningState": "Accepted"}}'
+        "2022-04-27T05:20:51.3725193Z", "lastModifiedBy": "honc@microsoft.com", "lastModifiedByType":
+        "User", "lastModifiedAt": "2022-04-27T05:20:51.3725193Z"}, "properties": {"provisioningState":
+        "Accepted", "targetService": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.DocumentDB/databaseAccounts/servicelinker-table-cosmos/tables/MyItem",
+        "resourceProperties": null, "type": "AzureResource"}, "authInfo": {"authType":
+        "systemAssignedIdentity"}, "vNetSolution": null, "clientType": "python", "secretStore":
+        {"keyVaultId": null}, "scope": null}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/81c030d5-3932-4f03-978b-2af98bc5985c*89A56AA1FCBE084D198698DFC766FE7EA74FA1B99196A3461837FFA9533AD18A?api-version=2021-11-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/13d68cae-7928-4871-9f3b-16dea591d76c*6877EFDD81F9BBE567A690EB100C775A8F24F042F6CF380A598FADC2BEB68348?api-version=2022-05-01
       cache-control:
       - no-cache
       content-length:
-      - '824'
+      - '990'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Oct 2021 07:24:34 GMT
+      - Wed, 27 Apr 2022 05:20:51 GMT
       etag:
-      - '"36067e66-0000-0500-0000-617a50330000"'
+      - '"0200059b-0000-0400-0000-6268d2b30000"'
       expires:
       - '-1'
+      mise-correlation-id:
+      - 39b474a6-921a-4bc6-a84c-cd80b35d8c19
       pragma:
       - no-cache
       strict-transport-security:
@@ -55,7 +59,7 @@ interactions:
       x-ms-providerhub-traffic:
       - 'True'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1197'
     status:
       code: 201
       message: Created
@@ -73,26 +77,27 @@ interactions:
       ParameterSetName:
       - --connection --source-id --target-id --system-identity --client-type
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.35.0 azsdk-python-mgmt-servicelinker/1.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/81c030d5-3932-4f03-978b-2af98bc5985c*89A56AA1FCBE084D198698DFC766FE7EA74FA1B99196A3461837FFA9533AD18A?api-version=2021-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/13d68cae-7928-4871-9f3b-16dea591d76c*6877EFDD81F9BBE567A690EB100C775A8F24F042F6CF380A598FADC2BEB68348?api-version=2022-05-01
   response:
     body:
-      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/81c030d5-3932-4f03-978b-2af98bc5985c*89A56AA1FCBE084D198698DFC766FE7EA74FA1B99196A3461837FFA9533AD18A",
-        "name": "81c030d5-3932-4f03-978b-2af98bc5985c*89A56AA1FCBE084D198698DFC766FE7EA74FA1B99196A3461837FFA9533AD18A",
-        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.Web/sites/servicelinker-table-cosmos-asp-app2/providers/Microsoft.ServiceLinker/linkers/testconn",
-        "status": "Accepted", "startTime": "2021-10-28T07:24:34.3114636Z"}'
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/13d68cae-7928-4871-9f3b-16dea591d76c*6877EFDD81F9BBE567A690EB100C775A8F24F042F6CF380A598FADC2BEB68348",
+        "name": "13d68cae-7928-4871-9f3b-16dea591d76c*6877EFDD81F9BBE567A690EB100C775A8F24F042F6CF380A598FADC2BEB68348",
+        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.Web/sites/servicelinker-table-cosmos-asp-app/providers/Microsoft.ServiceLinker/linkers/testconn",
+        "status": "Succeeded", "startTime": "2022-04-27T05:20:51.5627254Z", "endTime":
+        "2022-04-27T05:21:02.9863211Z", "properties": {}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '633'
+      - '703'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Oct 2021 07:25:05 GMT
+      - Wed, 27 Apr 2022 05:21:21 GMT
       etag:
-      - '"0500e006-0000-0500-0000-617a50320000"'
+      - '"150037e5-0000-0400-0000-6268d2be0000"'
       expires:
       - '-1'
       pragma:
@@ -122,28 +127,32 @@ interactions:
       ParameterSetName:
       - --connection --source-id --target-id --system-identity --client-type
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.35.0 azsdk-python-mgmt-servicelinker/1.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/81c030d5-3932-4f03-978b-2af98bc5985c*89A56AA1FCBE084D198698DFC766FE7EA74FA1B99196A3461837FFA9533AD18A?api-version=2021-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.Web/sites/servicelinker-table-cosmos-asp-app/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2022-05-01
   response:
     body:
-      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/81c030d5-3932-4f03-978b-2af98bc5985c*89A56AA1FCBE084D198698DFC766FE7EA74FA1B99196A3461837FFA9533AD18A",
-        "name": "81c030d5-3932-4f03-978b-2af98bc5985c*89A56AA1FCBE084D198698DFC766FE7EA74FA1B99196A3461837FFA9533AD18A",
-        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.Web/sites/servicelinker-table-cosmos-asp-app2/providers/Microsoft.ServiceLinker/linkers/testconn",
-        "status": "Accepted", "startTime": "2021-10-28T07:24:34.3114636Z"}'
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.Web/sites/servicelinker-table-cosmos-asp-app/providers/Microsoft.ServiceLinker/linkers/testconn",
+        "name": "testconn", "type": "microsoft.servicelinker/linkers", "properties":
+        {"provisioningState": "Succeeded", "targetService": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.DocumentDB/databaseAccounts/servicelinker-table-cosmos/tables/MyItem",
+        "resourceProperties": null, "type": "AzureResource"}, "authInfo": {"authType":
+        "systemAssignedIdentity"}, "clientType": "python", "scope": null, "vNetSolution":
+        null, "secretStore": {"keyVaultId": null}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '633'
+      - '750'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Oct 2021 07:25:35 GMT
+      - Wed, 27 Apr 2022 05:21:21 GMT
       etag:
-      - '"0500e006-0000-0500-0000-617a50320000"'
+      - '"02000b9b-0000-0400-0000-6268d2bf0000"'
       expires:
       - '-1'
+      mise-correlation-id:
+      - 41cea295-bec6-4615-b1a2-37a504d205eb
       pragma:
       - no-cache
       strict-transport-security:
@@ -151,110 +160,7 @@ interactions:
       transfer-encoding:
       - chunked
       vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - webapp connection create cosmos-table
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --connection --source-id --target-id --system-identity --client-type
-      User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/81c030d5-3932-4f03-978b-2af98bc5985c*89A56AA1FCBE084D198698DFC766FE7EA74FA1B99196A3461837FFA9533AD18A?api-version=2021-11-01-preview
-  response:
-    body:
-      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/81c030d5-3932-4f03-978b-2af98bc5985c*89A56AA1FCBE084D198698DFC766FE7EA74FA1B99196A3461837FFA9533AD18A",
-        "name": "81c030d5-3932-4f03-978b-2af98bc5985c*89A56AA1FCBE084D198698DFC766FE7EA74FA1B99196A3461837FFA9533AD18A",
-        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.Web/sites/servicelinker-table-cosmos-asp-app2/providers/Microsoft.ServiceLinker/linkers/testconn",
-        "status": "Succeeded", "startTime": "2021-10-28T07:24:34.3114636Z", "endTime":
-        "2021-10-28T07:25:42.7461704Z", "properties": {}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '691'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 28 Oct 2021 07:26:05 GMT
-      etag:
-      - '"05001c07-0000-0500-0000-617a50760000"'
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - webapp connection create cosmos-table
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --connection --source-id --target-id --system-identity --client-type
-      User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.Web/sites/servicelinker-table-cosmos-asp-app2/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2021-11-01-preview
-  response:
-    body:
-      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.Web/sites/servicelinker-table-cosmos-asp-app2/providers/Microsoft.ServiceLinker/linkers/testconn",
-        "name": "testconn", "type": "microsoft.servicelinker/linkers", "systemData":
-        {"createdBy": "honc@microsoft.com", "createdByType": "User", "createdAt":
-        "2021-10-28T07:24:34.0592646Z", "lastModifiedBy": "c4288165-6698-45ba-98a5-48ea7791fed3",
-        "lastModifiedByType": "Application", "lastModifiedAt": "2021-10-28T07:25:42.3591558Z"},
-        "properties": {"targetId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.DocumentDB/databaseAccounts/servicelinker-table-cosmos2/tables/MyItem",
-        "authInfo": {"authType": "systemAssignedIdentity"}, "clientType": "python",
-        "provisioningState": "Succeeded"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '850'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 28 Oct 2021 07:26:06 GMT
-      etag:
-      - '"3606957b-0000-0500-0000-617a50760000"'
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      - Accept-Encoding,Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-providerhub-traffic:
@@ -276,28 +182,199 @@ interactions:
       ParameterSetName:
       - --source-id
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.35.0 azsdk-python-mgmt-servicelinker/1.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.Web/sites/servicelinker-table-cosmos-asp-app2/providers/Microsoft.ServiceLinker/linkers?api-version=2021-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.Web/sites/servicelinker-table-cosmos-asp-app/providers/Microsoft.ServiceLinker/linkers?api-version=2022-05-01
   response:
     body:
-      string: '{"value": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.Web/sites/servicelinker-table-cosmos-asp-app2/providers/Microsoft.ServiceLinker/linkers/testconn",
-        "name": "testconn", "type": "microsoft.servicelinker/linkers", "systemData":
-        {"createdBy": "honc@microsoft.com", "createdByType": "User", "createdAt":
-        "2021-10-28T07:24:34.0592646Z", "lastModifiedBy": "c4288165-6698-45ba-98a5-48ea7791fed3",
-        "lastModifiedByType": "Application", "lastModifiedAt": "2021-10-28T07:25:42.3591558Z"},
-        "properties": {"targetId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.DocumentDB/databaseAccounts/servicelinker-table-cosmos2/tables/MyItem",
-        "authInfo": {"authType": "systemAssignedIdentity"}, "clientType": "python",
-        "provisioningState": "Succeeded"}}]}'
+      string: '{"value": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.Web/sites/servicelinker-table-cosmos-asp-app/providers/Microsoft.ServiceLinker/linkers/testconn",
+        "name": "testconn", "type": "microsoft.servicelinker/linkers", "properties":
+        {"provisioningState": "Succeeded", "targetService": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.DocumentDB/databaseAccounts/servicelinker-table-cosmos/tables/MyItem",
+        "resourceProperties": null, "type": "AzureResource"}, "authInfo": {"authType":
+        "systemAssignedIdentity"}, "clientType": "python", "scope": null, "vNetSolution":
+        null, "secretStore": {"keyVaultId": null}}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '862'
+      - '763'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Oct 2021 07:26:13 GMT
+      - Wed, 27 Apr 2022 05:21:25 GMT
+      expires:
+      - '-1'
+      mise-correlation-id:
+      - 95858cc5-5f48-4efb-9f53-b36857bd1aa9
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-providerhub-traffic:
+      - 'True'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp connection update cosmos-table
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id --client-type
+      User-Agent:
+      - AZURECLI/2.35.0 azsdk-python-mgmt-servicelinker/1.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.Web/sites/servicelinker-table-cosmos-asp-app/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2022-05-01
+  response:
+    body:
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.Web/sites/servicelinker-table-cosmos-asp-app/providers/Microsoft.ServiceLinker/linkers/testconn",
+        "name": "testconn", "type": "microsoft.servicelinker/linkers", "properties":
+        {"provisioningState": "Succeeded", "targetService": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.DocumentDB/databaseAccounts/servicelinker-table-cosmos/tables/MyItem",
+        "resourceProperties": null, "type": "AzureResource"}, "authInfo": {"authType":
+        "systemAssignedIdentity"}, "clientType": "python", "scope": null, "vNetSolution":
+        null, "secretStore": {"keyVaultId": null}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '750'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 27 Apr 2022 05:21:26 GMT
+      etag:
+      - '"02000b9b-0000-0400-0000-6268d2bf0000"'
+      expires:
+      - '-1'
+      mise-correlation-id:
+      - 201f38f4-f20d-4d92-8c4f-86d62b2e270b
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-providerhub-traffic:
+      - 'True'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"targetService": {"type": "AzureResource", "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.DocumentDB/databaseAccounts/servicelinker-table-cosmos/tables/MyItem"},
+      "authInfo": {"authType": "systemAssignedIdentity"}, "clientType": "dotnet",
+      "secretStore": {}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp connection update cosmos-table
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '349'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --id --client-type
+      User-Agent:
+      - AZURECLI/2.35.0 azsdk-python-mgmt-servicelinker/1.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.Web/sites/servicelinker-table-cosmos-asp-app/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2022-05-01
+  response:
+    body:
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.Web/sites/servicelinker-table-cosmos-asp-app/providers/Microsoft.ServiceLinker/linkers/testconn",
+        "name": "testconn", "type": "microsoft.servicelinker/linkers", "systemData":
+        {"createdBy": "honc@microsoft.com", "createdByType": "User", "createdAt":
+        "2022-04-27T05:20:51.3725193Z", "lastModifiedBy": "honc@microsoft.com", "lastModifiedByType":
+        "User", "lastModifiedAt": "2022-04-27T05:21:27.4807207Z"}, "properties": {"provisioningState":
+        "Accepted", "targetService": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.DocumentDB/databaseAccounts/servicelinker-table-cosmos/tables/MyItem",
+        "resourceProperties": null, "type": "AzureResource"}, "authInfo": {"authType":
+        "systemAssignedIdentity"}, "vNetSolution": null, "clientType": "dotnet", "secretStore":
+        {"keyVaultId": null}, "scope": null}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/fd340b89-d16d-4e24-a866-b204e4bad74f*6877EFDD81F9BBE567A690EB100C775A8F24F042F6CF380A598FADC2BEB68348?api-version=2022-05-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '990'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 27 Apr 2022 05:21:27 GMT
+      etag:
+      - '"6a00ce4f-0000-0100-0000-6268d2d70000"'
+      expires:
+      - '-1'
+      mise-correlation-id:
+      - 7356d1a5-e90d-4125-95a1-a590f5fda252
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-providerhub-traffic:
+      - 'True'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp connection update cosmos-table
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id --client-type
+      User-Agent:
+      - AZURECLI/2.35.0 azsdk-python-mgmt-servicelinker/1.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/fd340b89-d16d-4e24-a866-b204e4bad74f*6877EFDD81F9BBE567A690EB100C775A8F24F042F6CF380A598FADC2BEB68348?api-version=2022-05-01
+  response:
+    body:
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/fd340b89-d16d-4e24-a866-b204e4bad74f*6877EFDD81F9BBE567A690EB100C775A8F24F042F6CF380A598FADC2BEB68348",
+        "name": "fd340b89-d16d-4e24-a866-b204e4bad74f*6877EFDD81F9BBE567A690EB100C775A8F24F042F6CF380A598FADC2BEB68348",
+        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.Web/sites/servicelinker-table-cosmos-asp-app/providers/Microsoft.ServiceLinker/linkers/testconn",
+        "status": "Succeeded", "startTime": "2022-04-27T05:21:27.6669561Z", "endTime":
+        "2022-04-27T05:21:38.104712Z", "properties": {}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '702'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 27 Apr 2022 05:21:58 GMT
+      etag:
+      - '"1300adfe-0000-0100-0000-6268d2e20000"'
       expires:
       - '-1'
       pragma:
@@ -308,6 +385,59 @@ interactions:
       - chunked
       vary:
       - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp connection update cosmos-table
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id --client-type
+      User-Agent:
+      - AZURECLI/2.35.0 azsdk-python-mgmt-servicelinker/1.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.Web/sites/servicelinker-table-cosmos-asp-app/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2022-05-01
+  response:
+    body:
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.Web/sites/servicelinker-table-cosmos-asp-app/providers/Microsoft.ServiceLinker/linkers/testconn",
+        "name": "testconn", "type": "microsoft.servicelinker/linkers", "properties":
+        {"provisioningState": "Succeeded", "targetService": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.DocumentDB/databaseAccounts/servicelinker-table-cosmos/tables/MyItem",
+        "resourceProperties": null, "type": "AzureResource"}, "authInfo": {"authType":
+        "systemAssignedIdentity"}, "clientType": "dotnet", "scope": null, "vNetSolution":
+        null, "secretStore": {"keyVaultId": null}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '750'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 27 Apr 2022 05:21:58 GMT
+      etag:
+      - '"6a000a50-0000-0100-0000-6268d2e20000"'
+      expires:
+      - '-1'
+      mise-correlation-id:
+      - 3579303b-78ee-4238-8933-bab697c697f3
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-providerhub-traffic:
@@ -331,26 +461,28 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.35.0 azsdk-python-mgmt-servicelinker/1.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.Web/sites/servicelinker-table-cosmos-asp-app2/providers/Microsoft.ServiceLinker/linkers/testconn/listConfigurations?api-version=2021-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.Web/sites/servicelinker-table-cosmos-asp-app/providers/Microsoft.ServiceLinker/linkers/testconn/listConfigurations?api-version=2022-05-01
   response:
     body:
       string: '{"configurations": [{"name": "AZURE_COSMOS_LISTCONNECTIONSTRINGURL",
-        "value": "https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.DocumentDB/databaseAccounts/servicelinker-table-cosmos2/listConnectionStrings?api-version=2021-04-15"},
-        {"name": "AZURE_COSMOS_RESOURCEENDPOINT", "value": "https://servicelinker-table-cosmos2.documents.azure.com:443/"},
+        "value": "https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.DocumentDB/databaseAccounts/servicelinker-table-cosmos/listConnectionStrings?api-version=2021-04-15"},
+        {"name": "AZURE_COSMOS_RESOURCEENDPOINT", "value": "https://servicelinker-table-cosmos.documents.azure.com:443/"},
         {"name": "AZURE_COSMOS_SCOPE", "value": "https://management.azure.com/.default"}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '513'
+      - '523'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Oct 2021 07:26:18 GMT
+      - Wed, 27 Apr 2022 05:22:03 GMT
       expires:
       - '-1'
+      mise-correlation-id:
+      - 501a3f69-3f74-40d5-b8fc-2af461745ea3
       pragma:
       - no-cache
       strict-transport-security:
@@ -364,7 +496,7 @@ interactions:
       x-ms-providerhub-traffic:
       - 'True'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1197'
     status:
       code: 200
       message: OK
@@ -382,32 +514,32 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.35.0 azsdk-python-mgmt-servicelinker/1.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.Web/sites/servicelinker-table-cosmos-asp-app2/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2021-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.Web/sites/servicelinker-table-cosmos-asp-app/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2022-05-01
   response:
     body:
-      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.Web/sites/servicelinker-table-cosmos-asp-app2/providers/Microsoft.ServiceLinker/linkers/testconn",
-        "name": "testconn", "type": "microsoft.servicelinker/linkers", "systemData":
-        {"createdBy": "honc@microsoft.com", "createdByType": "User", "createdAt":
-        "2021-10-28T07:24:34.0592646Z", "lastModifiedBy": "c4288165-6698-45ba-98a5-48ea7791fed3",
-        "lastModifiedByType": "Application", "lastModifiedAt": "2021-10-28T07:25:42.3591558Z"},
-        "properties": {"targetId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.DocumentDB/databaseAccounts/servicelinker-table-cosmos2/tables/MyItem",
-        "authInfo": {"authType": "systemAssignedIdentity"}, "clientType": "python",
-        "provisioningState": "Succeeded"}}'
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.Web/sites/servicelinker-table-cosmos-asp-app/providers/Microsoft.ServiceLinker/linkers/testconn",
+        "name": "testconn", "type": "microsoft.servicelinker/linkers", "properties":
+        {"provisioningState": "Succeeded", "targetService": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.DocumentDB/databaseAccounts/servicelinker-table-cosmos/tables/MyItem",
+        "resourceProperties": null, "type": "AzureResource"}, "authInfo": {"authType":
+        "systemAssignedIdentity"}, "clientType": "dotnet", "scope": null, "vNetSolution":
+        null, "secretStore": {"keyVaultId": null}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '850'
+      - '750'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Oct 2021 07:26:20 GMT
+      - Wed, 27 Apr 2022 05:22:03 GMT
       etag:
-      - '"3606957b-0000-0500-0000-617a50760000"'
+      - '"6a000a50-0000-0100-0000-6268d2e20000"'
       expires:
       - '-1'
+      mise-correlation-id:
+      - 1874196f-d1b4-4074-a692-b061670f529b
       pragma:
       - no-cache
       strict-transport-security:
@@ -415,7 +547,7 @@ interactions:
       transfer-encoding:
       - chunked
       vary:
-      - Accept-Encoding
+      - Accept-Encoding,Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-providerhub-traffic:
@@ -439,15 +571,15 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.35.0 azsdk-python-mgmt-servicelinker/1.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.Web/sites/servicelinker-table-cosmos-asp-app2/providers/Microsoft.ServiceLinker/linkers/testconn/validateLinker?api-version=2021-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.Web/sites/servicelinker-table-cosmos-asp-app/providers/Microsoft.ServiceLinker/linkers/testconn/validateLinker?api-version=2022-05-01
   response:
     body:
       string: 'null'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/52f469d8-30ab-45d4-8431-9b1fa781c7b5*89A56AA1FCBE084D198698DFC766FE7EA74FA1B99196A3461837FFA9533AD18A?api-version=2021-11-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/0bd05a8f-e48b-4a95-83b4-429d25289b82*6877EFDD81F9BBE567A690EB100C775A8F24F042F6CF380A598FADC2BEB68348?api-version=2022-05-01
       cache-control:
       - no-cache
       content-length:
@@ -455,11 +587,13 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Oct 2021 07:26:21 GMT
+      - Wed, 27 Apr 2022 05:22:04 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/52f469d8-30ab-45d4-8431-9b1fa781c7b5*89A56AA1FCBE084D198698DFC766FE7EA74FA1B99196A3461837FFA9533AD18A?api-version=2021-11-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/0bd05a8f-e48b-4a95-83b4-429d25289b82*6877EFDD81F9BBE567A690EB100C775A8F24F042F6CF380A598FADC2BEB68348?api-version=2022-05-01
+      mise-correlation-id:
+      - e984f50a-9418-4acd-90f3-833dbf75800a
       pragma:
       - no-cache
       strict-transport-security:
@@ -469,7 +603,7 @@ interactions:
       x-ms-providerhub-traffic:
       - 'True'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1195'
     status:
       code: 202
       message: Accepted
@@ -487,32 +621,32 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.35.0 azsdk-python-mgmt-servicelinker/1.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/52f469d8-30ab-45d4-8431-9b1fa781c7b5*89A56AA1FCBE084D198698DFC766FE7EA74FA1B99196A3461837FFA9533AD18A?api-version=2021-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/0bd05a8f-e48b-4a95-83b4-429d25289b82*6877EFDD81F9BBE567A690EB100C775A8F24F042F6CF380A598FADC2BEB68348?api-version=2022-05-01
   response:
     body:
-      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/52f469d8-30ab-45d4-8431-9b1fa781c7b5*89A56AA1FCBE084D198698DFC766FE7EA74FA1B99196A3461837FFA9533AD18A",
-        "name": "52f469d8-30ab-45d4-8431-9b1fa781c7b5*89A56AA1FCBE084D198698DFC766FE7EA74FA1B99196A3461837FFA9533AD18A",
-        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.Web/sites/servicelinker-table-cosmos-asp-app2/providers/Microsoft.ServiceLinker/linkers/testconn",
-        "status": "Succeeded", "startTime": "2021-10-28T07:26:20.8935693Z", "endTime":
-        "2021-10-28T07:26:25.3235427Z", "properties": {"message": "{\"ConnectionName\":\"testconn\",\"IsConnectionAvailable\":true,\"ValidationDetail\":[{\"Name\":\"The
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/0bd05a8f-e48b-4a95-83b4-429d25289b82*6877EFDD81F9BBE567A690EB100C775A8F24F042F6CF380A598FADC2BEB68348",
+        "name": "0bd05a8f-e48b-4a95-83b4-429d25289b82*6877EFDD81F9BBE567A690EB100C775A8F24F042F6CF380A598FADC2BEB68348",
+        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.Web/sites/servicelinker-table-cosmos-asp-app/providers/Microsoft.ServiceLinker/linkers/testconn",
+        "status": "Succeeded", "startTime": "2022-04-27T05:22:04.7471058Z", "endTime":
+        "2022-04-27T05:22:07.5378109Z", "properties": {"message": "{\"ConnectionName\":\"testconn\",\"IsConnectionAvailable\":true,\"ValidationDetail\":[{\"Name\":\"The
         target existence is validated\",\"Description\":null,\"Result\":0},{\"Name\":\"The
         target service firewall is validated\",\"Description\":null,\"Result\":0},{\"Name\":\"The
         configured values is validated\",\"Description\":null,\"Result\":0},{\"Name\":\"The
         identity existence is validated\",\"Description\":null,\"Result\":0},{\"Name\":\"The
-        identity permission is validated\",\"Description\":null,\"Result\":0}],\"ReportStartTimeUtc\":\"2021-10-28T07:26:22.6603463Z\",\"ReportEndTimeUtc\":\"2021-10-28T07:26:25.1879491Z\",\"SourceId\":null,\"TargetId\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.DocumentDB/databaseAccounts/servicelinker-table-cosmos2/tables/MyItem\",\"AuthType\":0}"}}'
+        identity permission is validated\",\"Description\":null,\"Result\":0}],\"ReportStartTimeUtc\":\"2022-04-27T05:22:05.9097931Z\",\"ReportEndTimeUtc\":\"2022-04-27T05:22:07.4700327Z\",\"SourceId\":null,\"TargetId\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.DocumentDB/databaseAccounts/servicelinker-table-cosmos/tables/MyItem\",\"AuthType\":0}"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1564'
+      - '1576'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Oct 2021 07:26:51 GMT
+      - Wed, 27 Apr 2022 05:22:35 GMT
       etag:
-      - '"05002207-0000-0500-0000-617a50a10000"'
+      - '"150046ed-0000-0400-0000-6268d2ff0000"'
       expires:
       - '-1'
       pragma:
@@ -542,32 +676,32 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.35.0 azsdk-python-mgmt-servicelinker/1.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.Web/sites/servicelinker-table-cosmos-asp-app2/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2021-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.Web/sites/servicelinker-table-cosmos-asp-app/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2022-05-01
   response:
     body:
-      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.Web/sites/servicelinker-table-cosmos-asp-app2/providers/Microsoft.ServiceLinker/linkers/testconn",
-        "name": "testconn", "type": "microsoft.servicelinker/linkers", "systemData":
-        {"createdBy": "honc@microsoft.com", "createdByType": "User", "createdAt":
-        "2021-10-28T07:24:34.0592646Z", "lastModifiedBy": "c4288165-6698-45ba-98a5-48ea7791fed3",
-        "lastModifiedByType": "Application", "lastModifiedAt": "2021-10-28T07:25:42.3591558Z"},
-        "properties": {"targetId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.DocumentDB/databaseAccounts/servicelinker-table-cosmos2/tables/MyItem",
-        "authInfo": {"authType": "systemAssignedIdentity"}, "clientType": "python",
-        "provisioningState": "Succeeded"}}'
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.Web/sites/servicelinker-table-cosmos-asp-app/providers/Microsoft.ServiceLinker/linkers/testconn",
+        "name": "testconn", "type": "microsoft.servicelinker/linkers", "properties":
+        {"provisioningState": "Succeeded", "targetService": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.DocumentDB/databaseAccounts/servicelinker-table-cosmos/tables/MyItem",
+        "resourceProperties": null, "type": "AzureResource"}, "authInfo": {"authType":
+        "systemAssignedIdentity"}, "clientType": "dotnet", "scope": null, "vNetSolution":
+        null, "secretStore": {"keyVaultId": null}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '850'
+      - '750'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Oct 2021 07:26:54 GMT
+      - Wed, 27 Apr 2022 05:22:36 GMT
       etag:
-      - '"3606957b-0000-0500-0000-617a50760000"'
+      - '"6a000a50-0000-0100-0000-6268d2e20000"'
       expires:
       - '-1'
+      mise-correlation-id:
+      - 641d8aab-cc4c-4a7b-bb00-a19f3b81a0f6
       pragma:
       - no-cache
       strict-transport-security:
@@ -575,7 +709,7 @@ interactions:
       transfer-encoding:
       - chunked
       vary:
-      - Accept-Encoding
+      - Accept-Encoding,Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-providerhub-traffic:
@@ -599,15 +733,15 @@ interactions:
       ParameterSetName:
       - --id --yes
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.35.0 azsdk-python-mgmt-servicelinker/1.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.Web/sites/servicelinker-table-cosmos-asp-app2/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2021-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.Web/sites/servicelinker-table-cosmos-asp-app/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2022-05-01
   response:
     body:
       string: 'null'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/5333f70f-b646-4686-8b39-f28dc9ccf4cf*89A56AA1FCBE084D198698DFC766FE7EA74FA1B99196A3461837FFA9533AD18A?api-version=2021-11-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/2eb7ddda-5a34-4941-8b56-a80b882a75c3*6877EFDD81F9BBE567A690EB100C775A8F24F042F6CF380A598FADC2BEB68348?api-version=2022-05-01
       cache-control:
       - no-cache
       content-length:
@@ -615,13 +749,15 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Oct 2021 07:27:01 GMT
+      - Wed, 27 Apr 2022 05:22:39 GMT
       etag:
-      - '"36062795-0000-0500-0000-617a50c50000"'
+      - '"6a004d51-0000-0100-0000-6268d3200000"'
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/5333f70f-b646-4686-8b39-f28dc9ccf4cf*89A56AA1FCBE084D198698DFC766FE7EA74FA1B99196A3461837FFA9533AD18A?api-version=2021-11-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/2eb7ddda-5a34-4941-8b56-a80b882a75c3*6877EFDD81F9BBE567A690EB100C775A8F24F042F6CF380A598FADC2BEB68348?api-version=2022-05-01
+      mise-correlation-id:
+      - 4e04383b-68cd-48cb-9398-0c8e6551a1c7
       pragma:
       - no-cache
       strict-transport-security:
@@ -631,7 +767,7 @@ interactions:
       x-ms-providerhub-traffic:
       - 'True'
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14998'
+      - '14999'
     status:
       code: 202
       message: Accepted
@@ -649,27 +785,27 @@ interactions:
       ParameterSetName:
       - --id --yes
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.35.0 azsdk-python-mgmt-servicelinker/1.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/5333f70f-b646-4686-8b39-f28dc9ccf4cf*89A56AA1FCBE084D198698DFC766FE7EA74FA1B99196A3461837FFA9533AD18A?api-version=2021-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/2eb7ddda-5a34-4941-8b56-a80b882a75c3*6877EFDD81F9BBE567A690EB100C775A8F24F042F6CF380A598FADC2BEB68348?api-version=2022-05-01
   response:
     body:
-      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/5333f70f-b646-4686-8b39-f28dc9ccf4cf*89A56AA1FCBE084D198698DFC766FE7EA74FA1B99196A3461837FFA9533AD18A",
-        "name": "5333f70f-b646-4686-8b39-f28dc9ccf4cf*89A56AA1FCBE084D198698DFC766FE7EA74FA1B99196A3461837FFA9533AD18A",
-        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.Web/sites/servicelinker-table-cosmos-asp-app2/providers/Microsoft.ServiceLinker/linkers/testconn",
-        "status": "Succeeded", "startTime": "2021-10-28T07:27:01.222217Z", "endTime":
-        "2021-10-28T07:27:04.7062904Z", "properties": null}'
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/2eb7ddda-5a34-4941-8b56-a80b882a75c3*6877EFDD81F9BBE567A690EB100C775A8F24F042F6CF380A598FADC2BEB68348",
+        "name": "2eb7ddda-5a34-4941-8b56-a80b882a75c3*6877EFDD81F9BBE567A690EB100C775A8F24F042F6CF380A598FADC2BEB68348",
+        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.Web/sites/servicelinker-table-cosmos-asp-app/providers/Microsoft.ServiceLinker/linkers/testconn",
+        "status": "Succeeded", "startTime": "2022-04-27T05:22:39.958821Z", "endTime":
+        "2022-04-27T05:22:43.3080929Z", "properties": null}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '692'
+      - '704'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Oct 2021 07:27:31 GMT
+      - Wed, 27 Apr 2022 05:23:11 GMT
       etag:
-      - '"05002c07-0000-0500-0000-617a50c80000"'
+      - '"130071ff-0000-0100-0000-6268d3230000"'
       expires:
       - '-1'
       pragma:
