@@ -54,11 +54,10 @@ from azure.cli.command_modules.acs.base_decorator import (
     BaseAKSManagedClusterDecorator,
     BaseAKSParamDict,
 )
+from azure.cli.command_modules.acs._roleassignments import ensure_cluster_identity_permission_on_kubelet_identity, subnet_role_assignment_exists
 from azure.cli.command_modules.acs.custom import (
     _ensure_aks_acr,
     _ensure_aks_service_principal,
-    _ensure_cluster_identity_permission_on_kubelet_identity,
-    subnet_role_assignment_exists,
 )
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core._profile import Profile
@@ -242,7 +241,7 @@ class AKSManagedClusterContext(BaseAKSContext):
             external_functions["ensure_aks_service_principal"] = _ensure_aks_service_principal
             external_functions[
                 "ensure_cluster_identity_permission_on_kubelet_identity"
-            ] = _ensure_cluster_identity_permission_on_kubelet_identity
+            ] = ensure_cluster_identity_permission_on_kubelet_identity
             external_functions["subnet_role_assignment_exists"] = subnet_role_assignment_exists
             self.__external_functions = SimpleNamespace(**external_functions)
         return self.__external_functions
@@ -4604,7 +4603,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
 
         The wrapper function "get_identity_by_msi_client" will be called (by "get_user_assigned_identity_object_id") to
         get the identity object, which internally use ManagedServiceIdentityClient to send the request.
-        The function "_ensure_cluster_identity_permission_on_kubelet_identity" will be called to create a role
+        The function "ensure_cluster_identity_permission_on_kubelet_identity" will be called to create a role
         assignment if necessary, which internally used AuthorizationManagementClient to send the request.
 
         :return: the ManagedCluster object

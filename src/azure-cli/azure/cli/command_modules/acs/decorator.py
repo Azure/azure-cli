@@ -35,6 +35,7 @@ from azure.cli.command_modules.acs._natgateway import (
 )
 from azure.cli.command_modules.acs._resourcegroup import get_rg_location
 from azure.cli.command_modules.acs._validators import extract_comma_separated_string
+from azure.cli.command_modules.acs._roleassignments import ensure_cluster_identity_permission_on_kubelet_identity, subnet_role_assignment_exists
 from azure.cli.command_modules.acs.addonconfiguration import (
     ensure_container_insights_for_monitoring,
     ensure_default_log_analytics_workspace_for_monitoring,
@@ -43,9 +44,7 @@ from azure.cli.command_modules.acs.custom import (
     _add_role_assignment,
     _ensure_aks_acr,
     _ensure_aks_service_principal,
-    _ensure_cluster_identity_permission_on_kubelet_identity,
     _put_managed_cluster_ensuring_permission,
-    subnet_role_assignment_exists,
 )
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core._profile import Profile
@@ -5764,7 +5763,7 @@ class AKSCreateDecorator:
 
         The wrapper function "get_identity_by_msi_client" will be called (by "get_user_assigned_identity_object_id") to
         get the identity object, which internally use ManagedServiceIdentityClient to send the request.
-        The function "_ensure_cluster_identity_permission_on_kubelet_identity" will be called to create a role
+        The function "ensure_cluster_identity_permission_on_kubelet_identity" will be called to create a role
         assignment if necessary, which internally used AuthorizationManagementClient to send the request.
 
         :return: the ManagedCluster object
@@ -5787,7 +5786,7 @@ class AKSCreateDecorator:
             }
             cluster_identity_object_id = self.context.get_user_assigned_identity_object_id()
             # ensure the cluster identity has "Managed Identity Operator" role at the scope of kubelet identity
-            _ensure_cluster_identity_permission_on_kubelet_identity(
+            ensure_cluster_identity_permission_on_kubelet_identity(
                 self.cmd,
                 cluster_identity_object_id,
                 assign_kubelet_identity)

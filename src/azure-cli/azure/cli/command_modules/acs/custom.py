@@ -56,8 +56,6 @@ from azure.cli.command_modules.acs._consts import (
     CONST_INGRESS_APPGW_SUBNET_ID,
     CONST_INGRESS_APPGW_WATCH_NAMESPACE,
     CONST_KUBE_DASHBOARD_ADDON_NAME,
-    CONST_MANAGED_IDENTITY_OPERATOR_ROLE,
-    CONST_MANAGED_IDENTITY_OPERATOR_ROLE_ID,
     CONST_MONITORING_ADDON_NAME,
     CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID,
     CONST_MONITORING_USING_AAD_MSI_AUTH,
@@ -92,14 +90,13 @@ from azure.cli.core.azclierror import (
     InvalidArgumentValueError,
     MutuallyExclusiveArgumentError,
     ResourceNotFoundError,
-    UnauthorizedError,
     ValidationError,
 )
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
 from azure.cli.core.keys import is_valid_ssh_rsa_public_key
 from azure.cli.core.profiles import ResourceType
-from azure.cli.core.util import get_file_json, in_cloud_console, sdk_no_wait, shell_safe_json_parse
+from azure.cli.core.util import in_cloud_console, sdk_no_wait, shell_safe_json_parse
 from azure.graphrbac.models import (
     ApplicationCreateParameters,
     ApplicationUpdateParameters,
@@ -1560,19 +1557,6 @@ def _update_dict(dict1, dict2):
     return cp
 
 
-def subnet_role_assignment_exists(cmd, scope):
-    network_contributor_role_id = "4d97b98b-1d4f-4787-a291-c67834d212e7"
-
-    factory = get_auth_management_client(cmd.cli_ctx, scope)
-    assignments_client = factory.role_assignments
-
-    if cmd.supported_api_version(min_api='2018-01-01-preview', resource_type=ResourceType.MGMT_AUTHORIZATION):
-        for i in assignments_client.list_for_scope(scope=scope, filter='atScope()'):
-            if i.scope == scope and i.role_definition_id.endswith(network_contributor_role_id):
-                return True
-    return False
-
-
 def aks_check_acr(cmd, client, resource_group_name, name, acr):
     if not which("kubectl"):
         raise ValidationError("Can not find kubectl executable in PATH")
@@ -2940,7 +2924,6 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
     return aks_agentpool_add_decorator.add_agentpool(agentpool)
 
 
-# pylint: disable=too-many-boolean-expressions
 def aks_agentpool_update(cmd, client, resource_group_name, cluster_name, nodepool_name,
                          enable_cluster_autoscaler=False,
                          disable_cluster_autoscaler=False,
@@ -3278,44 +3261,6 @@ def _create_client_secret():
     return client_secret
 
 
-def _check_cluster_autoscaler_flag(enable_cluster_autoscaler,
-                                   min_count,
-                                   max_count,
-                                   node_count,
-                                   agent_pool_profile):
-    if enable_cluster_autoscaler:
-        if min_count is None or max_count is None:
-            raise CLIError(
-                'Please specify both min-count and max-count when --enable-cluster-autoscaler enabled')
-        if int(min_count) > int(max_count):
-            raise CLIError(
-                'Value of min-count should be less than or equal to value of max-count')
-        if int(node_count) < int(min_count) or int(node_count) > int(max_count):
-            raise CLIError(
-                'node-count is not in the range of min-count and max-count')
-        agent_pool_profile.min_count = int(min_count)
-        agent_pool_profile.max_count = int(max_count)
-        agent_pool_profile.enable_auto_scaling = True
-    else:
-        if min_count is not None or max_count is not None:
-            raise CLIError(
-                'min-count and max-count are required for --enable-cluster-autoscaler, please use the flag')
-
-
-def _validate_autoscaler_update_counts(min_count, max_count, is_enable_or_update):
-    """
-    Validates the min, max, and node count when performing an update
-    """
-    if min_count is None or max_count is None:
-        if is_enable_or_update:
-            raise CLIError('Please specify both min-count and max-count when --enable-cluster-autoscaler or '
-                           '--update-cluster-autoscaler is set.')
-    if min_count is not None and max_count is not None:
-        if int(min_count) > int(max_count):
-            raise CLIError(
-                'Value of min-count should be less than or equal to value of max-count.')
-
-
 def _print_or_merge_credentials(path, kubeconfig, overwrite_existing, context_name):
     """Merge an unencrypted kubeconfig into the file at the specified path, or print it to
     stdout if the path is "-".
@@ -3627,6 +3572,8 @@ def openshift_monitor_disable(cmd, client, resource_group_name, name, no_wait=Fa
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, name, instance)
 
 
+# TODO: remove in cli June release
+# deprecated, see postprocessing_after_mc_created in managed_cluster_decorator.py
 def _put_managed_cluster_ensuring_permission(
         cmd,     # pylint: disable=too-many-locals,too-many-statements,too-many-branches
         client,
@@ -3711,26 +3658,6 @@ def _put_managed_cluster_ensuring_permission(
     return cluster
 
 
-def _ensure_cluster_identity_permission_on_kubelet_identity(cmd, cluster_identity_object_id, scope):
-    factory = get_auth_management_client(cmd.cli_ctx, scope)
-    assignments_client = factory.role_assignments
-
-    for i in assignments_client.list_for_scope(scope=scope, filter='atScope()'):
-        if i.scope.lower() != scope.lower():
-            continue
-        if not i.role_definition_id.lower().endswith(CONST_MANAGED_IDENTITY_OPERATOR_ROLE_ID):
-            continue
-        if i.principal_id.lower() != cluster_identity_object_id.lower():
-            continue
-        # already assigned
-        return
-
-    if not _add_role_assignment(cmd, CONST_MANAGED_IDENTITY_OPERATOR_ROLE, cluster_identity_object_id,
-                                is_service_principal=False, scope=scope):
-        raise UnauthorizedError('Could not grant Managed Identity Operator '
-                                'permission to cluster identity at scope {}'.format(scope))
-
-
 def aks_nodepool_snapshot_create(cmd,    # pylint: disable=too-many-locals,too-many-statements,too-many-branches
                                  client,
                                  resource_group_name,
@@ -3796,24 +3723,3 @@ def aks_nodepool_snapshot_list(cmd, client, resource_group_name=None):  # pylint
         return client.list()
 
     return client.list_by_resource_group(resource_group_name)
-
-
-def _get_kubelet_config(file_path):
-    if not os.path.isfile(file_path):
-        raise InvalidArgumentValueError("{} is not valid file, or not accessable.".format(file_path))
-    kubelet_config = get_file_json(file_path)
-    if not isinstance(kubelet_config, dict):
-        msg = "Error reading kubelet configuration at {}. Please see https://aka.ms/CustomNodeConfig for proper format."
-        raise InvalidArgumentValueError(msg.format(file_path))
-    return kubelet_config
-
-
-def _get_linux_os_config(file_path):
-    if not os.path.isfile(file_path):
-        raise InvalidArgumentValueError("{} is not valid file, or not accessable.".format(file_path))
-    os_config = get_file_json(file_path)
-    if not isinstance(os_config, dict):
-        msg = "Error reading Linux OS configuration at {}. \
-            Please see https://aka.ms/CustomNodeConfig for proper format."
-        raise InvalidArgumentValueError(msg.format(file_path))
-    return os_config

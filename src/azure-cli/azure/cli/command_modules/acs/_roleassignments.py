@@ -13,6 +13,10 @@ from azure.core.exceptions import HttpResponseError
 from azure.graphrbac.models import GetObjectsParameters
 from knack.log import get_logger
 from msrestazure.azure_exceptions import CloudError
+from azure.cli.core.azclierror import (
+    UnauthorizedError,
+)
+from azure.cli.command_modules.acs._consts import CONST_MANAGED_IDENTITY_OPERATOR_ROLE_ID, CONST_MANAGED_IDENTITY_OPERATOR_ROLE, CONST_NETWORK_CONTRIBUTOR_ROLE_ID
 
 logger = get_logger(__name__)
 
@@ -164,3 +168,34 @@ def add_role_assignment(cmd, role, service_principal_msi_id, is_service_principa
     hook.add(message='AAD role propagation done', value=1.0, total_val=1.0)
     logger.info('AAD role propagation done')
     return True
+
+
+def subnet_role_assignment_exists(cmd, scope):
+    factory = get_auth_management_client(cmd.cli_ctx, scope)
+    assignments_client = factory.role_assignments
+
+    if cmd.supported_api_version(min_api='2018-01-01-preview', resource_type=ResourceType.MGMT_AUTHORIZATION):
+        for i in assignments_client.list_for_scope(scope=scope, filter='atScope()'):
+            if i.scope == scope and i.role_definition_id.endswith(CONST_NETWORK_CONTRIBUTOR_ROLE_ID):
+                return True
+    return False
+
+
+def ensure_cluster_identity_permission_on_kubelet_identity(cmd, cluster_identity_object_id, scope):
+    factory = get_auth_management_client(cmd.cli_ctx, scope)
+    assignments_client = factory.role_assignments
+
+    for i in assignments_client.list_for_scope(scope=scope, filter='atScope()'):
+        if i.scope.lower() != scope.lower():
+            continue
+        if not i.role_definition_id.lower().endswith(CONST_MANAGED_IDENTITY_OPERATOR_ROLE_ID):
+            continue
+        if i.principal_id.lower() != cluster_identity_object_id.lower():
+            continue
+        # already assigned
+        return
+
+    if not add_role_assignment(cmd, CONST_MANAGED_IDENTITY_OPERATOR_ROLE, cluster_identity_object_id,
+                                is_service_principal=False, scope=scope):
+        raise UnauthorizedError('Could not grant Managed Identity Operator '
+                                'permission to cluster identity at scope {}'.format(scope))

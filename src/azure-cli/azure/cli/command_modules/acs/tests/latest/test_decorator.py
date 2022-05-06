@@ -6371,7 +6371,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             "azure.cli.command_modules.acs.decorator.AKSContext.get_identity_by_msi_client",
             side_effect=[identity_obj_1, identity_obj_2],
         ), patch(
-            "azure.cli.command_modules.acs.decorator._ensure_cluster_identity_permission_on_kubelet_identity"
+            "azure.cli.command_modules.acs.decorator.ensure_cluster_identity_permission_on_kubelet_identity"
         ) as mock_ensure_method:
             dec_2 = AKSCreateDecorator(
                 self.cmd,
