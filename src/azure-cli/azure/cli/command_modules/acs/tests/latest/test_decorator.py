@@ -1646,7 +1646,7 @@ class AKSContextTestCase(unittest.TestCase):
             "azure.cli.command_modules.acs.decorator.get_rg_location",
             return_value="test_location",
         ), patch(
-            "azure.cli.command_modules.acs.custom.get_graph_rbac_management_client",
+            "azure.cli.command_modules.acs._graph.get_graph_rbac_management_client",
             return_value=None,
         ):
             self.assertEqual(
@@ -1674,10 +1674,10 @@ class AKSContextTestCase(unittest.TestCase):
             "azure.cli.command_modules.acs.decorator.get_rg_location",
             return_value="test_location",
         ), patch(
-            "azure.cli.command_modules.acs.custom.get_graph_rbac_management_client",
+            "azure.cli.command_modules.acs._graph.get_graph_rbac_management_client",
             return_value=None,
         ), patch(
-            "azure.cli.command_modules.acs.custom._build_service_principal",
+            "azure.cli.command_modules.acs._graph.build_service_principal",
             return_value=("test_service_principal", "test_aad_session_key"),
         ):
             self.assertEqual(
@@ -1721,7 +1721,7 @@ class AKSContextTestCase(unittest.TestCase):
             "azure.cli.command_modules.acs.decorator.get_rg_location",
             return_value="test_location",
         ), patch(
-            "azure.cli.command_modules.acs.custom.get_graph_rbac_management_client",
+            "azure.cli.command_modules.acs._graph.get_graph_rbac_management_client",
             return_value=None,
         ):
             # fail on client_secret not specified
@@ -5140,7 +5140,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             "azure.cli.command_modules.acs.decorator.get_rg_location",
             return_value="test_location",
         ), patch(
-            "azure.cli.command_modules.acs.custom.get_graph_rbac_management_client",
+            "azure.cli.command_modules.acs._graph.get_graph_rbac_management_client",
             return_value=None,
         ):
             dec_mc_2 = dec_2.set_up_service_principal_profile(mc_2)

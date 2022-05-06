@@ -10,7 +10,6 @@ import uuid
 from azure.cli.command_modules.acs._client_factory import (
     cf_container_registry_service,
     get_auth_management_client,
-    get_graph_rbac_management_client,
     get_resource_by_name,
 )
 from azure.cli.command_modules.acs._consts import (
@@ -18,44 +17,16 @@ from azure.cli.command_modules.acs._consts import (
     CONST_MANAGED_IDENTITY_OPERATOR_ROLE_ID,
     CONST_NETWORK_CONTRIBUTOR_ROLE_ID,
 )
+from azure.cli.command_modules.acs._graph import resolve_object_id
 from azure.cli.command_modules.acs._helpers import get_property_from_dict_or_object
 from azure.cli.core.azclierror import AzCLIError, UnauthorizedError
 from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.core.exceptions import HttpResponseError
-from azure.graphrbac.models import GetObjectsParameters
 from knack.log import get_logger
 from knack.prompting import prompt_y_n
 from msrestazure.azure_exceptions import CloudError
 
 logger = get_logger(__name__)
-
-
-def _get_object_stubs(graph_client, assignees):
-    params = GetObjectsParameters(include_directory_object_references=True,
-                                  object_ids=assignees)
-    return list(graph_client.objects.get_objects_by_object_ids(params))
-
-
-def resolve_object_id(cli_ctx, assignee):
-    client = get_graph_rbac_management_client(cli_ctx)
-    result = None
-    if assignee is None:
-        raise AzCLIError('Inputted parameter "assignee" is None.')
-    if assignee.find('@') >= 0:  # looks like a user principal name
-        result = list(client.users.list(
-            filter="userPrincipalName eq '{}'".format(assignee)))
-    if not result:
-        result = list(client.service_principals.list(
-            filter="servicePrincipalNames/any(c:c eq '{}')".format(assignee)))
-    if not result:  # assume an object id, let us verify it
-        result = _get_object_stubs(client, [assignee])
-
-    # 2+ matches should never happen, so we only check 'no match' here
-    if not result:
-        raise AzCLIError(
-            "No matches in graph database for '{}'".format(assignee))
-
-    return result[0].object_id
 
 
 def resolve_role_id(role, scope, definitions_client):

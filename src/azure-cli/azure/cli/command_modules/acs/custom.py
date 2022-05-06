@@ -2821,42 +2821,6 @@ def _get_or_add_extension(cmd, extension_name, extension_module, update=False):
     return True
 
 
-def _ensure_aks_acr(cmd,
-                    assignee,
-                    acr_name_or_id,
-                    subscription_id,
-                    detach=False,
-                    is_service_principal=True):
-    from msrestazure.tools import is_valid_resource_id, parse_resource_id
-    # Check if the ACR exists by resource ID.
-    if is_valid_resource_id(acr_name_or_id):
-        try:
-            parsed_registry = parse_resource_id(acr_name_or_id)
-            acr_client = cf_container_registry_service(
-                cmd.cli_ctx, subscription_id=parsed_registry['subscription'])
-            registry = acr_client.registries.get(
-                parsed_registry['resource_group'], parsed_registry['name'])
-        except CloudError as ex:
-            raise CLIError(ex.message)
-        _ensure_aks_acr_role_assignment(
-            cmd, assignee, registry.id, detach, is_service_principal)
-        return
-
-    # Check if the ACR exists by name accross all resource groups.
-    registry_name = acr_name_or_id
-    registry_resource = 'Microsoft.ContainerRegistry/registries'
-    try:
-        registry = get_resource_by_name(
-            cmd.cli_ctx, registry_name, registry_resource)
-    except CloudError as ex:
-        if 'was not found' in ex.message:
-            raise CLIError(
-                "ACR {} not found. Have you provided the right ACR name?".format(registry_name))
-        raise CLIError(ex.message)
-    _ensure_aks_acr_role_assignment(cmd, assignee, registry.id, detach, is_service_principal)
-    return
-
-
 def aks_agentpool_show(cmd, client, resource_group_name, cluster_name, nodepool_name):
     instance = client.get(resource_group_name, cluster_name, nodepool_name)
     return instance
@@ -3078,31 +3042,6 @@ def aks_agentpool_delete(cmd, client, resource_group_name, cluster_name,
 
 def aks_agentpool_get_upgrade_profile(cmd, client, resource_group_name, cluster_name, nodepool_name):
     return client.get_upgrade_profile(resource_group_name, cluster_name, nodepool_name)
-
-
-def _ensure_aks_acr_role_assignment(cmd,
-                                    assignee,
-                                    registry_id,
-                                    detach=False,
-                                    is_service_principal=True):
-    if detach:
-        if not _delete_role_assignments(cmd.cli_ctx,
-                                        'acrpull',
-                                        assignee,
-                                        scope=registry_id,
-                                        is_service_principal=is_service_principal):
-            raise CLIError('Could not delete role assignments for ACR. '
-                           'Are you an Owner on this subscription?')
-        return
-
-    if not _add_role_assignment(cmd,
-                                'acrpull',
-                                assignee,
-                                scope=registry_id,
-                                is_service_principal=is_service_principal):
-        raise CLIError('Could not create a role assignment for ACR. '
-                       'Are you an Owner on this subscription?')
-    return
 
 
 def _ensure_aks_service_principal(cli_ctx,
