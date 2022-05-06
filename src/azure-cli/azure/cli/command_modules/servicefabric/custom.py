@@ -9,7 +9,6 @@ import os
 import time
 
 from OpenSSL import crypto
-from azure.core.exceptions import ResourceNotFoundError
 
 try:
     from urllib.parse import urlparse
@@ -24,6 +23,7 @@ from azure.graphrbac import GraphRbacManagementClient
 from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.command_modules.servicefabric._arm_deployment_utils import validate_and_deploy_arm_template
 from azure.cli.command_modules.servicefabric._sf_utils import _get_resource_group_by_name, _create_resource_group_name
+from azure.core.exceptions import ResourceNotFoundError
 
 from azure.mgmt.servicefabric.models import (ClusterUpdateParameters,
                                              ClientCertificateThumbprint,
@@ -1345,7 +1345,7 @@ def _safe_get_vault(cli_ctx, resource_group_name, vault_name):
         vault = key_vault_client.get(resource_group_name, vault_name)
         return vault
     except ResourceNotFoundError:
-            return None
+        return None
     except CloudError as ex:
         if ex.error.error == 'ResourceNotFound':
             return None
