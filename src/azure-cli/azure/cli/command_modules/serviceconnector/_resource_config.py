@@ -71,6 +71,9 @@ class CLIENT_TYPE(Enum):
 # The source resources released as CLI extensions
 SOURCE_RESOURCES_IN_EXTENSION = [RESOURCE.SpringCloud]
 
+# The source resources using user token
+SOURCE_RESOURCES_USERTOKEN = [RESOURCE.KubernetesCluster]
+
 # The target resources using user token
 TARGET_RESOURCES_USERTOKEN = [RESOURCE.PostgresFlexible, RESOURCE.MysqlFlexible, RESOURCE.KeyVault]
 
@@ -78,7 +81,6 @@ TARGET_RESOURCES_USERTOKEN = [RESOURCE.PostgresFlexible, RESOURCE.MysqlFlexible,
 SOURCE_RESOURCES = {
     RESOURCE.WebApp: '/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/Microsoft.Web/sites/{site}',
     RESOURCE.SpringCloud: '/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/Microsoft.AppPlatform/Spring/{spring}/apps/{app}/deployments/{deployment}',
-    # TODO: Houk, uncomment this when AKS is officially supported
     # RESOURCE.KubernetesCluster: '/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/Microsoft.ContainerService/managedClusters/{cluster}',
 }
 

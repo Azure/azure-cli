@@ -5,10 +5,12 @@
 
 import os
 from math import isnan
+from types import SimpleNamespace
 from typing import Dict, List, Tuple, TypeVar, Union
 
 from azure.cli.command_modules.acs._client_factory import cf_agent_pools
 from azure.cli.command_modules.acs._consts import (
+    CONST_AVAILABILITY_SET,
     CONST_DEFAULT_NODE_OS_TYPE,
     CONST_DEFAULT_NODE_VM_SIZE,
     CONST_DEFAULT_WINDOWS_NODE_VM_SIZE,
@@ -23,10 +25,9 @@ from azure.cli.command_modules.acs._consts import (
     DecoratorEarlyExitException,
     DecoratorMode,
 )
-from azure.cli.command_modules.acs._helpers import get_snapshot_by_snapshot_id
+from azure.cli.command_modules.acs._helpers import get_snapshot_by_snapshot_id, safe_list_get
 from azure.cli.command_modules.acs._validators import extract_comma_separated_string
 from azure.cli.command_modules.acs.base_decorator import BaseAKSContext, BaseAKSModels, BaseAKSParamDict
-from azure.cli.command_modules.acs.decorator import safe_list_get
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core.azclierror import (
     ArgumentUsageError,
@@ -101,7 +102,68 @@ class AKSAgentPoolContext(BaseAKSContext):
         super().__init__(cmd, raw_parameters, models, decorator_mode)
         self.agentpool_decorator_mode = agentpool_decorator_mode
         self.agentpool = None
+        # used to store origin agentpool in update mode
+        self.__existing_agentpool = None
+        # used to store all the agentpools in mc mode
         self._agentpools = []
+        # used to store external functions
+        self.__external_functions = None
+
+    @property
+    def existing_agentpool(self) -> AgentPool:
+        return self.__existing_agentpool
+
+    @property
+    def external_functions(self) -> SimpleNamespace:
+        if self.__external_functions is None:
+            external_functions = {}
+            external_functions["cf_agent_pools"] = cf_agent_pools
+            external_functions["get_snapshot_by_snapshot_id"] = get_snapshot_by_snapshot_id
+            self.__external_functions = SimpleNamespace(**external_functions)
+        return self.__external_functions
+
+    def attach_agentpool(self, agentpool: AgentPool) -> None:
+        """Attach the AgentPool object to the context.
+
+        The `agentpool` object is only allowed to be attached once, and attaching again will raise a CLIInternalError.
+
+        :return: None
+        """
+        if self.decorator_mode == DecoratorMode.UPDATE:
+            self.attach_existing_agentpool(agentpool)
+
+        if self.agentpool is None:
+            self.agentpool = agentpool
+        else:
+            msg = "the same" if self.agentpool == agentpool else "different"
+            raise CLIInternalError(
+                "Attempting to attach the `agentpool` object again, the two objects are {}.".format(
+                    msg
+                )
+            )
+
+    def attach_existing_agentpool(self, agentpool: AgentPool) -> None:
+        if self.__existing_agentpool is None:
+            self.__existing_agentpool = agentpool
+        else:
+            msg = "the same" if self.__existing_agentpool == agentpool else "different"
+            raise CLIInternalError(
+                "Attempting to attach the existing `agentpool` object again, the two objects are {}.".format(
+                    msg
+                )
+            )
+
+    def attach_agentpools(self, agentpools: List[AgentPool]) -> None:
+        if self._agentpools == []:
+            self._agentpools = agentpools
+        else:
+            msg = "the same" if self._agentpools == agentpools else "different"
+            raise CLIInternalError(
+                "Attempting to attach the `agentpools` object again, the two objects are {}.".format(
+                    msg
+                )
+            )
+        self._agentpools = agentpools
 
     # pylint: disable=no-self-use
     def __validate_counts_in_autoscaler(
@@ -149,23 +211,6 @@ class AKSAgentPoolContext(BaseAKSContext):
                         option_name
                     )
                 )
-
-    def attach_agentpool(self, agentpool: AgentPool) -> None:
-        """Attach the AgentPool object to the context.
-
-        The `agentpool` object is only allowed to be attached once, and attaching again will raise a CLIInternalError.
-
-        :return: None
-        """
-        if self.agentpool is None:
-            self.agentpool = agentpool
-        else:
-            msg = "the same" if self.agentpool == agentpool else "different"
-            raise CLIInternalError(
-                "Attempting to attach the `agentpool` object again, the two objects are {}.".format(
-                    msg
-                )
-            )
 
     def get_resource_group_name(self) -> str:
         """Obtain the value of resource_group_name.
@@ -231,7 +276,7 @@ class AKSAgentPoolContext(BaseAKSContext):
                 self.agentpool_decorator_mode == AgentPoolDecoratorMode.STANDALONE and
                 self.decorator_mode == DecoratorMode.CREATE
             ):
-                agentpool_client = cf_agent_pools(self.cmd.cli_ctx)
+                agentpool_client = self.external_functions.cf_agent_pools(self.cmd.cli_ctx)
                 instances = agentpool_client.list(self.get_resource_group_name(), self.get_cluster_name())
                 for agentpool_profile in instances:
                     if agentpool_profile.name == nodepool_name:
@@ -459,6 +504,7 @@ class AKSAgentPoolContext(BaseAKSContext):
         # try to read the property value corresponding to the parameter from the `agentpool` object
         if (
             self.agentpool and
+            hasattr(self.agentpool, "creation_data") and    # backward compatibility
             self.agentpool.creation_data and
             self.agentpool.creation_data.source_resource_id is not None
         ):
@@ -486,7 +532,7 @@ class AKSAgentPoolContext(BaseAKSContext):
 
         snapshot_id = self.get_snapshot_id()
         if snapshot_id:
-            snapshot = get_snapshot_by_snapshot_id(self.cmd.cli_ctx, snapshot_id)
+            snapshot = self.external_functions.get_snapshot_by_snapshot_id(self.cmd.cli_ctx, snapshot_id)
             self.set_intermediate("snapshot", snapshot, overwrite_exists=True)
         return snapshot
 
@@ -595,7 +641,7 @@ class AKSAgentPoolContext(BaseAKSContext):
         raw_value = self.raw_param.get("os_sku")
         # try to read the property value corresponding to the parameter from the `agentpool` object
         value_obtained_from_agentpool = None
-        if self.agentpool:
+        if self.agentpool and hasattr(self.agentpool, "os_sku"):    # backward compatibility
             value_obtained_from_agentpool = self.agentpool.os_sku
         # try to retrieve the value from snapshot
         value_obtained_from_snapshot = None
@@ -834,7 +880,11 @@ class AKSAgentPoolContext(BaseAKSContext):
         # read the original value passed by the command
         node_public_ip_prefix_id = self.raw_param.get("node_public_ip_prefix_id")
         # try to read the property value corresponding to the parameter from the `agentpool` object
-        if self.agentpool and self.agentpool.node_public_ip_prefix_id is not None:
+        if (
+            self.agentpool and
+            hasattr(self.agentpool, "node_public_ip_prefix_id") and     # backward compatibility
+            self.agentpool.node_public_ip_prefix_id is not None
+        ):
             node_public_ip_prefix_id = self.agentpool.node_public_ip_prefix_id
 
         # this parameter does not need dynamic completion
@@ -856,7 +906,13 @@ class AKSAgentPoolContext(BaseAKSContext):
             if self.agentpool and self.agentpool.type_properties_type is not None:
                 vm_set_type = self.agentpool.type_properties_type
 
-        # this parameter does not need dynamic completion
+        # normalize
+        if vm_set_type.lower() == CONST_VIRTUAL_MACHINE_SCALE_SETS.lower():
+            vm_set_type = CONST_VIRTUAL_MACHINE_SCALE_SETS
+        elif vm_set_type.lower() == CONST_AVAILABILITY_SET.lower():
+            vm_set_type = CONST_AVAILABILITY_SET
+        else:
+            raise InvalidArgumentValueError("--vm-set-type can only be VirtualMachineScaleSets or AvailabilitySet")
         # this parameter does not need validation
         return vm_set_type
 
@@ -883,7 +939,11 @@ class AKSAgentPoolContext(BaseAKSContext):
         # read the original value passed by the command
         enable_encryption_at_host = self.raw_param.get("enable_encryption_at_host", False)
         # try to read the property value corresponding to the parameter from the `agentpool` object
-        if self.agentpool and self.agentpool.enable_encryption_at_host is not None:
+        if (
+            self.agentpool and
+            hasattr(self.agentpool, "enable_encryption_at_host") and     # backward compatibility
+            self.agentpool.enable_encryption_at_host is not None
+        ):
             enable_encryption_at_host = self.agentpool.enable_encryption_at_host
 
         # this parameter does not need dynamic completion
@@ -898,7 +958,11 @@ class AKSAgentPoolContext(BaseAKSContext):
         # read the original value passed by the command
         enable_ultra_ssd = self.raw_param.get("enable_ultra_ssd", False)
         # try to read the property value corresponding to the parameter from the `agentpool` object
-        if self.agentpool and self.agentpool.enable_ultra_ssd is not None:
+        if (
+            self.agentpool and
+            hasattr(self.agentpool, "enable_ultra_ssd") and     # backward compatibility
+            self.agentpool.enable_ultra_ssd is not None
+        ):
             enable_ultra_ssd = self.agentpool.enable_ultra_ssd
 
         # this parameter does not need dynamic completion
@@ -913,7 +977,11 @@ class AKSAgentPoolContext(BaseAKSContext):
         # read the original value passed by the command
         enable_fips_image = self.raw_param.get("enable_fips_image", False)
         # try to read the property value corresponding to the parameter from the `agentpool` object
-        if self.agentpool and self.agentpool.enable_fips is not None:
+        if (
+            self.agentpool and
+            hasattr(self.agentpool, "enable_fips") and      # backward compatibility
+            self.agentpool.enable_fips is not None
+        ):
             enable_fips_image = self.agentpool.enable_fips
 
         # this parameter does not need dynamic completion
@@ -979,18 +1047,25 @@ class AKSAgentPoolContext(BaseAKSContext):
         return mode
 
     def get_scale_down_mode(self) -> str:
-        """Obtain the value of scale_down_mode, default value is CONST_SCALE_DOWN_MODE_DELETE.
+        """Obtain the value of scale_down_mode, default value is CONST_SCALE_DOWN_MODE_DELETE for standalone mode.
 
         :return: string
         """
         # read the original value passed by the command
-        if self.decorator_mode == DecoratorMode.CREATE:
+        if (
+            self.decorator_mode == DecoratorMode.CREATE and
+            self.agentpool_decorator_mode == AgentPoolDecoratorMode.STANDALONE
+        ):
             scale_down_mode = self.raw_param.get("scale_down_mode", CONST_SCALE_DOWN_MODE_DELETE)
         else:
             scale_down_mode = self.raw_param.get("scale_down_mode")
         # In create mode, try to read the property value corresponding to the parameter from the `agentpool` object
         if self.decorator_mode == DecoratorMode.CREATE:
-            if self.agentpool and self.agentpool.scale_down_mode is not None:
+            if (
+                self.agentpool and
+                hasattr(self.agentpool, "scale_down_mode") and      # backward compatibility
+                self.agentpool.scale_down_mode is not None
+            ):
                 scale_down_mode = self.agentpool.scale_down_mode
 
         # this parameter does not need dynamic completion
@@ -1122,11 +1197,31 @@ class AKSAgentPoolAddDecorator:
         """
         self.cmd = cmd
         self.client = client
+        self.__raw_parameters = raw_parameters
+        self.resource_type = resource_type
         self.agentpool_decorator_mode = agentpool_decorator_mode
-        self.models = AKSAgentPoolModels(cmd, resource_type, agentpool_decorator_mode)
-        # store the context in the process of assemble the AgentPool object
+        self.init_models()
+        self.init_context()
+
+    def init_models(self) -> None:
+        """Initialize an AKSAgentPoolModels object to store the models.
+
+        :return: None
+        """
+        self.models = AKSAgentPoolModels(self.cmd, self.resource_type, self.agentpool_decorator_mode)
+
+    def init_context(self) -> None:
+        """Initialize an AKSManagedClusterContext object to store the context in the process of assemble the
+        AgentPool object.
+
+        :return: None
+        """
         self.context = AKSAgentPoolContext(
-            cmd, AKSAgentPoolParamDict(raw_parameters), self.models, DecoratorMode.CREATE, agentpool_decorator_mode
+            self.cmd,
+            AKSAgentPoolParamDict(self.__raw_parameters),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
         )
 
     def _ensure_agentpool(self, agentpool: AgentPool) -> None:
@@ -1341,7 +1436,7 @@ class AKSAgentPoolAddDecorator:
         agentpool.linux_os_config = self.context.get_linux_os_config()
         return agentpool
 
-    def construct_agentpool_profile_default(self) -> AgentPool:
+    def construct_agentpool_profile_default(self, bypass_restore_defaults: bool = False) -> AgentPool:
         """The overall controller used to construct the AgentPool profile by default.
 
         The completely constructed AgentPool object will later be passed as a parameter to the underlying SDK
@@ -1372,7 +1467,8 @@ class AKSAgentPoolAddDecorator:
         # set up custom node config
         agentpool = self.set_up_custom_node_config(agentpool)
         # restore defaults
-        agentpool = self._restore_defaults_in_agentpool(agentpool)
+        if not bypass_restore_defaults:
+            agentpool = self._restore_defaults_in_agentpool(agentpool)
         return agentpool
 
     # pylint: disable=protected-access
@@ -1417,11 +1513,31 @@ class AKSAgentPoolUpdateDecorator:
         """
         self.cmd = cmd
         self.client = client
+        self.__raw_parameters = raw_parameters
+        self.resource_type = resource_type
         self.agentpool_decorator_mode = agentpool_decorator_mode
-        self.models = AKSAgentPoolModels(cmd, resource_type, agentpool_decorator_mode)
-        # store the context in the process of assemble the AgentPool object
+        self.init_models()
+        self.init_context()
+
+    def init_models(self) -> None:
+        """Initialize an AKSAgentPoolModels object to store the models.
+
+        :return: None
+        """
+        self.models = AKSAgentPoolModels(self.cmd, self.resource_type, self.agentpool_decorator_mode)
+
+    def init_context(self) -> None:
+        """Initialize an AKSManagedClusterContext object to store the context in the process of assemble the
+        AgentPool object.
+
+        :return: None
+        """
         self.context = AKSAgentPoolContext(
-            cmd, AKSAgentPoolParamDict(raw_parameters), self.models, DecoratorMode.UPDATE, agentpool_decorator_mode
+            self.cmd,
+            AKSAgentPoolParamDict(self.__raw_parameters),
+            self.models,
+            DecoratorMode.UPDATE,
+            self.agentpool_decorator_mode,
         )
 
     def _ensure_agentpool(self, agentpool: AgentPool) -> None:
@@ -1444,7 +1560,6 @@ class AKSAgentPoolUpdateDecorator:
                 "is not the same as the `agentpool` in the context."
             )
 
-    # pylint: disable=protected-access
     def fetch_agentpool(self, agentpools: List[AgentPool] = None) -> AgentPool:
         """Get the AgentPool object currently in use and attach it to internal context.
 
@@ -1453,7 +1568,7 @@ class AKSAgentPoolUpdateDecorator:
         :return: the AgentPool object
         """
         if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
-            self.context._agentpools = agentpools
+            self.context.attach_agentpools(agentpools)
             agentpool = safe_list_get(agentpools, 0)
         else:
             agentpool = self.client.get(
@@ -1557,10 +1672,14 @@ class AKSAgentPoolUpdateDecorator:
         """
         # fetch the Agentpool object
         agentpool = self.fetch_agentpool(agentpools)
+        # update upgrade settings
+        agentpool = self.update_upgrade_settings(agentpool)
         # update auto scaler properties
         agentpool = self.update_auto_scaler_properties(agentpool)
         # update label, tag, taint
         agentpool = self.update_label_tag_taint(agentpool)
+        # update misc vm properties
+        agentpool = self.update_vm_properties(agentpool)
         return agentpool
 
     def update_agentpool(self, agentpool: AgentPool) -> AgentPool:
