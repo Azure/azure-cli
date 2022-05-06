@@ -173,10 +173,10 @@ def search_role_assignments(
             a
             for a in assignments
             if (
-                not scope
-                or include_inherited
-                and re.match(get_property_from_dict_or_object(a, "scope"), scope, re.I)
-                or get_property_from_dict_or_object(a, "scope").lower() == scope.lower()
+                not scope or
+                include_inherited and
+                re.match(get_property_from_dict_or_object(a, "scope"), scope, re.I) or
+                get_property_from_dict_or_object(a, "scope").lower() == scope.lower()
             )
         ]
 
@@ -218,8 +218,17 @@ def delete_role_assignments(cli_ctx, role, service_principal, delay=2, scope=Non
     return True
 
 
-def delete_role_assignments_executor(cli_ctx, ids=None, assignee=None, role=None, resource_group_name=None,
-                            scope=None, include_inherited=False, yes=None, is_service_principal=True):
+def delete_role_assignments_executor(
+    cli_ctx,
+    ids=None,
+    assignee=None,
+    role=None,
+    resource_group_name=None,
+    scope=None,
+    include_inherited=False,
+    yes=None,
+    is_service_principal=True,
+):
     factory = get_auth_management_client(cli_ctx, scope)
     assignments_client = factory.role_assignments
     definitions_client = factory.role_definitions
@@ -236,11 +245,18 @@ def delete_role_assignments_executor(cli_ctx, ids=None, assignee=None, role=None
         if not prompt_y_n(msg, default="n"):
             return
 
-    scope = build_role_scope(resource_group_name, scope,
-                              assignments_client.config.subscription_id)
-    assignments = search_role_assignments(cli_ctx, assignments_client, definitions_client,
-                                           scope, assignee, role, include_inherited,
-                                           include_groups=False, is_service_principal=is_service_principal)
+    scope = build_role_scope(resource_group_name, scope, assignments_client.config.subscription_id)
+    assignments = search_role_assignments(
+        cli_ctx,
+        assignments_client,
+        definitions_client,
+        scope,
+        assignee,
+        role,
+        include_inherited,
+        include_groups=False,
+        is_service_principal=is_service_principal,
+    )
 
     if assignments:
         for a in assignments:

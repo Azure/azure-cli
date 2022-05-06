@@ -110,7 +110,7 @@ def load_command_table(self, _):
         g.custom_command('scale', 'aks_scale', supports_no_wait=True)
         g.command('delete', 'begin_delete', supports_no_wait=True, confirmation=True)
         g.custom_show_command('show', 'aks_show', table_transformer=aks_show_table_format)
-        g.custom_command('list', 'aks_list',  table_transformer=aks_list_table_format)
+        g.custom_command('list', 'aks_list', table_transformer=aks_list_table_format)
         g.custom_command('enable-addons', 'aks_enable_addons', supports_no_wait=True)
         g.custom_command('disable-addons', 'aks_disable_addons', supports_no_wait=True)
         g.custom_command('get-credentials', 'aks_get_credentials')
