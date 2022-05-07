@@ -15,7 +15,6 @@ name_arg_type = CLIArgumentType(metavar='NAME', configured_default='botname', id
 
 # supported_languages will be use with get_enum_type after the 'Node' value is completely removed from `az bot`
 # In custom.py we're still supporting 'Node' in __language_validator()
-SUPPORTED_LANGUAGES = ['Csharp', 'Javascript']
 UPCOMING_LANGUAGES = ['Csharp', 'Javascript', 'Typescript']
 SUPPORTED_APP_INSIGHTS_REGIONS = [
     'Australia East',
@@ -55,15 +54,11 @@ def load_arguments(self, _):
 
     with self.argument_context('bot create') as c:
         c.argument('sku_name', options_list=['--sku'], arg_type=get_enum_type(SUPPORTED_SKUS), help='The Sku of the bot.', arg_group='Registration Bot Specific')
-        c.argument('kind', options_list=['--kind', '-k'], arg_type=get_enum_type(['registration', 'webapp']), help='The kind of the bot.')
         c.argument('display_name', help='The display name of the bot. If not specified, defaults to the name of the bot.', arg_group='Registration Bot Specific')
         c.argument('description', options_list=['--description', '-d'], help='The description of the bot.', arg_group='Registration Bot Specific')
         c.argument('endpoint', options_list=['-e', '--endpoint'], help='The messaging endpoint of the bot.', arg_group='Registration Bot Specific')
         c.argument('msa_app_id', options_list=['--appid'], help='The Microsoft account ID (MSA ID) to be used with the bot.')
-        c.argument('password', options_list=['-p', '--password'], help='The Microsoft account (MSA) password for the bot. Used to authorize messages being sent from the bot. Required when "--kind" is "webapp".', arg_group='Web App Bot Specific')
         c.argument('tags', arg_type=tags_type)
-        c.argument('language', options_list=['--lang'], arg_type=get_enum_type(SUPPORTED_LANGUAGES), help='The language to be used to create the bot.', arg_group='Web App Bot Specific')
-        c.argument('deploy_echo', options_list=['--echo'], arg_type=get_three_state_flag(), help='Deploy an Echo Bot template to the newly created v4 Web App Bot.', arg_group='V4 Bot Templates')
         c.argument('cmek_key_vault_url', options_list=['--cmk-key-vault-key-url', '--cmk'], help='The key vault key url to enable Customer Managed Keys encryption')
 
     with self.argument_context('bot publish') as c:
