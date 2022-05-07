@@ -84,9 +84,9 @@ def delete_share(cmd, client, fail_not_exist=False, timeout=None, delete_snapsho
 
 def get_share_stats(client, timeout=None, **kwargs):
     result = client.get_share_stats(timeout=timeout, **kwargs)
-    datasize = round(int(result)/math.pow(1024, 3))
+    datasize = round(int(result) / math.pow(1024, 3))
     if datasize == 0:
-        return str(datasize+1)
+        return str(datasize + 1)
     else:
         return str(datasize)
 
