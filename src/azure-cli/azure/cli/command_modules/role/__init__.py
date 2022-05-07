@@ -3,10 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import azure.cli.command_modules.role._help  # pylint: disable=unused-import
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core.profiles import ResourceType
-
-import azure.cli.command_modules.role._help  # pylint: disable=unused-import
+from ._client_factory import _graph_client_factory as graph_client_factory
+from .msgrpah import GraphError
 
 
 class RoleCommandsLoader(AzCommandsLoader):
@@ -37,3 +38,11 @@ class RoleCommandsLoader(AzCommandsLoader):
 
 
 COMMAND_LOADER_CLS = RoleCommandsLoader
+
+
+__all__ = [
+    # Public msgraph.GraphClient factory that should be used by other modules
+    "graph_client_factory",
+    # Public Exception that is raised by msgraph.GraphClient
+    "GraphError"
+]
