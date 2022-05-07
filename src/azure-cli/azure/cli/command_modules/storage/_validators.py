@@ -15,7 +15,6 @@ from azure.cli.command_modules.storage._client_factory import (get_storage_data_
                                                                blob_data_service_factory,
                                                                file_data_service_factory,
                                                                storage_client_factory,
-                                                               cf_container_client,
                                                                cf_adls_file_system)
 from azure.cli.command_modules.storage.util import glob_files_locally, guess_content_type
 from azure.cli.command_modules.storage.sdkutil import get_table_data_type
@@ -1653,9 +1652,9 @@ def pop_data_client_auth(ns):
     del ns.sas_token
 
 
-def validate_encryption_scope_parameter(cmd, ns):
+def validate_encryption_scope_parameter(ns):
     if (ns.default_encryption_scope and ns.prevent_encryption_scope_override is None) or \
-         (not ns.default_encryption_scope and ns.prevent_encryption_scope_override is not None):
+            (not ns.default_encryption_scope and ns.prevent_encryption_scope_override is not None):
         raise CLIError("usage error: You need to specify both --default-encryption-scope and "
                        "--prevent-encryption-scope-override to set encryption scope information "
                        "when creating container.")
