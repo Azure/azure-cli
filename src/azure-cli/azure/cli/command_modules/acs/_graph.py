@@ -20,7 +20,7 @@ from azure.graphrbac.models import (
     PasswordCredential,
     ServicePrincipalCreateParameters,
 )
-from dateutil import relativedelta
+from dateutil.relativedelta import relativedelta
 from knack.log import get_logger
 logger = get_logger(__name__)
 
