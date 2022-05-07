@@ -31,7 +31,7 @@ def transform_acl_list_output(result):
 
 
 def transform_container_permission_output(result):
-    return {'publicAccess': result.public_access or 'off'}
+    return {'publicAccess': result.get('public_access', None) or 'off'}
 
 
 def transform_cors_list_output(result):

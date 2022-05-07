@@ -129,35 +129,52 @@ def container_rm_exists(client, resource_group_name, account_name, container_nam
         raise err
 
 
-def create_container(cmd, container_name, resource_group_name=None, account_name=None,
+# pylint: disable=unused-argument
+def create_container(client, container_name, resource_group_name=None,
                      metadata=None, public_access=None, fail_on_exist=False, timeout=None,
-                     default_encryption_scope=None, prevent_encryption_scope_override=None, **kwargs):
+                     default_encryption_scope=None, prevent_encryption_scope_override=None):
+    encryption_scope = None
     if default_encryption_scope is not None or prevent_encryption_scope_override is not None:
-        from .._client_factory import storage_client_factory
-        client = storage_client_factory(cmd.cli_ctx).blob_containers
-        BlobContainer = cmd.get_models('BlobContainer', resource_type=ResourceType.MGMT_STORAGE)
-        blob_container = BlobContainer(default_encryption_scope=default_encryption_scope,
-                                       deny_encryption_scope_override=prevent_encryption_scope_override)
-        container = client.create(resource_group_name=resource_group_name, account_name=account_name,
-                                  container_name=container_name, blob_container=blob_container)
+        encryption_scope = {
+            'default_encryption_scope': default_encryption_scope,
+            'prevent_encryption_scope_override': prevent_encryption_scope_override
+        }
+    try:
+        container = client.create_container(container_name, metadata=metadata,
+                                            public_access=public_access,
+                                            container_encryption_scope=encryption_scope,
+                                            timeout=timeout)
         return container is not None
-
-    from .._client_factory import blob_data_service_factory
-    kwargs['account_name'] = account_name
-    client = blob_data_service_factory(cmd.cli_ctx, kwargs)
-    return client.create_container(container_name, metadata=metadata, public_access=public_access,
-                                   fail_on_exist=fail_on_exist, timeout=timeout)
+    except ResourceExistsError as ex:
+        if not fail_on_exist:
+            return False
+        raise ex
 
 
 def delete_container(client, container_name, fail_not_exist=False, lease_id=None, if_modified_since=None,
                      if_unmodified_since=None, timeout=None, bypass_immutability_policy=False,
                      processed_resource_group=None, processed_account_name=None, mgmt_client=None):
+    from azure.core.exceptions import ResourceNotFoundError
     if bypass_immutability_policy:
         mgmt_client.blob_containers.delete(processed_resource_group, processed_account_name, container_name)
         return True
-    return client.delete_container(
-        container_name, fail_not_exist=fail_not_exist, lease_id=lease_id, if_modified_since=if_modified_since,
-        if_unmodified_since=if_unmodified_since, timeout=timeout)
+    try:
+        client.delete_container(container_name, lease=lease_id,
+                                if_modified_since=if_modified_since,
+                                if_unmodified_since=if_unmodified_since,
+                                timeout=timeout)
+        return True
+    except ResourceNotFoundError as ex:
+        if not fail_not_exist:
+            return False
+        raise ex
+
+
+def set_container_permission(client, public_access=None, **kwargs):
+    acl_response = client.get_container_access_policy()
+    signed_identifiers = {} if not acl_response.get('signed_identifiers', None) else acl_response['signed_identifiers']
+    return client.set_container_access_policy(signed_identifiers=signed_identifiers,
+                                              public_access=public_access, **kwargs)
 
 
 def list_blobs(client, delimiter=None, include=None, marker=None, num_results=None, prefix=None,
