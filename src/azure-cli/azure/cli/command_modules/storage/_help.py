@@ -1323,7 +1323,7 @@ examples:
 
 helps['storage container delete'] = """
 type: command
-short-summary: Marks the specified container for deletion.
+short-summary: Mark the specified container for deletion.
 long-summary: >
     The container and any blobs contained within it are later deleted during garbage collection.
 examples:
@@ -1360,6 +1360,21 @@ examples:
     text: |
         az storage container generate-sas --account-name mystorageaccount --as-user --auth-mode login --expiry 2020-01-01 --name container1 --permissions dlrw
     crafted: true
+"""
+
+helps['storage container show'] = """
+type: command
+short-summary: Return all user-defined metadata and system properties for the specified container.
+"""
+
+helps['storage container show-permission'] = """
+type: command
+short-summary: Get the permissions for the specified container.
+"""
+
+helps['storage container set-permission'] = """
+type: command
+short-summary: Set the permissions for the specified container.
 """
 
 helps['storage container immutability-policy'] = """
@@ -1483,6 +1498,16 @@ examples:
 helps['storage container metadata'] = """
 type: group
 short-summary: Manage container metadata.
+"""
+
+helps['storage container metadata show'] = """
+type: command
+short-summary: Return all user-defined metadata for the specified container.
+"""
+
+helps['storage container metadata update'] = """
+type: command
+short-summary: Set one or more user-defined name-value pairs for the specified container.
 """
 
 helps['storage container policy'] = """

@@ -7,7 +7,6 @@
 from enum import Enum
 
 from knack.log import get_logger
-from knack.util import CLIError
 from azure.mgmt.netapp.models import ActiveDirectory, NetAppAccount, NetAppAccountPatch, CapacityPool, \
     CapacityPoolPatch, Volume, VolumePatch, VolumePropertiesExportPolicy, ExportPolicyRule, Snapshot, \
     ReplicationObject, VolumePropertiesDataProtection, SnapshotPolicy, SnapshotPolicyPatch, HourlySchedule, \
@@ -51,7 +50,7 @@ def create_account(client, account_name, resource_group_name, location=None, tag
 # add an active directory to the netapp account
 # current limitation is 1 AD/subscription
 def add_active_directory(instance, account_name, resource_group_name, username, password, domain, dns,
-                         smb_server_name, organizational_unit=None, kdc_ip=None, ad_name=None,
+                         smb_server_name, organizational_unit=None, kdc_ip=None, ad_name=None, site=None,
                          server_root_ca_cert=None, backup_operators=None, aes_encryption=None, ldap_signing=None,
                          security_operators=None, ldap_over_tls=None, allow_local_ldap_users=None,
                          administrators=None, encrypt_dc_conn=None, user_dn=None, group_dn=None, group_filter=None):
@@ -59,7 +58,7 @@ def add_active_directory(instance, account_name, resource_group_name, username, 
                                            group_dn=group_dn,
                                            group_membership_filter=group_filter)
     active_directories = []
-    active_directory = ActiveDirectory(username=username, password=password, domain=domain, dns=dns,
+    active_directory = ActiveDirectory(username=username, password=password, domain=domain, dns=dns, site=site,
                                        smb_server_name=smb_server_name, organizational_unit=organizational_unit,
                                        kdc_ip=kdc_ip, ad_name=ad_name, backup_operators=backup_operators,
                                        server_root_ca_certificate=server_root_ca_cert, aes_encryption=aes_encryption,
@@ -80,7 +79,7 @@ def add_active_directory(instance, account_name, resource_group_name, username, 
 def update_active_directory(instance, account_name, resource_group_name, active_directory_id, username, password,
                             domain, dns, smb_server_name, organizational_unit=None, kdc_ip=None, ad_name=None,
                             server_root_ca_cert=None, backup_operators=None, aes_encryption=None, ldap_signing=None,
-                            security_operators=None, ldap_over_tls=None, allow_local_ldap_users=None,
+                            security_operators=None, ldap_over_tls=None, allow_local_ldap_users=None, site=None,
                             administrators=None, encrypt_dc_conn=None, user_dn=None, group_dn=None, group_filter=None):
     ad_list = instance.active_directories
 
@@ -89,7 +88,7 @@ def update_active_directory(instance, account_name, resource_group_name, active_
                                            group_membership_filter=group_filter)
 
     active_directory = ActiveDirectory(active_directory_id=active_directory_id, username=username, password=password,
-                                       domain=domain, dns=dns, smb_server_name=smb_server_name,
+                                       domain=domain, dns=dns, smb_server_name=smb_server_name, site=site,
                                        organizational_unit=organizational_unit, kdc_ip=kdc_ip, ad_name=ad_name,
                                        backup_operators=backup_operators, server_root_ca_certificate=server_root_ca_cert,
                                        aes_encryption=aes_encryption, ldap_signing=ldap_signing,
@@ -218,9 +217,9 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
         if "NFSv4.1" in protocol_types:
             isNfs41 = True
             if allowed_clients is None:
-                raise CLIError("Parameter allowed-clients needs to be set when protocol-type is NFSv4.1")
+                raise ValidationError("Parameter allowed-clients needs to be set when protocol-type is NFSv4.1")
             if rule_index is None:
-                raise CLIError("Parameter rule-index needs to be set when protocol-type is NFSv4.1")
+                raise ValidationError("Parameter rule-index needs to be set when protocol-type is NFSv4.1")
         if "NFSv3" in protocol_types:
             isNfs3 = True
         if "CIFS" in protocol_types:
@@ -354,9 +353,12 @@ def break_replication(client, resource_group_name, account_name, pool_name, volu
 
 # ---- VOLUME EXPORT POLICY ----
 # add new rule to policy
-def add_export_policy_rule(instance, allowed_clients, rule_index, unix_read_only, unix_read_write, cifs, nfsv3, nfsv41,
-                           kerberos5_r=None, kerberos5_rw=None, kerberos5i_r=None, kerberos5i_rw=None,
+def add_export_policy_rule(instance, allowed_clients, unix_read_only, unix_read_write, cifs, nfsv3, nfsv41,
+                           rule_index=None, kerberos5_r=None, kerberos5_rw=None, kerberos5i_r=None, kerberos5i_rw=None,
                            kerberos5p_r=None, kerberos5p_rw=None, has_root_access=None, chown_mode=None):
+    if rule_index is None:
+        rule_index = 1 if len(instance.export_policy.rules) < 1 else max(rule.rule_index for rule in instance.export_policy.rules) + 1
+
     rules = []
 
     export_policy = ExportPolicyRule(rule_index=rule_index, unix_read_only=unix_read_only,
@@ -373,6 +375,8 @@ def add_export_policy_rule(instance, allowed_clients, rule_index, unix_read_only
 
     rules.append(export_policy)
     for rule in instance.export_policy.rules:
+        if int(rule_index) == rule.rule_index:
+            raise ValidationError("Rule index %s already exist" % rule_index)
         rules.append(rule)
 
     volume_export_policy = VolumePropertiesExportPolicy(rules=rules)

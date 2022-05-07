@@ -28,7 +28,10 @@ class AddSecretAuthInfo(argparse.Action):
             if kl == 'name':
                 d['name'] = v[0]
             elif kl == 'secret':
-                d['secret'] = v[0]
+                d['secret_info'] = {
+                    'secret_type': 'rawValue',
+                    'value': v[0]
+                }
             else:
                 raise ValidationError('Unsupported Key {} is provided for parameter secret_auth_info. '
                                       'All possible keys are: name, secret'.format(k))
