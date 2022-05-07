@@ -47,7 +47,7 @@ def get_auth_info_params(auth_type):
         AUTH_TYPE.Secret: '--secret name=XX secret=XX',
         AUTH_TYPE.SecretAuto: '--secret',
         AUTH_TYPE.SystemIdentity: '--system-identity',
-        AUTH_TYPE.ServicePrincipalSecret: '--service-principal client-id=XX secret=XX',
+        AUTH_TYPE.ServicePrincipalSecret: '--service-principal client-id=XX object-id=XX secret=XX',
         AUTH_TYPE.UserIdentity: '--user-identity client-id=XX subs-id=XX'
     }
 
