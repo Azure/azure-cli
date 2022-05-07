@@ -20,8 +20,8 @@ from azure.graphrbac.models import (
     PasswordCredential,
     ServicePrincipalCreateParameters,
 )
+from dateutil import relativedelta
 from knack.log import get_logger
-
 logger = get_logger(__name__)
 
 
@@ -81,7 +81,7 @@ def _build_application_creds(
         start_date = dateutil.parser.parse(start_date)
 
     if not end_date:
-        end_date = start_date + dateutil.relativedelta(years=1)
+        end_date = start_date + relativedelta(years=1)
     elif isinstance(end_date, str):
         end_date = dateutil.parser.parse(end_date)
 
@@ -156,7 +156,7 @@ def build_service_principal(rbac_client, cli_ctx, name, url, client_secret):
     logger.info("Creating service principal")
     # always create application with 5 years expiration
     start_date = datetime.datetime.utcnow()
-    end_date = start_date + dateutil.relativedelta(years=5)
+    end_date = start_date + relativedelta(years=5)
     result, aad_session_key = create_application(
         rbac_client.applications, name, url, [url], password=client_secret, start_date=start_date, end_date=end_date
     )
@@ -184,6 +184,7 @@ def _create_client_secret():
     return client_secret
 
 
+# pylint: disable=unused-argument
 def ensure_aks_service_principal(
     cli_ctx,
     service_principal=None,

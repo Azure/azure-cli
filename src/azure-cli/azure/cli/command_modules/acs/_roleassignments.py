@@ -309,6 +309,7 @@ def ensure_aks_acr_role_assignment(cmd, assignee, registry_id, detach=False, is_
     return
 
 
+# pylint: disable=unused-argument
 def ensure_aks_acr(cmd, assignee, acr_name_or_id, subscription_id, detach=False, is_service_principal=True):
     from msrestazure.tools import is_valid_resource_id, parse_resource_id
 
