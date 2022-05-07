@@ -150,6 +150,14 @@ def transform_url(result):
     return encode_url_path(result)
 
 
+def transform_url_without_encode(result):
+    """ Ensures the resulting URL string does not contain extra / characters """
+    import re
+    result = re.sub('//', '/', result)
+    result = re.sub('/', '//', result, count=1)
+    return result
+
+
 def transform_fs_access_output(result):
     """ Transform to convert SDK output into a form that is more readily
     usable by the CLI and tools such as jpterm. """
