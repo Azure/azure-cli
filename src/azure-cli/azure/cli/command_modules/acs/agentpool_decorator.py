@@ -303,197 +303,6 @@ class AKSAgentPoolContext(BaseAKSContext):
         """
         return self._get_nodepool_name(enable_validation=True)
 
-    def get_max_surge(self):
-        """Obtain the value of max_surge.
-
-        :return: string
-        """
-        # read the original value passed by the command
-        max_surge = self.raw_param.get("max_surge")
-        # In create mode, try to read the property value corresponding to the parameter from the `agentpool` object
-        if self.decorator_mode == DecoratorMode.CREATE:
-            if (
-                self.agentpool and
-                self.agentpool.upgrade_settings and
-                self.agentpool.upgrade_settings.max_surge is not None
-            ):
-                max_surge = self.agentpool.upgrade_settings.max_surge
-
-        # this parameter does not need dynamic completion
-        # this parameter does not need validation
-        return max_surge
-
-    def get_node_count_and_enable_cluster_autoscaler_min_max_count(
-        self,
-    ) -> Tuple[int, bool, Union[int, None], Union[int, None]]:
-        """Obtain the value of node_count, enable_cluster_autoscaler, min_count and max_count.
-
-        This function will verify the parameters through function "__validate_counts_in_autoscaler" by default.
-
-        :return: a tuple containing four elements: node_count of int type, enable_cluster_autoscaler of bool type,
-        min_count of int type or None and max_count of int type or None
-        """
-        # node_count
-        # read the original value passed by the command
-        node_count = self.raw_param.get("node_count")
-        # try to read the property value corresponding to the parameter from the `agentpool` object
-        if self.agentpool and self.agentpool.count is not None:
-            node_count = self.agentpool.count
-
-        # enable_cluster_autoscaler
-        # read the original value passed by the command
-        enable_cluster_autoscaler = self.raw_param.get("enable_cluster_autoscaler", False)
-        # try to read the property value corresponding to the parameter from the `agentpool` object
-        if self.agentpool and self.agentpool.enable_auto_scaling is not None:
-            enable_cluster_autoscaler = self.agentpool.enable_auto_scaling
-
-        # min_count
-        # read the original value passed by the command
-        min_count = self.raw_param.get("min_count")
-        # try to read the property value corresponding to the parameter from the `agentpool` object
-        if self.agentpool and self.agentpool.min_count is not None:
-            min_count = self.agentpool.min_count
-
-        # max_count
-        # read the original value passed by the command
-        max_count = self.raw_param.get("max_count")
-        # try to read the property value corresponding to the parameter from the `agentpool` object
-        if self.agentpool and self.agentpool.max_count is not None:
-            max_count = self.agentpool.max_count
-
-        # these parameters do not need dynamic completion
-
-        # validation
-        self.__validate_counts_in_autoscaler(
-            node_count,
-            enable_cluster_autoscaler,
-            min_count,
-            max_count,
-            decorator_mode=DecoratorMode.CREATE,
-        )
-        return node_count, enable_cluster_autoscaler, min_count, max_count
-
-    def get_update_enable_disable_cluster_autoscaler_and_min_max_count(
-        self,
-    ) -> Tuple[bool, bool, bool, Union[int, None], Union[int, None]]:
-        """Obtain the value of update_cluster_autoscaler, enable_cluster_autoscaler, disable_cluster_autoscaler,
-        min_count and max_count.
-
-        This function will verify the parameters through function "__validate_counts_in_autoscaler" by default. Besides
-        if both enable_cluster_autoscaler and update_cluster_autoscaler are specified, a MutuallyExclusiveArgumentError
-        will be raised. If enable_cluster_autoscaler or update_cluster_autoscaler is specified and there are multiple
-        agent pool profiles, an ArgumentUsageError will be raised. If enable_cluster_autoscaler is specified and
-        autoscaler is already enabled in `mc`, it will output warning messages and exit with code 0. If
-        update_cluster_autoscaler is specified and autoscaler is not enabled in `mc`, it will raise an
-        InvalidArgumentValueError. If disable_cluster_autoscaler is specified and autoscaler is not enabled in `mc`,
-        it will output warning messages and exit with code 0.
-
-        :return: a tuple containing four elements: update_cluster_autoscaler of bool type, enable_cluster_autoscaler
-        of bool type, disable_cluster_autoscaler of bool type, min_count of int type or None and max_count of int type
-        or None
-        """
-        # update_cluster_autoscaler
-        # read the original value passed by the command
-        update_cluster_autoscaler = self.raw_param.get("update_cluster_autoscaler", False)
-
-        # enable_cluster_autoscaler
-        # read the original value passed by the command
-        enable_cluster_autoscaler = self.raw_param.get("enable_cluster_autoscaler", False)
-
-        # disable_cluster_autoscaler
-        # read the original value passed by the command
-        disable_cluster_autoscaler = self.raw_param.get("disable_cluster_autoscaler", False)
-
-        # min_count
-        # read the original value passed by the command
-        min_count = self.raw_param.get("min_count")
-
-        # max_count
-        # read the original value passed by the command
-        max_count = self.raw_param.get("max_count")
-
-        # these parameters do not need dynamic completion
-
-        # validation
-        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
-            # For multi-agent pool, use the az aks nodepool command
-            if (enable_cluster_autoscaler or update_cluster_autoscaler) and len(self._agentpools) > 1:
-                raise ArgumentUsageError(
-                    'There are more than one node pool in the cluster. Please use "az aks nodepool" command '
-                    "to update per node pool auto scaler settings"
-                )
-
-        if enable_cluster_autoscaler + update_cluster_autoscaler + disable_cluster_autoscaler > 1:
-            raise MutuallyExclusiveArgumentError(
-                "Can only specify one of --enable-cluster-autoscaler, --update-cluster-autoscaler and "
-                "--disable-cluster-autoscaler"
-            )
-
-        self.__validate_counts_in_autoscaler(
-            None,
-            enable_cluster_autoscaler or update_cluster_autoscaler,
-            min_count,
-            max_count,
-            decorator_mode=DecoratorMode.UPDATE,
-        )
-
-        if enable_cluster_autoscaler and self.agentpool.enable_auto_scaling:
-            logger.warning(
-                "Cluster autoscaler is already enabled for this node pool.\n"
-                'Please run "az aks --update-cluster-autoscaler" '
-                "if you want to update min-count or max-count."
-            )
-            raise DecoratorEarlyExitException()
-
-        if update_cluster_autoscaler and not self.agentpool.enable_auto_scaling:
-            raise InvalidArgumentValueError(
-                "Cluster autoscaler is not enabled for this node pool.\n"
-                'Run "az aks nodepool update --enable-cluster-autoscaler" '
-                "to enable cluster with min-count and max-count."
-            )
-
-        if disable_cluster_autoscaler and not self.agentpool.enable_auto_scaling:
-            logger.warning(
-                "Cluster autoscaler is already disabled for this node pool."
-            )
-            raise DecoratorEarlyExitException()
-
-        return update_cluster_autoscaler, enable_cluster_autoscaler, disable_cluster_autoscaler, min_count, max_count
-
-    def get_node_osdisk_size(self) -> Union[int, None]:
-        """Obtain the value of node_osdisk_size.
-
-        Note: SDK performs the following validation {'maximum': 2048, 'minimum': 0}.
-
-        This function will normalize the parameter by default. The parameter will be converted to int.
-
-        :return: int or None
-        """
-        # read the original value passed by the command
-        node_osdisk_size = self.raw_param.get("node_osdisk_size")
-        # try to read the property value corresponding to the parameter from the `agentpool` object
-        if self.agentpool and self.agentpool.os_disk_size_gb is not None:
-            node_osdisk_size = self.agentpool.os_disk_size_gb
-
-        # this parameter does not need dynamic completion
-        # this parameter does not need validation
-        return node_osdisk_size
-
-    def get_node_osdisk_type(self) -> Union[str, None]:
-        """Obtain the value of node_osdisk_type.
-
-        :return: string or None
-        """
-        # read the original value passed by the command
-        node_osdisk_type = self.raw_param.get("node_osdisk_type")
-        # try to read the property value corresponding to the parameter from the `agentpool` object
-        if self.agentpool and self.agentpool.os_disk_type is not None:
-            node_osdisk_type = self.agentpool.os_disk_type
-
-        # this parameter does not need dynamic completion
-        # this parameter does not need validation
-        return node_osdisk_type
-
     def get_snapshot_id(self) -> Union[str, None]:
         """Obtain the values of snapshot_id.
 
@@ -717,116 +526,6 @@ class AKSAgentPoolContext(BaseAKSContext):
         """
         return self._get_node_vm_size(read_only=False)
 
-    def get_nodepool_labels(self) -> Union[Dict[str, str], None]:
-        """Obtain the value of nodepool_labels.
-
-        :return: dictionary or None
-        """
-        # read the original value passed by the command
-        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
-            nodepool_labels = self.raw_param.get("nodepool_labels")
-        else:
-            nodepool_labels = self.raw_param.get("labels")
-
-        # In create mode, try to read the property value corresponding to the parameter from the `agentpool` object
-        if self.decorator_mode == DecoratorMode.CREATE:
-            if self.agentpool and self.agentpool.node_labels is not None:
-                nodepool_labels = self.agentpool.node_labels
-
-        # this parameter does not need dynamic completion
-        # this parameter does not need validation
-        return nodepool_labels
-
-    def get_nodepool_tags(self) -> Union[Dict[str, str], None]:
-        """Obtain the value of nodepool_tags.
-
-        :return: dictionary or None
-        """
-        # read the original value passed by the command
-        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
-            nodepool_tags = self.raw_param.get("nodepool_tags")
-        else:
-            nodepool_tags = self.raw_param.get("tags")
-
-        # In create mode, try to read the property value corresponding to the parameter from the `agentpool` object
-        if self.decorator_mode == DecoratorMode.CREATE:
-            if self.agentpool and self.agentpool.tags is not None:
-                nodepool_tags = self.agentpool.tags
-
-        # this parameter does not need dynamic completion
-        # this parameter does not need validation
-        return nodepool_tags
-
-    def get_node_taints(self) -> Union[List[str], None]:
-        """Obtain the value of node_taints.
-
-        :return: empty list, list of strings or None
-        """
-        # read the original value passed by the command
-        node_taints = self.raw_param.get("node_taints")
-        # normalize, default is an empty list
-        if node_taints is not None:
-            node_taints = [x.strip() for x in (node_taints.split(",") if node_taints else [])]
-        # keep None as None for update mode
-        if node_taints is None and self.decorator_mode == DecoratorMode.CREATE:
-            node_taints = []
-
-        # In create mode, try to read the property value corresponding to the parameter from the `agentpool` object
-        if self.decorator_mode == DecoratorMode.CREATE:
-            if self.agentpool and self.agentpool.node_taints is not None:
-                node_taints = self.agentpool.node_taints
-
-        # this parameter does not need validation
-        return node_taints
-
-    def get_priority(self) -> str:
-        """Obtain the value of priority, default value is CONST_SCALE_SET_PRIORITY_REGULAR.
-
-        :return: string
-        """
-        # read the original value passed by the command
-        priority = self.raw_param.get("priority", CONST_SCALE_SET_PRIORITY_REGULAR)
-        # try to read the property value corresponding to the parameter from the `agentpool` object
-        if self.agentpool and self.agentpool.scale_set_priority is not None:
-            priority = self.agentpool.scale_set_priority
-
-        # this parameter does not need dynamic completion
-        # this parameter does not need validation
-        return priority
-
-    def get_eviction_policy(self) -> str:
-        """Obtain the value of eviction_policy, default value is CONST_SPOT_EVICTION_POLICY_DELETE.
-
-        :return: string
-        """
-        # read the original value passed by the command
-        eviction_policy = self.raw_param.get("eviction_policy", CONST_SPOT_EVICTION_POLICY_DELETE)
-        # try to read the property value corresponding to the parameter from the `agentpool` object
-        if self.agentpool and self.agentpool.scale_set_eviction_policy is not None:
-            eviction_policy = self.agentpool.scale_set_eviction_policy
-
-        # this parameter does not need dynamic completion
-        # this parameter does not need validation
-        return eviction_policy
-
-    def get_spot_max_price(self) -> float:
-        """Obtain the value of spot_max_price, default value is float('nan').
-
-        :return: float
-        """
-        # read the original value passed by the command
-        spot_max_price = self.raw_param.get("spot_max_price", float('nan'))
-        # normalize
-        if isnan(spot_max_price):
-            spot_max_price = -1
-
-        # try to read the property value corresponding to the parameter from the `agentpool` object
-        if self.agentpool and self.agentpool.spot_max_price is not None:
-            spot_max_price = self.agentpool.spot_max_price
-
-        # this parameter does not need validation
-        return spot_max_price
-
     def get_vnet_subnet_id(self) -> Union[str, None]:
         """Obtain the value of vnet_subnet_id.
 
@@ -890,6 +589,307 @@ class AKSAgentPoolContext(BaseAKSContext):
         # this parameter does not need dynamic completion
         # this parameter does not need validation
         return node_public_ip_prefix_id
+
+    def get_node_count_and_enable_cluster_autoscaler_min_max_count(
+        self,
+    ) -> Tuple[int, bool, Union[int, None], Union[int, None]]:
+        """Obtain the value of node_count, enable_cluster_autoscaler, min_count and max_count.
+
+        This function will verify the parameters through function "__validate_counts_in_autoscaler" by default.
+
+        :return: a tuple containing four elements: node_count of int type, enable_cluster_autoscaler of bool type,
+        min_count of int type or None and max_count of int type or None
+        """
+        # node_count
+        # read the original value passed by the command
+        node_count = self.raw_param.get("node_count")
+        # try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.agentpool and self.agentpool.count is not None:
+            node_count = self.agentpool.count
+
+        # enable_cluster_autoscaler
+        # read the original value passed by the command
+        enable_cluster_autoscaler = self.raw_param.get("enable_cluster_autoscaler", False)
+        # try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.agentpool and self.agentpool.enable_auto_scaling is not None:
+            enable_cluster_autoscaler = self.agentpool.enable_auto_scaling
+
+        # min_count
+        # read the original value passed by the command
+        min_count = self.raw_param.get("min_count")
+        # try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.agentpool and self.agentpool.min_count is not None:
+            min_count = self.agentpool.min_count
+
+        # max_count
+        # read the original value passed by the command
+        max_count = self.raw_param.get("max_count")
+        # try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.agentpool and self.agentpool.max_count is not None:
+            max_count = self.agentpool.max_count
+
+        # these parameters do not need dynamic completion
+
+        # validation
+        self.__validate_counts_in_autoscaler(
+            node_count,
+            enable_cluster_autoscaler,
+            min_count,
+            max_count,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        return node_count, enable_cluster_autoscaler, min_count, max_count
+
+    def get_update_enable_disable_cluster_autoscaler_and_min_max_count(
+        self,
+    ) -> Tuple[bool, bool, bool, Union[int, None], Union[int, None]]:
+        """Obtain the value of update_cluster_autoscaler, enable_cluster_autoscaler, disable_cluster_autoscaler,
+        min_count and max_count.
+
+        This function will verify the parameters through function "__validate_counts_in_autoscaler" by default. Besides
+        if both enable_cluster_autoscaler and update_cluster_autoscaler are specified, a MutuallyExclusiveArgumentError
+        will be raised. If enable_cluster_autoscaler or update_cluster_autoscaler is specified and there are multiple
+        agent pool profiles, an ArgumentUsageError will be raised. If enable_cluster_autoscaler is specified and
+        autoscaler is already enabled in `mc`, it will output warning messages and exit with code 0. If
+        update_cluster_autoscaler is specified and autoscaler is not enabled in `mc`, it will raise an
+        InvalidArgumentValueError. If disable_cluster_autoscaler is specified and autoscaler is not enabled in `mc`,
+        it will output warning messages and exit with code 0.
+
+        :return: a tuple containing four elements: update_cluster_autoscaler of bool type, enable_cluster_autoscaler
+        of bool type, disable_cluster_autoscaler of bool type, min_count of int type or None and max_count of int type
+        or None
+        """
+        # update_cluster_autoscaler
+        # read the original value passed by the command
+        update_cluster_autoscaler = self.raw_param.get("update_cluster_autoscaler", False)
+
+        # enable_cluster_autoscaler
+        # read the original value passed by the command
+        enable_cluster_autoscaler = self.raw_param.get("enable_cluster_autoscaler", False)
+
+        # disable_cluster_autoscaler
+        # read the original value passed by the command
+        disable_cluster_autoscaler = self.raw_param.get("disable_cluster_autoscaler", False)
+
+        # min_count
+        # read the original value passed by the command
+        min_count = self.raw_param.get("min_count")
+
+        # max_count
+        # read the original value passed by the command
+        max_count = self.raw_param.get("max_count")
+
+        # these parameters do not need dynamic completion
+
+        # validation
+        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+            # For multi-agent pool, use the az aks nodepool command
+            if (enable_cluster_autoscaler or update_cluster_autoscaler) and len(self._agentpools) > 1:
+                raise ArgumentUsageError(
+                    'There are more than one node pool in the cluster. Please use "az aks nodepool" command '
+                    "to update per node pool auto scaler settings"
+                )
+
+        if enable_cluster_autoscaler + update_cluster_autoscaler + disable_cluster_autoscaler > 1:
+            raise MutuallyExclusiveArgumentError(
+                "Can only specify one of --enable-cluster-autoscaler, --update-cluster-autoscaler and "
+                "--disable-cluster-autoscaler"
+            )
+
+        self.__validate_counts_in_autoscaler(
+            None,
+            enable_cluster_autoscaler or update_cluster_autoscaler,
+            min_count,
+            max_count,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+
+        if enable_cluster_autoscaler and self.agentpool.enable_auto_scaling:
+            logger.warning(
+                "Cluster autoscaler is already enabled for this node pool.\n"
+                'Please run "az aks --update-cluster-autoscaler" '
+                "if you want to update min-count or max-count."
+            )
+            raise DecoratorEarlyExitException()
+
+        if update_cluster_autoscaler and not self.agentpool.enable_auto_scaling:
+            raise InvalidArgumentValueError(
+                "Cluster autoscaler is not enabled for this node pool.\n"
+                'Run "az aks nodepool update --enable-cluster-autoscaler" '
+                "to enable cluster with min-count and max-count."
+            )
+
+        if disable_cluster_autoscaler and not self.agentpool.enable_auto_scaling:
+            logger.warning(
+                "Cluster autoscaler is already disabled for this node pool."
+            )
+            raise DecoratorEarlyExitException()
+
+        return update_cluster_autoscaler, enable_cluster_autoscaler, disable_cluster_autoscaler, min_count, max_count
+
+    def get_priority(self) -> str:
+        """Obtain the value of priority, default value is CONST_SCALE_SET_PRIORITY_REGULAR.
+
+        :return: string
+        """
+        # read the original value passed by the command
+        priority = self.raw_param.get("priority", CONST_SCALE_SET_PRIORITY_REGULAR)
+        # try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.agentpool and self.agentpool.scale_set_priority is not None:
+            priority = self.agentpool.scale_set_priority
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return priority
+
+    def get_eviction_policy(self) -> str:
+        """Obtain the value of eviction_policy, default value is CONST_SPOT_EVICTION_POLICY_DELETE.
+
+        :return: string
+        """
+        # read the original value passed by the command
+        eviction_policy = self.raw_param.get("eviction_policy", CONST_SPOT_EVICTION_POLICY_DELETE)
+        # try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.agentpool and self.agentpool.scale_set_eviction_policy is not None:
+            eviction_policy = self.agentpool.scale_set_eviction_policy
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return eviction_policy
+
+    def get_spot_max_price(self) -> float:
+        """Obtain the value of spot_max_price, default value is float('nan').
+
+        :return: float
+        """
+        # read the original value passed by the command
+        spot_max_price = self.raw_param.get("spot_max_price", float('nan'))
+        # normalize
+        if isnan(spot_max_price):
+            spot_max_price = -1
+
+        # try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.agentpool and self.agentpool.spot_max_price is not None:
+            spot_max_price = self.agentpool.spot_max_price
+
+        # this parameter does not need validation
+        return spot_max_price
+
+    def get_nodepool_labels(self) -> Union[Dict[str, str], None]:
+        """Obtain the value of nodepool_labels.
+
+        :return: dictionary or None
+        """
+        # read the original value passed by the command
+        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+            nodepool_labels = self.raw_param.get("nodepool_labels")
+        else:
+            nodepool_labels = self.raw_param.get("labels")
+
+        # In create mode, try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if self.agentpool and self.agentpool.node_labels is not None:
+                nodepool_labels = self.agentpool.node_labels
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return nodepool_labels
+
+    def get_nodepool_tags(self) -> Union[Dict[str, str], None]:
+        """Obtain the value of nodepool_tags.
+
+        :return: dictionary or None
+        """
+        # read the original value passed by the command
+        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+            nodepool_tags = self.raw_param.get("nodepool_tags")
+        else:
+            nodepool_tags = self.raw_param.get("tags")
+
+        # In create mode, try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if self.agentpool and self.agentpool.tags is not None:
+                nodepool_tags = self.agentpool.tags
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return nodepool_tags
+
+    def get_node_taints(self) -> Union[List[str], None]:
+        """Obtain the value of node_taints.
+
+        :return: empty list, list of strings or None
+        """
+        # read the original value passed by the command
+        node_taints = self.raw_param.get("node_taints")
+        # normalize, default is an empty list
+        if node_taints is not None:
+            node_taints = [x.strip() for x in (node_taints.split(",") if node_taints else [])]
+        # keep None as None for update mode
+        if node_taints is None and self.decorator_mode == DecoratorMode.CREATE:
+            node_taints = []
+
+        # In create mode, try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if self.agentpool and self.agentpool.node_taints is not None:
+                node_taints = self.agentpool.node_taints
+
+        # this parameter does not need validation
+        return node_taints
+
+    def get_node_osdisk_size(self) -> Union[int, None]:
+        """Obtain the value of node_osdisk_size.
+
+        Note: SDK performs the following validation {'maximum': 2048, 'minimum': 0}.
+
+        This function will normalize the parameter by default. The parameter will be converted to int.
+
+        :return: int or None
+        """
+        # read the original value passed by the command
+        node_osdisk_size = self.raw_param.get("node_osdisk_size")
+        # try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.agentpool and self.agentpool.os_disk_size_gb is not None:
+            node_osdisk_size = self.agentpool.os_disk_size_gb
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return node_osdisk_size
+
+    def get_node_osdisk_type(self) -> Union[str, None]:
+        """Obtain the value of node_osdisk_type.
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        node_osdisk_type = self.raw_param.get("node_osdisk_type")
+        # try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.agentpool and self.agentpool.os_disk_type is not None:
+            node_osdisk_type = self.agentpool.os_disk_type
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return node_osdisk_type
+
+    def get_max_surge(self):
+        """Obtain the value of max_surge.
+
+        :return: string
+        """
+        # read the original value passed by the command
+        max_surge = self.raw_param.get("max_surge")
+        # In create mode, try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.agentpool and
+                self.agentpool.upgrade_settings and
+                self.agentpool.upgrade_settings.max_surge is not None
+            ):
+                max_surge = self.agentpool.upgrade_settings.max_surge
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return max_surge
 
     def get_vm_set_type(self) -> str:
         """Obtain the value of vm_set_type, default value is CONST_VIRTUAL_MACHINE_SCALE_SETS.
@@ -1296,29 +1296,38 @@ class AKSAgentPoolAddDecorator:
         self.context.attach_agentpool(agentpool)
         return agentpool
 
-    def set_up_upgrade_settings(self, agentpool: AgentPool) -> AgentPool:
-        """Set up upgrade settings for the AgentPool object.
+    def set_up_snapshot_properties(self, agentpool: AgentPool) -> AgentPool:
+        """Set up auto snapshot related properties for the AgentPool object.
 
         :return: the AgentPool object
         """
         self._ensure_agentpool(agentpool)
 
-        upgrade_settings = self.models.AgentPoolUpgradeSettings()
-        max_surge = self.context.get_max_surge()
-        if max_surge:
-            upgrade_settings.max_surge = max_surge
-        agentpool.upgrade_settings = upgrade_settings
+        creation_data = None
+        snapshot_id = self.context.get_snapshot_id()
+        if snapshot_id:
+            creation_data = self.models.CreationData(
+                source_resource_id=snapshot_id
+            )
+        agentpool.creation_data = creation_data
+
+        agentpool.orchestrator_version = self.context.get_kubernetes_version()
+        agentpool.os_type = self.context.get_os_type()
+        agentpool.os_sku = self.context.get_os_sku()
+        agentpool.vm_size = self.context.get_node_vm_size()
         return agentpool
 
-    def set_up_osdisk_properties(self, agentpool: AgentPool) -> AgentPool:
-        """Set up os disk related properties for the AgentPool object.
+    def set_up_node_network_properties(self, agentpool: AgentPool) -> AgentPool:
+        """Set up priority related properties for the AgentPool object.
 
         :return: the AgentPool object
         """
         self._ensure_agentpool(agentpool)
 
-        agentpool.os_disk_size_gb = self.context.get_node_osdisk_size()
-        agentpool.os_disk_type = self.context.get_node_osdisk_type()
+        agentpool.vnet_subnet_id = self.context.get_vnet_subnet_id()
+        agentpool.pod_subnet_id = self.context.get_pod_subnet_id()
+        agentpool.enable_node_public_ip = self.context.get_enable_node_public_ip()
+        agentpool.node_public_ip_prefix_id = self.context.get_node_public_ip_prefix_id()
         return agentpool
 
     def set_up_auto_scaler_properties(self, agentpool: AgentPool) -> AgentPool:
@@ -1342,39 +1351,6 @@ class AKSAgentPoolAddDecorator:
         agentpool.max_count = max_count
         return agentpool
 
-    def set_up_snapshot_properties(self, agentpool: AgentPool) -> AgentPool:
-        """Set up auto snapshot related properties for the AgentPool object.
-
-        :return: the AgentPool object
-        """
-        self._ensure_agentpool(agentpool)
-
-        creation_data = None
-        snapshot_id = self.context.get_snapshot_id()
-        if snapshot_id:
-            creation_data = self.models.CreationData(
-                source_resource_id=snapshot_id
-            )
-        agentpool.creation_data = creation_data
-
-        agentpool.orchestrator_version = self.context.get_kubernetes_version()
-        agentpool.os_type = self.context.get_os_type()
-        agentpool.os_sku = self.context.get_os_sku()
-        agentpool.vm_size = self.context.get_node_vm_size()
-        return agentpool
-
-    def set_up_label_tag_taint(self, agentpool: AgentPool) -> AgentPool:
-        """Set up label, tag, taint for the AgentPool object.
-
-        :return: the AgentPool object
-        """
-        self._ensure_agentpool(agentpool)
-
-        agentpool.tags = self.context.get_nodepool_tags()
-        agentpool.node_labels = self.context.get_nodepool_labels()
-        agentpool.node_taints = self.context.get_node_taints()
-        return agentpool
-
     def set_up_priority_properties(self, agentpool: AgentPool) -> AgentPool:
         """Set up priority related properties for the AgentPool object.
 
@@ -1389,17 +1365,41 @@ class AKSAgentPoolAddDecorator:
             agentpool.spot_max_price = self.context.get_spot_max_price()
         return agentpool
 
-    def set_up_node_network_properties(self, agentpool: AgentPool) -> AgentPool:
-        """Set up priority related properties for the AgentPool object.
+    def set_up_label_tag_taint(self, agentpool: AgentPool) -> AgentPool:
+        """Set up label, tag, taint for the AgentPool object.
 
         :return: the AgentPool object
         """
         self._ensure_agentpool(agentpool)
 
-        agentpool.vnet_subnet_id = self.context.get_vnet_subnet_id()
-        agentpool.pod_subnet_id = self.context.get_pod_subnet_id()
-        agentpool.enable_node_public_ip = self.context.get_enable_node_public_ip()
-        agentpool.node_public_ip_prefix_id = self.context.get_node_public_ip_prefix_id()
+        agentpool.tags = self.context.get_nodepool_tags()
+        agentpool.node_labels = self.context.get_nodepool_labels()
+        agentpool.node_taints = self.context.get_node_taints()
+        return agentpool
+
+    def set_up_osdisk_properties(self, agentpool: AgentPool) -> AgentPool:
+        """Set up os disk related properties for the AgentPool object.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        agentpool.os_disk_size_gb = self.context.get_node_osdisk_size()
+        agentpool.os_disk_type = self.context.get_node_osdisk_type()
+        return agentpool
+
+    def set_up_upgrade_settings(self, agentpool: AgentPool) -> AgentPool:
+        """Set up upgrade settings for the AgentPool object.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        upgrade_settings = self.models.AgentPoolUpgradeSettings()
+        max_surge = self.context.get_max_surge()
+        if max_surge:
+            upgrade_settings.max_surge = max_surge
+        agentpool.upgrade_settings = upgrade_settings
         return agentpool
 
     def set_up_vm_properties(self, agentpool: AgentPool) -> AgentPool:
@@ -1448,20 +1448,20 @@ class AKSAgentPoolAddDecorator:
         agentpool = self.init_agentpool()
         # remove defaults
         self._remove_defaults_in_agentpool(agentpool)
-        # set up upgrade settings
-        agentpool = self.set_up_upgrade_settings(agentpool)
-        # set up osdisk properties
-        agentpool = self.set_up_osdisk_properties(agentpool)
-        # set up auto scaler properties
-        agentpool = self.set_up_auto_scaler_properties(agentpool)
         # set up snapshot properties
         agentpool = self.set_up_snapshot_properties(agentpool)
-        # set up label, tag, taint
-        agentpool = self.set_up_label_tag_taint(agentpool)
-        # set up priority properties
-        agentpool = self.set_up_priority_properties(agentpool)
         # set up node network properties
         agentpool = self.set_up_node_network_properties(agentpool)
+        # set up auto scaler properties
+        agentpool = self.set_up_auto_scaler_properties(agentpool)
+        # set up priority properties
+        agentpool = self.set_up_priority_properties(agentpool)
+        # set up label, tag, taint
+        agentpool = self.set_up_label_tag_taint(agentpool)
+        # set up osdisk properties
+        agentpool = self.set_up_osdisk_properties(agentpool)
+        # set up upgrade settings
+        agentpool = self.set_up_upgrade_settings(agentpool)
         # set up misc vm properties
         agentpool = self.set_up_vm_properties(agentpool)
         # set up custom node config
@@ -1581,23 +1581,6 @@ class AKSAgentPoolUpdateDecorator:
         self.context.attach_agentpool(agentpool)
         return agentpool
 
-    def update_upgrade_settings(self, agentpool: AgentPool) -> AgentPool:
-        """Update upgrade settings for the Agentpool object.
-
-        :return: the Agentpool object
-        """
-        self._ensure_agentpool(agentpool)
-
-        upgrade_settings = agentpool.upgrade_settings
-        if upgrade_settings is None:
-            upgrade_settings = self.models.AgentPoolUpgradeSettings()
-
-        max_surge = self.context.get_max_surge()
-        if max_surge:
-            upgrade_settings.max_surge = max_surge
-            agentpool.upgrade_settings = upgrade_settings
-        return agentpool
-
     def update_auto_scaler_properties(self, agentpool: AgentPool) -> AgentPool:
         """Update auto scaler related properties for the Agentpool object.
 
@@ -1646,6 +1629,23 @@ class AKSAgentPoolUpdateDecorator:
             agentpool.node_taints = node_taints
         return agentpool
 
+    def update_upgrade_settings(self, agentpool: AgentPool) -> AgentPool:
+        """Update upgrade settings for the Agentpool object.
+
+        :return: the Agentpool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        upgrade_settings = agentpool.upgrade_settings
+        if upgrade_settings is None:
+            upgrade_settings = self.models.AgentPoolUpgradeSettings()
+
+        max_surge = self.context.get_max_surge()
+        if max_surge:
+            upgrade_settings.max_surge = max_surge
+            agentpool.upgrade_settings = upgrade_settings
+        return agentpool
+
     def update_vm_properties(self, agentpool: AgentPool) -> AgentPool:
         """Update vm related properties for the AgentPool object.
 
@@ -1672,12 +1672,12 @@ class AKSAgentPoolUpdateDecorator:
         """
         # fetch the Agentpool object
         agentpool = self.fetch_agentpool(agentpools)
-        # update upgrade settings
-        agentpool = self.update_upgrade_settings(agentpool)
         # update auto scaler properties
         agentpool = self.update_auto_scaler_properties(agentpool)
         # update label, tag, taint
         agentpool = self.update_label_tag_taint(agentpool)
+        # update upgrade settings
+        agentpool = self.update_upgrade_settings(agentpool)
         # update misc vm properties
         agentpool = self.update_vm_properties(agentpool)
         return agentpool
