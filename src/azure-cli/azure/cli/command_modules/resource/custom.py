@@ -34,7 +34,7 @@ from azure.cli.core.profiles import ResourceType, get_sdk, get_api_version, AZUR
 
 from azure.cli.command_modules.resource._client_factory import (
     _resource_client_factory, _resource_policy_client_factory, _resource_lock_client_factory,
-    _resource_links_client_factory, _resource_deploymentscripts_client_factory, _authorization_management_client, _resource_managedapps_client_factory, _resource_templatespecs_client_factory)
+    _resource_links_client_factory, _resource_deploymentscripts_client_factory, _authorization_management_client, _resource_managedapps_client_factory, _resource_templatespecs_client_factory, _resource_privatelinks_client_factory)
 from azure.cli.command_modules.resource._validators import _parse_lock_id
 
 from azure.core.pipeline.policies import SansIOHTTPPolicy
@@ -42,8 +42,6 @@ from azure.core.pipeline.policies import SansIOHTTPPolicy
 from knack.log import get_logger
 from knack.prompting import prompt, prompt_pass, prompt_t_f, prompt_choice_list, prompt_int, NoTTYException
 from knack.util import CLIError
-
-from msrest.serialization import Serializer
 
 from ._validators import MSI_LOCAL_ID
 from ._formatters import format_what_if_operation_result
@@ -351,12 +349,8 @@ def _deploy_arm_template_core_unmodified(cmd, resource_group_name, template_file
     deployment_client = smc.deployments  # This solves the multi-api for you
 
     if not template_uri:
-        # pylint: disable=protected-access
-        deployment_client._serialize = JSONSerializer(
-            deployment_client._serialize.dependencies
-        )
-
         # Plug this as default HTTP pipeline
+        # pylint: disable=protected-access
         from azure.core.pipeline import Pipeline
         smc._client._pipeline._impl_policies.append(JsonCTemplatePolicy())
         # Because JsonCTemplatePolicy needs to be wrapped as _SansIOHTTPPolicyRunner, so a new Pipeline is built
@@ -388,29 +382,14 @@ def _deploy_arm_template_core_unmodified(cmd, resource_group_name, template_file
                        deployment)
 
 
-class JsonCTemplate:
-    def __init__(self, template_as_bytes):
-        self.template_as_bytes = template_as_bytes
-
-
-class JSONSerializer(Serializer):
-    def body(self, data, data_type, **kwargs):
-        if data_type in ('Deployment', 'ScopedDeployment', 'DeploymentWhatIf', 'ScopedDeploymentWhatIf'):
-            # Be sure to pass a DeploymentProperties
-            template = data.properties.template
-            if template:
-                data_as_dict = data.serialize()
-                data_as_dict["properties"]["template"] = JsonCTemplate(template)
-
-                return data_as_dict
-        return super(JSONSerializer, self).body(data, data_type, **kwargs)
-
-
 class JsonCTemplatePolicy(SansIOHTTPPolicy):
 
+    # Obtain the template data and then splice it with other properties into the JSONC format
     def on_request(self, request):
         http_request = request.http_request
         request_data = getattr(http_request, 'data', {}) or {}
+        if not request_data:
+            return
 
         # In the case of retry, because the first request has been processed and
         # converted the type of "request.http_request.data" from string to bytes,
@@ -418,18 +397,25 @@ class JsonCTemplatePolicy(SansIOHTTPPolicy):
         if isinstance(request_data, bytes):
             return
 
-        if request_data.get('properties', {}).get('template'):
-            template = http_request.data["properties"]["template"]
-            if not isinstance(template, JsonCTemplate):
-                raise ValueError()
+        # 'request_data' has been dumped into JSON string in set_json_body() when building HttpRequest in Python SDK.
+        # In order to facilitate subsequent parsing, it is converted into a dict first
+        http_request.data = json.loads(request_data)
 
+        if http_request.data.get('properties', {}).get('template'):
+            template = http_request.data["properties"]["template"]
             del http_request.data["properties"]["template"]
+
             # templateLink nad template cannot exist at the same time in deployment_dry_run mode
             if "templateLink" in http_request.data["properties"].keys():
                 del http_request.data["properties"]["templateLink"]
-            partial_request = json.dumps(http_request.data)
 
-            http_request.data = partial_request[:-2] + ", template:" + template.template_as_bytes + r"}}"
+            # The 'template' and other properties (such as 'parameters','mode'...) are spliced and encoded into the UTF-8 bytes as the request data
+            # The format of the request data is: {"properties": {"parameters": {...}, "mode": "Incremental", template:{\r\n  "$schema": "...",\r\n  "contentVersion": "...",\r\n  "parameters": {...}}}
+            # This is not an ordinary JSON format, but it is a JSONC format that service can deserialize
+            # If not do this splicing, the request data generated by default serialization cannot be deserialized on the service side.
+            # Because the service cannot deserialize the template element: "template": "{\r\n  \"$schema\": \"...\",\r\n  \"contentVersion\": \"...\",\r\n  \"parameters\": {...}}"
+            partial_request = json.dumps(http_request.data)
+            http_request.data = partial_request[:-2] + ", template:" + template + r"}}"
             http_request.data = http_request.data.encode('utf-8')
 
 
@@ -1038,10 +1024,6 @@ def _get_deployment_management_client(cli_ctx, aux_subscriptions=None, aux_tenan
 
     if not plug_pipeline:
         return deployment_client
-
-    deployment_client._serialize = JSONSerializer(
-        deployment_client._serialize.dependencies
-    )
 
     # Plug this as default HTTP pipeline
     from azure.core.pipeline import Pipeline
@@ -3720,3 +3702,54 @@ def show_bicep_cli_version(cmd):
 
 def list_bicep_cli_versions(cmd):
     return get_bicep_available_release_tags()
+
+
+def create_resourcemanager_privatelink(
+        cmd, resource_group, name, location):
+    rcf = _resource_privatelinks_client_factory(cmd.cli_ctx)
+    ResourceManagementPrivateLinkLocation = cmd.get_models(
+        'ResourceManagementPrivateLinkLocation')
+    resource_management_private_link_location = ResourceManagementPrivateLinkLocation(
+        location=location)
+    return rcf.resource_management_private_link.put(resource_group, name, resource_management_private_link_location)
+
+
+def get_resourcemanager_privatelink(cmd, resource_group, name):
+    rcf = _resource_privatelinks_client_factory(cmd.cli_ctx)
+    return rcf.resource_management_private_link.get(resource_group, name)
+
+
+def list_resourcemanager_privatelink(cmd, resource_group=None):
+    rcf = _resource_privatelinks_client_factory(cmd.cli_ctx)
+    if resource_group:
+        return rcf.resource_management_private_link.list_by_resource_group(resource_group)
+    return rcf.resource_management_private_link.list()
+
+
+def delete_resourcemanager_privatelink(cmd, resource_group, name):
+    rcf = _resource_privatelinks_client_factory(cmd.cli_ctx)
+    return rcf.resource_management_private_link.delete(resource_group, name)
+
+
+def create_private_link_association(cmd, management_group_id, name, privatelink, public_network_access):
+    rcf = _resource_privatelinks_client_factory(cmd.cli_ctx)
+    PrivateLinkProperties, PrivateLinkObject = cmd.get_models(
+        'PrivateLinkAssociationProperties', 'PrivateLinkAssociationObject')
+    pl = PrivateLinkObject(properties=PrivateLinkProperties(
+        private_link=privatelink, public_network_access=public_network_access))
+    return rcf.private_link_association.put(group_id=management_group_id, pla_id=name, parameters=pl)
+
+
+def get_private_link_association(cmd, management_group_id, name):
+    rcf = _resource_privatelinks_client_factory(cmd.cli_ctx)
+    return rcf.private_link_association.get(group_id=management_group_id, pla_id=name)
+
+
+def delete_private_link_association(cmd, management_group_id, name):
+    rcf = _resource_privatelinks_client_factory(cmd.cli_ctx)
+    return rcf.private_link_association.delete(group_id=management_group_id, pla_id=name)
+
+
+def list_private_link_association(cmd, management_group_id):
+    rcf = _resource_privatelinks_client_factory(cmd.cli_ctx)
+    return rcf.private_link_association.list(group_id=management_group_id)
