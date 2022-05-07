@@ -793,7 +793,7 @@ def generate_sas_blob_uri(cmd, client, permission=None, expiry=None, start=None,
     if full_uri:
         blob_client = t_blob_client(account_url=client.url, container_name=container_name, blob_name=blob_name,
                                     snapshot=snapshot, credential=quote(sas_token, safe='&%()$=\',~'))
-        return encode_url_path(blob_client.url)
+        return encode_url_path(blob_client.url, safe='/()$=\',~%')
     return quote(sas_token, safe='&%()$=\',~')
 
 
@@ -823,9 +823,16 @@ def generate_container_shared_access_signature(cmd, client, container_name, perm
                                     content_language=content_language, content_type=content_type, **kwargs)
 
 
-def create_blob_url(client, container_name, blob_name, protocol=None, snapshot=None):
-    return client.make_blob_url(
-        container_name, blob_name, protocol=protocol, snapshot=snapshot, sas_token=client.sas_token)
+def create_blob_url(client, container_name, blob_name, snapshot, protocol='https'):
+    if blob_name:
+        blob_client = client.get_blob_client(container=container_name, blob=blob_name, snapshot=snapshot)
+        url = blob_client.url
+    else:
+        container_client = client.get_container_client(container=container_name)
+        url = container_client.url + '/'
+    if protocol == 'http':
+        return url.replace('https', 'http', 1)
+    return url
 
 
 def _copy_blob_to_blob_container(blob_service, source_blob_service, destination_container, destination_path,

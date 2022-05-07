@@ -875,9 +875,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('blob_name', required=True)
 
     with self.argument_context('storage blob url') as c:
-        c.argument('protocol', arg_type=get_enum_type(['http', 'https'], 'https'), help='Protocol to use.')
-        c.argument('snapshot', help='An string value that uniquely identifies the snapshot. The value of '
-                                    'this query parameter indicates the snapshot version.')
+        from ._validators import get_not_none_validator
+        c.extra('blob_name', required=True)
+        c.extra('container_name', required=True, validator=get_not_none_validator('container_name'))
+        c.extra('protocol', arg_type=get_enum_type(['http', 'https'], 'https'), help='Protocol to use.')
+        c.extra('snapshot', help='An string value that uniquely identifies the snapshot. The value of this query '
+                                 'parameter indicates the snapshot version.')
 
     with self.argument_context('storage blob set-tier') as c:
         from azure.cli.command_modules.storage._validators import (blob_rehydrate_priority_validator)
