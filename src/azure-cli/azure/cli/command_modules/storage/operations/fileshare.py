@@ -87,8 +87,7 @@ def get_share_stats(client, timeout=None, **kwargs):
     datasize = round(int(result) / math.pow(1024, 3))
     if datasize == 0:
         return str(datasize + 1)
-    else:
-        return str(datasize)
+    return str(datasize)
 
 
 def set_share_metadata(client, metadata=None, timeout=None, **kwargs):
