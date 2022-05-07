@@ -20,7 +20,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.Storage/storageAccounts/share000002/listKeys?api-version=2021-09-01&$expand=kerb
   response:
     body:
-      string: '{"keys":[{"creationTime":"2022-05-07T09:40:16.2868377Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2022-05-07T09:40:16.2868377Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+      string: '{"keys":[{"creationTime":"2022-05-07T10:01:57.9320032Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2022-05-07T10:01:57.9320032Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
     headers:
       cache-control:
       - no-cache
@@ -29,7 +29,57 @@ interactions:
       content-type:
       - application/json
       date:
-      - Sat, 07 May 2022 09:40:40 GMT
+      - Sat, 07 May 2022 10:02:21 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11998'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account show-connection-string
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n -g --query -o
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-storage/20.0.0 Python/3.8.7 (Windows-10-10.0.22000-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.Storage/storageAccounts/share000002/listKeys?api-version=2021-09-01&$expand=kerb
+  response:
+    body:
+      string: '{"keys":[{"creationTime":"2022-05-07T10:01:57.9320032Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2022-05-07T10:01:57.9320032Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '260'
+      content-type:
+      - application/json
+      date:
+      - Sat, 07 May 2022 10:02:23 GMT
       expires:
       - '-1'
       pragma:
@@ -60,26 +110,24 @@ interactions:
       - storage account show-connection-string
       Connection:
       - keep-alive
-      Content-Length:
-      - '0'
       ParameterSetName:
       - -n -g --query -o
       User-Agent:
       - AZURECLI/2.36.0 azsdk-python-azure-mgmt-storage/20.0.0 Python/3.8.7 (Windows-10-10.0.22000-SP0)
-    method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.Storage/storageAccounts/share000002/listKeys?api-version=2021-09-01&$expand=kerb
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.Storage/storageAccounts/share000002?api-version=2021-09-01
   response:
     body:
-      string: '{"keys":[{"creationTime":"2022-05-07T09:40:16.2868377Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2022-05-07T09:40:16.2868377Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+      string: '{"sku":{"name":"Standard_RAGRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.Storage/storageAccounts/share000002","name":"share000002","type":"Microsoft.Storage/storageAccounts","location":"eastus2","tags":{},"properties":{"keyCreationTime":{"key1":"2022-05-07T10:01:57.9320032Z","key2":"2022-05-07T10:01:57.9320032Z"},"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":true,"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2022-05-07T10:01:57.9482677Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2022-05-07T10:01:57.9482677Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2022-05-07T10:01:57.8069957Z","primaryEndpoints":{"dfs":"https://share000002.dfs.core.windows.net/","web":"https://share000002.z20.web.core.windows.net/","blob":"https://share000002.blob.core.windows.net/","queue":"https://share000002.queue.core.windows.net/","table":"https://share000002.table.core.windows.net/","file":"https://share000002.file.core.windows.net/"},"primaryLocation":"eastus2","statusOfPrimary":"available","secondaryLocation":"centralus","statusOfSecondary":"available","secondaryEndpoints":{"dfs":"https://share000002-secondary.dfs.core.windows.net/","web":"https://share000002-secondary.z20.web.core.windows.net/","blob":"https://share000002-secondary.blob.core.windows.net/","queue":"https://share000002-secondary.queue.core.windows.net/","table":"https://share000002-secondary.table.core.windows.net/"}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '260'
+      - '1784'
       content-type:
       - application/json
       date:
-      - Sat, 07 May 2022 09:40:43 GMT
+      - Sat, 07 May 2022 10:02:24 GMT
       expires:
       - '-1'
       pragma:
@@ -94,8 +142,6 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11999'
     status:
       code: 200
       message: OK
@@ -117,7 +163,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.36.0 azsdk-python-storage-file-share/12.1.1 Python/3.8.7 (Windows-10-10.0.22000-SP0)
       x-ms-date:
-      - Sat, 07 May 2022 09:40:44 GMT
+      - Sat, 07 May 2022 10:02:25 GMT
       x-ms-version:
       - '2019-07-07'
     method: PUT
@@ -129,11 +175,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Sat, 07 May 2022 09:40:44 GMT
+      - Sat, 07 May 2022 10:02:25 GMT
       etag:
-      - '"0x8DA300DA90659EB"'
+      - '"0x8DA3010B01318C5"'
       last-modified:
-      - Sat, 07 May 2022 09:40:45 GMT
+      - Sat, 07 May 2022 10:02:25 GMT
       server:
       - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
@@ -157,7 +203,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.36.0 azsdk-python-storage-file-share/12.1.1 Python/3.8.7 (Windows-10-10.0.22000-SP0)
       x-ms-date:
-      - Sat, 07 May 2022 09:40:46 GMT
+      - Sat, 07 May 2022 10:02:26 GMT
       x-ms-version:
       - '2019-07-07'
     method: GET
@@ -169,11 +215,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Sat, 07 May 2022 09:40:47 GMT
+      - Sat, 07 May 2022 10:02:26 GMT
       etag:
-      - '"0x8DA300DA90659EB"'
+      - '"0x8DA3010B01318C5"'
       last-modified:
-      - Sat, 07 May 2022 09:40:45 GMT
+      - Sat, 07 May 2022 10:02:25 GMT
       server:
       - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
       x-ms-has-immutability-policy:
@@ -205,7 +251,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.36.0 azsdk-python-storage-file-share/12.1.1 Python/3.8.7 (Windows-10-10.0.22000-SP0)
       x-ms-date:
-      - Sat, 07 May 2022 09:40:49 GMT
+      - Sat, 07 May 2022 10:02:28 GMT
       x-ms-meta-key1:
       - value1
       x-ms-version:
@@ -219,11 +265,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Sat, 07 May 2022 09:40:48 GMT
+      - Sat, 07 May 2022 10:02:27 GMT
       etag:
-      - '"0x8DA300DAB7B1FAA"'
+      - '"0x8DA3010B1B42EA4"'
       last-modified:
-      - Sat, 07 May 2022 09:40:49 GMT
+      - Sat, 07 May 2022 10:02:28 GMT
       server:
       - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
@@ -247,7 +293,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.36.0 azsdk-python-storage-file-share/12.1.1 Python/3.8.7 (Windows-10-10.0.22000-SP0)
       x-ms-date:
-      - Sat, 07 May 2022 09:40:50 GMT
+      - Sat, 07 May 2022 10:02:29 GMT
       x-ms-version:
       - '2019-07-07'
     method: GET
@@ -259,11 +305,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Sat, 07 May 2022 09:40:50 GMT
+      - Sat, 07 May 2022 10:02:30 GMT
       etag:
-      - '"0x8DA300DAB7B1FAA"'
+      - '"0x8DA3010B1B42EA4"'
       last-modified:
-      - Sat, 07 May 2022 09:40:49 GMT
+      - Sat, 07 May 2022 10:02:28 GMT
       server:
       - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
       x-ms-has-immutability-policy:
@@ -297,7 +343,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.36.0 azsdk-python-storage-file-share/12.1.1 Python/3.8.7 (Windows-10-10.0.22000-SP0)
       x-ms-date:
-      - Sat, 07 May 2022 09:40:52 GMT
+      - Sat, 07 May 2022 10:02:32 GMT
       x-ms-meta-newkey:
       - newvalue
       x-ms-meta-oldkey:
@@ -313,11 +359,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Sat, 07 May 2022 09:40:52 GMT
+      - Sat, 07 May 2022 10:02:32 GMT
       etag:
-      - '"0x8DA300DAD5D0712"'
+      - '"0x8DA3010B45577B0"'
       last-modified:
-      - Sat, 07 May 2022 09:40:52 GMT
+      - Sat, 07 May 2022 10:02:32 GMT
       server:
       - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
