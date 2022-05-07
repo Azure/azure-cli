@@ -316,7 +316,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                             custom_command_type=get_custom_sdk('blob', client_factory=cf_blob_client,
                                                                resource_type=ResourceType.DATA_STORAGE_BLOB)) as g:
         from ._transformers import (transform_blob_list_output, transform_blob_json_output,
-                                    transform_blob_upload_output, transform_url)
+                                    transform_blob_upload_output, transform_url_without_encode)
         from ._format import transform_blob_output
         from ._exception_handler import file_related_exception_handler
         from ._validators import process_blob_upload_batch_parameters, process_blob_download_batch_parameters
@@ -347,7 +347,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                        validator=process_blob_download_batch_parameters,
                                        exception_handler=file_related_exception_handler)
         g.storage_custom_command_oauth('url', 'create_blob_url', client_factory=cf_blob_service,
-                                       transform=transform_url)
+                                       transform=transform_url_without_encode)
 
     blob_service_custom_sdk = get_custom_sdk('blob', client_factory=cf_blob_service,
                                              resource_type=ResourceType.DATA_STORAGE_BLOB)

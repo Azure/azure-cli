@@ -147,6 +147,14 @@ def transform_url(result):
     import re
     result = re.sub('//', '/', result)
     result = re.sub('/', '//', result, count=1)
+    return encode_url_path(result)
+
+
+def transform_url_without_encode(result):
+    """ Ensures the resulting URL string does not contain extra / characters """
+    import re
+    result = re.sub('//', '/', result)
+    result = re.sub('/', '//', result, count=1)
     return result
 
 
