@@ -6,7 +6,6 @@
 # pylint: disable=line-too-long
 
 from knack.arguments import CLIArgumentType
-from azure.graphrbac.models import ConsentType
 
 from azure.cli.core.commands.parameters import get_enum_type, get_three_state_flag
 from azure.cli.core.commands.validators import validate_file_or_dict
@@ -133,9 +132,9 @@ def load_arguments(self, _):
         c.argument('scope', nargs='*',
                    help='A space-separated list of the claim values for delegated permissions which should be included '
                         'in access tokens for the resource application (the API). '
-                        "For example, openid User.Read GroupMember.Read.All. "
+                        'For example, openid User.Read GroupMember.Read.All. '
                         'Each claim value should match the value field of one of the delegated permissions defined by '
-                        'the API, listed in the publishedPermissionScopes property of the resource service principal.')
+                        'the API, listed in the oauth2PermissionScopes property of the resource service principal.')
         c.argument('consent_type', arg_type=get_enum_type(["AllPrincipals", "Principal"]), default="AllPrincipals",
                    help="Indicates whether authorization is granted for the client application to impersonate all "
                         "users or only a specific user. 'AllPrincipals' indicates authorization to impersonate all "
