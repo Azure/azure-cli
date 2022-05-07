@@ -2813,7 +2813,7 @@ examples:
 
 helps['storage share generate-sas'] = """
 type: command
-short-summary: Generates a shared access signature for the share.
+short-summary: Generate a shared access signature for the share.
 examples:
   - name: Generate a sas token for a fileshare and use it to upload a file.
     text: |
@@ -2837,25 +2837,25 @@ short-summary: List the file shares in a storage account.
 
 helps['storage share show'] = """
 type: command
-short-summary: Returns all user-defined metadata and system properties for the specified share.
+short-summary: Return all user-defined metadata and system properties for the specified share.
 long-summary: The data returned does not include the shares's list of files or directories.
 """
 
 helps['storage share delete'] = """
 type: command
-short-summary: Marks the specified share for deletion.
+short-summary: Mark the specified share for deletion.
 long-summary: If the share does not exist, the operation fails on the service. By default, the exception is swallowed by the client. To expose the exception, specify True for fail_not_exist.
 """
 
 helps['storage share stats'] = """
 type: command
-short-summary: Gets the approximate size of the data stored on the share, rounded up to the nearest gigabyte.
+short-summary: Get the approximate size of the data stored on the share, rounded up to the nearest gigabyte.
 long-summary: Note that this value may not include all recently created or recently re-sized files.
 """
 
 helps['storage share update'] = """
 type: command
-short-summary: Sets service-defined properties for the specified share.
+short-summary: Set service-defined properties for the specified share.
 """
 
 helps['storage share metadata'] = """
@@ -2865,12 +2865,12 @@ short-summary: Manage the metadata of a file share.
 
 helps['storage share metadata show'] = """
 type: command
-short-summary: Returns all user-defined metadata for the specified share.
+short-summary: Return all user-defined metadata for the specified share.
 """
 
 helps['storage share metadata update'] = """
 type: command
-short-summary: Sets one or more user-defined name-value pairs for the specified share.
+short-summary: Set one or more user-defined name-value pairs for the specified share.
 long-summary: Each call to this operation replaces all existing metadata attached to the share. To remove all metadata from the share, call this operation with no metadata dict.
 """
 

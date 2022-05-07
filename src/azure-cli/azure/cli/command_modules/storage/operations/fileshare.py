@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+import math
 
 from knack.log import get_logger
 
@@ -19,8 +20,9 @@ def list_shares(client, prefix=None, marker=None, num_results=None,
     pages = generator.by_page(continuation_token=marker)  # SharePropertiesPaged
     result = list_generator(pages=pages, num_results=num_results)
 
-    next_marker = {"nextMarker": pages.continuation_token}
-    result.append(next_marker)
+    if pages.continuation_token:
+        next_marker = {"nextMarker": pages.continuation_token}
+        result.append(next_marker)
 
     return result
 
@@ -78,3 +80,17 @@ def delete_share(cmd, client, fail_not_exist=False, timeout=None, delete_snapsho
         if not fail_not_exist:
             return _dont_fail_on_exist(ex, StorageErrorCode.share_not_found)
         raise ex
+
+
+def get_share_stats(client, timeout=None, **kwargs):
+    result = client.get_share_stats(timeout=timeout, **kwargs)
+    datasize = round(int(result)/math.pow(1024, 3))
+    if datasize == 0:
+        return str(datasize+1)
+    else:
+        return str(datasize)
+
+
+def set_share_metadata(client, metadata=None, timeout=None, **kwargs):
+    client.set_share_metadata(metadata=metadata, timeout=timeout, **kwargs)
+    return True

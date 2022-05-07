@@ -1620,7 +1620,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage share exists') as c:
         c.extra('share_name', share_name_type, options_list=('--name', '-n'), required=True)
-        c.extra('snapshot', options_list=['--snapshot'], is_preview=True,
+        c.extra('snapshot', options_list=['--snapshot'],
                 help='A string that represents the snapshot version, if applicable.')
         c.ignore('directory_name', 'file_name')
         c.extra('timeout', timeout_type)
@@ -1628,7 +1628,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     for item in ['show', 'metadata show']:
         with self.argument_context('storage share {}'.format(item)) as c:
             c.extra('share_name', share_name_type, options_list=('--name', '-n'), required=True)
-            c.extra('snapshot', options_list=['--snapshot'], is_preview=True,
+            c.extra('snapshot', options_list=['--snapshot'],
                     help='A string that represents the snapshot version, if applicable.')
             c.extra('timeout', timeout_type)
 
@@ -1662,7 +1662,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Specify the deletion strategy when the share has snapshots.')
         c.argument('fail_not_exist', help="Specify whether to throw an exception when the share doesn't exists. False "
                                           "by default.")
-        c.extra('snapshot', options_list=['--snapshot'], is_preview=True,
+        c.extra('snapshot', options_list=['--snapshot'],
                 help='A string that represents the snapshot version, if applicable.Specify this argument to delete a '
                      'specific snapshot only. delete_snapshots must be None if this is specified.')
         c.extra('timeout', timeout_type)

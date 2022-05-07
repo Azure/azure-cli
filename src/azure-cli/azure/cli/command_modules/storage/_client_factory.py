@@ -394,9 +394,7 @@ def cf_share_service(cli_ctx, kwargs):
         account_url = get_account_url(cli_ctx, account_name=account_name, service='file')
     credential = account_key or sas_token or token_credential
 
-    if account_url and credential:
-        return t_share_service(account_url=account_url, credential=credential, **client_kwargs)
-    return None
+    return t_share_service(account_url=account_url, credential=credential, **client_kwargs)
 
 
 def cf_share_client(cli_ctx, kwargs):

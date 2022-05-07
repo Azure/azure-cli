@@ -600,7 +600,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.custom_command('snapshot', 'snapshot_share_rm', min_api='2020-08-01-preview', is_preview=True,
                          transform=transform_share_rm_output)
 
-    with self.command_group('storage share', command_type=share_client_sdk, is_preview=True,
+    with self.command_group('storage share', command_type=share_client_sdk,
                             custom_command_type=get_custom_sdk('fileshare', cf_share_client,
                                                                ResourceType.DATA_STORAGE_FILESHARE),
                             resource_type=ResourceType.DATA_STORAGE_FILESHARE, min_api='2019-02-02') as g:
@@ -612,16 +612,16 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                  transform=create_boolean_result_output_transformer('deleted'),
                                  table_transformer=transform_boolean_for_table)
         g.storage_custom_command('generate-sas', 'generate_share_sas')
-        g.storage_command('stats', 'get_share_stats')
+        g.storage_custom_command('stats', 'get_share_stats')
         g.storage_command('show', 'get_share_properties', exception_handler=show_exception_handler)
         g.storage_custom_command('exists', 'share_exists', transform=create_boolean_result_output_transformer('exists'))
         g.storage_command('update', 'set_share_quota')
         g.storage_command('metadata show', 'get_share_properties', exception_handler=show_exception_handler,
                           transform=lambda x: getattr(x, 'metadata', x))
-        g.storage_command('metadata update', 'set_share_metadata',
-                          transform=create_boolean_result_output_transformer('updated'))
+        g.storage_custom_command('metadata update', 'set_share_metadata',
+                                 transform=create_boolean_result_output_transformer('updated'))
 
-    with self.command_group('storage share', command_type=share_service_sdk, is_preview=True,
+    with self.command_group('storage share', command_type=share_service_sdk,
                             custom_command_type=get_custom_sdk('fileshare', cf_share_service,
                                                                ResourceType.DATA_STORAGE_FILESHARE),
                             resource_type=ResourceType.DATA_STORAGE_FILESHARE, min_api='2019-02-02') as g:
