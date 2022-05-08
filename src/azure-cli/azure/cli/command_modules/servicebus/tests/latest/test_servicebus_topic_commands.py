@@ -32,13 +32,18 @@ class SBTopicsCRUDScenarioTest(ScenarioTest):
             'primary': 'PrimaryKey',
             'secondary': 'SecondaryKey',
             'topicname': self.create_random_name(prefix='sb-topiccli', length=25),
+            'topicname2': self.create_random_name(prefix='sb-topiccli2', length=25),
             'topicauthoname': self.create_random_name(prefix='cliTopicAutho', length=25),
+            'status': 'SendDisabled',
             'time_sample1': 'P1W',
             'time_sample2': 'P2D',
             'time_sample3': 'PT3H4M23S',
             'time_sample4': 'P1Y3M2D',
             'time_sample5': 'P1Y2M3DT3H11M2S',
             'time_sample6': 'P1Y',
+            'time_sample7': '01:03:04',
+            'time_sample8': 'PT10M',
+            'time_sample9': 'PT3M'
         })
 
         # Create Namespace
@@ -49,6 +54,24 @@ class SBTopicsCRUDScenarioTest(ScenarioTest):
         # Get Created Namespace
         self.cmd('servicebus namespace show --resource-group {rg} --name {namespacename}',
                  checks=[self.check('sku.name', '{sku}')])
+
+        topic = self.cmd(
+            'servicebus topic create --resource-group {rg} --namespace-name {namespacename} --name {topicname2} '+
+            '--default-message-time-to-live {time_sample6} --max-size 3072 --enable-duplicate-detection '
+            '--duplicate-detection-history-time-window {time_sample7} --enable-batched-operations --status {status} '
+            '--enable-ordering --auto-delete-on-idle {time_sample5} --enable-partitioning'
+        ).get_output_in_json()
+
+        self.assertEqual(topic['defaultMessageTimeToLive'], '365 days, 0:00:00')
+        self.assertEqual(topic['autoDeleteOnIdle'], '428 days, 3:11:02')
+        self.assertEqual(topic['duplicateDetectionHistoryTimeWindow'], '1 day, 0:03:04')
+        self.assertEqual(topic['enableBatchedOperations'], True)
+        self.assertEqual(topic['enableExpress'], False)
+        self.assertEqual(topic['enablePartitioning'], True)
+        self.assertEqual(topic['maxSizeInMegabytes'], 3072)
+        self.assertEqual(topic['requiresDuplicateDetection'], True)
+        self.assertEqual(topic['supportOrdering'], True)
+
 
         # Create Topic
         topic = self.cmd(

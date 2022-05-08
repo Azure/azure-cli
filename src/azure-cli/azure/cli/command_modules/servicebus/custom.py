@@ -15,7 +15,7 @@ from azure.cli.core.profiles import ResourceType
 
 # Namespace Region
 def cli_namespace_create(cmd, client, resource_group_name, namespace_name, location=None, tags=None, sku='Standard',
-                         capacity=None, default_action=None, mi_system_assigned=None, mi_user_assigned=None, encryption_config=None):
+                         capacity=None, zone_redundant=None, default_action=None, mi_system_assigned=None, mi_user_assigned=None, encryption_config=None):
 
     SBSku = cmd.get_models('SBSku', resource_type=ResourceType.MGMT_SERVICEBUS)
     SBNamespace = cmd.get_models('SBNamespace', resource_type=ResourceType.MGMT_SERVICEBUS)
@@ -28,6 +28,9 @@ def cli_namespace_create(cmd, client, resource_group_name, namespace_name, locat
 
     parameter.tags = tags
     parameter.sku = SBSku(name=sku, tier=sku, capacity=capacity)
+
+    if zone_redundant is not None:
+        parameter.zone_redundant = zone_redundant
 
     if mi_system_assigned:
         parameter.identity = Identity(type=IdentityType.SYSTEM_ASSIGNED)
@@ -182,7 +185,7 @@ def cli_sbqueue_update(instance, lock_duration=None,
 
     if lock_duration:
         instance.lock_duration = return_valid_duration(lock_duration, instance.lock_duration)
-    elif instance.lock_duration > timedelta(days=DURATION_DAYS-1):
+    elif instance.lock_duration > timedelta(days = DURATION_DAYS-1):
         instance.lock_duration = None
 
     if max_size_in_megabytes:
@@ -196,7 +199,7 @@ def cli_sbqueue_update(instance, lock_duration=None,
 
     if default_message_time_to_live:
         instance.default_message_time_to_live = return_valid_duration(default_message_time_to_live, instance.default_message_time_to_live)
-    elif instance.default_message_time_to_live > timedelta(days=DURATION_DAYS-1):
+    elif instance.default_message_time_to_live > timedelta(days = DURATION_DAYS-1):
         instance.default_message_time_to_live = None
 
     if dead_lettering_on_message_expiration is not None:
@@ -204,7 +207,7 @@ def cli_sbqueue_update(instance, lock_duration=None,
 
     if duplicate_detection_history_time_window:
         instance.duplicate_detection_history_time_window = return_valid_duration(duplicate_detection_history_time_window, instance.duplicate_detection_history_time_window)
-    elif instance.duplicate_detection_history_time_window > timedelta(days=DURATION_DAYS-1):
+    elif instance.duplicate_detection_history_time_window > timedelta(days = DURATION_DAYS-1):
         instance.duplicate_detection_history_time_window = None
 
     if max_delivery_count:
@@ -215,7 +218,7 @@ def cli_sbqueue_update(instance, lock_duration=None,
 
     if auto_delete_on_idle:
         instance.auto_delete_on_idle = return_valid_duration(auto_delete_on_idle, instance.auto_delete_on_idle)
-    elif instance.auto_delete_on_idle > timedelta(days=DURATION_DAYS-1):
+    elif instance.auto_delete_on_idle > timedelta(days = DURATION_DAYS-1):
         instance.auto_delete_on_idle = None
 
     if enable_partitioning is not None:
@@ -281,13 +284,13 @@ def cli_sbtopic_create(cmd, client, resource_group_name, namespace_name, topic_n
     )
 
     if default_message_time_to_live:
-        topic_params.default_message_time_to_live = return_valid_duration(update_value = default_message_time_to_live)
+        topic_params.default_message_time_to_live = return_valid_duration(update_value=default_message_time_to_live)
 
     if duplicate_detection_history_time_window:
-        topic_params.duplicate_detection_history_time_window = return_valid_duration(update_value = duplicate_detection_history_time_window)
+        topic_params.duplicate_detection_history_time_window = return_valid_duration(update_value=duplicate_detection_history_time_window)
 
     if auto_delete_on_idle:
-        topic_params.auto_delete_on_idle = return_valid_duration(update_value = auto_delete_on_idle)
+        topic_params.auto_delete_on_idle = return_valid_duration(update_value=auto_delete_on_idle)
 
     return client.create_or_update(
         resource_group_name=resource_group_name,
@@ -306,8 +309,8 @@ def cli_sbtopic_update(instance, default_message_time_to_live=None,
     from azure.cli.command_modules.servicebus.constants import DURATION_DAYS
 
     if default_message_time_to_live:
-        instance.default_message_time_to_live = default_message_time_to_live #return_valid_duration(default_message_time_to_live, instance.default_message_time_to_live)
-    elif instance.default_message_time_to_live > timedelta(days=DURATION_DAYS-1):
+        instance.default_message_time_to_live = default_message_time_to_live
+    elif instance.default_message_time_to_live > timedelta(days = DURATION_DAYS-1):
         instance.default_message_time_to_live = None
 
     if max_size_in_megabytes:
@@ -318,7 +321,7 @@ def cli_sbtopic_update(instance, default_message_time_to_live=None,
 
     if duplicate_detection_history_time_window:
         instance.duplicate_detection_history_time_window = return_valid_duration(duplicate_detection_history_time_window, instance.duplicate_detection_history_time_window)
-    elif instance.duplicate_detection_history_time_window > timedelta(days=DURATION_DAYS-1):
+    elif instance.duplicate_detection_history_time_window > timedelta(days = DURATION_DAYS-1):
         instance.duplicate_detection_history_time_window = None
 
     if enable_batched_operations is not None:
@@ -332,7 +335,7 @@ def cli_sbtopic_update(instance, default_message_time_to_live=None,
 
     if auto_delete_on_idle:
         instance.auto_delete_on_idle = return_valid_duration(auto_delete_on_idle, instance.auto_delete_on_idle)
-    elif instance.auto_delete_on_idle > timedelta(days=DURATION_DAYS-1):
+    elif instance.auto_delete_on_idle > timedelta(days = DURATION_DAYS-1):
         instance.auto_delete_on_idle = None
 
     if enable_partitioning is not None:
@@ -386,13 +389,13 @@ def cli_sbsubscription_create(cmd, client, resource_group_name, namespace_name, 
     )
 
     if default_message_time_to_live:
-        subscription_params.default_message_time_to_live = return_valid_duration(update_value = default_message_time_to_live)
+        subscription_params.default_message_time_to_live = return_valid_duration(update_value=default_message_time_to_live)
 
     if lock_duration:
-        subscription_params.lock_duration = return_valid_duration(update_value = lock_duration)
+        subscription_params.lock_duration = return_valid_duration(update_value=lock_duration)
 
     if auto_delete_on_idle:
-        subscription_params.auto_delete_on_idle = return_valid_duration(update_value = auto_delete_on_idle)
+        subscription_params.auto_delete_on_idle = return_valid_duration(update_value=auto_delete_on_idle)
 
     return client.create_or_update(
         resource_group_name=resource_group_name,
@@ -413,7 +416,7 @@ def cli_sbsubscription_update(instance, lock_duration=None,
 
     if lock_duration:
         instance.lock_duration = return_valid_duration(lock_duration, instance.lock_duration)
-    elif instance.lock_duration > timedelta(days=DURATION_DAYS-1):
+    elif instance.lock_duration > timedelta(days = DURATION_DAYS-1):
         instance.lock_duration = None
 
     if requires_session is not None:
@@ -421,7 +424,7 @@ def cli_sbsubscription_update(instance, lock_duration=None,
 
     if default_message_time_to_live:
         instance.default_message_time_to_live = return_valid_duration(default_message_time_to_live, instance.default_message_time_to_live)
-    elif instance.default_message_time_to_live > timedelta(days=DURATION_DAYS-1):
+    elif instance.default_message_time_to_live > timedelta(days = DURATION_DAYS-1):
         instance.default_message_time_to_live = None
 
     if dead_lettering_on_message_expiration is not None:
@@ -438,7 +441,7 @@ def cli_sbsubscription_update(instance, lock_duration=None,
 
     if auto_delete_on_idle:
         instance.auto_delete_on_idle = return_valid_duration(auto_delete_on_idle, instance.auto_delete_on_idle)
-    elif instance.auto_delete_on_idle > timedelta(days=DURATION_DAYS-1):
+    elif instance.auto_delete_on_idle > timedelta(days = DURATION_DAYS-1):
         instance.auto_delete_on_idle = None
 
     if forward_to:
@@ -613,7 +616,7 @@ iso8601pattern = re.compile("^P(?!$)(\\d+Y)?(\\d+M)?(\\d+W)?(\\d+D)?(T(?=\\d)(\\
 timedeltapattern = re.compile("^\\d+:\\d+:\\d+$")
 
 
-def return_valid_duration(update_value, current_value = None):
+def return_valid_duration(update_value, current_value=None):
     from datetime import timedelta
     from isodate import parse_duration
     from isodate import Duration
@@ -629,8 +632,7 @@ def return_valid_duration(update_value, current_value = None):
         if isinstance(time_duration, timedelta):
             if time_duration <= timedelta(days=DURATION_DAYS, minutes=DURATION_MIN, seconds=DURATION_SECS):
                 return time_duration
-            else:
-                return timedelta(days=DURATION_DAYS, minutes=DURATION_MIN, seconds=DURATION_SECS)
+            return timedelta(days=DURATION_DAYS, minutes=DURATION_MIN, seconds=DURATION_SECS)
 
         if isinstance(time_duration, Duration):
             # for some reason 2 duration objects cannot be compared, must find a fix

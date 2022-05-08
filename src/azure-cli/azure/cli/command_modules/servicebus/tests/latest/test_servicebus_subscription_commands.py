@@ -32,10 +32,13 @@ class SBSubscriptionCRUDScenarioTest(ScenarioTest):
             'secondary': 'SecondaryKey',
             'topicname': self.create_random_name(prefix='sb-topiccli', length=25),
             'topicname2': self.create_random_name(prefix='sb-topiccli', length=25),
+            'topicname3': self.create_random_name(prefix='sb-topiccli', length=25),
+            'topicname4': self.create_random_name(prefix='sb-topiccli', length=25),
             'topicauthoname': self.create_random_name(prefix='cliTopicAutho', length=25),
             'subscriptionname': self.create_random_name(prefix='sb-subscli', length=25),
             'subscriptionname2': self.create_random_name(prefix='sb-subscli', length=25),
             'subscriptionname3': self.create_random_name(prefix='sb-subscli', length=25),
+            'subscriptionname4': self.create_random_name(prefix='sb-subscli', length=25),
             'lockduration': 'PT4M',
             'defaultmessagetimetolive': 'PT7M',
             'autodeleteonidle': 'P9D',
@@ -78,12 +81,20 @@ class SBSubscriptionCRUDScenarioTest(ScenarioTest):
         # Get Topic
         self.cmd('servicebus topic show --resource-group {rg} --namespace-name {namespacename} --name {topicname}',
                  checks=[self.check('name', '{topicname}')])
-        print('hi')
+
+        # Create Topic
+        self.cmd('servicebus topic create --resource-group {rg} --namespace-name {namespacename} --name {topicname3}',
+                 checks=[self.check('name', '{topicname3}')])
+
+        # Get Topic
+        self.cmd('servicebus topic show --resource-group {rg} --namespace-name {namespacename} --name {topicname3}',
+                 checks=[self.check('name', '{topicname3}')])
+
         sub = self.cmd('servicebus topic subscription create --resource-group {rg} --name {subscriptionname3} --namespace-name {namespacename} '
                        '--topic-name {topicname} --lock-duration {time_sample9} --enable-dead-lettering-on-message-expiration --max-delivery-count 12 '
                        '--status Active --enable-batched-operations --forward-to {topicname2} --forward-dead-lettered-messages-to {topicname2} '
                        '--default-message-time-to-live {time_sample5}').get_output_in_json()
-        print('yellow')
+
         self.assertEqual(sub['autoDeleteOnIdle'], '10675199 days, 2:48:05.477581')
         self.assertEqual(sub['defaultMessageTimeToLive'], '428 days, 3:11:02')
         self.assertEqual(sub['deadLetteringOnMessageExpiration'], True)
@@ -195,6 +206,101 @@ class SBSubscriptionCRUDScenarioTest(ScenarioTest):
         self.assertEqual(sub['status'], self.kwargs['status'])
         self.assertEqual(sub['forwardTo'], self.kwargs['forwardTo'])
         self.assertEqual(sub['forwardDeadLetteredMessagesTo'], self.kwargs['forwardDeadLetteredMessagesTo'])
+
+        sub = self.cmd(
+            'servicebus topic subscription update --resource-group {rg} --namespace-name {namespacename} --name {subscriptionname3} '
+            '--topic-name {topicname} --forward-to {topicname3}').get_output_in_json()
+
+        self.assertEqual(sub['forwardTo'], self.kwargs['topicname3'])
+        self.kwargs.update({'forwardTo': sub['forwardTo']})
+
+        self.assertEqual(sub['autoDeleteOnIdle'], self.kwargs['autoDeleteOnIdle'])
+        self.assertEqual(sub['defaultMessageTimeToLive'], self.kwargs['defaultMessageTimeToLive'])
+        self.assertEqual(sub['deadLetteringOnMessageExpiration'], self.kwargs['deadLetteringOnMessageExpiration'])
+        self.assertEqual(sub['lockDuration'], self.kwargs['lockDuration'])
+        self.assertEqual(sub['maxDeliveryCount'], self.kwargs['maxDeliveryCount'])
+        self.assertEqual(sub['requiresSession'], self.kwargs['requiresSession'])
+        self.assertEqual(sub['enableBatchedOperations'], self.kwargs['enableBatchedOperations'])
+        self.assertEqual(sub['status'], self.kwargs['status'])
+        self.assertEqual(sub['forwardTo'], self.kwargs['forwardTo'])
+        self.assertEqual(sub['forwardDeadLetteredMessagesTo'], self.kwargs['forwardDeadLetteredMessagesTo'])
+
+        sub = self.cmd(
+            'servicebus topic subscription update --resource-group {rg} --namespace-name {namespacename} --name {subscriptionname3} '
+            '--topic-name {topicname} --forward-dead-lettered-messages-to {topicname3}').get_output_in_json()
+
+        self.assertEqual(sub['forwardDeadLetteredMessagesTo'], self.kwargs['topicname3'])
+        self.kwargs.update({'forwardDeadLetteredMessagesTo': sub['forwardDeadLetteredMessagesTo']})
+
+        self.assertEqual(sub['autoDeleteOnIdle'], self.kwargs['autoDeleteOnIdle'])
+        self.assertEqual(sub['defaultMessageTimeToLive'], self.kwargs['defaultMessageTimeToLive'])
+        self.assertEqual(sub['deadLetteringOnMessageExpiration'], self.kwargs['deadLetteringOnMessageExpiration'])
+        self.assertEqual(sub['lockDuration'], self.kwargs['lockDuration'])
+        self.assertEqual(sub['maxDeliveryCount'], self.kwargs['maxDeliveryCount'])
+        self.assertEqual(sub['requiresSession'], self.kwargs['requiresSession'])
+        self.assertEqual(sub['enableBatchedOperations'], self.kwargs['enableBatchedOperations'])
+        self.assertEqual(sub['status'], self.kwargs['status'])
+        self.assertEqual(sub['forwardTo'], self.kwargs['forwardTo'])
+        self.assertEqual(sub['forwardDeadLetteredMessagesTo'], self.kwargs['forwardDeadLetteredMessagesTo'])
+
+        sub = self.cmd(
+            'servicebus topic subscription update --resource-group {rg} --namespace-name {namespacename} --name {subscriptionname3} '
+            '--topic-name {topicname} --status ReceiveDisabled').get_output_in_json()
+
+        self.assertEqual(sub['status'], 'ReceiveDisabled')
+        self.kwargs.update({'status': sub['status']})
+
+        self.assertEqual(sub['autoDeleteOnIdle'], self.kwargs['autoDeleteOnIdle'])
+        self.assertEqual(sub['defaultMessageTimeToLive'], self.kwargs['defaultMessageTimeToLive'])
+        self.assertEqual(sub['deadLetteringOnMessageExpiration'], self.kwargs['deadLetteringOnMessageExpiration'])
+        self.assertEqual(sub['lockDuration'], self.kwargs['lockDuration'])
+        self.assertEqual(sub['maxDeliveryCount'], self.kwargs['maxDeliveryCount'])
+        self.assertEqual(sub['requiresSession'], self.kwargs['requiresSession'])
+        self.assertEqual(sub['enableBatchedOperations'], self.kwargs['enableBatchedOperations'])
+        self.assertEqual(sub['status'], self.kwargs['status'])
+        self.assertEqual(sub['forwardTo'], self.kwargs['forwardTo'])
+        self.assertEqual(sub['forwardDeadLetteredMessagesTo'], self.kwargs['forwardDeadLetteredMessagesTo'])
+
+        sub = self.cmd('servicebus topic subscription create --resource-group {rg} --namespace-name {namespacename} '
+                       '--name {subscriptionname4} --topic-name {topicname} --enable-session --auto-delete-on-idle {time_sample1}').get_output_in_json()
+
+        self.assertEqual(sub['autoDeleteOnIdle'], '7 days, 0:00:00')
+        self.assertEqual(sub['defaultMessageTimeToLive'], '10675199 days, 2:48:05.477581')
+        self.assertEqual(sub['deadLetteringOnMessageExpiration'], False)
+        self.assertEqual(sub['lockDuration'], '0:01:00')
+        self.assertEqual(sub['maxDeliveryCount'], 10)
+        self.assertEqual(sub['requiresSession'], True)
+        self.assertEqual(sub['enableBatchedOperations'], True)
+        self.assertEqual(sub['status'], 'Active')
+        self.assertEqual(sub['forwardTo'], None)
+        self.assertEqual(sub['forwardDeadLetteredMessagesTo'], None)
+
+        self.kwargs.update({
+            'autoDeleteOnIdle': sub['autoDeleteOnIdle'],
+            'defaultMessageTimeToLive': sub['defaultMessageTimeToLive'],
+            'deadLetteringOnMessageExpiration': sub['deadLetteringOnMessageExpiration'],
+            'lockDuration': sub['lockDuration'],
+            'maxDeliveryCount': sub['maxDeliveryCount'],
+            'enableBatchedOperations': sub['enableBatchedOperations'],
+            'requiresSession': sub['requiresSession'],
+            'status': sub['status'],
+            'forwardTo': sub['forwardTo'],
+            'forwardDeadLetteredMessagesTo': sub['forwardDeadLetteredMessagesTo']
+        })
+
+        sub = self.cmd('servicebus topic subscription update --resource-group {rg} --namespace-name {namespacename} '
+                       '--name {subscriptionname4} --topic-name {topicname} --auto-delete-on-idle {time_sample7}').get_output_in_json()
+
+        self.assertEqual(sub['autoDeleteOnIdle'], '1 day, 0:03:04')
+        self.assertEqual(sub['defaultMessageTimeToLive'], '10675199 days, 2:48:05.477581')
+        self.assertEqual(sub['deadLetteringOnMessageExpiration'], False)
+        self.assertEqual(sub['lockDuration'], '0:01:00')
+        self.assertEqual(sub['maxDeliveryCount'], 10)
+        self.assertEqual(sub['requiresSession'], True)
+        self.assertEqual(sub['enableBatchedOperations'], True)
+        self.assertEqual(sub['status'], 'Active')
+        self.assertEqual(sub['forwardTo'], None)
+        self.assertEqual(sub['forwardDeadLetteredMessagesTo'], None)
 
 
         # Create Subscription
