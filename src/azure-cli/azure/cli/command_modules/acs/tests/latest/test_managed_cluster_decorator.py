@@ -4483,6 +4483,8 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
                 "dns_service_ip": None,
                 "docker_bridge_cidr": None,
                 "network_policy": None,
+                "nat_gateway_managed_outbound_ip_count": 10,
+                "nat_gateway_idle_timeout": 20,
             },
             ResourceType.MGMT_CONTAINERSERVICE,
         )
@@ -4502,7 +4504,12 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             ),
             allocated_outbound_ports=5,
         )
-
+        nat_gateway_profile_2 = self.models.nat_gateway_models.ManagedClusterNATGatewayProfile(
+            managed_outbound_ip_profile=self.models.nat_gateway_models.ManagedClusterManagedOutboundIPProfile(
+                count=10
+            ),
+            idle_timeout_in_minutes=20,
+        )
         network_profile_2 = self.models.ContainerServiceNetworkProfile(
             network_plugin="kubenet",
             pod_cidr="10.246.0.0/16",
@@ -4512,6 +4519,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             load_balancer_sku="standard",
             outbound_type="loadBalancer",
             load_balancer_profile=load_balancer_profile_2,
+            nat_gateway_profile=nat_gateway_profile_2,
         )
         ground_truth_mc_2 = self.models.ManagedCluster(location="test_location", network_profile=network_profile_2)
         self.assertEqual(dec_mc_2, ground_truth_mc_2)
@@ -4534,6 +4542,8 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
                 "dns_service_ip": None,
                 "docker_bridge_cidr": None,
                 "network_policy": None,
+                "nat_gateway_managed_outbound_ip_count": None,
+                "nat_gateway_idle_timeout": None,
             },
             ResourceType.MGMT_CONTAINERSERVICE,
         )
