@@ -8,24 +8,19 @@ import importlib
 import os
 from functools import partial
 
-from azure.cli.core._profile import Profile
-from azure.cli.core.azclierror import CLIInternalError
 from knack.commands import CLICommand, PREVIEW_EXPERIMENTAL_CONFLICT_ERROR
 from knack.deprecation import Deprecated
 from knack.experimental import ExperimentalItem
 from knack.preview import PreviewItem
 
+from azure.cli.core.azclierror import CLIInternalError
 from ._arg import AAZArgumentsSchema, AAZBoolArg
-from ._arg_action import AAZArgActionOperations, AAZGenericUpdateAction
 from ._base import AAZUndefined, AAZBaseValue
 from ._field_type import AAZObjectType
-from ._field_value import AAZObject
-from ._poller import AAZLROPoller
 from ._paging import AAZPaged
-from ._utils import _get_profile_pkg
+from ._poller import AAZLROPoller
+from ._command_ctx import AAZCommandCtx
 from .exceptions import AAZUnknownFieldError
-
-_DOC_EXAMPLE_FLAG = ':example:'
 
 
 class AAZCommandGroup:
@@ -54,85 +49,6 @@ class AAZCommandGroup:
         self.help = self.AZ_HELP  # TODO: change knack to load help directly
 
 
-class AAZCommandCtx:
-
-    def __init__(self, cli_ctx, schema, command_args):
-        self._cli_ctx = cli_ctx
-        self._profile = Profile(cli_ctx=cli_ctx)
-        self._subscription_id = None
-        self.args = schema()
-        assert self.args._is_patch  # make sure self.ctx.args is patch
-        for dest, cmd_arg in command_args.items():
-            if hasattr(schema, dest):
-                if isinstance(cmd_arg, AAZArgActionOperations):
-                    cmd_arg.apply(self.args, dest)
-                elif cmd_arg != AAZUndefined:
-                    self.args[dest] = cmd_arg
-        self._clients = {}
-        self._vars_schema = AAZObjectType()
-        self.vars = AAZObject(schema=self._vars_schema, data={})
-        self.generic_update_args = command_args.get(AAZGenericUpdateAction.DEST, None)
-
-        self.next_link = AAZUndefined  # support paging
-
-    def format_args(self):
-        # TODO: apply format for argument values
-        pass
-
-    def get_login_credential(self):
-        credential, _, _ = self._profile.get_login_credentials(
-            subscription_id=self.subscription_id,
-            aux_subscriptions=self.aux_subscriptions,
-            aux_tenants=self.aux_tenants
-        )
-        return credential
-
-    def get_http_client(self, client_type):
-        from ._client import registered_clients
-
-        if client_type not in self._clients:
-            # if not client instance exist, then create a client instance
-            from azure.cli.core.commands.client_factory import _prepare_client_kwargs_track2
-            assert client_type
-            client_cls = registered_clients[client_type]
-            credential = self.get_login_credential()
-            client_kwargs = _prepare_client_kwargs_track2(self._cli_ctx)
-            client_kwargs['user_agent'] += " (AAZ)"  # Add AAZ label in user agent
-            self._clients[client_type] = client_cls(self._cli_ctx, credential, **client_kwargs)
-
-        return self._clients[client_type]
-
-    def set_var(self, name, data, schema_builder=None):
-        if not hasattr(self._vars_schema, name):
-            assert schema_builder is not None
-            self._vars_schema[name] = schema_builder()
-        self.vars[name] = data
-
-    @staticmethod
-    def get_error_format(name):
-        if name is None:
-            return None
-        from ._error_format import registered_error_formats
-        return registered_error_formats[name]
-
-    @property
-    def subscription_id(self):
-        from azure.cli.core.commands.client_factory import get_subscription_id
-        if self._subscription_id is None:
-            self._subscription_id = get_subscription_id(cli_ctx=self._cli_ctx)
-        return self._subscription_id
-
-    @property
-    def aux_subscriptions(self):
-        # TODO: fetch aux_subscription base on args
-        return None
-
-    @property
-    def aux_tenants(self):
-        # TODO: fetch aux_subscription base on args
-        return None
-
-
 class AAZCommand(CLICommand):
     """Atomic Layer Command"""
     AZ_NAME = None
@@ -147,12 +63,16 @@ class AAZCommand(CLICommand):
 
     @classmethod
     def get_arguments_schema(cls):
-        if not hasattr(cls, "_arguments_schema"):
+        """ Make sure _args_schema is build once.
+        """
+        if not hasattr(cls, "_args_schema"):
             cls._args_schema = cls._build_arguments_schema()
         return cls._args_schema
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
+        """ Build the schema of command's argument, this function should be inherited by sub classes.
+        """
         schema = AAZArgumentsSchema(*args, **kwargs)
         if cls.AZ_SUPPORT_NO_WAIT:
             schema.no_wait = AAZBoolArg(
@@ -206,6 +126,7 @@ class AAZCommand(CLICommand):
         return self._handler(*args, **kwargs)
 
     def _handler(self, command_args):
+        # command_args will be parsed by AAZCommandCtx
         self.ctx = AAZCommandCtx(cli_ctx=self.cli_ctx, schema=self.get_arguments_schema(), command_args=command_args)
         self.ctx.format_args()
 
@@ -214,34 +135,46 @@ class AAZCommand(CLICommand):
         schema = self.get_arguments_schema()
         args = {}
         for name, field in schema._fields.items():
+            # generate command arguments from argument schema.
             args[name] = field.to_cmd_arg(name)
         return list(args.items())
 
     def update_argument(self, param_name, argtype):
-        # not support to overwrite arguments defined in schema
+        """ This function is called by core to add global arguments
+        """
         schema = self.get_arguments_schema()
+        # not support to overwrite arguments defined in schema
         if not hasattr(schema, param_name):
             super().update_argument(param_name, argtype)
 
     @staticmethod
     def deserialize_output(value, client_flatten=True):
+        """ Deserialize output of a command.
+        """
         if not isinstance(value, AAZBaseValue):
             return value
 
         def processor(schema, result):
+            """A processor used in AAZBaseValue to serialized data"""
             if result == AAZUndefined:
                 return result
+
             if client_flatten and isinstance(schema, AAZObjectType):
+                # handle client flatten in result
                 disc_schema = schema.get_discriminator(result)
                 new_result = {}
                 for k, v in result.items():
+                    # get schema of k
                     try:
                         k_schema = schema[k]
                     except AAZUnknownFieldError as err:
                         if not disc_schema:
                             raise err
+                        # get k_schema from discriminator definition
                         k_schema = disc_schema[k]
+
                     if k_schema._flags.get('client_flatten', False):
+                        # flatten k when there are client_flatten flag in it's schema
                         assert isinstance(k_schema, AAZObjectType) and isinstance(v, dict)
                         for sub_k, sub_v in v.items():
                             if sub_k in new_result:
@@ -252,24 +185,32 @@ class AAZCommand(CLICommand):
                             raise KeyError(f"Conflict key when apply client flatten: {k} in {result}")
                         new_result[k] = v
                 result = new_result
+
             return result
 
         return value.to_serialized_data(processor=processor)
 
     @staticmethod
     def build_lro_poller(executor, extract_result):
+        """ Build AAZLROPoller instance to support long running operation
+        """
         return AAZLROPoller(polling_generator=executor, result_callback=extract_result)
 
     def build_paging(self, executor, extract_result):
+        """ Build AAZPaged instance to support paging
+        """
         def executor_wrapper(next_link):
             self.ctx.next_link = next_link
             executor()
+
         return AAZPaged(executor=executor_wrapper, extract_result=extract_result)
 
 
 def register_command_group(
         name, is_preview=False, is_experimental=False, hide=False, redirect=None, expiration=None):
-    """register AAZCommandGroup"""
+    """This decorator is used to register an AAZCommandGroup as a cli command group.
+    A registered AAZCommandGroup will be added into module's command group table.
+    """
     if is_preview and is_experimental:
         raise CLIInternalError(
             PREVIEW_EXPERIMENTAL_CONFLICT_ERROR.format(name)
@@ -285,7 +226,7 @@ def register_command_group(
     def decorator(cls):
         assert issubclass(cls, AAZCommandGroup)
         cls.AZ_NAME = name
-        short_summary, long_summary, _ = parse_cls_doc(cls)
+        short_summary, long_summary, _ = _parse_cls_doc(cls)
         cls.AZ_HELP = {
             "type": "group",
             "short-summary": short_summary,
@@ -312,7 +253,9 @@ def register_command_group(
 
 def register_command(
         name, is_preview=False, is_experimental=False, confirmation=None, hide=False, redirect=None, expiration=None):
-    """register AAZCommand"""
+    """This decorator is used to register an AAZCommand as a cli command.
+    A registered AAZCommand will be added into module's command table.
+    """
     if is_preview and is_experimental:
         raise CLIInternalError(
             PREVIEW_EXPERIMENTAL_CONFLICT_ERROR.format(name)
@@ -328,7 +271,7 @@ def register_command(
     def decorator(cls):
         assert issubclass(cls, AAZCommand)
         cls.AZ_NAME = name
-        short_summary, long_summary, examples = parse_cls_doc(cls)
+        short_summary, long_summary, examples = _parse_cls_doc(cls)
         cls.AZ_HELP = {
             "type": "command",
             "short-summary": short_summary,
@@ -349,14 +292,21 @@ def register_command(
     return decorator
 
 
+AAZ_PACKAGE_FULL_LOAD_ENV_NAME = 'AZURE_AAZ_FULL_LOAD'
+
+
 def load_aaz_command_table(loader, aaz_pkg_name, args):
+    """ This function is used in AzCommandsLoader.load_command_table.
+    It will load commands in module's aaz package.
+    """
     profile_pkg = _get_profile_pkg(aaz_pkg_name, loader.cli_ctx.cloud)
+
     command_table = {}
     command_group_table = {}
     arg_str = ' '.join(args)
-
+    fully_load = os.environ.get(AAZ_PACKAGE_FULL_LOAD_ENV_NAME, 'False').lower() == 'true'  # used to disable cut logic
     if profile_pkg is not None:
-        _load_aaz_pkg(loader, profile_pkg, command_table, command_group_table, arg_str)
+        _load_aaz_pkg(loader, profile_pkg, command_table, command_group_table, arg_str, fully_load)
 
     for group_name, command_group in command_group_table.items():
         loader.command_group_table[group_name] = command_group
@@ -365,31 +315,46 @@ def load_aaz_command_table(loader, aaz_pkg_name, args):
     return command_table, command_group_table
 
 
-def _load_aaz_pkg(loader, pkg, parent_command_table, command_group_table, arg_str):
+def _get_profile_pkg(aaz_module_name, cloud):
+    """ load the profile package of aaz module according to the cloud profile.
+    """
+    profile_module_name = cloud.profile.lower().replace('-', '_')
+    try:
+        return importlib.import_module(f'{aaz_module_name}.{profile_module_name}')
+    except ModuleNotFoundError:
+        return None
+
+
+def _load_aaz_pkg(loader, pkg, parent_command_table, command_group_table, arg_str, fully_load):
+    """ Load aaz commands and aaz command groups under a package folder.
+    """
     cut = False  # if cut, its sub commands and sub pkgs will not be added
     command_table = {}  # the command available for this pkg and its sub pkgs
     for value in pkg.__dict__.values():
-        if cut and command_table:
+        if not fully_load and cut and command_table:
             # when cut and command_table is not empty, stop loading more commands.
             # the command_table should not be empty.
             # Because if it's empty, the command group will be ignored in help if parent command group.
             break
         if isinstance(value, type):
             if issubclass(value, AAZCommandGroup):
-                if not arg_str.startswith(f'{value.AZ_NAME} '):
-                    # when args not contain command group prefix, then cut more loading.
-                    cut = True
-                # add command group into command group table
-                command_group_table[value.AZ_NAME] = value(
-                    cli_ctx=loader.cli_ctx)  # add command group even it's cut
+                if value.AZ_NAME:
+                    # AAZCommandGroup already be registered by register_command_command
+                    if not arg_str.startswith(f'{value.AZ_NAME} '):
+                        # when args not contain command group prefix, then cut more loading.
+                        cut = True
+                    # add command group into command group table
+                    command_group_table[value.AZ_NAME] = value(
+                        cli_ctx=loader.cli_ctx)  # add command group even it's cut
             elif issubclass(value, AAZCommand):
                 if value.AZ_NAME:
+                    # AAZCommand already be registered by register_command
                     command_table[value.AZ_NAME] = value(loader=loader)
 
     # continue load sub pkgs
     pkg_path = os.path.dirname(pkg.__file__)
     for sub_path in os.listdir(pkg_path):
-        if cut and command_table:
+        if not fully_load and cut and command_table:
             # when cut and command_table is not empty, stop loading more sub pkgs.
             break
         if sub_path.startswith('_') or not os.path.isdir(os.path.join(pkg_path, sub_path)):
@@ -398,12 +363,18 @@ def _load_aaz_pkg(loader, pkg, parent_command_table, command_group_table, arg_st
             sub_pkg = importlib.import_module(f'.{sub_path}', pkg.__name__)
         except ModuleNotFoundError:
             continue
-        _load_aaz_pkg(loader, sub_pkg, command_table, command_group_table, arg_str)
+        # recursively load sub package
+        _load_aaz_pkg(loader, sub_pkg, command_table, command_group_table, arg_str, fully_load)
 
     parent_command_table.update(command_table)  # update the parent pkg's command table.
 
 
-def parse_cls_doc(cls):
+_DOC_EXAMPLE_FLAG = ':example:'
+
+
+def _parse_cls_doc(cls):
+    """ Parse the help from the doc string of aaz classes. Examples are only defined in aaz command classes.
+    """
     doc = cls.__doc__
     short_summary = None
     long_summary = None
