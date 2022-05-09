@@ -624,10 +624,9 @@ def download_blob(client, file_path=None, open_mode='wb', start_range=None, end_
         with open(file_path, open_mode) as stream:
             download_stream.readinto(stream)
         return download_stream.properties
-    else:
-        with os.fdopen(sys.stdout.fileno(), open_mode) as stream:
-            download_stream.readinto(stream)
-        return
+    with os.fdopen(sys.stdout.fileno(), open_mode) as stream:
+        download_stream.readinto(stream)
+    return
 
 
 def get_block_ids(content_length, block_length):
