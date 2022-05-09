@@ -968,7 +968,7 @@ class NetworkPrivateLinkKustoClusterScenarioTest(ScenarioTest):
             'sku': 'Standard_D12_v2'
         })
 
-        self.cmd('az kusto cluster create -l {loc} -n {acc} -g {rg} --sku name={sku} capacity=2 tier="Standard"')
+        self.cmd('az kusto cluster create -l {loc} -n {acc} -g {rg} --sku {sku}')
 
         self.cmd('az network private-link-resource list --name {acc} --resource-group {rg} --type Microsoft.Kusto/clusters',
                  checks=[self.check('length(@)', 1), self.check('[0].properties.groupId', 'cluster')])
@@ -987,7 +987,7 @@ class NetworkPrivateLinkKustoClusterScenarioTest(ScenarioTest):
         })
 
         # Prepare kusto cluster and network
-        account = self.cmd('az kusto cluster create -l {loc} -n {acc} -g {rg} --sku name={sku} capacity=2 tier="Standard"').get_output_in_json()
+        account = self.cmd('az kusto cluster create -l {loc} -n {acc} -g {rg} --sku {sku}').get_output_in_json()
         self.kwargs['acc_id'] = account['id']
         self.cmd('az network vnet create -n {vnet} -g {rg} -l {loc} --subnet-name {subnet}',
                  checks=self.check('length(newVNet.subnets)', 1))

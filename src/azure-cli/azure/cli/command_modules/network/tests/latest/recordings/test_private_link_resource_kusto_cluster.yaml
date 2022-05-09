@@ -1,10 +1,6 @@
 interactions:
 - request:
-    body: '{"location": "eastus", "sku": {"name": "Standard_D12_v2", "capacity": 2,
-      "tier": "Standard"}, "properties": {"enableDiskEncryption": false, "enableStreamingIngest":
-      false, "enablePurge": false, "enableDoubleEncryption": false, "publicNetworkAccess":
-      "Enabled", "engineType": "V3", "enableAutoStop": true, "restrictOutboundNetworkAccess":
-      "Disabled", "publicIPType": "IPv4"}}'
+    body: '{"location": "eastus", "sku": {"name": "Standard_D12_v2", "tier": "Standard"}}'
     headers:
       Accept:
       - application/json
@@ -15,29 +11,32 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '374'
+      - '78'
       Content-Type:
-      - application/json
+      - application/json; charset=utf-8
       ParameterSetName:
       - -l -n -g --sku
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-mgmt-kusto/2.0.0b1 Python/3.8.10 (Windows-10-10.0.22000-SP0)
+      - python/3.8.10 (Windows-10-10.0.22000-SP0) msrest/0.6.21 msrest_azure/0.6.4
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.34.1
+      accept-language:
+      - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Kusto/clusters/clikusto000002?api-version=2022-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Kusto/clusters/clikusto000002?api-version=2019-01-21
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Kusto/Clusters/clikusto000002","name":"clikusto000002","type":"Microsoft.Kusto/Clusters","etag":"\"\"","location":"eastus","sku":{"name":"Standard_D12_v2","tier":"Standard","capacity":2},"properties":{"state":"Creating","enableDiskEncryption":false,"enableStreamingIngest":false,"enablePurge":false,"enableDoubleEncryption":false,"engineType":"V3","restrictOutboundNetworkAccess":"Disabled","publicNetworkAccess":"Enabled","enableAutoStop":true,"publicIPType":"IPv4","provisioningState":"Creating"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Kusto/Clusters/clikusto000002","name":"clikusto000002","type":"Microsoft.Kusto/Clusters","etag":"\"\"","location":"eastus","sku":{"name":"Standard_D12_v2","tier":"Standard"},"properties":{"state":"Creating","provisioningState":"Creating"}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationResults/2d786be2-14c1-4dd9-a14a-d45ece902d24?api-version=2022-02-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationResults/3a32db33-0595-4398-b074-181e770dc0d6?api-version=2019-01-21
       cache-control:
       - no-cache
       content-length:
-      - '610'
+      - '350'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 25 Apr 2022 13:25:49 GMT
+      - Mon, 09 May 2022 08:55:28 GMT
       etag:
       - '""'
       expires:
@@ -51,7 +50,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '198'
+      - '199'
     status:
       code: 201
       message: Created
@@ -59,7 +58,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - '*/*'
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -69,21 +68,22 @@ interactions:
       ParameterSetName:
       - -l -n -g --sku
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-mgmt-kusto/2.0.0b1 Python/3.8.10 (Windows-10-10.0.22000-SP0)
+      - python/3.8.10 (Windows-10-10.0.22000-SP0) msrest/0.6.21 msrest_azure/0.6.4
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.34.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationResults/2d786be2-14c1-4dd9-a14a-d45ece902d24?api-version=2022-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationResults/3a32db33-0595-4398-b074-181e770dc0d6?api-version=2019-01-21
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationresults/2d786be2-14c1-4dd9-a14a-d45ece902d24","name":"2d786be2-14c1-4dd9-a14a-d45ece902d24","status":"Running","startTime":"2022-04-25T13:25:48.1370483Z","endTime":"2022-04-25T13:25:48.1370483Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationresults/3a32db33-0595-4398-b074-181e770dc0d6","name":"3a32db33-0595-4398-b074-181e770dc0d6","status":"Running","startTime":"2022-05-09T08:55:26.567789Z","endTime":"2022-05-09T08:55:26.567789Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '443'
+      - '441'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 25 Apr 2022 13:26:19 GMT
+      - Mon, 09 May 2022 08:56:00 GMT
       expires:
       - '-1'
       pragma:
@@ -99,7 +99,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-root-activity-id:
-      - 6857e965-33d0-4366-a758-1d86fd1f470c
+      - 3e0bc1cf-abf5-44b4-9268-3c5f33ca8d09
       x-ms-ratelimit-remaining-subscription-resource-requests:
       - '299'
     status:
@@ -109,7 +109,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - '*/*'
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -119,21 +119,22 @@ interactions:
       ParameterSetName:
       - -l -n -g --sku
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-mgmt-kusto/2.0.0b1 Python/3.8.10 (Windows-10-10.0.22000-SP0)
+      - python/3.8.10 (Windows-10-10.0.22000-SP0) msrest/0.6.21 msrest_azure/0.6.4
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.34.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationResults/2d786be2-14c1-4dd9-a14a-d45ece902d24?api-version=2022-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationResults/3a32db33-0595-4398-b074-181e770dc0d6?api-version=2019-01-21
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationresults/2d786be2-14c1-4dd9-a14a-d45ece902d24","name":"2d786be2-14c1-4dd9-a14a-d45ece902d24","status":"Running","startTime":"2022-04-25T13:25:48.1370483Z","endTime":"2022-04-25T13:26:29.7165817Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationresults/3a32db33-0595-4398-b074-181e770dc0d6","name":"3a32db33-0595-4398-b074-181e770dc0d6","status":"Running","startTime":"2022-05-09T08:55:26.567789Z","endTime":"2022-05-09T08:55:26.567789Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '443'
+      - '441'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 25 Apr 2022 13:26:49 GMT
+      - Mon, 09 May 2022 08:56:33 GMT
       expires:
       - '-1'
       pragma:
@@ -149,7 +150,109 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-root-activity-id:
-      - 6857e965-33d0-4366-a758-1d86fd1f470c
+      - 3e0bc1cf-abf5-44b4-9268-3c5f33ca8d09
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '299'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -n -g --sku
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.22000-SP0) msrest/0.6.21 msrest_azure/0.6.4
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.34.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationResults/3a32db33-0595-4398-b074-181e770dc0d6?api-version=2019-01-21
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationresults/3a32db33-0595-4398-b074-181e770dc0d6","name":"3a32db33-0595-4398-b074-181e770dc0d6","status":"Running","startTime":"2022-05-09T08:55:26.567789Z","endTime":"2022-05-09T08:56:36.8367628Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '442'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 09 May 2022 08:57:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-root-activity-id:
+      - 3e0bc1cf-abf5-44b4-9268-3c5f33ca8d09
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '299'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -n -g --sku
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.22000-SP0) msrest/0.6.21 msrest_azure/0.6.4
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.34.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationResults/3a32db33-0595-4398-b074-181e770dc0d6?api-version=2019-01-21
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationresults/3a32db33-0595-4398-b074-181e770dc0d6","name":"3a32db33-0595-4398-b074-181e770dc0d6","status":"Running","startTime":"2022-05-09T08:55:26.567789Z","endTime":"2022-05-09T08:56:36.8367628Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '442'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 09 May 2022 08:57:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-root-activity-id:
+      - 3e0bc1cf-abf5-44b4-9268-3c5f33ca8d09
       x-ms-ratelimit-remaining-subscription-resource-requests:
       - '298'
     status:
@@ -159,7 +262,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - '*/*'
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -169,21 +272,22 @@ interactions:
       ParameterSetName:
       - -l -n -g --sku
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-mgmt-kusto/2.0.0b1 Python/3.8.10 (Windows-10-10.0.22000-SP0)
+      - python/3.8.10 (Windows-10-10.0.22000-SP0) msrest/0.6.21 msrest_azure/0.6.4
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.34.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationResults/2d786be2-14c1-4dd9-a14a-d45ece902d24?api-version=2022-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationResults/3a32db33-0595-4398-b074-181e770dc0d6?api-version=2019-01-21
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationresults/2d786be2-14c1-4dd9-a14a-d45ece902d24","name":"2d786be2-14c1-4dd9-a14a-d45ece902d24","status":"Running","startTime":"2022-04-25T13:25:48.1370483Z","endTime":"2022-04-25T13:26:29.7165817Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationresults/3a32db33-0595-4398-b074-181e770dc0d6","name":"3a32db33-0595-4398-b074-181e770dc0d6","status":"Running","startTime":"2022-05-09T08:55:26.567789Z","endTime":"2022-05-09T08:56:36.8367628Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '443'
+      - '442'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 25 Apr 2022 13:27:20 GMT
+      - Mon, 09 May 2022 08:58:07 GMT
       expires:
       - '-1'
       pragma:
@@ -199,7 +303,109 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-root-activity-id:
-      - 6857e965-33d0-4366-a758-1d86fd1f470c
+      - 3e0bc1cf-abf5-44b4-9268-3c5f33ca8d09
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '299'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -n -g --sku
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.22000-SP0) msrest/0.6.21 msrest_azure/0.6.4
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.34.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationResults/3a32db33-0595-4398-b074-181e770dc0d6?api-version=2019-01-21
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationresults/3a32db33-0595-4398-b074-181e770dc0d6","name":"3a32db33-0595-4398-b074-181e770dc0d6","status":"Running","startTime":"2022-05-09T08:55:26.567789Z","endTime":"2022-05-09T08:56:36.8367628Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '442'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 09 May 2022 08:58:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-root-activity-id:
+      - 3e0bc1cf-abf5-44b4-9268-3c5f33ca8d09
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '298'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -n -g --sku
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.22000-SP0) msrest/0.6.21 msrest_azure/0.6.4
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.34.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationResults/3a32db33-0595-4398-b074-181e770dc0d6?api-version=2019-01-21
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationresults/3a32db33-0595-4398-b074-181e770dc0d6","name":"3a32db33-0595-4398-b074-181e770dc0d6","status":"Running","startTime":"2022-05-09T08:55:26.567789Z","endTime":"2022-05-09T08:56:36.8367628Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '442'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 09 May 2022 08:59:09 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-root-activity-id:
+      - 3e0bc1cf-abf5-44b4-9268-3c5f33ca8d09
       x-ms-ratelimit-remaining-subscription-resource-requests:
       - '297'
     status:
@@ -209,7 +415,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - '*/*'
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -219,21 +425,22 @@ interactions:
       ParameterSetName:
       - -l -n -g --sku
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-mgmt-kusto/2.0.0b1 Python/3.8.10 (Windows-10-10.0.22000-SP0)
+      - python/3.8.10 (Windows-10-10.0.22000-SP0) msrest/0.6.21 msrest_azure/0.6.4
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.34.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationResults/2d786be2-14c1-4dd9-a14a-d45ece902d24?api-version=2022-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationResults/3a32db33-0595-4398-b074-181e770dc0d6?api-version=2019-01-21
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationresults/2d786be2-14c1-4dd9-a14a-d45ece902d24","name":"2d786be2-14c1-4dd9-a14a-d45ece902d24","status":"Running","startTime":"2022-04-25T13:25:48.1370483Z","endTime":"2022-04-25T13:26:29.7165817Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationresults/3a32db33-0595-4398-b074-181e770dc0d6","name":"3a32db33-0595-4398-b074-181e770dc0d6","status":"Running","startTime":"2022-05-09T08:55:26.567789Z","endTime":"2022-05-09T08:56:36.8367628Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '443'
+      - '442'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 25 Apr 2022 13:27:50 GMT
+      - Mon, 09 May 2022 08:59:40 GMT
       expires:
       - '-1'
       pragma:
@@ -249,7 +456,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-root-activity-id:
-      - 6857e965-33d0-4366-a758-1d86fd1f470c
+      - 3e0bc1cf-abf5-44b4-9268-3c5f33ca8d09
       x-ms-ratelimit-remaining-subscription-resource-requests:
       - '296'
     status:
@@ -259,7 +466,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - '*/*'
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -269,21 +476,22 @@ interactions:
       ParameterSetName:
       - -l -n -g --sku
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-mgmt-kusto/2.0.0b1 Python/3.8.10 (Windows-10-10.0.22000-SP0)
+      - python/3.8.10 (Windows-10-10.0.22000-SP0) msrest/0.6.21 msrest_azure/0.6.4
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.34.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationResults/2d786be2-14c1-4dd9-a14a-d45ece902d24?api-version=2022-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationResults/3a32db33-0595-4398-b074-181e770dc0d6?api-version=2019-01-21
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationresults/2d786be2-14c1-4dd9-a14a-d45ece902d24","name":"2d786be2-14c1-4dd9-a14a-d45ece902d24","status":"Running","startTime":"2022-04-25T13:25:48.1370483Z","endTime":"2022-04-25T13:26:29.7165817Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationresults/3a32db33-0595-4398-b074-181e770dc0d6","name":"3a32db33-0595-4398-b074-181e770dc0d6","status":"Running","startTime":"2022-05-09T08:55:26.567789Z","endTime":"2022-05-09T08:56:36.8367628Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '443'
+      - '442'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 25 Apr 2022 13:28:21 GMT
+      - Mon, 09 May 2022 09:00:12 GMT
       expires:
       - '-1'
       pragma:
@@ -299,9 +507,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-root-activity-id:
-      - 6857e965-33d0-4366-a758-1d86fd1f470c
+      - 3e0bc1cf-abf5-44b4-9268-3c5f33ca8d09
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '295'
+      - '298'
     status:
       code: 200
       message: OK
@@ -309,7 +517,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - '*/*'
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -319,21 +527,22 @@ interactions:
       ParameterSetName:
       - -l -n -g --sku
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-mgmt-kusto/2.0.0b1 Python/3.8.10 (Windows-10-10.0.22000-SP0)
+      - python/3.8.10 (Windows-10-10.0.22000-SP0) msrest/0.6.21 msrest_azure/0.6.4
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.34.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationResults/2d786be2-14c1-4dd9-a14a-d45ece902d24?api-version=2022-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationResults/3a32db33-0595-4398-b074-181e770dc0d6?api-version=2019-01-21
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationresults/2d786be2-14c1-4dd9-a14a-d45ece902d24","name":"2d786be2-14c1-4dd9-a14a-d45ece902d24","status":"Running","startTime":"2022-04-25T13:25:48.1370483Z","endTime":"2022-04-25T13:26:29.7165817Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationresults/3a32db33-0595-4398-b074-181e770dc0d6","name":"3a32db33-0595-4398-b074-181e770dc0d6","status":"Running","startTime":"2022-05-09T08:55:26.567789Z","endTime":"2022-05-09T08:56:36.8367628Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '443'
+      - '442'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 25 Apr 2022 13:28:51 GMT
+      - Mon, 09 May 2022 09:00:44 GMT
       expires:
       - '-1'
       pragma:
@@ -349,9 +558,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-root-activity-id:
-      - 6857e965-33d0-4366-a758-1d86fd1f470c
+      - 3e0bc1cf-abf5-44b4-9268-3c5f33ca8d09
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '294'
+      - '299'
     status:
       code: 200
       message: OK
@@ -359,7 +568,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - '*/*'
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -369,21 +578,22 @@ interactions:
       ParameterSetName:
       - -l -n -g --sku
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-mgmt-kusto/2.0.0b1 Python/3.8.10 (Windows-10-10.0.22000-SP0)
+      - python/3.8.10 (Windows-10-10.0.22000-SP0) msrest/0.6.21 msrest_azure/0.6.4
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.34.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationResults/2d786be2-14c1-4dd9-a14a-d45ece902d24?api-version=2022-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationResults/3a32db33-0595-4398-b074-181e770dc0d6?api-version=2019-01-21
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationresults/2d786be2-14c1-4dd9-a14a-d45ece902d24","name":"2d786be2-14c1-4dd9-a14a-d45ece902d24","status":"Running","startTime":"2022-04-25T13:25:48.1370483Z","endTime":"2022-04-25T13:26:29.7165817Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationresults/3a32db33-0595-4398-b074-181e770dc0d6","name":"3a32db33-0595-4398-b074-181e770dc0d6","status":"Running","startTime":"2022-05-09T08:55:26.567789Z","endTime":"2022-05-09T08:56:36.8367628Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '443'
+      - '442'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 25 Apr 2022 13:29:22 GMT
+      - Mon, 09 May 2022 09:01:17 GMT
       expires:
       - '-1'
       pragma:
@@ -399,9 +609,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-root-activity-id:
-      - 6857e965-33d0-4366-a758-1d86fd1f470c
+      - 3e0bc1cf-abf5-44b4-9268-3c5f33ca8d09
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '293'
+      - '299'
     status:
       code: 200
       message: OK
@@ -409,7 +619,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - '*/*'
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -419,21 +629,22 @@ interactions:
       ParameterSetName:
       - -l -n -g --sku
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-mgmt-kusto/2.0.0b1 Python/3.8.10 (Windows-10-10.0.22000-SP0)
+      - python/3.8.10 (Windows-10-10.0.22000-SP0) msrest/0.6.21 msrest_azure/0.6.4
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.34.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationResults/2d786be2-14c1-4dd9-a14a-d45ece902d24?api-version=2022-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationResults/3a32db33-0595-4398-b074-181e770dc0d6?api-version=2019-01-21
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationresults/2d786be2-14c1-4dd9-a14a-d45ece902d24","name":"2d786be2-14c1-4dd9-a14a-d45ece902d24","status":"Running","startTime":"2022-04-25T13:25:48.1370483Z","endTime":"2022-04-25T13:26:29.7165817Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationresults/3a32db33-0595-4398-b074-181e770dc0d6","name":"3a32db33-0595-4398-b074-181e770dc0d6","status":"Running","startTime":"2022-05-09T08:55:26.567789Z","endTime":"2022-05-09T08:56:36.8367628Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '443'
+      - '442'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 25 Apr 2022 13:29:52 GMT
+      - Mon, 09 May 2022 09:01:48 GMT
       expires:
       - '-1'
       pragma:
@@ -449,9 +660,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-root-activity-id:
-      - 6857e965-33d0-4366-a758-1d86fd1f470c
+      - 3e0bc1cf-abf5-44b4-9268-3c5f33ca8d09
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '292'
+      - '299'
     status:
       code: 200
       message: OK
@@ -459,7 +670,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - '*/*'
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -469,21 +680,22 @@ interactions:
       ParameterSetName:
       - -l -n -g --sku
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-mgmt-kusto/2.0.0b1 Python/3.8.10 (Windows-10-10.0.22000-SP0)
+      - python/3.8.10 (Windows-10-10.0.22000-SP0) msrest/0.6.21 msrest_azure/0.6.4
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.34.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationResults/2d786be2-14c1-4dd9-a14a-d45ece902d24?api-version=2022-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationResults/3a32db33-0595-4398-b074-181e770dc0d6?api-version=2019-01-21
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationresults/2d786be2-14c1-4dd9-a14a-d45ece902d24","name":"2d786be2-14c1-4dd9-a14a-d45ece902d24","status":"Running","startTime":"2022-04-25T13:25:48.1370483Z","endTime":"2022-04-25T13:26:29.7165817Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationresults/3a32db33-0595-4398-b074-181e770dc0d6","name":"3a32db33-0595-4398-b074-181e770dc0d6","status":"Running","startTime":"2022-05-09T08:55:26.567789Z","endTime":"2022-05-09T08:56:36.8367628Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '443'
+      - '442'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 25 Apr 2022 13:30:23 GMT
+      - Mon, 09 May 2022 09:02:19 GMT
       expires:
       - '-1'
       pragma:
@@ -499,9 +711,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-root-activity-id:
-      - 6857e965-33d0-4366-a758-1d86fd1f470c
+      - 3e0bc1cf-abf5-44b4-9268-3c5f33ca8d09
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '291'
+      - '298'
     status:
       code: 200
       message: OK
@@ -509,7 +721,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - '*/*'
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -519,21 +731,22 @@ interactions:
       ParameterSetName:
       - -l -n -g --sku
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-mgmt-kusto/2.0.0b1 Python/3.8.10 (Windows-10-10.0.22000-SP0)
+      - python/3.8.10 (Windows-10-10.0.22000-SP0) msrest/0.6.21 msrest_azure/0.6.4
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.34.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationResults/2d786be2-14c1-4dd9-a14a-d45ece902d24?api-version=2022-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationResults/3a32db33-0595-4398-b074-181e770dc0d6?api-version=2019-01-21
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationresults/2d786be2-14c1-4dd9-a14a-d45ece902d24","name":"2d786be2-14c1-4dd9-a14a-d45ece902d24","status":"Running","startTime":"2022-04-25T13:25:48.1370483Z","endTime":"2022-04-25T13:26:29.7165817Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationresults/3a32db33-0595-4398-b074-181e770dc0d6","name":"3a32db33-0595-4398-b074-181e770dc0d6","status":"Running","startTime":"2022-05-09T08:55:26.567789Z","endTime":"2022-05-09T08:56:36.8367628Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '443'
+      - '442'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 25 Apr 2022 13:30:53 GMT
+      - Mon, 09 May 2022 09:02:51 GMT
       expires:
       - '-1'
       pragma:
@@ -549,9 +762,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-root-activity-id:
-      - 6857e965-33d0-4366-a758-1d86fd1f470c
+      - 3e0bc1cf-abf5-44b4-9268-3c5f33ca8d09
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '290'
+      - '299'
     status:
       code: 200
       message: OK
@@ -559,7 +772,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - '*/*'
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -569,21 +782,22 @@ interactions:
       ParameterSetName:
       - -l -n -g --sku
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-mgmt-kusto/2.0.0b1 Python/3.8.10 (Windows-10-10.0.22000-SP0)
+      - python/3.8.10 (Windows-10-10.0.22000-SP0) msrest/0.6.21 msrest_azure/0.6.4
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.34.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationResults/2d786be2-14c1-4dd9-a14a-d45ece902d24?api-version=2022-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationResults/3a32db33-0595-4398-b074-181e770dc0d6?api-version=2019-01-21
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationresults/2d786be2-14c1-4dd9-a14a-d45ece902d24","name":"2d786be2-14c1-4dd9-a14a-d45ece902d24","status":"Running","startTime":"2022-04-25T13:25:48.1370483Z","endTime":"2022-04-25T13:26:29.7165817Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationresults/3a32db33-0595-4398-b074-181e770dc0d6","name":"3a32db33-0595-4398-b074-181e770dc0d6","status":"Running","startTime":"2022-05-09T08:55:26.567789Z","endTime":"2022-05-09T08:56:36.8367628Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '443'
+      - '442'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 25 Apr 2022 13:31:24 GMT
+      - Mon, 09 May 2022 09:03:22 GMT
       expires:
       - '-1'
       pragma:
@@ -599,9 +813,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-root-activity-id:
-      - 6857e965-33d0-4366-a758-1d86fd1f470c
+      - 3e0bc1cf-abf5-44b4-9268-3c5f33ca8d09
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '289'
+      - '298'
     status:
       code: 200
       message: OK
@@ -609,7 +823,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - '*/*'
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -619,21 +833,22 @@ interactions:
       ParameterSetName:
       - -l -n -g --sku
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-mgmt-kusto/2.0.0b1 Python/3.8.10 (Windows-10-10.0.22000-SP0)
+      - python/3.8.10 (Windows-10-10.0.22000-SP0) msrest/0.6.21 msrest_azure/0.6.4
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.34.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationResults/2d786be2-14c1-4dd9-a14a-d45ece902d24?api-version=2022-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationResults/3a32db33-0595-4398-b074-181e770dc0d6?api-version=2019-01-21
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationresults/2d786be2-14c1-4dd9-a14a-d45ece902d24","name":"2d786be2-14c1-4dd9-a14a-d45ece902d24","status":"Running","startTime":"2022-04-25T13:25:48.1370483Z","endTime":"2022-04-25T13:26:29.7165817Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationresults/3a32db33-0595-4398-b074-181e770dc0d6","name":"3a32db33-0595-4398-b074-181e770dc0d6","status":"Running","startTime":"2022-05-09T08:55:26.567789Z","endTime":"2022-05-09T08:56:36.8367628Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '443'
+      - '442'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 25 Apr 2022 13:31:54 GMT
+      - Mon, 09 May 2022 09:03:54 GMT
       expires:
       - '-1'
       pragma:
@@ -649,9 +864,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-root-activity-id:
-      - 6857e965-33d0-4366-a758-1d86fd1f470c
+      - 3e0bc1cf-abf5-44b4-9268-3c5f33ca8d09
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '288'
+      - '298'
     status:
       code: 200
       message: OK
@@ -659,7 +874,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - '*/*'
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -669,21 +884,22 @@ interactions:
       ParameterSetName:
       - -l -n -g --sku
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-mgmt-kusto/2.0.0b1 Python/3.8.10 (Windows-10-10.0.22000-SP0)
+      - python/3.8.10 (Windows-10-10.0.22000-SP0) msrest/0.6.21 msrest_azure/0.6.4
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.34.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationResults/2d786be2-14c1-4dd9-a14a-d45ece902d24?api-version=2022-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationResults/3a32db33-0595-4398-b074-181e770dc0d6?api-version=2019-01-21
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationresults/2d786be2-14c1-4dd9-a14a-d45ece902d24","name":"2d786be2-14c1-4dd9-a14a-d45ece902d24","status":"Running","startTime":"2022-04-25T13:25:48.1370483Z","endTime":"2022-04-25T13:26:29.7165817Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationresults/3a32db33-0595-4398-b074-181e770dc0d6","name":"3a32db33-0595-4398-b074-181e770dc0d6","status":"Running","startTime":"2022-05-09T08:55:26.567789Z","endTime":"2022-05-09T08:56:36.8367628Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '443'
+      - '442'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 25 Apr 2022 13:32:25 GMT
+      - Mon, 09 May 2022 09:04:27 GMT
       expires:
       - '-1'
       pragma:
@@ -699,9 +915,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-root-activity-id:
-      - 6857e965-33d0-4366-a758-1d86fd1f470c
+      - 3e0bc1cf-abf5-44b4-9268-3c5f33ca8d09
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '287'
+      - '299'
     status:
       code: 200
       message: OK
@@ -709,7 +925,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - '*/*'
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -719,21 +935,22 @@ interactions:
       ParameterSetName:
       - -l -n -g --sku
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-mgmt-kusto/2.0.0b1 Python/3.8.10 (Windows-10-10.0.22000-SP0)
+      - python/3.8.10 (Windows-10-10.0.22000-SP0) msrest/0.6.21 msrest_azure/0.6.4
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.34.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationResults/2d786be2-14c1-4dd9-a14a-d45ece902d24?api-version=2022-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationResults/3a32db33-0595-4398-b074-181e770dc0d6?api-version=2019-01-21
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationresults/2d786be2-14c1-4dd9-a14a-d45ece902d24","name":"2d786be2-14c1-4dd9-a14a-d45ece902d24","status":"Running","startTime":"2022-04-25T13:25:48.1370483Z","endTime":"2022-04-25T13:26:29.7165817Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationresults/3a32db33-0595-4398-b074-181e770dc0d6","name":"3a32db33-0595-4398-b074-181e770dc0d6","status":"Running","startTime":"2022-05-09T08:55:26.567789Z","endTime":"2022-05-09T08:56:36.8367628Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '443'
+      - '442'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 25 Apr 2022 13:32:55 GMT
+      - Mon, 09 May 2022 09:04:58 GMT
       expires:
       - '-1'
       pragma:
@@ -749,9 +966,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-root-activity-id:
-      - 6857e965-33d0-4366-a758-1d86fd1f470c
+      - 3e0bc1cf-abf5-44b4-9268-3c5f33ca8d09
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '286'
+      - '297'
     status:
       code: 200
       message: OK
@@ -759,7 +976,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - '*/*'
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -769,21 +986,22 @@ interactions:
       ParameterSetName:
       - -l -n -g --sku
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-mgmt-kusto/2.0.0b1 Python/3.8.10 (Windows-10-10.0.22000-SP0)
+      - python/3.8.10 (Windows-10-10.0.22000-SP0) msrest/0.6.21 msrest_azure/0.6.4
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.34.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationResults/2d786be2-14c1-4dd9-a14a-d45ece902d24?api-version=2022-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationResults/3a32db33-0595-4398-b074-181e770dc0d6?api-version=2019-01-21
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationresults/2d786be2-14c1-4dd9-a14a-d45ece902d24","name":"2d786be2-14c1-4dd9-a14a-d45ece902d24","status":"Running","startTime":"2022-04-25T13:25:48.1370483Z","endTime":"2022-04-25T13:26:29.7165817Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationresults/3a32db33-0595-4398-b074-181e770dc0d6","name":"3a32db33-0595-4398-b074-181e770dc0d6","status":"Running","startTime":"2022-05-09T08:55:26.567789Z","endTime":"2022-05-09T08:56:36.8367628Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '443'
+      - '442'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 25 Apr 2022 13:33:26 GMT
+      - Mon, 09 May 2022 09:05:29 GMT
       expires:
       - '-1'
       pragma:
@@ -799,9 +1017,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-root-activity-id:
-      - 6857e965-33d0-4366-a758-1d86fd1f470c
+      - 3e0bc1cf-abf5-44b4-9268-3c5f33ca8d09
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '285'
+      - '296'
     status:
       code: 200
       message: OK
@@ -809,7 +1027,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - '*/*'
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -819,21 +1037,22 @@ interactions:
       ParameterSetName:
       - -l -n -g --sku
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-mgmt-kusto/2.0.0b1 Python/3.8.10 (Windows-10-10.0.22000-SP0)
+      - python/3.8.10 (Windows-10-10.0.22000-SP0) msrest/0.6.21 msrest_azure/0.6.4
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.34.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationResults/2d786be2-14c1-4dd9-a14a-d45ece902d24?api-version=2022-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationResults/3a32db33-0595-4398-b074-181e770dc0d6?api-version=2019-01-21
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationresults/2d786be2-14c1-4dd9-a14a-d45ece902d24","name":"2d786be2-14c1-4dd9-a14a-d45ece902d24","status":"Running","startTime":"2022-04-25T13:25:48.1370483Z","endTime":"2022-04-25T13:26:29.7165817Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationresults/3a32db33-0595-4398-b074-181e770dc0d6","name":"3a32db33-0595-4398-b074-181e770dc0d6","status":"Running","startTime":"2022-05-09T08:55:26.567789Z","endTime":"2022-05-09T08:56:36.8367628Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '443'
+      - '442'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 25 Apr 2022 13:33:56 GMT
+      - Mon, 09 May 2022 09:06:01 GMT
       expires:
       - '-1'
       pragma:
@@ -849,9 +1068,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-root-activity-id:
-      - 6857e965-33d0-4366-a758-1d86fd1f470c
+      - 3e0bc1cf-abf5-44b4-9268-3c5f33ca8d09
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '284'
+      - '298'
     status:
       code: 200
       message: OK
@@ -859,7 +1078,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - '*/*'
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -869,21 +1088,22 @@ interactions:
       ParameterSetName:
       - -l -n -g --sku
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-mgmt-kusto/2.0.0b1 Python/3.8.10 (Windows-10-10.0.22000-SP0)
+      - python/3.8.10 (Windows-10-10.0.22000-SP0) msrest/0.6.21 msrest_azure/0.6.4
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.34.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationResults/2d786be2-14c1-4dd9-a14a-d45ece902d24?api-version=2022-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationResults/3a32db33-0595-4398-b074-181e770dc0d6?api-version=2019-01-21
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationresults/2d786be2-14c1-4dd9-a14a-d45ece902d24","name":"2d786be2-14c1-4dd9-a14a-d45ece902d24","status":"Running","startTime":"2022-04-25T13:25:48.1370483Z","endTime":"2022-04-25T13:26:29.7165817Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationresults/3a32db33-0595-4398-b074-181e770dc0d6","name":"3a32db33-0595-4398-b074-181e770dc0d6","status":"Running","startTime":"2022-05-09T08:55:26.567789Z","endTime":"2022-05-09T08:56:36.8367628Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '443'
+      - '442'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 25 Apr 2022 13:34:26 GMT
+      - Mon, 09 May 2022 09:06:32 GMT
       expires:
       - '-1'
       pragma:
@@ -899,9 +1119,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-root-activity-id:
-      - 6857e965-33d0-4366-a758-1d86fd1f470c
+      - 3e0bc1cf-abf5-44b4-9268-3c5f33ca8d09
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '283'
+      - '297'
     status:
       code: 200
       message: OK
@@ -909,7 +1129,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - '*/*'
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -919,21 +1139,22 @@ interactions:
       ParameterSetName:
       - -l -n -g --sku
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-mgmt-kusto/2.0.0b1 Python/3.8.10 (Windows-10-10.0.22000-SP0)
+      - python/3.8.10 (Windows-10-10.0.22000-SP0) msrest/0.6.21 msrest_azure/0.6.4
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.34.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationResults/2d786be2-14c1-4dd9-a14a-d45ece902d24?api-version=2022-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationResults/3a32db33-0595-4398-b074-181e770dc0d6?api-version=2019-01-21
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationresults/2d786be2-14c1-4dd9-a14a-d45ece902d24","name":"2d786be2-14c1-4dd9-a14a-d45ece902d24","status":"Running","startTime":"2022-04-25T13:25:48.1370483Z","endTime":"2022-04-25T13:26:29.7165817Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationresults/3a32db33-0595-4398-b074-181e770dc0d6","name":"3a32db33-0595-4398-b074-181e770dc0d6","status":"Running","startTime":"2022-05-09T08:55:26.567789Z","endTime":"2022-05-09T08:56:36.8367628Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '443'
+      - '442'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 25 Apr 2022 13:34:57 GMT
+      - Mon, 09 May 2022 09:07:04 GMT
       expires:
       - '-1'
       pragma:
@@ -949,9 +1170,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-root-activity-id:
-      - 6857e965-33d0-4366-a758-1d86fd1f470c
+      - 3e0bc1cf-abf5-44b4-9268-3c5f33ca8d09
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '282'
+      - '297'
     status:
       code: 200
       message: OK
@@ -959,7 +1180,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - '*/*'
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -969,21 +1190,22 @@ interactions:
       ParameterSetName:
       - -l -n -g --sku
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-mgmt-kusto/2.0.0b1 Python/3.8.10 (Windows-10-10.0.22000-SP0)
+      - python/3.8.10 (Windows-10-10.0.22000-SP0) msrest/0.6.21 msrest_azure/0.6.4
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.34.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationResults/2d786be2-14c1-4dd9-a14a-d45ece902d24?api-version=2022-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationResults/3a32db33-0595-4398-b074-181e770dc0d6?api-version=2019-01-21
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationresults/2d786be2-14c1-4dd9-a14a-d45ece902d24","name":"2d786be2-14c1-4dd9-a14a-d45ece902d24","status":"Running","startTime":"2022-04-25T13:25:48.1370483Z","endTime":"2022-04-25T13:26:29.7165817Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationresults/3a32db33-0595-4398-b074-181e770dc0d6","name":"3a32db33-0595-4398-b074-181e770dc0d6","status":"Succeeded","startTime":"2022-05-09T08:55:26.567789Z","endTime":"2022-05-09T09:07:10.9081548Z","percentComplete":1.0,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Succeeded","operationState":"Completed"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '443'
+      - '445'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 25 Apr 2022 13:35:28 GMT
+      - Mon, 09 May 2022 09:07:34 GMT
       expires:
       - '-1'
       pragma:
@@ -999,9 +1221,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-root-activity-id:
-      - 6857e965-33d0-4366-a758-1d86fd1f470c
+      - 3e0bc1cf-abf5-44b4-9268-3c5f33ca8d09
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '289'
+      - '299'
     status:
       code: 200
       message: OK
@@ -1009,7 +1231,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - '*/*'
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -1019,224 +1241,25 @@ interactions:
       ParameterSetName:
       - -l -n -g --sku
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-mgmt-kusto/2.0.0b1 Python/3.8.10 (Windows-10-10.0.22000-SP0)
+      - python/3.8.10 (Windows-10-10.0.22000-SP0) msrest/0.6.21 msrest_azure/0.6.4
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.34.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationResults/2d786be2-14c1-4dd9-a14a-d45ece902d24?api-version=2022-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Kusto/clusters/clikusto000002?api-version=2019-01-21
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationresults/2d786be2-14c1-4dd9-a14a-d45ece902d24","name":"2d786be2-14c1-4dd9-a14a-d45ece902d24","status":"Running","startTime":"2022-04-25T13:25:48.1370483Z","endTime":"2022-04-25T13:26:29.7165817Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Kusto/Clusters/clikusto000002","name":"clikusto000002","type":"Microsoft.Kusto/Clusters","etag":"\"2022-05-09T09:07:10.8144020Z\"","location":"East
+        US","sku":{"name":"Standard_D12_v2","tier":"Standard","capacity":2},"tags":{},"properties":{"state":"Running","uri":"https://clikusto000002.eastus.dev.kusto.windows.net","dataIngestionUri":"https://ingest-clikusto000002.eastus.dev.kusto.windows.net","trustedExternalTenants":[],"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '443'
+      - '570'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 25 Apr 2022 13:35:58 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-operation-root-activity-id:
-      - 6857e965-33d0-4366-a758-1d86fd1f470c
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '288'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - kusto cluster create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -l -n -g --sku
-      User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-mgmt-kusto/2.0.0b1 Python/3.8.10 (Windows-10-10.0.22000-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationResults/2d786be2-14c1-4dd9-a14a-d45ece902d24?api-version=2022-02-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationresults/2d786be2-14c1-4dd9-a14a-d45ece902d24","name":"2d786be2-14c1-4dd9-a14a-d45ece902d24","status":"Running","startTime":"2022-04-25T13:25:48.1370483Z","endTime":"2022-04-25T13:26:29.7165817Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '443'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 25 Apr 2022 13:36:29 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-operation-root-activity-id:
-      - 6857e965-33d0-4366-a758-1d86fd1f470c
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '287'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - kusto cluster create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -l -n -g --sku
-      User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-mgmt-kusto/2.0.0b1 Python/3.8.10 (Windows-10-10.0.22000-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationResults/2d786be2-14c1-4dd9-a14a-d45ece902d24?api-version=2022-02-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationresults/2d786be2-14c1-4dd9-a14a-d45ece902d24","name":"2d786be2-14c1-4dd9-a14a-d45ece902d24","status":"Running","startTime":"2022-04-25T13:25:48.1370483Z","endTime":"2022-04-25T13:26:29.7165817Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '443'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 25 Apr 2022 13:36:59 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-operation-root-activity-id:
-      - 6857e965-33d0-4366-a758-1d86fd1f470c
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '286'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - kusto cluster create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -l -n -g --sku
-      User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-mgmt-kusto/2.0.0b1 Python/3.8.10 (Windows-10-10.0.22000-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationResults/2d786be2-14c1-4dd9-a14a-d45ece902d24?api-version=2022-02-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/eastus/operationresults/2d786be2-14c1-4dd9-a14a-d45ece902d24","name":"2d786be2-14c1-4dd9-a14a-d45ece902d24","status":"Succeeded","startTime":"2022-04-25T13:25:48.1370483Z","endTime":"2022-04-25T13:37:22.7272897Z","percentComplete":1.0,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Succeeded","operationState":"Completed"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '446'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 25 Apr 2022 13:37:29 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-operation-root-activity-id:
-      - 6857e965-33d0-4366-a758-1d86fd1f470c
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '285'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - kusto cluster create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -l -n -g --sku
-      User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-mgmt-kusto/2.0.0b1 Python/3.8.10 (Windows-10-10.0.22000-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Kusto/clusters/clikusto000002?api-version=2022-02-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Kusto/Clusters/clikusto000002","name":"clikusto000002","type":"Microsoft.Kusto/Clusters","etag":"\"2022-04-25T13:37:22.6491621Z\"","location":"East
-        US","sku":{"name":"Standard_D12_v2","tier":"Standard","capacity":2},"tags":{},"properties":{"state":"Running","stateReason":null,"uri":"https://clikusto000002.eastus.dev.kusto.windows.net","dataIngestionUri":"https://ingest-clikusto000002.eastus.dev.kusto.windows.net","trustedExternalTenants":[],"virtualNetworkConfiguration":null,"optimizedAutoscale":null,"enableDiskEncryption":false,"enableStreamingIngest":false,"keyVaultProperties":null,"languageExtensions":{"value":[]},"enablePurge":false,"enableDoubleEncryption":false,"engineType":"V3","acceptedAudiences":[],"restrictOutboundNetworkAccess":"Disabled","allowedFqdnList":[],"publicNetworkAccess":"Enabled","allowedIpRangeList":[],"enableAutoStop":true,"publicIPType":"IPv4","virtualClusterGraduationProperties":null,"privateEndpointConnections":[],"provisioningState":"Succeeded"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1099'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 25 Apr 2022 13:37:30 GMT
+      - Mon, 09 May 2022 09:07:37 GMT
       etag:
-      - '"2022-04-25T13:37:22.6491621Z"'
+      - '"2022-05-09T09:07:10.8144020Z"'
       expires:
       - '-1'
       pragma:
@@ -1276,7 +1299,7 @@ interactions:
   response:
     body:
       string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Kusto/Clusters/clikusto000002/PrivateLinkResources/cluster","name":"clikusto000002/cluster","type":"Microsoft.Kusto/Clusters/PrivateLinkResources","location":"East
-        US","properties":{"groupId":"cluster","requiredMembers":["Engine","DataManagement","blob-hznkstrldclikusto00000200","queue-hznkstrldclikusto00000200","table-hznkstrldclikusto00000200","blob-nj3kstrldclikusto00000201","queue-nj3kstrldclikusto00000201","table-nj3kstrldclikusto00000201"],"requiredZoneNames":["privatelink.eastus.dev.kusto.windows.net","privatelink.blob.core.windows.net","privatelink.queue.core.windows.net","privatelink.table.core.windows.net"],"provisioningState":"Succeeded"}}]}'
+        US","properties":{"groupId":"cluster","requiredMembers":["Engine","DataManagement","blob-qfpkstrldclikusto00000200","queue-qfpkstrldclikusto00000200","table-qfpkstrldclikusto00000200","blob-9hykstrldclikusto00000201","queue-9hykstrldclikusto00000201","table-9hykstrldclikusto00000201"],"requiredZoneNames":["privatelink.eastus.dev.kusto.windows.net","privatelink.blob.core.windows.net","privatelink.queue.core.windows.net","privatelink.table.core.windows.net"],"provisioningState":"Succeeded"}}]}'
     headers:
       cache-control:
       - no-cache
@@ -1285,7 +1308,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 25 Apr 2022 13:37:31 GMT
+      - Mon, 09 May 2022 09:07:42 GMT
       expires:
       - '-1'
       pragma:
