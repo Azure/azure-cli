@@ -28,16 +28,23 @@ class AAZOperation:
 
 
 class AAZHttpOperation(AAZOperation):
-    CLIENT_TYPE = None
+    """ Http Operation
+    """
+
+    CLIENT_TYPE = None  # http client registered, its value should be in the keys of aaz._client.registered_clients
 
     def __init__(self, ctx):
         super().__init__(ctx)
         self.client = ctx.get_http_client(self.CLIENT_TYPE)
+        # common http errors by status code
         self.error_map = {
             401: ClientAuthenticationError,
             404: ResourceNotFoundError,
             409: ResourceExistsError,
         }
+
+    def __call__(self, *args, **kwargs):
+        raise NotImplementedError()
 
     @staticmethod
     def serialize_url_param(name, value, required=True, skip_quote=False, **kwargs):  # pylint: disable=unused-argument
@@ -47,7 +54,7 @@ class AAZHttpOperation(AAZOperation):
         if value == AAZUndefined or value == None:  # noqa: E711, pylint: disable=singleton-comparison
             if required:
                 raise ValueError(f"url parameter {name} is required.")
-            return {}
+            return {}  # return empty dict
 
         if isinstance(value, (list, dict)):
             raise NotImplementedError(f"not support type {type(value)} for url parameter")
@@ -136,6 +143,7 @@ class AAZHttpOperation(AAZOperation):
     def serialize_content(value, required=False):
         def processor(schema, result):
             if schema._flags.get('read_only', False):
+                # ignore read_only fields when serialize content
                 return AAZUndefined
             return result
 
@@ -160,6 +168,8 @@ class AAZHttpOperation(AAZOperation):
 
     @staticmethod
     def new_content_builder(arg_value, value=None, typ=None, typ_kwargs=None):
+        """ Create a Content Builder
+        """
         assert isinstance(arg_value, AAZBaseValue)
         arg_data = arg_value.to_serialized_data()
         if value is None:
@@ -184,6 +194,8 @@ class AAZHttpOperation(AAZOperation):
             args=[AAZArgBrowser(arg_value=arg_value, arg_data=arg_data)]
         )
         return value, builder
+
+    # properties
 
     @property
     def url(self):
@@ -219,9 +231,12 @@ class AAZHttpOperation(AAZOperation):
 
     @property
     def error_format(self):
+        # value should be in the keys of aaz._error_format.registered_error_formats
         return None
 
     def make_request(self):
+        """ Make http request based on the properties.
+        """
         if self.method in ("GET", ):
             # support making request for next link
             if self.ctx.next_link:
@@ -248,29 +263,35 @@ class AAZHttpOperation(AAZOperation):
             raise ValueError(f"Invalid request method {self.method}")
         return request
 
-    def __call__(self, *args, **kwargs):
-        raise NotImplementedError()
-
     def on_error(self, response):
+        """ handle errors in response
+        """
+        # raise common http errors
         error_type = self.error_map.get(response.status_code)
         if error_type:
             raise error_type(response=response)
+        # raise HttpResponseError
         error_format = self.ctx.get_error_format(self.error_format)
         raise HttpResponseError(response=response, error_format=error_format)
 
 
 class AAZJsonInstanceUpdateOperation(AAZOperation):
+    """ Instance Update Operation
+    """
 
     def __call__(self, *args, **kwargs):
         raise NotImplementedError()
 
     @staticmethod
-    def new_content_builder(arg_value, value=None, typ=None):
+    def new_content_builder(arg_value, value=None, typ=None, typ_kwargs=None):
+        """ Create a Content Builder
+        """
         assert isinstance(arg_value, AAZBaseValue)
         arg_data = arg_value.to_serialized_data()
         if value is None:
             assert issubclass(typ, AAZBaseType)
-            schema = typ()
+            schema = typ(**typ_kwargs) if typ_kwargs else typ()
+
             if isinstance(schema, AAZSimpleType):
                 value = typ._ValueCls(
                     schema=schema,
@@ -292,6 +313,8 @@ class AAZJsonInstanceUpdateOperation(AAZOperation):
 
 
 class AAZGenericInstanceUpdateOperation(AAZOperation):
+    """ Generic Instance Update Operation
+    """
 
     def __call__(self, *args, **kwargs):
         raise NotImplementedError()
