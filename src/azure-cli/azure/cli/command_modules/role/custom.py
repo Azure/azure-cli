@@ -1879,7 +1879,7 @@ def delete_group(client, object_id):
     return client.group_delete(id=object_id)
 
 
-def get_member_groups(client, object_id, security_enabled_only):
+def get_member_groups(client, object_id, security_enabled_only=False):
     """Get a collection of object IDs of groups of which the specified group is a member."""
     body = {
         "securityEnabledOnly": security_enabled_only
