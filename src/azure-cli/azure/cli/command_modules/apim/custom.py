@@ -184,7 +184,9 @@ def apim_apply_network_configuration_updates(client, resource_group_name, name, 
     if location is not None:
         properties['location'] = location
 
-    return client.api_management_service.apply_network_configuration_updates(resource_group_name, name, properties)
+    return client.api_management_service.begin_apply_network_configuration_updates(resource_group_name,
+                                                                                   name,
+                                                                                   properties)
 
 
 # Schema operations
