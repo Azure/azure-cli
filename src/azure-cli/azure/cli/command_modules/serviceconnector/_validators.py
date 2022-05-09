@@ -175,7 +175,7 @@ def get_client_type(cmd, namespace):
 
         return client_type
 
-    # fallback to use Dotnet as client type
+    # fallback to use None as client type
     client_type = None
     if 'webapp' in cmd.name:
         client_type = _infer_webapp(namespace.source_id)
@@ -184,7 +184,7 @@ def get_client_type(cmd, namespace):
 
     method = 'detected'
     if client_type is None:
-        client_type = CLIENT_TYPE.Dotnet
+        client_type = CLIENT_TYPE.Blank
         method = 'default'
 
     logger.warning('Client type is not specified, use %s one: --client-type %s', method, client_type.value)
