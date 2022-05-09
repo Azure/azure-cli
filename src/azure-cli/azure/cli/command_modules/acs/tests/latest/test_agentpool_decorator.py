@@ -296,6 +296,75 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         ):
             self.assertEqual(ctx_3.get_kubernetes_version(), "custom_kubernetes_version")
 
+    def common_get_node_vm_size(self):
+        # default
+        ctx_1 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"node_vm_size": None}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_1.get_node_vm_size(), CONST_DEFAULT_NODE_VM_SIZE)
+        agentpool = self.create_initialized_agentpool_instance(vm_size="Standard_ABCD_v2")
+        ctx_1.attach_agentpool(agentpool)
+        self.assertEqual(ctx_1.get_node_vm_size(), "Standard_ABCD_v2")
+
+        # custom value
+        ctx_2 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"node_vm_size": None, "snapshot_id": "test_snapshot_id"}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        mock_snapshot = Mock(vm_size="test_vm_size")
+        with patch(
+            "azure.cli.command_modules.acs.agentpool_decorator.get_snapshot_by_snapshot_id",
+            return_value=mock_snapshot,
+        ):
+            self.assertEqual(ctx_2.get_node_vm_size(), "test_vm_size")
+
+        # custom value
+        ctx_3 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict(
+                {
+                    "node_vm_size": "custom_node_vm_size",
+                    "snapshot_id": "test_snapshot_id",
+                }
+            ),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        mock_snapshot = Mock(vm_size="test_vm_size")
+        with patch(
+            "azure.cli.command_modules.acs.agentpool_decorator.get_snapshot_by_snapshot_id",
+            return_value=mock_snapshot,
+        ):
+            self.assertEqual(ctx_3.get_node_vm_size(), "custom_node_vm_size")
+
+        # custom value
+        ctx_4 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict(
+                {
+                    "node_vm_size": None,
+                    "os_type": "WINDOWS",
+                }
+            ),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+            # fail on windows os type for ManagedCluster mode (aks create)
+            with self.assertRaises(InvalidArgumentValueError):
+                ctx_4.get_node_vm_size()
+        else:
+            self.assertEqual(ctx_4.get_node_vm_size(), CONST_DEFAULT_WINDOWS_NODE_VM_SIZE)
+
     def common_get_os_type(self):
         # default
         ctx_1 = AKSAgentPoolContext(
@@ -412,75 +481,6 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
             return_value=mock_snapshot,
         ):
             self.assertEqual(ctx_3.get_os_sku(), "custom_os_sku")
-
-    def common_get_node_vm_size(self):
-        # default
-        ctx_1 = AKSAgentPoolContext(
-            self.cmd,
-            AKSAgentPoolParamDict({"node_vm_size": None}),
-            self.models,
-            DecoratorMode.CREATE,
-            self.agentpool_decorator_mode,
-        )
-        self.assertEqual(ctx_1.get_node_vm_size(), CONST_DEFAULT_NODE_VM_SIZE)
-        agentpool = self.create_initialized_agentpool_instance(vm_size="Standard_ABCD_v2")
-        ctx_1.attach_agentpool(agentpool)
-        self.assertEqual(ctx_1.get_node_vm_size(), "Standard_ABCD_v2")
-
-        # custom value
-        ctx_2 = AKSAgentPoolContext(
-            self.cmd,
-            AKSAgentPoolParamDict({"node_vm_size": None, "snapshot_id": "test_snapshot_id"}),
-            self.models,
-            DecoratorMode.CREATE,
-            self.agentpool_decorator_mode,
-        )
-        mock_snapshot = Mock(vm_size="test_vm_size")
-        with patch(
-            "azure.cli.command_modules.acs.agentpool_decorator.get_snapshot_by_snapshot_id",
-            return_value=mock_snapshot,
-        ):
-            self.assertEqual(ctx_2.get_node_vm_size(), "test_vm_size")
-
-        # custom value
-        ctx_3 = AKSAgentPoolContext(
-            self.cmd,
-            AKSAgentPoolParamDict(
-                {
-                    "node_vm_size": "custom_node_vm_size",
-                    "snapshot_id": "test_snapshot_id",
-                }
-            ),
-            self.models,
-            DecoratorMode.CREATE,
-            self.agentpool_decorator_mode,
-        )
-        mock_snapshot = Mock(vm_size="test_vm_size")
-        with patch(
-            "azure.cli.command_modules.acs.agentpool_decorator.get_snapshot_by_snapshot_id",
-            return_value=mock_snapshot,
-        ):
-            self.assertEqual(ctx_3.get_node_vm_size(), "custom_node_vm_size")
-
-        # custom value
-        ctx_4 = AKSAgentPoolContext(
-            self.cmd,
-            AKSAgentPoolParamDict(
-                {
-                    "node_vm_size": None,
-                    "os_type": "WINDOWS",
-                }
-            ),
-            self.models,
-            DecoratorMode.CREATE,
-            self.agentpool_decorator_mode,
-        )
-        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
-            # fail on windows os type for ManagedCluster mode (aks create)
-            with self.assertRaises(InvalidArgumentValueError):
-                ctx_4.get_node_vm_size()
-        else:
-            self.assertEqual(ctx_4.get_node_vm_size(), CONST_DEFAULT_WINDOWS_NODE_VM_SIZE)
 
     def common_get_vnet_subnet_id(self):
         # default
@@ -1312,14 +1312,14 @@ class AKSAgentPoolContextStandaloneModeTestCase(AKSAgentPoolContextCommonTestCas
     def test_get_kubernetes_version(self):
         self.common_get_kubernetes_version()
 
+    def test_get_node_vm_size(self):
+        self.common_get_node_vm_size()
+
     def test_get_os_type(self):
         self.common_get_os_type()
 
     def test_get_os_sku(self):
         self.common_get_os_sku()
-
-    def test_get_node_vm_size(self):
-        self.common_get_node_vm_size()
 
     def test_get_vnet_subnet_id(self):
         self.common_get_vnet_subnet_id()
@@ -1461,14 +1461,14 @@ class AKSAgentPoolContextManagedClusterModeTestCase(AKSAgentPoolContextCommonTes
     def test_get_kubernetes_version(self):
         self.common_get_kubernetes_version()
 
+    def test_get_node_vm_size(self):
+        self.common_get_node_vm_size()
+
     def test_get_os_type(self):
         self.common_get_os_type()
 
     def test_get_os_sku(self):
         self.common_get_os_sku()
-
-    def test_get_node_vm_size(self):
-        self.common_get_node_vm_size()
 
     def test_get_vnet_subnet_id(self):
         self.common_get_vnet_subnet_id()
@@ -1675,9 +1675,9 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
         dec_agentpool_1 = self._restore_defaults_in_agentpool(dec_agentpool_1)
         ground_truth_agentpool_1 = self.create_initialized_agentpool_instance(
             orchestrator_version="test_kubernetes_version",
+            vm_size=CONST_DEFAULT_NODE_VM_SIZE,
             os_type=CONST_DEFAULT_NODE_OS_TYPE,
             os_sku=None,
-            vm_size=CONST_DEFAULT_NODE_VM_SIZE,
         )
         self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
 
@@ -1714,9 +1714,9 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
         ground_truth_creation_data_2 = dec_2.models.CreationData(source_resource_id="test_snapshot_id")
         ground_truth_agentpool_2 = self.create_initialized_agentpool_instance(
             orchestrator_version="test_kubernetes_version",
+            vm_size="test_vm_size",
             os_type="test_os_type",
             os_sku="test_os_sku",
-            vm_size="test_vm_size",
             creation_data=ground_truth_creation_data_2,
         )
         self.assertEqual(dec_agentpool_2, ground_truth_agentpool_2)
@@ -2187,8 +2187,8 @@ class AKSAgentPoolAddDecoratorManagedClusterModeTestCase(AKSAgentPoolAddDecorato
         ground_truth_agentpool_1 = self.create_initialized_agentpool_instance(
             nodepool_name="nodepool1",
             orchestrator_version="",
-            os_type=CONST_DEFAULT_NODE_OS_TYPE,
             vm_size=CONST_DEFAULT_NODE_VM_SIZE,
+            os_type=CONST_DEFAULT_NODE_OS_TYPE,
             enable_node_public_ip=False,
             enable_auto_scaling=False,
             count=3,

@@ -388,6 +388,52 @@ class AKSAgentPoolContext(BaseAKSContext):
         """
         return self._get_kubernetes_version(read_only=False)
 
+    def _get_node_vm_size(self, read_only: bool = False) -> str:
+        """Internal function to dynamically obtain the value of node_vm_size according to the context.
+
+        If snapshot_id is specified, dynamic completion will be triggerd, and will try to get the corresponding value
+        from the Snapshot. When determining the value of the parameter, obtaining from `agentpool` takes precedence over
+        user's explicit input over snapshot over default vaule.
+
+        :return: string
+        """
+        # read the original value passed by the command
+        raw_value = self.raw_param.get("node_vm_size")
+        # try to read the property value corresponding to the parameter from the `agentpool` object
+        value_obtained_from_agentpool = None
+        if self.agentpool:
+            value_obtained_from_agentpool = self.agentpool.vm_size
+        # try to retrieve the value from snapshot
+        value_obtained_from_snapshot = None
+        # skip dynamic completion if read_only is specified
+        if not read_only:
+            snapshot = self.get_snapshot()
+            if snapshot:
+                value_obtained_from_snapshot = snapshot.vm_size
+
+        # set default value
+        if value_obtained_from_agentpool is not None:
+            node_vm_size = value_obtained_from_agentpool
+        elif raw_value is not None:
+            node_vm_size = raw_value
+        elif not read_only and value_obtained_from_snapshot is not None:
+            node_vm_size = value_obtained_from_snapshot
+        else:
+            if self.get_os_type().lower() == "windows":
+                node_vm_size = CONST_DEFAULT_WINDOWS_NODE_VM_SIZE
+            else:
+                node_vm_size = CONST_DEFAULT_NODE_VM_SIZE
+
+        # this parameter does not need validation
+        return node_vm_size
+
+    def get_node_vm_size(self) -> str:
+        """Obtain the value of node_vm_size.
+
+        :return: string
+        """
+        return self._get_node_vm_size(read_only=False)
+
     def _get_os_type(self, read_only: bool = False) -> Union[str, None]:
         """Internal function to dynamically obtain the value of os_type according to the context.
 
@@ -479,52 +525,6 @@ class AKSAgentPoolContext(BaseAKSContext):
         :return: string or None
         """
         return self._get_os_sku(read_only=False)
-
-    def _get_node_vm_size(self, read_only: bool = False) -> str:
-        """Internal function to dynamically obtain the value of node_vm_size according to the context.
-
-        If snapshot_id is specified, dynamic completion will be triggerd, and will try to get the corresponding value
-        from the Snapshot. When determining the value of the parameter, obtaining from `agentpool` takes precedence over
-        user's explicit input over snapshot over default vaule.
-
-        :return: string
-        """
-        # read the original value passed by the command
-        raw_value = self.raw_param.get("node_vm_size")
-        # try to read the property value corresponding to the parameter from the `agentpool` object
-        value_obtained_from_agentpool = None
-        if self.agentpool:
-            value_obtained_from_agentpool = self.agentpool.vm_size
-        # try to retrieve the value from snapshot
-        value_obtained_from_snapshot = None
-        # skip dynamic completion if read_only is specified
-        if not read_only:
-            snapshot = self.get_snapshot()
-            if snapshot:
-                value_obtained_from_snapshot = snapshot.vm_size
-
-        # set default value
-        if value_obtained_from_agentpool is not None:
-            node_vm_size = value_obtained_from_agentpool
-        elif raw_value is not None:
-            node_vm_size = raw_value
-        elif not read_only and value_obtained_from_snapshot is not None:
-            node_vm_size = value_obtained_from_snapshot
-        else:
-            if self.get_os_type().lower() == "windows":
-                node_vm_size = CONST_DEFAULT_WINDOWS_NODE_VM_SIZE
-            else:
-                node_vm_size = CONST_DEFAULT_NODE_VM_SIZE
-
-        # this parameter does not need validation
-        return node_vm_size
-
-    def get_node_vm_size(self) -> str:
-        """Obtain the value of node_vm_size.
-
-        :return: string
-        """
-        return self._get_node_vm_size(read_only=False)
 
     def get_vnet_subnet_id(self) -> Union[str, None]:
         """Obtain the value of vnet_subnet_id.
@@ -1312,9 +1312,9 @@ class AKSAgentPoolAddDecorator:
         agentpool.creation_data = creation_data
 
         agentpool.orchestrator_version = self.context.get_kubernetes_version()
+        agentpool.vm_size = self.context.get_node_vm_size()
         agentpool.os_type = self.context.get_os_type()
         agentpool.os_sku = self.context.get_os_sku()
-        agentpool.vm_size = self.context.get_node_vm_size()
         return agentpool
 
     def set_up_node_network_properties(self, agentpool: AgentPool) -> AgentPool:
