@@ -25,15 +25,15 @@ examples:
   - name: Create an application.
     text: |
         az ad app create --display-name mytestapp
-  - name: Create an application that can fall back to public client with delegated permission of "access the AAD directory as the signed-in user"
+  - name: Create an application that can fall back to public client with Microsoft Graph delegated permission Application.Read.All
     text: |
         az ad app create --display-name my-public --is-fallback-public-client --required-resource-accesses @manifest.json
         ("manifest.json" contains the following content)
         [{
-            "resourceAppId": "00000002-0000-0000-c000-000000000000",
+            "resourceAppId": "00000003-0000-0000-c000-000000000000",
             "resourceAccess": [
                 {
-                    "id": "a42657d6-7f20-40e3-b6f0-cee03008a62a",
+                    "id": "c79f8feb-a9db-4090-85f9-90d820caa0eb",
                     "type": "Scope"
                 }
            ]
