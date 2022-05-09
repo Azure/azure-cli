@@ -45,6 +45,7 @@ group_property_map = {
     'description': 'description'
 }
 
+
 def set_object_properties(property_map, graph_object, **kwargs):
     """Set properties of the graph object according to property_map.
     property_map is a map from argument name to property name, such as display_name -> displayName.

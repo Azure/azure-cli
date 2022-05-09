@@ -612,9 +612,9 @@ def create_application(cmd, client, display_name, identifier_uris=None,
                        public_client_redirect_uris=None,
                        # JSON properties
                        app_roles=None, optional_claims=None, required_resource_accesses=None):
-
+    # pylint:disable=too-many-locals
     graph_client = _graph_client_factory(cmd.cli_ctx)
-    key_credentials, password_creds, required_accesses = None, None, None
+
     existing_apps = list_applications(cmd, client, display_name=display_name)
     if existing_apps:
         if identifier_uris:
@@ -681,7 +681,7 @@ def create_application(cmd, client, display_name, identifier_uris=None,
     return result
 
 
-def update_application(instance, display_name=None, identifier_uris=None,
+def update_application(instance, display_name=None, identifier_uris=None,  # pylint: disable=unused-argument
                        is_fallback_public_client=None, sign_in_audience=None,
                        # keyCredentials
                        key_value=None, key_type=None, key_usage=None, start_date=None, end_date=None,
@@ -736,7 +736,8 @@ def delete_application(client, identifier):
     client.application_delete(id=object_id)
 
 
-def list_applications(cmd, client, app_id=None, display_name=None, identifier_uri=None, query_filter=None,
+def list_applications(cmd, client, app_id=None,  # pylint: disable=unused-argument
+                      display_name=None, identifier_uri=None, query_filter=None,
                       include_all=None, show_mine=None):
     if show_mine:
         return list_owned_objects(client, '#microsoft.graph.application')
@@ -772,13 +773,13 @@ def _resolve_application(client, identifier):
         result = client.application_list(filter="appId eq '{}'".format(identifier))
         # If not found, this looks like an object id
         return result[0][ID] if result else identifier
-    else:
-        result = client.application_list(filter="identifierUris/any(s:s eq '{}')".format(identifier))
-        if not result:
-            error = CLIError("Application with identifier URI '{}' doesn't exist".format(identifier))
-            error.status_code = 404  # Make sure CLI returns 3
-            raise error
-        return result[0][ID]
+
+    result = client.application_list(filter="identifierUris/any(s:s eq '{}')".format(identifier))
+    if not result:
+        error = CLIError("Application with identifier URI '{}' doesn't exist".format(identifier))
+        error.status_code = 404  # Make sure CLI returns 3
+        raise error
+    return result[0][ID]
 
 
 def reset_application_credential(cmd, client, identifier, create_cert=False, cert=None, years=None,
@@ -794,7 +795,7 @@ def reset_application_credential(cmd, client, identifier, create_cert=False, cer
     return result
 
 
-def delete_application_credential(cmd, client, identifier, key_id, cert=False):
+def delete_application_credential(cmd, client, identifier, key_id, cert=False):  # pylint: disable=unused-argument
     sp = show_application(client, identifier)
     _delete_credential(sp, client.application_remove_password, client.application_patch,
                        key_id=key_id, cert=cert)
@@ -939,7 +940,8 @@ def admin_consent(cmd, client, identifier):
     send_raw_request(cmd.cli_ctx, 'post', url, resource='74658136-14ec-4630-ad9b-26e160ff0fc6')
 
 
-def grant_application(cmd, client, identifier, api, scope, consent_type=None, principal_id=None):
+def grant_application(cmd, client, identifier,  # pylint: disable=unused-argument
+                      api, scope, consent_type=None, principal_id=None):
     # Get the Service Principal ObjectId for the client app
     client_sp_object_id = _resolve_service_principal(client, identifier)
 
@@ -1022,29 +1024,10 @@ def delete_service_principal(cmd, identifier):
     client = _graph_client_factory(cmd.cli_ctx)
     sp_object_id = _resolve_service_principal(client, identifier)
     client.service_principal_delete(sp_object_id)
-    return
-
-    app_object_id = None
-    try:
-        app_object_id = _get_app_object_id_from_sp_object_id(client, sp_object_id)
-    except CLIError as ex:
-        logger.info("%s. Skip application deletion.", ex)
-
-    profile = Profile()
-    if not profile.is_tenant_level_account():
-        assignments = list_role_assignments(cmd, assignee=identifier, show_all=True)
-        if assignments:
-            logger.warning('Removing role assignments')
-            delete_role_assignments(cmd, [a[ID] for a in assignments])
-
-    if app_object_id:  # delete the application, and AAD service will automatically clean up the SP
-        logger.info("Deleting associated application %s", app_object_id)
-        client.applications.delete(app_object_id)
-    else:
-        client.service_principals.delete(sp_object_id)
 
 
-def list_service_principals(cmd, client, spn=None, display_name=None, query_filter=None, show_mine=None,
+def list_service_principals(cmd, client,  # pylint: disable=unused-argument
+                            spn=None, display_name=None, query_filter=None, show_mine=None,
                             include_all=None):
     if show_mine:
         return list_owned_objects(client, '#microsoft.graph.servicePrincipal')
@@ -1084,7 +1067,8 @@ def reset_service_principal_credential(cmd, client, identifier, create_cert=Fals
     return result
 
 
-def delete_service_principal_credential(cmd, client, identifier, key_id, cert=False):
+def delete_service_principal_credential(cmd, client,  # pylint: disable=unused-argument
+                                        identifier, key_id, cert=False):
     sp = show_service_principal(client, identifier)
     _delete_credential(sp, client.service_principal_remove_password, client.service_principal_patch,
                        key_id=key_id, cert=cert)
@@ -1251,9 +1235,10 @@ def create_service_principal_for_rbac(
             cert_file)
         result['fileWithCertAndPrivateKey'] = cert_file
 
-    logger.info('To log in with this service principal, run:\n'
-                f'az login --service-principal --username {app_id} --password {password or cert_file} '
-                f'--tenant {graph_client.tenant}')
+    login_hint = ('To log in with this service principal, run:\n'
+                  f'az login --service-principal --username {app_id} --password {password or cert_file} '
+                  f'--tenant {graph_client.tenant}')
+    logger.info(login_hint)
     return result
 
 
@@ -1262,7 +1247,6 @@ def _resolve_service_principal(client, identifier):
       - servicePrincipalNames (contains appId and identifierUris of the corresponding app)
       - id (returned as-is)
     """
-    """Resolve a service principal and return its id."""
     result = client.service_principal_list(filter="servicePrincipalNames/any(c:c eq '{}')".format(identifier))
     if result:
         return result[0][ID]
@@ -1674,6 +1658,7 @@ def _build_key_credentials(key_value=None, key_type=None, key_usage=None,
 def _reset_credential(cmd, graph_object, add_password_func, remove_password_func, patch_func,
                       create_cert=False, cert=None, years=None,
                       end_date=None, keyvault=None, append=False, display_name=None):
+    # pylint: disable=too-many-locals
     """Reset passwordCredentials and keyCredentials properties for application or service principal.
     Application and service principal share the same interface for operating credentials.
 
@@ -1718,7 +1703,7 @@ def _reset_credential(cmd, graph_object, add_password_func, remove_password_func
         body = _build_add_password_credential_body(display_name, app_start_date, app_end_date)
         add_password_result = add_password_func(graph_object[ID], body)
         password = add_password_result['secretText']
-        key_id = add_password_result['keyId']
+        # key_id = add_password_result['keyId']
 
     else:
         public_cert_string, cert_file, cert_start_date, cert_end_date = \
@@ -1735,7 +1720,7 @@ def _reset_credential(cmd, graph_object, add_password_func, remove_password_func
         new_key_creds = _build_key_credentials(
             key_value=public_cert_string, start_date=app_start_date, end_date=app_end_date, display_name=display_name)
 
-        key_id = new_key_creds[0]['keyId']
+        # key_id = new_key_creds[0]['keyId']
         key_creds.extend(new_key_creds)
 
         patch_body = {
@@ -1768,9 +1753,9 @@ def _delete_credential(graph_object, remove_password_func, patch_function, key_i
                 'keyCredentials': key_creds
             }
             patch_function(graph_object[ID], body)
-        print(graph_object)
-        raise CLIError("'{}' doesn't exist in graph object '{}'.".format(
-            key_id, graph_object[ID]))
+        else:
+            raise CLIError("No key credential found with keyId as '{}' in graph object '{}'.".format(
+                key_id, graph_object[ID]))
     else:
         body = {
             "keyId": key_id
@@ -1781,8 +1766,7 @@ def _delete_credential(graph_object, remove_password_func, patch_function, key_i
 def _list_credentials(graph_object, cert):
     if cert:
         return graph_object['keyCredentials']
-    else:
-        return graph_object['passwordCredentials']
+    return graph_object['passwordCredentials']
 
 
 def _match_odata_type(odata_type, user_input):
@@ -1879,7 +1863,8 @@ def get_user_member_groups(client, upn_or_object_id, security_enabled_only=False
 def create_group(client, display_name, mail_nickname, force=None, description=None):
     # workaround to ensure idempotent even AAD graph service doesn't support it
     if not force:
-        matches = client.group_list(filter="displayName eq '{}' and mailNickname eq '{}'".format(display_name, mail_nickname))
+        matches = client.group_list(filter="displayName eq '{}' and mailNickname eq '{}'".format(display_name,
+                                                                                                 mail_nickname))
         if matches:
             if len(matches) > 1:
                 err = ('There is more than one group with the same display and nick names: "{}". '

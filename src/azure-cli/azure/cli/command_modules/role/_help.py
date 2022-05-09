@@ -595,14 +595,14 @@ type: command
 short-summary: List Azure Active Directory users.
 examples:
   - name: List all the Azure Active Directory users
-    text: az ad user list 
+    text: az ad user list
 """
 
 helps['ad user update'] = """
 type: command
 short-summary: Update Azure Active Directory users.
 examples:
-  - name: Update Azure Active Directory users. 
+  - name: Update Azure Active Directory users.
     text: az ad user update --id myuser@contoso.com --display-name username2
 """
 
@@ -610,7 +610,7 @@ helps['ad user delete'] = """
 type: command
 short-summary: Delete Azure Active Directory user.
 examples:
-  - name: Delete Azure Active Directory users. 
+  - name: Delete Azure Active Directory users.
     text: az ad user delete --id myuser@contoso.com
 """
 
@@ -619,7 +619,7 @@ helps['ad user show'] = """
 type: command
 short-summary: Show details for a Azure Active Directory user.
 examples:
-  - name: Show Azure Active Directory user. 
+  - name: Show Azure Active Directory user.
     text: az ad user show --id myuser@contoso.com
 """
 

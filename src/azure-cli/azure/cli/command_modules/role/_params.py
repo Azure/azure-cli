@@ -99,13 +99,13 @@ def load_arguments(self, _):
                         "experience. " + json_property_help)
         c.argument('app_roles', arg_group='JSON property', type=validate_file_or_dict,
                    help="The collection of roles assigned to the application. With app role assignments, these roles "
-                        "can be assigned to users, groups, or service principals associated with other applications. "
-                        + json_property_help)
+                        "can be assigned to users, groups, or service principals associated with other applications. " +
+                        json_property_help)
         c.argument('optional_claims', arg_group='JSON property', type=validate_file_or_dict,
                    help="Application developers can configure optional claims in their Azure AD applications to "
                         "specify the claims that are sent to their application by the Microsoft security token "
-                        "service. For more information, see https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-optional-claims. "
-                        + json_property_help)
+                        "service. For more information, see https://docs.microsoft.com/azure/active-directory/develop"
+                        "/active-directory-optional-claims. " + json_property_help)
 
     with self.argument_context('ad app owner list') as c:
         c.argument('identifier', options_list=['--id'], help='identifier uri, application id, or object id of the application')
@@ -230,12 +230,14 @@ def load_arguments(self, _):
                                         "the user's userPrincipalName (UPN) property when creating a new user account."
                                         " It is used to associate an on-premises Active Directory user account with "
                                         "their Azure AD user object.")
-        c.argument('user_principal_name', help="The user principal name (someuser@contoso.com). "
-                                "It must contain one of the verified domains for the tenant.")
+        c.argument('user_principal_name',
+                   help="The user principal name (someuser@contoso.com). It must contain one of the verified domains "
+                        "for the tenant.")
 
     with self.argument_context('ad user get-member-groups') as c:
         c.argument('security_enabled_only', arg_type=get_three_state_flag(),
-                   help='If true, only membership in security-enabled groups should be checked. Otherwise, membership in all groups should be checked.')
+                   help='If true, only membership in security-enabled groups should be checked. Otherwise, membership '
+                        'in all groups should be checked.')
 
     group_help_msg = "group's object id or display name(prefix also works if there is a unique match)"
     with self.argument_context('ad group') as c:
