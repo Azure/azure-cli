@@ -882,6 +882,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.extra('snapshot', help='An string value that uniquely identifies the snapshot. The value of this query '
                                  'parameter indicates the snapshot version.')
 
+    with self.argument_context('storage blob snapshot') as c:
+        c.register_blob_arguments()
+        c.register_precondition_options()
+        c.extra('lease', options_list=['--lease-id'], help='Required if the blob has an active lease.')
+
     with self.argument_context('storage blob set-tier') as c:
         from azure.cli.command_modules.storage._validators import (blob_rehydrate_priority_validator)
         c.register_blob_arguments()

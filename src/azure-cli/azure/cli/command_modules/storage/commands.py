@@ -348,6 +348,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                        exception_handler=file_related_exception_handler)
         g.storage_custom_command_oauth('url', 'create_blob_url', client_factory=cf_blob_service,
                                        transform=transform_url_without_encode)
+        g.storage_command_oauth('snapshot', 'create_snapshot')
 
     blob_service_custom_sdk = get_custom_sdk('blob', client_factory=cf_blob_service,
                                              resource_type=ResourceType.DATA_STORAGE_BLOB)
@@ -381,7 +382,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         # g.storage_command_oauth(
         #     'download', 'get_blob_to_path', table_transformer=transform_blob_output,
         #     exception_handler=file_related_exception_handler)
-        g.storage_command_oauth('snapshot', 'snapshot_blob')
         g.storage_command_oauth('update', 'set_blob_properties')
         g.storage_command_oauth(
             'exists', 'exists', transform=create_boolean_result_output_transformer('exists'))
