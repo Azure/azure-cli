@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import os
+import sys
 from datetime import datetime
 
 from azure.cli.core.profiles import ResourceType, get_sdk
@@ -512,7 +513,8 @@ def transform_blob_type(cmd, blob_type):
 def _adjust_block_blob_size(client, blob_type, length):
     if not blob_type or blob_type != 'block' or length is None:
         return
-
+    if length is None:
+        return
     # increase the block size to 100MB when the block list will contain more than 50,000 blocks(each block 4MB)
     if length > 50000 * 4 * 1024 * 1024:
         client._config.max_block_size = 100 * 1024 * 1024
@@ -606,7 +608,7 @@ def upload_blob(cmd, client, file_path=None, container_name=None, blob_name=None
     return response
 
 
-def download_blob(client, file_path, open_mode='wb', start_range=None, end_range=None,
+def download_blob(client, file_path=None, open_mode='wb', start_range=None, end_range=None,
                   progress_callback=None, **kwargs):
     offset = None
     length = None
@@ -615,11 +617,17 @@ def download_blob(client, file_path, open_mode='wb', start_range=None, end_range
         length = end_range - start_range + 1
     if progress_callback:
         kwargs['raw_response_hook'] = progress_callback
+    if not file_path:
+        kwargs['max_concurrency'] = 1
     download_stream = client.download_blob(offset=offset, length=length, **kwargs)
-    with open(file_path, open_mode) as stream:
-        download_stream.readinto(stream)
-
-    return download_stream.properties
+    if file_path:
+        with open(file_path, open_mode) as stream:
+            download_stream.readinto(stream)
+        return download_stream.properties
+    else:
+        with os.fdopen(sys.stdout.fileno(), open_mode) as stream:
+            download_stream.readinto(stream)
+        return
 
 
 def get_block_ids(content_length, block_length):

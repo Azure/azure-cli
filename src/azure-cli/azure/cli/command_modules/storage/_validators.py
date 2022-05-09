@@ -1462,6 +1462,8 @@ def blob_tier_validator_track2(cmd, namespace):
 
 
 def blob_download_file_path_validator(namespace):
+    if namespace.file_path is None:
+        return
     if os.path.isdir(namespace.file_path):
         from azure.cli.core.azclierror import FileOperationError
         raise FileOperationError('File is expected, not a directory: {}'.format(namespace.file_path))
