@@ -408,6 +408,8 @@ def apim_api_import(
 
     if api_revision is not None and api_id is not None:
         api_id = api_id + ";rev=" + api_revision
+    if api_revision is not None and api_id is None:
+        api_id = uuid.uuid4().hex + ";rev=" + api_revision
     elif api_id is None:
         api_id = uuid.uuid4().hex
 
