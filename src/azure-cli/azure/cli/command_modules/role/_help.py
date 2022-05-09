@@ -25,7 +25,7 @@ examples:
   - name: Create an application.
     text: |
         az ad app create --display-name mytestapp
-  - name: Create n application that can fall back to public client with delegated permission of "access the AAD directory as the signed-in user"
+  - name: Create an application that can fall back to public client with delegated permission of "access the AAD directory as the signed-in user"
     text: |
         az ad app create --display-name my-public --is-fallback-public-client --required-resource-accesses @manifest.json
         ("manifest.json" contains the following content)
