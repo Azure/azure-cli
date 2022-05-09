@@ -41,20 +41,6 @@ def validate_group(namespace):
             raise CLIError("More than one group match the name of '{}'".format(value))
 
 
-def validate_member_id(namespace):
-    from azure.cli.core._profile import Profile
-    cli_ctx = namespace.cmd.cli_ctx
-    try:
-        uuid.UUID(namespace.url)
-        profile = Profile(cli_ctx=cli_ctx)
-        _, _, tenant_id = profile.get_login_credentials()
-        graph_url = cli_ctx.cloud.endpoints.active_directory_graph_resource_id
-        namespace.url = '{}{}/directoryObjects/{}'.format(graph_url, tenant_id,
-                                                          namespace.url)
-    except ValueError:
-        pass  # let it go, invalid values will be caught by server anyway
-
-
 def validate_cert(namespace):
     cred_usage_error = CLIError('Usage error: --cert STRING | --create-cert [--keyvault VAULT --cert NAME] | '
                                 '--password STRING | --keyvault VAULT --cert NAME')
@@ -86,11 +72,6 @@ def validate_cert(namespace):
         if not x509:
             raise CLIError('usage error: --cert STRING | --cert NAME --keyvault VAULT')
         namespace.cert = x509
-
-
-def validate_change_password(namespace):
-    if namespace.password is None and namespace.force_change_password_next_login is not None:
-        raise CLIError("--force-change-password-next-login is only valid when --password is specified")
 
 
 def process_assignment_namespace(cmd, namespace):  # pylint: disable=unused-argument

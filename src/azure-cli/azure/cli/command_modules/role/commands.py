@@ -11,7 +11,7 @@ from azure.cli.core.commands import CliCommandType
 
 from ._client_factory import _auth_client_factory, _graph_client_factory
 
-from ._validators import process_assignment_namespace, validate_change_password
+from ._validators import process_assignment_namespace
 
 
 def transform_definition_list(result):

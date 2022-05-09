@@ -13,7 +13,7 @@ from azure.cli.core.commands.validators import validate_file_or_dict
 
 
 from azure.cli.command_modules.role._completers import get_role_definition_name_completion_list
-from azure.cli.command_modules.role._validators import validate_group, validate_member_id, validate_cert, VARIANT_GROUP_ID_ARGS
+from azure.cli.command_modules.role._validators import validate_group, validate_cert, VARIANT_GROUP_ID_ARGS
 
 name_arg_type = CLIArgumentType(options_list=('--name', '-n'), metavar='NAME')
 

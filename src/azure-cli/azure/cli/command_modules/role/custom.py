@@ -28,9 +28,8 @@ from msrestazure.azure_exceptions import CloudError
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import get_file_json, shell_safe_json_parse, is_guid
 from ._client_factory import _auth_client_factory, _graph_client_factory
-from ._graph_objects import application_property_map, user_property_map, group_property_map, set_object_properties
 from ._multi_api_adaptor import MultiAPIAdaptor
-from .msgrpah import GraphError
+from .msgrpah import GraphError, set_object_properties
 
 # ARM RBAC's principalType
 USER = 'User'
@@ -811,12 +810,11 @@ def list_application_credentials(cmd, identifier, cert=False):
 def add_application_owner(client, owner_object_id, identifier):
     app_object_id = _resolve_application(client, identifier)
     owners = client.application_owner_list(app_object_id)
-    # Graph is not idempotent and fails with:
+    # API not idempotent and fails with:
     #   One or more added object references already exist for the following modified properties: 'owners'
     # We make it idempotent.
     if not next((x for x in owners if x[ID] == owner_object_id), None):
-        owner_url = _get_owner_url(client, owner_object_id)
-        body = {"@odata.id": owner_url}
+        body = _get_directory_object_json(client, owner_object_id)
         client.application_owner_add(app_object_id, body)
 
 
@@ -1312,13 +1310,6 @@ def _validate_app_dates(app_start_date, app_end_date, cert_start_date, cert_end_
     return app_start_date, app_end_date, cert_start_date, cert_end_date
 
 
-def _get_signed_in_user_object_id(graph_client):
-    try:
-        return graph_client.signed_in_user_get()[ID]
-    except GraphError:  # error could be possible if you logged in as a service principal
-        pass
-
-
 def _get_keyvault_client(cli_ctx):
     from azure.cli.command_modules.keyvault._client_factory import keyvault_data_plane_factory
     return keyvault_data_plane_factory(cli_ctx)
@@ -1533,19 +1524,6 @@ def _get_object_stubs(graph_client, assignees):
     return result
 
 
-def _get_owner_url(client, owner_object_id):
-    # The owner object should be in the form of https://graph.microsoft.com/v1.0/directoryObjects/{id}
-    if '://' in owner_object_id:
-        return owner_object_id
-    return "{base_url}/directoryObjects/{id}".format(base_url=client.base_url, id=owner_object_id)
-
-
-def _set_owner(cli_ctx, graph_client, asset_object_id, setter):
-    signed_in_user_object_id = _get_signed_in_user_object_id(graph_client)
-    if signed_in_user_object_id:
-        setter(asset_object_id, _get_owner_url(cli_ctx, signed_in_user_object_id))
-
-
 # for injecting test seems to produce predictable role assignment id for playback
 def _gen_guid():
     return uuid.uuid4()
@@ -1574,7 +1552,7 @@ def _set_application_properties(body, **kwargs):
     if kwargs.get('required_resource_accesses'):
         kwargs['required_resource_accesses'] = _build_required_resource_accesses(kwargs['required_resource_accesses'])
 
-    set_object_properties(application_property_map, body, **kwargs)
+    set_object_properties('application', body, **kwargs)
 
 
 def _datetime_to_utc(dt):
@@ -1805,7 +1783,7 @@ def list_owned_objects(client, object_type=None):
 
 
 def create_user(client, user_principal_name, display_name, password,
-                mail_nickname=None, immutable_id=None, force_change_password_next_login=False):
+                mail_nickname=None, immutable_id=None, force_change_password_next_sign_in=False):
     '''
     :param mail_nickname: mail alias. default to user principal name
     '''
@@ -1813,21 +1791,21 @@ def create_user(client, user_principal_name, display_name, password,
     body = {}
     _set_user_properties(body, user_principal_name=user_principal_name, display_name=display_name, password=password,
                          mail_nickname=mail_nickname, immutable_id=immutable_id,
-                         force_change_password_next_login=force_change_password_next_login, account_enabled=True)
+                         force_change_password_next_sign_in=force_change_password_next_sign_in, account_enabled=True)
     return client.user_create(body)
 
 
-def update_user(client, upn_or_object_id, display_name=None, force_change_password_next_login=None, password=None,
+def update_user(client, upn_or_object_id, display_name=None, force_change_password_next_sign_in=None, password=None,
                 account_enabled=None, mail_nickname=None):
     body = {}
     _set_user_properties(body, display_name=display_name, password=password, mail_nickname=mail_nickname,
-                         force_change_password_next_login=force_change_password_next_login,
+                         force_change_password_next_sign_in=force_change_password_next_sign_in,
                          account_enabled=account_enabled)
     return client.user_patch(id=upn_or_object_id, body=body)
 
 
 def _set_user_properties(body, **kwargs):
-    set_object_properties(user_property_map, body, **kwargs)
+    set_object_properties('user', body, **kwargs)
 
 
 def show_user(client, upn_or_object_id):
@@ -1874,7 +1852,7 @@ def create_group(client, display_name, mail_nickname, force=None, description=No
             return matches[0]
 
     body = {}
-    set_object_properties(group_property_map, body, display_name=display_name,
+    set_object_properties('group', body, display_name=display_name,
                           mail_nickname=mail_nickname, description=description,
                           mail_enabled=False, security_enabled=True)
 
@@ -1916,12 +1894,11 @@ def list_group_owners(client, group_id):
 def add_group_owner(client, owner_object_id, group_id):
     group_object_id = _resolve_group(client, group_id)
     owners = client.group_owner_list(group_object_id)
+    # API is not idempotent and fails with:
+    #   One or more added object references already exist for the following modified properties: 'owners'.
     if not next((x for x in owners if x['id'] == owner_object_id), None):
-        owner_url = client.base_url + '/users/{id}'.format(id=owner_object_id)
-        body = {
-            "@odata.id": owner_url
-        }
-        return client.group_owner_add(id=group_object_id, body=body)
+        body = _get_directory_object_json(client, owner_object_id)
+        return client.group_owner_add(group_object_id, body)
 
 
 def remove_group_owner(client, owner_object_id, group_id):
@@ -1941,11 +1918,11 @@ def list_group_members(client, group_id):
 
 def add_group_member(client, group_id, member_object_id):
     """Add a member to a group."""
-    member_url = client.base_url + '/directoryObjects/{id}'.format(id=member_object_id)
-    body = {
-        "@odata.id": member_url
-    }
-    return client.group_member_add(id=group_id, body=body)
+    # API is not idempotent and fails with:
+    #   One or more added object references already exist for the following modified properties: 'members'.
+    # TODO: make it idempotent like add_group_owner
+    body = _get_directory_object_json(client, member_object_id)
+    return client.group_member_add(group_id, body)
 
 
 def remove_group_member(client, group_id, member_object_id):
@@ -1962,3 +1939,15 @@ def _resolve_group(client, identifier):
             raise CLIError('More than 1 group objects has the display name of ' + identifier)
         identifier = res[0].object_id
     return identifier
+
+
+def _get_directory_object_json(client, object_id):
+    """Get JSON representation of the id of the directoryObject.
+    The object URL should be in the form of https://graph.microsoft.com/v1.0/directoryObjects/{id}
+    """
+    # If object_id is not a GUID, use it as-is.
+    object_url = f'{client.base_url}/directoryObjects/{object_id}'if is_guid(object_id) else object_id
+    body = {
+        "@odata.id": object_url
+    }
+    return body

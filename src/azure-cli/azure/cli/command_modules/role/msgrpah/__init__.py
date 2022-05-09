@@ -9,8 +9,10 @@ A light-weight Microsoft Graph client, similar to https://github.com/microsoftgr
 """
 
 from ._graph_client import GraphClient, GraphError
+from ._graph_objects import set_object_properties
 
 __all__ = [
     "GraphClient",
-    "GraphError"
+    "GraphError",
+    'set_object_properties'
 ]
