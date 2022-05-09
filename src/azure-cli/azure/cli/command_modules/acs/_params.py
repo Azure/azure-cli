@@ -40,7 +40,8 @@ from azure.cli.command_modules.acs._validators import (
     validate_nodes_count, validate_pod_subnet_id, validate_ppg,
     validate_priority, validate_snapshot_id, validate_snapshot_name,
     validate_spot_max_price, validate_ssh_key, validate_taints,
-    validate_vm_set_type, validate_vnet_subnet_id)
+    validate_vm_set_type, validate_vnet_subnet_id,
+    validate_disable_and_enable_parameters, validate_defender_config_parameter)
 from azure.cli.core.commands.parameters import (
     edge_zone_type, file_type, get_enum_type,
     get_resource_name_completion_list, get_three_state_flag, name_type,
@@ -314,6 +315,8 @@ def load_arguments(self, _):
         c.argument('enable_fips_image', action='store_true')
         c.argument('kubelet_config')
         c.argument('linux_os_config')
+        c.argument('enable_defender', action='store_true')
+        c.argument('defender_config', validator=validate_defender_config_parameter)
         c.argument('yes', options_list=[
                    '--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
 
@@ -366,6 +369,9 @@ def load_arguments(self, _):
         c.argument('max_count', type=int, validator=validate_nodes_count)
         c.argument('nodepool_labels', nargs='*', validator=validate_nodepool_labels,
                    help='space-separated labels: key[=value] [key[=value] ...]. See https://aka.ms/node-labels for syntax of labels.')
+        c.argument('disable_defender', action='store_true', validator=validate_disable_and_enable_parameters)
+        c.argument('enable_defender', action='store_true')
+        c.argument('defender_config', validator=validate_defender_config_parameter)
         c.argument('yes', options_list=[
                    '--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
 

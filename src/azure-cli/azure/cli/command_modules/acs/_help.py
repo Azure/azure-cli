@@ -520,6 +520,13 @@ parameters:
   - name: --node-resource-group
     type: string
     short-summary: The node resource group is the resource group where all customer's resources will be created in, such as virtual machines.
+  - name: --enable-defender
+    type: bool
+    short-summary: Enable Microsoft Defender security profile.
+  - name: --defender-config
+    type: string
+    short-summary: Path to JSON file containing Microsoft Defender profile configurations.
+
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --ssh-key-value /path/to/publickey
@@ -733,6 +740,16 @@ parameters:
     long-summary: |-
         You do not need to set this if you have set DNS server in the VNET used by the cluster.
         You must set or not set --gmsa-dns-server and --gmsa-root-domain-name at the same time when setting --enable-windows-gmsa.
+  - name: --enable-defender
+    type: bool
+    short-summary: Enable Microsoft Defender security profile.
+  - name: --disable-defender
+    type: bool
+    short-summary: Disable defender profile.
+  - name: --defender-config
+    type: string
+    short-summary: Path to JSON file containing Microsoft Defender profile configurations.
+
 examples:
   - name: Update a kubernetes cluster with standard SKU load balancer to use two AKS created IPs for the load balancer outbound connection usage.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-managed-outbound-ip-count 2

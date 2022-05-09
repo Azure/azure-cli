@@ -1496,6 +1496,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,
                no_wait=False,
                yes=False,
                aks_custom_headers=None,
+               enable_defender=False,
+               defender_config=None,
                ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -1563,7 +1565,11 @@ def aks_update(cmd, client, resource_group_name, name,
                nodepool_labels=None,
                no_wait=False,
                yes=False,
-               aks_custom_headers=None):
+               aks_custom_headers=None,
+               enable_defender=False,
+               disable_defender=False,
+               defender_config=None,
+               ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
 
