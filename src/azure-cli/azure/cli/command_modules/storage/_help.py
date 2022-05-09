@@ -1323,7 +1323,7 @@ examples:
 
 helps['storage container delete'] = """
 type: command
-short-summary: Marks the specified container for deletion.
+short-summary: Mark the specified container for deletion.
 long-summary: >
     The container and any blobs contained within it are later deleted during garbage collection.
 examples:
@@ -1362,6 +1362,21 @@ examples:
     crafted: true
 """
 
+helps['storage container show'] = """
+type: command
+short-summary: Return all user-defined metadata and system properties for the specified container.
+"""
+
+helps['storage container show-permission'] = """
+type: command
+short-summary: Get the permissions for the specified container.
+"""
+
+helps['storage container set-permission'] = """
+type: command
+short-summary: Set the permissions for the specified container.
+"""
+
 helps['storage container immutability-policy'] = """
 type: group
 short-summary: Manage container immutability policies.
@@ -1381,6 +1396,61 @@ helps['storage container lease'] = """
 type: group
 short-summary: Manage blob storage container leases.
 """
+
+helps['storage container lease acquire'] = """
+type: command
+short-summary: Request a new lease.
+long-summary: If the container does not have an active lease, the Blob service creates a lease on the container and returns a new lease ID.
+examples:
+  - name: Request a new lease.
+    text: az storage container lease acquire --container-name mycontainer --account-name mystorageaccount --account-key 0000-0000
+"""
+
+helps['storage container lease renew'] = """
+type: command
+short-summary: Renew the lease.
+long-summary: The lease can be renewed if the lease ID specified matches that associated with the
+        container. Note that the lease may be renewed even if it has expired as long as the
+        container has not been leased again since the expiration of that lease. When you renew a
+        lease, the lease duration clock resets.
+examples:
+  - name: Renew the lease.
+    text: az storage container lease renew -c mycontainer --lease-id "32fe23cd-4779-4919-adb3-357e76c9b1bb" --account-name mystorageaccount --account-key 0000-0000
+"""
+
+helps['storage container lease break'] = """
+type: command
+short-summary: Break the lease, if the container has an active lease.
+long-summary: Once a lease is broken, it cannot be renewed. Any authorized request can break the lease;
+        the request is not required to specify a matching lease ID. When a lease is broken, the
+        lease break period is allowed to elapse, during which time no lease operation except break
+        and release can be performed on the container. When a lease is successfully broken, the
+        response indicates the interval in seconds until a new lease can be acquired.
+examples:
+  - name: Break the lease.
+    text: az storage container lease break -c mycontainer --lease-break-period 10 --account-name mystorageaccount --account-key 0000-0000
+"""
+
+helps['storage container lease change'] = """
+type: command
+short-summary: Change the lease ID of an active lease.
+long-summary: A change must include the current lease ID and a new lease ID.
+examples:
+  - name: Change the lease.
+    text: az storage container lease change -c mycontainer --lease-id "32fe23cd-4779-4919-adb3-357e76c9b1bb" --proposed-lease-id "sef2ef2d-4779-4919-adb3-357e76c9b1bb" --account-name mystorageaccount --account-key 0000-0000
+"""
+
+helps['storage container lease release'] = """
+type: command
+short-summary: Release the lease.
+long-summary: The lease may be released if the lease_id specified matches that associated with the
+        container. Releasing the lease allows another client to immediately acquire the lease for
+        the container as soon as the release is complete.
+examples:
+  - name: Release the lease.
+    text: az storage container lease release -c mycontainer --lease-id "32fe23cd-4779-4919-adb3-357e76c9b1bb" --account-name mystorageaccount --account-key 0000-0000
+"""
+
 
 helps['storage container legal-hold'] = """
 type: group
@@ -1428,6 +1498,16 @@ examples:
 helps['storage container metadata'] = """
 type: group
 short-summary: Manage container metadata.
+"""
+
+helps['storage container metadata show'] = """
+type: command
+short-summary: Return all user-defined metadata for the specified container.
+"""
+
+helps['storage container metadata update'] = """
+type: command
+short-summary: Set one or more user-defined name-value pairs for the specified container.
 """
 
 helps['storage container policy'] = """
@@ -2207,6 +2287,16 @@ helps['storage fs directory download'] = """
           text: az storage fs directory download -f myfilesystem --account-name mystorageaccount -s SourceDirectoryPath -d "<local-path>" --recursive
         - name: Download an entire subdirectory in ADLS Gen2 file system.
           text: az storage fs directory download -f myfilesystem --account-name mystorageaccount -s "path/to/subdirectory" -d "<local-path>" --recursive
+"""
+
+helps['storage fs directory generate-sas'] = """
+type: command
+short-summary: Generate a SAS token for directory in ADLS Gen2 account.
+examples:
+  - name: Generate a sas token for directory and use it to upload files.
+    text: |
+        end=`date -u -d "30 minutes" '+%Y-%m-%dT%H:%MZ'`
+        az storage fs directory generate-sas --name dir/ --file-system myfilesystem --https-only --permissions dlrw --expiry $end -o tsv
 """
 
 helps['storage fs file'] = """

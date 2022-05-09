@@ -1,3 +1,6 @@
+import json
+import string
+
 # --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
@@ -17,12 +20,26 @@ from azure.mgmt.security.models import (SecurityContact,
                                         RuleResultsInput,
                                         RulesResultsInput,
                                         AlertSyncSettings,
-                                        DataExportSettings)
+                                        DataExportSettings,
+                                        AlertsSuppressionRule,
+                                        SuppressionAlertsScope,
+                                        ScopeElement,
+                                        Automation,
+                                        AutomationScope,
+                                        AutomationSource,
+                                        AutomationActionWorkspace,
+                                        AutomationActionLogicApp,
+                                        AutomationActionEventHub,
+                                        AutomationRuleSet,
+                                        AutomationTriggeringRule)
 from azure.mgmt.security.models._security_center_enums import Enum69
 from azure.cli.core.commands.client_factory import get_subscription_id
-from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
+from azure.cli.core.azclierror import (MutuallyExclusiveArgumentError)
 from msrestazure.tools import resource_id
 from msrestazure.azure_exceptions import CloudError
+from ._utils import (
+    run_cli_cmd
+)
 
 # --------------------------------------------------------------------------------------------
 # Security Tasks
@@ -99,6 +116,102 @@ def update_security_alert(client, location, resource_name, status, resource_grou
             client.update_subscription_level_state_to_activate(resource_name)
         if status == "Resolve":
             client.update_subscription_level_state_to_resolve(resource_name)
+
+# --------------------------------------------------------------------------------------------
+# Security Alerts Suppression Rule
+# --------------------------------------------------------------------------------------------
+
+
+def list_security_alerts_suppression_rule(client):
+
+    return client.list()
+
+
+def show_security_alerts_suppression_rule(client, rule_name):
+
+    return client.get(alerts_suppression_rule_name=rule_name)
+
+
+def delete_security_alerts_suppression_rule(client, rule_name):
+
+    return client.delete(alerts_suppression_rule_name=rule_name)
+
+
+def update_security_alerts_suppression_rule(client,
+                                            rule_name,
+                                            alert_type,
+                                            reason,
+                                            state,
+                                            expiration_date_utc=None,
+                                            comment=None):
+
+    from azure.core.exceptions import ResourceNotFoundError
+
+    current_rule = None
+    try:
+        current_rule = client.get(alerts_suppression_rule_name=rule_name)
+    except ResourceNotFoundError:
+        suppression_alerts_scope = None
+
+    if current_rule is not None:
+        suppression_alerts_scope = current_rule.suppression_alerts_scope
+
+    suppression_rule_data = AlertsSuppressionRule(name=rule_name,
+                                                  alert_type=alert_type,
+                                                  expiration_date_utc=expiration_date_utc,
+                                                  reason=reason, state=state,
+                                                  comment=comment,
+                                                  suppression_alerts_scope=suppression_alerts_scope)
+
+    return client.update(alerts_suppression_rule_name=rule_name, alerts_suppression_rule=suppression_rule_data)
+
+
+def upsert_security_alerts_suppression_rule_scope(client, rule_name, field, contains_substring=None, any_of=None):
+    from azure.cli.core.commands import upsert_to_collection
+
+    # get the parent object
+    parent_object = client.get(alerts_suppression_rule_name=rule_name)
+
+    if contains_substring is not None:
+        current_additional_properties = {'contains': contains_substring}
+    else:
+        current_additional_properties = {'in': any_of}
+    scope = ScopeElement(additional_properties=current_additional_properties, field=field)
+
+    if parent_object.suppression_alerts_scope is None:
+        parent_object.suppression_alerts_scope = SuppressionAlertsScope(all_of=[scope])
+    else:
+        # add the new child to the parent collection
+        upsert_to_collection(parent_object.suppression_alerts_scope, 'all_of', scope, 'field')
+
+    # update the parent object
+    result = client.update(alerts_suppression_rule_name=rule_name, alerts_suppression_rule=parent_object)
+
+    # return the child object
+    return next((x for x in result.suppression_alerts_scope.all_of if x.field.lower() == field.lower()), None)
+
+
+def delete_security_alerts_suppression_rule_scope(client, rule_name, field):
+    from azure.cli.core.azclierror import InvalidArgumentValueError
+    err_msg_field_not_found = 'The specified --field was not found in scope'
+
+    # get the parent object
+    parent_object = client.get(alerts_suppression_rule_name=rule_name)
+
+    if parent_object.suppression_alerts_scope is None:
+        raise InvalidArgumentValueError(err_msg_field_not_found)
+
+    item_to_remove = next((x for x in
+                           parent_object.suppression_alerts_scope.all_of if x.field.lower() == field.lower()), None)
+
+    if item_to_remove is None:
+        raise InvalidArgumentValueError(err_msg_field_not_found)
+
+    parent_object.suppression_alerts_scope.all_of.remove(item_to_remove)
+    if len(parent_object.suppression_alerts_scope.all_of) == 0:
+        parent_object.suppression_alerts_scope = None
+
+    return client.update(alerts_suppression_rule_name=rule_name, alerts_suppression_rule=parent_object)
 
 
 # --------------------------------------------------------------------------------------------
@@ -816,3 +929,154 @@ def list_by_score(client, resource_name):
 def list_secure_score_control_definitions(client):
 
     return client.list_by_subscription()
+
+# --------------------------------------------------------------------------------------------
+# Security Automations
+# --------------------------------------------------------------------------------------------
+
+
+def list_security_automations(client, resource_group_name=None):
+
+    if resource_group_name:
+        return client.list_by_resource_group(resource_group_name)
+
+    return client.list()
+
+
+def get_security_automation(client, resource_group_name, resource_name):
+
+    return client.get(resource_group_name, resource_name)
+
+
+def delete_security_automation(client, resource_group_name, resource_name):
+
+    return client.delete(resource_group_name, resource_name)
+
+
+def create_or_update_security_automation(client, resource_group_name, resource_name, scopes, sources, actions, location=None, etag=None, tags=None, description=None, isEnabled=None):
+
+    if location is None:
+        resourceGroup = run_cli_cmd('az group show --name {}'.format(resource_group_name))
+        location = resourceGroup['location']
+    automation = create_security_automation_object(location, scopes, sources, actions, etag, tags, description, isEnabled)
+    return client.create_or_update(resource_group_name, resource_name, automation)
+
+
+def validate_security_automation(client, resource_group_name, resource_name, scopes, sources, actions, location=None, etag=None, tags=None, description=None, isEnabled=None):
+
+    if location is None:
+        resourceGroup = run_cli_cmd('az group show --name {}'.format(resource_group_name))
+        location = resourceGroup['location']
+    automation = create_security_automation_object(location, scopes, sources, actions, etag, tags, description, isEnabled)
+    return client.validate(resource_group_name, resource_name, automation)
+
+
+def create_security_automation_scope(description, scope_path):
+
+    return AutomationScope(description=description, scope_path=scope_path)
+
+
+def create_security_automation_rule(expected_value, operator, property_j_path, property_type):
+
+    return AutomationTriggeringRule(property_j_path=property_j_path, property_type=property_type, expected_value=expected_value, operator=operator)
+
+
+def create_security_automation_rule_set(rules=None):
+
+    return AutomationRuleSet(rules=rules)
+
+
+def create_security_automation_source(event_source, rule_sets=None):
+
+    return AutomationSource(event_source=event_source, rule_sets=rule_sets)
+
+
+def create_security_automation_action_logic_app(logic_app_resource_id, uri):
+
+    return AutomationActionLogicApp(logic_app_resource_id=logic_app_resource_id, uri=uri)
+
+
+def create_security_automation_action_event_hub(event_hub_resource_id, connection_string, sas_policy_name=None):
+
+    automationActionEventHub = AutomationActionEventHub(event_hub_resource_id=event_hub_resource_id, connection_string=connection_string)
+    automationActionEventHub.sas_policy_name = sas_policy_name
+    return automationActionEventHub
+
+
+def create_security_automation_action_workspace(workspace_resource_id):
+
+    return AutomationActionWorkspace(workspace_resource_id=workspace_resource_id)
+
+
+# Security Automations Utils
+
+
+def create_security_automation_object(location, scopes, sources, actions, etag=None, tags=None, description=None, isEnabled=None):
+
+    scopes = sanitize_json_as_string(scopes)
+    sources = sanitize_json_as_string(sources)
+    actions = sanitize_json_as_string(actions)
+
+    scopes = json.loads(scopes)
+    scopesAsObjectList = []
+    for scope in scopes:
+        scopeAsObject = AutomationScope(description=scope['description'], scope_path=scope['scopePath'])
+        scopesAsObjectList.append(scopeAsObject)
+
+    sources = json.loads(sources)
+    sourcesAsObjectList = []
+    for source in sources:
+        sourceAsObject = AutomationSource(event_source=source['eventSource'], rule_sets=get_security_automation_ruleSets_object(source['ruleSets']))
+        sourcesAsObjectList.append(sourceAsObject)
+
+    actions = json.loads(actions)
+    actionsAsObjectList = []
+    for action in actions:
+        if action['actionType'] == 'LogicApp':
+            actionAsObject = AutomationActionLogicApp(logic_app_resource_id=action['logicAppResourceId'], uri=action['ruleSets'])
+        elif action['actionType'] == 'EventHub':
+            actionAsObject = AutomationActionEventHub(event_hub_resource_id=action['eventHubResourceId'], connection_string=action['connectionString'])
+        elif action['actionType'] == 'Workspace':
+            actionAsObject = AutomationActionWorkspace(workspace_resource_id=action['workspaceResourceId'])
+
+        actionsAsObjectList.append(actionAsObject)
+
+    if tags is not None:
+        tags = json.loads(tags)
+
+    return Automation(location=location,
+                      scopes=scopesAsObjectList,
+                      sources=sourcesAsObjectList,
+                      actions=actionsAsObjectList,
+                      tags=tags,
+                      etag=etag,
+                      description=description,
+                      isEnabled=isEnabled)
+
+
+def get_security_automation_ruleSets_object(ruleSets):
+    if ruleSets is None:
+        return
+    ruleSetsAsObjectList = []
+    for ruleSet in ruleSets:
+        ruleSetAsObject = AutomationRuleSet(rules=get_security_automation_rules_object(ruleSet['rules']))
+        ruleSetsAsObjectList.append(ruleSetAsObject)
+    return ruleSetsAsObjectList
+
+
+def get_security_automation_rules_object(rules):
+    if rules is None:
+        return
+    ruleAsObjectList = []
+    for rule in rules:
+        ruleAsObject = AutomationTriggeringRule(property_j_path=rule['propertyJPath'], property_type=rule['propertyType'], expected_value=rule['expectedValue'], operator=rule['operator'])
+        ruleAsObjectList.append(ruleAsObject)
+    return ruleAsObjectList
+
+
+def sanitize_json_as_string(value: string):
+    valueLength = len(value)
+    if((value[0] == '\'' and value[valueLength - 1] == '\'') or (value[0] == '\"' and value[valueLength - 1] == '\"')):
+        value = value[1:]
+        value = value[:-1]
+    return value

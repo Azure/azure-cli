@@ -422,6 +422,7 @@ examples:
 helps['deployment validate'] = """
 type: command
 short-summary: Validate whether a template is valid at subscription scope.
+long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
@@ -447,6 +448,7 @@ examples:
 helps['deployment create'] = """
 type: command
 short-summary: Start a deployment at subscription scope.
+long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
@@ -561,6 +563,7 @@ examples:
 helps['deployment sub validate'] = """
 type: command
 short-summary: Validate whether a template is valid at subscription scope.
+long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
@@ -589,6 +592,7 @@ examples:
 helps['deployment sub create'] = """
 type: command
 short-summary: Start a deployment at subscription scope.
+long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
@@ -625,6 +629,7 @@ examples:
 helps['deployment sub what-if'] = """
 type: command
 short-summary: Execute a deployment What-If operation at subscription scope.
+long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
@@ -733,6 +738,7 @@ examples:
 helps['deployment group validate'] = """
 type: command
 short-summary: Validate whether a template is valid at resource group.
+long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
@@ -763,6 +769,7 @@ examples:
 helps['deployment group create'] = """
 type: command
 short-summary: Start a deployment at resource group.
+long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
@@ -809,6 +816,7 @@ examples:
 helps['deployment group what-if'] = """
 type: command
 short-summary: Execute a deployment What-If operation at resource group scope.
+long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
@@ -919,6 +927,7 @@ examples:
 helps['deployment mg validate'] = """
 type: command
 short-summary: Validate whether a template is valid at management group.
+long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
@@ -949,6 +958,7 @@ examples:
 helps['deployment mg what-if'] = """
 type: command
 short-summary: Execute a deployment What-If operation at management group scope.
+long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
@@ -984,6 +994,7 @@ examples:
 helps['deployment mg create'] = """
 type: command
 short-summary: Start a deployment at management group.
+long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
@@ -1089,6 +1100,7 @@ examples:
 helps['deployment tenant validate'] = """
 type: command
 short-summary: Validate whether a template is valid at tenant scope.
+long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
@@ -1117,6 +1129,7 @@ examples:
 helps['deployment tenant what-if'] = """
 type: command
 short-summary: Execute a deployment What-If operation at tenant scope.
+long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
@@ -1150,6 +1163,7 @@ examples:
 helps['deployment tenant create'] = """
 type: command
 short-summary: Start a deployment at tenant scope.
+long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
@@ -2743,4 +2757,80 @@ short-summary: Show the installed version of Bicep CLI.
 helps['bicep list-versions'] = """
 type: command
 short-summary: List out all available versions of Bicep CLI.
+"""
+
+helps['resourcemanagement'] = """
+type: group
+short-summary: resourcemanagement CLI command group.
+"""
+helps['resourcemanagement private-link'] = """
+type: group
+short-summary: resourcemanagement private-link management on a resource.
+"""
+helps['private-link'] = """
+type: group
+short-summary: private-link association CLI command group.
+"""
+helps['private-link association'] = """
+type: group
+short-summary: private-link association management on a resource.
+"""
+
+helps['resourcemanagement private-link create'] = """
+type: command
+short-summary: Create a resource management group private link.
+examples:
+  - name: Create a resource management group private link.
+    text: az resourcemanagement private-link create --resource-group testRG --name TestRMPL --location WestUS
+"""
+helps['resourcemanagement private-link show'] = """
+type: command
+short-summary: Get resource management private.
+examples:
+  - name: Get single resource management private link.
+    text: az resourcemanagement private-link show --resource-group testRG --name TestRMPL
+"""
+helps['resourcemanagement private-link list'] = """
+type: command
+short-summary: Get all the resource management private links at scope.
+examples:
+  - name: List all resource management private links in a subscription.
+    text: az resourcemanagement private-link list
+  - name: List all resource management private links in a resource group.
+    text: az resourcemanagement private-link list --resource-group testRG
+"""
+helps['resourcemanagement private-link delete'] = """
+type: command
+short-summary: Delete a resource management private link.
+examples:
+  - name: Delete a resource management private link.
+    text: az resourcemanagement private-link delete --resource-group TestRG --name testRMPL
+"""
+helps['private-link association create'] = """
+type: command
+short-summary: Create a PrivateLinkAssociation.
+examples:
+  - name: Create a PrivateLinkAssociation.
+    text: az private-link association create --management-group-id TestMG --name testPLA --privatelink testPL --public-network-access enabled
+"""
+helps['private-link association show'] = """
+type: command
+short-summary: Get a private link association.
+examples:
+  - name: Get a single private link association.
+    text: az private-link association show --management-group-id TestMG --name testPLA
+"""
+helps['private-link association list'] = """
+type: command
+short-summary: Get a private link association for a management group scope.
+examples:
+  - name: Get a private link association for a management group scope.
+    text: az private-link association list --management-group-id TestMG
+"""
+helps['private-link association delete'] = """
+type: command
+short-summary: Delete a PrivateLinkAssociation.
+examples:
+  - name: Delete a PrivateLinkAssociation.
+    text: az private-link association delete --management-group-id TestMG --name testPLA
 """

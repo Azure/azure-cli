@@ -678,10 +678,11 @@ class TestActions(unittest.TestCase):
         EncryptionImages = self._get_compute_model('EncryptionImages', api_version)
         OSDiskImageEncryption = self._get_compute_model('OSDiskImageEncryption', api_version)
         DataDiskImageEncryption = self._get_compute_model('DataDiskImageEncryption', api_version)
+        ConfidentialVMEncryptionType = self._get_compute_model('ConfidentialVMEncryptionType', api_version)
         cmd = mock.MagicMock()
-        cmd.get_models.return_value = [TargetRegion, EncryptionImages, OSDiskImageEncryption, DataDiskImageEncryption]
+        cmd.get_models.return_value = [TargetRegion, EncryptionImages, OSDiskImageEncryption, DataDiskImageEncryption, ConfidentialVMEncryptionType]
 
-        target_regions_list = ["southcentralus", "westus=1", "westus2=standard_zrs", "eastus=2=standard_lrs"]
+        target_regions_list = ["southcentralus", "westus=1", "westus2=standard_zrs", "eastus=2=standard_lrs", 'CentralUSEUAP=1']
         np.target_regions = target_regions_list
 
         process_gallery_image_version_namespace(cmd, np)
