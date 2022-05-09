@@ -307,7 +307,7 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals
             'key_vault_id': key_vault_id,
         },
         'client_type': client_type or linker.get('clientType'),
-        # scope does not support update due to aks solution's limitation
+        # scope can be updated in container app while cannot be updated in aks due to some limitations
         'scope': scope or linker.get('scope')
     }
 
