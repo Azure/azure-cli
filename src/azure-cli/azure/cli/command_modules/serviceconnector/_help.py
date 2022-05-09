@@ -196,7 +196,9 @@ for source in SOURCE_RESOURCES:
                 Usage: --secret name=XX secret=XX
 
                 name    : Required. Username or account name for secret auth.
-                secret  : Required. Password or account key for secret auth.
+                secret  : One of <secret, keyVaultSecretUri, keyVaultSecretName> is required. Password or account key for secret auth.
+                keyVaultSecretUri  : One of <secret, keyVaultSecretUri, keyVaultSecretName> is required. Keyvault secret uri for secret auth.
+                keyVaultSecretName : One of <secret, keyVaultSecretUri, keyVaultSecretName> is required. Keyvault secret name for secret auth. It's for AKS only.
         ''' if AUTH_TYPE.Secret in auth_types else ''
         secret_auto_param = '''
             - name: --secret
