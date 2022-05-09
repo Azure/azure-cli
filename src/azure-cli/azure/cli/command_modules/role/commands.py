@@ -133,7 +133,7 @@ def load_command_table(self, _):
 
     with self.command_group('ad signed-in-user', client_factory=get_graph_client,
                             exception_handler=graph_err_handler) as g:
-        g.custom_command('show', 'show_signed_in_user')
+        g.custom_show_command('show', 'show_signed_in_user')
         g.custom_command('list-owned-objects', 'list_owned_objects')
 
     with self.command_group('ad group', client_factory=get_graph_client, exception_handler=graph_err_handler) as g:

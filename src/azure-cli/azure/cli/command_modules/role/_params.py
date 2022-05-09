@@ -197,7 +197,6 @@ def load_arguments(self, _):
                    help="If missing, CLI will generate a strong password")
 
     with self.argument_context('ad app credential reset') as c:
-        c.argument('name', options_list=['--id'], help='identifier uri, application id, or object id')
         c.argument('cert', arg_group='Credential', validator=validate_cert, help='Certificate to use for credentials')
         c.argument('years', type=int, default=None, arg_group='Credential', help='Number of years for which the credentials will be valid')
         c.argument('append', action='store_true', help='Append the new credential instead of overwriting.')
@@ -224,6 +223,8 @@ def load_arguments(self, _):
         c.argument('account_enabled', arg_type=get_three_state_flag(), help='enable the user account')
         c.argument('password', help='user password')
         c.argument('upn_or_object_id', options_list=['--id', c.deprecate(target='--upn-or-object-id', redirect='--id', hide=True)], help='The object ID or principal name of the user for which to get information')
+        c.argument('force_change_password_next_sign_in', arg_type=get_three_state_flag(),
+                   help='If the user must change her password on the next login.')
 
     with self.argument_context('ad user create') as c:
         c.argument('immutable_id', help="This must be specified if you are using a federated domain for "
@@ -236,8 +237,9 @@ def load_arguments(self, _):
 
     with self.argument_context('ad user get-member-groups') as c:
         c.argument('security_enabled_only', arg_type=get_three_state_flag(),
-                   help='If true, only membership in security-enabled groups should be checked. Otherwise, membership '
-                        'in all groups should be checked.')
+                   help='true to specify that only security groups that the entity is a member of should be returned; '
+                        'false to specify that all groups and directory roles that the entity is a member of should be '
+                        'returned.')
 
     group_help_msg = "group's object id or display name(prefix also works if there is a unique match)"
     with self.argument_context('ad group') as c:
@@ -255,7 +257,10 @@ def load_arguments(self, _):
 
     member_id_help_msg = 'The object ID of the contact, group, user, or service principal'
     with self.argument_context('ad group get-member-groups') as c:
-        c.argument('security_enabled_only', arg_type=get_three_state_flag(), default=False, required=False)
+        c.argument('security_enabled_only', arg_type=get_three_state_flag(),
+                   help='true to specify that only security groups that the entity is a member of should be returned; '
+                        'false to specify that all groups and directory roles that the entity is a member of should be '
+                        'returned.')
         c.extra('cmd')
 
     # with self.argument_context('ad group member add') as c:
