@@ -875,9 +875,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('blob_name', required=True)
 
     with self.argument_context('storage blob url') as c:
-        c.argument('protocol', arg_type=get_enum_type(['http', 'https'], 'https'), help='Protocol to use.')
-        c.argument('snapshot', help='An string value that uniquely identifies the snapshot. The value of '
-                                    'this query parameter indicates the snapshot version.')
+        from ._validators import get_not_none_validator
+        c.extra('blob_name', required=True)
+        c.extra('container_name', required=True, validator=get_not_none_validator('container_name'))
+        c.extra('protocol', arg_type=get_enum_type(['http', 'https'], 'https'), help='Protocol to use.')
+        c.extra('snapshot', help='An string value that uniquely identifies the snapshot. The value of this query '
+                                 'parameter indicates the snapshot version.')
 
     with self.argument_context('storage blob set-tier') as c:
         from azure.cli.command_modules.storage._validators import (blob_rehydrate_priority_validator)
@@ -1303,18 +1306,36 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('exclude_path', exclude_path_type)
 
     with self.argument_context('storage container') as c:
-        from .sdkutil import get_container_access_type_names
+        t_public_access = self.get_sdk('_models#PublicAccess', resource_type=ResourceType.DATA_STORAGE_BLOB)
         c.argument('container_name', container_name_type, options_list=('--name', '-n'))
         c.argument('public_access', validator=validate_container_public_access,
-                   arg_type=get_enum_type(get_container_access_type_names()),
+                   arg_type=get_enum_type(t_public_access),
                    help='Specifies whether data in the container may be accessed publicly.')
+    for scope in ['show', 'exists', 'show-permission', 'set-permission', 'metadata show', 'metadata update']:
+        with self.argument_context('storage container {}'.format(scope)) as c:
+            c.extra('container_name', container_name_type, options_list=('--name', '-n'), required=True)
+            c.extra('timeout', timeout_type)
+
+    for scope in ['show', 'show-permission', 'set-permission', 'metadata show', 'metadata update']:
+        with self.argument_context('storage container {}'.format(scope)) as c:
+            c.extra('lease', options_list='--lease-id',
+                    help="If specified, only succeed if the container's lease is active and matches this ID.")
+
+    for scope in ['set-permission', 'metadata update']:
+        with self.argument_context(f'storage container {scope}') as c:
+            c.extra('if_modified_since', arg_group='Precondition', type=get_datetime_type(False),
+                    help="Commence only if modified since supplied UTC datetime (Y-m-d'T'H:M'Z').")
+            c.extra('if_unmodified_since', arg_group='Precondition', type=get_datetime_type(False),
+                    help="Commence only if unmodified since supplied UTC datetime (Y-m-d'T'H:M'Z').")
 
     with self.argument_context('storage container create') as c:
+        from ._validators import validate_encryption_scope_parameter
+        c.argument('resource_group_name', required=False, validator=None, deprecate_info=c.deprecate())
         c.argument('container_name', container_name_type, options_list=('--name', '-n'), completer=None)
         c.argument('fail_on_exist', help='Throw an exception if the container already exists.')
         c.argument('account_name', help='Storage account name. Related environment variable: AZURE_STORAGE_ACCOUNT.')
         c.argument('default_encryption_scope', options_list=['--default-encryption-scope', '-d'],
-                   arg_group='Encryption Policy', is_preview=True,
+                   arg_group='Encryption Policy', is_preview=True, validator=validate_encryption_scope_parameter,
                    help='Default the container to use specified encryption scope for all writes.')
         c.argument('prevent_encryption_scope_override', options_list=['--prevent-encryption-scope-override', '-p'],
                    arg_type=get_three_state_flag(), arg_group='Encryption Policy', is_preview=True,
@@ -1330,9 +1351,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.ignore('processed_resource_group')
         c.ignore('processed_account_name')
         c.ignore('mgmt_client')
-
-    with self.argument_context('storage container exists') as c:
-        c.ignore('blob_name', 'snapshot')
 
     for item in ['create', 'extend']:
         with self.argument_context('storage container immutability-policy {}'.format(item)) as c:

@@ -62,6 +62,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
             context.argument('enable_csi', options_list=['--enable-csi'], arg_type=get_three_state_flag(),
                              help="Use keyvault as a secrets store via a CSI volume. "
                                   "If specified, AuthType Arguments are not needed.")
+        elif source == RESOURCE.ContainerApp:
+            context.argument('scope', options_list=['-c', '--container'], type=str,
+                             help="The container where the connection information "
+                                  "will be saved (as environment variables).")
+            context.ignore('enable_csi')
         else:
             context.ignore('scope')
             context.ignore('enable_csi')

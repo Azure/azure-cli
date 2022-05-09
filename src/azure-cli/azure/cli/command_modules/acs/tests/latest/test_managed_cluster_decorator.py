@@ -725,7 +725,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             "azure.cli.command_modules.acs.managed_cluster_decorator.get_rg_location",
             return_value="test_location",
         ), patch(
-            "azure.cli.command_modules.acs.custom.get_graph_rbac_management_client",
+            "azure.cli.command_modules.acs._graph.get_graph_rbac_management_client",
             return_value=None,
         ):
             self.assertEqual(
@@ -752,8 +752,8 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         with patch(
             "azure.cli.command_modules.acs.managed_cluster_decorator.get_rg_location",
             return_value="test_location",
-        ), patch("azure.cli.command_modules.acs.custom.get_graph_rbac_management_client", return_value=None), patch(
-            "azure.cli.command_modules.acs.custom._build_service_principal",
+        ), patch("azure.cli.command_modules.acs._graph.get_graph_rbac_management_client", return_value=None), patch(
+            "azure.cli.command_modules.acs._graph.build_service_principal",
             return_value=("test_service_principal", "test_aad_session_key"),
         ):
             self.assertEqual(
@@ -795,7 +795,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             "azure.cli.command_modules.acs.managed_cluster_decorator.get_rg_location",
             return_value="test_location",
         ), patch(
-            "azure.cli.command_modules.acs.custom.get_graph_rbac_management_client",
+            "azure.cli.command_modules.acs._graph.get_graph_rbac_management_client",
             return_value=None,
         ):
             # fail on client_secret not specified
@@ -4187,7 +4187,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             "azure.cli.command_modules.acs.managed_cluster_decorator.get_rg_location",
             return_value="test_location",
         ), patch(
-            "azure.cli.command_modules.acs.custom.get_graph_rbac_management_client",
+            "azure.cli.command_modules.acs._graph.get_graph_rbac_management_client",
             return_value=None,
         ):
             dec_mc_2 = dec_2.set_up_service_principal_profile(mc_2)
@@ -4412,9 +4412,9 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         dec_3.context.set_intermediate("subscription_id", "test_subscription_id")
         registry = Mock(id="test_registry_id")
         with patch(
-            "azure.cli.command_modules.acs.custom.get_resource_by_name",
+            "azure.cli.command_modules.acs._roleassignments.get_resource_by_name",
             return_value=registry,
-        ), patch("azure.cli.command_modules.acs.custom._ensure_aks_acr_role_assignment") as ensure_assignment:
+        ), patch("azure.cli.command_modules.acs._roleassignments.ensure_aks_acr_role_assignment") as ensure_assignment:
             dec_3.process_attach_acr(mc_3)
         ensure_assignment.assert_called_once_with(self.cmd, "test_service_principal", "test_registry_id", False, True)
 
@@ -5330,7 +5330,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             "azure.cli.command_modules.acs.managed_cluster_decorator.AKSManagedClusterContext.get_identity_by_msi_client",
             side_effect=[identity_obj_1, identity_obj_2],
         ), patch(
-            "azure.cli.command_modules.acs.managed_cluster_decorator._ensure_cluster_identity_permission_on_kubelet_identity"
+            "azure.cli.command_modules.acs.managed_cluster_decorator.ensure_cluster_identity_permission_on_kubelet_identity"
         ) as mock_ensure_method:
             dec_2 = AKSManagedClusterCreateDecorator(
                 self.cmd,
@@ -5780,7 +5780,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         mock_profile_4 = Mock(get_subscription_id=Mock(return_value="1234-5678-9012"))
         with patch(
             "azure.cli.command_modules.acs.managed_cluster_decorator.Profile", return_value=mock_profile_4
-        ), patch("azure.cli.command_modules.acs.managed_cluster_decorator._ensure_aks_acr") as mock_ensure_4:
+        ), patch("azure.cli.command_modules.acs.managed_cluster_decorator.ensure_aks_acr") as mock_ensure_4:
             dec_4.postprocessing_after_mc_created(mc_4)
         mock_ensure_4.assert_called_once_with(
             self.cmd,
@@ -6183,7 +6183,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         )
         dec_2.context.attach_mc(mc_2)
         dec_2.context.set_intermediate("subscription_id", "test_subscription_id")
-        with patch("azure.cli.command_modules.acs.managed_cluster_decorator._ensure_aks_acr") as ensure_acr:
+        with patch("azure.cli.command_modules.acs.managed_cluster_decorator.ensure_aks_acr") as ensure_acr:
             dec_2.process_attach_detach_acr(mc_2)
             ensure_acr.assert_has_calls(
                 [
@@ -7526,7 +7526,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         mock_profile_4 = Mock(get_subscription_id=Mock(return_value="1234-5678-9012"))
         with patch(
             "azure.cli.command_modules.acs.managed_cluster_decorator.Profile", return_value=mock_profile_4
-        ), patch("azure.cli.command_modules.acs.managed_cluster_decorator._ensure_aks_acr") as mock_ensure_4:
+        ), patch("azure.cli.command_modules.acs.managed_cluster_decorator.ensure_aks_acr") as mock_ensure_4:
             dec_4.postprocessing_after_mc_created(mc_4)
         mock_ensure_4.assert_called_once_with(
             self.cmd,

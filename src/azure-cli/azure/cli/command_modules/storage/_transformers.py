@@ -31,7 +31,7 @@ def transform_acl_list_output(result):
 
 
 def transform_container_permission_output(result):
-    return {'publicAccess': result.public_access or 'off'}
+    return {'publicAccess': result.get('public_access', None) or 'off'}
 
 
 def transform_cors_list_output(result):
@@ -148,6 +148,14 @@ def transform_url(result):
     result = re.sub('//', '/', result)
     result = re.sub('/', '//', result, count=1)
     return encode_url_path(result)
+
+
+def transform_url_without_encode(result):
+    """ Ensures the resulting URL string does not contain extra / characters """
+    import re
+    result = re.sub('//', '/', result)
+    result = re.sub('/', '//', result, count=1)
+    return result
 
 
 def transform_fs_access_output(result):

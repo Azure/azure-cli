@@ -20,33 +20,27 @@ from azure.cli.command_modules.acs._consts import (
     DecoratorEarlyExitException,
     DecoratorMode,
 )
+from azure.cli.command_modules.acs._graph import ensure_aks_service_principal
 from azure.cli.command_modules.acs._helpers import (
     get_snapshot_by_snapshot_id,
     get_user_assigned_identity_by_resource_id,
 )
 from azure.cli.command_modules.acs._loadbalancer import create_load_balancer_profile, set_load_balancer_sku
 from azure.cli.command_modules.acs._loadbalancer import update_load_balancer_profile as _update_load_balancer_profile
-from azure.cli.command_modules.acs._natgateway import (
-    create_nat_gateway_profile,
-    is_nat_gateway_profile_provided,
-)
-from azure.cli.command_modules.acs._natgateway import (
-    update_nat_gateway_profile as _update_nat_gateway_profile,
-)
+from azure.cli.command_modules.acs._natgateway import create_nat_gateway_profile, is_nat_gateway_profile_provided
+from azure.cli.command_modules.acs._natgateway import update_nat_gateway_profile as _update_nat_gateway_profile
 from azure.cli.command_modules.acs._resourcegroup import get_rg_location
+from azure.cli.command_modules.acs._roleassignments import (
+    ensure_aks_acr,
+    ensure_cluster_identity_permission_on_kubelet_identity,
+    subnet_role_assignment_exists,
+)
 from azure.cli.command_modules.acs._validators import extract_comma_separated_string
 from azure.cli.command_modules.acs.addonconfiguration import (
     ensure_container_insights_for_monitoring,
     ensure_default_log_analytics_workspace_for_monitoring,
 )
-from azure.cli.command_modules.acs.custom import (
-    _add_role_assignment,
-    _ensure_aks_acr,
-    _ensure_aks_service_principal,
-    _ensure_cluster_identity_permission_on_kubelet_identity,
-    _put_managed_cluster_ensuring_permission,
-    subnet_role_assignment_exists,
-)
+from azure.cli.command_modules.acs.custom import _add_role_assignment, _put_managed_cluster_ensuring_permission
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core._profile import Profile
 from azure.cli.core.azclierror import (
@@ -62,7 +56,7 @@ from azure.cli.core.azclierror import (
 from azure.cli.core.commands import AzCliCommand
 from azure.cli.core.keys import is_valid_ssh_rsa_public_key
 from azure.cli.core.profiles import ResourceType
-from azure.cli.core.util import truncate_text, get_file_json
+from azure.cli.core.util import get_file_json, truncate_text
 from azure.core.exceptions import HttpResponseError
 from knack.log import get_logger
 from knack.prompting import NoTTYException, prompt, prompt_pass, prompt_y_n
@@ -2013,9 +2007,9 @@ class AKSContext:
         completion will not be triggered. For other cases, dynamic completion will be triggered.
         When client_secret is given but service_principal is not, dns_name_prefix or fqdn_subdomain will be used to
         create a service principal. The parameters subscription_id, location and name (cluster) are also required when
-        calling function "_ensure_aks_service_principal", which internally used GraphRbacManagementClient to send
+        calling function "ensure_aks_service_principal", which internally used GraphRbacManagementClient to send
         the request.
-        When service_principal is given but client_secret is not, function "_ensure_aks_service_principal" would raise
+        When service_principal is given but client_secret is not, function "ensure_aks_service_principal" would raise
         CLIError.
 
         This function supports the option of read_only. When enabled, it will skip dynamic completion and validation.
@@ -2076,7 +2070,7 @@ class AKSContext:
             not secret_read_from_mc
         )
         if dynamic_completion:
-            principal_obj = _ensure_aks_service_principal(
+            principal_obj = ensure_aks_service_principal(
                 cli_ctx=self.cmd.cli_ctx,
                 service_principal=service_principal,
                 client_secret=client_secret,
@@ -2102,9 +2096,9 @@ class AKSContext:
         completion will not be triggered. For other cases, dynamic completion will be triggered.
         When client_secret is given but service_principal is not, dns_name_prefix or fqdn_subdomain will be used to
         create a service principal. The parameters subscription_id, location and name (cluster) are also required when
-        calling function "_ensure_aks_service_principal", which internally used GraphRbacManagementClient to send
+        calling function "ensure_aks_service_principal", which internally used GraphRbacManagementClient to send
         the request.
-        When service_principal is given but client_secret is not, function "_ensure_aks_service_principal" would raise
+        When service_principal is given but client_secret is not, function "ensure_aks_service_principal" would raise
         CLIError.
 
         :return: a tuple containing two elements: service_principal of string type or None and client_secret of
@@ -5149,7 +5143,7 @@ class AKSCreateDecorator:
     def set_up_service_principal_profile(self, mc: ManagedCluster) -> ManagedCluster:
         """Set up service principal profile for the ManagedCluster object.
 
-        The function "_ensure_aks_service_principal" will be called if the user provides an incomplete sp and secret
+        The function "ensure_aks_service_principal" will be called if the user provides an incomplete sp and secret
         pair, which internally used GraphRbacManagementClient to send the request to create sp.
 
         :return: the ManagedCluster object
@@ -5262,7 +5256,7 @@ class AKSCreateDecorator:
     def process_attach_acr(self, mc: ManagedCluster) -> None:
         """Attach acr for the cluster.
 
-        The function "_ensure_aks_acr" will be called to create an AcrPull role assignment for the acr, which
+        The function "ensure_aks_acr" will be called to create an AcrPull role assignment for the acr, which
         internally used AuthorizationManagementClient to send the request.
 
         :return: None
@@ -5277,7 +5271,7 @@ class AKSCreateDecorator:
             # If enable_managed_identity, attach acr operation will be handled after the cluster is created
             if not self.context.get_enable_managed_identity():
                 service_principal_profile = mc.service_principal_profile
-                _ensure_aks_acr(
+                ensure_aks_acr(
                     self.cmd,
                     assignee=service_principal_profile.client_id,
                     acr_name_or_id=attach_acr,
@@ -5764,7 +5758,7 @@ class AKSCreateDecorator:
 
         The wrapper function "get_identity_by_msi_client" will be called (by "get_user_assigned_identity_object_id") to
         get the identity object, which internally use ManagedServiceIdentityClient to send the request.
-        The function "_ensure_cluster_identity_permission_on_kubelet_identity" will be called to create a role
+        The function "ensure_cluster_identity_permission_on_kubelet_identity" will be called to create a role
         assignment if necessary, which internally used AuthorizationManagementClient to send the request.
 
         :return: the ManagedCluster object
@@ -5787,7 +5781,7 @@ class AKSCreateDecorator:
             }
             cluster_identity_object_id = self.context.get_user_assigned_identity_object_id()
             # ensure the cluster identity has "Managed Identity Operator" role at the scope of kubelet identity
-            _ensure_cluster_identity_permission_on_kubelet_identity(
+            ensure_cluster_identity_permission_on_kubelet_identity(
                 self.cmd,
                 cluster_identity_object_id,
                 assign_kubelet_identity)
@@ -6143,7 +6137,7 @@ class AKSUpdateDecorator:
     def process_attach_detach_acr(self, mc: ManagedCluster) -> None:
         """Attach or detach acr for the cluster.
 
-        The function "_ensure_aks_acr" will be called to create or delete an AcrPull role assignment for the acr, which
+        The function "ensure_aks_acr" will be called to create or delete an AcrPull role assignment for the acr, which
         internally used AuthorizationManagementClient to send the request.
 
         :return: None
@@ -6156,19 +6150,23 @@ class AKSUpdateDecorator:
         detach_acr = self.context.get_detach_acr()
 
         if attach_acr:
-            _ensure_aks_acr(self.cmd,
-                            assignee=assignee,
-                            acr_name_or_id=attach_acr,
-                            subscription_id=subscription_id,
-                            is_service_principal=is_service_principal)
+            ensure_aks_acr(
+                self.cmd,
+                assignee=assignee,
+                acr_name_or_id=attach_acr,
+                subscription_id=subscription_id,
+                is_service_principal=is_service_principal,
+            )
 
         if detach_acr:
-            _ensure_aks_acr(self.cmd,
-                            assignee=assignee,
-                            acr_name_or_id=detach_acr,
-                            subscription_id=subscription_id,
-                            detach=True,
-                            is_service_principal=is_service_principal)
+            ensure_aks_acr(
+                self.cmd,
+                assignee=assignee,
+                acr_name_or_id=detach_acr,
+                subscription_id=subscription_id,
+                detach=True,
+                is_service_principal=is_service_principal,
+            )
 
     def update_sku(self, mc: ManagedCluster) -> ManagedCluster:
         """Update sku (uptime sla) for the ManagedCluster object.
