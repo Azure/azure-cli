@@ -30,6 +30,7 @@ from ._resource_config import (
     SOURCE_RESOURCES,
     TARGET_RESOURCES,
     SOURCE_RESOURCES_PARAMS,
+    SOURCE_RESOURCES_CREATE_PARAMS,
     TARGET_RESOURCES_PARAMS,
     AUTH_TYPE_PARAMS,
     SUPPORTED_AUTH_TYPE
@@ -384,6 +385,19 @@ def get_missing_source_args(cmd):
 
     return missing_args
 
+def get_missing_source_create_args(cmd, namespace):
+    '''Get source resource related args in create
+    '''
+    source = get_source_resource_name(cmd)
+    missing_args = dict()
+
+    args = SOURCE_RESOURCES_CREATE_PARAMS.get(source)
+    if args:
+        for arg, content in args.items():
+            if not getattr(namespace, arg, None):
+                missing_args[arg] = content
+
+    return missing_args
 
 def get_missing_target_args(cmd):
     '''Get target resource related args
@@ -471,6 +485,7 @@ def validate_create_params(cmd, namespace):
     missing_args = dict()
     if not validate_source_resource_id(namespace):
         missing_args.update(get_missing_source_args(cmd))
+    missing_args.update(get_missing_source_create_args(cmd, namespace))
     if not validate_target_resource_id(namespace):
         missing_args.update(get_missing_target_args(cmd))
     missing_args.update(get_missing_auth_args(cmd, namespace))
@@ -517,6 +532,15 @@ def apply_source_args(cmd, namespace, arg_values):
             subscription=get_subscription_id(cmd.cli_ctx),
             **arg_values
         )
+
+
+def apply_source_create_args(cmd, namespace, arg_values):
+    '''Set source resource related args in create by arg_values
+    '''
+    source = get_source_resource_name(cmd)
+    for arg in SOURCE_RESOURCES_CREATE_PARAMS.get(source, {}):
+        if arg in arg_values:
+            setattr(namespace, arg, arg_values.get(arg, None))
 
 
 def apply_target_args(cmd, namespace, arg_values):
@@ -568,6 +592,7 @@ def apply_create_params(cmd, namespace, arg_values):
     '''Set create command missing args
     '''
     apply_source_args(cmd, namespace, arg_values)
+    apply_source_create_args(cmd, namespace, arg_values)
     apply_target_args(cmd, namespace, arg_values)
     apply_auth_args(cmd, namespace, arg_values)
 
