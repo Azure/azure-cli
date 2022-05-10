@@ -12,7 +12,7 @@ from azure.cli.testsdk.exceptions import JMESPathCheckAssertionError
 class PolicyInsightsTests(ScenarioTest):
 
     # Current recording was recorded against "Azure Governance Perf 24" (3593b919-b078-4cc1-902f-201232a97ac0)
-    @record_only()
+    #@record_only()
     @AllowLargeResponse(8192)
     def test_policy_insights(self):
         self.kwargs.update({
