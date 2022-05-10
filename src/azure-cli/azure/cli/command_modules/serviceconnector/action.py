@@ -47,7 +47,7 @@ class AddSecretAuthInfo(argparse.Action):
                                       'keys are: name, secret, keyVaultSecretUri, keyVaultSecretName'.format(k))
         if len(d) != 2:
             raise ValidationError('Required keys missing for parameter --secret/keyVaultSecretUri/keyVaultSecretName.'
-            ' All possible keys are: name, secret, keyVaultSecretUri, keyVaultSecretName')
+                                  ' All possible keys are: name, secret, keyVaultSecretUri, keyVaultSecretName')
         d['auth_type'] = 'secret'
         return d
 

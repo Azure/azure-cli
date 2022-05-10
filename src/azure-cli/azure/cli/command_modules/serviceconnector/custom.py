@@ -210,7 +210,7 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals
         client = set_user_token_header(client, cmd.cli_ctx)
         from ._utils import create_key_vault_reference_connection_if_not_exist
         create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, key_vault_id)
-    elif auth_info['auth_type'] == 'secret' and auth_info['secret_info']['secret_type'] == 'keyVaultSecretReference': # pylint: disable=unsubscriptable-object
+    elif auth_info['auth_type'] == 'secret' and auth_info['secret_info']['secret_type'] == 'keyVaultSecretReference':  # pylint: disable=unsubscriptable-object
         raise ValidationError('--vault-id must be provided to use keyVaultSecretName')
 
     if service_endpoint:
