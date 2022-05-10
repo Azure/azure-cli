@@ -32,12 +32,12 @@ class AddSecretAuthInfo(argparse.Action):
                     'secret_type': 'rawValue',
                     'value': v[0]
                 }
-            elif kl == 'keyvaultsecreturi': 
+            elif kl == 'keyvaultsecreturi':
                 d['secret_info'] = {
                     'secret_type': 'keyVaultSecretUri',
                     'value': v[0]
                 }
-            elif kl == 'keyvaultsecretname': 
+            elif kl == 'keyvaultsecretname':
                 d['secret_info'] = {
                     'secret_type': 'keyVaultSecretReference',
                     'name': v[0]
