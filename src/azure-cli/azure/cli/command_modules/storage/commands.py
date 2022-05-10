@@ -608,6 +608,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                                                ResourceType.DATA_STORAGE_FILESHARE),
                             resource_type=ResourceType.DATA_STORAGE_FILESHARE, min_api='2019-02-02') as g:
         from ._format import transform_boolean_for_table
+        from ._transformers import transform_file_share_json_output
         g.storage_custom_command('create', 'create_share',
                                  transform=create_boolean_result_output_transformer('created'),
                                  table_transformer=transform_boolean_for_table)
@@ -616,7 +617,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                  table_transformer=transform_boolean_for_table)
         g.storage_custom_command('generate-sas', 'generate_share_sas')
         g.storage_custom_command('stats', 'get_share_stats')
-        g.storage_command('show', 'get_share_properties', exception_handler=show_exception_handler)
+        g.storage_command('show', 'get_share_properties', exception_handler=show_exception_handler,
+                          transform=transform_file_share_json_output)
         g.storage_custom_command('exists', 'share_exists', transform=create_boolean_result_output_transformer('exists'))
         g.storage_command('update', 'set_share_quota')
         g.storage_command('metadata show', 'get_share_properties', exception_handler=show_exception_handler,

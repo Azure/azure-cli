@@ -91,7 +91,7 @@ class StorageFileShareScenarios(StorageScenarioMixin, ScenarioTest):
 
         self.storage_cmd('storage share update --name {} --quota 3', account_info, s1)
         self.storage_cmd('storage share show --name {}', account_info, s1) \
-            .assert_with_checks(JMESPathCheck('quota', 3))
+            .assert_with_checks(JMESPathCheck('properties.quota', 3))
         self.storage_cmd('storage share url --name {}', account_info, s1) \
             .assert_with_checks(StringContainCheck(s1), StringContainCheck('http'))
         unc = self.storage_cmd('storage share url --name {} --unc', account_info, s1).output

@@ -71,7 +71,7 @@ class StorageShareScenarioTests(StorageScenarioMixin, ScenarioTest):
 
         self.storage_cmd('storage share update --name {} --quota 3', account_info, share)
         self.storage_cmd('storage share show --name {}', account_info, share) \
-            .assert_with_checks(JMESPathCheck('quota', 3))
+            .assert_with_checks(JMESPathCheck('properties.quota', 3))
 
     @ResourceGroupPreparer(name_prefix='clitest')
     @StorageAccountPreparer(name_prefix='share', kind='StorageV2', location='eastus2', sku='Standard_RAGRS')

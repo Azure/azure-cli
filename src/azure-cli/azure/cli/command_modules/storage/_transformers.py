@@ -374,3 +374,19 @@ def transform_queue_policy_output(result):
     if result['expiry']:
         result['expiry'] = parser.parse(result['expiry'])
     return result
+
+
+def transform_file_share_json_output(result):
+    result = todict(result)
+    new_result = {
+        "metadata": result.pop('metadata', None),
+        "name": result.pop('name', None),
+        "properties": {
+            "etag": result.pop('etag', None),
+            "lastModified": result.pop('lastModified', None),
+            "quota": result.pop('quota', None)
+        },
+        "snapshot": result.pop('snapshot', None)
+    }
+    new_result.update(result)
+    return new_result
