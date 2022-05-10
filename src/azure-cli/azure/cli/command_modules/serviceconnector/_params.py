@@ -15,6 +15,7 @@ from ._validators import (
 from ._resource_config import (
     RESOURCE,
     SOURCE_RESOURCES_PARAMS,
+    SOURCE_RESOURCES_CREATE_PARAMS,
     TARGET_RESOURCES_PARAMS,
     AUTH_TYPE_PARAMS,
     SUPPORTED_AUTH_TYPE,
@@ -62,6 +63,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
             context.argument('enable_csi', options_list=['--enable-csi'], arg_type=get_three_state_flag(),
                              help="Use keyvault as a secrets store via a CSI volume. "
                                   "If specified, AuthType Arguments are not needed.")
+        elif source == RESOURCE.ContainerApp:
+            for arg, content in SOURCE_RESOURCES_CREATE_PARAMS.get(source).items():
+                context.argument(arg, options_list=content.get('options'), type=str, help=content.get('help'))
+            context.ignore('enable_csi')
         else:
             context.ignore('scope')
             context.ignore('enable_csi')

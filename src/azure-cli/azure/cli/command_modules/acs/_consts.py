@@ -56,9 +56,12 @@ CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY = "userAssignedNATGateway"
 CONST_PRIVATE_DNS_ZONE_SYSTEM = "system"
 CONST_PRIVATE_DNS_ZONE_NONE = "none"
 
-# used to set identity profile (for kubelet)
+# role assignment for kubelet
 CONST_MANAGED_IDENTITY_OPERATOR_ROLE = 'Managed Identity Operator'
 CONST_MANAGED_IDENTITY_OPERATOR_ROLE_ID = 'f1a07417-d97a-45cb-824c-7a7467783830'
+
+# role assignment for vnet subnet
+CONST_NETWORK_CONTRIBUTOR_ROLE_ID = "4d97b98b-1d4f-4787-a291-c67834d212e7"
 
 # upgrade channel
 CONST_RAPID_UPGRADE_CHANNEL = "rapid"
