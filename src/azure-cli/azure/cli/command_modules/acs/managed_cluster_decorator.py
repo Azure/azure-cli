@@ -1295,7 +1295,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         """
         return self.external_functions.get_user_assigned_identity_by_resource_id(self.cmd.cli_ctx, assigned_identity)
 
-    def get_user_assigned_identity_client_id(self) -> str:
+    def get_user_assigned_identity_client_id(self, user_assigned_identity=None) -> str:
         """Helper function to obtain the client_id of user assigned identity.
 
         Note: This is not a parameter of aks_create, and it will not be decorated into the `mc` object.
@@ -1306,12 +1306,12 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         :return: string
         """
-        assigned_identity = self.get_assign_identity()
+        assigned_identity = user_assigned_identity if user_assigned_identity else self.get_assign_identity()
         if assigned_identity is None or assigned_identity == "":
             raise RequiredArgumentMissingError("No assigned identity provided.")
         return self.get_identity_by_msi_client(assigned_identity).client_id
 
-    def get_user_assigned_identity_object_id(self) -> str:
+    def get_user_assigned_identity_object_id(self, user_assigned_identity=None) -> str:
         """Helper function to obtain the principal_id of user assigned identity.
 
         Note: This is not a parameter of aks_create, and it will not be decorated into the `mc` object.
@@ -1322,7 +1322,7 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         :return: string
         """
-        assigned_identity = self.get_assign_identity()
+        assigned_identity = user_assigned_identity if user_assigned_identity else self.get_assign_identity()
         if assigned_identity is None or assigned_identity == "":
             raise RequiredArgumentMissingError("No assigned identity provided.")
         return self.get_identity_by_msi_client(assigned_identity).principal_id
@@ -4633,8 +4633,8 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             identity_profile = {
                 'kubeletidentity': self.models.UserAssignedIdentity(
                     resource_id=assign_kubelet_identity,
-                    client_id=kubelet_identity.client_id,
-                    object_id=kubelet_identity.principal_id
+                    client_id=kubelet_identity.client_id,       # TODO: may remove, rp would take care of this
+                    object_id=kubelet_identity.principal_id     # TODO: may remove, rp would take care of this
                 )
             }
             cluster_identity_object_id = self.context.get_user_assigned_identity_object_id()
