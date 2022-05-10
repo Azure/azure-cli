@@ -1044,7 +1044,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         with patch(
             "azure.cli.command_modules.acs.managed_cluster_decorator.AKSManagedClusterContext.get_identity_by_msi_client",
             return_value=identity_obj,
-        ):
+        ) as get_identity_helper:
             ctx_2 = AKSManagedClusterContext(
                 self.cmd,
                 AKSManagedClusterParamDict(
@@ -1057,6 +1057,9 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
                 DecoratorMode.CREATE,
             )
             self.assertEqual(ctx_2.get_user_assigned_identity_client_id(), "test_client_id")
+            get_identity_helper.assert_called_with("test_assign_identity")
+            self.assertEqual(ctx_2.get_user_assigned_identity_client_id("custom_assign_identity"), "test_client_id")
+            get_identity_helper.assert_called_with("custom_assign_identity")
 
     def test_get_user_assigned_identity_object_id(self):
         ctx_1 = AKSManagedClusterContext(
@@ -1076,7 +1079,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         with patch(
             "azure.cli.command_modules.acs.managed_cluster_decorator.AKSManagedClusterContext.get_identity_by_msi_client",
             return_value=identity_obj,
-        ):
+        ) as get_identity_helper:
             ctx_2 = AKSManagedClusterContext(
                 self.cmd,
                 AKSManagedClusterParamDict(
@@ -1088,10 +1091,10 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
                 self.models,
                 DecoratorMode.CREATE,
             )
-            self.assertEqual(
-                ctx_2.get_user_assigned_identity_object_id(),
-                "test_principal_id",
-            )
+            self.assertEqual(ctx_2.get_user_assigned_identity_object_id(), "test_principal_id")
+            get_identity_helper.assert_called_with("test_assign_identity")
+            self.assertEqual(ctx_2.get_user_assigned_identity_object_id("custom_assign_identity"), "test_principal_id")
+            get_identity_helper.assert_called_with("custom_assign_identity")
 
     def test_get_attach_acr(self):
         # default
