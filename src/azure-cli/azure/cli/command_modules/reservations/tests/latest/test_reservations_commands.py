@@ -154,7 +154,7 @@ class AzureReservationsTests(ScenarioTest):
         original_quantity = original_reservation['properties']['quantity']
 
         split_items = self.cmd('reservations reservation split --reservation-order-id {reservation_order_id} '
-                               '--reservation-id {reservation_id} -1 {quantity1} -2 {quantity2}').get_output_in_json()
+                               '--reservation-id {reservation_id} --quantity-1 {quantity1} --quantity-2 {quantity2}').get_output_in_json()
         self.assertIsNotNone(split_items)
 
         quantity_sum = 0
