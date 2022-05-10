@@ -385,6 +385,7 @@ def get_missing_source_args(cmd):
 
     return missing_args
 
+
 def get_missing_source_create_args(cmd, namespace):
     '''Get source resource related args in create
     '''
@@ -398,6 +399,7 @@ def get_missing_source_create_args(cmd, namespace):
                 missing_args[arg] = content
 
     return missing_args
+
 
 def get_missing_target_args(cmd):
     '''Get target resource related args
