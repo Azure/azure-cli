@@ -1366,7 +1366,7 @@ examples:
         az group delete -n MyResourceGroup
   - name: Force delete all the Virtual Machines in a resource group.
     text: >
-        az group delete -n MyResourceGroup --forceDeletionTypes Microsoft.Compute/virtualMachines
+        az group delete -n MyResourceGroup --force-deletion-types Microsoft.Compute/virtualMachines
 """
 
 helps['group deployment'] = """
