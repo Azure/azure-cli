@@ -173,11 +173,18 @@ class CreateForRbacScenarioTest(RoleScenarioTestBase):
             'role': 'Reader',
         })
 
+        # No role assignment argument
+        # Without this line, no recording YAML will be generated. Playing back this test will make it live and fail
+        # in CI because there is no logged in account.
+        self.kwargs['app_id'] = self.cmd('ad sp create-for-rbac').get_output_in_json()['appId']
+
         from azure.cli.core.azclierror import ArgumentUsageError
 
+        # Missing --role
         with self.assertRaisesRegex(ArgumentUsageError, 'both'):
             self.cmd('ad sp create-for-rbac --scopes {scope}')
 
+        # Missing --scopes
         with self.assertRaisesRegex(ArgumentUsageError, 'both'):
             self.cmd('ad sp create-for-rbac --role {role}')
 
