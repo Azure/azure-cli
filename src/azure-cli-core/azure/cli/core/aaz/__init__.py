@@ -2,8 +2,12 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
 # pylint: disable=unused-import
+
+""" AAZ is short for Atomic AZ, which is an atomic command layer of azure cli.
+The command in atomic layer is called atomic command, mapping to an operation of azure resource.
+Atomic commands can be generated from rest api by using aaz-dev tool.
+"""
 
 from ._arg import has_value, AAZArgumentsSchema, AAZArgEnum, AAZStrArg, AAZIntArg, AAZObjectArg, AAZDictArg, \
     AAZFloatArg, AAZBaseArg, AAZBoolArg, AAZListArg, AAZResourceGroupNameArg, AAZResourceLocationArg, \

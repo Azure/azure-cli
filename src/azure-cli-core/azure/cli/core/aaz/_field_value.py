@@ -7,6 +7,7 @@ from ._base import AAZBaseValue, AAZValuePatch, AAZUndefined
 
 
 class AAZSimpleValue(AAZBaseValue):
+    """ Simple build-in values such as int, float, boolean and string"""
 
     def __str__(self):
         return str(self._data)
@@ -64,7 +65,7 @@ class AAZObject(AAZBaseValue):
         if name not in self._data:
             # is key is not set before, then create a patch, and value updated in patch will be partial updated
             self._data[name] = AAZValuePatch.build(attr_schema)
-        return attr_schema._ValueCls(attr_schema, self._data[name])
+        return attr_schema._ValueCls(attr_schema, self._data[name])  # return as AAZValue
 
     def __setitem__(self, key, data):
         assert not key.startswith('_')
@@ -117,9 +118,11 @@ class AAZObject(AAZBaseValue):
     def to_serialized_data(self, processor=None):
         result = {}
         schemas = [self._schema]
+
         disc_schema = self._schema.get_discriminator(self._data)
         if disc_schema:
             schemas.append(disc_schema)
+
         for schema in schemas:
             for name, field_schema in schema._fields.items():
                 v = self[name].to_serialized_data(processor=processor)
@@ -131,11 +134,13 @@ class AAZObject(AAZBaseValue):
 
         if not result and self._is_patch:
             return AAZUndefined
+
         if processor:
             result = processor(self._schema, result)
         return result
 
     def _get_attr_schema_and_name(self, key):
+        """ get attribute schema and it's name based in key """
         disc_schema = self._schema.get_discriminator(self._data)
         if not hasattr(self._schema, key) and disc_schema is not None:
             attr_schema = disc_schema[key]
@@ -159,7 +164,7 @@ class AAZDict(AAZBaseValue):
         item_schema = self._schema.Element
         if key not in self._data:
             self._data[key] = AAZValuePatch.build(item_schema)
-        return item_schema._ValueCls(item_schema, self._data[key])
+        return item_schema._ValueCls(item_schema, self._data[key])  # return as AAZValue
 
     def __setitem__(self, key, data):
         try:

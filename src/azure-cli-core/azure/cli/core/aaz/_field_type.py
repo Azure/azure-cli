@@ -12,6 +12,8 @@ from .exceptions import AAZUnknownFieldError, AAZConflictFieldDefinitionError, A
 
 # build in types
 class AAZSimpleType(AAZBaseType):
+    """Simple value type"""
+
     DataType = None
 
     _ValueCls = AAZSimpleValue
@@ -66,13 +68,15 @@ class AAZFloatType(AAZSimpleType):
 
 # compound types
 class AAZObjectType(AAZBaseType):
+    """Object value type"""
+
     _PROTECTED_KEYWORDS = (
         "get_attr_name",
         "process_data",
         "to_serialized_data",
         "discriminate_by",
         "get_discriminator"
-    )
+    )   # these keywords are used in AAZObjectValue and AAZObjectType, object should not use them as a field name.
 
     _ValueCls = AAZObject
     _PatchDataCls = dict
@@ -95,33 +99,36 @@ class AAZObjectType(AAZBaseType):
 
     def __setitem__(self, key, value):
         assert not key.startswith('_')
+        assert key not in self._PROTECTED_KEYWORDS
 
-        if isinstance(value, AAZBaseType):
-            if hasattr(self, key):
-                # key should not be defined before
-                raise AAZConflictFieldDefinitionError(
-                    self, key, "Key already been defined before")
-            assert key not in self._PROTECTED_KEYWORDS
-            name = key
-            value._name = name
-            self._fields[name] = value
-
-            # update alias map
-            aliases = [*value._options] if value._options else []
-            if value._serialized_name:
-                aliases.append(value._serialized_name)
-
-            for alias in aliases:
-                if alias == name:
-                    continue
-                assert not alias.startswith('_')
-                assert alias not in self._PROTECTED_KEYWORDS
-                if alias in self._fields_alias_map and self._fields_alias_map[alias] != name:
-                    raise AAZConflictFieldDefinitionError(
-                        self, name, f"Alias is already used by other field: {self._fields_alias_map[alias]}")
-                self._fields_alias_map[alias] = name
-        else:
+        if not isinstance(value, AAZBaseType):
             raise AAZInvalidFieldError(self, key, f"unknown field type {type(value)}")
+
+        if hasattr(self, key):
+            # key should not be defined before
+            raise AAZConflictFieldDefinitionError(
+                self, key, "Key already been defined before")
+
+        name = key
+        value._name = name
+        self._fields[name] = value
+
+        # update alias map
+        aliases = [*value._options] if value._options else []
+        if value._serialized_name:
+            aliases.append(value._serialized_name)
+
+        for alias in aliases:
+            if alias == name:
+                continue
+
+            assert not alias.startswith('_')
+            assert alias not in self._PROTECTED_KEYWORDS
+
+            if alias in self._fields_alias_map and self._fields_alias_map[alias] != name:
+                raise AAZConflictFieldDefinitionError(
+                    self, name, f"Alias is already used by other field: {self._fields_alias_map[alias]}")
+            self._fields_alias_map[alias] = name
 
     def __getattr__(self, key):
         return self[key]
@@ -148,7 +155,9 @@ class AAZObjectType(AAZBaseType):
 
         result = {}
         value = AAZObject(schema=self, data=result)
+
         if isinstance(data, AAZObject):
+
             if self._discriminator_field_name:
                 # assign discriminator field first
                 for key in data._data.keys():
@@ -162,8 +171,10 @@ class AAZObjectType(AAZBaseType):
                     # ignore undefined key
                     continue
                 value[key] = data[key]
+
         else:
             assert isinstance(data, (dict,))
+
             if self._discriminator_field_name:
                 # assign discriminator field first
                 for key, sub_data in data.items():
@@ -177,10 +188,12 @@ class AAZObjectType(AAZBaseType):
                     # ignore undefined key
                     continue
                 value[key] = sub_data
+
         return result
 
     # Polymorphism support
     def discriminate_by(self, key, data, schema=None):
+
         name = self.get_attr_name(key)
         if name not in self._fields:
             raise AAZUnknownFieldError(self, key)
@@ -193,7 +206,7 @@ class AAZObjectType(AAZBaseType):
         elif self._discriminator_field_name != name:
             raise AAZConflictFieldDefinitionError(
                 self, name, f"Conflict discriminator field name with: {self._discriminator_field_name}")
-        schema = schema or AAZObjectType()
+        schema = schema or AAZObjectType()  # use provided schema or create a object type
         assert isinstance(schema, AAZObjectType)
         return self._discriminators.setdefault(data, schema)
 
@@ -207,11 +220,14 @@ class AAZObjectType(AAZBaseType):
         assert isinstance(data, dict)
         if self._discriminator_field_name not in data:
             return None
-        field_data = data[self._discriminator_field_name]
+
+        field_data = data[self._discriminator_field_name]  # get discriminator field data
         return self._discriminators.get(field_data, None)
 
 
 class AAZDictType(AAZBaseType):
+    """Dict value type"""
+
     _ValueCls = AAZDict
     _PatchDataCls = dict
 
@@ -258,6 +274,8 @@ class AAZDictType(AAZBaseType):
 
 
 class AAZListType(AAZBaseType):
+    """List value type"""
+
     _ValueCls = AAZList
     _PatchDataCls = dict
 
@@ -301,4 +319,5 @@ class AAZListType(AAZBaseType):
             assert isinstance(data, list)
             for idx, sub_data in enumerate(data):
                 value[idx] = sub_data
+
         return result
