@@ -165,7 +165,6 @@ def cli_sbqueue_create(cmd, client, resource_group_name, namespace_name, queue_n
     if auto_delete_on_idle:
         queue_params.auto_delete_on_idle = return_valid_duration(auto_delete_on_idle)
 
-
     return client.create_or_update(
         resource_group_name=resource_group_name,
         namespace_name=namespace_name,
@@ -181,11 +180,11 @@ def cli_sbqueue_update(instance, lock_duration=None,
                        forward_to=None, forward_dead_lettered_messages_to=None, enable_batched_operations=None):
 
     from datetime import timedelta
-    from azure.cli.command_modules.servicebus.constants import DURATION_DAYS
+    from azure.cli.command_modules.servicebus.constants import DURATION_LIMIT
 
     if lock_duration:
         instance.lock_duration = return_valid_duration(lock_duration, instance.lock_duration)
-    elif instance.lock_duration > timedelta(days = DURATION_DAYS-1):
+    elif instance.lock_duration > timedelta(days=DURATION_LIMIT):
         instance.lock_duration = None
 
     if max_size_in_megabytes:
@@ -199,7 +198,7 @@ def cli_sbqueue_update(instance, lock_duration=None,
 
     if default_message_time_to_live:
         instance.default_message_time_to_live = return_valid_duration(default_message_time_to_live, instance.default_message_time_to_live)
-    elif instance.default_message_time_to_live > timedelta(days = DURATION_DAYS-1):
+    elif instance.default_message_time_to_live > timedelta(days=DURATION_LIMIT):
         instance.default_message_time_to_live = None
 
     if dead_lettering_on_message_expiration is not None:
@@ -207,7 +206,7 @@ def cli_sbqueue_update(instance, lock_duration=None,
 
     if duplicate_detection_history_time_window:
         instance.duplicate_detection_history_time_window = return_valid_duration(duplicate_detection_history_time_window, instance.duplicate_detection_history_time_window)
-    elif instance.duplicate_detection_history_time_window > timedelta(days = DURATION_DAYS-1):
+    elif instance.duplicate_detection_history_time_window > timedelta(days=DURATION_LIMIT):
         instance.duplicate_detection_history_time_window = None
 
     if max_delivery_count:
@@ -218,7 +217,7 @@ def cli_sbqueue_update(instance, lock_duration=None,
 
     if auto_delete_on_idle:
         instance.auto_delete_on_idle = return_valid_duration(auto_delete_on_idle, instance.auto_delete_on_idle)
-    elif instance.auto_delete_on_idle > timedelta(days = DURATION_DAYS-1):
+    elif instance.auto_delete_on_idle > timedelta(days=DURATION_LIMIT):
         instance.auto_delete_on_idle = None
 
     if enable_partitioning is not None:
@@ -306,11 +305,11 @@ def cli_sbtopic_update(instance, default_message_time_to_live=None,
                        enable_partitioning=None, enable_express=None):
 
     from datetime import timedelta
-    from azure.cli.command_modules.servicebus.constants import DURATION_DAYS
+    from azure.cli.command_modules.servicebus.constants import DURATION_LIMIT
 
     if default_message_time_to_live:
         instance.default_message_time_to_live = default_message_time_to_live
-    elif instance.default_message_time_to_live > timedelta(days = DURATION_DAYS-1):
+    elif instance.default_message_time_to_live > timedelta(days=DURATION_LIMIT):
         instance.default_message_time_to_live = None
 
     if max_size_in_megabytes:
@@ -321,7 +320,7 @@ def cli_sbtopic_update(instance, default_message_time_to_live=None,
 
     if duplicate_detection_history_time_window:
         instance.duplicate_detection_history_time_window = return_valid_duration(duplicate_detection_history_time_window, instance.duplicate_detection_history_time_window)
-    elif instance.duplicate_detection_history_time_window > timedelta(days = DURATION_DAYS-1):
+    elif instance.duplicate_detection_history_time_window > timedelta(days=DURATION_LIMIT):
         instance.duplicate_detection_history_time_window = None
 
     if enable_batched_operations is not None:
@@ -335,7 +334,7 @@ def cli_sbtopic_update(instance, default_message_time_to_live=None,
 
     if auto_delete_on_idle:
         instance.auto_delete_on_idle = return_valid_duration(auto_delete_on_idle, instance.auto_delete_on_idle)
-    elif instance.auto_delete_on_idle > timedelta(days = DURATION_DAYS-1):
+    elif instance.auto_delete_on_idle > timedelta(days=DURATION_LIMIT):
         instance.auto_delete_on_idle = None
 
     if enable_partitioning is not None:
@@ -412,11 +411,11 @@ def cli_sbsubscription_update(instance, lock_duration=None,
                               auto_delete_on_idle=None, forward_to=None, forward_dead_lettered_messages_to=None, dead_lettering_on_filter_evaluation_exceptions=None):
 
     from datetime import timedelta
-    from azure.cli.command_modules.servicebus.constants import DURATION_DAYS
+    from azure.cli.command_modules.servicebus.constants import DURATION_LIMIT
 
     if lock_duration:
         instance.lock_duration = return_valid_duration(lock_duration, instance.lock_duration)
-    elif instance.lock_duration > timedelta(days = DURATION_DAYS-1):
+    elif instance.lock_duration > timedelta(days=DURATION_LIMIT):
         instance.lock_duration = None
 
     if requires_session is not None:
@@ -424,7 +423,7 @@ def cli_sbsubscription_update(instance, lock_duration=None,
 
     if default_message_time_to_live:
         instance.default_message_time_to_live = return_valid_duration(default_message_time_to_live, instance.default_message_time_to_live)
-    elif instance.default_message_time_to_live > timedelta(days = DURATION_DAYS-1):
+    elif instance.default_message_time_to_live > timedelta(days=DURATION_LIMIT):
         instance.default_message_time_to_live = None
 
     if dead_lettering_on_message_expiration is not None:
@@ -441,7 +440,7 @@ def cli_sbsubscription_update(instance, lock_duration=None,
 
     if auto_delete_on_idle:
         instance.auto_delete_on_idle = return_valid_duration(auto_delete_on_idle, instance.auto_delete_on_idle)
-    elif instance.auto_delete_on_idle > timedelta(days = DURATION_DAYS-1):
+    elif instance.auto_delete_on_idle > timedelta(days=DURATION_LIMIT):
         instance.auto_delete_on_idle = None
 
     if forward_to:

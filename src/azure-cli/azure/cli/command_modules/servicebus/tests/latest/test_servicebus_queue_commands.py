@@ -33,6 +33,7 @@ class SBQueueScenarioTest(ScenarioTest):
             'secondary': 'SecondaryKey',
             'queuename': self.create_random_name(prefix='sb-queuecli', length=25),
             'queuename2': self.create_random_name(prefix='sb-queuecli2', length=25),
+            'queuename3': self.create_random_name(prefix='sb-queuecli2', length=25),
             'samplequeue': self.create_random_name(prefix='sb-queuecli3', length=25),
             'samplequeue2': self.create_random_name(prefix='sb-queuecli4', length=25),
             'queueauthoname': self.create_random_name(prefix='cliQueueAutho', length=25),
@@ -60,6 +61,8 @@ class SBQueueScenarioTest(ScenarioTest):
                  checks=[self.check('sku.name', '{sku}')])
 
         self.cmd('servicebus queue create --name {samplequeue} --namespace-name {namespacename} --resource-group {rg}')
+
+        self.cmd('servicebus queue create --name {samplequeue2} --namespace-name {namespacename} --resource-group {rg}')
 
         queue = self.cmd('servicebus queue create --resource-group {rg} --name {queuename2} --namespace-name {namespacename}'
                  ' --lock-duration {time_sample9} --max-size 4096 '
@@ -177,6 +180,98 @@ class SBQueueScenarioTest(ScenarioTest):
 
         self.assertEqual(queue['maxDeliveryCount'], 15)
         self.kwargs.update({'maxDeliveryCount': queue['maxDeliveryCount']})
+
+        self.assertOnUpdate(queue, self.kwargs)
+
+        queue = self.cmd(
+            'servicebus queue update --resource-group {rg} --name {queuename2} --namespace-name {namespacename} '
+            '--forward-to {samplequeue2}').get_output_in_json()
+
+        self.assertEqual(queue['forwardTo'], self.kwargs['samplequeue2'])
+        self.kwargs.update({'forwardTo': queue['forwardTo']})
+
+        self.assertOnUpdate(queue, self.kwargs)
+
+        queue = self.cmd(
+            'servicebus queue update --resource-group {rg} --name {queuename2} --namespace-name {namespacename} '
+            '--forward-dead-lettered-messages-to {samplequeue2}').get_output_in_json()
+
+        self.assertEqual(queue['forwardDeadLetteredMessagesTo'], self.kwargs['samplequeue2'])
+        self.kwargs.update({'forwardDeadLetteredMessagesTo': queue['forwardDeadLetteredMessagesTo']})
+
+        self.assertOnUpdate(queue, self.kwargs)
+
+        queue = self.cmd(
+            'servicebus queue update --resource-group {rg} --name {queuename2} --namespace-name {namespacename} '
+            '--status SendDisabled').get_output_in_json()
+
+        self.assertEqual(queue['status'], 'SendDisabled')
+        self.kwargs.update({'status': queue['status']})
+
+        self.assertOnUpdate(queue, self.kwargs)
+
+        queue = self.cmd(
+            'servicebus queue update --resource-group {rg} --name {queuename2} --namespace-name {namespacename} '
+            '--max-size 2048').get_output_in_json()
+
+        self.assertEqual(queue['maxSizeInMegabytes'], 2048)
+        self.kwargs.update({'maxSizeInMegabytes': queue['maxSizeInMegabytes']})
+
+        self.assertOnUpdate(queue, self.kwargs)
+
+        queue = self.cmd(
+            'servicebus queue create --resource-group {rg} --name {queuename3} --namespace-name {namespacename} '
+            '--auto-delete-on-idle {time_sample1} --enable-session --enable-express --enable-partitioning').get_output_in_json()
+
+        self.assertEqual(queue['autoDeleteOnIdle'], '7 days, 0:00:00')
+        self.assertEqual(queue['enableExpress'], True)
+        self.assertEqual(queue['enablePartitioning'], True)
+        self.assertEqual(queue['requiresSession'], True)
+
+        self.kwargs.update({
+            'autoDeleteOnIdle': queue['autoDeleteOnIdle'],
+            'defaultMessageTimeToLive': queue['defaultMessageTimeToLive'],
+            'deadLetteringOnMessageExpiration': queue['deadLetteringOnMessageExpiration'],
+            'duplicateDetectionHistoryTimeWindow': queue['duplicateDetectionHistoryTimeWindow'],
+            'enableExpress': queue['enableExpress'],
+            'enablePartitioning': queue['enablePartitioning'],
+            'lockDuration': queue['lockDuration'],
+            'maxDeliveryCount': queue['maxDeliveryCount'],
+            'maxSizeInMegabytes': queue['maxSizeInMegabytes'],
+            'requiresDuplicateDetection': queue['requiresDuplicateDetection'],
+            'requiresSession': queue['requiresSession'],
+            'status': queue['status'],
+            'enableBatchedOperations': queue['enableBatchedOperations'],
+            'forwardTo': queue['forwardTo'],
+            'forwardDeadLetteredMessagesTo': queue['forwardDeadLetteredMessagesTo']
+        })
+
+        self.assertOnUpdate(queue, self.kwargs)
+
+        queue = self.cmd(
+            'servicebus queue update --resource-group {rg} --name {queuename3} --namespace-name {namespacename} '
+            '--auto-delete-on-idle {time_sample7}').get_output_in_json()
+
+        self.assertEqual(queue['autoDeleteOnIdle'], '1 day, 0:03:04')
+        self.kwargs.update({'autoDeleteOnIdle': queue['autoDeleteOnIdle']})
+
+        self.assertOnUpdate(queue, self.kwargs)
+
+        queue = self.cmd(
+            'servicebus queue update --resource-group {rg} --name {queuename3} --namespace-name {namespacename} '
+            '--enable-express false').get_output_in_json()
+
+        self.assertEqual(queue['enableExpress'], False)
+        self.kwargs.update({'enableExpress': queue['enableExpress']})
+
+        self.assertOnUpdate(queue, self.kwargs)
+
+        queue = self.cmd(
+            'servicebus queue update --resource-group {rg} --name {queuename3} --namespace-name {namespacename} '
+            '--enable-express').get_output_in_json()
+
+        self.assertEqual(queue['enableExpress'], True)
+        self.kwargs.update({'enableExpress': queue['enableExpress']})
 
         self.assertOnUpdate(queue, self.kwargs)
 
