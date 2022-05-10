@@ -655,7 +655,7 @@ class UserScenarioTest(GraphScenarioTestBase):
             'mail_nickname': 'graphusertest',
             'new_mail_nick_name': 'graphusertestupdate',
             'group': 'graphusertest_g',
-            'password': 'Test1234!!',
+            'password': '326c9c0e-e789-4554-bf97-eb6585ae91b5',
             'force_change_password_next_login': True,
         }
         # create
