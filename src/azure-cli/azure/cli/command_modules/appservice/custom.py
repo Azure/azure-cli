@@ -1896,8 +1896,6 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, p
 
     client = web_client_factory(cmd.cli_ctx)
     if app_service_environment:
-        if hyper_v:
-            raise ArgumentUsageError('Windows containers is not yet supported in app service environment')
         ase_list = client.app_service_environments.list()
         ase_found = False
         ase = None
@@ -1910,6 +1908,8 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, p
         if not ase_found:
             err_msg = "App service environment '{}' not found in subscription.".format(app_service_environment)
             raise ResourceNotFoundError(err_msg)
+        if hyper_v and ase.kind in ('ASEV1', 'ASEV2'):
+            raise ArgumentUsageError('Windows containers are only supported in app service environment v3 and newer')
     else:  # Non-ASE
         ase_def = None
         if location is None:
