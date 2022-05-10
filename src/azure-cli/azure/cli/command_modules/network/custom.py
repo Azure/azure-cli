@@ -3674,6 +3674,12 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
     DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
     IPAllocationMethod = cmd.get_models('IPAllocationMethod')
 
+    if public_ip_address is None:
+        logger.warning(
+            "Please note that the default public IP used for creation will be changed from Basic to Standard "
+            "in the future."
+        )
+
     tags = tags or {}
     public_ip_address = public_ip_address or 'PublicIP{}'.format(load_balancer_name)
     backend_pool_name = backend_pool_name or '{}bepool'.format(load_balancer_name)
@@ -3901,6 +3907,12 @@ def create_lb_frontend_ip_configuration(
         public_ip_address=SubResource(id=public_ip_address) if public_ip_address else None,
         public_ip_prefix=SubResource(id=public_ip_prefix) if public_ip_prefix else None,
         subnet=Subnet(id=subnet) if subnet else None)
+
+    if new_config.public_ip_address is None:
+        logger.warning(
+            "Please note that the default public IP used for LB frontend will be changed from Basic to Standard "
+            "in the future."
+        )
 
     if zone and cmd.supported_api_version(min_api='2017-06-01'):
         new_config.zones = zone
@@ -6359,15 +6371,11 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
                      allocation_method=None, dns_name=None,
                      idle_timeout=4, reverse_fqdn=None, version=None, sku=None, tier=None, zone=None, ip_tags=None,
                      public_ip_prefix=None, edge_zone=None, ip_address=None):
-
-    # In the latest profile, the default public IP will be expected to be changed from Basic to Standard.
-    # In order to avoid breaking change which has a big impact to users,
-    # we use the hint to guide users to use Standard sku to create public IP.
-    if sku is None and cmd.cli_ctx.cloud.profile == 'latest':
+    if sku is None:
         logger.warning(
-            'It is recommended to use parameter "--sku Standard" to create new public IP. '
-            'Please note that the default public IP used for creation will be changed from Basic to Standard '
-            'in the future.')
+            "Please note that the default public IP used for creation will be changed from Basic to Standard "
+            "in the future."
+        )
 
     IPAllocationMethod, PublicIPAddress, PublicIPAddressDnsSettings, SubResource = cmd.get_models(
         'IPAllocationMethod', 'PublicIPAddress', 'PublicIPAddressDnsSettings', 'SubResource')
