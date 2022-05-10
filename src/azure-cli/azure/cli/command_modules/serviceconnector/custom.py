@@ -29,7 +29,7 @@ from ._utils import (
     set_user_token_header,
     auto_register
 )
-# pylint: disable=unused-argument
+# pylint: disable=unused-argument,unsubscriptable-object,unsupported-membership-test
 
 
 logger = get_logger(__name__)
@@ -211,7 +211,7 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals
         from ._utils import create_key_vault_reference_connection_if_not_exist
         create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, key_vault_id)
     elif auth_info['auth_type'] == 'secret' and 'secret_info' in auth_info \
-        and auth_info['secret_info']['secret_type'] == 'keyVaultSecretReference':  # pylint: disable=unsubscriptable-object
+            and auth_info['secret_info']['secret_type'] == 'keyVaultSecretReference':
         raise ValidationError('--vault-id must be provided to use keyVaultSecretName')
 
     if service_endpoint:
@@ -323,7 +323,7 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals
         from ._utils import create_key_vault_reference_connection_if_not_exist
         create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, key_vault_id)
     elif auth_info['auth_type'] == 'secret' and 'secret_info' in auth_info \
-        and auth_info['secret_info']['secret_type'] == 'keyVaultSecretReference':  # pylint: disable=unsubscriptable-object
+            and auth_info['secret_info']['secret_type'] == 'keyVaultSecretReference':
         raise ValidationError('--vault-id must be provided to use keyVaultSecretName')
 
     parameters['v_net_solution'] = linker.get('vNetSolution')
