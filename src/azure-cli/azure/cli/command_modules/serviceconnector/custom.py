@@ -261,6 +261,7 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals
                       key_vault_id=None,
                       service_endpoint=None,
                       no_wait=False,
+                      scope=None,
                       cluster=None, enable_csi=False,                         # Resource.Kubernetes
                       site=None,                                              # Resource.WebApp
                       spring=None, app=None, deployment='default'):           # Resource.SpringCloud
@@ -306,8 +307,8 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals
             'key_vault_id': key_vault_id,
         },
         'client_type': client_type or linker.get('clientType'),
-        # scope does not support update due to aks solution's limitation
-        'scope': linker.get('scope')
+        # scope can be updated in container app while cannot be updated in aks due to some limitations
+        'scope': scope or linker.get('scope')
     }
 
     # HACK: set user token to work around OBO
