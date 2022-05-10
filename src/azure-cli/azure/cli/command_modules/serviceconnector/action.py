@@ -43,10 +43,11 @@ class AddSecretAuthInfo(argparse.Action):
                     'name': v[0]
                 }
             else:
-                raise ValidationError('Unsupported Key {} is provided for parameter secret_auth_info. '
-                                      'All possible keys are: name, secret, keyVaultSecretUri, keyVaultSecretName'.format(k))
+                raise ValidationError('Unsupported Key {} is provided for parameter secret_auth_info. All possible '
+                                      'keys are: name, secret, keyVaultSecretUri, keyVaultSecretName'.format(k))
         if len(d) != 2:
-            raise ValidationError('Required keys missing for parameter --secret/keyVaultSecretUri/keyVaultSecretName. All possible keys are: name, secret, keyVaultSecretUri, keyVaultSecretName')
+            raise ValidationError('Required keys missing for parameter --secret/keyVaultSecretUri/keyVaultSecretName.'
+            ' All possible keys are: name, secret, keyVaultSecretUri, keyVaultSecretName')
         d['auth_type'] = 'secret'
         return d
 
