@@ -62,7 +62,7 @@ class IoTHubTest(ScenarioTest):
         ])
 
         # Storage Connection String Pattern
-        storage_cs_pattern = 'DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName='
+        storage_cs_pattern = 'DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;'
         # Test 'az iot hub update'
         updated_hub = self.cmd('iot hub update -n {0} --fnd 80 --rd 4 --ct 34 --cdd 46 --ft 43 --fld 10 --fd 76'
                                ' --fn true --fnt 32 --fst 3 --fcs {1} --fc {2}'
