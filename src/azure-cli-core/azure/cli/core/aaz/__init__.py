@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=unused-import
 
-""" AAZ is short for Atomic AZ, which is an atomic command layer of azure cli.
+""" AAZ is short for Atomic Azure CLI, which is an atomic command layer of azure cli.
 The command in atomic layer is called atomic command, mapping to an operation of azure resource.
 Atomic commands can be generated from rest api by using aaz-dev tool.
 """

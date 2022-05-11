@@ -65,9 +65,9 @@ class AAZCommand(CLICommand):
     def get_arguments_schema(cls):
         """ Make sure _args_schema is build once.
         """
-        if not hasattr(cls, "_args_schema"):
-            cls._args_schema = cls._build_arguments_schema()
-        return cls._args_schema
+        if not hasattr(cls, "_arguments_schema") or cls._arguments_schema is None:
+            cls._arguments_schema = cls._build_arguments_schema()
+        return cls._arguments_schema
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
