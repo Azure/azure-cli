@@ -5285,11 +5285,28 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             json.dump(test_hook_data, f)
 
         try:
-           # check acr
-            check_cmd = 'aks check-acr -n {name} -g {resource_group} --acr {acr_name}.azurecr.io'
-            self.cmd(check_cmd, checks=[
-                StringContainCheck("Your cluster can pull images from {}.azurecr.io!".format(acr_name)),
-            ])
+            # get node name
+            k_get_node_cmd = ["kubectl", "get", "node", "-o", "name"]
+            k_get_node_output = subprocess.check_output(
+                k_get_node_cmd,
+                universal_newlines=True,
+                stderr=subprocess.STDOUT,
+            )
+            node_names = k_get_node_output.split("\n")
+            node_name = node_names[0].strip().strip("node/").strip()
+            self.kwargs.update(
+                {
+                    "hostname": node_name,
+                }
+            )
+            # check acr
+            check_cmd = "aks check-acr -n {name} -g {resource_group} --acr {acr_name}.azurecr.io --hostname {hostname}"
+            self.cmd(
+                check_cmd,
+                checks=[
+                    StringContainCheck("Your cluster can pull images from {}.azurecr.io!".format(acr_name)),
+                ],
+            )
         # clean up test hook file even if test failed
         finally:
             if os.path.exists(hook_file_path):
