@@ -463,10 +463,16 @@ class WaitCommandOperation(BaseCommandOperation):
             properties = getattr(instance, 'properties', None)
             if properties:
                 provisioning_state = getattr(properties, 'provisioning_state', None)
+                if provisioning_state:
+                    return provisioning_state
                 # some SDK, like keyvault, has 'provisioningState' under 'properties.additional_properties'
-                if not provisioning_state:
-                    additional_properties = getattr(properties, 'additional_properties', {})
-                    provisioning_state = additional_properties.get('provisioningState')
+                additional_properties = getattr(properties, 'additional_properties', {})
+                provisioning_state = additional_properties.get('provisioningState')
+                if provisioning_state:
+                    return provisioning_state
+                # some SDK, like resource, has 'provisioningState' under 'properties' dict
+                provisioning_state = properties['provisioningState']
+
         return provisioning_state
 
     def arguments_loader(self):
