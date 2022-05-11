@@ -353,6 +353,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command_oauth('update', 'set_http_headers')
         g.storage_custom_command_oauth('exists', 'exists', client_factory=cf_blob_service,
                                        transform=create_boolean_result_output_transformer('exists'))
+        g.storage_command_oauth('delete', 'delete_blob')
 
     blob_service_custom_sdk = get_custom_sdk('blob', client_factory=cf_blob_service,
                                              resource_type=ResourceType.DATA_STORAGE_BLOB)
@@ -386,8 +387,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         # g.storage_command_oauth(
         #     'download', 'get_blob_to_path', table_transformer=transform_blob_output,
         #     exception_handler=file_related_exception_handler)
-
-        g.storage_command_oauth('delete', 'delete_blob')
         g.storage_command_oauth('undelete', 'undelete_blob',
                                 transform=create_boolean_result_output_transformer(
                                     'undeleted'),

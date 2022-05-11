@@ -1054,7 +1054,15 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage blob delete') as c:
         from .sdkutil import get_delete_blob_snapshot_type_names
-        c.argument('delete_snapshots', arg_type=get_enum_type(get_delete_blob_snapshot_type_names()))
+        c.register_blob_arguments()
+        c.register_precondition_options()
+        c.argument('delete_snapshots', arg_type=get_enum_type(get_delete_blob_snapshot_type_names()),
+                   help='Required if the blob has associated snapshots. '
+                        'Values include: "only": Deletes only the blobs snapshots. '
+                        '"include": Deletes the blob along with all snapshots.')
+        c.extra('lease', options_list='--lease-id', help='Required if the blob has an active lease.')
+        c.extra('snapshot', help='The snapshot parameter is an opaque DateTime value that, when present, '
+                                 'specifies the blob snapshot to delete.')
 
     with self.argument_context('storage blob delete-batch') as c:
         c.ignore('source_container_name')

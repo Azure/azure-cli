@@ -326,6 +326,38 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(kind='StorageV2')
+    def test_storage_blob_delete_snapshot(self, resource_group, storage_account):
+        storage_account_info = self.get_account_info(resource_group, storage_account)
+        container = self.create_container(storage_account_info)
+        # create a blob
+        local_file = self.create_temp_file(1)
+        blob_name = self.create_random_name(prefix='blob', length=24)
+
+        self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --type block', storage_account_info,
+                         container, local_file, blob_name)
+        self.assertEqual(len(self.storage_cmd('storage blob list -c {}',
+                                              storage_account_info, container).get_output_in_json()), 1)
+        res = self.storage_cmd('storage blob snapshot -c {} -n {}',
+                               storage_account_info, container, blob_name).get_output_in_json()
+        snapshot = res["snapshot"]
+        self.assertTrue(self.storage_cmd('storage blob exists -c {} -n {} --snapshot {}', storage_account_info,
+                                         container, blob_name, snapshot).get_output_in_json()["exists"])
+        self.storage_cmd('storage blob delete -c {} -n {} --delete-snapshots only',
+                         storage_account_info, container, blob_name, snapshot)
+        self.assertFalse(self.storage_cmd('storage blob exists -c {} -n {} --snapshot {}', storage_account_info,
+                                         container, blob_name, snapshot).get_output_in_json()["exists"])
+        self.assertTrue(self.storage_cmd('storage blob exists -c {} -n {}', storage_account_info,
+                                          container, blob_name).get_output_in_json()["exists"])
+        res = self.storage_cmd('storage blob snapshot -c {} -n {}',
+                               storage_account_info, container, blob_name).get_output_in_json()
+        snapshot = res["snapshot"]
+        self.storage_cmd('storage blob delete -c {} -n {} --delete-snapshots include',
+                         storage_account_info, container, blob_name, snapshot)
+        self.assertFalse(self.storage_cmd('storage blob exists -c {} -n {}', storage_account_info,
+                                         container, blob_name).get_output_in_json()["exists"])
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     def test_storage_blob_soft_delete(self, resource_group, storage_account_info):
         container = self.create_container(storage_account_info)
         import time
