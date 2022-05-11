@@ -2885,7 +2885,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                                                                 build_vmss_storage_account_pool_resource,
                                                                 build_application_gateway_resource,
                                                                 build_msi_role_assignment, build_nsg_resource)
-    
+
     # In the latest profile, the default lb will be expected to be changed from Basic to Standard.
     # In order to avoid breaking change which has a big impact to users,
     # we use the hint to guide users to use Standard lb to create VMSS in the first stage.
@@ -2894,7 +2894,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             'It is recommended to use parameter "--lb-sku Standard" to create new VMSS with Standard lb. '
             'Please note that the default lb used for VMSS creation will be changed from Basic to Standard '
             'in the future.')
-    
+
     # Build up the ARM template
     master_template = ArmTemplateBuilder()
 
