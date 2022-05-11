@@ -145,7 +145,7 @@ class AddServicePrincipalAuthInfo(argparse.Action):
             from ._utils import run_cli_cmd
             output = run_cli_cmd('az ad sp show --id {}'.format(d['client_id']))
             if output:
-                d['principal_id'] = output.get('objectId')
+                d['principal_id'] = output.get('id')
             else:
                 raise ValidationError('Could not resolve object-id from the given client-id: {}. Please '
                                       'confirm the client-id and provide the object-id (Enterprise Application) '
