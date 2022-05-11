@@ -39,7 +39,6 @@ class ApimCommandsLoader(AzCommandsLoader):
         return self.command_table
 
     def load_arguments(self, command):
-        #raise Exception(command)
         from azure.cli.command_modules.apim._params import load_arguments
         load_arguments(self, command)
         try:
