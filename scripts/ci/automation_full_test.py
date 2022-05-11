@@ -185,7 +185,7 @@ class AutomaticScheduling(object):
                   serial_tests + ['--profile', f'{profile}', '--pytest-args', '"--durations=0"']
             logger.info(cmd)
             try:
-                subprocess.run(cmd)
+                subprocess.run(cmd, check=True)
             except subprocess.CalledProcessError:
                 error_flag = True
         if parallel_tests:
@@ -193,7 +193,7 @@ class AutomaticScheduling(object):
                   parallel_tests + ['--profile', f'{profile}', '--pytest-args', '"--durations=0"']
             logger.info(cmd)
             try:
-                subprocess.run(cmd)
+                subprocess.run(cmd, check=True)
             except subprocess.CalledProcessError:
                 error_flag = True
         return error_flag
