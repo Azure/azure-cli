@@ -118,7 +118,8 @@ def _obtain_referrers_from_registry(login_server,
 
 def _parse_fqdn(cmd, fqdn, is_manifest=True):
     try:
-        fqdn = fqdn.lstrip('https://')
+        if fqdn.startswith('https://'):
+            fqdn = fqdn[len('https://'):]
         reg_addr = fqdn.split('/', 1)[0]
         registry_name = reg_addr.split('.', 1)[0]
         reg_suffix = '.' + reg_addr.split('.', 1)[1]
