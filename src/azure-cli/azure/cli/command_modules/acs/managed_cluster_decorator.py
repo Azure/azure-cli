@@ -923,6 +923,127 @@ class AKSManagedClusterContext(BaseAKSContext):
         """
         return self._get_disable_ahub(enable_validation=True)
 
+    def _get_enable_windows_gmsa(self, enable_validation: bool = False) -> bool:
+        """Internal function to obtain the value of enable_windows_gmsa.
+
+        This function supports the option of enable_validation. Please refer to function __validate_gmsa_options for
+        details of validation.
+
+        :return: bool
+        """
+        # read the original value passed by the command
+        enable_windows_gmsa = self.raw_param.get("enable_windows_gmsa")
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.windows_profile and
+                hasattr(self.mc.windows_profile, "gmsa_profile") and  # backward compatibility
+                self.mc.windows_profile.gmsa_profile and
+                self.mc.windows_profile.gmsa_profile.enabled is not None
+            ):
+                enable_windows_gmsa = self.mc.windows_profile.gmsa_profile.enabled
+
+        # this parameter does not need dynamic completion
+        # validation
+        if enable_validation:
+            (
+                gmsa_dns_server,
+                gmsa_root_domain_name,
+            ) = self._get_gmsa_dns_server_and_root_domain_name(
+                enable_validation=False
+            )
+            self.__validate_gmsa_options(
+                enable_windows_gmsa, gmsa_dns_server, gmsa_root_domain_name, self.get_yes()
+            )
+        return enable_windows_gmsa
+
+    def get_enable_windows_gmsa(self) -> bool:
+        """Obtain the value of enable_windows_gmsa.
+
+        This function will verify the parameter by default. When enable_windows_gmsa is specified, if both
+        gmsa_dns_server and gmsa_root_domain_name are not assigned and user does not confirm the operation,
+        a DecoratorEarlyExitException will be raised; if only one of gmsa_dns_server or gmsa_root_domain_name is
+        assigned, raise a RequiredArgumentMissingError. When enable_windows_gmsa is not specified, if any of
+        gmsa_dns_server or gmsa_root_domain_name is assigned, raise a RequiredArgumentMissingError.
+
+        :return: bool
+        """
+        return self._get_enable_windows_gmsa(enable_validation=True)
+
+    def _get_gmsa_dns_server_and_root_domain_name(self, enable_validation: bool = False):
+        """Internal function to obtain the values of gmsa_dns_server and gmsa_root_domain_name.
+
+        This function supports the option of enable_validation. Please refer to function __validate_gmsa_options for
+        details of validation.
+
+        :return: a tuple containing two elements: gmsa_dns_server of string type or None and gmsa_root_domain_name of
+        string type or None
+        """
+        # gmsa_dns_server
+        # read the original value passed by the command
+        gmsa_dns_server = self.raw_param.get("gmsa_dns_server")
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
+        gmsa_dns_read_from_mc = False
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.windows_profile and
+                hasattr(self.mc.windows_profile, "gmsa_profile") and  # backward compatibility
+                self.mc.windows_profile.gmsa_profile and
+                self.mc.windows_profile.gmsa_profile.dns_server is not None
+            ):
+                gmsa_dns_server = self.mc.windows_profile.gmsa_profile.dns_server
+                gmsa_dns_read_from_mc = True
+
+        # gmsa_root_domain_name
+        # read the original value passed by the command
+        gmsa_root_domain_name = self.raw_param.get("gmsa_root_domain_name")
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
+        gmsa_root_read_from_mc = False
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.windows_profile and
+                hasattr(self.mc.windows_profile, "gmsa_profile") and  # backward compatibility
+                self.mc.windows_profile.gmsa_profile and
+                self.mc.windows_profile.gmsa_profile.root_domain_name is not None
+            ):
+                gmsa_root_domain_name = self.mc.windows_profile.gmsa_profile.root_domain_name
+                gmsa_root_read_from_mc = True
+
+        # consistent check
+        if gmsa_dns_read_from_mc != gmsa_root_read_from_mc:
+            raise CLIInternalError(
+                "Inconsistent state detected, one of gmsa_dns_server and gmsa_root_domain_name "
+                "is read from the `mc` object."
+            )
+
+        # this parameter does not need dynamic completion
+        # validation
+        if enable_validation:
+            self.__validate_gmsa_options(
+                self._get_enable_windows_gmsa(enable_validation=False),
+                gmsa_dns_server,
+                gmsa_root_domain_name,
+                self.get_yes(),
+            )
+        return gmsa_dns_server, gmsa_root_domain_name
+
+    def get_gmsa_dns_server_and_root_domain_name(self) -> Tuple[Union[str, None], Union[str, None]]:
+        """Obtain the values of gmsa_dns_server and gmsa_root_domain_name.
+
+        This function will verify the parameter by default. When enable_windows_gmsa is specified, if both
+        gmsa_dns_server and gmsa_root_domain_name are not assigned and user does not confirm the operation,
+        a DecoratorEarlyExitException will be raised; if only one of gmsa_dns_server or gmsa_root_domain_name is
+        assigned, raise a RequiredArgumentMissingError. When enable_windows_gmsa is not specified, if any of
+        gmsa_dns_server or gmsa_root_domain_name is assigned, raise a RequiredArgumentMissingError.
+
+        :return: a tuple containing two elements: gmsa_dns_server of string type or None and gmsa_root_domain_name of
+        string type or None
+        """
+        return self._get_gmsa_dns_server_and_root_domain_name(enable_validation=True)
+
     # pylint: disable=too-many-statements
     def _get_service_principal_and_client_secret(
         self, read_only: bool = False
@@ -1206,127 +1327,6 @@ class AKSManagedClusterContext(BaseAKSContext):
             raise RequiredArgumentMissingError("No assigned identity provided.")
         return self.get_identity_by_msi_client(assigned_identity).principal_id
 
-    def _get_enable_windows_gmsa(self, enable_validation: bool = False) -> bool:
-        """Internal function to obtain the value of enable_windows_gmsa.
-
-        This function supports the option of enable_validation. Please refer to function __validate_gmsa_options for
-        details of validation.
-
-        :return: bool
-        """
-        # read the original value passed by the command
-        enable_windows_gmsa = self.raw_param.get("enable_windows_gmsa")
-        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
-        if self.decorator_mode == DecoratorMode.CREATE:
-            if (
-                self.mc and
-                self.mc.windows_profile and
-                hasattr(self.mc.windows_profile, "gmsa_profile") and  # backward compatibility
-                self.mc.windows_profile.gmsa_profile and
-                self.mc.windows_profile.gmsa_profile.enabled is not None
-            ):
-                enable_windows_gmsa = self.mc.windows_profile.gmsa_profile.enabled
-
-        # this parameter does not need dynamic completion
-        # validation
-        if enable_validation:
-            (
-                gmsa_dns_server,
-                gmsa_root_domain_name,
-            ) = self._get_gmsa_dns_server_and_root_domain_name(
-                enable_validation=False
-            )
-            self.__validate_gmsa_options(
-                enable_windows_gmsa, gmsa_dns_server, gmsa_root_domain_name, self.get_yes()
-            )
-        return enable_windows_gmsa
-
-    def get_enable_windows_gmsa(self) -> bool:
-        """Obtain the value of enable_windows_gmsa.
-
-        This function will verify the parameter by default. When enable_windows_gmsa is specified, if both
-        gmsa_dns_server and gmsa_root_domain_name are not assigned and user does not confirm the operation,
-        a DecoratorEarlyExitException will be raised; if only one of gmsa_dns_server or gmsa_root_domain_name is
-        assigned, raise a RequiredArgumentMissingError. When enable_windows_gmsa is not specified, if any of
-        gmsa_dns_server or gmsa_root_domain_name is assigned, raise a RequiredArgumentMissingError.
-
-        :return: bool
-        """
-        return self._get_enable_windows_gmsa(enable_validation=True)
-
-    def _get_gmsa_dns_server_and_root_domain_name(self, enable_validation: bool = False):
-        """Internal function to obtain the values of gmsa_dns_server and gmsa_root_domain_name.
-
-        This function supports the option of enable_validation. Please refer to function __validate_gmsa_options for
-        details of validation.
-
-        :return: a tuple containing two elements: gmsa_dns_server of string type or None and gmsa_root_domain_name of
-        string type or None
-        """
-        # gmsa_dns_server
-        # read the original value passed by the command
-        gmsa_dns_server = self.raw_param.get("gmsa_dns_server")
-        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
-        gmsa_dns_read_from_mc = False
-        if self.decorator_mode == DecoratorMode.CREATE:
-            if (
-                self.mc and
-                self.mc.windows_profile and
-                hasattr(self.mc.windows_profile, "gmsa_profile") and  # backward compatibility
-                self.mc.windows_profile.gmsa_profile and
-                self.mc.windows_profile.gmsa_profile.dns_server is not None
-            ):
-                gmsa_dns_server = self.mc.windows_profile.gmsa_profile.dns_server
-                gmsa_dns_read_from_mc = True
-
-        # gmsa_root_domain_name
-        # read the original value passed by the command
-        gmsa_root_domain_name = self.raw_param.get("gmsa_root_domain_name")
-        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
-        gmsa_root_read_from_mc = False
-        if self.decorator_mode == DecoratorMode.CREATE:
-            if (
-                self.mc and
-                self.mc.windows_profile and
-                hasattr(self.mc.windows_profile, "gmsa_profile") and  # backward compatibility
-                self.mc.windows_profile.gmsa_profile and
-                self.mc.windows_profile.gmsa_profile.root_domain_name is not None
-            ):
-                gmsa_root_domain_name = self.mc.windows_profile.gmsa_profile.root_domain_name
-                gmsa_root_read_from_mc = True
-
-        # consistent check
-        if gmsa_dns_read_from_mc != gmsa_root_read_from_mc:
-            raise CLIInternalError(
-                "Inconsistent state detected, one of gmsa_dns_server and gmsa_root_domain_name "
-                "is read from the `mc` object."
-            )
-
-        # this parameter does not need dynamic completion
-        # validation
-        if enable_validation:
-            self.__validate_gmsa_options(
-                self._get_enable_windows_gmsa(enable_validation=False),
-                gmsa_dns_server,
-                gmsa_root_domain_name,
-                self.get_yes(),
-            )
-        return gmsa_dns_server, gmsa_root_domain_name
-
-    def get_gmsa_dns_server_and_root_domain_name(self) -> Tuple[Union[str, None], Union[str, None]]:
-        """Obtain the values of gmsa_dns_server and gmsa_root_domain_name.
-
-        This function will verify the parameter by default. When enable_windows_gmsa is specified, if both
-        gmsa_dns_server and gmsa_root_domain_name are not assigned and user does not confirm the operation,
-        a DecoratorEarlyExitException will be raised; if only one of gmsa_dns_server or gmsa_root_domain_name is
-        assigned, raise a RequiredArgumentMissingError. When enable_windows_gmsa is not specified, if any of
-        gmsa_dns_server or gmsa_root_domain_name is assigned, raise a RequiredArgumentMissingError.
-
-        :return: a tuple containing two elements: gmsa_dns_server of string type or None and gmsa_root_domain_name of
-        string type or None
-        """
-        return self._get_gmsa_dns_server_and_root_domain_name(enable_validation=True)
-
     def get_attach_acr(self) -> Union[str, None]:
         """Obtain the value of attach_acr.
 
@@ -1373,6 +1373,35 @@ class AKSManagedClusterContext(BaseAKSContext):
         # this parameter does not need dynamic completion
         # this parameter does not need validation
         return detach_acr
+
+    def get_assignee_from_identity_or_sp_profile(self) -> Tuple[str, bool]:
+        """Helper function to obtain the value of assignee from identity_profile or service_principal_profile.
+
+        Note: This is not a parameter of aks_update, and it will not be decorated into the `mc` object.
+
+        If assignee cannot be obtained, raise an UnknownError.
+
+        :return: string, bool
+        """
+        assignee = None
+        is_service_principal = False
+        if check_is_msi_cluster(self.mc):
+            if self.mc.identity_profile is None or self.mc.identity_profile["kubeletidentity"] is None:
+                raise UnknownError(
+                    "Unexpected error getting kubelet's identity for the cluster. "
+                    "Please do not set --attach-acr or --detach-acr. "
+                    "You can manually grant or revoke permission to the identity named "
+                    "<ClUSTER_NAME>-agentpool in MC_ resource group to access ACR."
+                )
+            assignee = self.mc.identity_profile["kubeletidentity"].object_id
+            is_service_principal = False
+        elif self.mc and self.mc.service_principal_profile is not None:
+            assignee = self.mc.service_principal_profile.client_id
+            is_service_principal = True
+
+        if not assignee:
+            raise UnknownError('Cannot get the AKS cluster\'s service principal.')
+        return assignee, is_service_principal
 
     def _get_load_balancer_sku(self, enable_validation: bool = False) -> Union[str, None]:
         """Internal function to obtain the value of load_balancer_sku, default value is
@@ -3623,28 +3652,6 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         return self._get_no_uptime_sla(enable_validation=True)
 
-    def get_edge_zone(self) -> Union[str, None]:
-        """Obtain the value of edge_zone.
-
-        :return: string or None
-        """
-        # read the original value passed by the command
-        edge_zone = self.raw_param.get("edge_zone")
-        # try to read the property value corresponding to the parameter from the `mc` object
-        # Backward Compatibility: We also support api version v2020.11.01 in profile 2020-09-01-hybrid and there is
-        # no such attribute.
-        if (
-            self.mc and
-            hasattr(self.mc, "extended_location") and
-            self.mc.extended_location and
-            self.mc.extended_location.name is not None
-        ):
-            edge_zone = self.mc.extended_location.name
-
-        # this parameter does not need dynamic completion
-        # this parameter does not need validation
-        return edge_zone
-
     def _get_disable_local_accounts(self, enable_validation: bool = False) -> bool:
         """Internal function to obtain the value of disable_local_accounts.
 
@@ -3717,34 +3724,42 @@ class AKSManagedClusterContext(BaseAKSContext):
         """
         return self._get_enable_local_accounts(enable_validation=True)
 
-    def get_assignee_from_identity_or_sp_profile(self) -> Tuple[str, bool]:
-        """Helper function to obtain the value of assignee from identity_profile or service_principal_profile.
+    def get_edge_zone(self) -> Union[str, None]:
+        """Obtain the value of edge_zone.
 
-        Note: This is not a parameter of aks_update, and it will not be decorated into the `mc` object.
-
-        If assignee cannot be obtained, raise an UnknownError.
-
-        :return: string, bool
+        :return: string or None
         """
-        assignee = None
-        is_service_principal = False
-        if check_is_msi_cluster(self.mc):
-            if self.mc.identity_profile is None or self.mc.identity_profile["kubeletidentity"] is None:
-                raise UnknownError(
-                    "Unexpected error getting kubelet's identity for the cluster. "
-                    "Please do not set --attach-acr or --detach-acr. "
-                    "You can manually grant or revoke permission to the identity named "
-                    "<ClUSTER_NAME>-agentpool in MC_ resource group to access ACR."
-                )
-            assignee = self.mc.identity_profile["kubeletidentity"].object_id
-            is_service_principal = False
-        elif self.mc and self.mc.service_principal_profile is not None:
-            assignee = self.mc.service_principal_profile.client_id
-            is_service_principal = True
+        # read the original value passed by the command
+        edge_zone = self.raw_param.get("edge_zone")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        # Backward Compatibility: We also support api version v2020.11.01 in profile 2020-09-01-hybrid and there is
+        # no such attribute.
+        if (
+            self.mc and
+            hasattr(self.mc, "extended_location") and
+            self.mc.extended_location and
+            self.mc.extended_location.name is not None
+        ):
+            edge_zone = self.mc.extended_location.name
 
-        if not assignee:
-            raise UnknownError('Cannot get the AKS cluster\'s service principal.')
-        return assignee, is_service_principal
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return edge_zone
+
+    def get_node_resource_group(self) -> Union[str, None]:
+        """Obtain the value of node_resource_group.
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        node_resource_group = self.raw_param.get("node_resource_group")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if self.mc and self.mc.node_resource_group is not None:
+            node_resource_group = self.mc.node_resource_group
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return node_resource_group
 
     def get_yes(self) -> bool:
         """Obtain the value of yes.
@@ -4685,6 +4700,16 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             )
         return mc
 
+    def set_up_node_resource_group(self, mc: ManagedCluster) -> ManagedCluster:
+        """Set up node resource group for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        mc.node_resource_group = self.context.get_node_resource_group()
+        return mc
+
     def construct_mc_profile_default(self, bypass_restore_defaults: bool = False) -> ManagedCluster:
         """The overall controller used to construct the default ManagedCluster profile.
 
@@ -4731,6 +4756,9 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.set_up_sku(mc)
         # set up extended location
         mc = self.set_up_extended_location(mc)
+        # set up node resource group
+        mc = self.set_up_node_resource_group(mc)
+
         # restore defaults
         if not bypass_restore_defaults:
             mc = self._restore_defaults_in_mc(mc)
