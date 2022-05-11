@@ -176,7 +176,7 @@ class GraphClient:
         result = self._send("POST", "/directoryObjects/{id}/checkMemberGroups".format(id=id), body=body)
         return result
 
-    def directory_object_get_member_groups(self, id, body):
+    def group_get_member_groups(self, id, body):
         # https://docs.microsoft.com/en-us/graph/api/directoryobject-getmembergroups
         result = self._send("POST", "/groups/{id}/getMemberGroups".format(id=id), body=body)
         return result
@@ -236,16 +236,16 @@ class GraphClient:
         result = self._send("POST", "/users", body=body)
         return result
 
-    def user_get(self, id):
+    def user_get(self, id_or_upn):
         # https://docs.microsoft.com/graph/api/user-get
 
         # MSGraph known issues regarding '$' and '#' https://docs.microsoft.com/en-us/graph/known-issues#users
-        if '@' in id and '#' in id:
-            id = id.replace('#', '%23')
-        if id.startswith('$'):
-            result = self._send("GET", "/users('{}')".format(id))
+        if '@' in id_or_upn and '#' in id_or_upn:
+            id_or_upn = id_or_upn.replace('#', '%23')
+        if id_or_upn.startswith('$'):
+            result = self._send("GET", "/users('{}')".format(id_or_upn))
         else:
-            result = self._send("GET", "/users/{}".format(id))
+            result = self._send("GET", "/users/{}".format(id_or_upn))
         return result
 
     def user_list(self, filter):
@@ -253,19 +253,19 @@ class GraphClient:
         result = self._send("GET", "/users" + _filter_to_query(filter))
         return result
 
-    def user_delete(self, id):
+    def user_delete(self, id_or_upn):
         # https://docs.microsoft.com/graph/api/user-delete
-        result = self._send("DELETE", "/users/{}".format(id))
+        result = self._send("DELETE", "/users/{}".format(id_or_upn))
         return result
 
-    def user_patch(self, id, body):
+    def user_patch(self, id_or_upn, body):
         # https://docs.microsoft.com/graph/api/user-update
-        result = self._send("PATCH", "/users/{}".format(id), body=body)
+        result = self._send("PATCH", "/users/{}".format(id_or_upn), body=body)
         return result
 
-    def user_member_of_list(self, id):
-        # https://docs.microsoft.com/graph/api/user-list-memberof
-        result = self._send("GET", "/users/{}/memberOf".format(id))
+    def user_get_member_groups(self, id_or_upn, body):
+        # https://docs.microsoft.com/en-us/graph/api/directoryobject-getmembergroups
+        result = self._send("POST", "/users/{}/getMemberGroups".format(id_or_upn), body=body)
         return result
 
     def oauth2_permission_grant_create(self, body):

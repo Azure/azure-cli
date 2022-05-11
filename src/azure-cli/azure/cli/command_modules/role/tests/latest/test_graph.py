@@ -698,7 +698,7 @@ class UserScenarioTest(GraphScenarioTestBase):
                  checks=self.is_empty())
 
         # show user's group memberships
-        self.cmd('ad user get-member-groups --upn-or-object-id {user1_id}',
+        self.cmd('ad user get-member-groups --id {user1_id}',
                  checks=self.check('[0].displayName', self.kwargs['group']))
 
         # list

@@ -732,7 +732,7 @@ def show_application(client, identifier):
 
 def delete_application(client, identifier):
     object_id = _resolve_application(client, identifier)
-    client.application_delete(id=object_id)
+    client.application_delete(object_id)
 
 
 def list_applications(cmd, client, app_id=None,  # pylint: disable=unused-argument
@@ -814,7 +814,7 @@ def add_application_owner(client, owner_object_id, identifier):
     #   One or more added object references already exist for the following modified properties: 'owners'
     # We make it idempotent.
     if not next((x for x in owners if x[ID] == owner_object_id), None):
-        body = _get_directory_object_json(client, owner_object_id)
+        body = _build_directory_object_json(client, owner_object_id)
         client.application_owner_add(app_object_id, body)
 
 
@@ -1801,7 +1801,7 @@ def update_user(client, upn_or_object_id, display_name=None, force_change_passwo
     _set_user_properties(body, display_name=display_name, password=password, mail_nickname=mail_nickname,
                          force_change_password_next_sign_in=force_change_password_next_sign_in,
                          account_enabled=account_enabled)
-    return client.user_patch(id=upn_or_object_id, body=body)
+    return client.user_patch(upn_or_object_id, body)
 
 
 def _set_user_properties(body, **kwargs):
@@ -1809,11 +1809,11 @@ def _set_user_properties(body, **kwargs):
 
 
 def show_user(client, upn_or_object_id):
-    return client.user_get(id=upn_or_object_id)
+    return client.user_get(upn_or_object_id)
 
 
 def delete_user(client, upn_or_object_id):
-    client.user_delete(id=upn_or_object_id)
+    client.user_delete(upn_or_object_id)
 
 
 def list_users(client, upn=None, display_name=None, query_filter=None):
@@ -1829,13 +1829,13 @@ def list_users(client, upn=None, display_name=None, query_filter=None):
 
 
 def get_user_member_groups(client, upn_or_object_id, security_enabled_only=False):
-    if not is_guid(upn_or_object_id):
-        upn_or_object_id = client.user_get(upn_or_object_id)["id"]
-
-    results = client.user_member_of_list(id=upn_or_object_id)
-    if security_enabled_only:
-        results = [res for res in results if res["securityEnabled"]]
-    return results
+    results = _get_member_groups(client.user_get_member_groups, upn_or_object_id, security_enabled_only)
+    try:
+        stubs = _get_object_stubs(client, results)
+    except GraphError:
+        stubs = []
+    stubs = {s[ID]: s['displayName'] for s in stubs}
+    return [{'id': x, 'displayName': stubs.get(x)} for x in results]
 
 
 def create_group(client, display_name, mail_nickname, force=None, description=None):
@@ -1856,7 +1856,7 @@ def create_group(client, display_name, mail_nickname, force=None, description=No
                           mail_nickname=mail_nickname, description=description,
                           mail_enabled=False, security_enabled=True)
 
-    return client.group_create(body=body)
+    return client.group_create(body)
 
 
 def list_groups(client, display_name=None, query_filter=None):
@@ -1871,20 +1871,17 @@ def list_groups(client, display_name=None, query_filter=None):
 
 def get_group(client, object_id):
     """Get group information from the directory."""
-    return client.group_get(id=object_id)
+    return client.group_get(object_id)
 
 
 def delete_group(client, object_id):
     """Delete a group from the directory."""
-    return client.group_delete(id=object_id)
+    return client.group_delete(object_id)
 
 
-def get_member_groups(client, object_id, security_enabled_only=False):
+def get_group_member_groups(client, object_id, security_enabled_only=False):
     """Get a collection of object IDs of groups of which the specified group is a member."""
-    body = {
-        "securityEnabledOnly": security_enabled_only
-    }
-    return client.directory_object_get_member_groups(id=object_id, body=body)
+    return _get_member_groups(client.group_get_member_groups, object_id, security_enabled_only)
 
 
 def list_group_owners(client, group_id):
@@ -1897,7 +1894,7 @@ def add_group_owner(client, owner_object_id, group_id):
     # API is not idempotent and fails with:
     #   One or more added object references already exist for the following modified properties: 'owners'.
     if not next((x for x in owners if x['id'] == owner_object_id), None):
-        body = _get_directory_object_json(client, owner_object_id)
+        body = _build_directory_object_json(client, owner_object_id)
         return client.group_owner_add(group_object_id, body)
 
 
@@ -1907,13 +1904,13 @@ def remove_group_owner(client, owner_object_id, group_id):
 
 def check_group_membership(client, group_id, member_object_id):
     body = {"groupIds": [group_id]}
-    response = client.directory_object_check_member_groups(id=member_object_id, body=body)
+    response = client.directory_object_check_member_groups(member_object_id, body)
     return {"value": response is not None and group_id in response}
 
 
 def list_group_members(client, group_id):
     """Get the members of a group."""
-    return client.group_member_list(id=group_id)
+    return client.group_member_list(group_id)
 
 
 def add_group_member(client, group_id, member_object_id):
@@ -1921,13 +1918,13 @@ def add_group_member(client, group_id, member_object_id):
     # API is not idempotent and fails with:
     #   One or more added object references already exist for the following modified properties: 'members'.
     # TODO: make it idempotent like add_group_owner
-    body = _get_directory_object_json(client, member_object_id)
+    body = _build_directory_object_json(client, member_object_id)
     return client.group_member_add(group_id, body)
 
 
 def remove_group_member(client, group_id, member_object_id):
     """Remove a member from a group."""
-    return client.group_member_remove(id=group_id, member_id=member_object_id)
+    return client.group_member_remove(group_id, member_id=member_object_id)
 
 
 def _resolve_group(client, identifier):
@@ -1941,7 +1938,7 @@ def _resolve_group(client, identifier):
     return identifier
 
 
-def _get_directory_object_json(client, object_id):
+def _build_directory_object_json(client, object_id):
     """Get JSON representation of the id of the directoryObject.
     The object URL should be in the form of https://graph.microsoft.com/v1.0/directoryObjects/{id}
     """
@@ -1951,3 +1948,13 @@ def _get_directory_object_json(client, object_id):
         "@odata.id": object_url
     }
     return body
+
+
+def _get_member_groups(get_member_group_func, identifier, security_enabled_only):
+    """Call 'directoryObject: getMemberGroups' API with specified get_member_group_func.
+    https://docs.microsoft.com/en-us/graph/api/directoryobject-getmembergroups
+    """
+    body = {
+        "securityEnabledOnly": security_enabled_only
+    }
+    return get_member_group_func(identifier, body)
