@@ -287,6 +287,154 @@ class TestAAZField(unittest.TestCase):
         with self.assertRaises(AssertionError):
             model_schema.sub_properties.err_sub_tags.Element = AAZStrType(options=["bbb"])
 
+    def test_aaz_recursive_type(self):
+        from azure.cli.core.aaz._field_type import AAZObjectType, AAZStrType, AAZDictType, AAZListType
+        from azure.cli.core.aaz._field_value import AAZObject
+        model_schema = AAZObjectType()
+
+        v = AAZObject(model_schema, data={})
+
+        model_schema.errors = AAZListType()
+
+        error = model_schema.errors.Element = AAZObjectType()
+
+        error.code = AAZStrType()
+        error.message = AAZStrType()
+        error.target = AAZStrType()
+        error.additional_info = AAZListType(serialized_name="additionalInfo")
+        error.details = AAZListType()
+        error.details.Element = error
+
+        add_info_element = model_schema.errors.Element.additional_info.Element = AAZObjectType()
+        add_info_element.type = AAZStrType()
+        add_info_element.info = AAZDictType()
+        add_info_element.info.Element = AAZStrType()
+
+        v.errors = [
+            {
+                "code": "",
+                "message": "",
+                "target": "",
+                "additionalInfo": [],
+                "details": [
+                    {
+                        "code": "",
+                        "target": "",
+                        "message": "",
+                        "additionalInfo": [
+                            {
+                                "type": "PolicyViolation",
+                                "info": {
+                                    "policySetDefinitionDisplayName": "Secure the environment",
+                                    "policySetDefinitionId": "/subscriptions/00000-00000-0000-000/providers/Microsoft.Authorization/policySetDefinitions/TestPolicySet",
+                                    "policyDefinitionDisplayName": "Allowed locations",
+                                    "policyDefinitionId": "/subscriptions/00000-00000-0000-000/providers/Microsoft.Authorization/policyDefinitions/TestPolicy1",
+                                    "policyAssignmentDisplayName": "Allow Central US and WEU only",
+                                    "policyAsssignmentId": "/subscriptions/00000-00000-0000-000/providers/Microsoft.Authorization/policyAssignments/TestAssignment1"
+                                }
+                            },
+                            {
+                                "type": "SomeOtherViolation",
+                                "info": {
+                                    "innerException": "innerException Details"
+                                }
+                            }
+                        ],
+                        "details": [
+                            {
+                                "code": "",
+                                "target": "",
+                                "message": "",
+                                "additionalInfo": [
+                                    {
+                                        "type": "PolicyViolation",
+                                        "info": {
+                                            "policySetDefinitionDisplayName": "Secure the environment",
+                                            "policySetDefinitionId": "/subscriptions/00000-00000-0000-000/providers/Microsoft.Authorization/policySetDefinitions/TestPolicySet",
+                                            "policyDefinitionDisplayName": "Allowed locations",
+                                            "policyDefinitionId": "/subscriptions/00000-00000-0000-000/providers/Microsoft.Authorization/policyDefinitions/TestPolicy1",
+                                            "policyAssignmentDisplayName": "Allow Central US and WEU only",
+                                            "policyAsssignmentId": "/subscriptions/00000-00000-0000-000/providers/Microsoft.Authorization/policyAssignments/TestAssignment1"
+                                        }
+                                    },
+                                    {
+                                        "type": "SomeOtherViolation",
+                                        "info": {
+                                            "innerException": "innerException Details"
+                                        }
+                                    }
+                                ],
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+
+        data = v.to_serialized_data()
+        self.assertTrue(data == {
+            "errors": [
+                {
+                    "code": "",
+                    "message": "",
+                    "target": "",
+                    "additionalInfo": [],
+                    "details": [
+                        {
+                            "code": "",
+                            "target": "",
+                            "message": "",
+                            "additionalInfo": [
+                                {
+                                    "type": "PolicyViolation",
+                                    "info": {
+                                        "policySetDefinitionDisplayName": "Secure the environment",
+                                        "policySetDefinitionId": "/subscriptions/00000-00000-0000-000/providers/Microsoft.Authorization/policySetDefinitions/TestPolicySet",
+                                        "policyDefinitionDisplayName": "Allowed locations",
+                                        "policyDefinitionId": "/subscriptions/00000-00000-0000-000/providers/Microsoft.Authorization/policyDefinitions/TestPolicy1",
+                                        "policyAssignmentDisplayName": "Allow Central US and WEU only",
+                                        "policyAsssignmentId": "/subscriptions/00000-00000-0000-000/providers/Microsoft.Authorization/policyAssignments/TestAssignment1"
+                                    }
+                                },
+                                {
+                                    "type": "SomeOtherViolation",
+                                    "info": {
+                                        "innerException": "innerException Details"
+                                    }
+                                }
+                            ],
+                            "details": [
+                                {
+                                    "code": "",
+                                    "target": "",
+                                    "message": "",
+                                    "additionalInfo": [
+                                        {
+                                            "type": "PolicyViolation",
+                                            "info": {
+                                                "policySetDefinitionDisplayName": "Secure the environment",
+                                                "policySetDefinitionId": "/subscriptions/00000-00000-0000-000/providers/Microsoft.Authorization/policySetDefinitions/TestPolicySet",
+                                                "policyDefinitionDisplayName": "Allowed locations",
+                                                "policyDefinitionId": "/subscriptions/00000-00000-0000-000/providers/Microsoft.Authorization/policyDefinitions/TestPolicy1",
+                                                "policyAssignmentDisplayName": "Allow Central US and WEU only",
+                                                "policyAsssignmentId": "/subscriptions/00000-00000-0000-000/providers/Microsoft.Authorization/policyAssignments/TestAssignment1"
+                                            }
+                                        },
+                                        {
+                                            "type": "SomeOtherViolation",
+                                            "info": {
+                                                "innerException": "innerException Details"
+                                            }
+                                        }
+                                    ],
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        })
+
     def test_aaz_object_with_polymorphism_support(self):
         from azure.cli.core.aaz._field_type import AAZObjectType, AAZListType, AAZStrType, AAZIntType
         from azure.cli.core.aaz._field_value import AAZObject
