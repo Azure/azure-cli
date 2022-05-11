@@ -489,7 +489,7 @@ def _delete_manifest_confirmation(login_server,
     return manifest
 
 
-def get_image_digest(cmd, registry_name, image):
+def get_image_digest(cmd, registry_name, image, tenant_suffix=None, username=None, password=None):
     repository, tag, manifest = _parse_image_name(image, allow_digest=True)
 
     if manifest:
@@ -499,6 +499,9 @@ def get_image_digest(cmd, registry_name, image):
     login_server, username, password = get_access_credentials(
         cmd=cmd,
         registry_name=registry_name,
+        tenant_suffix=tenant_suffix,
+        username=username,
+        password=password,
         repository=repository,
         permission=RepoAccessTokenPermission.METADATA_READ.value)
 
