@@ -684,7 +684,7 @@ class UserScenarioTest(GraphScenarioTestBase):
         )
 
         # show
-        self.cmd('ad user show --upn-or-object-id {user1}@{domain}',
+        self.cmd('ad user show --id {user1}@{domain}',
                  checks=[
                      self.check("displayName", '{user1_newName}')
                  ])

@@ -585,7 +585,7 @@ type: command
 short-summary: Get groups of which the user is a member
 examples:
   - name: Get groups of which the user is a member
-    text: az ad user get-member-groups --upn-or-object-id myuser@contoso.com
+    text: az ad user get-member-groups --id myuser@contoso.com
 """
 
 helps['ad user list'] = """
