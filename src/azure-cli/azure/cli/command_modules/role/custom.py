@@ -1924,7 +1924,7 @@ def add_group_member(client, group_id, member_object_id):
 
 def remove_group_member(client, group_id, member_object_id):
     """Remove a member from a group."""
-    return client.group_member_remove(group_id, member_id=member_object_id)
+    return client.group_member_remove(group_id, member_object_id)
 
 
 def _resolve_group(client, identifier):
