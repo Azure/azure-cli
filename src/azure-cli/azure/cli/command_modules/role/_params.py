@@ -13,7 +13,7 @@ from azure.cli.core.commands.validators import validate_file_or_dict
 
 
 from azure.cli.command_modules.role._completers import get_role_definition_name_completion_list
-from azure.cli.command_modules.role._validators import validate_group, validate_member_id, validate_cert, VARIANT_GROUP_ID_ARGS
+from azure.cli.command_modules.role._validators import validate_group, validate_cert, VARIANT_GROUP_ID_ARGS
 
 name_arg_type = CLIArgumentType(options_list=('--name', '-n'), metavar='NAME')
 
@@ -99,13 +99,13 @@ def load_arguments(self, _):
                         "experience. " + json_property_help)
         c.argument('app_roles', arg_group='JSON property', type=validate_file_or_dict,
                    help="The collection of roles assigned to the application. With app role assignments, these roles "
-                        "can be assigned to users, groups, or service principals associated with other applications. "
-                        + json_property_help)
+                        "can be assigned to users, groups, or service principals associated with other applications. " +
+                        json_property_help)
         c.argument('optional_claims', arg_group='JSON property', type=validate_file_or_dict,
                    help="Application developers can configure optional claims in their Azure AD applications to "
                         "specify the claims that are sent to their application by the Microsoft security token "
-                        "service. For more information, see https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-optional-claims. "
-                        + json_property_help)
+                        "service. For more information, see https://docs.microsoft.com/azure/active-directory/develop"
+                        "/active-directory-optional-claims. " + json_property_help)
 
     with self.argument_context('ad app owner list') as c:
         c.argument('identifier', options_list=['--id'], help='identifier uri, application id, or object id of the application')
@@ -197,7 +197,6 @@ def load_arguments(self, _):
                    help="If missing, CLI will generate a strong password")
 
     with self.argument_context('ad app credential reset') as c:
-        c.argument('name', options_list=['--id'], help='identifier uri, application id, or object id')
         c.argument('cert', arg_group='Credential', validator=validate_cert, help='Certificate to use for credentials')
         c.argument('years', type=int, default=None, arg_group='Credential', help='Number of years for which the credentials will be valid')
         c.argument('append', action='store_true', help='Append the new credential instead of overwriting.')
@@ -224,18 +223,23 @@ def load_arguments(self, _):
         c.argument('account_enabled', arg_type=get_three_state_flag(), help='enable the user account')
         c.argument('password', help='user password')
         c.argument('upn_or_object_id', options_list=['--id', c.deprecate(target='--upn-or-object-id', redirect='--id', hide=True)], help='The object ID or principal name of the user for which to get information')
+        c.argument('force_change_password_next_sign_in', arg_type=get_three_state_flag(),
+                   help='If the user must change her password on the next login.')
 
     with self.argument_context('ad user create') as c:
         c.argument('immutable_id', help="This must be specified if you are using a federated domain for "
                                         "the user's userPrincipalName (UPN) property when creating a new user account."
                                         " It is used to associate an on-premises Active Directory user account with "
                                         "their Azure AD user object.")
-        c.argument('user_principal_name', help="The user principal name (someuser@contoso.com). "
-                                "It must contain one of the verified domains for the tenant.")
+        c.argument('user_principal_name',
+                   help="The user principal name (someuser@contoso.com). It must contain one of the verified domains "
+                        "for the tenant.")
 
     with self.argument_context('ad user get-member-groups') as c:
         c.argument('security_enabled_only', arg_type=get_three_state_flag(),
-                   help='If true, only membership in security-enabled groups should be checked. Otherwise, membership in all groups should be checked.')
+                   help='true to specify that only security groups that the entity is a member of should be returned; '
+                        'false to specify that all groups and directory roles that the entity is a member of should be '
+                        'returned.')
 
     group_help_msg = "group's object id or display name(prefix also works if there is a unique match)"
     with self.argument_context('ad group') as c:
@@ -253,7 +257,10 @@ def load_arguments(self, _):
 
     member_id_help_msg = 'The object ID of the contact, group, user, or service principal'
     with self.argument_context('ad group get-member-groups') as c:
-        c.argument('security_enabled_only', arg_type=get_three_state_flag(), default=False, required=False)
+        c.argument('security_enabled_only', arg_type=get_three_state_flag(),
+                   help='true to specify that only security groups that the entity is a member of should be returned; '
+                        'false to specify that all groups and directory roles that the entity is a member of should be '
+                        'returned.')
         c.extra('cmd')
 
     # with self.argument_context('ad group member add') as c:

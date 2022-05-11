@@ -655,7 +655,7 @@ class UserScenarioTest(GraphScenarioTestBase):
             'mail_nickname': 'graphusertest',
             'new_mail_nick_name': 'graphusertestupdate',
             'group': 'graphusertest_g',
-            'password': 'Test1234!!',
+            'password': self.create_random_name(prefix='password-', length=40),
             'force_change_password_next_login': True,
         }
         # create
@@ -663,7 +663,7 @@ class UserScenarioTest(GraphScenarioTestBase):
             'ad user create --display-name {user1} '
             '--mail-nickname {mail_nickname} '
             '--password {password} '
-            '--force-change-password-next-login {force_change_password_next_login} '
+            '--force-change-password-next-sign-in {force_change_password_next_login} '
             '--user-principal-name {user1}@{domain} ',
             checks=[
                 self.check("displayName","{user1}"),
@@ -680,7 +680,7 @@ class UserScenarioTest(GraphScenarioTestBase):
             '--id {user1_id} '
             '--mail-nickname {new_mail_nick_name} '
             '--password {password} '
-            '--force-change-password-next-login true '
+            '--force-change-password-next-sign-in true '
         )
 
         # show

@@ -28,9 +28,8 @@ from msrestazure.azure_exceptions import CloudError
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import get_file_json, shell_safe_json_parse, is_guid
 from ._client_factory import _auth_client_factory, _graph_client_factory
-from ._graph_objects import application_property_map, user_property_map, group_property_map, set_object_properties
 from ._multi_api_adaptor import MultiAPIAdaptor
-from .msgrpah import GraphError
+from .msgrpah import GraphError, set_object_properties
 
 # ARM RBAC's principalType
 USER = 'User'
@@ -612,9 +611,9 @@ def create_application(cmd, client, display_name, identifier_uris=None,
                        public_client_redirect_uris=None,
                        # JSON properties
                        app_roles=None, optional_claims=None, required_resource_accesses=None):
-
+    # pylint:disable=too-many-locals
     graph_client = _graph_client_factory(cmd.cli_ctx)
-    key_credentials, password_creds, required_accesses = None, None, None
+
     existing_apps = list_applications(cmd, client, display_name=display_name)
     if existing_apps:
         if identifier_uris:
@@ -681,7 +680,7 @@ def create_application(cmd, client, display_name, identifier_uris=None,
     return result
 
 
-def update_application(instance, display_name=None, identifier_uris=None,
+def update_application(instance, display_name=None, identifier_uris=None,  # pylint: disable=unused-argument
                        is_fallback_public_client=None, sign_in_audience=None,
                        # keyCredentials
                        key_value=None, key_type=None, key_usage=None, start_date=None, end_date=None,
@@ -736,7 +735,8 @@ def delete_application(client, identifier):
     client.application_delete(id=object_id)
 
 
-def list_applications(cmd, client, app_id=None, display_name=None, identifier_uri=None, query_filter=None,
+def list_applications(cmd, client, app_id=None,  # pylint: disable=unused-argument
+                      display_name=None, identifier_uri=None, query_filter=None,
                       include_all=None, show_mine=None):
     if show_mine:
         return list_owned_objects(client, '#microsoft.graph.application')
@@ -772,13 +772,13 @@ def _resolve_application(client, identifier):
         result = client.application_list(filter="appId eq '{}'".format(identifier))
         # If not found, this looks like an object id
         return result[0][ID] if result else identifier
-    else:
-        result = client.application_list(filter="identifierUris/any(s:s eq '{}')".format(identifier))
-        if not result:
-            error = CLIError("Application with identifier URI '{}' doesn't exist".format(identifier))
-            error.status_code = 404  # Make sure CLI returns 3
-            raise error
-        return result[0][ID]
+
+    result = client.application_list(filter="identifierUris/any(s:s eq '{}')".format(identifier))
+    if not result:
+        error = CLIError("Application with identifier URI '{}' doesn't exist".format(identifier))
+        error.status_code = 404  # Make sure CLI returns 3
+        raise error
+    return result[0][ID]
 
 
 def reset_application_credential(cmd, client, identifier, create_cert=False, cert=None, years=None,
@@ -794,7 +794,7 @@ def reset_application_credential(cmd, client, identifier, create_cert=False, cer
     return result
 
 
-def delete_application_credential(cmd, client, identifier, key_id, cert=False):
+def delete_application_credential(cmd, client, identifier, key_id, cert=False):  # pylint: disable=unused-argument
     sp = show_application(client, identifier)
     _delete_credential(sp, client.application_remove_password, client.application_patch,
                        key_id=key_id, cert=cert)
@@ -810,12 +810,11 @@ def list_application_credentials(cmd, identifier, cert=False):
 def add_application_owner(client, owner_object_id, identifier):
     app_object_id = _resolve_application(client, identifier)
     owners = client.application_owner_list(app_object_id)
-    # Graph is not idempotent and fails with:
+    # API not idempotent and fails with:
     #   One or more added object references already exist for the following modified properties: 'owners'
     # We make it idempotent.
     if not next((x for x in owners if x[ID] == owner_object_id), None):
-        owner_url = _get_owner_url(client, owner_object_id)
-        body = {"@odata.id": owner_url}
+        body = _get_directory_object_json(client, owner_object_id)
         client.application_owner_add(app_object_id, body)
 
 
@@ -939,7 +938,8 @@ def admin_consent(cmd, client, identifier):
     send_raw_request(cmd.cli_ctx, 'post', url, resource='74658136-14ec-4630-ad9b-26e160ff0fc6')
 
 
-def grant_application(cmd, client, identifier, api, scope, consent_type=None, principal_id=None):
+def grant_application(cmd, client, identifier,  # pylint: disable=unused-argument
+                      api, scope, consent_type=None, principal_id=None):
     # Get the Service Principal ObjectId for the client app
     client_sp_object_id = _resolve_service_principal(client, identifier)
 
@@ -1022,29 +1022,10 @@ def delete_service_principal(cmd, identifier):
     client = _graph_client_factory(cmd.cli_ctx)
     sp_object_id = _resolve_service_principal(client, identifier)
     client.service_principal_delete(sp_object_id)
-    return
-
-    app_object_id = None
-    try:
-        app_object_id = _get_app_object_id_from_sp_object_id(client, sp_object_id)
-    except CLIError as ex:
-        logger.info("%s. Skip application deletion.", ex)
-
-    profile = Profile()
-    if not profile.is_tenant_level_account():
-        assignments = list_role_assignments(cmd, assignee=identifier, show_all=True)
-        if assignments:
-            logger.warning('Removing role assignments')
-            delete_role_assignments(cmd, [a[ID] for a in assignments])
-
-    if app_object_id:  # delete the application, and AAD service will automatically clean up the SP
-        logger.info("Deleting associated application %s", app_object_id)
-        client.applications.delete(app_object_id)
-    else:
-        client.service_principals.delete(sp_object_id)
 
 
-def list_service_principals(cmd, client, spn=None, display_name=None, query_filter=None, show_mine=None,
+def list_service_principals(cmd, client,  # pylint: disable=unused-argument
+                            spn=None, display_name=None, query_filter=None, show_mine=None,
                             include_all=None):
     if show_mine:
         return list_owned_objects(client, '#microsoft.graph.servicePrincipal')
@@ -1084,7 +1065,8 @@ def reset_service_principal_credential(cmd, client, identifier, create_cert=Fals
     return result
 
 
-def delete_service_principal_credential(cmd, client, identifier, key_id, cert=False):
+def delete_service_principal_credential(cmd, client,  # pylint: disable=unused-argument
+                                        identifier, key_id, cert=False):
     sp = show_service_principal(client, identifier)
     _delete_credential(sp, client.service_principal_remove_password, client.service_principal_patch,
                        key_id=key_id, cert=cert)
@@ -1251,9 +1233,10 @@ def create_service_principal_for_rbac(
             cert_file)
         result['fileWithCertAndPrivateKey'] = cert_file
 
-    logger.info('To log in with this service principal, run:\n'
-                f'az login --service-principal --username {app_id} --password {password or cert_file} '
-                f'--tenant {graph_client.tenant}')
+    login_hint = ('To log in with this service principal, run:\n'
+                  f'az login --service-principal --username {app_id} --password {password or cert_file} '
+                  f'--tenant {graph_client.tenant}')
+    logger.info(login_hint)
     return result
 
 
@@ -1262,7 +1245,6 @@ def _resolve_service_principal(client, identifier):
       - servicePrincipalNames (contains appId and identifierUris of the corresponding app)
       - id (returned as-is)
     """
-    """Resolve a service principal and return its id."""
     result = client.service_principal_list(filter="servicePrincipalNames/any(c:c eq '{}')".format(identifier))
     if result:
         return result[0][ID]
@@ -1326,13 +1308,6 @@ def _validate_app_dates(app_start_date, app_end_date, cert_start_date, cert_end_
         app_end_date = cert_end_date - datetime.timedelta(seconds=1)
 
     return app_start_date, app_end_date, cert_start_date, cert_end_date
-
-
-def _get_signed_in_user_object_id(graph_client):
-    try:
-        return graph_client.signed_in_user_get()[ID]
-    except GraphError:  # error could be possible if you logged in as a service principal
-        pass
 
 
 def _get_keyvault_client(cli_ctx):
@@ -1549,19 +1524,6 @@ def _get_object_stubs(graph_client, assignees):
     return result
 
 
-def _get_owner_url(client, owner_object_id):
-    # The owner object should be in the form of https://graph.microsoft.com/v1.0/directoryObjects/{id}
-    if '://' in owner_object_id:
-        return owner_object_id
-    return "{base_url}/directoryObjects/{id}".format(base_url=client.base_url, id=owner_object_id)
-
-
-def _set_owner(cli_ctx, graph_client, asset_object_id, setter):
-    signed_in_user_object_id = _get_signed_in_user_object_id(graph_client)
-    if signed_in_user_object_id:
-        setter(asset_object_id, _get_owner_url(cli_ctx, signed_in_user_object_id))
-
-
 # for injecting test seems to produce predictable role assignment id for playback
 def _gen_guid():
     return uuid.uuid4()
@@ -1590,7 +1552,7 @@ def _set_application_properties(body, **kwargs):
     if kwargs.get('required_resource_accesses'):
         kwargs['required_resource_accesses'] = _build_required_resource_accesses(kwargs['required_resource_accesses'])
 
-    set_object_properties(application_property_map, body, **kwargs)
+    set_object_properties('application', body, **kwargs)
 
 
 def _datetime_to_utc(dt):
@@ -1674,6 +1636,7 @@ def _build_key_credentials(key_value=None, key_type=None, key_usage=None,
 def _reset_credential(cmd, graph_object, add_password_func, remove_password_func, patch_func,
                       create_cert=False, cert=None, years=None,
                       end_date=None, keyvault=None, append=False, display_name=None):
+    # pylint: disable=too-many-locals
     """Reset passwordCredentials and keyCredentials properties for application or service principal.
     Application and service principal share the same interface for operating credentials.
 
@@ -1718,7 +1681,7 @@ def _reset_credential(cmd, graph_object, add_password_func, remove_password_func
         body = _build_add_password_credential_body(display_name, app_start_date, app_end_date)
         add_password_result = add_password_func(graph_object[ID], body)
         password = add_password_result['secretText']
-        key_id = add_password_result['keyId']
+        # key_id = add_password_result['keyId']
 
     else:
         public_cert_string, cert_file, cert_start_date, cert_end_date = \
@@ -1735,7 +1698,7 @@ def _reset_credential(cmd, graph_object, add_password_func, remove_password_func
         new_key_creds = _build_key_credentials(
             key_value=public_cert_string, start_date=app_start_date, end_date=app_end_date, display_name=display_name)
 
-        key_id = new_key_creds[0]['keyId']
+        # key_id = new_key_creds[0]['keyId']
         key_creds.extend(new_key_creds)
 
         patch_body = {
@@ -1768,9 +1731,9 @@ def _delete_credential(graph_object, remove_password_func, patch_function, key_i
                 'keyCredentials': key_creds
             }
             patch_function(graph_object[ID], body)
-        print(graph_object)
-        raise CLIError("'{}' doesn't exist in graph object '{}'.".format(
-            key_id, graph_object[ID]))
+        else:
+            raise CLIError("No key credential found with keyId as '{}' in graph object '{}'.".format(
+                key_id, graph_object[ID]))
     else:
         body = {
             "keyId": key_id
@@ -1781,8 +1744,7 @@ def _delete_credential(graph_object, remove_password_func, patch_function, key_i
 def _list_credentials(graph_object, cert):
     if cert:
         return graph_object['keyCredentials']
-    else:
-        return graph_object['passwordCredentials']
+    return graph_object['passwordCredentials']
 
 
 def _match_odata_type(odata_type, user_input):
@@ -1821,7 +1783,7 @@ def list_owned_objects(client, object_type=None):
 
 
 def create_user(client, user_principal_name, display_name, password,
-                mail_nickname=None, immutable_id=None, force_change_password_next_login=False):
+                mail_nickname=None, immutable_id=None, force_change_password_next_sign_in=False):
     '''
     :param mail_nickname: mail alias. default to user principal name
     '''
@@ -1829,21 +1791,21 @@ def create_user(client, user_principal_name, display_name, password,
     body = {}
     _set_user_properties(body, user_principal_name=user_principal_name, display_name=display_name, password=password,
                          mail_nickname=mail_nickname, immutable_id=immutable_id,
-                         force_change_password_next_login=force_change_password_next_login, account_enabled=True)
+                         force_change_password_next_sign_in=force_change_password_next_sign_in, account_enabled=True)
     return client.user_create(body)
 
 
-def update_user(client, upn_or_object_id, display_name=None, force_change_password_next_login=None, password=None,
+def update_user(client, upn_or_object_id, display_name=None, force_change_password_next_sign_in=None, password=None,
                 account_enabled=None, mail_nickname=None):
     body = {}
     _set_user_properties(body, display_name=display_name, password=password, mail_nickname=mail_nickname,
-                         force_change_password_next_login=force_change_password_next_login,
+                         force_change_password_next_sign_in=force_change_password_next_sign_in,
                          account_enabled=account_enabled)
     return client.user_patch(id=upn_or_object_id, body=body)
 
 
 def _set_user_properties(body, **kwargs):
-    set_object_properties(user_property_map, body, **kwargs)
+    set_object_properties('user', body, **kwargs)
 
 
 def show_user(client, upn_or_object_id):
@@ -1879,7 +1841,8 @@ def get_user_member_groups(client, upn_or_object_id, security_enabled_only=False
 def create_group(client, display_name, mail_nickname, force=None, description=None):
     # workaround to ensure idempotent even AAD graph service doesn't support it
     if not force:
-        matches = client.group_list(filter="displayName eq '{}' and mailNickname eq '{}'".format(display_name, mail_nickname))
+        matches = client.group_list(filter="displayName eq '{}' and mailNickname eq '{}'".format(display_name,
+                                                                                                 mail_nickname))
         if matches:
             if len(matches) > 1:
                 err = ('There is more than one group with the same display and nick names: "{}". '
@@ -1889,7 +1852,7 @@ def create_group(client, display_name, mail_nickname, force=None, description=No
             return matches[0]
 
     body = {}
-    set_object_properties(group_property_map, body, display_name=display_name,
+    set_object_properties('group', body, display_name=display_name,
                           mail_nickname=mail_nickname, description=description,
                           mail_enabled=False, security_enabled=True)
 
@@ -1916,7 +1879,7 @@ def delete_group(client, object_id):
     return client.group_delete(id=object_id)
 
 
-def get_member_groups(client, object_id, security_enabled_only):
+def get_member_groups(client, object_id, security_enabled_only=False):
     """Get a collection of object IDs of groups of which the specified group is a member."""
     body = {
         "securityEnabledOnly": security_enabled_only
@@ -1931,12 +1894,11 @@ def list_group_owners(client, group_id):
 def add_group_owner(client, owner_object_id, group_id):
     group_object_id = _resolve_group(client, group_id)
     owners = client.group_owner_list(group_object_id)
+    # API is not idempotent and fails with:
+    #   One or more added object references already exist for the following modified properties: 'owners'.
     if not next((x for x in owners if x['id'] == owner_object_id), None):
-        owner_url = client.base_url + '/users/{id}'.format(id=owner_object_id)
-        body = {
-            "@odata.id": owner_url
-        }
-        return client.group_owner_add(id=group_object_id, body=body)
+        body = _get_directory_object_json(client, owner_object_id)
+        return client.group_owner_add(group_object_id, body)
 
 
 def remove_group_owner(client, owner_object_id, group_id):
@@ -1956,11 +1918,11 @@ def list_group_members(client, group_id):
 
 def add_group_member(client, group_id, member_object_id):
     """Add a member to a group."""
-    member_url = client.base_url + '/directoryObjects/{id}'.format(id=member_object_id)
-    body = {
-        "@odata.id": member_url
-    }
-    return client.group_member_add(id=group_id, body=body)
+    # API is not idempotent and fails with:
+    #   One or more added object references already exist for the following modified properties: 'members'.
+    # TODO: make it idempotent like add_group_owner
+    body = _get_directory_object_json(client, member_object_id)
+    return client.group_member_add(group_id, body)
 
 
 def remove_group_member(client, group_id, member_object_id):
@@ -1977,3 +1939,15 @@ def _resolve_group(client, identifier):
             raise CLIError('More than 1 group objects has the display name of ' + identifier)
         identifier = res[0].object_id
     return identifier
+
+
+def _get_directory_object_json(client, object_id):
+    """Get JSON representation of the id of the directoryObject.
+    The object URL should be in the form of https://graph.microsoft.com/v1.0/directoryObjects/{id}
+    """
+    # If object_id is not a GUID, use it as-is.
+    object_url = f'{client.base_url}/directoryObjects/{object_id}'if is_guid(object_id) else object_id
+    body = {
+        "@odata.id": object_url
+    }
+    return body

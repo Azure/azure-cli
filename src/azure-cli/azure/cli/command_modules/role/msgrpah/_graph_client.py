@@ -7,9 +7,10 @@ import json
 from azure.cli.core._profile import Profile
 from azure.cli.core.util import send_raw_request
 from azure.cli.core.auth.util import resource_to_scopes
-from azure.cli.core.azclierror import AzCLIError
 from knack.util import CLIError
 
+
+# pylint: disable=redefined-builtin, too-many-public-methods
 
 class GraphClient:
     def __init__(self, cli_ctx):
@@ -59,8 +60,7 @@ class GraphClient:
 
                 # Return a single object
                 return r.json()
-            else:
-                return None
+            return None
 
     # id is python built-in name: https://docs.python.org/3/library/functions.html#id
     # filter is python built-in name: https://docs.python.org/3/library/functions.html#filter

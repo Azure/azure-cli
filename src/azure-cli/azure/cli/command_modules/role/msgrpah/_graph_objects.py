@@ -3,8 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+
+# property_map is a map from CLI argument name to API property name, such as display_name -> displayName.
+
 # https://docs.microsoft.com/en-us/graph/api/resources/application?view=graph-rest-1.0
-application_property_map = {
+_application_property_map = {
     # base properties
     'display_name': 'displayName',
     'identifier_uris': 'identifierUris',
@@ -25,7 +28,7 @@ application_property_map = {
 }
 
 # https://docs.microsoft.com/en-us/graph/api/resources/user?view=graph-rest-1.0#properties
-user_property_map = {
+_user_property_map = {
     # base properties
     'account_enabled': 'accountEnabled',
     'display_name': 'displayName',
@@ -33,11 +36,11 @@ user_property_map = {
     'user_principal_name': 'userPrincipalName',
     'immutable_id': 'onPremisesImmutableId',
     'password': ['passwordProfile', 'password'],
-    'force_change_password_next_login': ['passwordProfile', 'forceChangePasswordNextSignIn']
+    'force_change_password_next_sign_in': ['passwordProfile', 'forceChangePasswordNextSignIn']
 }
 
 # https://docs.microsoft.com/en-us/graph/api/resources/group?view=graph-rest-1.0#properties
-group_property_map = {
+_group_property_map = {
     'display_name': 'displayName',
     'mail_nickname': 'mailNickname',
     'mail_enabled': 'mailEnabled',
@@ -45,10 +48,24 @@ group_property_map = {
     'description': 'description'
 }
 
-def set_object_properties(property_map, graph_object, **kwargs):
-    """Set properties of the graph object according to property_map.
-    property_map is a map from argument name to property name, such as display_name -> displayName.
+
+_object_type_to_property_map = {
+    'application': _application_property_map,
+    'user': _user_property_map,
+    'group': _group_property_map
+}
+
+
+def set_object_properties(object_type, graph_object, **kwargs):
+    """Set properties of the graph object according to its property map.
+
+    :param object_type: String representation of the object type. One of 'application', 'user', 'group'.
+    :param graph_object: Dict representing the graph object.
+    :param kwargs: CLI argument name-value pairs.
     """
+    # This design of passing the string representation of the object type mimics Azure Python SDK:
+    #   body_content = self._serialize.body(parameters, 'ApplicationCreateParameters')
+    property_map = _object_type_to_property_map[object_type]
     for arg, value in kwargs.items():
         if value is not None:
             property_path = property_map[arg]
