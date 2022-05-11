@@ -2103,9 +2103,9 @@ def restore_backup(cmd, resource_group_name, webapp_name, storage_account_url, b
                                      site_name=target_name, databases=db_setting,
                                      ignore_conflicting_host_names=ignore_hostname_conflict)
     if slot:
-        return client.web_apps.restore_slot(resource_group_name, webapp_name, 0, restore_request, slot)
+        return client.web_apps.begin_restore_slot(resource_group_name, webapp_name, 0, slot, restore_request)
 
-    return client.web_apps.restore(resource_group_name, webapp_name, 0, restore_request)
+    return client.web_apps.begin_restore(resource_group_name, webapp_name, 0, restore_request)
 
 
 def list_snapshots(cmd, resource_group_name, name, slot=None):
