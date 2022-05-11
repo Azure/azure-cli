@@ -183,6 +183,18 @@ SOURCE_RESOURCES_PARAMS = {
 }
 
 
+# The dict defines the required parameters used in the source resources for creation.
+SOURCE_RESOURCES_CREATE_PARAMS = {
+    RESOURCE.ContainerApp: {
+        'scope': {
+            'options': ['--container', '-c'],
+            'help': 'The container where the connection information will be saved (as environment variables).',
+            'placeholder': 'MyContainer'
+        },
+    },
+}
+
+
 # The dict defines the parameters used to position the target resources.
 # The parmaters should include all variables defined in target resource id expect
 # for 'subscription', which will be dealt by CLI core as a default parameter.
