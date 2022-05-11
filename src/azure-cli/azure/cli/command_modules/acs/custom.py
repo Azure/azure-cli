@@ -2088,7 +2088,6 @@ def _handle_merge(existing, addition, key, replace):
                 key
             )
         )
-
     if not existing.get(key):
         existing[key] = addition[key]
         return
