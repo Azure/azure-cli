@@ -940,3 +940,11 @@ def copy_blob(client, source_url, metadata=None, **kwargs):
     if not kwargs['requires_sync']:
         kwargs.pop('requires_sync')
     return client.start_copy_from_url(source_url=source_url, metadata=metadata, incremental_copy=False, **kwargs)
+
+
+def exists(client, container_name, blob_name, snapshot, timeout):
+    if blob_name:
+        client = client.get_blob_client(container=container_name, blob=blob_name, snapshot=snapshot)
+    else:
+        client = client.get_container_client(container=container_name)
+    return client.exists(timeout=timeout)

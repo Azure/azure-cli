@@ -875,7 +875,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.extra('lease', options_list=['--lease-id'], help='Required if the blob has an active lease.')
 
     with self.argument_context('storage blob exists') as c:
-        c.argument('blob_name', required=True)
+        c.register_blob_arguments()
+        c.extra('snapshot', help='The snapshot parameter is an opaque DateTime value that, when present, '
+                                 'specifies the snapshot.')
 
     with self.argument_context('storage blob url') as c:
         from ._validators import get_not_none_validator
