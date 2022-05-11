@@ -28,7 +28,6 @@ from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumen
     MutuallyExclusiveArgumentError
 from azure.cli.core.profiles import ResourceType, AZURE_API_PROFILES, SDKProfile
 from azure.cli.core.util import sdk_no_wait
-from azure.graphrbac.models import GraphErrorException
 
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import rsa, ec
@@ -309,16 +308,17 @@ def list_vault(client, resource_group_name=None):
 
 # pylint: disable=inconsistent-return-statements
 def _get_current_user_object_id(graph_client):
+    from azure.cli.command_modules.role import GraphError
     try:
-        current_user = graph_client.signed_in_user.get()
-        if current_user and current_user.object_id:  # pylint:disable=no-member
-            return current_user.object_id  # pylint:disable=no-member
-    except CloudError:
+        current_user = graph_client.signed_in_user_get()
+        if current_user and current_user.get('id', None):  # pylint:disable=no-member
+            return current_user['id']  # pylint:disable=no-member
+    except GraphError:
         pass
 
 
 def _get_object_id_by_spn(graph_client, spn):
-    accounts = list(graph_client.service_principals.list(
+    accounts = list(graph_client.service_principal_list(
         filter="servicePrincipalNames/any(c:c eq '{}')".format(spn)))
     if not accounts:
         logger.warning("Unable to find user with spn '%s'", spn)
@@ -327,11 +327,11 @@ def _get_object_id_by_spn(graph_client, spn):
         logger.warning("Multiple service principals found with spn '%s'. "
                        "You can avoid this by specifying object id.", spn)
         return None
-    return accounts[0].object_id
+    return accounts[0]['id']
 
 
 def _get_object_id_by_upn(graph_client, upn):
-    accounts = list(graph_client.users.list(filter="userPrincipalName eq '{}'".format(upn)))
+    accounts = list(graph_client.user_list(filter="userPrincipalName eq '{}'".format(upn)))
     if not accounts:
         logger.warning("Unable to find user with upn '%s'", upn)
         return None
@@ -339,7 +339,7 @@ def _get_object_id_by_upn(graph_client, upn):
         logger.warning("Multiple users principals found with upn '%s'. "
                        "You can avoid this by specifying object id.", upn)
         return None
-    return accounts[0].object_id
+    return accounts[0]['id']
 
 
 def _get_object_id_from_subscription(graph_client, subscription):
@@ -665,7 +665,7 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
         # just continue the normal creation process
         pass
     from azure.cli.core._profile import Profile
-    from azure.graphrbac import GraphRbacManagementClient
+    from azure.cli.command_modules.role import graph_client_factory, GraphError
 
     VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters',
                                                    resource_type=ResourceType.MGMT_KEYVAULT)
@@ -682,10 +682,7 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
     cred, _, tenant_id = profile.get_login_credentials(
         resource=cmd.cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
 
-    graph_client = GraphRbacManagementClient(
-        cred,
-        tenant_id,
-        base_url=cmd.cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
+    graph_client = graph_client_factory(cmd.cli_ctx)
     subscription = profile.get_subscription()
 
     # if bypass or default_action was specified create a NetworkRuleSet
@@ -751,7 +748,7 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
 
         try:
             object_id = _get_current_user_object_id(graph_client)
-        except GraphErrorException:
+        except GraphError:
             object_id = _get_object_id(graph_client, subscription=subscription)
         if not object_id:
             raise CLIError('Cannot create vault.\nUnable to query active directory for information '
@@ -900,14 +897,12 @@ def update_hsm(cmd, instance,
 def _object_id_args_helper(cli_ctx, object_id, spn, upn):
     if not object_id:
         from azure.cli.core._profile import Profile
-        from azure.graphrbac import GraphRbacManagementClient
+        from azure.cli.command_modules.role import graph_client_factory
 
         profile = Profile(cli_ctx=cli_ctx)
         cred, _, tenant_id = profile.get_login_credentials(
             resource=cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
-        graph_client = GraphRbacManagementClient(cred,
-                                                 tenant_id,
-                                                 base_url=cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
+        graph_client = graph_client_factory(cli_ctx)
         object_id = _get_object_id(graph_client, spn=spn, upn=upn)
         if not object_id:
             raise CLIError('Unable to get object id from principal name.')
@@ -1998,15 +1993,15 @@ def _get_role_dics(role_defs):
 def _get_principal_dics(cli_ctx, role_assignments):
     principal_ids = {i.principal_id for i in role_assignments if getattr(i, 'principal_id', None)}
     if principal_ids:
+        from azure.cli.command_modules.role import graph_client_factory, GraphError
         try:
-            from azure.cli.command_modules.role._client_factory import _graph_client_factory
             from azure.cli.command_modules.role.custom import _get_displayable_name, _get_object_stubs
 
-            graph_client = _graph_client_factory(cli_ctx)
+            graph_client = graph_client_factory(cli_ctx)
             principals = _get_object_stubs(graph_client, principal_ids)
             return {i.object_id: (_get_displayable_name(i), i.object_type) for i in principals}
 
-        except (CloudError, GraphErrorException) as ex:
+        except GraphError as ex:
             # failure on resolving principal due to graph permission should not fail the whole thing
             logger.info("Failed to resolve graph object information per error '%s'", ex)
 
