@@ -3896,6 +3896,11 @@ def create_lb_frontend_ip_configuration(
     ncf = network_client_factory(cmd.cli_ctx)
     lb = lb_get(ncf.load_balancers, resource_group_name, load_balancer_name)
 
+    if public_ip_address is None:
+        logger.warning(
+            "Please note that the default public IP used for LB frontend will be changed from Basic to Standard "
+            "in the future."
+        )
     if private_ip_address_allocation is None:
         private_ip_address_allocation = 'static' if private_ip_address else 'dynamic'
 
@@ -3907,12 +3912,6 @@ def create_lb_frontend_ip_configuration(
         public_ip_address=SubResource(id=public_ip_address) if public_ip_address else None,
         public_ip_prefix=SubResource(id=public_ip_prefix) if public_ip_prefix else None,
         subnet=Subnet(id=subnet) if subnet else None)
-
-    if new_config.public_ip_address is None:
-        logger.warning(
-            "Please note that the default public IP used for LB frontend will be changed from Basic to Standard "
-            "in the future."
-        )
 
     if zone and cmd.supported_api_version(min_api='2017-06-01'):
         new_config.zones = zone
