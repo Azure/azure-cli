@@ -139,7 +139,7 @@ def load_command_table(self, _):
     with self.command_group('ad group', client_factory=get_graph_client, exception_handler=graph_err_handler) as g:
         g.custom_command('delete', 'delete_group')
         g.custom_show_command('show', 'get_group')
-        g.custom_command('get-member-groups', 'get_member_groups')
+        g.custom_command('get-member-groups', 'get_group_member_groups')
         g.custom_command('list', 'list_groups')
         g.custom_command('create', 'create_group')
 

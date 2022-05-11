@@ -222,7 +222,8 @@ def load_arguments(self, _):
         c.argument('force_change_password_next_login', arg_type=get_three_state_flag(), help='Require the user to change their password the next time they log in. Only valid when --password is specified')
         c.argument('account_enabled', arg_type=get_three_state_flag(), help='enable the user account')
         c.argument('password', help='user password')
-        c.argument('upn_or_object_id', options_list=['--id', c.deprecate(target='--upn-or-object-id', redirect='--id', hide=True)], help='The object ID or principal name of the user for which to get information')
+        c.argument('upn_or_object_id', options_list=['--id'],
+                   help='The object ID or principal name of the user for which to get information')
         c.argument('force_change_password_next_sign_in', arg_type=get_three_state_flag(),
                    help='If the user must change her password on the next login.')
 

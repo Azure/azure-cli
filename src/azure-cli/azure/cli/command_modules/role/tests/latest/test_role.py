@@ -335,7 +335,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTestBase):
                 with self.assertRaisesRegex(CLIError, "Cannot find user or service principal in graph database for 'fake'."):
                     self.cmd('role assignment create --assignee fake --role contributor')
             finally:
-                self.cmd('ad user delete --upn-or-object-id {upn}')
+                self.cmd('ad user delete --id {upn}')
 
     @ResourceGroupPreparer(name_prefix='cli_role_assign')
     @AllowLargeResponse()
@@ -399,7 +399,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTestBase):
                 _test_role_assignment_graph_call(result['id'], 'User')
             finally:
                 try:
-                    self.cmd('ad user delete --upn-or-object-id {upn}')
+                    self.cmd('ad user delete --id {upn}')
                 except:
                     pass
 
@@ -501,7 +501,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTestBase):
                 self.cmd('role assignment delete -g {rg}')
 
             finally:
-                self.cmd('ad user delete --upn-or-object-id {upn}')
+                self.cmd('ad user delete --id {upn}')
 
     @ResourceGroupPreparer(name_prefix='cli_role_assign')
     @AllowLargeResponse()
@@ -541,7 +541,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTestBase):
             finally:
                 self.cmd('configure --default group="" --scope local')
                 os.chdir(base_dir)
-                self.cmd('ad user delete --upn-or-object-id {upn}')
+                self.cmd('ad user delete --id {upn}')
 
     def test_role_assignment_empty_string_args(self):
         expected_msg = "{} can't be an empty string"
@@ -595,7 +595,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTestBase):
             finally:
                 if mgmt_grp_created:
                     self.cmd('account management-group delete -n {mgmt_grp}')
-                self.cmd('ad user delete --upn-or-object-id {upn}')
+                self.cmd('ad user delete --id {upn}')
 
     @ResourceGroupPreparer(name_prefix='cli_role_audit')
     @AllowLargeResponse()
@@ -640,7 +640,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTestBase):
                                                            x['principalName'] == self.kwargs['upn'])])
                 retry(check_changelogs, sleep_duration=60, max_retry=15)
             finally:
-                self.cmd('ad user delete --upn-or-object-id {upn}')
+                self.cmd('ad user delete --id {upn}')
 
 
 class RoleAssignmentListScenarioTest(ScenarioTest):
