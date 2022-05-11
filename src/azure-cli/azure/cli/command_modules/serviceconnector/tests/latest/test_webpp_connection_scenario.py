@@ -752,7 +752,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
 
 
-    @record_only()
+    # @record_only()
     def test_webapp_mysqlflexible_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -791,7 +791,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
         # update connection
         self.cmd('webapp connection update mysql-flexible --id {} --client-type dotnet '
-                 '--secret name={} keyVaultSecretUri={}'.format(connection_id, user, keyvaultUri),
+                 '--secret name={} secret-uri={}'.format(connection_id, user, keyvaultUri),
                  checks = [ self.check('clientType', 'dotnet') ])
 
         # list configuration

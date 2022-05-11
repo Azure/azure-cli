@@ -104,7 +104,7 @@ class ContainerAppConnectionScenarioTest(ScenarioTest):
 
         # create connection, test clientType=None
         self.cmd('containerapp connection create mysql --connection {} --source-id {} --target-id {} '
-                 '--secret name={} keyVaultSecretUri={} --client-type none -c {}'.format(name, source_id, target_id, user, keyvaultUri, self.default_container_name))
+                 '--secret name={} secret-uri={} --client-type none -c {}'.format(name, source_id, target_id, user, keyvaultUri, self.default_container_name))
 
         # list connection
         connections = self.cmd(

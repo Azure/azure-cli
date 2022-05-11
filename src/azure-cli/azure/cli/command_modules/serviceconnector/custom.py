@@ -212,7 +212,7 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals
         create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, key_vault_id)
     elif auth_info['auth_type'] == 'secret' and 'secret_info' in auth_info \
             and auth_info['secret_info']['secret_type'] == 'keyVaultSecretReference':
-        raise ValidationError('--vault-id must be provided to use keyVaultSecretName')
+        raise ValidationError('--vault-id must be provided to use secret-name')
 
     if service_endpoint:
         client = set_user_token_header(client, cmd.cli_ctx)
@@ -324,7 +324,7 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals
         create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, key_vault_id)
     elif auth_info['auth_type'] == 'secret' and 'secret_info' in auth_info \
             and auth_info['secret_info']['secret_type'] == 'keyVaultSecretReference':
-        raise ValidationError('--vault-id must be provided to use keyVaultSecretName')
+        raise ValidationError('--vault-id must be provided to use secret-name')
 
     parameters['v_net_solution'] = linker.get('vNetSolution')
     if service_endpoint:

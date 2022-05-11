@@ -656,7 +656,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
 
         # create connection
         self.cmd('spring-cloud connection create mysql --connection {} --source-id {} --target-id {} '
-                 '--secret name={} keyVaultSecretUri={} --client-type java'.format(name, source_id, target_id, user, keyvaultUri))
+                 '--secret name={} secret-uri={} --client-type java'.format(name, source_id, target_id, user, keyvaultUri))
 
         # list connection
         connections = self.cmd(
