@@ -24,6 +24,7 @@ _ELEMENT_APPEND_KEY = "_+_"  # used for list append
 
 
 class AAZArgActionOperations:
+    """AAZArg operations container"""
 
     def __init__(self):
         self._ops = []
@@ -54,7 +55,7 @@ class AAZArgActionOperations:
 class AAZArgAction(Action):
     _schema = None
 
-    _str_parser = AAZShortHandSyntaxParser()
+    _str_parser = AAZShortHandSyntaxParser()  # support to parse normal string or short hand syntax string
 
     def __call__(self, parser, namespace, values, option_string=None):
         if getattr(namespace, self.dest) is None or getattr(namespace, self.dest) == AAZUndefined:
@@ -65,6 +66,7 @@ class AAZArgAction(Action):
         except (ValueError, KeyError) as ex:
             raise azclierror.InvalidArgumentValueError(f"Failed to parse '{option_string}' argument: {ex}") from ex
         except AAZShowHelp as aaz_help:
+            # show help message
             aaz_help.keys = (option_string, *aaz_help.keys)
             self.show_aaz_help(parser, aaz_help)
 
@@ -92,7 +94,7 @@ class AAZSimpleTypeArgAction(AAZArgAction):
         if values is None:
             if cls._schema._blank == AAZUndefined:
                 raise AAZInvalidValueError("argument cannot be blank")
-            data = cls._schema._blank
+            data = cls._schema._blank  # use blank data when values string is None
         else:
             if isinstance(values, list):
                 assert prefix_keys  # the values will be input as an list when parse singular option of a list argument
@@ -114,9 +116,10 @@ class AAZSimpleTypeArgAction(AAZArgAction):
     @classmethod
     def format_data(cls, data):
         if isinstance(data, str):
+            # transfer string into correct data
             if cls._schema.enum:
                 return cls._schema.enum[data]
-            return cls._schema.DataType(data)
+            return cls._schema.DataType(data)   # str, int, float, boolean
 
         if isinstance(data, cls._schema.DataType):
             return data
@@ -124,15 +127,16 @@ class AAZSimpleTypeArgAction(AAZArgAction):
         if data is None:
             if cls._schema._nullable:
                 return data
-            raise AAZInvalidValueError("is not nullable")
+            raise AAZInvalidValueError("field is not nullable")
 
         raise AAZInvalidValueError(f"{cls._schema.DataType} type value expected, got '{data}'({type(data)})")
 
 
 class AAZCompoundTypeArgAction(AAZArgAction):  # pylint: disable=abstract-method
+
     key_pattern = re.compile(
         r'^(((\[-?[0-9]+])|(([a-zA-Z0-9_\-]+)(\[-?[0-9]+])?))(\.([a-zA-Z0-9_\-]+)(\[-?[0-9]+])?)*)=(.*)$'
-    )
+    )   # 'Partial Value' format
 
     @classmethod
     def setup_operations(cls, dest_ops, values, prefix_keys=None):
@@ -161,6 +165,7 @@ class AAZCompoundTypeArgAction(AAZArgAction):  # pylint: disable=abstract-method
 
     @classmethod
     def _split_value_str(cls, v):
+        """ split 'Partial Value' format """
         assert isinstance(v, str)
         match = cls.key_pattern.fullmatch(v)
         if not match:
@@ -173,6 +178,7 @@ class AAZCompoundTypeArgAction(AAZArgAction):  # pylint: disable=abstract-method
 
     @staticmethod
     def _split_key(key):
+        """ split index key of 'Partial Value' format """
         if key is None:
             return tuple()
         key_items = []

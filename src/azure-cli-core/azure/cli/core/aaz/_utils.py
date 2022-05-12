@@ -10,8 +10,9 @@ from ._help import AAZShowHelp
 
 
 class AAZShortHandSyntaxParser:
-    NULL_EXPRESSIONS = ('null', 'None')
-    HELP_EXPRESSIONS = ('??', )
+
+    NULL_EXPRESSIONS = ('null', 'None')  # user can use "null" or "None" string to pass `None` value
+    HELP_EXPRESSIONS = ('??', )  # the mark to show detail help.
 
     def __call__(self, data, is_simple=False):
         assert isinstance(data, str)

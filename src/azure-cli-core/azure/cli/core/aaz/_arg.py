@@ -18,6 +18,7 @@ from ._field_value import AAZObject
 
 
 class AAZArgumentsSchema(AAZObjectType):
+    """ Arguments' schema should be defined as fields of it """
 
     def __call__(self, data=None):
         return AAZObject(
@@ -27,12 +28,14 @@ class AAZArgumentsSchema(AAZObjectType):
 
 
 class AAZArgEnum:
+    """Argument enum properties"""
 
     def __init__(self, items, case_sensitive=False):
         self._case_sensitive = case_sensitive
         self.items = items
 
     def to_choices(self):
+        """Generate choices property of CLICommandArgument"""
         choices = list(self.items)
         if not self._case_sensitive:
             choices = CaseInsensitiveList(choices)
@@ -41,6 +44,7 @@ class AAZArgEnum:
     def __getitem__(self, data):
         key = data
         if isinstance(self.items, dict):
+            # convert data, it can be key, value or key.lower() when not case sensitive
             for k, v in self.items.items():
                 if v == data or k == data or not self._case_sensitive and k.lower() == data.lower():
                     key = k
@@ -57,11 +61,26 @@ class AAZArgEnum:
 
 
 class AAZBaseArg(AAZBaseType):  # pylint: disable=too-many-instance-attributes
+    """Base argument"""
 
     def __init__(self, options=None, required=False, help=None, arg_group=None, is_preview=False, is_experimental=False,
                  id_part=None, default=AAZUndefined, blank=AAZUndefined, nullable=False):
+        """
+
+        :param options: argument optional names.
+        :param required: argument is required or not.
+        :param help: help can be either string (for short-summary) or a dict with `name`, `short-summary`,
+                    `long-summary` and `populator-commands` properties
+        :param arg_group: argument group.
+        :param is_preview: is preview.
+        :param is_experimental: is experimental.
+        :param id_part: whether needs id part support in azure.cli.core
+        :param default: when the argument flag is not appeared, the default value will be used.
+        :param blank: when the argument flag is used without value data, the blank value will be used.
+        :param nullable: argument can accept `None` as value
+        """
         super().__init__(options=options, nullable=nullable)
-        self._help = {}  # the key of self._help is 'name', 'short-summary', 'long-summary', 'populator-commands'
+        self._help = {}  # the key in self._help can be 'name', 'short-summary', 'long-summary', 'populator-commands'
 
         if self._options:
             self._help['name'] = ' '.join(self._options)
@@ -79,6 +98,7 @@ class AAZBaseArg(AAZBaseType):  # pylint: disable=too-many-instance-attributes
         self._blank = blank
 
     def to_cmd_arg(self, name):
+        """ convert AAZArg to CLICommandArgument """
         arg = CLICommandArgument(
             dest=name,
             options_list=[*self._options] if self._options else None,
@@ -92,7 +112,7 @@ class AAZBaseArg(AAZBaseType):  # pylint: disable=too-many-instance-attributes
         if self._blank != AAZUndefined:
             arg.nargs = '?'
 
-        action = self._build_cmd_action()
+        action = self._build_cmd_action()   # call sub class's implementation to build CLICommandArgument action
         if action:
             arg.action = action
 
@@ -100,14 +120,17 @@ class AAZBaseArg(AAZBaseType):  # pylint: disable=too-many-instance-attributes
 
     @abc.abstractmethod
     def _build_cmd_action(self):
+        """build argparse Action"""
         raise NotImplementedError()
 
     @property
     def _type_in_help(self):
+        """argument type displayed in help"""
         return "Undefined"
 
 
 class AAZSimpleTypeArg(AAZBaseArg, AAZSimpleType):
+    """Argument accept simple value"""
 
     def __init__(self, enum=None, enum_case_sensitive=False, fmt=None, **kwargs):
         super().__init__(**kwargs)
@@ -117,12 +140,12 @@ class AAZSimpleTypeArg(AAZBaseArg, AAZSimpleType):
     def to_cmd_arg(self, name):
         arg = super().to_cmd_arg(name)
         if self.enum:
-            arg.choices = self.enum.to_choices()
+            arg.choices = self.enum.to_choices()    # convert it's enum value into choices in arg
         return arg
 
     def _build_cmd_action(self):
         class Action(AAZSimpleTypeArgAction):
-            _schema = self
+            _schema = self  # bind action class with current schema
 
         return Action
 
@@ -178,7 +201,7 @@ class AAZObjectArg(AAZBaseArg, AAZObjectType):
 
     def _build_cmd_action(self):
         class Action(AAZObjectArgAction):
-            _schema = self
+            _schema = self  # bind action class with current schema
 
         return Action
 
@@ -203,7 +226,7 @@ class AAZDictArg(AAZBaseArg, AAZDictType):
 
     def _build_cmd_action(self):
         class Action(AAZDictArgAction):
-            _schema = self
+            _schema = self  # bind action class with current schema
 
         return Action
 
@@ -223,7 +246,7 @@ class AAZListArg(AAZBaseArg, AAZListType):
         arg = super().to_cmd_arg(name)
         if self.singular_options:
             assert arg.options_list
-            arg.options_list.extend(self.singular_options)
+            arg.options_list.extend(self.singular_options)  # support to parse singular options
 
         if self._blank != AAZUndefined:
             arg.nargs = '*'
@@ -233,7 +256,7 @@ class AAZListArg(AAZBaseArg, AAZListType):
 
     def _build_cmd_action(self):
         class Action(AAZListArgAction):
-            _schema = self
+            _schema = self  # bind action class with current schema
 
         return Action
 
@@ -298,6 +321,12 @@ class AAZResourceLocationArg(AAZStrArg):
         return arg
 
 
+class AAZResourceIdArg(AAZStrArg):
+    """ResourceId Argument"""
+    # TODO: Resource Id arg can support both name and id. And can construct id from name by ResourceId Format
+    pass
+
+
 class AAZSubscriptionIdArg(AAZStrArg):
 
     def __init__(
@@ -317,6 +346,7 @@ class AAZSubscriptionIdArg(AAZStrArg):
         return arg
 
 
+# Generic Update arguments
 class AAZGenericUpdateForceString(AAZBoolArg):
 
     def __init__(
@@ -415,12 +445,3 @@ class AAZGenericUpdateRemoveArg(AAZGenericUpdateArg):
 
     def _build_cmd_action(self):
         return AAZGenericUpdateAction
-
-
-class AAZResourceIdArg(AAZStrArg):
-    # TODO: Resource Id arg can support both name and id. And can construct id from name by ResourceId Format
-    pass
-
-
-def has_value(arg_value):
-    return arg_value != AAZUndefined
