@@ -46,6 +46,7 @@ from azure.cli.command_modules.acs._client_factory import (
 from azure.cli.command_modules.acs._consts import (
     ADDONS,
     CONST_ACC_SGX_QUOTE_HELPER_ENABLED,
+    CONST_ACR_DOMAIN_NAME,
     CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME,
     CONST_CANIPULL_IMAGE,
     CONST_CONFCOM_ADDON_NAME,
@@ -2259,7 +2260,9 @@ def aks_update_credentials(cmd, client, resource_group_name, name,
                        name, parameters)
 
 
-def aks_check_acr(cmd, client, resource_group_name, name, acr):
+def aks_check_acr(cmd, client, resource_group_name, name, acr, node_name=None):
+    if not acr.endswith(CONST_ACR_DOMAIN_NAME):
+        acr = acr + CONST_ACR_DOMAIN_NAME
     if not which("kubectl"):
         raise ValidationError("Can not find kubectl executable in PATH")
 
@@ -2308,7 +2311,6 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr):
                         "args": ["-v6", acr],
                         "stdin": True,
                         "stdinOnce": True,
-                        "tty": True,
                         "volumeMounts": [
                             {"name": "azurejson", "mountPath": "/etc/kubernetes"},
                             {"name": "sslcerts", "mountPath": "/etc/ssl/certs"},
@@ -2326,6 +2328,21 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr):
                 "nodeSelector": {"kubernetes.io/os": "linux"},
             }
         }
+        if node_name is not None:
+            affinity = {
+                "nodeAffinity": {
+                    "requiredDuringSchedulingIgnoredDuringExecution": {
+                        "nodeSelectorTerms": [
+                            {
+                                "matchExpressions": [
+                                    {"key": "kubernetes.io/hostname", "operator": "In", "values": [node_name]}
+                                ]
+                            }
+                        ]
+                    }
+                }
+            }
+            overrides["spec"]["affinity"] = affinity
 
         try:
             cmd = [
