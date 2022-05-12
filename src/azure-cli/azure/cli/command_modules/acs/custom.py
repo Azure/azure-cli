@@ -99,12 +99,9 @@ from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import in_cloud_console, sdk_no_wait
 from azure.graphrbac.models import (
     ApplicationCreateParameters,
-    ApplicationUpdateParameters,
     GetObjectsParameters,
     KeyCredential,
     PasswordCredential,
-    RequiredResourceAccess,
-    ResourceAccess,
     ServicePrincipalCreateParameters,
 )
 from dateutil.relativedelta import relativedelta
