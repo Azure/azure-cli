@@ -517,6 +517,9 @@ parameters:
   - name: --linux-os-config
     type: string
     short-summary: Path to JSON file containing OS configurations for Linux agent nodes. https://aka.ms/aks/custom-node-config
+  - name: --node-resource-group
+    type: string
+    short-summary: The node resource group is the resource group where all customer's resources will be created in, such as virtual machines.
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --ssh-key-value /path/to/publickey
