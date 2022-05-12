@@ -17,8 +17,7 @@ class PolicyInsightsTests(ScenarioTest):
     def test_policy_insights(self):
         self.kwargs.update({
             'managementGroupId': 'azgovperftest',
-            'resourceGroup': 'PSTestRG1',
-            'subscriptionId': '3593b919-b078-4cc1-902f-201232a97ac0',
+            'rg': 'PSTestRG1',
             'keyVault': 'PSTestKV',
             'subnet': 'PSTestVN',
             'setDefinition': 'PSTestInitiative',
@@ -35,14 +34,14 @@ class PolicyInsightsTests(ScenarioTest):
         scopes = [
             '-m {managementGroupId}',
             '',
-            '-g {resourceGroup}',
-            '--resource "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroup}/providers/microsoft.keyvault/vaults/{keyVault}"',
-            '--resource "{keyVault}" --namespace "microsoft.keyvault" --resource-type "vaults" -g "{resourceGroup}"',
-            '--resource "default" --namespace "microsoft.network" --resource-type "subnets" --parent "virtualnetworks/{subnet}" -g "{resourceGroup}"',
+            '-g {rg}',
+            '--resource "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/{rg}/providers/microsoft.keyvault/vaults/{keyVault}"',
+            '--resource "{keyVault}" --namespace "microsoft.keyvault" --resource-type "vaults" -g "{rg}"',
+            '--resource "default" --namespace "microsoft.network" --resource-type "subnets" --parent "virtualnetworks/{subnet}" -g "{rg}"',
             '-s {setDefinition}',
             '-d {definition}',
             '-a {assignment}',
-            '-a {assignment} -g {resourceGroup}'
+            '-a {assignment} -g {rg}'
         ]
 
         for scope in scopes:
