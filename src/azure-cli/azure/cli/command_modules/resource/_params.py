@@ -648,10 +648,20 @@ def load_arguments(self, _):
                                                        help="When set, saves the output as the specified file path."))
         c.argument('stdout', arg_type=CLIArgumentType(options_list=['--stdout'], action='store_true',
                                                       help="When set, prints all output to stdout instead of corresponding files."))
+        c.argument('no_restore', arg_type=CLIArgumentType(options_list=['--no-restore'], action='store_true',
+                                                          help="When set, builds the bicep file without restoring external modules."))
 
     with self.argument_context('bicep decompile') as c:
         c.argument('file', arg_type=CLIArgumentType(options_list=['--file', '-f'], completer=FilesCompleter(),
                                                     type=file_type, help="The path to the ARM template to decompile in the file system."))
+        c.argument('force', arg_type=CLIArgumentType(options_list=['--force'], action='store_true',
+                                                     help="Allows overwriting the output file if it exists."))
+
+    with self.argument_context('bicep restore') as c:
+        c.argument('file', arg_type=CLIArgumentType(options_list=['--file', '-f'], completer=FilesCompleter(),
+                                                    type=file_type, help="The path to the Bicep file to restore external modules for."))
+        c.argument('force', arg_type=CLIArgumentType(options_list=['--force'], action='store_true',
+                                                     help="Allows overwriting the cached external modules."))
 
     with self.argument_context('bicep publish') as c:
         c.argument('file', arg_type=CLIArgumentType(options_list=['--file', '-f'], completer=FilesCompleter(),
@@ -669,16 +679,14 @@ def load_arguments(self, _):
     with self.argument_context('resourcemanagement private-link create') as c:
         c.argument('resource_group', arg_type=resource_group_name_type,
                    help='The name of the resource group.')
-        c.argument('name', options_list=[
-                   '--name', '-n'], help='The name of the resource management private link.')
+        c.argument('name', options_list=['--name', '-n'], help='The name of the resource management private link.')
         c.argument('location', arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group,
                    help='the region to create the resource management private link')
 
     with self.argument_context('resourcemanagement private-link show') as c:
         c.argument('resource_group', arg_type=resource_group_name_type,
                    help='The name of the resource group.')
-        c.argument('name', options_list=[
-                   '--name', '-n'], help='The name of the resource management private link.')
+        c.argument('name', options_list=['--name', '-n'], help='The name of the resource management private link.')
 
     with self.argument_context('resourcemanagement private-link list') as c:
         c.argument('resource_group', arg_type=resource_group_name_type,
@@ -687,27 +695,22 @@ def load_arguments(self, _):
     with self.argument_context('resourcemanagement private-link delete') as c:
         c.argument('resource_group', arg_type=resource_group_name_type,
                    help='The name of the resource group.')
-        c.argument('name', options_list=[
-                   '--name', '-n'], help='The name of the resource management private link.')
+        c.argument('name', options_list=['--name', '-n'], help='The name of the resource management private link.')
 
     with self.argument_context('private-link association create') as c:
         c.argument('management_group_id', arg_type=management_group_id_type)
-        c.argument('name', options_list=[
-                   '--name', '-n'], help='The name of the private link association')
-        c.argument('privatelink', options_list=[
-                   '--privatelink', '-p'], help='The name of the private link')
-        c.argument('public_network_access', options_list=['--public-network-access', '-a'], arg_type=get_enum_type(
-            ['enabled', 'disabled']), help='restrict traffic to private link')
+        c.argument('name', options_list=['--name', '-n'], help='The name of the private link association')
+        c.argument('privatelink', options_list=['--privatelink', '-p'], help='The name of the private link')
+        c.argument('public_network_access', options_list=['--public-network-access', '-a'],
+                   arg_type=get_enum_type(['enabled', 'disabled']), help='restrict traffic to private link')
 
     with self.argument_context('private-link association show') as c:
         c.argument('management_group_id', arg_type=management_group_id_type)
-        c.argument('name', options_list=[
-                   '--name', '-n'], help='The name of the private link association')
+        c.argument('name', options_list=['--name', '-n'], help='The name of the private link association')
 
     with self.argument_context('private-link association list') as c:
         c.argument('management_group_id', arg_type=management_group_id_type)
 
     with self.argument_context('private-link association delete') as c:
         c.argument('management_group_id', arg_type=management_group_id_type)
-        c.argument('name', options_list=[
-                   '--name', '-n'], help='The name of the private link association')
+        c.argument('name', options_list=['--name', '-n'], help='The name of the private link association')
