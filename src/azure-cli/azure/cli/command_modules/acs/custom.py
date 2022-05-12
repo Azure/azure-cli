@@ -2299,7 +2299,6 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr, node_name=None):
                         "args": ["-v6", acr],
                         "stdin": True,
                         "stdinOnce": True,
-                        "tty": True,
                         "volumeMounts": [
                             {"name": "azurejson", "mountPath": "/etc/kubernetes"},
                             {"name": "sslcerts", "mountPath": "/etc/ssl/certs"},
