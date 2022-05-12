@@ -46,6 +46,7 @@ from azure.cli.command_modules.acs._client_factory import (
 from azure.cli.command_modules.acs._consts import (
     ADDONS,
     CONST_ACC_SGX_QUOTE_HELPER_ENABLED,
+    CONST_ACR_DOMAIN_NAME,
     CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME,
     CONST_CANIPULL_IMAGE,
     CONST_CONFCOM_ADDON_NAME,
@@ -1401,14 +1402,15 @@ def wait_then_open_async(url):
 def aks_create(cmd, client, resource_group_name, name, ssh_key_value,
                location=None,
                kubernetes_version='',
-               admin_username="azureuser",
-               generate_ssh_keys=False,  # pylint: disable=unused-argument
-               no_ssh_key=False,
-               edge_zone=None,
+               tags=None,
+               dns_name_prefix=None,
                node_osdisk_diskencryptionset_id=None,
                disable_local_accounts=False,
                disable_rbac=None,
-               tags=None,
+               edge_zone=None,
+               admin_username="azureuser",
+               generate_ssh_keys=False,
+               no_ssh_key=False,
                pod_cidr=None,
                service_cidr=None,
                dns_service_ip=None,
@@ -1427,7 +1429,6 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,
                auto_upgrade_channel=None,
                cluster_autoscaler_profile=None,
                uptime_sla=False,
-               dns_name_prefix=None,
                fqdn_subdomain=None,
                api_server_authorized_ip_ranges=None,
                enable_private_cluster=False,
@@ -1453,6 +1454,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,
                gmsa_root_domain_name=None,
                attach_acr=None,
                skip_subnet_role_assignment=False,
+               node_resource_group=None,
+               # addons
                enable_addons=None,
                workspace_resource_id=None,
                enable_msi_auth_for_monitoring=False,
@@ -1465,6 +1468,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,
                enable_sgxquotehelper=False,
                enable_secret_rotation=False,
                rotation_poll_interval=None,
+               # nodepool paramerters
                nodepool_name="nodepool1",
                node_vm_size=None,
                os_sku=None,
@@ -1516,9 +1520,9 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,
 
 
 def aks_update(cmd, client, resource_group_name, name,
+               tags=None,
                disable_local_accounts=False,
                enable_local_accounts=False,
-               tags=None,
                load_balancer_managed_outbound_ip_count=None,
                load_balancer_outbound_ips=None,
                load_balancer_outbound_ip_prefixes=None,
@@ -1548,9 +1552,11 @@ def aks_update(cmd, client, resource_group_name, name,
                gmsa_root_domain_name=None,
                attach_acr=None,
                detach_acr=None,
+               # addons
                enable_secret_rotation=False,
                disable_secret_rotation=False,
                rotation_poll_interval=None,
+               # nodepool paramerters
                enable_cluster_autoscaler=False,
                disable_cluster_autoscaler=False,
                update_cluster_autoscaler=False,
@@ -2081,6 +2087,13 @@ def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
 def _handle_merge(existing, addition, key, replace):
     if not addition.get(key, False):
         return
+    if key not in existing:
+        raise FileOperationError(
+            "No such key '{}' in existing config, please confirm whether it is a valid config file. "
+            "May back up this config file, delete it and retry the command.".format(
+                key
+            )
+        )
     if not existing.get(key):
         existing[key] = addition[key]
         return
@@ -2247,7 +2260,9 @@ def aks_update_credentials(cmd, client, resource_group_name, name,
                        name, parameters)
 
 
-def aks_check_acr(cmd, client, resource_group_name, name, acr):
+def aks_check_acr(cmd, client, resource_group_name, name, acr, node_name=None):
+    if not acr.endswith(CONST_ACR_DOMAIN_NAME):
+        acr = acr + CONST_ACR_DOMAIN_NAME
     if not which("kubectl"):
         raise ValidationError("Can not find kubectl executable in PATH")
 
@@ -2296,7 +2311,6 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr):
                         "args": ["-v6", acr],
                         "stdin": True,
                         "stdinOnce": True,
-                        "tty": True,
                         "volumeMounts": [
                             {"name": "azurejson", "mountPath": "/etc/kubernetes"},
                             {"name": "sslcerts", "mountPath": "/etc/ssl/certs"},
@@ -2314,6 +2328,21 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr):
                 "nodeSelector": {"kubernetes.io/os": "linux"},
             }
         }
+        if node_name is not None:
+            affinity = {
+                "nodeAffinity": {
+                    "requiredDuringSchedulingIgnoredDuringExecution": {
+                        "nodeSelectorTerms": [
+                            {
+                                "matchExpressions": [
+                                    {"key": "kubernetes.io/hostname", "operator": "In", "values": [node_name]}
+                                ]
+                            }
+                        ]
+                    }
+                }
+            }
+            overrides["spec"]["affinity"] = affinity
 
         try:
             cmd = [
