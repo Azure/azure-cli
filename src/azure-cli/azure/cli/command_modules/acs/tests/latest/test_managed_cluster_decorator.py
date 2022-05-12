@@ -5594,6 +5594,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             )
             mc_1 = self.models.ManagedCluster(location="test_location")
             dec_1.context.attach_mc(mc_1)
+            dec_1.context.set_intermediate("subscription_id", "test_subscription_id")
             
             cf_resource_groups = Mock(check_existence=Mock(return_value=False))
             result = Mock(id="test_workspace_resource_id")
@@ -5629,6 +5630,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
                 {"disable_defender": True},
                 ResourceType.MGMT_CONTAINERSERVICE,
             )
+            dec_1.context.set_intermediate("subscription_id", "test_subscription_id")
             mc_1 = self.models.ManagedCluster(location="test_location")
             dec_1.context.attach_mc(mc_1)
             dec_mc_1 = dec_1.context.get_defender_config()
@@ -5650,7 +5652,8 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         )
         mc_1 = self.models.ManagedCluster(location="test_location")
         dec_1.context.attach_mc(mc_1)
-        
+        dec_1.context.set_intermediate("subscription_id", "test_subscription_id")
+
         cf_resource_groups = Mock(check_existence=Mock(return_value=False))
         result = Mock(id="test_workspace_resource_id")
         async_poller = Mock(
@@ -5693,7 +5696,8 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             )
             mc_1 = self.models.ManagedCluster(location="test_location")
             dec_1.context.attach_mc(mc_1)
-            
+            dec_1.context.set_intermediate("subscription_id", "test_subscription_id")
+
             cf_resource_groups = Mock(check_existence=Mock(return_value=False))
             result = Mock(id="test_workspace_resource_id")
             async_poller = Mock(
@@ -5735,6 +5739,8 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             )
             mc_1 = self.models.ManagedCluster(location="test_location")
             dec_1.context.attach_mc(mc_1)
+            dec_1.context.set_intermediate("subscription_id", "test_subscription_id")
+            
             dec_mc_1 = dec_1.update_defender(mc_1)
             ground_truth_mc_1 = self.models.ManagedCluster(
                 location="test_location",
