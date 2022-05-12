@@ -83,4 +83,8 @@ def delete_queue(cmd, client, fail_not_exist=False, timeout=None, **kwargs):
 
 def receive_messages(client, **kwargs):
     page_iter = client.receive_messages(**kwargs).by_page()
-    return list(next(page_iter))
+    try:
+        page = next(page_iter)
+    except StopIteration:
+        return []
+    return list(page)
