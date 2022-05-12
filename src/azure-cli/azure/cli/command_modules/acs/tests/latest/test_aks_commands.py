@@ -5285,11 +5285,40 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             json.dump(test_hook_data, f)
 
         try:
-           # check acr
-            check_cmd = 'aks check-acr -n {name} -g {resource_group} --acr {acr_name}.azurecr.io'
-            self.cmd(check_cmd, checks=[
-                StringContainCheck("Your cluster can pull images from {}.azurecr.io!".format(acr_name)),
-            ])
+            # get credential
+            fd, browse_path = tempfile.mkstemp()
+            self.kwargs.update(
+                {
+                    "browse_path": browse_path,
+                }
+            )
+            try:
+                get_credential_cmd = "aks get-credentials -n {name} -g {resource_group} -f {browse_path}"
+                self.cmd(get_credential_cmd)
+            finally:
+                os.close(fd)
+            # get node name
+            k_get_node_cmd = ["kubectl", "get", "node", "-o", "name", "--kubeconfig", browse_path]
+            k_get_node_output = subprocess.check_output(
+                k_get_node_cmd,
+                universal_newlines=True,
+                stderr=subprocess.STDOUT,
+            )
+            node_names = k_get_node_output.split("\n")
+            node_name = node_names[0].strip().strip("node/").strip()
+            self.kwargs.update(
+                {
+                    "node_name": node_name,
+                }
+            )
+            # check acr
+            check_cmd = "aks check-acr -n {name} -g {resource_group} --acr {acr_name}.azurecr.io --node-name {node_name}"
+            self.cmd(
+                check_cmd,
+                checks=[
+                    StringContainCheck("Your cluster can pull images from {}.azurecr.io!".format(acr_name)),
+                ],
+            )
         # clean up test hook file even if test failed
         finally:
             if os.path.exists(hook_file_path):
