@@ -376,3 +376,35 @@ def cf_table_service(cli_ctx, kwargs):
 
 def cf_table_client(cli_ctx, kwargs):
     return cf_table_service(cli_ctx, kwargs).get_table_client(table_name=kwargs.pop('table_name'))
+
+
+def cf_share_service(cli_ctx, kwargs):
+    client_kwargs = prepare_client_kwargs_track2(cli_ctx)
+    client_kwargs = _config_location_mode(kwargs, client_kwargs)
+    t_share_service = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_FILESHARE, '_share_service_client#ShareServiceClient')
+    connection_string = kwargs.pop('connection_string', None)
+    account_key = kwargs.pop('account_key', None)
+    token_credential = kwargs.pop('token_credential', None)
+    sas_token = kwargs.pop('sas_token', None)
+    account_name = kwargs.pop('account_name', None)
+    account_url = kwargs.pop('account_url', None)
+    if connection_string:
+        return t_share_service.from_connection_string(conn_str=connection_string, **client_kwargs)
+    if not account_url:
+        account_url = get_account_url(cli_ctx, account_name=account_name, service='file')
+    credential = account_key or sas_token or token_credential
+
+    return t_share_service(account_url=account_url, credential=credential, **client_kwargs)
+
+
+def cf_share_client(cli_ctx, kwargs):
+    return cf_share_service(cli_ctx, kwargs).get_share_client(share=kwargs.pop('share_name'),
+                                                              snapshot=kwargs.pop('snapshot', None))
+
+
+def cf_share_directory_client(cli_ctx, kwargs):
+    return cf_share_client(cli_ctx, kwargs).get_directory_client(directory_path=kwargs.pop('directory_path'))
+
+
+def cf_share_file_client(cli_ctx, kwargs):
+    return cf_share_client(cli_ctx, kwargs).get_file_client(file_path=kwargs.pop('file_path'))
