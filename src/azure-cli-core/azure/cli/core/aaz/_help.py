@@ -85,7 +85,7 @@ class AAZShowHelp(BaseException):
         else:
             _print_indent(f"{key}{FIRST_LINE_PREFIX}{schema_type}", indent=1)
 
-        short_summary = schema._help.get("short-summary", "")
+        short_summary = cls._build_short_summery(schema)
         if short_summary:
             _print_indent(short_summary, indent=2)
 
@@ -104,7 +104,9 @@ class AAZShowHelp(BaseException):
         for prop_schema in schema._fields.values():
             prop_tags = cls._build_schema_tags(prop_schema)
             prop_name = ' '.join(prop_schema._options)
-            prop_short_summary = prop_schema._help.get("short-summary", "")
+
+            prop_short_summary = cls._build_short_summery(prop_schema)
+
             prop_group_name = prop_schema._arg_group or ""
             header_len = len(prop_name) + len(prop_tags) + (1 if prop_tags else 0)
             if header_len > max_header_len:
@@ -131,9 +133,6 @@ class AAZShowHelp(BaseException):
                 subsequent_spaces=max_header_len + 4 + len(FIRST_LINE_PREFIX) - 1
             )
 
-    # @classmethod
-    # def _prop_arg_
-
     @staticmethod
     def _build_schema_tags(schema, required=True, preview=True, experimental=False):
         preview = PREVIEW_TAG if preview and schema._is_preview else ''
@@ -141,6 +140,19 @@ class AAZShowHelp(BaseException):
         required = REQUIRED_TAG if required and schema._required else ''
         tags = ' '.join([x for x in [required, experimental, preview] if x])
         return tags
+
+    @staticmethod
+    def _build_short_summery(schema):
+        from ._arg import AAZSimpleTypeArg
+        short_summary = schema._help.get("short-summary", "")
+
+        if isinstance(schema, AAZSimpleTypeArg) and schema.enum:
+            choices = schema.enum.to_choices()
+            if choices:
+                if short_summary:
+                    short_summary += '  '
+                short_summary += 'Allowed values: {}.'.format(', '.join(sorted([str(x) for x in choices])))
+        return short_summary
 
     @staticmethod
     def _build_long_summery(schema):
