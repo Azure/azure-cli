@@ -2086,6 +2086,13 @@ def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
 def _handle_merge(existing, addition, key, replace):
     if not addition.get(key, False):
         return
+    if key not in existing:
+        raise FileOperationError(
+            "No such key '{}' in existing config, please confirm whether it is a valid config file. "
+            "May back up this config file, delete it and retry the command.".format(
+                key
+            )
+        )
     if not existing.get(key):
         existing[key] = addition[key]
         return
