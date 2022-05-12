@@ -3660,7 +3660,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         """
         disable_defender = self.raw_param.get("disable_defender")
         if disable_defender:
-            return {"enabled": False, "logAnalyticsWorkspaceResourceId": ""}
+            return self.models.ManagedClusterSecurityProfileAzureDefender(enabled=False)
 
         # read the original value passed by the command
         enable_defender = self.raw_param.get("enable_defender")
@@ -4814,12 +4814,12 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.set_up_extended_location(mc)
         # set up node resource group
         mc = self.set_up_node_resource_group(mc)
-
+        # set up defender
+        mc = self.set_up_defender(mc)
         # restore defaults
         if not bypass_restore_defaults:
             mc = self._restore_defaults_in_mc(mc)
-        # set up defender
-        mc = self.set_up_defender(mc)
+
         return mc
 
     # pylint: disable=unused-argument,too-many-boolean-expressions
