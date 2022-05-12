@@ -840,13 +840,8 @@ def _transform_subscription_for_multiapi(s, s_dict):
 def _create_identity_instance(cli_ctx, *args, **kwargs):
     """Lazily import and create Identity instance to avoid unnecessary imports."""
     from .auth.identity import Identity
-
-    # Only enable encryption for Windows (for now).
-    fallback = sys.platform.startswith('win32')
-
-    # EXPERIMENTAL: Use core.encrypt_token_cache=False to turn off token cache encryption.
-    # encrypt_token_cache affects both MSAL token cache and service principal entries.
-    encrypt = cli_ctx.config.getboolean('core', 'encrypt_token_cache', fallback=fallback)
+    from .util import should_encrypt_token_cache
+    encrypt = should_encrypt_token_cache(cli_ctx)
 
     # EXPERIMENTAL: Use core.use_msal_http_cache=False to turn off MSAL HTTP cache.
     use_msal_http_cache = cli_ctx.config.getboolean('core', 'use_msal_http_cache', fallback=True)
