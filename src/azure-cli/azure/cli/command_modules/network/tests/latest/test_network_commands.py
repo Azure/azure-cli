@@ -1185,6 +1185,52 @@ class NetworkAppGatewayPrivateIpScenarioTest20170601(ScenarioTest):
             self.check('length(@)', 10)
         ])
 
+    @ResourceGroupPreparer(name_prefix='test_appgw_with_tcp', location='westus')
+    def test_appgw_with_tcp(self, resource_group):
+        self.kwargs.update({
+            'appgw': 'appgw',
+            'appgw_frontend_port': 'testFrontendPort',
+            'appgw_settings': 'testSettings',
+            'appgw_listener': 'testListener',
+            'appgw_address_pool': 'testAddressPool',
+            'appgw_routing_rule': 'testRule',
+            'appgw_public_ip': 'testPublicIp',
+            'appgw_rule_type': 'Basic',
+            'priority': 1001,
+            'port': 8080
+        })
+
+        self.cmd('network public-ip create -g {rg} -n {appgw_public_ip} --sku Standard')
+
+        self.cmd('network application-gateway create -g {rg} -n {appgw} '
+                 '--public-ip-address {appgw_public_ip} --sku Standard_v2 '
+                 '--priority {priority}')
+        show_appgw_data = self.cmd('network application-gateway show -g {rg} -n {appgw}').get_output_in_json()
+        print(show_appgw_data)
+        frontend_ip = show_appgw_data['frontendIpConfigurations'][0]['name']
+        self.kwargs.update({
+            'appgw_frontend_ip': frontend_ip
+        })
+
+        self.cmd('network application-gateway frontend-port create -g {rg} --gateway-name {appgw} '
+                 '-n {appgw_frontend_port} --port {port}')
+        self.cmd('network application-gateway listener create -g {rg} --gateway-name {appgw} '
+                 '--frontend-port {appgw_frontend_port} -n {appgw_listener} --frontend-ip {appgw_frontend_ip}',
+                 checks=(self.check('listeners[0].name', '{appgw_listener}')))
+        self.cmd('network application-gateway settings create -g {rg} --gateway-name {appgw} '
+                 '--name {appgw_settings} --port {port} ',
+                 checks=(self.check('backendSettingsCollection[0].name', '{appgw_settings}')))
+        self.cmd(
+            'network application-gateway address-pool create -g {rg} --gateway-name {appgw} -n {appgw_address_pool} '
+            '--servers 10.0.0.4 10.0.0.5')
+        self.cmd('network application-gateway routing-rule create -g {rg} --gateway-name {appgw} '
+                 '--name {appgw_routing_rule} --listener {appgw_listener} --rule-type {appgw_rule_type} '
+                 '--address-pool {appgw_address_pool} --settings {appgw_settings}',
+                 checks=[
+                     self.check('routingRules[0].name', '{appgw_routing_rule}')
+                 ])
+
+        self.cmd('network application-gateway delete --name {appgw} --resource-group {rg}')
 
 class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
 
