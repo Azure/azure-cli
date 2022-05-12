@@ -158,7 +158,7 @@ short-summary: Validate an ACR is accessible from an AKS cluster.
 parameters:
   - name: --acr
     short-summary: The FQDN of the ACR.
-  - name: --hostname
+  - name: --node-name
     short-summary: The name of a specific node to perform acr pull test checks. If not specified, it will be checked on a random node.
 examples:
   - name: Validate the ACR is accessible from the AKS cluster.

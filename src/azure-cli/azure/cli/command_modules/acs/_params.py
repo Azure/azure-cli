@@ -431,7 +431,7 @@ def load_arguments(self, _):
 
     with self.argument_context('aks check-acr', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
         c.argument('acr')
-        c.argument('hostname')
+        c.argument('node_name')
 
     with self.argument_context('aks nodepool', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
         c.argument('cluster_name', help='The cluster name.')

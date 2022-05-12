@@ -2247,7 +2247,7 @@ def aks_update_credentials(cmd, client, resource_group_name, name,
                        name, parameters)
 
 
-def aks_check_acr(cmd, client, resource_group_name, name, acr, hostname=None):
+def aks_check_acr(cmd, client, resource_group_name, name, acr, node_name=None):
     if not which("kubectl"):
         raise ValidationError("Can not find kubectl executable in PATH")
 
@@ -2314,14 +2314,14 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr, hostname=None):
                 "nodeSelector": {"kubernetes.io/os": "linux"},
             }
         }
-        if hostname is not None:
+        if node_name is not None:
             affinity = {
                 "nodeAffinity": {
                     "requiredDuringSchedulingIgnoredDuringExecution": {
                         "nodeSelectorTerms": [
                             {
                                 "matchExpressions": [
-                                    {"key": "kubernetes.io/hostname", "operator": "In", "values": [hostname]}
+                                    {"key": "kubernetes.io/hostname", "operator": "In", "values": [node_name]}
                                 ]
                             }
                         ]
