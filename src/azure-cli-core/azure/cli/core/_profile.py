@@ -5,7 +5,6 @@
 
 import os
 import os.path
-import sys
 from copy import deepcopy
 from enum import Enum
 

@@ -13,6 +13,7 @@ logger = get_logger(__name__)
 UPGRADE_MSG = 'Not able to upgrade automatically. Instructions can be found at https://aka.ms/doc/InstallAzureCli'
 SECRET_STORE_DEMO = "secret_store_demo"
 
+
 def rest_call(cmd, url, method=None, headers=None, uri_parameters=None,
               body=None, skip_authorization_header=False, resource=None, output_file=None):
     from azure.cli.core.commands.transform import unregister_global_transforms
