@@ -8,7 +8,6 @@ import re
 import time
 from types import SimpleNamespace
 from typing import Dict, List, Tuple, TypeVar, Union
-from unittest import result
 
 from azure.cli.command_modules.acs._consts import (
     CONST_LOAD_BALANCER_SKU_BASIC,
