@@ -8,6 +8,7 @@ import re
 import time
 from types import SimpleNamespace
 from typing import Dict, List, Tuple, TypeVar, Union
+from unittest import result
 
 from azure.cli.command_modules.acs._consts import (
     CONST_LOAD_BALANCER_SKU_BASIC,
@@ -3687,15 +3688,11 @@ class AKSManagedClusterContext(BaseAKSContext):
                 self.get_subscription_id(),
                 self.get_resource_group_name())
 
+        azure_defender = self.models.ManagedClusterSecurityProfileAzureDefender(enabled=enable_defender)
         if enable_defender:
-            return self.models.ManagedClusterSecurityProfileAzureDefender(
-                enabled=True,
-                log_analytics_workspace_resource_id=workspace
-            )
-        else:
-            return self.models.ManagedClusterSecurityProfileAzureDefender(
-                enabled=False,
-            )
+            azure_defender.log_analytics_workspace_resource_id = workspace
+
+        return azure_defender
 
     def _get_disable_local_accounts(self, enable_validation: bool = False) -> bool:
         """Internal function to obtain the value of disable_local_accounts.
