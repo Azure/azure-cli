@@ -18,8 +18,8 @@ class AlertAddEncryption(argparse._AppendAction):
         super(AlertAddEncryption, self).__call__(parser, namespace, action, option_string)
 
     def get_action(self, values, option_string):  # pylint: disable=no-self-use
-        from azure.mgmt.eventhub.v2021_06_01_preview.models import KeyVaultProperties
-        from azure.mgmt.eventhub.v2021_06_01_preview.models import UserAssignedIdentityProperties
+        from azure.mgmt.eventhub.v2021_11_01.models import KeyVaultProperties
+        from azure.mgmt.eventhub.v2021_11_01.models import UserAssignedIdentityProperties
         from azure.cli.core.azclierror import InvalidArgumentValueError
         from azure.cli.core import CLIError
 

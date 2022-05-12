@@ -118,7 +118,7 @@ def load_arguments_eh(self, _):
             c.argument('message_retention_in_days', options_list=['--message-retention'], type=int, help='Number of days to retain events for this Event Hub, value should be 1 to 7 days and depends on Namespace sku. if Namespace sku is Basic than value should be one and is Manadatory parameter. Namespace sku is standard value should be 1 to 7 days, default is 7 days and is optional parameter')
             c.argument('partition_count', type=int, help='Number of partitions created for the Event Hub. By default, allowed values are 2-32. Lower value of 1 is supported with Kafka enabled namespaces. In presence of a custom quota, the upper limit will match the upper limit of the quota.')
             c.argument('status', arg_type=get_enum_type(['Active', 'Disabled', 'SendDisabled']), help='Status of Eventhub')
-            c.argument('enabled', options_list=['--enable-capture'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether capture description is enabled.')
+            c.argument('enabled', options_list=['--enable-capture'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether capture is enabled.')
             c.argument('skip_empty_archives', options_list=['--skip-empty-archives'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether to Skip Empty.')
             c.argument('capture_interval_seconds', arg_group='Capture', options_list=['--capture-interval'], type=int, help='Allows you to set the frequency with which the capture to Azure Blobs will happen, value should between 60 to 900 seconds')
             c.argument('capture_size_limit_bytes', arg_group='Capture', options_list=['--capture-size-limit'], type=int, help='Defines the amount of data built up in your Event Hub before an capture operation, value should be between 10485760 to 524288000 bytes')
@@ -250,3 +250,18 @@ def load_arguments_eh(self, _):
     for scope in ['eventhubs namespace encryption add', 'eventhubs namespace identity remove']:
         with self.argument_context(scope, resource_type=ResourceType.MGMT_EVENTHUB) as c:
             c.argument('encryption_config', action=AlertAddEncryption, nargs='+', help='List of KeyVaultProperties objects.')
+
+# Schema Registry
+    with self.argument_context('eventhubs namespace schema-registry list') as c:
+        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
+
+    with self.argument_context('eventhubs namespace schema-registry') as c:
+        c.argument('namespace_name', arg_type=namespace_name_arg_type, options_list=['--namespace-name'], help='name of Namespace')
+        c.argument('schema_group_name', arg_type=name_type, id_part='child_name_1', help='name of schema group')
+
+    for scope in ['eventhubs namespace schema-registry create', 'eventhubs namespace schema-registry update']:
+        with self.argument_context(scope) as c:
+            c.argument('schema_compatibility', options_list=['--schema-compatibility'], arg_type=get_enum_type(['None', 'Backward', 'Forward']), help='Compatibility of Schema')
+            c.argument('schema_type', options_list=['--schema-type'], arg_type=get_enum_type(['Avro']), help='Type of Schema')
+            c.argument('tags', options_list=['--group-properties'], arg_type=tags_type,
+                       help='Type of Schema')
