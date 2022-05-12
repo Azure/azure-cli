@@ -158,6 +158,8 @@ short-summary: Validate an ACR is accessible from an AKS cluster.
 parameters:
   - name: --acr
     short-summary: The FQDN of the ACR.
+  - name: --node-name
+    short-summary: The name of a specific node to perform acr pull test checks. If not specified, it will be checked on a random node.
 examples:
   - name: Validate the ACR is accessible from the AKS cluster.
     text: az aks check-acr --name MyManagedCluster --resource-group MyResourceGroup --acr myacr.azurecr.io
@@ -517,6 +519,9 @@ parameters:
   - name: --linux-os-config
     type: string
     short-summary: Path to JSON file containing OS configurations for Linux agent nodes. https://aka.ms/aks/custom-node-config
+  - name: --node-resource-group
+    type: string
+    short-summary: The node resource group is the resource group where all customer's resources will be created in, such as virtual machines.
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --ssh-key-value /path/to/publickey
