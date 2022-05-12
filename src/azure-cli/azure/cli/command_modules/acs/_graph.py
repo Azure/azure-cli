@@ -10,11 +10,10 @@ import time
 import uuid
 
 import dateutil
-from azure.cli.command_modules.acs._client_factory import get_graph_rbac_management_client
+from azure.cli.command_modules.acs._client_factory import get_graph_rbac_management_client, cf_graph_client
 from azure.cli.core.azclierror import AzCLIError
 from azure.graphrbac.models import (
     ApplicationCreateParameters,
-    GetObjectsParameters,
     GraphErrorException,
     KeyCredential,
     PasswordCredential,
@@ -25,28 +24,34 @@ from knack.log import get_logger
 logger = get_logger(__name__)
 
 
-def _get_object_stubs(graph_client, assignees):
-    params = GetObjectsParameters(include_directory_object_references=True, object_ids=assignees)
-    return list(graph_client.objects.get_objects_by_object_ids(params))
-
-
 def resolve_object_id(cli_ctx, assignee):
-    client = get_graph_rbac_management_client(cli_ctx)
+    client = cf_graph_client(cli_ctx)
     result = None
     if assignee is None:
         raise AzCLIError('Inputted parameter "assignee" is None.')
-    if assignee.find("@") >= 0:  # looks like a user principal name
-        result = list(client.users.list(filter="userPrincipalName eq '{}'".format(assignee)))
+    # looks like a user principal name, find by upn
+    if assignee.find('@') >= 0:
+        result = list(client.user_list(
+            filter="userPrincipalName eq '{}'".format(assignee)))
+    # find by spn
     if not result:
-        result = list(client.service_principals.list(filter="servicePrincipalNames/any(c:c eq '{}')".format(assignee)))
-    if not result:  # assume an object id, let us verify it
-        result = _get_object_stubs(client, [assignee])
+        result = list(client.service_principal_list(filter="servicePrincipalNames/any(c:c eq '{}')".format(assignee)))
+    # find by display name
+    if not result:
+        result = list(client.service_principal_list(filter="displayName eq '{}'".format(assignee)))
+    # find by object id
+    if not result:
+        body = {
+            "ids": [assignee],
+            "types": ['user', 'group', 'servicePrincipal', 'directoryObjectPartnerReference']
+        }
+        result = list(client.directory_object_get_by_ids(body))
 
     # 2+ matches should never happen, so we only check 'no match' here
     if not result:
-        raise AzCLIError("No matches in graph database for '{}'".format(assignee))
-
-    return result[0].object_id
+        raise AzCLIError(
+            "No matches in graph database for '{}'".format(assignee))
+    return result[0]["id"]
 
 
 def create_service_principal(cli_ctx, identifier, resolve_app=True, rbac_client=None):
