@@ -530,8 +530,6 @@ def transform_blob_type(cmd, blob_type):
 def _adjust_block_blob_size(client, blob_type, length):
     if not blob_type or blob_type != 'block' or length is None:
         return
-    if length is None:
-        return
     # increase the block size to 100MB when the block list will contain more than 50,000 blocks(each block 4MB)
     if length > 50000 * 4 * 1024 * 1024:
         client._config.max_block_size = 100 * 1024 * 1024
