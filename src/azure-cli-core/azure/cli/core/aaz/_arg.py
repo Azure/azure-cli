@@ -324,7 +324,6 @@ class AAZResourceLocationArg(AAZStrArg):
 class AAZResourceIdArg(AAZStrArg):
     """ResourceId Argument"""
     # TODO: Resource Id arg can support both name and id. And can construct id from name by ResourceId Format
-    pass
 
 
 class AAZSubscriptionIdArg(AAZStrArg):
