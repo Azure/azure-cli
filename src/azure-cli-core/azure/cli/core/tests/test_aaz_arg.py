@@ -21,7 +21,7 @@ class TestAAZArgShorthandSyntax(unittest.TestCase):
         assert parser("null", is_simple=True) is None
         assert parser("'null'", is_simple=True) == 'null'
 
-        assert parser("None", is_simple=True) is None
+        assert parser("None", is_simple=True) == 'None'
         assert parser("'None'", is_simple=True) == 'None'
 
         # test single quota
@@ -111,7 +111,7 @@ class TestAAZArgShorthandSyntax(unittest.TestCase):
         assert parser("{a:1,b:2,c:None,d:'',}") == {
             "a": "1",
             "b": "2",
-            "c": None,
+            "c": "None",
             "d": ''
         }
         assert parser("{a:1,b:'/''}") == {
@@ -284,8 +284,8 @@ class TestAAZArgShorthandSyntax(unittest.TestCase):
 
         assert parser("[null]") == [None]
         assert parser("[null,]") == [None]
-        assert parser("[None]") == [None]
-        assert parser("[None,]") == [None]
+        assert parser("[None]") == ['None']
+        assert parser("[None,]") == ['None']
 
         assert parser("['null',]") == ['null']
 
@@ -300,7 +300,7 @@ class TestAAZArgShorthandSyntax(unittest.TestCase):
             "a", None, "", "d"
         ]
         assert parser("[a,None,'',d,]") == [
-            "a", None, "", "d"
+            "a", 'None', "", "d"
         ]
         assert parser("[a,[],{},[b,c,d],]") == [
             "a", [], {}, ["b", "c", "d"]
@@ -496,7 +496,7 @@ class TestAAZArg(unittest.TestCase):
         assert v.work_day == "Sunday"
 
         # null value
-        action.setup_operations(dest_ops, 'None')
+        action.setup_operations(dest_ops, 'null')
         assert len(dest_ops._ops) == 7
         dest_ops.apply(v, "work_day")
         assert v.work_day == None
@@ -583,7 +583,7 @@ class TestAAZArg(unittest.TestCase):
         assert v.score == 0
 
         # null value
-        action.setup_operations(dest_ops, "None")
+        action.setup_operations(dest_ops, "null")
         assert len(dest_ops._ops) == 4
         dest_ops.apply(v, "score")
         assert v.score == None
@@ -672,7 +672,7 @@ class TestAAZArg(unittest.TestCase):
         assert v.score == 0.0
 
         # null value
-        action.setup_operations(dest_ops, "None")
+        action.setup_operations(dest_ops, "null")
         assert len(dest_ops._ops) == 4
         dest_ops.apply(v, "score")
         assert v.score == None
@@ -791,7 +791,7 @@ class TestAAZArg(unittest.TestCase):
 
         # null value
         with self.assertRaises(aazerror.AAZInvalidValueError):
-            action.setup_operations(dest_ops, "None")
+            action.setup_operations(dest_ops, "null")
 
         schema.started = AAZBoolArg(
             options=["--started", "-s"],
@@ -891,7 +891,7 @@ class TestAAZArg(unittest.TestCase):
         action.setup_operations(dest_ops, ["a", 'null', 'None', "b", ""])
         assert len(dest_ops._ops) == 10
         dest_ops.apply(v, "names")
-        assert v.names == ["a", None, None, "b", ""]
+        assert v.names == ["a", None, 'None', "b", ""]
 
         # blank value
         with self.assertRaises(aazerror.AAZInvalidValueError):
@@ -949,7 +949,7 @@ class TestAAZArg(unittest.TestCase):
         action.setup_operations(dest_ops, ["a=null", "b=None"])
         assert len(dest_ops._ops) == 2
         dest_ops.apply(v, "tags")
-        assert v.tags == {"a": None, "b": None}
+        assert v.tags == {"a": None, "b": 'None'}
 
         action.setup_operations(dest_ops, ["b=6", "c="])
         assert len(dest_ops._ops) == 4
@@ -973,7 +973,7 @@ class TestAAZArg(unittest.TestCase):
             action.setup_operations(dest_ops, ["null"])
 
         with self.assertRaises(aazerror.AAZInvalidValueError):
-            action.setup_operations(dest_ops, ["None"])
+            action.setup_operations(dest_ops, ["null"])
 
         with self.assertRaises(aazerror.AAZInvalidShorthandSyntaxError):
             action.setup_operations(dest_ops, ["{c:}"])

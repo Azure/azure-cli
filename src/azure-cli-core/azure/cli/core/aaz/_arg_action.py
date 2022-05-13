@@ -237,7 +237,7 @@ class AAZObjectArgAction(AAZCompoundTypeArgAction):
         if data is None:
             if cls._schema._nullable:
                 return data
-            raise AAZInvalidValueError("is not nullable")
+            raise AAZInvalidValueError("field is not nullable")
 
         if isinstance(data, dict):
             result = OrderedDict()
@@ -259,7 +259,7 @@ class AAZDictArgAction(AAZCompoundTypeArgAction):
         if data is None:
             if cls._schema._nullable:
                 return data
-            raise AAZInvalidValueError("is not nullable")
+            raise AAZInvalidValueError("field is not nullable")
 
         if isinstance(data, dict):
             result = OrderedDict()
@@ -356,7 +356,7 @@ class AAZListArgAction(AAZCompoundTypeArgAction):
         if data is None:
             if cls._schema._nullable:
                 return data
-            raise AAZInvalidValueError("is not nullable")
+            raise AAZInvalidValueError("field is not nullable")
 
         if isinstance(data, list):
             result = []
