@@ -6,11 +6,11 @@ Azure cli shorthand syntax can help cli users to pass complicated argument value
 
 The command lines written in shorthand syntax can run in both _Powershell_ and _Bash_ terminals without any change in must situations.
 
-# Structure Parameter
+# Shorthand syntax formats
 
-## Full Value
+## `Full Value` format
 
-Shorthand syntax for full value is json without __double quotes__.
+Shorthand syntax in `Full Value` format is json without __double quotes__.
 For example if you want to pass following object in --contact argument:
 
 Json:
@@ -43,7 +43,7 @@ In the example above you can see the shorthand syntax wrapped in double quotes t
 Please don't use single quotes to wrap the shorthand syntax, because single quotes are used for _Single Quotes String_ introduced later.
 
 
-## Partial Value
+## `Partial Value` format
 
 Shorthand syntax for partial value is composed of two parts joined by `=`: the index key and the value. It's format is `{key}={value}`
 
@@ -51,28 +51,29 @@ The value can be simple string, full value format, json or even json file path.
 
 For the above example, if we want to pass some part properties of --contact:
 
-
-Partial Value for `name` properties
+Use `Partial Value` for _name_ properties:
 ```bash
 az some-command --contact name=Bill
 ```
 
-Partial Value for both `age` and `paid` properties
+Use `Partial Value` for both _age_ and _paid_ properties
 ```bash
 az some-command --contact age=20 paid=true
 ```
 
-Partial Value for second value of `emails`
+Use `Partial Value` for second element of _emails_
 ```bash
 az some-command --contact emails[1]="Bill@outlook.com"
 ```
 
-Partial Value for `details` property of `address`.
+Use `Partial Value` for _details_ property of _address_.
 ```bash
 az some-command --contact address.details="{line1:'15590 NE 31st St',line2:'Redmond, WA'}"
 ```
 
 It's also possible to pass json file as value.
+
+Use `json file` for value:
 ```bash
 az some-command --contact address.details=./address_detials.json
 ```
@@ -99,21 +100,34 @@ Json:
 Because http url has `:` character, so in `Full Value` format, it should be a __Single Quotes String__(introduced below). In order to support both Powershell and Bash, _Single Quotes String_ uses `/` as escape character.
 which means `https://bill.microsft.com/blog` should be `'https:////bill.microsft.com//blog'` in `Full Value` format. It becomes longer than original, which obeys the goal of shorthand syntax.
 
-Use `Full Value` only
+Use `Full Value`:
 ```bash
 az some-command --contact "{name:Bill,homepage:'https:////bill.microsft.com//blog',age:20,paid:true,emails:[Bill@microsoft.com,Bill@outlook.com]}"
 ```
 
 However in `Partial Value` format, the url can be parsed as string, and it doesn't need to be a __Single Quotes String__.
-Use `Partial Value`
+
+Use `Partial Value`:
 ```bash
 az some-command --contact homepage="https://bill.microsft.com/blog"
 ```
 
 Shorthand syntax arguments support to patch `Full Value` by adding `Partial Value` after it.
+
+Use `Full Value` and `Partial Value`:
 ```bash
 az some-command --contact "{name:Bill,age:20,paid:true,emails:[Bill@microsoft.com,Bill@outlook.com]}" homepage="https://bill.microsft.com/blog"
 ```
+
+There's no limitation to put them after one --contact flag or put them after two --contact flags.
+
+Use `Full Value` and `Partial Value` in two --contact flags:
+```bash
+az some-command --contact "{name:Bill,age:20,paid:true,emails:[Bill@microsoft.com,Bill@outlook.com]}" \
+--contact homepage="https://bill.microsft.com/blog"
+```
+
+The __order__ of them is important!!! If you reverse the order, the final data will only be the `Full Value`. 
 
 ## use `??` to show help
 
@@ -176,7 +190,8 @@ az some-command --contact emails[0]=??
 
 ## Pass a `null` Value
 
-Shorthand syntax support `null` keyword in both `Full Value` and `Partial Value` format.
+Shorthand syntax support `null` keyword in both `Full Value` and `Partial Value` formats.
+
 For example if you want to pass following object with `null` value address property in --contact argument:
 
 Json:
@@ -201,6 +216,41 @@ az some-command --contact "{name:Bill,age:20,paid:true,emails:[Bill@microsoft.co
 pass `null` in `Partial Value`:
 ```bash
 az some-command --contact name=Bill address=null
+```
+
+### `null` value in update commands
+
+In update commands `null` value is usually used to unset properties.
+For example if there already exists an resource with following contact property
+
+contact
+```json
+{
+  "contact": {
+    "name": "Bill",
+    "age": 20,
+    "paid": true,
+    "emails": [
+      "Bill@microsoft.com",
+      "Bill@outlook.com"
+    ],
+    "address": {
+      "country": "USA",
+      "company": "Microsoft",
+      "details": {
+        "line1": "15590 NE 31st St",
+        "line2": "Redmond, WA"
+      }
+    }
+  },
+
+  "other_properties": {}
+}
+```
+
+By using `null` value in update command, _address_ property of resource's _contact_ can be unset:
+```bash
+az some-update-command --contact address=null
 ```
 
 # Single Quotes String
