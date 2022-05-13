@@ -194,6 +194,7 @@ class ResourceScenarioTest(ScenarioTest):
 
 class ResourceIDScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_resource_id')
     def test_resource_id_scenario(self, resource_group):
 
