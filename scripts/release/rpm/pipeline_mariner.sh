@@ -5,7 +5,7 @@
 set -exv
 
 : "${BUILD_STAGINGDIRECTORY:?BUILD_STAGINGDIRECTORY environment variable not set.}"
-: "${ACR:?ACR environment variable not set.}"
+: "${IMAGE:?IMAGE environment variable not set.}"
 : "${TAG:?TAG environment variable not set.}"
 
 CLI_VERSION=`cat src/azure-cli/azure/cli/__main__.py | grep __version__ | sed s/' '//g | sed s/'__version__='// |  sed s/\"//g`
@@ -13,7 +13,7 @@ CLI_VERSION=`cat src/azure-cli/azure/cli/__main__.py | grep __version__ | sed s/
 # Create a container image that includes the source code and a built RPM using this file.
 docker build \
     --target build-env \
-    --build-arg acr=${ACR} \
+    --build-arg image=${IMAGE} \
     --build-arg tag=${TAG} \
     --build-arg cli_version=${CLI_VERSION} \
     -f ./scripts/release/rpm/mariner.dockerfile \
@@ -22,7 +22,7 @@ docker build \
 
 # Continue the previous build, and create a container that has the current azure-cli build but not the source code.
 docker build \
-    --build-arg acr=${ACR} \
+    --build-arg image=${IMAGE} \
     --build-arg tag=${TAG} \
     --build-arg cli_version=${CLI_VERSION} \
     -f ./scripts/release/rpm/mariner.dockerfile \
