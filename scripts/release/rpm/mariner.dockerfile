@@ -18,7 +18,7 @@ RUN dos2unix ./scripts/release/rpm/azure-cli.spec && \
 FROM ${image}:${tag} AS execution-env
 
 RUN tdnf update -y
-RUN tdnf install -y python3 python3-virtualenv
+RUN tdnf install -y python3 python3-virtualenv rpm
 
 COPY --from=build-env /azure-cli-dev.rpm ./
 RUN rpm -i ./azure-cli-dev.rpm && \
