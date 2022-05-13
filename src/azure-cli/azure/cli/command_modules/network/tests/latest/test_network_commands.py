@@ -5232,6 +5232,7 @@ class NetworkWatcherScenarioTest(ScenarioTest):
         self.cmd('network watcher show-security-group-view -g {rg} --vm {vm}')
         self.cmd('network watcher show-next-hop -g {rg} --vm {vm} --source-ip 10.0.0.9 --dest-ip 10.0.0.6')
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_nw_flow_log', location='westus')
     @StorageAccountPreparer(name_prefix='clitestnw', location='westus', kind='StorageV2')
     def test_network_watcher_flow_log(self, resource_group, resource_group_location, storage_account):
