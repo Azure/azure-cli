@@ -19,6 +19,13 @@ except ImportError:
 
 # pylint: disable=protected-access
 
+shorthand_help_messages = {
+    "show-help": 'Try `??` to show more.',
+    "short-summery": 'Shorthand syntax supported.',
+    "long-summery": 'See https://github.com/Azure/azure-cli/tree/dev/doc/shorthand_syntax.md '
+                    'for more about shorthand syntax.'
+}
+
 
 class AAZShowHelp(BaseException):
 
@@ -105,7 +112,7 @@ class AAZShowHelp(BaseException):
             prop_tags = cls._build_schema_tags(prop_schema)
             prop_name = ' '.join(prop_schema._options)
 
-            prop_short_summary = cls._build_short_summery(prop_schema)
+            prop_short_summary = cls._build_short_summery(prop_schema, is_prop=True)
 
             prop_group_name = prop_schema._arg_group or ""
             header_len = len(prop_name) + len(prop_tags) + (1 if prop_tags else 0)
@@ -142,8 +149,8 @@ class AAZShowHelp(BaseException):
         return tags
 
     @staticmethod
-    def _build_short_summery(schema):
-        from ._arg import AAZSimpleTypeArg
+    def _build_short_summery(schema, is_prop=False):
+        from ._arg import AAZSimpleTypeArg, AAZCompoundTypeArg
         short_summary = schema._help.get("short-summary", "")
 
         if isinstance(schema, AAZSimpleTypeArg) and schema.enum:
@@ -152,14 +159,24 @@ class AAZShowHelp(BaseException):
                 if short_summary:
                     short_summary += '  '
                 short_summary += 'Allowed values: {}.'.format(', '.join(sorted([str(x) for x in choices])))
+        elif isinstance(schema, AAZCompoundTypeArg):
+            if short_summary:
+                short_summary += '  '
+            if is_prop:
+                short_summary += shorthand_help_messages['show-help']
         return short_summary
 
     @staticmethod
     def _build_long_summery(schema):
+        from ._arg import AAZCompoundTypeArg
         lines = []
         long_summary = schema._help.get("long-summary", "")
         if long_summary:
             lines.append(long_summary)
+
+        if isinstance(schema, AAZCompoundTypeArg):
+            lines.append(shorthand_help_messages['long-summery'])
+
         if schema._is_preview:
             preview = status_tag_messages['preview'].format("This argument")
             lines.append(preview)

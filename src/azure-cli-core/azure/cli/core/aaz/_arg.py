@@ -185,7 +185,27 @@ class AAZFloatArg(AAZSimpleTypeArg, AAZFloatType):
         return "Float"
 
 
-class AAZObjectArg(AAZBaseArg, AAZObjectType):
+class AAZCompoundTypeArg(AAZBaseArg):
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    @abc.abstractmethod
+    def _build_cmd_action(self):
+        raise NotImplementedError()
+
+    def to_cmd_arg(self, name):
+        from ._help import shorthand_help_messages
+        arg = super().to_cmd_arg(name)
+        short_summery = arg.type.settings.get('help', None) or ''
+        if short_summery:
+            short_summery += '  '
+        short_summery += shorthand_help_messages['show-help'] + '  ' + shorthand_help_messages['short-summery']
+        arg.help = short_summery
+        return arg
+
+
+class AAZObjectArg(AAZCompoundTypeArg, AAZObjectType):
 
     def __init__(self, fmt=None, **kwargs):
         super().__init__(**kwargs)
@@ -210,7 +230,7 @@ class AAZObjectArg(AAZBaseArg, AAZObjectType):
         return "Object"
 
 
-class AAZDictArg(AAZBaseArg, AAZDictType):
+class AAZDictArg(AAZCompoundTypeArg, AAZDictType):
 
     def __init__(self, fmt=None, **kwargs):
         super().__init__(**kwargs)
@@ -235,7 +255,7 @@ class AAZDictArg(AAZBaseArg, AAZDictType):
         return f"Dict<String,{self.Element._type_in_help}>"
 
 
-class AAZListArg(AAZBaseArg, AAZListType):
+class AAZListArg(AAZCompoundTypeArg, AAZListType):
 
     def __init__(self, fmt=None, singular_options=None, **kwargs):
         super().__init__(**kwargs)
