@@ -224,13 +224,13 @@ def validate_nat_gateway_idle_timeout(namespace):
 
 
 def validate_nodes_count(namespace):
-    """Validates that min_count and max_count is set between 1-100"""
+    """Validates that min_count and max_count is set between 1-1000"""
     if namespace.min_count is not None:
-        if namespace.min_count < 1 or namespace.min_count > 100:
-            raise CLIError('--min-count must be in the range [1,100]')
+        if namespace.min_count < 1 or namespace.min_count > 1000:
+            raise CLIError('--min-count must be in the range [1,1000]')
     if namespace.max_count is not None:
-        if namespace.max_count < 1 or namespace.max_count > 100:
-            raise CLIError('--max-count must be in the range [1,100]')
+        if namespace.max_count < 1 or namespace.max_count > 1000:
+            raise CLIError('--max-count must be in the range [1,1000]')
 
 
 def validate_taints(namespace):
