@@ -4,12 +4,15 @@
 # --------------------------------------------------------------------------------------------
 
 from enum import Enum
+from knack.log import get_logger
 from knack.util import CLIError
 
 from azure.cli.core.azclierror import RequiredArgumentMissingError
 from azure.cli.core.commands import CliCommandType
 from azure.cli.core.profiles import get_api_version, ResourceType
 from azure.cli.core._profile import Profile
+
+logger = get_logger(__name__)
 
 
 class Clients(str, Enum):
@@ -71,7 +74,12 @@ def get_docs_tmpl(cli_ctx, resource_type, client_name, module_name='operations')
                          ResourceType.DATA_KEYVAULT_KEYS]:
         return KEYVAULT_TEMPLATE_STRINGS[resource_type].format(obj_name='.{}')
 
-    api_version = '.v' + str(get_api_version(cli_ctx, resource_type)).replace('.', '_').replace('-', '_')
+    api_version = get_api_version(cli_ctx, resource_type, as_sdk_profile=True)
+    from azure.cli.core.profiles import SDKProfile
+    if isinstance(api_version, SDKProfile):
+        api_version = api_version.profile[client_name] if api_version.profile.get(client_name, None) else \
+            api_version.profile[None]
+    api_version = '.v' + api_version.replace('.', '_').replace('-', '_')
     if is_mgmt_plane(resource_type):
         class_name = OPERATIONS_NAME.get(client_name, '') + '.' if module_name == 'operations' else ''
     else:
@@ -81,12 +89,6 @@ def get_docs_tmpl(cli_ctx, resource_type, client_name, module_name='operations')
         module_name=module_name,
         class_name=class_name,
         obj_name='{}')
-
-
-def get_client_api_version(cli_ctx, resource_type):
-    if resource_type == ResourceType.DATA_KEYVAULT_KEYS:
-        return '7.0' if not is_azure_stack_profile(cmd=None, cli_ctx=cli_ctx) else '2016-10-01'
-    return get_api_version(cli_ctx, resource_type)
 
 
 def get_client_factory(resource_type, client_name=''):
@@ -141,6 +143,7 @@ def keyvault_mgmt_client_factory(resource_type, client_name):
     def _keyvault_mgmt_client_factory(cli_ctx, _):
         from azure.cli.core.commands.client_factory import get_mgmt_service_client
         return getattr(get_mgmt_service_client(cli_ctx, resource_type), client_name)
+
     return _keyvault_mgmt_client_factory
 
 
@@ -151,18 +154,8 @@ def keyvault_data_plane_factory(cli_ctx, *_):
     version = str(get_api_version(cli_ctx, ResourceType.DATA_KEYVAULT))
 
     def get_token(server, resource, scope):  # pylint: disable=unused-argument
-        import adal
-        try:
-            return Profile(cli_ctx=cli_ctx).get_raw_token(resource=resource,
-                                                          subscription=cli_ctx.data.get('subscription_id'))[0]
-        except adal.AdalError as err:
-            # pylint: disable=no-member
-            if (hasattr(err, 'error_response') and
-                    ('error_description' in err.error_response) and
-                    ('AADSTS70008:' in err.error_response['error_description'])):
-                raise CLIError(
-                    "Credentials have expired due to inactivity. Please run 'az login'")
-            raise CLIError(err)
+        return Profile(cli_ctx=cli_ctx).get_raw_token(resource=resource,
+                                                      subscription=cli_ctx.data.get('subscription_id'))[0]
 
     client = KeyVaultClient(KeyVaultAuthentication(get_token), api_version=version)
 
@@ -173,8 +166,6 @@ def keyvault_data_plane_factory(cli_ctx, *_):
         verify = not should_disable_connection_verify()
         client._client.config.connection.verify = verify
     else:
-        from knack.log import get_logger
-        logger = get_logger(__name__)
         logger.info('Could not find the configuration object to turn off the verification if needed')
 
     return client
@@ -188,18 +179,8 @@ def keyvault_private_data_plane_factory_v7_2_preview(cli_ctx, _):
     version = str(get_api_version(cli_ctx, ResourceType.DATA_PRIVATE_KEYVAULT))
 
     def get_token(server, resource, scope):  # pylint: disable=unused-argument
-        import adal
-        try:
-            return Profile(cli_ctx=cli_ctx).get_raw_token(resource=resource,
-                                                          subscription=cli_ctx.data.get('subscription_id'))[0]
-        except adal.AdalError as err:
-            # pylint: disable=no-member
-            if (hasattr(err, 'error_response') and
-                    ('error_description' in err.error_response) and
-                    ('AADSTS70008:' in err.error_response['error_description'])):
-                raise CLIError(
-                    "Credentials have expired due to inactivity. Please run 'az login'")
-            raise CLIError(err)
+        return Profile(cli_ctx=cli_ctx).get_raw_token(resource=resource,
+                                                      subscription=cli_ctx.data.get('subscription_id'))[0]
 
     client = KeyVaultClient(KeyVaultAuthentication(get_token), api_version=version)
 
@@ -210,8 +191,6 @@ def keyvault_private_data_plane_factory_v7_2_preview(cli_ctx, _):
         verify = not should_disable_connection_verify()
         client._client.config.connection.verify = verify
     else:
-        from knack.log import get_logger
-        logger = get_logger(__name__)
         logger.info('Could not find the configuration object to turn off the verification if needed')
 
     return client
@@ -240,15 +219,21 @@ def data_plane_azure_keyvault_key_client(cli_ctx, command_args):
 
     vault_url, credential, version = _prepare_data_plane_azure_keyvault_client(
         cli_ctx, command_args, ResourceType.DATA_KEYVAULT_KEYS)
+    is_hsm = command_args.get('hsm_name', None) is not None
+    if not is_hsm and command_args.get('identifier', None) is not None:
+        is_hsm = 'managedhsm' in command_args.get('identifier')
+    if is_hsm and ('key rotate' in cli_ctx.data['command'] or 'key rotation-policy' in cli_ctx.data['command']):
+        logger.warning("This command is in preview and under development.")
     command_args.pop('hsm_name', None)
     command_args.pop('vault_base_url', None)
     command_args.pop('identifier', None)
+    api_version = '7.3' if not is_azure_stack_profile(cmd=None, cli_ctx=cli_ctx) else '2016-10-01'
     return KeyClient(
-        vault_url=vault_url, credential=credential, api_version=version)
+        vault_url=vault_url, credential=credential, api_version=api_version or version)
 
 
 def _prepare_data_plane_azure_keyvault_client(cli_ctx, command_args, resource_type):
-    version = str(get_client_api_version(cli_ctx, resource_type))
+    version = str(get_api_version(cli_ctx, resource_type))
     profile = Profile(cli_ctx=cli_ctx)
     credential, _, _ = profile.get_login_credentials()
     vault_url = \

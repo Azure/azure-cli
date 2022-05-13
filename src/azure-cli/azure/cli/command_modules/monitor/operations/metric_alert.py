@@ -123,7 +123,7 @@ def create_metric_alert_dimension(dimension_name, value_list, operator=None):
 def create_metric_alert_condition(condition_type, aggregation, metric_name, operator, metric_namespace='',
                                   dimension_list=None, threshold=None, alert_sensitivity=None,
                                   number_of_evaluation_periods=None, min_failing_periods_to_alert=None,
-                                  ignore_data_before=None):
+                                  ignore_data_before=None, skip_metric_validation=None):
     if metric_namespace:
         metric_namespace += '.'
     condition = "{} {}'{}' {} ".format(aggregation, metric_namespace, metric_name, operator)
@@ -144,6 +144,9 @@ def create_metric_alert_condition(condition_type, aggregation, metric_name, oper
             dimensions = [t for t in dimensions.split(_metric_alert_dimension_prefix) if t]
             dimensions = 'where' + 'and'.join(dimensions)
         condition += dimensions
+
+    if skip_metric_validation:
+        condition += ' with skipmetricvalidation'
 
     return condition.strip()
 

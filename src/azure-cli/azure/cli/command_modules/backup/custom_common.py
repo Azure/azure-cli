@@ -4,11 +4,12 @@
 # --------------------------------------------------------------------------------------------
 
 
-import azure.cli.command_modules.backup.custom_help as custom_help
+from azure.cli.command_modules.backup import custom_help
 from azure.cli.command_modules.backup._client_factory import backup_protected_items_cf, \
-    protection_containers_cf, protected_items_cf, backup_protected_items_crr_cf, recovery_points_crr_cf
+    protected_items_cf, backup_protected_items_crr_cf, recovery_points_crr_cf
 from azure.cli.core.util import CLIError
 from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError
+from azure.mgmt.recoveryservicesbackup.activestamp.models import RecoveryPointTierStatus, RecoveryPointTierType
 # pylint: disable=import-error
 
 fabric_name = "Azure"
@@ -40,8 +41,6 @@ def show_container(cmd, client, name, resource_group_name, vault_name, backup_ma
                 Please either remove the flag or query for any other container type.
                 """)
 
-    if custom_help.is_native_name(name):
-        return protection_containers_cf(cmd.cli_ctx).get(vault_name, resource_group_name, fabric_name, name)
     containers = _get_containers(client, container_type, status, resource_group_name, vault_name, name,
                                  use_secondary_region)
     return custom_help.get_none_one_or_many(containers)
@@ -57,14 +56,25 @@ def show_policy(client, resource_group_name, vault_name, name):
     return client.get(vault_name, resource_group_name, name)
 
 
-def list_policies(client, resource_group_name, vault_name, workload_type=None, backup_management_type=None):
+def list_policies(client, resource_group_name, vault_name, workload_type=None, backup_management_type=None,
+                  policy_sub_type=None):
     workload_type = _check_map(workload_type, workload_type_map)
     filter_string = custom_help.get_filter_string({
         'backupManagementType': backup_management_type,
         'workloadType': workload_type})
 
     policies = client.list(vault_name, resource_group_name, filter_string)
-    return custom_help.get_list_from_paged_response(policies)
+    paged_policies = custom_help.get_list_from_paged_response(policies)
+
+    if policy_sub_type:
+        if policy_sub_type == 'Enhanced':
+            paged_policies = [policy for policy in paged_policies if (hasattr(policy.properties, 'policy_type') and
+                                                                      policy.properties.policy_type == 'V2')]
+        else:
+            paged_policies = [policy for policy in paged_policies if (not hasattr(policy.properties, 'policy_type') or
+                                                                      policy.properties.policy_type is None or
+                                                                      policy.properties.policy_type == 'V1')]
+    return paged_policies
 
 
 def show_item(cmd, client, resource_group_name, vault_name, container_name, name, backup_management_type=None,
@@ -126,49 +136,66 @@ def list_items(cmd, client, resource_group_name, vault_name, workload_type=None,
     return paged_items
 
 
+def list_associated_items_for_policy(client, resource_group_name, vault_name, name, backup_management_type):
+    filter_string = custom_help.get_filter_string({
+        'policyName': name,
+        'backupManagementType': backup_management_type})
+    items = client.list(vault_name, resource_group_name, filter_string)
+    return custom_help.get_list_from_paged_response(items)
+
+
+def fetch_tier_for_rp(rp):
+    isRehydrated = False
+    isInstantRecoverable = False
+    isHardenedRP = False
+    isArchived = False
+
+    if rp.properties.recovery_point_tier_details is None:
+        setattr(rp, "tier_type", None)
+        return
+
+    for i in range(len(rp.properties.recovery_point_tier_details)):
+        currRpTierDetails = rp.properties.recovery_point_tier_details[i]
+        if (currRpTierDetails.type == RecoveryPointTierType.ARCHIVED_RP and
+                currRpTierDetails.status == RecoveryPointTierStatus.REHYDRATED):
+            isRehydrated = True
+
+        if currRpTierDetails.status == RecoveryPointTierStatus.VALID:
+            if currRpTierDetails.type == RecoveryPointTierType.INSTANT_RP:
+                isInstantRecoverable = True
+
+            if currRpTierDetails.type == RecoveryPointTierType.HARDENED_RP:
+                isHardenedRP = True
+
+            if currRpTierDetails.type == RecoveryPointTierType.ARCHIVED_RP:
+                isArchived = True
+
+    if (isHardenedRP and isArchived) or (isRehydrated):
+        setattr(rp, "tier_type", "VaultStandardRehydrated")
+
+    elif isInstantRecoverable and isHardenedRP:
+        setattr(rp, "tier_type", "SnapshotAndVaultStandard")
+
+    elif isInstantRecoverable and isArchived:
+        setattr(rp, "tier_type", "SnapshotAndVaultArchive")
+
+    elif isArchived:
+        setattr(rp, "tier_type", "VaultArchive")
+
+    elif isInstantRecoverable:
+        setattr(rp, "tier_type", "Snapshot")
+
+    elif isHardenedRP:
+        setattr(rp, "tier_type", "VaultStandard")
+
+    else:
+        setattr(rp, "tier_type", None)
+
+
 def fetch_tier(paged_recovery_points):
 
     for rp in paged_recovery_points:
-        isRehydrated = False
-        isInstantRecoverable = False
-        isHardenedRP = False
-        isArchived = False
-
-        if rp.properties.recovery_point_tier_details is None:
-            continue
-
-        for i in range(len(rp.properties.recovery_point_tier_details)):
-            if (rp.properties.recovery_point_tier_details[i].type == "ArchivedRP" and
-                    rp.properties.recovery_point_tier_details[i].status == "Rehydrated"):
-                isRehydrated = True
-
-            if rp.properties.recovery_point_tier_details[i].status == "Valid":
-                if rp.properties.recovery_point_tier_details[i].type == "InstantRP":
-                    isInstantRecoverable = True
-
-                if rp.properties.recovery_point_tier_details[i].type == "HardenedRP":
-                    isHardenedRP = True
-
-                if rp.properties.recovery_point_tier_details[i].type == "ArchivedRP":
-                    isArchived = True
-
-        if (isHardenedRP and isArchived) or (isRehydrated):
-            setattr(rp, "tier_type", "VaultStandardRehydrated")
-
-        elif isInstantRecoverable and isHardenedRP:
-            setattr(rp, "tier_type", "SnapshotAndVaultStandard")
-
-        elif isInstantRecoverable and isArchived:
-            setattr(rp, "tier_type", "SnapshotAndVaultArchive")
-
-        elif isArchived:
-            setattr(rp, "tier_type", "VaultArchive")
-
-        elif isInstantRecoverable:
-            setattr(rp, "tier_type", "Snapshot")
-
-        elif isHardenedRP:
-            setattr(rp, "tier_type", "VaultStandard")
+        fetch_tier_for_rp(rp)
 
 
 def check_rp_move_readiness(paged_recovery_points, target_tier, is_ready_for_move):
@@ -230,9 +257,17 @@ def show_recovery_point(cmd, client, resource_group_name, vault_name, container_
         recovery_points = client.list(vault_name, resource_group_name, fabric_name, container_uri, item_uri, None)
         paged_rps = custom_help.get_list_from_paged_response(recovery_points)
         filtered_rps = [rp for rp in paged_rps if rp.name.lower() == name.lower()]
-        return custom_help.get_none_one_or_many(filtered_rps)
+        recovery_point = custom_help.get_none_one_or_many(filtered_rps)
+        if recovery_point is None:
+            raise InvalidArgumentValueError("The recovery point provided does not exist. Please provide valid RP.")
+        return recovery_point
 
-    return client.get(vault_name, resource_group_name, fabric_name, container_uri, item_uri, name)
+    try:
+        response = client.get(vault_name, resource_group_name, fabric_name, container_uri, item_uri, name)
+    except Exception as ex:
+        errorMessage = str(ex)
+        raise InvalidArgumentValueError("Specified recovery point can not be fetched - \n" + errorMessage)
+    return response
 
 
 def delete_policy(client, resource_group_name, vault_name, name):
@@ -272,7 +307,7 @@ def _get_containers(client, backup_management_type, status, resource_group_name,
     containers = custom_help.get_list_from_paged_response(paged_containers)
 
     if container_name and custom_help.is_native_name(container_name):
-        return [container for container in containers if container.name == container_name]
+        return [container for container in containers if container.name.lower() == container_name.lower()]
 
     return containers
 

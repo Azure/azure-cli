@@ -9,7 +9,7 @@ import azure.cli.command_modules.backup.custom_help as helper
 
 import azure.cli.command_modules.backup.custom_common as common
 
-from azure.mgmt.recoveryservicesbackup.models import ProtectedItemResource, \
+from azure.mgmt.recoveryservicesbackup.activestamp.models import ProtectedItemResource, \
     RestoreRequestResource, BackupRequestResource, RestoreFileSpecs, \
     AzureFileShareBackupRequest, AzureFileshareProtectedItem, AzureFileShareRestoreRequest, \
     TargetAFSRestoreInfo, ProtectionState, ProtectionContainerResource, AzureStorageContainer
@@ -45,7 +45,8 @@ def enable_for_AzureFileShare(cmd, client, resource_group_name, vault_name, afs_
             filter_string = helper.get_filter_string({'backupManagementType': "AzureStorage"})
 
             refresh_result = protection_containers_client.refresh(vault_name, resource_group_name, fabric_name,
-                                                                  filter=filter_string, raw=True)
+                                                                  filter=filter_string,
+                                                                  cls=helper.get_pipeline_response)
             helper.track_refresh_operation(cmd.cli_ctx, refresh_result, vault_name, resource_group_name)
 
             # refetch the protectable containers after refresh
@@ -62,7 +63,7 @@ def enable_for_AzureFileShare(cmd, client, resource_group_name, vault_name, afs_
                                            workload_type="AzureFileShare")
         param = ProtectionContainerResource(properties=properties)
         result = protection_containers_client.register(vault_name, resource_group_name, fabric_name,
-                                                       storage_account.name, param, raw=True)
+                                                       storage_account.name, param, cls=helper.get_pipeline_response)
         helper.track_register_operation(cmd.cli_ctx, result, vault_name, resource_group_name, storage_account.name)
 
     protectable_item = _get_protectable_item_for_afs(cmd.cli_ctx, vault_name, resource_group_name, afs_name,
@@ -91,7 +92,7 @@ def enable_for_AzureFileShare(cmd, client, resource_group_name, vault_name, afs_
     item = ProtectedItemResource(properties=item_properties)
 
     result = client.create_or_update(vault_name, resource_group_name, fabric_name,
-                                     container_uri, item_uri, item, raw=True)
+                                     container_uri, item_uri, item, cls=helper.get_pipeline_response)
     return helper.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
@@ -105,7 +106,7 @@ def backup_now(cmd, client, resource_group_name, vault_name, item, retain_until)
     trigger_backup_request = _get_backup_request(retain_until)
 
     result = client.trigger(vault_name, resource_group_name, fabric_name,
-                            container_uri, item_uri, trigger_backup_request, raw=True)
+                            container_uri, item_uri, trigger_backup_request, cls=helper.get_pipeline_response)
     return helper.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
@@ -126,7 +127,8 @@ def _get_protectable_item_for_afs(cli_ctx, vault_name, resource_group_name, afs_
 
         filter_string = helper.get_filter_string({'workloadType': "AzureFileShare"})
         result = protection_containers_client.inquire(vault_name, resource_group_name, fabric_name,
-                                                      storage_account.name, filter=filter_string, raw=True)
+                                                      storage_account.name, filter=filter_string,
+                                                      cls=helper.get_pipeline_response)
 
         helper.track_inquiry_operation(cli_ctx, result, vault_name, resource_group_name, storage_account.name)
 
@@ -172,39 +174,42 @@ def restore_AzureFileShare(cmd, client, resource_group_name, vault_name, rp_name
     item_uri = helper.get_protected_item_uri_from_id(item.id)
 
     sa_name = item.properties.container_name
-    source_resource_id = _get_storage_account_id(cmd.cli_ctx, sa_name.split(';')[-1], sa_name.split(';')[-2])
-    target_resource_id = None
 
     afs_restore_request = AzureFileShareRestoreRequest()
     target_details = None
 
     afs_restore_request.copy_options = resolve_conflict
     afs_restore_request.recovery_type = restore_mode
-    afs_restore_request.source_resource_id = source_resource_id
+    afs_restore_request.source_resource_id = _get_storage_account_id(cmd.cli_ctx, sa_name.split(';')[-1],
+                                                                     sa_name.split(';')[-2])
     afs_restore_request.restore_request_type = restore_request_type
 
     restore_file_specs = None
 
     if source_file_path is not None:
+        if len(source_file_path) > 99:
+            raise ArgumentUsageError("""
+            You can only recover a maximum of 99 Files/Folder.
+            Please ensure you have provided less than 100 source file paths.
+            """)
         restore_file_specs = []
         for filepath in source_file_path:
             restore_file_specs.append(RestoreFileSpecs(path=filepath, file_spec_type=source_file_type,
                                                        target_folder_path=target_folder))
 
     if restore_mode == "AlternateLocation":
-        target_resource_id = _get_storage_account_id(cmd.cli_ctx, target_storage_account_name, resource_group_name)
+        target_sa_name, target_sa_rg = helper.get_resource_name_and_rg(resource_group_name, target_storage_account_name)
         target_details = TargetAFSRestoreInfo()
         target_details.name = target_file_share_name
-        target_details.target_resource_id = target_resource_id
+        target_details.target_resource_id = _get_storage_account_id(cmd.cli_ctx, target_sa_name, target_sa_rg)
         afs_restore_request.target_details = target_details
 
     afs_restore_request.restore_file_specs = restore_file_specs
 
     trigger_restore_request = RestoreRequestResource(properties=afs_restore_request)
 
-    result = client.trigger(vault_name, resource_group_name, fabric_name,
-                            container_uri, item_uri, rp_name,
-                            trigger_restore_request, raw=True, polling=False).result()
+    result = client.begin_trigger(vault_name, resource_group_name, fabric_name, container_uri, item_uri, rp_name,
+                                  trigger_restore_request, cls=helper.get_pipeline_response, polling=False).result()
 
     return helper.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
@@ -267,7 +272,7 @@ def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, p
 
     # Update policy
     result = client.create_or_update(vault_name, resource_group_name, fabric_name,
-                                     container_uri, item_uri, afs_item, raw=True)
+                                     container_uri, item_uri, afs_item, cls=helper.get_pipeline_response)
     return helper.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
@@ -279,7 +284,8 @@ def disable_protection(cmd, client, resource_group_name, vault_name, item,
 
     # Trigger disable protection and wait for completion
     if delete_backup_data:
-        result = client.delete(vault_name, resource_group_name, fabric_name, container_uri, item_uri, raw=True)
+        result = client.delete(vault_name, resource_group_name, fabric_name, container_uri, item_uri,
+                               cls=helper.get_pipeline_response)
         return helper.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
     afs_item_properties = AzureFileshareProtectedItem()
@@ -288,7 +294,7 @@ def disable_protection(cmd, client, resource_group_name, vault_name, item,
     afs_item_properties.source_resource_id = item.properties.source_resource_id
     afs_item = ProtectedItemResource(properties=afs_item_properties)
     result = client.create_or_update(vault_name, resource_group_name, fabric_name,
-                                     container_uri, item_uri, afs_item, raw=True)
+                                     container_uri, item_uri, afs_item, cls=helper.get_pipeline_response)
     return helper.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
@@ -341,7 +347,8 @@ def create_policy(client, resource_group_name, vault_name, name, policy):
 
 
 def unregister_afs_container(cmd, client, vault_name, resource_group_name, container_name):
-    result = client.unregister(vault_name, resource_group_name, fabric_name, container_name, raw=True)
+    result = client.unregister(vault_name, resource_group_name, fabric_name, container_name,
+                               cls=helper.get_pipeline_response)
     return helper.track_register_operation(cmd.cli_ctx, result, vault_name, resource_group_name, container_name)
 
 

@@ -11,10 +11,10 @@ import os
 
 
 id_sql = '/subscriptions/da364f0f-307b-41c9-9d47-b7413ec45535/resourceGroups/pstestwlRG1bca8/providers/Microsoft.Compute/virtualMachines/pstestwlvm1bca8'
-item_id_sql = '/Subscriptions/da364f0f-307b-41c9-9d47-b7413ec45535/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;pstestwlrg1bca8;pstestwlvm1bca8/protectedItems/sqldatabase;mssqlserver;testdb'
+item_id_sql = '/Subscriptions/da364f0f-307b-41c9-9d47-b7413ec45535/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/sql-clitest-vault/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;pstestwlrg1bca8;pstestwlvm1bca8/protectedItems/sqldatabase;mssqlserver;testdb'
 sub_sql = 'da364f0f-307b-41c9-9d47-b7413ec45535'
 rg_sql = 'pstestwlRG1bca8'
-vault_sql = 'pstestwlRSV1bca8'
+vault_sql = 'sql-clitest-vault'
 container_sql = 'VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8'
 container_friendly_sql = 'pstestwlvm1bca8'
 item_auto_sql = 'SQLInstance;mssqlserver'
@@ -27,11 +27,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     # SQL workload tests start here
     # Please make sure you have the following setup in place before running the tests -
 
-    # For the tests using pstestwlvm1bca8 and pstestwlRSV1bca8 -
-    # Each test will register the container at the start and unregister at the end of the test
-    # Make sure that the container is not already registered since the start of the test
-
-    # For the tests using PSTestVM664243 and hiagaSrcVault -
+    # For the tests using pstestwlvm1bca8 and sql-clitest-vault -
     # Each test will register the container at the start and unregister at the end of the test
     # Make sure that the container is not already registered since the start of the test
 
@@ -40,13 +36,13 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     def test_backup_wl_sql_container(self):
 
         self.kwargs.update({
-            'vault': "hiagaSrcVault",
-            'name': "VMAppContainer;Compute;hiagaSrcRG2;PSTestVM664243",
-            'fname': "PSTestVM664243",
-            'rg': "hiagaSrcRG",
+            'vault': vault_sql,
+            'name': container_sql,
+            'fname': container_friendly_sql,
+            'rg': rg_sql,
             'wt': 'MSSQL',
             'sub': sub_sql,
-            'id': "/subscriptions/da364f0f-307b-41c9-9d47-b7413ec45535/resourceGroups/HIAGASRCRG2/providers/Microsoft.Compute/virtualMachines/PSTestVM664243"
+            'id': id_sql
         })
 
         self.cmd('backup container register -v {vault} -g {rg} --backup-management-type AzureWorkload --workload-type {wt} --resource-id {id} ')
@@ -271,7 +267,16 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         self.cmd('backup protection auto-enable-for-azurewl -v {vault} -g {rg} -p {policy} --protectable-item-name {item} --protectable-item-type {pit} --server-name {fname} --workload-type {wt}')
 
-        self.cmd('backup protection auto-disable-for-azurewl -v {vault} -g {rg} --item-name {item}')
+        protectable_item_json = self.cmd('backup protectable-item show -v {vault} -g {rg} -n {item} --protectable-item-type {pit} --server-name {fname} --workload-type {wt}', checks=[
+            self.check("properties.isAutoProtected", True)]).get_output_in_json()
+
+        self.assertIn(self.kwargs['policy'], protectable_item_json['properties']['autoProtectionPolicy'])
+
+        self.cmd('backup protection auto-disable-for-azurewl -v {vault} -g {rg} --protectable-item-name {item} --protectable-item-type {pit} --server-name {fname} --workload-type {wt}')
+
+        self.cmd('backup protectable-item show -v {vault} -g {rg} -n {item} --protectable-item-type {pit} --server-name {fname} --workload-type {wt}', checks=[
+            self.check("properties.isAutoProtected", False),
+            self.check("properties.autoProtectionPolicy", None)])
 
         self.cmd('backup container unregister -v {vault} -g {rg} -c {name} -y')
 
@@ -400,10 +405,11 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['container1'] = self.cmd('backup container show -n {name} -v {vault} -g {rg} --backup-management-type AzureWorkload --query name').get_output_in_json()
 
         self.kwargs['backup_job'] = self.cmd('backup protection backup-now -v {vault} -g {rg} -i {item} -c {name} --backup-type Full --enable-compression false', checks=[
-            self.check("properties.operation", "Backup (Full)"),
             self.check("properties.status", "InProgress"),
             self.check("resourceGroup", '{rg}')
         ]).get_output_in_json()
+
+        self.assertIn("Backup", self.kwargs['backup_job']['properties']['operation'])
 
         self.kwargs['job'] = self.kwargs['backup_job']['name']
 
@@ -471,10 +477,11 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['container1'] = self.cmd('backup container show -n {name} -v {vault} -g {rg} --backup-management-type AzureWorkload --query name').get_output_in_json()
 
         self.kwargs['backup_job'] = self.cmd('backup protection backup-now -v {vault} -g {rg} -i {item} -c {name} --backup-type Full --enable-compression false', checks=[
-            self.check("properties.operation", "Backup (Full)"),
             self.check("properties.status", "InProgress"),
             self.check("resourceGroup", '{rg}')
         ]).get_output_in_json()
+
+        self.assertIn("Backup", self.kwargs['backup_job']['properties']['operation'])
 
         self.kwargs['job'] = self.kwargs['backup_job']['name']
 
@@ -493,10 +500,10 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['rp'] = self.kwargs['rp']['name']
 
         self.kwargs['rc'] = json.dumps(self.cmd('backup recoveryconfig show --vault-name {vault} -g {rg} --restore-mode AlternateWorkloadRestore --rp-name {rp} --item-name {item} --container-name {container1} --target-item-name {titem} --target-server-type SQLInstance --target-server-name {fname} --workload-type {wt}').get_output_in_json(), separators=(',', ':'))
-        with open("recoveryconfig.json", "w") as f:
+        with open("recoveryconfig_sql_restore.json", "w") as f:
             f.write(self.kwargs['rc'])
 
-        self.kwargs['backup_job'] = self.cmd('backup restore restore-azurewl --vault-name {vault} -g {rg} --recovery-config recoveryconfig.json', checks=[
+        self.kwargs['backup_job'] = self.cmd('backup restore restore-azurewl --vault-name {vault} -g {rg} --recovery-config recoveryconfig_sql_restore.json', checks=[
             self.check("properties.operation", "Restore"),
             self.check("properties.status", "InProgress"),
             self.check("resourceGroup", '{rg}')
@@ -507,10 +514,10 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup job wait -v {vault} -g {rg} -n {job}')
 
         self.kwargs['rc'] = json.dumps(self.cmd('backup recoveryconfig show --vault-name {vault} -g {rg} --restore-mode OriginalWorkloadRestore --item-name {item} --container-name {container1} --rp-name {rp}').get_output_in_json(), separators=(',', ':'))
-        with open("recoveryconfig.json", "w") as f:
+        with open("recoveryconfig_sql_restore.json", "w") as f:
             f.write(self.kwargs['rc'])
 
-        self.kwargs['backup_job'] = self.cmd('backup restore restore-azurewl --vault-name {vault} -g {rg} --recovery-config recoveryconfig.json', checks=[
+        self.kwargs['backup_job'] = self.cmd('backup restore restore-azurewl --vault-name {vault} -g {rg} --recovery-config recoveryconfig_sql_restore.json', checks=[
             self.check("properties.operation", "Restore"),
             self.check("properties.status", "InProgress"),
             self.check("resourceGroup", '{rg}')
@@ -560,10 +567,11 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['container1'] = self.cmd('backup container show -n {name} -v {vault} -g {rg} --backup-management-type AzureWorkload --query name').get_output_in_json()
 
         self.kwargs['backup_job'] = self.cmd('backup protection backup-now -v {vault} -g {rg} -i {item} -c {name} --backup-type Full --enable-compression false', checks=[
-            self.check("properties.operation", "Backup (Full)"),
             self.check("properties.status", "InProgress"),
             self.check("resourceGroup", '{rg}')
         ]).get_output_in_json()
+
+        self.assertIn("Backup", self.kwargs['backup_job']['properties']['operation'])
 
         self.kwargs['job'] = self.kwargs['backup_job']['name']
 
@@ -580,10 +588,10 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['rp'] = self.kwargs['rp']['name']
 
         self.kwargs['rc'] = json.dumps(self.cmd('backup recoveryconfig show --vault-name {vault} -g {rg} --restore-mode RestoreAsFiles --rp-name {rp} --filepath "C:\" --target-container-name {container1} --item-name {item} --container-name {container1}  --workload-type {wt}').get_output_in_json(), separators=(',', ':'))
-        with open("recoveryconfig.json", "w") as f:
+        with open("recoveryconfig_sql_raf.json", "w") as f:
             f.write(self.kwargs['rc'])
 
-        self.kwargs['backup_job'] = self.cmd('backup restore restore-azurewl --vault-name {vault} -g {rg} --recovery-config recoveryconfig.json', checks=[
+        self.kwargs['backup_job'] = self.cmd('backup restore restore-azurewl --vault-name {vault} -g {rg} --recovery-config recoveryconfig_sql_raf.json', checks=[
             self.check("properties.operation", "Restore"),
             self.check("properties.status", "InProgress"),
             self.check("resourceGroup", '{rg}')
@@ -637,31 +645,31 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         #SQL CRR ALR Restore
         self.kwargs['rc'] = json.dumps(self.cmd('backup recoveryconfig show --vault-name {vault} -g {rg} --restore-mode AlternateWorkloadRestore --rp-name {rp} --item-name {item} --container-name {container1} --target-item-name {titem} --target-server-type SQLInstance --target-server-name {tserver} --target-container-name {tcontainer} --workload-type {wt} --target-vault-name {tvault} --target-resource-group {trg}').get_output_in_json(), separators=(',', ':'))
-        with open("recoveryconfig.json", "w") as f:
+        with open("recoveryconfig_sql_crr.json", "w") as f:
             f.write(self.kwargs['rc'])
 
-        self.kwargs['backup_job'] = self.cmd('backup restore restore-azurewl --vault-name {vault} -g {rg} --recovery-config recoveryconfig.json --use-secondary-region', checks=[
+        self.kwargs['backup_job'] = self.cmd('backup restore restore-azurewl --vault-name {vault} -g {rg} --recovery-config recoveryconfig_sql_crr.json --use-secondary-region', checks=[
             self.check("properties.operation", "CrossRegionRestore"),
             self.check("properties.status", "InProgress")
         ]).get_output_in_json()
 
         self.kwargs['job'] = self.kwargs['backup_job']['name']
 
-        self.cmd('backup job wait -v {vault} -g {rg} -n {job}')
+        self.cmd('backup job wait -v {vault} -g {rg} -n {job} --use-secondary-region')
 
         #SQL CRR RAF Restore
         self.kwargs['rc'] = json.dumps(self.cmd('backup recoveryconfig show --vault-name {vault} -g {rg} --restore-mode restoreasfiles --rp-name {rp} --item-name {item} --container-name {container1} --target-container-name {tcontainer} --workload-type {wt} --target-vault-name {tvault} --target-resource-group {trg} --filepath "C:\"').get_output_in_json(), separators=(',', ':'))
-        with open("recoveryconfig.json", "w") as f:
+        with open("recoveryconfig_sql_crr.json", "w") as f:
             f.write(self.kwargs['rc'])
 
-        self.kwargs['backup_job'] = self.cmd('backup restore restore-azurewl --vault-name {vault} -g {rg} --recovery-config recoveryconfig.json --use-secondary-region', checks=[
+        self.kwargs['backup_job'] = self.cmd('backup restore restore-azurewl --vault-name {vault} -g {rg} --recovery-config recoveryconfig_sql_crr.json --use-secondary-region', checks=[
             self.check("properties.operation", "CrossRegionRestore"),
             self.check("properties.status", "InProgress")
         ]).get_output_in_json()
 
         self.kwargs['job'] = self.kwargs['backup_job']['name']
 
-        self.cmd('backup job wait -v {vault} -g {rg} -n {job}')
+        self.cmd('backup job wait -v {vault} -g {rg} -n {job} --use-secondary-region')
 
     @record_only()
     def test_backup_wl_sql_archive (self):
@@ -715,11 +723,11 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         # # Integrated Restore
         self.kwargs['rc'] = json.dumps(self.cmd('backup recoveryconfig show --vault-name {vault} -g {rg} --restore-mode OriginalWorkloadRestore --item-name {item} --container-name {container} --rp-name {rp_restore}').get_output_in_json(), separators=(',', ':'))
-        with open("recoveryconfig.json", "w") as f:
+        with open("recoveryconfig_sql_archive.json", "w") as f:
             f.write(self.kwargs['rc'])
 
         # # Trigger Restore
-        self.cmd('backup restore restore-azurewl -g {rg} -v {vault} --recovery-config recoveryconfig.json --rehydration-priority High', checks=[
+        self.cmd('backup restore restore-azurewl -g {rg} -v {vault} --recovery-config recoveryconfig_sql_archive.json --rehydration-priority High', checks=[
             self.check("properties.operation", "RestoreWithRehydrate"),
             self.check("properties.status", "InProgress"),
             self.check("resourceGroup", '{rg}')

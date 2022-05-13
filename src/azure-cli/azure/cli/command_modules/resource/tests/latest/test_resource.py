@@ -13,8 +13,8 @@ import unittest
 from pathlib import Path
 
 from azure.cli.core.parser import IncorrectUsageError, InvalidArgumentValueError
-from azure_devtools.scenario_tests.const import MOCKED_SUBSCRIPTION_ID
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests.const import MOCKED_SUBSCRIPTION_ID
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer,
                                create_random_name, live_only, record_only)
 from azure.cli.testsdk.constants import AUX_SUBSCRIPTION, AUX_TENANT
@@ -43,6 +43,10 @@ class ResourceGroupScenarioTest(ScenarioTest):
             self.check('tags', {'a': 'b', 'c': ''})
         ])
         self.cmd('group list --tag a=b', checks=[
+            self.check('[0].name', '{rg}'),
+            self.check('[0].tags', {'a': 'b', 'c': ''})
+        ])
+        self.cmd('group list --tag a', checks=[
             self.check('[0].name', '{rg}'),
             self.check('[0].tags', {'a': 'b', 'c': ''})
         ])
@@ -723,7 +727,11 @@ class ProviderRegistrationTest(ScenarioTest):
 
 class ProviderOperationTest(ScenarioTest):
 
+    @AllowLargeResponse(size_kb=99999)
     def test_provider_operation(self):
+        result = self.cmd('provider operation list').get_output_in_json()
+        self.assertGreater(len(result), 0)
+        
         self.cmd('provider operation show --namespace microsoft.compute', checks=[
             self.check('id', '/providers/Microsoft.Authorization/providerOperations/Microsoft.Compute'),
             self.check('type', 'Microsoft.Authorization/providerOperations')
@@ -1231,9 +1239,22 @@ class DeploymentTestAtSubscriptionScope(ScenarioTest):
         self.cmd('deployment sub export -n {dn}', checks=[
         ])
 
-        self.cmd('deployment operation sub list -n {dn}', checks=[
+        operations = self.cmd('deployment operation sub list -n {dn}', checks=[
             self.check('length([])', 5)
+        ]).get_output_in_json()
+
+        self.kwargs.update({
+            'oid1': operations[0]['operationId'],
+            'oid2': operations[1]['operationId'],
+            'oid3': operations[2]['operationId'],
+            'oid4': operations[3]['operationId'],
+            'oid5': operations[4]['operationId']
+        })
+        self.cmd('deployment operation sub show -n {dn} --operation-ids {oid1} {oid2} {oid3} {oid4} {oid5}', checks=[
+            self.check('[].properties.provisioningOperation', '[\'Create\', \'Create\', \'Create\', \'Create\', \'EvaluateDeploymentOutput\']'),
+            self.check('[].properties.provisioningState', '[\'Succeeded\', \'Succeeded\', \'Succeeded\', \'Succeeded\', \'Succeeded\']')
         ])
+        self.cmd('deployment sub delete -n {dn}')
 
         self.cmd('deployment sub create -n {dn2} --location WestUS --template-file "{tf}" --parameters @"{params}" '
                  '--parameters storageAccountName="{storage-account-name}" --no-wait')
@@ -1393,8 +1414,16 @@ class DeploymentTestAtResourceGroup(ScenarioTest):
         self.cmd('deployment group export --resource-group {rg} -n {dn}', checks=[
         ])
 
-        self.cmd('deployment operation group list --resource-group {rg} -n {dn}', checks=[
+        operation_output = self.cmd('deployment operation group list --resource-group {rg} -n {dn}', checks=[
             self.check('length([])', 2)
+        ]).get_output_in_json()
+
+        self.kwargs.update({
+            'operation_id': operation_output[0]['operationId']
+        })
+        self.cmd('deployment operation group show --resource-group {rg} -n {dn} --operation-id {operation_id}', checks=[
+            self.check('[0].properties.provisioningOperation', 'Create'),
+            self.check('[0].properties.provisioningState', 'Succeeded')
         ])
 
         self.cmd('deployment group create --resource-group {rg} -n {dn2} --template-file "{tf}" --parameters @"{params}" --no-wait')
@@ -1449,9 +1478,20 @@ class DeploymentTestAtManagementGroup(ScenarioTest):
         self.cmd('deployment mg export --management-group-id {mg} -n {dn}', checks=[
         ])
 
-        self.cmd('deployment operation mg list --management-group-id {mg} -n {dn}', checks=[
+        operation_output = self.cmd('deployment operation mg list --management-group-id {mg} -n {dn}', checks=[
             self.check('length([])', 4)
+        ]).get_output_in_json()
+
+        self.kwargs.update({
+            'oid1': operation_output[0]['operationId'],
+            'oid2': operation_output[1]['operationId'],
+            'oid3': operation_output[2]['operationId']
+        })
+        self.cmd('deployment operation mg show --management-group-id {mg} -n {dn} --operation-ids {oid1} {oid2} {oid3}', checks=[
+            self.check('[].properties.provisioningOperation', '[\'Create\', \'Create\', \'Create\']'),
+            self.check('[].properties.provisioningState', '[\'Succeeded\', \'Succeeded\', \'Succeeded\']')
         ])
+        self.cmd('deployment mg delete --management-group-id {mg} -n {dn}')
 
         self.cmd('deployment mg create --management-group-id {mg} --location WestUS -n {dn2} --template-file "{tf}" '
                  '--parameters @"{params}" --parameters targetMG="{mg}" --parameters nestedRG="{sub-rg}" '
@@ -1505,13 +1545,27 @@ class DeploymentTestAtTenantScope(ScenarioTest):
         self.cmd('deployment tenant export -n {dn}', checks=[
         ])
 
-        self.cmd('deployment operation tenant list -n {dn}', checks=[
+        operations = self.cmd('deployment operation tenant list -n {dn}', checks=[
             self.check('length([])', 4)
+        ]).get_output_in_json()
+
+        self.kwargs.update({
+            'oid1': operations[0]['operationId'],
+            'oid2': operations[1]['operationId'],
+            'oid3': operations[2]['operationId'],
+            'oid4': operations[3]['operationId'],
+        })
+        self.cmd('deployment operation tenant show -n {dn} --operation-ids {oid1} {oid2} {oid3} {oid4}', checks=[
+            self.check('[].properties.provisioningOperation', '[\'Create\', \'Create\', \'Create\', \'EvaluateDeploymentOutput\']'),
+            self.check('[].properties.provisioningState', '[\'Succeeded\', \'Succeeded\', \'Succeeded\', \'Succeeded\']')
         ])
+        self.cmd('deployment tenant delete -n {dn}')
 
         self.cmd('deployment tenant create --location WestUS -n {dn2} --template-file "{tf}" --parameters targetMG="{mg}" --no-wait')
 
         self.cmd('deployment tenant cancel -n {dn2}')
+
+        self.cmd('deployment tenant wait -n {dn2} --custom "provisioningState==Canceled"')
 
         self.cmd('deployment tenant show -n {dn2}', checks=[
             self.check('properties.provisioningState', 'Canceled')
@@ -2250,7 +2304,7 @@ class PolicyScenarioTest(ScenarioTest):
         self.cmd('policy assignment delete -n {pan} -g {rg}')
         self.cmd('policy assignment list --disable-scope-strict-match', checks=self.check("length([?name=='{pan}'])", 0))
 
-    def applyPolicyAtScope(self, scope, policyId, enforcementMode='Default'):
+    def applyPolicyAtScope(self, scope, policyId, enforcementMode='Default', atMGLevel=False):
         # create a policy assignment at the given scope
         self.kwargs.update({
             'pol': policyId,
@@ -2260,11 +2314,19 @@ class PolicyScenarioTest(ScenarioTest):
             'em': enforcementMode
         })
 
-        self.cmd('policy assignment create --policy {pol} -n {pan} --display-name {padn} --params "{params}" --scope {scope} --enforcement-mode {em} --not-scopes "{scope}/providers/Microsoft.Compute/virtualMachines/myVm"', checks=[
-            self.check('name', '{pan}'),
-            self.check('displayName', '{padn}'),
-            self.check('enforcementMode', '{em}')
-        ])
+        # Not set not scope for MG level assignment
+        if atMGLevel:
+            self.cmd('policy assignment create --policy {pol} -n {pan} --display-name {padn} --params "{params}" --scope {scope} --enforcement-mode {em}', checks=[
+                self.check('name', '{pan}'),
+                self.check('displayName', '{padn}'),
+                self.check('enforcementMode', '{em}')
+            ])
+        else:
+            self.cmd('policy assignment create --policy {pol} -n {pan} --display-name {padn} --params "{params}" --scope {scope} --enforcement-mode {em} --not-scopes "{scope}/providers/Microsoft.Compute/virtualMachines/myVm"', checks=[
+                self.check('name', '{pan}'),
+                self.check('displayName', '{padn}'),
+                self.check('enforcementMode', '{em}')
+            ])
 
         # ensure the policy assignment shows up in the list result
         self.cmd('policy assignment list --scope {scope}', checks=self.check("length([?name=='{pan}'])", 1))
@@ -2341,7 +2403,7 @@ class PolicyScenarioTest(ScenarioTest):
         if management_group:
             scope = '/providers/Microsoft.Management/managementGroups/{mg}'.format(mg=management_group)
             policy = '{scope}/providers/Microsoft.Authorization/policyDefinitions/{pn}'.format(pn=self.kwargs['pn'], scope=scope)
-            self.applyPolicyAtScope(scope, policy)
+            self.applyPolicyAtScope(scope, policy, atMGLevel=True)
         elif subscription:
             policy = '/subscriptions/{sub}/providers/Microsoft.Authorization/policyDefinitions/{pn}'.format(sub=subscription, pn=self.kwargs['pn'])
             self.applyPolicyAtScope('/subscriptions/{sub}'.format(sub=subscription), policy, 'DoNotEnforce')
@@ -2367,7 +2429,7 @@ class PolicyScenarioTest(ScenarioTest):
             'dpn': self.create_random_name('azure-cli-test-data-policy', 30),
             'dpdn': self.create_random_name('test_data_policy', 20),
             'dp_desc': 'desc_for_test_data_policy_123',
-            'dp_mode': 'Microsoft.DataCatalog.Data',
+            'dp_mode': 'Microsoft.KeyVault.Data',
             'psn': self.create_random_name('azure-cli-test-policyset', 30),
             'psdn': self.create_random_name('test_policyset', 20),
             'ps_desc': 'desc_for_test_policyset_123',
@@ -2619,6 +2681,190 @@ class PolicyScenarioTest(ScenarioTest):
 
         self.cmd('policy assignment delete -n {pan} -g {rg}')
 
+    @ResourceGroupPreparer(name_prefix='cli_test_policy_identity_systemassigned')
+    @AllowLargeResponse(8192)
+    def test_resource_policy_identity_systemassigned(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'pan': self.create_random_name('azurecli-test-policy-assignment', 40),
+            'bip': '06a78e20-9358-41c9-923c-fb736d382a4d',
+            'sub': self.get_subscription_id(),
+            'location': resource_group_location,
+            'em': 'DoNotEnforce'
+        })
+
+        # create a policy assignment with managed identity using a built in policy definition
+        assignmentIdentity = self.cmd('policy assignment create --policy {bip} -n {pan} -g {rg} --location {location} --mi-system-assigned --enforcement-mode {em}', checks=[
+            self.check('name', '{pan}'),
+            self.check('location', '{location}'),
+            self.check('identity.type', 'SystemAssigned'),
+            self.exists('identity.principalId'),
+            self.exists('identity.tenantId')
+        ]).get_output_in_json()['identity']
+
+        # ensure managed identity details are retrievable directly through 'policy assignment identity' commands
+        self.cmd('policy assignment identity show -n {pan} -g {rg}', checks=[
+            self.check('type', assignmentIdentity['type']),
+            self.check('principalId', assignmentIdentity['principalId']),
+            self.check('tenantId', assignmentIdentity['tenantId'])
+        ])
+
+        # ensure the managed identity is not touched during update
+        self.cmd('policy assignment update -n {pan} -g {rg} --description "New description"', checks=[
+            self.check('description', 'New description'),
+            self.check('identity.type', 'SystemAssigned'),
+            self.exists('identity.principalId'),
+            self.exists('identity.tenantId')
+        ])
+
+        # remove the managed identity and ensure it is removed when retrieving the policy assignment
+        self.cmd('policy assignment identity remove -n {pan} -g {rg}', checks=[
+            self.check('type', 'None')
+        ])
+        self.cmd('policy assignment show -n {pan} -g {rg}', checks=[
+            self.check('name', '{pan}'),
+            self.check('identity.type', 'None')
+        ])
+
+        # add an identity using 'identity assign'
+        self.cmd('policy assignment identity assign --system-assigned -n {pan} -g {rg}', checks=[
+            self.check('type', 'SystemAssigned'),
+            self.exists('principalId'),
+            self.exists('tenantId')
+        ])
+        self.cmd('policy assignment show -n {pan} -g {rg}', checks=[
+            self.check('name', '{pan}'),
+            self.check('identity.type', 'SystemAssigned'),
+            self.exists('identity.principalId'),
+            self.exists('identity.tenantId')
+        ])
+
+        self.cmd('policy assignment identity remove -n {pan} -g {rg}', checks=[
+            self.check('type', 'None')
+        ])
+
+        # create a role assignment for the identity using --mi-system-assigned
+        self.kwargs.update({
+            'idScope': '/subscriptions/{sub}/resourceGroups/{rg}'.format(**self.kwargs),
+            'idRole': 'Reader'
+        })
+        with mock.patch('azure.cli.core.commands.arm._gen_guid', side_effect=self.create_guid):
+            assignmentIdentity = self.cmd('policy assignment create --policy {bip} -n {pan} -g {rg} --location {location} --mi-system-assigned --identity-scope {idScope} --role {idRole}', checks=[
+                self.check('name', '{pan}'),
+                self.check('location', '{location}'),
+                self.check('identity.type', 'SystemAssigned'),
+                self.exists('identity.principalId'),
+                self.exists('identity.tenantId')
+            ]).get_output_in_json()['identity']
+
+        self.kwargs['principalId'] = assignmentIdentity['principalId']
+        self.cmd('role assignment list --resource-group {rg} --role {idRole}', checks=[
+            self.check("length([?principalId == '{principalId}'])", 1),
+            self.check("[?principalId == '{principalId}'].roleDefinitionName | [0]", '{idRole}')
+        ])
+        self.cmd('policy assignment identity remove -n {pan} -g {rg}', checks=[
+            self.check('type', 'None')
+        ])
+
+        # create a role assignment for the identity using 'identity assign'
+        with mock.patch('azure.cli.core.commands.arm._gen_guid', side_effect=self.create_guid):
+            assignmentIdentity = self.cmd('policy assignment identity assign -n {pan} -g {rg} --system-assigned --identity-scope {idScope} --role {idRole}', checks=[
+                self.check('type', 'SystemAssigned'),
+                self.exists('principalId'),
+                self.exists('tenantId')
+            ]).get_output_in_json()
+
+        self.kwargs['principalId'] = assignmentIdentity['principalId']
+        self.cmd('role assignment list --resource-group {rg} --role {idRole}', checks=[
+            self.check("length([?principalId == '{principalId}'])", 1),
+            self.check("[?principalId == '{principalId}'].roleDefinitionName | [0]", '{idRole}')
+        ])
+
+        self.cmd('policy assignment delete -n {pan} -g {rg}')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_policy_identity_userassigned')
+    @AllowLargeResponse(8192)
+    def test_resource_policy_identity_userassigned(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'pan': self.create_random_name('azurecli-test-assignment', 40),
+            'bip': '06a78e20-9358-41c9-923c-fb736d382a4d',
+            'sub': self.get_subscription_id(),
+            'location': resource_group_location,
+            'em': 'DoNotEnforce',
+            'msi': 'policyCliTestMsi'
+        })
+
+        # create a managed identity
+        msi_result = self.cmd('identity create -g {rg} -n {msi} --tags tag1=d1', checks=[
+            self.check('name', '{msi}')]).get_output_in_json()
+        self.kwargs['fullQualifiedMsi'] = msi_result['id']
+
+        # create a policy assignment with user assigned managed identity using a built in policy definition
+        assignmentIdentity = self.cmd('policy assignment create --policy {bip} -n {pan} -g {rg} --location {location} --mi-user-assigned {msi} --enforcement-mode {em}', checks=[
+            self.check('name', '{pan}'),
+            self.check('location', '{location}'),
+            self.check('identity.type', 'UserAssigned'),
+            self.exists('identity.userAssignedIdentities')
+        ]).get_output_in_json()['identity']
+        msis = [x.lower() for x in assignmentIdentity['userAssignedIdentities'].keys()]
+        self.assertEqual(msis[0], msi_result['id'].lower())
+
+        # ensure managed identity details are retrievable directly through 'policy assignment identity' commands
+        assignmentIdentity = self.cmd('policy assignment identity show -n {pan} -g {rg}', checks=[
+            self.check('type', assignmentIdentity['type']),
+            self.exists('userAssignedIdentities')
+        ]).get_output_in_json()
+        msis = [x.lower() for x in assignmentIdentity['userAssignedIdentities'].keys()]
+        self.assertEqual(msis[0], msi_result['id'].lower())
+
+        # ensure the managed identity is not touched during update
+        self.cmd('policy assignment update -n {pan} -g {rg} --description "New description"', checks=[
+            self.check('description', 'New description'),
+            self.check('identity.type', 'UserAssigned'),
+            self.exists('identity.userAssignedIdentities')
+        ])
+
+        # remove the managed identity and ensure it is removed when retrieving the policy assignment
+        self.cmd('policy assignment identity remove -n {pan} -g {rg}', checks=[
+            self.check('type', 'None')
+        ])
+        self.cmd('policy assignment show -n {pan} -g {rg}', checks=[
+            self.check('name', '{pan}'),
+            self.check('identity.type', 'None')
+        ])
+
+        # add an identity using 'identity assign'
+        assignmentIdentity = self.cmd('policy assignment identity assign --user-assigned {fullQualifiedMsi} -n {pan} -g {rg}', checks=[
+            self.check('type', 'UserAssigned'),
+            self.exists('userAssignedIdentities')
+        ]).get_output_in_json()
+        msis = [x.lower() for x in assignmentIdentity['userAssignedIdentities'].keys()]
+        self.assertEqual(msis[0], msi_result['id'].lower())
+
+        assignmentIdentity = self.cmd('policy assignment show -n {pan} -g {rg}', checks=[
+            self.check('name', '{pan}'),
+            self.check('identity.type', 'UserAssigned'),
+            self.exists('identity.userAssignedIdentities')
+        ]).get_output_in_json()['identity']
+        msis = [x.lower() for x in assignmentIdentity['userAssignedIdentities'].keys()]
+        self.assertEqual(msis[0], msi_result['id'].lower())
+
+        # replace an identity with system assigned msi
+        self.cmd('policy assignment identity assign --system-assigned -n {pan} -g {rg}', checks=[
+            self.check('type', 'SystemAssigned'),
+            self.exists('principalId'),
+            self.exists('tenantId')
+        ])
+        self.cmd('policy assignment show -n {pan} -g {rg}', checks=[
+            self.check('name', '{pan}'),
+            self.check('identity.type', 'SystemAssigned'),
+            self.exists('identity.principalId'),
+            self.exists('identity.tenantId')
+        ])
+        self.cmd('policy assignment identity remove -n {pan} -g {rg}', checks=[
+            self.check('type', 'None')
+        ])
+        self.cmd('policy assignment delete -n {pan} -g {rg}')
+
     @ResourceGroupPreparer(name_prefix='cli_test_policy_ncm')
     @AllowLargeResponse(8192)
     def test_resource_policy_non_compliance_messages(self, resource_group, resource_group_location):
@@ -2850,7 +3096,8 @@ class PolicyScenarioTest(ScenarioTest):
     def test_show_built_in_policy(self):
         # get the list of builtins, then retrieve each via show and validate the results match
         results = self.cmd('policy definition list --query "[?policyType==\'BuiltIn\']"').get_output_in_json()
-        for i, result in enumerate(results):
+        if results:
+            result = results[0]
             self.kwargs['pn'] = result['name']
             self.kwargs['dn'] = result['displayName']
             self.kwargs['desc'] = result['description']
@@ -2908,7 +3155,7 @@ class PolicyScenarioTest(ScenarioTest):
             'dpn': self.create_random_name('clitest-dp', 30),
             'dpdn': self.create_random_name('clitest_dp', 20),
             'dp_desc': 'desc_for_clitest_data_policy_123',
-            'dp_mode': 'Microsoft.DataCatalog.Data',
+            'dp_mode': 'Microsoft.KeyVault.Data',
             'psn': self.create_random_name('clitest', 30),
             'psdn': self.create_random_name('clitest', 20),
             'pan': self.create_random_name('clitest', 24),
@@ -3674,7 +3921,7 @@ class ResourceGroupLocalContextScenarioTest(LocalContextScenarioTest):
             self.check('name', self.kwargs['group1']),
             self.check('location', self.kwargs['location'])
         ])
-        with self.assertRaisesRegexp(SystemExit, '2'):
+        with self.assertRaisesRegex(SystemExit, '2'):
             self.cmd('group delete')
         self.cmd('group delete -n {group1} -y')
         self.cmd('group create -n {group2}', checks=[
@@ -3693,14 +3940,68 @@ class BicepScenarioTest(ScenarioTest):
         ])
 
 
-class DeploymentWithBicepScenarioTest(LiveScenarioTest):
+# Because don't want to record bicep cli binary
+class BicepBuildTest(LiveScenarioTest):
+    
+    def test_bicep_build_decompile(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        tf = os.path.join(curr_dir, 'storage_account_deploy.bicep').replace('\\', '\\\\')
+        build_path = os.path.join(curr_dir, 'test.json').replace('\\', '\\\\')
+        decompile_path = os.path.join(curr_dir, 'test.bicep').replace('\\', '\\\\')
+        self.kwargs.update({
+            'tf': tf,
+            'build_path': build_path,
+            'decompile_path': decompile_path
+        })
+
+        self.cmd('az bicep build -f {tf} --outfile {build_path}')
+        self.cmd('az bicep decompile -f {build_path}')
+
+        if os.path.exists(build_path):
+            os.remove(build_path)
+        if os.path.exists(decompile_path):
+            os.remove(decompile_path)
+
+
+class BicepInstallationTest(LiveScenarioTest):
     def setup(self):
-        super.setup()
-        self._remove_bicep_cli()
+        super().setup()
+        self.cmd('az bicep uninstall')
 
     def tearDown(self):
         super().tearDown()
-        self._remove_bicep_cli()
+        self.cmd('az bicep uninstall')
+        
+    def test_install_and_upgrade(self):
+        self.cmd('az bicep install')
+        self.cmd('az bicep version')
+        
+        self.cmd('az bicep uninstall')
+        
+        self.cmd('az bicep install --target-platform win-x64')
+        self.cmd('az bicep version')
+
+        self.cmd('az bicep uninstall')
+
+        self.cmd('az bicep install --version v0.4.63')
+        self.cmd('az bicep upgrade')
+        self.cmd('az bicep version')
+        
+        self.cmd('az bicep uninstall')
+        
+        self.cmd('az bicep install --version v0.4.63')
+        self.cmd('az bicep upgrade -t win-x64')
+        self.cmd('az bicep version')
+
+
+class DeploymentWithBicepScenarioTest(LiveScenarioTest):
+    def setup(self):
+        super.setup()
+        self.cmd('az bicep uninstall')
+
+    def tearDown(self):
+        super().tearDown()
+        self.cmd('az bicep uninstall')
 
     @ResourceGroupPreparer(name_prefix='cli_test_deployment_with_bicep')
     def test_resource_group_level_deployment_with_bicep(self):
@@ -3804,18 +4105,190 @@ class DeploymentWithBicepScenarioTest(LiveScenarioTest):
         self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', '')
         self.cmd('ts delete --template-spec {template_spec_id} --yes')
 
-    def _remove_bicep_cli(self):
-        bicep_cli_path = self._get_bicep_cli_path()
-        if os.path.isfile(bicep_cli_path):
-            os.remove(bicep_cli_path)
 
-    def _get_bicep_cli_path(self):
-        installation_folder = os.path.join(str(Path.home()), ".azure", "bin")
+class ResourceManagementPrivateLinkTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_resourcemanager_privatelink_get', location='westus')
+    def test_get_resourcemanagementprivatelink(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'loc': resource_group_location,
+            'n': self.create_random_name('privatelink', 30)
+        })
+        self.cmd('resourcemanagement private-link create -g {rg} -n {n} -l {loc}')
+        self.cmd('resourcemanagement private-link show -g {rg} -n {n}', checks=[
+            self.check('name', '{n}'),
+            self.check('location', '{loc}')
+        ])
+        self.cmd('resourcemanagement private-link delete -g {rg} -n {n} --yes', checks=self.is_empty())
 
-        if platform.system() == "Windows":
-            return os.path.join(installation_folder, "bicep.exe")
-        return os.path.join(installation_folder, "bicep")
+    @ResourceGroupPreparer(name_prefix='cli_test_resourcemanager_privatelink_create', location='westus')
+    def test_create_resourcemanagementprivatelink(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'loc': resource_group_location,
+            'n': self.create_random_name('privatelink', 30)
+        })
+        self.cmd('resourcemanagement private-link create -g {rg} -n {n} -l {loc}', checks=[
+            self.check('name', '{n}'),
+            self.check('location', '{loc}')
+        ])
+        self.cmd('resourcemanagement private-link delete -g {rg} -n {n} --yes', checks=self.is_empty())
 
+    @ResourceGroupPreparer(name_prefix='cli_test_resourcemanager_privatelink_delete', location='westus')
+    def test_delete_resourcemanagementprivatelink(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'loc': resource_group_location,
+            'n': self.create_random_name('privatelink', 30)
+        })
+        self.cmd('resourcemanagement private-link create -g {rg} -n {n} -l {loc}', checks=[
+            self.check('name', '{n}'),
+            self.check('location', '{loc}')
+        ])
+        self.cmd('resourcemanagement private-link delete -g {rg} -n {n} --yes', checks=self.is_empty())
+
+    @ResourceGroupPreparer(name_prefix='cli_test_resourcemanager_privatelink_list', location='westus')
+    def test_list_resourcemanagementprivatelink(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'loc': resource_group_location,
+            'name1': self.create_random_name('privatelink', 30),
+            'name2': self.create_random_name('privatelink', 30)
+        })
+        self.cmd('resourcemanagement private-link create -g {rg} -n {name1} -l {loc}')
+        self.cmd('resourcemanagement private-link create -g {rg} -n {name2} -l {loc}')
+        self.cmd('resourcemanagement private-link list -g {rg}', checks=[
+            self.check('value[0].name', '{name1}'),
+            self.check('value[1].name', '{name2}'),
+            self.check('value[0].location', '{loc}'),
+            self.check('value[1].location', '{loc}')
+        ])
+        self.cmd('resourcemanagement private-link delete -g {rg} -n {name1} --yes', checks=self.is_empty())
+        self.cmd('resourcemanagement private-link delete -g {rg} -n {name2} --yes', checks=self.is_empty())
+
+class PrivateLinkAssociationTest(ScenarioTest):    
+
+    @ResourceGroupPreparer(name_prefix='cli_test_resourcemanager_privatelink_get', location='westus')
+    def test_get_privatelinkassociation(self, resource_group, resource_group_location):
+        account = self.cmd("account show").get_output_in_json()
+        tenant_id = account["tenantId"]
+        self.kwargs.update({
+            'loc': resource_group_location,
+            'n': self.create_random_name('privatelink', 30),
+            'mg': tenant_id,
+            'pla': self.create_guid(),
+            'sub': self.get_subscription_id()
+        })
+
+        self.cmd('resourcemanagement private-link create -g {rg} -n {n} -l {loc}', checks=[
+            self.check('name', '{n}'),
+            self.check('location', '{loc}')
+        ])            
+        self.kwargs['pl'] = '/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Authorization/resourceManagementPrivateLinks/{n}'.format(
+            **self.kwargs)
+
+
+        self.cmd('private-link association create -m {mg} -n {pla} --privatelink {pl} --public-network-access enabled', checks=[])
+        
+        self.cmd('private-link association show -m {mg} -n {pla}', checks=[
+            self.check('name', '{pla}'),
+            self.check('properties.publicNetworkAccess', 'Enabled'),
+            self.check('properties.privateLink', '{pl}')
+        ])
+
+        # clean
+        self.cmd('resourcemanagement private-link delete -g {rg} -n {n} --yes', checks=self.is_empty())
+        self.cmd('private-link association delete -m {mg} -n {pla} --yes', self.is_empty())
+
+
+    @ResourceGroupPreparer(name_prefix='cli_test_resourcemanager_privatelink_create', location='westus')
+    def test_create_privatelinkassociation(self, resource_group, resource_group_location):
+        account = self.cmd("account show").get_output_in_json()
+        tenant_id = account["tenantId"]
+        self.kwargs.update({
+            'loc': resource_group_location,
+            'n': self.create_random_name('privatelink', 30),
+            'mg': tenant_id,
+            'pla': self.create_guid(),
+            'sub': self.get_subscription_id()
+        })
+
+        self.cmd('resourcemanagement private-link create -g {rg} -n {n} -l {loc}', checks=[
+            self.check('name', '{n}'),
+            self.check('location', '{loc}')
+        ])            
+        self.kwargs['pl'] = '/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Authorization/resourceManagementPrivateLinks/{n}'.format(
+            **self.kwargs)
+
+        self.cmd('private-link association create -m {mg} -n {pla} --privatelink {pl} --public-network-access enabled', checks=[
+            self.check('name', '{pla}'),
+            self.check('properties.publicNetworkAccess', 'Enabled'),
+            self.check('properties.privateLink', '{pl}')
+        ])
+
+
+        # clean
+        self.cmd('resourcemanagement private-link delete -g {rg} -n {n} --yes', checks=self.is_empty())
+        self.cmd('private-link association delete -m {mg} -n {pla} --yes', self.is_empty())
+
+    @ResourceGroupPreparer(name_prefix='cli_test_resourcemanager_privatelink_delete', location='westus')
+    def test_delete_privatelinkassociation(self, resource_group, resource_group_location):
+        account = self.cmd("account show").get_output_in_json()
+        tenant_id = account["tenantId"]
+        self.kwargs.update({
+            'loc': resource_group_location,
+            'n': self.create_random_name('privatelink', 30),
+            'mg': tenant_id,
+            'pla': self.create_guid(),
+            'sub': self.get_subscription_id()
+        })
+
+        self.cmd('resourcemanagement private-link create -g {rg} -n {n} -l {loc}', checks=[
+            self.check('name', '{n}'),
+            self.check('location', '{loc}')
+        ])            
+        self.kwargs['pl'] = '/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Authorization/resourceManagementPrivateLinks/{n}'.format(
+            **self.kwargs)
+
+
+        self.cmd('private-link association create -m {mg} -n {pla} --privatelink {pl} --public-network-access enabled', checks=[
+            self.check('name', '{pla}'),
+            self.check('properties.publicNetworkAccess', 'Enabled'),
+            self.check('properties.privateLink', '{pl}')
+        ])
+
+        self.cmd('resourcemanagement private-link delete -g {rg} -n {n} --yes', checks=self.is_empty())
+
+        # clean
+        self.cmd('private-link association delete -m {mg} -n {pla} --yes', self.is_empty())
+   
+    @ResourceGroupPreparer(name_prefix='cli_test_resourcemanager_privatelink_list', location='westus')
+    def test_list_privatelinkassociation(self, resource_group, resource_group_location):
+        account = self.cmd("account show").get_output_in_json()
+        tenant_id = account["tenantId"]
+        self.kwargs.update({
+            'loc': resource_group_location,
+            'n': self.create_random_name('privatelink', 30),
+            'mg': tenant_id,
+            'pla': self.create_guid(),
+            'sub': self.get_subscription_id()
+        })
+
+        self.cmd('resourcemanagement private-link create -g {rg} -n {n} -l {loc}', checks=[
+            self.check('name', '{n}'),
+            self.check('location', '{loc}')
+        ])            
+        self.kwargs['pl'] = '/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Authorization/resourceManagementPrivateLinks/{n}'.format(
+            **self.kwargs)
+
+        self.cmd('private-link association create -m {mg} -n {pla} --privatelink {pl} --public-network-access enabled', checks=[])
+        
+        self.cmd('private-link association list -m {mg}', checks=[
+            self.check('value[5].name', '{pla}'),
+            self.check('value[5].properties.publicNetworkAccess', 'Enabled'),
+            self.check('value[5].properties.privateLink', '{pl}')
+        ])
+
+
+        # clean
+        self.cmd('resourcemanagement private-link delete -g {rg} -n {n} --yes', checks=self.is_empty())
+        self.cmd('private-link association delete -m {mg} -n {pla} --yes', self.is_empty())
 
 if __name__ == '__main__':
     unittest.main()

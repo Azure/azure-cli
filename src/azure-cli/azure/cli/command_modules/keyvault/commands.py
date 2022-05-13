@@ -14,7 +14,7 @@ from azure.cli.command_modules.keyvault._client_factory import (
 from azure.cli.command_modules.keyvault._transformers import (
     extract_subresource_name, filter_out_managed_resources,
     multi_transformers, transform_key_decryption_output, keep_max_results,
-    transform_key_output)
+    transform_key_output, transform_key_encryption_output, transform_key_random_output)
 
 from azure.cli.command_modules.keyvault._format import transform_secret_list
 
@@ -169,9 +169,6 @@ def load_command_table(self, _):
         g.keyvault_custom('restore', 'restore_key', supports_no_wait=True,
                           doc_string_source=data_entity.operations_docs_tmpl.format('restore_key'))
         g.keyvault_custom('download', 'download_key')
-        g.keyvault_custom('get-policy-template', 'get_policy_template', is_preview=True)
-        g.keyvault_command('encrypt', 'encrypt', is_preview=True)
-        g.keyvault_command('decrypt', 'decrypt', transform=transform_key_decryption_output, is_preview=True)
 
     with self.command_group('keyvault key', data_key_entity.command_type) as g:
         g.keyvault_custom('create', 'create_key', transform=transform_key_output,
@@ -179,6 +176,18 @@ def load_command_table(self, _):
         g.keyvault_command('set-attributes', 'update_key_properties', transform=transform_key_output)
         g.keyvault_command('show', 'get_key', transform=transform_key_output)
         g.keyvault_custom('import', 'import_key', transform=transform_key_output)
+        g.keyvault_custom('get-policy-template', 'get_policy_template', is_preview=True)
+        g.keyvault_custom('encrypt', 'encrypt_key', is_preview=True, transform=transform_key_encryption_output)
+        g.keyvault_custom('decrypt', 'decrypt_key', is_preview=True, transform=transform_key_decryption_output)
+
+    if not is_azure_stack_profile(self):
+        with self.command_group('keyvault key', data_key_entity.command_type) as g:
+            g.keyvault_command('random', 'get_random_bytes', transform=transform_key_random_output)
+            g.keyvault_command('rotate', 'rotate_key', transform=transform_key_output)
+
+        with self.command_group('keyvault key rotation-policy', data_key_entity.command_type) as g:
+            g.keyvault_command('show', 'get_key_rotation_policy', )
+            g.keyvault_custom('update', 'update_key_rotation_policy')
 
     with self.command_group('keyvault secret', data_entity.command_type) as g:
         g.keyvault_command('list', 'get_secrets',

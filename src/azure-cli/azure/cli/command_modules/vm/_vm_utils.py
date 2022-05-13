@@ -123,10 +123,11 @@ def list_sku_info(cli_ctx, location=None):
     return result
 
 
-# pylint: disable=too-many-statements
+# pylint: disable=too-many-statements, too-many-branches
 def normalize_disk_info(image_data_disks=None,
                         data_disk_sizes_gb=None, attach_data_disks=None, storage_sku=None,
-                        os_disk_caching=None, data_disk_cachings=None, size='', ephemeral_os_disk=False,
+                        os_disk_caching=None, data_disk_cachings=None, size='',
+                        ephemeral_os_disk=False, ephemeral_os_disk_placement=None,
                         data_disk_delete_option=None):
     from msrestazure.tools import is_valid_resource_id
     from ._validators import validate_delete_options
@@ -144,7 +145,12 @@ def normalize_disk_info(image_data_disks=None,
     data_disk_sizes_gb = data_disk_sizes_gb or []
     image_data_disks = image_data_disks or []
 
-    data_disk_delete_option = validate_delete_options(attach_data_disks, data_disk_delete_option)
+    if data_disk_delete_option:
+        if attach_data_disks:
+            data_disk_delete_option = validate_delete_options(attach_data_disks, data_disk_delete_option)
+        else:
+            if isinstance(data_disk_delete_option, list) and len(data_disk_delete_option) == 1 and len(data_disk_delete_option[0].split('=')) == 1:  # pylint: disable=line-too-long
+                data_disk_delete_option = data_disk_delete_option[0]
     info['os'] = {}
     # update os diff disk settings
     if ephemeral_os_disk:
@@ -152,6 +158,8 @@ def normalize_disk_info(image_data_disks=None,
         # local os disks require readonly caching, default to ReadOnly if os_disk_caching not specified.
         if not os_disk_caching:
             os_disk_caching = 'ReadOnly'
+        if ephemeral_os_disk_placement:
+            info['os']['diffDiskSettings']['placement'] = ephemeral_os_disk_placement
 
     # add managed image data disks
     for data_disk in image_data_disks:
@@ -178,8 +186,9 @@ def normalize_disk_info(image_data_disks=None,
             'managedDisk': {'storageAccountType': None},
             'createOption': 'empty',
             'diskSizeGB': sizes_copy.pop(0),
-            'deleteOption': data_disk_delete_option if isinstance(data_disk_delete_option, str) else None
         }
+        if isinstance(data_disk_delete_option, str):
+            info[i]['deleteOption'] = data_disk_delete_option
 
     # update storage skus for managed data disks
     if storage_sku is not None:
@@ -207,7 +216,7 @@ def normalize_disk_info(image_data_disks=None,
         }
 
         d = attach_data_disks_copy.pop(0)
-
+        info[i]['name'] = d.split('/')[-1].split('.')[0]
         if is_valid_resource_id(d):
             info[i]['managedDisk'] = {'id': d}
             if data_disk_delete_option:
@@ -215,7 +224,6 @@ def normalize_disk_info(image_data_disks=None,
                     else data_disk_delete_option.get(info[i]['name'], None)
         else:
             info[i]['vhd'] = {'uri': d}
-            info[i]['name'] = d.split('/')[-1].split('.')[0]
             if data_disk_delete_option:
                 info[i]['deleteOption'] = data_disk_delete_option if isinstance(data_disk_delete_option, str) \
                     else data_disk_delete_option.get(info[i]['name'], None)
@@ -389,8 +397,43 @@ def parse_shared_gallery_image_id(image_reference):
     return image_info.group(1), image_info.group(2)
 
 
+def is_community_gallery_image_id(image_reference):
+    if not image_reference:
+        return False
+
+    community_gallery_id_pattern = re.compile(r'^/CommunityGalleries/[^/]*/Images/[^/]*/Versions/.*$', re.IGNORECASE)
+    if community_gallery_id_pattern.match(image_reference):
+        return True
+
+    return False
+
+
+def parse_community_gallery_image_id(image_reference):
+    from azure.cli.core.azclierror import InvalidArgumentValueError
+
+    if not image_reference:
+        raise InvalidArgumentValueError(
+            'Please pass in the community gallery image id through the parameter --image')
+
+    image_info = re.search(r'^/CommunityGalleries/([^/]*)/Images/([^/]*)/Versions/.*$', image_reference, re.IGNORECASE)
+    if not image_info or len(image_info.groups()) < 2:
+        raise InvalidArgumentValueError(
+            'The community gallery image id is invalid. The valid format should be '
+            '"/CommunityGalleries/{gallery_unique_name}/Images/{gallery_image_name}/Versions/{image_version}"')
+
+    # Return the gallery unique name and gallery image name parsed from community gallery image id
+    return image_info.group(1), image_info.group(2)
+
+
 class ArmTemplateBuilder20190401(ArmTemplateBuilder):
 
     def __init__(self):
         super().__init__()
         self.template['$schema'] = 'https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#'
+
+
+def raise_unsupported_error_for_flex_vmss(vmss, error_message):
+    if hasattr(vmss, 'orchestration_mode') and vmss.orchestration_mode \
+            and vmss.orchestration_mode.lower() == 'flexible':
+        from azure.cli.core.azclierror import ArgumentUsageError
+        raise ArgumentUsageError(error_message)

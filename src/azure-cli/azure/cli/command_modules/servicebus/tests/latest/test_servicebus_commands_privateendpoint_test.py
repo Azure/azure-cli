@@ -16,7 +16,7 @@ from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer)
 
 class SBNamespacePrivateEndpointCRUDScenarioTest(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_eh_network')
+    @ResourceGroupPreparer(name_prefix='cli_test_sb_private')
     def test_sb_privateendpoint(self, resource_group):
         from msrestazure.azure_exceptions import CloudError
         self.kwargs.update({

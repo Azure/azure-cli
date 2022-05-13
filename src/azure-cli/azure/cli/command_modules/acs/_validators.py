@@ -4,22 +4,17 @@
 # --------------------------------------------------------------------------------------------
 
 from __future__ import unicode_literals
+
 import os
-import os.path
 import re
-from math import isnan, isclose
 from ipaddress import ip_network
+from math import isclose, isnan
 
-# pylint: disable=no-name-in-module,import-error
-from knack.log import get_logger
-
-from azure.cli.core.profiles import ResourceType
-
+from azure.cli.core import keys
+from azure.cli.core.azclierror import InvalidArgumentValueError
 from azure.cli.core.commands.validators import validate_tag
 from azure.cli.core.util import CLIError
-from azure.cli.core.azclierror import InvalidArgumentValueError
-import azure.cli.core.keys as keys
-
+from knack.log import get_logger
 
 logger = get_logger(__name__)
 
@@ -108,39 +103,6 @@ def validate_k8s_version(namespace):
                            'such as "1.11.8" or "1.12.6"')
 
 
-def validate_cluster_autoscaler_profile(cmd, namespace):
-    """ Validates that cluster autoscaler profile is acceptable by:
-        1. Extracting the key[=value] format to map
-        2. Validating that the key isn't empty and that the key is valid
-        Empty strings pass validation
-    """
-    _extract_cluster_autoscaler_params(namespace)
-    if namespace.cluster_autoscaler_profile is not None:
-        for key in namespace.cluster_autoscaler_profile.keys():
-            _validate_cluster_autoscaler_key(cmd, key)
-
-
-def _validate_cluster_autoscaler_key(cmd, key):
-    if not key:
-        raise CLIError('Empty key specified for cluster-autoscaler-profile')
-    ManagedClusterPropertiesAutoScalerProfile = cmd.get_models('ManagedClusterPropertiesAutoScalerProfile',
-                                                               resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                                               operation_group='managed_clusters')
-    valid_keys = list(k.replace("_", "-") for k, v in ManagedClusterPropertiesAutoScalerProfile._attribute_map.items())  # pylint: disable=protected-access
-    if key not in valid_keys:
-        raise CLIError("'{0}' is an invalid key for cluster-autoscaler-profile. "
-                       "Valid keys are {1}.".format(key, ', '.join(valid_keys)))
-
-
-def _extract_cluster_autoscaler_params(namespace):
-    """ Extracts multiple space-separated cluster autoscaler parameters in key[=value] format """
-    if isinstance(namespace.cluster_autoscaler_profile, list):
-        params_dict = {}
-        for item in namespace.cluster_autoscaler_profile:
-            params_dict.update(validate_tag(item))
-        namespace.cluster_autoscaler_profile = params_dict
-
-
 def validate_nodepool_name(namespace):
     """Validates a nodepool name to be at most 12 characters, alphanumeric only."""
     if namespace.nodepool_name != "":
@@ -185,6 +147,15 @@ def validate_linux_host_name(namespace):
     if not found:
         raise CLIError('--name cannot exceed 63 characters and can only contain '
                        'letters, numbers, or dashes (-).')
+
+
+def validate_snapshot_name(namespace):
+    """Validates a nodepool snapshot name to be alphanumeric and dashes."""
+    rfc1123_regex = re.compile(r'^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])(\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9]))*$')  # pylint:disable=line-too-long
+    found = rfc1123_regex.findall(namespace.snapshot_name)
+    if not found:
+        raise InvalidArgumentValueError('--name cannot exceed 63 characters and can only contain '
+                                        'letters, numbers, or dashes (-).')
 
 
 def validate_vm_set_type(namespace):
@@ -236,6 +207,20 @@ def validate_load_balancer_idle_timeout(namespace):
     if namespace.load_balancer_idle_timeout is not None:
         if namespace.load_balancer_idle_timeout < 4 or namespace.load_balancer_idle_timeout > 100:
             raise CLIError("--load-balancer-idle-timeout must be in the range [4,100]")
+
+
+def validate_nat_gateway_managed_outbound_ip_count(namespace):
+    """validate NAT gateway profile managed outbound IP count"""
+    if namespace.nat_gateway_managed_outbound_ip_count is not None:
+        if namespace.nat_gateway_managed_outbound_ip_count < 1 or namespace.nat_gateway_managed_outbound_ip_count > 16:
+            raise InvalidArgumentValueError("--nat-gateway-managed-outbound-ip-count must be in the range [1,16]")
+
+
+def validate_nat_gateway_idle_timeout(namespace):
+    """validate NAT gateway profile idle timeout"""
+    if namespace.nat_gateway_idle_timeout is not None:
+        if namespace.nat_gateway_idle_timeout < 4 or namespace.nat_gateway_idle_timeout > 120:
+            raise InvalidArgumentValueError("--nat-gateway-idle-timeout must be in the range [4,120]")
 
 
 def validate_nodes_count(namespace):
@@ -310,12 +295,19 @@ def validate_nodepool_tags(ns):
 
 
 def validate_vnet_subnet_id(namespace):
-    if namespace.vnet_subnet_id is not None:
-        if namespace.vnet_subnet_id == '':
-            return
-        from msrestazure.tools import is_valid_resource_id
-        if not is_valid_resource_id(namespace.vnet_subnet_id):
-            raise CLIError("--vnet-subnet-id is not a valid Azure resource ID.")
+    _validate_subnet_id(namespace.vnet_subnet_id, "--vnet-subnet-id")
+
+
+def validate_pod_subnet_id(namespace):
+    _validate_subnet_id(namespace.pod_subnet_id, "--pod-subnet-id")
+
+
+def _validate_subnet_id(subnet_id, name):
+    if subnet_id is None or subnet_id == '':
+        return
+    from msrestazure.tools import is_valid_resource_id
+    if not is_valid_resource_id(subnet_id):
+        raise InvalidArgumentValueError(name + " is not a valid Azure resource ID.")
 
 
 def validate_ppg(namespace):
@@ -430,3 +422,89 @@ def validate_assign_kubelet_identity(namespace):
         from msrestazure.tools import is_valid_resource_id
         if not is_valid_resource_id(namespace.assign_kubelet_identity):
             raise InvalidArgumentValueError("--assign-kubelet-identity is not a valid Azure resource ID.")
+
+
+def validate_nodepool_id(namespace):
+    from msrestazure.tools import is_valid_resource_id
+    if not is_valid_resource_id(namespace.nodepool_id):
+        raise InvalidArgumentValueError("--nodepool-id is not a valid Azure resource ID.")
+
+
+def validate_snapshot_id(namespace):
+    if namespace.snapshot_id:
+        from msrestazure.tools import is_valid_resource_id
+        if not is_valid_resource_id(namespace.snapshot_id):
+            raise InvalidArgumentValueError("--snapshot-id is not a valid Azure resource ID.")
+
+
+def extract_comma_separated_string(
+    raw_string,
+    enable_strip=False,
+    extract_kv=False,
+    allow_empty_value=False,
+    keep_none=False,
+    default_value=None,
+    allow_appending_values_to_same_key=False,
+):
+    """Extract comma-separated string.
+
+    If enable_strip is specified, will remove leading and trailing whitespace before each operation on the string.
+    If extract_kv is specified, will extract key value pairs from the string with "=" as the delimiter and this would
+    return a dictionary, otherwise keep the entire string.
+    Option allow_empty_value is valid since extract_kv is specified. When the number of string segments split by "="
+    is 1, the first segment is retained as the key and empty string would be set as its corresponding value without
+    raising an exception.
+    Option allow_appending_values_to_same_key is valid since extract_kv is specified. For the same key, the new value
+    is appended to the existing value separated by commas.
+    If keep_none is specified, will return None when input is None. Otherwise will return default_value if input is
+    None or empty string.
+    """
+    if raw_string is None:
+        if keep_none:
+            return None
+        return default_value
+    if enable_strip:
+        raw_string = raw_string.strip()
+    if raw_string == "":
+        return default_value
+
+    result = {} if extract_kv else []
+    for item in raw_string.split(","):
+        if enable_strip:
+            item = item.strip()
+        if extract_kv:
+            kv_list = item.split("=")
+            if len(kv_list) in [1, 2]:
+                key = kv_list[0]
+                value = ""
+                if len(kv_list) == 2:
+                    value = kv_list[1]
+                if not allow_empty_value and (value == "" or value.isspace()):
+                    raise InvalidArgumentValueError(
+                        "Empty value not allowed. The value '{}' of key '{}' in '{}' is empty. Raw input '{}'.".format(
+                            value, key, item, raw_string
+                        )
+                    )
+                if enable_strip:
+                    key = key.strip()
+                    value = value.strip()
+                if allow_appending_values_to_same_key and key in result:
+                    value = "{},{}".format(result[key], value)
+                result[key] = value
+            else:
+                raise InvalidArgumentValueError(
+                    "The format of '{}' in '{}' is incorrect, correct format should be "
+                    "'Key1=Value1,Key2=Value2'.".format(
+                        item, raw_string
+                    )
+                )
+        else:
+            result.append(item)
+    return result
+
+
+def validate_credential_format(namespace):
+    if namespace.credential_format and \
+        namespace.credential_format.lower() != "azure" and \
+            namespace.credential_format.lower() != "exec":
+        raise InvalidArgumentValueError("--format can only be azure or exec.")

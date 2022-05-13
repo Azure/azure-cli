@@ -61,6 +61,7 @@ from azure.mgmt.sql.models import (
     ServerNetworkAccessFlag,
     ServiceObjectiveName,
     ServerTrustGroup,
+    ServicePrincipal,
     ShortTermRetentionPolicyName,
     Sku,
     StorageKeyType,
@@ -422,6 +423,20 @@ def _get_tenant_id():
     return sub['tenantId']
 
 
+def _get_service_principal_object_from_type(servicePrincipalType):
+    '''
+    Gets the service principal object from type.
+    '''
+    servicePrincipalResult = None
+
+    if (servicePrincipalType is not None and
+        (servicePrincipalType == ServicePrincipalType.system_assigned.value or
+         servicePrincipalType == ServicePrincipalType.none.value)):
+        servicePrincipalResult = ServicePrincipal(type=servicePrincipalType)
+
+    return servicePrincipalResult
+
+
 def _get_identity_object_from_type(
         assignIdentityIsPresent,
         resourceIdentityType,
@@ -604,6 +619,14 @@ class ResourceIdType(Enum):
     none = 'None'
 
 
+class ServicePrincipalType(Enum):
+    '''
+    Types of service principal.
+    '''
+    system_assigned = 'SystemAssigned'
+    none = 'None'
+
+
 class SqlManagedInstanceMinimalTlsVersionType(Enum):
     no_tls = "None"
     tls_1_0 = "1.0"
@@ -655,8 +678,6 @@ def _get_managed_db_resource_id(cli_ctx, resource_group_name, managed_instance_n
     '''
     Gets the Managed db resource id in this Azure environment.
     '''
-
-    # url parse package has different names in Python 2 and 3. 'six' package works cross-version.
     from azure.cli.core.commands.client_factory import get_subscription_id
     from msrestazure.tools import resource_id
 
@@ -699,8 +720,7 @@ def _get_managed_dropped_db_resource_id(
     Gets the Managed db resource id in this Azure environment.
     '''
 
-    # url parse package has different names in Python 2 and 3. 'six' package works cross-version.
-    from six.moves.urllib.parse import quote  # pylint: disable=import-error
+    from urllib.parse import quote
     from azure.cli.core.commands.client_factory import get_subscription_id
     from msrestazure.tools import resource_id
 
@@ -829,8 +849,7 @@ class DatabaseIdentity():  # pylint: disable=too-few-public-methods
         self.cli_ctx = cli_ctx
 
     def id(self):
-        # url parse package has different names in Python 2 and 3. 'six' package works cross-version.
-        from six.moves.urllib.parse import quote  # pylint: disable=import-error
+        from urllib.parse import quote
         from azure.cli.core.commands.client_factory import get_subscription_id
 
         return '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Sql/servers/{}/databases/{}'.format(
@@ -1655,8 +1674,7 @@ def _get_storage_account_name(storage_endpoint):
     Determines storage account name from endpoint url string.
     e.g. 'https://mystorage.blob.core.windows.net' -> 'mystorage'
     '''
-    # url parse package has different names in Python 2 and 3. 'six' package works cross-version.
-    from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
+    from urllib.parse import urlparse
 
     return urlparse(storage_endpoint).netloc.split('.')[0]
 
@@ -2741,7 +2759,7 @@ def update_short_term_retention(
         server_name,
         resource_group_name,
         retention_days,
-        diffbackup_hours,
+        diffbackup_hours=None,
         no_wait=False,
         **kwargs):
     '''
@@ -3540,6 +3558,7 @@ def server_create(
         enable_public_network=None,
         restrict_outbound_network_access=None,
         key_id=None,
+        federated_client_id=None,
         user_assigned_identity_id=None,
         primary_user_assigned_identity_id=None,
         identity_type=None,
@@ -3568,6 +3587,7 @@ def server_create(
             else ServerNetworkAccessFlag.DISABLED)
 
     kwargs['key_id'] = key_id
+    kwargs['federated_client_id'] = federated_client_id
 
     kwargs['primary_user_assigned_identity_id'] = primary_user_assigned_identity_id
 
@@ -3639,6 +3659,7 @@ def server_update(
         restrict_outbound_network_access=None,
         primary_user_assigned_identity_id=None,
         key_id=None,
+        federated_client_id=None,
         identity_type=None,
         user_assigned_identity_id=None):
     '''
@@ -3675,6 +3696,7 @@ def server_update(
         primary_user_assigned_identity_id or instance.primary_user_assigned_identity_id)
 
     instance.key_id = (key_id or instance.key_id)
+    instance.federated_client_id = (federated_client_id or instance.federated_client_id)
 
     return instance
 
@@ -3703,6 +3725,20 @@ def server_ad_admin_set(
         parameters=kwargs)
 
 
+def server_ad_admin_delete(
+        client,
+        resource_group_name,
+        server_name):
+    '''
+    Sets a server's AD admin.
+    '''
+
+    return client.begin_delete(
+        server_name=server_name,
+        resource_group_name=resource_group_name,
+        administrator_name=AdministratorName.ACTIVE_DIRECTORY)
+
+
 def server_ad_admin_update(
         instance,
         login=None,
@@ -3718,6 +3754,37 @@ def server_ad_admin_update(
     instance.tenant_id = tenant_id or instance.tenant_id
 
     return instance
+
+
+def server_ad_admin_update_setter(
+        client,
+        resource_group_name,
+        server_name,
+        **kwargs):
+    '''
+    Updates a server' AD admin.
+    '''
+
+    return client.begin_create_or_update(
+        server_name=server_name,
+        resource_group_name=resource_group_name,
+        administrator_name=AdministratorName.ACTIVE_DIRECTORY,
+        parameters=kwargs["parameters"])
+
+
+def server_ad_admin_update_getter(
+        client,
+        resource_group_name,
+        server_name):
+    '''
+    Updates a server' AD admin.
+    '''
+
+    return client.get(
+        server_name=server_name,
+        resource_group_name=resource_group_name,
+        administrator_name=AdministratorName.ACTIVE_DIRECTORY)
+
 
 #####
 #           sql server firewall-rule
@@ -3912,8 +3979,7 @@ def server_dns_alias_set(
     '''
     Sets a server DNS alias.
     '''
-    # url parse package has different names in Python 2 and 3. 'six' package works cross-version.
-    from six.moves.urllib.parse import quote  # pylint: disable=import-error
+    from urllib.parse import quote
     from azure.cli.core.commands.client_factory import get_subscription_id
 
     # Build the old alias id
@@ -4062,7 +4128,7 @@ def ledger_digest_uploads_enable(
 
     kwargs['digest_storage_endpoint'] = endpoint
 
-    return client.create_or_update(
+    return client.begin_create_or_update(
         resource_group_name=resource_group_name,
         server_name=server_name,
         database_name=database_name,
@@ -4079,7 +4145,7 @@ def ledger_digest_uploads_disable(
     Disables ledger storage target
     '''
 
-    return client.disable(
+    return client.begin_disable(
         resource_group_name=resource_group_name,
         server_name=server_name,
         database_name=database_name,
@@ -4205,6 +4271,7 @@ def managed_instance_create(
         external_admin_principal_type=None,
         external_admin_sid=None,
         external_admin_name=None,
+        service_principal_type=None,
         **kwargs):
     '''
     Creates a managed instance.
@@ -4215,13 +4282,14 @@ def managed_instance_create(
     else:
         kwargs['identity'] = _get_identity_object_from_type(False, identity_type, user_assigned_identity_id, None)
 
+    kwargs['service_principal'] = _get_service_principal_object_from_type(service_principal_type)
     kwargs['location'] = location
     kwargs['sku'] = _find_managed_instance_sku_from_capabilities(cmd.cli_ctx, kwargs['location'], sku)
     kwargs['subnet_id'] = virtual_network_subnet_id
     kwargs['maintenance_configuration_id'] = _complete_maintenance_configuration_id(cmd.cli_ctx, kwargs['maintenance_configuration_id'])
 
     if not kwargs['yes'] and kwargs['location'].lower() in ['southeastasia', 'brazilsouth', 'eastasia']:
-        if kwargs['storage_account_type'] == 'GRS':
+        if kwargs['requested_backup_storage_redundancy'] == 'Geo':
             confirmation = prompt_y_n("""Selected value for backup storage redundancy is geo-redundant storage.
              Note that database backups will be geo-replicated to the paired region.
              To learn more about Azure Paired Regions visit https://aka.ms/azure-ragrs-regions.
@@ -4229,7 +4297,7 @@ def managed_instance_create(
             if not confirmation:
                 return
 
-        if not kwargs['storage_account_type']:
+        if not kwargs['requested_backup_storage_redundancy']:
             confirmation = prompt_y_n("""You have not specified the value for backup storage redundancy
             which will default to geo-redundant storage. Note that database backups will be geo-replicated
             to the paired region. To learn more about Azure Paired Regions visit https://aka.ms/azure-ragrs-regions.
@@ -4317,9 +4385,12 @@ def managed_instance_update(
         maintenance_configuration_id=None,
         primary_user_assigned_identity_id=None,
         key_id=None,
+        requested_backup_storage_redundancy=None,
         identity_type=None,
         user_assigned_identity_id=None,
-        virtual_network_subnet_id=None):
+        virtual_network_subnet_id=None,
+        yes=None,
+        service_principal_type=None):
     '''
     Updates a managed instance. Custom update function to apply parameters to instance.
     '''
@@ -4330,6 +4401,9 @@ def managed_instance_update(
         identity_type,
         user_assigned_identity_id,
         instance.identity)
+
+    # Assigning Service Principal to instance
+    instance.service_principal = _get_service_principal_object_from_type(service_principal_type)
 
     # Apply params to instance
     instance.administrator_login_password = (
@@ -4354,6 +4428,18 @@ def managed_instance_update(
         cmd.cli_ctx,
         instance.location,
         instance.sku)
+
+    if not yes and _should_show_backup_storage_redundancy_warnings(instance.location) and requested_backup_storage_redundancy == 'Geo':
+        confirmation = prompt_y_n("""Selected value for backup storage redundancy is geo-redundant storage.
+             Note that database backups will be geo-replicated to the paired region.
+             To learn more about Azure Paired Regions visit https://aka.ms/azure-ragrs-regions.
+             Do you want to proceed?""")
+        if not confirmation:
+            return
+
+    if requested_backup_storage_redundancy is not None:
+        instance.requested_backup_storage_redundancy = requested_backup_storage_redundancy
+        instance.zone_redundant = None
 
     if public_data_endpoint_enabled is not None:
         instance.public_data_endpoint_enabled = public_data_endpoint_enabled
@@ -5135,7 +5221,7 @@ def failover_group_create(
     Creates a failover group.
     '''
 
-    from six.moves.urllib.parse import quote  # pylint: disable=import-error
+    from urllib.parse import quote
     from azure.cli.core.commands.client_factory import get_subscription_id
 
     # Build the partner server id
@@ -5412,7 +5498,7 @@ def update_conn_policy(
     '''
     Updates a connectin policy
     '''
-    return client.create_or_update(
+    return client.begin_create_or_update(
         resource_group_name=resource_group_name,
         server_name=server_name,
         connection_policy_name=ConnectionPolicyName.DEFAULT,
@@ -5435,13 +5521,13 @@ def transparent_data_encryptions_set(
     '''
     Sets a Transparent Data Encryption
     '''
-    kwargs['status'] = status
+    kwargs['state'] = status
 
     return client.create_or_update(
         resource_group_name=resource_group_name,
         server_name=server_name,
         database_name=database_name,
-        transparent_data_encryption_name=TransparentDataEncryptionName.CURRENT,
+        tde_name=TransparentDataEncryptionName.CURRENT,
         parameters=kwargs)
 
 
@@ -5458,23 +5544,8 @@ def transparent_data_encryptions_get(
         resource_group_name=resource_group_name,
         server_name=server_name,
         database_name=database_name,
-        transparent_data_encryption_name=TransparentDataEncryptionName.CURRENT)
+        tde_name=TransparentDataEncryptionName.CURRENT)
 
-
-def tde_list_by_configuration(
-        client,
-        resource_group_name,
-        server_name,
-        database_name):
-    '''
-    Lists Transparent Data Encryption
-    '''
-
-    return client.list_by_configuration(
-        resource_group_name=resource_group_name,
-        server_name=server_name,
-        database_name=database_name,
-        transparent_data_encryption_name=TransparentDataEncryptionName.CURRENT)
 
 ###############################################
 #              sql server vnet-rule           #

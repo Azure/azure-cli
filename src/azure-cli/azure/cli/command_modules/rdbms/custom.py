@@ -12,7 +12,7 @@ from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id  # pylint: disable=import-error
 from knack.log import get_logger
 from knack.util import todict
-from six.moves.urllib.request import urlretrieve  # pylint: disable=import-error
+from urllib.request import urlretrieve
 from azure.core.exceptions import ResourceNotFoundError
 from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import get_subscription_id
@@ -707,6 +707,7 @@ def server_ad_admin_set(client, resource_group_name, server_name, login=None, si
     '''
 
     parameters = {
+        'administratorType': 'ActiveDirectory',
         'login': login,
         'sid': sid,
         'tenant_id': _get_tenant_id()
@@ -781,8 +782,7 @@ def create_postgresql_connection_string(server_name, host, user, password):
 def check_server_name_availability(check_name_client, parameters):
     server_availability = check_name_client.execute(parameters)
     if not server_availability.name_available:
-        raise CLIError("The server name '{}' already exists.Please re-run command with some "
-                       "other server name.".format(parameters.name))
+        raise CLIError(server_availability.message)
     return True
 
 
@@ -819,7 +819,7 @@ def get_connection_string(cmd, client, server_name='{server}', database_name='{d
             'jdbc': "jdbc:mysql://{host}:3306/{database}?user={user}@{server}&password={password}",
             'node.js': "var conn = mysql.createConnection({{host: '{host}', user: '{user}@{server}',"
                        "password: {password}, database: {database}, port: 3306}});",
-            'php': "host={host} port=3306 dbname={database} user={user}@{server} password={password}",
+            'php': "$con=mysqli_init(); [mysqli_ssl_set($con, NULL, NULL, {{ca-cert filename}}, NULL, NULL);] mysqli_real_connect($con, '{host}', '{user}@{server}', '{password}', '{database}', 3306);",
             'python': "cnx = mysql.connector.connect(user='{user}@{server}', password='{password}', host='{host}', "
                       "port=3306, database='{database}')",
             'ruby': "client = Mysql2::Client.new(username: '{user}@{server}', password: '{password}', "
@@ -872,7 +872,7 @@ def get_connection_string(cmd, client, server_name='{server}', database_name='{d
             'jdbc': "jdbc:mariadb://{host}:3306/{database}?user={user}@{server}&password={password}",
             'node.js': "var conn = mysql.createConnection({{host: '{host}', user: '{user}@{server}',"
                        "password: {password}, database: {database}, port: 3306}});",
-            'php': "host={host} port=3306 dbname={database} user={user}@{server} password={password}",
+            'php': "$con=mysqli_init(); [mysqli_ssl_set($con, NULL, NULL, {{ca-cert filename}}, NULL, NULL);] mysqli_real_connect($con, '{host}', '{user}@{server}', '{password}', '{database}', 3306);",
             'python': "cnx = mysql.connector.connect(user='{user}@{server}', password='{password}', host='{host}', "
                       "port=3306, database='{database}')",
             'ruby': "client = Mysql2::Client.new(username: '{user}@{server}', password: '{password}', "

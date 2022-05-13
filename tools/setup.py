@@ -29,7 +29,6 @@ DEPENDENCIES = [
     'requests',
     'pyyaml~=5.2',
     'knack',
-    'six>=1.10.0',
     'tabulate>=0.7.7',
     'colorama>=0.3.7'
 ]
@@ -59,7 +58,7 @@ setup(
         ]
     },
     install_requires=DEPENDENCIES,
-    extras_require={ 
+    extras_require={
         ":python_version<'3.0'": ['pylint==1.9.2'],
         ":python_version>='3.0'": ['pylint==2.0.0']
     }

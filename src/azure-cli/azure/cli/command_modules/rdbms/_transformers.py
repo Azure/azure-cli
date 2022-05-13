@@ -31,13 +31,13 @@ def table_transform_output_list_servers(result):
         new_entry['Resource Group'] = key['resourceGroup']
         new_entry['Location'] = key['location']
         new_entry['Version'] = key['version']
-        new_entry['Storage Size(GiB)'] = int(key['storageProfile']['storageMb']) / 1024.0
+        new_entry['Storage Size(GiB)'] = int(key['storage']['storageSizeGb'])
         new_entry['Tier'] = key['sku']['tier']
         new_entry['SKU'] = key['sku']['name']
 
         if 'flexibleServers' in result[0]['id']:
             new_entry['State'] = key['state']
-            new_entry['HA State'] = key['haState']
+            new_entry['HA State'] = key['highAvailability']['state']
             new_entry['Availability zone'] = key['availabilityZone']
 
         table_result.append(new_entry)
@@ -98,5 +98,25 @@ def table_transform_output_list_skus_single_server(result):
                     table_result.append(new_entry)
             except:
                 raise CLIError("There is no sku available for this location.")
+
+    return table_result
+
+
+def table_transform_output_parameters(result):
+
+    table_result = []
+
+    if not result:
+        return table_result
+
+    for key in result:
+        new_entry = OrderedDict()
+        new_entry['Name'] = key['name']
+        new_entry['DataType'] = key['dataType']
+        new_entry['DefaultValue'] = key['defaultValue']
+        new_entry['Source'] = key['source']
+        new_entry['AllowedValues'] = key['allowedValues']
+
+        table_result.append(new_entry)
 
     return table_result

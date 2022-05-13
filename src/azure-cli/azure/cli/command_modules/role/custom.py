@@ -37,14 +37,6 @@ CREDENTIAL_WARNING = (
     "The output includes credentials that you must protect. Be sure that you do not include these credentials in "
     "your code or check the credentials into your source control. For more information, see https://aka.ms/azadsp-cli")
 
-ROLE_ASSIGNMENT_CREATE_WARNING = (
-    "In a future release, this command will NOT create a 'Contributor' role assignment by default. "
-    "If needed, use the --role argument to explicitly create a role assignment."
-)
-
-NAME_DEPRECATION_WARNING = \
-    "'name' property in the output is deprecated and will be removed in the future. Use 'appId' instead."
-
 logger = get_logger(__name__)
 
 # pylint: disable=too-many-lines
@@ -604,7 +596,7 @@ def list_apps(cmd, app_id=None, display_name=None, identifier_uri=None, query_fi
     if identifier_uri:
         sub_filters.append("identifierUris/any(s:s eq '{}')".format(identifier_uri))
 
-    result = client.applications.list(filter=(' and '.join(sub_filters)))
+    result = client.applications.list(filter=' and '.join(sub_filters) if sub_filters else None)
     if sub_filters or include_all:
         return list(result)
 
@@ -647,7 +639,7 @@ def list_sps(cmd, spn=None, display_name=None, query_filter=None, show_mine=None
     if display_name:
         sub_filters.append("startswith(displayName,'{}')".format(display_name))
 
-    result = client.service_principals.list(filter=(' and '.join(sub_filters)))
+    result = client.service_principals.list(filter=' and '.join(sub_filters) if sub_filters else None)
 
     if sub_filters or include_all:
         return result
@@ -675,7 +667,7 @@ def list_users(client, upn=None, display_name=None, query_filter=None):
     if display_name:
         sub_filters.append("startswith(displayName,'{}')".format(display_name))
 
-    return client.list(filter=(' and ').join(sub_filters))
+    return client.list(filter=' and '.join(sub_filters) if sub_filters else None)
 
 
 def create_user(client, user_principal_name, display_name, password,
@@ -756,7 +748,7 @@ def list_groups(client, display_name=None, query_filter=None):
         sub_filters.append(query_filter)
     if display_name:
         sub_filters.append("startswith(displayName,'{}')".format(display_name))
-    return client.list(filter=(' and ').join(sub_filters))
+    return client.list(filter=' and '.join(sub_filters) if sub_filters else None)
 
 
 def list_group_owners(cmd, group_id):
@@ -1404,14 +1396,17 @@ def _validate_app_dates(app_start_date, app_end_date, cert_start_date, cert_end_
 
 # pylint: disable=inconsistent-return-statements
 def create_service_principal_for_rbac(
-        # pylint:disable=too-many-statements,too-many-locals, too-many-branches
+        # pylint:disable=too-many-statements,too-many-locals, too-many-branches, unused-argument
         cmd, name=None, years=None, create_cert=False, cert=None, scopes=None, role=None,
         show_auth_for_sdk=None, skip_assignment=False, keyvault=None):
     import time
 
+    if role and not scopes or not role and scopes:
+        from azure.cli.core.azclierror import ArgumentUsageError
+        raise ArgumentUsageError("Usage error: To create role assignments, specify both --role and --scopes.")
+
     graph_client = _graph_client_factory(cmd.cli_ctx)
-    role_client = _auth_client_factory(cmd.cli_ctx).role_assignments
-    scopes = scopes or ['/subscriptions/' + role_client.config.subscription_id]
+
     years = years or 1
     _RETRY_TIMES = 36
     existing_sps = None
@@ -1470,13 +1465,10 @@ def create_service_principal_for_rbac(
                     raise
     sp_oid = aad_sp.object_id
 
-    # retry while server replication is done
-    if not skip_assignment:
-        if not role:
-            role = "Contributor"
-            logger.warning(ROLE_ASSIGNMENT_CREATE_WARNING)
+    if role:
         for scope in scopes:
             logger.warning("Creating '%s' role assignment under scope '%s'", role, scope)
+            # retry till server replication is done
             for retry_time in range(0, _RETRY_TIMES):
                 try:
                     _create_role_assignment(cmd.cli_ctx, role, sp_oid, None, scope, resolve_assignee=False,
@@ -1500,7 +1492,6 @@ def create_service_principal_for_rbac(
                     raise
 
     logger.warning(CREDENTIAL_WARNING)
-    logger.warning(NAME_DEPRECATION_WARNING)
 
     if show_auth_for_sdk:
         from azure.cli.core._profile import Profile
@@ -1514,7 +1505,6 @@ def create_service_principal_for_rbac(
     result = {
         'appId': app_id,
         'password': password,
-        'name': app_id,
         'displayName': app_display_name,
         'tenant': graph_client.config.tenant_id
     }
@@ -1544,22 +1534,30 @@ def _create_self_signed_cert(start_date, end_date):  # pylint: disable=too-many-
     from OpenSSL import crypto
     from datetime import timedelta
 
-    _, cert_file = tempfile.mkstemp()
-    _, key_file = tempfile.mkstemp()
+    # Create a PEM file ~/tmpxxxxxxxx.pem with both PRIVATE KEY & CERTIFICATE so users can use to log in.
+    # The PEM file looks like
+    # -----BEGIN PRIVATE KEY-----
+    # MIIEv...
+    # -----END PRIVATE KEY-----
+    # -----BEGIN CERTIFICATE-----
+    # MIICo...
+    # -----END CERTIFICATE-----
 
-    # create a file with both cert & key so users can use to login
-    # leverage tempfile ot produce a random file name
-    _, temp_file = tempfile.mkstemp()
-    creds_file = path.join(path.expanduser("~"), path.basename(temp_file) + '.pem')
+    # Leverage tempfile to produce a random file name. The temp file itself is automatically deleted.
+    # There doesn't seem to be a good way to create a random file name without creating the file itself:
+    # https://stackoverflow.com/questions/26541416/generate-temporary-file-names-without-creating-actual-file-in-python
+    with tempfile.NamedTemporaryFile() as f:
+        temp_file_name = f.name
+    creds_file = path.join(path.expanduser("~"), path.basename(temp_file_name) + '.pem')
 
-    # create a key pair
+    # Create a key pair
     k = crypto.PKey()
     k.generate_key(crypto.TYPE_RSA, 2048)
 
-    # create a self-signed cert
+    # Create a self-signed cert
     cert = crypto.X509()
     subject = cert.get_subject()
-    # as long it works, we skip fileds C, ST, L, O, OU, which we have no reasonable defaults for
+    # As long as it works, we skip fields C, ST, L, O, OU, which we have no reasonable defaults for
     subject.CN = 'CLI-Login'
     cert.set_serial_number(1000)
     asn1_format = '%Y%m%d%H%M%SZ'
@@ -1571,23 +1569,16 @@ def _create_self_signed_cert(start_date, end_date):  # pylint: disable=too-many-
     cert.set_pubkey(k)
     cert.sign(k, 'sha1')
 
-    with open(cert_file, "wt") as f:
-        f.write(crypto.dump_certificate(crypto.FILETYPE_PEM, cert).decode())
-    with open(key_file, "wt") as f:
-        f.write(crypto.dump_privatekey(crypto.FILETYPE_PEM, k).decode())
+    cert_string = crypto.dump_certificate(crypto.FILETYPE_PEM, cert).decode()
+    key_string = crypto.dump_privatekey(crypto.FILETYPE_PEM, k).decode()
 
-    cert_string = None
-    with open(creds_file, 'wt') as cf:
-        with open(key_file, 'rt') as f:
-            cf.write(f.read())
-        with open(cert_file, "rt") as f:
-            cert_string = f.read()
-            cf.write(cert_string)
-    os.chmod(creds_file, 0o600)  # make the file readable/writable only for current user
+    with os.fdopen(_open(creds_file), 'w+') as cf:
+        cf.write(key_string)
+        cf.write(cert_string)
 
-    # get rid of the header and tails for upload to AAD: ----BEGIN CERT....----
-    cert_string = re.sub(r'\-+[A-z\s]+\-+', '', cert_string).strip()
-    return (cert_string, creds_file, cert_start_date, cert_end_date)
+    # Get rid of the header and tail for uploading to AAD: -----BEGIN CERTIFICATE-----, -----END CERTIFICATE-----
+    cert_string = re.sub(r'-+[A-z\s]+-+', '', cert_string).strip()
+    return cert_string, creds_file, cert_start_date, cert_end_date
 
 
 def _create_self_signed_cert_with_keyvault(cli_ctx, years, keyvault, keyvault_cert_name):  # pylint: disable=too-many-locals
@@ -1625,7 +1616,7 @@ def _create_self_signed_cert_with_keyvault(cli_ctx, years, keyvault, keyvault_ce
                 'keyCertSign'
             ],
             'subject': 'CN=KeyVault Generated',
-            'validity_in_months': int((years * 12) + 1)
+            'validity_in_months': int(years * 12)
         }
     }
     vault_base_url = 'https://{}{}/'.format(keyvault, cli_ctx.cloud.suffixes.keyvault_dns)
@@ -1882,9 +1873,7 @@ def _random_password(length):
     return password
 
 
-def list_user_assigned_identities(cmd, resource_group_name=None):
-    from azure.cli.command_modules.role._client_factory import _msi_client_factory
-    client = _msi_client_factory(cmd.cli_ctx)
-    if resource_group_name:
-        return client.user_assigned_identities.list_by_resource_group(resource_group_name)
-    return client.user_assigned_identities.list_by_subscription()
+def _open(location):
+    """Open a file that only the current user can access."""
+    # The 600 seems no-op on Windows, and that is fine.
+    return os.open(location, os.O_RDWR | os.O_CREAT | os.O_TRUNC, 0o600)

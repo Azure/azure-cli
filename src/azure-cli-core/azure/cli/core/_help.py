@@ -62,7 +62,7 @@ class CLIPrintMixin(CLIHelp):
     def _print_detailed_help(self, cli_name, help_file):
         CLIPrintMixin._print_extensions_msg(help_file)
         super(CLIPrintMixin, self)._print_detailed_help(cli_name, help_file)
-        self._print_az_find_message(help_file.command, self.cli_ctx.enable_color)
+        self._print_az_find_message(help_file.command)
 
     @staticmethod
     def _get_choices_defaults_sources_str(p):
@@ -88,12 +88,9 @@ class CLIPrintMixin(CLIHelp):
             print('')
 
     @staticmethod
-    def _print_az_find_message(command, enable_color):
-        from colorama import Style
+    def _print_az_find_message(command):
         indent = 0
-        message = 'For more specific examples, use: az find "az {}"'.format(command)
-        if enable_color:
-            message = Style.BRIGHT + message + Style.RESET_ALL
+        message = 'To search AI knowledge base for examples, use: az find "az {}"'.format(command)
         _print_indent(message + '\n', indent)
 
     @staticmethod

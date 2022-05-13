@@ -17,21 +17,21 @@ interactions:
       ParameterSetName:
       - -n -g --location
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-mgmt-recoveryservices/2.0.0 Python/3.8.5 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.36.0 azsdk-python-mgmt-recoveryservices/2.0.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2021-03-01
   response:
     body:
-      string: '{"location":"southeastasia","name":"clitest-vault000002","etag":"W/\"datetime''2021-09-20T11%3A29%3A41.6279647Z''\"","properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
+      string: '{"location":"southeastasia","name":"clitest-vault000002","etag":"W/\"datetime''2022-05-10T12%3A25%3A34.9928897Z''\"","properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '484'
+      - '470'
       content-type:
       - application/json
       date:
-      - Mon, 20 Sep 2021 11:29:41 GMT
+      - Tue, 10 May 2022 12:25:34 GMT
       expires:
       - '-1'
       pragma:
@@ -63,21 +63,21 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-storage/19.0.0 Python/3.8.5 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-storage/20.0.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000003/listKeys?api-version=2021-06-01&$expand=kerb
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000003/listKeys?api-version=2021-09-01&$expand=kerb
   response:
     body:
-      string: '{"keys":[{"creationTime":"2021-09-20T11:29:46.3030868Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2021-09-20T11:29:46.3030868Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+      string: '{"keys":[{"creationTime":"2022-05-10T12:25:36.1502676Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2022-05-10T12:25:36.1502676Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '380'
+      - '260'
       content-type:
       - application/json
       date:
-      - Mon, 20 Sep 2021 11:30:12 GMT
+      - Tue, 10 May 2022 12:26:01 GMT
       expires:
       - '-1'
       pragma:
@@ -93,7 +93,53 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11998'
+      - '11999'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account show-connection-string
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-storage/20.0.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000003?api-version=2021-09-01
+  response:
+    body:
+      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000003","name":"clitest000003","type":"Microsoft.Storage/storageAccounts","location":"southeastasia","tags":{},"properties":{"keyCreationTime":{"key1":"2022-05-10T12:25:36.1502676Z","key2":"2022-05-10T12:25:36.1502676Z"},"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":true,"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2022-05-10T12:25:36.1502676Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2022-05-10T12:25:36.1502676Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2022-05-10T12:25:36.0253034Z","primaryEndpoints":{"blob":"https://clitest000003.blob.core.windows.net/","queue":"https://clitest000003.queue.core.windows.net/","table":"https://clitest000003.table.core.windows.net/","file":"https://clitest000003.file.core.windows.net/"},"primaryLocation":"southeastasia","statusOfPrimary":"available"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1283'
+      content-type:
+      - application/json
+      date:
+      - Tue, 10 May 2022 12:26:01 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
     status:
       code: 200
       message: OK
@@ -105,9 +151,9 @@ interactions:
       Content-Length:
       - '0'
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.8.5; Windows 10) AZURECLI/2.28.1
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.9; Windows 10) AZURECLI/2.36.0
       x-ms-date:
-      - Mon, 20 Sep 2021 11:30:13 GMT
+      - Tue, 10 May 2022 12:26:01 GMT
       x-ms-share-quota:
       - '1'
       x-ms-version:
@@ -121,11 +167,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Mon, 20 Sep 2021 11:30:13 GMT
+      - Tue, 10 May 2022 12:26:02 GMT
       etag:
-      - '"0x8D97C2A03B14315"'
+      - '"0x8DA32803F93FC58"'
       last-modified:
-      - Mon, 20 Sep 2021 11:30:14 GMT
+      - Tue, 10 May 2022 12:26:03 GMT
       server:
       - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
@@ -147,24 +193,22 @@ interactions:
       ParameterSetName:
       - -g -v -n
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.28.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.36.0 azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.7.9
+        (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupPolicies/DefaultPolicy?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupPolicies/DefaultPolicy?api-version=2021-12-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupPolicies/DefaultPolicy","name":"DefaultPolicy","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureIaasVM","instantRPDetails":{},"schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2021-09-20T21:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2021-09-20T21:00:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}},"instantRpRetentionRangeInDays":2,"timeZone":"UTC","protectedItemsCount":0}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupPolicies/DefaultPolicy","name":"DefaultPolicy","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureIaasVM","instantRPDetails":{},"schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2022-05-10T22:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2022-05-10T22:00:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}},"instantRpRetentionRangeInDays":2,"timeZone":"UTC","protectedItemsCount":0}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '773'
+      - '764'
       content-type:
       - application/json
       date:
-      - Mon, 20 Sep 2021 11:30:15 GMT
+      - Tue, 10 May 2022 12:26:03 GMT
       expires:
       - '-1'
       pragma:
@@ -180,7 +224,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '149'
+      - '148'
       x-powered-by:
       - ASP.NET
     status:
@@ -189,9 +233,9 @@ interactions:
 - request:
     body: '{"properties": {"protectedItemsCount": 0, "backupManagementType": "AzureStorage",
       "workLoadType": "AzureFileShare", "schedulePolicy": {"schedulePolicyType": "SimpleSchedulePolicy",
-      "scheduleRunFrequency": "Daily", "scheduleRunTimes": ["2021-09-20T21:00:00.000Z"],
+      "scheduleRunFrequency": "Daily", "scheduleRunTimes": ["2022-05-10T22:00:00.000Z"],
       "scheduleWeeklyFrequency": 0}, "retentionPolicy": {"retentionPolicyType": "LongTermRetentionPolicy",
-      "dailySchedule": {"retentionTimes": ["2021-09-20T21:00:00.000Z"], "retentionDuration":
+      "dailySchedule": {"retentionTimes": ["2022-05-10T22:00:00.000Z"], "retentionDuration":
       {"count": 30, "durationType": "Days"}}}, "timeZone": "UTC"}}'
     headers:
       Accept:
@@ -205,28 +249,26 @@ interactions:
       Content-Length:
       - '512'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g -v --policy -n --backup-management-type
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.28.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.36.0 azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.7.9
+        (Windows-10-10.0.22000-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupPolicies/clitest-item000005?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupPolicies/clitest-item000005?api-version=2021-12-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupPolicies/clitest-item000005","name":"clitest-item000005","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureStorage","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2021-09-20T21:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2021-09-20T21:00:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}},"timeZone":"UTC","protectedItemsCount":0}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupPolicies/clitest-item000005","name":"clitest-item000005","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureStorage","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2022-05-10T22:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2022-05-10T22:00:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}},"timeZone":"UTC","protectedItemsCount":0}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '740'
+      - '719'
       content-type:
       - application/json
       date:
-      - Mon, 20 Sep 2021 11:30:17 GMT
+      - Tue, 10 May 2022 12:26:04 GMT
       expires:
       - '-1'
       pragma:
@@ -242,7 +284,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
       x-powered-by:
       - ASP.NET
     status:
@@ -262,12 +304,10 @@ interactions:
       ParameterSetName:
       - -g -v --azure-file-share --storage-account -p
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.28.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.36.0 azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.7.9
+        (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectionContainers?api-version=2021-07-01&$filter=backupManagementType%20eq%20%27AzureStorage%27%20and%20status%20eq%20%27Registered%27
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectionContainers?api-version=2021-12-01&%24filter=backupManagementType+eq+%27AzureStorage%27+and+status+eq+%27Registered%27
   response:
     body:
       string: '{"value":[]}'
@@ -279,7 +319,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 20 Sep 2021 11:30:17 GMT
+      - Tue, 10 May 2022 12:26:05 GMT
       expires:
       - '-1'
       pragma:
@@ -315,24 +355,22 @@ interactions:
       ParameterSetName:
       - -g -v --azure-file-share --storage-account -p
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.28.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.36.0 azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.7.9
+        (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectableContainers?api-version=2021-07-01&$filter=backupManagementType%20eq%20%27AzureStorage%27
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectableContainers?api-version=2021-12-01&%24filter=backupManagementType+eq+%27AzureStorage%27
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectableContainers/StorageContainer;Storage;clitest.rga4iwjpqrcn;clitestyktdt6e4vupdp3jsu","name":"StorageContainer;Storage;clitest.rga4iwjpqrcn;clitestyktdt6e4vupdp3jsu","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"clitestyktdt6e4vupdp3jsu","backupManagementType":"AzureStorage","protectableContainerType":"StorageContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rga4iwjpqrcn/providers/Microsoft.Storage/storageAccounts/clitestyktdt6e4vupdp3jsu"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectableContainers/StorageContainer;Storage;clitest.rgbb5lcglmbl;clitest5tgpaogzfbw6ib7hf","name":"StorageContainer;Storage;clitest.rgbb5lcglmbl;clitest5tgpaogzfbw6ib7hf","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"clitest5tgpaogzfbw6ib7hf","backupManagementType":"AzureStorage","protectableContainerType":"StorageContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgbb5lcglmbl/providers/Microsoft.Storage/storageAccounts/clitest5tgpaogzfbw6ib7hf"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectableContainers/StorageContainer;Storage;clitest.rgbzx4fpm2ur;clitestr7vlks4zf74rnmqr6","name":"StorageContainer;Storage;clitest.rgbzx4fpm2ur;clitestr7vlks4zf74rnmqr6","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"clitestr7vlks4zf74rnmqr6","backupManagementType":"AzureStorage","protectableContainerType":"StorageContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgbzx4fpm2ur/providers/Microsoft.Storage/storageAccounts/clitestr7vlks4zf74rnmqr6"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectableContainers/StorageContainer;Storage;clitest.rgfhzgi6vckb;clitest5da3iw53k2zd6zav4","name":"StorageContainer;Storage;clitest.rgfhzgi6vckb;clitest5da3iw53k2zd6zav4","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"clitest5da3iw53k2zd6zav4","backupManagementType":"AzureStorage","protectableContainerType":"StorageContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgfhzgi6vckb/providers/Microsoft.Storage/storageAccounts/clitest5da3iw53k2zd6zav4"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectableContainers/StorageContainer;Storage;clitest.rggnhec5fjqn;clitestid46ifaymywtrwjmi","name":"StorageContainer;Storage;clitest.rggnhec5fjqn;clitestid46ifaymywtrwjmi","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"clitestid46ifaymywtrwjmi","backupManagementType":"AzureStorage","protectableContainerType":"StorageContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rggnhec5fjqn/providers/Microsoft.Storage/storageAccounts/clitestid46ifaymywtrwjmi"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectableContainers/StorageContainer;Storage;clitest.rgpcyj3da4ew;clitestgzplo62oqmxsjncsr","name":"StorageContainer;Storage;clitest.rgpcyj3da4ew;clitestgzplo62oqmxsjncsr","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"clitestgzplo62oqmxsjncsr","backupManagementType":"AzureStorage","protectableContainerType":"StorageContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgpcyj3da4ew/providers/Microsoft.Storage/storageAccounts/clitestgzplo62oqmxsjncsr"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectableContainers/StorageContainer;Storage;clitest.rg000001;clitest000003","name":"StorageContainer;Storage;clitest.rg000001;clitest000003","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"clitest000003","backupManagementType":"AzureStorage","protectableContainerType":"StorageContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000003"}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectableContainers/StorageContainer;Storage;AzureSDKTest_reserved;cs1100320007de01867","name":"StorageContainer;Storage;AzureSDKTest_reserved;cs1100320007de01867","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"cs1100320007de01867","backupManagementType":"AzureStorage","protectableContainerType":"StorageContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureSDKTest_reserved/providers/Microsoft.Storage/storageAccounts/cs1100320007de01867"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectableContainers/StorageContainer;Storage;AzureSDKTest_reserved;cs110032000ca62af00","name":"StorageContainer;Storage;AzureSDKTest_reserved;cs110032000ca62af00","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"cs110032000ca62af00","backupManagementType":"AzureStorage","protectableContainerType":"StorageContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureSDKTest_reserved/providers/Microsoft.Storage/storageAccounts/cs110032000ca62af00"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectableContainers/StorageContainer;Storage;clitest.rg000001;clitest000003","name":"StorageContainer;Storage;clitest.rg000001;clitest000003","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"clitest000003","backupManagementType":"AzureStorage","protectableContainerType":"StorageContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000003"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectableContainers/StorageContainer;Storage;clitest.rg5ao3bbzgbp;clitestaxocvpbfijqn6mf3s","name":"StorageContainer;Storage;clitest.rg5ao3bbzgbp;clitestaxocvpbfijqn6mf3s","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"clitestaxocvpbfijqn6mf3s","backupManagementType":"AzureStorage","protectableContainerType":"StorageContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg5ao3bbzgbp/providers/Microsoft.Storage/storageAccounts/clitestaxocvpbfijqn6mf3s"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectableContainers/StorageContainer;Storage;clitest.rgypwfnwlfis;clitestzv526fvomxwam2w7o","name":"StorageContainer;Storage;clitest.rgypwfnwlfis;clitestzv526fvomxwam2w7o","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"clitestzv526fvomxwam2w7o","backupManagementType":"AzureStorage","protectableContainerType":"StorageContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgypwfnwlfis/providers/Microsoft.Storage/storageAccounts/clitestzv526fvomxwam2w7o"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectableContainers/StorageContainer;Storage;clitest.rgyyzrauxr3a;clitestmhl5oubzmyxmpbwqk","name":"StorageContainer;Storage;clitest.rgyyzrauxr3a;clitestmhl5oubzmyxmpbwqk","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"clitestmhl5oubzmyxmpbwqk","backupManagementType":"AzureStorage","protectableContainerType":"StorageContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgyyzrauxr3a/providers/Microsoft.Storage/storageAccounts/clitestmhl5oubzmyxmpbwqk"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectableContainers/StorageContainer;Storage;clitest.rgyyzrauxr3a;clitestzxxmlrhqul6sbeutw","name":"StorageContainer;Storage;clitest.rgyyzrauxr3a;clitestzxxmlrhqul6sbeutw","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"clitestzxxmlrhqul6sbeutw","backupManagementType":"AzureStorage","protectableContainerType":"StorageContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgyyzrauxr3a/providers/Microsoft.Storage/storageAccounts/clitestzxxmlrhqul6sbeutw"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectableContainers/StorageContainer;Storage;cloud-shell-storage-southeastasia;cs1100320004dd89524","name":"StorageContainer;Storage;cloud-shell-storage-southeastasia;cs1100320004dd89524","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"cs1100320004dd89524","backupManagementType":"AzureStorage","protectableContainerType":"StorageContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cloud-shell-storage-southeastasia/providers/Microsoft.Storage/storageAccounts/cs1100320004dd89524"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectableContainers/StorageContainer;Storage;cloud-shell-storage-southeastasia;cs1100320005416c8c9","name":"StorageContainer;Storage;cloud-shell-storage-southeastasia;cs1100320005416c8c9","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"cs1100320005416c8c9","backupManagementType":"AzureStorage","protectableContainerType":"StorageContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cloud-shell-storage-southeastasia/providers/Microsoft.Storage/storageAccounts/cs1100320005416c8c9"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectableContainers/StorageContainer;Storage;cloud-shell-storage-southeastasia;cs1100320007b1ce356","name":"StorageContainer;Storage;cloud-shell-storage-southeastasia;cs1100320007b1ce356","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"cs1100320007b1ce356","backupManagementType":"AzureStorage","protectableContainerType":"StorageContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cloud-shell-storage-southeastasia/providers/Microsoft.Storage/storageAccounts/cs1100320007b1ce356"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectableContainers/StorageContainer;Storage;cloud-shell-storage-southeastasia;cs1100320007f91393f","name":"StorageContainer;Storage;cloud-shell-storage-southeastasia;cs1100320007f91393f","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"cs1100320007f91393f","backupManagementType":"AzureStorage","protectableContainerType":"StorageContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cloud-shell-storage-southeastasia/providers/Microsoft.Storage/storageAccounts/cs1100320007f91393f"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectableContainers/StorageContainer;Storage;cloud-shell-storage-southeastasia;cs11003200087c55daf","name":"StorageContainer;Storage;cloud-shell-storage-southeastasia;cs11003200087c55daf","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"cs11003200087c55daf","backupManagementType":"AzureStorage","protectableContainerType":"StorageContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cloud-shell-storage-southeastasia/providers/Microsoft.Storage/storageAccounts/cs11003200087c55daf"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectableContainers/StorageContainer;Storage;cloud-shell-storage-southeastasia;cs1100320008debd5bc","name":"StorageContainer;Storage;cloud-shell-storage-southeastasia;cs1100320008debd5bc","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"cs1100320008debd5bc","backupManagementType":"AzureStorage","protectableContainerType":"StorageContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cloud-shell-storage-southeastasia/providers/Microsoft.Storage/storageAccounts/cs1100320008debd5bc"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectableContainers/StorageContainer;Storage;cloud-shell-storage-southeastasia;cs110032000919ef7c5","name":"StorageContainer;Storage;cloud-shell-storage-southeastasia;cs110032000919ef7c5","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"cs110032000919ef7c5","backupManagementType":"AzureStorage","protectableContainerType":"StorageContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cloud-shell-storage-southeastasia/providers/Microsoft.Storage/storageAccounts/cs110032000919ef7c5"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectableContainers/StorageContainer;Storage;cloud-shell-storage-southeastasia;cs11003200092fe0771","name":"StorageContainer;Storage;cloud-shell-storage-southeastasia;cs11003200092fe0771","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"cs11003200092fe0771","backupManagementType":"AzureStorage","protectableContainerType":"StorageContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cloud-shell-storage-southeastasia/providers/Microsoft.Storage/storageAccounts/cs11003200092fe0771"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectableContainers/StorageContainer;Storage;cloud-shell-storage-southeastasia;cs110032000b6f3c90c","name":"StorageContainer;Storage;cloud-shell-storage-southeastasia;cs110032000b6f3c90c","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"cs110032000b6f3c90c","backupManagementType":"AzureStorage","protectableContainerType":"StorageContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cloud-shell-storage-southeastasia/providers/Microsoft.Storage/storageAccounts/cs110032000b6f3c90c"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectableContainers/StorageContainer;Storage;cloud-shell-storage-southeastasia;cs110032000c31bae71","name":"StorageContainer;Storage;cloud-shell-storage-southeastasia;cs110032000c31bae71","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"cs110032000c31bae71","backupManagementType":"AzureStorage","protectableContainerType":"StorageContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cloud-shell-storage-southeastasia/providers/Microsoft.Storage/storageAccounts/cs110032000c31bae71"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectableContainers/StorageContainer;Storage;cloud-shell-storage-southeastasia;cs110032000e1cb9f41","name":"StorageContainer;Storage;cloud-shell-storage-southeastasia;cs110032000e1cb9f41","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"cs110032000e1cb9f41","backupManagementType":"AzureStorage","protectableContainerType":"StorageContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cloud-shell-storage-southeastasia/providers/Microsoft.Storage/storageAccounts/cs110032000e1cb9f41"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectableContainers/StorageContainer;Storage;cloud-shell-storage-southeastasia;cs110032000e3121978","name":"StorageContainer;Storage;cloud-shell-storage-southeastasia;cs110032000e3121978","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"cs110032000e3121978","backupManagementType":"AzureStorage","protectableContainerType":"StorageContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cloud-shell-storage-southeastasia/providers/Microsoft.Storage/storageAccounts/cs110032000e3121978"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectableContainers/StorageContainer;Storage;cloud-shell-storage-southeastasia;cs110032000f3aac891","name":"StorageContainer;Storage;cloud-shell-storage-southeastasia;cs110032000f3aac891","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"cs110032000f3aac891","backupManagementType":"AzureStorage","protectableContainerType":"StorageContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cloud-shell-storage-southeastasia/providers/Microsoft.Storage/storageAccounts/cs110032000f3aac891"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectableContainers/StorageContainer;Storage;cloud-shell-storage-southeastasia;cs1100320010339dce7","name":"StorageContainer;Storage;cloud-shell-storage-southeastasia;cs1100320010339dce7","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"cs1100320010339dce7","backupManagementType":"AzureStorage","protectableContainerType":"StorageContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cloud-shell-storage-southeastasia/providers/Microsoft.Storage/storageAccounts/cs1100320010339dce7"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectableContainers/StorageContainer;Storage;cloud-shell-storage-southeastasia;cs11003200127365c47","name":"StorageContainer;Storage;cloud-shell-storage-southeastasia;cs11003200127365c47","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"cs11003200127365c47","backupManagementType":"AzureStorage","protectableContainerType":"StorageContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cloud-shell-storage-southeastasia/providers/Microsoft.Storage/storageAccounts/cs11003200127365c47"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectableContainers/StorageContainer;Storage;cloud-shell-storage-southeastasia;cs11003200129e38348","name":"StorageContainer;Storage;cloud-shell-storage-southeastasia;cs11003200129e38348","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"cs11003200129e38348","backupManagementType":"AzureStorage","protectableContainerType":"StorageContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cloud-shell-storage-southeastasia/providers/Microsoft.Storage/storageAccounts/cs11003200129e38348"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectableContainers/StorageContainer;Storage;cloud-shell-storage-southeastasia;cs1100320012c36c452","name":"StorageContainer;Storage;cloud-shell-storage-southeastasia;cs1100320012c36c452","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"cs1100320012c36c452","backupManagementType":"AzureStorage","protectableContainerType":"StorageContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cloud-shell-storage-southeastasia/providers/Microsoft.Storage/storageAccounts/cs1100320012c36c452"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectableContainers/StorageContainer;Storage;cloud-shell-storage-southeastasia;cs110032001520b2764","name":"StorageContainer;Storage;cloud-shell-storage-southeastasia;cs110032001520b2764","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"cs110032001520b2764","backupManagementType":"AzureStorage","protectableContainerType":"StorageContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cloud-shell-storage-southeastasia/providers/Microsoft.Storage/storageAccounts/cs110032001520b2764"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectableContainers/StorageContainer;Storage;cloud-shell-storage-southeastasia;cs1100320016ac59291","name":"StorageContainer;Storage;cloud-shell-storage-southeastasia;cs1100320016ac59291","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"cs1100320016ac59291","backupManagementType":"AzureStorage","protectableContainerType":"StorageContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cloud-shell-storage-southeastasia/providers/Microsoft.Storage/storageAccounts/cs1100320016ac59291"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectableContainers/StorageContainer;Storage;cloud-shell-storage-southeastasia;cs1100320018cedbbd6","name":"StorageContainer;Storage;cloud-shell-storage-southeastasia;cs1100320018cedbbd6","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"cs1100320018cedbbd6","backupManagementType":"AzureStorage","protectableContainerType":"StorageContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cloud-shell-storage-southeastasia/providers/Microsoft.Storage/storageAccounts/cs1100320018cedbbd6"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectableContainers/StorageContainer;Storage;cloud-shell-storage-southeastasia;cs1100320018db36b92","name":"StorageContainer;Storage;cloud-shell-storage-southeastasia;cs1100320018db36b92","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"cs1100320018db36b92","backupManagementType":"AzureStorage","protectableContainerType":"StorageContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cloud-shell-storage-southeastasia/providers/Microsoft.Storage/storageAccounts/cs1100320018db36b92"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectableContainers/StorageContainer;Storage;cloud-shell-storage-southeastasia;cs110032001b3f915f1","name":"StorageContainer;Storage;cloud-shell-storage-southeastasia;cs110032001b3f915f1","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"cs110032001b3f915f1","backupManagementType":"AzureStorage","protectableContainerType":"StorageContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cloud-shell-storage-southeastasia/providers/Microsoft.Storage/storageAccounts/cs110032001b3f915f1"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectableContainers/StorageContainer;Storage;cloud-shell-storage-southeastasia;cs110032001b429e302","name":"StorageContainer;Storage;cloud-shell-storage-southeastasia;cs110032001b429e302","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"cs110032001b429e302","backupManagementType":"AzureStorage","protectableContainerType":"StorageContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cloud-shell-storage-southeastasia/providers/Microsoft.Storage/storageAccounts/cs110032001b429e302"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectableContainers/StorageContainer;Storage;cloud-shell-storage-southeastasia;cs110032001b42c9a19","name":"StorageContainer;Storage;cloud-shell-storage-southeastasia;cs110032001b42c9a19","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"cs110032001b42c9a19","backupManagementType":"AzureStorage","protectableContainerType":"StorageContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cloud-shell-storage-southeastasia/providers/Microsoft.Storage/storageAccounts/cs110032001b42c9a19"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectableContainers/StorageContainer;Storage;cloud-shell-storage-southeastasia;cs110032001c7af275f","name":"StorageContainer;Storage;cloud-shell-storage-southeastasia;cs110032001c7af275f","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"cs110032001c7af275f","backupManagementType":"AzureStorage","protectableContainerType":"StorageContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cloud-shell-storage-southeastasia/providers/Microsoft.Storage/storageAccounts/cs110032001c7af275f"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectableContainers/StorageContainer;Storage;cloud-shell-storage-southeastasia;cs110032001d33a7d6b","name":"StorageContainer;Storage;cloud-shell-storage-southeastasia;cs110032001d33a7d6b","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectableContainers","properties":{"friendlyName":"cs110032001d33a7d6b","backupManagementType":"AzureStorage","protectableContainerType":"StorageContainer","healthStatus":"Healthy","containerId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cloud-shell-storage-southeastasia/providers/Microsoft.Storage/storageAccounts/cs110032001d33a7d6b"}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '5450'
+      - '25759'
       content-type:
       - application/json
       date:
-      - Mon, 20 Sep 2021 11:30:17 GMT
+      - Tue, 10 May 2022 12:26:06 GMT
       expires:
       - '-1'
       pragma:
@@ -367,24 +405,22 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '273'
+      - '258'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g -v --azure-file-share --storage-account -p
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.28.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.36.0 azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.7.9
+        (Windows-10-10.0.22000-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer%3BStorage%3Bclitest.rg000001%3Bclitest000003?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer%3BStorage%3Bclitest.rg000001%3Bclitest000003?api-version=2021-12-01
   response:
     body:
       string: '{}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationsStatus/c124571e-4077-4737-a545-0127d455b6ef?api-version=2019-05-13-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationsStatus/5d0603e5-2ed1-4040-8768-8f38f2817eb8?api-version=2019-05-13-preview
       cache-control:
       - no-cache
       content-length:
@@ -392,11 +428,11 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 20 Sep 2021 11:30:19 GMT
+      - Tue, 10 May 2022 12:26:07 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationResults/c124571e-4077-4737-a545-0127d455b6ef?api-version=2021-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationResults/5d0603e5-2ed1-4040-8768-8f38f2817eb8?api-version=2021-12-01
       pragma:
       - no-cache
       server:
@@ -426,18 +462,16 @@ interactions:
       ParameterSetName:
       - -g -v --azure-file-share --storage-account -p
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.28.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.36.0 azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.7.9
+        (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer%3BStorage%3Bclitest.rg000001%3Bclitest000003/operationResults/c124571e-4077-4737-a545-0127d455b6ef?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer%3BStorage%3Bclitest.rg000001%3Bclitest000003/operationResults/5d0603e5-2ed1-4040-8768-8f38f2817eb8?api-version=2021-12-01
   response:
     body:
       string: '{}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationsStatus/c124571e-4077-4737-a545-0127d455b6ef?api-version=2019-05-13-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationsStatus/5d0603e5-2ed1-4040-8768-8f38f2817eb8?api-version=2019-05-13-preview
       cache-control:
       - no-cache
       content-length:
@@ -445,11 +479,11 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 20 Sep 2021 11:30:19 GMT
+      - Tue, 10 May 2022 12:26:08 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationResults/c124571e-4077-4737-a545-0127d455b6ef?api-version=2021-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationResults/5d0603e5-2ed1-4040-8768-8f38f2817eb8?api-version=2021-12-01
       pragma:
       - no-cache
       server:
@@ -479,18 +513,16 @@ interactions:
       ParameterSetName:
       - -g -v --azure-file-share --storage-account -p
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.28.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.36.0 azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.7.9
+        (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer%3BStorage%3Bclitest.rg000001%3Bclitest000003/operationResults/c124571e-4077-4737-a545-0127d455b6ef?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer%3BStorage%3Bclitest.rg000001%3Bclitest000003/operationResults/5d0603e5-2ed1-4040-8768-8f38f2817eb8?api-version=2021-12-01
   response:
     body:
       string: '{}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationsStatus/c124571e-4077-4737-a545-0127d455b6ef?api-version=2019-05-13-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationsStatus/5d0603e5-2ed1-4040-8768-8f38f2817eb8?api-version=2019-05-13-preview
       cache-control:
       - no-cache
       content-length:
@@ -498,11 +530,11 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 20 Sep 2021 11:30:25 GMT
+      - Tue, 10 May 2022 12:26:13 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationResults/c124571e-4077-4737-a545-0127d455b6ef?api-version=2021-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationResults/5d0603e5-2ed1-4040-8768-8f38f2817eb8?api-version=2021-12-01
       pragma:
       - no-cache
       server:
@@ -532,595 +564,10 @@ interactions:
       ParameterSetName:
       - -g -v --azure-file-share --storage-account -p
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.28.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.36.0 azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.7.9
+        (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer%3BStorage%3Bclitest.rg000001%3Bclitest000003/operationResults/c124571e-4077-4737-a545-0127d455b6ef?api-version=2021-07-01
-  response:
-    body:
-      string: '{}'
-    headers:
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationsStatus/c124571e-4077-4737-a545-0127d455b6ef?api-version=2019-05-13-preview
-      cache-control:
-      - no-cache
-      content-length:
-      - '2'
-      content-type:
-      - application/json
-      date:
-      - Mon, 20 Sep 2021 11:30:30 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationResults/c124571e-4077-4737-a545-0127d455b6ef?api-version=2021-07-01
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '147'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - backup protection enable-for-azurefileshare
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -v --azure-file-share --storage-account -p
-      User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.28.1
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer%3BStorage%3Bclitest.rg000001%3Bclitest000003/operationResults/c124571e-4077-4737-a545-0127d455b6ef?api-version=2021-07-01
-  response:
-    body:
-      string: '{}'
-    headers:
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationsStatus/c124571e-4077-4737-a545-0127d455b6ef?api-version=2019-05-13-preview
-      cache-control:
-      - no-cache
-      content-length:
-      - '2'
-      content-type:
-      - application/json
-      date:
-      - Mon, 20 Sep 2021 11:30:35 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationResults/c124571e-4077-4737-a545-0127d455b6ef?api-version=2021-07-01
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '146'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - backup protection enable-for-azurefileshare
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -v --azure-file-share --storage-account -p
-      User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.28.1
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer%3BStorage%3Bclitest.rg000001%3Bclitest000003/operationResults/c124571e-4077-4737-a545-0127d455b6ef?api-version=2021-07-01
-  response:
-    body:
-      string: '{}'
-    headers:
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationsStatus/c124571e-4077-4737-a545-0127d455b6ef?api-version=2019-05-13-preview
-      cache-control:
-      - no-cache
-      content-length:
-      - '2'
-      content-type:
-      - application/json
-      date:
-      - Mon, 20 Sep 2021 11:30:40 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationResults/c124571e-4077-4737-a545-0127d455b6ef?api-version=2021-07-01
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '145'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - backup protection enable-for-azurefileshare
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -v --azure-file-share --storage-account -p
-      User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.28.1
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer%3BStorage%3Bclitest.rg000001%3Bclitest000003/operationResults/c124571e-4077-4737-a545-0127d455b6ef?api-version=2021-07-01
-  response:
-    body:
-      string: '{}'
-    headers:
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationsStatus/c124571e-4077-4737-a545-0127d455b6ef?api-version=2019-05-13-preview
-      cache-control:
-      - no-cache
-      content-length:
-      - '2'
-      content-type:
-      - application/json
-      date:
-      - Mon, 20 Sep 2021 11:30:45 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationResults/c124571e-4077-4737-a545-0127d455b6ef?api-version=2021-07-01
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '144'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - backup protection enable-for-azurefileshare
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -v --azure-file-share --storage-account -p
-      User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.28.1
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer%3BStorage%3Bclitest.rg000001%3Bclitest000003/operationResults/c124571e-4077-4737-a545-0127d455b6ef?api-version=2021-07-01
-  response:
-    body:
-      string: '{}'
-    headers:
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationsStatus/c124571e-4077-4737-a545-0127d455b6ef?api-version=2019-05-13-preview
-      cache-control:
-      - no-cache
-      content-length:
-      - '2'
-      content-type:
-      - application/json
-      date:
-      - Mon, 20 Sep 2021 11:30:51 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationResults/c124571e-4077-4737-a545-0127d455b6ef?api-version=2021-07-01
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '143'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - backup protection enable-for-azurefileshare
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -v --azure-file-share --storage-account -p
-      User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.28.1
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer%3BStorage%3Bclitest.rg000001%3Bclitest000003/operationResults/c124571e-4077-4737-a545-0127d455b6ef?api-version=2021-07-01
-  response:
-    body:
-      string: '{}'
-    headers:
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationsStatus/c124571e-4077-4737-a545-0127d455b6ef?api-version=2019-05-13-preview
-      cache-control:
-      - no-cache
-      content-length:
-      - '2'
-      content-type:
-      - application/json
-      date:
-      - Mon, 20 Sep 2021 11:30:56 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationResults/c124571e-4077-4737-a545-0127d455b6ef?api-version=2021-07-01
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '142'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - backup protection enable-for-azurefileshare
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -v --azure-file-share --storage-account -p
-      User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.28.1
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer%3BStorage%3Bclitest.rg000001%3Bclitest000003/operationResults/c124571e-4077-4737-a545-0127d455b6ef?api-version=2021-07-01
-  response:
-    body:
-      string: '{}'
-    headers:
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationsStatus/c124571e-4077-4737-a545-0127d455b6ef?api-version=2019-05-13-preview
-      cache-control:
-      - no-cache
-      content-length:
-      - '2'
-      content-type:
-      - application/json
-      date:
-      - Mon, 20 Sep 2021 11:31:01 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationResults/c124571e-4077-4737-a545-0127d455b6ef?api-version=2021-07-01
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '141'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - backup protection enable-for-azurefileshare
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -v --azure-file-share --storage-account -p
-      User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.28.1
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer%3BStorage%3Bclitest.rg000001%3Bclitest000003/operationResults/c124571e-4077-4737-a545-0127d455b6ef?api-version=2021-07-01
-  response:
-    body:
-      string: '{}'
-    headers:
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationsStatus/c124571e-4077-4737-a545-0127d455b6ef?api-version=2019-05-13-preview
-      cache-control:
-      - no-cache
-      content-length:
-      - '2'
-      content-type:
-      - application/json
-      date:
-      - Mon, 20 Sep 2021 11:31:07 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationResults/c124571e-4077-4737-a545-0127d455b6ef?api-version=2021-07-01
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '140'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - backup protection enable-for-azurefileshare
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -v --azure-file-share --storage-account -p
-      User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.28.1
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer%3BStorage%3Bclitest.rg000001%3Bclitest000003/operationResults/c124571e-4077-4737-a545-0127d455b6ef?api-version=2021-07-01
-  response:
-    body:
-      string: '{}'
-    headers:
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationsStatus/c124571e-4077-4737-a545-0127d455b6ef?api-version=2019-05-13-preview
-      cache-control:
-      - no-cache
-      content-length:
-      - '2'
-      content-type:
-      - application/json
-      date:
-      - Mon, 20 Sep 2021 11:31:12 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationResults/c124571e-4077-4737-a545-0127d455b6ef?api-version=2021-07-01
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '139'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - backup protection enable-for-azurefileshare
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -v --azure-file-share --storage-account -p
-      User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.28.1
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer%3BStorage%3Bclitest.rg000001%3Bclitest000003/operationResults/c124571e-4077-4737-a545-0127d455b6ef?api-version=2021-07-01
-  response:
-    body:
-      string: '{}'
-    headers:
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationsStatus/c124571e-4077-4737-a545-0127d455b6ef?api-version=2019-05-13-preview
-      cache-control:
-      - no-cache
-      content-length:
-      - '2'
-      content-type:
-      - application/json
-      date:
-      - Mon, 20 Sep 2021 11:31:17 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationResults/c124571e-4077-4737-a545-0127d455b6ef?api-version=2021-07-01
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '138'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - backup protection enable-for-azurefileshare
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -v --azure-file-share --storage-account -p
-      User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.28.1
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer%3BStorage%3Bclitest.rg000001%3Bclitest000003/operationResults/c124571e-4077-4737-a545-0127d455b6ef?api-version=2021-07-01
-  response:
-    body:
-      string: '{}'
-    headers:
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationsStatus/c124571e-4077-4737-a545-0127d455b6ef?api-version=2019-05-13-preview
-      cache-control:
-      - no-cache
-      content-length:
-      - '2'
-      content-type:
-      - application/json
-      date:
-      - Mon, 20 Sep 2021 11:31:22 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationResults/c124571e-4077-4737-a545-0127d455b6ef?api-version=2021-07-01
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '137'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - backup protection enable-for-azurefileshare
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -v --azure-file-share --storage-account -p
-      User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.28.1
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer%3BStorage%3Bclitest.rg000001%3Bclitest000003/operationResults/c124571e-4077-4737-a545-0127d455b6ef?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer%3BStorage%3Bclitest.rg000001%3Bclitest000003/operationResults/5d0603e5-2ed1-4040-8768-8f38f2817eb8?api-version=2021-12-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003","name":"StorageContainer;Storage;clitest.rg000001;clitest000003","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000003","protectedItemCount":0,"acquireStorageAccountLock":"Acquire","friendlyName":"clitest000003","backupManagementType":"AzureStorage","registrationStatus":"Registered","healthStatus":"Healthy","containerType":"StorageContainer","protectableObjectType":"StorageContainer"}}'
@@ -1128,11 +575,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '828'
+      - '763'
       content-type:
       - application/json
       date:
-      - Mon, 20 Sep 2021 11:31:28 GMT
+      - Tue, 10 May 2022 12:26:18 GMT
       expires:
       - '-1'
       pragma:
@@ -1148,7 +595,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '136'
+      - '147'
       x-powered-by:
       - ASP.NET
     status:
@@ -1168,12 +615,10 @@ interactions:
       ParameterSetName:
       - -g -v --azure-file-share --storage-account -p
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.28.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.36.0 azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.7.9
+        (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectableItems?api-version=2021-07-01&$filter=backupManagementType%20eq%20%27AzureStorage%27%20and%20workloadType%20eq%20%27AzureFileShare%27
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectableItems?api-version=2021-12-01&%24filter=backupManagementType+eq+%27AzureStorage%27+and+workloadType+eq+%27AzureFileShare%27
   response:
     body:
       string: '{"value":[]}'
@@ -1185,7 +630,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 20 Sep 2021 11:31:29 GMT
+      - Tue, 10 May 2022 12:26:19 GMT
       expires:
       - '-1'
       pragma:
@@ -1223,28 +668,26 @@ interactions:
       ParameterSetName:
       - -g -v --azure-file-share --storage-account -p
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.28.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.36.0 azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.7.9
+        (Windows-10-10.0.22000-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer%3BStorage%3Bclitest.rg000001%3Bclitest000003/inquire?api-version=2021-07-01&$filter=workloadType%20eq%20%27AzureFileShare%27
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer%3BStorage%3Bclitest.rg000001%3Bclitest000003/inquire?api-version=2021-12-01&%24filter=workloadType+eq+%27AzureFileShare%27
   response:
     body:
       string: ''
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationsStatus/6d154331-b85b-440f-83db-de2b336bda44?api-version=2019-05-13-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationsStatus/2524b8f6-16ad-4258-9831-f01a9d9bfcfe?api-version=2019-05-13-preview
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Mon, 20 Sep 2021 11:31:29 GMT
+      - Tue, 10 May 2022 12:26:21 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationResults/6d154331-b85b-440f-83db-de2b336bda44?api-version=2021-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationResults/2524b8f6-16ad-4258-9831-f01a9d9bfcfe?api-version=2021-12-01
       pragma:
       - no-cache
       strict-transport-security:
@@ -1252,7 +695,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
       x-powered-by:
       - ASP.NET
     status:
@@ -1272,18 +715,16 @@ interactions:
       ParameterSetName:
       - -g -v --azure-file-share --storage-account -p
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.28.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.36.0 azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.7.9
+        (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer%3BStorage%3Bclitest.rg000001%3Bclitest000003/operationResults/6d154331-b85b-440f-83db-de2b336bda44?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer%3BStorage%3Bclitest.rg000001%3Bclitest000003/operationResults/2524b8f6-16ad-4258-9831-f01a9d9bfcfe?api-version=2021-12-01
   response:
     body:
       string: '{}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationsStatus/6d154331-b85b-440f-83db-de2b336bda44?api-version=2019-05-13-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationsStatus/2524b8f6-16ad-4258-9831-f01a9d9bfcfe?api-version=2019-05-13-preview
       cache-control:
       - no-cache
       content-length:
@@ -1291,11 +732,11 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 20 Sep 2021 11:31:29 GMT
+      - Tue, 10 May 2022 12:26:22 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationResults/6d154331-b85b-440f-83db-de2b336bda44?api-version=2021-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationResults/2524b8f6-16ad-4258-9831-f01a9d9bfcfe?api-version=2021-12-01
       pragma:
       - no-cache
       server:
@@ -1305,7 +746,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '137'
+      - '149'
       x-powered-by:
       - ASP.NET
     status:
@@ -1325,24 +766,18 @@ interactions:
       ParameterSetName:
       - -g -v --azure-file-share --storage-account -p
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.28.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.36.0 azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.7.9
+        (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer%3BStorage%3Bclitest.rg000001%3Bclitest000003/operationResults/6d154331-b85b-440f-83db-de2b336bda44?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer%3BStorage%3Bclitest.rg000001%3Bclitest000003/operationResults/2524b8f6-16ad-4258-9831-f01a9d9bfcfe?api-version=2021-12-01
   response:
     body:
       string: ''
     headers:
       cache-control:
       - no-cache
-      content-type:
-      - application/json; charset=utf-8
       date:
-      - Mon, 20 Sep 2021 11:31:35 GMT
-      expires:
-      - '-1'
+      - Tue, 10 May 2022 12:26:28 GMT
       pragma:
       - no-cache
       strict-transport-security:
@@ -1350,7 +785,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '135'
+      - '148'
       x-powered-by:
       - ASP.NET
     status:
@@ -1370,24 +805,22 @@ interactions:
       ParameterSetName:
       - -g -v --azure-file-share --storage-account -p
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.28.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.36.0 azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.7.9
+        (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectableItems?api-version=2021-07-01&$filter=backupManagementType%20eq%20%27AzureStorage%27%20and%20workloadType%20eq%20%27AzureFileShare%27
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectableItems?api-version=2021-12-01&%24filter=backupManagementType+eq+%27AzureStorage%27+and+workloadType+eq+%27AzureFileShare%27
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/storagecontainer;storage;clitest.rg000001;clitest000003/protectableItems/azurefileshare;7a24e06222ef6b7f03eafb64d4ddbcec4104dcd9a1c5b6cd893f734ee602270f","name":"azurefileshare;7a24e06222ef6b7f03eafb64d4ddbcec4104dcd9a1c5b6cd893f734ee602270f","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentContainerFabricId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000003","parentContainerFriendlyName":"clitest000003","azureFileShareType":"XSMB","backupManagementType":"AzureStorage","workloadType":"AzureFileShare","protectableItemType":"AzureFileShare","friendlyName":"clitest-item000004","protectionState":"NotProtected"}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/storagecontainer;storage;clitest.rg000001;clitest000003/protectableItems/azurefileshare;b3ba9b74c8522c3747db96e38b6708dad758b73a975261d6bd292a4ca2d5956c","name":"azurefileshare;b3ba9b74c8522c3747db96e38b6708dad758b73a975261d6bd292a4ca2d5956c","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentContainerFabricId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000003","parentContainerFriendlyName":"clitest000003","azureFileShareType":"XSMB","backupManagementType":"AzureStorage","workloadType":"AzureFileShare","protectableItemType":"AzureFileShare","friendlyName":"clitest-item000004","protectionState":"NotProtected"}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '983'
       content-type:
       - application/json
       date:
-      - Mon, 20 Sep 2021 11:31:36 GMT
+      - Tue, 10 May 2022 12:26:28 GMT
       expires:
       - '-1'
       pragma:
@@ -1423,132 +856,22 @@ interactions:
       ParameterSetName:
       - -g -v --azure-file-share --storage-account -p
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.28.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.36.0 azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.7.9
+        (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupPolicies/clitest-item000005?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupPolicies/clitest-item000005?api-version=2021-12-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupPolicies/clitest-item000005","name":"clitest-item000005","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureStorage","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2021-09-20T21:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2021-09-20T21:00:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}},"timeZone":"UTC","protectedItemsCount":0}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupPolicies/clitest-item000005","name":"clitest-item000005","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureStorage","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2022-05-10T22:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2022-05-10T22:00:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}},"timeZone":"UTC","protectedItemsCount":0}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '740'
+      - '719'
       content-type:
       - application/json
       date:
-      - Mon, 20 Sep 2021 11:31:37 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '149'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"properties": {"sourceResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000003",
-      "policyId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupPolicies/clitest-item000005",
-      "protectedItemType": "AzureFileShareProtectedItem"}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - backup protection enable-for-azurefileshare
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '460'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - -g -v --azure-file-share --storage-account -p
-      User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.28.1
-      accept-language:
-      - en-US
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/storagecontainer%3Bstorage%3Bclitest.rg000001%3Bclitest000003/protectedItems/azurefileshare%3B7a24e06222ef6b7f03eafb64d4ddbcec4104dcd9a1c5b6cd893f734ee602270f?api-version=2021-07-01
-  response:
-    body:
-      string: ''
-    headers:
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/storagecontainer;storage;clitest.rg000001;clitest000003/protectedItems/azurefileshare;7a24e06222ef6b7f03eafb64d4ddbcec4104dcd9a1c5b6cd893f734ee602270f/operationsStatus/8db48805-a8f6-4bd2-848d-2b345412b039?api-version=2021-07-01
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      date:
-      - Mon, 20 Sep 2021 11:31:38 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/storagecontainer;storage;clitest.rg000001;clitest000003/protectedItems/azurefileshare;7a24e06222ef6b7f03eafb64d4ddbcec4104dcd9a1c5b6cd893f734ee602270f/operationResults/8db48805-a8f6-4bd2-848d-2b345412b039?api-version=2021-07-01
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1196'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - backup protection enable-for-azurefileshare
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -v --azure-file-share --storage-account -p
-      User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.28.1
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/8db48805-a8f6-4bd2-848d-2b345412b039?api-version=2021-07-01
-  response:
-    body:
-      string: '{"id":"8db48805-a8f6-4bd2-848d-2b345412b039","name":"8db48805-a8f6-4bd2-848d-2b345412b039","status":"InProgress","startTime":"2021-09-20T11:31:37.8096046Z","endTime":"0001-01-01T00:00:00"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '188'
-      content-type:
-      - application/json
-      date:
-      - Mon, 20 Sep 2021 11:31:37 GMT
+      - Tue, 10 May 2022 12:26:28 GMT
       expires:
       - '-1'
       pragma:
@@ -1571,7 +894,9 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: null
+    body: '{"properties": {"protectedItemType": "AzureFileShareProtectedItem", "sourceResourceId":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000003",
+      "policyId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupPolicies/clitest-item000005"}}'
     headers:
       Accept:
       - application/json
@@ -1581,48 +906,46 @@ interactions:
       - backup protection enable-for-azurefileshare
       Connection:
       - keep-alive
+      Content-Length:
+      - '430'
+      Content-Type:
+      - application/json
       ParameterSetName:
       - -g -v --azure-file-share --storage-account -p
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.28.1
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/8db48805-a8f6-4bd2-848d-2b345412b039?api-version=2021-07-01
+      - AZURECLI/2.36.0 azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.7.9
+        (Windows-10-10.0.22000-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/storagecontainer%3Bstorage%3Bclitest.rg000001%3Bclitest000003/protectedItems/azurefileshare%3Bb3ba9b74c8522c3747db96e38b6708dad758b73a975261d6bd292a4ca2d5956c?api-version=2021-12-01
   response:
     body:
-      string: '{"id":"8db48805-a8f6-4bd2-848d-2b345412b039","name":"8db48805-a8f6-4bd2-848d-2b345412b039","status":"InProgress","startTime":"2021-09-20T11:31:37.8096046Z","endTime":"0001-01-01T00:00:00"}'
+      string: ''
     headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/storagecontainer;storage;clitest.rg000001;clitest000003/protectedItems/azurefileshare;b3ba9b74c8522c3747db96e38b6708dad758b73a975261d6bd292a4ca2d5956c/operationsStatus/eab6f8b0-0733-44bc-aa18-ce6001a993c7?api-version=2021-12-01
       cache-control:
       - no-cache
       content-length:
-      - '188'
-      content-type:
-      - application/json
+      - '0'
       date:
-      - Mon, 20 Sep 2021 11:31:43 GMT
+      - Tue, 10 May 2022 12:26:30 GMT
       expires:
       - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/storagecontainer;storage;clitest.rg000001;clitest000003/protectedItems/azurefileshare;b3ba9b74c8522c3747db96e38b6708dad758b73a975261d6bd292a4ca2d5956c/operationResults/eab6f8b0-0733-44bc-aa18-ce6001a993c7?api-version=2021-12-01
       pragma:
       - no-cache
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '146'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
       x-powered-by:
       - ASP.NET
     status:
-      code: 200
-      message: OK
+      code: 202
+      message: Accepted
 - request:
     body: null
     headers:
@@ -1637,15 +960,13 @@ interactions:
       ParameterSetName:
       - -g -v --azure-file-share --storage-account -p
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.28.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.36.0 azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.7.9
+        (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/8db48805-a8f6-4bd2-848d-2b345412b039?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/eab6f8b0-0733-44bc-aa18-ce6001a993c7?api-version=2021-12-01
   response:
     body:
-      string: '{"id":"8db48805-a8f6-4bd2-848d-2b345412b039","name":"8db48805-a8f6-4bd2-848d-2b345412b039","status":"InProgress","startTime":"2021-09-20T11:31:37.8096046Z","endTime":"0001-01-01T00:00:00"}'
+      string: '{"id":"eab6f8b0-0733-44bc-aa18-ce6001a993c7","name":"eab6f8b0-0733-44bc-aa18-ce6001a993c7","status":"InProgress","startTime":"2022-05-10T12:26:30.5924917Z","endTime":"0001-01-01T00:00:00"}'
     headers:
       cache-control:
       - no-cache
@@ -1654,7 +975,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 20 Sep 2021 11:31:48 GMT
+      - Tue, 10 May 2022 12:26:31 GMT
       expires:
       - '-1'
       pragma:
@@ -1690,15 +1011,13 @@ interactions:
       ParameterSetName:
       - -g -v --azure-file-share --storage-account -p
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.28.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.36.0 azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.7.9
+        (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/8db48805-a8f6-4bd2-848d-2b345412b039?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/eab6f8b0-0733-44bc-aa18-ce6001a993c7?api-version=2021-12-01
   response:
     body:
-      string: '{"id":"8db48805-a8f6-4bd2-848d-2b345412b039","name":"8db48805-a8f6-4bd2-848d-2b345412b039","status":"InProgress","startTime":"2021-09-20T11:31:37.8096046Z","endTime":"0001-01-01T00:00:00"}'
+      string: '{"id":"eab6f8b0-0733-44bc-aa18-ce6001a993c7","name":"eab6f8b0-0733-44bc-aa18-ce6001a993c7","status":"InProgress","startTime":"2022-05-10T12:26:30.5924917Z","endTime":"0001-01-01T00:00:00"}'
     headers:
       cache-control:
       - no-cache
@@ -1707,7 +1026,58 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 20 Sep 2021 11:31:53 GMT
+      - Tue, 10 May 2022 12:26:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '143'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurefileshare
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v --azure-file-share --storage-account -p
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.7.9
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/eab6f8b0-0733-44bc-aa18-ce6001a993c7?api-version=2021-12-01
+  response:
+    body:
+      string: '{"id":"eab6f8b0-0733-44bc-aa18-ce6001a993c7","name":"eab6f8b0-0733-44bc-aa18-ce6001a993c7","status":"InProgress","startTime":"2022-05-10T12:26:30.5924917Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Tue, 10 May 2022 12:26:42 GMT
       expires:
       - '-1'
       pragma:
@@ -1743,15 +1113,13 @@ interactions:
       ParameterSetName:
       - -g -v --azure-file-share --storage-account -p
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.28.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.36.0 azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.7.9
+        (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/8db48805-a8f6-4bd2-848d-2b345412b039?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/eab6f8b0-0733-44bc-aa18-ce6001a993c7?api-version=2021-12-01
   response:
     body:
-      string: '{"id":"8db48805-a8f6-4bd2-848d-2b345412b039","name":"8db48805-a8f6-4bd2-848d-2b345412b039","status":"InProgress","startTime":"2021-09-20T11:31:37.8096046Z","endTime":"0001-01-01T00:00:00"}'
+      string: '{"id":"eab6f8b0-0733-44bc-aa18-ce6001a993c7","name":"eab6f8b0-0733-44bc-aa18-ce6001a993c7","status":"InProgress","startTime":"2022-05-10T12:26:30.5924917Z","endTime":"0001-01-01T00:00:00"}'
     headers:
       cache-control:
       - no-cache
@@ -1760,7 +1128,58 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 20 Sep 2021 11:31:59 GMT
+      - Tue, 10 May 2022 12:26:47 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '141'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurefileshare
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v --azure-file-share --storage-account -p
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.7.9
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/eab6f8b0-0733-44bc-aa18-ce6001a993c7?api-version=2021-12-01
+  response:
+    body:
+      string: '{"id":"eab6f8b0-0733-44bc-aa18-ce6001a993c7","name":"eab6f8b0-0733-44bc-aa18-ce6001a993c7","status":"InProgress","startTime":"2022-05-10T12:26:30.5924917Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Tue, 10 May 2022 12:26:52 GMT
       expires:
       - '-1'
       pragma:
@@ -1796,15 +1215,13 @@ interactions:
       ParameterSetName:
       - -g -v --azure-file-share --storage-account -p
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.28.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.36.0 azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.7.9
+        (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/8db48805-a8f6-4bd2-848d-2b345412b039?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/eab6f8b0-0733-44bc-aa18-ce6001a993c7?api-version=2021-12-01
   response:
     body:
-      string: '{"id":"8db48805-a8f6-4bd2-848d-2b345412b039","name":"8db48805-a8f6-4bd2-848d-2b345412b039","status":"InProgress","startTime":"2021-09-20T11:31:37.8096046Z","endTime":"0001-01-01T00:00:00"}'
+      string: '{"id":"eab6f8b0-0733-44bc-aa18-ce6001a993c7","name":"eab6f8b0-0733-44bc-aa18-ce6001a993c7","status":"InProgress","startTime":"2022-05-10T12:26:30.5924917Z","endTime":"0001-01-01T00:00:00"}'
     headers:
       cache-control:
       - no-cache
@@ -1813,7 +1230,58 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 20 Sep 2021 11:32:04 GMT
+      - Tue, 10 May 2022 12:26:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '139'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurefileshare
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v --azure-file-share --storage-account -p
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.7.9
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/eab6f8b0-0733-44bc-aa18-ce6001a993c7?api-version=2021-12-01
+  response:
+    body:
+      string: '{"id":"eab6f8b0-0733-44bc-aa18-ce6001a993c7","name":"eab6f8b0-0733-44bc-aa18-ce6001a993c7","status":"InProgress","startTime":"2022-05-10T12:26:30.5924917Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Tue, 10 May 2022 12:27:03 GMT
       expires:
       - '-1'
       pragma:
@@ -1849,15 +1317,13 @@ interactions:
       ParameterSetName:
       - -g -v --azure-file-share --storage-account -p
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.28.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.36.0 azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.7.9
+        (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/8db48805-a8f6-4bd2-848d-2b345412b039?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/eab6f8b0-0733-44bc-aa18-ce6001a993c7?api-version=2021-12-01
   response:
     body:
-      string: '{"id":"8db48805-a8f6-4bd2-848d-2b345412b039","name":"8db48805-a8f6-4bd2-848d-2b345412b039","status":"InProgress","startTime":"2021-09-20T11:31:37.8096046Z","endTime":"0001-01-01T00:00:00"}'
+      string: '{"id":"eab6f8b0-0733-44bc-aa18-ce6001a993c7","name":"eab6f8b0-0733-44bc-aa18-ce6001a993c7","status":"InProgress","startTime":"2022-05-10T12:26:30.5924917Z","endTime":"0001-01-01T00:00:00"}'
     headers:
       cache-control:
       - no-cache
@@ -1866,7 +1332,58 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 20 Sep 2021 11:32:09 GMT
+      - Tue, 10 May 2022 12:27:08 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '137'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurefileshare
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v --azure-file-share --storage-account -p
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.7.9
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/eab6f8b0-0733-44bc-aa18-ce6001a993c7?api-version=2021-12-01
+  response:
+    body:
+      string: '{"id":"eab6f8b0-0733-44bc-aa18-ce6001a993c7","name":"eab6f8b0-0733-44bc-aa18-ce6001a993c7","status":"Succeeded","startTime":"2022-05-10T12:26:30.5924917Z","endTime":"2022-05-10T12:26:30.5924917Z","properties":{"objectType":"OperationStatusJobExtendedInfo","jobId":"aa85d9aa-5ea1-4dce-bf45-a53b5cf15929"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '304'
+      content-type:
+      - application/json
+      date:
+      - Tue, 10 May 2022 12:27:14 GMT
       expires:
       - '-1'
       pragma:
@@ -1902,15 +1419,269 @@ interactions:
       ParameterSetName:
       - -g -v --azure-file-share --storage-account -p
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.28.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.36.0 azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.7.9
+        (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/8db48805-a8f6-4bd2-848d-2b345412b039?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/aa85d9aa-5ea1-4dce-bf45-a53b5cf15929?api-version=2021-12-01
   response:
     body:
-      string: '{"id":"8db48805-a8f6-4bd2-848d-2b345412b039","name":"8db48805-a8f6-4bd2-848d-2b345412b039","status":"InProgress","startTime":"2021-09-20T11:31:37.8096046Z","endTime":"0001-01-01T00:00:00"}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/aa85d9aa-5ea1-4dce-bf45-a53b5cf15929","name":"aa85d9aa-5ea1-4dce-bf45-a53b5cf15929","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureStorageJob","duration":"PT41.8639932S","storageAccountName":"clitest000003","storageAccountVersion":"Storage","extendedInfo":{"tasksList":[],"propertyBag":{"File
+        Share Name":"clitest-item000004","Storage Account Name":"clitest000003","Policy
+        Name":"clitest-item000005"}},"isUserTriggered":false,"entityFriendlyName":"clitest-item000004","backupManagementType":"AzureStorage","operation":"ConfigureBackup","status":"Completed","startTime":"2022-05-10T12:26:30.5924917Z","endTime":"2022-05-10T12:27:12.4564849Z","activityId":"5c205cf6-d05c-11ec-beee-8a7e9d03995b"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '897'
+      content-type:
+      - application/json
+      date:
+      - Tue, 10 May 2022 12:27:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '148'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -v -g --backup-management-type
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.7.9
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectionContainers?api-version=2021-12-01&%24filter=backupManagementType+eq+%27AzureStorage%27+and+friendlyName+eq+%27clitest000003%27+and+status+eq+%27Registered%27
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003","name":"StorageContainer;Storage;clitest.rg000001;clitest000003","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000003","protectedItemCount":1,"acquireStorageAccountLock":"Acquire","friendlyName":"clitest000003","backupManagementType":"AzureStorage","registrationStatus":"Registered","healthStatus":"Healthy","containerType":"StorageContainer","protectableObjectType":"StorageContainer"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '853'
+      content-type:
+      - application/json
+      date:
+      - Tue, 10 May 2022 12:27:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '148'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup item list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c --query
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.7.9
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectedItems?api-version=2021-12-01
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;storage;clitest.rg000001;clitest000003/protectedItems/AzureFileShare;b3ba9b74c8522c3747db96e38b6708dad758b73a975261d6bd292a4ca2d5956c","name":"AzureFileShare;b3ba9b74c8522c3747db96e38b6708dad758b73a975261d6bd292a4ca2d5956c","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{},"friendlyName":"clitest-item000004","protectionStatus":"Healthy","protectionState":"IRPending","lastBackupStatus":"IRPending","protectedItemType":"AzureFileShareProtectedItem","backupManagementType":"AzureStorage","workloadType":"AzureFileShare","containerName":"StorageContainer;storage;clitest.rg000001;clitest000003","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.storage/storageAccounts/clitest000003","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupPolicies/clitest-item000005","isArchiveEnabled":false}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1277'
+      content-type:
+      - application/json
+      date:
+      - Tue, 10 May 2022 12:27:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '149'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection disable
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -i --backup-management-type --delete-backup-data --yes
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.7.9
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer%3BStorage%3Bclitest.rg000001%3Bclitest000003/protectedItems/AzureFileShare%3Bb3ba9b74c8522c3747db96e38b6708dad758b73a975261d6bd292a4ca2d5956c?api-version=2021-12-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;storage;clitest.rg000001;clitest000003/protectedItems/AzureFileShare;b3ba9b74c8522c3747db96e38b6708dad758b73a975261d6bd292a4ca2d5956c","name":"AzureFileShare;b3ba9b74c8522c3747db96e38b6708dad758b73a975261d6bd292a4ca2d5956c","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{},"friendlyName":"clitest-item000004","protectionStatus":"Healthy","protectionState":"IRPending","lastBackupStatus":"IRPending","extendedInfo":{"recoveryPointCount":0,"policyState":"Consistent","resourceState":"Active","resourceStateSyncTime":"2022-05-10T12:27:12.2533757Z"},"protectedItemType":"AzureFileShareProtectedItem","backupManagementType":"AzureStorage","workloadType":"AzureFileShare","containerName":"StorageContainer;storage;clitest.rg000001;clitest000003","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.storage/storageAccounts/clitest000003","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupPolicies/clitest-item000005","isArchiveEnabled":false}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1412'
+      content-type:
+      - application/json
+      date:
+      - Tue, 10 May 2022 12:27:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '149'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection disable
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -v -c -i --backup-management-type --delete-backup-data --yes
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.7.9
+        (Windows-10-10.0.22000-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer%3Bstorage%3Bclitest.rg000001%3Bclitest000003/protectedItems/AzureFileShare%3Bb3ba9b74c8522c3747db96e38b6708dad758b73a975261d6bd292a4ca2d5956c?api-version=2021-12-01
+  response:
+    body:
+      string: ''
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/1b785c10-daf5-47b8-8d93-79214ad2000e?api-version=2021-12-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Tue, 10 May 2022 12:27:18 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperationResults/1b785c10-daf5-47b8-8d93-79214ad2000e?api-version=2021-12-01
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection disable
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -i --backup-management-type --delete-backup-data --yes
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.7.9
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/1b785c10-daf5-47b8-8d93-79214ad2000e?api-version=2021-12-01
+  response:
+    body:
+      string: '{"id":"1b785c10-daf5-47b8-8d93-79214ad2000e","name":"1b785c10-daf5-47b8-8d93-79214ad2000e","status":"InProgress","startTime":"2022-05-10T12:27:19.3249406Z","endTime":"0001-01-01T00:00:00"}'
     headers:
       cache-control:
       - no-cache
@@ -1919,7 +1690,58 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 20 Sep 2021 11:32:14 GMT
+      - Tue, 10 May 2022 12:27:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '135'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection disable
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -i --backup-management-type --delete-backup-data --yes
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.7.9
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/1b785c10-daf5-47b8-8d93-79214ad2000e?api-version=2021-12-01
+  response:
+    body:
+      string: '{"id":"1b785c10-daf5-47b8-8d93-79214ad2000e","name":"1b785c10-daf5-47b8-8d93-79214ad2000e","status":"InProgress","startTime":"2022-05-10T12:27:19.3249406Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Tue, 10 May 2022 12:27:25 GMT
       expires:
       - '-1'
       pragma:
@@ -1949,30 +1771,79 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - backup protection enable-for-azurefileshare
+      - backup protection disable
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -v --azure-file-share --storage-account -p
+      - -g -v -c -i --backup-management-type --delete-backup-data --yes
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.28.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.36.0 azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.7.9
+        (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/8db48805-a8f6-4bd2-848d-2b345412b039?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/1b785c10-daf5-47b8-8d93-79214ad2000e?api-version=2021-12-01
   response:
     body:
-      string: '{"id":"8db48805-a8f6-4bd2-848d-2b345412b039","name":"8db48805-a8f6-4bd2-848d-2b345412b039","status":"Succeeded","startTime":"2021-09-20T11:31:37.8096046Z","endTime":"2021-09-20T11:31:37.8096046Z","properties":{"objectType":"OperationStatusJobExtendedInfo","jobId":"5a258ad4-b07c-44cc-9a8e-e74cc04124a2"}}'
+      string: '{"id":"1b785c10-daf5-47b8-8d93-79214ad2000e","name":"1b785c10-daf5-47b8-8d93-79214ad2000e","status":"InProgress","startTime":"2022-05-10T12:27:19.3249406Z","endTime":"0001-01-01T00:00:00"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '304'
+      - '188'
       content-type:
       - application/json
       date:
-      - Mon, 20 Sep 2021 11:32:20 GMT
+      - Tue, 10 May 2022 12:27:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '133'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection disable
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -i --backup-management-type --delete-backup-data --yes
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.7.9
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/1b785c10-daf5-47b8-8d93-79214ad2000e?api-version=2021-12-01
+  response:
+    body:
+      string: '{"id":"1b785c10-daf5-47b8-8d93-79214ad2000e","name":"1b785c10-daf5-47b8-8d93-79214ad2000e","status":"InProgress","startTime":"2022-05-10T12:27:19.3249406Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Tue, 10 May 2022 12:27:36 GMT
       expires:
       - '-1'
       pragma:
@@ -2002,86 +1873,28 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - backup protection enable-for-azurefileshare
+      - backup protection disable
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -v --azure-file-share --storage-account -p
+      - -g -v -c -i --backup-management-type --delete-backup-data --yes
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.28.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.36.0 azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.7.9
+        (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/5a258ad4-b07c-44cc-9a8e-e74cc04124a2?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/1b785c10-daf5-47b8-8d93-79214ad2000e?api-version=2021-12-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/5a258ad4-b07c-44cc-9a8e-e74cc04124a2","name":"5a258ad4-b07c-44cc-9a8e-e74cc04124a2","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureStorageJob","duration":"PT42.1009116S","storageAccountName":"clitest000003","storageAccountVersion":"Storage","extendedInfo":{"tasksList":[],"propertyBag":{"File
-        Share Name":"clitest-item000004","Storage Account Name":"clitest000003","Policy
-        Name":"clitest-item000005"}},"isUserTriggered":false,"entityFriendlyName":"clitest-item000004","backupManagementType":"AzureStorage","operation":"ConfigureBackup","status":"Completed","startTime":"2021-09-20T11:31:37.8096046Z","endTime":"2021-09-20T11:32:19.9105162Z","activityId":"215ac3e2-1a06-11ec-943f-c8f750f92764"}}'
+      string: '{"id":"1b785c10-daf5-47b8-8d93-79214ad2000e","name":"1b785c10-daf5-47b8-8d93-79214ad2000e","status":"Succeeded","startTime":"2022-05-10T12:27:19.3249406Z","endTime":"2022-05-10T12:27:19.3249406Z","properties":{"objectType":"OperationStatusJobExtendedInfo","jobId":"0603905f-4930-437b-bc58-2e56edc42716"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '946'
+      - '304'
       content-type:
       - application/json
       date:
-      - Mon, 20 Sep 2021 11:32:20 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '149'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - backup container show
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -v -g --backup-management-type
-      User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.28.1
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectionContainers?api-version=2021-07-01&$filter=backupManagementType%20eq%20%27AzureStorage%27%20and%20friendlyName%20eq%20%27clitest000003%27%20and%20status%20eq%20%27Registered%27
-  response:
-    body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003","name":"StorageContainer;Storage;clitest.rg000001;clitest000003","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000003","protectedItemCount":1,"acquireStorageAccountLock":"Acquire","friendlyName":"clitest000003","backupManagementType":"AzureStorage","registrationStatus":"Registered","healthStatus":"Healthy","containerType":"StorageContainer","protectableObjectType":"StorageContainer"}}]}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '918'
-      content-type:
-      - application/json
-      date:
-      - Mon, 20 Sep 2021 11:32:21 GMT
+      - Tue, 10 May 2022 12:27:42 GMT
       expires:
       - '-1'
       pragma:
@@ -2097,60 +1910,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '149'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - backup item list
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -v -c --query
-      User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.28.1
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectedItems?api-version=2021-07-01
-  response:
-    body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;storage;clitest.rg000001;clitest000003/protectedItems/AzureFileShare;7a24e06222ef6b7f03eafb64d4ddbcec4104dcd9a1c5b6cd893f734ee602270f","name":"AzureFileShare;7a24e06222ef6b7f03eafb64d4ddbcec4104dcd9a1c5b6cd893f734ee602270f","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{},"friendlyName":"clitest-item000004","protectionStatus":"Healthy","protectionState":"IRPending","lastBackupStatus":"IRPending","protectedItemType":"AzureFileShareProtectedItem","backupManagementType":"AzureStorage","workloadType":"AzureFileShare","containerName":"StorageContainer;storage;clitest.rg000001;clitest000003","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.storage/storageAccounts/clitest000003","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupPolicies/clitest-item000005","isArchiveEnabled":false}}]}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1352'
-      content-type:
-      - application/json
-      date:
-      - Mon, 20 Sep 2021 11:32:23 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '149'
+      - '131'
       x-powered-by:
       - ASP.NET
     status:
@@ -2170,394 +1930,23 @@ interactions:
       ParameterSetName:
       - -g -v -c -i --backup-management-type --delete-backup-data --yes
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.28.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.36.0 azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.7.9
+        (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer%3BStorage%3Bclitest.rg000001%3Bclitest000003/protectedItems/AzureFileShare%3B7a24e06222ef6b7f03eafb64d4ddbcec4104dcd9a1c5b6cd893f734ee602270f?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/0603905f-4930-437b-bc58-2e56edc42716?api-version=2021-12-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;storage;clitest.rg000001;clitest000003/protectedItems/AzureFileShare;7a24e06222ef6b7f03eafb64d4ddbcec4104dcd9a1c5b6cd893f734ee602270f","name":"AzureFileShare;7a24e06222ef6b7f03eafb64d4ddbcec4104dcd9a1c5b6cd893f734ee602270f","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{},"friendlyName":"clitest-item000004","protectionStatus":"Healthy","protectionState":"IRPending","lastBackupStatus":"IRPending","extendedInfo":{"recoveryPointCount":0,"policyState":"Consistent","resourceState":"Active","resourceStateSyncTime":"2021-09-20T11:32:19.3744962Z"},"protectedItemType":"AzureFileShareProtectedItem","backupManagementType":"AzureStorage","workloadType":"AzureFileShare","containerName":"StorageContainer;storage;clitest.rg000001;clitest000003","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.storage/storageAccounts/clitest000003","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupPolicies/clitest-item000005","isArchiveEnabled":false}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/0603905f-4930-437b-bc58-2e56edc42716","name":"0603905f-4930-437b-bc58-2e56edc42716","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureStorageJob","duration":"PT21.3595095S","storageAccountName":"clitest000003","storageAccountVersion":"Storage","extendedInfo":{"tasksList":[],"propertyBag":{"File
+        Share Name":"clitest-item000004","Storage Account Name":"clitest000003"}},"isUserTriggered":false,"entityFriendlyName":"clitest-item000004","backupManagementType":"AzureStorage","operation":"DeleteBackupData","status":"Completed","startTime":"2022-05-10T12:27:19.3249406Z","endTime":"2022-05-10T12:27:40.6844501Z","activityId":"876c5db8-d05c-11ec-9a7d-8a7e9d03995b"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1487'
+      - '863'
       content-type:
       - application/json
       date:
-      - Mon, 20 Sep 2021 11:32:24 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '149'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - backup protection disable
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      ParameterSetName:
-      - -g -v -c -i --backup-management-type --delete-backup-data --yes
-      User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.28.1
-      accept-language:
-      - en-US
-    method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer%3Bstorage%3Bclitest.rg000001%3Bclitest000003/protectedItems/AzureFileShare%3B7a24e06222ef6b7f03eafb64d4ddbcec4104dcd9a1c5b6cd893f734ee602270f?api-version=2021-07-01
-  response:
-    body:
-      string: ''
-    headers:
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/e4cde054-fa1d-4578-a5ab-47f9b9f3b4ad?api-version=2021-07-01
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      date:
-      - Mon, 20 Sep 2021 11:32:24 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperationResults/e4cde054-fa1d-4578-a5ab-47f9b9f3b4ad?api-version=2021-07-01
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - backup protection disable
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -v -c -i --backup-management-type --delete-backup-data --yes
-      User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.28.1
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/e4cde054-fa1d-4578-a5ab-47f9b9f3b4ad?api-version=2021-07-01
-  response:
-    body:
-      string: '{"id":"e4cde054-fa1d-4578-a5ab-47f9b9f3b4ad","name":"e4cde054-fa1d-4578-a5ab-47f9b9f3b4ad","status":"InProgress","startTime":"2021-09-20T11:32:24.932527Z","endTime":"0001-01-01T00:00:00"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '187'
-      content-type:
-      - application/json
-      date:
-      - Mon, 20 Sep 2021 11:32:25 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '149'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - backup protection disable
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -v -c -i --backup-management-type --delete-backup-data --yes
-      User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.28.1
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/e4cde054-fa1d-4578-a5ab-47f9b9f3b4ad?api-version=2021-07-01
-  response:
-    body:
-      string: '{"id":"e4cde054-fa1d-4578-a5ab-47f9b9f3b4ad","name":"e4cde054-fa1d-4578-a5ab-47f9b9f3b4ad","status":"InProgress","startTime":"2021-09-20T11:32:24.932527Z","endTime":"0001-01-01T00:00:00"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '187'
-      content-type:
-      - application/json
-      date:
-      - Mon, 20 Sep 2021 11:32:30 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '148'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - backup protection disable
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -v -c -i --backup-management-type --delete-backup-data --yes
-      User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.28.1
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/e4cde054-fa1d-4578-a5ab-47f9b9f3b4ad?api-version=2021-07-01
-  response:
-    body:
-      string: '{"id":"e4cde054-fa1d-4578-a5ab-47f9b9f3b4ad","name":"e4cde054-fa1d-4578-a5ab-47f9b9f3b4ad","status":"InProgress","startTime":"2021-09-20T11:32:24.932527Z","endTime":"0001-01-01T00:00:00"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '187'
-      content-type:
-      - application/json
-      date:
-      - Mon, 20 Sep 2021 11:32:35 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '147'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - backup protection disable
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -v -c -i --backup-management-type --delete-backup-data --yes
-      User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.28.1
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/e4cde054-fa1d-4578-a5ab-47f9b9f3b4ad?api-version=2021-07-01
-  response:
-    body:
-      string: '{"id":"e4cde054-fa1d-4578-a5ab-47f9b9f3b4ad","name":"e4cde054-fa1d-4578-a5ab-47f9b9f3b4ad","status":"InProgress","startTime":"2021-09-20T11:32:24.932527Z","endTime":"0001-01-01T00:00:00"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '187'
-      content-type:
-      - application/json
-      date:
-      - Mon, 20 Sep 2021 11:32:41 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '146'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - backup protection disable
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -v -c -i --backup-management-type --delete-backup-data --yes
-      User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.28.1
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/e4cde054-fa1d-4578-a5ab-47f9b9f3b4ad?api-version=2021-07-01
-  response:
-    body:
-      string: '{"id":"e4cde054-fa1d-4578-a5ab-47f9b9f3b4ad","name":"e4cde054-fa1d-4578-a5ab-47f9b9f3b4ad","status":"Succeeded","startTime":"2021-09-20T11:32:24.932527Z","endTime":"2021-09-20T11:32:24.932527Z","properties":{"objectType":"OperationStatusJobExtendedInfo","jobId":"41f94e00-9cd6-4d28-ae30-6872f0bea400"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '302'
-      content-type:
-      - application/json
-      date:
-      - Mon, 20 Sep 2021 11:32:46 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '145'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - backup protection disable
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -v -c -i --backup-management-type --delete-backup-data --yes
-      User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.28.1
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/41f94e00-9cd6-4d28-ae30-6872f0bea400?api-version=2021-07-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/41f94e00-9cd6-4d28-ae30-6872f0bea400","name":"41f94e00-9cd6-4d28-ae30-6872f0bea400","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureStorageJob","duration":"PT21.4227714S","storageAccountName":"clitest000003","storageAccountVersion":"Storage","extendedInfo":{"tasksList":[],"propertyBag":{"File
-        Share Name":"clitest-item000004","Storage Account Name":"clitest000003"}},"isUserTriggered":false,"entityFriendlyName":"clitest-item000004","backupManagementType":"AzureStorage","operation":"DeleteBackupData","status":"Completed","startTime":"2021-09-20T11:32:24.932527Z","endTime":"2021-09-20T11:32:46.3552984Z","activityId":"6c8f79d7-1a06-11ec-b448-c8f750f92764"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '905'
-      content-type:
-      - application/json
-      date:
-      - Mon, 20 Sep 2021 11:32:46 GMT
+      - Tue, 10 May 2022 12:27:42 GMT
       expires:
       - '-1'
       pragma:
@@ -2591,33 +1980,82 @@ interactions:
       - backup container unregister
       Connection:
       - keep-alive
+      ParameterSetName:
+      - -g -v -c --yes
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.7.9
+        (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectionContainers?api-version=2021-12-01&%24filter=backupManagementType+eq+%27AzureStorage%27+and+status+eq+%27Registered%27
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003","name":"StorageContainer;Storage;clitest.rg000001;clitest000003","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000003","protectedItemCount":0,"acquireStorageAccountLock":"Acquire","friendlyName":"clitest000003","backupManagementType":"AzureStorage","registrationStatus":"Registered","healthStatus":"Healthy","containerType":"StorageContainer","protectableObjectType":"StorageContainer"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '853'
+      content-type:
+      - application/json
+      date:
+      - Tue, 10 May 2022 12:27:43 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '149'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container unregister
+      Connection:
+      - keep-alive
       Content-Length:
       - '0'
       ParameterSetName:
       - -g -v -c --yes
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.28.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.36.0 azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.7.9
+        (Windows-10-10.0.22000-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer%3BStorage%3Bclitest.rg000001%3Bclitest000003?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer%3BStorage%3Bclitest.rg000001%3Bclitest000003?api-version=2021-12-01
   response:
     body:
       string: ''
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/operationsStatus/4d69c0f3-3040-4284-ac4c-ffef7b445c9c?api-version=2019-05-13-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/operationsStatus/7fb5379a-f25f-4b8c-adac-19f8c64c41a6?api-version=2019-05-13-preview
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Mon, 20 Sep 2021 11:32:48 GMT
+      - Tue, 10 May 2022 12:27:44 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperationResults/4d69c0f3-3040-4284-ac4c-ffef7b445c9c?fabricName=Azure?api-version=2021-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperationResults/7fb5379a-f25f-4b8c-adac-19f8c64c41a6?fabricName=Azure?api-version=2021-12-01
       pragma:
       - no-cache
       strict-transport-security:
@@ -2645,18 +2083,16 @@ interactions:
       ParameterSetName:
       - -g -v -c --yes
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.28.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.36.0 azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.7.9
+        (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer%3BStorage%3Bclitest.rg000001%3Bclitest000003/operationResults/4d69c0f3-3040-4284-ac4c-ffef7b445c9c?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer%3BStorage%3Bclitest.rg000001%3Bclitest000003/operationResults/7fb5379a-f25f-4b8c-adac-19f8c64c41a6?api-version=2021-12-01
   response:
     body:
       string: '{}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationsStatus/4d69c0f3-3040-4284-ac4c-ffef7b445c9c?api-version=2019-05-13-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationsStatus/7fb5379a-f25f-4b8c-adac-19f8c64c41a6?api-version=2019-05-13-preview
       cache-control:
       - no-cache
       content-length:
@@ -2664,11 +2100,11 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 20 Sep 2021 11:32:49 GMT
+      - Tue, 10 May 2022 12:27:45 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationResults/4d69c0f3-3040-4284-ac4c-ffef7b445c9c?api-version=2021-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationResults/7fb5379a-f25f-4b8c-adac-19f8c64c41a6?api-version=2021-12-01
       pragma:
       - no-cache
       server:
@@ -2698,18 +2134,16 @@ interactions:
       ParameterSetName:
       - -g -v -c --yes
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.28.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.36.0 azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.7.9
+        (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer%3BStorage%3Bclitest.rg000001%3Bclitest000003/operationResults/4d69c0f3-3040-4284-ac4c-ffef7b445c9c?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer%3BStorage%3Bclitest.rg000001%3Bclitest000003/operationResults/7fb5379a-f25f-4b8c-adac-19f8c64c41a6?api-version=2021-12-01
   response:
     body:
       string: '{}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationsStatus/4d69c0f3-3040-4284-ac4c-ffef7b445c9c?api-version=2019-05-13-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationsStatus/7fb5379a-f25f-4b8c-adac-19f8c64c41a6?api-version=2019-05-13-preview
       cache-control:
       - no-cache
       content-length:
@@ -2717,11 +2151,11 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 20 Sep 2021 11:32:54 GMT
+      - Tue, 10 May 2022 12:27:51 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationResults/4d69c0f3-3040-4284-ac4c-ffef7b445c9c?api-version=2021-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationResults/7fb5379a-f25f-4b8c-adac-19f8c64c41a6?api-version=2021-12-01
       pragma:
       - no-cache
       server:
@@ -2751,18 +2185,16 @@ interactions:
       ParameterSetName:
       - -g -v -c --yes
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.28.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.36.0 azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.7.9
+        (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer%3BStorage%3Bclitest.rg000001%3Bclitest000003/operationResults/4d69c0f3-3040-4284-ac4c-ffef7b445c9c?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer%3BStorage%3Bclitest.rg000001%3Bclitest000003/operationResults/7fb5379a-f25f-4b8c-adac-19f8c64c41a6?api-version=2021-12-01
   response:
     body:
       string: '{}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationsStatus/4d69c0f3-3040-4284-ac4c-ffef7b445c9c?api-version=2019-05-13-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationsStatus/7fb5379a-f25f-4b8c-adac-19f8c64c41a6?api-version=2019-05-13-preview
       cache-control:
       - no-cache
       content-length:
@@ -2770,11 +2202,11 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 20 Sep 2021 11:33:00 GMT
+      - Tue, 10 May 2022 12:27:58 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationResults/4d69c0f3-3040-4284-ac4c-ffef7b445c9c?api-version=2021-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationResults/7fb5379a-f25f-4b8c-adac-19f8c64c41a6?api-version=2021-12-01
       pragma:
       - no-cache
       server:
@@ -2804,18 +2236,16 @@ interactions:
       ParameterSetName:
       - -g -v -c --yes
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.28.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.36.0 azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.7.9
+        (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer%3BStorage%3Bclitest.rg000001%3Bclitest000003/operationResults/4d69c0f3-3040-4284-ac4c-ffef7b445c9c?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer%3BStorage%3Bclitest.rg000001%3Bclitest000003/operationResults/7fb5379a-f25f-4b8c-adac-19f8c64c41a6?api-version=2021-12-01
   response:
     body:
       string: '{}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationsStatus/4d69c0f3-3040-4284-ac4c-ffef7b445c9c?api-version=2019-05-13-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationsStatus/7fb5379a-f25f-4b8c-adac-19f8c64c41a6?api-version=2019-05-13-preview
       cache-control:
       - no-cache
       content-length:
@@ -2823,11 +2253,11 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 20 Sep 2021 11:33:05 GMT
+      - Tue, 10 May 2022 12:28:04 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationResults/4d69c0f3-3040-4284-ac4c-ffef7b445c9c?api-version=2021-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;clitest.rg000001;clitest000003/operationResults/7fb5379a-f25f-4b8c-adac-19f8c64c41a6?api-version=2021-12-01
       pragma:
       - no-cache
       server:
@@ -2857,24 +2287,18 @@ interactions:
       ParameterSetName:
       - -g -v -c --yes
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.28.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.36.0 azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.7.9
+        (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer%3BStorage%3Bclitest.rg000001%3Bclitest000003/operationResults/4d69c0f3-3040-4284-ac4c-ffef7b445c9c?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer%3BStorage%3Bclitest.rg000001%3Bclitest000003/operationResults/7fb5379a-f25f-4b8c-adac-19f8c64c41a6?api-version=2021-12-01
   response:
     body:
       string: ''
     headers:
       cache-control:
       - no-cache
-      content-type:
-      - application/json; charset=utf-8
       date:
-      - Mon, 20 Sep 2021 11:33:10 GMT
-      expires:
-      - '-1'
+      - Tue, 10 May 2022 12:28:09 GMT
       pragma:
       - no-cache
       strict-transport-security:
@@ -2902,12 +2326,10 @@ interactions:
       ParameterSetName:
       - -v -g --backup-management-type
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.28.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.36.0 azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.7.9
+        (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectionContainers?api-version=2021-07-01&$filter=backupManagementType%20eq%20%27AzureStorage%27%20and%20status%20eq%20%27Registered%27
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectionContainers?api-version=2021-12-01&%24filter=backupManagementType+eq+%27AzureStorage%27+and+status+eq+%27Registered%27
   response:
     body:
       string: '{"value":[]}'
@@ -2919,7 +2341,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 20 Sep 2021 11:33:11 GMT
+      - Tue, 10 May 2022 12:28:10 GMT
       expires:
       - '-1'
       pragma:
@@ -2955,12 +2377,10 @@ interactions:
       ParameterSetName:
       - --backup-management-type -v -g --query
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.28.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.36.0 azsdk-python-mgmt-recoveryservicesbackup/4.1.1 Python/3.7.9
+        (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectionContainers?api-version=2021-07-01&$filter=backupManagementType%20eq%20%27AzureIaasVM%27%20and%20status%20eq%20%27Registered%27
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectionContainers?api-version=2021-12-01&%24filter=backupManagementType+eq+%27AzureIaasVM%27+and+status+eq+%27Registered%27
   response:
     body:
       string: '{"value":[]}'
@@ -2972,7 +2392,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 20 Sep 2021 11:34:51 GMT
+      - Tue, 10 May 2022 12:29:51 GMT
       expires:
       - '-1'
       pragma:
@@ -3010,7 +2430,7 @@ interactions:
       ParameterSetName:
       - -n -g --yes
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-mgmt-recoveryservices/2.0.0 Python/3.8.5 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.36.0 azsdk-python-mgmt-recoveryservices/2.0.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2021-03-01
   response:
@@ -3022,7 +2442,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Mon, 20 Sep 2021 11:35:02 GMT
+      - Tue, 10 May 2022 12:29:55 GMT
       expires:
       - '-1'
       pragma:

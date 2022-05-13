@@ -5,9 +5,8 @@
 import time
 
 from datetime import datetime
-from time import sleep
 from dateutil.tz import tzutc  # pylint: disable=import-error
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from msrestazure.azure_exceptions import CloudError
 from azure.core.exceptions import HttpResponseError
 from azure.cli.core.util import CLIError
@@ -234,7 +233,7 @@ class ServerMgmtScenarioTest(ScenarioTest):
         date_format = '%Y-%m-%dT%H:%M:%S.%f+00:00'
 
         if current_time < earliest_restore_time:
-            sleep((datetime.strptime(earliest_restore_time, date_format) - datetime.strptime(current_time,
+            time.sleep((datetime.strptime(earliest_restore_time, date_format) - datetime.strptime(current_time,
                                                                                              date_format)).total_seconds())
 
         self.cmd('{} server restore -g {} --name {} '
@@ -682,11 +681,11 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
                      self.check('provisioningState', 'Ready')
                  ])
 
-        with self.assertRaisesRegexp(HttpResponseError, expectedError):
+        with self.assertRaisesRegex(HttpResponseError, expectedError):
             self.cmd('{} server private-endpoint-connection approve --server-name {} -g {} --name {} --description "{}"'
                      .format(database_engine, server, resource_group, server_pec_name, approval_description))
 
-        with self.assertRaisesRegexp(HttpResponseError, expectedError):
+        with self.assertRaisesRegex(HttpResponseError, expectedError):
             self.cmd('{} server private-endpoint-connection reject --server-name {} -g {} --name {} --description "{}"'
                      .format(database_engine, server, resource_group, server_pec_name, rejection_description))
 
@@ -737,7 +736,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
                      self.check('provisioningState', 'Ready')
                  ])
 
-        with self.assertRaisesRegexp(HttpResponseError, expectedError):
+        with self.assertRaisesRegex(HttpResponseError, expectedError):
             self.cmd('{} server private-endpoint-connection reject --server-name {} -g {} --name {} --description "{}"'
                      .format(database_engine, server, resource_group, server_pec_name, rejection_description))
 
@@ -787,7 +786,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
                      self.check('provisioningState', 'Ready')
                  ])
 
-        with self.assertRaisesRegexp(HttpResponseError, expectedError):
+        with self.assertRaisesRegex(HttpResponseError, expectedError):
             self.cmd('{} server private-endpoint-connection approve --server-name {} -g {} --name {} --description "{}"'
                      .format(database_engine, server, resource_group, server_pec_name, approval_description))
 
@@ -1026,7 +1025,7 @@ class ReplicationPostgreSqlMgmtScenarioTest(ScenarioTest):  # pylint: disable=to
             # restart server
             self.cmd('{} server restart -g {} --name {}'
                      .format(database_engine, resource_group, server), checks=NoneCheck())
-            sleep(120)
+            time.sleep(120)
 
         # test replica create
         self.cmd('{} server replica create -g {} -n {} -l westus --sku-name {} '

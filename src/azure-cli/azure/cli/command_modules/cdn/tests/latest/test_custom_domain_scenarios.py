@@ -8,8 +8,7 @@ from .scenario_mixin import CdnScenarioMixin
 from azure.mgmt.cdn.models import (SkuName, CustomHttpsProvisioningState, ProtocolType,
                                    CertificateType)
 
-from azure.core.exceptions import (HttpResponseError)
-
+from azure.core.exceptions import (HttpResponseError, ResourceNotFoundError, ResourceExistsError)
 
 class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_cdn_domain')
@@ -37,9 +36,10 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
         with self.assertRaises(SystemExit):  # exits with code 3 due to missing resource
             self.cmd('cdn custom-domain show -g {rg} --endpoint-name {endpoint} --profile-name {profile} -n {name}')
         self.cmd('cdn custom-domain delete -g {rg} --endpoint-name {endpoint} --profile-name {profile} -n {name}')
-        with self.assertRaises(HttpResponseError):
+        with self.assertRaises(ResourceNotFoundError):
             self.cmd(
                 'cdn custom-domain enable-https -g {rg} --endpoint-name {endpoint} --profile-name {profile} -n {name}')
+
         with self.assertRaises(CLIError):
             self.cmd(
                 'cdn custom-domain disable-https -g {rg} --endpoint-name {endpoint} --profile-name {profile} -n {name}')
@@ -169,7 +169,7 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
             self.custom_domain_disable_https_cmd(resource_group, profile_name, endpoint_name, custom_domain_name)
 
     @ResourceGroupPreparer()
-    @KeyVaultPreparer(location='centralus', name_prefix='keyvault', name_len=20)
+    @KeyVaultPreparer(location='centralus', name_prefix='cdncli-byoc', name_len=24)
     def test_cdn_custom_domain_https_msft(self, resource_group, key_vault):
         profile_name = 'profile123'
         self.endpoint_list_cmd(resource_group, profile_name, expect_failure=True)
@@ -224,27 +224,21 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
         version = versions[0]['id'].split('/')[-1]
 
         # Enable custom HTTPS with a custom certificate
-        checks = [JMESPathCheck('name', byoc_custom_domain_name),
-                  JMESPathCheck('hostName', byoc_hostname),
-                  JMESPathCheck('customHttpsProvisioningState', 'Enabling'),
-                  JMESPathCheck('customHttpsProvisioningSubstate', 'ImportingUserProvidedCertificate')]
-        self.custom_domain_enable_https_command(resource_group,
-                                                profile_name,
-                                                endpoint_name,
-                                                byoc_custom_domain_name,
-                                                user_cert_subscription_id=self.get_subscription_id(),
-                                                user_cert_group_name=resource_group,
-                                                user_cert_vault_name=key_vault,
-                                                user_cert_secret_name=cert_name,
-                                                user_cert_secret_version=version,
-                                                user_cert_protocol_type='sni',
-                                                checks=checks)
-
-        with self.assertRaises(HttpResponseError):
-            self.custom_domain_disable_https_cmd(resource_group, profile_name, endpoint_name, custom_domain_name)
+        # With the latest service side change to move the certificate validation to RP layer, the request will be rejected.
+        with self.assertRaisesRegexp(HttpResponseError, "The certificate imported from the Key Vault is a Self Signed certificate and is not permitted for Bring Your Own Certificate"):
+            self.custom_domain_enable_https_command(resource_group,
+                                                    profile_name,
+                                                    endpoint_name,
+                                                    byoc_custom_domain_name,
+                                                    user_cert_subscription_id=self.get_subscription_id(),
+                                                    user_cert_group_name=resource_group,
+                                                    user_cert_vault_name=key_vault,
+                                                    user_cert_secret_name=cert_name,
+                                                    user_cert_secret_version=version,
+                                                    user_cert_protocol_type='sni')
 
     @ResourceGroupPreparer()
-    @KeyVaultPreparer(location='centralus', name_prefix='keyvault', name_len=20)
+    @KeyVaultPreparer(location='centralus', name_prefix='cdnclibyoc-latest', name_len=24)
     def test_cdn_custom_domain_byoc_latest(self, resource_group, key_vault):
         profile_name = 'profile123'
         self.endpoint_list_cmd(resource_group, profile_name, expect_failure=True)
@@ -276,17 +270,14 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
         self.byoc_create_keyvault_cert(key_vault, cert_name)
 
         # Enable custom HTTPS with the custom certificate.
-        checks = [JMESPathCheck('name', custom_domain_name),
-                  JMESPathCheck('hostName', hostname),
-                  JMESPathCheck('customHttpsProvisioningState', 'Enabling'),
-                  JMESPathCheck('customHttpsProvisioningSubstate', 'ImportingUserProvidedCertificate')]
-        self.custom_domain_enable_https_command(resource_group,
-                                                profile_name,
-                                                endpoint_name,
-                                                custom_domain_name,
-                                                user_cert_subscription_id=self.get_subscription_id(),
-                                                user_cert_group_name=resource_group,
-                                                user_cert_vault_name=key_vault,
-                                                user_cert_secret_name=cert_name,
-                                                user_cert_protocol_type='sni',
-                                                checks=checks)
+        # With the latest service side change to move the certificate validation to RP layer, the request will be rejected.
+        with self.assertRaisesRegexp(HttpResponseError, "The certificate imported from the Key Vault is a Self Signed certificate and is not permitted for Bring Your Own Certificate"):
+            self.custom_domain_enable_https_command(resource_group,
+                                                    profile_name,
+                                                    endpoint_name,
+                                                    custom_domain_name,
+                                                    user_cert_subscription_id=self.get_subscription_id(),
+                                                    user_cert_group_name=resource_group,
+                                                    user_cert_vault_name=key_vault,
+                                                    user_cert_secret_name=cert_name,
+                                                    user_cert_protocol_type='sni')

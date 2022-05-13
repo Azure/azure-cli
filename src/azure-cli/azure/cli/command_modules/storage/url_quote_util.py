@@ -13,12 +13,12 @@ SAFE_CHARS = '/()$=\',~'
 
 
 def encode_for_url(url_component, safe=SAFE_CHARS):
-    from six.moves.urllib.parse import quote as url_quote  # pylint: disable=import-error
+    from urllib.parse import quote as url_quote
     return url_quote(url_component, safe)
 
 
 def encode_url_path(url, safe=SAFE_CHARS):
-    from six.moves.urllib.parse import urlparse, urlunparse  # pylint: disable=import-error
+    from urllib.parse import urlparse, urlunparse
     url_parts = urlparse(url)
     quoted_path = encode_for_url(url_parts.path, safe)
     return urlunparse(url_parts[:2] + (quoted_path,) + url_parts[3:])

@@ -343,6 +343,8 @@ short-summary: Creates the EventHubs Namespace
 examples:
   - name: Creates a new namespace.
     text: az eventhubs namespace create --resource-group myresourcegroup --name mynamespace --location westus --tags tag1=value1 tag2=value2 --sku Standard --enable-auto-inflate --maximum-throughput-units 20
+  - name: Create a new namespace with Identity and Encryption enabled.
+    text: az eventhubs namespace create --resource-group myresourcegroup --name mynamespace --location westus --sku Premium --mi-user-assigned /subscriptions/{subscriptionId}/resourceGroups/{resourcegroup}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MSIName --encryption-config key-name=key1 key-vault-uri=https://mykeyvault.vault.azure.net/ user-assigned-identity=/subscriptions/{subscriptionId}}/resourceGroups/{resourcegroup}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MSIName --encryption-config key-name=key1 key-vault-uri=https://mykeyvault.vault.azure.net/ user-assigned-identity=/subscriptions/{subscriptionId}}/resourceGroups/{resourcegroup}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MSIName
 """
 
 helps['eventhubs namespace delete'] = """
@@ -594,4 +596,91 @@ examples:
   - name: Get the private link resources that need to be created for a eventhubs namespace.
     text: |
         az eventhubs namespace private-link-resource show --namespace-name mynamespace -g MyResourceGroup
+"""
+
+helps['eventhubs namespace encryption'] = """
+type: group
+short-summary: Manage eventhubs namespace encryption properties.
+"""
+
+helps['eventhubs namespace encryption add'] = """
+type: command
+short-summary: Add Encryption properties to a namespace.
+examples:
+  - name: Set 2 different encryption properties for a namespace that has User Assigned Identity already enabled
+    text: |
+        az eventhubs namespace encryption add --namespace-name mynamespace -g MyResourceGroup --encryption-config key-name=key1 key-vault-uri=https://mykeyvault.vault.azure.net/ user-assigned-identity=/subscriptions/{subscriptionId}}/resourceGroups/{resourcegroup}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MSIName --encryption-config key-name=key1 key-vault-uri=https://mykeyvault.vault.azure.net/ user-assigned-identity=/subscriptions/{subscriptionId}}/resourceGroups/{resourcegroup}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MSIName2
+"""
+
+helps['eventhubs namespace encryption remove'] = """
+type: command
+short-summary: Remove one or more Encryption properties from a namespace.
+examples:
+  - name: Remove encryption properties for a namespace that has User Assigned Identity already enabled
+    text: |
+        az eventhubs namespace encryption remove --namespace-name mynamespace -g MyResourceGroup --encryption-config key-name=key1 key-vault-uri=https://mykeyvault.vault.azure.net/ user-assigned-identity=/subscriptions/{subscriptionId}}/resourceGroups/{resourcegroup}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MSIName
+"""
+
+helps['eventhubs namespace identity'] = """
+type: group
+short-summary: Manage eventhubs namespace identity.
+"""
+
+helps['eventhubs namespace identity assign'] = """
+type: command
+short-summary: Assign System or User or System,User assigned identities to a namespace
+examples:
+  - name: Assign system assigned and user assigned identity to a namespace. (give a list of identity id's for --user-assigned)
+    text: |
+        az eventhubs namespace identity assign --namespace-name mynamespace -g MyResourceGroup --system-assigned --user-assigned /subscriptions/{subscriptionId}}/resourceGroups/{resourcegroup}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MSIName /subscriptions/{subscriptionId}}/resourceGroups/{resourcegroup}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MSIName2
+"""
+
+helps['eventhubs namespace identity remove'] = """
+type: command
+short-summary: Remove System or User or System,User assigned identities from a namespace
+examples:
+  - name: Remove system assigned and a user assigned identity from a namespace. (give a list of identity id's for --user-assigned)
+    text: |
+        az eventhubs namespace identity remove --namespace-name mynamespace -g MyResourceGroup --system-assigned --user-assigned /subscriptions/{subscriptionId}}/resourceGroups/{resourcegroup}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MSIName
+"""
+
+helps['eventhubs namespace schema-registry'] = """
+type: group
+short-summary: Manages eventhubs namespace schema registry.
+"""
+
+helps['eventhubs namespace schema-registry create'] = """
+type: command
+short-summary: Creates a schema group for an EventHub namespace
+examples:
+  - name: Create a schema group mySchemaGroup for eventhub namespace mynamespace
+    text: |
+        az eventhubs namespace schema-registry create --namespace-name mynamespace -g MyResourceGroup --name mySchemaGroup --schema-compatibility Forward --schema-type Avro --group-properties k1=v1 k2=v2
+"""
+
+helps['eventhubs namespace schema-registry list'] = """
+type: command
+short-summary: Lists all schema groups of the EventHub Namespace
+examples:
+  - name: List all schema groups within eventhub namespace mynamespace.
+    text: |
+        az eventhubs namespace schema-registry list --namespace-name mynamespace -g MyResourceGroup
+"""
+
+helps['eventhubs namespace schema-registry show'] = """
+type: command
+short-summary: Get a specific schema group from an EventHub namespace.
+examples:
+  - name: Get mySchemaGroup from namespace mynamespace
+    text: |
+        az eventhubs namespace schema-registry show --namespace-name mynamespace -g MyResourceGroup --name mySchemaGroup
+"""
+
+helps['eventhubs namespace schema-registry delete'] = """
+type: command
+short-summary: Deletes a schema group from a namespace
+examples:
+  - name: Deletes a schema group mySchemaGroup from a namespace
+    text: |
+        az eventhubs namespace schema-registry delete --namespace-name mynamespace -g MyResourceGroup --name mySchemaGroup
 """

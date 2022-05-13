@@ -125,17 +125,18 @@ def validate_rights(namespace):
 
 
 def validate_private_endpoint_connection_id(namespace):
+    from azure.cli.core.azclierror import RequiredArgumentMissingError
     if namespace.connection_id:
         from azure.cli.core.util import parse_proxy_resource_id
         result = parse_proxy_resource_id(namespace.connection_id)
         namespace.resource_group_name = result['resource_group']
         namespace.namespace_name = result['name']
-        namespace.private_endpoint_connection_name = result['child_name_1']
+        namespace.private_endpoint_connection_name = result.get('child_name_1')
 
 #    if namespace.account_name and not namespace.resource_group_name:
 #        namespace.resource_group_name = _query_account_rg(cmd.cli_ctx, namespace.account_name)[0]
 
     if not all([namespace.namespace_name, namespace.resource_group_name, namespace.private_endpoint_connection_name]):
-        raise CLIError('incorrect usage: [--id ID | --name NAME --account-name NAME]')
+        raise RequiredArgumentMissingError("Please provide either `--Id` or `-g` value `--namespace-name` vaule `--name` value")
 
     del namespace.connection_id

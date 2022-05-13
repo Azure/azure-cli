@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
-LOCATION = "eastus2euap"
+LOCATION = "southcentralusstage"
 
 # No tidy up of tests required. The resource group is automatically removed
 
@@ -12,7 +12,7 @@ LOCATION = "eastus2euap"
 
 
 class AzureNetAppFilesBackupPolicyServiceScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_backup_policy_')
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_backup_policy_', additional_tags={'owner': 'cli_test'})
     def test_create_delete_backup_policies(self):
         # create account
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
@@ -37,6 +37,8 @@ class AzureNetAppFilesBackupPolicyServiceScenarioTest(ScenarioTest):
         assert backup_policy['enabled'] == enabled
         assert backup_policy['tags']['Tag1'] == 'Value1'
         assert backup_policy['tags']['Tag2'] == 'Value2'
+        assert backup_policy['etag'] is not None
+        assert backup_policy['backupPolicyId'] is not None
 
         # validate backup policy exist
         backup_policy_list = self.cmd("az netappfiles account backup-policy list -g {rg} -a '%s'" %
@@ -69,7 +71,7 @@ class AzureNetAppFilesBackupPolicyServiceScenarioTest(ScenarioTest):
                                       account_name).get_output_in_json()
         assert len(backup_policy_list) == 0
 
-    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_backup_policy_')
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_backup_policy_', additional_tags={'owner': 'cli_test'})
     def test_list_backup_policy(self):
         # create account
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
@@ -98,7 +100,7 @@ class AzureNetAppFilesBackupPolicyServiceScenarioTest(ScenarioTest):
                                       account_name).get_output_in_json()
         assert len(backup_policy_list) == 0
 
-    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_backup_policy_')
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_backup_policy_', additional_tags={'owner': 'cli_test'})
     def test_get_backup_policy_by_name(self):
         # create account
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
@@ -121,7 +123,7 @@ class AzureNetAppFilesBackupPolicyServiceScenarioTest(ScenarioTest):
         assert backup_policy_from_id['name'] == account_name + '/' + backup_policy_name
         assert backup_policy['dailyBackupsToKeep'] == 1
 
-    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_backup_policy_')
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_backup_policy_', additional_tags={'owner': 'cli_test'})
     def test_update_backup_policy(self):
         # create account
         account_name = self.create_random_name(prefix='cli-acc-', length=24)

@@ -10,6 +10,7 @@ from knack.log import get_logger
 from azure.cli.core.commands.parameters import (
     tags_type,
     get_enum_type,
+    get_three_state_flag,
     resource_group_name_type,
     get_resource_name_completion_list,
     get_location_type)
@@ -20,7 +21,7 @@ from azure.cli.core.decorators import Completer
 
 from azure.cli.command_modules.cognitiveservices._client_factory import cf_resource_skus
 
-from azure.mgmt.cognitiveservices.models import KeyName
+from azure.mgmt.cognitiveservices.models import KeyName, DeploymentScaleType, HostingModel
 
 logger = get_logger(__name__)
 name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
@@ -164,3 +165,36 @@ def load_arguments(self, _):
         c.argument('ip_address', help='IPv4 address or CIDR range.')
         c.argument('subnet', help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
         c.argument('vnet_name', help='Name of a virtual network.', validator=_validate_subnet)
+
+    with self.argument_context('cognitiveservices account deployment') as c:
+        c.argument('deployment_name', help='Cognitive Services account deployment name')
+
+    with self.argument_context('cognitiveservices account deployment', arg_group='DeploymentModel') as c:
+        c.argument('model_name', help='Cognitive Services account deployment model name.')
+        c.argument('model_format', help='Cognitive Services account deployment model format.')
+        c.argument('model_version', help='Cognitive Services account deployment model version.')
+
+    with self.argument_context('cognitiveservices account deployment', arg_group='DeploymentScaleSettings') as c:
+        c.argument(
+            'scale_settings_scale_type', get_enum_type(DeploymentScaleType),
+            options_list=['--scale-type', '--scale-settings-scale-type'],
+            help='Cognitive Services account deployment scale settings scale type.')
+        c.argument(
+            'scale_settings_capacity', options_list=['--scale-capacity', '--scale-settings-capacity'],
+            help='Cognitive Services account deployment scale settings capacity.')
+
+    with self.argument_context('cognitiveservices account commitment-plan') as c:
+        c.argument('commitment_plan_name', help='Cognitive Services account commitment plan name')
+        c.argument('plan_type', help='Cognitive Services account commitment plan type')
+        c.argument('hosting_model', get_enum_type(HostingModel), help='Cognitive Services account hosting model')
+        c.argument(
+            'auto_renew', arg_type=get_three_state_flag(),
+            help='A boolean indicating whether to apply auto renew.')
+
+    with self.argument_context('cognitiveservices account commitment-plan', arg_group='Current CommitmentPeriod') as c:
+        c.argument('current_count', help='Cognitive Services account commitment plan current commitment period count.')
+        c.argument('current_tier', help='Cognitive Services account commitment plan current commitment period tier.')
+
+    with self.argument_context('cognitiveservices account commitment-plan', arg_group='Next CommitmentPeriod') as c:
+        c.argument('next_count', help='Cognitive Services account commitment plan next commitment period count.')
+        c.argument('next_tier', help='Cognitive Services account commitment plan next commitment period tier.')

@@ -5,25 +5,45 @@
 
 import ipaddress
 
-from azure.cli.core.azclierror import (InvalidArgumentValueError, ArgumentUsageError)
-from azure.cli.core.commands.client_factory import get_mgmt_service_client
+
+from azure.cli.core.azclierror import (InvalidArgumentValueError, ArgumentUsageError, RequiredArgumentMissingError,
+                                       ResourceNotFoundError, ValidationError, MutuallyExclusiveArgumentError)
+from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
 from azure.cli.core.profiles import ResourceType
+from azure.cli.core.commands.validators import validate_tags
+
 from knack.log import get_logger
-from knack.util import CLIError
 from msrestazure.tools import is_valid_resource_id, parse_resource_id
 
 from ._appservice_utils import _generic_site_operation
 from ._client_factory import web_client_factory
-from .utils import _normalize_sku
+from .utils import (_normalize_sku, get_sku_tier, _normalize_location, get_resource_name_and_group,
+                    get_resource_if_exists)
 
 logger = get_logger(__name__)
+
+
+def validate_and_convert_to_int(flag, val):
+    try:
+        return int(val)
+    except ValueError:
+        raise ArgumentUsageError("{} is expected to have an int value.".format(flag))
+
+
+def validate_range_of_int_flag(flag_name, value, min_val, max_val):
+    value = validate_and_convert_to_int(flag_name, value)
+    if min_val > value or value > max_val:
+        raise ArgumentUsageError("Usage error: {} is expected to be between {} and {} (inclusive)".format(flag_name,
+                                                                                                          min_val,
+                                                                                                          max_val))
+    return value
 
 
 def validate_timeout_value(namespace):
     """Validates that zip deployment timeout is set to a reasonable min value"""
     if isinstance(namespace.timeout, int):
         if namespace.timeout <= 29:
-            raise CLIError('--timeout value should be a positive value in seconds and should be at least 30')
+            raise ArgumentUsageError('--timeout value should be a positive value in seconds and should be at least 30')
 
 
 def validate_site_create(cmd, namespace):
@@ -40,7 +60,8 @@ def validate_site_create(cmd, namespace):
         else:
             plan_info = client.app_service_plans.get(resource_group_name, plan)
         if not plan_info:
-            raise CLIError("The plan '{}' doesn't exist in the resource group '{}'".format(plan, resource_group_name))
+            raise ResourceNotFoundError("The plan '{}' doesn't exist in the resource group '{}'".format(
+                plan, resource_group_name))
         # verify that the name is available for create
         validation_payload = {
             "name": namespace.name,
@@ -52,7 +73,7 @@ def validate_site_create(cmd, namespace):
         }
         validation = client.validate(resource_group_name, validation_payload)
         if validation.status.lower() == "failure" and validation.error.code != 'SiteAlreadyExists':
-            raise CLIError(validation.error.message)
+            raise ValidationError(validation.error.message)
 
 
 def validate_ase_create(cmd, namespace):
@@ -62,82 +83,101 @@ def validate_ase_create(cmd, namespace):
     if isinstance(namespace.name, str):
         name_validation = client.check_name_availability(namespace.name, resource_type)
         if not name_validation.name_available:
-            raise CLIError(name_validation.message)
+            raise ValidationError(name_validation.message)
 
 
-def validate_asp_create(cmd, namespace):
-    """Validate the SiteName that is being used to create is available
-    This API requires that the RG is already created"""
-    client = web_client_factory(cmd.cli_ctx)
-    if isinstance(namespace.name, str) and isinstance(namespace.resource_group_name, str):
-        resource_group_name = namespace.resource_group_name
-        if isinstance(namespace.location, str):
-            location = namespace.location
-        else:
-            rg_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
-
-            group = rg_client.resource_groups.get(resource_group_name)
-            location = group.location
-        validation_payload = {
-            "name": namespace.name,
-            "type": "Microsoft.Web/serverfarms",
-            "location": location,
-            "properties": {
-                "skuName": _normalize_sku(namespace.sku) or 'B1',
-                "capacity": namespace.number_of_workers or 1,
-                "needLinuxWorkers": namespace.is_linux,
-                "isXenon": namespace.hyper_v
-            }
-        }
-        validation = client.validate(resource_group_name, validation_payload)
-        if validation.status.lower() == "failure" and validation.error.code != 'ServerFarmAlreadyExists':
-            raise CLIError(validation.error.message)
-
-
-def validate_app_or_slot_exists_in_rg(cmd, namespace):
-    """Validate that the App/slot exists in the RG provided"""
-    client = web_client_factory(cmd.cli_ctx)
-    webapp = namespace.name
-    resource_group_name = namespace.resource_group_name
-    if isinstance(namespace.slot, str):
-        app = client.web_apps.get_slot(resource_group_name, webapp, namespace.slot, raw=True)
+def _validate_asp_sku(sku, app_service_environment, zone_redundant):
+    if zone_redundant and get_sku_tier(sku.upper()) not in ['PREMIUMV2', 'PREMIUMV3']:
+        raise ValidationError("Zone redundancy cannot be enabled for sku {}".format(sku))
+    # Isolated SKU is supported only for ASE
+    if sku.upper() in ['I1', 'I2', 'I3', 'I1V2', 'I2V2', 'I3V2']:
+        if not app_service_environment:
+            raise ValidationError("The pricing tier 'Isolated' is not allowed for this app service plan. "
+                                  "Use this link to learn more: "
+                                  "https://docs.microsoft.com/azure/app-service/overview-hosting-plans")
     else:
-        app = client.web_apps.get(resource_group_name, webapp, None, raw=True)
-    if app.response.status_code != 200:
-        raise CLIError(app.response.text)
+        if app_service_environment:
+            raise ValidationError("Only pricing tier 'Isolated' is allowed in this app service plan. Use this link to "
+                                  "learn more: https://docs.microsoft.com/azure/app-service/overview-hosting-plans")
 
 
-def validate_app_exists_in_rg(cmd, namespace):
-    client = web_client_factory(cmd.cli_ctx)
-    webapp = namespace.name
+def validate_asp_create(namespace):
+    validate_tags(namespace)
+    sku = _normalize_sku(namespace.sku)
+    _validate_asp_sku(sku, namespace.app_service_environment, namespace.zone_redundant)
+    if namespace.is_linux and namespace.hyper_v:
+        raise MutuallyExclusiveArgumentError('Usage error: --is-linux and --hyper-v cannot be used together.')
+
+
+def validate_functionapp_asp_create(namespace):
+    validate_tags(namespace)
+    sku = _normalize_sku(namespace.sku)
+    tier = get_sku_tier(sku)
+    _validate_asp_sku(sku=sku, app_service_environment=None, zone_redundant=namespace.zone_redundant)
+    if namespace.max_burst is not None:
+        if tier.lower() != "elasticpremium":
+            raise ArgumentUsageError("--max-burst is only supported for Elastic Premium (EP) plans")
+
+
+def validate_app_exists(cmd, namespace):
+    app = namespace.name
     resource_group_name = namespace.resource_group_name
-    app = client.web_apps.get(resource_group_name, webapp, None, raw=True)
-    if app.response.status_code != 200:
-        raise CLIError(app.response.text)
+    slot = namespace.slot
+    app = _generic_site_operation(cmd.cli_ctx, resource_group_name, app, 'get', slot)
+    if not app:
+        raise ResourceNotFoundError("'{}' app not found in ResourceGroup '{}'".format(app, resource_group_name))
 
 
 def validate_add_vnet(cmd, namespace):
+    from azure.core.exceptions import ResourceNotFoundError as ResNotFoundError
+
     resource_group_name = namespace.resource_group_name
     from azure.cli.command_modules.network._client_factory import network_client_factory
-    vnet_client = network_client_factory(cmd.cli_ctx)
-    list_all_vnets = vnet_client.virtual_networks.list_all()
-    vnet = namespace.vnet
+
+    vnet_identifier = namespace.vnet
     name = namespace.name
     slot = namespace.slot
 
-    vnet_loc = ''
-    for v in list_all_vnets:
-        if vnet in (v.name, v.id):
-            vnet_loc = v.location
-            break
+    if is_valid_resource_id(vnet_identifier):
+        current_sub_id = get_subscription_id(cmd.cli_ctx)
+        parsed_vnet = parse_resource_id(vnet_identifier)
+
+        vnet_sub_id = parsed_vnet['subscription']
+        vnet_group = parsed_vnet['resource_group']
+        vnet_name = parsed_vnet['name']
+
+        cmd.cli_ctx.data['subscription_id'] = vnet_sub_id
+        vnet_client = network_client_factory(cmd.cli_ctx)
+        vnet_loc = vnet_client.virtual_networks.get(resource_group_name=vnet_group,
+                                                    virtual_network_name=vnet_name).location
+        cmd.cli_ctx.data['subscription_id'] = current_sub_id
+    else:
+        vnet_client = network_client_factory(cmd.cli_ctx)
+
+        try:
+            vnet_loc = vnet_client.virtual_networks.get(resource_group_name=namespace.resource_group_name,
+                                                        virtual_network_name=vnet_identifier).location
+        except ResNotFoundError:
+            vnets = vnet_client.virtual_networks.list_all()
+            vnet_loc = ''
+            for v in vnets:
+                if vnet_identifier == v.name:
+                    vnet_loc = v.location
+                    break
+
+    if not vnet_loc:
+        # Fall back to back end validation
+        logger.warning("Failed to fetch vnet. Skipping location validation.")
+        return
 
     webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
-    # converting geo region to geo location
-    webapp_loc = webapp.location.lower().replace(" ", "")
+
+    webapp_loc = _normalize_location(cmd, webapp.location)
+    vnet_loc = _normalize_location(cmd, vnet_loc)
 
     if vnet_loc != webapp_loc:
-        raise CLIError("The app and the vnet resources are in different locations. \
-                        Cannot integrate a regional VNET to an app in a different region")
+        raise ValidationError("The app and the vnet resources are in different locations. "
+                              "Cannot integrate a regional VNET to an app in a different region")
 
 
 def validate_front_end_scale_factor(namespace):
@@ -147,7 +187,7 @@ def validate_front_end_scale_factor(namespace):
         scale_error_text = "Frontend Scale Factor '{}' is invalid. Must be between {} and {}"
         scale_factor = namespace.front_end_scale_factor
         if scale_factor < min_scale_factor or scale_factor > max_scale_factor:
-            raise CLIError(scale_error_text.format(scale_factor, min_scale_factor, max_scale_factor))
+            raise ValidationError(scale_error_text.format(scale_factor, min_scale_factor, max_scale_factor))
 
 
 def validate_ip_address(cmd, namespace):
@@ -160,13 +200,13 @@ def validate_ip_address(cmd, namespace):
 
 def validate_onedeploy_params(namespace):
     if namespace.src_path and namespace.src_url:
-        raise CLIError('Only one of --src-path and --src-url can be specified')
+        raise MutuallyExclusiveArgumentError('Only one of --src-path and --src-url can be specified')
 
     if not namespace.src_path and not namespace.src_url:
-        raise CLIError('Either of --src-path or --src-url must be specified')
+        raise RequiredArgumentMissingError('Either of --src-path or --src-url must be specified')
 
     if namespace.src_url and not namespace.artifact_type:
-        raise CLIError('Deployment type is mandatory when deploying from URLs. Use --type')
+        raise RequiredArgumentMissingError('Deployment type is mandatory when deploying from URLs. Use --type')
 
 
 def _validate_ip_address_format(namespace):
@@ -249,4 +289,104 @@ def _validate_service_tag_existence(cmd, namespace):
 def validate_public_cloud(cmd):
     from azure.cli.core.cloud import AZURE_PUBLIC_CLOUD
     if cmd.cli_ctx.cloud.name != AZURE_PUBLIC_CLOUD.name:
-        raise CLIError('This command is not yet supported on soveriegn clouds.')
+        raise ValidationError('This command is not yet supported on soveriegn clouds.')
+
+
+def validate_staticsite_sku(cmd, namespace):
+    from azure.mgmt.web import WebSiteManagementClient
+    client = get_mgmt_service_client(cmd.cli_ctx, WebSiteManagementClient).static_sites
+    sku_name = client.get_static_site(namespace.resource_group_name, namespace.name).sku.name
+    if sku_name.lower() != "standard":
+        raise ValidationError("Invalid SKU: '{}'. Staticwebapp must have 'Standard' SKU".format(sku_name))
+
+
+def validate_staticsite_link_function(cmd, namespace):
+    from azure.mgmt.web import WebSiteManagementClient
+    validate_staticsite_sku(cmd, namespace)
+
+    if not is_valid_resource_id(namespace.function_resource_id):
+        raise ArgumentUsageError("--function-resource-id must specify a function resource ID. "
+                                 "To get resource ID, use the following commmand, inserting the function "
+                                 "group/name as needed: \n"
+                                 "az functionapp show --resource-group \"[FUNCTION_RESOURCE_GROUP]\" "
+                                 "--name \"[FUNCTION_NAME]\" --query id ")
+
+    client = get_mgmt_service_client(cmd.cli_ctx, WebSiteManagementClient, api_version="2020-12-01").static_sites
+    functions = client.get_user_provided_function_apps_for_static_site(
+        name=namespace.name, resource_group_name=namespace.resource_group_name)
+    if list(functions):
+        raise ValidationError("Cannot have more than one user provided function app associated with a Static Web App")
+
+
+# TODO consider combining with validate_add_vnet
+def validate_vnet_integration(cmd, namespace):
+    validate_tags(namespace)
+    if namespace.subnet or namespace.vnet:
+        if not namespace.subnet:
+            raise ArgumentUsageError("Cannot use --vnet without --subnet")
+        if not is_valid_resource_id(namespace.subnet) and not namespace.vnet:
+            raise ArgumentUsageError("Must either specify subnet by resource ID or include --vnet argument")
+
+        client = web_client_factory(cmd.cli_ctx)
+        if is_valid_resource_id(namespace.plan):
+            parse_result = parse_resource_id(namespace.plan)
+            plan_info = client.app_service_plans.get(parse_result['resource_group'], parse_result['name'])
+        else:
+            plan_info = client.app_service_plans.get(name=namespace.plan,
+                                                     resource_group_name=namespace.resource_group_name)
+
+        sku_name = plan_info.sku.name
+        disallowed_skus = {'FREE', 'SHARED', 'BASIC', 'ElasticPremium', 'PremiumContainer', 'Isolated', 'IsolatedV2'}
+        if get_sku_tier(sku_name) in disallowed_skus:
+            raise ArgumentUsageError("App Service Plan has invalid sku for vnet integration: {}."
+                                     "Plan sku cannot be one of: {}. "
+                                     "Please run 'az appservice plan create -h' "
+                                     "to see all available App Service Plan SKUs ".format(sku_name, disallowed_skus))
+
+
+def _validate_ase_exists(client, ase_name, ase_rg):
+    extant_ase = get_resource_if_exists(client.app_service_environments,
+                                        resource_group_name=ase_rg, name=ase_name)
+    if extant_ase is None:
+        raise ValidationError("App Service Environment {} does not exist.".format(ase_name))
+
+
+# if the ASP exists, validate that it is in the ASE
+def _validate_plan_in_ase(client, plan_name, plan_rg, ase_id):
+    if plan_name is not None:
+        plan_info = get_resource_if_exists(client.app_service_plans,
+                                           resource_group_name=plan_rg, name=plan_name)
+        if plan_info is not None:
+            plan_hosting_env = plan_info.hosting_environment_profile
+
+            if not plan_hosting_env or plan_hosting_env.id != ase_id:
+                raise ValidationError("Plan {} already exists and is not in the "
+                                      "app service environment.".format(plan_name))
+
+
+def _validate_ase_is_v3(ase):
+    if ase.kind.upper() != "ASEV3":
+        raise ValidationError("Only V3 App Service Environments supported")
+
+
+def _validate_ase_not_ilb(ase):
+    if ase.internal_load_balancing_mode != 0:
+        raise ValidationError("Internal Load Balancer (ILB) App Service Environments not supported")
+
+
+def validate_webapp_up(cmd, namespace):
+    if namespace.runtime and namespace.html:
+        raise MutuallyExclusiveArgumentError('Conflicting parameters: cannot have both --runtime and --html specified.')
+
+    client = web_client_factory(cmd.cli_ctx)
+    if namespace.app_service_environment:
+        ase_name, ase_rg, ase_id = get_resource_name_and_group(cmd, namespace.app_service_environment,
+                                                               namespace.resource_group_name,
+                                                               namespace="Microsoft.Web",
+                                                               type="hostingEnvironments")
+        _validate_ase_exists(client, ase_name, ase_rg)
+        _validate_plan_in_ase(client, namespace.plan, namespace.resource_group_name, ase_id)
+
+        ase = client.app_service_environments.get(resource_group_name=ase_rg, name=ase_name)
+        _validate_ase_is_v3(ase)
+        _validate_ase_not_ilb(ase)

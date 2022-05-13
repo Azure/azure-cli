@@ -49,14 +49,38 @@ def extract_subresource_name(id_parameter='id'):
     return _extract_subresource_name
 
 
-def transform_key_decryption_output(output, **command_args):
+def transform_key_encryption_output(result, **command_args):  # pylint: disable=unused-argument
+    if not result or isinstance(result, dict):
+        return result
+
+    # transform EncryptResult to dict
+    import base64
+    import binascii
+    output = {
+        'kid': result.key_id,
+        'result': base64.b64encode(result.ciphertext),
+        'algorithm': result.algorithm,
+        'iv': binascii.hexlify(result.iv) if result.iv else None,
+        'tag': binascii.hexlify(result.tag) if result.tag else None,
+        'aad': binascii.hexlify(result.aad) if result.aad else None
+    }
+    return output
+
+
+def transform_key_decryption_output(result, **command_args):
+    if not result or isinstance(result, dict):
+        return result
+
+    # transform DecryptResult to dict
+    import base64
+    output = {
+        'kid': result.key_id,
+        'result': result.plaintext,
+        'algorithm': result.algorithm
+    }
     data_type = command_args.get('data_type')
     if data_type == KeyEncryptionDataType.BASE64:
-        return output
-    raw_result = getattr(output, 'result')
-    if not raw_result or not isinstance(raw_result, bytes):
-        return output
-    setattr(output, 'result', raw_result.decode('utf-8'))
+        output['result'] = base64.b64encode(result.plaintext)
     return output
 
 
@@ -64,6 +88,7 @@ def transform_key_decryption_output(output, **command_args):
 def transform_key_output(result, **command_args):
     from azure.keyvault.keys import KeyVaultKey, JsonWebKey
     import base64
+
     if not isinstance(result, KeyVaultKey):
         return result
 
@@ -77,6 +102,16 @@ def transform_key_output(result, **command_args):
         'attributes': result.properties._attributes,
         'key': result.key,
         'managed': result.properties.managed,
-        'tags': result.properties.tags
+        'tags': result.properties.tags,
+        'releasePolicy': result.properties.release_policy
     }
     return output
+
+
+# pylint: disable=unused-argument
+def transform_key_random_output(result, **command_args):
+    if result and isinstance(result, bytes):
+        import base64
+        return {"value": base64.b64encode(result)}
+
+    return result

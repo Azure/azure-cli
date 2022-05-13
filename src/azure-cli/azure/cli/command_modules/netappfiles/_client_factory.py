@@ -46,3 +46,11 @@ def backup_policies_mgmt_client_factory(cli_ctx, _):
 
 def vaults_mgmt_client_factory(cli_ctx, _):
     return cf_netappfiles(cli_ctx).vaults
+
+
+def subvolumes_mgmt_client_factory(cli_ctx, _):
+    return cf_netappfiles(cli_ctx).subvolumes
+
+
+def volume_groups_mgmt_client_factory(cli_ctx, _):
+    return cf_netappfiles(cli_ctx).volume_groups

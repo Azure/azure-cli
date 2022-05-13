@@ -183,6 +183,9 @@ def load_arguments(self, _):
         c.argument('ignore_data_before', options_list=['--since'],
                    arg_type=get_datetime_type(
                        help='The date from which to start learning the metric historical data and calculate the dynamic thresholds.'))
+        c.argument('skip_metric_validation', options_list=['--skip-metric-validation'],
+                   arg_type=get_three_state_flag(),
+                   help='Cause the metric validation to be skipped. This allows to use a metric that has not been emitted yet.')
 
     # endregion
 
@@ -280,8 +283,10 @@ def load_arguments(self, _):
 
     with self.argument_context('monitor diagnostic-settings create') as c:
         c.resource_parameter('resource_uri', required=True, arg_group='Target Resource', skip_validator=True)
-        c.argument('logs', type=get_json_object)
-        c.argument('metrics', type=get_json_object)
+        c.argument('logs', type=get_json_object, help="JSON encoded list of logs settings. Use '@{file}' to load from a file."
+                   'For more information, visit: https://docs.microsoft.com/rest/api/monitor/diagnosticsettings/createorupdate#logsettings')
+        c.argument('metrics', type=get_json_object, help="JSON encoded list of metric settings. Use '@{file}' to load from a file. "
+                   'For more information, visit: https://docs.microsoft.com/rest/api/monitor/diagnosticsettings/createorupdate#metricsettings')
         c.argument('export_to_resource_specific', arg_type=get_three_state_flag(),
                    help='Indicate that the export to LA must be done to a resource specific table, '
                         'a.k.a. dedicated or fixed schema table, '
@@ -413,6 +418,9 @@ def load_arguments(self, _):
                    arg_type=get_enum_type(PublicNetworkAccessType))
         c.argument('force', options_list=['--force', '-f'], arg_type=get_three_state_flag())
 
+    with self.argument_context('monitor log-analytics workspace update') as c:
+        c.argument('default_data_collection_rule_resource_id', options_list='--data-collection-rule', help='The resource ID of the default Data Collection Rule to use for this workspace. Expected format is /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/dataCollectionRules/{dcrName}.')
+
     with self.argument_context('monitor log-analytics workspace pack') as c:
         c.argument('intelligence_pack_name', options_list=['--name', '-n'])
         c.argument('workspace_name', options_list='--workspace-name')
@@ -437,7 +445,31 @@ def load_arguments(self, _):
     with self.argument_context('monitor log-analytics workspace table') as c:
         c.argument('table_name', name_arg_type, help='Name of the table.')
         c.argument('workspace_name', options_list='--workspace-name')
-        c.argument('retention_in_days', options_list='--retention-time', help='The data table data retention in days, between 30 and 730. Setting this property to null will default to the workspace', type=int, required=True)
+        c.argument('retention_in_days', type=int, options_list='--retention-time', help='The data table data retention in days, between 30 and 730. Setting this property to null will default to the workspace')
+        c.argument('total_retention_in_days', type=int, options_list='--total-retention-time', help='The table data total retention in days, between 4 and 2555. Setting this property to null will default to table retention.')
+
+    with self.argument_context('monitor log-analytics workspace table create') as c:
+        from azure.mgmt.loganalytics.models import TablePlanEnum
+        c.argument('columns', nargs='+', help='A list of table custom columns.Extracts multiple space-separated colunms in colunm_name=colunm_type format')
+        c.argument('plan', arg_type=get_enum_type(TablePlanEnum), help='The table plan. Possible values include: "Basic", "Analytics".')
+        c.argument('description', help='Schema description.')
+
+    with self.argument_context('monitor log-analytics workspace table search-job create') as c:
+        c.argument('search_query', options_list=['--search-query'], help='Search job query.')
+        c.argument('limit', type=int, help='Limit the search job to return up to specified number of rows.')
+        c.argument('start_search_time', arg_type=get_datetime_type(help='Datetime format.'))
+        c.argument('end_search_time', arg_type=get_datetime_type(help='Datetime format.'))
+
+    with self.argument_context('monitor log-analytics workspace table restore create') as c:
+        c.argument('start_restore_time', arg_type=get_datetime_type(help='Datetime format.'))
+        c.argument('end_restore_time', arg_type=get_datetime_type(help='Datetime format.'))
+        c.argument('restore_source_table', help='The table to restore data from.')
+
+    with self.argument_context('monitor log-analytics workspace table update') as c:
+        from azure.mgmt.loganalytics.models import TablePlanEnum
+        c.argument('columns', nargs='+', help='A list of table custom columns.Extracts multiple space-separated colunms in colunm_name=colunm_type format')
+        c.argument('plan', arg_type=get_enum_type(TablePlanEnum), help='The table plan. Possible values include: "Basic", "Analytics".')
+        c.argument('description', help='Table description.')
     # endregion
 
     # region Log Analytics Workspace Data Export

@@ -7,9 +7,10 @@
 from unittest import mock
 
 from azure.cli.testsdk import ResourceGroupPreparer, ScenarioTest, StorageAccountPreparer
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.mgmt.iothub.models import RoutingSource
 from azure.cli.command_modules.iot.shared import IdentityType
+from azure.core.exceptions import HttpResponseError
 from .recording_processors import KeyReplacer
 
 
@@ -77,7 +78,7 @@ class IoTHubTest(ScenarioTest):
         ])
 
         # Storage Connection String Pattern
-        storage_cs_pattern = 'DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName='
+        storage_cs_pattern = 'DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;'
         # Test 'az iot hub update'
         updated_hub = self.cmd('iot hub update -n {0} --fnd 80 --rd 4 --ct 34 --cdd 46 --ft 43 --fld 10 --fd 76'
                                ' --fn true --fnt 32 --fst 3 --fcs {1} --fc {2} --tags e=f g=h'
@@ -413,6 +414,20 @@ class IoTHubTest(ScenarioTest):
         # Test 'az iot hub delete'
         self.cmd('iot hub delete -n {0}'.format(hub), checks=self.is_empty())
 
+        # Data Residency tests
+        dr_hub_name = self.create_random_name('dps-dr', 20)
+
+        # Data residency not enabled in this region
+        with self.assertRaises(HttpResponseError):
+            self.cmd('az iot hub create -g {} -n {} --edr'.format(rg, dr_hub_name))
+
+        # Successfully create in this region
+        self.cmd('az iot hub create -g {} -n {} --location southeastasia --edr'.format(rg, dr_hub_name),
+                 checks=[self.check('name', dr_hub_name),
+                         self.check('location', 'southeastasia'),
+                         self.check('properties.enableDataResidency', True)])
+        self.cmd('az iot hub delete -n {}'.format(dr_hub_name))
+
     @AllowLargeResponse()
     @ResourceGroupPreparer(location='westus2')
     @StorageAccountPreparer()
@@ -434,7 +449,7 @@ class IoTHubTest(ScenarioTest):
         storageConnectionString = self._get_azurestorage_connectionstring(rg, containerName, storage_account)
         endpoint_name = 'Event1'
         endpoint_type = 'EventHub'
-        storage_cs_pattern = 'DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName='
+        storage_cs_pattern = 'DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;'
 
         identity_storage_role = 'Storage Blob Data Contributor'
         storage_account_id = self.cmd('storage account show -n {0} -g {1}'.format(storage_account, rg)).get_output_in_json()['id']
@@ -678,7 +693,7 @@ class IoTHubTest(ScenarioTest):
     @StorageAccountPreparer()
     def test_hub_file_upload(self, resource_group, resource_group_location, storage_account):
         from time import sleep
-
+        from azure.cli.core.azclierror import UnclassifiedUserFault
         hub = self.create_random_name(prefix='cli-file-upload-hub', length=32)
         user_identity_name = self.create_random_name(prefix='hub-user-identity', length=32)
         rg = resource_group
@@ -686,7 +701,7 @@ class IoTHubTest(ScenarioTest):
         storageConnectionString = self._get_azurestorage_connectionstring(rg, containerName, storage_account)
         identity_based_auth = 'identityBased'
         key_based_auth = 'keyBased'
-        storage_cs_pattern = 'DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName='
+        storage_cs_pattern = 'DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;'
 
         # create user-assigned identity
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
@@ -708,6 +723,35 @@ class IoTHubTest(ScenarioTest):
         self.cmd('iot hub update -n {0} -g {1} --fc {2} --fcs {3} --fsi [system]'
                  .format(hub, rg, containerName, storageConnectionString),
                  expect_failure=True)
+
+        # Testing hub update without $default storage endpoint
+        self.kwargs.update({
+            'hub': hub,
+            'rg': rg
+        })
+        self.cmd('iot hub update -n {hub} -g {rg} --set "properties.storageEndpoints={{}}"',
+                 checks=[self.not_exists('properties.storageEndpoints')])
+        # update with fileUpload args (not container and cstring) should error
+        with self.assertRaises(UnclassifiedUserFault) as ex:
+            # configure fileupload SAS TTL
+            self.cmd('iot hub update -n {hub} -g {rg} --fst 2')
+        self.assertTrue('This hub has no default storage endpoint' in str(ex.exception))
+
+        with self.assertRaises(UnclassifiedUserFault) as ex:
+            # configure fileupload SAS TTL, with container name
+            self.cmd('iot hub update -n {0} -g {1} --fst 2 --fc {2}'.format(hub, rg, containerName))
+        self.assertTrue('This hub has no default storage endpoint' in str(ex.exception))
+
+        # update with non-fileupload args should succeed (c2d TTL)
+        self.cmd('iot hub update -n {hub} -g {rg} --ct 13',
+                 checks=[self.check('properties.cloudToDevice.defaultTtlAsIso8601', '13:00:00')])
+        # # --set identity
+        self.cmd('iot hub update -n {hub} -g {rg} --set identity.type="SystemAssigned"',
+                 checks=[self.check('identity.type', IdentityType.system_assigned.value)])
+
+        # # reset identity for following tests
+        self.cmd('iot hub identity remove -n {hub} -g {rg} --system',
+                 checks=[self.check('type', IdentityType.none.value)])
 
         # File upload - add connection string and containername - keybased
         updated_hub = self.cmd('iot hub update -n {0} -g {1} --fc {2} --fcs {3}'

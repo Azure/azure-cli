@@ -5,7 +5,7 @@
 
 import os
 import unittest
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer)
 
 
@@ -161,16 +161,20 @@ class ApimScenarioTest(ScenarioTest):
             checks=[self.check('displayName', '{display_name}'),
                     self.check('path', '{path}'),
                     self.check('serviceUrl', '{service_url}'),
-                    self.check('protocols[0]', '{protocol}')])
+                    self.check('protocols[0]', '{protocol}'),
+                    self.check('subscriptionKeyParameterNames.header', '{subscription_key_header_name}'),
+                    self.check('subscriptionKeyParameterNames.query', '{subscription_key_query_param_name}')])
 
         # wait
         self.cmd('apim api wait -g "{rg}" -n "{service_name}" --api-id "{api_id}" --created', checks=[self.is_empty()])
 
         # import api
         self.cmd(
-            'apim api import -g "{rg}" --service-name "{service_name}" --path "{path2}" --api-id "{api_id2}" --specification-url "{specification_url}" --specification-format "{specification_format}" --api-version-set-id {vs_id} --api-version {api_version}',
+            'apim api import -g "{rg}" --service-name "{service_name}" --path "{path2}" --api-id "{api_id2}" --specification-url "{specification_url}" --specification-format "{specification_format}" --api-version-set-id {vs_id} --api-version {api_version} --subscription-key-header-name "{subscription_key_header_name}" --subscription-key-query-param-name "{subscription_key_query_param_name}"',
             checks=[self.check('displayName', 'Swagger Petstore'),
-                    self.check('path', '{path2}')])
+                    self.check('path', '{path2}'),
+                    self.check('subscriptionKeyParameterNames.header', '{subscription_key_header_name}'),
+                    self.check('subscriptionKeyParameterNames.query', '{subscription_key_query_param_name}')])
 
         # get api
         self.cmd('apim api show -g {rg} --service-name {service_name} --api-id {api_id}', checks=[
@@ -180,9 +184,11 @@ class ApimScenarioTest(ScenarioTest):
 
         # update api
         self.cmd(
-            'apim api update -g "{rg}" --service-name "{service_name}" --api-id "{api_id}" --description "{description}" --protocols {protocol}',
+            'apim api update -g "{rg}" --service-name "{service_name}" --api-id "{api_id}" --description "{description}" --protocols {protocol} --subscription-key-header-name "{subscription_key_header_name}" --subscription-key-query-param-name "{subscription_key_query_param_name}"',
             checks=[self.check('description', '{description}'),
-                    self.check('protocols[0]', '{protocol}')])
+                    self.check('protocols[0]', '{protocol}'),
+                    self.check('subscriptionKeyParameterNames.header', '{subscription_key_header_name}'),
+                    self.check('subscriptionKeyParameterNames.query', '{subscription_key_query_param_name}')])
 
         # list apis
         api_count = len(self.cmd('apim api list -g "{rg}" -n "{service_name}"').get_output_in_json())
@@ -303,6 +309,10 @@ class ApimScenarioTest(ScenarioTest):
             checks=[self.check('name', '{release_id}'),
                     self.check('notes', '{release_notes}')])
 
+        # check the revision is being updated
+        self.cmd('apim api show -g {rg} --service-name {service_name} --api-id {api_id}',
+                 checks=[self.check('apiRevision', '{api_revision}')])
+
         # show API release
         self.cmd('apim api release show -g "{rg}" -n "{service_name}" --api-id "{api_id}" --release-id "{release_id}"')
 
@@ -356,7 +366,65 @@ class ApimScenarioTest(ScenarioTest):
         self.assertEqual(api_count, 1)
 
         count = len(self.cmd('apim list').get_output_in_json())
-
+        pythonfile = 'gql_schema.gql'
+        schemapath = os.path.join(TEST_DIR, pythonfile)
+        api_file = open(schemapath, 'r')
+        content_value = api_file.read()
+        value = content_value
+        
+        self.kwargs.update({
+            'graphql_api_id': self.create_random_name('gr-api', 10),
+            'graphql_sch_id': 'graphql',
+            'graphql_schema_path': schemapath,
+            'graphql_schema_type': 'application/vnd.ms-azure-apim.graphql.schema',
+            'graphql_schema_type2': 'Microsoft.ApiManagement/service/apis/schemas',
+            'schema_file_value': value,
+            'graphql_display_name': 'graphQl API',
+            'graphql_protocol': 'https',
+            'graphql_api_type': 'graphql',
+            'graphql_path': 'graphqltestpath',
+            'graphql_service_url': 'https://api.spacex.land/graphql/'
+        })
+        
+        self.cmd(
+            'apim api create -g "{rg}" --service-name "{service_name}" --display-name "{graphql_display_name}" --path "{graphql_path}" --api-id "{graphql_api_id}" --protocols "{graphql_protocol}" --service-url "{graphql_service_url}" --api-type "{graphql_api_type}"',
+            checks=[self.check('displayName', '{graphql_display_name}'),
+                    self.check('path', '{graphql_path}'),
+                    self.check('serviceUrl', '{graphql_service_url}'),
+                    self.check('protocols[0]', '{graphql_protocol}')])
+ 
+        #create schema
+        self.cmd(
+            'apim api schema create -g "{rg}" --service-name "{service_name}" --api-id "{graphql_api_id}" --schema-id "{graphql_sch_id}" --schema-type "{graphql_schema_type}" --schema-path "{graphql_schema_path}"',
+            checks=[self.check('contentType', '{graphql_schema_type}'),
+                    self.check('name', '{graphql_sch_id}'),
+                    self.check('value', '{schema_file_value}')])
+        
+        #get schema
+        self.cmd(
+            'apim api schema show -g "{rg}" --service-name "{service_name}" --api-id "{graphql_api_id}" --schema-id "{graphql_sch_id}"',
+            checks=[self.check('contentType', '{graphql_schema_type}'),
+                    self.check('name', '{graphql_sch_id}'),
+                    self.check('value', '{schema_file_value}')])
+        
+        
+        #list api schemas
+        schema_count = len(self.cmd('apim api schema list -g "{rg}" -n "{service_name}" --api-id "{graphql_api_id}"').get_output_in_json())
+        self.assertEqual(schema_count, 1)
+        
+        
+        #entity
+        entity = self.cmd(
+            'apim api schema get-etag -g "{rg}" --service-name "{service_name}" --api-id "{graphql_api_id}" --schema-id "{graphql_sch_id}"')
+        self.assertTrue(entity)
+        
+        #delete schema
+        self.cmd(
+            'apim api schema delete -g "{rg}" --service-name "{service_name}" --api-id "{graphql_api_id}" --schema-id "{graphql_sch_id}" --yes')
+        
+        schema_count = len(self.cmd('apim api schema list -g "{rg}" -n "{service_name}" --api-id "{graphql_api_id}"').get_output_in_json())
+        self.assertEqual(schema_count, 0)
+        
         # named value operations
         self.kwargs.update({
             'display_name': self.create_random_name('nv-name', 14),
@@ -411,6 +479,8 @@ class ApimScenarioTest(ScenarioTest):
 
         final_count = len(self.cmd('apim list').get_output_in_json())
         self.assertEqual(final_count, count - 1)
+
+
 
 
 KNOWN_LOCS = {'eastasia': 'East Asia',

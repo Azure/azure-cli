@@ -109,13 +109,13 @@ class TestActions(unittest.TestCase):
 
     def test_figure_out_storage_source(self):
         test_data = 'https://av123images.blob.core.windows.net/images/TDAZBET.vhd'
-        src_blob_uri, src_disk, src_snapshot = _figure_out_storage_source(DummyCli(), 'tg1', test_data)
+        src_blob_uri, src_disk, src_snapshot, _ = _figure_out_storage_source(DummyCli(), 'tg1', test_data)
         self.assertFalse(src_disk)
         self.assertFalse(src_snapshot)
         self.assertEqual(src_blob_uri, test_data)
 
         test_data = '/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/JAVACSMRG6017/providers/Microsoft.Compute/disks/ex.vhd'
-        src_blob_uri, src_disk, src_snapshot = _figure_out_storage_source(None, 'tg1', test_data)
+        src_blob_uri, src_disk, src_snapshot, _ = _figure_out_storage_source(None, 'tg1', test_data)
         self.assertEqual(src_disk, test_data)
         self.assertFalse(src_snapshot)
         self.assertFalse(src_blob_uri)
@@ -300,23 +300,33 @@ class TestActions(unittest.TestCase):
     @mock.patch('azure.cli.core.commands.client_factory.get_subscription_id', autospec=True)
     def test_validate_msi_on_create(self, mock_get_subscription, mock_resolve_role_id):
         # check throw on : az vm/vmss create --assign-identity --role reader --scope ""
+        from azure.cli.core.azclierror import ArgumentUsageError
+
         np_mock = mock.MagicMock()
         cmd = mock.MagicMock()
         cmd.cli_ctx = DummyCli()
         np_mock.assign_identity = []
         np_mock.identity_scope = None
         np_mock.identity_role = 'reader'
-
-        with self.assertRaises(CLIError) as err:
+        with self.assertRaises(ArgumentUsageError) as err:
             _validate_vm_vmss_msi(cmd, np_mock)
-        self.assertTrue("usage error: '--role reader' is not applicable as the '--scope' is "
-                        "not provided" in str(err.exception))
+        self.assertTrue("usage error: please specify both --role and --scope "
+                        "when assigning a role to the managed identity" in str(err.exception))
+
+        np_mock = mock.MagicMock()
+        np_mock.assign_identity = []
+        np_mock.identity_scope = 'foo-scope'
+        np_mock.identity_role = None
+        with self.assertRaises(ArgumentUsageError) as err:
+            _validate_vm_vmss_msi(cmd, np_mock)
+        self.assertTrue("usage error: please specify both --role and --scope "
+                        "when assigning a role to the managed identity" in str(err.exception))
 
         # check throw on : az vm/vmss create --scope "some scope"
         np_mock = mock.MagicMock()
         np_mock.assign_identity = None
         np_mock.identity_scope = 'foo-scope'
-        with self.assertRaises(CLIError) as err:
+        with self.assertRaises(ArgumentUsageError) as err:
             _validate_vm_vmss_msi(cmd, np_mock)
         self.assertTrue('usage error: --assign-identity [--scope SCOPE] [--role ROLE]' in str(err.exception))
 
@@ -324,7 +334,7 @@ class TestActions(unittest.TestCase):
         np_mock = mock.MagicMock()
         np_mock.assign_identity = None
         np_mock.identity_role = 'reader'
-        with self.assertRaises(CLIError) as err:
+        with self.assertRaises(ArgumentUsageError) as err:
             _validate_vm_vmss_msi(cmd, np_mock)
         self.assertTrue('usage error: --assign-identity [--scope SCOPE] [--role ROLE]' in str(err.exception))
 
@@ -348,10 +358,11 @@ class TestActions(unittest.TestCase):
         np_mock.identity_scope = ''
         np_mock.identity_role = 'reader'
 
-        with self.assertRaises(CLIError) as err:
-            _validate_vm_vmss_msi(cmd, np_mock, from_set_command=True)
-        self.assertTrue("usage error: '--role reader' is not applicable as the '--scope' is set to None",
-                        str(err.exception))
+        from azure.cli.core.azclierror import ArgumentUsageError
+        with self.assertRaises(ArgumentUsageError) as err:
+            _validate_vm_vmss_msi(cmd, np_mock, is_identity_assign=True)
+        self.assertTrue("usage error: please specify --scope when assigning a role to the managed identity"
+                        in str(err.exception))
 
         # check we set right role id
         np_mock = mock.MagicMock()
@@ -359,7 +370,7 @@ class TestActions(unittest.TestCase):
         np_mock.identity_role = 'reader'
         np_mock.assign_identity = []
         mock_resolve_role_id.return_value = 'foo-role-id'
-        _validate_vm_vmss_msi(cmd, np_mock, from_set_command=True)
+        _validate_vm_vmss_msi(cmd, np_mock, is_identity_assign=True)
         self.assertEqual(np_mock.identity_role_id, 'foo-role-id')
         mock_resolve_role_id.assert_called_with(cmd.cli_ctx, 'reader', 'foo-scope')
 
@@ -429,7 +440,6 @@ class TestActions(unittest.TestCase):
             'lun': 0,
             'managedDisk': {'storageAccountType': 'premium_lrs'},
             'createOption': 'empty',
-            'deleteOption': None,
             'diskSizeGB': data_disk_sizes[0]
         })
 
@@ -437,7 +447,6 @@ class TestActions(unittest.TestCase):
             'lun': 1,
             'managedDisk': {'storageAccountType': 'premium_lrs'},
             'createOption': 'empty',
-            'deleteOption': None,
             'diskSizeGB': data_disk_sizes[1]
         })
 
@@ -465,7 +474,8 @@ class TestActions(unittest.TestCase):
         self.assertEqual(r[5], {
             'lun': 5,
             'managedDisk': {'id': attach_data_disks[1]},
-            'createOption': 'attach'
+            'createOption': 'attach',
+            'name': 'disk'
         })
 
         # last image data disk
@@ -496,7 +506,6 @@ class TestActions(unittest.TestCase):
             'lun': 1,
             'managedDisk': {'storageAccountType': 'premium_lrs'},
             'createOption': 'empty',
-            'deleteOption': None,
             'diskSizeGB': data_disk_sizes[0]
         })
 
@@ -516,7 +525,6 @@ class TestActions(unittest.TestCase):
             'lun': 4,
             'managedDisk': {'storageAccountType': 'premium_lrs'},
             'createOption': 'empty',
-            'deleteOption': None,
             'diskSizeGB': data_disk_sizes[1]
         })
 
@@ -536,7 +544,8 @@ class TestActions(unittest.TestCase):
         self.assertEqual(r[7], {
             'lun': 7,
             'managedDisk': {'id': attach_data_disks[1]},
-            'createOption': 'attach'
+            'createOption': 'attach',
+            'name': 'disk'
         })
 
         self.assertEqual(r[10], {
@@ -669,10 +678,11 @@ class TestActions(unittest.TestCase):
         EncryptionImages = self._get_compute_model('EncryptionImages', api_version)
         OSDiskImageEncryption = self._get_compute_model('OSDiskImageEncryption', api_version)
         DataDiskImageEncryption = self._get_compute_model('DataDiskImageEncryption', api_version)
+        ConfidentialVMEncryptionType = self._get_compute_model('ConfidentialVMEncryptionType', api_version)
         cmd = mock.MagicMock()
-        cmd.get_models.return_value = [TargetRegion, EncryptionImages, OSDiskImageEncryption, DataDiskImageEncryption]
+        cmd.get_models.return_value = [TargetRegion, EncryptionImages, OSDiskImageEncryption, DataDiskImageEncryption, ConfidentialVMEncryptionType]
 
-        target_regions_list = ["southcentralus", "westus=1", "westus2=standard_zrs", "eastus=2=standard_lrs"]
+        target_regions_list = ["southcentralus", "westus=1", "westus2=standard_zrs", "eastus=2=standard_lrs", 'CentralUSEUAP=1']
         np.target_regions = target_regions_list
 
         process_gallery_image_version_namespace(cmd, np)

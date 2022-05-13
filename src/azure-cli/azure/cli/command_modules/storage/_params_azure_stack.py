@@ -10,8 +10,8 @@ from azure.cli.core.commands.parameters import (tags_type, file_type, get_locati
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction, ALL
 
 from ._validators import (get_datetime_type, validate_metadata, get_permission_validator, get_permission_help_string,
-                          resource_type_type, services_type, validate_entity, validate_select, validate_blob_type,
-                          validate_included_datasets, validate_custom_domain, validate_container_public_access,
+                          resource_type_type, services_type, validate_select, validate_blob_type,
+                          validate_included_datasets, validate_custom_domain,
                           validate_table_payload_format, add_progress_callback, process_resource_group,
                           storage_account_key_options, process_file_download_namespace, process_metric_update_namespace,
                           get_char_options_validator, validate_bypass, validate_encryption_source, validate_marker,
@@ -19,11 +19,11 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           validate_azcopy_remove_arguments, as_user_validator, parse_storage_account,
                           validator_delete_retention_days, validate_delete_retention_days,
                           validate_fs_public_access)
+from ._validators_azure_stack import validate_entity, validate_container_public_access
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines
     from argcomplete.completers import FilesCompleter
-    from six import u as unicode_string
 
     from knack.arguments import ignore_type, CLIArgumentType
 
@@ -1062,7 +1062,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage message') as c:
         c.argument('queue_name', queue_name_type)
         c.argument('message_id', options_list='--id')
-        c.argument('content', type=unicode_string, help='Message content, up to 64KB in size.')
+        c.argument('content', type=str, help='Message content, up to 64KB in size.')
 
     with self.argument_context('storage remove') as c:
         from .completers import file_path_completer

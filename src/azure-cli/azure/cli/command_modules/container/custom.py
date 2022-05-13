@@ -109,7 +109,8 @@ def create_container(cmd,
                      identity_scope=None,
                      identity_role='Contributor',
                      no_wait=False,
-                     acr_identity=None):
+                     acr_identity=None,
+                     zone=None):
     """Create a container group. """
     if file:
         return _create_update_from_file(cmd.cli_ctx, resource_group_name, name, location, file, no_wait)
@@ -199,6 +200,11 @@ def create_container(cmd,
 
     cgroup_ip_address = _create_ip_address(ip_address, ports, protocol, dns_name_label, subnet_id)
 
+    # Setup zones, validation done in control plane so check is not needed here
+    zones = None
+    if zone:
+        zones = [zone]
+
     container = Container(name=name,
                           image=image,
                           resources=container_resource_requirements,
@@ -218,7 +224,8 @@ def create_container(cmd,
                             volumes=volumes or None,
                             subnet_ids=cgroup_subnet,
                             diagnostics=diagnostics,
-                            tags=tags)
+                            tags=tags,
+                            zones=zones)
 
     container_group_client = cf_container_groups(cmd.cli_ctx)
 
@@ -314,6 +321,7 @@ def _get_subnet_id(cmd, location, resource_group_name, vnet, vnet_address_prefix
                                                         vnet_name,
                                                         VirtualNetwork(name=vnet_name,
                                                                        location=location,
+                                                                       polling=False,
                                                                        address_space=AddressSpace(address_prefixes=[vnet_address_prefix])))
         subnet = Subnet(
             name=subnet_name,
@@ -402,6 +410,29 @@ def _create_resource_requirements(cpu, memory):
 def _create_image_registry_credentials(cmd, resource_group_name, registry_login_server, registry_username, registry_password, image, identity):
     from msrestazure.tools import is_valid_resource_id
     image_registry_credentials = None
+
+    if identity:
+        # Get full resource ID if only identity name is provided
+        if not is_valid_resource_id(identity):
+            msi_client = cf_msi(cmd.cli_ctx)
+            identity = msi_client.user_assigned_identities.get(resource_group_name=resource_group_name,
+                                                               resource_name=identity).id
+        if registry_login_server:
+            image_registry_credentials = [ImageRegistryCredential(server=registry_login_server,
+                                                                  username=registry_username,
+                                                                  password=registry_password,
+                                                                  identity=identity)]
+        elif ACR_SERVER_DELIMITER in image.split("/")[0]:
+            acr_server = image.split("/")[0] if image.split("/") else None
+            if acr_server:
+                image_registry_credentials = [ImageRegistryCredential(server=acr_server,
+                                                                      username=registry_username,
+                                                                      password=registry_password,
+                                                                      identity=identity)]
+        else:
+            raise RequiredArgumentMissingError('Failed to parse login server from image name; please explicitly specify --registry-server.')
+        return image_registry_credentials
+
     if registry_login_server:
         if not registry_username:
             raise RequiredArgumentMissingError('Please specify --registry-username in order to use custom image registry.')
@@ -414,33 +445,23 @@ def _create_image_registry_credentials(cmd, resource_group_name, registry_login_
                                                               username=registry_username,
                                                               password=registry_password)]
     elif ACR_SERVER_DELIMITER in image.split("/")[0]:
-        acr_server = image.split("/")[0] if image.split("/") else None
-        if identity:
-            if not is_valid_resource_id(identity):
-                msi_client = cf_msi(cmd.cli_ctx)
-                identity = msi_client.user_assigned_identities.get(resource_group_name=resource_group_name,
-                                                                   resource_name=identity).id
-            if acr_server:
-                image_registry_credentials = [ImageRegistryCredential(server=acr_server,
-                                                                      username=registry_username,
-                                                                      password=registry_password,
-                                                                      identity=identity)]
-        else:
-            if not registry_username:
-                try:
-                    registry_username = prompt(msg='Image registry username: ')
-                except NoTTYException:
-                    raise RequiredArgumentMissingError('Please specify --registry-username in order to use Azure Container Registry.')
+        if not registry_username:
+            try:
+                registry_username = prompt(msg='Image registry username: ')
+            except NoTTYException:
+                raise RequiredArgumentMissingError('Please specify --registry-username in order to use Azure Container Registry.')
 
-            if not registry_password:
-                try:
-                    registry_password = prompt_pass(msg='Image registry password: ')
-                except NoTTYException:
-                    raise RequiredArgumentMissingError('Please specify --registry-password in order to use Azure Container Registry.')
-            if acr_server:
-                image_registry_credentials = [ImageRegistryCredential(server=acr_server,
-                                                                      username=registry_username,
-                                                                      password=registry_password)]
+        if not registry_password:
+            try:
+                registry_password = prompt_pass(msg='Image registry password: ')
+            except NoTTYException:
+                raise RequiredArgumentMissingError('Please specify --registry-password in order to use Azure Container Registry.')
+
+        acr_server = image.split("/")[0] if image.split("/") else None
+        if acr_server:
+            image_registry_credentials = [ImageRegistryCredential(server=acr_server,
+                                                                  username=registry_username,
+                                                                  password=registry_password)]
     elif registry_username and registry_password and SERVER_DELIMITER in image.split("/")[0]:
         login_server = image.split("/")[0] if image.split("/") else None
         if login_server:

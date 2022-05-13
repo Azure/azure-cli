@@ -12,6 +12,7 @@ def load_arguments(self, _):
     from azure.mgmt.resource.locks.models import LockLevel
     from azure.mgmt.resource.managedapplications.models import ApplicationLockLevel
     from azure.mgmt.resource.policy.models import (ExemptionCategory, EnforcementMode)
+    from azure.cli.core.commands.validators import get_default_location_from_resource_group
 
     from azure.cli.core.api import get_subscription_id_list
     from azure.cli.core.commands.parameters import (
@@ -26,8 +27,7 @@ def load_arguments(self, _):
         get_policy_completion_list, get_policy_set_completion_list, get_policy_assignment_completion_list, get_policy_exemption_completion_list,
         get_resource_types_completion_list, get_providers_completion_list)
     from azure.cli.command_modules.resource._validators import (
-        validate_lock_parameters, validate_resource_lock, validate_group_lock, validate_subscription_lock, validate_metadata, RollbackAction,
-        validate_msi)
+        validate_lock_parameters, validate_resource_lock, validate_group_lock, validate_subscription_lock, validate_metadata, RollbackAction)
     from azure.cli.command_modules.resource.parameters import TagUpdateOperation
 
     DeploymentMode, WhatIfResultFormat, ChangeType = self.get_models('DeploymentMode', 'WhatIfResultFormat', 'ChangeType')
@@ -96,6 +96,11 @@ def load_arguments(self, _):
     ts_version_description_type = CLIArgumentType(options_list=['--version-description'], help='The description of the template spec version.')
     ui_form_definition_file_type = CLIArgumentType(options_list=['--ui-form-definition'], completer=FilesCompleter(), type=file_type,
                                                    help="A path to a uiFormDefinition file in the file system")
+
+    bicep_target_platform_type = CLIArgumentType(options_list=['--target-platform', '-t'],
+                                                 arg_type=get_enum_type(
+                                                     ["win-x64", "linux-musl-x64", "linux-x64", "osx-x64"]),
+                                                 help="The platform the Bicep CLI will be running on. Set this to skip automatic platform detection if it does not work properly.")
 
     _PROVIDER_HELP_TEXT = 'the resource namespace, aka \'provider\''
 
@@ -192,7 +197,6 @@ def load_arguments(self, _):
         c.argument('name', options_list=['--name', '-n'], help='Name of the new policy definition.')
 
     with self.argument_context('policy assignment', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
-        c.ignore('_subscription')
         c.argument('name', options_list=['--name', '-n'], completer=get_policy_assignment_completion_list, help='Name of the policy assignment.')
         c.argument('scope', help='Scope to which this policy assignment applies.')
         c.argument('disable_scope_strict_match', action='store_true', help='Include policy assignments either inherited from parent scope or at child scope.')
@@ -207,7 +211,9 @@ def load_arguments(self, _):
         c.argument('notscopes', options_list='--not-scopes', nargs='+')
 
     with self.argument_context('policy assignment', resource_type=ResourceType.MGMT_RESOURCE_POLICY, arg_group='Managed Identity', min_api='2018-05-01') as c:
-        c.argument('assign_identity', nargs='*', validator=validate_msi, help="Assigns a system assigned identity to the policy assignment.")
+        c.argument('assign_identity', nargs='*', help="Assigns a system assigned identity to the policy assignment. This argument will be deprecated, please use --mi-system-assigned instead", deprecate_info=c.deprecate(hide=True))
+        c.argument('mi_system_assigned', action='store_true', help='Provide this flag to use system assigned identity for policy assignment. Check out help for more examples')
+        c.argument('mi_user_assigned', min_api='2021-06-01', help='UserAssigned Identity Id to be used for policy assignment. Check out help for more examples')
         c.argument('identity_scope', arg_type=identity_scope_type)
         c.argument('identity_role', arg_type=identity_role_type)
 
@@ -221,6 +227,8 @@ def load_arguments(self, _):
         c.argument('location', arg_type=get_location_type(self.cli_ctx), help='The location of the policy assignment. Only required when utilizing managed identity.')
 
     with self.argument_context('policy assignment identity', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2018-05-01') as c:
+        c.argument('mi_system_assigned', action='store_true', options_list=['--system-assigned'], help='Provide this flag to use system assigned identity for policy assignment. Check out help for more examples')
+        c.argument('mi_user_assigned', options_list=['--user-assigned'], min_api='2021-06-01', help='UserAssigned Identity Id to be used for policy assignment. Check out help for more examples')
         c.argument('identity_scope', arg_type=identity_scope_type)
         c.argument('identity_role', arg_type=identity_role_type)
 
@@ -570,6 +578,7 @@ def load_arguments(self, _):
 
     with self.argument_context('account management-group') as c:
         c.argument('group_name', options_list=['--name', '-n'])
+        c.argument('no_register', action='store_true', help='Skip registration for resource provider Microsoft.Management')
 
     with self.argument_context('account management-group show') as c:
         c.argument('expand', options_list=['--expand', '-e'], action='store_true')
@@ -582,6 +591,14 @@ def load_arguments(self, _):
     with self.argument_context('account management-group update') as c:
         c.argument('display_name', options_list=['--display-name', '-d'])
         c.argument('parent_id', options_list=['--parent', '-p'])
+
+    with self.argument_context('account management-group hierarchy-settings create') as c:
+        c.argument('default_management_group', options_list=['--default-management-group', '-m'])
+        c.argument('require_authorization_for_group_creation', options_list=['--require-authorization-for-group-creation', '-r'])
+
+    with self.argument_context('account management-group hierarchy-settings update') as c:
+        c.argument('default_management_group', options_list=['--default-management-group', '-m'])
+        c.argument('require_authorization_for_group_creation', options_list=['--require-authorization-for-group-creation', '-r'])
 
     with self.argument_context('ts') as c:
         c.argument('name', options_list=['--name', '-n'], help='The name of the template spec.')
@@ -636,5 +653,61 @@ def load_arguments(self, _):
         c.argument('file', arg_type=CLIArgumentType(options_list=['--file', '-f'], completer=FilesCompleter(),
                                                     type=file_type, help="The path to the ARM template to decompile in the file system."))
 
+    with self.argument_context('bicep publish') as c:
+        c.argument('file', arg_type=CLIArgumentType(options_list=['--file', '-f'], completer=FilesCompleter(),
+                                                    type=file_type, help="The path to the Bicep module file to publish in the file system."))
+        c.argument('target', arg_type=CLIArgumentType(options_list=['--target', '-t'],
+                                                      help="The target location where the Bicep module will be published."))
+
     with self.argument_context('bicep install') as c:
         c.argument('version', options_list=['--version', '-v'], help='The version of Bicep CLI to be installed. Default to the latest if not specified.')
+        c.argument('target_platform', arg_type=bicep_target_platform_type)
+
+    with self.argument_context('bicep upgrade') as c:
+        c.argument('target_platform', arg_type=bicep_target_platform_type)
+
+    with self.argument_context('resourcemanagement private-link create') as c:
+        c.argument('resource_group', arg_type=resource_group_name_type,
+                   help='The name of the resource group.')
+        c.argument('name', options_list=[
+                   '--name', '-n'], help='The name of the resource management private link.')
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group,
+                   help='the region to create the resource management private link')
+
+    with self.argument_context('resourcemanagement private-link show') as c:
+        c.argument('resource_group', arg_type=resource_group_name_type,
+                   help='The name of the resource group.')
+        c.argument('name', options_list=[
+                   '--name', '-n'], help='The name of the resource management private link.')
+
+    with self.argument_context('resourcemanagement private-link list') as c:
+        c.argument('resource_group', arg_type=resource_group_name_type,
+                   help='The name of the resource group.')
+
+    with self.argument_context('resourcemanagement private-link delete') as c:
+        c.argument('resource_group', arg_type=resource_group_name_type,
+                   help='The name of the resource group.')
+        c.argument('name', options_list=[
+                   '--name', '-n'], help='The name of the resource management private link.')
+
+    with self.argument_context('private-link association create') as c:
+        c.argument('management_group_id', arg_type=management_group_id_type)
+        c.argument('name', options_list=[
+                   '--name', '-n'], help='The name of the private link association')
+        c.argument('privatelink', options_list=[
+                   '--privatelink', '-p'], help='The name of the private link')
+        c.argument('public_network_access', options_list=['--public-network-access', '-a'], arg_type=get_enum_type(
+            ['enabled', 'disabled']), help='restrict traffic to private link')
+
+    with self.argument_context('private-link association show') as c:
+        c.argument('management_group_id', arg_type=management_group_id_type)
+        c.argument('name', options_list=[
+                   '--name', '-n'], help='The name of the private link association')
+
+    with self.argument_context('private-link association list') as c:
+        c.argument('management_group_id', arg_type=management_group_id_type)
+
+    with self.argument_context('private-link association delete') as c:
+        c.argument('management_group_id', arg_type=management_group_id_type)
+        c.argument('name', options_list=[
+                   '--name', '-n'], help='The name of the private link association')
