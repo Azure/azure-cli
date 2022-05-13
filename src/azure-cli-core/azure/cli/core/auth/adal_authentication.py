@@ -27,12 +27,11 @@ class MSIAuthenticationWrapper(MSIAuthentication):
                 import msal
                 from .util import check_result, build_sdk_access_token
                 app = msal.PublicClientApplication(
-                    "placeholder",  # It needs a string placeholder
-                    #token_cache=...,  # TODO: This PoC does not currently maintain a token cache
+                    "04b07795-8ddb-461a-bbee-02f9e1bf7b46",  # Use a real client_id, so that cache would work
+                    #token_cache=...,  # TODO: This PoC does not currently maintain a token cache;
+                                       #       Ideally we should reuse the real MSAL app object which has cache configured.
                     )
-                result = app.acquire_token_silent(list(scopes),
-                                                  app.get_accounts(username=msal.CURRENT_USER)[0],
-                                                  data=kwargs['data'])
+                result = app.acquire_token_interactive(list(scopes), prompt="none", data=kwargs["data"])
                 check_result(result)
                 return build_sdk_access_token(result)
             else:
