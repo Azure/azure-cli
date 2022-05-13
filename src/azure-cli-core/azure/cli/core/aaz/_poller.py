@@ -53,7 +53,7 @@ class AAZLROPoller:
 
     def __init__(self, polling_generator, result_callback):
         self._callbacks = []
-        self._polling_generator = polling_generator
+        self._polling_generator = polling_generator  # generator
         self._polling_method = None
         self._result_callback = result_callback
 

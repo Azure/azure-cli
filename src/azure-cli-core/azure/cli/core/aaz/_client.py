@@ -28,6 +28,8 @@ def register_client(name):
 
 @register_client("MgmtClient")
 class AAZMgmtClient(PipelineClient):
+    """Management Client for Management Plane APIs"""
+
     class _Configuration(Configuration):
         def __init__(self, credential, credential_scopes, **kwargs):
             if credential is None:

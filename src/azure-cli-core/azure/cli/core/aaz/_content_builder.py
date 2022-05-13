@@ -12,6 +12,7 @@ from ._arg_browser import AAZArgBrowser
 
 
 class AAZContentBuilder:
+    """Content Builder is used to build operation content"""
 
     def __init__(self, values, args, is_discriminated=False):
         assert len(args) > 0
@@ -30,6 +31,7 @@ class AAZContentBuilder:
         self._discriminator_builders = {}
 
     def set_const(self, prop_name, prop_value, typ, arg_key=None, typ_kwargs=None):
+        """Set const value for a property"""
         for value, arg in zip(self._values, self._args):
             schema = value._schema
             if self._is_discriminated:
@@ -46,6 +48,7 @@ class AAZContentBuilder:
                 value[prop_name] = prop_value
 
     def set_prop(self, prop_name, typ, arg_key=None, typ_kwargs=None):
+        """Set property value from argument"""
         sub_values = []
         sub_args = []
         for value, arg in zip(self._values, self._args):
@@ -80,6 +83,7 @@ class AAZContentBuilder:
         return None
 
     def set_elements(self, typ, arg_key=None, typ_kwargs=None):
+        """Set elements of dict or list from argument"""
         sub_values = []
         sub_args = []
         for value, arg in zip(self._values, self._args):
@@ -115,6 +119,7 @@ class AAZContentBuilder:
         return None
 
     def discriminate_by(self, prop_name, prop_value):
+        """discriminate object by a specify property"""
         if self._discriminator_prop_name is None:
             self._discriminator_prop_name = prop_name
         if self._discriminator_prop_name != prop_name:
@@ -137,6 +142,7 @@ class AAZContentBuilder:
         return self._discriminator_builders[prop_value]
 
     def get(self, key):
+        """Get sub builder by key"""
         if not key or key == '.':
             return self
         parts = [part for part in key.replace('[', '.[').replace('{', '.{').split('.') if part]

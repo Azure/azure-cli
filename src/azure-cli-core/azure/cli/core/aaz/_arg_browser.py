@@ -7,6 +7,7 @@ from ._base import AAZBaseValue
 
 
 class AAZArgBrowser:
+    """Argument Browser is used to access the data of argument."""
 
     @classmethod
     def create(cls, arg):
@@ -20,6 +21,7 @@ class AAZArgBrowser:
         self._parent = parent
 
     def get_prop(self, key):
+        """The sub property argument by key. The return value will be an Argument Browser as well."""
         if key is None or key == '.':
             return self
 
@@ -44,6 +46,7 @@ class AAZArgBrowser:
         raise NotImplementedError()
 
     def get_elements(self):
+        """Iter over sub elements of list or dict."""
         if isinstance(self._arg_data, list):
             for idx, d in enumerate(self._arg_data):
                 # not support to access parent from element args
