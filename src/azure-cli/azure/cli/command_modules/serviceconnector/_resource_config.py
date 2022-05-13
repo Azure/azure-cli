@@ -18,7 +18,9 @@ from .action import (
 # The enum value will be used in command name
 class RESOURCE(Enum):
     WebApp = 'webapp'
-    SpringCloud = 'spring-cloud'
+    # `az spring-cloud` migrated to `az spring`
+    SpringCloud = 'spring'
+    SpringCloudDeprecated = 'spring-cloud'
     KubernetesCluster = 'aks'
     ContainerApp = 'containerapp'
     CosmosCassandra = 'cosmos-cassandra'
@@ -70,7 +72,7 @@ class CLIENT_TYPE(Enum):
 
 
 # The source resources released as CLI extensions
-SOURCE_RESOURCES_IN_EXTENSION = [RESOURCE.SpringCloud, RESOURCE.ContainerApp]
+SOURCE_RESOURCES_IN_EXTENSION = [RESOURCE.SpringCloud, RESOURCE.SpringCloudDeprecated, RESOURCE.ContainerApp]
 
 # The source resources using user token
 SOURCE_RESOURCES_USERTOKEN = [RESOURCE.KubernetesCluster]
@@ -82,6 +84,7 @@ TARGET_RESOURCES_USERTOKEN = [RESOURCE.PostgresFlexible, RESOURCE.MysqlFlexible,
 SOURCE_RESOURCES = {
     RESOURCE.WebApp: '/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/Microsoft.Web/sites/{site}',
     RESOURCE.SpringCloud: '/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/Microsoft.AppPlatform/Spring/{spring}/apps/{app}/deployments/{deployment}',
+    RESOURCE.SpringCloudDeprecated: '/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/Microsoft.AppPlatform/Spring/{spring}/apps/{app}/deployments/{deployment}',
     # RESOURCE.KubernetesCluster: '/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/Microsoft.ContainerService/managedClusters/{cluster}',
     RESOURCE.ContainerApp: '/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/Microsoft.App/containerApps/{app}'
 }
@@ -135,6 +138,28 @@ SOURCE_RESOURCES_PARAMS = {
         }
     },
     RESOURCE.SpringCloud: {
+        'source_resource_group': {
+            'options': ['--resource-group', '-g'],
+            'help': 'The resource group which contains the spring-cloud',
+            'placeholder': 'SpringCloudRG'
+        },
+        'spring': {
+            'options': ['--service'],
+            'help': 'Name of the spring-cloud service',
+            'placeholder': 'MySpringService'
+        },
+        'app': {
+            'options': ['--app'],
+            'help': 'Name of the spring-cloud app',
+            'placeholder': 'MyApp'
+        },
+        'deployment': {
+            'options': ['--deployment'],
+            'help': 'The deployment name of the app',
+            'placeholder': 'MyDeployment'
+        }
+    },
+    RESOURCE.SpringCloudDeprecated: {
         'source_resource_group': {
             'options': ['--resource-group', '-g'],
             'help': 'The resource group which contains the spring-cloud',
@@ -706,6 +731,7 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.ConfluentKafka: [AUTH_TYPE.Secret],
     },
 }
+SUPPORTED_AUTH_TYPE[RESOURCE.SpringCloudDeprecated] = SUPPORTED_AUTH_TYPE[RESOURCE.SpringCloud]
 
 
 # The dict defines the supported client types of each source-target resource pair
@@ -1041,5 +1067,6 @@ SUPPORTED_CLIENT_TYPE = {
         ]
     }
 }
+SUPPORTED_CLIENT_TYPE[RESOURCE.SpringCloudDeprecated] = SUPPORTED_CLIENT_TYPE[RESOURCE.SpringCloud]
 SUPPORTED_CLIENT_TYPE[RESOURCE.KubernetesCluster] = SUPPORTED_CLIENT_TYPE[RESOURCE.WebApp]
 SUPPORTED_CLIENT_TYPE[RESOURCE.ContainerApp] = SUPPORTED_CLIENT_TYPE[RESOURCE.WebApp]
