@@ -2716,7 +2716,7 @@ def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None)
     webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
     if not webapp:
         slot_text = "Deployment slot {} in ".format(slot) if slot else ''
-        raise ResourceNotFoundError("{0}app {1} doesn't exist in resource group {2}".format(slot_text,
+        raise ResourceNotFoundError("{0}app {1} doesn't exist in resource group {2}".format(slot_text,
                                                                                             name,
                                                                                             resource_group_name))
 
@@ -2727,7 +2727,7 @@ def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None)
 
     if not _verify_hostname_binding(cmd, resource_group_name, name, hostname, slot):
         slot_text = " --slot {}".format(slot) if slot else ""
-        raise ValidationError("Hostname (custom domain) '{0}' is not registered with {1}. "
+        raise ValidationError("Hostname (custom domain) '{0}' is not registered with {1}. "
                               "Use 'az webapp config hostname add --resource-group {2} "
                               "--webapp-name {1}{3} --hostname {0}' "
                               "to register the hostname.".format(hostname, name, resource_group_name, slot_text))
