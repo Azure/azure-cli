@@ -172,6 +172,7 @@ class AKSAgentPoolContext(BaseAKSContext):
         enable_cluster_autoscaler,
         min_count,
         max_count,
+        mode,
         decorator_mode,
     ) -> None:
         """Helper function to check the validity of serveral count-related parameters in autoscaler.
@@ -200,6 +201,11 @@ class AKSAgentPoolContext(BaseAKSContext):
                 if node_count < min_count or node_count > max_count:
                     raise InvalidArgumentValueError(
                         "node-count is not in the range of min-count and max-count"
+                    )
+            if mode == CONST_NODEPOOL_MODE_SYSTEM:
+                if min_count < 1:
+                    raise InvalidArgumentValueError(
+                        "Value of min-count should be greater than or equal to 1 for System node pools"
                     )
         else:
             if min_count is not None or max_count is not None:
@@ -628,6 +634,13 @@ class AKSAgentPoolContext(BaseAKSContext):
         if self.agentpool and self.agentpool.max_count is not None:
             max_count = self.agentpool.max_count
 
+        # mode
+        # read the original value passed by the command
+        mode = self.raw_param.get("mode")
+        # try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.agentpool and self.agentpool.mode is not None:
+            mode = self.agentpool.mode
+
         # these parameters do not need dynamic completion
 
         # validation
@@ -636,6 +649,7 @@ class AKSAgentPoolContext(BaseAKSContext):
             enable_cluster_autoscaler,
             min_count,
             max_count,
+            mode,
             decorator_mode=DecoratorMode.CREATE,
         )
         return node_count, enable_cluster_autoscaler, min_count, max_count
@@ -679,6 +693,10 @@ class AKSAgentPoolContext(BaseAKSContext):
         # read the original value passed by the command
         max_count = self.raw_param.get("max_count")
 
+        # mode
+        # read the original value passed by the command, defaulting to the value from the `agentpool` object
+        mode = self.raw_param.get("mode", self.agentpool.mode)
+
         # these parameters do not need dynamic completion
 
         # validation
@@ -701,6 +719,7 @@ class AKSAgentPoolContext(BaseAKSContext):
             enable_cluster_autoscaler or update_cluster_autoscaler,
             min_count,
             max_count,
+            mode,
             decorator_mode=DecoratorMode.UPDATE,
         )
 

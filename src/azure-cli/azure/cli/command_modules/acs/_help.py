@@ -985,10 +985,10 @@ parameters:
     short-summary: Enable cluster autoscaler.
   - name: --min-count
     type: int
-    short-summary: Minimum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 1000]
+    short-summary: Minimum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [0, 1000]
   - name: --max-count
     type: int
-    short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 1000]
+    short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [0, 1000]
   - name: --scale-down-mode
     type: string
     short-summary: "Describe how VMs are added to or removed from nodepools."
@@ -1101,10 +1101,10 @@ parameters:
     short-summary: Update min-count or max-count for cluster autoscaler.
   - name: --min-count
     type: int
-    short-summary: Minimum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 1000]
+    short-summary: Minimum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [0, 1000]
   - name: --max-count
     type: int
-    short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 1000]
+    short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [0, 1000]
   - name: --scale-down-mode
     type: string
     short-summary: "Describe how VMs are added to or removed from nodepools."
