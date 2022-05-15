@@ -218,6 +218,8 @@ def transform_blob_list_output(result):
 
 
 def transform_blob_json_output(result):
+    if result is None:
+        return
     result = todict(result)
     new_result = {
         "content": "",

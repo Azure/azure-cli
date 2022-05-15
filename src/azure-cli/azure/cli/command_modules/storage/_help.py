@@ -1193,6 +1193,8 @@ short-summary: Download a blob to a file path.
 examples:
   - name: Download a blob.
     text: az storage blob download -f /path/to/file -c mycontainer -n MyBlob
+  - name: Download a blob content to stdout(pipe support).
+    text: az storage blob download -c mycontainer -n myblob --account-name mystorageaccount --account-key myaccountkey
 """
 
 helps['storage blob url'] = """
