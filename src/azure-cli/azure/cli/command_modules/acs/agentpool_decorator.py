@@ -634,13 +634,6 @@ class AKSAgentPoolContext(BaseAKSContext):
         if self.agentpool and self.agentpool.max_count is not None:
             max_count = self.agentpool.max_count
 
-        # mode
-        # read the original value passed by the command
-        mode = self.raw_param.get("mode")
-        # try to read the property value corresponding to the parameter from the `agentpool` object
-        if self.agentpool and self.agentpool.mode is not None:
-            mode = self.agentpool.mode
-
         # these parameters do not need dynamic completion
 
         # validation
@@ -649,7 +642,7 @@ class AKSAgentPoolContext(BaseAKSContext):
             enable_cluster_autoscaler,
             min_count,
             max_count,
-            mode,
+            mode=self.get_mode(),
             decorator_mode=DecoratorMode.CREATE,
         )
         return node_count, enable_cluster_autoscaler, min_count, max_count
@@ -693,10 +686,6 @@ class AKSAgentPoolContext(BaseAKSContext):
         # read the original value passed by the command
         max_count = self.raw_param.get("max_count")
 
-        # mode
-        # read the original value passed by the command, defaulting to the value from the `agentpool` object
-        mode = self.raw_param.get("mode", self.agentpool.mode)
-
         # these parameters do not need dynamic completion
 
         # validation
@@ -719,7 +708,7 @@ class AKSAgentPoolContext(BaseAKSContext):
             enable_cluster_autoscaler or update_cluster_autoscaler,
             min_count,
             max_count,
-            mode,
+            mode=self.get_mode(),
             decorator_mode=DecoratorMode.UPDATE,
         )
 
