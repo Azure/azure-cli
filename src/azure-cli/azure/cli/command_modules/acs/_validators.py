@@ -11,7 +11,9 @@ from ipaddress import ip_network
 from math import isclose, isnan
 
 from azure.cli.core import keys
-from azure.cli.core.azclierror import InvalidArgumentValueError
+from azure.cli.core.azclierror import (
+    InvalidArgumentValueError, RequiredArgumentMissingError,
+    ArgumentUsageError)
 from azure.cli.core.commands.validators import validate_tag
 from azure.cli.core.util import CLIError
 from knack.log import get_logger
@@ -508,3 +510,13 @@ def validate_credential_format(namespace):
         namespace.credential_format.lower() != "azure" and \
             namespace.credential_format.lower() != "exec":
         raise InvalidArgumentValueError("--format can only be azure or exec.")
+
+
+def validate_defender_config_parameter(namespace):
+    if namespace.defender_config and not namespace.enable_defender:
+        raise RequiredArgumentMissingError("Please specify --enable-defnder")
+
+
+def validate_disable_and_enable_parameters(namespace):
+    if namespace.disable_defender and namespace.enable_defender:
+        raise ArgumentUsageError('Providing both --disable-defender and --enable-defender flags is invalid')
