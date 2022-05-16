@@ -5143,7 +5143,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_nodepool_autoscaler_then_update(self, resource_group, resource_group_location):
         aks_name = self.create_random_name('cliakstest', 16)
-        np_name = self.create_random_name('cliaksnp', 10)
+        np_name = self.create_random_name('clinp', 12)
         self.kwargs.update({
             'name': aks_name,
             'resource_group': resource_group,
@@ -5159,7 +5159,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('agentPoolProfiles[0].count', 1),
         ])
 
-        add_nodepool_cmd = 'aks nodepool add -g {resource_group} --cluster-name {name} -n {np_name} ' \
+        add_nodepool_cmd = 'aks nodepool add -g {resource_group} --cluster-name {name} -n {nodepool_name} ' \
                      '--mode user --enable-cluster-autoscaler -c 0 --min-count 0 --max-count 3'
         self.cmd(add_nodepool_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
@@ -5168,7 +5168,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('maxCount', 3),
         ])
 
-        update_nodepool_cmd = 'aks nodepool add -g {resource_group} --cluster-name {name} -n {np_name} ' \
+        update_nodepool_cmd = 'aks nodepool update -g {resource_group} --cluster-name {name} -n {nodepool_name} ' \
                      '--update-cluster-autoscaler --min-count 1 --max-count 101'
         self.cmd(update_nodepool_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
