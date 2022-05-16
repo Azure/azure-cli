@@ -537,7 +537,7 @@ def add_ag_private_link(cmd,
     # prepare the subnet for new private link
     for subnet in vnet.subnets:
         if subnet.name == private_link_subnet_name_or_id:
-            raise CLIError('Subnet duplicates, in order to use existing subnet, please enter subnet resources ID.')
+            raise CLIError('Subnet name duplicates. In order to use existing subnet, please enter subnet ID.')
         if subnet.address_prefix == private_link_subnet_prefix:
             raise CLIError('Subnet prefix duplicates')
         if subnet.address_prefixes and private_link_subnet_prefix in subnet.address_prefixes:
