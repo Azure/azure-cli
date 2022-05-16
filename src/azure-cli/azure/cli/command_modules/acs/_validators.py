@@ -100,7 +100,7 @@ def validate_k8s_version(namespace):
             namespace.kubernetes_version = found[0]
         else:
             raise CLIError('--kubernetes-version should be the full version number or major.minor version number, '
-                            'such as "1.7.12" or "1.7"')
+                           'such as "1.7.12" or "1.7"')
 
 
 def validate_nodepool_name(namespace):
