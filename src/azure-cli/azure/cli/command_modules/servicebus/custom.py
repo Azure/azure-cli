@@ -748,10 +748,12 @@ def _update_private_endpoint_connection_status(cmd, client, resource_group_name,
                                              private_endpoint_connection_name=private_endpoint_connection_name)
 
     old_status = private_endpoint_connection.private_link_service_connection_state.status
+    if description:
+        private_endpoint_connection.private_link_service_connection_state.description = description
+
     if old_status != "Approved" or not is_approved:
         private_endpoint_connection.private_link_service_connection_state.status = PrivateEndpointServiceConnectionStatus.APPROVED\
             if is_approved else PrivateEndpointServiceConnectionStatus.REJECTED
-        private_endpoint_connection.private_link_service_connection_state.description = description
         try:
             private_endpoint_connection = client.create_or_update(resource_group_name=resource_group_name,
                                                                   namespace_name=namespace_name,
@@ -763,6 +765,7 @@ def _update_private_endpoint_connection_status(cmd, client, resource_group_name,
                 private_endpoint_connection = client.get(resource_group_name=resource_group_name,
                                                          namespace_name=namespace_name,
                                                          private_endpoint_connection_name=private_endpoint_connection_name)
+
     return private_endpoint_connection
 
 
