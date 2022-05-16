@@ -67,6 +67,7 @@ def _aks_table_format(result):
         location: location,
         resourceGroup: resourceGroup,
         kubernetesVersion: kubernetesVersion,
+        currentKubernetesVersion: currentKubernetesVersion,
         provisioningState: provisioningState,
         fqdn: fqdn || privateFqdn
     }""")
