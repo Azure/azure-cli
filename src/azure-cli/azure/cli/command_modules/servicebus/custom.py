@@ -174,13 +174,12 @@ def cli_sbqueue_create(cmd, client, resource_group_name, namespace_name, queue_n
         parameters=queue_params)
 
 
-def cli_sbqueue_update(cmd, instance, lock_duration=None,
+def cli_sbqueue_update(instance, lock_duration=None,
                        max_size_in_megabytes=None, requires_duplicate_detection=None, requires_session=None,
                        default_message_time_to_live=None, dead_lettering_on_message_expiration=None,
                        duplicate_detection_history_time_window=None, max_delivery_count=None, status=None,
                        auto_delete_on_idle=None, enable_partitioning=None, enable_express=None,
                        forward_to=None, forward_dead_lettered_messages_to=None, enable_batched_operations=None):
-
 
     from datetime import timedelta
     from azure.cli.command_modules.servicebus.constants import DURATION_LIMIT
@@ -300,7 +299,7 @@ def cli_sbtopic_create(cmd, client, resource_group_name, namespace_name, topic_n
         parameters=topic_params)
 
 
-def cli_sbtopic_update(cmd, instance, default_message_time_to_live=None,
+def cli_sbtopic_update(instance, default_message_time_to_live=None,
                        max_size_in_megabytes=None, requires_duplicate_detection=None,
                        duplicate_detection_history_time_window=None,
                        enable_batched_operations=None, status=None, support_ordering=None, auto_delete_on_idle=None,
@@ -537,7 +536,8 @@ def cli_rules_update(cmd, instance,
     if message_id:
         instance.correlation_filter.message_id = message_id
 
-    if reply_to:instance.correlation_filter.reply_to = reply_to
+    if reply_to:
+        instance.correlation_filter.reply_to = reply_to
 
     if label:
         instance.correlation_filter.label = label
