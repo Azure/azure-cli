@@ -546,7 +546,10 @@ class AKSManagedClusterContext(BaseAKSContext):
         if assigned_identity is None or assigned_identity == "":
             # Suppose identity is present on mc
             if not(self.mc and self.mc.identity and self.mc.identity.user_assigned_identities):
-                raise RequiredArgumentMissingError("--assign-identity is not provided and the cluster identity type is not user assigned, cannot update kubelet identity")
+                raise RequiredArgumentMissingError(
+                    "--assign-identity is not provided and the cluster identity type is not user assigned, "
+                    "cannot update kubelet identity"
+                )
             cluster_identity_resource_id = list(self.mc.identity.user_assigned_identities.keys())[0]
         else:
             cluster_identity_resource_id = assigned_identity
