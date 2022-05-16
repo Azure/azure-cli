@@ -55,3 +55,21 @@ helps['demo style'] = """
 type: command
 short-summary: A demo showing supported text styles.
 """
+
+helps['demo secret-store'] = """
+type: group
+short-summary: A demo showing how to use secret store.
+"""
+
+helps['demo secret-store save'] = """
+type: command
+short-summary: Save custom data to secret store.
+examples:
+  - name: Save data to secret store.
+    text: az demo secret-store save "name=Johann Sebastian Bach" job=musician
+"""
+
+helps['demo secret-store load'] = """
+type: command
+short-summary: Load custom data from secret store.
+"""
