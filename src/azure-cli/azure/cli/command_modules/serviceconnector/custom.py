@@ -247,7 +247,7 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals
 
     validate_service_state(parameters)
     new_auth_info = enable_mi_for_db_linker(cmd.cli_ctx, source_id, target_id, auth_info, source_type, target_type)
-    parameters['auth_info'] = new_auth_info if new_auth_info != None else parameters['auth_info']
+    parameters['auth_info'] = new_auth_info if new_auth_info is not None else parameters['auth_info']
     return auto_register(sdk_no_wait, no_wait,
                          client.begin_create_or_update,
                          resource_uri=source_id,
