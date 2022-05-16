@@ -302,7 +302,7 @@ def enable_mi_for_db_linker(cli_ctx, source_id, target_id, auth_info, source_typ
         # object_id = run_cli_cmd('az webapp show --ids {0}'.format(source_id)).get('identity').get('principalId')
         # enable source mi
         identity = None
-        if source_type == RESOURCE.SpringCloudDeprecated or source_type == RESOURCE.SpringCloud:
+        if source_type in {RESOURCE.SpringCloudDeprecated, RESOURCE.SpringCloud}:
             identity = get_springcloud_identity(source_id)
         object_id = identity.get('principalId')
         client_id = run_cli_cmd('az ad sp show --id {0}'.format(object_id)).get('appId')
@@ -399,7 +399,7 @@ def get_springcloud_identity(source_id):
     rg = segments.get('resource_group')
     identity = run_cli_cmd('az spring-cloud app show -g {0} -s {1} -n {2}'.format(rg, spring, app)).get('identity')
     if (identity is None or identity.get('type') != "SystemAssigned"):
-        # assign system identity
+        # assign system identity for spring-cloud
         run_cli_cmd('az spring-cloud app identity assign -g {0} -s {1} -n {2}'.format(rg, spring, app))
         print('spring cloud app identity is enabled.')
         cnt = 0
