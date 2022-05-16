@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import os
 import re
 import time
 from types import SimpleNamespace
@@ -74,7 +75,7 @@ from azure.cli.core.azclierror import (
 from azure.cli.core.commands import AzCliCommand, LongRunningOperation
 from azure.cli.core.keys import is_valid_ssh_rsa_public_key
 from azure.cli.core.profiles import ResourceType
-from azure.cli.core.util import sdk_no_wait, truncate_text
+from azure.cli.core.util import sdk_no_wait, truncate_text, get_file_json
 from azure.core.exceptions import HttpResponseError
 from knack.log import get_logger
 from knack.prompting import NoTTYException, prompt, prompt_pass, prompt_y_n
@@ -3652,6 +3653,46 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         return self._get_no_uptime_sla(enable_validation=True)
 
+    def get_defender_config(self) -> Union[TypeVar("ManagedClusterSecurityProfileAzureDefender"), None]:
+        """Obtain the value of defender.
+
+        :return: string or None
+        """
+        disable_defender = self.raw_param.get("disable_defender")
+        if disable_defender:
+            return self.models.ManagedClusterSecurityProfileAzureDefender(enabled=False)
+
+        # read the original value passed by the command
+        enable_defender = self.raw_param.get("enable_defender")
+
+        if not enable_defender:
+            return None
+
+        workspace = ""
+        config_file_path = self.raw_param.get("defender_config")
+        if config_file_path:
+            if not os.path.isfile(config_file_path):
+                raise InvalidArgumentValueError(
+                    "{} is not valid file, or not accessable.".format(
+                        config_file_path
+                    )
+                )
+            defender_config = get_file_json(config_file_path)
+            if "logAnalyticsWorkspaceResourceId" in defender_config:
+                workspace = defender_config["logAnalyticsWorkspaceResourceId"]
+
+        if workspace == "":
+            workspace = self.external_functions.ensure_default_log_analytics_workspace_for_monitoring(
+                self.cmd,
+                self.get_subscription_id(),
+                self.get_resource_group_name())
+
+        azure_defender = self.models.ManagedClusterSecurityProfileAzureDefender(enabled=enable_defender)
+        if enable_defender:
+            azure_defender.log_analytics_workspace_resource_id = workspace
+
+        return azure_defender
+
     def _get_disable_local_accounts(self, enable_validation: bool = False) -> bool:
         """Internal function to obtain the value of disable_local_accounts.
 
@@ -3914,6 +3955,21 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         for key, value in defaults_in_mc.items():
             if getattr(mc, key, None) is None:
                 setattr(mc, key, value)
+        return mc
+
+    def set_up_defender(self, mc: ManagedCluster) -> ManagedCluster:
+        """Set up defender for the ManagedCluster object.
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        defender = self.context.get_defender_config()
+        if defender:
+            if mc.security_profile is None:
+                mc.security_profile = self.models.ManagedClusterSecurityProfile()
+
+            mc.security_profile.azure_defender = defender
+
         return mc
 
     def init_mc(self) -> ManagedCluster:
@@ -4758,10 +4814,12 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.set_up_extended_location(mc)
         # set up node resource group
         mc = self.set_up_node_resource_group(mc)
-
+        # set up defender
+        mc = self.set_up_defender(mc)
         # restore defaults
         if not bypass_restore_defaults:
             mc = self._restore_defaults_in_mc(mc)
+
         return mc
 
     # pylint: disable=unused-argument,too-many-boolean-expressions
@@ -5505,6 +5563,21 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         self.update_azure_keyvault_secrets_provider_addon_profile(azure_keyvault_secrets_provider_addon_profile)
         return mc
 
+    def update_defender(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update defender for the ManagedCluster object.
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        defender = self.context.get_defender_config()
+        if defender:
+            if mc.security_profile is None:
+                mc.security_profile = self.models.ManagedClusterSecurityProfile()
+
+            mc.security_profile.azure_defender = defender
+
+        return mc
+
     def update_mc_profile_default(self) -> ManagedCluster:
         """The overall controller used to update the default ManagedCluster profile.
 
@@ -5548,6 +5621,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.update_identity(mc)
         # update addon profiles
         mc = self.update_addon_profiles(mc)
+        # update defender
+        mc = self.update_defender(mc)
         return mc
 
     # pylint: disable=unused-argument
