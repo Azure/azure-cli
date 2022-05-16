@@ -182,7 +182,7 @@ class MSGraphClientPasswordReplacer(RecordingProcessor):
         return response
 
 
-class MSGraphUserReplacer:
+class MSGraphUserReplacer(RecordingProcessor):
     def __init__(self, test_user, mock_user):
         self.test_user = test_user
         self.mock_user = mock_user
