@@ -2105,7 +2105,7 @@ def restore_backup(cmd, resource_group_name, webapp_name, storage_account_url, b
     if slot:
         return client.web_apps.begin_restore_slot(resource_group_name, webapp_name, 0, slot, restore_request)
 
-    return client.web_apps.begin_restore(resource_group_name, webapp_name, 0, restore_request)
+    return client.web_apps.begin_restore_from_backup_blob(resource_group_name, webapp_name, restore_request)
 
 
 def list_snapshots(cmd, resource_group_name, name, slot=None):
