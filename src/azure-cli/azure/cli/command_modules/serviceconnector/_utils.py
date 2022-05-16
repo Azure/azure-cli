@@ -304,7 +304,7 @@ def enable_mi_for_db_linker(cli_ctx, source_id, target_id, auth_info, source_typ
         # object_id = run_cli_cmd('az webapp show --ids {0}'.format(source_id)).get('identity').get('principalId')
         # enable source mi
         identity = None
-        if source_type == RESOURCE.SpringCloud:
+        if source_type == RESOURCE.SpringCloudDeprecated or source_type == RESOURCE.SpringCloud:
             identity = get_springcloud_identity(source_id)
         print(identity)
         object_id = identity.get('principalId')
@@ -312,7 +312,7 @@ def enable_mi_for_db_linker(cli_ctx, source_id, target_id, auth_info, source_typ
 
         # add new firewall rule
         ipname = generate_random_string(prefix='svc_')
-        set_target_firewall(target_id, target_type, True. ipname)
+        set_target_firewall(target_id, target_type, True, ipname)
        
         aaduser = generate_random_string(prefix="aad_" + target_type.value + '_')
         create_aad_user_in_db(cli_ctx, target_id, aaduser, client_id)
@@ -337,7 +337,7 @@ def set_target_firewall(target_id, target_type, add_new_rule, ipname):
             run_cli_cmd('az postgres server firewall-rule create -g {0} -s {1} -n {2} '
             '--start-ip-address 0.0.0.0 --end-ip-address 255.255.255.255'.format(rg, server, ipname))
         else:
-            run_cli_cmd('az postgres server firewall-rule delete -g {0} -s {1} -n {2}'
+            run_cli_cmd('az postgres server firewall-rule delete -g {0} -s {1} -n {2} -y'
                 .format(rg, server, ipname))
            
 
