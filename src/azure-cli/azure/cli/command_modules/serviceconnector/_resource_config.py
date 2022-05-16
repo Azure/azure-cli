@@ -619,7 +619,7 @@ AUTH_TYPE_PARAMS = {
 # The first one will be used as the default auth type
 SUPPORTED_AUTH_TYPE = {
     RESOURCE.WebApp: {
-        RESOURCE.Postgres: [AUTH_TYPE.Secret],
+        RESOURCE.Postgres: [AUTH_TYPE.Secret, AUTH_TYPE.SystemIdentity],
         RESOURCE.PostgresFlexible: [AUTH_TYPE.Secret],
         RESOURCE.Mysql: [AUTH_TYPE.Secret],
         RESOURCE.MysqlFlexible: [AUTH_TYPE.Secret],
@@ -647,7 +647,7 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.ConfluentKafka: [AUTH_TYPE.Secret],
     },
     RESOURCE.SpringCloud: {
-        RESOURCE.Postgres: [AUTH_TYPE.Secret],
+        RESOURCE.Postgres: [AUTH_TYPE.Secret, AUTH_TYPE.SystemIdentity],
         RESOURCE.PostgresFlexible: [AUTH_TYPE.Secret],
         RESOURCE.Mysql: [AUTH_TYPE.Secret],
         RESOURCE.MysqlFlexible: [AUTH_TYPE.Secret],
@@ -703,7 +703,7 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.ConfluentKafka: [AUTH_TYPE.Secret],
     },
     RESOURCE.ContainerApp: {
-        RESOURCE.Postgres: [AUTH_TYPE.Secret],
+        RESOURCE.Postgres: [AUTH_TYPE.Secret, AUTH_TYPE.SystemIdentity],
         RESOURCE.PostgresFlexible: [AUTH_TYPE.Secret],
         RESOURCE.Mysql: [AUTH_TYPE.Secret],
         RESOURCE.MysqlFlexible: [AUTH_TYPE.Secret],

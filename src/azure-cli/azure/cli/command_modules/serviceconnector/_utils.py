@@ -12,7 +12,8 @@ from azure.cli.core.azclierror import (
 )
 from ._resource_config import (
     SOURCE_RESOURCES_USERTOKEN,
-    TARGET_RESOURCES_USERTOKEN
+    TARGET_RESOURCES_USERTOKEN,
+    RESOURCE
 )
 
 
@@ -296,3 +297,108 @@ def get_auth_if_no_valid_key_vault_connection(logger, source_name, source_id, ke
         auth_info['clientId'] = client_id
         auth_info['subscriptionId'] = subscription_id
     return auth_info
+
+
+def enable_mi_for_db_linker(cli_ctx, source_id, target_id, auth_info, source_type, target_type):
+    if(target_type in {RESOURCE.Postgres} and auth_info['auth_type'] == 'systemAssignedIdentity'):
+        # object_id = run_cli_cmd('az webapp show --ids {0}'.format(source_id)).get('identity').get('principalId')
+        # enable source mi
+        identity = None
+        if source_type == RESOURCE.SpringCloud:
+            identity = get_springcloud_identity(source_id)
+        print(identity)
+        object_id = identity.get('principalId')
+        client_id = run_cli_cmd('az ad sp show --id {0}'.format(object_id)).get('appId')
+
+        # add new firewall rule
+        ipname = generate_random_string(prefix='svc_')
+        set_target_firewall(target_id, target_type, True. ipname)
+       
+        aaduser = generate_random_string(prefix="aad_" + target_type.value + '_')
+        create_aad_user_in_db(cli_ctx, target_id, aaduser, client_id)
+
+        # remove firewall rule
+        set_target_firewall(target_id, target_type, False, ipname)
+        
+        return {
+            'auth_type': 'secret',
+            'name': aaduser,
+            'secret_info': {
+                'secret_type': 'rawValue'
+            }
+        }
+
+def set_target_firewall(target_id, target_type, add_new_rule, ipname):
+    if target_type == RESOURCE.Postgres:
+        target_segments = parse_resource_id(target_id)
+        rg = target_segments.get('resource_group')
+        server = target_segments.get('name')
+        if add_new_rule:
+            run_cli_cmd('az postgres server firewall-rule create -g {0} -s {1} -n {2} '
+            '--start-ip-address 0.0.0.0 --end-ip-address 255.255.255.255'.format(rg, server, ipname))
+        else:
+            run_cli_cmd('az postgres server firewall-rule delete -g {0} -s {1} -n {2}'
+                .format(rg, server, ipname))
+           
+
+def create_aad_user_in_db(cli_ctx, target_id, aaduser, client_id):
+    import psycopg2
+    from azure.cli.core._profile import Profile
+
+    # pylint: disable=protected-access
+    profile = Profile(cli_ctx=cli_ctx)
+
+    # Update connection string information
+    target_segments = parse_resource_id(target_id)
+    dbserver = target_segments.get('name')
+    host = "{0}.postgres.database.azure.com".format(dbserver)
+    dbname = target_segments.get('child_name_1')
+    user = profile.get_current_account_user()+'@'+dbserver
+    password = run_cli_cmd('az account get-access-token --resource-type oss-rdbms').get('accessToken')
+    sslmode = "require"
+
+    # Construct connection string
+    conn_string = "host={0} user={1} dbname={2} password={3} sslmode={4}".format(host, user, dbname, password, sslmode)
+    try:
+        conn = psycopg2.connect(conn_string)
+    except psycopg2.Error as e:
+        raise e
+    print("Connection established")
+   
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("SET aad_validate_oids_in_tenant = off;")
+        cursor.execute("CREATE ROLE {0} WITH LOGIN PASSWORD '{1}' IN ROLE azure_ad_user;".format(aaduser, client_id))
+    except psycopg2.Error as e: # role "aaduser" already exists
+        print(e)
+        conn.commit()
+    try:
+        cursor.execute("GRANT ALL PRIVILEGES ON DATABASE {} TO {};".format(dbname, aaduser))
+    except psycopg2.Error as e:
+        print(e)
+        conn.commit()
+    # Clean up
+    cursor.close()
+    conn.close()
+
+
+def get_springcloud_identity(source_id):
+    print('get_springcloud_identity')
+
+    segments = parse_resource_id(source_id)
+    spring = segments.get('name')
+    app = segments.get('child_name_1')
+    rg = segments.get('resource_group')
+    identity = run_cli_cmd('az spring-cloud app show -g {0} -s {1} -n {2}'.format(rg, spring, app)).get('identity')
+    if (identity == None):
+        # assign system identity
+        result = run_cli_cmd('az spring-cloud app identity assign -g {0} -s {1} -n {2}'.format(rg, spring, app))
+        cnt = 0
+        while (identity == None and cnt < 5):
+            identity = run_cli_cmd('az spring-cloud app show -g {0} -s {1} -n {2}'.format(rg, spring, app)).get(
+                'identity')
+            time.sleep(3)
+            cnt += 1
+    return identity
+

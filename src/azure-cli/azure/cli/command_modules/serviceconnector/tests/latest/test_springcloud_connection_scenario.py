@@ -18,7 +18,7 @@ from azure.cli.command_modules.serviceconnector._resource_config import (
 from ._test_utils import CredentialReplacer
 
 
-@unittest.skip('Need spring-cloud extension installed')
+# @unittest.skip('Need spring-cloud extension installed')
 class SpringCloudConnectionScenarioTest(ScenarioTest):
 
     def __init__(self, method_name):
@@ -682,6 +682,27 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
         # delete connection
         self.cmd('spring-cloud connection delete --id {} --yes'.format(connection_id))
 
+
+    def test_springcloud_postgres_e2e_mi(self):
+        self.kwargs.update({
+            'subscription': get_subscription_id(self.cli_ctx),
+            'source_resource_group': 'servicelinker-test-linux-group',
+            'target_resource_group': 'servicelinker-test-linux-group',
+            'spring': 'servicelinker-springcloud',
+            'app': 'postgresql',
+            'deployment': 'default',
+            'server': 'servicelinker-postgresql',
+            'database': 'postgres'
+        })
+
+        # prepare params
+        name = 'testconn'
+        source_id = SOURCE_RESOURCES.get(RESOURCE.SpringCloud).format(**self.kwargs)
+        target_id = TARGET_RESOURCES.get(RESOURCE.Postgres).format(**self.kwargs)
+
+        # create connection
+        self.cmd('spring-cloud connection create postgres --connection {} --source-id {} --target-id {} '
+                 '--system-identity --client-type java'.format(name, source_id, target_id))
 
     # @record_only
     def test_springcloud_postgres_e2e(self):
