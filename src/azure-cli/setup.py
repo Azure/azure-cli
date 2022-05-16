@@ -78,7 +78,7 @@ DEPENDENCIES = [
     'azure-mgmt-consumption~=2.0',
     'azure-mgmt-containerinstance~=9.1.0',
     'azure-mgmt-containerregistry==8.2.0',
-    'azure-mgmt-containerservice~=19.0.0',
+    'azure-mgmt-containerservice~=19.1.0',
     'azure-mgmt-cosmosdb==7.0.0b2',
     'azure-mgmt-databoxedge~=1.0.0',
     'azure-mgmt-datalake-analytics~=0.2.1',
@@ -112,7 +112,7 @@ DEPENDENCIES = [
     'azure-mgmt-rdbms~=10.0.0',
     'azure-mgmt-recoveryservicesbackup~=4.1.1',
     'azure-mgmt-recoveryservices~=2.0.0',
-    'azure-mgmt-redhatopenshift==1.0.0',
+    'azure-mgmt-redhatopenshift==1.1.0',
     'azure-mgmt-redis~=13.1.0',
     'azure-mgmt-relay~=0.1.0',
     'azure-mgmt-reservations==2.0.0',  # TODO: Use requirements.txt instead of '==' #9781
