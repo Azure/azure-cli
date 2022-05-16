@@ -662,7 +662,8 @@ def poller_classes():
     from msrestazure.azure_operation import AzureOperationPoller
     from msrest.polling.poller import LROPoller
     from azure.core.polling import LROPoller as AzureCoreLROPoller
-    return (AzureOperationPoller, LROPoller, AzureCoreLROPoller)
+    from azure.cli.core.aaz._poller import AAZLROPoller
+    return (AzureOperationPoller, LROPoller, AzureCoreLROPoller, AAZLROPoller)
 
 
 def augment_no_wait_handler_args(no_wait_enabled, handler, handler_args):
@@ -1305,3 +1306,27 @@ def rmtree_with_retry(path):
             else:
                 logger.warning("Failed to delete '%s': %s. You may try to delete it manually.", path, err)
                 break
+
+
+def get_secret_store(cli_ctx, name):
+    """Create a process-concurrency-safe azure.cli.core.auth.persistence.SecretStore instance that can be used to
+    save secret data.
+    """
+    from azure.cli.core._environment import get_config_dir
+    from azure.cli.core.auth.persistence import load_secret_store
+    # Save to CLI's config dir, by default ~/.azure
+    location = os.path.join(get_config_dir(), name)
+    # We honor the system type (Windows, Linux, or MacOS) and global config
+    encrypt = should_encrypt_token_cache(cli_ctx)
+    return load_secret_store(location, encrypt)
+
+
+def should_encrypt_token_cache(cli_ctx):
+    # Only enable encryption for Windows (for now).
+    fallback = sys.platform.startswith('win32')
+
+    # EXPERIMENTAL: Use core.encrypt_token_cache=False to turn off token cache encryption.
+    # encrypt_token_cache affects both MSAL token cache and service principal entries.
+    encrypt = cli_ctx.config.getboolean('core', 'encrypt_token_cache', fallback=fallback)
+
+    return encrypt

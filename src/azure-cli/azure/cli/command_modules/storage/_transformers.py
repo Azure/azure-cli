@@ -42,11 +42,10 @@ def transform_cors_list_output(result):
             new_entry = OrderedDict()
             new_entry['Service'] = service
             new_entry['Rule'] = i + 1
-
-            new_entry['AllowedMethods'] = ', '.join((x for x in rule.allowed_methods))
-            new_entry['AllowedOrigins'] = ', '.join((x for x in rule.allowed_origins))
-            new_entry['ExposedHeaders'] = ', '.join((x for x in rule.exposed_headers))
-            new_entry['AllowedHeaders'] = ', '.join((x for x in rule.allowed_headers))
+            new_entry['AllowedMethods'] = rule.allowed_methods
+            new_entry['AllowedOrigins'] = rule.allowed_origins
+            new_entry['ExposedHeaders'] = rule.exposed_headers
+            new_entry['AllowedHeaders'] = rule.allowed_headers
             new_entry['MaxAgeInSeconds'] = rule.max_age_in_seconds
             new_result.append(new_entry)
     return new_result
@@ -218,6 +217,8 @@ def transform_blob_list_output(result):
 
 
 def transform_blob_json_output(result):
+    if result is None:
+        return
     result = todict(result)
     new_result = {
         "content": "",
