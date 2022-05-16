@@ -222,7 +222,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.custom_command('update', 'update_file_service_properties')
 
     with self.command_group('storage logging', get_custom_sdk('logging', multi_service_properties_factory)) as g:
-        from ._transformers import transform_logging_list_output
+        from ._transformers_azure_stack import transform_logging_list_output
         g.storage_command('update', 'set_logging')
         g.storage_command('show', 'get_logging',
                           table_transformer=transform_logging_list_output,
@@ -230,7 +230,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command('off', 'disable_logging', is_preview=True)
 
     with self.command_group('storage metrics', get_custom_sdk('metrics', multi_service_properties_factory)) as g:
-        from ._transformers import transform_metrics_list_output
+        from ._transformers_azure_stack import transform_metrics_list_output
         g.storage_command('update', 'set_metrics')
         g.storage_command('show', 'get_metrics',
                           table_transformer=transform_metrics_list_output,
@@ -522,8 +522,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_custom_command('delete-batch', 'storage_file_delete_batch')
         g.storage_custom_command('copy start-batch', 'storage_file_copy_batch')
 
-    with self.command_group('storage cors', get_custom_sdk('cors', multi_service_properties_factory)) as g:
-        from ._transformers import transform_cors_list_output
+    with self.command_group('storage cors', get_custom_sdk('cors_azure_stack', multi_service_properties_factory)) as g:
+        from ._transformers_azure_stack import transform_cors_list_output
 
         g.storage_command('add', 'add_cors')
         g.storage_command('clear', 'clear_cors')

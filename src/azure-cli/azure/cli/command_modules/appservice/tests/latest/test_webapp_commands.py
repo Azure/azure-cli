@@ -339,6 +339,34 @@ class BackupWithName(ScenarioTest):
             JMESPathCheck('[0].namePropertiesName', slot_backup_name)
         ])
 
+    @ResourceGroupPreparer(parameter_name='resource_group', location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_config_backup_restore(self, resource_group):
+        plan = self.create_random_name(prefix='plan-backup', length=24)
+        webapp = self.create_random_name(prefix='backup-webapp', length=24)
+        storage_account = self.create_random_name(prefix='backup', length=24)
+        container = self.create_random_name(prefix='backupcontainer', length=24)
+        backup_name = self.create_random_name(prefix='backup-name', length=24)
+
+        expirydate = (datetime.datetime.now() + datetime.timedelta(days=1, hours=3)).strftime("\"%Y-%m-%dT%H:%MZ\"")
+        slot_name = "slot"
+
+        self.cmd(f'storage account create -n {storage_account} -g {resource_group} --sku Standard_LRS')
+        self.cmd(f'storage container create --account-name {storage_account} --name {container}')
+        sastoken = self.cmd(f'storage container generate-sas --account-name {storage_account} --name {container} --expiry {expirydate} --permissions rwdl -otsv').output.strip()
+        sasurl = f'\"https://{storage_account}.blob.core.windows.net/{container}?{sastoken}\"'
+
+        self.cmd(f'appservice plan create -g {resource_group} -n {plan} --sku S1')
+        self.cmd(f'webapp create -g {resource_group} -n {webapp} --plan {plan}')
+        self.cmd(f"webapp deployment slot create -g {resource_group} -n {webapp} -s {slot_name}")
+
+        self.cmd(f"webapp config backup create -g {resource_group} --webapp-name {webapp} --backup-name {backup_name} --container-url {sasurl}")
+        time.sleep(240)
+
+        # restore a backup
+        self.cmd(f"webapp config backup restore -g {resource_group} --webapp-name {webapp} --target-name {webapp} --backup-name {backup_name} --container-url {sasurl} --overwrite --ignore-hostname-conflict")
+
+        # restore a backup to a slot
+        self.cmd(f"webapp config backup restore -g {resource_group} --webapp-name {webapp} --target-name {webapp} --slot {slot_name} --backup-name {backup_name} --container-url {sasurl} --overwrite --ignore-hostname-conflict")
 
 
 # Test Framework is not able to handle binary file format, hence, only run live

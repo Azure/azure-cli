@@ -5285,11 +5285,40 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             json.dump(test_hook_data, f)
 
         try:
-           # check acr
-            check_cmd = 'aks check-acr -n {name} -g {resource_group} --acr {acr_name}.azurecr.io'
-            self.cmd(check_cmd, checks=[
-                StringContainCheck("Your cluster can pull images from {}.azurecr.io!".format(acr_name)),
-            ])
+            # get credential
+            fd, browse_path = tempfile.mkstemp()
+            self.kwargs.update(
+                {
+                    "browse_path": browse_path,
+                }
+            )
+            try:
+                get_credential_cmd = "aks get-credentials -n {name} -g {resource_group} -f {browse_path}"
+                self.cmd(get_credential_cmd)
+            finally:
+                os.close(fd)
+            # get node name
+            k_get_node_cmd = ["kubectl", "get", "node", "-o", "name", "--kubeconfig", browse_path]
+            k_get_node_output = subprocess.check_output(
+                k_get_node_cmd,
+                universal_newlines=True,
+                stderr=subprocess.STDOUT,
+            )
+            node_names = k_get_node_output.split("\n")
+            node_name = node_names[0].strip().strip("node/").strip()
+            self.kwargs.update(
+                {
+                    "node_name": node_name,
+                }
+            )
+            # check acr
+            check_cmd = "aks check-acr -n {name} -g {resource_group} --acr {acr_name}.azurecr.io --node-name {node_name}"
+            self.cmd(
+                check_cmd,
+                checks=[
+                    StringContainCheck("Your cluster can pull images from {}.azurecr.io!".format(acr_name)),
+                ],
+            )
         # clean up test hook file even if test failed
         finally:
             if os.path.exists(hook_file_path):
@@ -5628,6 +5657,28 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_create_with_defender(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'name': aks_name,
+            'resource_group': resource_group,
+            'ssh_key_value': self.generate_ssh_keys()
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--ssh-key-value={ssh_key_value} --enable-defender'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('securityProfile.azureDefender.enabled', True)
+        ])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_create_with_custom_monitoring_workspace(self, resource_group, resource_group_location):
         aks_name = self.create_random_name('cliakstest', 16)
         workspace_name = self.create_random_name('cliaksworkspace', 20)
@@ -5794,6 +5845,37 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd('aks update --resource-group={resource_group} --name={name} --disable-local-accounts', checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('disableLocalAccounts', True)
+        ])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_update_with_defender(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'ssh_key_value': self.generate_ssh_keys()
+        })
+
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --ssh-key-value={ssh_key_value}'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        # update to enable defender
+        self.cmd('aks update --resource-group={resource_group} --name={name} --enable-defender', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('securityProfile.azureDefender.enabled', True)
+        ])
+
+         # update to disable defender
+        self.cmd('aks update --resource-group={resource_group} --name={name} --disable-defender', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('securityProfile.azureDefender.enabled', False)
         ])
 
         # delete
@@ -6634,6 +6716,32 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('agentPoolProfiles[0].vmSize', 'Standard_DS2_v2'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.check('kubernetesVersion', '{kubernetes_version}')
+        ])
+
+        # delete
+        self.cmd('aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_create_node_resource_group(self, resource_group, resource_group_location):
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+        node_resource_group_name = self.create_random_name('cliaksnrg', 17)
+
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'location': resource_group_location,
+            'node_resource_group': node_resource_group_name,
+            'ssh_key_value': self.generate_ssh_keys(),
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--ssh-key-value={ssh_key_value} --node-resource-group {node_resource_group}'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('nodeResourceGroup', '{node_resource_group}')
         ])
 
         # delete

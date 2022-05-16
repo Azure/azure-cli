@@ -1140,13 +1140,14 @@ def _is_paged(obj):
             and not isinstance(obj, dict):
         from msrest.paging import Paged
         from azure.core.paging import ItemPaged as AzureCorePaged
-        return isinstance(obj, (AzureCorePaged, Paged))
+        from azure.cli.core.aaz._paging import AAZPaged
+        return isinstance(obj, (AzureCorePaged, Paged, AAZPaged))
     return False
 
 
 def _is_poller(obj):
     # Since loading msrest is expensive, we avoid it until we have to
-    if obj.__class__.__name__ in ['AzureOperationPoller', 'LROPoller']:
+    if obj.__class__.__name__ in ['AzureOperationPoller', 'LROPoller', 'AAZLROPoller']:
         return isinstance(obj, poller_classes())
     return False
 
