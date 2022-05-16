@@ -382,7 +382,7 @@ def create_aad_user_in_db(cli_ctx, target_id, aaduser, client_id):
 
     try:
         cursor.execute("GRANT ALL PRIVILEGES ON DATABASE {} TO {};".format(dbname, aaduser))
-        print("AAD user {} is granted with database {} privileges".format(dbname, aaduser))
+        print("AAD user {} is granted with database {} privileges".format(aaduser, dbname))
     except psycopg2.Error as e:
         print(e)
         conn.commit()
