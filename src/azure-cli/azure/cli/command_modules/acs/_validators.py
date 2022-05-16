@@ -96,13 +96,13 @@ def validate_k8s_version(namespace):
     """Validates a string as a possible Kubernetes version. An empty string is also valid, which tells the server
     to use its default version."""
     if namespace.kubernetes_version:
-        k8s_release_regex = re.compile(r'^[v|V]?(\d+\.\d+\.\d+.*)$')
+        k8s_release_regex = re.compile(r'^[v|V]?(\d+\.\d+(?:\.\d+)?)$')
         found = k8s_release_regex.findall(namespace.kubernetes_version)
         if found:
             namespace.kubernetes_version = found[0]
         else:
-            raise CLIError('--kubernetes-version should be the full version number, '
-                           'such as "1.11.8" or "1.12.6"')
+            raise CLIError('--kubernetes-version should be the full version number or major.minor version number, '
+                           'such as "1.7.12" or "1.7"')
 
 
 def validate_nodepool_name(namespace):
