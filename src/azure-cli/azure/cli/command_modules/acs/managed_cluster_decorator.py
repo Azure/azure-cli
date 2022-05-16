@@ -3682,7 +3682,7 @@ class AKSManagedClusterContext(BaseAKSContext):
                 workspace = defender_config["logAnalyticsWorkspaceResourceId"]
 
         if workspace == "":
-            workspace = ensure_default_log_analytics_workspace_for_monitoring(
+            workspace = self.external_functions.ensure_default_log_analytics_workspace_for_monitoring(
                 self.cmd,
                 self.get_subscription_id(),
                 self.get_resource_group_name())

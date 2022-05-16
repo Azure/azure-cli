@@ -5595,25 +5595,10 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             mc_1 = self.models.ManagedCluster(location="test_location")
             dec_1.context.attach_mc(mc_1)
             dec_1.context.set_intermediate("subscription_id", "test_subscription_id")
-            
-            cf_resource_groups = Mock(check_existence=Mock(return_value=False))
-            result = Mock(id="test_workspace_resource_id")
-            async_poller = Mock(
-                result=Mock(return_value=result), done=Mock(return_value=True)
-            )
-            cf_resources = Mock(
-                begin_create_or_update_by_id=Mock(return_value=async_poller)
-            )
 
             with patch(
-                "azure.cli.command_modules.acs.addonconfiguration.get_rg_location",
-                return_value="test_location",
-            ), patch(
-                "azure.cli.command_modules.acs.addonconfiguration.cf_resource_groups",
-                return_value=cf_resource_groups,
-            ), patch(
-                "azure.cli.command_modules.acs.addonconfiguration.cf_resources",
-                return_value=cf_resources,
+                "azure.cli.command_modules.acs.managed_cluster_decorator.ensure_default_log_analytics_workspace_for_monitoring",
+                return_value="test_workspace_resource_id",
             ):
                 dec_mc_1 = dec_1.context.get_defender_config()
             
@@ -5654,24 +5639,9 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         dec_1.context.attach_mc(mc_1)
         dec_1.context.set_intermediate("subscription_id", "test_subscription_id")
 
-        cf_resource_groups = Mock(check_existence=Mock(return_value=False))
-        result = Mock(id="test_workspace_resource_id")
-        async_poller = Mock(
-            result=Mock(return_value=result), done=Mock(return_value=True)
-        )
-        cf_resources = Mock(
-            begin_create_or_update_by_id=Mock(return_value=async_poller)
-        )
-
         with patch(
-            "azure.cli.command_modules.acs.addonconfiguration.get_rg_location",
-            return_value="test_location",
-        ), patch(
-            "azure.cli.command_modules.acs.addonconfiguration.cf_resource_groups",
-            return_value=cf_resource_groups,
-        ), patch(
-            "azure.cli.command_modules.acs.addonconfiguration.cf_resources",
-            return_value=cf_resources,
+                "azure.cli.command_modules.acs.managed_cluster_decorator.ensure_default_log_analytics_workspace_for_monitoring",
+                return_value="test_workspace_resource_id",
         ):
             dec_mc_1 = dec_1.set_up_defender(mc_1)
 
@@ -5687,73 +5657,32 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         self.assertEqual(dec_mc_1, ground_truth_mc_1)
 
     def test_update_defender(self):
-        def test_enabled_defender():
-            dec_1 = AKSManagedClusterUpdateDecorator(
-                self.cmd,
-                self.client,
-                {"enable_defender": True},
-                ResourceType.MGMT_CONTAINERSERVICE,
-            )
-            mc_1 = self.models.ManagedCluster(location="test_location")
-            dec_1.context.attach_mc(mc_1)
-            dec_1.context.set_intermediate("subscription_id", "test_subscription_id")
+        dec_1 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {"enable_defender": True},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_1.context.attach_mc(mc_1)
+        dec_1.context.set_intermediate("subscription_id", "test_subscription_id")
 
-            cf_resource_groups = Mock(check_existence=Mock(return_value=False))
-            result = Mock(id="test_workspace_resource_id")
-            async_poller = Mock(
-                result=Mock(return_value=result), done=Mock(return_value=True)
-            )
-            cf_resources = Mock(
-                begin_create_or_update_by_id=Mock(return_value=async_poller)
-            )
-
-            with patch(
-                "azure.cli.command_modules.acs.addonconfiguration.get_rg_location",
-                return_value="test_location",
-            ), patch(
-                "azure.cli.command_modules.acs.addonconfiguration.cf_resource_groups",
-                return_value=cf_resource_groups,
-            ), patch(
-                "azure.cli.command_modules.acs.addonconfiguration.cf_resources",
-                return_value=cf_resources,
-            ):
-                dec_mc_1 = dec_1.update_defender(mc_1)
-            
-            ground_truth_mc_1 = self.models.ManagedCluster(
-                location="test_location",
-                security_profile=self.models.ManagedClusterSecurityProfile(
-                    azure_defender=self.models.ManagedClusterSecurityProfileAzureDefender(
-                        enabled=True,
-                        log_analytics_workspace_resource_id="test_workspace_resource_id",
-                    )
-                ),
-            )
-            self.assertEqual(dec_mc_1, ground_truth_mc_1)
-
-        def test_disabled_defender():
-            dec_1 = AKSManagedClusterUpdateDecorator(
-                self.cmd,
-                self.client,
-                {"disable_defender": True},
-                ResourceType.MGMT_CONTAINERSERVICE,
-            )
-            mc_1 = self.models.ManagedCluster(location="test_location")
-            dec_1.context.attach_mc(mc_1)
-            dec_1.context.set_intermediate("subscription_id", "test_subscription_id")
-            
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.ensure_default_log_analytics_workspace_for_monitoring",
+            return_value="test_workspace_resource_id",
+        ):
             dec_mc_1 = dec_1.update_defender(mc_1)
-            ground_truth_mc_1 = self.models.ManagedCluster(
-                location="test_location",
-                security_profile=self.models.ManagedClusterSecurityProfile(
-                    azure_defender=self.models.ManagedClusterSecurityProfileAzureDefender(
-                        enabled=False,
-                    )
-                ),
-            )
-            self.assertEqual(dec_mc_1, ground_truth_mc_1)
         
-        test_enabled_defender()
-        test_disabled_defender()
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            security_profile=self.models.ManagedClusterSecurityProfile(
+                azure_defender=self.models.ManagedClusterSecurityProfileAzureDefender(
+                    enabled=True,
+                    log_analytics_workspace_resource_id="test_workspace_resource_id",
+                )
+            ),
+        )
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
 
     def test_construct_mc_profile_default(self):
         import inspect
