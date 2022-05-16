@@ -1646,7 +1646,7 @@ class AKSContextTestCase(unittest.TestCase):
             "azure.cli.command_modules.acs.decorator.get_rg_location",
             return_value="test_location",
         ), patch(
-            "azure.cli.command_modules.acs.custom.get_graph_rbac_management_client",
+            "azure.cli.command_modules.acs._graph.get_graph_rbac_management_client",
             return_value=None,
         ):
             self.assertEqual(
@@ -1674,10 +1674,10 @@ class AKSContextTestCase(unittest.TestCase):
             "azure.cli.command_modules.acs.decorator.get_rg_location",
             return_value="test_location",
         ), patch(
-            "azure.cli.command_modules.acs.custom.get_graph_rbac_management_client",
+            "azure.cli.command_modules.acs._graph.get_graph_rbac_management_client",
             return_value=None,
         ), patch(
-            "azure.cli.command_modules.acs.custom._build_service_principal",
+            "azure.cli.command_modules.acs._graph.build_service_principal",
             return_value=("test_service_principal", "test_aad_session_key"),
         ):
             self.assertEqual(
@@ -1721,7 +1721,7 @@ class AKSContextTestCase(unittest.TestCase):
             "azure.cli.command_modules.acs.decorator.get_rg_location",
             return_value="test_location",
         ), patch(
-            "azure.cli.command_modules.acs.custom.get_graph_rbac_management_client",
+            "azure.cli.command_modules.acs._graph.get_graph_rbac_management_client",
             return_value=None,
         ):
             # fail on client_secret not specified
@@ -5140,7 +5140,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             "azure.cli.command_modules.acs.decorator.get_rg_location",
             return_value="test_location",
         ), patch(
-            "azure.cli.command_modules.acs.custom.get_graph_rbac_management_client",
+            "azure.cli.command_modules.acs._graph.get_graph_rbac_management_client",
             return_value=None,
         ):
             dec_mc_2 = dec_2.set_up_service_principal_profile(mc_2)
@@ -5376,10 +5376,10 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         )
         registry = Mock(id="test_registry_id")
         with patch(
-            "azure.cli.command_modules.acs.custom.get_resource_by_name",
+            "azure.cli.command_modules.acs._roleassignments.get_resource_by_name",
             return_value=registry,
         ), patch(
-            "azure.cli.command_modules.acs.custom._ensure_aks_acr_role_assignment"
+            "azure.cli.command_modules.acs._roleassignments.ensure_aks_acr_role_assignment"
         ) as ensure_assignment:
             dec_3.process_attach_acr(mc_3)
         ensure_assignment.assert_called_once_with(
@@ -6371,7 +6371,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             "azure.cli.command_modules.acs.decorator.AKSContext.get_identity_by_msi_client",
             side_effect=[identity_obj_1, identity_obj_2],
         ), patch(
-            "azure.cli.command_modules.acs.decorator._ensure_cluster_identity_permission_on_kubelet_identity"
+            "azure.cli.command_modules.acs.decorator.ensure_cluster_identity_permission_on_kubelet_identity"
         ) as mock_ensure_method:
             dec_2 = AKSCreateDecorator(
                 self.cmd,
@@ -7057,7 +7057,7 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
             "subscription_id", "test_subscription_id"
         )
         with patch(
-            "azure.cli.command_modules.acs.decorator._ensure_aks_acr"
+            "azure.cli.command_modules.acs.decorator.ensure_aks_acr"
         ) as ensure_acr:
             dec_2.process_attach_detach_acr(mc_2)
             ensure_acr.assert_has_calls(

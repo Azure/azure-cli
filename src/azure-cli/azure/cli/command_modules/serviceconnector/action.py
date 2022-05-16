@@ -28,7 +28,10 @@ class AddSecretAuthInfo(argparse.Action):
             if kl == 'name':
                 d['name'] = v[0]
             elif kl == 'secret':
-                d['secret'] = v[0]
+                d['secret_info'] = {
+                    'secret_type': 'rawValue',
+                    'value': v[0]
+                }
             else:
                 raise ValidationError('Unsupported Key {} is provided for parameter secret_auth_info. '
                                       'All possible keys are: name, secret'.format(k))
@@ -142,7 +145,7 @@ class AddServicePrincipalAuthInfo(argparse.Action):
             from ._utils import run_cli_cmd
             output = run_cli_cmd('az ad sp show --id {}'.format(d['client_id']))
             if output:
-                d['principal_id'] = output.get('objectId')
+                d['principal_id'] = output.get('id')
             else:
                 raise ValidationError('Could not resolve object-id from the given client-id: {}. Please '
                                       'confirm the client-id and provide the object-id (Enterprise Application) '

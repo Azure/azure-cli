@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import os
+import sys
 from datetime import datetime
 
 from azure.cli.core.profiles import ResourceType, get_sdk
@@ -129,35 +130,52 @@ def container_rm_exists(client, resource_group_name, account_name, container_nam
         raise err
 
 
-def create_container(cmd, container_name, resource_group_name=None, account_name=None,
+# pylint: disable=unused-argument
+def create_container(client, container_name, resource_group_name=None,
                      metadata=None, public_access=None, fail_on_exist=False, timeout=None,
-                     default_encryption_scope=None, prevent_encryption_scope_override=None, **kwargs):
+                     default_encryption_scope=None, prevent_encryption_scope_override=None):
+    encryption_scope = None
     if default_encryption_scope is not None or prevent_encryption_scope_override is not None:
-        from .._client_factory import storage_client_factory
-        client = storage_client_factory(cmd.cli_ctx).blob_containers
-        BlobContainer = cmd.get_models('BlobContainer', resource_type=ResourceType.MGMT_STORAGE)
-        blob_container = BlobContainer(default_encryption_scope=default_encryption_scope,
-                                       deny_encryption_scope_override=prevent_encryption_scope_override)
-        container = client.create(resource_group_name=resource_group_name, account_name=account_name,
-                                  container_name=container_name, blob_container=blob_container)
+        encryption_scope = {
+            'default_encryption_scope': default_encryption_scope,
+            'prevent_encryption_scope_override': prevent_encryption_scope_override
+        }
+    try:
+        container = client.create_container(container_name, metadata=metadata,
+                                            public_access=public_access,
+                                            container_encryption_scope=encryption_scope,
+                                            timeout=timeout)
         return container is not None
-
-    from .._client_factory import blob_data_service_factory
-    kwargs['account_name'] = account_name
-    client = blob_data_service_factory(cmd.cli_ctx, kwargs)
-    return client.create_container(container_name, metadata=metadata, public_access=public_access,
-                                   fail_on_exist=fail_on_exist, timeout=timeout)
+    except ResourceExistsError as ex:
+        if not fail_on_exist:
+            return False
+        raise ex
 
 
 def delete_container(client, container_name, fail_not_exist=False, lease_id=None, if_modified_since=None,
                      if_unmodified_since=None, timeout=None, bypass_immutability_policy=False,
                      processed_resource_group=None, processed_account_name=None, mgmt_client=None):
+    from azure.core.exceptions import ResourceNotFoundError
     if bypass_immutability_policy:
         mgmt_client.blob_containers.delete(processed_resource_group, processed_account_name, container_name)
         return True
-    return client.delete_container(
-        container_name, fail_not_exist=fail_not_exist, lease_id=lease_id, if_modified_since=if_modified_since,
-        if_unmodified_since=if_unmodified_since, timeout=timeout)
+    try:
+        client.delete_container(container_name, lease=lease_id,
+                                if_modified_since=if_modified_since,
+                                if_unmodified_since=if_unmodified_since,
+                                timeout=timeout)
+        return True
+    except ResourceNotFoundError as ex:
+        if not fail_not_exist:
+            return False
+        raise ex
+
+
+def set_container_permission(client, public_access=None, **kwargs):
+    acl_response = client.get_container_access_policy()
+    signed_identifiers = {} if not acl_response.get('signed_identifiers', None) else acl_response['signed_identifiers']
+    return client.set_container_access_policy(signed_identifiers=signed_identifiers,
+                                              public_access=public_access, **kwargs)
 
 
 def list_blobs(client, delimiter=None, include=None, marker=None, num_results=None, prefix=None,
@@ -512,7 +530,6 @@ def transform_blob_type(cmd, blob_type):
 def _adjust_block_blob_size(client, blob_type, length):
     if not blob_type or blob_type != 'block' or length is None:
         return
-
     # increase the block size to 100MB when the block list will contain more than 50,000 blocks(each block 4MB)
     if length > 50000 * 4 * 1024 * 1024:
         client._config.max_block_size = 100 * 1024 * 1024
@@ -606,7 +623,7 @@ def upload_blob(cmd, client, file_path=None, container_name=None, blob_name=None
     return response
 
 
-def download_blob(client, file_path, open_mode='wb', start_range=None, end_range=None,
+def download_blob(client, file_path=None, open_mode='wb', start_range=None, end_range=None,
                   progress_callback=None, **kwargs):
     offset = None
     length = None
@@ -615,11 +632,16 @@ def download_blob(client, file_path, open_mode='wb', start_range=None, end_range
         length = end_range - start_range + 1
     if progress_callback:
         kwargs['raw_response_hook'] = progress_callback
+    if not file_path:
+        kwargs['max_concurrency'] = 1
     download_stream = client.download_blob(offset=offset, length=length, **kwargs)
-    with open(file_path, open_mode) as stream:
+    if file_path:
+        with open(file_path, open_mode) as stream:
+            download_stream.readinto(stream)
+        return download_stream.properties
+    with os.fdopen(sys.stdout.fileno(), open_mode) as stream:
         download_stream.readinto(stream)
-
-    return download_stream.properties
+    return
 
 
 def get_block_ids(content_length, block_length):
@@ -776,7 +798,7 @@ def generate_sas_blob_uri(cmd, client, permission=None, expiry=None, start=None,
     if full_uri:
         blob_client = t_blob_client(account_url=client.url, container_name=container_name, blob_name=blob_name,
                                     snapshot=snapshot, credential=quote(sas_token, safe='&%()$=\',~'))
-        return encode_url_path(blob_client.url)
+        return encode_url_path(blob_client.url, safe='/()$=\',~%')
     return quote(sas_token, safe='&%()$=\',~')
 
 
@@ -806,9 +828,16 @@ def generate_container_shared_access_signature(cmd, client, container_name, perm
                                     content_language=content_language, content_type=content_type, **kwargs)
 
 
-def create_blob_url(client, container_name, blob_name, protocol=None, snapshot=None):
-    return client.make_blob_url(
-        container_name, blob_name, protocol=protocol, snapshot=snapshot, sas_token=client.sas_token)
+def create_blob_url(client, container_name, blob_name, snapshot, protocol='https'):
+    if blob_name:
+        blob_client = client.get_blob_client(container=container_name, blob=blob_name, snapshot=snapshot)
+        url = blob_client.url
+    else:
+        container_client = client.get_container_client(container=container_name)
+        url = container_client.url + '/'
+    if protocol == 'http':
+        return url.replace('https', 'http', 1)
+    return url
 
 
 def _copy_blob_to_blob_container(blob_service, source_blob_service, destination_container, destination_path,

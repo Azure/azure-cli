@@ -39,6 +39,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     t_base_blob_service = self.get_sdk('blob.baseblobservice#BaseBlobService')
     t_file_service = self.get_sdk('file#FileService')
+    t_share_service = self.get_sdk('_share_service_client#ShareServiceClient',
+                                   resource_type=ResourceType.DATA_STORAGE_FILESHARE)
     t_queue_service = self.get_sdk('_queue_service_client#QueueServiceClient',
                                    resource_type=ResourceType.DATA_STORAGE_QUEUE)
     t_table_service = get_table_data_type(self.cli_ctx, 'table', 'TableService')
@@ -68,7 +70,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                                                                 'list_directories_and_files',
                                                                                 parent='share_name'))
     share_name_type = CLIArgumentType(options_list=['--share-name', '-s'], help='The file share name.',
-                                      completer=get_storage_name_completion_list(t_file_service, 'list_shares'))
+                                      completer=get_storage_name_completion_list(t_share_service, 'list_shares'))
     table_name_type = CLIArgumentType(options_list=['--table-name', '-t'], help='The table name.',
                                       completer=get_storage_name_completion_list(t_table_service, 'list_tables'))
     queue_name_type = CLIArgumentType(options_list=['--queue-name', '-q'], help='The queue name.',
@@ -875,9 +877,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('blob_name', required=True)
 
     with self.argument_context('storage blob url') as c:
-        c.argument('protocol', arg_type=get_enum_type(['http', 'https'], 'https'), help='Protocol to use.')
-        c.argument('snapshot', help='An string value that uniquely identifies the snapshot. The value of '
-                                    'this query parameter indicates the snapshot version.')
+        from ._validators import get_not_none_validator
+        c.extra('blob_name', required=True)
+        c.extra('container_name', required=True, validator=get_not_none_validator('container_name'))
+        c.extra('protocol', arg_type=get_enum_type(['http', 'https'], 'https'), help='Protocol to use.')
+        c.extra('snapshot', help='An string value that uniquely identifies the snapshot. The value of this query '
+                                 'parameter indicates the snapshot version.')
 
     with self.argument_context('storage blob set-tier') as c:
         from azure.cli.command_modules.storage._validators import (blob_rehydrate_priority_validator)
@@ -1003,7 +1008,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.register_blob_arguments_track2()
         c.register_precondition_options()
         c.argument('file_path', options_list=('--file', '-f'), type=file_type, completer=FilesCompleter(),
-                   help='Path of file to write out to.', validator=blob_download_file_path_validator)
+                   help='Path of file to write out to. If not specified, stdout will be used '
+                        'and max_connections will be set to 1.', validator=blob_download_file_path_validator)
         c.argument('start_range', type=int,
                    help='Start of byte range to use for downloading a section of the blob. If no end_range is given, '
                         'all bytes after the start_range will be downloaded. The start_range and end_range params are '
@@ -1302,18 +1308,36 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('exclude_path', exclude_path_type)
 
     with self.argument_context('storage container') as c:
-        from .sdkutil import get_container_access_type_names
+        t_public_access = self.get_sdk('_models#PublicAccess', resource_type=ResourceType.DATA_STORAGE_BLOB)
         c.argument('container_name', container_name_type, options_list=('--name', '-n'))
         c.argument('public_access', validator=validate_container_public_access,
-                   arg_type=get_enum_type(get_container_access_type_names()),
+                   arg_type=get_enum_type(t_public_access),
                    help='Specifies whether data in the container may be accessed publicly.')
+    for scope in ['show', 'exists', 'show-permission', 'set-permission', 'metadata show', 'metadata update']:
+        with self.argument_context('storage container {}'.format(scope)) as c:
+            c.extra('container_name', container_name_type, options_list=('--name', '-n'), required=True)
+            c.extra('timeout', timeout_type)
+
+    for scope in ['show', 'show-permission', 'set-permission', 'metadata show', 'metadata update']:
+        with self.argument_context('storage container {}'.format(scope)) as c:
+            c.extra('lease', options_list='--lease-id',
+                    help="If specified, only succeed if the container's lease is active and matches this ID.")
+
+    for scope in ['set-permission', 'metadata update']:
+        with self.argument_context(f'storage container {scope}') as c:
+            c.extra('if_modified_since', arg_group='Precondition', type=get_datetime_type(False),
+                    help="Commence only if modified since supplied UTC datetime (Y-m-d'T'H:M'Z').")
+            c.extra('if_unmodified_since', arg_group='Precondition', type=get_datetime_type(False),
+                    help="Commence only if unmodified since supplied UTC datetime (Y-m-d'T'H:M'Z').")
 
     with self.argument_context('storage container create') as c:
+        from ._validators import validate_encryption_scope_parameter
+        c.argument('resource_group_name', required=False, validator=None, deprecate_info=c.deprecate())
         c.argument('container_name', container_name_type, options_list=('--name', '-n'), completer=None)
         c.argument('fail_on_exist', help='Throw an exception if the container already exists.')
         c.argument('account_name', help='Storage account name. Related environment variable: AZURE_STORAGE_ACCOUNT.')
         c.argument('default_encryption_scope', options_list=['--default-encryption-scope', '-d'],
-                   arg_group='Encryption Policy', is_preview=True,
+                   arg_group='Encryption Policy', is_preview=True, validator=validate_encryption_scope_parameter,
                    help='Default the container to use specified encryption scope for all writes.')
         c.argument('prevent_encryption_scope_override', options_list=['--prevent-encryption-scope-override', '-p'],
                    arg_type=get_three_state_flag(), arg_group='Encryption Policy', is_preview=True,
@@ -1329,9 +1353,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.ignore('processed_resource_group')
         c.ignore('processed_account_name')
         c.ignore('mgmt_client')
-
-    with self.argument_context('storage container exists') as c:
-        c.ignore('blob_name', 'snapshot')
 
     for item in ['create', 'extend']:
         with self.argument_context('storage container immutability-policy {}'.format(item)) as c:
@@ -1592,15 +1613,48 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('restored_name',
                    help='A new file share name to be restored. If not specified, deleted share name will be used.')
 
+    with self.argument_context('storage share create') as c:
+        c.extra('share_name', share_name_type, options_list=('--name', '-n'), required=True)
+        c.argument('fail_on_exist', help='Specify whether to throw an exception when the share exists. False by '
+                                         'default.')
+        c.argument('quota', type=int, help='Specifies the maximum size of the share, in gigabytes. Must be greater '
+                                           'than 0, and less than or equal to 5TB (5120).')
+
     with self.argument_context('storage share url') as c:
         c.argument('unc', action='store_true', help='Output UNC network path.')
         c.argument('protocol', arg_type=get_enum_type(['http', 'https'], 'https'), help='Protocol to use.')
 
     with self.argument_context('storage share list') as c:
         c.argument('num_results', arg_type=num_results_type)
+        c.extra('marker', help='An opaque continuation token. This value can be retrieved from the next_marker field '
+                               'of a previous generator object if num_results was specified and that generator has '
+                               'finished enumerating results. If specified, this generator will begin returning '
+                               'results from the point where the previous generator stopped.')
+        c.extra('timeout', timeout_type)
+        c.argument('include_snapshots', help='Specifies that share snapshots be returned in the response.')
+        c.argument('include_metadata', help='Specifies that share metadata be returned in the response.')
+        c.extra('prefix',
+                help='Filter the results to return only blobs whose name begins with the specified prefix.')
+        c.ignore('name_starts_with')
 
     with self.argument_context('storage share exists') as c:
+        c.extra('share_name', share_name_type, options_list=('--name', '-n'), required=True)
+        c.extra('snapshot', options_list=['--snapshot'],
+                help='A string that represents the snapshot version, if applicable.')
         c.ignore('directory_name', 'file_name')
+        c.extra('timeout', timeout_type)
+
+    for item in ['show', 'metadata show']:
+        with self.argument_context('storage share {}'.format(item)) as c:
+            c.extra('share_name', share_name_type, options_list=('--name', '-n'), required=True)
+            c.extra('snapshot', options_list=['--snapshot'],
+                    help='A string that represents the snapshot version, if applicable.')
+            c.extra('timeout', timeout_type)
+
+    for item in ['stats', 'metadata update']:
+        with self.argument_context('storage share {}'.format(item)) as c:
+            c.extra('share_name', share_name_type, options_list=('--name', '-n'), required=True)
+            c.extra('timeout', timeout_type)
 
     with self.argument_context('storage share policy') as c:
         from .completers import get_storage_acl_name_completion_list
@@ -1622,21 +1676,47 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage share delete') as c:
         from .sdkutil import get_delete_file_snapshot_type_names
+        c.extra('share_name', share_name_type, options_list=('--name', '-n'), required=True)
         c.argument('delete_snapshots', arg_type=get_enum_type(get_delete_file_snapshot_type_names()),
                    help='Specify the deletion strategy when the share has snapshots.')
+        c.argument('fail_not_exist', help="Specify whether to throw an exception when the share doesn't exists. False "
+                                          "by default.")
+        c.extra('snapshot', options_list=['--snapshot'],
+                help='A string that represents the snapshot version, if applicable.Specify this argument to delete a '
+                     'specific snapshot only. delete_snapshots must be None if this is specified.')
+        c.extra('timeout', timeout_type)
 
     with self.argument_context('storage share generate-sas') as c:
         from .completers import get_storage_acl_name_completion_list
 
-        t_share_permissions = self.get_sdk('file.models#SharePermissions')
+        t_share_permissions = self.get_sdk('_models#ShareSasPermissions',
+                                           resource_type=ResourceType.DATA_STORAGE_FILESHARE)
         c.register_sas_arguments()
-        c.argument('id', options_list='--policy-name',
+        c.extra('share_name', share_name_type, options_list=('--name', '-n'), required=True)
+        c.argument('cache_control', help='Response header value for Cache-Control when resource is accessed using this '
+                                         'shared access signature.')
+        c.argument('content_disposition', help='Response header value for Content-Disposition when resource is '
+                                               'accessed using this shared access signature.')
+        c.argument('content_encoding', help='Response header value for Content-Encoding when resource is accessed '
+                                            'using this shared access signature.')
+        c.argument('content_language', help='Response header value for Content-Language when resource is accessed '
+                                            'using this shared access signature.')
+        c.argument('content_type', help='Response header value for Content-Type when resource is accessed using this '
+                                        'shared access signature.')
+        c.argument('policy_id', options_list='--policy-name',
                    help='The name of a stored access policy within the share\'s ACL.',
-                   completer=get_storage_acl_name_completion_list(t_share_permissions, 'share_name', 'get_share_acl'))
+                   completer=get_storage_acl_name_completion_list(t_share_service, 'share_name',
+                                                                  'get_share_access_policy'))
         c.argument('permission', options_list='--permissions',
                    help=sas_help.format(get_permission_help_string(t_share_permissions)),
                    validator=get_permission_validator(t_share_permissions))
         c.ignore('sas_token')
+
+    with self.argument_context('storage share update') as c:
+        c.extra('share_name', share_name_type, options_list=('--name', '-n'), required=True)
+        c.argument('quota', help='Specifies the maximum size of the share, in gigabytes. Must be greater than 0, and '
+                                 'less than or equal to 5 TB (5120 GB).')
+        c.extra('timeout', timeout_type)
 
     with self.argument_context('storage share list-handle') as c:
         c.register_path_argument(default_file_param="")
@@ -1786,7 +1866,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('source_share')
 
     with self.argument_context('storage cors list') as c:
-        c.extra('services', validator=get_char_options_validator('bfqt', 'services'), default='bqft',
+        c.extra('services', validator=get_char_options_validator('bfqt', 'services'), default='bfqt',
                 options_list='--services', required=False)
 
     with self.argument_context('storage cors add') as c:

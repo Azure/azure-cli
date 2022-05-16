@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import os
 import re
 import time
 from types import SimpleNamespace
@@ -21,6 +22,7 @@ from azure.cli.command_modules.acs._consts import (
     DecoratorEarlyExitException,
     DecoratorMode,
 )
+from azure.cli.command_modules.acs._graph import ensure_aks_service_principal
 from azure.cli.command_modules.acs._helpers import (
     check_is_msi_cluster,
     check_is_private_cluster,
@@ -34,7 +36,12 @@ from azure.cli.command_modules.acs._loadbalancer import update_load_balancer_pro
 from azure.cli.command_modules.acs._natgateway import create_nat_gateway_profile, is_nat_gateway_profile_provided
 from azure.cli.command_modules.acs._natgateway import update_nat_gateway_profile as _update_nat_gateway_profile
 from azure.cli.command_modules.acs._resourcegroup import get_rg_location
-from azure.cli.command_modules.acs._roleassignments import add_role_assignment
+from azure.cli.command_modules.acs._roleassignments import (
+    add_role_assignment,
+    ensure_aks_acr,
+    ensure_cluster_identity_permission_on_kubelet_identity,
+    subnet_role_assignment_exists,
+)
 from azure.cli.command_modules.acs._validators import extract_comma_separated_string
 from azure.cli.command_modules.acs.addonconfiguration import (
     add_ingress_appgw_addon_role_assignment,
@@ -54,12 +61,6 @@ from azure.cli.command_modules.acs.base_decorator import (
     BaseAKSManagedClusterDecorator,
     BaseAKSParamDict,
 )
-from azure.cli.command_modules.acs.custom import (
-    _ensure_aks_acr,
-    _ensure_aks_service_principal,
-    _ensure_cluster_identity_permission_on_kubelet_identity,
-    subnet_role_assignment_exists,
-)
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core._profile import Profile
 from azure.cli.core.azclierror import (
@@ -74,7 +75,7 @@ from azure.cli.core.azclierror import (
 from azure.cli.core.commands import AzCliCommand, LongRunningOperation
 from azure.cli.core.keys import is_valid_ssh_rsa_public_key
 from azure.cli.core.profiles import ResourceType
-from azure.cli.core.util import sdk_no_wait, truncate_text
+from azure.cli.core.util import sdk_no_wait, truncate_text, get_file_json
 from azure.core.exceptions import HttpResponseError
 from knack.log import get_logger
 from knack.prompting import NoTTYException, prompt, prompt_pass, prompt_y_n
@@ -150,8 +151,14 @@ class AKSManagedClusterModels(AKSAgentPoolModels):
         """
         if self.__nat_gateway_models is None:
             nat_gateway_models = {}
-            nat_gateway_models["ManagedClusterNATGatewayProfile"] = self.ManagedClusterNATGatewayProfile
-            nat_gateway_models["ManagedClusterManagedOutboundIPProfile"] = self.ManagedClusterManagedOutboundIPProfile
+            nat_gateway_models["ManagedClusterNATGatewayProfile"] = (
+                self.ManagedClusterNATGatewayProfile if hasattr(self, "ManagedClusterNATGatewayProfile") else None
+            )  # backward compatibility
+            nat_gateway_models["ManagedClusterManagedOutboundIPProfile"] = (
+                self.ManagedClusterManagedOutboundIPProfile
+                if hasattr(self, "ManagedClusterManagedOutboundIPProfile")
+                else None
+            )   # backward compatibility
             self.__nat_gateway_models = SimpleNamespace(**nat_gateway_models)
         return self.__nat_gateway_models
 
@@ -207,6 +214,39 @@ class AKSManagedClusterContext(BaseAKSContext):
         self.__existing_mc = None
         # store the context, and used later to get agentpool related properties
         self.agentpool_context = None
+        # used to store external functions
+        self.__external_functions = None
+
+    @property
+    def existing_mc(self) -> ManagedCluster:
+        """Get the existing ManagedCluster object in update mode.
+
+        :return: ManagedCluster
+        """
+        return self.__existing_mc
+
+    @property
+    def external_functions(self) -> SimpleNamespace:
+        if self.__external_functions is None:
+            external_functions = {}
+            external_functions["get_user_assigned_identity_by_resource_id"] = get_user_assigned_identity_by_resource_id
+            external_functions["get_rg_location"] = get_rg_location
+            external_functions["add_role_assignment"] = add_role_assignment
+            external_functions["add_ingress_appgw_addon_role_assignment"] = add_ingress_appgw_addon_role_assignment
+            external_functions["add_monitoring_role_assignment"] = add_monitoring_role_assignment
+            external_functions["add_virtual_node_role_assignment"] = add_virtual_node_role_assignment
+            external_functions["ensure_container_insights_for_monitoring"] = ensure_container_insights_for_monitoring
+            external_functions[
+                "ensure_default_log_analytics_workspace_for_monitoring"
+            ] = ensure_default_log_analytics_workspace_for_monitoring
+            external_functions["ensure_aks_acr"] = ensure_aks_acr
+            external_functions["ensure_aks_service_principal"] = ensure_aks_service_principal
+            external_functions[
+                "ensure_cluster_identity_permission_on_kubelet_identity"
+            ] = ensure_cluster_identity_permission_on_kubelet_identity
+            external_functions["subnet_role_assignment_exists"] = subnet_role_assignment_exists
+            self.__external_functions = SimpleNamespace(**external_functions)
+        return self.__external_functions
 
     def attach_mc(self, mc: ManagedCluster) -> None:
         """Attach the ManagedCluster object to the context.
@@ -244,14 +284,6 @@ class AKSManagedClusterContext(BaseAKSContext):
                     msg
                 )
             )
-
-    @property
-    def existing_mc(self) -> ManagedCluster:
-        """Get the existing ManagedCluster object in update mode.
-
-        :return: ManagedCluster
-        """
-        return self.__existing_mc
 
     def attach_agentpool_context(self, agentpool_context: AKSAgentPoolContext) -> None:
         """Attach the AKSAgentPoolContext object to the context.
@@ -437,7 +469,7 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         # dynamic completion
         if not read_from_mc and location is None:
-            location = get_rg_location(
+            location = self.external_functions.get_rg_location(
                 self.cmd.cli_ctx, self.get_resource_group_name()
             )
             self.set_intermediate("location", location, overwrite_exists=True)
@@ -892,6 +924,127 @@ class AKSManagedClusterContext(BaseAKSContext):
         """
         return self._get_disable_ahub(enable_validation=True)
 
+    def _get_enable_windows_gmsa(self, enable_validation: bool = False) -> bool:
+        """Internal function to obtain the value of enable_windows_gmsa.
+
+        This function supports the option of enable_validation. Please refer to function __validate_gmsa_options for
+        details of validation.
+
+        :return: bool
+        """
+        # read the original value passed by the command
+        enable_windows_gmsa = self.raw_param.get("enable_windows_gmsa")
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.windows_profile and
+                hasattr(self.mc.windows_profile, "gmsa_profile") and  # backward compatibility
+                self.mc.windows_profile.gmsa_profile and
+                self.mc.windows_profile.gmsa_profile.enabled is not None
+            ):
+                enable_windows_gmsa = self.mc.windows_profile.gmsa_profile.enabled
+
+        # this parameter does not need dynamic completion
+        # validation
+        if enable_validation:
+            (
+                gmsa_dns_server,
+                gmsa_root_domain_name,
+            ) = self._get_gmsa_dns_server_and_root_domain_name(
+                enable_validation=False
+            )
+            self.__validate_gmsa_options(
+                enable_windows_gmsa, gmsa_dns_server, gmsa_root_domain_name, self.get_yes()
+            )
+        return enable_windows_gmsa
+
+    def get_enable_windows_gmsa(self) -> bool:
+        """Obtain the value of enable_windows_gmsa.
+
+        This function will verify the parameter by default. When enable_windows_gmsa is specified, if both
+        gmsa_dns_server and gmsa_root_domain_name are not assigned and user does not confirm the operation,
+        a DecoratorEarlyExitException will be raised; if only one of gmsa_dns_server or gmsa_root_domain_name is
+        assigned, raise a RequiredArgumentMissingError. When enable_windows_gmsa is not specified, if any of
+        gmsa_dns_server or gmsa_root_domain_name is assigned, raise a RequiredArgumentMissingError.
+
+        :return: bool
+        """
+        return self._get_enable_windows_gmsa(enable_validation=True)
+
+    def _get_gmsa_dns_server_and_root_domain_name(self, enable_validation: bool = False):
+        """Internal function to obtain the values of gmsa_dns_server and gmsa_root_domain_name.
+
+        This function supports the option of enable_validation. Please refer to function __validate_gmsa_options for
+        details of validation.
+
+        :return: a tuple containing two elements: gmsa_dns_server of string type or None and gmsa_root_domain_name of
+        string type or None
+        """
+        # gmsa_dns_server
+        # read the original value passed by the command
+        gmsa_dns_server = self.raw_param.get("gmsa_dns_server")
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
+        gmsa_dns_read_from_mc = False
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.windows_profile and
+                hasattr(self.mc.windows_profile, "gmsa_profile") and  # backward compatibility
+                self.mc.windows_profile.gmsa_profile and
+                self.mc.windows_profile.gmsa_profile.dns_server is not None
+            ):
+                gmsa_dns_server = self.mc.windows_profile.gmsa_profile.dns_server
+                gmsa_dns_read_from_mc = True
+
+        # gmsa_root_domain_name
+        # read the original value passed by the command
+        gmsa_root_domain_name = self.raw_param.get("gmsa_root_domain_name")
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
+        gmsa_root_read_from_mc = False
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.windows_profile and
+                hasattr(self.mc.windows_profile, "gmsa_profile") and  # backward compatibility
+                self.mc.windows_profile.gmsa_profile and
+                self.mc.windows_profile.gmsa_profile.root_domain_name is not None
+            ):
+                gmsa_root_domain_name = self.mc.windows_profile.gmsa_profile.root_domain_name
+                gmsa_root_read_from_mc = True
+
+        # consistent check
+        if gmsa_dns_read_from_mc != gmsa_root_read_from_mc:
+            raise CLIInternalError(
+                "Inconsistent state detected, one of gmsa_dns_server and gmsa_root_domain_name "
+                "is read from the `mc` object."
+            )
+
+        # this parameter does not need dynamic completion
+        # validation
+        if enable_validation:
+            self.__validate_gmsa_options(
+                self._get_enable_windows_gmsa(enable_validation=False),
+                gmsa_dns_server,
+                gmsa_root_domain_name,
+                self.get_yes(),
+            )
+        return gmsa_dns_server, gmsa_root_domain_name
+
+    def get_gmsa_dns_server_and_root_domain_name(self) -> Tuple[Union[str, None], Union[str, None]]:
+        """Obtain the values of gmsa_dns_server and gmsa_root_domain_name.
+
+        This function will verify the parameter by default. When enable_windows_gmsa is specified, if both
+        gmsa_dns_server and gmsa_root_domain_name are not assigned and user does not confirm the operation,
+        a DecoratorEarlyExitException will be raised; if only one of gmsa_dns_server or gmsa_root_domain_name is
+        assigned, raise a RequiredArgumentMissingError. When enable_windows_gmsa is not specified, if any of
+        gmsa_dns_server or gmsa_root_domain_name is assigned, raise a RequiredArgumentMissingError.
+
+        :return: a tuple containing two elements: gmsa_dns_server of string type or None and gmsa_root_domain_name of
+        string type or None
+        """
+        return self._get_gmsa_dns_server_and_root_domain_name(enable_validation=True)
+
     # pylint: disable=too-many-statements
     def _get_service_principal_and_client_secret(
         self, read_only: bool = False
@@ -903,9 +1056,9 @@ class AKSManagedClusterContext(BaseAKSContext):
         completion will not be triggered. For other cases, dynamic completion will be triggered.
         When client_secret is given but service_principal is not, dns_name_prefix or fqdn_subdomain will be used to
         create a service principal. The parameters subscription_id, location and name (cluster) are also required when
-        calling function "_ensure_aks_service_principal", which internally used GraphRbacManagementClient to send
+        calling function "ensure_aks_service_principal", which internally used GraphRbacManagementClient to send
         the request.
-        When service_principal is given but client_secret is not, function "_ensure_aks_service_principal" would raise
+        When service_principal is given but client_secret is not, function "ensure_aks_service_principal" would raise
         CLIError.
 
         This function supports the option of read_only. When enabled, it will skip dynamic completion and validation.
@@ -966,7 +1119,7 @@ class AKSManagedClusterContext(BaseAKSContext):
             not secret_read_from_mc
         )
         if dynamic_completion:
-            principal_obj = _ensure_aks_service_principal(
+            principal_obj = self.external_functions.ensure_aks_service_principal(
                 cli_ctx=self.cmd.cli_ctx,
                 service_principal=service_principal,
                 client_secret=client_secret,
@@ -991,9 +1144,9 @@ class AKSManagedClusterContext(BaseAKSContext):
         completion will not be triggered. For other cases, dynamic completion will be triggered.
         When client_secret is given but service_principal is not, dns_name_prefix or fqdn_subdomain will be used to
         create a service principal. The parameters subscription_id, location and name (cluster) are also required when
-        calling function "_ensure_aks_service_principal", which internally used GraphRbacManagementClient to send
+        calling function "ensure_aks_service_principal", which internally used GraphRbacManagementClient to send
         the request.
-        When service_principal is given but client_secret is not, function "_ensure_aks_service_principal" would raise
+        When service_principal is given but client_secret is not, function "ensure_aks_service_principal" would raise
         CLIError.
 
         :return: a tuple containing two elements: service_principal of string type or None and client_secret of
@@ -1141,7 +1294,7 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         :return: string
         """
-        return get_user_assigned_identity_by_resource_id(self.cmd.cli_ctx, assigned_identity)
+        return self.external_functions.get_user_assigned_identity_by_resource_id(self.cmd.cli_ctx, assigned_identity)
 
     def get_user_assigned_identity_client_id(self) -> str:
         """Helper function to obtain the client_id of user assigned identity.
@@ -1174,127 +1327,6 @@ class AKSManagedClusterContext(BaseAKSContext):
         if assigned_identity is None or assigned_identity == "":
             raise RequiredArgumentMissingError("No assigned identity provided.")
         return self.get_identity_by_msi_client(assigned_identity).principal_id
-
-    def _get_enable_windows_gmsa(self, enable_validation: bool = False) -> bool:
-        """Internal function to obtain the value of enable_windows_gmsa.
-
-        This function supports the option of enable_validation. Please refer to function __validate_gmsa_options for
-        details of validation.
-
-        :return: bool
-        """
-        # read the original value passed by the command
-        enable_windows_gmsa = self.raw_param.get("enable_windows_gmsa")
-        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
-        if self.decorator_mode == DecoratorMode.CREATE:
-            if (
-                self.mc and
-                self.mc.windows_profile and
-                hasattr(self.mc.windows_profile, "gmsa_profile") and  # backward compatibility
-                self.mc.windows_profile.gmsa_profile and
-                self.mc.windows_profile.gmsa_profile.enabled is not None
-            ):
-                enable_windows_gmsa = self.mc.windows_profile.gmsa_profile.enabled
-
-        # this parameter does not need dynamic completion
-        # validation
-        if enable_validation:
-            (
-                gmsa_dns_server,
-                gmsa_root_domain_name,
-            ) = self._get_gmsa_dns_server_and_root_domain_name(
-                enable_validation=False
-            )
-            self.__validate_gmsa_options(
-                enable_windows_gmsa, gmsa_dns_server, gmsa_root_domain_name, self.get_yes()
-            )
-        return enable_windows_gmsa
-
-    def get_enable_windows_gmsa(self) -> bool:
-        """Obtain the value of enable_windows_gmsa.
-
-        This function will verify the parameter by default. When enable_windows_gmsa is specified, if both
-        gmsa_dns_server and gmsa_root_domain_name are not assigned and user does not confirm the operation,
-        a DecoratorEarlyExitException will be raised; if only one of gmsa_dns_server or gmsa_root_domain_name is
-        assigned, raise a RequiredArgumentMissingError. When enable_windows_gmsa is not specified, if any of
-        gmsa_dns_server or gmsa_root_domain_name is assigned, raise a RequiredArgumentMissingError.
-
-        :return: bool
-        """
-        return self._get_enable_windows_gmsa(enable_validation=True)
-
-    def _get_gmsa_dns_server_and_root_domain_name(self, enable_validation: bool = False):
-        """Internal function to obtain the values of gmsa_dns_server and gmsa_root_domain_name.
-
-        This function supports the option of enable_validation. Please refer to function __validate_gmsa_options for
-        details of validation.
-
-        :return: a tuple containing two elements: gmsa_dns_server of string type or None and gmsa_root_domain_name of
-        string type or None
-        """
-        # gmsa_dns_server
-        # read the original value passed by the command
-        gmsa_dns_server = self.raw_param.get("gmsa_dns_server")
-        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
-        gmsa_dns_read_from_mc = False
-        if self.decorator_mode == DecoratorMode.CREATE:
-            if (
-                self.mc and
-                self.mc.windows_profile and
-                hasattr(self.mc.windows_profile, "gmsa_profile") and  # backward compatibility
-                self.mc.windows_profile.gmsa_profile and
-                self.mc.windows_profile.gmsa_profile.dns_server is not None
-            ):
-                gmsa_dns_server = self.mc.windows_profile.gmsa_profile.dns_server
-                gmsa_dns_read_from_mc = True
-
-        # gmsa_root_domain_name
-        # read the original value passed by the command
-        gmsa_root_domain_name = self.raw_param.get("gmsa_root_domain_name")
-        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
-        gmsa_root_read_from_mc = False
-        if self.decorator_mode == DecoratorMode.CREATE:
-            if (
-                self.mc and
-                self.mc.windows_profile and
-                hasattr(self.mc.windows_profile, "gmsa_profile") and  # backward compatibility
-                self.mc.windows_profile.gmsa_profile and
-                self.mc.windows_profile.gmsa_profile.root_domain_name is not None
-            ):
-                gmsa_root_domain_name = self.mc.windows_profile.gmsa_profile.root_domain_name
-                gmsa_root_read_from_mc = True
-
-        # consistent check
-        if gmsa_dns_read_from_mc != gmsa_root_read_from_mc:
-            raise CLIInternalError(
-                "Inconsistent state detected, one of gmsa_dns_server and gmsa_root_domain_name "
-                "is read from the `mc` object."
-            )
-
-        # this parameter does not need dynamic completion
-        # validation
-        if enable_validation:
-            self.__validate_gmsa_options(
-                self._get_enable_windows_gmsa(enable_validation=False),
-                gmsa_dns_server,
-                gmsa_root_domain_name,
-                self.get_yes(),
-            )
-        return gmsa_dns_server, gmsa_root_domain_name
-
-    def get_gmsa_dns_server_and_root_domain_name(self) -> Tuple[Union[str, None], Union[str, None]]:
-        """Obtain the values of gmsa_dns_server and gmsa_root_domain_name.
-
-        This function will verify the parameter by default. When enable_windows_gmsa is specified, if both
-        gmsa_dns_server and gmsa_root_domain_name are not assigned and user does not confirm the operation,
-        a DecoratorEarlyExitException will be raised; if only one of gmsa_dns_server or gmsa_root_domain_name is
-        assigned, raise a RequiredArgumentMissingError. When enable_windows_gmsa is not specified, if any of
-        gmsa_dns_server or gmsa_root_domain_name is assigned, raise a RequiredArgumentMissingError.
-
-        :return: a tuple containing two elements: gmsa_dns_server of string type or None and gmsa_root_domain_name of
-        string type or None
-        """
-        return self._get_gmsa_dns_server_and_root_domain_name(enable_validation=True)
 
     def get_attach_acr(self) -> Union[str, None]:
         """Obtain the value of attach_acr.
@@ -1342,6 +1374,35 @@ class AKSManagedClusterContext(BaseAKSContext):
         # this parameter does not need dynamic completion
         # this parameter does not need validation
         return detach_acr
+
+    def get_assignee_from_identity_or_sp_profile(self) -> Tuple[str, bool]:
+        """Helper function to obtain the value of assignee from identity_profile or service_principal_profile.
+
+        Note: This is not a parameter of aks_update, and it will not be decorated into the `mc` object.
+
+        If assignee cannot be obtained, raise an UnknownError.
+
+        :return: string, bool
+        """
+        assignee = None
+        is_service_principal = False
+        if check_is_msi_cluster(self.mc):
+            if self.mc.identity_profile is None or self.mc.identity_profile["kubeletidentity"] is None:
+                raise UnknownError(
+                    "Unexpected error getting kubelet's identity for the cluster. "
+                    "Please do not set --attach-acr or --detach-acr. "
+                    "You can manually grant or revoke permission to the identity named "
+                    "<ClUSTER_NAME>-agentpool in MC_ resource group to access ACR."
+                )
+            assignee = self.mc.identity_profile["kubeletidentity"].object_id
+            is_service_principal = False
+        elif self.mc and self.mc.service_principal_profile is not None:
+            assignee = self.mc.service_principal_profile.client_id
+            is_service_principal = True
+
+        if not assignee:
+            raise UnknownError('Cannot get the AKS cluster\'s service principal.')
+        return assignee, is_service_principal
 
     def _get_load_balancer_sku(self, enable_validation: bool = False) -> Union[str, None]:
         """Internal function to obtain the value of load_balancer_sku, default value is
@@ -2122,7 +2183,7 @@ class AKSManagedClusterContext(BaseAKSContext):
             if workspace_resource_id is None:
                 # use default workspace if exists else create default workspace
                 workspace_resource_id = (
-                    ensure_default_log_analytics_workspace_for_monitoring(
+                    self.external_functions.ensure_default_log_analytics_workspace_for_monitoring(
                         self.cmd,
                         self.get_subscription_id(),
                         self.get_resource_group_name(),
@@ -2176,9 +2237,13 @@ class AKSManagedClusterContext(BaseAKSContext):
                 CONST_MONITORING_ADDON_NAME
             ).config.get(CONST_MONITORING_USING_AAD_MSI_AUTH) is not None
         ):
-            enable_msi_auth_for_monitoring = self.mc.addon_profiles.get(
-                CONST_MONITORING_ADDON_NAME
-            ).config.get(CONST_MONITORING_USING_AAD_MSI_AUTH)
+            enable_msi_auth_for_monitoring = (
+                safe_lower(
+                    self.mc.addon_profiles.get(CONST_MONITORING_ADDON_NAME).config.get(
+                        CONST_MONITORING_USING_AAD_MSI_AUTH
+                    )
+                ) == "true"
+            )
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
@@ -3588,27 +3653,45 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         return self._get_no_uptime_sla(enable_validation=True)
 
-    def get_edge_zone(self) -> Union[str, None]:
-        """Obtain the value of edge_zone.
+    def get_defender_config(self) -> Union[TypeVar("ManagedClusterSecurityProfileAzureDefender"), None]:
+        """Obtain the value of defender.
 
         :return: string or None
         """
-        # read the original value passed by the command
-        edge_zone = self.raw_param.get("edge_zone")
-        # try to read the property value corresponding to the parameter from the `mc` object
-        # Backward Compatibility: We also support api version v2020.11.01 in profile 2020-09-01-hybrid and there is
-        # no such attribute.
-        if (
-            self.mc and
-            hasattr(self.mc, "extended_location") and
-            self.mc.extended_location and
-            self.mc.extended_location.name is not None
-        ):
-            edge_zone = self.mc.extended_location.name
+        disable_defender = self.raw_param.get("disable_defender")
+        if disable_defender:
+            return self.models.ManagedClusterSecurityProfileAzureDefender(enabled=False)
 
-        # this parameter does not need dynamic completion
-        # this parameter does not need validation
-        return edge_zone
+        # read the original value passed by the command
+        enable_defender = self.raw_param.get("enable_defender")
+
+        if not enable_defender:
+            return None
+
+        workspace = ""
+        config_file_path = self.raw_param.get("defender_config")
+        if config_file_path:
+            if not os.path.isfile(config_file_path):
+                raise InvalidArgumentValueError(
+                    "{} is not valid file, or not accessable.".format(
+                        config_file_path
+                    )
+                )
+            defender_config = get_file_json(config_file_path)
+            if "logAnalyticsWorkspaceResourceId" in defender_config:
+                workspace = defender_config["logAnalyticsWorkspaceResourceId"]
+
+        if workspace == "":
+            workspace = self.external_functions.ensure_default_log_analytics_workspace_for_monitoring(
+                self.cmd,
+                self.get_subscription_id(),
+                self.get_resource_group_name())
+
+        azure_defender = self.models.ManagedClusterSecurityProfileAzureDefender(enabled=enable_defender)
+        if enable_defender:
+            azure_defender.log_analytics_workspace_resource_id = workspace
+
+        return azure_defender
 
     def _get_disable_local_accounts(self, enable_validation: bool = False) -> bool:
         """Internal function to obtain the value of disable_local_accounts.
@@ -3622,7 +3705,11 @@ class AKSManagedClusterContext(BaseAKSContext):
         disable_local_accounts = self.raw_param.get("disable_local_accounts")
         # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
         if self.decorator_mode == DecoratorMode.CREATE:
-            if self.mc and self.mc.disable_local_accounts is not None:
+            if (
+                self.mc and
+                hasattr(self.mc, "disable_local_accounts") and      # backward compatibility
+                self.mc.disable_local_accounts is not None
+            ):
                 disable_local_accounts = self.mc.disable_local_accounts
 
         # this parameter does not need dynamic completion
@@ -3678,34 +3765,42 @@ class AKSManagedClusterContext(BaseAKSContext):
         """
         return self._get_enable_local_accounts(enable_validation=True)
 
-    def get_assignee_from_identity_or_sp_profile(self) -> Tuple[str, bool]:
-        """Helper function to obtain the value of assignee from identity_profile or service_principal_profile.
+    def get_edge_zone(self) -> Union[str, None]:
+        """Obtain the value of edge_zone.
 
-        Note: This is not a parameter of aks_update, and it will not be decorated into the `mc` object.
-
-        If assignee cannot be obtained, raise an UnknownError.
-
-        :return: string, bool
+        :return: string or None
         """
-        assignee = None
-        is_service_principal = False
-        if check_is_msi_cluster(self.mc):
-            if self.mc.identity_profile is None or self.mc.identity_profile["kubeletidentity"] is None:
-                raise UnknownError(
-                    "Unexpected error getting kubelet's identity for the cluster. "
-                    "Please do not set --attach-acr or --detach-acr. "
-                    "You can manually grant or revoke permission to the identity named "
-                    "<ClUSTER_NAME>-agentpool in MC_ resource group to access ACR."
-                )
-            assignee = self.mc.identity_profile["kubeletidentity"].object_id
-            is_service_principal = False
-        elif self.mc and self.mc.service_principal_profile is not None:
-            assignee = self.mc.service_principal_profile.client_id
-            is_service_principal = True
+        # read the original value passed by the command
+        edge_zone = self.raw_param.get("edge_zone")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        # Backward Compatibility: We also support api version v2020.11.01 in profile 2020-09-01-hybrid and there is
+        # no such attribute.
+        if (
+            self.mc and
+            hasattr(self.mc, "extended_location") and
+            self.mc.extended_location and
+            self.mc.extended_location.name is not None
+        ):
+            edge_zone = self.mc.extended_location.name
 
-        if not assignee:
-            raise UnknownError('Cannot get the AKS cluster\'s service principal.')
-        return assignee, is_service_principal
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return edge_zone
+
+    def get_node_resource_group(self) -> Union[str, None]:
+        """Obtain the value of node_resource_group.
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        node_resource_group = self.raw_param.get("node_resource_group")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if self.mc and self.mc.node_resource_group is not None:
+            node_resource_group = self.mc.node_resource_group
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return node_resource_group
 
     def get_yes(self) -> bool:
         """Obtain the value of yes.
@@ -3828,6 +3923,55 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                 "is not the same as the `mc` in the context."
             )
 
+    def _remove_defaults_in_mc(self, mc: ManagedCluster) -> ManagedCluster:
+        """Internal function to remove values from properties with default values of the `mc` object.
+
+        Removing default values is to prevent getters from mistakenly overwriting user provided values with default
+        values in the object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        defaults_in_mc = {}
+        for attr_name, attr_value in vars(mc).items():
+            if not attr_name.startswith("_") and attr_name != "location" and attr_value is not None:
+                defaults_in_mc[attr_name] = attr_value
+                setattr(mc, attr_name, None)
+        self.context.set_intermediate("defaults_in_mc", defaults_in_mc, overwrite_exists=True)
+        return mc
+
+    def _restore_defaults_in_mc(self, mc: ManagedCluster) -> ManagedCluster:
+        """Internal function to restore values of properties with default values of the `mc` object.
+
+        Restoring default values is to keep the content of the request sent by cli consistent with that before the
+        refactoring.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        defaults_in_mc = self.context.get_intermediate("defaults_in_mc", {})
+        for key, value in defaults_in_mc.items():
+            if getattr(mc, key, None) is None:
+                setattr(mc, key, value)
+        return mc
+
+    def set_up_defender(self, mc: ManagedCluster) -> ManagedCluster:
+        """Set up defender for the ManagedCluster object.
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        defender = self.context.get_defender_config()
+        if defender:
+            if mc.security_profile is None:
+                mc.security_profile = self.models.ManagedClusterSecurityProfile()
+
+            mc.security_profile.azure_defender = defender
+
+        return mc
+
     def init_mc(self) -> ManagedCluster:
         """Initialize a ManagedCluster object with required parameter location and attach it to internal context.
 
@@ -3938,7 +4082,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
     def set_up_service_principal_profile(self, mc: ManagedCluster) -> ManagedCluster:
         """Set up service principal profile for the ManagedCluster object.
 
-        The function "_ensure_aks_service_principal" will be called if the user provides an incomplete sp and secret
+        The function "ensure_aks_service_principal" will be called if the user provides an incomplete sp and secret
         pair, which internally used GraphRbacManagementClient to send the request to create sp.
 
         :return: the ManagedCluster object
@@ -3990,7 +4134,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         if (
             vnet_subnet_id and
             not skip_subnet_role_assignment and
-            not subnet_role_assignment_exists(self.cmd, vnet_subnet_id)
+            not self.context.external_functions.subnet_role_assignment_exists(self.cmd, vnet_subnet_id)
         ):
             # if service_principal_profile is None, then this cluster is an MSI cluster,
             # and the service principal does not exist. Two cases:
@@ -4026,7 +4170,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                     )
                 else:
                     identity_client_id = service_principal_profile.client_id
-                if not add_role_assignment(
+                if not self.context.external_functions.add_role_assignment(
                     self.cmd,
                     "Network Contributor",
                     identity_client_id,
@@ -4045,7 +4189,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
     def process_attach_acr(self, mc: ManagedCluster) -> None:
         """Attach acr for the cluster.
 
-        The function "_ensure_aks_acr" will be called to create an AcrPull role assignment for the acr, which
+        The function "ensure_aks_acr" will be called to create an AcrPull role assignment for the acr, which
         internally used AuthorizationManagementClient to send the request.
 
         :return: None
@@ -4057,7 +4201,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             # If enable_managed_identity, attach acr operation will be handled after the cluster is created
             if not self.context.get_enable_managed_identity():
                 service_principal_profile = mc.service_principal_profile
-                _ensure_aks_acr(
+                self.context.external_functions.ensure_aks_acr(
                     self.cmd,
                     assignee=service_principal_profile.client_id,
                     acr_name_or_id=attach_acr,
@@ -4201,11 +4345,13 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             enabled=True,
             config={
                 CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: self.context.get_workspace_resource_id(),
-                CONST_MONITORING_USING_AAD_MSI_AUTH: self.context.get_enable_msi_auth_for_monitoring(),
+                CONST_MONITORING_USING_AAD_MSI_AUTH: "True"
+                if self.context.get_enable_msi_auth_for_monitoring()
+                else "False",
             },
         )
         # post-process, create a deployment
-        ensure_container_insights_for_monitoring(
+        self.context.external_functions.ensure_container_insights_for_monitoring(
             self.cmd, monitoring_addon_profile,
             self.context.get_subscription_id(),
             self.context.get_resource_group_name(),
@@ -4529,7 +4675,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
 
         The wrapper function "get_identity_by_msi_client" will be called (by "get_user_assigned_identity_object_id") to
         get the identity object, which internally use ManagedServiceIdentityClient to send the request.
-        The function "_ensure_cluster_identity_permission_on_kubelet_identity" will be called to create a role
+        The function "ensure_cluster_identity_permission_on_kubelet_identity" will be called to create a role
         assignment if necessary, which internally used AuthorizationManagementClient to send the request.
 
         :return: the ManagedCluster object
@@ -4549,7 +4695,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             }
             cluster_identity_object_id = self.context.get_user_assigned_identity_object_id()
             # ensure the cluster identity has "Managed Identity Operator" role at the scope of kubelet identity
-            _ensure_cluster_identity_permission_on_kubelet_identity(
+            self.context.external_functions.ensure_cluster_identity_permission_on_kubelet_identity(
                 self.cmd,
                 cluster_identity_object_id,
                 assign_kubelet_identity)
@@ -4610,7 +4756,17 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             )
         return mc
 
-    def construct_mc_profile_default(self) -> ManagedCluster:
+    def set_up_node_resource_group(self, mc: ManagedCluster) -> ManagedCluster:
+        """Set up node resource group for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        mc.node_resource_group = self.context.get_node_resource_group()
+        return mc
+
+    def construct_mc_profile_default(self, bypass_restore_defaults: bool = False) -> ManagedCluster:
         """The overall controller used to construct the default ManagedCluster profile.
 
         The completely constructed ManagedCluster object will later be passed as a parameter to the underlying SDK
@@ -4620,6 +4776,8 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         """
         # initialize the ManagedCluster object
         mc = self.init_mc()
+        # remove defaults
+        self._remove_defaults_in_mc(mc)
         # set up agentpool profile
         mc = self.set_up_agentpool_profile(mc)
         # set up misc direct mc properties
@@ -4654,6 +4812,14 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.set_up_sku(mc)
         # set up extended location
         mc = self.set_up_extended_location(mc)
+        # set up node resource group
+        mc = self.set_up_node_resource_group(mc)
+        # set up defender
+        mc = self.set_up_defender(mc)
+        # restore defaults
+        if not bypass_restore_defaults:
+            mc = self._restore_defaults_in_mc(mc)
+
         return mc
 
     # pylint: disable=unused-argument,too-many-boolean-expressions
@@ -4697,7 +4863,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             # Grant vnet permission to system assigned identity RIGHT AFTER the cluster is put, this operation can
             # reduce latency for the role assignment take effect
             instant_cluster = self.client.get(self.context.get_resource_group_name(), self.context.get_name())
-            if not add_role_assignment(
+            if not self.context.external_functions.add_role_assignment(
                 self.cmd,
                 "Network Contributor",
                 instant_cluster.identity.principal_id,
@@ -4731,12 +4897,14 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                         type="managedClusters",
                         name=self.context.get_name(),
                     )
-                    add_monitoring_role_assignment(cluster, cluster_resource_id, self.cmd)
+                    self.context.external_functions.add_monitoring_role_assignment(
+                        cluster, cluster_resource_id, self.cmd
+                    )
             else:
                 # Create the DCR Association here
                 addon_consts = self.context.get_addon_consts()
                 CONST_MONITORING_ADDON_NAME = addon_consts.get("CONST_MONITORING_ADDON_NAME")
-                ensure_container_insights_for_monitoring(
+                self.context.external_functions.ensure_container_insights_for_monitoring(
                     self.cmd,
                     cluster.addon_profiles[CONST_MONITORING_ADDON_NAME],
                     self.context.get_subscription_id(),
@@ -4752,12 +4920,14 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         # ingress appgw addon
         ingress_appgw_addon_enabled = self.context.get_intermediate("ingress_appgw_addon_enabled", default_value=False)
         if ingress_appgw_addon_enabled:
-            add_ingress_appgw_addon_role_assignment(cluster, self.cmd)
+            self.context.external_functions.add_ingress_appgw_addon_role_assignment(cluster, self.cmd)
 
         # virtual node addon
         virtual_node_addon_enabled = self.context.get_intermediate("virtual_node_addon_enabled", default_value=False)
         if virtual_node_addon_enabled:
-            add_virtual_node_role_assignment(self.cmd, cluster, self.context.get_vnet_subnet_id())
+            self.context.external_functions.add_virtual_node_role_assignment(
+                self.cmd, cluster, self.context.get_vnet_subnet_id()
+            )
 
         # attach acr
         enable_managed_identity = self.context.get_enable_managed_identity()
@@ -4773,7 +4943,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                 )
             else:
                 kubelet_identity_object_id = cluster.identity_profile["kubeletidentity"].object_id
-                _ensure_aks_acr(
+                self.context.external_functions.ensure_aks_acr(
                     self.cmd,
                     assignee=kubelet_identity_object_id,
                     acr_name_or_id=attach_acr,
@@ -5028,7 +5198,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
     def process_attach_detach_acr(self, mc: ManagedCluster) -> None:
         """Attach or detach acr for the cluster.
 
-        The function "_ensure_aks_acr" will be called to create or delete an AcrPull role assignment for the acr, which
+        The function "ensure_aks_acr" will be called to create or delete an AcrPull role assignment for the acr, which
         internally used AuthorizationManagementClient to send the request.
 
         :return: None
@@ -5041,19 +5211,23 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         detach_acr = self.context.get_detach_acr()
 
         if attach_acr:
-            _ensure_aks_acr(self.cmd,
-                            assignee=assignee,
-                            acr_name_or_id=attach_acr,
-                            subscription_id=subscription_id,
-                            is_service_principal=is_service_principal)
+            self.context.external_functions.ensure_aks_acr(
+                self.cmd,
+                assignee=assignee,
+                acr_name_or_id=attach_acr,
+                subscription_id=subscription_id,
+                is_service_principal=is_service_principal,
+            )
 
         if detach_acr:
-            _ensure_aks_acr(self.cmd,
-                            assignee=assignee,
-                            acr_name_or_id=detach_acr,
-                            subscription_id=subscription_id,
-                            detach=True,
-                            is_service_principal=is_service_principal)
+            self.context.external_functions.ensure_aks_acr(
+                self.cmd,
+                assignee=assignee,
+                acr_name_or_id=detach_acr,
+                subscription_id=subscription_id,
+                detach=True,
+                is_service_principal=is_service_principal,
+            )
 
     def update_sku(self, mc: ManagedCluster) -> ManagedCluster:
         """Update sku (uptime sla) for the ManagedCluster object.
@@ -5389,6 +5563,21 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         self.update_azure_keyvault_secrets_provider_addon_profile(azure_keyvault_secrets_provider_addon_profile)
         return mc
 
+    def update_defender(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update defender for the ManagedCluster object.
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        defender = self.context.get_defender_config()
+        if defender:
+            if mc.security_profile is None:
+                mc.security_profile = self.models.ManagedClusterSecurityProfile()
+
+            mc.security_profile.azure_defender = defender
+
+        return mc
+
     def update_mc_profile_default(self) -> ManagedCluster:
         """The overall controller used to update the default ManagedCluster profile.
 
@@ -5432,6 +5621,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.update_identity(mc)
         # update addon profiles
         mc = self.update_addon_profiles(mc)
+        # update defender
+        mc = self.update_defender(mc)
         return mc
 
     # pylint: disable=unused-argument
@@ -5488,12 +5679,14 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                         type="managedClusters",
                         name=self.context.get_name(),
                     )
-                    add_monitoring_role_assignment(cluster, cluster_resource_id, self.cmd)
+                    self.context.external_functions.add_monitoring_role_assignment(
+                        cluster, cluster_resource_id, self.cmd
+                    )
             else:
                 # Create the DCR Association here
                 addon_consts = self.context.get_addon_consts()
                 CONST_MONITORING_ADDON_NAME = addon_consts.get("CONST_MONITORING_ADDON_NAME")
-                ensure_container_insights_for_monitoring(
+                self.context.external_functions.ensure_container_insights_for_monitoring(
                     self.cmd,
                     cluster.addon_profiles[CONST_MONITORING_ADDON_NAME],
                     self.context.get_subscription_id(),
@@ -5509,12 +5702,14 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         # ingress appgw addon
         ingress_appgw_addon_enabled = self.context.get_intermediate("ingress_appgw_addon_enabled", default_value=False)
         if ingress_appgw_addon_enabled:
-            add_ingress_appgw_addon_role_assignment(cluster, self.cmd)
+            self.context.external_functions.add_ingress_appgw_addon_role_assignment(cluster, self.cmd)
 
         # virtual node addon
         virtual_node_addon_enabled = self.context.get_intermediate("virtual_node_addon_enabled", default_value=False)
         if virtual_node_addon_enabled:
-            add_virtual_node_role_assignment(self.cmd, cluster, self.context.get_vnet_subnet_id())
+            self.context.external_functions.add_virtual_node_role_assignment(
+                self.cmd, cluster, self.context.get_vnet_subnet_id()
+            )
 
         # attach acr
         enable_managed_identity = check_is_msi_cluster(cluster)
@@ -5530,7 +5725,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 )
             else:
                 kubelet_identity_object_id = cluster.identity_profile["kubeletidentity"].object_id
-                _ensure_aks_acr(
+                self.context.external_functions.ensure_aks_acr(
                     self.cmd,
                     assignee=kubelet_identity_object_id,
                     acr_name_or_id=attach_acr,
