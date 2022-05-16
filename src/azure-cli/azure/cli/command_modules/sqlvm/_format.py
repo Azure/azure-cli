@@ -88,7 +88,6 @@ def transform_sqlvm_list(vm_list):
     return [transform_sqlvm_output(v) for v in vm_list]
 
 
-
 def transform_aglistener_output(result):
     '''
     Transforms the result of Availability Group Listener to eliminate unnecessary parameters.
