@@ -550,12 +550,21 @@ short-summary: Resource Guard Mapping details of the Recovery Services vault.
 helps['backup vault resource-guard-mapping update'] = """
 type: command
 short-summary: Creates/Updates resource guard mapping of the Recovery Services vault.
+examples:
+  - name: Creates/Updates resource guard mapping of the Recovery Services vault.
+    text: az backup vault resource-guard-mapping update --resource-group MyResourceGroup --name MyVault --resource-guard-id MyResourceGuardId
 """
 helps['backup vault resource-guard-mapping show'] = """
 type: command
 short-summary: Gets resource guard mapping of the Recovery Services vault.
+examples:
+  - name: Gets resource guard mapping of the Recovery Services vault.
+    text: az backup vault resource-guard-mapping show --resource-group MyResourceGroup --name MyVault
 """
 helps['backup vault resource-guard-mapping delete'] = """
 type: command
 short-summary: Deletes resource guard mapping of the Recovery Services vault.
+examples:
+  - name: Deletes resource guard mapping of the Recovery Services vault.
+    text: az backup vault resource-guard-mapping delete --resource-group MyResourceGroup --name MyVault
 """
