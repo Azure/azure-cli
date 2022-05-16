@@ -31,8 +31,7 @@ from knack.util import CLIError
 # is set with the environment varibale for sp_name. This method is compatible with
 # both cases.
 def _process_sp_name(sp_name):
-    from azure.cli.core.util import is_guid
-    return sp_name if is_guid(sp_name) else 'http://{}'.format(sp_name)
+    return sp_name
 
 
 class AzureKubernetesServiceScenarioTest(ScenarioTest):
@@ -820,7 +819,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
                      '--nat-gateway-managed-outbound-ip-count=2 ' \
-                     '--nat-gateway-idle-timeout=30 ' 
+                     '--nat-gateway-idle-timeout=30 '
         self.cmd(update_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('networkProfile.outboundType', 'managedNATGateway'),

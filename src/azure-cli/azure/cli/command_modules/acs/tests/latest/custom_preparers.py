@@ -177,7 +177,7 @@ class AKSCustomRoleBasedServicePrincipalPreparer(
                 pass
 
             if self.live_test or self.test_class_instance.in_recording:
-                sp_name = name
+                sp_name = self.result['appId']
                 sp_password = self.result.get("password") or GraphClientPasswordReplacer.PWD_REPLACEMENT
             else:
                 sp_name = MOCK_GUID
