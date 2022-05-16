@@ -112,7 +112,7 @@ def _obtain_data_from_registry(login_server,
             # like `Link: </v2/_catalog?last=hello-world&n=1>; rel="next"`
             # we should follow the next path indicated in the link header
             next_link_path = next_link[(next_link.index('<') + 1):next_link.index('>')]
-            tokens = next_link_path.split('?', 2)
+            tokens = next_link_path.split('?', 1)
             params = {y[0]: unquote(y[1]) for y in (x.split('=', 1) for x in tokens[1].split('&'))}
             execute_next_http_call = True
 
