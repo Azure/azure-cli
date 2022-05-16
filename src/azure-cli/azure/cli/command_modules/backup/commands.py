@@ -41,6 +41,11 @@ def load_command_table(self, _):
         g.custom_command('encryption update', 'update_encryption')
         g.custom_command('encryption show', 'show_encryption', client_factory=backup_resource_encryption_config_cf)
 
+    with self.command_group('backup vault resource-guard-mapping', backup_custom, client_factory=resource_guard_proxy_cf, exception_handler=backup_exception_handler) as g:
+        g.show_command('update', 'update_resource_guard_mapping')
+        g.show_command('show', 'show_resource_guard_mapping')
+        g.show_command('delete', 'delete_resource_guard_mapping')
+
     with self.command_group('backup container', backup_custom_base, client_factory=protection_containers_cf, exception_handler=backup_exception_handler) as g:
         g.show_command('show', 'show_container', client_factory=backup_protection_containers_cf, table_transformer=transform_container)
         g.command('list', 'list_containers', table_transformer=transform_container_list, client_factory=backup_protection_containers_cf)
@@ -112,9 +117,3 @@ def load_command_table(self, _):
 
     with self.command_group('backup recoveryconfig', backup_custom_base, client_factory=recovery_points_cf, exception_handler=backup_exception_handler) as g:
         g.show_command('show', 'show_recovery_config')
-
-    with self.command_group('backup resourceguardproxy', backup_custom, client_factory=resource_guard_proxy_cf, exception_handler=backup_exception_handler) as g:
-        g.show_command('create', 'create_resource_guard_proxy')
-        g.show_command('update', 'update_resource_guard_proxy')
-        g.show_command('show', 'show_resource_guard_proxy')
-        g.show_command('delete', 'delete_resource_guard_proxy')

@@ -1139,3 +1139,63 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('properties.useSystemAssignedIdentity', False),
             self.check('properties.lastUpdateStatus', 'Succeeded')
         ])
+
+
+    @ResourceGroupPreparer(location="centraluseuap")
+    @VaultPreparer()
+    @VMPreparer(parameter_name='vm1')
+    @ItemPreparer(vm_parameter_name='vm1')
+    @PolicyPreparer(parameter_name='policy1', instant_rp_days='4')
+    @PolicyPreparer(parameter_name='policy2', instant_rp_days='2')
+    def test_backup_rg_mapping(self, resource_group, vault_name, vm1, policy1, policy2):
+        self.kwargs.update({
+            'vault': vault_name,
+            'vm1': vm1,
+            'policy1': policy1,
+            'policy2': policy2,
+            'default': 'DefaultPolicy',
+            'resource_graph': '/subscriptions/38304e13-357e-405e-9e9a-220351dcce8c/resourceGroups/clitest-rg/providers/Microsoft.DataProtection/resourceGuards/clitest-resource-guard'
+        })
+        # associate vault with an already present resource guard
+        self.cmd('backup vault resource-guard-mapping update -g {rg} -n {vault} --resource-guard-id {resource_graph}', checks=[
+            self.check('name', 'VaultProxy'),
+            self.check('length(properties.resourceGuardOperationDetails)', 6)
+        ])
+
+        self.cmd('backup vault resource-guard-mapping show -g {rg} -n {vault}', checks=[
+            self.check('name', 'VaultProxy'),
+            self.check('length(properties.resourceGuardOperationDetails)', 6)
+        ])
+
+        # Try disabling soft delete
+        self.cmd('backup vault backup-properties set -g {rg} -n {vault} --soft-delete-feature-state Disable', checks=[
+            self.check('properties.softDeleteFeatureState', 'Disabled')
+        ])
+
+        time.sleep(300)
+
+        # try modifying protection using the second policy
+        self.cmd('backup item set-policy --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {vm1} -n {vm1} -p {policy1}', checks=[
+            self.check("properties.entityFriendlyName", '{vm1}'),
+            self.check("properties.operation", "ConfigureBackup"),
+            self.check("properties.status", "Completed"),
+            self.check("resourceGroup", '{rg}')
+        ])
+
+        self.cmd('backup item set-policy --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {vm1} -n {vm1} -p {policy2}', checks=[
+            self.check("properties.entityFriendlyName", '{vm1}'),
+            self.check("properties.operation", "ConfigureBackup"),
+            self.check("properties.status", "Completed"),
+            self.check("resourceGroup", '{rg}')
+        ])
+
+        # try deleting protection
+        self.cmd('backup protection disable --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {vm1} -i {vm1} --delete-backup-data --yes', checks=[
+            self.check("properties.entityFriendlyName", '{vm1}'),
+            self.check("properties.operation", "DeleteBackupData"),
+            self.check("properties.status", "Completed"),
+            self.check("resourceGroup", '{rg}')
+        ])
+
+        # try deleting resource guard mapping
+        self.cmd('backup vault resource-guard-mapping delete -n {vault} -g {rg}')

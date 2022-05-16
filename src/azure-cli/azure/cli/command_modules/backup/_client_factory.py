@@ -205,6 +205,11 @@ def backup_resource_encryption_config_cf(cli_ctx, *_):
 def aad_properties_cf(cli_ctx, *_):
     return _backup_passive_client_factory(cli_ctx).aad_properties
 
+
 # Resource Guard Proxy Client Factories
 def resource_guard_proxy_cf(cli_ctx, *_):
     return _backup_client_factory(cli_ctx).resource_guard_proxy
+
+
+def resource_guard_proxies_cf(cli_ctx, *_):
+    return _backup_client_factory(cli_ctx).resource_guard_proxies

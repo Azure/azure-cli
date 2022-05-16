@@ -543,3 +543,19 @@ examples:
   - name: Show details of encryption properties of a Recovery Services Vault.
     text: az backup vault encryption show --resource-group MyResourceGroup --name MyVault
 """
+helps['backup vault resource-guard-mapping'] = """
+type: group
+short-summary: Resource Guard Mapping details of the Recovery Services vault.
+"""
+helps['backup vault resource-guard-mapping update'] = """
+type: command
+short-summary: Creates/Updates resource guard mapping of the Recovery Services vault.
+"""
+helps['backup vault resource-guard-mapping show'] = """
+type: command
+short-summary: Gets resource guard mapping of the Recovery Services vault.
+"""
+helps['backup vault resource-guard-mapping delete'] = """
+type: command
+short-summary: Deletes resource guard mapping of the Recovery Services vault.
+"""
