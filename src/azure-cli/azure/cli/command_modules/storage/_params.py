@@ -1736,12 +1736,18 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                      "Astrix (‘*’) is a wildcard that specifies all handles.")
         c.argument('snapshot', help="A string that represents the snapshot version, if applicable.")
 
-    with self.argument_context('storage directory') as c:
-        c.argument('directory_name', directory_type, options_list=('--name', '-n'))
+    for scope in ['create', 'delete', 'show', 'exists']:
+        with self.argument_context(f'storage directory {scope}') as c:
+            c.extra('share_name', share_name_type, required=True)
+            c.extra('snapshot', help="A string that represents the snapshot version, if applicable.")
+            c.extra('directory_path', directory_type, options_list=('--name', '-n'), required=True)
+            c.extra('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
 
-    with self.argument_context('storage directory exists') as c:
-        c.ignore('file_name')
-        c.argument('directory_name', required=True)
+    with self.argument_context('storage directory create') as c:
+        c.argument('fail_on_exist', help='Throw an exception if the directory already exists.')
+
+    with self.argument_context('storage directory delete') as c:
+        c.argument('fail_not_exist', help='Throw an exception if the directory does not exist.')
 
     with self.argument_context('storage file') as c:
         c.argument('file_name', file_name_type, options_list=('--name', '-n'))

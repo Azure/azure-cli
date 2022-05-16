@@ -18,6 +18,7 @@ from azure.cli.command_modules.storage._client_factory import (cf_sa, cf_blob_co
                                                                cf_queue_service, cf_table_service, cf_table_client,
                                                                cf_sa_blob_inventory, cf_blob_service, cf_queue_client,
                                                                cf_share_client, cf_share_service,
+                                                               cf_share_file_client, cf_share_directory_client,
                                                                cf_container_lease_client)
 
 from azure.cli.core.commands import CliCommandType
@@ -585,6 +586,16 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         client_factory=cf_share_service,
         resource_type=ResourceType.DATA_STORAGE_FILESHARE)
 
+    directory_client_sdk = CliCommandType(
+        operations_tmpl='azure.multiapi.storagev2.fileshare._directory_client#ShareDirectoryClient.{}',
+        client_factory=cf_share_directory_client,
+        resource_type=ResourceType.DATA_STORAGE_FILESHARE)
+
+    file_client_sdk = CliCommandType(
+        operations_tmpl='azure.multiapi.storagev2.fileshare._file_client#ShareFileClient.{}',
+        client_factory=cf_share_file_client,
+        resource_type=ResourceType.DATA_STORAGE_FILESHARE)
+
     with self.command_group('storage share-rm', command_type=file_shares_mgmt_sdk,
                             custom_command_type=get_custom_sdk('file',
                                                                cf_mgmt_file_shares,
@@ -651,18 +662,34 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
             'list', 'list_acl_policies', table_transformer=transform_acl_list_output)
         g.storage_custom_command('update', 'set_acl_policy')
 
+    with self.command_group('storage directory', command_type=directory_client_sdk,
+                            custom_command_type=get_custom_sdk('directory', cf_share_directory_client)) as g:
+        from ._transformers import transform_share_directory_json_output
+        from ._format import transform_file_directory_result, transform_file_output
+        g.storage_custom_command('create', 'create_directory',
+                                 transform=create_boolean_result_output_transformer('created'),
+                                 table_transformer=transform_boolean_for_table)
+        g.storage_custom_command('delete', 'delete_directory',
+                                 transform=create_boolean_result_output_transformer('deleted'),
+                                 table_transformer=transform_boolean_for_table)
+        g.storage_command('show', 'get_directory_properties',
+                          transform=transform_share_directory_json_output,
+                          table_transformer=transform_file_output,
+                          exception_handler=show_exception_handler)
+        g.storage_command('exists', 'exists',
+                          transform=create_boolean_result_output_transformer('exists'))
+
     with self.command_group('storage directory', command_type=file_sdk,
                             custom_command_type=get_custom_sdk('directory', file_data_service_factory)) as g:
-        from ._format import transform_file_directory_result, transform_file_output
 
-        g.storage_command('create', 'create_directory', transform=create_boolean_result_output_transformer('created'),
-                          table_transformer=transform_boolean_for_table)
-        g.storage_command('delete', 'delete_directory', transform=create_boolean_result_output_transformer('deleted'),
-                          table_transformer=transform_boolean_for_table)
-        g.storage_command('show', 'get_directory_properties', table_transformer=transform_file_output,
-                          exception_handler=show_exception_handler)
-        g.storage_command(
-            'exists', 'exists', transform=create_boolean_result_output_transformer('exists'))
+        # g.storage_command('create', 'create_directory', transform=create_boolean_result_output_transformer('created'),
+        #                   table_transformer=transform_boolean_for_table)
+        # g.storage_command('delete', 'delete_directory', transform=create_boolean_result_output_transformer('deleted'),
+        #                   table_transformer=transform_boolean_for_table)
+        # g.storage_command('show', 'get_directory_properties', table_transformer=transform_file_output,
+        #                   exception_handler=show_exception_handler)
+        # g.storage_command(
+        #     'exists', 'exists', transform=create_boolean_result_output_transformer('exists'))
         g.storage_command('metadata show', 'get_directory_metadata',
                           exception_handler=show_exception_handler)
         g.storage_command('metadata update', 'set_directory_metadata')
@@ -704,6 +731,11 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
             'download-batch', 'storage_file_download_batch')
         g.storage_custom_command('delete-batch', 'storage_file_delete_batch')
         g.storage_custom_command('copy start-batch', 'storage_file_copy_batch')
+
+    with self.command_group('storage file', command_type=file_client_sdk,
+                            custom_command_type=get_custom_sdk('file', cf_share_file_client)) as g:
+        g.storage_custom_command('list', 'list_share_files', transform=transform_file_directory_result(self.cli_ctx),
+                                 table_transformer=transform_file_output)
 
     with self.command_group('storage cors', get_custom_sdk('cors', multi_service_properties_factory)) as g:
         from ._transformers import transform_cors_list_output

@@ -1652,6 +1652,21 @@ type: group
 short-summary: Manage file storage directories.
 """
 
+helps['storage directory create'] = """
+type: command
+short-summary: Create a new directory under the specified share or parent directory.
+"""
+
+helps['storage directory delete'] = """
+type: command
+short-summary: Delete the specified empty directory.
+"""
+
+helps['storage directory show'] = """
+type: command
+short-summary: Get all user-defined metadata and system properties for the specified directory
+"""
+
 helps['storage directory exists'] = """
 type: command
 short-summary: Check for the existence of a storage directory.
