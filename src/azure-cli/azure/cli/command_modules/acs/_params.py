@@ -515,27 +515,6 @@ def load_arguments(self, _):
         c.argument('prompt', options_list=[
                    '--yes', '-y'], action='store_true', help='Do not prompt for confirmation')
 
-    # OpenShift command argument configuration
-    with self.argument_context('openshift', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='open_shift_managed_clusters') as c:
-        c.argument('resource_name', name_type, help='Name of the managed OpenShift cluster.',
-                   completer=get_resource_name_completion_list('Microsoft.ContainerService/OpenShiftManagedClusters'))
-        c.argument('name', name_type, help='Name of the managed OpenShift cluster.',
-                   completer=get_resource_name_completion_list('Microsoft.ContainerService/OpenShiftManagedClusters'))
-        c.argument('compute_count', options_list=[
-                   '--compute-count', '-c'], type=int, default=4)
-        c.argument('tags', tags_type)
-
-    with self.argument_context('openshift create', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='open_shift_managed_clusters') as c:
-        c.argument('name', validator=validate_linux_host_name)
-        c.argument('compute_vm_size', options_list=['--compute-vm-size', '-s'])
-        c.argument('customer_admin_group_id', options_list=[
-                   '--customer-admin-group-id'])
-        c.argument('workspace_id')
-
-    with self.argument_context('openshift monitor enable', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='open_shift_managed_clusters') as c:
-        c.argument(
-            'workspace_id', help='The resource ID of an existing Log Analytics Workspace to use for storing monitoring data.')
-
     for scope in ['aks nodepool snapshot create', 'aks snapshot create']:
         with self.argument_context(scope) as c:
             c.argument('snapshot_name', options_list=['--name', '-n'], required=True, validator=validate_snapshot_name, help='The nodepool snapshot name.')
