@@ -24,7 +24,7 @@ from .patches import (patch_load_cached_subscriptions, patch_main_exception_hand
                       patch_progress_controller, patch_get_current_system_username)
 from .exceptions import CliExecutionError
 from .utilities import (find_recording_dir, StorageAccountKeyReplacer, GraphClientPasswordReplacer,
-                        AADAuthRequestFilter)
+                        MSGraphClientPasswordReplacer, AADAuthRequestFilter)
 from .reverse_dependency import get_dummy_cli
 
 logger = logging.getLogger('azure.cli.testsdk')
@@ -86,7 +86,8 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
         self.name_replacer = GeneralNameReplacer()
         self.kwargs = {}
         self.test_guid_count = 0
-        self._processors_to_reset = [StorageAccountKeyReplacer(), GraphClientPasswordReplacer()]
+        self._processors_to_reset = [StorageAccountKeyReplacer(), GraphClientPasswordReplacer(),
+                                     MSGraphClientPasswordReplacer()]
         default_recording_processors = [
             SubscriptionRecordingProcessor(MOCKED_SUBSCRIPTION_ID),
             AADAuthRequestFilter(),
