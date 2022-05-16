@@ -525,6 +525,33 @@ class AKSManagedClusterContext(BaseAKSContext):
         """
         return self.agentpool_context.get_nodepool_labels()
 
+    def get_updated_assign_kubelet_identity(self) -> str:
+        """Obtain the value of assign_kubelet_identity based on the user input.
+        :return: str
+        """
+        kubelet_identity_resource_id = self.raw_param.get("assign_kubelet_identity")
+        if not kubelet_identity_resource_id:
+            return ""
+
+        msg = "You're going to update kubelet identity to {}, which will upgrade every node pool in the cluster " \
+              "and might take a while, do you wish to continue?".format(kubelet_identity_resource_id)
+        if not self.get_yes() and not prompt_y_n(msg, default="n"):
+            raise DecoratorEarlyExitException
+
+        return kubelet_identity_resource_id
+
+    def get_cluster_uaidentity_object_id(self) -> str:
+        assigned_identity = self.get_assign_identity()
+        cluster_identity_resource_id = ""
+        if assigned_identity is None or assigned_identity == "":
+            # Suppose identity is present on mc
+            if not(self.mc and self.mc.identity and self.mc.identity.user_assigned_identities):
+                raise RequiredArgumentMissingError("--assign-identity is not provided and the cluster identity type is not user assigned, cannot update kubelet identity")
+            cluster_identity_resource_id = list(self.mc.identity.user_assigned_identities.keys())[0]
+        else:
+            cluster_identity_resource_id = assigned_identity
+        return self.get_identity_by_msi_client(cluster_identity_resource_id).principal_id
+
     def _get_dns_name_prefix(
         self, enable_validation: bool = False, read_only: bool = False
     ) -> Union[str, None]:
@@ -5578,6 +5605,28 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
 
         return mc
 
+    def update_identity_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update identity profile for the ManagedCluster object.
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        assign_kubelet_identity = self.context.get_updated_assign_kubelet_identity()
+        if assign_kubelet_identity:
+            identity_profile = {
+                'kubeletidentity': self.models.UserAssignedIdentity(
+                    resource_id=assign_kubelet_identity,
+                )
+            }
+            cluster_identity_object_id = self.context.get_cluster_uaidentity_object_id()
+            # ensure the cluster identity has "Managed Identity Operator" role at the scope of kubelet identity
+            ensure_cluster_identity_permission_on_kubelet_identity(
+                self.cmd,
+                cluster_identity_object_id,
+                assign_kubelet_identity)
+            mc.identity_profile = identity_profile
+        return mc
+
     def update_mc_profile_default(self) -> ManagedCluster:
         """The overall controller used to update the default ManagedCluster profile.
 
@@ -5623,6 +5672,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.update_addon_profiles(mc)
         # update defender
         mc = self.update_defender(mc)
+        # update identity profile
+        mc = self.update_identity_profile(mc)
         return mc
 
     # pylint: disable=unused-argument
