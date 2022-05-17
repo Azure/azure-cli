@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import base64
+from uuid import UUID
 
 from dateutil import parser
 from knack.log import get_logger
@@ -89,6 +90,8 @@ def transform_entity_result(entity):
             entity_property.value = base64.b64encode(entity_property.value).decode()
         if isinstance(entity_property, bytes):
             entity[key] = base64.b64encode(entity_property).decode()
+        if isinstance(entity_property, UUID):
+            entity[key] = str(entity_property)
     if hasattr(entity, 'metadata'):
         entity['Timestamp'] = entity.metadata['timestamp']
         entity['etag'] = entity.metadata['etag']
