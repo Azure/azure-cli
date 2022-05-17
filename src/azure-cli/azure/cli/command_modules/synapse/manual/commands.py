@@ -210,7 +210,7 @@ def load_command_table(self, _):
     synapse_link_connection_sdk = CliCommandType(
         operations_tmpl='azure.synapse.artifacts.operations#linkconnectionOperations.{}',
         client_factory=None,
-    )    
+    )
     # Management Plane Commands --Workspace
     with self.command_group('synapse workspace', command_type=synapse_workspace_sdk,
                             custom_command_type=get_custom_sdk('workspace', cf_synapse_client_workspace_factory),
