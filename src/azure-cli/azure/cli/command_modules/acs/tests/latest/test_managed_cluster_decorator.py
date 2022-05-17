@@ -7605,7 +7605,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             self.assertEqual(dec_mc_2, ground_truth_mc_2)
 
         with patch(
-            "azext_aks_preview.managed_cluster_decorator.prompt_y_n",
+            "azure.cli.command_modules.acs.managed_cluster_decorator.prompt_y_n",
             return_value=False,
         ), self.assertRaises(DecoratorEarlyExitException):
             dec_3 = AKSManagedClusterUpdateDecorator(

@@ -5623,7 +5623,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             cluster_identity_object_id = self.context.get_user_assigned_identity_object_id(user_assigned_identity)
             # ensure the cluster identity has "Managed Identity Operator" role at the scope of kubelet identity
             self.context.external_functions.ensure_cluster_identity_permission_on_kubelet_identity(
-                self.cmd.cli_ctx,
+                self.cmd,
                 cluster_identity_object_id,
                 assign_kubelet_identity)
             mc.identity_profile = identity_profile
