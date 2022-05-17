@@ -150,7 +150,6 @@ def storage_file_upload_batch(cmd, client, destination, source, destination_path
     from azure.cli.command_modules.storage.util import glob_files_locally, normalize_blob_file_path
 
     source_files = list(glob_files_locally(source, pattern))
-    logger = get_logger(__name__)
     settings_class = cmd.get_models('file.models#ContentSettings')
 
     if dryrun:
@@ -199,7 +198,6 @@ def storage_file_download_batch(cmd, client, source, destination, pattern=None, 
     if dryrun:
         source_files_list = list(source_files)
 
-        logger = get_logger(__name__)
         logger.warning('download files from file share')
         logger.warning('    account %s', client.account_name)
         logger.warning('      share %s', source)
@@ -237,7 +235,6 @@ def storage_file_copy_batch(cmd, client, source_client, destination_share=None, 
     """
     logger = None
     if dryrun:
-        logger = get_logger(__name__)
         logger.warning('copy files or blobs to file share')
         logger.warning('    account %s', client.account_name)
         logger.warning('      share %s', destination_share)
@@ -321,7 +318,6 @@ def storage_file_delete_batch(cmd, client, source, pattern=None, dryrun=False, t
     source_files = list(glob_files_remotely(cmd, client, source, pattern))
 
     if dryrun:
-        logger = get_logger(__name__)
         logger.warning('delete files from %s', source)
         logger.warning('    pattern %s', pattern)
         logger.warning('      share %s', source)

@@ -683,17 +683,14 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                           transform=lambda x: getattr(x, 'metadata', x))
         g.storage_command('metadata update', 'set_directory_metadata')
         g.storage_custom_command('list', 'list_share_directories',
-                                 transform=transform_file_directory_result(self.cli_ctx),
+                                 transform=transform_file_directory_result,
                                  table_transformer=transform_file_output)
 
     with self.command_group('storage file', command_type=file_sdk,
                             custom_command_type=get_custom_sdk('file', file_data_service_factory)) as g:
-        from ._format import transform_file_directory_result, transform_boolean_for_table, transform_file_output
+        from ._format import transform_boolean_for_table, transform_file_output
         from ._transformers import transform_url
         from ._exception_handler import file_related_exception_handler
-        g.storage_custom_command('list', 'list_share_files', transform=transform_file_directory_result(self.cli_ctx),
-                                 table_transformer=transform_file_output,
-                                 doc_string_source='file#FileService.list_directories_and_files')
         g.storage_command('delete', 'delete_file', transform=create_boolean_result_output_transformer('deleted'),
                           table_transformer=transform_boolean_for_table)
         g.storage_command('resize', 'resize_file')
@@ -722,7 +719,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
     with self.command_group('storage file', command_type=file_client_sdk,
                             custom_command_type=get_custom_sdk('file', cf_share_file_client)) as g:
         g.storage_custom_command('list', 'list_share_files', client_factory=cf_share_client,
-                                 transform=transform_file_directory_result(self.cli_ctx),
+                                 transform=transform_file_directory_result,
                                  table_transformer=transform_file_output)
 
     with self.command_group('storage cors', get_custom_sdk('cors', multi_service_properties_factory)) as g:

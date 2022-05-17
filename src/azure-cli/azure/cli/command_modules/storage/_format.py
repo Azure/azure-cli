@@ -5,7 +5,6 @@
 """Table transformer for storage commands"""
 
 from azure.cli.core.commands.transform import build_table_output
-from azure.cli.core.profiles import get_sdk, ResourceType
 from knack.log import get_logger
 
 logger = get_logger(__name__)
@@ -104,7 +103,7 @@ def transform_boolean_for_table(result):
     return result
 
 
-def transform_file_directory_result(cli_ctx):
+def transform_file_directory_result(result):
     """
     Transform a the result returned from file and directory listing API.
 
@@ -113,17 +112,14 @@ def transform_file_directory_result(cli_ctx):
     list.
     """
     from ._transformers import transform_share_directory_json_output, transform_share_file_json_output
+    return_list = []
+    for each in result:
+        if getattr(each, 'is_directory', None):
+            setattr(each, 'type', 'dir')
+            each = transform_share_directory_json_output(each)
+        else:
+            setattr(each, 'type', 'file')
+            each = transform_share_file_json_output(each)
+        return_list.append(each)
 
-    def transformer(result):
-        return_list = []
-        for each in result:
-            if getattr(each, 'is_directory', None):
-                setattr(each, 'type', 'dir')
-                each = transform_share_directory_json_output(each)
-            else:
-                setattr(each, 'type', 'file')
-                each = transform_share_file_json_output(each)
-            return_list.append(each)
-
-        return return_list
-    return transformer
+    return return_list

@@ -1811,6 +1811,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('directory_name', options_list=('--path', '-p'), help='The directory path within the file share.',
                    completer=dir_path_completer)
         c.argument('num_results', arg_type=num_results_type)
+        c.argument('marker', arg_type=marker_type)
         c.argument('exclude_extended_info',
                    help='Specify to exclude "timestamps", "Etag", "Attributes", "PermissionKey" info from response')
 

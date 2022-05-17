@@ -417,7 +417,7 @@ def transform_share_file_json_output(result):
             "etag": result.pop('etag', None),
             "lastModified": result.pop('lastModified', None),
             "serverEncrypted": result.pop('serverEncrypted', None),
-            "contentLength": result.pop('contentLength', None),
+            "contentLength": result.pop('size', None),
             "contentRange": result.pop('contentRange', None),
             "contentSettings": result.pop('contentSettings', None),
             "copy": result.pop("copy", None)
