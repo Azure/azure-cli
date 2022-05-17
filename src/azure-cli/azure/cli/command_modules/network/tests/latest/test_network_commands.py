@@ -5562,7 +5562,6 @@ class NetworkSecurityPartnerProviderScenarioTest(ScenarioTest):
         super(NetworkSecurityPartnerProviderScenarioTest, self).__init__(method_name)
         self.cmd('extension add -n virtual-wan')
 
-    @live_only()
     @ResourceGroupPreparer()
     def test_network_security_partner_provider(self, resource_group):
         self.kwargs.update({
@@ -5607,7 +5606,6 @@ class NetworkVirtualApplianceScenarioTest(ScenarioTest):
         # self.cmd('extension remove -n virtual-wan')
         super(NetworkVirtualApplianceScenarioTest, self).tearDown()
 
-    @live_only()
     @ResourceGroupPreparer(location='westcentralus', name_prefix='test_network_virtual_appliance')
     def test_network_virtual_appliance(self, resource_group):
         self.kwargs.update({
