@@ -257,4 +257,8 @@ def cf_synapse_sql_script(cli_ctx, workspace_name):
 
 
 def cf_synapse_link_connection(cli_ctx, workspace_name):
+<<<<<<< HEAD
     return cf_synapse_client_artifacts_factory(cli_ctx, workspace_name).link_connection
+=======
+    return cf_synapse_client_artifacts_factory(cli_ctx, workspace_name).link_connection
+>>>>>>> c49b2af935871e6dab21f3975133f9415d37ba26

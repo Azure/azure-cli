@@ -2988,20 +2988,34 @@ class SynapseScenarioTests(ScenarioTest):
     def test_link_connection(self):
         self.kwargs.update({
             'workspace_name': 'xiaoyuxingtestne',
+<<<<<<< HEAD
             'link_connection_name': 'linkconnectionfortest',
             'link_table_id': '887e9d4df0fa4afaaad0d7a2c7f42d88',
+=======
+            'link_connection_name': 'linkconnectionh1',
+            'link_table_id': '887e9d4df0fa4afaaad0d7a2c7f42d67',
+            'sas_token': '1',
+>>>>>>> c49b2af935871e6dab21f3975133f9415d37ba26
             'edit_table_file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'link-connection-table.json'),
             'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'linkconnection111.json')
         })
         # create link connnection
         self.cmd(
             'az synapse link-connection create --workspace-name {workspace_name} '
+<<<<<<< HEAD
             '--name {workspace_name} --file @"{file}" ',
             checks=[
                 self.check('name', self.kwargs['link_connection_name'])
             ])
 
         time.sleep(600)
+=======
+            '--name linkconnection111 --file @"{file}" ',
+            checks=[
+                self.check('name', 'linkconnection111')
+            ])
+
+>>>>>>> c49b2af935871e6dab21f3975133f9415d37ba26
         # get link connnection
         self.cmd(
             'az synapse link-connection show --workspace-name {workspace_name} --name {link_connection_name}',
@@ -3016,11 +3030,14 @@ class SynapseScenarioTests(ScenarioTest):
                 self.check('[0].type', 'Microsoft.Synapse/workspaces/linkconnections')
             ])
 
+<<<<<<< HEAD
         # edit link tables
         self.cmd(
             'az synapse link-connection edit-link-tables --workspace-name {workspace_name} --n {link_connection_name} --file @"{edit_table_file}" ')
         
         time.sleep(600)
+=======
+>>>>>>> c49b2af935871e6dab21f3975133f9415d37ba26
         # start a link connnection
         self.cmd(
             'az synapse link-connection start --workspace-name {workspace_name} --name {link_connection_name}')
@@ -3039,12 +3056,23 @@ class SynapseScenarioTests(ScenarioTest):
                 self.check('status', 'Stopping')
             ])
 
+<<<<<<< HEAD
+=======
+        #delete a link connnection
+        self.cmd(
+            'az synapse link-connection delete --workspace-name {workspace_name} --name linkconnectionwstest3')
+        self.cmd(
+            'az synapse link-connection show --workspace-name {workspace_name} --name linkconnectionwstest3',
+            expect_failure=True)
+
+>>>>>>> c49b2af935871e6dab21f3975133f9415d37ba26
          # list link tables
         self.cmd(
             'az synapse link-connection list-link-tables --workspace-name {workspace_name} --n {link_connection_name} ',
             checks=[
                 self.check('[0].id', self.kwargs['link_table_id'])
             ])
+<<<<<<< HEAD
 
         time.sleep(300)
         #delete a link connnection
@@ -3053,3 +3081,9 @@ class SynapseScenarioTests(ScenarioTest):
         self.cmd(
             'az synapse link-connection show --workspace-name {workspace_name} --name {link_connection_name}',
             expect_failure=True)
+=======
+        
+        # edit link tables
+        self.cmd(
+            'az synapse link-connection edit-link-tables --workspace-name {workspace_name} --n {link_connection_name} --file @"{edit_table_file}" ')
+>>>>>>> c49b2af935871e6dab21f3975133f9415d37ba26

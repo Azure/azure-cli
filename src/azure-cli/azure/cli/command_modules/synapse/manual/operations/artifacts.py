@@ -10,8 +10,13 @@ from azure.synapse.artifacts.models import (LinkedService, Dataset, PipelineReso
                                             Trigger, DataFlow, BigDataPoolReference, NotebookSessionProperties,
                                             NotebookResource, SparkJobDefinition, SqlScriptResource, SqlScriptFolder,
                                             SqlScriptContent, SqlScriptMetadata, SqlScript, SqlConnection,
+<<<<<<< HEAD
                                             NotebookFolder, LinkConnectionResource, LinkTableRequest,
                                             QueryTableStatusRequest, SecureString)
+=======
+                                            NotebookFolder,LinkConnectionResource,LinkTableRequest,QueryTableStatusRequest,
+                                            SecureString)
+>>>>>>> c49b2af935871e6dab21f3975133f9415d37ba26
 from azure.cli.core.util import sdk_no_wait, CLIError
 from azure.core.exceptions import ResourceNotFoundError
 from .._client_factory import (cf_synapse_linked_service, cf_synapse_dataset, cf_synapse_pipeline,
@@ -558,7 +563,11 @@ def export_sql_script(cmd, workspace_name, output_folder, sql_script_name=None):
 
 def list_link_connection(cmd, workspace_name):
     client = cf_synapse_link_connection(cmd.cli_ctx, workspace_name)
+<<<<<<< HEAD
     return client.list_link_connections_by_workspace()
+=======
+    return client.get_link_connections_by_workspace()
+>>>>>>> c49b2af935871e6dab21f3975133f9415d37ba26
 
 
 def get_link_connection(cmd, workspace_name, link_connection_name):
@@ -568,6 +577,7 @@ def get_link_connection(cmd, workspace_name, link_connection_name):
 
 def create_or_update_link_connection(cmd, workspace_name, link_connection_name, definition_file):
     client = cf_synapse_link_connection(cmd.cli_ctx, workspace_name)
+<<<<<<< HEAD
     info = definition_file['properties']
     properties_file = {}
     properties_file['sourceDatabase'] = info['sourceDatabase']
@@ -576,6 +586,9 @@ def create_or_update_link_connection(cmd, workspace_name, link_connection_name, 
     if 'landingZone' in properties_file.keys():
         properties_file['landingZone'] = info['landingZone']
     properties = LinkConnectionResource(properties=properties_file)
+=======
+    properties = LinkConnectionResource.from_dict(definition_file['properties'])
+>>>>>>> c49b2af935871e6dab21f3975133f9415d37ba26
     return client.create_or_update_link_connection(link_connection_name, properties)
 
 
@@ -613,8 +626,12 @@ def synapse_edit_link_table(cmd, workspace_name, link_connection_name, definitio
     return client.edit_tables(link_connection_name, linkTableRequset_list)
 
 
+<<<<<<< HEAD
 def synapse_get_link_tables_status(cmd, workspace_name, link_connection_name, max_segment_count=50,
                                    continuation_token=None):
+=======
+def synapse_get_link_tables_status(cmd, workspace_name, link_connection_name, max_segment_count=50, continuation_token=None):
+>>>>>>> c49b2af935871e6dab21f3975133f9415d37ba26
     client = cf_synapse_link_connection(cmd.cli_ctx, workspace_name)
     query_table_status_request = QueryTableStatusRequest(
         max_segment_count=max_segment_count,
@@ -623,7 +640,16 @@ def synapse_get_link_tables_status(cmd, workspace_name, link_connection_name, ma
     return client.query_table_status(link_connection_name, query_table_status_request)
 
 
+<<<<<<< HEAD
 def synapse_update_landing_zone_credential(cmd, workspace_name, link_connection_name, sas_token):
     client = cf_synapse_link_connection(cmd.cli_ctx, workspace_name)
     sas_tokens = SecureString(value=sas_token)
     return client.update_landing_zone_credential(link_connection_name, sas_tokens)
+=======
+def synapse_update_landing_zone_credential(cmd, workspace_name, link_connection_name, sas_token_type, sas_token_value):
+    client = cf_synapse_link_connection(cmd.cli_ctx, workspace_name)
+    sas_token = SecureString(
+        value = sas_token_value
+    )
+    return client.update_landing_zone_credential(link_connection_name, sas_token)
+>>>>>>> c49b2af935871e6dab21f3975133f9415d37ba26

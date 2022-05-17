@@ -2336,7 +2336,11 @@ examples:
   - name: Start a link connection.
     text: |-
         az synapse link-connection start --workspace-name testsynapseworkspace \\
+<<<<<<< HEAD
           --name testlinkconnectionname
+=======
+          --name testlinkconnectionname"
+>>>>>>> c49b2af935871e6dab21f3975133f9415d37ba26
 """
 
 helps['synapse link-connection stop'] = """
@@ -2403,7 +2407,11 @@ examples:
             },
             {
               "id": "<linkTableId3>",
+<<<<<<< HEAD
               "source": {
+=======
+              "source": { 
+>>>>>>> c49b2af935871e6dab21f3975133f9415d37ba26
                 "tableName": "<sourceTableName3>",
                 "schemaName": "<sourceSchemaName3>"
               },
@@ -2434,13 +2442,24 @@ examples:
           --continuation-token token
 """
 
+<<<<<<< HEAD
 helps['synapse link-connection update-landing-zone-credential'] = """
+=======
+helps['synapse link-connection update-landingzone-credential'] = """
+>>>>>>> c49b2af935871e6dab21f3975133f9415d37ba26
 type: command
 short-summary: Update landing zone credetial of a link connection.
 examples:
   - name: Update landing zone credetial of a link connection.
     text: |-
+<<<<<<< HEAD
         az synapse link-connection update-landing-zone-credential --workspace-name testsynapseworkspace \\
           --name linkconnectionname \\
           --sas-token sastoken
+=======
+        az synapse link-connection update-landingzone-credential --workspace-name testsynapseworkspace \\
+          --name linkconnectionname \\
+          --sas-token-type sastokentype \\
+          --sas-token-value sastokenvalue
+>>>>>>> c49b2af935871e6dab21f3975133f9415d37ba26
 """
