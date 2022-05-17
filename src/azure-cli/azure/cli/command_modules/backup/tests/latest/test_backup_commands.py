@@ -1198,4 +1198,4 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         ])
 
         # try deleting resource guard mapping
-        self.cmd('backup vault resource-guard-mapping delete -n {vault} -g {rg}')
+        self.cmd('backup vault resource-guard-mapping delete -n {vault} -g {rg} -y')

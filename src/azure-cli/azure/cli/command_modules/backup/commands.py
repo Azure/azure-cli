@@ -44,7 +44,7 @@ def load_command_table(self, _):
     with self.command_group('backup vault resource-guard-mapping', backup_custom, client_factory=resource_guard_proxy_cf, exception_handler=backup_exception_handler) as g:
         g.show_command('update', 'update_resource_guard_mapping')
         g.show_command('show', 'show_resource_guard_mapping')
-        g.show_command('delete', 'delete_resource_guard_mapping')
+        g.show_command('delete', 'delete_resource_guard_mapping', confirmation=True)
 
     with self.command_group('backup container', backup_custom_base, client_factory=protection_containers_cf, exception_handler=backup_exception_handler) as g:
         g.show_command('show', 'show_container', client_factory=backup_protection_containers_cf, table_transformer=transform_container)
