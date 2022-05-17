@@ -303,7 +303,8 @@ def add_app_cert(cmd,
     return client.get(resource_group_name, cluster_name)
 
 
-def add_client_cert(client,
+def add_client_cert(cmd,
+                    client,
                     resource_group_name,
                     cluster_name,
                     is_admin=False,
@@ -313,6 +314,7 @@ def add_client_cert(client,
                     admin_client_thumbprints=None,
                     readonly_client_thumbprints=None,
                     client_certificate_common_names=None):
+    cli_ctx = cmd.cli_ctx
     if thumbprint:
         if certificate_common_name or certificate_issuer_thumbprint or admin_client_thumbprints or readonly_client_thumbprints or client_certificate_common_names:
             raise CLIError(
@@ -377,16 +379,19 @@ def add_client_cert(client,
 
     patch_request = ClusterUpdateParameters(client_certificate_thumbprints=cluster.client_certificate_thumbprints,
                                             client_certificate_common_names=cluster.client_certificate_common_names)
-    return client.update(resource_group_name, cluster_name, patch_request)
+    update_cluster_poll = client.begin_update(resource_group_name, cluster_name, patch_request)
+    return LongRunningOperation(cli_ctx)(update_cluster_poll)
 
 
-def remove_client_cert(client,
+def remove_client_cert(cmd,
+                       client,
                        resource_group_name,
                        cluster_name,
                        thumbprints=None,
                        certificate_common_name=None,
                        certificate_issuer_thumbprint=None,
                        client_certificate_common_names=None):
+    cli_ctx = cmd.cli_ctx
     if thumbprints:
         if certificate_common_name or certificate_issuer_thumbprint or client_certificate_common_names:
             raise CLIError("--thumbprint can only specified alone")
@@ -442,7 +447,8 @@ def remove_client_cert(client,
     patch_request = ClusterUpdateParameters(client_certificate_thumbprints=cluster.client_certificate_thumbprints,
                                             client_certificate_common_names=cluster.client_certificate_common_names)
 
-    return client.update(resource_group_name, cluster_name, patch_request)
+    update_cluster_poll = client.begin_update(resource_group_name, cluster_name, patch_request)
+    return LongRunningOperation(cli_ctx)(update_cluster_poll)
 
 
 def add_cluster_node(cmd, client, resource_group_name, cluster_name, node_type, number_of_nodes_to_add):
@@ -469,7 +475,8 @@ def add_cluster_node(cmd, client, resource_group_name, cluster_name, node_type, 
     node_type.vm_instance_count = vmss.sku.capacity
     patch_request = ClusterUpdateParameters(node_types=cluster.node_types)
 
-    return client.update(resource_group_name, cluster_name, patch_request)
+    update_cluster_poll = client.begin_update(resource_group_name, cluster_name, patch_request)
+    return LongRunningOperation(cli_ctx)(update_cluster_poll)
 
 
 def remove_cluster_node(cmd, client, resource_group_name, cluster_name, node_type, number_of_nodes_to_remove):
@@ -501,13 +508,14 @@ def remove_cluster_node(cmd, client, resource_group_name, cluster_name, node_typ
     node_type.vm_instance_count = vmss.sku.capacity
     patch_request = ClusterUpdateParameters(node_types=cluster.node_types)
 
-    return client.update(resource_group_name, cluster_name, patch_request)
+    sfrp_poll = client.begin_update(resource_group_name, cluster_name, patch_request)
+    return LongRunningOperation(cli_ctx)(sfrp_poll)
 
 
 def update_cluster_durability(cmd, client, resource_group_name, cluster_name, node_type, durability_level):
     cli_ctx = cmd.cli_ctx
 
-    # get cluster node type durablity
+    # get cluster node type durability
     cluster = client.get(resource_group_name, cluster_name)
     node_type_refs = [n for n in cluster.node_types if n.name.lower() == node_type.lower()]
     if not node_type_refs:
@@ -536,7 +544,7 @@ def update_cluster_durability(cmd, client, resource_group_name, cluster_name, no
     if curr_node_type_durability.lower() != durability_level.lower():
         node_type_ref.durability_level = durability_level
         patch_request = ClusterUpdateParameters(node_types=cluster.node_types)
-        update_cluster_poll = client.update(resource_group_name, cluster_name, patch_request)
+        update_cluster_poll = client.begin_update(resource_group_name, cluster_name, patch_request)
         LongRunningOperation(cli_ctx)(update_cluster_poll)
 
     # update vmss sf extension durability
@@ -549,7 +557,8 @@ def update_cluster_durability(cmd, client, resource_group_name, cluster_name, no
     return client.get(resource_group_name, cluster_name)
 
 
-def update_cluster_upgrade_type(client,
+def update_cluster_upgrade_type(cmd,
+                                client,
                                 resource_group_name,
                                 cluster_name,
                                 upgrade_mode,
@@ -558,6 +567,7 @@ def update_cluster_upgrade_type(client,
         raise CLIError(
             '--upgrade-mode can either be \'manual\' or \'automatic\'')
 
+    cli_ctx = cmd.cli_ctx
     cluster = client.get(resource_group_name, cluster_name)
     patch_request = ClusterUpdateParameters(node_types=cluster.node_types)
     if upgrade_mode.lower() == 'manual':
@@ -567,16 +577,20 @@ def update_cluster_upgrade_type(client,
         patch_request.cluster_code_version = version
 
     patch_request.upgrade_mode = upgrade_mode
-    return client.update(resource_group_name, cluster_name, patch_request)
+    update_cluster_poll = client.begin_update(resource_group_name, cluster_name, patch_request)
+    return LongRunningOperation(cli_ctx)(update_cluster_poll)
 
 
-def set_cluster_setting(client,
+def set_cluster_setting(cmd,
+                        client,
                         resource_group_name,
                         cluster_name,
                         section=None,
                         parameter=None,
                         value=None,
                         settings_section_description=None):
+    cli_ctx = cmd.cli_ctx
+
     def _set(setting_dict, section, parameter, value):
         if section not in setting_dict:
             setting_dict[section] = {}
@@ -602,15 +616,19 @@ def set_cluster_setting(client,
         setting_dict = _set(setting_dict, section, parameter, value)
     settings = _dict_to_fabric_settings(setting_dict)
     patch_request = ClusterUpdateParameters(fabric_settings=settings)
-    return client.update(resource_group_name, cluster_name, patch_request)
+    update_cluster_poll = client.begin_update(resource_group_name, cluster_name, patch_request)
+    return LongRunningOperation(cli_ctx)(update_cluster_poll)
 
 
-def remove_cluster_setting(client,
+def remove_cluster_setting(cmd,
+                           client,
                            resource_group_name,
                            cluster_name,
                            section=None,
                            parameter=None,
                            settings_section_description=None):
+    cli_ctx = cmd.cli_ctx
+
     def _remove(setting_dict, section, parameter):
         if section not in setting_dict:
             raise CLIError(
@@ -637,7 +655,8 @@ def remove_cluster_setting(client,
 
     settings = _dict_to_fabric_settings(setting_dict)
     patch_request = ClusterUpdateParameters(fabric_settings=settings)
-    return client.update(resource_group_name, cluster_name, patch_request)
+    update_cluster_poll = client.begin_update(resource_group_name, cluster_name, patch_request)
+    return LongRunningOperation(cli_ctx)(update_cluster_poll)
 
 
 def update_cluster_reliability_level(cmd,
@@ -671,7 +690,8 @@ def update_cluster_reliability_level(cmd,
     node_type.vm_instance_count = vmss.sku.capacity
     patch_request = ClusterUpdateParameters(
         node_types=cluster.node_types, reliability_level=reliability_level)
-    return client.update(resource_group_name, cluster_name, patch_request)
+    update_cluster_poll = client.begin_update(resource_group_name, cluster_name, patch_request)
+    return LongRunningOperation(cli_ctx)(update_cluster_poll)
 
 
 def add_cluster_node_type(cmd,
