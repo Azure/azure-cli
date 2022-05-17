@@ -573,7 +573,7 @@ def create_or_update_link_connection(cmd, workspace_name, link_connection_name, 
     properties_file['sourceDatabase'] = info['sourceDatabase']
     properties_file['targetDatabase'] = info['targetDatabase']
     properties_file['compute'] = info['compute']
-    if 'landingZone' in properties_file.keys():
+    if 'landingZone' in properties_file:
         properties_file['landingZone'] = info['landingZone']
     properties = LinkConnectionResource(properties=properties_file)
     return client.create_or_update_link_connection(link_connection_name, properties)
