@@ -1064,6 +1064,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.extra('snapshot', help='The snapshot parameter is an opaque DateTime value that, when present, '
                                  'specifies the blob snapshot to delete.')
 
+    with self.argument_context('storage blob undelete') as c:
+        c.register_blob_arguments()
+
     with self.argument_context('storage blob delete-batch') as c:
         c.ignore('source_container_name')
         c.argument('source', options_list=('--source', '-s'))
