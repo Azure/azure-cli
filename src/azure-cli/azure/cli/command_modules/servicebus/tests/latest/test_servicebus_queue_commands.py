@@ -34,6 +34,7 @@ class SBQueueScenarioTest(ScenarioTest):
             'queuename': self.create_random_name(prefix='sb-queuecli', length=25),
             'queuename2': self.create_random_name(prefix='sb-queuecli2', length=25),
             'queuename3': self.create_random_name(prefix='sb-queuecli2', length=25),
+            'queuename4': self.create_random_name(prefix='sb-queuecli2', length=25),
             'samplequeue': self.create_random_name(prefix='sb-queuecli3', length=25),
             'samplequeue2': self.create_random_name(prefix='sb-queuecli4', length=25),
             'queueauthoname': self.create_random_name(prefix='cliQueueAutho', length=25),
@@ -272,6 +273,15 @@ class SBQueueScenarioTest(ScenarioTest):
 
         self.assertEqual(queue['enableExpress'], True)
         self.kwargs.update({'enableExpress': queue['enableExpress']})
+
+        self.assertOnUpdate(queue, self.kwargs)
+
+        queue = self.cmd(
+            'servicebus queue update --resource-group {rg} --name {queuename3} --namespace-name {namespacename} '
+            '--status ReceiveDisabled').get_output_in_json()
+
+        self.assertEqual(queue['status'], 'ReceiveDisabled')
+        self.kwargs.update({'status': queue['status']})
 
         self.assertOnUpdate(queue, self.kwargs)
 

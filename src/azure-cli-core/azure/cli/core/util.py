@@ -978,7 +978,9 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
         reason = r.reason
         if r.text:
             reason += '({})'.format(r.text)
-        raise CLIError(reason)
+        ex = CLIError(reason)
+        ex.response = r
+        raise ex
     if output_file:
         with open(output_file, 'wb') as fd:
             for chunk in r.iter_content(chunk_size=128):
@@ -1306,3 +1308,27 @@ def rmtree_with_retry(path):
             else:
                 logger.warning("Failed to delete '%s': %s. You may try to delete it manually.", path, err)
                 break
+
+
+def get_secret_store(cli_ctx, name):
+    """Create a process-concurrency-safe azure.cli.core.auth.persistence.SecretStore instance that can be used to
+    save secret data.
+    """
+    from azure.cli.core._environment import get_config_dir
+    from azure.cli.core.auth.persistence import load_secret_store
+    # Save to CLI's config dir, by default ~/.azure
+    location = os.path.join(get_config_dir(), name)
+    # We honor the system type (Windows, Linux, or MacOS) and global config
+    encrypt = should_encrypt_token_cache(cli_ctx)
+    return load_secret_store(location, encrypt)
+
+
+def should_encrypt_token_cache(cli_ctx):
+    # Only enable encryption for Windows (for now).
+    fallback = sys.platform.startswith('win32')
+
+    # EXPERIMENTAL: Use core.encrypt_token_cache=False to turn off token cache encryption.
+    # encrypt_token_cache affects both MSAL token cache and service principal entries.
+    encrypt = cli_ctx.config.getboolean('core', 'encrypt_token_cache', fallback=fallback)
+
+    return encrypt

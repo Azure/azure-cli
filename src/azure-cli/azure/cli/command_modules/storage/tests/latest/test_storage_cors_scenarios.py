@@ -27,7 +27,7 @@ class StorageCorsTests(ScenarioTest):
         self.cmd('storage cors add --method GET --origins http://example.com --services bft '
                  '--connection-string "{}"'.format(connection_string))
 
-        time.sleep(8)
+        time.sleep(15)
         rules = self.cmd('storage cors list --connection-string "{}"'.format(connection_string)).get_output_in_json()
         self.assertEqual(len(rules), 7)
         for rule in rules:

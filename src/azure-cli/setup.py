@@ -130,7 +130,7 @@ DEPENDENCIES = [
     'azure-mgmt-synapse==2.1.0b2',
     'azure-mgmt-trafficmanager~=1.0.0',
     'azure-mgmt-web~=6.1.0',
-    'azure-multiapi-storage~=0.8.0',
+    'azure-multiapi-storage~=0.9.0',
     'azure-storage-common~=1.4',
     'azure-synapse-accesscontrol~=0.5.0',
     'azure-synapse-artifacts~=0.12.0',
