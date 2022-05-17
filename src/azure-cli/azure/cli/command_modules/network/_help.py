@@ -966,7 +966,7 @@ examples:
     crafted: true
 """
 
-helps['network application-gateway rule'] = """
+helps['network application-gateway routing-rule'] = """
 type: group
 short-summary: Evaluate probe information and define routing rules.
 long-summary: >

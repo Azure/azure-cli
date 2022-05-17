@@ -206,11 +206,8 @@ def load_arguments(self, _):
         {'name': 'frontend-port', 'display': 'frontend port', 'ref': 'frontend_ports'},
         {'name': 'address-pool', 'display': 'backend address pool', 'ref': 'backend_address_pools'},
         {'name': 'http-settings', 'display': 'backed HTTP settings', 'ref': 'backend_http_settings_collection'},
-        {'name': 'settings', 'display': 'backed settings', 'ref': 'backend_settings_collection'},
         {'name': 'http-listener', 'display': 'HTTP listener', 'ref': 'http_listeners'},
-        {'name': 'listener', 'display': 'listener', 'ref': 'listeners'},
         {'name': 'rule', 'display': 'request routing rule', 'ref': 'request_routing_rules'},
-        {'name': 'routing-rule', 'display': 'routing rule', 'ref': 'routing_rules'},
         {'name': 'probe', 'display': 'probe', 'ref': 'probes'},
         {'name': 'url-path-map', 'display': 'URL path map', 'ref': 'url_path_maps'},
         {'name': 'redirect-config', 'display': 'redirect configuration', 'ref': 'redirect_configurations'},
@@ -220,6 +217,10 @@ def load_arguments(self, _):
         ag_subresources.append({'name': 'root-cert', 'display': 'trusted root certificate', 'ref': 'trusted_root_certificates'})
     if self.supported_api_version(min_api='2018-12-01'):
         ag_subresources.append({'name': 'rewrite-rule set', 'display': 'rewrite rule set', 'ref': 'rewrite_rule_sets'})
+    if self.supported_api_version(min_api='2021-08-01'):
+        ag_subresources.append({'name': 'settings', 'display': 'backed settings', 'ref': 'backend_settings_collection'})
+        ag_subresources.append({'name': 'listener', 'display': 'listener', 'ref': 'listeners'})
+        ag_subresources.append({'name': 'routing-rule', 'display': 'routing rule', 'ref': 'routing_rules'})
 
     for item in ag_subresources:
         with self.argument_context('network application-gateway {}'.format(item['name'])) as c:
@@ -347,7 +348,11 @@ def load_arguments(self, _):
 
     with self.argument_context('network application-gateway settings') as c:
         c.argument('timeout', help='Request timeout in seconds.')
-        c.argument('root_certs', nargs='+', min_api='2019-04-01', help='Space-separated list of trusted root certificates (names or IDs) to associate with the HTTP settings. --host-name or --host-name-from-backend-pool is required when this field is set.')
+        c.argument('probe', help='Name or ID of the probe to associate with the settings.', completer=get_ag_subresource_completion_list('probes'))
+        c.argument('root_certs', nargs='+', help='Space-separated list of trusted root certificates (names or IDs) to associate with the settings. --host-name or --host-name-from-backend-pool is required when this field is set.')
+        c.argument('host_name', help='Host header sent to the backend servers.')
+        c.argument('host_name_from_backend_pool', options_list=['--backend-pool-host-name'], help='Use host name of the backend server as the host header.', arg_type=get_three_state_flag())
+        c.argument('path', help='Path that will prefix all requests.')
 
     with self.argument_context('network application-gateway probe') as c:
         c.argument('host', help='The name of the host to send the probe.')
@@ -461,7 +466,7 @@ def load_arguments(self, _):
     with self.argument_context('network application-gateway probe', min_api='2017-06-01') as c:
         c.argument('host', default=None, required=False, help='The name of the host to send the probe.')
         c.argument('host_name_from_http_settings', help='Use host header from HTTP settings.', arg_type=get_three_state_flag())
-        c.argument('host_name_from_settings', min_api='2021-08-01', help='Use host header from settings.', arg_type=get_three_state_flag())
+        c.argument('host_name_from_settings', options_list=['--settings'], min_api='2021-08-01', help='Use host header from settings.', arg_type=get_three_state_flag())
         c.argument('min_servers', type=int, help='Minimum number of servers that are always marked healthy.')
         c.argument('match_body', help='Body that must be contained in the health response.')
         c.argument('match_status_codes', nargs='+', help='Space-separated list of allowed ranges of healthy status codes for the health response.')

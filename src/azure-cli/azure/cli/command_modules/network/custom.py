@@ -461,8 +461,7 @@ def create_ag_listener(cmd, resource_group_name, application_gateway_name, item_
         ssl_certificate=SubResource(id=ssl_cert) if ssl_cert else None,
     )
 
-    if cmd.supported_api_version(min_api='2020-06-01'):
-        new_listener.ssl_profile = SubResource(id=ssl_profile_id) if ssl_profile_id else None
+    new_listener.ssl_profile = SubResource(id=ssl_profile_id) if ssl_profile_id else None
 
     upsert_to_collection(ag, 'listeners', new_listener, 'name')
     return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update,
@@ -484,9 +483,8 @@ def update_ag_listener(cmd, instance, parent, item_name, frontend_ip=None, front
             instance.ssl_certificate = None
             instance.protocol = 'tcp'
 
-    if cmd.supported_api_version(min_api='2020-06-01'):
-        if ssl_profile_id is not None:
-            instance.ssl_profile = SubResource(id=ssl_profile_id)
+    if ssl_profile_id is not None:
+        instance.ssl_profile = SubResource(id=ssl_profile_id)
 
     return parent
 
@@ -1141,12 +1139,10 @@ def create_ag_backend_settings_collection(cmd, resource_group_name, application_
         timeout=timeout,
         probe=SubResource(id=probe) if probe else None,
         name=item_name)
-    if cmd.supported_api_version(min_api='2017-06-01'):
-        new_settings.host_name = host_name
-        new_settings.pick_host_name_from_backend_address = host_name_from_backend_pool
-        new_settings.path = path
-    if cmd.supported_api_version(min_api='2019-04-01'):
-        new_settings.trusted_root_certificates = [SubResource(id=x) for x in root_certs or []]
+    new_settings.host_name = host_name
+    new_settings.pick_host_name_from_backend_address = host_name_from_backend_pool
+    new_settings.path = path
+    new_settings.trusted_root_certificates = [SubResource(id=x) for x in root_certs or []]
     upsert_to_collection(ag, 'backend_settings_collection', new_settings, 'name')
     return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update,
                        resource_group_name, application_gateway_name, ag)
