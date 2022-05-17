@@ -3688,6 +3688,8 @@ def build_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, no_resto
 
 
 def publish_bicep_file(cmd, file, target):
+    ensure_bicep_installation()
+
     minimum_supported_version = "0.4.1008"
     if bicep_version_greater_than_or_equal_to(minimum_supported_version):
         run_bicep_command(["publish", file, "--target", target])
@@ -3696,6 +3698,8 @@ def publish_bicep_file(cmd, file, target):
 
 
 def restore_bicep_file(cmd, file, force=None):
+    ensure_bicep_installation()
+
     minimum_supported_version = "0.4.1008"
     if bicep_version_greater_than_or_equal_to(minimum_supported_version):
         args = ["restore", file]
