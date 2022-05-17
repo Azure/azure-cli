@@ -57,12 +57,12 @@ def load_command_table(self, _):
         resource_type=ResourceType.MGMT_SERVICEBUS)
 
     sb_private_endpoints_util = CliCommandType(
-        operations_tmpl='azure.mgmt.eventhub.operations#PrivateEndpointConnectionsOperations.{}',
+        operations_tmpl='azure.mgmt.servicebus.operations#PrivateEndpointConnectionsOperations.{}',
         client_factory=private_endpoint_connections_mgmt_client_factory,
         resource_type=ResourceType.MGMT_SERVICEBUS)
 
     sb_private_links_util = CliCommandType(
-        operations_tmpl='azure.mgmt.eventhub.operations#PrivateLinkResourcesOperations.{}',
+        operations_tmpl='azure.mgmt.servicebus.operations#PrivateLinkResourcesOperations.{}',
         client_factory=private_link_mgmt_client_factory,
         resource_type=ResourceType.MGMT_SERVICEBUS)
 
