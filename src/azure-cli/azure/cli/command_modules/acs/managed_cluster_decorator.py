@@ -24,6 +24,7 @@ from azure.cli.command_modules.acs._consts import (
 )
 from azure.cli.command_modules.acs._graph import ensure_aks_service_principal
 from azure.cli.command_modules.acs._helpers import (
+    check_is_managed_aad_cluster,
     check_is_msi_cluster,
     check_is_private_cluster,
     get_user_assigned_identity_by_resource_id,
@@ -1296,7 +1297,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         """
         return self.external_functions.get_user_assigned_identity_by_resource_id(self.cmd.cli_ctx, assigned_identity)
 
-    def get_user_assigned_identity_client_id(self) -> str:
+    def get_user_assigned_identity_client_id(self, user_assigned_identity=None) -> str:
         """Helper function to obtain the client_id of user assigned identity.
 
         Note: This is not a parameter of aks_create, and it will not be decorated into the `mc` object.
@@ -1307,12 +1308,12 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         :return: string
         """
-        assigned_identity = self.get_assign_identity()
+        assigned_identity = user_assigned_identity if user_assigned_identity else self.get_assign_identity()
         if assigned_identity is None or assigned_identity == "":
             raise RequiredArgumentMissingError("No assigned identity provided.")
         return self.get_identity_by_msi_client(assigned_identity).client_id
 
-    def get_user_assigned_identity_object_id(self) -> str:
+    def get_user_assigned_identity_object_id(self, user_assigned_identity=None) -> str:
         """Helper function to obtain the principal_id of user assigned identity.
 
         Note: This is not a parameter of aks_create, and it will not be decorated into the `mc` object.
@@ -1323,7 +1324,7 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         :return: string
         """
-        assigned_identity = self.get_assign_identity()
+        assigned_identity = user_assigned_identity if user_assigned_identity else self.get_assign_identity()
         if assigned_identity is None or assigned_identity == "":
             raise RequiredArgumentMissingError("No assigned identity provided.")
         return self.get_identity_by_msi_client(assigned_identity).principal_id
@@ -2690,11 +2691,7 @@ class AKSManagedClusterContext(BaseAKSContext):
                     )
             elif self.decorator_mode == DecoratorMode.UPDATE:
                 if enable_aad:
-                    if (
-                        self.mc and
-                        self.mc.aad_profile is not None and
-                        self.mc.aad_profile.managed
-                    ):
+                    if check_is_managed_aad_cluster(self.mc):
                         raise InvalidArgumentValueError(
                             'Cannot specify "--enable-aad" if managed AAD is already enabled'
                         )
@@ -2829,7 +2826,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         if enable_validation:
             if aad_tenant_id:
                 if self.decorator_mode == DecoratorMode.UPDATE:
-                    if self.mc is None or self.mc.aad_profile is None or not self.mc.aad_profile.managed:
+                    if not check_is_managed_aad_cluster(self.mc):
                         raise InvalidArgumentValueError(
                             'Cannot specify "--aad-tenant-id" if managed AAD is not enabled'
                         )
@@ -2881,7 +2878,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         if enable_validation:
             if aad_admin_group_object_ids:
                 if self.decorator_mode == DecoratorMode.UPDATE:
-                    if self.mc is None or self.mc.aad_profile is None or not self.mc.aad_profile.managed:
+                    if not check_is_managed_aad_cluster(self.mc):
                         raise InvalidArgumentValueError(
                             'Cannot specify "--aad-admin-group-object-ids" if managed AAD is not enabled'
                         )
@@ -3013,7 +3010,7 @@ class AKSManagedClusterContext(BaseAKSContext):
                             "--enable-azure-rbac cannot be used together with --disable-rbac"
                         )
                 elif self.decorator_mode == DecoratorMode.UPDATE:
-                    if self.mc is None or self.mc.aad_profile is None or not self.mc.aad_profile.managed:
+                    if not check_is_managed_aad_cluster(self.mc):
                         raise InvalidArgumentValueError(
                             'Cannot specify "--enable-azure-rbac" if managed AAD is not enabled'
                         )
@@ -3055,7 +3052,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         if enable_validation:
             if disable_azure_rbac:
                 if self.decorator_mode == DecoratorMode.UPDATE:
-                    if self.mc is None or self.mc.aad_profile is None or not self.mc.aad_profile.managed:
+                    if not check_is_managed_aad_cluster(self.mc):
                         raise InvalidArgumentValueError(
                             'Cannot specify "--disable-azure-rbac" if managed AAD is not enabled'
                         )
@@ -4689,8 +4686,8 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             identity_profile = {
                 'kubeletidentity': self.models.UserAssignedIdentity(
                     resource_id=assign_kubelet_identity,
-                    client_id=kubelet_identity.client_id,
-                    object_id=kubelet_identity.principal_id
+                    client_id=kubelet_identity.client_id,       # TODO: may remove, rp would take care of this
+                    object_id=kubelet_identity.principal_id     # TODO: may remove, rp would take care of this
                 )
             }
             cluster_identity_object_id = self.context.get_user_assigned_identity_object_id()
