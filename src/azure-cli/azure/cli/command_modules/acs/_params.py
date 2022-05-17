@@ -341,6 +341,7 @@ def load_arguments(self, _):
         c.argument('disable_public_fqdn', action='store_true')
         c.argument('enable_managed_identity', action='store_true')
         c.argument('assign_identity', validator=validate_assign_identity)
+        c.argument('assign_kubelet_identity', validator=validate_assign_kubelet_identity)
         c.argument('enable_aad', action='store_true')
         c.argument('enable_azure_rbac', action='store_true')
         c.argument('disable_azure_rbac', action='store_true')
