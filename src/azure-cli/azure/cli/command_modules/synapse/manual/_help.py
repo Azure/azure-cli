@@ -2336,11 +2336,7 @@ examples:
   - name: Start a link connection.
     text: |-
         az synapse link-connection start --workspace-name testsynapseworkspace \\
-<<<<<<< HEAD
           --name testlinkconnectionname
-=======
-          --name testlinkconnectionname"
->>>>>>> c49b2af935871e6dab21f3975133f9415d37ba26
 """
 
 helps['synapse link-connection stop'] = """
