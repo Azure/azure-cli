@@ -55,6 +55,7 @@ from azure.cli.command_modules.acs.tests.latest.mocks import (
     MockClient,
     MockCmd,
 )
+from azure.cli.command_modules.acs.tests.latest.utils import get_test_data_file_path
 from azure.cli.core.azclierror import (
     AzureInternalError,
     AzCLIError,
@@ -3880,6 +3881,32 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         ctx_1.attach_mc(mc)
         self.assertEqual(ctx_1.get_node_resource_group(), "test_node_resource_group")
 
+    def test_get_defender_config(self):
+        ctx_1 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {"enable_defender": True, "defender_config": get_test_data_file_path("defenderconfig.json")}
+            ),
+            self.models,
+            DecoratorMode.CREATE,
+        )
+        defender_config_1 = ctx_1.get_defender_config()
+        ground_truth_defender_config_1 = self.models.ManagedClusterSecurityProfileAzureDefender(
+            enabled=True, log_analytics_workspace_resource_id="test_workspace_resource_id"
+        )
+        self.assertEqual(defender_config_1, ground_truth_defender_config_1)
+
+        # custom value
+        ctx_2 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({"enable_defender": True, "defender_config": "fake-path"}),
+            self.models,
+            DecoratorMode.CREATE,
+        )
+        # fail on invalid file path
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx_2.get_defender_config()
+
     def test_get_yes(self):
         # default
         ctx_1 = AKSManagedClusterContext(
@@ -5679,49 +5706,45 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         )
         self.assertEqual(dec_mc_1, ground_truth_mc_1)
 
-    def test_get_defender_config(self):
-        def test_enabled_defender():
-            dec_1 = AKSManagedClusterCreateDecorator(
-                self.cmd,
-                self.client,
-                {"enable_defender": True},
-                ResourceType.MGMT_CONTAINERSERVICE,
-            )
-            mc_1 = self.models.ManagedCluster(location="test_location")
-            dec_1.context.attach_mc(mc_1)
-            dec_1.context.set_intermediate("subscription_id", "test_subscription_id")
+    def test_enabled_defender(self):
+        dec_1 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {"enable_defender": True},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_1.context.attach_mc(mc_1)
+        dec_1.context.set_intermediate("subscription_id", "test_subscription_id")
 
-            with patch(
-                "azure.cli.command_modules.acs.managed_cluster_decorator.ensure_default_log_analytics_workspace_for_monitoring",
-                return_value="test_workspace_resource_id",
-            ):
-                dec_mc_1 = dec_1.context.get_defender_config()
-            
-            ground_truth_mc_1 = self.models.ManagedClusterSecurityProfileAzureDefender(
-                enabled=True,
-                log_analytics_workspace_resource_id="test_workspace_resource_id",
-            )
-            self.assertEqual(dec_mc_1, ground_truth_mc_1)
-
-        def test_disabled_defender():
-            dec_1 = AKSManagedClusterCreateDecorator(
-                self.cmd,
-                self.client,
-                {"disable_defender": True},
-                ResourceType.MGMT_CONTAINERSERVICE,
-            )
-            dec_1.context.set_intermediate("subscription_id", "test_subscription_id")
-            mc_1 = self.models.ManagedCluster(location="test_location")
-            dec_1.context.attach_mc(mc_1)
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.ensure_default_log_analytics_workspace_for_monitoring",
+            return_value="test_workspace_resource_id",
+        ):
             dec_mc_1 = dec_1.context.get_defender_config()
-            ground_truth_mc_1 = self.models.ManagedClusterSecurityProfileAzureDefender(
-                enabled=False,
-            )
-
-            self.assertEqual(dec_mc_1, ground_truth_mc_1)
         
-        test_enabled_defender()
-        test_disabled_defender()
+        ground_truth_mc_1 = self.models.ManagedClusterSecurityProfileAzureDefender(
+            enabled=True,
+            log_analytics_workspace_resource_id="test_workspace_resource_id",
+        )
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+    def test_disabled_defender(self):
+        dec_1 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {"disable_defender": True},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        dec_1.context.set_intermediate("subscription_id", "test_subscription_id")
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.context.get_defender_config()
+        ground_truth_mc_1 = self.models.ManagedClusterSecurityProfileAzureDefender(
+            enabled=False,
+        )
+
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
 
     def test_set_up_defender(self):
         dec_1 = AKSManagedClusterCreateDecorator(
