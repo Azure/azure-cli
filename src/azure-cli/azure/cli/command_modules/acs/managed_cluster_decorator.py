@@ -3504,7 +3504,7 @@ class AKSManagedClusterContext(BaseAKSContext):
                     raise RequiredArgumentMissingError(
                         "--assign-kubelet-identity can only be specified when --assign-identity is specified"
                     )
-                elif self.decorator_mode == DecoratorMode.UPDATE:
+                if self.decorator_mode == DecoratorMode.UPDATE:
                     msg = (
                         "You're going to update kubelet identity to {}, "
                         "which will upgrade every node pool in the cluster "
