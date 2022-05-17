@@ -298,6 +298,8 @@ def get_auth_if_no_valid_key_vault_connection(logger, source_name, source_id, ke
 
 
 def enable_mi_for_db_linker(cli_ctx, source_id, target_id, auth_info, source_type, target_type):
+    from azure.cli.core._profile import Profile
+
     if(target_type in {RESOURCE.Postgres} and auth_info['auth_type'] == 'systemAssignedIdentity'):
         # object_id = run_cli_cmd('az webapp show --ids {0}'.format(source_id)).get('identity').get('principalId')
         # enable source mi
@@ -307,16 +309,20 @@ def enable_mi_for_db_linker(cli_ctx, source_id, target_id, auth_info, source_typ
         object_id = identity.get('principalId')
         client_id = run_cli_cmd('az ad sp show --id {0}'.format(object_id)).get('appId')
 
-        # add new firewall rule
-        ipname = generate_random_string(prefix='svc_')
-        deny_public_access = set_target_firewall(target_id, target_type, True, ipname)
+        account_user = Profile(cli_ctx=cli_ctx).get_current_account_user()
+        print('set user {} as target AAD admin'.format(account_user))
+        user_object_id = run_cli_cmd('az ad user show --id {}'.format(account_user)).get('objectId')
+        # set aad user
+        target_segments = parse_resource_id(target_id)
+        rg = target_segments.get('resource_group')
+        server = target_segments.get('name')
+        run_cli_cmd('az postgres server ad-admin create -g {} --server-name {} --display-name {} --object-id {}'
+                    .format(rg, server, account_user, user_object_id)).get('objectId')
 
         aaduser = generate_random_string(prefix="aad_" + target_type.value + '_')
-        create_aad_user_in_db(cli_ctx, target_id, aaduser, client_id)
+        create_aad_user_in_db(cli_ctx, target_id, target_type, aaduser, client_id)
 
-        # remove firewall rule
-        set_target_firewall(target_id, target_type, False, ipname, deny_public_access)
-
+        
         return {
             'auth_type': 'secret',
             'name': aaduser,
@@ -346,7 +352,7 @@ def set_target_firewall(target_id, target_type, add_new_rule, ipname, deny_publi
             run_cli_cmd('az postgres server update --public Disabled --ids {}'.format(target_id))
 
 
-def create_aad_user_in_db(cli_ctx, target_id, aaduser, client_id):
+def create_aad_user_in_db(cli_ctx, target_id, target_type, aaduser, client_id):
     import psycopg2
     from azure.cli.core._profile import Profile
 
@@ -367,7 +373,14 @@ def create_aad_user_in_db(cli_ctx, target_id, aaduser, client_id):
     try:
         conn = psycopg2.connect(conn_string)
     except psycopg2.Error as e:
-        raise e
+        # add new firewall rule
+        ipname = generate_random_string(prefix='svc_')
+        deny_public_access = set_target_firewall(target_id, target_type, True, ipname)
+        try:
+            conn = psycopg2.connect(conn_string)
+        except psycopg2.Error as e:
+            raise e
+
     print("Connection established")
 
     cursor = conn.cursor()
@@ -390,6 +403,13 @@ def create_aad_user_in_db(cli_ctx, target_id, aaduser, client_id):
     # Clean up
     cursor.close()
     conn.close()
+
+    # remove firewall rule
+    if ipname is not None:
+        try:
+            set_target_firewall(target_id, target_type, False, ipname, deny_public_access)
+        except Exception as e:
+            print(e)
 
 
 def get_springcloud_identity(source_id):
