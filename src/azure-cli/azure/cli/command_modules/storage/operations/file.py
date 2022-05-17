@@ -233,7 +233,6 @@ def storage_file_copy_batch(cmd, client, source_client, destination_share=None, 
     """
     Copy a group of files asynchronously
     """
-    logger = None
     if dryrun:
         logger.warning('copy files or blobs to file share')
         logger.warning('    account %s', client.account_name)
