@@ -119,6 +119,7 @@ def validate_expand(namespace):
     if namespace.expand is not None:
         namespace.expand = ",".join(namespace.expand)
 
+
 # pylint: disable=too-many-statements,line-too-long
 def validate_assessment(namespace):
     '''
@@ -133,8 +134,8 @@ def validate_assessment(namespace):
 
     is_assessment_schedule_provided = False
     if (assessment_weekly_interval is not None or
-        assessment_weekly_interval is not None or assessment_monthly_occurrence is not None or
-        assessment_day_of_week is not None or assessment_start_time_local is not None):
+            assessment_weekly_interval is not None or assessment_monthly_occurrence is not None or
+            assessment_day_of_week is not None or assessment_start_time_local is not None):
         is_assessment_schedule_provided = True
 
     # Validate conflicting settings
@@ -155,6 +156,7 @@ def validate_assessment(namespace):
             raise CLIError("assessment-day-of-week must be provided for Assessment schedule")
         if assessment_start_time_local is None:
             raise CLIError("assessment-start-time-local must be provided for Assessment schedule")
+
 
 # pylint: disable=too-many-statements,line-too-long
 def validate_assessment_start_time_local(namespace):
