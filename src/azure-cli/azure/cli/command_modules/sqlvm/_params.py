@@ -341,3 +341,10 @@ def load_arguments(self, _):
         c.argument('assessment_start_time_local',
                    help='Time of the day in HH:mm format. Examples include 17:30, 05:13.',
                    validator=validate_assessment_start_time_local)
+
+    with self.argument_context('sql vm', arg_group='Log Analytics Workspace Settings') as c:
+        c.argument('workspace_name',
+                   help='Workspace name')
+        c.argument('workspace_rg',
+                   help='Workspace resource group')
+              

@@ -5,6 +5,7 @@
 
 from msrestazure.tools import is_valid_resource_id, resource_id
 from knack.prompting import prompt_pass
+from knack.util import CLIError
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.util import (
     sdk_no_wait
@@ -29,6 +30,15 @@ from azure.mgmt.sqlvirtualmachine.models import (
     SqlVirtualMachine
 )
 
+from azure.cli.command_modules.vm.custom import (
+    show_extensions,
+    list_extensions,
+    _compute_client_factory,
+)
+
+from ._util import (
+    set_windows_log_analytics_workspace_extension
+)
 
 def sqlvm_list(
         client,
@@ -288,7 +298,7 @@ def sqlvm_create(client, cmd, sql_virtual_machine_name, resource_group_name, sql
 
 
 # pylint: disable=too-many-statements, line-too-long, too-many-boolean-expressions
-def sqlvm_update(instance, sql_server_license_type=None, sql_image_sku=None, enable_auto_patching=None,
+def sqlvm_update(cmd, instance, sql_virtual_machine_name, resource_group_name, sql_server_license_type=None, sql_image_sku=None, enable_auto_patching=None,
                  day_of_week=None, maintenance_window_starting_hour=None, maintenance_window_duration=None,
                  enable_auto_backup=None, enable_encryption=False, retention_period=None, storage_account_url=None, prompt=True,
                  storage_access_key=None, backup_password=None, backup_system_dbs=False, backup_schedule_type=None, sql_management_mode=None,
@@ -296,7 +306,8 @@ def sqlvm_update(instance, sql_server_license_type=None, sql_image_sku=None, ena
                  enable_key_vault_credential=None, credential_name=None, azure_key_vault_url=None, service_principal_name=None,
                  service_principal_secret=None, connectivity_type=None, port=None, sql_workload_type=None, enable_r_services=None, tags=None,
                  enable_assessment=None, enable_assessment_schedule = None, assessment_weekly_interval = None,
-                 assessment_monthly_occurrence = None, assessment_day_of_week = None, assessment_start_time_local = None):
+                 assessment_monthly_occurrence = None, assessment_day_of_week = None, assessment_start_time_local = None,
+                 workspace_name = None, workspace_rg = None):
     '''
     Updates a SQL virtual machine.
     '''
@@ -388,6 +399,7 @@ def sqlvm_update(instance, sql_server_license_type=None, sql_image_sku=None, ena
     if (enable_assessment_schedule is not None and enable_assessment is None):
         enable_assessment = True
 
+    # Build assessment settings
     if enable_assessment is not None:
         instance.assessment_settings = AssessmentSettings()
         instance.assessment_settings.enable = enable_assessment
@@ -401,6 +413,29 @@ def sqlvm_update(instance, sql_server_license_type=None, sql_image_sku=None, ena
                 instance.assessment_settings.schedule.monthly_occurrence = assessment_monthly_occurrence
                 instance.assessment_settings.schedule.day_of_week = assessment_day_of_week
                 instance.assessment_settings.schedule.start_time = assessment_start_time_local
+
+    if enable_assessment:
+        workspace_id = None
+
+        extensions = list_extensions(cmd, resource_group_name, sql_virtual_machine_name)
+        for ext in extensions:
+            if ext.publisher is 'Microsoft.EnterpriseCloud.Monitoring' and ext.type_properties_type is 'MicrosoftMonitoringAgent ':
+                workspace_id = ext.settings.get('workspaceId', None)
+                print(ext.publisher, ext.type_properties_type, workspace_id)
+    
+        # Log Analytics extension not found
+        if workspace_id is None:
+            if workspace_name is None or workspace_rg is None:
+                raise CLIError('Usage error: If VM is not connected to a Log Analytics workspace and Best practice Assessment is enabled,', 
+                        'then workspace name and resource group must be specified')
+
+            # Install extension as it is missing
+            set_windows_log_analytics_workspace_extension(cmd, resource_group_name, sql_virtual_machine_name, workspace_name, workspace_rg)
+
+        # Validate custom log definition on workspace
+        
+
+
 
     return instance
 
