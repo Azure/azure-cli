@@ -2991,12 +2991,12 @@ class SynapseScenarioTests(ScenarioTest):
             'link_connection_name': 'linkconnectionfortest',
             'link_table_id': '887e9d4df0fa4afaaad0d7a2c7f42d88',
             'edit_table_file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'link-connection-table.json'),
-            'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'linkconnection111.json')
+            'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'linkconnectionfortest.json')
         })
         # create link connnection
         self.cmd(
             'az synapse link-connection create --workspace-name {workspace_name} '
-            '--name {workspace_name} --file @"{file}" ',
+            '--name {link_connection_name} --file @"{file}" ',
             checks=[
                 self.check('name', self.kwargs['link_connection_name'])
             ])
