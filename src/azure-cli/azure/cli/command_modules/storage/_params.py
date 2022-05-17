@@ -1757,6 +1757,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage directory delete') as c:
         c.argument('fail_not_exist', help='Throw an exception if the directory does not exist.')
 
+    with self.argument_context('storage directory metadata update') as c:
+        c.argument('metadata', required=False)
+
     with self.argument_context('storage file') as c:
         c.argument('file_name', file_name_type, options_list=('--name', '-n'))
         c.argument('directory_name', directory_type, required=False)

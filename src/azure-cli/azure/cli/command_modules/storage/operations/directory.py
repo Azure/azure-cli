@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from azure.cli.core.profiles import ResourceType
 
+
 def create_directory(client, metadata=None, fail_on_exist=False, **kwargs):
     from azure.core.exceptions import ResourceExistsError
     try:
@@ -33,3 +34,10 @@ def list_share_directories(cmd, client, exclude_extended_info=False, **kwargs):
     results = list_generator(pages=generator.by_page(), num_results=None)
     t_dir_properties = cmd.get_models('_models#DirectoryProperties', resource_type=ResourceType.DATA_STORAGE_FILESHARE)
     return list(f for f in results if isinstance(f, t_dir_properties))
+
+
+def get_directory_properties(client, **kwargs):
+    directory = client.get_directory_properties(**kwargs)
+    if hasattr(directory, 'name'):
+        setattr(directory, 'name', client.directory_path)
+    return directory

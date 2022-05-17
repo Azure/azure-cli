@@ -672,10 +672,10 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_custom_command('delete', 'delete_directory',
                                  transform=create_boolean_result_output_transformer('deleted'),
                                  table_transformer=transform_boolean_for_table)
-        g.storage_command('show', 'get_directory_properties',
-                          transform=transform_share_directory_json_output,
-                          table_transformer=transform_file_output,
-                          exception_handler=show_exception_handler)
+        g.storage_custom_command('show', 'get_directory_properties',
+                                 transform=transform_share_directory_json_output,
+                                 table_transformer=transform_file_output,
+                                 exception_handler=show_exception_handler)
         g.storage_command('exists', 'exists',
                           transform=create_boolean_result_output_transformer('exists'))
         g.storage_command('metadata show', 'get_directory_properties',
