@@ -32,11 +32,22 @@ class AddSecretAuthInfo(argparse.Action):
                     'secret_type': 'rawValue',
                     'value': v[0]
                 }
+            elif kl == 'secret-uri':
+                d['secret_info'] = {
+                    'secret_type': 'keyVaultSecretUri',
+                    'value': v[0]
+                }
+            elif kl == 'secret-name':
+                d['secret_info'] = {
+                    'secret_type': 'keyVaultSecretReference',
+                    'name': v[0]
+                }
             else:
-                raise ValidationError('Unsupported Key {} is provided for parameter secret_auth_info. '
-                                      'All possible keys are: name, secret'.format(k))
+                raise ValidationError('Unsupported Key {} is provided for parameter secret_auth_info. All possible '
+                                      'keys are: name, secret/secret-uri/secret-name'.format(k))
         if len(d) != 2:
-            raise ValidationError('Required keys missing for parameter --secret. All possible keys are: name, secret')
+            raise ValidationError('Required keys missing for parameter --secret.'
+                                  ' All possible keys are: name, secret/secret-uri/secret-name')
         d['auth_type'] = 'secret'
         return d
 
