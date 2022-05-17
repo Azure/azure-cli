@@ -459,6 +459,7 @@ def cached_put(cmd_obj, operation, parameters, *args, setter_arg_name='parameter
         return cache_obj
 
     # for a successful PUT, attempt to delete the cache file
+    kwargs.pop("content_type", None)
     obj_dir, obj_file = cache_obj.path(args, kwargs)
     obj_path = os.path.join(obj_dir, obj_file)
     try:
