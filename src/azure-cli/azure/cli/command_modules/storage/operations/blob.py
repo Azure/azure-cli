@@ -708,12 +708,13 @@ def show_blob(cmd, client, container_name, blob_name, snapshot=None, lease_id=No
 def storage_blob_delete_batch(client, source, source_container_name, pattern=None, lease_id=None,
                               delete_snapshots=None, if_modified_since=None, if_unmodified_since=None, if_match=None,
                               if_none_match=None, timeout=None, dryrun=False):
+    container_client = client.get_container_client(source_container_name)
+
     @check_precondition_success
     def _delete_blob(blob_name):
         delete_blob_args = {
-            'container_name': source_container_name,
-            'blob_name': blob_name,
-            'lease_id': lease_id,
+            'blob': blob_name,
+            'lease': lease_id,
             'delete_snapshots': delete_snapshots,
             'if_modified_since': if_modified_since,
             'if_unmodified_since': if_unmodified_since,
@@ -721,7 +722,7 @@ def storage_blob_delete_batch(client, source, source_container_name, pattern=Non
             'if_none_match': if_none_match,
             'timeout': timeout
         }
-        return client.delete_blob(**delete_blob_args)
+        return container_client.delete_blob(**delete_blob_args)
 
     source_blobs = list(collect_blob_objects(client, source_container_name, pattern))
 
@@ -731,8 +732,8 @@ def storage_blob_delete_batch(client, source, source_container_name, pattern=Non
         if_modified_since_utc = if_modified_since.replace(tzinfo=timezone.utc) if if_modified_since else None
         if_unmodified_since_utc = if_unmodified_since.replace(tzinfo=timezone.utc) if if_unmodified_since else None
         for blob in source_blobs:
-            if not if_modified_since or blob[1].properties.last_modified >= if_modified_since_utc:
-                if not if_unmodified_since or blob[1].properties.last_modified <= if_unmodified_since_utc:
+            if not if_modified_since or blob[1].last_modified >= if_modified_since_utc:
+                if not if_unmodified_since or blob[1].last_modified <= if_unmodified_since_utc:
                     delete_blobs.append(blob[0])
         logger.warning('delete action: from %s', source)
         logger.warning('    pattern %s', pattern)

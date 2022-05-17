@@ -320,7 +320,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                     create_boolean_result_output_transformer)
         from ._format import transform_blob_output, transform_boolean_for_table
         from ._exception_handler import file_related_exception_handler
-        from ._validators import process_blob_upload_batch_parameters, process_blob_download_batch_parameters
+        from ._validators import (process_blob_upload_batch_parameters, process_blob_download_batch_parameters,
+                                  process_blob_delete_batch_parameters)
         g.storage_custom_command_oauth('copy start', 'copy_blob')
         g.storage_custom_command_oauth('show', 'show_blob_v2', transform=transform_blob_json_output,
                                        table_transformer=transform_blob_output,
@@ -357,6 +358,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command_oauth('undelete', 'undelete_blob',
                                 transform=create_boolean_result_output_transformer('undeleted'),
                                 table_transformer=transform_boolean_for_table)
+        g.storage_custom_command_oauth('delete-batch', 'storage_blob_delete_batch', client_factory=cf_blob_service,
+                                       validator=process_blob_delete_batch_parameters)
 
     blob_service_custom_sdk = get_custom_sdk('blob', client_factory=cf_blob_service,
                                              resource_type=ResourceType.DATA_STORAGE_BLOB)
@@ -393,8 +396,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         # g.storage_custom_command_oauth('download-batch', 'storage_blob_download_batch',
         #                                validator=process_blob_download_batch_parameters,
         #                                exception_handler=file_related_exception_handler)
-        g.storage_custom_command_oauth('delete-batch', 'storage_blob_delete_batch',
-                                       validator=process_blob_delete_batch_parameters)
         g.storage_command_oauth(
             'metadata show', 'get_blob_metadata', exception_handler=show_exception_handler)
         g.storage_command_oauth('metadata update', 'set_blob_metadata')
