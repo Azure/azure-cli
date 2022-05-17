@@ -178,8 +178,8 @@ def sqlvm_create(client, cmd, sql_virtual_machine_name, resource_group_name, sql
                  enable_key_vault_credential=None, credential_name=None, azure_key_vault_url=None, service_principal_name=None,
                  service_principal_secret=None, connectivity_type=None, port=None, sql_auth_update_username=None,
                  sql_auth_update_password=None, sql_workload_type=None, enable_r_services=None, tags=None, sql_image_offer=None,
-                 enable_assessment=None, enable_assessment_schedule = None, assessment_weekly_interval = None,
-                 assessment_monthly_occurrence = None, assessment_day_of_week = None, assessment_start_time_local = None):
+                 enable_assessment=None, enable_assessment_schedule=None, assessment_weekly_interval=None,
+                 assessment_monthly_occurrence=None, assessment_day_of_week=None, assessment_start_time_local=None):
     '''
     Creates a SQL virtual machine.
     '''
@@ -295,8 +295,8 @@ def sqlvm_update(instance, sql_server_license_type=None, sql_image_sku=None, ena
                  full_backup_frequency=None, full_backup_start_time=None, full_backup_window_hours=None, log_backup_frequency=None,
                  enable_key_vault_credential=None, credential_name=None, azure_key_vault_url=None, service_principal_name=None,
                  service_principal_secret=None, connectivity_type=None, port=None, sql_workload_type=None, enable_r_services=None, tags=None,
-                 enable_assessment=None, enable_assessment_schedule = None, assessment_weekly_interval = None,
-                 assessment_monthly_occurrence = None, assessment_day_of_week = None, assessment_start_time_local = None):
+                 enable_assessment=None, enable_assessment_schedule=None, assessment_weekly_interval=None,
+                 assessment_monthly_occurrence=None, assessment_day_of_week=None, assessment_start_time_local=None):
     '''
     Updates a SQL virtual machine.
     '''
@@ -382,7 +382,7 @@ def sqlvm_update(instance, sql_server_license_type=None, sql_image_sku=None, ena
     # If assessment.schedule settings are provided but enable schedule is skipped, ensure schedule is enabled
     if (enable_assessment_schedule is None and
         (assessment_weekly_interval is not None or assessment_monthly_occurrence or assessment_day_of_week or assessment_start_time_local)):
-        enable_assessment_schedule = True
+         enable_assessment_schedule = True
 
     # If assessment.schedule setting is provided but enable assessment is skipped, ensure assessment is enabled
     if (enable_assessment_schedule is not None and enable_assessment is None):
