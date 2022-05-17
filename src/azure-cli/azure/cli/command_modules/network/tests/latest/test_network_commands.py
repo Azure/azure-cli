@@ -1487,7 +1487,7 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
 
         self.cmd('network public-ip create -g {rg} -n {gateway_ip} --sku Standard')
         self.cmd('network application-gateway create -g {rg} -n {ag} '
-                 '--sku WAF_v2 '
+                 '--sku WAF_v2 --priority 1001 '
                  '--public-ip-address {gateway_ip} ')
 
         self.cmd('network application-gateway probe create -g {rg} --gateway-name {ag} -n {name} --no-wait '
@@ -1534,6 +1534,63 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
             self.check('host', ''),
             self.check('length(match.statusCodes)', 1),
             self.check('pickHostNameFromBackendHttpSettings', True),
+            self.check('port', 4096)
+        ])
+        self.cmd('network application-gateway probe list -g {rg} --gateway-name {ag}', checks=self.check('length(@)', 1))
+        self.cmd('network application-gateway probe delete -g {rg} --gateway-name {ag} --no-wait -n {name}')
+        self.cmd('network application-gateway probe list -g {rg} --gateway-name {ag}', checks=self.check('length(@)', 0))
+
+    @ResourceGroupPreparer(name_prefix='cli_test_ag_probe_with_host_name_from_settings')
+    def test_network_ag_probe_with_host_name_from_settings(self, resource_group):
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'gateway_ip': 'gateway_ip',
+            'ag': 'ag1',
+            'name': 'myprobe'
+        })
+
+        self.cmd('network public-ip create -g {rg} -n {gateway_ip} --sku Standard')
+        self.cmd('network application-gateway create -g {rg} -n {ag} '
+                 '--sku Standard_v2 --priority 1001 '
+                 '--public-ip-address {gateway_ip} ')
+
+        self.cmd('network application-gateway probe create -g {rg} --gateway-name {ag} -n {name} --no-wait '
+                 '--protocol tcp '
+                 '--interval 25 '
+                 '--timeout 100 '
+                 '--threshold 10 '
+                 '--min-servers 2 '
+                 '--match-status-codes 200 204 '
+                 '--host-name-from-settings false '
+                 '--port 2048 ')
+        self.cmd('network application-gateway probe show -g {rg} --gateway-name {ag} -n {name}', checks=[
+            self.check('protocol', 'Tcp'),
+            self.check('interval', 25),
+            self.check('timeout', 100),
+            self.check('unhealthyThreshold', 10),
+            self.check('minServers', 2),
+            self.check('length(match.statusCodes)', 2),
+            self.check('pickHostNameFromBackendSettings', False),
+            self.check('port', 2048)
+        ])
+        self.cmd('network application-gateway probe update -g {rg} --gateway-name {ag} -n {name} --no-wait '
+                 '--protocol tls '
+                 '--interval 26 '
+                 '--timeout 101 '
+                 '--threshold 11 '
+                 '--min-servers 3 '
+                 '--match-status-codes 201 '
+                 '--host-name-from-settings false '
+                 '--port 4096 ')
+        self.cmd('network application-gateway probe show -g {rg} --gateway-name {ag} -n {name}', checks=[
+            self.check('protocol', 'Tls'),
+            self.check('interval', 26),
+            self.check('timeout', 101),
+            self.check('unhealthyThreshold', 11),
+            self.check('minServers', 3),
+            self.check('length(match.statusCodes)', 1),
+            self.check('pickHostNameFromBackendSettings', False),
             self.check('port', 4096)
         ])
         self.cmd('network application-gateway probe list -g {rg} --gateway-name {ag}', checks=self.check('length(@)', 1))
@@ -1674,6 +1731,157 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
             self.cmd(
                 'network application-gateway url-path-map rule create -g {rg} --gateway-name {ag} -n {rulename2} --path-map-name {name} '
                 '--paths /mypath122/* --address-pool {pool} --http-settings {settings} --redirect-config {redirect_config}')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_ag_listener')
+    def test_network_ag_listener(self, resource_group):
+        self.kwargs.update({
+            'appgw': 'appgw',
+            'appgw_frontend_port': 'testFrontendPort01',
+            'appgw_listener': 'testListener',
+            'appgw_public_ip': 'testPublicIp',
+            'appgw_frontend_ip': 'appGatewayFrontendIP',
+            'appgw_rule_type': 'Basic',
+            'priority': 1001,
+            'port1': 8080,
+            'port2': 8081,
+        })
+
+        self.cmd('network public-ip create -g {rg} -n {appgw_public_ip} --sku Standard')
+
+        self.cmd('network application-gateway create -g {rg} -n {appgw} '
+                 '--public-ip-address {appgw_public_ip} --sku Standard_v2 '
+                 '--priority {priority}')
+
+        self.cmd('network application-gateway frontend-port create -g {rg} --gateway-name {appgw} '
+                 '-n {appgw_frontend_port} --port {port1}')
+        self.cmd('network application-gateway frontend-port create -g {rg} --gateway-name {appgw} '
+                 '-n testFrontendPort02 --port {port2}')
+
+        self.cmd('network application-gateway listener create -g {rg} --gateway-name {appgw} '
+                 '--frontend-port {appgw_frontend_port} -n {appgw_listener} --frontend-ip {appgw_frontend_ip}',
+                 checks=(self.check('listeners[0].name', '{appgw_listener}')))
+
+        listener = self.cmd('network application-gateway listener update -g {rg} --gateway-name {appgw} '
+                            '--frontend-port testFrontendPort02 -n {appgw_listener}').get_output_in_json()
+        self.assertTrue(listener['frontendPort']['id'].endswith('testFrontendPort02'))
+
+        self.cmd('network application-gateway listener show -g {rg} --gateway-name {appgw} -n {appgw_listener}',
+                 checks=(self.check('name', '{appgw_listener}')))
+
+        self.cmd('network application-gateway listener list -g {rg} --gateway-name {appgw}',
+                 checks=(self.check('length(@)', 1)))
+
+        self.cmd('network application-gateway listener delete -g {rg} --gateway-name {appgw} -n {appgw_listener}')
+
+        self.cmd('network application-gateway listener list -g {rg} --gateway-name {appgw}',
+                 checks=(self.check('length(@)', 0)))
+
+        self.cmd('network application-gateway delete --name {appgw} --resource-group {rg}')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_ag_settings')
+    def test_network_ag_settings(self, resource_group):
+        self.kwargs.update({
+            'appgw': 'appgw',
+            'appgw_frontend_port1': 'testFrontendPort01',
+            'appgw_frontend_port2': 'testFrontendPort02',
+            'appgw_settings': 'testSettings',
+            'appgw_public_ip': 'testPublicIp',
+            'appgw_rule_type': 'Basic',
+            'priority': 1001,
+            'port1': 8080,
+            'port2': 8081
+        })
+
+        self.cmd('network public-ip create -g {rg} -n {appgw_public_ip} --sku Standard')
+
+        self.cmd('network application-gateway create -g {rg} -n {appgw} '
+                 '--public-ip-address {appgw_public_ip} --sku Standard_v2 '
+                 '--priority {priority}')
+
+        self.cmd('network application-gateway frontend-port create -g {rg} --gateway-name {appgw} '
+                 '-n {appgw_frontend_port1} --port {port1}')
+        self.cmd('network application-gateway frontend-port create -g {rg} --gateway-name {appgw} '
+                 '-n {appgw_frontend_port2} --port {port2}')
+
+        self.cmd('network application-gateway settings create -g {rg} --gateway-name {appgw} '
+                 '--name {appgw_settings} --port {port1} ',
+                 checks=(self.check('backendSettingsCollection[0].name', '{appgw_settings}')))
+
+        self.cmd('network application-gateway settings update -g {rg} --gateway-name {appgw} '
+                 '--name {appgw_settings} --port {port2}',
+                 checks=(self.check('port', 8081)))
+        self.cmd('network application-gateway settings show -g {rg} --gateway-name {appgw} -n {appgw_settings}',
+                 checks=(self.check('name', '{appgw_settings}')))
+
+        self.cmd('network application-gateway settings list -g {rg} --gateway-name {appgw}',
+                 checks=(self.check('length(@)', 1)))
+
+        self.cmd('network application-gateway settings delete --gateway-name {appgw} --name {appgw_settings} --resource-group {rg}')
+
+        self.cmd('network application-gateway settings list -g {rg} --gateway-name {appgw}',
+                 checks=(self.check('length(@)', 0)))
+
+    @ResourceGroupPreparer(name_prefix='cli_test_ag_routing_rule')
+    def test_network_ag_routing_rule(self, resource_group):
+        self.kwargs.update({
+            'appgw': 'appgw',
+            'appgw_frontend_port1': 'testFrontendPort01',
+            'appgw_frontend_port2': 'testFrontendPort02',
+            'appgw_settings': 'testSettings',
+            'appgw_listener1': 'testListener01',
+            'appgw_listener2': 'testListener02',
+            'appgw_address_pool': 'testAddressPool',
+            'appgw_routing_rule': 'testRule',
+            'appgw_public_ip': 'testPublicIp',
+            'appgw_rule_type': 'Basic',
+            'priority': 1001,
+            'port1': 8080,
+            'port2': 8081
+        })
+
+        self.cmd('network public-ip create -g {rg} -n {appgw_public_ip} --sku Standard')
+
+        self.cmd('network application-gateway create -g {rg} -n {appgw} '
+                 '--public-ip-address {appgw_public_ip} --sku Standard_v2 '
+                 '--priority {priority}')
+
+        self.cmd('network application-gateway frontend-port create -g {rg} --gateway-name {appgw} '
+                 '-n {appgw_frontend_port1} --port {port1}')
+        self.cmd('network application-gateway frontend-port create -g {rg} --gateway-name {appgw} '
+                 '-n {appgw_frontend_port2} --port {port2}')
+
+        self.cmd('network application-gateway listener create -g {rg} --gateway-name {appgw} '
+                 '--frontend-port {appgw_frontend_port1} -n {appgw_listener1} --frontend-ip appGatewayFrontendIP',
+                 checks=(self.check('listeners[0].name', '{appgw_listener1}')))
+
+        self.cmd('network application-gateway listener create -g {rg} --gateway-name {appgw} '
+                 '--frontend-port {appgw_frontend_port2} -n {appgw_listener2} --frontend-ip appGatewayFrontendIP',
+                 checks=(self.check('listeners[1].name', '{appgw_listener2}')))
+
+        self.cmd('network application-gateway settings create -g {rg} --gateway-name {appgw} '
+                 '--name {appgw_settings} --port {port1} ',
+                 checks=(self.check('backendSettingsCollection[0].name', '{appgw_settings}')))
+        self.cmd(
+            'network application-gateway address-pool create -g {rg} --gateway-name {appgw} -n {appgw_address_pool} '
+            '--servers 10.0.0.4 10.0.0.5')
+        self.cmd('network application-gateway routing-rule create -g {rg} --gateway-name {appgw} '
+                 '--name {appgw_routing_rule} --listener {appgw_listener1} --rule-type {appgw_rule_type} '
+                 '--address-pool {appgw_address_pool} --settings {appgw_settings}',
+                 checks=[
+                     self.check('routingRules[0].name', '{appgw_routing_rule}')
+                 ])
+
+        routing_rule = self.cmd('network application-gateway routing-rule update -g {rg} --gateway-name {appgw} '
+                                '--name {appgw_routing_rule} --listener {appgw_listener2} --rule-type {appgw_rule_type} '
+                                '--address-pool {appgw_address_pool}').get_output_in_json()
+        self.assertTrue(routing_rule['listener']['id'].endswith('testListener02'))
+
+        self.cmd('network application-gateway routing-rule show -g {rg} --gateway-name {appgw} -n {appgw_routing_rule}')
+        self.cmd('network application-gateway routing-rule list -g {rg} --gateway-name {appgw}',
+                 checks=(self.check('length(@)', 1)))
+        self.cmd('network application-gateway routing-rule delete --gateway-name {appgw} --resource-group {rg} -n {appgw_routing_rule}')
+        self.cmd('network application-gateway routing-rule list -g {rg} --gateway-name {appgw}',
+                 checks=(self.check('length(@)', 0)))
 
 
 class NetworkAppGatewayRewriteRuleset(ScenarioTest):

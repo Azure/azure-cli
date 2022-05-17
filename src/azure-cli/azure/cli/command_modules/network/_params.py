@@ -266,7 +266,7 @@ def load_arguments(self, _):
 
     for item in ['http-settings', 'settings', 'probe']:
         with self.argument_context('network application-gateway {}'.format(item)) as c:
-            c.argument('protocol', http_protocol_type, help='The HTTP settings protocol.')
+            c.argument('protocol', http_protocol_type, help='The settings protocol.')
 
     for item in ['http-listener', 'listener']:
         with self.argument_context('network application-gateway {}'.format(item)) as c:
@@ -351,7 +351,7 @@ def load_arguments(self, _):
 
     with self.argument_context('network application-gateway probe') as c:
         c.argument('host', help='The name of the host to send the probe.')
-        c.argument('path', help='The relative path of the probe. Valid paths start from "/"')
+        c.argument('path', required=False, help='The relative path of the probe. Valid paths start from "/"')
         c.argument('interval', help='The time interval in seconds between consecutive probes.')
         c.argument('threshold', help='The number of failed probes after which the back end server is marked down.')
         c.argument('timeout', help='The probe timeout in seconds.')
@@ -361,14 +361,22 @@ def load_arguments(self, _):
                         'In case not set, port from http settings will be used. '
                         'This property is valid for Standard_v2 and WAF_v2 only.')
 
+    for scope in ['rule', 'routing-rule']:
+        with self.argument_context('network application-gateway {}'.format(scope)) as c:
+            c.argument('address_pool', help='The name or ID of the backend address pool.',
+                       completer=get_ag_subresource_completion_list('backend_address_pools'))
+            c.argument('rule_type', help='The rule type (Basic, PathBasedRouting).')
+            c.argument('priority', type=int, help='Priority of the rule.')
+
     with self.argument_context('network application-gateway rule') as c:
-        c.argument('address_pool', help='The name or ID of the backend address pool.', completer=get_ag_subresource_completion_list('backend_address_pools'))
         c.argument('http_listener', help='The name or ID of the HTTP listener.', completer=get_ag_subresource_completion_list('http_listeners'))
         c.argument('http_settings', help='The name or ID of the backend HTTP settings.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'))
-        c.argument('rule_type', help='The rule type (Basic, PathBasedRouting).')
         c.argument('url_path_map', help='The name or ID of the URL path map.', completer=get_ag_subresource_completion_list('url_path_maps'))
         c.argument('rewrite_rule_set', min_api='2019-04-01', help='The name or ID of the rewrite rule set.')
-        c.argument('priority', type=int, help='Priority of the request routing rule. Range from 1 to 2000')
+
+    with self.argument_context('network application-gateway routing-rule') as c:
+        c.argument('listener', help='The name or ID of the listener.', completer=get_ag_subresource_completion_list('listeners'))
+        c.argument('settings', help='The name or ID of the settings.', completer=get_ag_subresource_completion_list('backend_settings_collection'))
 
     with self.argument_context('network application-gateway ssl-cert') as c:
         c.argument('cert_data', options_list='--cert-file', type=file_type, completer=FilesCompleter(), help='The path to the PFX certificate file.', validator=validate_ssl_cert)
@@ -453,6 +461,7 @@ def load_arguments(self, _):
     with self.argument_context('network application-gateway probe', min_api='2017-06-01') as c:
         c.argument('host', default=None, required=False, help='The name of the host to send the probe.')
         c.argument('host_name_from_http_settings', help='Use host header from HTTP settings.', arg_type=get_three_state_flag())
+        c.argument('host_name_from_settings', min_api='2021-08-01', help='Use host header from settings.', arg_type=get_three_state_flag())
         c.argument('min_servers', type=int, help='Minimum number of servers that are always marked healthy.')
         c.argument('match_body', help='Body that must be contained in the health response.')
         c.argument('match_status_codes', nargs='+', help='Space-separated list of allowed ranges of healthy status codes for the health response.')

@@ -488,7 +488,6 @@ def update_ag_listener(cmd, instance, parent, item_name, frontend_ip=None, front
         if ssl_profile_id is not None:
             instance.ssl_profile = SubResource(id=ssl_profile_id)
 
-    instance.require_server_name_indication = instance.host_name and instance.protocol.lower() == 'tls'
     return parent
 
 
@@ -1132,8 +1131,8 @@ def create_ag_backend_settings_collection(cmd, resource_group_name, application_
                                           no_wait=False,
                                           host_name=None, host_name_from_backend_pool=None,
                                           path=None, root_certs=None):
-    ApplicationGatewayBackendSettings, ApplicationGatewayConnectionDraining, SubResource = cmd.get_models(
-        'ApplicationGatewayBackendSettings', 'ApplicationGatewayConnectionDraining', 'SubResource')
+    ApplicationGatewayBackendSettings, SubResource = cmd.get_models(
+        'ApplicationGatewayBackendSettings', 'SubResource')
     ncf = network_client_factory(cmd.cli_ctx)
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
     new_settings = ApplicationGatewayBackendSettings(
@@ -1367,9 +1366,9 @@ def delete_ag_rewrite_rule_condition(cmd, resource_group_name, application_gatew
     sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, application_gateway_name, gateway)
 
 
-def create_ag_probe(cmd, resource_group_name, application_gateway_name, item_name, protocol, host,
-                    path, interval=30, timeout=120, threshold=8, no_wait=False, host_name_from_http_settings=None,
-                    min_servers=None, match_body=None, match_status_codes=None, port=None):
+def create_ag_probe(cmd, resource_group_name, application_gateway_name, item_name, protocol, host, path, interval=30,
+                    timeout=120, threshold=8,  no_wait=False, host_name_from_http_settings=None, min_servers=None,
+                    match_body=None, match_status_codes=None, host_name_from_settings=None, port=None):
     ApplicationGatewayProbe, ProbeMatchCriteria = cmd.get_models(
         'ApplicationGatewayProbe', 'ApplicationGatewayProbeHealthResponseMatch')
     ncf = network_client_factory(cmd.cli_ctx)
@@ -1388,6 +1387,8 @@ def create_ag_probe(cmd, resource_group_name, application_gateway_name, item_nam
         new_probe.match = ProbeMatchCriteria(body=match_body, status_codes=match_status_codes)
     if cmd.supported_api_version(min_api='2019-04-01'):
         new_probe.port = port
+    if cmd.supported_api_version(min_api='2021-08-01'):
+        new_probe.pick_host_name_from_backend_settings = host_name_from_settings
 
     upsert_to_collection(ag, 'probes', new_probe, 'name')
     return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update,
@@ -1395,8 +1396,8 @@ def create_ag_probe(cmd, resource_group_name, application_gateway_name, item_nam
 
 
 def update_ag_probe(cmd, instance, parent, item_name, protocol=None, host=None, path=None,
-                    interval=None, timeout=None, threshold=None, host_name_from_http_settings=None,
-                    min_servers=None, match_body=None, match_status_codes=None, port=None):
+                    interval=None, timeout=None, threshold=None, host_name_from_http_settings=None, min_servers=None,
+                    match_body=None, match_status_codes=None, host_name_from_settings=None, port=None):
     if protocol is not None:
         instance.protocol = protocol
     if host is not None:
@@ -1411,6 +1412,8 @@ def update_ag_probe(cmd, instance, parent, item_name, protocol=None, host=None, 
         instance.unhealthy_threshold = threshold
     if host_name_from_http_settings is not None:
         instance.pick_host_name_from_backend_http_settings = host_name_from_http_settings
+    if host_name_from_settings is not None:
+        instance.pick_host_name_from_backend_settings = host_name_from_settings
     if min_servers is not None:
         instance.min_servers = min_servers
     if match_body is not None or match_status_codes is not None:
@@ -1493,9 +1496,9 @@ def create_ag_routing_rule(cmd, resource_group_name, application_gateway_name, i
     if not address_pool:
         address_pool = _get_default_id(ag, 'backend_address_pools', '--address-pool')
     if not settings:
-        settings = _get_default_id(ag, 'backend_http_settings_collection', '--http-settings')
+        settings = _get_default_id(ag, 'backend_settings_collection', '--settings')
     if not listener:
-        listener = _get_default_id(ag, 'http_listeners', '--http-listener')
+        listener = _get_default_id(ag, 'listeners', '--listener')
     new_rule = ApplicationGatewayRoutingRule(
         name=item_name,
         rule_type=rule_type,
@@ -1509,16 +1512,16 @@ def create_ag_routing_rule(cmd, resource_group_name, application_gateway_name, i
                        resource_group_name, application_gateway_name, ag)
 
 
-def update_ag_request_routing_rule(cmd, instance, parent, item_name, address_pool=None,
-                                   settings=None, listener=None,
-                                   rule_type=None, priority=None):
+def update_ag_routing_rule(cmd, instance, parent, item_name, address_pool=None,
+                           settings=None, listener=None,
+                           rule_type=None, priority=None):
     SubResource = cmd.get_models('SubResource')
     if address_pool is not None:
         instance.backend_address_pool = SubResource(id=address_pool)
     if settings is not None:
-        instance.backend_http_settings = SubResource(id=settings)
+        instance.backend_settings = SubResource(id=settings)
     if listener is not None:
-        instance.http_listener = SubResource(id=listener)
+        instance.listener = SubResource(id=listener)
     if rule_type is not None:
         instance.rule_type = rule_type
     with cmd.update_context(instance) as c:
