@@ -47,6 +47,9 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
         overriding_none_arg_type = CLIArgumentType(local_context_attribute=LocalContextAttribute(name='context_name', actions=[LocalContextAction.GET]))
 
+        database_arg_type = CLIArgumentType(metavar='NAME', help='The name of the database',
+                                            local_context_attribute=LocalContextAttribute(name='database_name', actions=[LocalContextAction.SET], scopes=server_name_scope))
+
         with self.argument_context(command_group) as c:
             c.argument('name', options_list=['--sku-name'], required=True)
             c.argument('server_name', arg_type=server_name_arg_type, completer=server_completers[command_group], options_list=['--server-name', '-s'])
@@ -135,7 +138,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('server_name', id_part=None, help='Name of the Server.')
 
         with self.argument_context('{} db'.format(command_group)) as c:
-            c.argument('database_name', options_list=['--name', '-n'], help='The name of the database')
+            c.argument('database_name', options_list=['--name', '-n'], arg_type=database_arg_type)
             c.argument('charset', options_list=['--charset'], help='The charset of the database')
             c.argument('collation', options_list=['--collation'], help='The collation of the database')
 

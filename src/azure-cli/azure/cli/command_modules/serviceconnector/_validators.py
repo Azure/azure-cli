@@ -154,10 +154,10 @@ def get_client_type(cmd, namespace):
         return client_type
 
     def _infer_springcloud(source_id):
-        client_type = None
+        client_type = CLIENT_TYPE.SpringBoot
         try:
             segments = parse_resource_id(source_id)
-            output = run_cli_cmd('az spring-cloud app show -g {} -s {} -n {}'
+            output = run_cli_cmd('az spring app show -g {} -s {} -n {}'
                                  ' -o json'.format(segments.get('resource_group'), segments.get('name'),
                                                    segments.get('child_name_1')))
             prop_val = output.get('properties')\
@@ -180,7 +180,7 @@ def get_client_type(cmd, namespace):
     client_type = None
     if 'webapp' in cmd.name:
         client_type = _infer_webapp(namespace.source_id)
-    elif 'spring-cloud' in cmd.name:
+    elif 'spring-cloud' in cmd.name or 'spring' in cmd.name:
         client_type = _infer_springcloud(namespace.source_id)
 
     method = 'detected'
@@ -247,12 +247,12 @@ def interactive_input(arg, hint):
 def get_local_context_value(cmd, arg):
     '''Get local context values
     '''
-    groups = ['all', 'cupertino', 'serviceconnector']
+    groups = ['all', 'cupertino', 'serviceconnector', 'postgres']
     arg_map = {
         'source_resource_group': ['resource_group_name'],
         'target_resource_group': ['resource_group_name'],
-        'server': ['postgres_server_name'],
-        'database': ['postgres_database_name'],
+        'server': ['server_name', "server"],
+        'database': ['database_name', "database"],
         'site': ['webapp_name']
     }
     for group in groups:

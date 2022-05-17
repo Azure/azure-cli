@@ -4,8 +4,10 @@
 # --------------------------------------------------------------------------------------------
 
 import time
+from knack.log import get_logger
 from knack.util import todict
 from msrestazure.tools import parse_resource_id
+from azure.cli.core.extension.operations import _install_deps_for_psycopg2
 from azure.cli.core.azclierror import (
     ValidationError,
     CLIInternalError
@@ -15,6 +17,9 @@ from ._resource_config import (
     TARGET_RESOURCES_USERTOKEN,
     RESOURCE
 )
+
+
+logger = get_logger(__name__)
 
 
 def should_load_source(source):
@@ -45,7 +50,8 @@ def generate_random_string(length=5, prefix='', lower_only=False, ensure_complex
     import string
 
     if lower_only and ensure_complexity:
-        raise CLIInternalError('lower_only and ensure_complexity can not both be specified to True')
+        raise CLIInternalError(
+            'lower_only and ensure_complexity can not both be specified to True')
     if ensure_complexity and length < 8:
         raise CLIInternalError('ensure_complexity needs length >= 8')
 
@@ -54,14 +60,15 @@ def generate_random_string(length=5, prefix='', lower_only=False, ensure_complex
         character_set = string.ascii_lowercase
 
     while True:
-        randstr = '{}{}'.format(prefix, ''.join(random.sample(character_set, length)))
+        randstr = '{}{}'.format(prefix, ''.join(
+            random.sample(character_set, length)))
         lowers = [c for c in randstr if c.islower()]
         uppers = [c for c in randstr if c.isupper()]
         numbers = [c for c in randstr if c.isnumeric()]
         if not ensure_complexity or (lowers and uppers and numbers):
             break
 
-    return randstr
+    return randstr.lower()
 
 
 def run_cli_cmd(cmd, retry=0):
@@ -72,7 +79,8 @@ def run_cli_cmd(cmd, retry=0):
     import json
     import subprocess
 
-    output = subprocess.run(cmd, shell=True, check=False, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+    output = subprocess.run(cmd, shell=True, check=False,
+                            stderr=subprocess.PIPE, stdout=subprocess.PIPE)
     if output.returncode != 0:
         if retry:
             run_cli_cmd(cmd, retry - 1)
@@ -93,7 +101,8 @@ def set_user_token_header(client, cli_ctx):
     creds, _, _ = profile.get_raw_token()
     client._client._config.headers_policy._headers['x-ms-serviceconnector-user-token'] = creds[1]
     # HACK: hide token header
-    client._config.logging_policy.headers_to_redact.append('x-ms-serviceconnector-user-token')
+    client._config.logging_policy.headers_to_redact.append(
+        'x-ms-serviceconnector-user-token')
 
     return client
 
@@ -110,16 +119,14 @@ def provider_is_registered(subscription=None):
     subs_arg = ''
     if subscription:
         subs_arg = '--subscription {}'.format(subscription)
-    output = run_cli_cmd('az provider show -n Microsoft.ServiceLinker {}'.format(subs_arg))
+    output = run_cli_cmd(
+        'az provider show -n Microsoft.ServiceLinker {}'.format(subs_arg))
     if output.get('registrationState') == 'NotRegistered':
         return False
     return True
 
 
 def register_provider(subscription=None):
-    from knack.log import get_logger
-    logger = get_logger(__name__)
-
     logger.warning('Provider Microsoft.ServiceLinker is not registered, '
                    'trying to register. This usually takes 1-2 minutes.')
 
@@ -128,7 +135,8 @@ def register_provider(subscription=None):
         subs_arg = '--subscription {}'.format(subscription)
 
     # register the provider
-    run_cli_cmd('az provider register -n Microsoft.ServiceLinker {}'.format(subs_arg))
+    run_cli_cmd(
+        'az provider register -n Microsoft.ServiceLinker {}'.format(subs_arg))
 
     # verify the registration, 30 * 10s polling the result
     MAX_RETRY_TIMES = 30
@@ -137,7 +145,8 @@ def register_provider(subscription=None):
     count = 0
     while count < MAX_RETRY_TIMES:
         time.sleep(RETRY_INTERVAL)
-        output = run_cli_cmd('az provider show -n Microsoft.ServiceLinker {}'.format(subs_arg))
+        output = run_cli_cmd(
+            'az provider show -n Microsoft.ServiceLinker {}'.format(subs_arg))
         current_state = output.get('registrationState')
         if current_state == 'Registered':
             return True
@@ -172,7 +181,8 @@ def auto_register(func, *args, **kwargs):
         # target subscription is not registered, raw check
         if ex.error and ex.error.code == 'UnauthorizedResourceAccess' and 'not registered' in ex.error.message:
             if 'parameters' in kwargs_backup and 'target_id' in kwargs_backup.get('parameters'):
-                segments = parse_resource_id(kwargs_backup.get('parameters').get('target_id'))
+                segments = parse_resource_id(
+                    kwargs_backup.get('parameters').get('target_id'))
                 target_subs = segments.get('subscription')
                 # double check whether target subscription is registered
                 if not provider_is_registered(target_subs):
@@ -186,8 +196,6 @@ def auto_register(func, *args, **kwargs):
 
 def create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, key_vault_id):
     from ._validators import get_source_resource_name
-    from knack.log import get_logger
-    logger = get_logger(__name__)
 
     logger.warning('get valid key vualt reference connection')
     key_vault_connections = []
@@ -197,7 +205,8 @@ def create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, k
             key_vault_connections.append(connection)
 
     source_name = get_source_resource_name(cmd)
-    auth_info = get_auth_if_no_valid_key_vault_connection(logger, source_name, source_id, key_vault_connections)
+    auth_info = get_auth_if_no_valid_key_vault_connection(
+        source_name, source_id, key_vault_connections)
     if not auth_info:
         return
 
@@ -215,7 +224,8 @@ def create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, k
             "id": key_vault_id
         },
         'auth_info': auth_info,
-        'client_type': CLIENT_TYPE.Dotnet,  # Key Vault Configuration are same across all client types
+        # Key Vault Configuration are same across all client types
+        'client_type': CLIENT_TYPE.Dotnet,
     }
 
     if source_name == RESOURCE.KubernetesCluster:
@@ -230,7 +240,7 @@ def create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, k
                          parameters=parameters)
 
 
-def get_auth_if_no_valid_key_vault_connection(logger, source_name, source_id, key_vault_connections):
+def get_auth_if_no_valid_key_vault_connection(source_name, source_id, key_vault_connections):
     auth_type = 'systemAssignedIdentity'
     client_id = None
     subscription_id = None
@@ -243,8 +253,10 @@ def get_auth_if_no_valid_key_vault_connection(logger, source_name, source_id, ke
         # https://docs.microsoft.com/azure/app-service/app-service-key-vault-references
         if source_name == RESOURCE.WebApp:
             try:
-                webapp = run_cli_cmd('az rest -u {}?api-version=2020-09-01 -o json'.format(source_id))
-                reference_identity = webapp.get('properties').get('keyVaultReferenceIdentity')
+                webapp = run_cli_cmd(
+                    'az rest -u {}?api-version=2020-09-01 -o json'.format(source_id))
+                reference_identity = webapp.get(
+                    'properties').get('keyVaultReferenceIdentity')
             except Exception as e:
                 raise ValidationError('{}. Unable to get "properties.keyVaultReferenceIdentity" from {}.'
                                       'Please check your source id is correct.'.format(e, source_id))
@@ -254,11 +266,13 @@ def get_auth_if_no_valid_key_vault_connection(logger, source_name, source_id, ke
                 segments = parse_resource_id(reference_identity)
                 subscription_id = segments.get('subscription')
                 try:
-                    identity = webapp.get('identity').get('userAssignedIdentities').get(reference_identity)
+                    identity = webapp.get('identity').get(
+                        'userAssignedIdentities').get(reference_identity)
                     client_id = identity.get('clientId')
                 except Exception:  # pylint: disable=broad-except
                     try:
-                        identity = run_cli_cmd('az identity show --ids {} -o json'.format(reference_identity))
+                        identity = run_cli_cmd(
+                            'az identity show --ids {} -o json'.format(reference_identity))
                         client_id = identity.get('clientId')
                     except Exception:  # pylint: disable=broad-except
                         pass
@@ -268,12 +282,14 @@ def get_auth_if_no_valid_key_vault_connection(logger, source_name, source_id, ke
                 for connection in key_vault_connections:
                     auth_info = connection.get('authInfo')
                     if auth_info.get('clientId') == client_id and auth_info.get('subscriptionId') == subscription_id:
-                        logger.warning('key vualt reference connection: %s', connection.get('id'))
+                        logger.warning(
+                            'key vualt reference connection: %s', connection.get('id'))
                         return
             else:  # System Identity
                 for connection in key_vault_connections:
                     if connection.get('authInfo').get('authType') == auth_type:
-                        logger.warning('key vualt reference connection: %s', connection.get('id'))
+                        logger.warning(
+                            'key vualt reference connection: %s', connection.get('id'))
                         return
 
         # any connection with csi enabled is a valid connection
@@ -285,7 +301,8 @@ def get_auth_if_no_valid_key_vault_connection(logger, source_name, source_id, ke
             return {'authType': 'userAssignedIdentity'}
 
         else:
-            logger.warning('key vualt reference connection: %s', key_vault_connections[0].get('id'))
+            logger.warning('key vualt reference connection: %s',
+                           key_vault_connections[0].get('id'))
             return
 
     auth_info = {
@@ -301,32 +318,42 @@ def enable_mi_for_db_linker(cli_ctx, source_id, target_id, auth_info, source_typ
     from azure.cli.core._profile import Profile
 
     if(target_type in {RESOURCE.Postgres} and auth_info['auth_type'] == 'systemAssignedIdentity'):
-        # object_id = run_cli_cmd('az webapp show --ids {0}'.format(source_id)).get('identity').get('principalId')
         # enable source mi
         identity = None
         if source_type in {RESOURCE.SpringCloudDeprecated, RESOURCE.SpringCloud}:
             identity = get_springcloud_identity(source_id)
         object_id = identity.get('principalId')
-        client_id = run_cli_cmd('az ad sp show --id {0}'.format(object_id)).get('appId')
+        client_id = run_cli_cmd(
+            'az ad sp show --id {0}'.format(object_id)).get('appId')
 
         account_user = Profile(cli_ctx=cli_ctx).get_current_account_user()
         user_info = run_cli_cmd('az ad user show --id {}'.format(account_user))
         user_object_id = user_info.get('objectId') if user_info.get('objectId') is not None \
-                            else user_info.get('id')
-        print('set user object id={} as target AAD admin'.format(user_object_id))
+            else user_info.get('id')
 
         # set aad user
         if user_object_id is None:
-            raise Exception("no object id found for user {}".format(account_user))
+            raise Exception(
+                "no object id found for user {}".format(account_user))
 
         target_segments = parse_resource_id(target_id)
+        sub = target_segments.get('subscription')
         rg = target_segments.get('resource_group')
         server = target_segments.get('name')
-        run_cli_cmd('az postgres server ad-admin create -g {} --server-name {} --display-name {} --object-id {}'
-                    .format(rg, server, account_user, user_object_id)).get('objectId')
+        # pylint: disable=not-an-iterable
+        admins = run_cli_cmd('az postgres server ad-admin list --ids {}'
+                             .format(target_id))
+        is_admin = any(ad.get('sid') == user_object_id for ad in admins)
+        if not is_admin:
+            logger.warning('Setting current user as database server AAD admin:'
+                           ' user=%s object id=%s', account_user, user_object_id)
+            run_cli_cmd('az postgres server ad-admin create -g {} --server-name {} --display-name {} --object-id {}'
+                        ' --subscription {}'.format(rg, server, account_user, user_object_id, sub)).get('objectId')
 
-        aaduser = generate_random_string(prefix="aad_" + target_type.value + '_')
-        create_aad_user_in_db(cli_ctx, target_id, target_type, aaduser, client_id)
+        aaduser = generate_random_string(
+            prefix="aad_" + target_type.value + '_')
+        create_aad_user_in_db(cli_ctx, target_id,
+                              target_type, aaduser, client_id)
 
         return {
             'auth_type': 'secret',
@@ -337,27 +364,42 @@ def enable_mi_for_db_linker(cli_ctx, source_id, target_id, auth_info, source_typ
         }
 
 
+# pylint: disable=unused-argument, not-an-iterable, too-many-statements
 def set_target_firewall(target_id, target_type, add_new_rule, ipname, deny_public_access=False):
     if target_type == RESOURCE.Postgres:
         target_segments = parse_resource_id(target_id)
+        sub = target_segments.get('subscription')
         rg = target_segments.get('resource_group')
         server = target_segments.get('name')
         if add_new_rule:
-            target = run_cli_cmd('az postgres server show --ids {}'.format(target_id))
+            target = run_cli_cmd(
+                'az postgres server show --ids {}'.format(target_id))
+            # logger.warning("Update database server firewall rule to connect...")
             if target.get('publicNetworkAccess') == "Disabled":
-                run_cli_cmd('az postgres server update --public Enabled --ids {}'.format(target_id))
+                run_cli_cmd(
+                    'az postgres server update --public Enabled --ids {}'.format(target_id))
             run_cli_cmd(
-                'az postgres server firewall-rule create -g {0} -s {1} -n {2} '
-                '--start-ip-address 0.0.0.0 --end-ip-address 255.255.255.255'.format(rg, server, ipname)
+                'az postgres server firewall-rule create -g {0} -s {1} -n {2} --subscription {3}'
+                ' --start-ip-address 0.0.0.0 --end-ip-address 255.255.255.255'.format(
+                    rg, server, ipname, sub)
             )
             return target.get('publicNetworkAccess') == "Disabled"
 
-        run_cli_cmd('az postgres server firewall-rule delete -g {0} -s {1} -n {2} -y'.format(rg, server, ipname))
-        if deny_public_access:
-            run_cli_cmd('az postgres server update --public Disabled --ids {}'.format(target_id))
+        # logger.warning("Remove database server firewall rules to recover...")
+        # run_cli_cmd('az postgres server firewall-rule delete -g {0} -s {1} -n {2} -y'.format(rg, server, ipname))
+        # if deny_public_access:
+        #     run_cli_cmd('az postgres server update --public Disabled --ids {}'.format(target_id))
 
 
 def create_aad_user_in_db(cli_ctx, target_id, target_type, aaduser, client_id):
+    import pkg_resources
+    installed_packages = pkg_resources.working_set
+    psyinstalled = any(('psycopg2') in d.key.lower() for d in installed_packages)
+    if not psyinstalled:
+        _install_deps_for_psycopg2()
+        import pip
+        pip.main(['install', 'psycopg2-binary'])
+
     import psycopg2
     from azure.cli.core._profile import Profile
 
@@ -370,67 +412,84 @@ def create_aad_user_in_db(cli_ctx, target_id, target_type, aaduser, client_id):
     host = "{0}.postgres.database.azure.com".format(dbserver)
     dbname = target_segments.get('child_name_1')
     user = profile.get_current_account_user() + '@' + dbserver
-    password = run_cli_cmd('az account get-access-token --resource-type oss-rdbms').get('accessToken')
+    password = run_cli_cmd(
+        'az account get-access-token --resource-type oss-rdbms').get('accessToken')
     sslmode = "require"
 
+    ipname = None
+
     # Construct connection string
-    conn_string = "host={0} user={1} dbname={2} password={3} sslmode={4}".format(host, user, dbname, password, sslmode)
+    conn_string = "host={0} user={1} dbname={2} password={3} sslmode={4}".format(
+        host, user, dbname, password, sslmode)
     try:
+        logger.warning("Connecting to database...")
         conn = psycopg2.connect(conn_string)
     except psycopg2.Error:
         # add new firewall rule
         ipname = generate_random_string(prefix='svc_')
-        deny_public_access = set_target_firewall(target_id, target_type, True, ipname)
+        deny_public_access = set_target_firewall(
+            target_id, target_type, True, ipname)
         try:
             conn = psycopg2.connect(conn_string)
         except psycopg2.Error as e:
             raise e
-
-    print("Connection established")
-
+    conn.autocommit = True
     cursor = conn.cursor()
 
     try:
+        logger.warning("Adding new AAD user %s to database...", aaduser)
         cursor.execute("SET aad_validate_oids_in_tenant = off;")
-        cursor.execute("CREATE ROLE {0} WITH LOGIN PASSWORD '{1}' IN ROLE azure_ad_user;".format(aaduser, client_id))
-        print("New DB AAD user {0} is created".format(aaduser))
+        cursor.execute("CREATE ROLE {0} WITH LOGIN PASSWORD '{1}' IN ROLE azure_ad_user;".format(
+            aaduser, client_id))
     except psycopg2.Error as e:  # role "aaduser" already exists
-        print(e)
+        logger.warning(e)
         conn.commit()
 
     try:
-        cursor.execute("GRANT ALL PRIVILEGES ON DATABASE {} TO {};".format(dbname, aaduser))
-        print("AAD user {} is granted with database {} privileges".format(aaduser, dbname))
+        logger.warning(
+            "Grant read and write privileges of database %s to %s ...", dbname, aaduser)
+        cursor.execute(
+            "GRANT ALL PRIVILEGES ON DATABASE {} TO {};".format(dbname, aaduser))
+        cursor.execute(
+            'GRANT ALL ON ALL TABLES IN SCHEMA "public" TO {};'.format(aaduser))
     except psycopg2.Error as e:
-        print(e)
+        logger.warning(e)
         conn.commit()
 
     # Clean up
+    conn.commit()
     cursor.close()
     conn.close()
     # remove firewall rule
     if ipname is not None:
         try:
-            set_target_firewall(target_id, target_type, False, ipname, deny_public_access)
-        # pylint: disable=broad-except
-        except Exception as e:
-            print(e)
+            set_target_firewall(target_id, target_type,
+                                False, ipname, deny_public_access)
+        # pylint: disable=bare-except
+        except:
+            pass
+            # logger.warning('Please manually delete firewall rule %s to avoid security issue', ipname)
+    logger.warning("Creating service connection to postgresql ...")
 
 
 def get_springcloud_identity(source_id):
     segments = parse_resource_id(source_id)
+    sub = segments.get('subscription')
     spring = segments.get('name')
     app = segments.get('child_name_1')
     rg = segments.get('resource_group')
-    identity = run_cli_cmd('az spring-cloud app show -g {0} -s {1} -n {2}'.format(rg, spring, app)).get('identity')
+    logger.warning('Checking if Spring Cloud app enables System Identity...')
+    identity = run_cli_cmd(
+        'az spring app show -g {0} -s {1} -n {2} --subscription {3}'.format(rg, spring, app, sub)).get('identity')
     if (identity is None or identity.get('type') != "SystemAssigned"):
         # assign system identity for spring-cloud
-        run_cli_cmd('az spring-cloud app identity assign -g {0} -s {1} -n {2}'.format(rg, spring, app))
-        print('spring cloud app identity is enabled.')
+        logger.warning('Enabling Spring Cloud app System Identity...')
+        run_cli_cmd(
+            'az spring app identity assign -g {0} -s {1} -n {2} --subscription {3}'.format(rg, spring, app, sub))
         cnt = 0
         while (identity is None and cnt < 5):
-            identity = run_cli_cmd('az spring-cloud app show -g {0} -s {1} -n {2}'.format(rg, spring, app)).get(
-                'identity')
+            identity = run_cli_cmd('az spring app show -g {0} -s {1} -n {2} --subscription {3}'
+                                   .format(rg, spring, app, sub)).get('identity')
             time.sleep(3)
             cnt += 1
     return identity
