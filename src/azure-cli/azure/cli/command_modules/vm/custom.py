@@ -374,6 +374,8 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
     encryption = None
     if disk_encryption_set:
         encryption = Encryption(type=encryption_type, disk_encryption_set_id=disk_encryption_set)
+    elif encryption_type:
+        encryption = Encryption(type=encryption_type)
 
     disk = Disk(location=location, creation_data=creation_data, tags=(tags or {}),
                 sku=_get_sku_object(cmd, sku), disk_size_gb=size_gb, os_type=os_type, encryption=encryption)
@@ -467,8 +469,9 @@ def update_managed_disk(cmd, resource_group_name, instance, size_gb=None, sku=No
                 subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
                 namespace='Microsoft.Compute', type='diskEncryptionSets', name=disk_encryption_set)
         instance.encryption.disk_encryption_set_id = disk_encryption_set
-    if encryption_type is not None:
+    elif encryption_type is not None:
         instance.encryption.type = encryption_type
+        instance.encryption.disk_encryption_set_id = None
     if network_access_policy is not None:
         instance.network_access_policy = network_access_policy
     if disk_access is not None:
