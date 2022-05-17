@@ -2984,20 +2984,19 @@ class SynapseScenarioTests(ScenarioTest):
             'az synapse sql-script show --workspace-name {workspace} --name {name}',
             expect_failure=True)
 
-    #@record_only()
+    @record_only()
     def test_link_connection(self):
         self.kwargs.update({
             'workspace_name': 'xiaoyuxingtestne',
-            'link_connection_name': 'linkconnection111',
+            'link_connection_name': 'linkconnectionfortest',
             'link_table_id': '887e9d4df0fa4afaaad0d7a2c7f42d88',
-            'sas_token': '1',
             'edit_table_file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'link-connection-table.json'),
             'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'linkconnection111.json')
         })
         # create link connnection
         self.cmd(
             'az synapse link-connection create --workspace-name {workspace_name} '
-            '--name linkconnection111 --file @"{file}" ',
+            '--name {workspace_name} --file @"{file}" ',
             checks=[
                 self.check('name', self.kwargs['link_connection_name'])
             ])

@@ -10,8 +10,8 @@ from azure.synapse.artifacts.models import (LinkedService, Dataset, PipelineReso
                                             Trigger, DataFlow, BigDataPoolReference, NotebookSessionProperties,
                                             NotebookResource, SparkJobDefinition, SqlScriptResource, SqlScriptFolder,
                                             SqlScriptContent, SqlScriptMetadata, SqlScript, SqlConnection,
-                                            NotebookFolder,LinkConnectionResource,LinkTableRequest,
-                                            QueryTableStatusRequest,SecureString)
+                                            NotebookFolder, LinkConnectionResource, LinkTableRequest,
+                                            QueryTableStatusRequest, SecureString)
 from azure.cli.core.util import sdk_no_wait, CLIError
 from azure.core.exceptions import ResourceNotFoundError
 from .._client_factory import (cf_synapse_linked_service, cf_synapse_dataset, cf_synapse_pipeline,
@@ -573,10 +573,8 @@ def create_or_update_link_connection(cmd, workspace_name, link_connection_name, 
     properties_file['sourceDatabase'] = info['sourceDatabase']
     properties_file['targetDatabase'] = info['targetDatabase']
     properties_file['compute'] = info['compute']
-    try:
+    if 'landingZone' in properties_file.keys():
         properties_file['landingZone'] = info['landingZone']
-    except:
-        pass
     properties = LinkConnectionResource(properties=properties_file)
     return client.create_or_update_link_connection(link_connection_name, properties)
 
@@ -627,5 +625,5 @@ def synapse_get_link_tables_status(cmd, workspace_name, link_connection_name, ma
 
 def synapse_update_landing_zone_credential(cmd, workspace_name, link_connection_name, sas_token):
     client = cf_synapse_link_connection(cmd.cli_ctx, workspace_name)
-    sas_token = SecureString(value = sas_token)
-    return client.update_landing_zone_credential(link_connection_name, sas_token)
+    sas_tokens = SecureString(value=sas_token)
+    return client.update_landing_zone_credential(link_connection_name, sas_tokens)
