@@ -684,7 +684,7 @@ def load_command_table(self, _):
 
     with self.command_group('network application-gateway waf-policy managed-rule exclusion rule-set', network_ag_waf_sdk,
                             client_factory=cf_app_gateway_waf_policy,
-                            min_api='2021-08-01') as g:
+                            min_api='2021-05-01') as g:
         g.custom_command('add', 'add_waf_exclusion_rule_set')
         g.custom_command('remove', 'remove_waf_exclusion_rule_set')
         g.custom_command('list', 'list_waf_exclusion_rule_set')
@@ -880,12 +880,12 @@ def load_command_table(self, _):
         g.show_command('show')
         g.command('list', 'list')
 
-    with self.command_group('network private-endpoint ip-config', network_private_endpoint_sdk, min_api='2021-08-01') as g:
+    with self.command_group('network private-endpoint ip-config', network_private_endpoint_sdk, min_api='2021-05-01') as g:
         g.custom_command('add', 'add_private_endpoint_ip_config')
         g.custom_command('remove', 'remove_private_endpoint_ip_config')
         g.custom_command('list', 'list_private_endpoint_ip_config')
 
-    with self.command_group('network private-endpoint asg', network_private_endpoint_sdk, min_api='2021-08-01') as g:
+    with self.command_group('network private-endpoint asg', network_private_endpoint_sdk, min_api='2021-05-01') as g:
         g.custom_command('add', 'add_private_endpoint_asg')
         g.custom_command('remove', 'remove_private_endpoint_asg')
         g.custom_command('list', 'list_private_endpoint_asg')
@@ -920,7 +920,7 @@ def load_command_table(self, _):
         g.generic_update_command('update', getter_name='lb_get', getter_type=network_load_balancers_custom,
                                  setter_name='begin_create_or_update')
         g.custom_command('list-nic', 'list_load_balancer_nic', min_api='2017-06-01')
-        g.custom_command('list-mapping', 'list_load_balancer_mapping', min_api='2021-08-01')
+        g.custom_command('list-mapping', 'list_load_balancer_mapping', min_api='2021-05-01')
 
     property_map = {
         'frontend_ip_configurations': 'frontend-ip',
