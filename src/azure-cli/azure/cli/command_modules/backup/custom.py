@@ -493,9 +493,7 @@ def list_policies(client, resource_group_name, vault_name):
 
 def set_policy(cmd, client, resource_group_name, vault_name, policy, policy_name, tenant_id=None,
                is_critical_operation=False):
-    print('policy', policy)
     policy_object = cust_help.get_policy_from_json(client, policy)
-    print('policy_object', policy_object)
     retention_range_in_days = policy_object.properties.instant_rp_retention_range_in_days
     schedule_run_frequency = policy_object.properties.schedule_policy.schedule_run_frequency
 
