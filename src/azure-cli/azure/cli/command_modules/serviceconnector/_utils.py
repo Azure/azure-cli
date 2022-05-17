@@ -322,7 +322,6 @@ def enable_mi_for_db_linker(cli_ctx, source_id, target_id, auth_info, source_typ
         aaduser = generate_random_string(prefix="aad_" + target_type.value + '_')
         create_aad_user_in_db(cli_ctx, target_id, target_type, aaduser, client_id)
 
-        
         return {
             'auth_type': 'secret',
             'name': aaduser,
@@ -372,7 +371,7 @@ def create_aad_user_in_db(cli_ctx, target_id, target_type, aaduser, client_id):
     conn_string = "host={0} user={1} dbname={2} password={3} sslmode={4}".format(host, user, dbname, password, sslmode)
     try:
         conn = psycopg2.connect(conn_string)
-    except psycopg2.Error as e:
+    except psycopg2.Error:
         # add new firewall rule
         ipname = generate_random_string(prefix='svc_')
         deny_public_access = set_target_firewall(target_id, target_type, True, ipname)
@@ -403,11 +402,11 @@ def create_aad_user_in_db(cli_ctx, target_id, target_type, aaduser, client_id):
     # Clean up
     cursor.close()
     conn.close()
-
     # remove firewall rule
     if ipname is not None:
         try:
             set_target_firewall(target_id, target_type, False, ipname, deny_public_access)
+        # pylint: disable=broad-except
         except Exception as e:
             print(e)
 
