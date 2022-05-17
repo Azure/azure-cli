@@ -7,7 +7,6 @@ from azure.cli.command_modules.acs._client_factory import (
     cf_agent_pools,
     cf_container_services,
     cf_managed_clusters,
-    cf_openshift_managed_clusters,
     cf_snapshots,
 )
 from azure.cli.command_modules.acs._format import (
@@ -20,7 +19,6 @@ from azure.cli.command_modules.acs._format import (
     aks_show_table_format,
     aks_upgrades_table_format,
     aks_versions_table_format,
-    osa_list_table_format,
 )
 from azure.cli.core.commands import CliCommandType
 from azure.cli.core.commands.arm import deployment_validate_table_format
@@ -60,14 +58,6 @@ def load_command_table(self, _):
         operation_group='snapshots',
         resource_type=ResourceType.MGMT_CONTAINERSERVICE,
         client_factory=cf_snapshots
-    )
-
-    openshift_managed_clusters_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.containerservice.operations.'
-                        '_open_shift_managed_clusters_operations#OpenShiftManagedClustersOperations.{}',
-        operation_group='open_shift_managed_clusters',
-        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-        client_factory=cf_openshift_managed_clusters
     )
 
     # ACS base commands
@@ -179,23 +169,3 @@ def load_command_table(self, _):
         g.custom_command('create', 'aks_nodepool_snapshot_create', supports_no_wait=True)
         g.custom_command('delete', 'aks_nodepool_snapshot_delete', supports_no_wait=True)
         g.wait_command('wait')
-
-    # OSA commands
-    with self.command_group('openshift', openshift_managed_clusters_sdk,
-                            client_factory=cf_openshift_managed_clusters,
-                            deprecate_info=self.deprecate(redirect='aro', hide=True)) as g:
-        g.custom_command('create', 'openshift_create', supports_no_wait=True)
-        g.command('delete', 'begin_delete', supports_no_wait=True, confirmation=True)
-        g.custom_command('scale', 'openshift_scale', supports_no_wait=True)
-        g.custom_show_command('show', 'openshift_show')
-        g.custom_command('list', 'osa_list',
-                         table_transformer=osa_list_table_format)
-        g.wait_command('wait')
-
-    # OSA monitor subgroup
-    with self.command_group('openshift monitor', openshift_managed_clusters_sdk,
-                            client_factory=cf_openshift_managed_clusters) as g:
-        g.custom_command('enable', 'openshift_monitor_enable',
-                         supports_no_wait=True)
-        g.custom_command('disable', 'openshift_monitor_disable',
-                         supports_no_wait=True)

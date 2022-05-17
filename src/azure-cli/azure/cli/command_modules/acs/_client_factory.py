@@ -30,16 +30,6 @@ def cf_snapshots(cli_ctx, *_):
     return get_container_service_client(cli_ctx).snapshots
 
 
-def get_osa_container_service_client(cli_ctx, **_):
-    from azure.mgmt.containerservice import ContainerServiceClient
-
-    return get_mgmt_service_client(cli_ctx, ContainerServiceClient, api_version='2019-09-30-preview')
-
-
-def cf_openshift_managed_clusters(cli_ctx, *_):
-    return get_osa_container_service_client(cli_ctx).open_shift_managed_clusters
-
-
 def cf_compute_service(cli_ctx, *_):
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_COMPUTE)
 

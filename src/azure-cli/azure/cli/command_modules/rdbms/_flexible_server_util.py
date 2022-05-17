@@ -362,7 +362,7 @@ def register_credential_secrets(cmd, database_engine, server, repository):
         provider = "DBforPostgreSQL"
     scope = "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.{}/flexibleServers/{}".format(get_subscription_id(cmd.cli_ctx), resource_group, provider, server.name)
 
-    app = create_service_principal_for_rbac(cmd, name=server.name, role='contributor', scopes=[scope])
+    app = create_service_principal_for_rbac(cmd, display_name=server.name, role='contributor', scopes=[scope])
     app['clientId'], app['clientSecret'], app['tenantId'] = app.pop('appId'), app.pop('password'), app.pop('tenant')
     app['subscriptionId'] = get_subscription_id(cmd.cli_ctx)
     app.pop('displayName')

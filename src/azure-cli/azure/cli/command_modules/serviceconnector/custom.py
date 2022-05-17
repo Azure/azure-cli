@@ -29,7 +29,7 @@ from ._utils import (
     set_user_token_header,
     auto_register
 )
-# pylint: disable=unused-argument
+# pylint: disable=unused-argument,unsubscriptable-object,unsupported-membership-test
 
 
 logger = get_logger(__name__)
@@ -210,6 +210,9 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals
         client = set_user_token_header(client, cmd.cli_ctx)
         from ._utils import create_key_vault_reference_connection_if_not_exist
         create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, key_vault_id)
+    elif auth_info['auth_type'] == 'secret' and 'secret_info' in auth_info \
+            and auth_info['secret_info']['secret_type'] == 'keyVaultSecretReference':
+        raise ValidationError('--vault-id must be provided to use secret-name')
 
     if service_endpoint:
         client = set_user_token_header(client, cmd.cli_ctx)
@@ -261,6 +264,7 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals
                       key_vault_id=None,
                       service_endpoint=None,
                       no_wait=False,
+                      scope=None,
                       cluster=None, enable_csi=False,                         # Resource.Kubernetes
                       site=None,                                              # Resource.WebApp
                       spring=None, app=None, deployment='default'):           # Resource.SpringCloud
@@ -306,8 +310,8 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals
             'key_vault_id': key_vault_id,
         },
         'client_type': client_type or linker.get('clientType'),
-        # scope does not support update due to aks solution's limitation
-        'scope': linker.get('scope')
+        # scope can be updated in container app while cannot be updated in aks due to some limitations
+        'scope': scope or linker.get('scope')
     }
 
     # HACK: set user token to work around OBO
@@ -319,6 +323,9 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals
         client = set_user_token_header(client, cmd.cli_ctx)
         from ._utils import create_key_vault_reference_connection_if_not_exist
         create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, key_vault_id)
+    elif auth_info['auth_type'] == 'secret' and 'secret_info' in auth_info \
+            and auth_info['secret_info']['secret_type'] == 'keyVaultSecretReference':
+        raise ValidationError('--vault-id must be provided to use secret-name')
 
     parameters['v_net_solution'] = linker.get('vNetSolution')
     if service_endpoint:

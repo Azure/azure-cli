@@ -5,6 +5,7 @@
 
 import time
 import os
+import unittest
 
 from azure.core.exceptions import ResourceNotFoundError
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse, live_only
@@ -87,7 +88,7 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
     target_subnet_name = 'ManagedInstance2'
     target_subnet = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(subscription_id, group, target_vnet_name, target_subnet_name)
     target_subnet_vcores = 4
-    
+
     collation = "Serbian_Cyrillic_100_CS_AS"
 
     licence = 'LicenseIncluded'
@@ -270,7 +271,7 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('administratorLogin', admin_login),
                      JMESPathCheck('identity.type', 'SystemAssigned'),
                      JMESPathCheck('federatedClientId', federated_client_id_1)])
-        
+
         self.cmd('sql server show -g {} --name {}'
                  .format(resource_group_1, server_name_3),
                  checks=[
@@ -295,7 +296,7 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('resourceGroup', resource_group_1),
                      JMESPathCheck('administratorLogin', admin_login),
                      JMESPathCheck('federatedClientId', None)])
-                     
+
         # delete sql server
         self.cmd('sql server delete -g {} --name {} --yes'
                  .format(resource_group_1, server_name_3), checks=NoneCheck())
@@ -1181,6 +1182,13 @@ class AzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
 
         print('Arguments are updated with login and sid data')
 
+        with self.assertRaisesRegexp(SystemExit, "2"):
+            self.cmd('sql server ad-admin create -s {sn} -g {rg}')
+        with self.assertRaisesRegexp(SystemExit, "2"):
+            self.cmd('sql server ad-admin create -s {sn} -g {rg} -u {user}')
+        with self.assertRaisesRegexp(SystemExit, "2"):
+            self.cmd('sql server ad-admin create -s {sn} -g {rg} -i {oid}')
+
         self.cmd('sql server ad-admin create -s {sn} -g {rg} -i {oid} -u {user}',
                  checks=[
                      self.check('login', '{user}'),
@@ -1190,13 +1198,13 @@ class AzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
                  checks=[
                      self.check('[0].login', '{user}'),
                      self.check('[0].sid', '{oid}')])
-        
+
         self.cmd('sql server ad-admin update -s {sn} -g {rg}'
                  ' -u {user2} -i {oid2}',
                  checks=[
                      self.check('login', '{user2}'),
                      self.check('sid', '{oid2}')])
-        
+
         self.cmd('sql server ad-admin delete -s {sn} -g {rg}')
 
         self.cmd('sql server ad-admin list -s {sn} -g {rg}',
@@ -3484,7 +3492,7 @@ class SqlTransparentDataEncryptionScenarioTest(ScenarioTest):
                      JMESPathCheck('serverKeyName', server_key_name),
                      JMESPathCheck('uri', kid)])
                      # JMESPathCheck('autoRotationEnabled', True) - property is removed from backend
-                     
+
 
         # validate encryption protector is akv via show
         self.cmd('sql server tde-key show -g {} -s {}'
@@ -3906,7 +3914,7 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
                      JMESPathCheck('requestedBackupStorageRedundancy', 'Geo'),
                      JMESPathCheck('zoneRedundant', False)])
 
-		# Create zone redundant source vldb with zone redundancy == true and backup storage redundancy == Zone 
+		# Create zone redundant source vldb with zone redundancy == true and backup storage redundancy == Zone
         # Verify created vldb has correct values (specifically zone redundancy == true and backup storage redundancy == Zone)
         self.cmd('sql db create -g {} --server {} --name {} --edition {} --family {} --capacity {}  --backup-storage-redundancy {} --zone-redundant {}'
                  .format(resource_group, server, source_zr_db_name, "Hyperscale", 'Gen5', 2, 'zone', True),
@@ -3994,14 +4002,14 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
         # Verify created secondary vldb replica has correct values (specifically zone redundancy == true and backup storage redundancy == Zone)
         self.cmd('sql db replica create -g {} -s {} -n {} --partner-resource-group {} --partner-server {} '
                  '--partner-database {} --backup-storage-redundancy {} --z'
-                 .format(resource_group_pri, server_name_pri, non_zr_db_name_1, 
+                 .format(resource_group_pri, server_name_pri, non_zr_db_name_1,
                          resource_group_sec, server_name_sec, pri_non_zr_true_param_db_name, 'zone'),
                  checks=[
 					 JMESPathCheck('name', pri_non_zr_true_param_db_name),
 					 JMESPathCheck('requestedBackupStorageRedundancy', 'Zone'),
                      JMESPathCheck('zoneRedundant', True)])
 
-		# Create zone redundant primary vldb with zone redundancy == true and backup storage redundancy == Zone 
+		# Create zone redundant primary vldb with zone redundancy == true and backup storage redundancy == Zone
         # Verify created vldb has correct values (specifically zone redundancy == true and backup storage redundancy == Zone)
         self.cmd('sql db create -g {} --server {} --name {} --edition {} --family {} --capacity {}  --backup-storage-redundancy {} --zone-redundant {}'
                  .format(resource_group_pri, server_name_pri, zr_db_name_1, "Hyperscale", 'Gen5', 2, 'zone', True),
@@ -4019,7 +4027,7 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
         # Verify created secondary vldb replica has correct values (specifically zone redundancy == false and backup storage redundancy == Zone)
         self.cmd('sql db replica create -g {} -s {} -n {} --partner-resource-group {} --partner-server {} '
                  '--partner-database {} --z {}'
-                 .format(resource_group_pri, server_name_pri, zr_db_name_1, 
+                 .format(resource_group_pri, server_name_pri, zr_db_name_1,
                          resource_group_sec, server_name_sec, pri_zr_false_param_db_name, False),
                  checks=[
 					 JMESPathCheck('name', pri_zr_false_param_db_name),
@@ -4043,14 +4051,14 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
         # Create secondary vldb replica from non zone redundant primary vldb with no parameters passed in
         # Verify created secondary vldb replica has correct values (specifically zone redundancy == false and backup storage redundancy == geo)
         self.cmd('sql db replica create -g {} -s {} -n {} --partner-resource-group {} --partner-server {} --partner-database {}'
-                 .format(resource_group_pri, server_name_pri, non_zr_db_name_2, 
+                 .format(resource_group_pri, server_name_pri, non_zr_db_name_2,
                          resource_group_sec, server_name_sec, pri_non_zr_no_param_db_name),
                  checks=[
 					 JMESPathCheck('name', pri_non_zr_no_param_db_name),
 					 JMESPathCheck('requestedBackupStorageRedundancy', 'Geo'),
                      JMESPathCheck('zoneRedundant', False)])
 
-		# Create zone redundant primary vldb with zone redundancy == true and backup storage redundancy == Zone 
+		# Create zone redundant primary vldb with zone redundancy == true and backup storage redundancy == Zone
         # Verify created vldb has correct values (specifically zone redundancy == true and backup storage redundancy == Zone)
         self.cmd('sql db create -g {} --server {} --name {} --edition {} --family {} --capacity {}  --backup-storage-redundancy {} --zone-redundant'
                  .format(resource_group_pri, server_name_pri, zr_db_name_2, "Hyperscale", 'Gen5', 2, 'zone'),
@@ -4067,7 +4075,7 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
         # Create secondary vldb replica from zone redundant primary vldb with no parameters passed in
         # Verify created secondary vldb replica has correct values (specifically zone redundancy == true and backup storage redundancy == Zone)
         self.cmd('sql db replica create -g {} -s {} -n {} --partner-resource-group {} --partner-server {} --partner-database {}'
-                 .format(resource_group_pri, server_name_pri, zr_db_name_2, 
+                 .format(resource_group_pri, server_name_pri, zr_db_name_2,
                          resource_group_sec, server_name_sec, pri_zr_no_param_db_name),
                  checks=[
 					 JMESPathCheck('name', pri_zr_no_param_db_name),
@@ -4100,7 +4108,7 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
                      JMESPathCheck('requestedBackupStorageRedundancy', 'Geo'),
                      JMESPathCheck('zoneRedundant', False)])
 
-		# Create zone redundant source vldb with zone redundancy == true and backup storage redundancy == Zone 
+		# Create zone redundant source vldb with zone redundancy == true and backup storage redundancy == Zone
         # Verify created vldb has correct values (specifically zone redundancy == true and backup storage redundancy == Zone)
         self.cmd('sql db create -g {} --server {} --name {} --edition {} --family {} --capacity {}  --backup-storage-redundancy {} --zone-redundant {}'
                  .format(resource_group, server, source_zr_db_name, "Hyperscale", 'Gen5', 2, 'zone', True),
@@ -4118,7 +4126,7 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
         # Verify restored vldb has correct values (specifically zone redundancy == true and backup storage redundancy == Zone)
         self.cmd('sql db restore -g {} --server {} --name {} --dest-name {} --time {} '
                  '--edition {} --family {} --capacity {} --backup-storage-redundancy {} --z'
-                 .format(resource_group, server, source_non_zr_db_name, restore_source_non_zr_true_param_db_name, datetime.utcnow().isoformat(), 
+                 .format(resource_group, server, source_non_zr_db_name, restore_source_non_zr_true_param_db_name, datetime.utcnow().isoformat(),
                          "Hyperscale", 'Gen5', 2, 'zone'),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
@@ -4765,6 +4773,7 @@ class SqlManagedInstancePoolScenarioTest(ScenarioTest):
 
 
 class SqlManagedInstanceTransparentDataEncryptionScenarioTest(ScenarioTest):
+    @unittest.skip('Cannot record due to https://github.com/Azure/azure-cli/issues/22174')
     @ManagedInstancePreparer(
         identity_type=ResourceIdType.system_assigned.value
     )
@@ -4845,7 +4854,7 @@ class SqlManagedInstanceTransparentDataEncryptionScenarioTest(ScenarioTest):
                 self.check('serverKeyType', 'AzureKeyVault'),
                 self.check('serverKeyName', '{server_key_name}'),
                 self.check('uri', '{kid}')])
-                
+
         # validate encryption protector is akv via show
         self.cmd('sql mi tde-key show -g {rg} --mi {managed_instance_name}',
                  checks=[
