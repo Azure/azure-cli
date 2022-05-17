@@ -678,26 +678,13 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                           exception_handler=show_exception_handler)
         g.storage_command('exists', 'exists',
                           transform=create_boolean_result_output_transformer('exists'))
-
-    with self.command_group('storage directory', command_type=file_sdk,
-                            custom_command_type=get_custom_sdk('directory', file_data_service_factory)) as g:
-
-        # g.storage_command('create', 'create_directory', transform=create_boolean_result_output_transformer('created'),
-        #                   table_transformer=transform_boolean_for_table)
-        # g.storage_command('delete', 'delete_directory', transform=create_boolean_result_output_transformer('deleted'),
-        #                   table_transformer=transform_boolean_for_table)
-        # g.storage_command('show', 'get_directory_properties', table_transformer=transform_file_output,
-        #                   exception_handler=show_exception_handler)
-        # g.storage_command(
-        #     'exists', 'exists', transform=create_boolean_result_output_transformer('exists'))
-        g.storage_command('metadata show', 'get_directory_metadata',
-                          exception_handler=show_exception_handler)
+        g.storage_command('metadata show', 'get_directory_properties',
+                          exception_handler=show_exception_handler,
+                          transform=lambda x: getattr(x, 'metadata', x))
         g.storage_command('metadata update', 'set_directory_metadata')
         g.storage_custom_command('list', 'list_share_directories',
-                                 transform=transform_file_directory_result(
-                                     self.cli_ctx),
-                                 table_transformer=transform_file_output,
-                                 doc_string_source='file#FileService.list_directories_and_files')
+                                 transform=transform_file_directory_result(self.cli_ctx),
+                                 table_transformer=transform_file_output)
 
     with self.command_group('storage file', command_type=file_sdk,
                             custom_command_type=get_custom_sdk('file', file_data_service_factory)) as g:
@@ -734,7 +721,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
     with self.command_group('storage file', command_type=file_client_sdk,
                             custom_command_type=get_custom_sdk('file', cf_share_file_client)) as g:
-        g.storage_custom_command('list', 'list_share_files', transform=transform_file_directory_result(self.cli_ctx),
+        g.storage_custom_command('list', 'list_share_files', client_factory=cf_share_client,
+                                 transform=transform_file_directory_result(self.cli_ctx),
                                  table_transformer=transform_file_output)
 
     with self.command_group('storage cors', get_custom_sdk('cors', multi_service_properties_factory)) as g:

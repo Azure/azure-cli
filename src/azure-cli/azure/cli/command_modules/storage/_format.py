@@ -112,19 +112,17 @@ def transform_file_directory_result(cli_ctx):
     in order to align the object's properties so as to offer a better view to the file and dir
     list.
     """
-    def transformer(result):
-        if getattr(result, 'next_marker', None):
-            logger.warning('Next Marker:')
-            logger.warning(result.next_marker)
+    from ._transformers import transform_share_directory_json_output, transform_share_file_json_output
 
-        t_file, t_dir = get_sdk(cli_ctx, ResourceType.DATA_STORAGE, 'File', 'Directory', mod='file.models')
+    def transformer(result):
         return_list = []
         for each in result:
-            if isinstance(each, t_file):
-                delattr(each, 'content')
-                setattr(each, 'type', 'file')
-            elif isinstance(each, t_dir):
+            if getattr(each, 'is_directory', None):
                 setattr(each, 'type', 'dir')
+                each = transform_share_directory_json_output(each)
+            else:
+                setattr(each, 'type', 'file')
+                each = transform_share_file_json_output(each)
             return_list.append(each)
 
         return return_list

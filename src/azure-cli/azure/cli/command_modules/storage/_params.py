@@ -1737,12 +1737,19 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                      "Astrix (‘*’) is a wildcard that specifies all handles.")
         c.argument('snapshot', help="A string that represents the snapshot version, if applicable.")
 
-    for scope in ['create', 'delete', 'show', 'exists']:
+    for scope in ['create', 'delete', 'show', 'exists', 'metadata show', 'metadata update']:
         with self.argument_context(f'storage directory {scope}') as c:
             c.extra('share_name', share_name_type, required=True)
             c.extra('snapshot', help="A string that represents the snapshot version, if applicable.")
             c.extra('directory_path', directory_type, options_list=('--name', '-n'), required=True)
             c.extra('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
+
+    with self.argument_context('storage directory list') as c:
+        c.extra('share_name', share_name_type, required=True)
+        c.extra('directory_path', directory_type, options_list=('--name', '-n'))
+        c.argument('exclude_extended_info',
+                   help='Specify to exclude "timestamps", "Etag", "Attributes", "PermissionKey" info from response')
+        c.extra('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
 
     with self.argument_context('storage directory create') as c:
         c.argument('fail_on_exist', help='Throw an exception if the directory already exists.')
@@ -1796,9 +1803,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage file list') as c:
         from .completers import dir_path_completer
+        c.extra('share_name', share_name_type, required=True)
+        c.extra('snapshot', help="A string that represents the snapshot version, if applicable.")
         c.argument('directory_name', options_list=('--path', '-p'), help='The directory path within the file share.',
                    completer=dir_path_completer)
         c.argument('num_results', arg_type=num_results_type)
+        c.argument('exclude_extended_info',
+                   help='Specify to exclude "timestamps", "Etag", "Attributes", "PermissionKey" info from response')
 
     with self.argument_context('storage file metadata show') as c:
         c.register_path_argument()

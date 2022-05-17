@@ -1694,6 +1694,16 @@ type: group
 short-summary: Manage file storage directory metadata.
 """
 
+helps['storage directory metadata show'] = """
+type: command
+short-summary: Get all user-defined metadata for the specified directory.
+"""
+
+helps['storage directory metadata update'] = """
+type: command
+short-summary: Set one or more user-defined name-value pairs for the specified directory.
+"""
+
 helps['storage entity'] = """
 type: group
 short-summary: Manage table storage entities.

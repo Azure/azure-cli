@@ -17,6 +17,8 @@ from azure.cli.command_modules.storage.util import (filter_none, collect_blobs, 
 from azure.cli.command_modules.storage.url_quote_util import encode_for_url, make_encoded_file_url_and_params
 from azure.cli.core.profiles import ResourceType
 
+logger = get_logger(__name__)
+
 
 def create_share_rm(cmd, client, resource_group_name, account_name, share_name, metadata=None, share_quota=None,
                     enabled_protocols=None, root_squash=None, access_tier=None):
@@ -112,21 +114,23 @@ def create_file_url(client, share_name, directory_name, file_name, protocol=None
         share_name, directory_name, file_name, protocol=protocol, sas_token=client.sas_token)
 
 
-def list_share_files(cmd, client, share_name, directory_name=None, timeout=None, exclude_dir=False, snapshot=None,
+def list_share_files(cmd, client, directory_name=None, timeout=None, exclude_dir=False, exclude_extended_info=False,
                      num_results=None, marker=None):
-    if cmd.supported_api_version(min_api='2017-04-17'):
-        generator = client.list_directories_and_files(
-            share_name, directory_name, timeout=timeout, num_results=num_results, marker=marker, snapshot=snapshot)
-    else:
-        generator = client.list_directories_and_files(
-            share_name, directory_name, timeout=timeout, num_results=num_results, marker=marker)
+    from ..track2_util import list_generator
+    include = [] if exclude_extended_info else ["timestamps", "Etag", "Attributes", "PermissionKey"]
+    generator = client.list_directories_and_files(directory_name=directory_name, include=include,
+                                                  timeout=timeout, results_per_page=num_results)
+    pages = generator.by_page(continuation_token=marker)
+    results = list_generator(pages=pages, num_results=num_results)
+
+    if pages.continuation_token:
+        logger.warning('Next Marker:')
+        logger.warning(pages.continuation_token)
 
     if exclude_dir:
-        t_file_properties = cmd.get_models('file.models#FileProperties')
-
-        return list(f for f in generator if isinstance(f.properties, t_file_properties))
-
-    return generator
+        t_file_properties = cmd.get_models('_models#FileProperties', resource_type=ResourceType.DATA_STORAGE_FILESHARE)
+        return list(f for f in results if isinstance(f.properties, t_file_properties))
+    return results
 
 
 def close_handle(client, share_name, close_all=None, directory_name=None, file_name=None, recursive=None,
