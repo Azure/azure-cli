@@ -310,9 +310,15 @@ def enable_mi_for_db_linker(cli_ctx, source_id, target_id, auth_info, source_typ
         client_id = run_cli_cmd('az ad sp show --id {0}'.format(object_id)).get('appId')
 
         account_user = Profile(cli_ctx=cli_ctx).get_current_account_user()
-        print('set user {} as target AAD admin'.format(account_user))
-        user_object_id = run_cli_cmd('az ad user show --id {}'.format(account_user)).get('objectId')
+        user_info = run_cli_cmd('az ad user show --id {}'.format(account_user))
+        user_object_id = user_info.get('objectId') if user_info.get('objectId') is not None \
+                            else user_info.get('id')
+        print('set user object id={} as target AAD admin'.format(user_object_id))
+
         # set aad user
+        if user_object_id is None:
+            raise Exception("no object id found for user {}".format(account_user))
+
         target_segments = parse_resource_id(target_id)
         rg = target_segments.get('resource_group')
         server = target_segments.get('name')
