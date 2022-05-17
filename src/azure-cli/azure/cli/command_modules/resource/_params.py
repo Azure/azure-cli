@@ -504,7 +504,7 @@ def load_arguments(self, _):
     with self.argument_context('group delete') as c:
         c.argument('resource_group_name', resource_group_name_type,
                    options_list=['--name', '-n', '--resource-group', '-g'], local_context_attribute=None)
-        c.argument('force_deletion_types', options_list=['--force-deletion-types', '-f'], arg_type=get_enum_type("Microsoft.Compute/virtualMachines", "Microsoft.Compute/virtualMachineScaleSets"), min_api='2021-04-01', help='The resource types you want to force delete. Currently, only the following is supported: forceDeletionTypes=Microsoft.Compute/virtualMachines,Microsoft.Compute/virtualMachineScaleSets')
+        c.argument('force_deletion_types', options_list=['--force-deletion-types', '-f'], arg_type=get_enum_type(['Microsoft.Compute/virtualMachines', 'Microsoft.Compute/virtualMachineScaleSets']), min_api='2021-04-01', help='The resource types you want to force delete.')
 
     with self.argument_context('tag') as c:
         c.argument('tag_name', tag_name_type)
