@@ -880,7 +880,7 @@ examples:
     text: az aks enable-addons --addons virtual-node --name MyManagedCluster --resource-group MyResourceGroup --subnet MySubnetName
     crafted: true
   - name: Enable ingress-appgw addon with subnet prefix.
-    text: az aks enable-addons --name MyManagedCluster --resource-group MyResourceGroup --addons ingress-appgw --appgw-subnet-cidr 10.2.0.0/16 --appgw-name gateway
+    text: az aks enable-addons --name MyManagedCluster --resource-group MyResourceGroup --addons ingress-appgw --appgw-subnet-cidr 10.225.0.0/16 --appgw-name gateway
     crafted: true
   - name: Enable open-service-mesh addon.
     text: az aks enable-addons --name MyManagedCluster --resource-group MyResourceGroup --addons open-service-mesh
