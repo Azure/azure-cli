@@ -9,7 +9,7 @@ from azure.cli.core.commands import CliCommandType
 def load_command_table(self, _):
 
     from ._client_factory import (
-        cf_alert_rules, cf_metric_def, cf_alert_rule_incidents, cf_log_profiles, cf_autoscale,
+        cf_alert_rules, cf_metric_def, cf_log_profiles, cf_autoscale,
         cf_diagnostics, cf_activity_log, cf_action_groups, cf_activity_log_alerts, cf_event_categories,
         cf_metric_alerts, cf_metric_ns, cf_log_analytics_deleted_workspaces, cf_log_analytics_workspace,
         cf_log_analytics_workspace_tables, cf_log_analytics_workspace_management_groups,

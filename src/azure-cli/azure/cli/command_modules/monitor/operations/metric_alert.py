@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=too-many-locals
 
-from azure.cli.command_modules.monitor.util import get_operator_map, get_aggregation_map
 from knack.log import get_logger
 
 logger = get_logger(__name__)
