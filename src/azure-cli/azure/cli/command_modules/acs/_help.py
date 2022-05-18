@@ -694,6 +694,9 @@ parameters:
   - name: --assign-identity
     type: string
     short-summary: Specify an existing user assigned identity to manage cluster resource group.
+  - name: --assign-kubelet-identity
+    type: string
+    short-summary: Update cluster's kubelet identity to an existing user assigned identity. Please note this operation will recreate all agent nodes in the cluster.
   - name: --enable-azure-rbac
     type: bool
     short-summary: Enable Azure RBAC to control authorization checks on cluster.

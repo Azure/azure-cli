@@ -4870,11 +4870,13 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         aks_name = self.create_random_name('cliakstest', 16)
         control_plane_identity_name = self.create_random_name('cliakstest', 16)
         kubelet_identity_name = self.create_random_name('cliakstest', 16)
+        new_kubelet_identity_name = self.create_random_name('cliakstest', 16)
         self.kwargs.update({
             'resource_group': resource_group,
             'name': aks_name,
             'control_plane_identity_name': control_plane_identity_name,
             'kubelet_identity_name': kubelet_identity_name,
+            "new_kubelet_identity_name": new_kubelet_identity_name,
             'ssh_key_value': self.generate_ssh_keys()
         })
 
@@ -4910,6 +4912,26 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.exists('identityProfile'),
             self.check('provisioningState', 'Succeeded'),
             self.check('identityProfile.kubeletidentity.resourceId', kubelet_identity_resource_id),
+        ])
+
+        # create new kubelet identity
+        new_kubelet_identity = 'identity create --resource-group={resource_group} --name={new_kubelet_identity_name}'
+        new_identity = self.cmd(new_kubelet_identity, checks=[
+            self.check('name', new_kubelet_identity_name)
+        ]).get_output_in_json()
+        new_kubelet_identity_resource_id = new_identity["id"]
+        assert new_kubelet_identity_resource_id is not None
+        self.kwargs.update({
+            'new_kubelet_identity_resource_id': new_kubelet_identity_resource_id,
+        })
+
+        # update to new kubelet identity
+        self.cmd('aks update --resource-group={resource_group} --name={name} --assign-kubelet-identity {new_kubelet_identity_resource_id} --yes', checks=[
+            self.exists('identity'),
+            self.exists('identityProfile'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('identityProfile.kubeletidentity.resourceId',
+                       new_kubelet_identity_resource_id),
         ])
 
         # delete
