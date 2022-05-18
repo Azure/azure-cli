@@ -321,7 +321,7 @@ def load_arguments(self, _):
                    help='Enable or disable R services (SQL 2016 onwards).',
                    arg_type=get_three_state_flag())
 
-    with self.argument_context('sql vm', arg_group='Assessment Settings') as c:
+    with self.argument_context('sql vm update', arg_group='Assessment Settings') as c:
         c.argument('enable_assessment',
                    help='Enable or disable assessment feature. If any assessment settings provided, parameter automatically sets to true.',
                    validator=validate_assessment,

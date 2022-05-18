@@ -52,9 +52,6 @@ examples:
   - name: Create SQL virtual machine and configure SQL connectivity settings.
     text: >
         az sql vm create -n sqlvm -g myresourcegroup -l eastus --license-type PAYG --sql-mgmt-type Full --connectivity-type private --port 1433 --sql-auth-update-username {newlogin} --sql-auth-update-pwd {sqlpassword}
-  - name: Create SQL virtual machine and configure SQL Best Pracices Assessment settings.
-    text: >
-        az sql vm create -n sqlvm -g myresourcegroup -l eastus --license-type PAYG --sql-mgmt-type Full --enable-assessment true --enable-assessment-schedule true --assessment-weekly-interval 1 --assessment-day-of-week monday --assessment-start-time-local '19:30'
 """
 
 helps['sql vm group'] = """
