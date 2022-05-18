@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 # pylint: disable=too-many-statements
-import unittest
 from unittest import mock
 
 from azure.cli.testsdk import ResourceGroupPreparer, ScenarioTest, StorageAccountPreparer
@@ -428,7 +427,6 @@ class IoTHubTest(ScenarioTest):
                          self.check('properties.enableDataResidency', True)])
         self.cmd('az iot hub delete -n {}'.format(dr_hub_name))
 
-    @unittest.skip('Will be recorded in https://github.com/Azure/azure-cli/pull/22262')
     @AllowLargeResponse()
     @ResourceGroupPreparer(location='westus2')
     @StorageAccountPreparer()
@@ -689,7 +687,6 @@ class IoTHubTest(ScenarioTest):
                      self.check('userAssignedIdentities', None),
                      self.check('type', IdentityType.none.value)])
 
-    @unittest.skip('Will be recorded in https://github.com/Azure/azure-cli/pull/22262')
     @AllowLargeResponse()
     @ResourceGroupPreparer(location='westus2')
     @StorageAccountPreparer()
