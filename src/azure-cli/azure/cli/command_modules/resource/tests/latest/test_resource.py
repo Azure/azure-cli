@@ -3998,8 +3998,8 @@ class BicepInstallationTest(LiveScenarioTest):
 class BicepRestoreTest(LiveScenarioTest):
     def test_restore(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
-        bf = os.path.join(curr_dir, 'external_modules.bicep').replace('\\', '\\\\')
-        out_path = os.path.join(curr_dir, 'external_modules.json').replace('\\', '\\\\')
+        bf = os.path.join(curr_dir, 'data', 'external_modules.bicep').replace('\\', '\\\\')
+        out_path = os.path.join(curr_dir, 'data', 'external_modules.json').replace('\\', '\\\\')
         self.kwargs.update({
             'bf': bf,
             'out_path': out_path,
