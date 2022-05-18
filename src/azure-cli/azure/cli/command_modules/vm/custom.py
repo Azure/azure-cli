@@ -4372,7 +4372,7 @@ def create_dedicated_host_group(cmd, client, host_group_name, resource_group_nam
                                            support_automatic_placement=automatic_placement, zones=zones, tags=tags)
     if ultra_ssd_enabled is not None:
         additionalCapabilities = {'ultraSSDEnabled': ultra_ssd_enabled}
-        host_group_params.additionalCapabilities = additionalCapabilities
+        host_group_params.additional_capabilities = additionalCapabilities
 
     return client.create_or_update(resource_group_name, host_group_name, parameters=host_group_params)
 

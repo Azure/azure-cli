@@ -5408,7 +5408,7 @@ class DedicatedHostScenarioTest(ScenarioTest):
             self.check('tags.foo', 'bar')
         ])
         self.cmd('vm host group create -n {host} --host-group {host-group2} -g {rg} --ultra-ssd-enabled true', checks=[
-            self.check('properties.additionalCapabilities.ultraSSDEnabled', True)
+            self.check('additionalCapabilities.ultraSSDEnabled', True)
         ])
 
         self.cmd('vm host delete -n {host} --host-group {host-group} -g {rg} --yes')
