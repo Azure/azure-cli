@@ -314,6 +314,10 @@ class ResourceCreateAndShowScenarioTest(ScenarioTest):
         self.cmd('resource create --id {app_settings_id} --properties "{{\\"key2\\":\\"value12\\"}}"',
                  checks=[self.check('properties.key2', 'value12')])
 
+        self.cmd('resource wait --id {app_settings_id} --created')
+
+        self.cmd('resource wait --id {app_settings_id} --exists')
+
         self.cmd('resource show --id {app_config_id}',
                  checks=self.check('properties.publishingUsername', '${app}'))
         self.cmd('resource show --id {app_config_id} --include-response-body',
