@@ -130,6 +130,7 @@ class CacheObject:
             raise CLIError('cloud name unexpectedly empty')
         copy_kwargs = kwargs.copy()
         copy_kwargs.pop('self', None)
+        # handle "content_type" introduced by https://gist.github.com/iscai-msft/47fe6ecbdd06013bb19a2e16f85a0b43
         copy_kwargs.pop('content_type', None)
         resource_group = copy_kwargs.pop('resource_group_name', None) or args[0]
 
