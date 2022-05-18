@@ -920,7 +920,7 @@ def load_arguments(self, _):
             c.argument('vm', existing_vm_name)
             c.argument('vmss_name', vmss_name_type)
             c.argument('application_version_ids', options_list=['--app-version-ids'], nargs='*', help="Space-separated application version ids to set to VM.")
-            c.argument('order_applications', action='store_true', help='Whether to set order index at each gallery applications. If specified, the first app version id get specified an order = 1, then next one 2, and so on. This parameter is meant to be used when the VMApplications specified by app version ids must be installed in a particular order; lowest order is installed first.')
+            c.argument('order_applications', action='store_true', help='Whether to set order index at each gallery application. If specified, the first app version id gets specified an order = 1, then the next one 2, and so on. This parameter is meant to be used when the VMApplications specified by app version ids must be installed in a particular order; the lowest order is installed first.')
             c.argument('application_configuration_overrides', options_list=['--app-config-overrides'], nargs='*',
                        help='Space-separated application configuration overrides for each application version ids. '
                        'It should have the same number of items as the application version ids. Null is available for a application '
