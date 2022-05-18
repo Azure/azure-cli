@@ -300,6 +300,27 @@ def transform_share_rm_list_output(result):
     return new_result
 
 
+def delete_blob_output_key(_, result):
+    result.pop('additionalProperties', None)
+    return result
+
+
+def transform_blob_json_output_track2(result):
+    result['logging'] = result.pop('analytics_logging')
+    result['deleteRetentionPolicy'] = result.pop('delete_retention_policy')
+    result['hourMetrics'] = result.pop('hour_metrics')
+    result['minuteMetrics'] = result.pop('minute_metrics')
+    result['staticWebsite'] = result.pop('static_website')
+    for i in result['cors']:
+        i.allowed_methods = i.allowed_methods.split(',') if i.allowed_methods else []
+        i.allowed_origins = i.allowed_origins.split(',') if i.allowed_origins else []
+        i.exposed_headers = i.exposed_headers.split(',') if i.exposed_headers else []
+        i.allowed_headers = i.allowed_headers.split(',') if i.allowed_headers else []
+    new_result = todict(result, delete_blob_output_key)
+    new_result['staticWebsite']['errorDocument_404Path'] = new_result['staticWebsite'].pop('errorDocument404Path')
+    return new_result
+
+
 def transform_container_json_output(result):
     result = todict(result)
     new_result = {

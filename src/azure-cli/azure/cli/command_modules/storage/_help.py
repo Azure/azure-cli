@@ -752,7 +752,7 @@ parameters:
     short-summary: List the files or blobs to be uploaded. No actual data transfer will occur.
   - name: --source-account-name
     type: string
-    short-summary: The source storage account from which the files or blobs are copied to the destination. If omitted, the source account is used.
+    short-summary: The source storage account from which the files or blobs are copied to the destination. If omitted, the destination account is used.
   - name: --source-account-key
     type: string
     short-summary: The account key for the source storage account.
@@ -967,6 +967,21 @@ examples:
 helps['storage blob metadata'] = """
 type: group
 short-summary: Manage blob metadata.
+"""
+
+helps['storage blob metadata show'] = """
+type: command
+short-summary: Returns all user-defined metadata for the specified blob or snapshot.
+examples:
+  - name: Show user-defined metadata for blob.
+    text: az storage blob metadata show --container-name mycontainer --name myblob
+"""
+
+helps['storage blob metadata update'] = """
+type: command
+examples:
+  - name: Set user-defined metadata for blob.
+    text: az storage blob metadata update --container-name mycontainer --name myblob --metadata key=value
 """
 
 helps['storage blob query'] = """

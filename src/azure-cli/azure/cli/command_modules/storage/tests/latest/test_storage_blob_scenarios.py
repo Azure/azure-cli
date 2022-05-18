@@ -451,6 +451,9 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
                                 JMESPathCheck('minuteMetrics.enabled', True),
                                 JMESPathCheck('minuteMetrics.includeApis', True),
                                 JMESPathCheck('logging.delete', True))
+        self.storage_cmd('storage blob service-properties delete-policy update --days 2', account_info)
+        self.storage_cmd('storage blob service-properties delete-policy show', account_info) \
+            .assert_with_checks(JMESPathCheck('days', 2))
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
@@ -462,8 +465,8 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         copy_id = 'abcdabcd-abcd-abcd-abcd-abcdabcdabcd'
 
         self.storage_cmd('storage blob upload -c {} -n {} -f "{}"', account_info, c, b, local_file)
-        from azure.common import AzureException
-        with self.assertRaisesRegex(AzureException, "NoPendingCopyOperation"):
+        from azure.core.exceptions import ResourceExistsError
+        with self.assertRaisesRegex(ResourceExistsError, "There is currently no pending copy operation"):
             self.storage_cmd('storage blob copy cancel -c {} -b {} --copy-id {}', account_info, c, b, copy_id)
 
     @ResourceGroupPreparer()
@@ -781,6 +784,7 @@ class StorageBlobCommonTests(StorageScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer(name_prefix='clitest')
     @StorageAccountPreparer(name_prefix='storage', kind='StorageV2', location='eastus2', sku='Standard_RAGZRS')
     def test_storage_blob_list_scenarios(self, resource_group, storage_account):
+        import time
         account_info = self.get_account_info(resource_group, storage_account)
         container = self.create_container(account_info, prefix="con")
 
@@ -849,6 +853,7 @@ class StorageBlobCommonTests(StorageScenarioMixin, ScenarioTest):
             .assert_with_checks(JMESPathCheck('length(@)', 1),
                                 JMESPathCheck('[0].name', 'dir'))
 
+        time.sleep(5)
         # Test secondary location
         account_name = account_info[0] + '-secondary'
         account_key = account_info[1]
@@ -963,6 +968,30 @@ class StorageBlobCopyTestScenario(StorageScenarioMixin, ScenarioTest):
         self.storage_cmd('storage blob show -c {} -n {} ', account_info, target_container, 'dst') \
             .assert_with_checks(JMESPathCheck('properties.blobTier', 'Archive'),
                                 JMESPathCheck('properties.rehydrationStatus', 'rehydrate-pending-to-cool'))
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
+    def test_storage_blob_copy_batch(self, storage_account_info):
+        src_container = self.create_container(storage_account_info)
+        dst_container = self.create_container(storage_account_info)
+
+        source_file = self.create_temp_file(16, full_random=False)
+        blobs = ['blobğşŞ', 'blogÉ®']
+
+        for blob_name in blobs:
+            self.storage_cmd('storage blob upload -c {} -f "{}" -n {}', storage_account_info,
+                             src_container, source_file, blob_name)
+
+        # Empty dir will be skipped when start-batch
+        self.storage_cmd('storage fs directory create -f {} -n  newdir', storage_account_info, src_container)
+
+        self.storage_cmd('storage blob copy start-batch --destination-container {} --source-container {}',
+                         storage_account_info, dst_container, src_container).assert_with_checks(
+            JMESPathCheck('length(@)', 2))
+        self.storage_cmd('storage blob copy start-batch --destination-container {} --pattern "blob*" '
+                         '--source-container {}',
+                         storage_account_info, dst_container, src_container).assert_with_checks(
+            JMESPathCheck('length(@)', 1))
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='clitest')
