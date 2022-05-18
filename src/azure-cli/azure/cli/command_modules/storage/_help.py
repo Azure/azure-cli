@@ -793,7 +793,7 @@ helps['storage blob undelete'] = """
 type: command
 short-summary: Restores soft deleted blob or snapshot.
 long-summary: >
-    Operation will only be successful if used within the specified number of days set in the delete retention policy. 
+    Operation will only be successful if used within the specified number of days set in the delete retention policy.
     Attempting to undelete a blob or snapshot that is not soft deleted will succeed without any changes.
 examples:
   - name: Undelete a blob.
