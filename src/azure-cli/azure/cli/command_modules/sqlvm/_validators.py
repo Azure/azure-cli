@@ -155,7 +155,7 @@ def validate_assessment(namespace):
         if (assessment_weekly_interval is not None and assessment_monthly_occurrence is not None):
             raise MutuallyExclusiveArgumentError("Both assessment-weekly-interval and assessment-montly-occurrence cannot be provided at the same time for Assessment schedule")
         if (assessment_weekly_interval is None and assessment_monthly_occurrence is None):
-            raise RequiredArgumentMissingError("Either assessment-weekly-interval and assessment-montly-occurrence must be provided for Assessment schedule")
+            raise RequiredArgumentMissingError("Either assessment-weekly-interval or assessment-montly-occurrence must be provided for Assessment schedule")
         if assessment_day_of_week is None:
             raise RequiredArgumentMissingError("assessment-day-of-week must be provided for Assessment schedule")
         if assessment_start_time_local is None:
