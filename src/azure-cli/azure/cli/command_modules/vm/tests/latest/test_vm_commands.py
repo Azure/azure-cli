@@ -5086,7 +5086,7 @@ class VMGalleryImage(ScenarioTest):
             self.check('softDeletePolicy.isSoftDeleteEnabled', True)
         ])
 
-        self.cmd('sig show -g {rg} -r {gallery_name} --expand sharingProfile/Groups', checks=[
+        self.cmd('sig show -g {rg} -r {gallery_name} --sharing-groups', checks=[
             self.check('location', 'westus'),
             self.check('name', '{gallery_name}'),
             self.check('resourceGroup', '{rg}'),
