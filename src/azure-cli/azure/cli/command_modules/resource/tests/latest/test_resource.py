@@ -3969,6 +3969,7 @@ class BicepBuildTest(LiveScenarioTest):
 
         self.cmd('az bicep build -f {tf} --outfile {build_path}')
         self.cmd('az bicep decompile -f {build_path}')
+        self.cmd('az bicep decompile -f {build_path} --force')
 
         if os.path.exists(build_path):
             os.remove(build_path)
@@ -4005,6 +4006,24 @@ class BicepInstallationTest(LiveScenarioTest):
         self.cmd('az bicep install --version v0.4.63')
         self.cmd('az bicep upgrade -t win-x64')
         self.cmd('az bicep version')
+
+
+class BicepRestoreTest(LiveScenarioTest):
+    def test_restore(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        bf = os.path.join(curr_dir, 'data', 'external_modules.bicep').replace('\\', '\\\\')
+        out_path = os.path.join(curr_dir, 'data', 'external_modules.json').replace('\\', '\\\\')
+        self.kwargs.update({
+            'bf': bf,
+            'out_path': out_path,
+        })
+
+        self.cmd('az bicep restore -f {bf}')
+        self.cmd('az bicep restore -f {bf} --force')
+        self.cmd('az bicep build -f {bf} --no-restore')
+
+        if os.path.exists(out_path):
+            os.remove(out_path)
 
 
 class DeploymentWithBicepScenarioTest(LiveScenarioTest):
