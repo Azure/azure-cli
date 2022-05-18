@@ -88,6 +88,19 @@ class ResourceGroupScenarioTest(ScenarioTest):
         result = self.cmd('group export --name {rg} --resource-ids "{vnet_id}" --skip-resource-name-params --query "parameters"')
 
         self.assertEqual('{}\n', result.output)
+        
+    @ResourceGroupPreparer(name_prefix='cli_test_rg_scenario')
+    def test_resource_group_force_deletion_type(self, resource_group):
+
+        self.cmd('group create -n testrg -l westus --tag a=b c --managed-by test_admin', checks=[
+            self.check('name', 'testrg'),
+            self.check('tags', {'a': 'b', 'c': ''}),
+            self.check('managedBy', 'test_admin')
+        ])
+
+        self.cmd('group delete -n testrg -f Microsoft.Compute/virtualMachines --yes')
+        self.cmd('group exists -n testrg',
+                 checks=self.check('@', False))        
 
 
 class ResourceGroupNoWaitScenarioTest(ScenarioTest):
