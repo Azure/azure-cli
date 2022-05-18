@@ -1125,6 +1125,10 @@ def load_arguments(self, _):
             c.argument('gallery_name', options_list=['--gallery-name', '-r'], id_part='name', help='gallery name')
             c.argument('gallery_image_name', options_list=['--gallery-image-definition', '-i'], id_part='child_name_1', help='gallery image definition')
 
+    with self.argument_context('sig show') as c:
+        c.argument('select', help='The select expression to apply on the operation.')
+        c.argument('sharing_groups', action='store_true', help='The expand query option to query shared gallery groups')
+
     with self.argument_context('sig list-shared') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx))
         c.argument('shared_to', shared_to_type)
