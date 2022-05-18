@@ -1193,6 +1193,8 @@ short-summary: Download a blob to a file path.
 examples:
   - name: Download a blob.
     text: az storage blob download -f /path/to/file -c mycontainer -n MyBlob
+  - name: Download a blob content to stdout(pipe support).
+    text: az storage blob download -c mycontainer -n myblob --account-name mystorageaccount --account-key myaccountkey
 """
 
 helps['storage blob url'] = """
@@ -1323,7 +1325,7 @@ examples:
 
 helps['storage container delete'] = """
 type: command
-short-summary: Marks the specified container for deletion.
+short-summary: Mark the specified container for deletion.
 long-summary: >
     The container and any blobs contained within it are later deleted during garbage collection.
 examples:
@@ -1362,6 +1364,21 @@ examples:
     crafted: true
 """
 
+helps['storage container show'] = """
+type: command
+short-summary: Return all user-defined metadata and system properties for the specified container.
+"""
+
+helps['storage container show-permission'] = """
+type: command
+short-summary: Get the permissions for the specified container.
+"""
+
+helps['storage container set-permission'] = """
+type: command
+short-summary: Set the permissions for the specified container.
+"""
+
 helps['storage container immutability-policy'] = """
 type: group
 short-summary: Manage container immutability policies.
@@ -1381,6 +1398,61 @@ helps['storage container lease'] = """
 type: group
 short-summary: Manage blob storage container leases.
 """
+
+helps['storage container lease acquire'] = """
+type: command
+short-summary: Request a new lease.
+long-summary: If the container does not have an active lease, the Blob service creates a lease on the container and returns a new lease ID.
+examples:
+  - name: Request a new lease.
+    text: az storage container lease acquire --container-name mycontainer --account-name mystorageaccount --account-key 0000-0000
+"""
+
+helps['storage container lease renew'] = """
+type: command
+short-summary: Renew the lease.
+long-summary: The lease can be renewed if the lease ID specified matches that associated with the
+        container. Note that the lease may be renewed even if it has expired as long as the
+        container has not been leased again since the expiration of that lease. When you renew a
+        lease, the lease duration clock resets.
+examples:
+  - name: Renew the lease.
+    text: az storage container lease renew -c mycontainer --lease-id "32fe23cd-4779-4919-adb3-357e76c9b1bb" --account-name mystorageaccount --account-key 0000-0000
+"""
+
+helps['storage container lease break'] = """
+type: command
+short-summary: Break the lease, if the container has an active lease.
+long-summary: Once a lease is broken, it cannot be renewed. Any authorized request can break the lease;
+        the request is not required to specify a matching lease ID. When a lease is broken, the
+        lease break period is allowed to elapse, during which time no lease operation except break
+        and release can be performed on the container. When a lease is successfully broken, the
+        response indicates the interval in seconds until a new lease can be acquired.
+examples:
+  - name: Break the lease.
+    text: az storage container lease break -c mycontainer --lease-break-period 10 --account-name mystorageaccount --account-key 0000-0000
+"""
+
+helps['storage container lease change'] = """
+type: command
+short-summary: Change the lease ID of an active lease.
+long-summary: A change must include the current lease ID and a new lease ID.
+examples:
+  - name: Change the lease.
+    text: az storage container lease change -c mycontainer --lease-id "32fe23cd-4779-4919-adb3-357e76c9b1bb" --proposed-lease-id "sef2ef2d-4779-4919-adb3-357e76c9b1bb" --account-name mystorageaccount --account-key 0000-0000
+"""
+
+helps['storage container lease release'] = """
+type: command
+short-summary: Release the lease.
+long-summary: The lease may be released if the lease_id specified matches that associated with the
+        container. Releasing the lease allows another client to immediately acquire the lease for
+        the container as soon as the release is complete.
+examples:
+  - name: Release the lease.
+    text: az storage container lease release -c mycontainer --lease-id "32fe23cd-4779-4919-adb3-357e76c9b1bb" --account-name mystorageaccount --account-key 0000-0000
+"""
+
 
 helps['storage container legal-hold'] = """
 type: group
@@ -1428,6 +1500,16 @@ examples:
 helps['storage container metadata'] = """
 type: group
 short-summary: Manage container metadata.
+"""
+
+helps['storage container metadata show'] = """
+type: command
+short-summary: Return all user-defined metadata for the specified container.
+"""
+
+helps['storage container metadata update'] = """
+type: command
+short-summary: Set one or more user-defined name-value pairs for the specified container.
 """
 
 helps['storage container policy'] = """
@@ -1572,6 +1654,21 @@ type: group
 short-summary: Manage file storage directories.
 """
 
+helps['storage directory create'] = """
+type: command
+short-summary: Create a new directory under the specified share or parent directory.
+"""
+
+helps['storage directory delete'] = """
+type: command
+short-summary: Delete the specified empty directory.
+"""
+
+helps['storage directory show'] = """
+type: command
+short-summary: Get all user-defined metadata and system properties for the specified directory
+"""
+
 helps['storage directory exists'] = """
 type: command
 short-summary: Check for the existence of a storage directory.
@@ -1595,6 +1692,16 @@ examples:
 helps['storage directory metadata'] = """
 type: group
 short-summary: Manage file storage directory metadata.
+"""
+
+helps['storage directory metadata show'] = """
+type: command
+short-summary: Get all user-defined metadata for the specified directory.
+"""
+
+helps['storage directory metadata update'] = """
+type: command
+short-summary: Set one or more user-defined name-value pairs for the specified directory.
 """
 
 helps['storage entity'] = """
@@ -2209,6 +2316,16 @@ helps['storage fs directory download'] = """
           text: az storage fs directory download -f myfilesystem --account-name mystorageaccount -s "path/to/subdirectory" -d "<local-path>" --recursive
 """
 
+helps['storage fs directory generate-sas'] = """
+type: command
+short-summary: Generate a SAS token for directory in ADLS Gen2 account.
+examples:
+  - name: Generate a sas token for directory and use it to upload files.
+    text: |
+        end=`date -u -d "30 minutes" '+%Y-%m-%dT%H:%MZ'`
+        az storage fs directory generate-sas --name dir/ --file-system myfilesystem --https-only --permissions dlrw --expiry $end -o tsv
+"""
+
 helps['storage fs file'] = """
 type: group
 short-summary: Manage files in Azure Data Lake Storage Gen2 account.
@@ -2748,6 +2865,7 @@ examples:
 
 helps['storage share generate-sas'] = """
 type: command
+short-summary: Generate a shared access signature for the share.
 examples:
   - name: Generate a sas token for a fileshare and use it to upload a file.
     text: |
@@ -2769,9 +2887,43 @@ type: command
 short-summary: List the file shares in a storage account.
 """
 
+helps['storage share show'] = """
+type: command
+short-summary: Return all user-defined metadata and system properties for the specified share.
+long-summary: The data returned does not include the shares's list of files or directories.
+"""
+
+helps['storage share delete'] = """
+type: command
+short-summary: Mark the specified share for deletion.
+long-summary: If the share does not exist, the operation fails on the service. By default, the exception is swallowed by the client. To expose the exception, specify True for fail_not_exist.
+"""
+
+helps['storage share stats'] = """
+type: command
+short-summary: Get the approximate size of the data stored on the share, rounded up to the nearest gigabyte.
+long-summary: Note that this value may not include all recently created or recently re-sized files.
+"""
+
+helps['storage share update'] = """
+type: command
+short-summary: Set service-defined properties for the specified share.
+"""
+
 helps['storage share metadata'] = """
 type: group
 short-summary: Manage the metadata of a file share.
+"""
+
+helps['storage share metadata show'] = """
+type: command
+short-summary: Return all user-defined metadata for the specified share.
+"""
+
+helps['storage share metadata update'] = """
+type: command
+short-summary: Set one or more user-defined name-value pairs for the specified share.
+long-summary: Each call to this operation replaces all existing metadata attached to the share. To remove all metadata from the share, call this operation with no metadata dict.
 """
 
 helps['storage share policy'] = """

@@ -26,7 +26,8 @@ from azure.cli.core.azclierror import (
     CLIInternalError,
     ResourceNotFoundError,
     ValidationError,
-    RequiredArgumentMissingError
+    RequiredArgumentMissingError,
+    ArgumentUsageError
 )
 
 from azure.cli.command_modules.vm._validators import _get_resource_group_from_vault_name
@@ -295,7 +296,8 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                         gallery_image_reference=None, gallery_image_reference_lun=None,
                         network_access_policy=None, disk_access=None, logical_sector_size=None,
                         tier=None, enable_bursting=None, edge_zone=None, security_type=None, support_hibernation=None,
-                        public_network_access=None, accelerated_network=None, architecture=None):
+                        public_network_access=None, accelerated_network=None, architecture=None,
+                        data_access_auth_mode=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -415,6 +417,8 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         else:
             disk.supported_capabilities.accelerated_network = accelerated_network
             disk.supported_capabilities.architecture = architecture
+    if data_access_auth_mode is not None:
+        disk.data_access_auth_mode = data_access_auth_mode
 
     client = _compute_client_factory(cmd.cli_ctx)
     return sdk_no_wait(no_wait, client.disks.begin_create_or_update, resource_group_name, disk_name, disk)
@@ -436,7 +440,7 @@ def update_managed_disk(cmd, resource_group_name, instance, size_gb=None, sku=No
                         disk_mbps_read_write=None, encryption_type=None, disk_encryption_set=None,
                         network_access_policy=None, disk_access=None, max_shares=None, disk_iops_read_only=None,
                         disk_mbps_read_only=None, enable_bursting=None, public_network_access=None,
-                        accelerated_network=None, architecture=None):
+                        accelerated_network=None, architecture=None, data_access_auth_mode=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -485,6 +489,8 @@ def update_managed_disk(cmd, resource_group_name, instance, size_gb=None, sku=No
         else:
             instance.supported_capabilities.accelerated_network = accelerated_network
             instance.supported_capabilities.architecture = architecture
+    if data_access_auth_mode is not None:
+        instance.data_access_auth_mode = data_access_auth_mode
 
     return instance
 # endregion
@@ -763,7 +769,7 @@ def capture_vm(cmd, resource_group_name, vm_name, vhd_name_prefix,
     print(json.dumps(output, indent=2))  # pylint: disable=no-member
 
 
-# pylint: disable=too-many-locals, unused-argument, too-many-statements, too-many-branches
+# pylint: disable=too-many-locals, unused-argument, too-many-statements, too-many-branches, broad-except
 def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_v2', location=None, tags=None,
               no_wait=False, authentication_type=None, admin_password=None, computer_name=None,
               admin_username=None, ssh_dest_key_path=None, ssh_key_value=None, generate_ssh_keys=False,
@@ -788,7 +794,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               enable_hotpatching=None, platform_fault_domain=None, security_type=None, enable_secure_boot=None,
               enable_vtpm=None, count=None, edge_zone=None, nic_delete_option=None, os_disk_delete_option=None,
               data_disk_delete_option=None, user_data=None, capacity_reservation_group=None, enable_hibernation=None,
-              v_cpus_available=None, v_cpus_per_core=None, accept_term=None):
+              v_cpus_available=None, v_cpus_per_core=None, accept_term=None, disable_integrity_monitoring=False):
 
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
@@ -1073,6 +1079,33 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, deployment_name, deployment)
     LongRunningOperation(cmd.cli_ctx)(client.begin_create_or_update(resource_group_name, deployment_name, deployment))
 
+    # Guest Attestation Extension and enable System Assigned MSI by default
+    is_trusted_launch = security_type and security_type.lower() == 'trustedlaunch' and\
+        enable_vtpm and enable_secure_boot
+    if is_trusted_launch and not disable_integrity_monitoring:
+        vm = get_vm(cmd, resource_group_name, vm_name, 'instanceView')
+        client = _compute_client_factory(cmd.cli_ctx)
+        if vm.storage_profile.os_disk.os_type == 'Linux':
+            publisher = 'Microsoft.Azure.Security.LinuxAttestation'
+        if vm.storage_profile.os_disk.os_type == 'Windows':
+            publisher = 'Microsoft.Azure.Security.WindowsAttestation'
+        version = _normalize_extension_version(cmd.cli_ctx, publisher, 'GuestAttestation', None, vm.location)
+        VirtualMachineExtension = cmd.get_models('VirtualMachineExtension')
+        ext = VirtualMachineExtension(location=vm.location,
+                                      publisher=publisher,
+                                      type_properties_type='GuestAttestation',
+                                      protected_settings=None,
+                                      type_handler_version=version,
+                                      settings=None,
+                                      auto_upgrade_minor_version=True,
+                                      enable_automatic_upgrade=None)
+        try:
+            LongRunningOperation(cmd.cli_ctx)(client.virtual_machine_extensions.begin_create_or_update(
+                resource_group_name, vm_name, 'GuestAttestation', ext))
+            logger.info('Guest Attestation Extension has been successfully installed by default '
+                        'when Trusted Launch configuration is met')
+        except Exception as e:
+            logger.error('Failed to install Guest Attestation Extension for Trusted Launch. %s', e)
     if count:
         vm_names = [vm_name + str(i) for i in range(count)]
     else:
@@ -1702,7 +1735,7 @@ def get_boot_log(cmd, resource_group_name, vm_name):
     import re
     import sys
     from azure.cli.core.profiles import get_sdk
-    from msrestazure.azure_exceptions import CloudError
+    from azure.core.exceptions import HttpResponseError
     BlockBlobService = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE, 'blob.blockblobservice#BlockBlobService')
 
     client = _compute_client_factory(cmd.cli_ctx)
@@ -1719,7 +1752,7 @@ def get_boot_log(cmd, resource_group_name, vm_name):
         try:
             boot_diagnostics_data = client.virtual_machines.retrieve_boot_diagnostics_data(resource_group_name, vm_name)
             blob_uri = boot_diagnostics_data.serial_console_log_blob_uri
-        except CloudError:
+        except HttpResponseError:
             pass
         if blob_uri is None:
             raise CLIError('Please enable boot diagnostics.')
@@ -2846,7 +2879,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 user_data=None, network_api_version=None, enable_spot_restore=None, spot_restore_timeout=None,
                 capacity_reservation_group=None, enable_auto_update=None, patch_mode=None, enable_agent=None,
                 security_type=None, enable_secure_boot=None, enable_vtpm=None, automatic_repairs_action=None,
-                v_cpus_available=None, v_cpus_per_core=None, accept_term=None):
+                v_cpus_available=None, v_cpus_per_core=None, accept_term=None, disable_integrity_monitoring=False):
 
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
@@ -2857,6 +2890,16 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                                                                 build_vmss_storage_account_pool_resource,
                                                                 build_application_gateway_resource,
                                                                 build_msi_role_assignment, build_nsg_resource)
+
+    # The default load balancer will be expected to be changed from Basic to Standard.
+    # In order to avoid breaking change which has a big impact to users,
+    # we use the hint to guide users to use Standard load balancer to create VMSS in the first stage.
+    if load_balancer_sku is None:
+        logger.warning(
+            'It is recommended to use parameter "--lb-sku Standard" to create new VMSS with Standard load balancer. '
+            'Please note that the default load balancer used for VMSS creation will be changed from Basic to Standard '
+            'in the future.')
+
     # Build up the ARM template
     master_template = ArmTemplateBuilder()
 
@@ -3178,6 +3221,40 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
         deployment_result['vmss']['identity'] = _construct_identity_info(identity_scope, identity_role,
                                                                          vmss_info.identity.principal_id,
                                                                          vmss_info.identity.user_assigned_identities)
+    # Guest Attestation Extension and enable System Assigned MSI by default
+    is_trusted_launch = security_type and security_type.lower() == 'trustedlaunch' and\
+        enable_vtpm and enable_secure_boot
+    if is_trusted_launch and not disable_integrity_monitoring:
+        client = _compute_client_factory(cmd.cli_ctx)
+        vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
+        vmss.virtual_machine_profile.storage_profile.image_reference = None
+        VirtualMachineScaleSetExtension, VirtualMachineScaleSetExtensionProfile = cmd.get_models(
+            'VirtualMachineScaleSetExtension', 'VirtualMachineScaleSetExtensionProfile')
+        if vmss.virtual_machine_profile.storage_profile.os_disk.os_type == 'Linux':
+            publisher = 'Microsoft.Azure.Security.LinuxAttestation'
+        if vmss.virtual_machine_profile.storage_profile.os_disk.os_type == 'Windows':
+            publisher = 'Microsoft.Azure.Security.WindowsAttestation'
+        version = _normalize_extension_version(cmd.cli_ctx, publisher, 'GuestAttestation', None, vmss.location)
+        ext = VirtualMachineScaleSetExtension(name='GuestAttestation',
+                                              publisher=publisher,
+                                              type_properties_type='GuestAttestation',
+                                              protected_settings=None,
+                                              type_handler_version=version,
+                                              settings=None,
+                                              auto_upgrade_minor_version=True,
+                                              provision_after_extensions=None,
+                                              enable_automatic_upgrade=None)
+        if not vmss.virtual_machine_profile.extension_profile:
+            vmss.virtual_machine_profile.extension_profile = VirtualMachineScaleSetExtensionProfile(extensions=[])
+        vmss.virtual_machine_profile.extension_profile.extensions.append(ext)
+        try:
+            LongRunningOperation(cmd.cli_ctx)(client.virtual_machine_scale_sets.begin_create_or_update(
+                resource_group_name, vmss_name, vmss))
+            logger.info('Guest Attestation Extension has been successfully installed by default'
+                        'when Trusted Launch configuration is met')
+        except Exception as e:
+            logger.error('Failed to install Guest Attestation Extension for Trusted Launch. %s', e)
+
     return deployment_result
 
 
@@ -4034,6 +4111,13 @@ def update_image_galleries(cmd, resource_group_name, gallery_name, gallery, perm
     return client.galleries.begin_create_or_update(resource_group_name, gallery_name, gallery, **kwargs)
 
 
+def show_image_gallery(cmd, resource_group_name, gallery_name, select=None, sharing_groups=None):
+    if sharing_groups:
+        sharing_groups = 'sharingProfile/Groups'
+    client = _compute_client_factory(cmd.cli_ctx)
+    return client.galleries.get(resource_group_name, gallery_name, select=select, expand=sharing_groups)
+
+
 def create_image_gallery(cmd, resource_group_name, gallery_name, description=None,
                          location=None, no_wait=False, tags=None, permissions=None, soft_delete=None):
     Gallery = cmd.get_models('Gallery')
@@ -4115,8 +4199,7 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                          os_snapshot=None, data_snapshots=None, managed_image=None, data_snapshot_luns=None,
                          target_region_encryption=None, os_vhd_uri=None, os_vhd_storage_account=None,
                          data_vhds_uris=None, data_vhds_luns=None, data_vhds_storage_accounts=None,
-                         replication_mode=None):
-    # print(target_regions)
+                         replication_mode=None, target_region_cvm_encryption=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -4150,7 +4233,7 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
         profile.replication_mode = replication_mode
     if cmd.supported_api_version(min_api='2019-07-01', operation_group='gallery_image_versions'):
         if managed_image is None and os_snapshot is None and os_vhd_uri is None:
-            raise CLIError('usage error: Please provide --managed-image or --os-snapshot or --vhd')
+            raise RequiredArgumentMissingError('usage error: Please provide --managed-image or --os-snapshot or --vhd')
         GalleryImageVersionStorageProfile = cmd.get_models('GalleryImageVersionStorageProfile')
         GalleryArtifactVersionSource = cmd.get_models('GalleryArtifactVersionSource')
         GalleryOSDiskImage = cmd.get_models('GalleryOSDiskImage')
@@ -4161,10 +4244,11 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
         if os_snapshot is not None:
             os_disk_image = GalleryOSDiskImage(source=GalleryArtifactVersionSource(id=os_snapshot))
         if data_snapshot_luns and not data_snapshots:
-            raise CLIError('usage error: --data-snapshot-luns must be used together with --data-snapshots')
+            raise ArgumentUsageError('usage error: --data-snapshot-luns must be used together with --data-snapshots')
         if data_snapshots:
             if data_snapshot_luns and len(data_snapshots) != len(data_snapshot_luns):
-                raise CLIError('usage error: Length of --data-snapshots and --data-snapshot-luns should be equal.')
+                raise ArgumentUsageError('usage error: Length of --data-snapshots and '
+                                         '--data-snapshot-luns should be equal.')
             if not data_snapshot_luns:
                 data_snapshot_luns = list(range(len(data_snapshots)))
             data_disk_images = []
@@ -4175,7 +4259,7 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
         if cmd.supported_api_version(min_api='2020-09-30', operation_group='gallery_image_versions'):
             # OS disk
             if os_vhd_uri and os_vhd_storage_account is None or os_vhd_uri is None and os_vhd_storage_account:
-                raise ValidationError('--os-vhd-uri and --os-vhd-storage-account should be used together.')
+                raise ArgumentUsageError('--os-vhd-uri and --os-vhd-storage-account should be used together.')
             if os_vhd_uri and os_vhd_storage_account:
                 if not is_valid_resource_id(os_vhd_storage_account):
                     os_vhd_storage_account = resource_id(
@@ -4187,9 +4271,9 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
             # Data disks
             if data_vhds_uris and data_vhds_storage_accounts is None or \
                     data_vhds_uris is None and data_vhds_storage_accounts:
-                raise ValidationError('--data-vhds-uris and --data-vhds-storage-accounts should be used together.')
+                raise ArgumentUsageError('--data-vhds-uris and --data-vhds-storage-accounts should be used together.')
             if data_vhds_luns and data_vhds_uris is None:
-                raise ValidationError('--data-vhds-luns must be used together with --data-vhds-uris')
+                raise ArgumentUsageError('--data-vhds-luns must be used together with --data-vhds-uris')
             if data_vhds_uris:
                 # Generate LUNs
                 if data_vhds_luns is None:
@@ -4200,8 +4284,8 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                 len_data_vhds_luns = len(data_vhds_luns)
                 len_data_vhds_storage_accounts = len(data_vhds_storage_accounts)
                 if len_data_vhds_uris != len_data_vhds_luns or len_data_vhds_uris != len_data_vhds_storage_accounts:
-                    raise ValidationError('Length of --data-vhds-uris, --data-vhds-luns, --data-vhds-storage-accounts '
-                                          'must be same.')
+                    raise ArgumentUsageError(
+                        'Length of --data-vhds-uris, --data-vhds-luns, --data-vhds-storage-accounts must be same.')
                 # Generate full storage account ID
                 for i, storage_account in enumerate(data_vhds_storage_accounts):
                     if not is_valid_resource_id(storage_account):
@@ -4220,7 +4304,7 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                                      storage_profile=storage_profile)
     else:
         if managed_image is None:
-            raise CLIError('usage error: Please provide --managed-image')
+            raise RequiredArgumentMissingError('usage error: Please provide --managed-image')
         image_version = ImageVersion(publishing_profile=profile, location=location, tags=(tags or {}))
 
     return client.gallery_image_versions.begin_create_or_update(

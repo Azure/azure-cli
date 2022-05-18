@@ -3,6 +3,124 @@
 Release History
 ===============
 
+2.36.0
+++++++
+
+**ACR**
+
+* `acr task run`: Add `--no-format` option (#21983)
+* `acr task logs`: Add `--no-format` option (#21983)
+* `acr taskrun logs`: Add `--no-format` option (#21983)
+
+**AKS**
+
+* `az aks create`: Add `--nat-gateway-managed-outbound-ip-count` and `--nat-gateway-idle-timeout` to support nat gateway integration (#21623)
+* `az aks create`: Add `managedNATGateway` and `userAssignedNATGateway` to supported outbound type (#21623)
+* `az aks check-acr`: Bump canipull to 0.0.4-alpha to skip location check if cname returns only privatelink (#22092)
+
+**AMS**
+
+* `az ams asset-track create`: Add command to create an asset track (#22056)
+* `az ams asset-track show`: Add command to show an asset track (#22056)
+* `az ams asset-track list`: Add command to list all tracks under an asset (#22056)
+* `az ams asset-track update`: Add command to update the parameters of a track (#22056)
+* `az ams asset-track update-data`: Add update-data command to refresh the server in case track file was updated (#22056)
+* `az ams asset-track delete`: Add command to delete track (#22056)
+* `az ams streaming-endpoint get-skus`: Add command to get skus under a streaming endpoint (#22056)
+
+**App Config**
+
+* Fix feature flag import for missing description when using 'appconfig/kvset' profile (#21941)
+
+**App Service**
+
+* `az staticwebapp create`: Allow creating Static Web Apps not connected to a github repo (#22042)
+* Fix #21943: `az webapp config backup create`: Fix AttributeError 'str' object has no attribute 'get' (#22024)
+
+**Backup**
+
+* `az backup policy create/set`: Add support for creating/updating IaaSVM MBPD policy (#22105)
+
+**Bot Service**
+
+* `az bot directline/email/facebook/kik/msteams/skype/slack/sms/telegram create`: Add `--location` argument as specified by user to channel creation for regionality/EUDB (#21908)
+
+**CDN**
+
+* `az afd rule create`: Fix rule creation failure with action type RouteConfigurationOverride (#21975)
+* `az afd route create`: Fix route creation issue with disabled `--link-to-default-domain option` (#21975)
+* Fix #22066: `az cdn name-exists` missing type argument (#22139)
+
+**Compute**
+
+* `az vm create`: Fix the bug of "NoneType object has no attribute lower" when creating Flex VMSS without `--vm-sku` parameter (#22016)
+* `az restore-point create`: Add a new parameter `--source-restore-point` to support cross region copy (#21841)
+* `az restore-point show`: Add a new parameter `--instance-view` to show the instance view of a restore point and replace the deprecated `--expand` (#21841)
+* `az restore-point collection show`: Add a new parameter `--restore-points` to show all contained restore points in the restore point collection and replace the deprecated `--expand` (#21841)
+* `az sig image-version create`: Add new parameter `--target-region-cvm-encryption` to support Confidential VM encrypting the OS disk (#22091)
+* `az vm/vmss create`: Install guest attestation extension and enable system managed identity by default when Trusted Launch configuration is met (#22048)
+* `az vm/vmss create`: Add new parameter `--disable-integrity-monitoring` to disable the default behavior (installing guest attestation extension and turning on MSI) when creating VM/VMSS compliant with Trusted Launch (#22048)
+
+**IoT**
+
+* [BREAKING CHANGE] `iot dps access-policy`: Deprecate access-policy in favor of policy (#21928)
+
+**Key Vault**
+
+* `az keyvault key`: GA SKR and keyvault key rotation (#21989)
+* Fix #20520: `az keyvault network-rule`: Support removing multiple IP (#22025)
+
+**NetAppFiles**
+
+* `az netappfiles volume-group`: Add command group to manage volume group resources (#21897)
+
+**Network**
+
+* Fix #21845: `az network routeserver create` required `--public-ip-address` argument (#21864)
+* Fix #21829: `az network traffic-manager endpoint update` required `--type` argument (#21895)
+* Private link add `Microsoft.Network/privateLinkServices` provider (#21986)
+* Fix #22085: `az network nsg rule create` has no attribute "is_default" (#22109)
+
+**Packaging**
+
+* Release DEB package for Ubuntu 22.04 Jammy Jellyfish (#21948)
+* Release RPM package for RHEL 8, CentOS Stream 8 (#21655)
+* Release RPM package for Mariner 1.0, 2.0 preview (#22034)
+
+**RDBMS**
+
+* `az postgres server create`: Fix error message for invalid server names (#22019)
+
+**Security**
+
+* Add `az security automation` CLI commands (#21942)
+
+**Service Bus**
+
+* `az servicebus namespace create`: Add zone redundant parameter (#22099)
+* `az servicebus namespace authorization-rule keys renew`: Add `--key-value` parameter (#22115)
+
+**Service Connector**
+
+* `az webapp connection`: Add command `create sql/webpubsub` to support more target resources (#21894)
+
+**SQL**
+
+* `az sql mi create`, `az sql mi update`: Add `--service-principal-type` parameter to support Win Auth (Kerberos) (#21872)
+
+**Storage**
+
+* Fix #21914: `az storage blob upload`: Make block size larger (100MB) for large files (>200GB) (#21971)
+* `az storage account/container/blob generate-sas`: Add `--encryption-scope` (#21990)
+* Fix #21920: `az storage copy`&`az storage remove`: Hide credentials in warning message (#21980)
+* Add `--blob-endpoint/--file-endpoint/--table-endpoint/--queue-endpoint` for data service commands to support customized service endpoint (#21782)
+* GA storage file datalake soft delete (#22037)
+* `az storage cors add`: Allow `PATCH` for `--methods` (#22045)
+* `az storage entity`: Support specifying `EdmType` for `--entity` (#22060)
+* Fix #21966: `az storage blob download-batch`: Fix failure when `--pattern` is blob name (#22072)
+* Fix #21414: `az storage blob sync`: Fix the flag `--delete-destination` default to false (#21662)
+* `az storage account blob-inventory-policy create`: Add missing fields, add excludePrefix in filter (#22088)
+
 2.35.0
 ++++++
 
@@ -974,7 +1092,7 @@ Hotfix: Fix #19468: pip installs azure-cli 2.0.73 because of the dependency on d
 * Upgrade api-version for VM and VMSS from `2021-03-01` to `2021-04-01` (#19158)
 * `az vmss create/update`: Support spot restore policy to VM scale sets (#19189)
 * Add new examples for creating disk from share image gallery (#19270)
-* `az vm image​ list/list-offers/list-skus/list-publishers/show`: Add new parameter ​`--edge-zone`​ to support querying the image under edge zone (#19206)
+* `az vm image list/list-offers/list-skus/list-publishers/show`: Add new parameter `--edge-zone` to support querying the image under edge zone (#19206)
 * Fix the issue caused by the lack of `os_type` when creating VM from shared gallery id (#19291)
 * Update shared image gallery doc (#19427)
 * `az capacity reservation`: Add new commands to manage capacity reservation (#19416)

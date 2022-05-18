@@ -643,3 +643,44 @@ examples:
     text: |
         az eventhubs namespace identity remove --namespace-name mynamespace -g MyResourceGroup --system-assigned --user-assigned /subscriptions/{subscriptionId}}/resourceGroups/{resourcegroup}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MSIName
 """
+
+helps['eventhubs namespace schema-registry'] = """
+type: group
+short-summary: Manages eventhubs namespace schema registry.
+"""
+
+helps['eventhubs namespace schema-registry create'] = """
+type: command
+short-summary: Creates a schema group for an EventHub namespace
+examples:
+  - name: Create a schema group mySchemaGroup for eventhub namespace mynamespace
+    text: |
+        az eventhubs namespace schema-registry create --namespace-name mynamespace -g MyResourceGroup --name mySchemaGroup --schema-compatibility Forward --schema-type Avro --group-properties k1=v1 k2=v2
+"""
+
+helps['eventhubs namespace schema-registry list'] = """
+type: command
+short-summary: Lists all schema groups of the EventHub Namespace
+examples:
+  - name: List all schema groups within eventhub namespace mynamespace.
+    text: |
+        az eventhubs namespace schema-registry list --namespace-name mynamespace -g MyResourceGroup
+"""
+
+helps['eventhubs namespace schema-registry show'] = """
+type: command
+short-summary: Get a specific schema group from an EventHub namespace.
+examples:
+  - name: Get mySchemaGroup from namespace mynamespace
+    text: |
+        az eventhubs namespace schema-registry show --namespace-name mynamespace -g MyResourceGroup --name mySchemaGroup
+"""
+
+helps['eventhubs namespace schema-registry delete'] = """
+type: command
+short-summary: Deletes a schema group from a namespace
+examples:
+  - name: Deletes a schema group mySchemaGroup from a namespace
+    text: |
+        az eventhubs namespace schema-registry delete --namespace-name mynamespace -g MyResourceGroup --name mySchemaGroup
+"""

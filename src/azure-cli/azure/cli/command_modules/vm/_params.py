@@ -68,7 +68,7 @@ def load_arguments(self, _):
              "Windows Server, use 'Windows_Server'. To enable Multi-tenant Hosting Rights for Windows 10, "
              "use 'Windows_Client'. For more information see the Azure Windows VM online docs.",
         arg_type=get_enum_type(['Windows_Server', 'Windows_Client', 'RHEL_BYOS', 'SLES_BYOS', 'RHEL_BASE',
-                                'RHEL_SAPAPPS', 'RHEL_SAPHA', 'RHEL_EUS', 'RHEL_BASESAPAPPS', 'RHEL_BASESAPHA', 'SLES_STANDARD', 'SLES_SAP', 'SLES_HPC',
+                                'RHEL_SAPAPPS', 'RHEL_SAPHA', 'RHEL_EUS', 'RHEL_BASESAPAPPS', 'RHEL_BASESAPHA', 'SLES_STANDARD', 'SLES', 'SLES_SAP', 'SLES_HPC',
                                 'None', 'RHEL_ELS_6']))
 
     # StorageAccountTypes renamed to DiskStorageAccountTypes in 2018_06_01 of azure-mgmt-compute
@@ -186,9 +186,10 @@ def load_arguments(self, _):
         c.argument('logical_sector_size', type=int, help='Logical sector size in bytes for Ultra disks. Supported values are 512 ad 4096. 4096 is the default.')
         c.argument('tier', help='Performance tier of the disk (e.g, P4, S10) as described here: https://azure.microsoft.com/pricing/details/managed-disks/. Does not apply to Ultra disks.')
         c.argument('edge_zone', edge_zone_type)
-        c.argument('security_type', choices=['TrustedLaunch'], help='The security type of the VM. Applicable for OS disks only.', min_api='2020-12-01')
+        c.argument('security_type', arg_type=get_enum_type(self.get_models('DiskSecurityTypes', operation_group='disks')), help='The security type of the VM. Applicable for OS disks only.', min_api='2020-12-01')
         c.argument('support_hibernation', arg_type=get_three_state_flag(), help='Indicate the OS on a disk supports hibernation.', min_api='2020-12-01')
         c.argument('architecture', arg_type=get_enum_type(self.get_models('Architecture', operation_group='disks')), min_api='2021-12-01', help='CPU architecture.')
+        c.argument('data_access_auth_mode', arg_type=get_enum_type(['AzureActiveDirectory', 'None']), min_api='2021-12-01', help='Specify the auth mode when exporting or uploading to a disk or snapshot.')
     # endregion
 
     # region Snapshots
@@ -919,7 +920,7 @@ def load_arguments(self, _):
             c.argument('vm', existing_vm_name)
             c.argument('vmss_name', vmss_name_type)
             c.argument('application_version_ids', options_list=['--app-version-ids'], nargs='*', help="Space-separated application version ids to set to VM.")
-            c.argument('order_applications', action='store_true', help='Whether set order index at each gallery applications, the order index starts from 1.')
+            c.argument('order_applications', action='store_true', help='Whether to set order index at each gallery application. If specified, the first app version id gets specified an order = 1, then the next one 2, and so on. This parameter is meant to be used when the VMApplications specified by app version ids must be installed in a particular order; the lowest order is installed first.')
             c.argument('application_configuration_overrides', options_list=['--app-config-overrides'], nargs='*',
                        help='Space-separated application configuration overrides for each application version ids. '
                        'It should have the same number of items as the application version ids. Null is available for a application '
@@ -944,6 +945,7 @@ def load_arguments(self, _):
             c.ignore('aux_subscriptions')
             c.argument('edge_zone', edge_zone_type)
             c.argument('accept_term', action='store_true', help="Accept the license agreement and privacy statement.")
+            c.argument('disable_integrity_monitoring', action='store_true', min_api='2020-12-01', help='Disable the default behavior of installing guest attestation extension and enabling System Assigned Identity for Trusted Launch enabled VMs and VMSS.')
 
         with self.argument_context(scope, arg_group='Authentication') as c:
             c.argument('generate_ssh_keys', action='store_true', help='Generate SSH public and private key files if missing. The keys will be stored in the ~/.ssh directory')
@@ -1123,6 +1125,10 @@ def load_arguments(self, _):
             c.argument('gallery_name', options_list=['--gallery-name', '-r'], id_part='name', help='gallery name')
             c.argument('gallery_image_name', options_list=['--gallery-image-definition', '-i'], id_part='child_name_1', help='gallery image definition')
 
+    with self.argument_context('sig show') as c:
+        c.argument('select', help='The select expression to apply on the operation.')
+        c.argument('sharing_groups', action='store_true', help='The expand query option to query shared gallery groups')
+
     with self.argument_context('sig list-shared') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx))
         c.argument('shared_to', shared_to_type)
@@ -1236,6 +1242,7 @@ def load_arguments(self, _):
         c.argument('data_vhds_luns', nargs='+', help='Logical unit numbers (space-delimited) of source VHD URIs of data disks')
         c.argument('data_vhds_storage_accounts', options_list=['--data-vhds-storage-accounts', '--data-vhds-sa'], nargs='+', help='Names or IDs (space-delimited) of storage accounts of source VHD URIs of data disks')
         c.argument('replication_mode', min_api='2021-07-01', arg_type=get_enum_type(ReplicationMode), help='Optional parameter which specifies the mode to be used for replication. This property is not updatable.')
+        c.argument('target_region_cvm_encryption', nargs='+', min_api='2021-10-01', help='Space-separated list of customer managed key for Confidential VM encrypting the OS disk in the gallery artifact for each region. Format for each region: `<os_cvm_encryption_type>,<os_cvm_des>`. The valid values for os_cvm_encryption_type are EncryptedVMGuestStateOnlyWithPmk, EncryptedWithPmk, EncryptedWithCmk.')
 
     with self.argument_context('sig image-version list-shared') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')

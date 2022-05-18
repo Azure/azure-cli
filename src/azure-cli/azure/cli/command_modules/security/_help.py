@@ -9,7 +9,7 @@ from knack.help_files import helps  # pylint: disable=unused-import
 
 helps['security'] = """
 type: group
-short-summary: Manage your security posture with Azure Security Center.
+short-summary: Manage your security posture with Microsoft Defender for Cloud.
 """
 
 helps['security alert'] = """
@@ -57,6 +57,65 @@ examples:
   - name: Activate a security alert on a resource group scope.
     text: >
         az security alert update -g "myRg" --location "centralus" -n "alertName" --status "activate"
+"""
+
+helps['security alerts-suppression-rule'] = """
+type: group
+short-summary: View and manage alerts suppression rules.
+"""
+
+helps['security alerts-suppression-rule list'] = """
+type: command
+short-summary: List all alerts suppression rule on a subscription scope.
+examples:
+  - name: List alerts suppression rules.
+    text: >
+        az security alerts-suppression-rule list
+"""
+
+helps['security alerts-suppression-rule show'] = """
+type: command
+short-summary: Shows an alerts suppression rule.
+examples:
+  - name: Get an alerts suppression rule on a subscription scope.
+    text: >
+        az security alerts-suppression-rule show --rule-name RuleName
+"""
+
+helps['security alerts-suppression-rule update'] = """
+type: command
+short-summary: Updates or create an alerts suppression rule.
+examples:
+  - name: Create suppression rule with entities.
+    text: >
+        az security alerts-suppression-rule update --rule-name RuleName --alert-type "Test" --reason "Other" --comment "Test comment" --state "Enabled"
+"""
+
+helps['security alerts-suppression-rule delete'] = """
+type: command
+short-summary: Delete an alerts suppression rule.
+examples:
+  - name: Delete an alerts suppression rule.
+    text: >
+        az security alerts-suppression-rule delete --rule-name RuleName
+"""
+
+helps['security alerts-suppression-rule upsert_scope'] = """
+type: command
+short-summary: Update an alerts suppression rule with scope element.
+examples:
+  - name: Add "entities.host.dnsdomain" scope to an alerts suppression rule.
+    text: >
+        az security alerts-suppression-rule upsert_scope --field "entities.process.commandline" --contains-substring "example" --rule-name RuleName
+"""
+
+helps['security alerts-suppression-rule delete_scope'] = """
+type: command
+short-summary: Delete an alerts suppression rule scope.
+examples:
+  - name: Delete an alerts suppression rule scope.
+    text: >
+        az security alerts-suppression-rule delete_scope --rule-name RuleName --field "entities.process.commandline"
 """
 
 helps['security atp'] = """
@@ -386,23 +445,23 @@ examples:
 
 helps['security location'] = """
 type: group
-short-summary: Shows the Azure Security Center Home region location.
+short-summary: Shows the Microsoft Defender for Cloud Home region location.
 """
 
 helps['security location list'] = """
 type: command
-short-summary: Shows the Azure Security Center Home region location.
+short-summary: Shows the Microsoft Defender for Cloud Home region location.
 examples:
-  - name: Shows the Azure Security Center Home region location.
+  - name: Shows the Microsoft Defender for Cloud Home region location.
     text: >
         az security location list
 """
 
 helps['security location show'] = """
 type: command
-short-summary: Shows the Azure Security Center Home region location.
+short-summary: Shows the Microsoft Defender for Cloud Home region location.
 examples:
-  - name: Shows the Azure Security Center Home region location.
+  - name: Shows the Microsoft Defender for Cloud Home region location.
     text: >
         az security location show -n centralus
 """
@@ -996,4 +1055,154 @@ examples:
   - name: Get secure score control definitions.
     text: >
         az security secure-score-control-definitions list
+"""
+helps['security automation'] = """
+type: group
+short-summary: View your security automations.
+"""
+
+helps['security automation list'] = """
+type: command
+short-summary: List all security automations under subscription/resource group
+examples:
+  - name: List all security automations under subscription
+    text: >
+        az security automation list
+  - name: List all security automations under resource group
+    text: >
+        az security automation list -g 'sampleRg'
+"""
+
+helps['security automation show'] = """
+type: command
+short-summary: Shows a security automation.
+examples:
+  - name: Shows a security automation.
+    text: >
+        az security automation show -g Sample-RG -n 'sampleAutomation'
+"""
+
+helps['security automation create_or_update'] = """
+type: command
+short-summary: Creates or update a security automation.
+examples:
+  - name: Creates a security automation.
+    text: >
+        az security automation create_or_update -g Sample-RG -n sampleAutomation -l eastus --scopes '[{\"description\": \"Scope for 487bb485-b5b0-471e-9c0d-10717612f869\", \"scopePath\": \"/subscriptions/487bb485-b5b0-471e-9c0d-10717612f869\"}]' --sources '[{\"eventSource\":\"SubAssessments\",\"ruleSets\":null}]' --actions '[{\"actionType\":\"EventHub\",\"eventHubResourceId\":\"subscriptions/212f9889-769e-45ae-ab43-6da33674bd26/resourceGroups/ContosoSiemPipeRg/providers/Microsoft.EventHub/namespaces/contososiempipe-ns/eventhubs/surashed-test\",\"connectionString\":\"Endpoint=sb://contososiempipe-ns.servicebus.windows.net/;SharedAccessKeyName=Send;SharedAccessKey=dummy=;EntityPath=dummy\",\"SasPolicyName\":\"dummy\"}]'
+"""
+
+helps['security automation validate'] = """
+type: command
+short-summary: Validates a security automation model before create or update.
+examples:
+  - name: Validates a security automation model before create or update.
+    text: >
+        az security automation validate -g Sample-RG -n sampleAutomation -l eastus --scopes '[{\"description\": \"Scope for 487bb485-b5b0-471e-9c0d-10717612f869\", \"scopePath\": \"/subscriptions/487bb485-b5b0-471e-9c0d-10717612f869\"}]' --sources '[{\"eventSource\":\"SubAssessments\",\"ruleSets\":null}]' --actions '[{\"actionType\":\"EventHub\",\"eventHubResourceId\":\"subscriptions/212f9889-769e-45ae-ab43-6da33674bd26/resourceGroups/ContosoSiemPipeRg/providers/Microsoft.EventHub/namespaces/contososiempipe-ns/eventhubs/surashed-test\",\"connectionString\":\"Endpoint=sb://contososiempipe-ns.servicebus.windows.net/;SharedAccessKeyName=Send;SharedAccessKey=dummy=;EntityPath=dummy\",\"SasPolicyName\":\"dummy\"}]'
+"""
+
+helps['security automation delete'] = """
+type: command
+short-summary: Deletes a security automation.
+examples:
+  - name: Deletes a security automation.
+    text: >
+        az security automation delete -g 'sampleRg' -n 'sampleAutomation'
+"""
+
+helps['security automation-scope'] = """
+type: group
+short-summary: Creates security automation scope.
+"""
+
+helps['security automation-scope create'] = """
+type: command
+short-summary: Creates security automation scope.
+examples:
+  - name: Creates security automation scope.
+    text: >
+        az security automation-scope create --description 'this is a sample description' --scope-path '/subscriptions/03b601f1-7eca-4496-8f8d-355219eee254/'
+"""
+
+helps['security automation-rule'] = """
+type: group
+short-summary: Creates security automation rule.
+"""
+
+helps['security automation-rule create'] = """
+type: command
+short-summary: Creates security automation rule.
+examples:
+  - name: Creates security automation rule.
+    text: >
+        az security automation-rule create --expected-value 'High' --operator 'Equals' --property-j-path 'properties.metadata.severity' --property-type 'string'
+"""
+
+helps['security automation-rule-set'] = """
+type: group
+short-summary: Creates security automation rule set.
+"""
+
+helps['security automation-rule-set create'] = """
+type: command
+short-summary: Creates security automation rule set.
+examples:
+  - name: Creates security automation rule set.
+    text: >
+        az security automation-rule-set create
+"""
+
+helps['security automation-source'] = """
+type: group
+short-summary: Creates security automation source.
+"""
+
+helps['security automation-source create'] = """
+type: command
+short-summary: Creates security automation source.
+examples:
+  - name: Creates security automation source.
+    text: >
+        az security automation-source create --event-source 'Assessments'
+"""
+
+helps['security automation-action-logic-app'] = """
+type: group
+short-summary: Creates security automation logic app action.
+"""
+
+helps['security automation-action-logic-app create'] = """
+type: command
+short-summary: Creates security automation logic app action.
+examples:
+  - name: Creates security automation logic app action.
+    text: >
+        az security automation-action-logic-app create --logic-app-resource-id '/subscriptions/03b601f1-7eca-4496-8f8d-355219eee254/resourceGroups/sample-rg/providers/Microsoft.Logic/workflows/LA' --uri 'https://ms.portal.azure.com/'
+"""
+
+helps['security automation-action-event-hub'] = """
+type: group
+short-summary: Creates security automation event hub action.
+"""
+
+helps['security automation-action-event-hub create'] = """
+type: command
+short-summary: Creates security automation event hub action.
+examples:
+  - name: Creates security automation event hub action.
+    text: >
+        az security automation-action-event-hub create --event-hub-resource-id '/subscriptions/03b601f1-7eca-4496-8f8d-355219eee254/resourceGroups/sample-rg/providers/Microsoft.EventHub/namespaces/evenhubnamespace1/eventhubs/evenhubname1' --connection-string 'Endpoint=sb://dummy/;SharedAccessKeyName=dummy;SharedAccessKey=dummy;EntityPath=dummy' --sas-policy-name 'Send'
+"""
+
+helps['security automation-action-workspace'] = """
+type: group
+short-summary: Creates security automation workspace action.
+"""
+
+helps['security automation-action-workspace create'] = """
+type: command
+short-summary: Creates security automation workspace action.
+examples:
+  - name: Creates security automation workspace action.
+    text: >
+        az security automation-action-workspace create --workspace-resource-id '/subscriptions/03b601f1-7eca-4496-8f8d-355219eee254/resourcegroups/sample-rg/providers/microsoft.operationalinsights/workspaces/sampleworkspace'
 """
