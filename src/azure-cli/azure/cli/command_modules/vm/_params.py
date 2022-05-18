@@ -68,7 +68,7 @@ def load_arguments(self, _):
              "Windows Server, use 'Windows_Server'. To enable Multi-tenant Hosting Rights for Windows 10, "
              "use 'Windows_Client'. For more information see the Azure Windows VM online docs.",
         arg_type=get_enum_type(['Windows_Server', 'Windows_Client', 'RHEL_BYOS', 'SLES_BYOS', 'RHEL_BASE',
-                                'RHEL_SAPAPPS', 'RHEL_SAPHA', 'RHEL_EUS', 'RHEL_BASESAPAPPS', 'RHEL_BASESAPHA', 'SLES_STANDARD', 'SLES_SAP', 'SLES_HPC',
+                                'RHEL_SAPAPPS', 'RHEL_SAPHA', 'RHEL_EUS', 'RHEL_BASESAPAPPS', 'RHEL_BASESAPHA', 'SLES_STANDARD', 'SLES', 'SLES_SAP', 'SLES_HPC',
                                 'None', 'RHEL_ELS_6']))
 
     # StorageAccountTypes renamed to DiskStorageAccountTypes in 2018_06_01 of azure-mgmt-compute
@@ -189,6 +189,7 @@ def load_arguments(self, _):
         c.argument('security_type', arg_type=get_enum_type(self.get_models('DiskSecurityTypes', operation_group='disks')), help='The security type of the VM. Applicable for OS disks only.', min_api='2020-12-01')
         c.argument('support_hibernation', arg_type=get_three_state_flag(), help='Indicate the OS on a disk supports hibernation.', min_api='2020-12-01')
         c.argument('architecture', arg_type=get_enum_type(self.get_models('Architecture', operation_group='disks')), min_api='2021-12-01', help='CPU architecture.')
+        c.argument('data_access_auth_mode', arg_type=get_enum_type(['AzureActiveDirectory', 'None']), min_api='2021-12-01', help='Specify the auth mode when exporting or uploading to a disk or snapshot.')
     # endregion
 
     # region Snapshots

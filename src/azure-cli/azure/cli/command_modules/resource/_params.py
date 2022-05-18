@@ -12,6 +12,7 @@ def load_arguments(self, _):
     from azure.mgmt.resource.locks.models import LockLevel
     from azure.mgmt.resource.managedapplications.models import ApplicationLockLevel
     from azure.mgmt.resource.policy.models import (ExemptionCategory, EnforcementMode)
+    from azure.cli.core.commands.validators import get_default_location_from_resource_group
 
     from azure.cli.core.api import get_subscription_id_list
     from azure.cli.core.commands.parameters import (
@@ -40,7 +41,7 @@ def load_arguments(self, _):
     existing_policy_definition_name_type = CLIArgumentType(options_list=['--name', '-n'], completer=get_policy_completion_list, help='The policy definition name.')
     existing_policy_set_definition_name_type = CLIArgumentType(options_list=['--name', '-n'], completer=get_policy_set_completion_list, help='The policy set definition name.')
     subscription_type = CLIArgumentType(options_list='--subscription', FilesCompleter=get_subscription_id_list, help='The subscription id of the policy [set] definition.')
-    management_group_name_type = CLIArgumentType(options_list='--management-group', help='The name of the management group of the policy [set] definition.')
+    management_group_name_type = CLIArgumentType(options_list='--management-group', help='The name of the management group of the policy [set] definition. This parameter is required if your policy set is scoped to a management group.')
     identity_scope_type = CLIArgumentType(help="Scope that the system assigned identity can access")
     identity_role_type = CLIArgumentType(options_list=['--role'], help="Role name or id that will be assigned to the managed identity")
     extended_json_format_type = CLIArgumentType(options_list=['--handle-extended-json-format', '-j'], action='store_true',
@@ -97,7 +98,8 @@ def load_arguments(self, _):
                                                    help="A path to a uiFormDefinition file in the file system")
 
     bicep_target_platform_type = CLIArgumentType(options_list=['--target-platform', '-t'],
-                                                 arg_type=get_enum_type(["win-x64", "linux-musl-x64", "linux-x64", "osx-x64"]),
+                                                 arg_type=get_enum_type(
+                                                     ["win-x64", "linux-musl-x64", "linux-x64", "osx-x64"]),
                                                  help="The platform the Bicep CLI will be running on. Set this to skip automatic platform detection if it does not work properly.")
 
     _PROVIDER_HELP_TEXT = 'the resource namespace, aka \'provider\''
@@ -504,6 +506,7 @@ def load_arguments(self, _):
     with self.argument_context('group delete') as c:
         c.argument('resource_group_name', resource_group_name_type,
                    options_list=['--name', '-n', '--resource-group', '-g'], local_context_attribute=None)
+        c.argument('force_deletion_types', options_list=['--force-deletion-types', '-f'], arg_type=get_enum_type(['Microsoft.Compute/virtualMachines', 'Microsoft.Compute/virtualMachineScaleSets']), min_api='2021-04-01', help='The resource types you want to force delete.')
 
     with self.argument_context('tag') as c:
         c.argument('tag_name', tag_name_type)
@@ -663,3 +666,49 @@ def load_arguments(self, _):
 
     with self.argument_context('bicep upgrade') as c:
         c.argument('target_platform', arg_type=bicep_target_platform_type)
+
+    with self.argument_context('resourcemanagement private-link create') as c:
+        c.argument('resource_group', arg_type=resource_group_name_type,
+                   help='The name of the resource group.')
+        c.argument('name', options_list=[
+                   '--name', '-n'], help='The name of the resource management private link.')
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group,
+                   help='the region to create the resource management private link')
+
+    with self.argument_context('resourcemanagement private-link show') as c:
+        c.argument('resource_group', arg_type=resource_group_name_type,
+                   help='The name of the resource group.')
+        c.argument('name', options_list=[
+                   '--name', '-n'], help='The name of the resource management private link.')
+
+    with self.argument_context('resourcemanagement private-link list') as c:
+        c.argument('resource_group', arg_type=resource_group_name_type,
+                   help='The name of the resource group.')
+
+    with self.argument_context('resourcemanagement private-link delete') as c:
+        c.argument('resource_group', arg_type=resource_group_name_type,
+                   help='The name of the resource group.')
+        c.argument('name', options_list=[
+                   '--name', '-n'], help='The name of the resource management private link.')
+
+    with self.argument_context('private-link association create') as c:
+        c.argument('management_group_id', arg_type=management_group_id_type)
+        c.argument('name', options_list=[
+                   '--name', '-n'], help='The name of the private link association')
+        c.argument('privatelink', options_list=[
+                   '--privatelink', '-p'], help='The name of the private link')
+        c.argument('public_network_access', options_list=['--public-network-access', '-a'], arg_type=get_enum_type(
+            ['enabled', 'disabled']), help='restrict traffic to private link')
+
+    with self.argument_context('private-link association show') as c:
+        c.argument('management_group_id', arg_type=management_group_id_type)
+        c.argument('name', options_list=[
+                   '--name', '-n'], help='The name of the private link association')
+
+    with self.argument_context('private-link association list') as c:
+        c.argument('management_group_id', arg_type=management_group_id_type)
+
+    with self.argument_context('private-link association delete') as c:
+        c.argument('management_group_id', arg_type=management_group_id_type)
+        c.argument('name', options_list=[
+                   '--name', '-n'], help='The name of the private link association')

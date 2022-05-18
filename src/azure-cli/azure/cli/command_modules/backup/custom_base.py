@@ -179,7 +179,7 @@ def backup_now(cmd, client, resource_group_name, vault_name, item_name, retain_u
 
 
 def disable_protection(cmd, client, resource_group_name, vault_name, item_name, container_name,
-                       backup_management_type=None, workload_type=None, delete_backup_data=False, **kwargs):
+                       backup_management_type=None, workload_type=None, delete_backup_data=False, tenant_id=None):
 
     items_client = backup_protected_items_cf(cmd.cli_ctx)
     item = show_item(cmd, items_client, resource_group_name, vault_name, container_name, item_name,
@@ -189,19 +189,20 @@ def disable_protection(cmd, client, resource_group_name, vault_name, item_name, 
     if isinstance(item, list):
         raise ValidationError("Multiple items found. Please give native names instead.")
 
+    if delete_backup_data:
+        return common.delete_protected_item(cmd, client, resource_group_name, vault_name, item, tenant_id)
+
     if item.properties.backup_management_type.lower() == "azureiaasvm":
-        return custom.disable_protection(cmd, client, resource_group_name, vault_name, item, delete_backup_data,
-                                         **kwargs)
+        return custom.disable_protection(cmd, client, resource_group_name, vault_name, item)
     if item.properties.backup_management_type.lower() == "azurestorage":
-        return custom_afs.disable_protection(cmd, client, resource_group_name, vault_name, item, delete_backup_data,
-                                             **kwargs)
+        return custom_afs.disable_protection(cmd, client, resource_group_name, vault_name, item)
     if item.properties.backup_management_type.lower() == "azureworkload":
-        return custom_wl.disable_protection(cmd, client, resource_group_name, vault_name, item, delete_backup_data)
+        return custom_wl.disable_protection(cmd, client, resource_group_name, vault_name, item)
     return None
 
 
 def update_policy_for_item(cmd, client, resource_group_name, vault_name, container_name, item_name, policy_name,
-                           workload_type=None, backup_management_type=None):
+                           workload_type=None, backup_management_type=None, tenant_id=None):
 
     items_client = backup_protected_items_cf(cmd.cli_ctx)
     item = show_item(cmd, items_client, resource_group_name, vault_name, container_name, item_name,
@@ -214,29 +215,40 @@ def update_policy_for_item(cmd, client, resource_group_name, vault_name, contain
     policy = show_policy(protection_policies_cf(cmd.cli_ctx), resource_group_name, vault_name, policy_name)
     custom_help.validate_policy(policy)
 
+    is_critical_operation = custom_help.has_resource_guard_mapping(cmd.cli_ctx, resource_group_name, vault_name,
+                                                                   "updateProtection")
+
     if item.properties.backup_management_type.lower() == "azureiaasvm":
-        return custom.update_policy_for_item(cmd, client, resource_group_name, vault_name, item, policy)
+        return custom.update_policy_for_item(cmd, client, resource_group_name, vault_name, item, policy, tenant_id,
+                                             is_critical_operation)
 
     if item.properties.backup_management_type.lower() == "azurestorage":
-        return custom_afs.update_policy_for_item(cmd, client, resource_group_name, vault_name, item, policy)
+        return custom_afs.update_policy_for_item(cmd, client, resource_group_name, vault_name, item, policy, tenant_id,
+                                                 is_critical_operation)
 
     if item.properties.backup_management_type.lower() == "azureworkload":
-        return custom_wl.update_policy_for_item(cmd, client, resource_group_name, vault_name, item, policy)
+        return custom_wl.update_policy_for_item(cmd, client, resource_group_name, vault_name, item, policy, tenant_id,
+                                                is_critical_operation)
     return None
 
 
-def set_policy(client, resource_group_name, vault_name, policy=None, name=None,
-               fix_for_inconsistent_items=None, backup_management_type=None):
+def set_policy(cmd, client, resource_group_name, vault_name, policy=None, name=None,
+               fix_for_inconsistent_items=None, backup_management_type=None, tenant_id=None):
     if backup_management_type is None and policy is not None:
         policy_object = custom_help.get_policy_from_json(client, policy)
         backup_management_type = policy_object.properties.backup_management_type.lower()
+    is_critical_operation = custom_help.has_resource_guard_mapping(cmd.cli_ctx, resource_group_name, vault_name,
+                                                                   "updatePolicy")
+
     if backup_management_type.lower() == "azureiaasvm":
-        return custom.set_policy(client, resource_group_name, vault_name, policy, name)
+        return custom.set_policy(cmd, client, resource_group_name, vault_name, policy, name, tenant_id,
+                                 is_critical_operation)
     if backup_management_type.lower() == "azurestorage":
-        return custom_afs.set_policy(client, resource_group_name, vault_name, policy, name)
+        return custom_afs.set_policy(cmd, client, resource_group_name, vault_name, policy, name, tenant_id,
+                                     is_critical_operation)
     if backup_management_type.lower() == "azureworkload":
-        return custom_wl.set_policy(client, resource_group_name, vault_name, policy, name,
-                                    fix_for_inconsistent_items)
+        return custom_wl.set_policy(cmd, client, resource_group_name, vault_name, policy, name,
+                                    fix_for_inconsistent_items, tenant_id, is_critical_operation)
     return None
 
 

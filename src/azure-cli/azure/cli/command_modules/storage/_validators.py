@@ -887,26 +887,9 @@ def table_permission_validator(namespace):
         namespace.permission = TableSasPermissions(_str=namespace.permission)
 
 
-def validate_container_public_access(cmd, namespace):
-    from .sdkutil import get_container_access_type
-    t_base_blob_svc = cmd.get_models('blob.baseblobservice#BaseBlobService')
-
-    if namespace.public_access:
-        namespace.public_access = get_container_access_type(cmd.cli_ctx, namespace.public_access.lower())
-
-        if hasattr(namespace, 'signed_identifiers'):
-            # must retrieve the existing ACL to simulate a patch operation because these calls
-            # are needlessly conflated
-            ns = vars(namespace)
-            validate_client_parameters(cmd, namespace)
-            account = ns.get('account_name')
-            key = ns.get('account_key')
-            cs = ns.get('connection_string')
-            sas = ns.get('sas_token')
-            client = get_storage_data_service_client(cmd.cli_ctx, t_base_blob_svc, account, key, cs, sas)
-            container = ns.get('container_name')
-            lease_id = ns.get('lease_id')
-            ns['signed_identifiers'] = client.get_container_acl(container, lease_id=lease_id)
+def validate_container_public_access(namespace):
+    if namespace.public_access and namespace.public_access == 'off':
+        namespace.public_access = None
 
 
 def validate_container_nfsv3_squash(cmd, namespace):
@@ -1462,6 +1445,8 @@ def blob_tier_validator_track2(cmd, namespace):
 
 
 def blob_download_file_path_validator(namespace):
+    if namespace.file_path is None:
+        return
     if os.path.isdir(namespace.file_path):
         from azure.cli.core.azclierror import FileOperationError
         raise FileOperationError('File is expected, not a directory: {}'.format(namespace.file_path))
@@ -1669,25 +1654,12 @@ def pop_data_client_auth(ns):
     del ns.sas_token
 
 
-def validate_client_auth_parameter(cmd, ns):
-    from .sdkutil import get_container_access_type
-    if ns.public_access:
-        ns.public_access = get_container_access_type(cmd.cli_ctx, ns.public_access.lower())
-    if ns.default_encryption_scope and ns.prevent_encryption_scope_override is not None:
-        # simply try to retrieve the remaining variables from environment variables
-        if not ns.account_name:
-            ns.account_name = get_config_value(cmd, 'storage', 'account', None)
-        if ns.account_name and not ns.resource_group_name:
-            ns.resource_group_name = _query_account_rg(cmd.cli_ctx, account_name=ns.account_name)[0]
-        pop_data_client_auth(ns)
-    elif (ns.default_encryption_scope and ns.prevent_encryption_scope_override is None) or \
-         (not ns.default_encryption_scope and ns.prevent_encryption_scope_override is not None):
+def validate_encryption_scope_parameter(ns):
+    if (ns.default_encryption_scope and ns.prevent_encryption_scope_override is None) or \
+            (not ns.default_encryption_scope and ns.prevent_encryption_scope_override is not None):
         raise CLIError("usage error: You need to specify both --default-encryption-scope and "
                        "--prevent-encryption-scope-override to set encryption scope information "
                        "when creating container.")
-    else:
-        validate_client_parameters(cmd, ns)
-    validate_metadata(ns)
 
 
 def validate_encryption_scope_client_params(ns):

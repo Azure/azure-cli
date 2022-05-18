@@ -6566,6 +6566,20 @@ class VMSSOrchestrationModeScenarioTest(ScenarioTest):
             self.check('platformFaultDomain', 0)
         ])
 
+
+    @ResourceGroupPreparer(name_prefix='cli_test_simple_placement')
+    def test_vmss_simple_placement(self, resource_group):
+        self.kwargs.update({
+            'vmss': self.create_random_name('vmss', 10),
+        })
+        self.cmd('vmss create -g {rg} -n {vmss} --orchestration-mode Flexible --platform-fault-domain-count 2 '
+                 '--single-placement-group true --image UbuntuLTS --vm-sku Standard_M8ms --admin-username clitest '
+                 '-l eastus2euap --upgrade-policy-mode automatic', checks=[
+            self.check('vmss.singlePlacementGroup', True),
+            self.check('vmss.platformFaultDomainCount', 2),
+        ])
+
+
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_orchestration_mode_', location='eastus2euap')
     @VirtualNetworkPreparer(location='eastus2euap', parameter_name='virtual_network')
@@ -7084,6 +7098,19 @@ class DiskHibernationScenarioTest(ScenarioTest):
     def test_disk_hibernation(self):
         self.cmd('disk create -g {rg} -n d1 --size-gb 10 --support-hibernation true', checks=[
             self.check('supportsHibernation', True)
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_disk_data_access_auth_mode_', location='eastus2euap')
+    def test_disk_data_access_auth_mode(self):
+        self.kwargs.update({
+            'disk': self.create_random_name('disk-', 10),
+            'disk1': self.create_random_name('disk-', 10)
+        })
+        self.cmd('disk create -g {rg} -n {disk} --size-gb 10 --data-access-auth-mode AzureActiveDirectory', checks=[
+            self.check('dataAccessAuthMode', 'AzureActiveDirectory')
+        ])
+        self.cmd('disk create -g {rg} -n {disk1} --size-gb 10 --data-access-auth-mode None', checks=[
+            self.check('dataAccessAuthMode', 'None')
         ])
 
 

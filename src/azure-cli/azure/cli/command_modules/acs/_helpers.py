@@ -64,6 +64,18 @@ def safe_lower(obj: Any) -> Any:
     return obj
 
 
+def get_property_from_dict_or_object(obj, property_name) -> Any:
+    """Get the value corresponding to the property name from a dictionary or object.
+
+    Note: Would raise exception if the property does not exist.
+
+    :return: Any
+    """
+    if isinstance(obj, dict):
+        return obj[property_name]
+    return getattr(obj, property_name)
+
+
 def check_is_msi_cluster(mc: ManagedCluster) -> bool:
     """Check `mc` object to determine whether managed identity is enabled.
 
@@ -83,6 +95,16 @@ def check_is_private_cluster(mc: ManagedCluster) -> bool:
     """
     if mc and mc.api_server_access_profile:
         return bool(mc.api_server_access_profile.enable_private_cluster)
+    return False
+
+
+def check_is_managed_aad_cluster(mc: ManagedCluster) -> bool:
+    """Check `mc` object to determine whether managed aad is enabled.
+
+    :return: bool
+    """
+    if mc and mc.aad_profile is not None and mc.aad_profile.managed:
+        return True
     return False
 
 

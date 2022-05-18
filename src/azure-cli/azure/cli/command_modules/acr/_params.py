@@ -74,7 +74,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     with self.argument_context('acr') as c:
         c.argument('tags', arg_type=tags_type)
-        c.argument('registry_name', options_list=['--name', '-n'], help='The name of the container registry. You can configure the default registry name using `az configure --defaults acr=<registry name>`', completer=get_resource_name_completion_list(REGISTRY_RESOURCE_TYPE), configured_default='acr', validator=validate_registry_name)
+        c.argument('registry_name', options_list=['--name', '-n'], help='The name of the container registry. It should be specified in lower case. You can configure the default registry name using `az configure --defaults acr=<registry name>`', completer=get_resource_name_completion_list(REGISTRY_RESOURCE_TYPE), configured_default='acr', validator=validate_registry_name)
         c.argument('tenant_suffix', options_list=['--suffix'], help="The tenant suffix in registry login server. You may specify '--suffix tenant' if your registry login server is in the format 'registry-tenant.azurecr.io'. Applicable if you\'re accessing the registry from a different subscription or you have permission to access images but not the permission to manage the registry resource.")
         c.argument('sku', help='The SKU of the container registry', arg_type=get_enum_type(SkuName))
         c.argument('admin_enabled', help='Indicates whether the admin user is enabled', arg_type=get_three_state_flag())
@@ -93,7 +93,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('auth_mode', help='Auth mode of the source registry.', arg_type=get_enum_type(SourceRegistryLoginMode))
         # Overwrite default shorthand of cmd to make availability for acr usage
         c.argument('cmd', options_list=['--__cmd__'])
-        c.argument('cmd_value', help="Commands to execute. This also supports additional docker run parameters or even other docker commands.", options_list=['--cmd'])
+        c.argument('cmd_value', help="Commands to execute. This also supports additional docker run parameters (https://docs.docker.com/engine/reference/commandline/run/) or even other docker commands (https://docs.docker.com/engine/reference/commandline/docker/).", options_list=['--cmd'])
         c.argument('zone_redundancy', is_preview=True, arg_type=get_enum_type(ZoneRedundancy), help="Indicates whether or not zone redundancy should be enabled for this registry or replication. For more information, such as supported locations, please visit https://aka.ms/acr/az. Zone-redundancy cannot be updated. Defaults to 'Disabled'.")
         c.argument('allow_exports', arg_type=get_three_state_flag(), is_preview=True, help="Configure exportPolicy to allow/disallow artifacts from being exported from this registry. Artifacts can be exported via import or transfer operations. For more information, please visit https://aka.ms/acr/export-policy.")
 
