@@ -1092,7 +1092,7 @@ Hotfix: Fix #19468: pip installs azure-cli 2.0.73 because of the dependency on d
 * Upgrade api-version for VM and VMSS from `2021-03-01` to `2021-04-01` (#19158)
 * `az vmss create/update`: Support spot restore policy to VM scale sets (#19189)
 * Add new examples for creating disk from share image gallery (#19270)
-* `az vm image​ list/list-offers/list-skus/list-publishers/show`: Add new parameter ​`--edge-zone`​ to support querying the image under edge zone (#19206)
+* `az vm image list/list-offers/list-skus/list-publishers/show`: Add new parameter `--edge-zone` to support querying the image under edge zone (#19206)
 * Fix the issue caused by the lack of `os_type` when creating VM from shared gallery id (#19291)
 * Update shared image gallery doc (#19427)
 * `az capacity reservation`: Add new commands to manage capacity reservation (#19416)
