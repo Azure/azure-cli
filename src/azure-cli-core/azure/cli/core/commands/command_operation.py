@@ -471,7 +471,8 @@ class WaitCommandOperation(BaseCommandOperation):
                 if provisioning_state:
                     return provisioning_state
                 # some SDK, like resource, has 'provisioningState' under 'properties' dict
-                provisioning_state = properties['provisioningState']
+                if 'provisioningState' in properties:
+                    provisioning_state = properties['provisioningState']
 
         return provisioning_state
 
