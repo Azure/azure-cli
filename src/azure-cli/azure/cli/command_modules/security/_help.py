@@ -9,7 +9,7 @@ from knack.help_files import helps  # pylint: disable=unused-import
 
 helps['security'] = """
 type: group
-short-summary: Manage your security posture with Azure Security Center.
+short-summary: Manage your security posture with Microsoft Defender for Cloud.
 """
 
 helps['security alert'] = """
@@ -445,23 +445,23 @@ examples:
 
 helps['security location'] = """
 type: group
-short-summary: Shows the Azure Security Center Home region location.
+short-summary: Shows the Microsoft Defender for Cloud Home region location.
 """
 
 helps['security location list'] = """
 type: command
-short-summary: Shows the Azure Security Center Home region location.
+short-summary: Shows the Microsoft Defender for Cloud Home region location.
 examples:
-  - name: Shows the Azure Security Center Home region location.
+  - name: Shows the Microsoft Defender for Cloud Home region location.
     text: >
         az security location list
 """
 
 helps['security location show'] = """
 type: command
-short-summary: Shows the Azure Security Center Home region location.
+short-summary: Shows the Microsoft Defender for Cloud Home region location.
 examples:
-  - name: Shows the Azure Security Center Home region location.
+  - name: Shows the Microsoft Defender for Cloud Home region location.
     text: >
         az security location show -n centralus
 """
