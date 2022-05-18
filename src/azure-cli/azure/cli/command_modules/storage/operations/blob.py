@@ -119,7 +119,6 @@ def list_container_rm(cmd, client, resource_group_name, account_name, include_de
 
 
 def container_rm_exists(client, resource_group_name, account_name, container_name):
-    from azure.core.exceptions import HttpResponseError
     try:
         container = client.get(resource_group_name=resource_group_name,
                                account_name=account_name, container_name=container_name)
