@@ -596,7 +596,7 @@ examples:
 
 helps['sig show'] = """
 type: command
-short-summary: Retrieves information about a Shared Image Gallery.
+short-summary: Retrieve information about a Shared Image Gallery.
 """
 
 helps['sig image-definition'] = """
