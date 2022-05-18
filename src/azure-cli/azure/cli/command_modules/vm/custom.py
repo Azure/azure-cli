@@ -4111,6 +4111,13 @@ def update_image_galleries(cmd, resource_group_name, gallery_name, gallery, perm
     return client.galleries.begin_create_or_update(resource_group_name, gallery_name, gallery, **kwargs)
 
 
+def show_image_gallery(cmd, resource_group_name, gallery_name, select=None, sharing_groups=None):
+    if sharing_groups:
+        sharing_groups = 'sharingProfile/Groups'
+    client = _compute_client_factory(cmd.cli_ctx)
+    return client.galleries.get(resource_group_name, gallery_name, select=select, expand=sharing_groups)
+
+
 def create_image_gallery(cmd, resource_group_name, gallery_name, description=None,
                          location=None, no_wait=False, tags=None, permissions=None, soft_delete=None):
     Gallery = cmd.get_models('Gallery')
