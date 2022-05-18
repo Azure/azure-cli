@@ -727,7 +727,11 @@ def storage_blob_delete_batch(client, source, source_container_name, pattern=Non
             'if_none_match': if_none_match,
             'timeout': timeout
         }
-        return container_client.delete_blob(**delete_blob_args)
+        try:
+            container_client.delete_blob(**delete_blob_args)
+            return blob_name
+        except Exception as ex:
+            pass
 
     source_blobs = list(collect_blob_objects(client, source_container_name, pattern))
 
@@ -749,7 +753,7 @@ def storage_blob_delete_batch(client, source, source_container_name, pattern=Non
             logger.warning('  - %s', blob)
         return []
 
-    results = [result for include, result in (_delete_blob(blob[0]) for blob in source_blobs) if include]
+    results = [result for (include, result) in (_delete_blob(blob[0]) for blob in source_blobs) if result]
     num_failures = len(source_blobs) - len(results)
     if num_failures:
         logger.warning('%s of %s blobs not deleted due to "Failed Precondition"', num_failures, len(source_blobs))
