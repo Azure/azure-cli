@@ -23,8 +23,7 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           validate_fs_public_access, validate_logging_version, validate_or_policy, validate_policy,
                           get_api_version_type, blob_download_file_path_validator, blob_tier_validator, validate_subnet,
                           validate_immutability_arguments, validate_blob_name_for_upload, validate_share_close_handle,
-                          add_upload_progress_callback, blob_tier_validator_track2, add_download_progress_callback,
-                          services_type_v2, resource_type_type_v2)
+                          blob_tier_validator_track2, services_type_v2, resource_type_type_v2)
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines, too-many-branches, line-too-long
@@ -968,7 +967,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('blob_type', options_list=('--type', '-t'), validator=validate_blob_type,
                    arg_type=get_enum_type(get_blob_types()), arg_group="Additional Flags")
         c.argument('validate_content', action='store_true', min_api='2016-05-31', arg_group="Content Control")
-        c.extra('no_progress', progress_type, validator=add_upload_progress_callback, arg_group="Additional Flags")
+        c.extra('no_progress', progress_type, validator=add_progress_callback, arg_group="Additional Flags")
         c.extra('tier', tier_type, validator=blob_tier_validator_track2, arg_group="Additional Flags")
         c.argument('encryption_scope', validator=validate_encryption_scope_client_params,
                    help='A predefined encryption scope used to encrypt the data on the service.',
@@ -994,7 +993,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('maxsize_condition', arg_group='Content Control')
         c.argument('validate_content', action='store_true', min_api='2016-05-31', arg_group='Content Control')
         c.argument('blob_type', options_list=('--type', '-t'), arg_type=get_enum_type(get_blob_types()))
-        c.extra('no_progress', progress_type, validator=add_upload_progress_callback)
+        c.extra('no_progress', progress_type, validator=add_progress_callback)
         c.extra('tier', tier_type, is_preview=True, validator=blob_tier_validator_track2)
         c.extra('overwrite', arg_type=get_three_state_flag(), is_preview=True,
                 help='Whether the blob to be uploaded should overwrite the current data. If True, blob upload '
@@ -1018,7 +1017,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='End of byte range to use for downloading a section of the blob. If end_range is given, '
                         'start_range must be provided. The start_range and end_range params are inclusive. '
                         'Ex: start_range=0, end_range=511 will download first 512 bytes of blob.')
-        c.extra('no_progress', progress_type, validator=add_download_progress_callback)
+        c.extra('no_progress', progress_type, validator=add_progress_callback)
         c.extra('snapshot', help='The snapshot parameter is an opaque DateTime value that, when present, '
                                  'specifies the blob snapshot to retrieve.')
         c.extra('lease', options_list=['--lease-id'], help='Required if the blob has an active lease.')
