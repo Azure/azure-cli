@@ -55,6 +55,7 @@ from azure.cli.command_modules.acs.tests.latest.mocks import (
     MockClient,
     MockCmd,
 )
+from azure.cli.command_modules.acs.tests.latest.utils import get_test_data_file_path
 from azure.cli.core.azclierror import (
     AzureInternalError,
     AzCLIError,
@@ -1044,7 +1045,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         with patch(
             "azure.cli.command_modules.acs.managed_cluster_decorator.AKSManagedClusterContext.get_identity_by_msi_client",
             return_value=identity_obj,
-        ):
+        ) as get_identity_helper:
             ctx_2 = AKSManagedClusterContext(
                 self.cmd,
                 AKSManagedClusterParamDict(
@@ -1057,6 +1058,9 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
                 DecoratorMode.CREATE,
             )
             self.assertEqual(ctx_2.get_user_assigned_identity_client_id(), "test_client_id")
+            get_identity_helper.assert_called_with("test_assign_identity")
+            self.assertEqual(ctx_2.get_user_assigned_identity_client_id("custom_assign_identity"), "test_client_id")
+            get_identity_helper.assert_called_with("custom_assign_identity")
 
     def test_get_user_assigned_identity_object_id(self):
         ctx_1 = AKSManagedClusterContext(
@@ -1076,7 +1080,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         with patch(
             "azure.cli.command_modules.acs.managed_cluster_decorator.AKSManagedClusterContext.get_identity_by_msi_client",
             return_value=identity_obj,
-        ):
+        ) as get_identity_helper:
             ctx_2 = AKSManagedClusterContext(
                 self.cmd,
                 AKSManagedClusterParamDict(
@@ -1088,10 +1092,10 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
                 self.models,
                 DecoratorMode.CREATE,
             )
-            self.assertEqual(
-                ctx_2.get_user_assigned_identity_object_id(),
-                "test_principal_id",
-            )
+            self.assertEqual(ctx_2.get_user_assigned_identity_object_id(), "test_principal_id")
+            get_identity_helper.assert_called_with("test_assign_identity")
+            self.assertEqual(ctx_2.get_user_assigned_identity_object_id("custom_assign_identity"), "test_principal_id")
+            get_identity_helper.assert_called_with("custom_assign_identity")
 
     def test_get_attach_acr(self):
         # default
@@ -3424,6 +3428,27 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         with self.assertRaises(InvalidArgumentValueError):
             self.assertEqual(ctx_4.get_private_dns_zone(), CONST_PRIVATE_DNS_ZONE_NONE)
 
+    def test_get_user_assignd_identity_from_mc(self):
+        ctx_1 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({}),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        user_assigned_identity_1 = {
+            "test_assign_identity": self.models.ManagedServiceIdentityUserAssignedIdentitiesValue()
+        }
+        identity_1 = self.models.ManagedClusterIdentity(
+            type="UserAssigned",
+            user_assigned_identities=user_assigned_identity_1,
+        )
+        mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            identity=identity_1,
+        )
+        ctx_1.attach_mc(mc_1)
+        self.assertEqual(ctx_1.get_user_assignd_identity_from_mc(), "test_assign_identity")
+
     def test_get_assign_kubelet_identity(self):
         # default
         ctx_1 = AKSManagedClusterContext(
@@ -3468,6 +3493,77 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
                 ctx_2.get_assign_kubelet_identity(),
                 "test_assign_kubelet_identity",
             )
+
+        # update
+        ctx_3 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "assign_identity": None,
+                    "assign_kubelet_identity": "test_assign_kubelet_identity",
+                }
+            ),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        user_assigned_identity_3 = {
+            "test_assign_identity": self.models.ManagedServiceIdentityUserAssignedIdentitiesValue()
+        }
+        identity_3 = self.models.ManagedClusterIdentity(
+            type="UserAssigned",
+            user_assigned_identities=user_assigned_identity_3,
+        )
+        mc_3 = self.models.ManagedCluster(
+            location="test_location",
+            identity=identity_3,
+        )
+        ctx_3.attach_mc(mc_3)
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.prompt_y_n",
+            return_value=True,
+        ):
+            self.assertEqual(
+                ctx_3.get_assign_kubelet_identity(),
+                "test_assign_kubelet_identity",
+            )
+
+        # update
+        ctx_4 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "assign_identity": None,
+                    "assign_kubelet_identity": "test_assign_kubelet_identity",
+                }
+            ),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        # fail on assign_identity not specified and not existed in mc
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.prompt_y_n",
+            return_value=True,
+        ), self.assertRaises(RequiredArgumentMissingError):
+            ctx_4.get_assign_kubelet_identity()
+
+        # update
+        ctx_5 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "assign_identity": None,
+                    "assign_kubelet_identity": "test_assign_kubelet_identity",
+                }
+            ),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        # fail on no confirm
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.prompt_y_n",
+            return_value=False,
+        ), self.assertRaises(DecoratorEarlyExitException):
+            ctx_5.get_assign_kubelet_identity()
 
     def test_get_auto_upgrade_channel(self):
         # default
@@ -3784,6 +3880,32 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         )
         ctx_1.attach_mc(mc)
         self.assertEqual(ctx_1.get_node_resource_group(), "test_node_resource_group")
+
+    def test_get_defender_config(self):
+        ctx_1 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {"enable_defender": True, "defender_config": get_test_data_file_path("defenderconfig.json")}
+            ),
+            self.models,
+            DecoratorMode.CREATE,
+        )
+        defender_config_1 = ctx_1.get_defender_config()
+        ground_truth_defender_config_1 = self.models.ManagedClusterSecurityProfileAzureDefender(
+            enabled=True, log_analytics_workspace_resource_id="test_workspace_resource_id"
+        )
+        self.assertEqual(defender_config_1, ground_truth_defender_config_1)
+
+        # custom value
+        ctx_2 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({"enable_defender": True, "defender_config": "fake-path"}),
+            self.models,
+            DecoratorMode.CREATE,
+        )
+        # fail on invalid file path
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx_2.get_defender_config()
 
     def test_get_yes(self):
         # default
@@ -5584,49 +5706,45 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         )
         self.assertEqual(dec_mc_1, ground_truth_mc_1)
 
-    def test_get_defender_config(self):
-        def test_enabled_defender():
-            dec_1 = AKSManagedClusterCreateDecorator(
-                self.cmd,
-                self.client,
-                {"enable_defender": True},
-                ResourceType.MGMT_CONTAINERSERVICE,
-            )
-            mc_1 = self.models.ManagedCluster(location="test_location")
-            dec_1.context.attach_mc(mc_1)
-            dec_1.context.set_intermediate("subscription_id", "test_subscription_id")
+    def test_enabled_defender(self):
+        dec_1 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {"enable_defender": True},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_1.context.attach_mc(mc_1)
+        dec_1.context.set_intermediate("subscription_id", "test_subscription_id")
 
-            with patch(
-                "azure.cli.command_modules.acs.managed_cluster_decorator.ensure_default_log_analytics_workspace_for_monitoring",
-                return_value="test_workspace_resource_id",
-            ):
-                dec_mc_1 = dec_1.context.get_defender_config()
-            
-            ground_truth_mc_1 = self.models.ManagedClusterSecurityProfileAzureDefender(
-                enabled=True,
-                log_analytics_workspace_resource_id="test_workspace_resource_id",
-            )
-            self.assertEqual(dec_mc_1, ground_truth_mc_1)
-
-        def test_disabled_defender():
-            dec_1 = AKSManagedClusterCreateDecorator(
-                self.cmd,
-                self.client,
-                {"disable_defender": True},
-                ResourceType.MGMT_CONTAINERSERVICE,
-            )
-            dec_1.context.set_intermediate("subscription_id", "test_subscription_id")
-            mc_1 = self.models.ManagedCluster(location="test_location")
-            dec_1.context.attach_mc(mc_1)
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.ensure_default_log_analytics_workspace_for_monitoring",
+            return_value="test_workspace_resource_id",
+        ):
             dec_mc_1 = dec_1.context.get_defender_config()
-            ground_truth_mc_1 = self.models.ManagedClusterSecurityProfileAzureDefender(
-                enabled=False,
-            )
-
-            self.assertEqual(dec_mc_1, ground_truth_mc_1)
         
-        test_enabled_defender()
-        test_disabled_defender()
+        ground_truth_mc_1 = self.models.ManagedClusterSecurityProfileAzureDefender(
+            enabled=True,
+            log_analytics_workspace_resource_id="test_workspace_resource_id",
+        )
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+    def test_disabled_defender(self):
+        dec_1 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {"disable_defender": True},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        dec_1.context.set_intermediate("subscription_id", "test_subscription_id")
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.context.get_defender_config()
+        ground_truth_mc_1 = self.models.ManagedClusterSecurityProfileAzureDefender(
+            enabled=False,
+        )
+
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
 
     def test_set_up_defender(self):
         dec_1 = AKSManagedClusterCreateDecorator(
@@ -5645,34 +5763,6 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         ):
             dec_mc_1 = dec_1.set_up_defender(mc_1)
 
-        ground_truth_mc_1 = self.models.ManagedCluster(
-            location="test_location",
-            security_profile=self.models.ManagedClusterSecurityProfile(
-                azure_defender=self.models.ManagedClusterSecurityProfileAzureDefender(
-                    enabled=True,
-                    log_analytics_workspace_resource_id="test_workspace_resource_id",
-                )
-            ),
-        )
-        self.assertEqual(dec_mc_1, ground_truth_mc_1)
-
-    def test_update_defender(self):
-        dec_1 = AKSManagedClusterUpdateDecorator(
-            self.cmd,
-            self.client,
-            {"enable_defender": True},
-            ResourceType.MGMT_CONTAINERSERVICE,
-        )
-        mc_1 = self.models.ManagedCluster(location="test_location")
-        dec_1.context.attach_mc(mc_1)
-        dec_1.context.set_intermediate("subscription_id", "test_subscription_id")
-
-        with patch(
-            "azure.cli.command_modules.acs.managed_cluster_decorator.ensure_default_log_analytics_workspace_for_monitoring",
-            return_value="test_workspace_resource_id",
-        ):
-            dec_mc_1 = dec_1.update_defender(mc_1)
-        
         ground_truth_mc_1 = self.models.ManagedCluster(
             location="test_location",
             security_profile=self.models.ManagedClusterSecurityProfile(
@@ -7451,6 +7541,163 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         self.assertEqual(dec_1.context.get_intermediate("monitoring_addon_enabled"), True)
         self.assertEqual(dec_1.context.get_intermediate("ingress_appgw_addon_enabled"), True)
         self.assertEqual(dec_1.context.get_intermediate("virtual_node_addon_enabled"), True)
+
+    def test_update_defender(self):
+        dec_1 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {"enable_defender": True},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_1.context.attach_mc(mc_1)
+        dec_1.context.set_intermediate("subscription_id", "test_subscription_id")
+
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.ensure_default_log_analytics_workspace_for_monitoring",
+            return_value="test_workspace_resource_id",
+        ):
+            dec_mc_1 = dec_1.update_defender(mc_1)
+
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            security_profile=self.models.ManagedClusterSecurityProfile(
+                azure_defender=self.models.ManagedClusterSecurityProfileAzureDefender(
+                    enabled=True,
+                    log_analytics_workspace_resource_id="test_workspace_resource_id",
+                )
+            ),
+        )
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+    def test_update_identity_profile(self):
+        dec_1 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.update_identity_profile(mc_1)
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+        cluster_identity_obj = Mock(
+            client_id="test_cluster_identity_client_id",
+            principal_id="test_cluster_identity_object_id",
+        )
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.AKSManagedClusterContext.get_identity_by_msi_client",
+            side_effect=[cluster_identity_obj],
+        ), patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.ensure_cluster_identity_permission_on_kubelet_identity",
+            return_value=None,
+        ):
+            dec_2 = AKSManagedClusterUpdateDecorator(
+                self.cmd,
+                self.client,
+                {
+                    "assign_kubelet_identity": "test_assign_kubelet_identity",
+                    "yes": True,
+                },
+                ResourceType.MGMT_CONTAINERSERVICE,
+            )
+            cluster_identity = self.models.ManagedClusterIdentity(
+                type="UserAssigned",
+                user_assigned_identities={"test_assign_identity": {}},
+            )
+            mc_2 = self.models.ManagedCluster(location="test_location", identity=cluster_identity)
+            dec_2.context.attach_mc(mc_2)
+            dec_mc_2 = dec_2.update_identity_profile(mc_2)
+
+            identity_profile_2 = {
+                "kubeletidentity": self.models.UserAssignedIdentity(
+                    resource_id="test_assign_kubelet_identity",
+                )
+            }
+            ground_truth_mc_2 = self.models.ManagedCluster(
+                location="test_location",
+                identity=cluster_identity,
+                identity_profile=identity_profile_2,
+            )
+            self.assertEqual(dec_mc_2, ground_truth_mc_2)
+
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.prompt_y_n",
+            return_value=False,
+        ), self.assertRaises(DecoratorEarlyExitException):
+            dec_3 = AKSManagedClusterUpdateDecorator(
+                self.cmd,
+                self.client,
+                {
+                    "assign_kubelet_identity": "test_assign_kubelet_identity",
+                },
+                ResourceType.MGMT_CONTAINERSERVICE,
+            )
+            cluster_identity = self.models.ManagedClusterIdentity(
+                type="UserAssigned",
+                user_assigned_identities={"test_assign_identity": {}},
+            )
+            mc_3 = self.models.ManagedCluster(location="test_location", identity=cluster_identity)
+            dec_3.context.attach_mc(mc_3)
+            dec_3.update_identity_profile(mc_3)
+
+        with self.assertRaises(RequiredArgumentMissingError):
+            dec_4 = AKSManagedClusterUpdateDecorator(
+                self.cmd,
+                self.client,
+                {
+                    "assign_kubelet_identity": "test_assign_kubelet_identity",
+                    "yes": True,
+                },
+                ResourceType.MGMT_CONTAINERSERVICE,
+            )
+            mc_4 = self.models.ManagedCluster(location="test_location")
+            dec_4.context.attach_mc(mc_4)
+            dec_4.update_identity_profile(mc_4)
+
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.AKSManagedClusterContext.get_identity_by_msi_client",
+            side_effect=[cluster_identity_obj],
+        ), patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.ensure_cluster_identity_permission_on_kubelet_identity",
+            return_value=None,
+        ):
+            dec_5 = AKSManagedClusterUpdateDecorator(
+                self.cmd,
+                self.client,
+                {
+                    "enable_managed_identity": True,
+                    "assign_identity": "test_assign_identity",
+                    "assign_kubelet_identity": "test_assign_kubelet_identity",
+                    "yes": True,
+                },
+                ResourceType.MGMT_CONTAINERSERVICE,
+            )
+            cluster_identity = self.models.ManagedClusterIdentity(
+                type="UserAssigned",
+                user_assigned_identities={"test_assign_identity": {}},
+            )
+            mc_5 = self.models.ManagedCluster(location="test_location", identity=cluster_identity)
+            dec_5.context.attach_mc(mc_5)
+            dec_mc_5 = dec_5.update_identity_profile(mc_5)
+
+            identity_profile_5 = {
+                "kubeletidentity": self.models.UserAssignedIdentity(
+                    resource_id="test_assign_kubelet_identity",
+                )
+            }
+            ground_truth_mc_5 = self.models.ManagedCluster(
+                location="test_location",
+                identity=cluster_identity,
+                identity_profile=identity_profile_5,
+            )
+            self.assertEqual(dec_mc_5, ground_truth_mc_5)
 
     def test_update_mc_profile_default(self):
         import inspect

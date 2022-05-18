@@ -240,7 +240,7 @@ def _parse_image_argument(cmd, namespace):
     """ Systematically determines what type is supplied for the --image parameter. Updates the
         namespace and returns the type for subsequent processing. """
     from msrestazure.tools import is_valid_resource_id
-    from msrestazure.azure_exceptions import CloudError
+    from azure.core.exceptions import HttpResponseError
     import re
 
     # 1 - check if a fully-qualified ID (assumes it is an image ID)
@@ -304,7 +304,7 @@ def _parse_image_argument(cmd, namespace):
         namespace.image = _get_resource_id(cmd.cli_ctx, namespace.image, namespace.resource_group_name,
                                            'images', 'Microsoft.Compute')
         return 'image_id'
-    except CloudError:
+    except HttpResponseError:
         if images is not None:
             err = 'Invalid image "{}". Use a valid image URN, custom image name, custom image id, ' \
                   'VHD blob URI, or pick an image from {}.\nSee vm create -h for more information ' \
@@ -317,7 +317,6 @@ def _parse_image_argument(cmd, namespace):
 
 
 def _get_image_plan_info_if_exists(cmd, namespace):
-    from msrestazure.azure_exceptions import CloudError
     try:
         compute_client = _compute_client_factory(cmd.cli_ctx)
         if namespace.os_version.lower() == 'latest':
@@ -334,7 +333,7 @@ def _get_image_plan_info_if_exists(cmd, namespace):
 
         # pylint: disable=no-member
         return image.plan
-    except CloudError as ex:
+    except ResourceNotFoundError as ex:
         logger.warning("Querying the image of '%s' failed for an error '%s'. Configuring plan settings "
                        "will be skipped", namespace.image, ex.message)
 
@@ -1715,7 +1714,7 @@ def validate_vmss_disk(cmd, namespace):
 
 
 def process_disk_or_snapshot_create_namespace(cmd, namespace):
-    from msrestazure.azure_exceptions import CloudError
+    from azure.core.exceptions import HttpResponseError
     validate_tags(namespace)
     validate_edge_zone(cmd, namespace)
     if namespace.source:
@@ -1745,7 +1744,7 @@ def process_disk_or_snapshot_create_namespace(cmd, namespace):
                     get_default_location_from_resource_group(cmd, namespace)
                 # if the source location differs from target location, then it's copy_start scenario
                 namespace.copy_start = source_info.location != namespace.location
-        except CloudError:
+        except HttpResponseError:
             raise CLIError(usage_error)
 
 

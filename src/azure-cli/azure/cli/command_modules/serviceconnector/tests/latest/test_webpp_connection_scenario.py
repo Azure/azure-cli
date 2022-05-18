@@ -752,7 +752,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
 
 
-    @record_only()
+    # @record_only()
     def test_webapp_mysqlflexible_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -767,7 +767,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         user = 'servicelinker'
         password = self.cmd('keyvault secret show --vault-name cupertino-kv-test -n TestDbPassword')\
             .get_output_in_json().get('value')
-
+        keyvaultUri = "https://cupertino-kv-test.vault.azure.net/secrets/TestDbPassword"
+        
         # prepare params
         name = 'testconn'
         source_id = SOURCE_RESOURCES.get(RESOURCE.WebApp).format(**self.kwargs)
@@ -790,7 +791,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
         # update connection
         self.cmd('webapp connection update mysql-flexible --id {} --client-type dotnet '
-                 '--secret name={} secret={}'.format(connection_id, user, password),
+                 '--secret name={} secret-uri={}'.format(connection_id, user, keyvaultUri),
                  checks = [ self.check('clientType', 'dotnet') ])
 
         # list configuration

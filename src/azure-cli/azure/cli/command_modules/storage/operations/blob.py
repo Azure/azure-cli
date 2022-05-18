@@ -568,7 +568,7 @@ def upload_blob(cmd, client, file_path=None, container_name=None, blob_name=None
         upload_args['validate_content'] = validate_content
 
     if progress_callback:
-        upload_args['raw_response_hook'] = progress_callback
+        upload_args['progress_hook'] = progress_callback
 
     check_blob_args = {
         'if_modified_since': if_modified_since,
@@ -631,7 +631,7 @@ def download_blob(client, file_path=None, open_mode='wb', start_range=None, end_
         offset = start_range
         length = end_range - start_range + 1
     if progress_callback:
-        kwargs['raw_response_hook'] = progress_callback
+        kwargs['progress_hook'] = progress_callback
     if not file_path:
         kwargs['max_concurrency'] = 1
     download_stream = client.download_blob(offset=offset, length=length, **kwargs)
