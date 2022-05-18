@@ -730,7 +730,7 @@ def storage_blob_delete_batch(client, source, source_container_name, pattern=Non
         try:
             container_client.delete_blob(**delete_blob_args)
             return blob_name
-        except Exception as ex:
+        except:
             pass
 
     source_blobs = list(collect_blob_objects(client, source_container_name, pattern))
