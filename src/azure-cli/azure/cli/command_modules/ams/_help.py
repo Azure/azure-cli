@@ -241,6 +241,31 @@ helps['ams account-filter'] = """
     short-summary: Manage account filters for an Azure Media Services account.
 """
 
+helps['ams asset-track'] = """
+    type: group
+    short-summary: Manage asset tracks for an Azure Media Services account.
+"""
+
+helps['ams asset-track show'] = """
+    type: command
+    short-summary: Show the details of a track.
+"""
+
+helps['ams asset-track create'] = """
+    type: command
+    short-summary: Create a track for an Azure Media Services asset.
+"""
+
+helps['ams asset-track update'] = """
+    type: command
+    short-summary: Update the parameters of a track.
+"""
+
+helps['ams asset-track update-data'] = """
+    type: command
+    short-summary: Update a track if the file in the storage container was recently modified.
+"""
+
 helps['ams asset show'] = """
     type: command
     short-summary: Show the details of an asset.
@@ -471,6 +496,11 @@ helps['ams streaming-policy show'] = """
 helps['ams streaming-endpoint'] = """
     type: group
     short-summary: Manage streaming endpoints for an Azure Media Service account.
+"""
+
+helps['ams streaming-endpoint get-skus'] = """
+    type: command
+    short-summary: Get the sku details for a streaming endpoint.
 """
 
 helps['ams streaming-endpoint start'] = """

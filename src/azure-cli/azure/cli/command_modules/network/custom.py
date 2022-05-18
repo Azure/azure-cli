@@ -537,7 +537,7 @@ def add_ag_private_link(cmd,
     # prepare the subnet for new private link
     for subnet in vnet.subnets:
         if subnet.name == private_link_subnet_name_or_id:
-            raise CLIError('Subnet duplicates')
+            raise CLIError('Subnet name duplicates. In order to use existing subnet, please enter subnet ID.')
         if subnet.address_prefix == private_link_subnet_prefix:
             raise CLIError('Subnet prefix duplicates')
         if subnet.address_prefixes and private_link_subnet_prefix in subnet.address_prefixes:
@@ -2284,23 +2284,18 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):
         record_set_name = record_set.name
         record_data = getattr(record_set, _type_to_property_name(record_type), None)
 
-        # ignore empty record sets
         if not record_data:
-            continue
-
+            record_data = []
         if not isinstance(record_data, list):
             record_data = [record_data]
 
         if record_set_name not in zone_obj:
             zone_obj[record_set_name] = OrderedDict()
 
+        zone_obj[record_set_name][record_type] = []
+
         for record in record_data:
-
             record_obj = {'ttl': record_set.ttl}
-
-            if record_type not in zone_obj[record_set_name]:
-                zone_obj[record_set_name][record_type] = []
-
             if record_type == 'aaaa':
                 record_obj.update({'ip': record.ipv6_address})
             elif record_type == 'a':
@@ -2329,9 +2324,15 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):
                                    'port': record.port, 'target': record.target.rstrip('.') + '.'})
             elif record_type == 'txt':
                 record_obj.update({'txt': ''.join(record.value)})
-
             zone_obj[record_set_name][record_type].append(record_obj)
 
+        if len(record_data) == 0:
+            record_obj = {'ttl': record_set.ttl}
+            if record_type == 'aaaa' or record_type == 'a':
+                record_obj.update({'ip': ''})
+            elif record_type == 'cname':
+                record_obj.update({'alias': ''})
+            zone_obj[record_set_name][record_type].append(record_obj)
     zone_file_content = make_zone_file(zone_obj)
     print(zone_file_content)
     if file_name:
@@ -3673,6 +3674,12 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
     DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
     IPAllocationMethod = cmd.get_models('IPAllocationMethod')
 
+    if public_ip_address is None:
+        logger.warning(
+            "Please note that the default public IP used for creation will be changed from Basic to Standard "
+            "in the future."
+        )
+
     tags = tags or {}
     public_ip_address = public_ip_address or 'PublicIP{}'.format(load_balancer_name)
     backend_pool_name = backend_pool_name or '{}bepool'.format(load_balancer_name)
@@ -3889,6 +3896,11 @@ def create_lb_frontend_ip_configuration(
     ncf = network_client_factory(cmd.cli_ctx)
     lb = lb_get(ncf.load_balancers, resource_group_name, load_balancer_name)
 
+    if public_ip_address is None:
+        logger.warning(
+            "Please note that the default public IP used for LB frontend will be changed from Basic to Standard "
+            "in the future."
+        )
     if private_ip_address_allocation is None:
         private_ip_address_allocation = 'static' if private_ip_address else 'dynamic'
 
@@ -4982,7 +4994,7 @@ def _handle_asg_property(kwargs, key, asgs):
     prefix = key.split('_', 1)[0] + '_'
     if asgs:
         kwargs[key] = asgs
-        if kwargs[prefix + 'address_prefix'].is_default:
+        if kwargs[prefix + 'address_prefix']:
             kwargs[prefix + 'address_prefix'] = ''
 
 
@@ -5411,6 +5423,12 @@ def _create_nw_connection_monitor_v2(cmd,
                                                              [test_config],
                                                              [src_endpoint],
                                                              [dst_endpoint])
+
+    # If 'workspace_ids' option is specified but 'output_type' is not then still it should be implicit that 'output-type' is 'Workspace'
+    # since only supported value for output_type is 'Workspace' currently.
+    if workspace_ids and not output_type:
+        output_type = 'Workspace'
+
     if output_type:
         outputs = []
         if workspace_ids:
@@ -6352,6 +6370,12 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
                      allocation_method=None, dns_name=None,
                      idle_timeout=4, reverse_fqdn=None, version=None, sku=None, tier=None, zone=None, ip_tags=None,
                      public_ip_prefix=None, edge_zone=None, ip_address=None):
+    if sku is None:
+        logger.warning(
+            "Please note that the default public IP used for creation will be changed from Basic to Standard "
+            "in the future."
+        )
+
     IPAllocationMethod, PublicIPAddress, PublicIPAddressDnsSettings, SubResource = cmd.get_models(
         'IPAllocationMethod', 'PublicIPAddress', 'PublicIPAddressDnsSettings', 'SubResource')
     client = network_client_factory(cmd.cli_ctx).public_ip_addresses

@@ -222,7 +222,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
 
         self.cmd('storage account show-connection-string -g {} -n {} --protocol http'.format(
             resource_group, name), checks=[
-            JMESPathCheck("contains(connectionString, 'https')", False),
+            JMESPathCheck("contains(connectionString, 'https')", True),
             JMESPathCheck("contains(connectionString, '{}')".format(name), True)])
 
         self.cmd('storage account update -g {} -n {} --tags foo=bar cat'
@@ -637,6 +637,15 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('blob.retentionPolicy.days', 1)
         ])
 
+        self.cmd('storage logging update --services b --log r --retention 0 '
+                 '--service b --connection-string {}'.format(connection_string))
+
+        self.cmd('storage logging show --connection-string {}'.format(connection_string), checks=[
+            JMESPathCheck('blob.read', True),
+            JMESPathCheck('blob.retentionPolicy.enabled', False),
+            JMESPathCheck('blob.retentionPolicy.days', None)
+        ])
+
         self.cmd('storage logging off --connection-string {}'.format(connection_string))
 
         self.cmd('storage logging show --connection-string {}'.format(connection_string), checks=[
@@ -723,7 +732,17 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
 
         self.storage_cmd('storage metrics show', storage_account_info).assert_with_checks(
             JMESPathCheck('file.hour.enabled', True),
-            JMESPathCheck('file.minute.enabled', True))
+            JMESPathCheck('file.minute.enabled', True),
+            JMESPathCheck('file.hour.retentionPolicy.days', 1))
+
+        self.storage_cmd('storage metrics update --services b --api true --hour false --minute true --retention 0 ',
+                         storage_account_info)
+
+        self.storage_cmd('storage metrics show', storage_account_info).assert_with_checks(
+            JMESPathCheck('blob.hour.enabled', False),
+            JMESPathCheck('blob.minute.enabled', True),
+            JMESPathCheck('blob.hour.retentionPolicy.enabled', False),
+            JMESPathCheck('blob.hour.retentionPolicy.days', None),)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer()
@@ -2243,18 +2262,20 @@ class StorageAccountORScenarioTest(StorageScenarioMixin, ScenarioTest):
 
 class StorageAccountBlobInventoryScenarioTest(StorageScenarioMixin, ScenarioTest):
     @AllowLargeResponse()
-    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2020-08-01-preview')
-    @ResourceGroupPreparer(name_prefix='cli_test_blob_inventory', location='eastus2')
-    @StorageAccountPreparer(location='eastus2', kind='StorageV2')
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2021-09-01')
+    @ResourceGroupPreparer(name_prefix='cli_test_blob_inventory', location='eastus2euap')
+    @StorageAccountPreparer(location='eastus2euap', kind='StorageV2')
     def test_storage_account_blob_inventory_policy(self, resource_group, storage_account):
         import os
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         policy_file = os.path.join(curr_dir, 'blob_inventory_policy.json').replace('\\', '\\\\')
         policy_file_no_type = os.path.join(curr_dir, 'blob_inventory_policy_no_type.json').replace('\\', '\\\\')
+        policy_file_fns = os.path.join(curr_dir, 'blob_inventory_fns.json').replace('\\', '\\\\')
         self.kwargs = {'rg': resource_group,
                        'sa': storage_account,
                        'policy': policy_file,
-                       'policy_no_type': policy_file_no_type}
+                       'policy_no_type': policy_file_no_type,
+                       'policy_file_fns': policy_file_fns}
         account_info = self.get_account_info(resource_group, storage_account)
         self.storage_cmd('storage container create -n mycontainer', account_info)
 
@@ -2339,6 +2360,75 @@ class StorageAccountBlobInventoryScenarioTest(StorageScenarioMixin, ScenarioTest
         self.cmd('storage account blob-inventory-policy delete --account-name {sa} -g {rg} -y')
         self.cmd('storage account blob-inventory-policy show --account-name {sa} -g {rg}', expect_failure=True)
 
+        # test add new fields
+        res = self.cmd('storage account blob-inventory-policy create --account-name {sa} -g {rg} --policy '
+                       '@"{policy_file_fns}"').get_output_in_json()
+        blobDefinition = res["policy"]["rules"][0]["definition"]
+        containerDefinition = res["policy"]["rules"][1]["definition"]
+        self.assertEqual('ac', blobDefinition['filters']["excludePrefix"][0])
+
+        commonBlobFields = ["Name", "Creation-Time", "Last-Modified", "LastAccessTime", "ETag", "Content-Length",
+                            "Content-Type", "Content-Encoding", "Content-Language", "Content-CRC64", "Content-MD5",
+                            "Cache-Control", "Content-Disposition", "BlobType", "AccessTier", "AccessTierInferred",
+                            "AccessTierChangeTime", "LeaseStatus", "LeaseState", "LeaseDuration",
+                            "ServerEncrypted", "Snapshot", "Metadata", "Deleted", "RemainingRetentionDays",
+                            "ImmutabilityPolicyUntilDate", "ImmutabilityPolicyMode", "LegalHold", "CopyId",
+                            "CopyStatus", "CopySource", "CopyProgress", "CopyCompletionTime",
+                            "CopyStatusDescription", "CustomerProvidedKeySha256", "RehydratePriority",
+                            "ArchiveStatus", "x-ms-blob-sequence-number", "EncryptionScope", "IncrementalCopy"]
+        fnsFields = ["VersionId", "IsCurrentVersion", "TagCount", "Tags"]
+        fnsFields.extend(commonBlobFields)
+        for field in fnsFields:
+            self.assertIn(field, blobDefinition["schemaFields"])
+
+        containerFields = ['Name', 'Last-Modified', 'ETag', 'LeaseStatus', 'LeaseState', 'LeaseDuration',
+                           'PublicAccess', 'DefaultEncryptionScope', 'DenyEncryptionScopeOverride',
+                           'HasImmutabilityPolicy', 'HasLegalHold', 'ImmutableStorageWithVersioningEnabled',
+                           'Metadata', 'Deleted', 'Version', 'DeletedTime', 'RemainingRetentionDays']
+        for field in containerFields:
+            self.assertIn(field, containerDefinition["schemaFields"])
+
+    @AllowLargeResponse()
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2021-09-01')
+    @ResourceGroupPreparer(name_prefix='cli_test_blob_inventory_hns', location='eastus2euap')
+    @StorageAccountPreparer(location='eastus2euap', kind='StorageV2', hns=True)
+    def test_storage_account_blob_inventory_policy_hns(self, resource_group, storage_account):
+        import os
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        policy_file_hns = os.path.join(curr_dir, 'blob_inventory_hns.json').replace('\\', '\\\\')
+        self.kwargs = {'rg': resource_group,
+                       'sa': storage_account,
+                       'policy_file_hns': policy_file_hns}
+        account_info = self.get_account_info(resource_group, storage_account)
+        self.storage_cmd('storage container create -n mycontainer', account_info)
+
+        # test add new fields
+        res = self.cmd('storage account blob-inventory-policy create --account-name {sa} -g {rg} --policy '
+                       '@"{policy_file_hns}"').get_output_in_json()
+        blobDefinition = res["policy"]["rules"][0]["definition"]
+        containerDefinition = res["policy"]["rules"][1]["definition"]
+        self.assertEqual('ac', blobDefinition['filters']["excludePrefix"][0])
+
+        commonBlobFields = ["Name", "Creation-Time", "Last-Modified", "LastAccessTime", "ETag", "Content-Length",
+                            "Content-Type", "Content-Encoding", "Content-Language", "Content-CRC64", "Content-MD5",
+                            "Cache-Control", "Content-Disposition", "BlobType", "AccessTier", "AccessTierInferred",
+                            "AccessTierChangeTime", "LeaseStatus", "LeaseState", "LeaseDuration",
+                            "ServerEncrypted", "Snapshot", "Metadata", "Deleted", "RemainingRetentionDays",
+                            "ImmutabilityPolicyUntilDate", "ImmutabilityPolicyMode", "LegalHold", "CopyId",
+                            "CopyStatus", "CopySource", "CopyProgress", "CopyCompletionTime",
+                            "CopyStatusDescription", "CustomerProvidedKeySha256", "RehydratePriority",
+                            "ArchiveStatus", "EncryptionScope", "IncrementalCopy"]
+        hnsFields = ["hdi_isfolder", "DeletionId", "DeletedTime", "Expiry-Time", "Owner", "Group", "Permissions", "Acl"]
+        hnsFields.extend(commonBlobFields)
+        for field in hnsFields:
+            self.assertIn(field, blobDefinition["schemaFields"])
+
+        containerFields = ['Name', 'Last-Modified', 'ETag', 'LeaseStatus', 'LeaseState', 'LeaseDuration',
+                           'PublicAccess', 'DefaultEncryptionScope', 'DenyEncryptionScopeOverride',
+                           'HasImmutabilityPolicy', 'HasLegalHold', 'ImmutableStorageWithVersioningEnabled',
+                           'Metadata', 'Deleted', 'Version', 'DeletedTime', 'RemainingRetentionDays']
+        for field in containerFields:
+            self.assertIn(field, containerDefinition["schemaFields"])
 
 class StorageAccountHNSMigrationScenarioTest(StorageScenarioMixin, ScenarioTest):
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2021-06-01')

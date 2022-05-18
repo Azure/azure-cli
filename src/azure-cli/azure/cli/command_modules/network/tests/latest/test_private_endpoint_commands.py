@@ -958,6 +958,95 @@ class NetworkPrivateLinkCosmosDBScenarioTest(ScenarioTest):
         self.cmd('az network private-endpoint-connection delete --id {pec_id} -y')
 
 
+class NetworkPrivateLinkKustoClusterScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(location='westus')
+    def test_private_link_resource_kusto_cluster(self, resource_group):
+        self.kwargs.update({
+            'acc': self.create_random_name('clikusto', 12),
+            'loc': 'eastus',
+            'rg': resource_group,
+            'sku': 'Standard_D12_v2'
+        })
+
+        self.cmd('az kusto cluster create -l {loc} -n {acc} -g {rg} --sku {sku}')
+
+        self.cmd('az network private-link-resource list --name {acc} --resource-group {rg} --type Microsoft.Kusto/clusters',
+                 checks=[self.check('length(@)', 1), self.check('[0].properties.groupId', 'cluster')])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_kusto_pe')
+    def test_private_endpoint_connection_kusto_cluster(self, resource_group):
+        self.kwargs.update({
+            'acc': self.create_random_name('clikusto', 12),
+            'loc': 'eastus',
+            'rg': resource_group,
+            'vnet': self.create_random_name('cli-vnet-', 24),
+            'subnet': self.create_random_name('cli-subnet-', 24),
+            'pe': self.create_random_name('cli-pe-', 24),
+            'pe_connection': self.create_random_name('cli-pec-', 24),
+            'sku': 'Standard_D11_v2'
+        })
+
+        # Prepare kusto cluster and network
+        account = self.cmd('az kusto cluster create -l {loc} -n {acc} -g {rg} --sku {sku}').get_output_in_json()
+        self.kwargs['acc_id'] = account['id']
+        self.cmd('az network vnet create -n {vnet} -g {rg} -l {loc} --subnet-name {subnet}',
+                 checks=self.check('length(newVNet.subnets)', 1))
+        self.cmd('az network vnet subnet update -n {subnet} --vnet-name {vnet} -g {rg} '
+                 '--disable-private-endpoint-network-policies true',
+                 checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
+
+        # Create a private endpoint connection
+        pe = self.cmd(
+            'az network private-endpoint create -g {rg} -n {pe} --vnet-name {vnet} --subnet {subnet} -l {loc} '
+            '--connection-name {pe_connection} --private-connection-resource-id {acc_id} '
+            '--group-id cluster').get_output_in_json()
+        self.kwargs['pe_id'] = pe['id']
+        self.kwargs['pe_name'] = self.kwargs['pe_id'].split('/')[-1]
+
+        list_private_endpoint_conn = self.cmd(
+            "az network private-endpoint-connection list --name {acc} --resource-group {rg} --type Microsoft.Kusto/clusters",
+            checks=[self.check('length(@)', 1)]
+        ).get_output_in_json()
+        self.kwargs.update({"pec_id": list_private_endpoint_conn[0]["id"]})
+
+        self.kwargs.update({"pec_name": self.kwargs["pec_id"].split("/")[-1]})
+        self.cmd(
+            "az network private-endpoint-connection show --id {pec_id}",
+            checks=self.check("id", "{pec_id}"),
+        )
+
+        self.cmd(
+            'az network private-endpoint-connection show --resource-name {acc} --name {pec_name} --resource-group {rg} --type Microsoft.Kusto/clusters',
+            checks=self.check('name', '{pec_name}'))
+        self.cmd(
+            'az network private-endpoint-connection show --resource-name {acc} -n {pec_name} -g {rg} --type Microsoft.Kusto/clusters',
+            checks=self.check('name', '{pec_name}'))
+
+        # Test approval/rejection
+        self.kwargs.update({
+            'approval_desc': 'You are approved!',
+            'rejection_desc': 'You are rejected!'
+        })
+        self.cmd(
+            'az network private-endpoint-connection approve --resource-name {acc} --resource-group {rg} --name {pec_name} --type Microsoft.Kusto/clusters '
+            '--description "{approval_desc}"', checks=[
+                self.check('properties.privateLinkServiceConnectionState.status', 'Approved')
+            ])
+        self.cmd('az network private-endpoint-connection reject --id {pec_id} '
+                 '--description "{rejection_desc}"',
+                 checks=[
+                     self.check('properties.privateLinkServiceConnectionState.status', 'Rejected')
+                 ])
+        self.cmd(
+            'az network private-endpoint-connection list --name {acc} --resource-group {rg} --type Microsoft.Kusto/clusters',
+            checks=[
+                self.check('length(@)', 1)
+            ])
+
+        # Test delete
+        self.cmd('az network private-endpoint-connection delete --id {pec_id} -y')
+
+
 class NetworkPrivateLinkWebappScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='westus')
     def test_private_link_resource_webapp(self, resource_group):
@@ -3062,6 +3151,69 @@ class NetworkPrivateLinkRecoveryServicesScenarioTest(ScenarioTest):
         ])
 
         self.cmd('vault delete --name {vault} --resource-group {rg}')
+
+
+class NetworkPrivateLinkPrivateLinkServicesScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_private_endpoint_pls', location='centralus')
+    def test_private_endpoint_pls(self):
+        self.kwargs.update({
+            'vnet': self.create_random_name('cli-test-vnet-', 20),
+            'subnet1': self.create_random_name('cli-test-subnet-', 20),
+            'subnet2': self.create_random_name('cli-test-subnet-', 20),
+            'lb': self.create_random_name('cli-test-lb-', 20),
+            'ip': self.create_random_name('cli-test-ip-', 20),
+            'pls': self.create_random_name('cli-test-pls-', 20),
+            'endpoint1': self.create_random_name('cli-test-endpoint-', 25),
+            'endpoint2': self.create_random_name('cli-test-endpoint-', 25),
+            'connection1': self.create_random_name('cli-test-conn-', 20),
+            'connection2': self.create_random_name('cli-test-conn-', 20),
+            'type': 'Microsoft.Network/privateLinkServices'
+        })
+
+        # create private link service
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet2}')
+        self.cmd('network vnet subnet update -g {rg} -n {subnet2} --vnet-name {vnet} --disable-private-link-service-network-policies')
+        self.cmd('network lb create -g {rg} -n {lb} --public-ip-address {ip} --sku Standard')
+        self.kwargs['pls_id'] = self.cmd('network private-link-service create -g {rg} -n {pls} --vnet-name {vnet} --subnet {subnet2} --lb-name {lb} --lb-frontend-ip-configs LoadBalancerFrontEnd').get_output_in_json()['id']
+
+        # create subnet with disabled endpoint network policies
+        self.cmd('network vnet subnet create -g {rg} -n {subnet1} --vnet-name {vnet} --address-prefixes 10.0.2.0/24')
+        self.cmd('network vnet subnet update -g {rg} -n {subnet1} --vnet-name {vnet} --disable-private-endpoint-network-policies')
+
+        # add an endpoint and approve it
+        self.cmd('network private-endpoint create -g {rg} -n {endpoint1} --vnet-name {vnet} --subnet {subnet1} --private-connection-resource-id {pls_id} --connection-name {connection1}')
+        self.kwargs['request1'] = self.cmd('network private-endpoint-connection list -g {rg} -n {pls} --type {type}').get_output_in_json()[0]['name']
+        self.cmd(
+            'network private-endpoint-connection approve -n {request1} -g {rg} --resource-name {pls} --type {type} --description Approved',
+            checks=[
+                self.check('properties.privateLinkServiceConnectionState.status', 'Approved'),
+                self.check('properties.privateLinkServiceConnectionState.description', 'Approved')
+            ]
+        )
+
+        # add an endpoint and then reject it
+        self.cmd('network private-endpoint create -g {rg} -n {endpoint2} --vnet-name {vnet} --subnet {subnet1} --private-connection-resource-id {pls_id} --connection-name {connection2}')
+        self.kwargs['request2'] = self.cmd('network private-endpoint-connection list -g {rg} -n {pls} --type {type}').get_output_in_json()[1]['name']
+        self.cmd(
+            'network private-endpoint-connection reject -n {request2} -g {rg} --resource-name {pls} --type {type} --description Rejected',
+            checks=[
+                self.check('properties.privateLinkServiceConnectionState.status', 'Rejected'),
+                self.check('properties.privateLinkServiceConnectionState.description', 'Rejected')
+            ]
+        )
+
+        # remove endpoints
+        self.cmd('network private-endpoint-connection delete -g {rg} --resource-name {pls} -n {request2} --type {type} --yes')
+        time.sleep(30)
+        self.cmd(
+            'network private-endpoint-connection show -g {rg} --resource-name {pls} -n {request1} --type {type}',
+            checks=[
+                self.check('properties.privateLinkServiceConnectionState.status', 'Approved'),
+                self.check('properties.privateLinkServiceConnectionState.description', 'Approved'),
+                self.check('name', '{request1}')
+            ]
+        )
+        self.cmd('network private-endpoint-connection delete -g {rg} --resource-name {pls} -n {request1} --type {type} --yes')
 
 
 if __name__ == '__main__':

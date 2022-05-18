@@ -6,16 +6,16 @@
 from __future__ import unicode_literals
 
 import os
-import os.path
 import re
 from ipaddress import ip_network
 from math import isclose, isnan
 
 from azure.cli.core import keys
-from azure.cli.core.azclierror import InvalidArgumentValueError
+from azure.cli.core.azclierror import (
+    InvalidArgumentValueError, RequiredArgumentMissingError,
+    ArgumentUsageError)
 from azure.cli.core.commands.validators import validate_tag
 from azure.cli.core.util import CLIError
-# pylint: disable=no-name-in-module,import-error
 from knack.log import get_logger
 
 logger = get_logger(__name__)
@@ -96,13 +96,13 @@ def validate_k8s_version(namespace):
     """Validates a string as a possible Kubernetes version. An empty string is also valid, which tells the server
     to use its default version."""
     if namespace.kubernetes_version:
-        k8s_release_regex = re.compile(r'^[v|V]?(\d+\.\d+\.\d+.*)$')
+        k8s_release_regex = re.compile(r'^[v|V]?(\d+\.\d+(?:\.\d+)?)$')
         found = k8s_release_regex.findall(namespace.kubernetes_version)
         if found:
             namespace.kubernetes_version = found[0]
         else:
-            raise CLIError('--kubernetes-version should be the full version number, '
-                           'such as "1.11.8" or "1.12.6"')
+            raise CLIError('--kubernetes-version should be the full version number or major.minor version number, '
+                           'such as "1.7.12" or "1.7"')
 
 
 def validate_nodepool_name(namespace):
@@ -226,13 +226,13 @@ def validate_nat_gateway_idle_timeout(namespace):
 
 
 def validate_nodes_count(namespace):
-    """Validates that min_count and max_count is set between 1-100"""
+    """Validates that min_count and max_count is set between 0-1000"""
     if namespace.min_count is not None:
-        if namespace.min_count < 1 or namespace.min_count > 100:
-            raise CLIError('--min-count must be in the range [1,100]')
+        if namespace.min_count < 0 or namespace.min_count > 1000:
+            raise CLIError('--min-count must be in the range [0,1000]')
     if namespace.max_count is not None:
-        if namespace.max_count < 1 or namespace.max_count > 100:
-            raise CLIError('--max-count must be in the range [1,100]')
+        if namespace.max_count < 0 or namespace.max_count > 1000:
+            raise CLIError('--max-count must be in the range [0,1000]')
 
 
 def validate_taints(namespace):
@@ -510,3 +510,13 @@ def validate_credential_format(namespace):
         namespace.credential_format.lower() != "azure" and \
             namespace.credential_format.lower() != "exec":
         raise InvalidArgumentValueError("--format can only be azure or exec.")
+
+
+def validate_defender_config_parameter(namespace):
+    if namespace.defender_config and not namespace.enable_defender:
+        raise RequiredArgumentMissingError("Please specify --enable-defnder")
+
+
+def validate_disable_and_enable_parameters(namespace):
+    if namespace.disable_defender and namespace.enable_defender:
+        raise ArgumentUsageError('Providing both --disable-defender and --enable-defender flags is invalid')

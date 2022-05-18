@@ -594,6 +594,11 @@ examples:
         az sig create --resource-group MyResourceGroup --gallery-name MyGallery
 """
 
+helps['sig show'] = """
+type: command
+short-summary: Retrieve information about a Shared Image Gallery.
+"""
+
 helps['sig image-definition'] = """
 type: group
 short-summary: Manage shared gallery image with VM
