@@ -130,6 +130,7 @@ class CacheObject:
             raise CLIError('cloud name unexpectedly empty')
         copy_kwargs = kwargs.copy()
         copy_kwargs.pop('self', None)
+        copy_kwargs.pop('content_type', None)
         resource_group = copy_kwargs.pop('resource_group_name', None) or args[0]
 
         if len(args) > 2:
@@ -459,7 +460,6 @@ def cached_put(cmd_obj, operation, parameters, *args, setter_arg_name='parameter
         return cache_obj
 
     # for a successful PUT, attempt to delete the cache file
-    kwargs.pop("content_type", None)
     obj_dir, obj_file = cache_obj.path(args, kwargs)
     obj_path = os.path.join(obj_dir, obj_file)
     try:
