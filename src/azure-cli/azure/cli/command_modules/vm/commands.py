@@ -524,7 +524,6 @@ def load_command_table(self, _):
     with self.command_group('sig', compute_galleries_sdk, operation_group='galleries', min_api='2018-06-01') as g:
         g.custom_command('create', 'create_image_gallery')
         g.custom_show_command('show', 'show_image_gallery')
-        # g.show_command('show', 'get')
         g.custom_command('list', 'list_image_galleries')
         g.command('delete', 'begin_delete')
         g.generic_update_command('update', setter_type=compute_custom, setter_name='update_image_galleries', setter_arg_name='gallery')
