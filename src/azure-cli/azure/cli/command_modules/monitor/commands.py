@@ -60,18 +60,6 @@ def load_command_table(self, _):
         operation_group='activity_log_alerts',
         exception_handler=exception_handler)
 
-    alert_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.monitor.operations#AlertRulesOperations.{}',
-        client_factory=cf_alert_rules,
-        operation_group='alert_rules',
-        exception_handler=exception_handler)
-
-    alert_rule_incidents_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.monitor.operations#AlertRuleIncidentsOperations.{}',
-        client_factory=cf_alert_rule_incidents,
-        operation_group='alert_rule_incidents',
-        exception_handler=exception_handler)
-
     autoscale_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.monitor.operations#AutoscaleSettingsOperations.{}',
         client_factory=cf_autoscale,
