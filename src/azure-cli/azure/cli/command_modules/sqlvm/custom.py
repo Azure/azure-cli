@@ -287,7 +287,7 @@ def sqlvm_create(client, cmd, sql_virtual_machine_name, resource_group_name, sql
     return client.get(resource_group_name, sql_virtual_machine_name)
 
 
-# pylint: disable=too-many-statements, line-too-long, too-many-boolean-expressions, too-many-branches
+# pylint: disable=too-many-statements, line-too-long, too-many-boolean-expressions
 def sqlvm_update(instance, sql_server_license_type=None, sql_image_sku=None, enable_auto_patching=None,
                  day_of_week=None, maintenance_window_starting_hour=None, maintenance_window_duration=None,
                  enable_auto_backup=None, enable_encryption=False, retention_period=None, storage_account_url=None, prompt=True,
@@ -379,28 +379,13 @@ def sqlvm_update(instance, sql_server_license_type=None, sql_image_sku=None, ena
             instance.server_configurations_management_settings.additional_features_server_configurations is None):
         instance.server_configurations_management_settings = None
 
-    # If assessment.schedule settings are provided but enable schedule is skipped, ensure schedule is enabled
-    if (enable_assessment_schedule is None and
-            (assessment_weekly_interval is not None or assessment_monthly_occurrence or assessment_day_of_week or assessment_start_time_local)):
-        enable_assessment_schedule = True
-
-    # If assessment.schedule setting is provided but enable assessment is skipped, ensure assessment is enabled
-    if (enable_assessment_schedule is not None and enable_assessment is None):
-        enable_assessment = True
-
-    if enable_assessment is not None:
-        instance.assessment_settings = AssessmentSettings()
-        instance.assessment_settings.enable = enable_assessment
-
-        if enable_assessment_schedule is not None:
-            instance.assessment_settings.schedule = Schedule()
-            instance.assessment_settings.schedule.enable = enable_assessment_schedule
-
-            if enable_assessment_schedule:
-                instance.assessment_settings.schedule.weekly_interval = assessment_weekly_interval
-                instance.assessment_settings.schedule.monthly_occurrence = assessment_monthly_occurrence
-                instance.assessment_settings.schedule.day_of_week = assessment_day_of_week
-                instance.assessment_settings.schedule.start_time = assessment_start_time_local
+    set_assessment_properties(instance,
+                              enable_assessment,
+                              enable_assessment_schedule,
+                              assessment_weekly_interval,
+                              assessment_monthly_occurrence,
+                              assessment_day_of_week,
+                              assessment_start_time_local)
 
     return instance
 
@@ -448,3 +433,37 @@ def sqlvm_remove_from_group(client, cmd, sql_virtual_machine_name, resource_grou
                                                   resource_group_name, sql_virtual_machine_name, sqlvm_object))
 
     return client.get(resource_group_name, sql_virtual_machine_name)
+
+
+# region Helpers for custom commands
+def set_assessment_properties(instance, enable_assessment, enable_assessment_schedule,
+                              assessment_weekly_interval, assessment_monthly_occurrence,
+                              assessment_day_of_week, assessment_start_time_local):
+    '''
+    Set assessment properties to be sent in sql vm update
+    '''
+
+    # If assessment.schedule settings are provided but enable schedule is skipped, then ensure schedule is enabled
+    if (enable_assessment_schedule is None and
+            (assessment_weekly_interval is not None or assessment_monthly_occurrence or assessment_day_of_week or assessment_start_time_local)):
+        enable_assessment_schedule = True
+
+    # If assessment schedule is enabled but enable assessment is skipped, then ensure assessment is enabled
+    if (enable_assessment_schedule is not None and enable_assessment is None):
+        enable_assessment = True
+
+    if enable_assessment is not None:
+        instance.assessment_settings = AssessmentSettings()
+        instance.assessment_settings.enable = enable_assessment
+
+        if enable_assessment_schedule is not None:
+            instance.assessment_settings.schedule = Schedule()
+            instance.assessment_settings.schedule.enable = enable_assessment_schedule
+
+            if enable_assessment_schedule:
+                instance.assessment_settings.schedule.weekly_interval = assessment_weekly_interval
+                instance.assessment_settings.schedule.monthly_occurrence = assessment_monthly_occurrence
+                instance.assessment_settings.schedule.day_of_week = assessment_day_of_week
+                instance.assessment_settings.schedule.start_time = assessment_start_time_local
+
+# endRegion
