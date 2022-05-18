@@ -6,7 +6,7 @@
 """
 Credentials defined in this module are alternative implementations of credentials provided by Azure Identity.
 
-These credentials implements azure.core.credentials.TokenCredential by exposing get_token method for Track 2
+These credentials implement azure.core.credentials.TokenCredential by exposing get_token method for Track 2
 SDK invocation.
 """
 
