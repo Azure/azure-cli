@@ -294,15 +294,6 @@ def load_command_table(self, _):
         g.custom_command('scope add', 'add_scope')
         g.custom_command('scope remove', 'remove_scope')
 
-    with self.command_group('monitor alert', alert_sdk, custom_command_type=alert_custom, deprecate_info=self.deprecate(redirect='monitor metrics alert', hide='2.0.44')) as g:
-        g.custom_command('create', 'create_metric_rule')
-        g.command('delete', 'delete')
-        g.show_command('show', 'get')
-        g.command('list', 'list_by_resource_group')
-        g.command('show-incident', 'get', command_type=alert_rule_incidents_sdk)
-        g.command('list-incidents', 'list_by_alert_rule', command_type=alert_rule_incidents_sdk)
-        g.generic_update_command('update', custom_func_name='update_metric_rule')
-
     with self.command_group('monitor autoscale', autoscale_sdk, custom_command_type=autoscale_custom) as g:
         g.custom_command('create', 'autoscale_create', validator=process_autoscale_create_namespace)
         g.generic_update_command('update', custom_func_name='autoscale_update', custom_func_type=autoscale_custom)
@@ -322,15 +313,6 @@ def load_command_table(self, _):
         g.custom_command('list', 'autoscale_rule_list')
         g.custom_command('delete', 'autoscale_rule_delete')
         g.custom_command('copy', 'autoscale_rule_copy')
-
-    with self.command_group('monitor autoscale-settings', autoscale_sdk, custom_command_type=autoscale_custom,
-                            deprecate_info=self.deprecate(redirect='monitor autoscale', hide='2.0.34')) as g:
-        g.command('create', 'create_or_update', deprecate_info='az monitor autoscale create')
-        g.command('delete', 'delete', deprecate_info='az monitor autoscale delete')
-        g.show_command('show', 'get', deprecate_info='az monitor autoscale show')
-        g.command('list', 'list_by_resource_group', deprecate_info='az monitor autoscale list')
-        g.custom_command('get-parameters-template', 'scaffold_autoscale_settings_parameters', deprecate_info='az monitor autoscale show')
-        g.generic_update_command('update', deprecate_info='az monitor autoscale update')
 
     with self.command_group('monitor diagnostic-settings', diagnostics_sdk, custom_command_type=diagnostics_custom) as g:
         from .validators import validate_diagnostic_settings
