@@ -30,13 +30,13 @@ class MSIAuthenticationWrapper(MSIAuthentication):
                     # TODO: This PoC does not currently maintain a token cache;
                     #   Ideally we should reuse the real MSAL app object which has cache configured.
                     # token_cache=...,
-                    )
+                )
                 result = app.acquire_token_interactive(list(scopes), prompt="none", data=kwargs["data"])
                 check_result(result, scopes=scopes)
                 return build_sdk_access_token(result)
-            else:
-                from azure.cli.core.azclierror import AuthenticationError
-                raise AuthenticationError("VM SSH currently doesn't support managed identity.")
+
+            from azure.cli.core.azclierror import AuthenticationError
+            raise AuthenticationError("VM SSH currently doesn't support managed identity.")
 
         # Use msrestazure to get access token
         resource = scopes_to_resource(_normalize_scopes(scopes))
