@@ -2850,7 +2850,12 @@ class AKSContext:
             ) = self._get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy(
                 enable_validation=False
             )
-            if not network_plugin:
+            if network_plugin:
+                if network_plugin == "azure" and pod_cidr:
+                    raise InvalidArgumentValueError(
+                        "Please use kubenet as the network plugin type when pod_cidr is specified"
+                    )
+            else:
                 if (
                     pod_cidr or
                     service_cidr or
@@ -2954,7 +2959,12 @@ class AKSContext:
         # validation
         if enable_validation:
             network_plugin = self._get_network_plugin(enable_validation=False)
-            if not network_plugin:
+            if network_plugin:
+                if network_plugin == "azure" and pod_cidr:
+                    raise InvalidArgumentValueError(
+                        "Please use kubenet as the network plugin type when pod_cidr is specified"
+                    )
+            else:
                 if (
                     pod_cidr or
                     service_cidr or
