@@ -5410,7 +5410,6 @@ class DedicatedHostScenarioTest(ScenarioTest):
 
         self.cmd('vm host delete -n {host} --host-group {host-group} -g {rg} --yes')
         self.cmd('vm host group delete -n {host-group} -g {rg} --yes')
-        self.cmd('vm host group delete -n {host-group2} -g {rg} --yes')
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_host_ultra_ssd_')
     def test_vm_host_ultra_ssd(self, resource_group):
