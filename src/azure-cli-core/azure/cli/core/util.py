@@ -978,9 +978,8 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
         reason = r.reason
         if r.text:
             reason += '({})'.format(r.text)
-        ex = CLIError(reason)
-        ex.response = r
-        raise ex
+        from .azclierror import HTTPError
+        raise HTTPError(reason, r)
     if output_file:
         with open(output_file, 'wb') as fd:
             for chunk in r.iter_content(chunk_size=128):
