@@ -196,7 +196,9 @@ for source in SOURCE_RESOURCES:
                 Usage: --secret name=XX secret=XX
 
                 name    : Required. Username or account name for secret auth.
-                secret  : Required. Password or account key for secret auth.
+                secret  : One of <secret, secret-uri, secret-name> is required. Password or account key for secret auth.
+                secret-uri  : One of <secret, secret-uri, secret-name> is required. Keyvault secret uri which stores password.
+                secret-name : One of <secret, secret-uri, secret-name> is required. Keyvault secret name which stores password. It's for AKS only.
         ''' if AUTH_TYPE.Secret in auth_types else ''
         secret_auto_param = '''
             - name: --secret
@@ -225,10 +227,10 @@ for source in SOURCE_RESOURCES:
             - name: --service-principal
               short-summary: The service principal auth info
               long-summary: |
-                Usage: --service-principal client-id=XX object-id=XX secret=XX
+                Usage: --service-principal client-id=XX secret=XX
 
                 client-id      : Required. Client id of the service principal.
-                object-id      : Required. Object id (Enterprise Application) of the service principal.
+                object-id      : Optional. Object id of the service principal (Enterprise Application).
                 secret         : Required. Secret of the service principal.
         ''' if AUTH_TYPE.ServicePrincipalSecret in auth_types else ''
 
@@ -307,7 +309,7 @@ for source in SOURCE_RESOURCES:
     # special target resource, independent implementation
     target = RESOURCE.ConfluentKafka
     server_params = ('--bootstrap-server xxx.eastus.azure.confluent.cloud:9092 '
-                     '--kafka-key Name --kafka-secret Secret ')
+                     '--kafka-key Name --kafka-secret Secret')
     registry_params = ('--schema-registry https://xxx.eastus.azure.confluent.cloud '
                        '--schema-key Name --schema-secret Secret')
 

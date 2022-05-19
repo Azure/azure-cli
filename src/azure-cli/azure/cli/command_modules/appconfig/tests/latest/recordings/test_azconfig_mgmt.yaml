@@ -1,7 +1,8 @@
 interactions:
 - request:
     body: '{"tags": {"key": "value"}, "location": "eastus", "identity": {"type": "SystemAssigned"},
-      "sku": {"name": "Standard"}}'
+      "sku": {"name": "Standard"}, "properties": {"softDeleteRetentionInDays": 1,
+      "enablePurgeProtection": false, "createMode": "Default"}}'
     headers:
       Accept:
       - application/json
@@ -12,29 +13,29 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '117'
+      - '222'
       Content-Type:
       - application/json
       ParameterSetName:
-      - -n -g -l --sku --tags --assign-identity
+      - -n -g -l --sku --tags --assign-identity --retention-days --enable-purge-protection
       User-Agent:
-      - AZURECLI/2.32.0 azsdk-python-mgmt-appconfiguration/2.0.0 Python/3.9.7 (Windows-10-10.0.22538-SP0)
+      - AZURECLI/2.36.0 azsdk-python-mgmt-appconfiguration/2.1.0b2 Python/3.10.4 (Windows-10-10.0.19044-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/MgmtTest000002?api-version=2021-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/MgmtTest000002?api-version=2021-10-01-preview
   response:
     body:
-      string: '{"type":"Microsoft.AppConfiguration/configurationStores","location":"eastus","properties":{"provisioningState":"Creating","creationDate":"2022-02-02T05:26:22.5558913+00:00","endpoint":null,"encryption":null,"privateEndpointConnections":null,"disableLocalAuth":null},"sku":{"name":"Standard"},"systemData":null,"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/MgmtTest000002","name":"MgmtTest000002","tags":{"key":"value"}}'
+      string: '{"type":"Microsoft.AppConfiguration/configurationStores","location":"eastus","properties":{"provisioningState":"Creating","creationDate":"2022-05-12T14:31:19.7112069+00:00","endpoint":null,"encryption":null,"privateEndpointConnections":null,"disableLocalAuth":null,"softDeleteRetentionInDays":null,"enablePurgeProtection":null},"sku":{"name":"Standard"},"systemData":null,"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/MgmtTest000002","name":"MgmtTest000002","tags":{"key":"value"}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/d9c550c2-c048-57ef-dadf-4eac9f5cb264?api-version=2021-03-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/_aWZE2eApUV48J369F6FOE-54iyfweXaK7giqW-YAzg?api-version=2021-10-01-preview
       cache-control:
       - no-cache
       content-length:
-      - '520'
+      - '582'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 02 Feb 2022 05:26:21 GMT
+      - Thu, 12 May 2022 14:31:21 GMT
       expires:
       - '-1'
       pragma:
@@ -46,7 +47,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1197'
     status:
       code: 201
       message: Created
@@ -62,25 +63,25 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -n -g -l --sku --tags --assign-identity
+      - -n -g -l --sku --tags --assign-identity --retention-days --enable-purge-protection
       User-Agent:
-      - AZURECLI/2.32.0 azsdk-python-mgmt-appconfiguration/2.0.0 Python/3.9.7 (Windows-10-10.0.22538-SP0)
+      - AZURECLI/2.36.0 azsdk-python-mgmt-appconfiguration/2.1.0b2 Python/3.10.4 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/d9c550c2-c048-57ef-dadf-4eac9f5cb264?api-version=2021-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/_aWZE2eApUV48J369F6FOE-54iyfweXaK7giqW-YAzg?api-version=2021-10-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/d9c550c2-c048-57ef-dadf-4eac9f5cb264","name":"d9c550c2-c048-57ef-dadf-4eac9f5cb264","status":"Succeeded","error":null}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/_aWZE2eApUV48J369F6FOE-54iyfweXaK7giqW-YAzg","name":"_aWZE2eApUV48J369F6FOE-54iyfweXaK7giqW-YAzg","status":"Succeeded","error":null}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/d9c550c2-c048-57ef-dadf-4eac9f5cb264?api-version=2021-03-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/_aWZE2eApUV48J369F6FOE-54iyfweXaK7giqW-YAzg?api-version=2021-10-01-preview
       cache-control:
       - no-cache
       content-length:
-      - '248'
+      - '262'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 02 Feb 2022 05:26:32 GMT
+      - Thu, 12 May 2022 14:31:31 GMT
       expires:
       - '-1'
       pragma:
@@ -110,25 +111,25 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -n -g -l --sku --tags --assign-identity
+      - -n -g -l --sku --tags --assign-identity --retention-days --enable-purge-protection
       User-Agent:
-      - AZURECLI/2.32.0 azsdk-python-mgmt-appconfiguration/2.0.0 Python/3.9.7 (Windows-10-10.0.22538-SP0)
+      - AZURECLI/2.36.0 azsdk-python-mgmt-appconfiguration/2.1.0b2 Python/3.10.4 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/MgmtTest000002?api-version=2021-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/MgmtTest000002?api-version=2021-10-01-preview
   response:
     body:
-      string: '{"type":"Microsoft.AppConfiguration/configurationStores","location":"eastus","identity":{"type":"SystemAssigned","principalId":"bb354c2e-cd43-4037-a152-be310d0929ab","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"properties":{"provisioningState":"Succeeded","creationDate":"2022-02-02T05:26:22+00:00","endpoint":"https://mgmttestu47ngfwf7pzhqjic.azconfig.io","encryption":{"keyVaultProperties":null},"privateEndpointConnections":null,"disableLocalAuth":false},"sku":{"name":"standard"},"systemData":{"createdBy":"prsangli@microsoft.com","createdByType":"User","createdAt":"2022-02-02T05:26:22+00:00","lastModifiedBy":"prsangli@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-02-02T05:26:24+00:00"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/mgmttestu47ngfwf7pzhqjic","name":"MgmtTest000002","tags":{"key":"value"}}'
+      string: '{"type":"Microsoft.AppConfiguration/configurationStores","location":"eastus","identity":{"type":"SystemAssigned","principalId":"2539e7b9-9099-4971-b5d1-7e467e04918e","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a"},"properties":{"provisioningState":"Succeeded","creationDate":"2022-05-12T14:31:20+00:00","endpoint":"https://mgmttestk2ptpcy375wujusl.azconfig.io","encryption":{"keyVaultProperties":null},"privateEndpointConnections":null,"disableLocalAuth":false,"softDeleteRetentionInDays":1,"enablePurgeProtection":false},"sku":{"name":"standard"},"systemData":{"createdBy":"rolelivetest@azuresdkteam.onmicrosoft.com","createdByType":"User","createdAt":"2022-05-12T14:31:20+00:00","lastModifiedBy":"rolelivetest@azuresdkteam.onmicrosoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-05-12T14:31:22+00:00"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/mgmttestk2ptpcy375wujusl","name":"MgmtTest000002","tags":{"key":"value"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '941'
+      - '1039'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 02 Feb 2022 05:26:33 GMT
+      - Thu, 12 May 2022 14:31:32 GMT
       etag:
-      - W/"2601764d-0000-0100-0000-61fa15ff0000"
+      - W/"5801daa9-0000-0100-0000-627d1a3a0000"
       expires:
       - '-1'
       pragma:
@@ -160,25 +161,25 @@ interactions:
       ParameterSetName:
       - -g
       User-Agent:
-      - AZURECLI/2.32.0 azsdk-python-mgmt-appconfiguration/2.0.0 Python/3.9.7 (Windows-10-10.0.22538-SP0)
+      - AZURECLI/2.36.0 azsdk-python-mgmt-appconfiguration/2.1.0b2 Python/3.10.4 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores?api-version=2021-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores?api-version=2021-10-01-preview
   response:
     body:
-      string: '{"value":[{"type":"Microsoft.AppConfiguration/configurationStores","location":"eastus","identity":{"type":"SystemAssigned","principalId":"bb354c2e-cd43-4037-a152-be310d0929ab","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"properties":{"provisioningState":"Succeeded","creationDate":"2022-02-02T05:26:22+00:00","endpoint":"https://mgmttestu47ngfwf7pzhqjic.azconfig.io","encryption":{"keyVaultProperties":null},"privateEndpointConnections":null,"disableLocalAuth":false},"sku":{"name":"standard"},"systemData":{"createdBy":"prsangli@microsoft.com","createdByType":"User","createdAt":"2022-02-02T05:26:22+00:00","lastModifiedBy":"prsangli@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-02-02T05:26:24+00:00"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/mgmttestu47ngfwf7pzhqjic","name":"MgmtTest000002","tags":{"key":"value"}}],"nextLink":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores?api-version=2021-03-01-preview&$skipToken=mgmttestu47ngfwf7pzhqjic"}'
+      string: '{"value":[{"type":"Microsoft.AppConfiguration/configurationStores","location":"eastus","identity":{"type":"SystemAssigned","principalId":"2539e7b9-9099-4971-b5d1-7e467e04918e","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a"},"properties":{"provisioningState":"Succeeded","creationDate":"2022-05-12T14:31:20+00:00","endpoint":"https://mgmttestk2ptpcy375wujusl.azconfig.io","encryption":{"keyVaultProperties":null},"privateEndpointConnections":null,"disableLocalAuth":false,"softDeleteRetentionInDays":1,"enablePurgeProtection":false},"sku":{"name":"standard"},"systemData":{"createdBy":"rolelivetest@azuresdkteam.onmicrosoft.com","createdByType":"User","createdAt":"2022-05-12T14:31:20+00:00","lastModifiedBy":"rolelivetest@azuresdkteam.onmicrosoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-05-12T14:31:22+00:00"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/mgmttestk2ptpcy375wujusl","name":"MgmtTest000002","tags":{"key":"value"}}],"nextLink":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores?api-version=2021-10-01-preview&$skipToken=mgmttestk2ptpcy375wujusl"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1202'
+      - '1300'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 02 Feb 2022 05:26:33 GMT
+      - Thu, 12 May 2022 14:31:33 GMT
       expires:
       - '-1'
       link:
-      - </subscriptions/77d5ab06-7edd-4eec-bce9-52c11b75bb37/resourceGroups/clitest.rg4nemrjwrc3tjtvfucbq2lli3ezmhv22boe4p7xm4orrwj56hzkwprcvrfcx6qwglc/providers/Microsoft.AppConfiguration/configurationStores?api-version=2021-03-01-preview&$skipToken=mgmttestu47ngfwf7pzhqjic>;
+      - </subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clitest.rg7gzlnl2sp3ttbdpsuaydhf5quxw354775bggsazximtaxft5z5bovtchurhff35vw/providers/Microsoft.AppConfiguration/configurationStores?api-version=2021-10-01-preview&$skipToken=mgmttestk2ptpcy375wujusl>;
         rel="next"
       pragma:
       - no-cache
@@ -209,9 +210,9 @@ interactions:
       ParameterSetName:
       - -g
       User-Agent:
-      - AZURECLI/2.32.0 azsdk-python-mgmt-appconfiguration/2.0.0 Python/3.9.7 (Windows-10-10.0.22538-SP0)
+      - AZURECLI/2.36.0 azsdk-python-mgmt-appconfiguration/2.1.0b2 Python/3.10.4 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores?api-version=2021-03-01-preview&$skipToken=mgmttestu47ngfwf7pzhqjic
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores?api-version=2021-10-01-preview&$skipToken=mgmttestk2ptpcy375wujusl
   response:
     body:
       string: '{"value":[],"nextLink":null}'
@@ -223,7 +224,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 02 Feb 2022 05:26:33 GMT
+      - Thu, 12 May 2022 14:31:33 GMT
       expires:
       - '-1'
       pragma:
@@ -255,23 +256,23 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - AZURECLI/2.32.0 azsdk-python-mgmt-appconfiguration/2.0.0 Python/3.9.7 (Windows-10-10.0.22538-SP0)
+      - AZURECLI/2.36.0 azsdk-python-mgmt-appconfiguration/2.1.0b2 Python/3.10.4 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/MgmtTest000002?api-version=2021-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/MgmtTest000002?api-version=2021-10-01-preview
   response:
     body:
-      string: '{"type":"Microsoft.AppConfiguration/configurationStores","location":"eastus","identity":{"type":"SystemAssigned","principalId":"bb354c2e-cd43-4037-a152-be310d0929ab","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"properties":{"provisioningState":"Succeeded","creationDate":"2022-02-02T05:26:22+00:00","endpoint":"https://mgmttestu47ngfwf7pzhqjic.azconfig.io","encryption":{"keyVaultProperties":null},"privateEndpointConnections":null,"disableLocalAuth":false},"sku":{"name":"standard"},"systemData":{"createdBy":"prsangli@microsoft.com","createdByType":"User","createdAt":"2022-02-02T05:26:22+00:00","lastModifiedBy":"prsangli@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-02-02T05:26:24+00:00"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/mgmttestu47ngfwf7pzhqjic","name":"MgmtTest000002","tags":{"key":"value"}}'
+      string: '{"type":"Microsoft.AppConfiguration/configurationStores","location":"eastus","identity":{"type":"SystemAssigned","principalId":"2539e7b9-9099-4971-b5d1-7e467e04918e","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a"},"properties":{"provisioningState":"Succeeded","creationDate":"2022-05-12T14:31:20+00:00","endpoint":"https://mgmttestk2ptpcy375wujusl.azconfig.io","encryption":{"keyVaultProperties":null},"privateEndpointConnections":null,"disableLocalAuth":false,"softDeleteRetentionInDays":1,"enablePurgeProtection":false},"sku":{"name":"standard"},"systemData":{"createdBy":"rolelivetest@azuresdkteam.onmicrosoft.com","createdByType":"User","createdAt":"2022-05-12T14:31:20+00:00","lastModifiedBy":"rolelivetest@azuresdkteam.onmicrosoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-05-12T14:31:22+00:00"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/mgmttestk2ptpcy375wujusl","name":"MgmtTest000002","tags":{"key":"value"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '941'
+      - '1039'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 02 Feb 2022 05:26:33 GMT
+      - Thu, 12 May 2022 14:31:35 GMT
       etag:
-      - W/"2601764d-0000-0100-0000-61fa15ff0000"
+      - W/"5801daa9-0000-0100-0000-627d1a3a0000"
       expires:
       - '-1'
       pragma:
@@ -307,23 +308,23 @@ interactions:
       ParameterSetName:
       - -n -g --tags --sku
       User-Agent:
-      - AZURECLI/2.32.0 azsdk-python-mgmt-appconfiguration/2.0.0 Python/3.9.7 (Windows-10-10.0.22538-SP0)
+      - AZURECLI/2.36.0 azsdk-python-mgmt-appconfiguration/2.1.0b2 Python/3.10.4 (Windows-10-10.0.19044-SP0)
     method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/MgmtTest000002?api-version=2021-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/MgmtTest000002?api-version=2021-10-01-preview
   response:
     body:
-      string: '{"type":"Microsoft.AppConfiguration/configurationStores","location":"eastus","identity":{"type":"SystemAssigned","principalId":"bb354c2e-cd43-4037-a152-be310d0929ab","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"properties":{"provisioningState":"Succeeded","creationDate":"2022-02-02T05:26:22+00:00","endpoint":"https://mgmttestu47ngfwf7pzhqjic.azconfig.io","encryption":{"keyVaultProperties":null},"privateEndpointConnections":null,"disableLocalAuth":false},"sku":{"name":"standard"},"systemData":{"createdBy":"prsangli@microsoft.com","createdByType":"User","createdAt":"2022-02-02T05:26:22+00:00","lastModifiedBy":"prsangli@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-02-02T05:26:35+00:00"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/mgmttestu47ngfwf7pzhqjic","name":"MgmtTest000002","tags":{"Env":"Prod"}}'
+      string: '{"type":"Microsoft.AppConfiguration/configurationStores","location":"eastus","identity":{"type":"SystemAssigned","principalId":"2539e7b9-9099-4971-b5d1-7e467e04918e","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a"},"properties":{"provisioningState":"Succeeded","creationDate":"2022-05-12T14:31:20+00:00","endpoint":"https://mgmttestk2ptpcy375wujusl.azconfig.io","encryption":{"keyVaultProperties":null},"privateEndpointConnections":null,"disableLocalAuth":false,"softDeleteRetentionInDays":1,"enablePurgeProtection":false},"sku":{"name":"standard"},"systemData":{"createdBy":"rolelivetest@azuresdkteam.onmicrosoft.com","createdByType":"User","createdAt":"2022-05-12T14:31:20+00:00","lastModifiedBy":"rolelivetest@azuresdkteam.onmicrosoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-05-12T14:31:36+00:00"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/mgmttestk2ptpcy375wujusl","name":"MgmtTest000002","tags":{"Env":"Prod"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '940'
+      - '1038'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 02 Feb 2022 05:26:34 GMT
+      - Thu, 12 May 2022 14:31:39 GMT
       etag:
-      - W/"26018d50-0000-0100-0000-61fa160a0000"
+      - W/"58014fb7-0000-0100-0000-627d1a480000"
       expires:
       - '-1'
       pragma:
@@ -339,7 +340,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1197'
     status:
       code: 200
       message: OK
@@ -357,7 +358,7 @@ interactions:
       ParameterSetName:
       - -n -g -l --enable-purge-protection --enable-soft-delete
       User-Agent:
-      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-keyvault/9.3.0 Python/3.9.7 (Windows-10-10.0.22538-SP0)
+      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-keyvault/9.3.0 Python/3.10.4 (Windows-10-10.0.19044-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/cmk-test-keyvault000003?api-version=2021-06-01-preview
   response:
@@ -373,7 +374,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 02 Feb 2022 05:26:35 GMT
+      - Thu, 12 May 2022 14:31:40 GMT
       expires:
       - '-1'
       pragma:
@@ -391,80 +392,56 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
+      CommandName:
+      - keyvault create
       Connection:
       - keep-alive
+      ParameterSetName:
+      - -n -g -l --enable-purge-protection --enable-soft-delete
       User-Agent:
-      - python/3.9.7 (Windows-10-10.0.22538-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-graphrbac/0.60.0 Azure-SDK-For-Python
-      accept-language:
-      - en-US
+      - python/3.10.4 (Windows-10-10.0.19044-SP0) AZURECLI/2.36.0
     method: GET
-    uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/me?api-version=1.6
+    uri: https://graph.microsoft.com/v1.0/me
   response:
     body:
-      string: '{"odata.metadata":"https://graph.windows.net/00000000-0000-0000-0000-000000000000/$metadata#directoryObjects/@Element","odata.type":"Microsoft.DirectoryServices.User","objectType":"User","objectId":"1120d05c-61c7-4bdd-b83a-787d66480a5f","deletionTimestamp":null,"accountEnabled":true,"ageGroup":null,"assignedLicenses":[{"disabledPlans":["b76fb638-6ba6-402a-b9f9-83d28acb3d86","cd31b152-6326-4d1b-ae1b-997b625182e6","a413a9ff-720c-4822-98ef-2f37c2a21f4c","a6520331-d7d4-4276-95f5-15c0933bc757","ded3d325-1bdc-453e-8432-5bac26d7a014","afa73018-811e-46e9-988f-f75d2b1b8430","b21a6b06-1988-436e-a07b-51ec6d9f52ad","531ee2f8-b1cb-453b-9c21-d2180d014ca5","bf28f719-7844-4079-9c78-c1307898e192","28b0fa46-c39a-4188-89e2-58e979a6b014","199a5c09-e0ca-4e37-8f7c-b05d533e1ea2","65cc641f-cccd-4643-97e0-a17e3045e541","e26c2fcc-ab91-4a61-b35c-03cdc8dddf66","46129a58-a698-46f0-aa5b-17f6586297d9","6db1f1db-2b46-403f-be40-e39395f08dbb","6dc145d6-95dd-4191-b9c3-185575ee6f6b","41fcdd7d-4733-4863-9cf4-c65b83ce2df4","c4801e8a-cb58-4c35-aca6-f2dcc106f287","0898bdbb-73b0-471a-81e5-20f1fe4dd66e","617b097b-4b93-4ede-83de-5f075bb5fb2f","33c4f319-9bdd-48d6-9c4d-410b750a4a5a","8e0c0a52-6a6c-4d40-8370-dd62790dcd70","4828c8ec-dc2e-4779-b502-87ac9ce28ab7","3e26ee1f-8a5f-4d52-aee2-b81ce45c8f40"],"skuId":"c7df2760-2c81-4ef7-b578-5b5392b571df"},{"disabledPlans":["b622badb-1b45-48d5-920f-4b27a2c0996c"],"skuId":"3d957427-ecdc-4df2-aacd-01cc9d519da8"},{"disabledPlans":[],"skuId":"85aae730-b3d1-4f99-bb28-c9f81b05137c"},{"disabledPlans":[],"skuId":"9f3d9c1d-25a5-4aaa-8e59-23a1e6450a67"},{"disabledPlans":[],"skuId":"26a18e8f-4d14-46f8-835a-ed3ba424a961"},{"disabledPlans":[],"skuId":"412ce1a7-a499-41b3-8eb6-b38f2bbc5c3f"},{"disabledPlans":[],"skuId":"dcb1a3ae-b33f-4487-846a-a640262fadf4"},{"disabledPlans":["39b5c996-467e-4e60-bd62-46066f572726"],"skuId":"90d8b3f8-712e-4f7b-aa1e-62e7ae6cbe96"},{"disabledPlans":[],"skuId":"c5928f49-12ba-48f7-ada3-0d743a3601d5"},{"disabledPlans":[],"skuId":"b05e124f-c7cc-45a0-a6aa-8cf78c946968"},{"disabledPlans":["e95bec33-7c88-4a70-8e19-b10bd9d0c014","5dbe027f-2339-4123-9542-606e4d348a72"],"skuId":"09015f9f-377f-4538-bbb5-f75ceb09358a"},{"disabledPlans":[],"skuId":"488ba24a-39a9-4473-8ee5-19291e71b002"},{"disabledPlans":["0b03f40b-c404-40c3-8651-2aceb74365fa","b650d915-9886-424b-a08d-633cede56f57","e95bec33-7c88-4a70-8e19-b10bd9d0c014","5dbe027f-2339-4123-9542-606e4d348a72","fe71d6c3-a2ea-4499-9778-da042bf08063","fafd7243-e5c1-4a3a-9e40-495efcb1d3c3"],"skuId":"ea126fc5-a19e-42e2-a731-da9d437bffcf"}],"assignedPlans":[{"assignedTimestamp":"2021-10-27T00:11:10Z","capabilityStatus":"Enabled","service":"SharePoint","servicePlanId":"fe71d6c3-a2ea-4499-9778-da042bf08063"},{"assignedTimestamp":"2021-10-27T00:11:10Z","capabilityStatus":"Enabled","service":"exchange","servicePlanId":"199a5c09-e0ca-4e37-8f7c-b05d533e1ea2"},{"assignedTimestamp":"2021-10-27T00:11:10Z","capabilityStatus":"Enabled","service":"SharePoint","servicePlanId":"e95bec33-7c88-4a70-8e19-b10bd9d0c014"},{"assignedTimestamp":"2021-10-27T00:11:10Z","capabilityStatus":"Enabled","service":"SharePoint","servicePlanId":"5dbe027f-2339-4123-9542-606e4d348a72"},{"assignedTimestamp":"2021-10-27T00:11:10Z","capabilityStatus":"Enabled","service":"exchange","servicePlanId":"b622badb-1b45-48d5-920f-4b27a2c0996c"},{"assignedTimestamp":"2021-10-27T00:11:10Z","capabilityStatus":"Enabled","service":"MicrosoftOffice","servicePlanId":"fafd7243-e5c1-4a3a-9e40-495efcb1d3c3"},{"assignedTimestamp":"2021-06-22T11:13:07Z","capabilityStatus":"Enabled","service":"WindowsUpdateforBusinessCloudExtensions","servicePlanId":"7bf960f6-2cd9-443a-8046-5dbff9558365"},{"assignedTimestamp":"2021-04-15T22:39:41Z","capabilityStatus":"Deleted","service":"MIPExchangeSolutions","servicePlanId":"cd31b152-6326-4d1b-ae1b-997b625182e6"},{"assignedTimestamp":"2020-12-22T09:49:11Z","capabilityStatus":"Enabled","service":"exchange","servicePlanId":"2f442157-a11c-46b9-ae5b-6e39ff4e5849"},{"assignedTimestamp":"2020-12-12T18:06:59Z","capabilityStatus":"Enabled","service":"CRM","servicePlanId":"18fa3aba-b085-4105-87d7-55617b8585e6"},{"assignedTimestamp":"2020-12-12T18:06:59Z","capabilityStatus":"Enabled","service":"ERP","servicePlanId":"69f07c66-bee4-4222-b051-195095efee5b"},{"assignedTimestamp":"2020-12-12T18:06:59Z","capabilityStatus":"Enabled","service":"ProjectProgramsAndPortfolios","servicePlanId":"0a05d977-a21a-45b2-91ce-61c240dbafa2"},{"assignedTimestamp":"2020-11-03T22:03:47Z","capabilityStatus":"Deleted","service":"M365CommunicationCompliance","servicePlanId":"a413a9ff-720c-4822-98ef-2f37c2a21f4c"},{"assignedTimestamp":"2020-10-30T07:22:46Z","capabilityStatus":"Enabled","service":"ProcessSimple","servicePlanId":"7e6d7d78-73de-46ba-83b1-6d25117334ba"},{"assignedTimestamp":"2020-10-17T07:13:49Z","capabilityStatus":"Enabled","service":"WorkplaceAnalytics","servicePlanId":"f477b0f0-3bb1-4890-940c-40fcee6ce05f"},{"assignedTimestamp":"2020-08-14T21:42:34Z","capabilityStatus":"Enabled","service":"YammerEnterprise","servicePlanId":"7547a3fe-08ee-4ccb-b430-5077c5041653"},{"assignedTimestamp":"2020-08-04T06:20:20Z","capabilityStatus":"Enabled","service":"exchange","servicePlanId":"f3d5636e-ddc2-41bf-bba6-ca6fadece269"},{"assignedTimestamp":"2020-06-18T13:04:33Z","capabilityStatus":"Enabled","service":"MicrosoftPrint","servicePlanId":"795f6fe0-cc4d-4773-b050-5dde4dc704c9"},{"assignedTimestamp":"2019-11-05T01:59:13Z","capabilityStatus":"Enabled","service":"WhiteboardServices","servicePlanId":"4a51bca5-1eff-43f5-878c-177680f191af"},{"assignedTimestamp":"2019-10-15T17:27:13Z","capabilityStatus":"Enabled","service":"exchange","servicePlanId":"5136a095-5cf0-4aff-bec3-e84448b38ea5"},{"assignedTimestamp":"2019-10-15T17:27:13Z","capabilityStatus":"Enabled","service":"exchange","servicePlanId":"efb0351d-3b08-4503-993d-383af8de41e3"},{"assignedTimestamp":"2019-08-09T00:34:46Z","capabilityStatus":"Enabled","service":"MicrosoftFormsProTest","servicePlanId":"97f29a83-1a20-44ff-bf48-5e4ad11f3e51"},{"assignedTimestamp":"2019-05-26T18:53:53Z","capabilityStatus":"Deleted","service":"exchange","servicePlanId":"617b097b-4b93-4ede-83de-5f075bb5fb2f"},{"assignedTimestamp":"2019-05-23T00:05:35Z","capabilityStatus":"Enabled","service":"MicrosoftCommunicationsOnline","servicePlanId":"018fb91e-cee3-418c-9063-d7562978bdaf"},{"assignedTimestamp":"2019-05-23T00:05:33Z","capabilityStatus":"Enabled","service":"MicrosoftCommunicationsOnline","servicePlanId":"ca4be917-fbce-4b52-839e-6647467a1668"},{"assignedTimestamp":"2019-05-21T18:54:32Z","capabilityStatus":"Enabled","service":"ProcessSimple","servicePlanId":"50e68c76-46c6-4674-81f9-75456511b170"},{"assignedTimestamp":"2019-05-21T18:54:32Z","capabilityStatus":"Enabled","service":"ProcessSimple","servicePlanId":"d20bfa21-e9ae-43fc-93c2-20783f0840c3"},{"assignedTimestamp":"2019-05-21T18:54:32Z","capabilityStatus":"Enabled","service":"PowerAppsService","servicePlanId":"d5368ca3-357e-4acb-9c21-8495fb025d1f"},{"assignedTimestamp":"2019-05-21T18:54:32Z","capabilityStatus":"Enabled","service":"CRM","servicePlanId":"17ab22cd-a0b3-4536-910a-cb6eb12696c0"},{"assignedTimestamp":"2019-05-21T07:12:29Z","capabilityStatus":"Enabled","service":"exchange","servicePlanId":"9f431833-0334-42de-a7dc-70aa40db46db"},{"assignedTimestamp":"2019-05-21T07:12:29Z","capabilityStatus":"Enabled","service":"exchange","servicePlanId":"efb87545-963c-4e0d-99df-69c6916d9eb0"},{"assignedTimestamp":"2019-05-21T07:12:29Z","capabilityStatus":"Enabled","service":"exchange","servicePlanId":"34c0d7a0-a70f-4668-9238-47f9fc208882"},{"assignedTimestamp":"2019-05-17T13:43:01Z","capabilityStatus":"Enabled","service":"MicrosoftCommunicationsOnline","servicePlanId":"0feaeb32-d00e-4d66-bd5a-43b5b83db82c"},{"assignedTimestamp":"2019-05-17T13:43:01Z","capabilityStatus":"Enabled","service":"ProcessSimple","servicePlanId":"07699545-9485-468e-95b6-2fca3738be01"},{"assignedTimestamp":"2019-05-17T13:43:01Z","capabilityStatus":"Enabled","service":"Adallom","servicePlanId":"8c098270-9dd4-4350-9b30-ba4703f3b36b"},{"assignedTimestamp":"2019-05-17T13:43:01Z","capabilityStatus":"Enabled","service":"exchange","servicePlanId":"b1188c4c-1b36-4018-b48b-ee07604f6feb"},{"assignedTimestamp":"2019-05-17T13:43:01Z","capabilityStatus":"Enabled","service":"MicrosoftStream","servicePlanId":"6c6042f5-6f01-4d67-b8c1-eb99d36eed3e"},{"assignedTimestamp":"2019-05-17T13:43:01Z","capabilityStatus":"Enabled","service":"AADPremiumService","servicePlanId":"41781fb2-bc02-4b7c-bd55-b576c07bb09d"},{"assignedTimestamp":"2019-05-17T13:43:01Z","capabilityStatus":"Enabled","service":"Sway","servicePlanId":"a23b959c-7ce8-4e57-9140-b90eb88a9e97"},{"assignedTimestamp":"2019-05-17T13:43:01Z","capabilityStatus":"Enabled","service":"PowerBI","servicePlanId":"70d33638-9c74-4d01-bfd3-562de28bd4ba"},{"assignedTimestamp":"2019-05-17T13:43:01Z","capabilityStatus":"Enabled","service":"ProjectWorkManagement","servicePlanId":"b737dad2-2f6c-4c65-90e3-ca563267e8b9"},{"assignedTimestamp":"2019-05-17T13:43:01Z","capabilityStatus":"Enabled","service":"RMSOnline","servicePlanId":"bea4c11e-220a-4e6d-8eb8-8ea15d019f90"},{"assignedTimestamp":"2019-05-17T13:43:01Z","capabilityStatus":"Enabled","service":"AADPremiumService","servicePlanId":"eec0eb4f-6444-4f95-aba0-50c24d67f998"},{"assignedTimestamp":"2019-05-17T13:43:01Z","capabilityStatus":"Enabled","service":"ProjectProgramsAndPortfolios","servicePlanId":"818523f5-016b-4355-9be8-ed6944946ea7"},{"assignedTimestamp":"2019-05-17T13:43:01Z","capabilityStatus":"Enabled","service":"OfficeForms","servicePlanId":"e212cbc7-0961-4c40-9825-01117710dcb1"},{"assignedTimestamp":"2019-05-17T13:43:01Z","capabilityStatus":"Enabled","service":"exchange","servicePlanId":"4de31727-a228-4ec3-a5bf-8e45b5ca48cc"},{"assignedTimestamp":"2019-05-17T13:43:01Z","capabilityStatus":"Enabled","service":"SCO","servicePlanId":"c1ec4a95-1f05-45b3-a911-aa3fa01094f5"},{"assignedTimestamp":"2019-05-17T13:43:01Z","capabilityStatus":"Enabled","service":"SharePoint","servicePlanId":"2bdbaf8f-738f-4ac7-9234-3c3ee2ce7d0f"},{"assignedTimestamp":"2019-05-17T13:43:01Z","capabilityStatus":"Enabled","service":"MicrosoftOffice","servicePlanId":"663a804f-1c30-4ff0-9915-9db84f0d1cea"},{"assignedTimestamp":"2019-05-17T13:43:01Z","capabilityStatus":"Enabled","service":"TeamspaceAPI","servicePlanId":"57ff2da0-773e-42df-b2af-ffb7a2317929"},{"assignedTimestamp":"2019-05-17T13:43:01Z","capabilityStatus":"Enabled","service":"AzureAdvancedThreatAnalytics","servicePlanId":"14ab5db5-e6c4-4b20-b4bc-13e36fd2227f"},{"assignedTimestamp":"2019-05-17T13:43:01Z","capabilityStatus":"Enabled","service":"PowerAppsService","servicePlanId":"9c0dab89-a30c-4117-86e7-97bda240acd2"},{"assignedTimestamp":"2019-05-17T13:43:01Z","capabilityStatus":"Enabled","service":"SharePoint","servicePlanId":"da792a53-cbc0-4184-a10d-e544dd34b3c1"},{"assignedTimestamp":"2019-05-17T13:43:01Z","capabilityStatus":"Enabled","service":"Deskless","servicePlanId":"8c7d2df8-86f0-4902-b2ed-a0458298f3b3"},{"assignedTimestamp":"2019-05-17T13:43:01Z","capabilityStatus":"Enabled","service":"RMSOnline","servicePlanId":"6c57d4b6-3b23-47a5-9bc9-69f17b4947b3"},{"assignedTimestamp":"2019-05-17T13:43:01Z","capabilityStatus":"Enabled","service":"MultiFactorService","servicePlanId":"8a256a2b-b617-496d-b51b-e76466e88db0"},{"assignedTimestamp":"2019-05-17T13:43:01Z","capabilityStatus":"Enabled","service":"ProcessSimple","servicePlanId":"fa200448-008c-4acb-abd4-ea106ed2199d"},{"assignedTimestamp":"2019-05-17T13:43:01Z","capabilityStatus":"Enabled","service":"To-Do","servicePlanId":"3fb82609-8c27-4f7b-bd51-30634711ee67"},{"assignedTimestamp":"2019-05-17T13:43:01Z","capabilityStatus":"Enabled","service":"RMSOnline","servicePlanId":"5689bec4-755d-4753-8b61-40975025187c"},{"assignedTimestamp":"2019-05-17T13:43:01Z","capabilityStatus":"Enabled","service":"MicrosoftOffice","servicePlanId":"43de0ff5-c92c-492b-9116-175376d08c38"},{"assignedTimestamp":"2019-05-17T13:43:01Z","capabilityStatus":"Enabled","service":"CRM","servicePlanId":"50554c47-71d9-49fd-bc54-42a2765c555c"},{"assignedTimestamp":"2019-05-17T13:43:01Z","capabilityStatus":"Enabled","service":"Adallom","servicePlanId":"2e2ddb96-6af9-4b1d-a3f0-d6ecfd22edb2"},{"assignedTimestamp":"2019-05-17T10:49:56Z","capabilityStatus":"Enabled","service":"WindowsDefenderATP","servicePlanId":"871d91ec-ec1a-452b-a83f-bd76c7d770ef"},{"assignedTimestamp":"2019-05-17T10:49:56Z","capabilityStatus":"Enabled","service":"Windows","servicePlanId":"e7c91390-7625-45be-94e0-e16907e03118"},{"assignedTimestamp":"2019-05-17T10:49:54Z","capabilityStatus":"Enabled","service":"Netbreeze","servicePlanId":"03acaee3-9492-4f40-aed4-bcb6b32981b6"},{"assignedTimestamp":"2019-05-17T10:49:54Z","capabilityStatus":"Enabled","service":"DYN365AISERVICEINSIGHTS","servicePlanId":"1412cdc1-d593-4ad1-9050-40c30ad0b023"},{"assignedTimestamp":"2019-05-17T10:49:54Z","capabilityStatus":"Enabled","service":"CRM","servicePlanId":"d56f3deb-50d8-465a-bedb-f079817ccac1"}],"city":"REDMOND","companyName":"MICROSOFT","consentProvidedForMinor":null,"country":null,"createdDateTime":"2019-05-17T10:06:47Z","creationType":null,"department":".NET","dirSyncEnabled":true,"displayName":"Pratik
-        Sanglikar","employeeId":null,"facsimileTelephoneNumber":null,"givenName":"Pratik","immutableId":"1361949","isCompromised":null,"jobTitle":"SOFTWARE
-        ENGINEER II","lastDirSyncTime":"2021-12-07T20:14:36Z","legalAgeGroupClassification":null,"mail":"Pratik.Sanglikar@microsoft.com","mailNickname":"prsangli","mobile":null,"onPremisesDistinguishedName":"CN=Pratik
-        Sanglikar,OU=MSE,OU=Users,OU=CoreIdentity,DC=redmond,DC=corp,DC=microsoft,DC=com","onPremisesSecurityIdentifier":"S-1-5-21-2127521184-1604012920-1887927527-35591645","otherMails":[],"passwordPolicies":"DisablePasswordExpiration","passwordProfile":null,"physicalDeliveryOfficeName":"18/3450FL","postalCode":null,"preferredLanguage":null,"provisionedPlans":[{"capabilityStatus":"Enabled","provisioningStatus":"Success","service":"exchange"},{"capabilityStatus":"Enabled","provisioningStatus":"Success","service":"exchange"},{"capabilityStatus":"Enabled","provisioningStatus":"Success","service":"SharePoint"},{"capabilityStatus":"Enabled","provisioningStatus":"Success","service":"SharePoint"},{"capabilityStatus":"Enabled","provisioningStatus":"Success","service":"SharePoint"},{"capabilityStatus":"Enabled","provisioningStatus":"Success","service":"exchange"},{"capabilityStatus":"Enabled","provisioningStatus":"Success","service":"CRM"},{"capabilityStatus":"Enabled","provisioningStatus":"Success","service":"exchange"},{"capabilityStatus":"Enabled","provisioningStatus":"Success","service":"exchange"},{"capabilityStatus":"Enabled","provisioningStatus":"Success","service":"exchange"},{"capabilityStatus":"Deleted","provisioningStatus":"Success","service":"exchange"},{"capabilityStatus":"Enabled","provisioningStatus":"Success","service":"MicrosoftCommunicationsOnline"},{"capabilityStatus":"Enabled","provisioningStatus":"Success","service":"MicrosoftCommunicationsOnline"},{"capabilityStatus":"Enabled","provisioningStatus":"Success","service":"CRM"},{"capabilityStatus":"Enabled","provisioningStatus":"Success","service":"exchange"},{"capabilityStatus":"Enabled","provisioningStatus":"Success","service":"exchange"},{"capabilityStatus":"Enabled","provisioningStatus":"Success","service":"exchange"},{"capabilityStatus":"Enabled","provisioningStatus":"Success","service":"exchange"},{"capabilityStatus":"Enabled","provisioningStatus":"Success","service":"exchange"},{"capabilityStatus":"Enabled","provisioningStatus":"Success","service":"MicrosoftCommunicationsOnline"},{"capabilityStatus":"Enabled","provisioningStatus":"Success","service":"CRM"},{"capabilityStatus":"Enabled","provisioningStatus":"Success","service":"SharePoint"},{"capabilityStatus":"Enabled","provisioningStatus":"Success","service":"SharePoint"},{"capabilityStatus":"Enabled","provisioningStatus":"Success","service":"Netbreeze"},{"capabilityStatus":"Enabled","provisioningStatus":"Success","service":"CRM"}],"provisioningErrors":[],"proxyAddresses":["x500:/o=ExchangeLabs/ou=Exchange
-        Administrative Group (FYDIBOHF23SPDLT)/cn=Recipients/cn=eded40ab783b447d88bcfdf5d6ec3818-Pratik
-        Sang","X500:/o=microsoft/ou=Exchange Administrative Group (FYDIBOHF23SPDLT)/cn=Recipients/cn=f75f2eda1eff47cc94eba380d52d1d51-Pratik
-        Sanglik","X500:/o=microsoft/ou=Exchange Administrative Group (FYDIBOHF23SPDLT)/cn=Recipients/cn=ca04b1217506445c8acbb65fbcdb0c04-Pratik
-        Sanglik","smtp:prsangli@microsoft.onmicrosoft.com","smtp:prsangli@service.microsoft.com","smtp:prsangli@microsoft.com","SMTP:Pratik.Sanglikar@microsoft.com"],"refreshTokensValidFromDateTime":"2019-08-15T23:07:58Z","showInAddressList":null,"signInNames":[],"sipProxyAddress":"prsangli@microsoft.com","state":null,"streetAddress":null,"surname":"Sanglikar","telephoneNumber":null,"thumbnailPhoto@odata.mediaEditLink":"directoryObjects/1120d05c-61c7-4bdd-b83a-787d66480a5f/Microsoft.DirectoryServices.User/thumbnailPhoto","usageLocation":"US","userIdentities":[],"userPrincipalName":"prsangli@microsoft.com","userState":null,"userStateChangedOn":null,"userType":"Member","extension_18e31482d3fb4a8ea958aa96b662f508_ReportsToPersonnelNbr":"332765","extension_18e31482d3fb4a8ea958aa96b662f508_ReportsToFullName":"Wang,
-        Zhenlan","extension_18e31482d3fb4a8ea958aa96b662f508_ReportsToEmailName":"ZHENLWA","extension_18e31482d3fb4a8ea958aa96b662f508_ZipCode":"98052","extension_18e31482d3fb4a8ea958aa96b662f508_StateProvinceCode":"WA","extension_18e31482d3fb4a8ea958aa96b662f508_CountryShortCode":"US","extension_18e31482d3fb4a8ea958aa96b662f508_CityName":"REDMOND","extension_18e31482d3fb4a8ea958aa96b662f508_AddressLine1":"1
-        Microsoft Way","extension_18e31482d3fb4a8ea958aa96b662f508_ProfitCenterCode":"P10007331","extension_18e31482d3fb4a8ea958aa96b662f508_CostCenterCode":"10007331","extension_18e31482d3fb4a8ea958aa96b662f508_SupervisorInd":"N","extension_18e31482d3fb4a8ea958aa96b662f508_PositionNumber":"30028286","extension_18e31482d3fb4a8ea958aa96b662f508_LocationAreaCode":"US","extension_18e31482d3fb4a8ea958aa96b662f508_CompanyCode":"1010","extension_18e31482d3fb4a8ea958aa96b662f508_BuildingName":"18","extension_18e31482d3fb4a8ea958aa96b662f508_BuildingID":"17","extension_18e31482d3fb4a8ea958aa96b662f508_PersonnelNumber":"1361949"}'
+      string: '{"@odata.context":"https://graph.microsoft.com/v1.0/$metadata#users/$entity","businessPhones":[],"displayName":"rolelivetest","givenName":null,"jobTitle":null,"mail":null,"mobilePhone":null,"officeLocation":null,"preferredLanguage":null,"surname":null,"userPrincipalName":"rolelivetest@azuresdkteam.onmicrosoft.com","id":"6d97229a-391f-473a-893f-f0608b592d7b"}'
     headers:
-      access-control-allow-origin:
-      - '*'
       cache-control:
       - no-cache
       content-length:
-      - '18278'
+      - '360'
       content-type:
-      - application/json; odata=minimalmetadata; streaming=true; charset=utf-8
-      dataserviceversion:
-      - 3.0;
+      - application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8
       date:
-      - Wed, 02 Feb 2022 05:26:35 GMT
-      duration:
-      - '1418640'
-      expires:
-      - '-1'
-      ocp-aad-diagnostics-server-name:
-      - u+oPRLPAgc8orMjVeN2UhynZ62ayCLSsUPIVjJWdrnc=
-      ocp-aad-session-key:
-      - jwZYwrMVBpbJmlmULW9efrxv6x4X4fYZfuTUQiPyRs3Cd3LQVd3yaGKE69_IxmkA5dObVGWp_OOyxaqP8-SjAnwnCHkDiaNFSfCsxL2u4gV-Dkg5fb_fCxb9PYu-k1OE.Yu25ZAHXDpG7ChvaOwG0vamRNZPpPTaTbbTgoHiXvVw
-      pragma:
-      - no-cache
+      - Thu, 12 May 2022 14:31:42 GMT
+      odata-version:
+      - '4.0'
       request-id:
-      - 43fe41b4-c277-4eb7-8851-45f51d4dcbfd
+      - cef5fdb3-9f55-4e22-a381-cbb172efde7c
       strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-aspnet-version:
-      - 4.0.30319
-      x-ms-dirapi-data-contract-version:
-      - '1.6'
+      - max-age=31536000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-ms-ags-diagnostic:
+      - '{"ServerInfo":{"DataCenter":"Southeast Asia","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"SI1PEPF00007865"}}'
       x-ms-resource-unit:
       - '1'
-      x-powered-by:
-      - ASP.NET
     status:
       code: 200
       message: OK
 - request:
-    body: '{"location": "eastus", "properties": {"tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47",
+    body: '{"location": "eastus", "properties": {"tenantId": "54826b22-38d6-4fb2-bad9-b7b93a3e9c5a",
       "sku": {"family": "A", "name": "standard"}, "accessPolicies": [{"tenantId":
-      "72f988bf-86f1-41af-91ab-2d7cd011db47", "objectId": "1120d05c-61c7-4bdd-b83a-787d66480a5f",
-      "permissions": {"keys": ["get", "create", "delete", "list", "update", "import",
-      "backup", "restore", "recover"], "secrets": ["get", "list", "set", "delete",
-      "backup", "restore", "recover"], "certificates": ["get", "list", "delete", "create",
-      "import", "update", "managecontacts", "getissuers", "listissuers", "setissuers",
-      "deleteissuers", "manageissuers", "recover"], "storage": ["get", "list", "delete",
-      "set", "update", "regeneratekey", "setsas", "listsas", "getsas", "deletesas"]}}],
-      "enableSoftDelete": true, "softDeleteRetentionInDays": 90, "enablePurgeProtection":
-      true, "networkAcls": {"bypass": "AzureServices", "defaultAction": "Allow"}}}'
+      "54826b22-38d6-4fb2-bad9-b7b93a3e9c5a", "objectId": "6d97229a-391f-473a-893f-f0608b592d7b",
+      "permissions": {"keys": ["all"], "secrets": ["all"], "certificates": ["all"],
+      "storage": ["all"]}}], "enableSoftDelete": true, "softDeleteRetentionInDays":
+      90, "enablePurgeProtection": true, "networkAcls": {"bypass": "AzureServices",
+      "defaultAction": "Allow"}}}'
     headers:
       Accept:
       - application/json
@@ -475,27 +452,27 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '906'
+      - '519'
       Content-Type:
       - application/json
       ParameterSetName:
       - -n -g -l --enable-purge-protection --enable-soft-delete
       User-Agent:
-      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-keyvault/9.3.0 Python/3.9.7 (Windows-10-10.0.22538-SP0)
+      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-keyvault/9.3.0 Python/3.10.4 (Windows-10-10.0.19044-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/cmk-test-keyvault000003?api-version=2021-06-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/cmk-test-keyvault000003","name":"cmk-test-keyvault000003","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{},"systemData":{"createdBy":"prsangli@microsoft.com","createdByType":"User","createdAt":"2022-02-02T05:26:36.336Z","lastModifiedBy":"prsangli@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-02-02T05:26:36.336Z"},"properties":{"sku":{"family":"A","name":"standard"},"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","accessPolicies":[{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"1120d05c-61c7-4bdd-b83a-787d66480a5f","permissions":{"keys":["get","create","delete","list","update","import","backup","restore","recover"],"secrets":["get","list","set","delete","backup","restore","recover"],"certificates":["get","list","delete","create","import","update","managecontacts","getissuers","listissuers","setissuers","deleteissuers","manageissuers","recover"],"storage":["get","list","delete","set","update","regeneratekey","setsas","listsas","getsas","deletesas"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":90,"enablePurgeProtection":true,"vaultUri":"https://cmk-test-keyvault000003.vault.azure.net","provisioningState":"RegisteringDns","publicNetworkAccess":"Enabled"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/cmk-test-keyvault000003","name":"cmk-test-keyvault000003","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{},"systemData":{"createdBy":"rolelivetest@azuresdkteam.onmicrosoft.com","createdByType":"User","createdAt":"2022-05-12T14:31:47.656Z","lastModifiedBy":"rolelivetest@azuresdkteam.onmicrosoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-05-12T14:31:47.656Z"},"properties":{"sku":{"family":"A","name":"standard"},"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","accessPolicies":[{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"6d97229a-391f-473a-893f-f0608b592d7b","permissions":{"keys":["all"],"secrets":["all"],"certificates":["all"],"storage":["all"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":90,"enablePurgeProtection":true,"vaultUri":"https://cmk-test-keyvault000003.vault.azure.net","provisioningState":"RegisteringDns","publicNetworkAccess":"Enabled"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1388'
+      - '1074'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 02 Feb 2022 05:26:37 GMT
+      - Thu, 12 May 2022 14:31:51 GMT
       expires:
       - '-1'
       pragma:
@@ -513,11 +490,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.5.273.0
+      - 1.5.372.0
       x-ms-ratelimit-remaining-subscription-writes:
       - '1198'
-      x-powered-by:
-      - ASP.NET
     status:
       code: 200
       message: OK
@@ -535,21 +510,21 @@ interactions:
       ParameterSetName:
       - -n -g -l --enable-purge-protection --enable-soft-delete
       User-Agent:
-      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-keyvault/9.3.0 Python/3.9.7 (Windows-10-10.0.22538-SP0)
+      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-keyvault/9.3.0 Python/3.10.4 (Windows-10-10.0.19044-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/cmk-test-keyvault000003?api-version=2021-06-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/cmk-test-keyvault000003","name":"cmk-test-keyvault000003","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{},"systemData":{"createdBy":"prsangli@microsoft.com","createdByType":"User","createdAt":"2022-02-02T05:26:36.336Z","lastModifiedBy":"prsangli@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-02-02T05:26:36.336Z"},"properties":{"sku":{"family":"A","name":"standard"},"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","accessPolicies":[{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"1120d05c-61c7-4bdd-b83a-787d66480a5f","permissions":{"keys":["get","create","delete","list","update","import","backup","restore","recover"],"secrets":["get","list","set","delete","backup","restore","recover"],"certificates":["get","list","delete","create","import","update","managecontacts","getissuers","listissuers","setissuers","deleteissuers","manageissuers","recover"],"storage":["get","list","delete","set","update","regeneratekey","setsas","listsas","getsas","deletesas"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":90,"enablePurgeProtection":true,"vaultUri":"https://cmk-test-keyvault000003.vault.azure.net/","provisioningState":"Succeeded","publicNetworkAccess":"Enabled"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/cmk-test-keyvault000003","name":"cmk-test-keyvault000003","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{},"systemData":{"createdBy":"rolelivetest@azuresdkteam.onmicrosoft.com","createdByType":"User","createdAt":"2022-05-12T14:31:47.656Z","lastModifiedBy":"rolelivetest@azuresdkteam.onmicrosoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-05-12T14:31:47.656Z"},"properties":{"sku":{"family":"A","name":"standard"},"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","accessPolicies":[{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"6d97229a-391f-473a-893f-f0608b592d7b","permissions":{"keys":["all"],"secrets":["all"],"certificates":["all"],"storage":["all"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":90,"enablePurgeProtection":true,"vaultUri":"https://cmk-test-keyvault000003.vault.azure.net/","provisioningState":"Succeeded","publicNetworkAccess":"Enabled"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1384'
+      - '1070'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 02 Feb 2022 05:27:08 GMT
+      - Thu, 12 May 2022 14:32:21 GMT
       expires:
       - '-1'
       pragma:
@@ -567,9 +542,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.5.273.0
-      x-powered-by:
-      - ASP.NET
+      - 1.5.372.0
     status:
       code: 200
       message: OK
@@ -587,9 +560,9 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - azsdk-python-keyvault-keys/4.5.0b4 Python/3.9.7 (Windows-10-10.0.22538-SP0)
+      - azsdk-python-keyvault-keys/4.5.1 Python/3.10.4 (Windows-10-10.0.19044-SP0)
     method: POST
-    uri: https://cmk-test-keyvault000003.vault.azure.net/keys/key/create?api-version=7.3-preview
+    uri: https://cmk-test-keyvault000003.vault.azure.net/keys/key/create?api-version=7.3
   response:
     body:
       string: '{"error":{"code":"Unauthorized","message":"AKV10000: Request is missing
@@ -602,7 +575,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 02 Feb 2022 05:27:09 GMT
+      - Thu, 12 May 2022 14:32:23 GMT
       expires:
       - '-1'
       pragma:
@@ -610,18 +583,16 @@ interactions:
       strict-transport-security:
       - max-age=31536000;includeSubDomains
       www-authenticate:
-      - Bearer authorization="https://login.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47",
+      - Bearer authorization="https://login.windows.net/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a",
         resource="https://vault.azure.net"
       x-content-type-options:
       - nosniff
       x-ms-keyvault-network-info:
-      - conn_type=Ipv4;addr=131.107.159.181;act_addr_fam=InterNetwork;
+      - conn_type=Ipv4;addr=167.220.255.27;act_addr_fam=InterNetwork;
       x-ms-keyvault-region:
       - eastus
       x-ms-keyvault-service-version:
-      - 1.9.276.1
-      x-powered-by:
-      - ASP.NET
+      - 1.9.395.1
     status:
       code: 401
       message: Unauthorized
@@ -639,12 +610,12 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - azsdk-python-keyvault-keys/4.5.0b4 Python/3.9.7 (Windows-10-10.0.22538-SP0)
+      - azsdk-python-keyvault-keys/4.5.1 Python/3.10.4 (Windows-10-10.0.19044-SP0)
     method: POST
-    uri: https://cmk-test-keyvault000003.vault.azure.net/keys/key/create?api-version=7.3-preview
+    uri: https://cmk-test-keyvault000003.vault.azure.net/keys/key/create?api-version=7.3
   response:
     body:
-      string: '{"key":{"kid":"https://cmk-test-keyvault000003.vault.azure.net/keys/key/5c340520a6f74167a38a1feef7b0807d","kty":"RSA","key_ops":["encrypt","decrypt","sign","verify","wrapKey","unwrapKey"],"n":"r5uNZle3yHoBr8xNP49V7sZcfNdK0Z_ZJoW_sGkun_9GpQsP3T1N_A7UGB95o8mLWbcfbl5dN70vBZxDeyb2QBeYKP2rawlZUHawG_oi6UxMBp3p_FVL52PSE8HZw1yePwoPrr7ICYQRtWcB0rFVoLocdhsQNktz565BquCY9f_OoOPfuU9gF3YhlK3nWtw-6SBU9jJJ5b7YVfAzqYJb5CpgTBsulRgo878rqdBsA8e10egyZ1yjAsmkSI_KfJHX7RJe4Q5pmS5xsOsT5n2dymOFkLoIkaB4qVtpa3gRjqZmXaoM4feyJBoKg9bco-dhoVj9ifYldzuCIWMCK0QYTQ","e":"AQAB"},"attributes":{"enabled":true,"created":1643779629,"updated":1643779629,"recoveryLevel":"Recoverable","recoverableDays":90}}'
+      string: '{"key":{"kid":"https://cmk-test-keyvault000003.vault.azure.net/keys/key/a9b13a3624bf42adae288db62465c7a8","kty":"RSA","key_ops":["encrypt","decrypt","sign","verify","wrapKey","unwrapKey"],"n":"vt_Bl_1eB-vgEG5Fr375Q4E4ZylgGMPbzey4gFvDe6d4Otls-A-HxvVdMRCZp2ZudR-VMjpmOGO0r1tKPAbf35VbT_7I1DU3fCpIOwydTi8BHmAkJ5PYxhvDsckfYnxoyO0UC517A9FVH9OiVgXKRfwb5iJLKbKGkTKmlVZBtPiG-f0V9Dw-VWM0PaKJe85iuvRIs2G0uWSaSvjqmh8uAU1l9RQkR3NMVYCRR1ci2aq8PzIf8pyuY4bg2UKrcKF2cXXaVdzju_a-6_ssLIh6bPZOqppP3eqEhiYXEaUuidifzunuiFm9xYJa26-mAIouS4IiKsa-oe2_arTvHBK9uQ","e":"AQAB"},"attributes":{"enabled":true,"created":1652365944,"updated":1652365944,"recoveryLevel":"Recoverable","recoverableDays":90}}'
     headers:
       cache-control:
       - no-cache
@@ -653,7 +624,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 02 Feb 2022 05:27:10 GMT
+      - Thu, 12 May 2022 14:32:24 GMT
       expires:
       - '-1'
       pragma:
@@ -663,13 +634,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-network-info:
-      - conn_type=Ipv4;addr=131.107.159.181;act_addr_fam=InterNetwork;
+      - conn_type=Ipv4;addr=167.220.255.27;act_addr_fam=InterNetwork;
       x-ms-keyvault-region:
       - eastus
       x-ms-keyvault-service-version:
-      - 1.9.276.1
-      x-powered-by:
-      - ASP.NET
+      - 1.9.395.1
     status:
       code: 200
       message: OK
@@ -687,21 +656,21 @@ interactions:
       ParameterSetName:
       - -n --key-permissions --object-id
       User-Agent:
-      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-keyvault/9.3.0 Python/3.9.7 (Windows-10-10.0.22538-SP0)
+      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-keyvault/9.3.0 Python/3.10.4 (Windows-10-10.0.19044-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceType%20eq%20%27Microsoft.KeyVault%2Fvaults%27&api-version=2015-11-01
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azcfgbilling-group-xuxu-test-keyvault/providers/Microsoft.KeyVault/vaults/xuxutest-keyvault","name":"xuxutest-keyvault","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Dogfood-EUS-KeyVault/providers/Microsoft.KeyVault/vaults/azcfgbillingsdogfoodeus","name":"azcfgbillingsdogfoodeus","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Dogfood-EUS2-KeyVault/providers/Microsoft.KeyVault/vaults/azcfgbillingsdogfoodeus2","name":"azcfgbillingsdogfoodeus2","type":"Microsoft.KeyVault/vaults","location":"eastus2","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jimmyca-eus2euap/providers/Microsoft.KeyVault/vaults/jimmyca-eus2euap","name":"jimmyca-eus2euap","type":"Microsoft.KeyVault/vaults","location":"eastus2euap","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jiyu/providers/Microsoft.KeyVault/vaults/jiyu-kv-pe","name":"jiyu-kv-pe","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alkemper-test/providers/Microsoft.KeyVault/vaults/alex-test-keyvault-msft","name":"alex-test-keyvault-msft","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/SyntheticTest/providers/Microsoft.KeyVault/vaults/SyntheticKeyVault","name":"SyntheticKeyVault","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jimmyca-eus/providers/Microsoft.KeyVault/vaults/jimmyca-prem-test","name":"jimmyca-prem-test","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alkemper-test/providers/Microsoft.KeyVault/vaults/alkemper-key-vault","name":"alkemper-key-vault","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/richardmuniu-appcfg-test/providers/Microsoft.KeyVault/vaults/appcfg-test-keyvault","name":"appcfg-test-keyvault","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ernestt-test/providers/Microsoft.KeyVault/vaults/ernestt-kv-test","name":"ernestt-kv-test","type":"Microsoft.KeyVault/vaults","location":"westus2","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jingao/providers/Microsoft.KeyVault/vaults/JinKeyVault-292","name":"JinKeyVault-292","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jlinares-test/providers/Microsoft.KeyVault/vaults/jlinares-keyvault","name":"jlinares-keyvault","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jlinares-test/providers/Microsoft.KeyVault/vaults/jlinares-keyvault2","name":"jlinares-keyvault2","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jlinares-test/providers/Microsoft.KeyVault/vaults/jlinares-keyvault4","name":"jlinares-keyvault4","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azcfgbilling-group-xuxu-test-keyvault/providers/Microsoft.KeyVault/vaults/xuxutest-keyvault1","name":"xuxutest-keyvault1","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jiyu/providers/Microsoft.KeyVault/vaults/jiyu-kvwithpe","name":"jiyu-kvwithpe","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{"fdsa":"fdsa"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pratiks-testing/providers/Microsoft.KeyVault/vaults/prsangli-appc-keyvault","name":"prsangli-appc-keyvault","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{"key-vault-tag":"kv-tag-value"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzConfigRunnerRG/providers/Microsoft.KeyVault/vaults/RunnerLocalTestKV","name":"RunnerLocalTestKV","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jlinares-test/providers/Microsoft.KeyVault/vaults/InfraSP","name":"InfraSP","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Mgich-Test/providers/Microsoft.KeyVault/vaults/Mgich-testkeyVault1","name":"Mgich-testkeyVault1","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/msolomonTest/providers/Microsoft.KeyVault/vaults/msolKV","name":"msolKV","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Mgich-Test/providers/Microsoft.KeyVault/vaults/Mgich-TestKeyVault","name":"Mgich-TestKeyVault","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Mgich-Test/providers/Microsoft.KeyVault/vaults/Mgich-testKeyvault-3","name":"Mgich-testKeyvault-3","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Mgich-Test/providers/Microsoft.KeyVault/vaults/Mgich-softdelete-test4","name":"Mgich-softdelete-test4","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/cmk-test-keyvault000003","name":"cmk-test-keyvault000003","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgfgaaxtm2zvm5bu7z4rit2xuon7rgcfoh5hfassy44e7mcg3nczqimake4n5dy2auz/providers/Microsoft.KeyVault/vaults/clitestfjb4zurcuqkyb6nqq","name":"clitestfjb4zurcuqkyb6nqq","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhenlwa/providers/Microsoft.KeyVault/vaults/KeyVaultReference","name":"KeyVaultReference","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/shuawan/providers/Microsoft.KeyVault/vaults/shuaiTestLab8547","name":"shuaiTestLab8547","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{"hidden-DevTestLabs-LabUId":"c52944db-6d24-46c1-ad01-b6254f282605","CreatedBy":"DevTestLabs"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jiyu/providers/Microsoft.KeyVault/vaults/jiyu-keyvault","name":"jiyu-keyvault","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jiyu/providers/Microsoft.KeyVault/vaults/jiyu-keyvault-2","name":"jiyu-keyvault-2","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/shuawan/providers/Microsoft.KeyVault/vaults/shuaivault","name":"shuaivault","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jimmyca-wus/providers/Microsoft.KeyVault/vaults/jimmyca-demo","name":"jimmyca-demo","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/avgupta-key-vault-testing/providers/Microsoft.KeyVault/vaults/keyvault-importexport","name":"keyvault-importexport","type":"Microsoft.KeyVault/vaults","location":"westus2","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azconfig-test-infrastructure/providers/Microsoft.KeyVault/vaults/azcfg-integration-tests","name":"azcfg-integration-tests","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azconfig-test-infrastructure/providers/Microsoft.KeyVault/vaults/azconfig-test","name":"azconfig-test","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jiyu/providers/Microsoft.KeyVault/vaults/jiyu-kv2","name":"jiyu-kv2","type":"Microsoft.KeyVault/vaults","location":"westeurope","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jiyu/providers/Microsoft.KeyVault/vaults/jiyu-keyvault1","name":"jiyu-keyvault1","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mametcal/providers/Microsoft.KeyVault/vaults/keyvault-theclassics","name":"keyvault-theclassics","type":"Microsoft.KeyVault/vaults","location":"northcentralus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jimmyca-wus/providers/Microsoft.KeyVault/vaults/jimmyca-rbac","name":"jimmyca-rbac","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bez-rg/providers/Microsoft.KeyVault/vaults/bez-kv","name":"bez-kv","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{"key":"value"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_network_rulei2qaqwbgclxe6kp3gzgotcynmjfopwwmimgixphclrffb/providers/Microsoft.KeyVault/vaults/cli-test-kv-nr-7ir5wsfq6","name":"cli-test-kv-nr-7ir5wsfq6","type":"Microsoft.KeyVault/vaults","location":"eastus2","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_network_rulei2qaqwbgclxe6kp3gzgotcynmjfopwwmimgixphclrffb/providers/Microsoft.KeyVault/vaults/cli-test-kv-nr-hzopasysf","name":"cli-test-kv-nr-hzopasysf","type":"Microsoft.KeyVault/vaults","location":"eastus2","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_network_rulei2qaqwbgclxe6kp3gzgotcynmjfopwwmimgixphclrffb/providers/Microsoft.KeyVault/vaults/cli-test-kv-nr-ovkwsgndu","name":"cli-test-kv-nr-ovkwsgndu","type":"Microsoft.KeyVault/vaults","location":"eastus2","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_network_rulei2qaqwbgclxe6kp3gzgotcynmjfopwwmimgixphclrffb/providers/Microsoft.KeyVault/vaults/cli-test-kv-nr-p4vy2pzue","name":"cli-test-kv-nr-p4vy2pzue","type":"Microsoft.KeyVault/vaults","location":"eastus2","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_network_rulei2qaqwbgclxe6kp3gzgotcynmjfopwwmimgixphclrffb/providers/Microsoft.KeyVault/vaults/cli-test-kv-nr-udnutpypm","name":"cli-test-kv-nr-udnutpypm","type":"Microsoft.KeyVault/vaults","location":"eastus2","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_network_rulei2qaqwbgclxe6kp3gzgotcynmjfopwwmimgixphclrffb/providers/Microsoft.KeyVault/vaults/cli-test-kv-nr-xnwq63csj","name":"cli-test-kv-nr-xnwq63csj","type":"Microsoft.KeyVault/vaults","location":"eastus2","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/cmk-test-keyvault000003","name":"cmk-test-keyvault000003","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/python-sdk-test/providers/Microsoft.KeyVault/vaults/python-devops-key","name":"python-devops-key","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/python-sdk-test/providers/Microsoft.KeyVault/vaults/SDKAutoPipelineSecrets","name":"SDKAutoPipelineSecrets","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yishitest/providers/Microsoft.KeyVault/vaults/ystestkv","name":"ystestkv","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '9673'
+      - '3060'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 02 Feb 2022 05:27:09 GMT
+      - Thu, 12 May 2022 14:32:25 GMT
       expires:
       - '-1'
       pragma:
@@ -729,21 +698,21 @@ interactions:
       ParameterSetName:
       - -n --key-permissions --object-id
       User-Agent:
-      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-keyvault/9.3.0 Python/3.9.7 (Windows-10-10.0.22538-SP0)
+      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-keyvault/9.3.0 Python/3.10.4 (Windows-10-10.0.19044-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/cmk-test-keyvault000003?api-version=2021-06-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/cmk-test-keyvault000003","name":"cmk-test-keyvault000003","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{},"systemData":{"createdBy":"prsangli@microsoft.com","createdByType":"User","createdAt":"2022-02-02T05:26:36.336Z","lastModifiedBy":"prsangli@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-02-02T05:26:36.336Z"},"properties":{"sku":{"family":"A","name":"standard"},"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","accessPolicies":[{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"1120d05c-61c7-4bdd-b83a-787d66480a5f","permissions":{"keys":["get","create","delete","list","update","import","backup","restore","recover"],"secrets":["get","list","set","delete","backup","restore","recover"],"certificates":["get","list","delete","create","import","update","managecontacts","getissuers","listissuers","setissuers","deleteissuers","manageissuers","recover"],"storage":["get","list","delete","set","update","regeneratekey","setsas","listsas","getsas","deletesas"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":90,"enablePurgeProtection":true,"vaultUri":"https://cmk-test-keyvault000003.vault.azure.net/","provisioningState":"Succeeded","publicNetworkAccess":"Enabled"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/cmk-test-keyvault000003","name":"cmk-test-keyvault000003","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{},"systemData":{"createdBy":"rolelivetest@azuresdkteam.onmicrosoft.com","createdByType":"User","createdAt":"2022-05-12T14:31:47.656Z","lastModifiedBy":"rolelivetest@azuresdkteam.onmicrosoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-05-12T14:31:47.656Z"},"properties":{"sku":{"family":"A","name":"standard"},"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","accessPolicies":[{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"6d97229a-391f-473a-893f-f0608b592d7b","permissions":{"keys":["all"],"secrets":["all"],"certificates":["all"],"storage":["all"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":90,"enablePurgeProtection":true,"vaultUri":"https://cmk-test-keyvault000003.vault.azure.net/","provisioningState":"Succeeded","publicNetworkAccess":"Enabled"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1384'
+      - '1070'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 02 Feb 2022 05:27:09 GMT
+      - Thu, 12 May 2022 14:32:26 GMT
       expires:
       - '-1'
       pragma:
@@ -761,24 +730,18 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.5.273.0
-      x-powered-by:
-      - ASP.NET
+      - 1.5.372.0
     status:
       code: 200
       message: OK
 - request:
-    body: '{"location": "eastus", "tags": {}, "properties": {"tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47",
+    body: '{"location": "eastus", "tags": {}, "properties": {"tenantId": "54826b22-38d6-4fb2-bad9-b7b93a3e9c5a",
       "sku": {"family": "A", "name": "standard"}, "accessPolicies": [{"tenantId":
-      "72f988bf-86f1-41af-91ab-2d7cd011db47", "objectId": "1120d05c-61c7-4bdd-b83a-787d66480a5f",
-      "permissions": {"keys": ["get", "create", "delete", "list", "update", "import",
-      "backup", "restore", "recover"], "secrets": ["get", "list", "set", "delete",
-      "backup", "restore", "recover"], "certificates": ["get", "list", "delete", "create",
-      "import", "update", "managecontacts", "getissuers", "listissuers", "setissuers",
-      "deleteissuers", "manageissuers", "recover"], "storage": ["get", "list", "delete",
-      "set", "update", "regeneratekey", "setsas", "listsas", "getsas", "deletesas"]}},
-      {"tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47", "objectId": "bb354c2e-cd43-4037-a152-be310d0929ab",
-      "permissions": {"keys": ["unwrapKey", "get", "wrapKey"]}}], "vaultUri": "https://cmk-test-keyvault000003.vault.azure.net/",
+      "54826b22-38d6-4fb2-bad9-b7b93a3e9c5a", "objectId": "6d97229a-391f-473a-893f-f0608b592d7b",
+      "permissions": {"keys": ["all"], "secrets": ["all"], "certificates": ["all"],
+      "storage": ["all"]}}, {"tenantId": "54826b22-38d6-4fb2-bad9-b7b93a3e9c5a", "objectId":
+      "2539e7b9-9099-4971-b5d1-7e467e04918e", "permissions": {"keys": ["get", "unwrapKey",
+      "wrapKey"]}}], "vaultUri": "https://cmk-test-keyvault000003.vault.azure.net/",
       "enabledForDeployment": false, "enableSoftDelete": true, "softDeleteRetentionInDays":
       90, "enablePurgeProtection": true, "provisioningState": "Succeeded", "publicNetworkAccess":
       "Enabled"}}'
@@ -792,27 +755,27 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '1175'
+      - '788'
       Content-Type:
       - application/json
       ParameterSetName:
       - -n --key-permissions --object-id
       User-Agent:
-      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-keyvault/9.3.0 Python/3.9.7 (Windows-10-10.0.22538-SP0)
+      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-keyvault/9.3.0 Python/3.10.4 (Windows-10-10.0.19044-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/cmk-test-keyvault000003?api-version=2021-06-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/cmk-test-keyvault000003","name":"cmk-test-keyvault000003","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{},"systemData":{"createdBy":"prsangli@microsoft.com","createdByType":"User","createdAt":"2022-02-02T05:26:36.336Z","lastModifiedBy":"prsangli@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-02-02T05:27:10.731Z"},"properties":{"sku":{"family":"A","name":"standard"},"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","accessPolicies":[{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"1120d05c-61c7-4bdd-b83a-787d66480a5f","permissions":{"keys":["get","create","delete","list","update","import","backup","restore","recover"],"secrets":["get","list","set","delete","backup","restore","recover"],"certificates":["get","list","delete","create","import","update","managecontacts","getissuers","listissuers","setissuers","deleteissuers","manageissuers","recover"],"storage":["get","list","delete","set","update","regeneratekey","setsas","listsas","getsas","deletesas"]}},{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"bb354c2e-cd43-4037-a152-be310d0929ab","permissions":{"keys":["unwrapKey","get","wrapKey"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":90,"enablePurgeProtection":true,"vaultUri":"https://cmk-test-keyvault000003.vault.azure.net/","provisioningState":"Succeeded","publicNetworkAccess":"Enabled"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/cmk-test-keyvault000003","name":"cmk-test-keyvault000003","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{},"systemData":{"createdBy":"rolelivetest@azuresdkteam.onmicrosoft.com","createdByType":"User","createdAt":"2022-05-12T14:31:47.656Z","lastModifiedBy":"rolelivetest@azuresdkteam.onmicrosoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-05-12T14:32:27.275Z"},"properties":{"sku":{"family":"A","name":"standard"},"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","accessPolicies":[{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"6d97229a-391f-473a-893f-f0608b592d7b","permissions":{"keys":["all"],"secrets":["all"],"certificates":["all"],"storage":["all"]}},{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"2539e7b9-9099-4971-b5d1-7e467e04918e","permissions":{"keys":["get","unwrapKey","wrapKey"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":90,"enablePurgeProtection":true,"vaultUri":"https://cmk-test-keyvault000003.vault.azure.net/","provisioningState":"Succeeded","publicNetworkAccess":"Enabled"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1539'
+      - '1225'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 02 Feb 2022 05:27:10 GMT
+      - Thu, 12 May 2022 14:32:27 GMT
       expires:
       - '-1'
       pragma:
@@ -830,11 +793,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.5.273.0
+      - 1.5.372.0
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
-      x-powered-by:
-      - ASP.NET
+      - '1196'
     status:
       code: 200
       message: OK
@@ -857,23 +818,23 @@ interactions:
       ParameterSetName:
       - -n -g --encryption-key-name --encryption-key-vault
       User-Agent:
-      - AZURECLI/2.32.0 azsdk-python-mgmt-appconfiguration/2.0.0 Python/3.9.7 (Windows-10-10.0.22538-SP0)
+      - AZURECLI/2.36.0 azsdk-python-mgmt-appconfiguration/2.1.0b2 Python/3.10.4 (Windows-10-10.0.19044-SP0)
     method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/MgmtTest000002?api-version=2021-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/MgmtTest000002?api-version=2021-10-01-preview
   response:
     body:
-      string: '{"type":"Microsoft.AppConfiguration/configurationStores","location":"eastus","identity":{"type":"SystemAssigned","principalId":"bb354c2e-cd43-4037-a152-be310d0929ab","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"properties":{"provisioningState":"Succeeded","creationDate":"2022-02-02T05:26:22+00:00","endpoint":"https://mgmttestu47ngfwf7pzhqjic.azconfig.io","encryption":{"keyVaultProperties":{"keyIdentifier":"https://cmk-test-keyvault000003.vault.azure.net/keys/key/","identityClientId":null}},"privateEndpointConnections":null,"disableLocalAuth":false},"sku":{"name":"standard"},"systemData":{"createdBy":"prsangli@microsoft.com","createdByType":"User","createdAt":"2022-02-02T05:26:22+00:00","lastModifiedBy":"prsangli@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-02-02T05:27:12+00:00"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/mgmttestu47ngfwf7pzhqjic","name":"MgmtTest000002","tags":{"Env":"Prod"}}'
+      string: '{"type":"Microsoft.AppConfiguration/configurationStores","location":"eastus","identity":{"type":"SystemAssigned","principalId":"2539e7b9-9099-4971-b5d1-7e467e04918e","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a"},"properties":{"provisioningState":"Succeeded","creationDate":"2022-05-12T14:31:20+00:00","endpoint":"https://mgmttestk2ptpcy375wujusl.azconfig.io","encryption":{"keyVaultProperties":{"keyIdentifier":"https://cmk-test-keyvault000003.vault.azure.net/keys/key/","identityClientId":null}},"privateEndpointConnections":null,"disableLocalAuth":false,"softDeleteRetentionInDays":1,"enablePurgeProtection":false},"sku":{"name":"standard"},"systemData":{"createdBy":"rolelivetest@azuresdkteam.onmicrosoft.com","createdByType":"User","createdAt":"2022-05-12T14:31:20+00:00","lastModifiedBy":"rolelivetest@azuresdkteam.onmicrosoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-05-12T14:32:29+00:00"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/mgmttestk2ptpcy375wujusl","name":"MgmtTest000002","tags":{"Env":"Prod"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1037'
+      - '1135'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 02 Feb 2022 05:27:11 GMT
+      - Thu, 12 May 2022 14:32:28 GMT
       etag:
-      - W/"2601bb5a-0000-0100-0000-61fa16300000"
+      - W/"58010ae8-0000-0100-0000-627d1a7d0000"
       expires:
       - '-1'
       pragma:
@@ -889,7 +850,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1197'
     status:
       code: 200
       message: OK
@@ -911,23 +872,23 @@ interactions:
       ParameterSetName:
       - -n -g --tags
       User-Agent:
-      - AZURECLI/2.32.0 azsdk-python-mgmt-appconfiguration/2.0.0 Python/3.9.7 (Windows-10-10.0.22538-SP0)
+      - AZURECLI/2.36.0 azsdk-python-mgmt-appconfiguration/2.1.0b2 Python/3.10.4 (Windows-10-10.0.19044-SP0)
     method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/MgmtTest000002?api-version=2021-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/MgmtTest000002?api-version=2021-10-01-preview
   response:
     body:
-      string: '{"type":"Microsoft.AppConfiguration/configurationStores","location":"eastus","identity":{"type":"SystemAssigned","principalId":"bb354c2e-cd43-4037-a152-be310d0929ab","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"properties":{"provisioningState":"Succeeded","creationDate":"2022-02-02T05:26:22+00:00","endpoint":"https://mgmttestu47ngfwf7pzhqjic.azconfig.io","encryption":{"keyVaultProperties":{"keyIdentifier":"https://cmk-test-keyvault000003.vault.azure.net/keys/key/","identityClientId":null}},"privateEndpointConnections":null,"disableLocalAuth":false},"sku":{"name":"standard"},"systemData":{"createdBy":"prsangli@microsoft.com","createdByType":"User","createdAt":"2022-02-02T05:26:22+00:00","lastModifiedBy":"prsangli@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-02-02T05:27:14+00:00"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/mgmttestu47ngfwf7pzhqjic","name":"MgmtTest000002","tags":{}}'
+      string: '{"type":"Microsoft.AppConfiguration/configurationStores","location":"eastus","identity":{"type":"SystemAssigned","principalId":"2539e7b9-9099-4971-b5d1-7e467e04918e","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a"},"properties":{"provisioningState":"Succeeded","creationDate":"2022-05-12T14:31:20+00:00","endpoint":"https://mgmttestk2ptpcy375wujusl.azconfig.io","encryption":{"keyVaultProperties":{"keyIdentifier":"https://cmk-test-keyvault000003.vault.azure.net/keys/key/","identityClientId":null}},"privateEndpointConnections":null,"disableLocalAuth":false,"softDeleteRetentionInDays":1,"enablePurgeProtection":false},"sku":{"name":"standard"},"systemData":{"createdBy":"rolelivetest@azuresdkteam.onmicrosoft.com","createdByType":"User","createdAt":"2022-05-12T14:31:20+00:00","lastModifiedBy":"rolelivetest@azuresdkteam.onmicrosoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-05-12T14:32:32+00:00"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/mgmttestk2ptpcy375wujusl","name":"MgmtTest000002","tags":{}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1025'
+      - '1123'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 02 Feb 2022 05:27:13 GMT
+      - Thu, 12 May 2022 14:32:34 GMT
       etag:
-      - W/"2601205b-0000-0100-0000-61fa16310000"
+      - W/"5801b9ea-0000-0100-0000-627d1a800000"
       expires:
       - '-1'
       pragma:
@@ -943,7 +904,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
     status:
       code: 200
       message: OK
@@ -963,9 +924,9 @@ interactions:
       ParameterSetName:
       - -n -g -y
       User-Agent:
-      - AZURECLI/2.32.0 azsdk-python-mgmt-appconfiguration/2.0.0 Python/3.9.7 (Windows-10-10.0.22538-SP0)
+      - AZURECLI/2.36.0 azsdk-python-mgmt-appconfiguration/2.1.0b2 Python/3.10.4 (Windows-10-10.0.19044-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/MgmtTest000002?api-version=2021-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/MgmtTest000002?api-version=2021-10-01-preview
   response:
     body:
       string: ''
@@ -975,7 +936,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Wed, 02 Feb 2022 05:27:14 GMT
+      - Thu, 12 May 2022 14:32:41 GMT
       expires:
       - '-1'
       pragma:
@@ -988,6 +949,1221 @@ interactions:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
       - '14997'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"tags": {"key": "value"}, "location": "eastus", "identity": {"type": "SystemAssigned"},
+      "sku": {"name": "Standard"}, "properties": {"softDeleteRetentionInDays": 1,
+      "enablePurgeProtection": false, "createMode": "Default"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appconfig create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '222'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g -l --sku --tags --assign-identity --retention-days --enable-purge-protection
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-appconfiguration/2.1.0b2 Python/3.10.4 (Windows-10-10.0.19044-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/MgmtTestdel000004?api-version=2021-10-01-preview
+  response:
+    body:
+      string: '{"type":"Microsoft.AppConfiguration/configurationStores","location":"eastus","properties":{"provisioningState":"Creating","creationDate":"2022-05-12T14:32:49.0543434+00:00","endpoint":null,"encryption":null,"privateEndpointConnections":null,"disableLocalAuth":null,"softDeleteRetentionInDays":null,"enablePurgeProtection":null},"sku":{"name":"Standard"},"systemData":null,"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/MgmtTestdel000004","name":"MgmtTestdel000004","tags":{"key":"value"}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/iIAQ-nOz749BbLk5sfHx11sGwQT_o-v3nEYJ0qa4J40?api-version=2021-10-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '588'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 12 May 2022 14:32:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - nginx/1.17.10
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1197'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appconfig create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -l --sku --tags --assign-identity --retention-days --enable-purge-protection
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-appconfiguration/2.1.0b2 Python/3.10.4 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/iIAQ-nOz749BbLk5sfHx11sGwQT_o-v3nEYJ0qa4J40?api-version=2021-10-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/iIAQ-nOz749BbLk5sfHx11sGwQT_o-v3nEYJ0qa4J40","name":"iIAQ-nOz749BbLk5sfHx11sGwQT_o-v3nEYJ0qa4J40","status":"Succeeded","error":null}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/iIAQ-nOz749BbLk5sfHx11sGwQT_o-v3nEYJ0qa4J40?api-version=2021-10-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '262'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 12 May 2022 14:33:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - nginx/1.17.10
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appconfig create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -l --sku --tags --assign-identity --retention-days --enable-purge-protection
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-appconfiguration/2.1.0b2 Python/3.10.4 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/MgmtTestdel000004?api-version=2021-10-01-preview
+  response:
+    body:
+      string: '{"type":"Microsoft.AppConfiguration/configurationStores","location":"eastus","identity":{"type":"SystemAssigned","principalId":"808a39ad-e7c8-4b9b-a448-c793f9373ba4","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a"},"properties":{"provisioningState":"Succeeded","creationDate":"2022-05-12T14:32:50+00:00","endpoint":"https://mgmttestdelbkxrqafb4pso2.azconfig.io","encryption":{"keyVaultProperties":null},"privateEndpointConnections":null,"disableLocalAuth":false,"softDeleteRetentionInDays":1,"enablePurgeProtection":false},"sku":{"name":"standard"},"systemData":{"createdBy":"rolelivetest@azuresdkteam.onmicrosoft.com","createdByType":"User","createdAt":"2022-05-12T14:32:50+00:00","lastModifiedBy":"rolelivetest@azuresdkteam.onmicrosoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-05-12T14:32:52+00:00"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/mgmttestdelbkxrqafb4pso2","name":"MgmtTestdel000004","tags":{"key":"value"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1042'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 12 May 2022 14:33:00 GMT
+      etag:
+      - W/"580144fe-0000-0100-0000-627d1a940000"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - nginx/1.17.10
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appconfig delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n -g -y
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-appconfiguration/2.1.0b2 Python/3.10.4 (Windows-10-10.0.19044-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/MgmtTestdel000004?api-version=2021-10-01-preview
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Thu, 12 May 2022 14:33:09 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - nginx/1.17.10
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appconfig show-deleted
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-appconfiguration/2.1.0b2 Python/3.10.4 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/deletedConfigurationStores?api-version=2021-10-01-preview
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/deletedConfigurationStores/mgmttestdelbkxrqafb4pso2","name":"MgmtTestdel000004","type":"Microsoft.AppConfiguration/deletedConfigurationStores","properties":{"configurationStoreId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/mgmttestdelbkxrqafb4pso2","location":"eastus","deletionDate":"2022-05-12T14:33:03+00:00","scheduledPurgeDate":"2022-05-13T14:33:03+00:00","tags":{"key":"value"},"purgeProtectionEnabled":false}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/deletedConfigurationStores/mgmttesti57dakzj6oleir7h","name":"MgmtTesti57dakzj6oleir7h","type":"Microsoft.AppConfiguration/deletedConfigurationStores","properties":{"configurationStoreId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg5ggsxklbl3izynefnmrqka5pkxxjcmbtbi37itg4gtox3abtgakd4fmek4ps7v5qc/providers/Microsoft.AppConfiguration/configurationStores/mgmttesti57dakzj6oleir7h","location":"eastus","deletionDate":"2022-05-12T02:11:07+00:00","scheduledPurgeDate":"2022-05-13T02:11:07+00:00","tags":{},"purgeProtectionEnabled":false}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/deletedConfigurationStores/mgmttestk2ptpcy375wujusl","name":"MgmtTest000002","type":"Microsoft.AppConfiguration/deletedConfigurationStores","properties":{"configurationStoreId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/mgmttestk2ptpcy375wujusl","location":"eastus","deletionDate":"2022-05-12T14:32:36+00:00","scheduledPurgeDate":"2022-05-13T14:32:36+00:00","tags":{},"purgeProtectionEnabled":false}}],"nextLink":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/deletedConfigurationStores?api-version=2021-10-01-preview&%24skiptoken=VY3LTsMwEEX%2fxULsHDtuS5RIFaqq7mCV8gGOM05N6oc84xSo%2bu%2bEJdurc869swBf9ObCjKy7s9OhP3%2f0rGMXooSdEF4HPYGHQJX%2bKRkqE73AMqDJLpGLAYUcavuybWpeD1by7ThqrsFsuBla1Sgr210rRcpxcSNkFO%2fO5IjRUnVI6RiDdVPJ%2bi8lRrgCwfhv7ClmwFedHF9WfcX2Sqr1THJZ85RhcXB7fsLZpXOcIez95IkAaVaJkvneNLtb%2bSx4ZY%2fHLw%3d%3d"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2423'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 12 May 2022 14:33:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-original-request-ids:
+      - 331df0a1-c9c1-4156-8a69-39b5e73c86cb
+      - 02688aa0-7e44-479e-bd33-fab9e66cf827
+      - a7a16095-6818-4835-a71a-5bab6f1ebedd
+      - 9cd0b357-dd2f-4dfe-aa21-9c2850b7153b
+      - a6f71513-49ef-4c47-8815-f1b6d39f1d81
+      - 12755056-8b4c-45cb-a0a8-20ef52f80b4a
+      - aa7d6456-edee-4610-bad6-f5275eaa568a
+      - 95a555ad-90f3-46cc-a645-3f7b44e378bd
+      - 08046e83-ead3-416c-bf30-677cbf9e1b86
+      - 9a74713f-01d7-4f4f-9771-7158b9382b60
+      - 7cf4e22b-379c-438f-b0d1-956190754731
+      - 988476fb-a575-4a2e-95a1-21ab4b2043cc
+      - e132684c-69c0-4765-9ae6-b59ab5f0c5bb
+      - a39bf8b4-0a11-4e55-b799-2f2f16d08696
+      - e6958a1c-6a32-47a9-b5f2-66fdda5e5aae
+      - 7d593ee9-da4b-422d-af8a-b9c96668d7e2
+      - ffe5d719-94cd-4738-b44d-48296221dcad
+      - 13dd3f6d-320e-4385-b8b2-f324a4492115
+      - 7a5422a4-17f4-4bcb-a81c-e8f0df57be99
+      - 7cc7e11f-c508-4e49-85ca-a0d411722915
+      - c6dca5a6-b490-423e-9c84-0f57ba495ec3
+      - 1cb51b4c-ad53-4656-ad98-a9abe8ce813a
+      - 096b805d-f022-44d9-873c-92b5d048f8df
+      - f69b0466-b1db-4600-9628-47a3e737a49e
+      - 2276fd43-496a-4696-8fae-4868e4e07735
+      - ac7fea66-cfb2-4968-a3d9-e0901d00d50c
+      - 306962f7-22b7-497e-97a8-009768bdbc9f
+      - 99458aba-6127-41b7-8f45-ee0f5557e59b
+      - 709d33b1-61f2-4640-92d0-7afbdd52490e
+      - 09d7b553-491d-445d-b0a8-d562e5f39784
+      - 47543d52-72e7-4bce-8739-dc10877628dc
+      - 51e44958-a5a1-4f89-9927-4602bb779eae
+      - c664e41c-af1b-4492-a768-848a6dc4d5b3
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appconfig show-deleted
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-appconfiguration/2.1.0b2 Python/3.10.4 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/deletedConfigurationStores?api-version=2021-10-01-preview&%24skiptoken=VY3LTsMwEEX%2FxULsHDtuS5RIFaqq7mCV8gGOM05N6oc84xSo%2Bu%2BEJdurc869swBf9ObCjKy7s9OhP3%2F0rGMXooSdEF4HPYGHQJX%2BKRkqE73AMqDJLpGLAYUcavuybWpeD1by7ThqrsFsuBla1Sgr210rRcpxcSNkFO%2FO5IjRUnVI6RiDdVPJ%2Bi8lRrgCwfhv7ClmwFedHF9WfcX2Sqr1THJZ85RhcXB7fsLZpXOcIez95IkAaVaJkvneNLtb%2BSx4ZY%2FHLw%3D%3D
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 12 May 2022 14:33:12 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-original-request-ids:
+      - b03493bf-0350-4ea3-be30-d1933878ec79
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appconfig show-deleted
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-appconfiguration/2.1.0b2 Python/3.10.4 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/deletedConfigurationStores/MgmtTestdel000004?api-version=2021-10-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/deletedConfigurationStores/mgmttestdelbkxrqafb4pso2","name":"MgmtTestdel000004","type":"Microsoft.AppConfiguration/deletedConfigurationStores","properties":{"configurationStoreId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/mgmttestdelbkxrqafb4pso2","location":"eastus","deletionDate":"2022-05-12T14:33:03+00:00","scheduledPurgeDate":"2022-05-13T14:33:03+00:00","tags":{"key":"value"},"purgeProtectionEnabled":false}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '628'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 12 May 2022 14:33:13 GMT
+      etag:
+      - W/"59019207-0000-0100-0000-627d1a9f0000"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - nginx/1.17.10
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appconfig list-deleted
+      Connection:
+      - keep-alive
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-appconfiguration/2.1.0b2 Python/3.10.4 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/deletedConfigurationStores?api-version=2021-10-01-preview
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/deletedConfigurationStores/mgmttestdelbkxrqafb4pso2","name":"MgmtTestdel000004","type":"Microsoft.AppConfiguration/deletedConfigurationStores","properties":{"configurationStoreId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/mgmttestdelbkxrqafb4pso2","location":"eastus","deletionDate":"2022-05-12T14:33:03+00:00","scheduledPurgeDate":"2022-05-13T14:33:03+00:00","tags":{"key":"value"},"purgeProtectionEnabled":false}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/deletedConfigurationStores/mgmttesti57dakzj6oleir7h","name":"MgmtTesti57dakzj6oleir7h","type":"Microsoft.AppConfiguration/deletedConfigurationStores","properties":{"configurationStoreId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg5ggsxklbl3izynefnmrqka5pkxxjcmbtbi37itg4gtox3abtgakd4fmek4ps7v5qc/providers/Microsoft.AppConfiguration/configurationStores/mgmttesti57dakzj6oleir7h","location":"eastus","deletionDate":"2022-05-12T02:11:07+00:00","scheduledPurgeDate":"2022-05-13T02:11:07+00:00","tags":{},"purgeProtectionEnabled":false}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/deletedConfigurationStores/mgmttestk2ptpcy375wujusl","name":"MgmtTest000002","type":"Microsoft.AppConfiguration/deletedConfigurationStores","properties":{"configurationStoreId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/mgmttestk2ptpcy375wujusl","location":"eastus","deletionDate":"2022-05-12T14:32:36+00:00","scheduledPurgeDate":"2022-05-13T14:32:36+00:00","tags":{},"purgeProtectionEnabled":false}}],"nextLink":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/deletedConfigurationStores?api-version=2021-10-01-preview&%24skiptoken=VY3LTsMwEEX%2fxULsHDtuS5RIFaqq7mCV8gGOM05N6oc84xSo%2bu%2bEJdurc869swBf9ObCjKy7s9OhP3%2f0rGMXooSdEF4HPYGHQJX%2bKRkqE73AMqDJLpGLAYUcavuybWpeD1by7ThqrsFsuBla1Sgr210rRcpxcSNkFO%2fO5IjRUnVI6RiDdVPJ%2bi8lRrgCwfhv7ClmwFedHF9WfcX2Sqr1THJZ85RhcXB7fsLZpXOcIez95IkAaVaJkvneNLtb%2bSx4ZY%2fHLw%3d%3d"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2423'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 12 May 2022 14:33:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-original-request-ids:
+      - c2075ee6-e2fb-4113-869f-c55ebfe2de55
+      - f10a7709-23b5-449a-8288-c9cd7a8a78b3
+      - 22da3f61-5eba-4707-aafc-ac1f478deb45
+      - df6ebf85-84f7-4dee-b0a1-4c6a8ab93280
+      - d2a82677-e309-4471-8af5-be50a508678d
+      - 57e99800-f35d-4215-ae83-cc5d92742445
+      - 161b416e-92a9-4c42-971b-f699689668f0
+      - 63b3bef4-47d5-44e8-bbb0-a33bbae0de11
+      - 53d94e98-51e2-44da-9979-a4c59c014772
+      - 95e9b351-eb11-46ea-9033-2f3de8c2901b
+      - 91d683f2-c31c-4e8d-bb54-b2e6d64efe7b
+      - 9e7ab26a-ae1a-45ec-8fc9-d5b43984cd71
+      - 067a0d7c-cc4d-485f-ad9e-45902f9f5abd
+      - 09e04e6e-8b22-450e-8875-3ed4269e97fb
+      - 45bc6888-5de8-49a2-9aea-d904b57f12a0
+      - 49de57ae-2368-4e82-ba4b-1f0873affa44
+      - 1dea4ac5-a9e8-4d40-8754-906641383cfe
+      - 70841eab-44e6-4650-856c-6e4ff0feb335
+      - b670f95b-7ddc-4588-b732-48a08676fb92
+      - 1d5ac5af-46cc-41b0-b6c4-ea2d31f1ed9f
+      - ac67d7a4-41da-480b-bfe3-75d76048ac2f
+      - 0d33a93d-ae23-42d2-8010-ad3e2a8affb5
+      - c97e9f7d-7f22-4b79-be59-a81608b4e6e7
+      - 7c700e9c-f8e8-4bc4-964b-1ea529cf511b
+      - 1007bcb8-9117-4efa-9130-8c6d9ebfe14e
+      - f4aef7eb-0501-456a-b5ef-bd911b67af03
+      - 7af68cca-25dd-4a83-bc40-9c152dea39dc
+      - ee613aae-c048-4125-8429-84d55ae53578
+      - 450b9233-df10-40da-a0f7-dfaaccbeba46
+      - 49f9e671-a8d9-4612-9a40-b0b499eb6584
+      - e9f4661c-8a27-44c3-a01b-d1e4134dbbc9
+      - 86ea3688-79c3-4941-8baa-e99201037536
+      - 6a67e07c-a6e3-428b-a3e9-c5514d70821f
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appconfig list-deleted
+      Connection:
+      - keep-alive
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-appconfiguration/2.1.0b2 Python/3.10.4 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/deletedConfigurationStores?api-version=2021-10-01-preview&%24skiptoken=VY3LTsMwEEX%2FxULsHDtuS5RIFaqq7mCV8gGOM05N6oc84xSo%2Bu%2BEJdurc869swBf9ObCjKy7s9OhP3%2F0rGMXooSdEF4HPYGHQJX%2BKRkqE73AMqDJLpGLAYUcavuybWpeD1by7ThqrsFsuBla1Sgr210rRcpxcSNkFO%2FO5IjRUnVI6RiDdVPJ%2Bi8lRrgCwfhv7ClmwFedHF9WfcX2Sqr1THJZ85RhcXB7fsLZpXOcIez95IkAaVaJkvneNLtb%2BSx4ZY%2FHLw%3D%3D
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 12 May 2022 14:33:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-original-request-ids:
+      - 113505bb-71db-4c75-a321-3c6e5235badc
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appconfig recover
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -y
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-appconfiguration/2.1.0b2 Python/3.10.4 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/deletedConfigurationStores?api-version=2021-10-01-preview
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/deletedConfigurationStores/mgmttestdelbkxrqafb4pso2","name":"MgmtTestdel000004","type":"Microsoft.AppConfiguration/deletedConfigurationStores","properties":{"configurationStoreId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/mgmttestdelbkxrqafb4pso2","location":"eastus","deletionDate":"2022-05-12T14:33:03+00:00","scheduledPurgeDate":"2022-05-13T14:33:03+00:00","tags":{"key":"value"},"purgeProtectionEnabled":false}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/deletedConfigurationStores/mgmttesti57dakzj6oleir7h","name":"MgmtTesti57dakzj6oleir7h","type":"Microsoft.AppConfiguration/deletedConfigurationStores","properties":{"configurationStoreId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg5ggsxklbl3izynefnmrqka5pkxxjcmbtbi37itg4gtox3abtgakd4fmek4ps7v5qc/providers/Microsoft.AppConfiguration/configurationStores/mgmttesti57dakzj6oleir7h","location":"eastus","deletionDate":"2022-05-12T02:11:07+00:00","scheduledPurgeDate":"2022-05-13T02:11:07+00:00","tags":{},"purgeProtectionEnabled":false}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/deletedConfigurationStores/mgmttestk2ptpcy375wujusl","name":"MgmtTest000002","type":"Microsoft.AppConfiguration/deletedConfigurationStores","properties":{"configurationStoreId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/mgmttestk2ptpcy375wujusl","location":"eastus","deletionDate":"2022-05-12T14:32:36+00:00","scheduledPurgeDate":"2022-05-13T14:32:36+00:00","tags":{},"purgeProtectionEnabled":false}}],"nextLink":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/deletedConfigurationStores?api-version=2021-10-01-preview&%24skiptoken=VY3LTsMwEEX%2fxULsHDtuS5RIFaqq7mCV8gGOM05N6oc84xSo%2bu%2bEJdurc869swBf9ObCjKy7s9OhP3%2f0rGMXooSdEF4HPYGHQJX%2bKRkqE73AMqDJLpGLAYUcavuybWpeD1by7ThqrsFsuBla1Sgr210rRcpxcSNkFO%2fO5IjRUnVI6RiDdVPJ%2bi8lRrgCwfhv7ClmwFedHF9WfcX2Sqr1THJZ85RhcXB7fsLZpXOcIez95IkAaVaJkvneNLtb%2bSx4ZY%2fHLw%3d%3d"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2423'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 12 May 2022 14:33:17 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-original-request-ids:
+      - eae74cfb-8cb8-434d-9db3-19d53c32a68a
+      - 1ce7838d-7b61-4470-9cc2-b90b9b285d50
+      - d5bca1dc-cd95-4b8c-a201-446de02a018b
+      - 9a6b0745-f012-480b-8fbc-bb30e9a78a42
+      - 539e1811-3762-4715-b4c5-bbded4fce146
+      - 87f2b161-f8a3-4ebe-bee0-cb710b183937
+      - c7219db4-12c6-46eb-ad1f-da26ec1e3406
+      - 0e5a2ab8-0082-4340-852c-4be88205d3c4
+      - 8dc2e6a0-5082-4e79-bf7f-45b760c9d218
+      - 4cb4cecb-df4b-44b6-9a5c-0a89682d5b93
+      - 99c5250d-6d30-46f5-87f5-c0ac4152984d
+      - cc42c345-604a-49eb-8b96-71732579f127
+      - 9a59f841-ab1d-4d88-b563-725c0e9f9ab2
+      - 8b4da486-d723-4e9c-8df4-110793ecfa75
+      - 7f9ea985-1600-4c20-b7a3-914bfe98e112
+      - 3d915054-72a0-4f5b-9eb5-4943354dd872
+      - d7652d65-c74b-469a-9a4c-b1ae1847baad
+      - 6b7c6238-6024-473c-b2d6-5e6e0c0b9fff
+      - 12ea93aa-f7d4-4d8a-9e3a-4980cec139c8
+      - 6b35af45-2485-41ee-b169-5ab95525c88c
+      - 0c7956c7-1f87-49c6-9d5c-ec58845f7058
+      - dc352b78-ac69-4239-9d11-df4453bd770d
+      - af220c92-01ce-43ef-b4a6-49db50185d5b
+      - 15a18fe9-bcd1-4ebc-bba6-a73d2a634bea
+      - 49cb9f88-546e-42ee-a41f-68f87d47ac6a
+      - 7d3f5a81-c862-4372-9b26-8300e5c92633
+      - 4f230e6b-3edb-4800-a349-c2f890177c34
+      - 2f97e985-23fe-4bed-977e-d96aa6bcee87
+      - 40bad53f-d33a-4afe-bbe1-9a3f009fbb95
+      - 15ef6527-2758-4f2b-a693-8bf3f809d544
+      - b2b34b07-3f48-45ce-8eb2-2d08379aebdd
+      - 452c26be-aae1-43f6-b413-de778586785f
+      - 47bff821-fb0f-41eb-978f-6421d7b5cd4c
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appconfig recover
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -y
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-appconfiguration/2.1.0b2 Python/3.10.4 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/deletedConfigurationStores?api-version=2021-10-01-preview&%24skiptoken=VY3LTsMwEEX%2FxULsHDtuS5RIFaqq7mCV8gGOM05N6oc84xSo%2Bu%2BEJdurc869swBf9ObCjKy7s9OhP3%2F0rGMXooSdEF4HPYGHQJX%2BKRkqE73AMqDJLpGLAYUcavuybWpeD1by7ThqrsFsuBla1Sgr210rRcpxcSNkFO%2FO5IjRUnVI6RiDdVPJ%2Bi8lRrgCwfhv7ClmwFedHF9WfcX2Sqr1THJZ85RhcXB7fsLZpXOcIez95IkAaVaJkvneNLtb%2BSx4ZY%2FHLw%3D%3D
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 12 May 2022 14:33:17 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-original-request-ids:
+      - 125aa150-63e4-4fef-b675-ae4a136c3173
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "eastus", "sku": {"name": "Standard"}, "properties": {"disableLocalAuth":
+      false, "softDeleteRetentionInDays": 7, "enablePurgeProtection": false, "createMode":
+      "Recover"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appconfig recover
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '183'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -y
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-appconfiguration/2.1.0b2 Python/3.10.4 (Windows-10-10.0.19044-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/MgmtTestdel000004?api-version=2021-10-01-preview
+  response:
+    body:
+      string: '{"type":"Microsoft.AppConfiguration/configurationStores","location":"eastus","properties":{"provisioningState":"Creating","creationDate":"2022-05-12T14:33:24.30179+00:00","endpoint":null,"encryption":null,"privateEndpointConnections":null,"disableLocalAuth":null,"softDeleteRetentionInDays":null,"enablePurgeProtection":null},"sku":{"name":"Standard"},"systemData":null,"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/MgmtTestdel000004","name":"MgmtTestdel000004","tags":{}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/AvDNMUfiRTeOPwjM6b35_LNiPqqfjm4YIadBzkYLeqo?api-version=2021-10-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '573'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 12 May 2022 14:33:25 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - nginx/1.17.10
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1195'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appconfig recover
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -y
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-appconfiguration/2.1.0b2 Python/3.10.4 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/AvDNMUfiRTeOPwjM6b35_LNiPqqfjm4YIadBzkYLeqo?api-version=2021-10-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/AvDNMUfiRTeOPwjM6b35_LNiPqqfjm4YIadBzkYLeqo","name":"AvDNMUfiRTeOPwjM6b35_LNiPqqfjm4YIadBzkYLeqo","status":"Succeeded","error":null}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/AvDNMUfiRTeOPwjM6b35_LNiPqqfjm4YIadBzkYLeqo?api-version=2021-10-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '262'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 12 May 2022 14:33:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - nginx/1.17.10
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appconfig recover
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -y
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-appconfiguration/2.1.0b2 Python/3.10.4 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/MgmtTestdel000004?api-version=2021-10-01-preview
+  response:
+    body:
+      string: '{"type":"Microsoft.AppConfiguration/configurationStores","location":"eastus","properties":{"provisioningState":"Succeeded","creationDate":"2022-05-12T14:32:50+00:00","endpoint":"https://mgmttestdelbkxrqafb4pso2.azconfig.io","encryption":{"keyVaultProperties":null},"privateEndpointConnections":null,"disableLocalAuth":false,"softDeleteRetentionInDays":1,"enablePurgeProtection":false},"sku":{"name":"standard"},"systemData":{"createdBy":"rolelivetest@azuresdkteam.onmicrosoft.com","createdByType":"User","createdAt":"2022-05-12T14:32:50+00:00","lastModifiedBy":"rolelivetest@azuresdkteam.onmicrosoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-05-12T14:33:26+00:00"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/mgmttestdelbkxrqafb4pso2","name":"MgmtTestdel000004","tags":{}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '889'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 12 May 2022 14:33:35 GMT
+      etag:
+      - W/"5901871c-0000-0100-0000-627d1ab60000"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - nginx/1.17.10
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appconfig show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-appconfiguration/2.1.0b2 Python/3.10.4 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/configurationStores?api-version=2021-10-01-preview
+  response:
+    body:
+      string: '{"value":[{"type":"Microsoft.AppConfiguration/configurationStores","location":"eastus","properties":{"provisioningState":"Succeeded","creationDate":"2022-05-12T14:32:50+00:00","endpoint":"https://mgmttestdelbkxrqafb4pso2.azconfig.io","encryption":{"keyVaultProperties":null},"privateEndpointConnections":null,"disableLocalAuth":false,"softDeleteRetentionInDays":1,"enablePurgeProtection":false},"sku":{"name":"standard"},"systemData":{"createdBy":"rolelivetest@azuresdkteam.onmicrosoft.com","createdByType":"User","createdAt":"2022-05-12T14:32:50+00:00","lastModifiedBy":"rolelivetest@azuresdkteam.onmicrosoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-05-12T14:33:26+00:00"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/mgmttestdelbkxrqafb4pso2","name":"MgmtTestdel000004","tags":{}}],"nextLink":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/configurationStores?api-version=2021-10-01-preview&$skipToken=mgmttestdelbkxrqafb4pso2"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1118'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 12 May 2022 14:33:37 GMT
+      expires:
+      - '-1'
+      link:
+      - </subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.AppConfiguration/configurationStores?api-version=2021-10-01-preview&$skipToken=mgmttestdelbkxrqafb4pso2>;
+        rel="next"
+      pragma:
+      - no-cache
+      server:
+      - nginx/1.17.10
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appconfig show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-appconfiguration/2.1.0b2 Python/3.10.4 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/configurationStores?api-version=2021-10-01-preview&$skipToken=mgmttestdelbkxrqafb4pso2
+  response:
+    body:
+      string: '{"value":[],"nextLink":null}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '28'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 12 May 2022 14:33:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - nginx/1.17.10
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appconfig show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-appconfiguration/2.1.0b2 Python/3.10.4 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/MgmtTestdel000004?api-version=2021-10-01-preview
+  response:
+    body:
+      string: '{"type":"Microsoft.AppConfiguration/configurationStores","location":"eastus","properties":{"provisioningState":"Succeeded","creationDate":"2022-05-12T14:32:50+00:00","endpoint":"https://mgmttestdelbkxrqafb4pso2.azconfig.io","encryption":{"keyVaultProperties":null},"privateEndpointConnections":null,"disableLocalAuth":false,"softDeleteRetentionInDays":1,"enablePurgeProtection":false},"sku":{"name":"standard"},"systemData":{"createdBy":"rolelivetest@azuresdkteam.onmicrosoft.com","createdByType":"User","createdAt":"2022-05-12T14:32:50+00:00","lastModifiedBy":"rolelivetest@azuresdkteam.onmicrosoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-05-12T14:33:26+00:00"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/mgmttestdelbkxrqafb4pso2","name":"MgmtTestdel000004","tags":{}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '889'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 12 May 2022 14:33:38 GMT
+      etag:
+      - W/"5901871c-0000-0100-0000-627d1ab60000"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - nginx/1.17.10
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appconfig delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n -g -y
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-appconfiguration/2.1.0b2 Python/3.10.4 (Windows-10-10.0.19044-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/MgmtTestdel000004?api-version=2021-10-01-preview
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Thu, 12 May 2022 14:33:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - nginx/1.17.10
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appconfig purge
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -y
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-appconfiguration/2.1.0b2 Python/3.10.4 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/deletedConfigurationStores?api-version=2021-10-01-preview
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/deletedConfigurationStores/mgmttestdelbkxrqafb4pso2","name":"MgmtTestdel000004","type":"Microsoft.AppConfiguration/deletedConfigurationStores","properties":{"configurationStoreId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/mgmttestdelbkxrqafb4pso2","location":"eastus","deletionDate":"2022-05-12T14:33:41+00:00","scheduledPurgeDate":"2022-05-13T14:33:41+00:00","tags":{},"purgeProtectionEnabled":false}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/deletedConfigurationStores/mgmttesti57dakzj6oleir7h","name":"MgmtTesti57dakzj6oleir7h","type":"Microsoft.AppConfiguration/deletedConfigurationStores","properties":{"configurationStoreId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg5ggsxklbl3izynefnmrqka5pkxxjcmbtbi37itg4gtox3abtgakd4fmek4ps7v5qc/providers/Microsoft.AppConfiguration/configurationStores/mgmttesti57dakzj6oleir7h","location":"eastus","deletionDate":"2022-05-12T02:11:07+00:00","scheduledPurgeDate":"2022-05-13T02:11:07+00:00","tags":{},"purgeProtectionEnabled":false}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/deletedConfigurationStores/mgmttestk2ptpcy375wujusl","name":"MgmtTest000002","type":"Microsoft.AppConfiguration/deletedConfigurationStores","properties":{"configurationStoreId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/mgmttestk2ptpcy375wujusl","location":"eastus","deletionDate":"2022-05-12T14:32:36+00:00","scheduledPurgeDate":"2022-05-13T14:32:36+00:00","tags":{},"purgeProtectionEnabled":false}}],"nextLink":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/deletedConfigurationStores?api-version=2021-10-01-preview&%24skiptoken=VY3LTsMwEEX%2fxULsHDtuS5RIFaqq7mCV8gGOM05N6oc84xSo%2bu%2bEJdurc869swBf9ObCjKy7s9OhP3%2f0rGMXooSdEF4HPYGHQJX%2bKRkqE73AMqDJLpGLAYUcavuybWpeD1by7ThqrsFsuBla1Sgr210rRcpxcSNkFO%2fO5IjRUnVI6RiDdVPJ%2bi8lRrgCwfhv7ClmwFedHF9WfcX2Sqr1THJZ85RhcXB7fsLZpXOcIez95IkAaVaJkvneNLtb%2bSx4ZY%2fHLw%3d%3d"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2410'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 12 May 2022 14:33:47 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-original-request-ids:
+      - a409bef4-0cd5-4238-ba50-0c51d43ced59
+      - 7a38e54b-8963-4b83-b550-d9ed5f9ae23c
+      - a64d94ba-b120-445f-b8c8-386681bcfe9e
+      - 468fd03c-80df-497e-b945-8b0b0b82e2e7
+      - 4f989488-54cc-4735-99e0-5f8948e0b08e
+      - a09bc7ba-b2a1-431e-b2a3-528f12deacad
+      - 6063fa7b-16dc-4c2c-96cd-ac559a8d1a2f
+      - 26277c6e-7e85-4dac-bb47-190bf4e672ee
+      - 55bc8e0a-0851-40c1-97de-78f3f7e36bf8
+      - 6014a779-6dcd-4097-be23-a3054ca028bc
+      - dae0ce53-59d8-4d74-9e19-696cadd60f96
+      - 5ca72545-c79c-49dd-a0b8-8b62ed46fff0
+      - f34010c9-7acb-46f5-976e-db3aa93df6bf
+      - 11f13ba0-cfec-4aaa-88c4-ae458f8875c8
+      - 3261448b-1222-4990-aaf4-1c159e6f2797
+      - 7333a38b-a159-44c9-a1c9-f40be492586b
+      - 6c3223e8-bbba-4255-a49a-d2c9197675f7
+      - 62968e45-93b6-48e1-b6c4-9eaa992f1abd
+      - 0d7fb2c8-21cf-4e18-a58d-24429bcdbe85
+      - 068036c8-9e61-4c56-a424-ebb2690a1df2
+      - 8e9e261f-134d-45bc-9a97-3cfaf99a48a1
+      - be8dc691-fb47-43ad-b555-c07234e68bb6
+      - 61471aa8-62b6-4698-a4bf-c8294568a147
+      - 50637596-693f-4f93-a9b0-64769176545a
+      - 394255e8-1893-4c2b-996a-9fb0907936ca
+      - 241a75b9-efb4-484a-a603-190f7ea03b24
+      - 74c1e4c9-1571-4613-b4b9-7c3f552f4bb6
+      - 18bedce4-af38-4c65-9c6d-b69751c41cd3
+      - 5e3290d6-6e8c-4bbd-8f3c-271dcd1ba5ee
+      - b36dfffc-e1c3-4663-a706-17cbad448792
+      - 504a9628-3a82-4cb2-b837-99511593863a
+      - 298b5416-5ca9-46bc-b553-9ed7eb5b4bf9
+      - 4e1016e7-6f66-4d7f-bdbc-a8686b31866c
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appconfig purge
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -y
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-appconfiguration/2.1.0b2 Python/3.10.4 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/deletedConfigurationStores?api-version=2021-10-01-preview&%24skiptoken=VY3LTsMwEEX%2FxULsHDtuS5RIFaqq7mCV8gGOM05N6oc84xSo%2Bu%2BEJdurc869swBf9ObCjKy7s9OhP3%2F0rGMXooSdEF4HPYGHQJX%2BKRkqE73AMqDJLpGLAYUcavuybWpeD1by7ThqrsFsuBla1Sgr210rRcpxcSNkFO%2FO5IjRUnVI6RiDdVPJ%2Bi8lRrgCwfhv7ClmwFedHF9WfcX2Sqr1THJZ85RhcXB7fsLZpXOcIez95IkAaVaJkvneNLtb%2BSx4ZY%2FHLw%3D%3D
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 12 May 2022 14:33:47 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-original-request-ids:
+      - e1d2088e-51b7-4cf4-92ae-173916b0f6bf
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appconfig purge
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n -y
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-appconfiguration/2.1.0b2 Python/3.10.4 (Windows-10-10.0.19044-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/deletedConfigurationStores/MgmtTestdel000004/purge?api-version=2021-10-01-preview
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Thu, 12 May 2022 14:33:48 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - nginx/1.17.10
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appconfig show-deleted
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-appconfiguration/2.1.0b2 Python/3.10.4 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/deletedConfigurationStores?api-version=2021-10-01-preview
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/deletedConfigurationStores/mgmttesti57dakzj6oleir7h","name":"MgmtTesti57dakzj6oleir7h","type":"Microsoft.AppConfiguration/deletedConfigurationStores","properties":{"configurationStoreId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg5ggsxklbl3izynefnmrqka5pkxxjcmbtbi37itg4gtox3abtgakd4fmek4ps7v5qc/providers/Microsoft.AppConfiguration/configurationStores/mgmttesti57dakzj6oleir7h","location":"eastus","deletionDate":"2022-05-12T02:11:07+00:00","scheduledPurgeDate":"2022-05-13T02:11:07+00:00","tags":{},"purgeProtectionEnabled":false}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/deletedConfigurationStores/mgmttestk2ptpcy375wujusl","name":"MgmtTest000002","type":"Microsoft.AppConfiguration/deletedConfigurationStores","properties":{"configurationStoreId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/mgmttestk2ptpcy375wujusl","location":"eastus","deletionDate":"2022-05-12T14:32:36+00:00","scheduledPurgeDate":"2022-05-13T14:32:36+00:00","tags":{},"purgeProtectionEnabled":false}}],"nextLink":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/deletedConfigurationStores?api-version=2021-10-01-preview&%24skiptoken=VY3LTsMwEEX%2fxULsHDtuS5RIFaqq7mCV8gGOM05N6oc84xSo%2bu%2bEJdurc869swBf9ObCjKy7s9OhP3%2f0rGMXooSdEF4HPYGHQJX%2bKRkqE73AMqDJLpGLAYUcavuybWpeD1by7ThqrsFsuBla1Sgr210rRcpxcSNkFO%2fO5IjRUnVI6RiDdVPJ%2bi8lRrgCwfhv7ClmwFedHF9WfcX2Sqr1THJZ85RhcXB7fsLZpXOcIez95IkAaVaJkvneNLtb%2bSx4ZY%2fHLw%3d%3d"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1794'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 12 May 2022 14:33:49 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-original-request-ids:
+      - 1b7e1822-d5ea-40db-adfa-dfde941a74a5
+      - 64052cb4-6f59-416a-a0ea-aab90872c0a8
+      - 1fa141e7-efcc-4e8e-9cc6-72a8032258cd
+      - 3cdf146b-0ffc-432c-ac46-24e33c212d1e
+      - 8312fce5-4da4-43f8-8149-2dab192d4014
+      - b5f45803-07d5-4a03-9fb6-565b0a21178a
+      - 826d6a5b-b88e-4a1d-b759-4268a71c546e
+      - bc3a7f7b-1127-49a4-8127-214a53ae9b88
+      - a7652513-1312-4f76-a25e-bdc240cc4233
+      - 45cc7140-a519-4609-b43d-5525d9f608a5
+      - 9a751d0b-8b5b-4036-839c-f9789e9844e5
+      - 59230570-f2c1-454e-b78a-6757faae5a4d
+      - 29df5acb-2800-42c7-baab-4d0ca408178a
+      - b61741be-f666-4a34-bd9c-6b3cfa5d4300
+      - 9f227150-d64a-4644-82c7-844e3fa0d9aa
+      - 9603a7db-5a1b-40ce-ba15-211e4325f565
+      - bbba17cb-9cf7-4576-9365-c27130952600
+      - 32d690a3-2d31-42f9-ab65-475113639506
+      - 8602c0e9-4d6d-42c1-8e57-a88c31de69aa
+      - 7f824aba-8f7b-417d-89f9-004d16eede02
+      - 94350b80-fe0e-4ff7-b7ae-c2ae02756d9d
+      - 931cf4af-43f9-41c3-9e28-66909dfad72f
+      - d4d83f33-0ac8-4fb4-816f-23092a6e6b2f
+      - 202c27d9-52fc-4d9f-91f8-3a71ff83731f
+      - 1296118f-b2fc-4e1c-bbda-93e6b1826d43
+      - 7746535a-6f07-4eb7-ab1b-1002dee2d7d1
+      - 9755682c-b87b-4449-980f-7dd44566dd5b
+      - 1fca521a-a1a2-48f4-b0f8-656bcb85ea88
+      - 3fec7734-0e27-4460-be6b-a3166cfecf30
+      - cbb844b9-e3ed-4f27-b89f-bfe918ad1383
+      - 38f19942-0a15-4a6c-8b8f-9c553db2b87d
+      - 04bfa37b-8582-4eb0-8d8d-3374eff83530
+      - 736ef6be-67a2-4e98-a1f9-0dd02187c35d
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appconfig show-deleted
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-appconfiguration/2.1.0b2 Python/3.10.4 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/deletedConfigurationStores?api-version=2021-10-01-preview&%24skiptoken=VY3LTsMwEEX%2FxULsHDtuS5RIFaqq7mCV8gGOM05N6oc84xSo%2Bu%2BEJdurc869swBf9ObCjKy7s9OhP3%2F0rGMXooSdEF4HPYGHQJX%2BKRkqE73AMqDJLpGLAYUcavuybWpeD1by7ThqrsFsuBla1Sgr210rRcpxcSNkFO%2FO5IjRUnVI6RiDdVPJ%2Bi8lRrgCwfhv7ClmwFedHF9WfcX2Sqr1THJZ85RhcXB7fsLZpXOcIez95IkAaVaJkvneNLtb%2BSx4ZY%2FHLw%3D%3D
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 12 May 2022 14:33:49 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-original-request-ids:
+      - 47fe5285-d989-4bbe-b15d-100f390a5186
     status:
       code: 200
       message: OK

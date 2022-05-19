@@ -53,8 +53,7 @@ class AzCopy:
         else:
             raise CLIError('Azcopy ({}) does not exist.'.format(self.system))
         try:
-            os.chmod(install_dir,
-                     os.stat(install_dir).st_mode | stat.S_IWUSR | stat.S_IWGRP | stat.S_IWOTH)
+            os.chmod(install_dir, os.stat(install_dir).st_mode | stat.S_IWUSR)
             _urlretrieve(file_url, install_location)
             os.chmod(install_location,
                      os.stat(install_location).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
@@ -75,7 +74,11 @@ class AzCopy:
 
     def run_command(self, args):
         args = [self.executable] + args
-        logger.warning("Azcopy command: %s", args)
+        args_hides = args.copy()
+        for i in range(len(args_hides)):
+            if args_hides[i].find('sig') > 0:
+                args_hides[i] = args_hides[i][0:args_hides[i].index('sig') + 4]
+        logger.warning("Azcopy command: %s", args_hides)
         env_kwargs = {}
         if self.creds and self.creds.token_info:
             env_kwargs = {'AZCOPY_OAUTH_TOKEN_INFO': json.dumps(self.creds.token_info)}

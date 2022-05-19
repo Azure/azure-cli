@@ -58,7 +58,7 @@ def transform_key_encryption_output(result, **command_args):  # pylint: disable=
     import binascii
     output = {
         'kid': result.key_id,
-        'result': base64.b64encode(result.ciphertext),
+        'result': base64.b64encode(result.ciphertext).decode('utf-8'),
         'algorithm': result.algorithm,
         'iv': binascii.hexlify(result.iv) if result.iv else None,
         'tag': binascii.hexlify(result.tag) if result.tag else None,
@@ -80,7 +80,7 @@ def transform_key_decryption_output(result, **command_args):
     }
     data_type = command_args.get('data_type')
     if data_type == KeyEncryptionDataType.BASE64:
-        output['result'] = base64.b64encode(result.plaintext)
+        output['result'] = base64.b64encode(result.plaintext).decode('utf-8')
     return output
 
 
@@ -106,3 +106,12 @@ def transform_key_output(result, **command_args):
         'releasePolicy': result.properties.release_policy
     }
     return output
+
+
+# pylint: disable=unused-argument
+def transform_key_random_output(result, **command_args):
+    if result and isinstance(result, bytes):
+        import base64
+        return {"value": base64.b64encode(result)}
+
+    return result

@@ -61,6 +61,7 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
     from azure.core.exceptions import AzureError
     from requests.exceptions import SSLError, HTTPError
     from azure.cli.core import azclierror
+    from msal_extensions.persistence import PersistenceError
     import traceback
 
     logger.debug("azure.cli.core.util.handle_exception is called with an exception:")
@@ -135,6 +136,19 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
     elif isinstance(ex, KeyboardInterrupt):
         error_msg = 'Keyboard interrupt is captured.'
         az_error = azclierror.ManualInterrupt(error_msg)
+
+    elif isinstance(ex, PersistenceError):
+        # errno is already in strerror. str(ex) gives duplicated errno.
+        az_error = azclierror.CLIInternalError(ex.strerror)
+        if ex.errno == 0:
+            az_error.set_recommendation(
+                "Please report to us via Github: https://github.com/Azure/azure-cli/issues/20278")
+        elif ex.errno == -2146893813:
+            az_error.set_recommendation(
+                "Please report to us via Github: https://github.com/Azure/azure-cli/issues/20231")
+        elif ex.errno == -2146892987:
+            az_error.set_recommendation(
+                "Please report to us via Github: https://github.com/Azure/azure-cli/issues/21010")
 
     else:
         error_msg = "The command failed with an unexpected error. Here is the traceback:"
@@ -551,7 +565,7 @@ def shell_safe_json_parse(json_or_dict_string, preserve_order=False, strict=True
             # Recommendation for all shells
             from azure.cli.core.azclierror import InvalidArgumentValueError
             recommendation = "The JSON may have been parsed by the shell. See " \
-                             "https://docs.microsoft.com/cli/azure/use-cli-effectively#quoting-issues"
+                             "https://docs.microsoft.com/cli/azure/use-cli-effectively#use-quotation-marks-in-arguments"
 
             # Recommendation especially for PowerShell
             parent_proc = get_parent_proc_name()
@@ -648,7 +662,8 @@ def poller_classes():
     from msrestazure.azure_operation import AzureOperationPoller
     from msrest.polling.poller import LROPoller
     from azure.core.polling import LROPoller as AzureCoreLROPoller
-    return (AzureOperationPoller, LROPoller, AzureCoreLROPoller)
+    from azure.cli.core.aaz._poller import AAZLROPoller
+    return (AzureOperationPoller, LROPoller, AzureCoreLROPoller, AAZLROPoller)
 
 
 def augment_no_wait_handler_args(no_wait_enabled, handler, handler_args):
@@ -963,7 +978,8 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
         reason = r.reason
         if r.text:
             reason += '({})'.format(r.text)
-        raise CLIError(reason)
+        from .azclierror import HTTPError
+        raise HTTPError(reason, r)
     if output_file:
         with open(output_file, 'wb') as fd:
             for chunk in r.iter_content(chunk_size=128):
@@ -1279,6 +1295,10 @@ def rmtree_with_retry(path):
             import shutil
             shutil.rmtree(path)
             return
+        except FileNotFoundError:
+            # The folder has already been deleted. No further retry is needed.
+            # errno: 2, winerror: 3, strerror: 'The system cannot find the path specified'
+            return
         except OSError as err:
             if retry_num > 0:
                 logger.warning("Failed to delete '%s': %s. Retrying ...", path, err)
@@ -1287,3 +1307,27 @@ def rmtree_with_retry(path):
             else:
                 logger.warning("Failed to delete '%s': %s. You may try to delete it manually.", path, err)
                 break
+
+
+def get_secret_store(cli_ctx, name):
+    """Create a process-concurrency-safe azure.cli.core.auth.persistence.SecretStore instance that can be used to
+    save secret data.
+    """
+    from azure.cli.core._environment import get_config_dir
+    from azure.cli.core.auth.persistence import load_secret_store
+    # Save to CLI's config dir, by default ~/.azure
+    location = os.path.join(get_config_dir(), name)
+    # We honor the system type (Windows, Linux, or MacOS) and global config
+    encrypt = should_encrypt_token_cache(cli_ctx)
+    return load_secret_store(location, encrypt)
+
+
+def should_encrypt_token_cache(cli_ctx):
+    # Only enable encryption for Windows (for now).
+    fallback = sys.platform.startswith('win32')
+
+    # EXPERIMENTAL: Use core.encrypt_token_cache=False to turn off token cache encryption.
+    # encrypt_token_cache affects both MSAL token cache and service principal entries.
+    encrypt = cli_ctx.config.getboolean('core', 'encrypt_token_cache', fallback=fallback)
+
+    return encrypt

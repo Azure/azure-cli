@@ -15,7 +15,9 @@ from ._client_factory import (
     account_backups_mgmt_client_factory,
     backups_mgmt_client_factory,
     backup_policies_mgmt_client_factory,
-    vaults_mgmt_client_factory)
+    vaults_mgmt_client_factory,
+    subvolumes_mgmt_client_factory,
+    volume_groups_mgmt_client_factory)
 from ._exception_handler import netappfiles_exception_handler
 
 
@@ -82,6 +84,20 @@ def load_command_table(self, _):
         exception_handler=netappfiles_exception_handler
     )
     load_vaults_command_groups(self, netappfiles_vaults_sdk)
+
+    netappfiles_subvolumes_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.netapp.operations._subvolumes_operations#SubvolumesOperations.{}',
+        client_factory=subvolumes_mgmt_client_factory,
+        exception_handler=netappfiles_exception_handler
+    )
+    load_subvolumes_command_groups(self, netappfiles_subvolumes_sdk)
+
+    netappfiles_volume_groups_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.netapp.operations._volume_groups_operations#VolumeGroupsOperations.{}',
+        client_factory=volume_groups_mgmt_client_factory,
+        exception_handler=netappfiles_exception_handler
+    )
+    load_volume_groups_command_groups(self, netappfiles_volume_groups_sdk)
 
     with self.command_group('netappfiles', is_preview=False):
         pass
@@ -252,6 +268,10 @@ def load_snapshots_command_groups(self, netappfiles_snapshots_sdk):
                          doc_string_source='azure.mgmt.netapp.models#Snapshot',
                          exception_handler=netappfiles_exception_handler)
         g.command('update', 'begin_update')
+        g.custom_command('restore-files', 'snapshot_restore_files',
+                         client_factory=snapshots_mgmt_client_factory,
+                         doc_string_source='azure.mgmt.netapp.models#SnapshotRestoreFiles',
+                         exception_handler=netappfiles_exception_handler)
 
 
 def load_snapshots_policies_command_groups(self, netappfiles_snapshot_policies_sdk):
@@ -273,3 +293,34 @@ def load_snapshots_policies_command_groups(self, netappfiles_snapshot_policies_s
 def load_vaults_command_groups(self, netappfiles_vaults_sdk):
     with self.command_group('netappfiles vault', netappfiles_vaults_sdk) as g:
         g.command('list', 'list')
+
+
+def load_subvolumes_command_groups(self, netappfiles_subvolumes_sdk):
+    with self.command_group('netappfiles subvolume', netappfiles_subvolumes_sdk) as g:
+        g.show_command('show', 'get')
+        g.command('list', 'list_by_volume')
+        g.custom_command('create', 'create_subvolume',
+                         client_factory=subvolumes_mgmt_client_factory,
+                         doc_string_source='azure.mgmt.netapp.models#SubvolumeInfo',
+                         exception_handler=netappfiles_exception_handler)
+        g.custom_command('update', 'patch_subvolume',
+                         client_factory=subvolumes_mgmt_client_factory,
+                         doc_string_source='azure.mgmt.netapp.models#SubvolumePatchRequest',
+                         exception_handler=netappfiles_exception_handler)
+        g.command('delete', 'begin_delete', confirmation=True)
+
+    with self.command_group('netappfiles subvolume metadata', netappfiles_subvolumes_sdk) as g:
+        g.show_command('show', 'begin_get_metadata')
+
+
+def load_volume_groups_command_groups(self, netappfiles_volume_groups_sdk):
+    with self.command_group('netappfiles volume-group', netappfiles_volume_groups_sdk) as g:
+        g.show_command('show', 'get')
+        g.command('list', 'list_by_net_app_account')
+        g.custom_command('create', 'create_volume_group',
+                         client_factory=volume_groups_mgmt_client_factory,
+                         supports_no_wait=True,
+                         doc_string_source='azure.mgmt.netapp.models#VolumeGroupDetails',
+                         exception_handler=netappfiles_exception_handler)
+        g.command('delete', 'begin_delete', confirmation=True)
+        g.wait_command('wait')

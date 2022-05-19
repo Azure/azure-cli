@@ -31,7 +31,7 @@ from azure.mgmt.sql.models import (
     ServerConnectionType,
     ServerKeyType,
     StorageKeyType,
-    TransparentDataEncryptionStatus
+    TransparentDataEncryptionState
 )
 
 from azure.cli.core.commands.parameters import (
@@ -57,6 +57,7 @@ from .custom import (
     ElasticPoolCapabilitiesAdditionalDetails,
     FailoverPolicyType,
     ResourceIdType,
+    ServicePrincipalType,
     SqlServerMinimalTlsVersionType,
     SqlManagedInstanceMinimalTlsVersionType,
     AuthenticationType
@@ -66,7 +67,6 @@ from ._validators import (
     create_args_for_complex_type,
     validate_managed_instance_storage_size,
     validate_backup_storage_redundancy,
-    validate_backup_storage_redundancy_mi,
     validate_subnet
 )
 
@@ -110,14 +110,7 @@ def get_internal_backup_storage_redundancy(self):
         'local': 'Local',
         'zone': 'Zone',
         'geo': 'Geo',
-    }.get(self.lower(), 'Invalid')
-
-
-def get_internal_backup_storage_redundancy_mi(self):
-    return {
-        'local': 'LRS',
-        'zone': 'ZRS',
-        'geo': 'GRS',
+        'geozone': 'GeoZone',
     }.get(self.lower(), 'Invalid')
 
 
@@ -250,9 +243,9 @@ backup_storage_redundancy_param_type = CLIArgumentType(
 
 backup_storage_redundancy_param_type_mi = CLIArgumentType(
     options_list=['--backup-storage-redundancy', '--bsr'],
-    type=get_internal_backup_storage_redundancy_mi,
-    help='Backup storage redundancy used to store backups. Allowed values include: Local, Zone, Geo.',
-    validator=validate_backup_storage_redundancy_mi)
+    type=get_internal_backup_storage_redundancy,
+    help='Backup storage redundancy used to store backups. Allowed values include: Local, Zone, Geo, GeoZone.',
+    validator=validate_backup_storage_redundancy)
 
 grace_period_param_type = CLIArgumentType(
     help='Interval in hours before automatic failover is initiated '
@@ -268,10 +261,12 @@ allow_data_loss_param_type = CLIArgumentType(
 
 aad_admin_login_param_type = CLIArgumentType(
     options_list=['--display-name', '-u'],
+    required=True,
     help='Display name of the Azure AD administrator user or group.')
 
 aad_admin_sid_param_type = CLIArgumentType(
     options_list=['--object-id', '-i'],
+    required=True,
     help='The unique ID of the Azure AD administrator.')
 
 read_scale_param_type = CLIArgumentType(
@@ -985,7 +980,7 @@ def load_arguments(self, _):
                    options_list=['--status'],
                    required=True,
                    help='Status of the transparent data encryption.',
-                   arg_type=get_enum_type(TransparentDataEncryptionStatus))
+                   arg_type=get_enum_type(TransparentDataEncryptionState))
 
     #####
     #           sql db ledger-digest-uploads
@@ -1105,7 +1100,6 @@ def load_arguments(self, _):
         c.argument(
             'diffbackup_hours',
             options_list=['--diffbackup-hours'],
-            required=True,
             help='New backup short term retention policy differential backup interval in hours.'
             'Valid differential backup interval for live database can be 12 or 24 hours.')
 
@@ -1423,6 +1417,10 @@ def load_arguments(self, _):
                    arg_type=get_enum_type(ResourceIdType),
                    help='Type of Identity to be used. Possible values are SystemAsssigned,'
                    'UserAssigned, SystemAssigned,UserAssigned and None.')
+
+        c.argument('federated_client_id',
+                   options_list=['--federated-client-id', '--fid'],
+                   help='The federated client id used in cross tenant CMK scenario.')
 
     with self.argument_context('sql server create') as c:
         c.argument('location',
@@ -1860,6 +1858,9 @@ def load_arguments(self, _):
                    help='Type of Identity to be used. Possible values are SystemAsssigned,'
                    'UserAssigned, SystemAssignedUserAssigned and None.')
 
+        c.argument('requested_backup_storage_redundancy',
+                   arg_type=backup_storage_redundancy_param_type_mi)
+
     with self.argument_context('sql mi create') as c:
         c.argument('location',
                    arg_type=get_location_type_with_default_from_resource_group(self.cli_ctx))
@@ -1879,7 +1880,7 @@ def load_arguments(self, _):
                 'public_data_endpoint_enabled',
                 'timezone_id',
                 'tags',
-                'storage_account_type',
+                'requested_backup_storage_redundancy',
                 'yes',
                 'maintenance_configuration_id',
                 'primary_user_assigned_identity_id',
@@ -1920,9 +1921,6 @@ def load_arguments(self, _):
                    help='Generate and assign an Azure Active Directory Identity for this managed instance '
                    'for use with key management services like Azure KeyVault.')
 
-        c.argument('storage_account_type',
-                   arg_type=backup_storage_redundancy_param_type_mi)
-
         c.argument('yes',
                    options_list=['--yes', '-y'],
                    help='Do not prompt for confirmation.', action='store_true')
@@ -1948,12 +1946,21 @@ def load_arguments(self, _):
                    options_list=['--external-admin-principal-type'],
                    help='User, Group or Application')
 
+        c.argument('service_principal_type',
+                   options_list=['--service-principal-type'],
+                   arg_type=get_enum_type(ServicePrincipalType),
+                   required=False,
+                   help='Service Principal type to be used for this Managed Instance. '
+                   'Possible values are SystemAssigned and None')
+
     with self.argument_context('sql mi update') as c:
         # Create args that will be used to build up the ManagedInstance object
         create_args_for_complex_type(
             c, 'parameters', ManagedInstance, [
                 'administrator_login_password',
+                'requested_backup_storage_redundancy',
                 'tags',
+                'yes',
             ])
 
         c.argument('administrator_login_password',
@@ -1964,6 +1971,10 @@ def load_arguments(self, _):
                    help='Generate and assign an Azure Active Directory Identity for this managed instance '
                    'for use with key management services like Azure KeyVault. '
                    'If identity is already assigned - do nothing.')
+
+        c.argument('yes',
+                   options_list=['--yes', '-y'],
+                   help='Do not prompt for confirmation.', action='store_true')
 
         c.argument('maintenance_configuration_id',
                    options_list=['--maint-config-id', '-m'],
@@ -1989,6 +2000,13 @@ def load_arguments(self, _):
                    required=False,
                    help='Name or ID of the subnet that allows access to an Azure Sql Managed Instance. '
                    'If subnet name is provided, --vnet-name must be provided.')
+
+        c.argument('service_principal_type',
+                   options_list=['--service-principal-type'],
+                   arg_type=get_enum_type(ServicePrincipalType),
+                   required=False,
+                   help='Service Principal type to be used for this Managed Instance. '
+                   'Possible values are SystemAssigned and None')
 
     with self.argument_context('sql mi show') as c:
         c.argument('expand_ad_admin',
@@ -2254,7 +2272,7 @@ def load_arguments(self, _):
                    help='The resource id of the long term retention backup to be restored. '
                    'Use \'az sql midb ltr-backup show\' or \'az sql midb ltr-backup list\' for backup id.')
 
-        c.argument('storage_account_type',
+        c.argument('requested_backup_storage_redundancy',
                    arg_type=backup_storage_redundancy_param_type_mi)
 
     with self.argument_context('sql midb log-replay start') as c:

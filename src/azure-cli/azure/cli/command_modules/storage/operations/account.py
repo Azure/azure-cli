@@ -8,6 +8,7 @@
 import os
 from azure.cli.command_modules.storage._client_factory import storage_client_factory, cf_sa_for_keys
 from azure.cli.core.util import get_file_json, shell_safe_json_parse, find_child_item
+from azure.cli.core.profiles import ResourceType, get_sdk
 from knack.log import get_logger
 from knack.util import CLIError
 
@@ -26,9 +27,10 @@ def regenerate_key(cmd, client, account_name, key_name, resource_group_name=None
     return client.regenerate_key(resource_group_name, account_name, regenerate_key_parameters)
 
 
-def generate_sas(client, services, resource_types, permission, expiry, start=None, ip=None, protocol=None):
+def generate_sas(cmd, client, services, resource_types, permission, expiry, start=None,
+                 ip=None, protocol=None, **kwargs):
     from azure.cli.core.azclierror import RequiredArgumentMissingError
-    if not client.account_name or not client.account_key:
+    if not client.account_name or not client.credential or not client.credential.account_key:
         error_msg = """
         Missing/Invalid credentials to access storage service. The following variations are accepted:
             (1) account name and key (--account-name and --account-key options or
@@ -40,8 +42,13 @@ def generate_sas(client, services, resource_types, permission, expiry, start=Non
                 quoting to preserve literal character interpretation.
         """
         raise RequiredArgumentMissingError(error_msg)
-    return client.generate_shared_access_signature(services, resource_types, permission, expiry,
-                                                   start=start, ip=ip, protocol=protocol)
+
+    t_account_sas = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_BLOB,
+                            '_shared.shared_access_signature#SharedAccessSignature')
+
+    return t_account_sas(account_name=client.account_name, account_key=client.credential.account_key).\
+        generate_account(services=services, resource_types=resource_types, permission=permission, expiry=expiry,
+                         start=start, ip=ip, protocol=protocol, **kwargs)
 
 
 # pylint: disable=too-many-locals, too-many-statements, too-many-branches, unused-argument
@@ -52,6 +59,7 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
                            enable_files_aadds=None, bypass=None, default_action=None, assign_identity=False,
                            enable_large_file_share=None, enable_files_adds=None, domain_name=None,
                            net_bios_domain_name=None, forest_name=None, domain_guid=None, domain_sid=None,
+                           sam_account_name=None, account_type=None,
                            azure_storage_sid=None, enable_hierarchical_namespace=None,
                            encryption_key_type_for_table=None, encryption_key_type_for_queue=None,
                            routing_choice=None, publish_microsoft_endpoints=None, publish_internet_endpoints=None,
@@ -128,7 +136,9 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
                                                                     net_bios_domain_name=net_bios_domain_name,
                                                                     forest_name=forest_name, domain_guid=domain_guid,
                                                                     domain_sid=domain_sid,
-                                                                    azure_storage_sid=azure_storage_sid)
+                                                                    azure_storage_sid=azure_storage_sid,
+                                                                    sam_account_name=sam_account_name,
+                                                                    account_type=account_type)
             # TODO: Enabling AD will automatically disable AADDS. Maybe we should throw error message
 
             params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
@@ -265,6 +275,17 @@ def show_storage_account_connection_string(cmd, resource_group_name, account_nam
             # Older API versions have a slightly different structure
             keys = [obj.key1, obj.key2]  # pylint: disable=no-member
 
+        sa = scf.get_properties(resource_group_name, account_name)
+        if getattr(sa, 'primary_endpoints') is not None:
+            if not blob_endpoint:
+                blob_endpoint = getattr(sa.primary_endpoints, 'blob', None)
+            if not file_endpoint:
+                file_endpoint = getattr(sa.primary_endpoints, 'file', None)
+            if not queue_endpoint:
+                queue_endpoint = getattr(sa.primary_endpoints, 'queue', None)
+            if not table_endpoint:
+                table_endpoint = getattr(sa.primary_endpoints, 'table', None)
+
         connection_string = '{}{}{}'.format(
             connection_string,
             ';AccountName={}'.format(account_name),
@@ -311,8 +332,8 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                            access_tier=None, https_only=None, enable_files_aadds=None, assign_identity=False,
                            bypass=None, default_action=None, enable_large_file_share=None, enable_files_adds=None,
                            domain_name=None, net_bios_domain_name=None, forest_name=None, domain_guid=None,
-                           domain_sid=None, azure_storage_sid=None, routing_choice=None,
-                           publish_microsoft_endpoints=None, publish_internet_endpoints=None,
+                           domain_sid=None, azure_storage_sid=None, sam_account_name=None, account_type=None,
+                           routing_choice=None, publish_microsoft_endpoints=None, publish_internet_endpoints=None,
                            allow_blob_public_access=None, min_tls_version=None, allow_shared_key_access=None,
                            identity_type=None, user_identity_id=None, key_vault_user_identity_id=None,
                            sas_expiration_period=None, key_expiration_period_in_days=None,
@@ -422,7 +443,9 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                                                                     net_bios_domain_name=net_bios_domain_name,
                                                                     forest_name=forest_name, domain_guid=domain_guid,
                                                                     domain_sid=domain_sid,
-                                                                    azure_storage_sid=azure_storage_sid)
+                                                                    azure_storage_sid=azure_storage_sid,
+                                                                    sam_account_name=sam_account_name,
+                                                                    account_type=account_type)
             # TODO: Enabling AD will automatically disable AADDS. Maybe we should throw error message
 
             params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(

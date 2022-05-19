@@ -17,7 +17,8 @@ from msrestazure.tools import is_valid_resource_id, parse_resource_id
 
 from ._appservice_utils import _generic_site_operation
 from ._client_factory import web_client_factory
-from .utils import _normalize_sku, get_sku_tier, _normalize_location
+from .utils import (_normalize_sku, get_sku_tier, _normalize_location, get_resource_name_and_group,
+                    get_resource_if_exists)
 
 logger = get_logger(__name__)
 
@@ -116,32 +117,15 @@ def validate_functionapp_asp_create(namespace):
     if namespace.max_burst is not None:
         if tier.lower() != "elasticpremium":
             raise ArgumentUsageError("--max-burst is only supported for Elastic Premium (EP) plans")
-        namespace.max_burst = validate_range_of_int_flag('--max-burst', namespace.max_burst, min_val=0, max_val=100)
-    if namespace.number_of_workers is not None:
-        namespace.number_of_workers = validate_range_of_int_flag('--number-of-workers / --min-elastic-worker-count',
-                                                                 namespace.number_of_workers, min_val=0, max_val=100)
 
 
-def validate_app_or_slot_exists_in_rg(cmd, namespace):
-    """Validate that the App/slot exists in the RG provided"""
-    client = web_client_factory(cmd.cli_ctx)
-    webapp = namespace.name
+def validate_app_exists(cmd, namespace):
+    app = namespace.name
     resource_group_name = namespace.resource_group_name
-    if isinstance(namespace.slot, str):
-        app = client.web_apps.get_slot(resource_group_name, webapp, namespace.slot, raw=True)
-    else:
-        app = client.web_apps.get(resource_group_name, webapp, None, raw=True)
-    if app.response.status_code != 200:
-        raise ResourceNotFoundError(app.response.text)
-
-
-def validate_app_exists_in_rg(cmd, namespace):
-    client = web_client_factory(cmd.cli_ctx)
-    webapp = namespace.name
-    resource_group_name = namespace.resource_group_name
-    app = client.web_apps.get(resource_group_name, webapp, None, raw=True)
-    if app.response.status_code != 200:
-        raise ResourceNotFoundError(app.response.text)
+    slot = namespace.slot
+    app = _generic_site_operation(cmd.cli_ctx, resource_group_name, app, 'get', slot)
+    if not app:
+        raise ResourceNotFoundError("'{}' app not found in ResourceGroup '{}'".format(app, resource_group_name))
 
 
 def validate_add_vnet(cmd, namespace):
@@ -358,3 +342,51 @@ def validate_vnet_integration(cmd, namespace):
                                      "Plan sku cannot be one of: {}. "
                                      "Please run 'az appservice plan create -h' "
                                      "to see all available App Service Plan SKUs ".format(sku_name, disallowed_skus))
+
+
+def _validate_ase_exists(client, ase_name, ase_rg):
+    extant_ase = get_resource_if_exists(client.app_service_environments,
+                                        resource_group_name=ase_rg, name=ase_name)
+    if extant_ase is None:
+        raise ValidationError("App Service Environment {} does not exist.".format(ase_name))
+
+
+# if the ASP exists, validate that it is in the ASE
+def _validate_plan_in_ase(client, plan_name, plan_rg, ase_id):
+    if plan_name is not None:
+        plan_info = get_resource_if_exists(client.app_service_plans,
+                                           resource_group_name=plan_rg, name=plan_name)
+        if plan_info is not None:
+            plan_hosting_env = plan_info.hosting_environment_profile
+
+            if not plan_hosting_env or plan_hosting_env.id != ase_id:
+                raise ValidationError("Plan {} already exists and is not in the "
+                                      "app service environment.".format(plan_name))
+
+
+def _validate_ase_is_v3(ase):
+    if ase.kind.upper() != "ASEV3":
+        raise ValidationError("Only V3 App Service Environments supported")
+
+
+def _validate_ase_not_ilb(ase):
+    if ase.internal_load_balancing_mode != 0:
+        raise ValidationError("Internal Load Balancer (ILB) App Service Environments not supported")
+
+
+def validate_webapp_up(cmd, namespace):
+    if namespace.runtime and namespace.html:
+        raise MutuallyExclusiveArgumentError('Conflicting parameters: cannot have both --runtime and --html specified.')
+
+    client = web_client_factory(cmd.cli_ctx)
+    if namespace.app_service_environment:
+        ase_name, ase_rg, ase_id = get_resource_name_and_group(cmd, namespace.app_service_environment,
+                                                               namespace.resource_group_name,
+                                                               namespace="Microsoft.Web",
+                                                               type="hostingEnvironments")
+        _validate_ase_exists(client, ase_name, ase_rg)
+        _validate_plan_in_ase(client, namespace.plan, namespace.resource_group_name, ase_id)
+
+        ase = client.app_service_environments.get(resource_group_name=ase_rg, name=ase_name)
+        _validate_ase_is_v3(ase)
+        _validate_ase_not_ilb(ase)

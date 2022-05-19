@@ -4,9 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 from collections import OrderedDict
-# pylint: disable=import-error
-from jmespath import compile as compile_jmes, Options
-# pylint: disable=import-error
+
+from jmespath import Options
+from jmespath import compile as compile_jmes
 from jmespath import functions
 
 
@@ -56,11 +56,6 @@ def aks_run_command_result_format(cmdResult):
     return result
 
 
-def osa_list_table_format(results):
-    """"Format a list of OpenShift managed clusters as summary results for display with "-o table"."""
-    return [_osa_table_format(r) for r in results]
-
-
 def aks_show_table_format(result):
     """Format a managed cluster as summary results for display with "-o table"."""
     return [_aks_table_format(result)]
@@ -72,21 +67,9 @@ def _aks_table_format(result):
         location: location,
         resourceGroup: resourceGroup,
         kubernetesVersion: kubernetesVersion,
+        currentKubernetesVersion: currentKubernetesVersion,
         provisioningState: provisioningState,
         fqdn: fqdn || privateFqdn
-    }""")
-    # use ordered dicts so headers are predictable
-    return parsed.search(result, Options(dict_cls=OrderedDict))
-
-
-def _osa_table_format(result):
-    parsed = compile_jmes("""{
-        name: name,
-        location: location,
-        resourceGroup: resourceGroup,
-        openShiftVersion: openShiftVersion,
-        provisioningState: provisioningState,
-        publicHostname: publicHostname
     }""")
     # use ordered dicts so headers are predictable
     return parsed.search(result, Options(dict_cls=OrderedDict))
@@ -136,17 +119,17 @@ def aks_versions_table_format(result):
     return sorted(results, key=lambda x: version_to_tuple(x.get('kubernetesVersion')), reverse=True)
 
 
-def aks_list_snapshot_table_format(results):
-    """"Format a list of snapshots as summary results for display with "-o table"."""
-    return [_aks_snapshot_table_format(r) for r in results]
+def aks_list_nodepool_snapshot_table_format(results):
+    """"Format a list of nodepool snapshots as summary results for display with "-o table"."""
+    return [_aks_nodepool_snapshot_table_format(r) for r in results]
 
 
-def aks_show_snapshot_table_format(result):
-    """Format a snapshot as summary results for display with "-o table"."""
-    return [_aks_snapshot_table_format(result)]
+def aks_show_nodepool_snapshot_table_format(result):
+    """Format a nodepool snapshot as summary results for display with "-o table"."""
+    return [_aks_nodepool_snapshot_table_format(result)]
 
 
-def _aks_snapshot_table_format(result):
+def _aks_nodepool_snapshot_table_format(result):
     parsed = compile_jmes("""{
         name: name,
         location: location,

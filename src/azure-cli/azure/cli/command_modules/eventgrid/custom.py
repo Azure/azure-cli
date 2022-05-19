@@ -11,6 +11,7 @@ from knack.util import CLIError
 from msrestazure.tools import parse_resource_id
 from dateutil.parser import parse   # pylint: disable=import-error,relative-import
 
+from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
 from azure.mgmt.eventgrid.models import (
     EventSubscription,
     EventSubscriptionUpdateParameters,
@@ -70,6 +71,8 @@ SKU_PREMIUM = "Premium"
 IDENTITY_NO_IDENTITY = "NoIdentity"
 IDENTITY_NONE = "None"
 IDENTITY_SYSTEM_ASSIGNED = "SystemAssigned"
+IDENTITY_USER_ASSIGNED = "UserAssigned"
+IDENTITY_MIXED_MODE = "SystemAssigned, UserAssigned"
 
 WEBHOOK_DESTINATION = "webhook"
 EVENTHUB_DESTINATION = "eventhub"
@@ -130,9 +133,11 @@ def cli_topic_create_or_update(
         inbound_ip_rules=None,
         sku=SKU_BASIC,
         identity=None,
+        user_assigned=None,
         kind=KIND_AZURE,
         extended_location_name=None,
-        extended_location_type=None):
+        extended_location_type=None,
+        system_assigned=None):
 
     final_input_schema, input_schema_mapping = _get_input_schema_and_mapping(
         input_schema,
@@ -144,8 +149,8 @@ def cli_topic_create_or_update(
 
     kind_name = _get_kind(kind)
     extended_location = _get_extended_location(kind, extended_location_name, extended_location_type)
+    identity_info = _get_identity_info(identity, kind, user_assigned, system_assigned)
 
-    identity_info = _get_identity_info(identity, kind)
     topic_info = Topic(
         location=location,
         tags=tags,
@@ -172,13 +177,15 @@ def cli_topic_update(
         public_network_access=None,
         inbound_ip_rules=None,
         sku=None,
-        identity=None):
+        identity=None,
+        user_assigned=None,
+        system_assigned=None):
     sku_info = None
     if sku is not None:
         sku_name = _get_sku(sku)
         sku_info = ResourceSku(name=sku_name)
 
-    identity_info = _get_identity_info_only_if_not_none(identity)
+    identity_info = _get_identity_info_only_if_not_none(identity, user_assigned, system_assigned)
     topic_update_parameters = TopicUpdateParameters(
         tags=tags,
         public_network_access=public_network_access,
@@ -214,13 +221,15 @@ def cli_domain_update(
         public_network_access=None,
         inbound_ip_rules=None,
         sku=None,
-        identity=None):
+        identity=None,
+        user_assigned=None,
+        system_assigned=None):
     sku_info = None
     if sku is not None:
         sku_name = _get_sku(sku)
         sku_info = ResourceSku(name=sku_name)
 
-    identity_info = _get_identity_info_only_if_not_none(identity)
+    identity_info = _get_identity_info_only_if_not_none(identity, user_assigned, system_assigned)
     domain_update_parameters = DomainUpdateParameters(
         tags=tags,
         public_network_access=public_network_access,
@@ -271,7 +280,9 @@ def cli_domain_create_or_update(
         public_network_access=None,
         inbound_ip_rules=None,
         sku=SKU_BASIC,
-        identity=None):
+        identity=None,
+        user_assigned=None,
+        system_assigned=None):
     final_input_schema, input_schema_mapping = _get_input_schema_and_mapping(
         input_schema,
         input_mapping_fields,
@@ -281,7 +292,7 @@ def cli_domain_create_or_update(
 
     identity_info = None
 
-    identity_info = _get_identity_info(identity)
+    identity_info = _get_identity_info(identity, user_assigned, system_assigned)
     domain_info = Domain(
         location=location,
         tags=tags,
@@ -638,9 +649,11 @@ def cli_system_topic_create_or_update(
         source,
         location=None,
         tags=None,
-        identity=None):
+        identity=None,
+        user_assigned=None,
+        system_assigned=None):
 
-    identity_info = _get_identity_info_only_if_not_none(identity)
+    identity_info = _get_identity_info_only_if_not_none(identity, user_assigned, system_assigned)
 
     system_topic_info = SystemTopic(
         location=location,
@@ -660,9 +673,11 @@ def cli_system_topic_update(
         resource_group_name,
         system_topic_name,
         tags=None,
-        identity=None):
+        identity=None,
+        user_assigned=None,
+        system_assigned=None):
 
-    identity_info = _get_identity_info_only_if_not_none(identity)
+    identity_info = _get_identity_info_only_if_not_none(identity, user_assigned, system_assigned)
 
     system_topic_update_parameters = SystemTopicUpdateParameters(
         tags=tags,
@@ -1341,8 +1356,10 @@ def _update_event_subscription_internal(  # pylint: disable=too-many-locals,too-
     current_event_delivery_schema = instance.event_delivery_schema
     current_retry_policy = instance.retry_policy
     current_destination_with_resource_identity = None
+    current_destination2 = None
 
     if instance.delivery_with_resource_identity is not None:
+        current_destination2 = instance.delivery_with_resource_identity
         current_destination_with_resource_identity = instance.delivery_with_resource_identity.destination
 
     tenant_id = _get_tenant_id(current_destination, current_destination_with_resource_identity)
@@ -1375,10 +1392,10 @@ def _update_event_subscription_internal(  # pylint: disable=too-many-locals,too-
         elif current_destination_with_resource_identity is not None:
             _validate_and_update_destination(
                 current_destination_with_resource_identity.endpoint_type,
-                current_destination_with_resource_identity.destination,
+                current_destination_with_resource_identity,
                 storage_queue_msg_ttl,
                 delivery_attribute_mapping)
-            updated_delivery_with_resource_identity = current_destination_with_resource_identity
+            updated_delivery_with_resource_identity = current_destination2
     elif endpoint is not None:
         _validate_destination_attribute(
             endpoint_type,
@@ -1621,6 +1638,25 @@ def _get_sku(sku_name):
     return result
 
 
+def _get_identity_type_with_checks(
+        identity_type_name=IDENTITY_NONE,
+        user_identity_properties=None,
+        mi_system_assigned=None):
+    if identity_type_name is not None and user_identity_properties is None and mi_system_assigned is None:
+        result = _get_identity_type(identity_type_name)
+    elif identity_type_name is None and user_identity_properties is None and mi_system_assigned is not None:
+        result = IDENTITY_SYSTEM_ASSIGNED
+    elif identity_type_name is None and user_identity_properties is not None and mi_system_assigned is None:
+        result = IDENTITY_USER_ASSIGNED
+    elif identity_type_name is None and user_identity_properties is not None and mi_system_assigned is not None:
+        result = IDENTITY_MIXED_MODE
+    elif identity_type_name is not None and (user_identity_properties is not None or mi_system_assigned is not None):
+        raise MutuallyExclusiveArgumentError(
+            'usage error: cannot use --identity together with --mi-system-assigned or --mi-user-assigned')
+
+    return result
+
+
 def _get_identity_type(identity_type_name=IDENTITY_NONE):
     if identity_type_name.lower() == IDENTITY_NO_IDENTITY.lower():
         result = IDENTITY_NONE
@@ -1796,10 +1832,10 @@ def _validate_subscription_id_matches_default_subscription_id(
                        ' use az account set ID_OR_NAME, or use the global argument --subscription ')
 
 
-def _get_identity_info(identity=None, kind=None):
+def _get_identity_info(identity=None, kind=None, user_identity_properties=None, mi_system_assigned=None):
     if (identity is not None and identity.lower() != IDENTITY_NONE.lower()):
-        identity_type_name = _get_identity_type(identity)
-        identity_info = IdentityInfo(type=identity_type_name)
+        identity_type_name = _get_identity_type_with_checks(identity, user_identity_properties, mi_system_assigned)
+        identity_info = IdentityInfo(type=identity_type_name, user_assigned_identities=user_identity_properties)
     else:
         if kind is None or kind.lower() == KIND_AZURE.lower():
             identity_info = IdentityInfo(type=IDENTITY_NONE)
@@ -1808,11 +1844,11 @@ def _get_identity_info(identity=None, kind=None):
     return identity_info
 
 
-def _get_identity_info_only_if_not_none(identity=None):
+def _get_identity_info_only_if_not_none(identity=None, user_identity_properties=None, mi_system_assigned=None):
     identity_info = None
     if (identity is not None and identity.lower() != IDENTITY_NONE.lower()):
-        identity_type_name = _get_identity_type(identity)
-        identity_info = IdentityInfo(type=identity_type_name)
+        identity_type_name = _get_identity_type_with_checks(identity, user_identity_properties, mi_system_assigned)
+        identity_info = IdentityInfo(type=identity_type_name, user_assigned_identities=user_identity_properties)
     return identity_info
 
 

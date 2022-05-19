@@ -4,10 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
-
 from knack.util import CLIError
 from knack.log import get_logger
-from azure.cli.core.util import user_confirmation
 from azure.mgmt.appconfiguration.models import (ConfigurationStoreUpdateParameters,
                                                 ConfigurationStore,
                                                 Sku,
@@ -15,10 +13,10 @@ from azure.mgmt.appconfiguration.models import (ConfigurationStoreUpdateParamete
                                                 UserIdentity,
                                                 EncryptionProperties,
                                                 KeyVaultProperties,
-                                                RegenerateKeyParameters)
+                                                RegenerateKeyParameters, CreateMode)
+from azure.cli.core.util import user_confirmation
 
-from ._utils import resolve_store_metadata
-
+from ._utils import resolve_store_metadata, resolve_deleted_store_metadata
 
 logger = get_logger(__name__)
 
@@ -36,7 +34,9 @@ def create_configstore(client,
                        tags=None,
                        assign_identity=None,
                        enable_public_network=None,
-                       disable_local_auth=None):
+                       disable_local_auth=None,
+                       retention_days=None,
+                       enable_purge_protection=None):
     if assign_identity is not None and not assign_identity:
         assign_identity = [SYSTEM_ASSIGNED_IDENTITY]
 
@@ -44,13 +44,37 @@ def create_configstore(client,
     if enable_public_network is not None:
         public_network_access = 'Enabled' if enable_public_network else 'Disabled'
 
+    if sku.lower() == 'free' and (enable_purge_protection or retention_days):
+        logger.warning("Options '--enable-purge-protection' and '--retention-days' will be ignored when creating a free store.")
+        retention_days = None
+        enable_purge_protection = None
+
     configstore_params = ConfigurationStore(location=location.lower(),
                                             identity=__get_resource_identity(assign_identity) if assign_identity else None,
                                             sku=Sku(name=sku),
                                             tags=tags,
                                             public_network_access=public_network_access,
-                                            disable_local_auth=disable_local_auth)
+                                            disable_local_auth=disable_local_auth,
+                                            soft_delete_retention_in_days=retention_days,
+                                            enable_purge_protection=enable_purge_protection,
+                                            create_mode=CreateMode.DEFAULT)
 
+    return client.begin_create(resource_group_name, name, configstore_params)
+
+
+def recover_deleted_configstore(cmd, client, name, resource_group_name=None, location=None, yes=False):
+    if resource_group_name is None or location is None:
+        metadata_resource_group, metadata_location = resolve_deleted_store_metadata(cmd, name, resource_group_name, location)
+
+        if resource_group_name is None:
+            resource_group_name = metadata_resource_group
+        if location is None:
+            location = metadata_location
+
+    configstore_params = ConfigurationStore(location=location.lower(),
+                                            sku=Sku(name="Standard"),  # Only Standard SKU stores can be recovered!
+                                            create_mode=CreateMode.RECOVER)
+    user_confirmation("Are you sure you want to recover the App Configuration: {}".format(name), yes)
     return client.begin_create(resource_group_name, name, configstore_params)
 
 
@@ -62,8 +86,21 @@ def delete_configstore(cmd, client, name, resource_group_name=None, yes=False):
     return client.begin_delete(resource_group_name, name)
 
 
+def purge_deleted_configstore(cmd, client, name, location=None, yes=False):
+    if location is None:
+        _, location = resolve_deleted_store_metadata(cmd, name)
+    confirmation_message = "This operation will permanently delete App Configuration and it's contents.\nAre you sure you want to purge the App Configuration: {}".format(name)
+    user_confirmation(confirmation_message, yes)
+    return client.begin_purge_deleted(config_store_name=name, location=location)
+
+
 def list_configstore(client, resource_group_name=None):
     response = client.list() if resource_group_name is None else client.list_by_resource_group(resource_group_name)
+    return response
+
+
+def list_deleted_configstore(client):
+    response = client.list_deleted()
     return response
 
 
@@ -71,6 +108,12 @@ def show_configstore(cmd, client, name, resource_group_name=None):
     if resource_group_name is None:
         resource_group_name, _ = resolve_store_metadata(cmd, name)
     return client.get(resource_group_name, name)
+
+
+def show_deleted_configstore(cmd, client, name, location=None):
+    if location is None:
+        _, location = resolve_deleted_store_metadata(cmd, name)
+    return client.get_deleted(config_store_name=name, location=location)
 
 
 def update_configstore(cmd,
@@ -84,7 +127,8 @@ def update_configstore(cmd,
                        encryption_key_version=None,
                        identity_client_id=None,
                        enable_public_network=None,
-                       disable_local_auth=None):
+                       disable_local_auth=None,
+                       enable_purge_protection=None):
     __validate_cmk(encryption_key_name, encryption_key_vault, encryption_key_version, identity_client_id)
     if resource_group_name is None:
         resource_group_name, _ = resolve_store_metadata(cmd, name)
@@ -95,7 +139,8 @@ def update_configstore(cmd,
     update_params = ConfigurationStoreUpdateParameters(tags=tags,
                                                        sku=Sku(name=sku) if sku else None,
                                                        public_network_access=public_network_access,
-                                                       disable_local_auth=disable_local_auth)
+                                                       disable_local_auth=disable_local_auth,
+                                                       enable_purge_protection=enable_purge_protection)
 
     if encryption_key_name is not None:
         key_vault_properties = KeyVaultProperties()

@@ -14,7 +14,7 @@ from azure.cli.command_modules.keyvault._client_factory import (
 from azure.cli.command_modules.keyvault._transformers import (
     extract_subresource_name, filter_out_managed_resources,
     multi_transformers, transform_key_decryption_output, keep_max_results,
-    transform_key_output, transform_key_encryption_output)
+    transform_key_output, transform_key_encryption_output, transform_key_random_output)
 
 from azure.cli.command_modules.keyvault._format import transform_secret_list
 
@@ -182,11 +182,10 @@ def load_command_table(self, _):
 
     if not is_azure_stack_profile(self):
         with self.command_group('keyvault key', data_key_entity.command_type) as g:
-            g.keyvault_command('random', 'get_random_bytes', is_preview=True)
-            g.keyvault_command('rotate', 'rotate_key', transform=transform_key_output, is_preview=True)
+            g.keyvault_command('random', 'get_random_bytes', transform=transform_key_random_output)
+            g.keyvault_command('rotate', 'rotate_key', transform=transform_key_output)
 
-        with self.command_group('keyvault key rotation-policy', data_key_entity.command_type,
-                                is_preview=True) as g:
+        with self.command_group('keyvault key rotation-policy', data_key_entity.command_type) as g:
             g.keyvault_command('show', 'get_key_rotation_policy', )
             g.keyvault_custom('update', 'update_key_rotation_policy')
 

@@ -18,7 +18,7 @@ from ._completers import get_hostname_completion_list
 from ._constants import (FUNCTIONS_VERSIONS, WINDOWS_OS_NAME, LINUX_OS_NAME)
 
 from ._validators import (validate_timeout_value, validate_site_create, validate_asp_create,
-                          validate_add_vnet, validate_front_end_scale_factor, validate_ase_create, validate_ip_address,
+                          validate_front_end_scale_factor, validate_ase_create, validate_ip_address,
                           validate_service_tag, validate_public_cloud)
 
 AUTH_TYPES = {
@@ -102,8 +102,7 @@ def load_arguments(self, _):
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                    configured_default='appserviceplan', id_part='name',
                    local_context_attribute=LocalContextAttribute(name='plan_name', actions=[LocalContextAction.GET]))
-        c.argument('admin_site_name', help='The name of the admin web app.',
-                   deprecate_info=c.deprecate(expiration='0.2.17'))
+        c.argument('number_of_workers', help='Number of workers to be allocated.', type=int, default=1)
         c.ignore('max_burst')
 
     with self.argument_context('appservice plan create') as c:
@@ -155,6 +154,8 @@ def load_arguments(self, _):
                    local_context_attribute=LocalContextAttribute(name='plan_name', actions=[LocalContextAction.GET]))
         c.argument('vnet', help="Name or resource ID of the regional virtual network. If there are multiple vnets of the same name across different resource groups, use vnet resource id to specify which vnet to use. If vnet name is used, by default, the vnet in the same resource group as the webapp will be used. Must be used with --subnet argument.")
         c.argument('subnet', help="Name or resource ID of the pre-existing subnet to have the webapp join. The --vnet is argument also needed if specifying subnet by name.")
+        c.argument('https_only', help="Redirect all traffic made to an app using HTTP to HTTPS.",
+                   arg_type=get_three_state_flag(return_label=True))
         c.ignore('language')
         c.ignore('using_webapp_up')
 
@@ -351,7 +352,7 @@ def load_arguments(self, _):
             c.argument('docker_registry_server_url', options_list=['--docker-registry-server-url', '-r'],
                        help='the container registry server url')
             c.argument('docker_custom_image_name', options_list=['--docker-custom-image-name', '-c', '-i'],
-                       help='the container custom image name and optionally the tag name')
+                       help='the container custom image name and optionally the tag name (e.g., <registry-name>/<image-name>:<tag>)')
             c.argument('docker_registry_server_user', options_list=['--docker-registry-server-user', '-u'],
                        help='the container registry server username')
             c.argument('docker_registry_server_password', options_list=['--docker-registry-server-password', '-p'],
@@ -397,6 +398,11 @@ def load_arguments(self, _):
     with self.argument_context('webapp deployment slot create') as c:
         c.argument('configuration_source',
                    help="source slot to clone configurations from. Use web app's name to refer to the production slot")
+        c.argument('deployment_container_image_name', options_list=['--deployment-container-image-name', '-i'],
+                   help='Container image name, e.g. publisher/image-name:tag')
+        c.argument('docker_registry_server_password', options_list=['--docker-registry-server-password', '-w'],
+                   help='The container registry server password')
+        c.argument('docker_registry_server_user', options_list=['--docker-registry-server-user', '-u'], help='the container registry server username')
     with self.argument_context('webapp deployment slot swap') as c:
         c.argument('action',
                    help="swap types. use 'preview' to apply target slot's settings on the source slot first; use 'swap' to complete it; use 'reset' to reset the swap",
@@ -565,7 +571,7 @@ def load_arguments(self, _):
         c.argument('client_secret_certificate_thumbprint', options_list=['--aad-client-secret-certificate-thumbprint', '--thumbprint'], arg_group='Azure Active Directory',
                    help='Alternative to AAD Client Secret, thumbprint of a certificate used for signing purposes')
         c.argument('allowed_audiences', nargs='+', options_list=['--aad-allowed-token-audiences'],
-                   arg_group='Azure Active Directory', help="One or more token audiences (space-delimited).")
+                   arg_group='Azure Active Directory', help="One or more token audiences (comma-delimited).")
         c.argument('issuer', options_list=['--aad-token-issuer-url'],
                    help='This url can be found in the JSON output returned from your active directory endpoint using your tenantID. The endpoint can be queried from `az cloud show` at \"endpoints.activeDirectory\". '
                         'The tenantID can be found using `az account show`. Get the \"issuer\" from the JSON at <active directory endpoint>/<tenantId>/.well-known/openid-configuration.',
@@ -574,7 +580,7 @@ def load_arguments(self, _):
                    help="Application ID to integrate Facebook Sign-in into your web app")
         c.argument('facebook_app_secret', arg_group='Facebook', help='Facebook Application client secret')
         c.argument('facebook_oauth_scopes', nargs='+',
-                   help="One or more facebook authentication scopes (space-delimited).", arg_group='Facebook')
+                   help="One or more facebook authentication scopes (comma-delimited).", arg_group='Facebook')
         c.argument('twitter_consumer_key', arg_group='Twitter',
                    help='Application ID to integrate Twitter Sign-in into your web app')
         c.argument('twitter_consumer_secret', arg_group='Twitter', help='Twitter Application client secret')
@@ -587,7 +593,7 @@ def load_arguments(self, _):
                    help="AAD V2 Application ID to integrate Microsoft account Sign-in into your web app")
         c.argument('microsoft_account_client_secret', arg_group='Microsoft', help='AAD V2 Application client secret')
         c.argument('microsoft_account_oauth_scopes', nargs='+',
-                   help="One or more Microsoft authentification scopes (space-delimited).", arg_group='Microsoft')
+                   help="One or more Microsoft authentification scopes (comma-delimited).", arg_group='Microsoft')
 
     with self.argument_context('webapp hybrid-connection') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
@@ -637,7 +643,7 @@ def load_arguments(self, _):
                    help="Configure default logging required to enable viewing log stream immediately after launching the webapp",
                    default=False, action='store_true')
         c.argument('html', help="Ignore app detection and deploy as an html app", default=False, action='store_true')
-        c.argument('app_service_environment', options_list=['--app-service-environment', '-e'], help='name of the (pre-existing) App Service Environment to deploy to. Requires an Isolated V2 sku [I1v2, I2v2, I3v2]')
+        c.argument('app_service_environment', options_list=['--app-service-environment', '-e'], help='name or resource ID of the (pre-existing) App Service Environment to deploy to. Requires an Isolated V2 sku [I1v2, I2v2, I3v2]')
 
     with self.argument_context('webapp ssh') as c:
         c.argument('port', options_list=['--port', '-p'],
@@ -694,7 +700,7 @@ def load_arguments(self, _):
     with self.argument_context('functionapp vnet-integration') as c:
         c.argument('name', arg_type=functionapp_name_arg_type, id_part=None)
         c.argument('slot', help="The name of the slot. Default to the productions slot if not specified")
-        c.argument('vnet', help="The name or resource ID of the Vnet", validator=validate_add_vnet,
+        c.argument('vnet', help="The name or resource ID of the Vnet",
                    local_context_attribute=LocalContextAttribute(name='vnet_name', actions=[LocalContextAction.GET]))
         c.argument('subnet', help="The name or resource ID of the subnet",
                    local_context_attribute=LocalContextAttribute(name='subnet_name', actions=[LocalContextAction.GET]))
@@ -715,9 +721,7 @@ def load_arguments(self, _):
                        help="name or resource id of the {} app service plan. Use 'appservice plan create' to get one. If using an App Service plan from a different resource group, the full resource id must be used and not the plan name.".format(scope),
                        local_context_attribute=LocalContextAttribute(name='plan_name', actions=[LocalContextAction.GET]))
             c.argument('name', options_list=['--name', '-n'], help='name of the new {} app'.format(app_type),
-                       local_context_attribute=LocalContextAttribute(name=scope + '_name',
-                       actions=[LocalContextAction.SET],
-                       scopes=[scope]))
+                       local_context_attribute=LocalContextAttribute(name=scope + '_name', actions=[LocalContextAction.SET], scopes=[scope]))
             c.argument('storage_account', options_list=['--storage-account', '-s'],
                        help='Provide a string value of a Storage Account in the provided Resource Group. Or Resource ID of a Storage Account in a different Resource Group',
                        local_context_attribute=LocalContextAttribute(name='storage_account_name', actions=[LocalContextAction.GET]))
@@ -813,6 +817,11 @@ def load_arguments(self, _):
     with self.argument_context('functionapp deployment slot create') as c:
         c.argument('configuration_source',
                    help="source slot to clone configurations from. Use function app's name to refer to the production slot")
+        c.argument('deployment_container_image_name', options_list=['--deployment-container-image-name', '-i'],
+                   help='Container image name, e.g. publisher/image-name:tag')
+        c.argument('docker_registry_server_password', options_list=['--docker-registry-server-password', '-d'],
+                   help='The container registry server password')
+        c.argument('docker_registry_server_user', options_list=['--docker-registry-server-user', '-u'], help='the container registry server username')
     with self.argument_context('functionapp deployment slot swap') as c:
         c.argument('action',
                    help="swap types. use 'preview' to apply target slot's settings on the source slot first; use 'swap' to complete it; use 'reset' to reset the swap",
@@ -871,8 +880,7 @@ def load_arguments(self, _):
             c.argument('ignore_missing_vnet_service_endpoint',
                        options_list=['--ignore-missing-endpoint', '-i'],
                        help='Create access restriction rule with checking if the subnet has Microsoft.Web service endpoint enabled',
-                       arg_type=get_three_state_flag(),
-                       default=False)
+                       arg_type=get_three_state_flag(), default=False)
             c.argument('scm_site', help='True if access restrictions is added for scm site',
                        arg_type=get_three_state_flag())
             c.argument('vnet_resource_group', help='Resource group of virtual network (default is web app resource group)')
@@ -952,11 +960,12 @@ def load_arguments(self, _):
     with self.argument_context('appservice ase create-inbound-services') as c:
         c.argument('name', options_list=['--name', '-n'], help='Name of the app service environment',
                    local_context_attribute=LocalContextAttribute(name='ase_name', actions=[LocalContextAction.GET]))
-        c.argument('subnet', help='Name or ID of existing subnet for inbound traffic to ASEv3. \
+        c.argument('subnet', help='Name or ID of existing subnet for DNS Zone link. \
                    To create vnet and/or subnet use `az network vnet [subnet] create`')
         c.argument('vnet_name', help='Name of the vNet. Mandatory if only subnet name is specified.')
         c.argument('skip_dns', arg_type=get_three_state_flag(),
-                   help='Do not create Private DNS Zone and DNS records.')
+                   help='Do not create Private DNS Zone and DNS records.',
+                   deprecate_info=c.deprecate(expiration='3.0.0'))
 
     # App Service Domain Commands
     with self.argument_context('appservice domain create') as c:
@@ -977,15 +986,16 @@ def load_arguments(self, _):
         c.argument('hostname', options_list=['--hostname', '-n'], help='Name of the custom domain')
 
     with self.argument_context('staticwebapp', validator=validate_public_cloud) as c:
-        c.argument('name', options_list=['--name', '-n'], metavar='NAME', help="Name of the static site")
-        c.argument('source', options_list=['--source', '-s'], help="URL for the repository of the static site.")
-        c.argument('token', options_list=['--token', '-t'],
+        c.argument('source', options_list=['--source', '-s'], help="URL for the repository of the static site.", arg_group="Github")
+        c.argument('token', options_list=['--token', '-t'], arg_group="Github",
                    help="A user's github repository token. This is used to setup the Github Actions workflow file and "
                         "API secrets. If you need to create a Github Personal Access Token, "
                         "please run with the '--login-with-github' flag or follow the steps found at the following link:\n"
                         "https://help.github.com/en/articles/creating-a-personal-access-token-for-the-command-line")
-        c.argument('login_with_github', help="Interactively log in with Github to retrieve the Personal Access Token")
-        c.argument('branch', options_list=['--branch', '-b'], help="The target branch in the repository.")
+        c.argument('login_with_github', help="Interactively log in with Github to retrieve the Personal Access Token", arg_group="Github")
+        c.argument('branch', options_list=['--branch', '-b'], help="The target branch in the repository.", arg_group="Github")
+        c.ignore('format_output')
+        c.argument('name', options_list=['--name', '-n'], metavar='NAME', help="Name of the static site")
     with self.argument_context('staticwebapp environment') as c:
         c.argument('environment_name',
                    options_list=['--environment-name'], help="Name of the environment of static site")

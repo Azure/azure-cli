@@ -16,7 +16,7 @@ from azure.cli.core.commands.arm import handle_template_based_exception
 from azure.cli.command_modules.resource._client_factory import (
     cf_resource_groups, cf_providers, cf_features, cf_feature_registrations, cf_tags, cf_deployments,
     cf_deployment_operations, cf_policy_definitions, cf_policy_set_definitions, cf_policy_exemptions, cf_resource_links,
-    cf_resource_deploymentscripts, cf_resource_managedapplications, cf_resource_managedappdefinitions, cf_management_groups, cf_management_group_subscriptions, cf_resource_templatespecs)
+    cf_resource_deploymentscripts, cf_resource_managedapplications, cf_resource_managedappdefinitions, cf_management_groups, cf_management_groups_mixin, cf_management_group_subscriptions, cf_management_group_entities, cf_hierarchy_settings, cf_resource_templatespecs, cf_resource_resourcemanagementprivatelinks, cf_resource_privatelinkassociations)
 from azure.cli.command_modules.resource._validators import (
     process_deployment_create_namespace, process_ts_create_or_update_namespace, _validate_template_spec, _validate_template_spec_out,
     process_assign_identity_namespace, process_assignment_create_namespace)
@@ -25,6 +25,36 @@ from ._exception_handler import managementgroups_exception_handler
 
 
 logger = get_logger(__name__)
+
+resource_managementgroups_subscriptions_sdk = CliCommandType(
+    operations_tmpl='azure.mgmt.managementgroups.operations#ManagementGroupSubscriptionsOperations.{}',
+    client_factory=cf_management_group_subscriptions,
+    exception_handler=managementgroups_exception_handler
+)
+
+resource_hierarchy_settings_sdk = CliCommandType(
+    operations_tmpl='azure.mgmt.managementgroups.operations#HierarchySettingsOperations.{}',
+    client_factory=cf_hierarchy_settings,
+    exception_handler=managementgroups_exception_handler
+)
+
+resource_managementgroups_entities_sdk = CliCommandType(
+    operations_tmpl='azure.mgmt.managementgroups.operations#EntitiesOperations.{}',
+    client_factory=cf_management_group_entities,
+    exception_handler=managementgroups_exception_handler
+)
+
+resource_resourcemanagementprivatelink_sdk = CliCommandType(
+    operations_tmpl='azure.mgmt.resource.privatelinks.operations#ResourceManagementPrivateLinkOperations.{}',
+    client_factory=cf_resource_resourcemanagementprivatelinks,
+    resource_type=ResourceType.MGMT_RESOURCE_PRIVATELINKS
+)
+
+resource_privatelinksassociation_sdk = CliCommandType(
+    operations_tmpl='azure.mgmt.resource.privatelinks.operations#PrivateLinkAssociationOperations.{}',
+    client_factory=cf_resource_privatelinkassociations,
+    resource_type=ResourceType.MGMT_RESOURCE_PRIVATELINKS
+)
 
 
 # Resource group commands
@@ -159,19 +189,25 @@ def load_command_table(self, _):
         resource_type=ResourceType.MGMT_RESOURCE_RESOURCES
     )
 
+    resource_managementgroups_mixin_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.managementgroups.operations#ManagementGroupsAPIOperationsMixin.{}',
+        client_factory=cf_management_groups_mixin,
+        exception_handler=managementgroups_exception_handler
+    )
+
     resource_managementgroups_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.managementgroups.operations#ManagementGroupsOperations.{}',
         client_factory=cf_management_groups,
         exception_handler=managementgroups_exception_handler
     )
 
-    resource_managementgroups_subscriptions_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.managementgroups.operations#ManagementGroupSubscriptionsOperations.{}',
-        client_factory=cf_management_group_subscriptions,
+    resource_managementgroups_update_type = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.resource.custom#{}',
+        client_factory=cf_management_groups,
         exception_handler=managementgroups_exception_handler
     )
 
-    resource_managementgroups_update_type = CliCommandType(
+    resource_hierarchysettings_update_type = CliCommandType(
         operations_tmpl='azure.cli.command_modules.resource.custom#{}',
         client_factory=cf_management_groups,
         exception_handler=managementgroups_exception_handler
@@ -454,6 +490,13 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'show_applicationdefinition')
         g.command('list', 'list_by_resource_group', exception_handler=empty_on_404)
 
+    with self.command_group('account management-group tenant-backfill', resource_managementgroups_mixin_sdk, client_factory=cf_management_groups_mixin) as g:
+        g.custom_command('get', 'cli_managementgroups_get_tenant_backfill_status')
+        g.custom_command('start', 'cli_managementgroups_start_tenant_backfill')
+
+    with self.command_group('account management-group', resource_managementgroups_mixin_sdk, client_factory=cf_management_groups_mixin) as g:
+        g.custom_command('check-name-availability', 'cli_managementgroups_get_name_availability')
+
     with self.command_group('account management-group', resource_managementgroups_sdk, client_factory=cf_management_groups) as g:
         g.custom_command('list', 'cli_managementgroups_group_list')
         g.custom_show_command('show', 'cli_managementgroups_group_show')
@@ -471,7 +514,26 @@ def load_command_table(self, _):
 
     with self.command_group('account management-group subscription', resource_managementgroups_subscriptions_sdk, client_factory=cf_management_group_subscriptions) as g:
         g.custom_command('add', 'cli_managementgroups_subscription_add')
+        g.custom_show_command('show', 'cli_managementgroups_subscription_show')
+        g.custom_command('show-sub-under-mg', 'cli_managementgroups_subscription_show_sub_under_mg')
         g.custom_command('remove', 'cli_managementgroups_subscription_remove')
+
+    with self.command_group('account management-group entities', resource_managementgroups_entities_sdk, client_factory=cf_management_group_entities) as g:
+        g.custom_command('list', 'cli_managementgroups_entities_list')
+
+    with self.command_group('account management-group hierarchy-settings', resource_hierarchy_settings_sdk, client_factory=cf_hierarchy_settings) as g:
+        g.custom_command('list', 'cli_hierarchy_settings_list')
+        g.custom_command('create', 'cli_hierarchy_settings_create')
+        g.custom_command('delete', 'cli_hierarchy_settings_delete', confirmation=True)
+        g.generic_update_command(
+            'update',
+            getter_name='cli_hierarchysettings_group_update_get',
+            getter_type=resource_hierarchysettings_update_type,
+            setter_name='cli_hierarchysettings_group_update_set',
+            setter_type=resource_hierarchysettings_update_type,
+            custom_func_name='cli_hierarchysettings_group_update_custom_func',
+            custom_func_type=resource_hierarchysettings_update_type,
+            exception_handler=managementgroups_exception_handler)
 
     with self.command_group('bicep') as g:
         g.custom_command('install', 'install_bicep_cli')
@@ -479,6 +541,19 @@ def load_command_table(self, _):
         g.custom_command('upgrade', 'upgrade_bicep_cli')
         g.custom_command('build', 'build_bicep_file')
         g.custom_command('decompile', 'decompile_bicep_file')
+        g.custom_command('restore', 'restore_bicep_file')
         g.custom_command('publish', 'publish_bicep_file')
         g.custom_command('version', 'show_bicep_cli_version')
         g.custom_command('list-versions', 'list_bicep_cli_versions')
+
+    with self.command_group('resourcemanagement private-link', resource_resourcemanagementprivatelink_sdk, resource_type=ResourceType.MGMT_RESOURCE_PRIVATELINKS) as g:
+        g.custom_command('create', 'create_resourcemanager_privatelink')
+        g.custom_show_command('show', 'get_resourcemanager_privatelink')
+        g.custom_command('list', 'list_resourcemanager_privatelink')
+        g.custom_command('delete', 'delete_resourcemanager_privatelink', confirmation=True)
+
+    with self.command_group('private-link association', resource_privatelinksassociation_sdk, resource_type=ResourceType.MGMT_RESOURCE_PRIVATELINKS) as g:
+        g.custom_command('create', 'create_private_link_association')
+        g.custom_show_command('show', 'get_private_link_association')
+        g.custom_command('list', 'list_private_link_association')
+        g.custom_command('delete', 'delete_private_link_association', confirmation=True)

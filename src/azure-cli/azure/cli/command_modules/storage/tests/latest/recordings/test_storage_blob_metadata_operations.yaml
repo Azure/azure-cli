@@ -15,21 +15,21 @@ interactions:
       ParameterSetName:
       - -n -g --query -o
       User-Agent:
-      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-storage/19.0.0 Python/3.9.6 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.35.0 azsdk-python-azure-mgmt-storage/20.0.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2021-06-01&$expand=kerb
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2021-09-01&$expand=kerb
   response:
     body:
-      string: '{"keys":[{"creationTime":"2021-10-19T10:57:44.6628807Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2021-10-19T10:57:44.6628807Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+      string: '{"keys":[{"creationTime":"2022-04-11T13:54:02.6831493Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2022-04-11T13:54:02.6831493Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '380'
+      - '260'
       content-type:
       - application/json
       date:
-      - Tue, 19 Oct 2021 10:58:05 GMT
+      - Mon, 11 Apr 2022 13:54:23 GMT
       expires:
       - '-1'
       pragma:
@@ -57,9 +57,9 @@ interactions:
       Content-Length:
       - '0'
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.9.6; Windows 10) AZURECLI/2.29.0
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.9.6; Windows 10) AZURECLI/2.35.0
       x-ms-date:
-      - Tue, 19 Oct 2021 10:58:06 GMT
+      - Mon, 11 Apr 2022 13:54:24 GMT
       x-ms-version:
       - '2018-11-09'
     method: PUT
@@ -71,11 +71,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 19 Oct 2021 10:58:08 GMT
+      - Mon, 11 Apr 2022 13:54:24 GMT
       etag:
-      - '"0x8D992EF55D41027"'
+      - '"0x8DA1BC2C9E14984"'
       last-modified:
-      - Tue, 19 Oct 2021 10:58:08 GMT
+      - Mon, 11 Apr 2022 13:54:25 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
@@ -94,7 +94,8 @@ interactions:
       api_version_constraint)\r\nfrom knack.util import CLIError\r\nfrom azure.cli.core.profiles
       import ResourceType\r\n\r\nfrom azure.cli.command_modules.storage._client_factory
       import MISSING_CREDENTIALS_ERROR_MESSAGE\r\nfrom ..storage_test_util import
-      StorageScenarioMixin\r\nfrom azure.cli.testsdk.scenario_tests import AllowLargeResponse\r\n\r\n\r\n@api_version_constraint(ResourceType.MGMT_STORAGE,
+      StorageScenarioMixin, StorageTestFilesPreparer\r\nfrom azure.cli.testsdk.scenario_tests
+      import AllowLargeResponse\r\n\r\n\r\n@api_version_constraint(ResourceType.MGMT_STORAGE,
       min_api='2016-12-01')\r\nclass StorageBlobUploadTests(StorageScenarioMixin,
       ScenarioTest):\r\n    @ResourceGroupPreparer()\r\n    @StorageAccountPreparer(parameter_name='source_account')\r\n
       \   @StorageAccountPreparer(parameter_name='target_account')\r\n    def test_storage_blob_incremental_copy(self,
@@ -117,11 +118,12 @@ interactions:
       \   @ResourceGroupPreparer()\r\n    @StorageAccountPreparer()\r\n    def test_storage_blob_upload_small_file(self,
       resource_group, storage_account):\r\n        for blob_type in ['block', 'page']:\r\n
       \           self.verify_blob_upload_and_download(resource_group, storage_account,
-      1, blob_type, 0)\r\n\r\n    @ResourceGroupPreparer()\r\n    @StorageAccountPreparer()\r\n
-      \   def test_storage_blob_upload_midsize_file(self, resource_group, storage_account):\r\n
-      \       for blob_type in ['block', 'page']:\r\n            self.verify_blob_upload_and_download(resource_group,
-      storage_account, 4096, 'block', 0)\r\n\r\n    def verify_blob_upload_and_download(self,
-      group, account, file_size_kb, blob_type,\r\n                                        block_count=0,
+      1, blob_type, 0)\r\n\r\n    @AllowLargeResponse(size_kb=2048)\r\n    @ResourceGroupPreparer()\r\n
+      \   @StorageAccountPreparer()\r\n    def test_storage_blob_upload_midsize_file(self,
+      resource_group, storage_account):\r\n        for blob_type in ['block', 'page']:\r\n
+      \           self.verify_blob_upload_and_download(resource_group, storage_account,
+      2048, blob_type, 0)\r\n\r\n    def verify_blob_upload_and_download(self, group,
+      account, file_size_kb, blob_type,\r\n                                        block_count=0,
       skip_download=False):\r\n        local_dir = self.create_temp_dir()\r\n        local_file
       = self.create_temp_file(file_size_kb)\r\n        blob_name = self.create_random_name(prefix='blob',
       length=24)\r\n        account_info = self.get_account_info(group, account)\r\n\r\n
@@ -192,30 +194,10 @@ interactions:
       \   def test_storage_blob_download_directory(self, resource_group, storage_account):\r\n
       \       local_dir = self.create_temp_dir()\r\n        account_info = self.get_account_info(resource_group,
       storage_account)\r\n        from azure.cli.core.azclierror import FileOperationError\r\n
-      \       with self.assertRaisesRegexp(FileOperationError, 'File is expected,
-      not a directory'):\r\n            self.storage_cmd('storage blob download -c
-      mycontainer -n myblob -f \"{}\"', account_info, local_dir)\r\n\r\n    @ResourceGroupPreparer()\r\n
-      \   @StorageAccountPreparer()\r\n    def test_storage_blob_socket_timeout(self,
-      resource_group, storage_account):\r\n        local_dir = self.create_temp_dir()\r\n
-      \       local_file = self.create_temp_file(1)\r\n        blob_name = self.create_random_name(prefix='blob',
-      length=24)\r\n        account_info = self.get_account_info(resource_group, storage_account)\r\n\r\n
-      \       container = self.create_container(account_info)\r\n\r\n        from
-      azure.common import AzureException\r\n        with self.assertRaises(AzureException):\r\n
-      \           self.storage_cmd('storage blob upload -c {} -f \"{}\" -n {} --type
-      block --socket-timeout -11',\r\n                             account_info, container,
-      local_file, blob_name)\r\n\r\n        self.storage_cmd('storage blob exists
-      -n {} -c {}', account_info, blob_name, container) \\\r\n            .assert_with_checks(JMESPathCheck('exists',
-      False))\r\n\r\n        self.storage_cmd('storage blob upload -c {} -f \"{}\"
-      -n {} --type block --socket-timeout 10',\r\n                         account_info,
-      container, local_file, blob_name)\r\n        self.storage_cmd('storage blob
-      exists -n {} -c {}', account_info, blob_name, container) \\\r\n            .assert_with_checks(JMESPathCheck('exists',
-      True))\r\n\r\n        self.storage_cmd('storage blob show -n {} -c {}', account_info,
-      blob_name, container) \\\r\n            .assert_with_checks(JMESPathCheck('name',
-      blob_name))\r\n\r\n        downloaded = os.path.join(local_dir, 'test.file')\r\n\r\n
-      \       self.storage_cmd('storage blob download -n {} -c {} --file \"{}\" --socket-timeout
-      10',\r\n                         account_info, blob_name, container, downloaded)\r\n
-      \       self.assertTrue(os.path.isfile(downloaded), 'The file is not downloaded.')\r\n\r\n
-      \   @ResourceGroupPreparer()\r\n    @StorageAccountPreparer()\r\n    def test_storage_blob_lease_operations(self,
+      \       with self.assertRaisesRegex(FileOperationError, 'File is expected, not
+      a directory'):\r\n            self.storage_cmd('storage blob download -c mycontainer
+      -n myblob -f \"{}\"', account_info, local_dir)\r\n\r\n    @ResourceGroupPreparer()\r\n
+      \   @StorageAccountPreparer()\r\n    def test_storage_blob_lease_operations(self,
       resource_group, storage_account):\r\n        account_info = self.get_account_info(resource_group,
       storage_account)\r\n        local_file = self.create_temp_file(128)\r\n        c
       = self.create_container(account_info)\r\n        b = self.create_random_name('blob',
@@ -399,7 +381,7 @@ interactions:
       = self.create_random_name('blob', 24)\r\n        local_file = self.create_temp_file(1)\r\n
       \       copy_id = 'abcdabcd-abcd-abcd-abcd-abcdabcdabcd'\r\n\r\n        self.storage_cmd('storage
       blob upload -c {} -n {} -f \"{}\"', account_info, c, b, local_file)\r\n        from
-      azure.common import AzureException\r\n        with self.assertRaisesRegexp(AzureException,
+      azure.common import AzureException\r\n        with self.assertRaisesRegex(AzureException,
       \"NoPendingCopyOperation\"):\r\n            self.storage_cmd('storage blob copy
       cancel -c {} -b {} --copy-id {}', account_info, c, b, copy_id)\r\n\r\n    @ResourceGroupPreparer()\r\n
       \   @StorageAccountPreparer()\r\n    def test_storage_blob_generate_sas_full_uri(self,
@@ -415,7 +397,7 @@ interactions:
       \       account_info = self.get_account_info(resource_group, storage_account)\r\n
       \       c = self.create_container(account_info)\r\n        b = self.create_random_name('blob',
       24)\r\n\r\n        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')\r\n\r\n
-      \       with self.assertRaisesRegexp(CLIError, \"incorrect usage: specify --as-user
+      \       with self.assertRaisesRegex(CLIError, \"incorrect usage: specify --as-user
       when --auth-mode login\"):\r\n            self.cmd('storage blob generate-sas
       --account-name {} -n {} -c {} --expiry {} --permissions r --https-only '\r\n
       \                    '--auth-mode login'.format(storage_account, b, c, expiry))\r\n\r\n
@@ -441,9 +423,88 @@ interactions:
       \           self.storage_cmd('storage blob show -c foo -n bar.txt', account_info)\r\n
       \       self.assertEqual(ex.exception.code, 3)\r\n\r\n        # test 403\r\n
       \       from azure.core.exceptions import ClientAuthenticationError\r\n        with
-      self.assertRaisesRegexp(ClientAuthenticationError, \"Authentication failure\"):\r\n
+      self.assertRaisesRegex(ClientAuthenticationError, \"Authentication failure\"):\r\n
       \           self.cmd('storage blob show --account-name {} --account-key=\"YQ==\"
-      -c foo -n bar.txt '.format(storage_account))\r\n\r\n\r\n@api_version_constraint(ResourceType.DATA_STORAGE_BLOB,
+      -c foo -n bar.txt '.format(storage_account))\r\n\r\n    @ResourceGroupPreparer()\r\n
+      \   @StorageAccountPreparer(kind='StorageV2', location='centraluseuap')\r\n
+      \   def test_storage_blob_upload_tiers_scenarios(self, resource_group, storage_account_info):\r\n
+      \       account_info = storage_account_info\r\n        container = self.create_container(account_info,
+      prefix=\"con\")\r\n\r\n        local_file = self.create_temp_file(128)\r\n\r\n
+      \       # test with file\r\n        block_blob_tiers = ['Hot','Cool','Archive']\r\n
+      \       for tier in block_blob_tiers:\r\n            blob_name = self.create_random_name(prefix='blob',
+      length=24)\r\n            self.storage_cmd('storage blob upload -c {} -f \"{}\"
+      -n {} --type {} --tier {} ', account_info,\r\n                             container,
+      local_file, blob_name, 'block', tier)\r\n            self.storage_cmd('storage
+      blob show -c {} -n {} ', account_info, container, blob_name) \\\r\n                .assert_with_checks(JMESPathCheck('name',
+      blob_name),\r\n                                    JMESPathCheck('properties.blobType',
+      'BlockBlob'),\r\n                                    JMESPathCheck('properties.contentLength',
+      128 * 1024),\r\n                                    JMESPathCheck('properties.blobTier',
+      tier))\r\n\r\n        # page_blob_tiers = [\"P4\",\"P6\",\"P10\",\"P15\",\"P20\",\"P30\",\"P40\",\"P50\",\"P60\",\"P70\",\"P80\"]\r\n
+      \       # for tier in page_blob_tiers:\r\n        #     blob_name = self.create_random_name(prefix='blob',
+      length=24)\r\n        #     self.storage_cmd('storage blob upload -c {} -f \"{}\"
+      -n {} --type {} --tier {} --debug', account_info,\r\n        #                      container,
+      local_file, blob_name, 'page', tier)\r\n        #     self.storage_cmd('storage
+      blob show -c {} -n {} ', account_info, container, blob_name) \\\r\n        #
+      \        .assert_with_checks(JMESPathCheck('name', blob_name),\r\n        #
+      \                            JMESPathCheck('properties.blobType', 'PageBlob'),\r\n
+      \       #                             JMESPathCheck('properties.contentLength',
+      128 * 1024),\r\n        #                             JMESPathCheck('properties.blobTier',
+      tier))\r\n\r\n        # test with data\r\n        blob_name = self.create_random_name(prefix='blob',
+      length=24)\r\n        test_string = \"testupload\"\r\n        length = len(test_string)\r\n\r\n
+      \       self.storage_cmd('storage blob upload -c {} --data \"{}\" --length {}
+      -n {} --overwrite', account_info,\r\n                         container, test_string,
+      length, blob_name)\r\n        self.storage_cmd('storage blob show -c {} -n {}
+      ', account_info, container, blob_name) \\\r\n            .assert_with_checks(JMESPathCheck('name',
+      blob_name),\r\n                                JMESPathCheck('properties.blobType',
+      'BlockBlob'),\r\n                                JMESPathCheck('properties.contentLength',
+      length))\r\n\r\n    @ResourceGroupPreparer()\r\n    @StorageAccountPreparer()\r\n
+      \   def test_storage_blob_upload_content_md5_scenarios(self, resource_group,
+      storage_account_info):\r\n        import hashlib\r\n        import base64\r\n
+      \       account_info = storage_account_info\r\n        container = self.create_container(account_info,
+      prefix=\"con\")\r\n\r\n        local_file = self.create_temp_file(128)\r\n\r\n
+      \       def md5(fname):\r\n            hash_md5 = hashlib.md5()\r\n            with
+      open(fname, \"rb\") as f:\r\n                for chunk in iter(lambda: f.read(4096),
+      b\"\"):\r\n                    hash_md5.update(chunk)\r\n            return
+      hash_md5.digest()\r\n        md5_digest = md5(local_file)\r\n        md5_base64_encode
+      = base64.b64encode(md5_digest).decode(\"utf-8\")\r\n        blob_name = self.create_random_name(prefix='blob',
+      length=24)\r\n        self.storage_cmd('storage blob upload -c {} -f \"{}\"
+      -n {} --content-md5 {}', account_info,\r\n                         container,
+      local_file, blob_name, md5_base64_encode)\r\n\r\n    @ResourceGroupPreparer()\r\n
+      \   @StorageAccountPreparer()\r\n    def test_storage_blob_upload_precondition_scenarios(self,
+      resource_group, storage_account_info):\r\n        from datetime import datetime\r\n
+      \       import time\r\n        account_info = storage_account_info\r\n        container
+      = self.create_container(account_info)\r\n\r\n        local_file = self.create_temp_file(128)\r\n\r\n
+      \       blob_name = self.create_random_name(prefix='blob', length=24)\r\n\r\n
+      \       self.storage_cmd('storage blob upload -c {} -f \"{}\" -n {}', account_info,\r\n
+      \                        container, local_file, blob_name)\r\n        time.sleep(1)\r\n
+      \       current = datetime.now().strftime(\"%Y-%m-%dT%H:%M:%SZ\")\r\n        time.sleep(1)\r\n
+      \       with self.assertRaises(Exception):\r\n            self.storage_cmd('storage
+      blob upload -c {} -f \"{}\" -n {}', account_info,\r\n                             container,
+      local_file, blob_name)\r\n        with self.assertRaises(Exception):\r\n            self.storage_cmd('storage
+      blob upload -c {} -f \"{}\" -n {} --if-modified-since {}', account_info,\r\n
+      \                            container, local_file, blob_name, current)\r\n
+      \       with self.assertRaises(Exception):\r\n            self.storage_cmd('storage
+      blob upload -c {} -f \"{}\" -n {} --if-modified-since {} --overwrite', account_info,\r\n
+      \                            container, local_file, blob_name, current)\r\n
+      \       self.storage_cmd('storage blob upload -c {} -f \"{}\" -n {} --if-unmodified-since
+      {}', account_info,\r\n                         container, local_file, blob_name,
+      current)\r\n\r\n    @ResourceGroupPreparer()\r\n    @StorageAccountPreparer()\r\n
+      \   def test_storage_blob_upload_guess_type_scenarios(self, resource_group,
+      storage_account_info):\r\n        account_info = storage_account_info\r\n        container
+      = self.create_container(account_info)\r\n\r\n        size_kb = 16\r\n        import
+      tempfile\r\n\r\n        test_types = [(\".png\", \"image/png\"), (\".html\",
+      \"text/html\"), (None, \"application/octet-stream\")]\r\n\r\n        for suffix,
+      contentType in test_types:\r\n            fd, path = tempfile.mkstemp(suffix=suffix)\r\n
+      \           os.close(fd)\r\n            print(path)\r\n\r\n            with
+      open(path, mode='r+b') as f:\r\n                chunk = bytearray([0] * 1024)\r\n
+      \               for _ in range(int(size_kb)):\r\n                    f.write(chunk)\r\n
+      \               chunk = os.urandom(int(1024 * (size_kb % 1)))\r\n                f.write(chunk)\r\n\r\n
+      \           blob_name = self.create_random_name(prefix='blob', length=24)\r\n\r\n
+      \           self.storage_cmd('storage blob upload -c {} -f \"{}\" -n {}', account_info,\r\n
+      \                            container, path, blob_name)\r\n            self.storage_cmd('storage
+      blob show -c {} -n {}', account_info,\r\n                             container,
+      blob_name).\\\r\n                assert_with_checks(JMESPathCheck(\"properties.contentSettings.contentType\",
+      contentType))\r\n            os.remove(path)\r\n\r\n\r\n@api_version_constraint(ResourceType.DATA_STORAGE_BLOB,
       min_api='2019-02-02')\r\nclass StorageBlobSetTierTests(StorageScenarioMixin,
       ScenarioTest):\r\n\r\n    @ResourceGroupPreparer()\r\n    @StorageAccountPreparer(kind='StorageV2',
       sku='Premium_LRS')\r\n    def test_storage_page_blob_set_tier(self, resource_group,
@@ -495,10 +556,36 @@ interactions:
       container_name, blob_name2) \\\r\n            .assert_with_checks(JMESPathCheck('properties.blobTier',
       'Archive'),\r\n                                JMESPathCheck('properties.rehydrationStatus',
       'rehydrate-pending-to-hot'))\r\n\r\n\r\n@api_version_constraint(ResourceType.DATA_STORAGE_BLOB,
-      min_api='2019-02-02')\r\nclass StorageBlobCommonTests(StorageScenarioMixin,
-      ScenarioTest):\r\n    @ResourceGroupPreparer(name_prefix='clitest')\r\n    @StorageAccountPreparer(name_prefix='storage',
-      kind='StorageV2', location='eastus2', sku='Standard_RAGZRS')\r\n    def test_storage_blob_list_scenarios(self,
-      resource_group, storage_account):\r\n        account_info = self.get_account_info(resource_group,
+      min_api='2020-10-02')\r\nclass StorageBlobImmutabilityTests(StorageScenarioMixin,
+      ScenarioTest):\r\n    @ResourceGroupPreparer(name_prefix='clitest')\r\n    @StorageAccountPreparer(name_prefix='version',
+      kind='StorageV2', location='centraluseuap')\r\n    def test_storage_blob_vlm(self,
+      resource_group, storage_account_info):\r\n        container = self.create_random_name(prefix='container',
+      length=18)\r\n        blob = self.create_random_name(prefix='blob', length=18)\r\n
+      \       self.kwargs.update({\r\n            'container': container,\r\n            'blob':
+      blob\r\n        })\r\n        # Enable blob versioning\r\n        self.cmd('storage
+      account blob-service-properties update -n {sa} -g {rg} --enable-versioning')\r\n
+      \       # Enable vlm on container creation\r\n        self.cmd('storage container-rm
+      create -n {container} --storage-account {sa} -g {rg} --enable-vlw')\r\n        #
+      Prepare blob resource\r\n        file = self.create_temp_file(10)\r\n        self.storage_cmd('storage
+      blob upload -c {} -f \"{}\" -n {} ', storage_account_info, container, file,
+      blob)\r\n\r\n        # Test set immutability policy\r\n        from datetime
+      import datetime, timedelta\r\n        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')\r\n
+      \       result = self.storage_cmd('storage blob immutability-policy set -n {}
+      -c {} '\r\n                                  '--expiry-time {} --policy-mode
+      Unlocked',\r\n                                  storage_account_info, blob,
+      container, expiry).get_output_in_json()\r\n        self.assertEqual(result.get('immutability_policy_mode'),
+      'unlocked')\r\n        self.assertIsNotNone(result.get('immutability_policy_until_date'))\r\n
+      \       # Test delete immutability policy\r\n        self.storage_cmd('storage
+      blob immutability-policy delete -n {} -c {}', storage_account_info, blob, container)\r\n
+      \       # Test set legal hold\r\n        self.storage_cmd('storage blob set-legal-hold
+      --legal-hold -n {} -c {}', storage_account_info, blob, container)\\\r\n            .assert_with_checks(JMESPathCheck('legal_hold',
+      True))\r\n        self.storage_cmd('storage blob set-legal-hold --legal-hold
+      false -n {} -c {}', storage_account_info, blob, container) \\\r\n            .assert_with_checks(JMESPathCheck('legal_hold',
+      False))\r\n\r\n\r\n@api_version_constraint(ResourceType.DATA_STORAGE_BLOB, min_api='2019-02-02')\r\nclass
+      StorageBlobCommonTests(StorageScenarioMixin, ScenarioTest):\r\n    @ResourceGroupPreparer(name_prefix='clitest')\r\n
+      \   @StorageAccountPreparer(name_prefix='storage', kind='StorageV2', location='eastus2',
+      sku='Standard_RAGZRS')\r\n    def test_storage_blob_list_scenarios(self, resource_group,
+      storage_account):\r\n        account_info = self.get_account_info(resource_group,
       storage_account)\r\n        container = self.create_container(account_info,
       prefix=\"con\")\r\n\r\n        local_file = self.create_temp_file(128)\r\n        blob_name1
       = \"/\".join([\"dir\", self.create_random_name(prefix='blob', length=24)])\r\n
@@ -700,20 +787,32 @@ interactions:
       container list --include-deleted ', account_info) \\\r\n            .assert_with_checks(JMESPathCheck('length(@)',
       1))\r\n\r\n\r\nif __name__ == '__main__':\r\n    unittest.main()\r\n"
     headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage blob upload
       Connection:
       - keep-alive
       Content-Length:
-      - '53404'
+      - '60642'
+      Content-Type:
+      - application/octet-stream
+      If-None-Match:
+      - '*'
+      ParameterSetName:
+      - -c -n -f --account-name --account-key
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.9.6; Windows 10) AZURECLI/2.29.0
+      - AZURECLI/2.35.0 azsdk-python-storage-blob/12.10.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
       x-ms-blob-content-type:
       - text/x-python
       x-ms-blob-type:
       - BlockBlob
       x-ms-date:
-      - Tue, 19 Oct 2021 10:58:09 GMT
+      - Mon, 11 Apr 2022 13:54:25 GMT
       x-ms-version:
-      - '2018-11-09'
+      - '2021-04-10'
     method: PUT
     uri: https://clitest000002.blob.core.windows.net/cont000003/blob000004
   response:
@@ -723,19 +822,21 @@ interactions:
       content-length:
       - '0'
       content-md5:
-      - 3ic4Sc5wmqtG7uZqB+s/5Q==
+      - zhTiHaf5kD8/AjhFgwYQFw==
       date:
-      - Tue, 19 Oct 2021 10:58:09 GMT
+      - Mon, 11 Apr 2022 13:54:26 GMT
       etag:
-      - '"0x8D992EF56E56E63"'
+      - '"0x8DA1BC2CAC6EE22"'
       last-modified:
-      - Tue, 19 Oct 2021 10:58:10 GMT
+      - Mon, 11 Apr 2022 13:54:26 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-content-crc64:
+      - 1bSjusTyxXc=
       x-ms-request-server-encrypted:
       - 'true'
       x-ms-version:
-      - '2018-11-09'
+      - '2021-04-10'
     status:
       code: 201
       message: Created
@@ -747,9 +848,9 @@ interactions:
       Content-Length:
       - '0'
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.9.6; Windows 10) AZURECLI/2.29.0
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.9.6; Windows 10) AZURECLI/2.35.0
       x-ms-date:
-      - Tue, 19 Oct 2021 10:58:10 GMT
+      - Mon, 11 Apr 2022 13:54:27 GMT
       x-ms-meta-a:
       - b
       x-ms-meta-c:
@@ -765,11 +866,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 19 Oct 2021 10:58:10 GMT
+      - Mon, 11 Apr 2022 13:54:26 GMT
       etag:
-      - '"0x8D992EF5792ACD9"'
+      - '"0x8DA1BC2CB66721F"'
       last-modified:
-      - Tue, 19 Oct 2021 10:58:11 GMT
+      - Mon, 11 Apr 2022 13:54:27 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-request-server-encrypted:
@@ -785,9 +886,9 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.9.6; Windows 10) AZURECLI/2.29.0
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.9.6; Windows 10) AZURECLI/2.35.0
       x-ms-date:
-      - Tue, 19 Oct 2021 10:58:11 GMT
+      - Mon, 11 Apr 2022 13:54:28 GMT
       x-ms-version:
       - '2018-11-09'
     method: GET
@@ -799,11 +900,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 19 Oct 2021 10:58:11 GMT
+      - Mon, 11 Apr 2022 13:54:27 GMT
       etag:
-      - '"0x8D992EF5792ACD9"'
+      - '"0x8DA1BC2CB66721F"'
       last-modified:
-      - Tue, 19 Oct 2021 10:58:11 GMT
+      - Mon, 11 Apr 2022 13:54:27 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-meta-a:
@@ -823,9 +924,9 @@ interactions:
       Content-Length:
       - '0'
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.9.6; Windows 10) AZURECLI/2.29.0
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.9.6; Windows 10) AZURECLI/2.35.0
       x-ms-date:
-      - Tue, 19 Oct 2021 10:58:12 GMT
+      - Mon, 11 Apr 2022 13:54:29 GMT
       x-ms-version:
       - '2018-11-09'
     method: PUT
@@ -837,11 +938,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 19 Oct 2021 10:58:13 GMT
+      - Mon, 11 Apr 2022 13:54:29 GMT
       etag:
-      - '"0x8D992EF58F05D96"'
+      - '"0x8DA1BC2CCA4DE01"'
       last-modified:
-      - Tue, 19 Oct 2021 10:58:13 GMT
+      - Mon, 11 Apr 2022 13:54:29 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-request-server-encrypted:
@@ -857,9 +958,9 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.9.6; Windows 10) AZURECLI/2.29.0
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.9.6; Windows 10) AZURECLI/2.35.0
       x-ms-date:
-      - Tue, 19 Oct 2021 10:58:14 GMT
+      - Mon, 11 Apr 2022 13:54:30 GMT
       x-ms-version:
       - '2018-11-09'
     method: GET
@@ -871,11 +972,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 19 Oct 2021 10:58:14 GMT
+      - Mon, 11 Apr 2022 13:54:29 GMT
       etag:
-      - '"0x8D992EF58F05D96"'
+      - '"0x8DA1BC2CCA4DE01"'
       last-modified:
-      - Tue, 19 Oct 2021 10:58:13 GMT
+      - Mon, 11 Apr 2022 13:54:29 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:

@@ -3,10 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import azure.cli.command_modules.role._help  # pylint: disable=unused-import
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core.profiles import ResourceType
-
-import azure.cli.command_modules.role._help  # pylint: disable=unused-import
+from ._client_factory import _graph_client_factory as graph_client_factory
+from .msgrpah import GraphError
 
 
 class RoleCommandsLoader(AzCommandsLoader):
@@ -20,6 +21,12 @@ class RoleCommandsLoader(AzCommandsLoader):
                                                  custom_command_type=role_custom)
 
     def load_command_table(self, args):
+        if args and args[0] in ('role', 'ad'):
+            from knack.log import get_logger
+            logger = get_logger(__name__)
+            logger.warning("This command or command group has been migrated to Microsoft Graph API. "
+                           "Please carefully review all breaking changes introduced during this migration: "
+                           "https://docs.microsoft.com/cli/azure/microsoft-graph-migration")
         from azure.cli.command_modules.role.commands import load_command_table
         load_command_table(self, args)
         return self.command_table
@@ -30,3 +37,11 @@ class RoleCommandsLoader(AzCommandsLoader):
 
 
 COMMAND_LOADER_CLS = RoleCommandsLoader
+
+
+__all__ = [
+    # Public msgraph.GraphClient factory that should be used by other modules
+    "graph_client_factory",
+    # Public Exception that is raised by msgraph.GraphClient
+    "GraphError"
+]

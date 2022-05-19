@@ -442,7 +442,11 @@ class DnsParseZoneFiles(unittest.TestCase):
             (7200, 7, 'foo bar')
         ])
         self._check_txt(zone, 'mytxtrs.' + zn, [(3600, 2, 'hi')])
-        self._check_srv(zone, 'mysrv.' + zn, [(3600, 1, 2, 1234, 'target.contoso.com.')])
+        self._check_srv(zone, 'mysrv.' + zn, [
+            (3600, 1, 2, 1234, 'target-1.contoso.com.'),
+            (3600, 1, 2, 1234, 'target-2.contoso.com.'),
+            (3600, 1, 2, 1234, 'target-3.contoso.com.')
+        ])
         self._check_caa(zone, 'caa1.' + zn, [
             (60, 0, 'issue', 'ca1.contoso.com'),
             (60, 128, 'iodef', 'mailto:test@contoso.com')

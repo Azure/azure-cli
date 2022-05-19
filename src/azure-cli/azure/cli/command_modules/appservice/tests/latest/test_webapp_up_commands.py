@@ -8,6 +8,7 @@
 
 import unittest
 import os
+from pytest import skip
 import requests
 
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
@@ -69,6 +70,7 @@ class WebAppUpE2ETests(ScenarioTest):
 
 
     @live_only()
+    @unittest.skip("Flaky test skipping")
     @ResourceGroupPreparer(random_name_length=24, name_prefix='clitest', location=LINUX_ASP_LOCATION_WEBAPP)
     def test_webapp_up_no_plan_different_os_e2e(self, resource_group):
         webapp_name = self.create_random_name('up-nodeapp', 24)
@@ -943,6 +945,7 @@ class WebAppUpE2ETests(ScenarioTest):
     @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(random_name_length=24, name_prefix='clitest', location=WINDOWS_ASP_LOCATION_WEBAPP)
+    @unittest.skip("Temp skip - flaky test")
     def test_windows_to_linux_fail(self, resource_group):
         plan = self.create_random_name('up-nodeplan', 24)
         webapp_name = self.create_random_name('up-nodeapp', 24)
@@ -996,75 +999,50 @@ class WebAppUpE2ETests(ScenarioTest):
         import shutil
         shutil.rmtree(temp_dir)
 
-    @unittest.skip("Flaky test")
     @live_only()
     @AllowLargeResponse()
-    @ResourceGroupPreparer(random_name_length=24, name_prefix='clitest', location=LINUX_ASP_LOCATION_WEBAPP)
-    def test_webapp_up_change_runtime_version(self, resource_group):
+    @ResourceGroupPreparer(random_name_length=24, name_prefix='clitest', location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_webapp_up_change_runtime_version_windows(self, resource_group):
         plan = self.create_random_name('up-nodeplan', 24)
         webapp_name = self.create_random_name('up-nodeapp', 24)
-        zip_file_name = os.path.join(TEST_DIR, 'node-Express-up.zip')
+        zip_file_name = os.path.join(TEST_DIR, 'node_app.zip')
 
         # create a temp directory and unzip the code to this folder
         import zipfile
         import tempfile
-        import time
         temp_dir = tempfile.mkdtemp()
         zip_ref = zipfile.ZipFile(zip_file_name, 'r')
         zip_ref.extractall(temp_dir)
         current_working_dir = os.getcwd()
 
         # change the working dir to the dir where the code has been extracted to
-        up_working_dir = os.path.join(temp_dir, 'myExpressApp')
-        os.chdir(up_working_dir)
-
-        # test dryrun operation
-        result = self.cmd(
-            'webapp up -n {} -g {} --plan {} --os "linux" --runtime "node|12-LTS" --sku "S1" --dryrun'.format(webapp_name, resource_group, plan)).get_output_in_json()
-        self.assertEqual(result['sku'].lower(), 'standard')
-        self.assertTrue(result['name'].startswith(webapp_name))
-        self.assertTrue(result['src_path'].replace(
-            os.sep + os.sep, os.sep), up_working_dir)
-        self.assertEqual(result['runtime_version'].lower(), 'node|12-lts')
-        self.assertEqual(result['os'].lower(), 'linux')
+        os.chdir(temp_dir)
 
         # test the full E2E operation works
-        full_result = self.cmd(
-            'webapp up -n {} -g {} --plan {} --os "linux" --runtime "node|12-LTS" --sku "S1"'.format(webapp_name, resource_group, plan)).get_output_in_json()
-        self.assertEqual(result['name'], full_result['name'])
+        self.cmd('webapp up -n {} -g {} --plan {} --os "windows" --runtime "node|12-LTS"'.format(webapp_name, resource_group, plan))
 
         # Verify app is created
         # since we set local context, -n and -g are no longer required
         self.cmd('webapp show', checks=[
             JMESPathCheck('name', webapp_name),
-            JMESPathCheck('httpsOnly', True),
-            JMESPathCheck('kind', 'app,linux'),
+            JMESPathCheck('kind', 'app'),
             JMESPathCheck('resourceGroup', resource_group)
         ])
 
+        # verify runtime version
+        app_settings = self.cmd('webapp config appsettings list').get_output_in_json()
+        app_settings = {s["name"] : s["value"] for s in app_settings}
+        self.assertIn("WEBSITE_NODE_DEFAULT_VERSION", app_settings)
+        self.assertIn("12", app_settings["WEBSITE_NODE_DEFAULT_VERSION"].lower())
+
         # test changing runtime to newer version
-        time.sleep(30)
-        full_result = self.cmd(
-            'webapp up -n {} -g {} --plan {} --os "linux" --runtime "node|16-lts" --sku "S1"'.format(webapp_name, resource_group, plan)).get_output_in_json()
-        self.assertEqual(result['name'], full_result['name'])
+        self.cmd('webapp up -n {} -g {} --plan {} --os "windows" --runtime "node|16-lts"'.format(webapp_name, resource_group, plan))
 
         # verify newer version
-        self.cmd('webapp config show', checks=[
-            JMESPathCheck('linuxFxVersion', "NODE|16-lts"),
-            JMESPathCheck('tags.cli', 'None')
-        ])
-
-        # test changing runtime to older version
-        time.sleep(30)
-        full_result = self.cmd(
-            'webapp up -n {} -g {} --plan {} --os "linux" --runtime "node|12-lts" --sku "S1"'.format(webapp_name, resource_group, plan)).get_output_in_json()
-        self.assertEqual(result['name'], full_result['name'])
-
-        # verify older version
-        self.cmd('webapp config show', checks=[
-            JMESPathCheck('linuxFxVersion', "NODE|12-lts"),
-            JMESPathCheck('tags.cli', 'None')
-        ])
+        app_settings = self.cmd('webapp config appsettings list').get_output_in_json()
+        app_settings = {s["name"] : s["value"] for s in app_settings}
+        self.assertIn("WEBSITE_NODE_DEFAULT_VERSION", app_settings)
+        self.assertIn("16", app_settings["WEBSITE_NODE_DEFAULT_VERSION"].lower())
 
         # cleanup
         # switch back the working dir

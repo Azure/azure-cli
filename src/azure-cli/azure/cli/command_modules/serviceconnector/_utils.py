@@ -4,8 +4,15 @@
 # --------------------------------------------------------------------------------------------
 
 import time
+from knack.util import todict
+from msrestazure.tools import parse_resource_id
 from azure.cli.core.azclierror import (
+    ValidationError,
     CLIInternalError
+)
+from ._resource_config import (
+    SOURCE_RESOURCES_USERTOKEN,
+    TARGET_RESOURCES_USERTOKEN
 )
 
 
@@ -90,14 +97,37 @@ def set_user_token_header(client, cli_ctx):
     return client
 
 
-def register_provider():
+def set_user_token_by_source_and_target(client, cli_ctx, source, target):
+    '''Set user token header to work around OBO according to source and target'''
+    if source in SOURCE_RESOURCES_USERTOKEN or target in TARGET_RESOURCES_USERTOKEN:
+        return set_user_token_header(client, cli_ctx)
+    return client
+
+
+def provider_is_registered(subscription=None):
+    # register the provider
+    subs_arg = ''
+    if subscription:
+        subs_arg = '--subscription {}'.format(subscription)
+    output = run_cli_cmd('az provider show -n Microsoft.ServiceLinker {}'.format(subs_arg))
+    if output.get('registrationState') == 'NotRegistered':
+        return False
+    return True
+
+
+def register_provider(subscription=None):
     from knack.log import get_logger
     logger = get_logger(__name__)
 
     logger.warning('Provider Microsoft.ServiceLinker is not registered, '
                    'trying to register. This usually takes 1-2 minutes.')
+
+    subs_arg = ''
+    if subscription:
+        subs_arg = '--subscription {}'.format(subscription)
+
     # register the provider
-    run_cli_cmd('az provider register -n Microsoft.ServiceLinker')
+    run_cli_cmd('az provider register -n Microsoft.ServiceLinker {}'.format(subs_arg))
 
     # verify the registration, 30 * 10s polling the result
     MAX_RETRY_TIMES = 30
@@ -106,7 +136,7 @@ def register_provider():
     count = 0
     while count < MAX_RETRY_TIMES:
         time.sleep(RETRY_INTERVAL)
-        output = run_cli_cmd('az provider show -n Microsoft.ServiceLinker')
+        output = run_cli_cmd('az provider show -n Microsoft.ServiceLinker {}'.format(subs_arg))
         current_state = output.get('registrationState')
         if current_state == 'Registered':
             return True
@@ -118,14 +148,151 @@ def register_provider():
 
 
 def auto_register(func, *args, **kwargs):
+    import copy
+    from azure.core.polling._poller import LROPoller
     from azure.core.exceptions import HttpResponseError
 
+    # kwagrs will be modified in SDK
+    kwargs_backup = copy.deepcopy(kwargs)
     try:
-        return func(*args, **kwargs)
+        res = func(*args, **kwargs)
+        if isinstance(res, LROPoller):
+            # polling the result to handle the case when target subscription is not registered
+            return res.result()
+        return res
+
     except HttpResponseError as ex:
+        # source subscription is not registered
         if ex.error and ex.error.code == 'SubscriptionNotRegistered':
             if register_provider():
-                return func(*args, **kwargs)
+                return func(*args, **kwargs_backup)
             raise CLIInternalError('Registeration failed, please manually run command '
                                    '`az provider register -n Microsoft.ServiceLinker` to register the provider.')
+        # target subscription is not registered, raw check
+        if ex.error and ex.error.code == 'UnauthorizedResourceAccess' and 'not registered' in ex.error.message:
+            if 'parameters' in kwargs_backup and 'target_id' in kwargs_backup.get('parameters'):
+                segments = parse_resource_id(kwargs_backup.get('parameters').get('target_id'))
+                target_subs = segments.get('subscription')
+                # double check whether target subscription is registered
+                if not provider_is_registered(target_subs):
+                    if register_provider(target_subs):
+                        return func(*args, **kwargs_backup)
+                    raise CLIInternalError('Registeration failed, please manually run command '
+                                           '`az provider register -n Microsoft.ServiceLinker --subscription {}` '
+                                           'to register the provider.'.format(target_subs))
         raise ex
+
+
+def create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, key_vault_id):
+    from ._validators import get_source_resource_name
+    from knack.log import get_logger
+    logger = get_logger(__name__)
+
+    logger.warning('get valid key vualt reference connection')
+    key_vault_connections = []
+    for connection in client.list(resource_uri=source_id):
+        connection = todict(connection)
+        if connection.get('targetService', dict()).get('id') == key_vault_id:
+            key_vault_connections.append(connection)
+
+    source_name = get_source_resource_name(cmd)
+    auth_info = get_auth_if_no_valid_key_vault_connection(logger, source_name, source_id, key_vault_connections)
+    if not auth_info:
+        return
+
+    # No Valid Key Vault Connection, Create
+    logger.warning('no valid key vault connection found. Creating...')
+
+    from ._resource_config import (
+        RESOURCE,
+        CLIENT_TYPE
+    )
+
+    connection_name = generate_random_string(prefix='keyvault_')
+    parameters = {
+        'target_service': {
+            "type": "AzureResource",
+            "id": key_vault_id
+        },
+        'auth_info': auth_info,
+        'client_type': CLIENT_TYPE.Dotnet,  # Key Vault Configuration are same across all client types
+    }
+
+    if source_name == RESOURCE.KubernetesCluster:
+        parameters['target_service']['resource_properties'] = {
+            'type': 'KeyVault',
+            'connect_as_kubernetes_csi_driver': True,
+        }
+
+    return auto_register(client.begin_create_or_update,
+                         resource_uri=source_id,
+                         linker_name=connection_name,
+                         parameters=parameters)
+
+
+def get_auth_if_no_valid_key_vault_connection(logger, source_name, source_id, key_vault_connections):
+    auth_type = 'systemAssignedIdentity'
+    client_id = None
+    subscription_id = None
+
+    if key_vault_connections:
+        from ._resource_config import RESOURCE
+        from msrestazure.tools import (
+            is_valid_resource_id
+        )
+
+        # https://docs.microsoft.com/azure/app-service/app-service-key-vault-references
+        if source_name == RESOURCE.WebApp:
+            try:
+                webapp = run_cli_cmd('az rest -u {}?api-version=2020-09-01 -o json'.format(source_id))
+                reference_identity = webapp.get('properties').get('keyVaultReferenceIdentity')
+            except Exception as e:
+                raise ValidationError('{}. Unable to get "properties.keyVaultReferenceIdentity" from {}.'
+                                      'Please check your source id is correct.'.format(e, source_id))
+
+            if is_valid_resource_id(reference_identity):  # User Identity
+                auth_type = 'userAssignedIdentity'
+                segments = parse_resource_id(reference_identity)
+                subscription_id = segments.get('subscription')
+                try:
+                    identity = webapp.get('identity').get('userAssignedIdentities').get(reference_identity)
+                    client_id = identity.get('clientId')
+                except Exception:  # pylint: disable=broad-except
+                    try:
+                        identity = run_cli_cmd('az identity show --ids {} -o json'.format(reference_identity))
+                        client_id = identity.get('clientId')
+                    except Exception:  # pylint: disable=broad-except
+                        pass
+                if not subscription_id or not client_id:
+                    raise ValidationError('Unable to get subscriptionId or clientId'
+                                          'of the keyVaultReferenceIdentity {}'.format(reference_identity))
+                for connection in key_vault_connections:
+                    auth_info = connection.get('authInfo')
+                    if auth_info.get('clientId') == client_id and auth_info.get('subscriptionId') == subscription_id:
+                        logger.warning('key vualt reference connection: %s', connection.get('id'))
+                        return
+            else:  # System Identity
+                for connection in key_vault_connections:
+                    if connection.get('authInfo').get('authType') == auth_type:
+                        logger.warning('key vualt reference connection: %s', connection.get('id'))
+                        return
+
+        # any connection with csi enabled is a valid connection
+        elif source_name == RESOURCE.KubernetesCluster:
+            for connection in key_vault_connections:
+                if connection.get('target_service', dict()).get(
+                        'resource_properties', dict()).get('connect_as_kubernetes_csi_driver'):
+                    return
+            return {'authType': 'userAssignedIdentity'}
+
+        else:
+            logger.warning('key vualt reference connection: %s', key_vault_connections[0].get('id'))
+            return
+
+    auth_info = {
+        'authType': auth_type
+    }
+    if client_id and subscription_id:
+        auth_info['clientId'] = client_id
+        auth_info['subscriptionId'] = subscription_id
+    return auth_info

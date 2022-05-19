@@ -3,16 +3,20 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack import CLI
 import tempfile
+from typing import Any, TypeVar
 
 from azure.cli.core import AzCommandsLoader
+from azure.cli.core._config import ENV_VAR_PREFIX
 from azure.cli.core.cloud import get_active_cloud
 from azure.cli.core.commands import AzCliCommand
-from azure.cli.core._config import ENV_VAR_PREFIX
+from knack import CLI
 
 MOCK_CLI_CONFIG_DIR = tempfile.mkdtemp()
 MOCK_CLI_ENV_VAR_PREFIX = "MOCK_" + ENV_VAR_PREFIX
+
+# type variables
+ManagedCluster = TypeVar("ManagedCluster")
 
 
 class MockClient:
@@ -20,6 +24,11 @@ class MockClient:
         pass
 
     def get(self):
+        pass
+
+    def begin_create_or_update(
+        self, resource_group_name: str, resource_name: str, parameters: ManagedCluster, **kwargs: Any
+    ):
         pass
 
 
@@ -56,3 +65,12 @@ class MockCmd:
 
     def get_models(self, *attr_args, **kwargs):
         return self.cmd.get_models(*attr_args, **kwargs)
+
+
+class MockUrlretrieveUrlValidator(object):
+    def __init__(self, url, version):
+        self.url = url
+        self.version = version
+
+    def __eq__(self, other):
+        return other.startswith(self.url) and self.version in other

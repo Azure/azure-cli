@@ -14,7 +14,6 @@ from azure.cli.core._profile import (Profile, SubscriptionFinder, _attach_token_
                                      _transform_subscription_for_multiapi)
 from azure.cli.core.auth.util import AccessToken
 from azure.cli.core.mock import DummyCli
-from azure.identity import AuthenticationRecord
 from azure.mgmt.resource.subscriptions.models import \
     (Subscription, SubscriptionPolicies, SpendingLimit, ManagedByTenant)
 
@@ -94,9 +93,6 @@ class TestProfile(unittest.TestCase):
         cls.display_name1 = 'foo account'
         cls.home_account_id = "00000003-0000-0000-0000-000000000000.00000003-0000-0000-0000-000000000000"
         cls.client_id = "00000003-0000-0000-0000-000000000000"
-        cls.authentication_record = AuthenticationRecord(cls.tenant_id, cls.client_id,
-                                                         "https://login.microsoftonline.com", cls.home_account_id,
-                                                         cls.user1)
         cls.state1 = 'Enabled'
         cls.managed_by_tenants = [ManagedByTenantStub('00000003-0000-0000-0000-000000000000'),
                                   ManagedByTenantStub('00000004-0000-0000-0000-000000000000')]
@@ -1386,53 +1382,6 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(all_subscriptions, [self.subscription1])
 
         # With pytest, use -o log_cli=True to manually check the log
-
-    # Tests for get_sp_auth_info
-    def test_get_auth_info_fail_on_user_account(self):
-        cli = DummyCli()
-        storage_mock = {'subscriptions': None}
-        profile = Profile(cli_ctx=cli, storage=storage_mock)
-
-        consolidated = profile._normalize_properties(self.user1,
-                                                     [self.subscription1],
-                                                     False)
-        profile._set_subscriptions(consolidated)
-
-        # testing dump of existing logged in account
-        self.assertRaises(CLIError, profile.get_sp_auth_info)
-
-    @mock.patch('azure.cli.core.auth.identity.Identity.get_service_principal_entry', autospec=True)
-    @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
-    @mock.patch('azure.cli.core.auth.identity.Identity.get_service_principal_credential', autospec=True)
-    @mock.patch('azure.cli.core.auth.identity.Identity.login_with_service_principal', autospec=True)
-    def test_get_auth_info_for_logged_in_service_principal(self, login_with_service_principal_mock,
-                                                           get_service_principal_credential_mock,
-                                                           create_subscription_client_mock,
-                                                           get_service_principal_entry_mock):
-        cli = DummyCli()
-        mock_subscription_client = mock.MagicMock()
-        mock_subscription_client.tenants.list.return_value = [TenantStub(self.tenant_id)]
-        mock_subscription_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
-        create_subscription_client_mock.return_value = mock_subscription_client
-
-        storage_mock = {'subscriptions': []}
-        profile = Profile(cli_ctx=cli, storage=storage_mock)
-        profile._management_resource_uri = 'https://management.core.windows.net/'
-        profile.login(False, '1234', 'my-secret', True, self.tenant_id, use_device_code=False,
-                      allow_no_subscriptions=False)
-        # action
-        get_service_principal_entry_mock.return_value = {
-            "tenant": self.tenant_id,
-            "client_id": '1234',
-            "client_secret": 'my-secret'
-        }
-        extended_info = profile.get_sp_auth_info()
-        # assert
-        self.assertEqual(self.id1.split('/')[-1], extended_info['subscriptionId'])
-        self.assertEqual('1234', extended_info['clientId'])
-        self.assertEqual('my-secret', extended_info['clientSecret'])
-        self.assertEqual('https://login.microsoftonline.com', extended_info['activeDirectoryEndpointUrl'])
-        self.assertEqual('https://management.azure.com/', extended_info['resourceManagerEndpointUrl'])
 
     def test_get_auth_info_for_newly_created_service_principal(self):
         cli = DummyCli()

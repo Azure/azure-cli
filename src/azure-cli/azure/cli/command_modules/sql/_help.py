@@ -779,6 +779,8 @@ examples:
     text: az sql mi create -g mygroup -n myinstance -l mylocation -i -u myusername -p mypassword --license-type LicenseIncluded --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName} --capacity 8 --storage 32GB --edition GeneralPurpose --family Gen5 --backup-storage-redundancy Local
   - name: Create a managed instance with maintenance configuration
     text: az sql mi create -g mygroup -n myinstance -l mylocation -i -u myusername -p mypassword --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName} -m SQL_{Region}_{MaintenanceConfigName}
+  - name: Create a managed instance with Service Principal enabled
+    text: az sql mi create -g mygroup -n myinstance -l mylocation -i -u myusername -p mypassword --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName} --service-principal-type SystemAssigned
   - name: Create a managed instance without SQL Admin, with AAD admin and AD Only enabled
     text: az sql mi create --enable-ad-only-auth --external-admin-principal-type User --external-admin-name myUserName --external-admin-sid c5e964e2-6bb2-2222-1111-3b16ec0e1234 -g myResourceGroup -n miName --subnet /subscriptions/78975f9f-2222-1111-1111-29c42ac70000/resourceGroups/myResourceGroup/providers/Microsoft.Network/virtualNetworks/vnet-test/subnets/ManagedInstance
   - name: Create a managed instance without SQL Admin, with AD admin, AD Only enabled, User ManagedIdenties and Identity Type is SystemAssigned,UserAssigned.
@@ -888,6 +890,8 @@ examples:
     text: az sql mi update -g mygroup -n myinstance -m SQL_{Region}_{MaintenanceConfigName}
   - name: Remove maintenance configuration from managed instance
     text: az sql mi update -g mygroup -n myinstance -m SQL_Default
+  - name: Update a managed instance with Service Principal
+    text: az sql mi update -g mygroup -n myinstance --service-principal-type SystemAssigned
   - name: Update a managed instance with User Managed Identies and Identity Type is SystemAssigned,UserAssigned.
     text: az sql mi update -g myResourceGroup -n myServer -i \\
               --user-assigned-identity-id /subscriptions/xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi \\
@@ -899,6 +903,8 @@ examples:
   - name: Move managed instance to another subnet
     text: az sql mi update -g myResourceGroup -n myServer -i \\
               --subnet /subscriptions/xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi \\
+  - name: Update mi backup storage redundancy
+    text: az sql mi update -g mygroup -n myinstance --bsr Local
 """
 
 helps['sql midb'] = """

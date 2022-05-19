@@ -6,6 +6,7 @@
 import re
 import random
 import string
+
 from knack.log import get_logger
 from knack.prompting import (
     prompt,
@@ -17,16 +18,19 @@ from msrestazure.tools import (
 )
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.azclierror import (
+    ValidationError,
     InvalidArgumentValueError,
     RequiredArgumentMissingError
 )
 
+from ._utils import run_cli_cmd
 from ._resource_config import (
     CLIENT_TYPE,
     RESOURCE,
     SOURCE_RESOURCES,
     TARGET_RESOURCES,
     SOURCE_RESOURCES_PARAMS,
+    SOURCE_RESOURCES_CREATE_PARAMS,
     TARGET_RESOURCES_PARAMS,
     AUTH_TYPE_PARAMS,
     SUPPORTED_AUTH_TYPE
@@ -58,6 +62,20 @@ def get_target_resource_name(cmd):
         if item.value.lower() == target_name.lower():
             target = item
     return target
+
+
+def get_resource_type_by_id(resource_id):
+    '''Get source or target resource type by resource id
+    '''
+    target_type = None
+    all_resources = dict()
+    all_resources.update(SOURCE_RESOURCES)
+    all_resources.update(TARGET_RESOURCES)
+    for _type, _id in all_resources.items():
+        matched = re.match(get_resource_regex(_id), resource_id, re.IGNORECASE)
+        if matched:
+            target_type = _type
+    return target_type
 
 
 def get_resource_regex(resource):
@@ -94,7 +112,6 @@ def generate_connection_name(cmd):
 def get_client_type(cmd, namespace):
     '''Infer client type from source resource
     '''
-    from ._utils import run_cli_cmd
 
     def _infer_webapp(source_id):
         value_type_map = {
@@ -159,7 +176,7 @@ def get_client_type(cmd, namespace):
 
         return client_type
 
-    # fallback to use Dotnet as client type
+    # fallback to use None as client type
     client_type = None
     if 'webapp' in cmd.name:
         client_type = _infer_webapp(namespace.source_id)
@@ -168,7 +185,7 @@ def get_client_type(cmd, namespace):
 
     method = 'detected'
     if client_type is None:
-        client_type = CLIENT_TYPE.Dotnet
+        client_type = CLIENT_TYPE.Blank
         method = 'default'
 
     logger.warning('Client type is not specified, use %s one: --client-type %s', method, client_type.value)
@@ -185,14 +202,17 @@ def interactive_input(arg, hint):
         secret = prompt_pass('Password of database (--secret secret=): ')
         value = {
             'name': name,
-            'secret': secret,
+            'secret_info': {
+                'secret_type': 'rawValue',
+                'value': secret
+            },
             'auth_type': 'secret'
         }
         cmd_value = 'name={} secret={}'.format(name, '*' * len(secret))
     elif arg == 'service_principal_auth_info_secret':
         client_id = prompt('ServicePrincipal client-id (--service-principal client_id=): ')
-        object_id = prompt('ServicePrincipal object-id (--service-principal object-id=): ')
-        secret = prompt_pass('ServicePrincipal object-id (--service-principal secret=): ')
+        object_id = prompt('Enterprise Application object-id (--service-principal object-id=): ')
+        secret = prompt_pass('ServicePrincipal secret (--service-principal secret=): ')
         value = {
             'client_id': client_id,
             'object-id': object_id,
@@ -366,6 +386,21 @@ def get_missing_source_args(cmd):
     return missing_args
 
 
+def get_missing_source_create_args(cmd, namespace):
+    '''Get source resource related args in create
+    '''
+    source = get_source_resource_name(cmd)
+    missing_args = dict()
+
+    args = SOURCE_RESOURCES_CREATE_PARAMS.get(source)
+    if args:
+        for arg, content in args.items():
+            if not getattr(namespace, arg, None):
+                missing_args[arg] = content
+
+    return missing_args
+
+
 def get_missing_target_args(cmd):
     '''Get target resource related args
     '''
@@ -384,6 +419,14 @@ def get_missing_auth_args(cmd, namespace):
     source = get_source_resource_name(cmd)
     target = get_target_resource_name(cmd)
     missing_args = dict()
+
+    # when keyvault csi is enabled, auth_type is userIdentity without subs_id and client_id
+    if source == RESOURCE.KubernetesCluster and target == RESOURCE.KeyVault\
+            and getattr(namespace, 'enable_csi', None):
+        setattr(namespace, 'user_identity_auth_info', {
+            'auth_type': 'userAssignedIdentity'
+        })
+        return missing_args
 
     # check if there are auth_info related params
     auth_param_exist = False
@@ -444,6 +487,7 @@ def validate_create_params(cmd, namespace):
     missing_args = dict()
     if not validate_source_resource_id(namespace):
         missing_args.update(get_missing_source_args(cmd))
+    missing_args.update(get_missing_source_create_args(cmd, namespace))
     if not validate_target_resource_id(namespace):
         missing_args.update(get_missing_target_args(cmd))
     missing_args.update(get_missing_auth_args(cmd, namespace))
@@ -490,6 +534,15 @@ def apply_source_args(cmd, namespace, arg_values):
             subscription=get_subscription_id(cmd.cli_ctx),
             **arg_values
         )
+
+
+def apply_source_create_args(cmd, namespace, arg_values):
+    '''Set source resource related args in create by arg_values
+    '''
+    source = get_source_resource_name(cmd)
+    for arg in SOURCE_RESOURCES_CREATE_PARAMS.get(source, {}):
+        if arg in arg_values:
+            setattr(namespace, arg, arg_values.get(arg, None))
 
 
 def apply_target_args(cmd, namespace, arg_values):
@@ -541,6 +594,7 @@ def apply_create_params(cmd, namespace, arg_values):
     '''Set create command missing args
     '''
     apply_source_args(cmd, namespace, arg_values)
+    apply_source_create_args(cmd, namespace, arg_values)
     apply_target_args(cmd, namespace, arg_values)
     apply_auth_args(cmd, namespace, arg_values)
 
@@ -578,7 +632,7 @@ def validate_params(cmd, namespace):
     # for command: 'list'
     if cmd.name.endswith(' list'):
         _validate_and_apply(validate_list_params, apply_list_params)
-    # for command: 'add'
+    # for command: 'create'
     elif 'create' in cmd.name:
         # if --new is specified
         if getattr(namespace, 'new_addon'):
@@ -614,3 +668,26 @@ def validate_kafka_params(cmd, namespace):
 
         if getattr(namespace, 'client_type', None) is None:
             namespace.client_type = get_client_type(cmd, namespace)
+
+
+def validate_service_state(linker_parameters):
+    '''Validate whether user provided params are applicable to service state
+    '''
+    target_type = None
+    target_id = linker_parameters.get('target_service', dict()).get('id')
+    for target, resource_id in TARGET_RESOURCES.items():
+        matched = re.match(get_resource_regex(resource_id), target_id, re.IGNORECASE)
+        if matched:
+            target_type = target
+
+    if target_type == RESOURCE.AppConfig and linker_parameters.get('auth_info', dict()).get('auth_type') == 'secret':
+        segments = parse_resource_id(target_id)
+        rg = segments.get('resource_group')
+        name = segments.get('name')
+        if not rg or not name:
+            return
+
+        output = run_cli_cmd('az appconfig show -g {} -n {}'.format(rg, name))
+        if output and output.get('disableLocalAuth') is True:
+            raise ValidationError('Secret as auth type is not allowed when local auth is disabled for the '
+                                  'specified appconfig, you may use service principal or managed identity.')

@@ -63,6 +63,11 @@ type: group
 short-summary: Manage Azure API Management API Version Set.
 """
 
+helps['apim api schema'] = """
+type: group
+short-summary: Manage Azure API Management API Schema's.
+"""
+
 helps['apim backup'] = """
 type: command
 short-summary: Creates a backup of the API Management service to the given Azure Storage Account. This is long running operation and could take several minutes to complete.
@@ -83,6 +88,15 @@ examples:
         az apim restore --name MyApim -g MyResourceGroup --backup-name myBackup \
              --storage-account-name mystorageaccount --storage-account-container backups \
              --storage-account-key Ay2ZbdxLnD4OJPT29F6jLPkB6KynOzx85YCObhrw==
+"""
+
+helps['apim apply-network-updates'] = """
+type: command
+short-summary: Update the API Management resource running in the virtual network to pick the updated network settings.
+examples:
+  - name: Update the virtual network settings of the API Management service instance
+    text: |-
+        az apim apply-network-updates --name MyApim -g MyResourceGroup
 """
 
 helps['apim create'] = """
@@ -516,4 +530,85 @@ examples:
   - name: Deletes specific Api Version Set.
     text: |-
         az apim api versionset delete --resource-group MyResourceGroup --service-name MyServiceName --version-set-id MyVersionSetId
+"""
+
+helps['apim api schema create'] = """
+type: command
+short-summary: Create an API Management API Schema.
+parameters:
+  - name: --api-id
+    type: string
+    short-summary: unique name of the api for which schema needs to be created
+    long-summary: |
+        API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
+  - name: --schema-id
+    type: string
+    short-summary: unique name of the api schema to be created
+    long-summary: |
+        Schema identifier. Must be unique in the current API Management service instance.
+  - name: --schema-path
+    type: string
+    short-summary: File path specified to import schema of the API.
+    long-summary: |
+        Specify either --schema-path or --schema-content not both
+  - name: --schema-content
+    type: string
+    short-summary: Json escaped string defining the document representing the Schema
+    long-summary: |
+        Specify either --schema-path or --schema-content not both
+  - name: --schema-type
+    type: string
+    short-summary: Schema type  (e.g. application/json, application/vnd.ms-azure-apim.graphql.schema).
+    long-summary: |
+        Must be a valid media type used in a Content-Type header as defined in the RFC 2616. Media type of the schema document
+examples:
+  - name: Create a API Schema.
+    text: |-
+        az apim api schema create --service-name MyApim -g MyResourceGroup --api-id MyApi --schema-id schemaId --schema-type schemaType --schema-path schemaFilePath
+"""
+
+helps['apim api schema delete'] = """
+type: command
+short-summary: Delete an API Management API Schema.
+examples:
+  - name: delete a API Schema.
+    text: |-
+            az apim api schema delete --service-name MyApim -g MyResourceGroup --api-id MyApi --schema-id schemaId
+"""
+
+helps['apim api schema show'] = """
+type: command
+short-summary: Show details of an API Management API Schema.
+examples:
+  - name: Get a API Schema.
+    text: |-
+            az apim api schema show --service-name MyApim -g MyResourceGroup --api-id MyApi --schema-id schemaId
+"""
+
+helps['apim api schema list'] = """
+type: command
+short-summary: List API Management API schema's.
+examples:
+  - name: Get list of schema's associated with an api id.
+    text: |-
+            az apim api schema list --service-name MyApim -g MyResourceGroup --api-id MyApi
+"""
+
+helps['apim api schema get-etag'] = """
+type: command
+short-summary: Get etag of an API Management API schema.
+examples:
+  - name: get a schema entity tag.
+    text: |-
+            az apim api schema get-etag --service-name MyApim -g MyResourceGroup --api-id MyApi --schema-id schemaId
+"""
+
+helps['apim api schema wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of an apim api schema is met.
+examples:
+  - name: Place the CLI in a waiting state until a condition of a apim api schema is met.
+    text: |
+        az apim api schema wait --created --api-id MyApi --name MyApim --schema-id schemaId -g MyResourceGroup
+    crafted: true
 """

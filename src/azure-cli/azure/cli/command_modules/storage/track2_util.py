@@ -46,6 +46,12 @@ def _encode_bytes(b):
     return b
 
 
+def _str_to_bytearray(data):
+    if data is not None:
+        return bytearray(base64.b64decode(data))
+    return data
+
+
 def transform_dict_keys_to_hump(data_dict):
     new_dict = {}
     if not data_dict:

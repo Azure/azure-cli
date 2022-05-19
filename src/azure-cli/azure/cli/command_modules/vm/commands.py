@@ -19,7 +19,8 @@ from azure.cli.command_modules.vm._client_factory import (cf_vm, cf_avail_set, c
                                                           cf_shared_gallery_image_version,
                                                           cf_capacity_reservation_groups, cf_capacity_reservations,
                                                           cf_vmss_run_commands, cf_gallery_application,
-                                                          cf_gallery_application_version)
+                                                          cf_gallery_application_version, cf_restore_point,
+                                                          cf_restore_point_collection)
 from azure.cli.command_modules.vm._format import (
     transform_ip_addresses, transform_vm, transform_vm_create_output, transform_vm_usage_list, transform_vm_list,
     transform_sku_for_table_output, transform_disk_show_table_output, transform_extension_show_table_output,
@@ -28,7 +29,7 @@ from azure.cli.command_modules.vm._validators import (
     process_vm_create_namespace, process_vmss_create_namespace, process_image_create_namespace,
     process_disk_or_snapshot_create_namespace, process_disk_encryption_namespace, process_assign_identity_namespace,
     process_remove_identity_namespace, process_vm_secret_format, process_vm_vmss_stop, validate_vmss_update_namespace,
-    process_vm_update_namespace, process_set_applications_namespace)
+    process_vm_update_namespace, process_set_applications_namespace, process_vm_disk_attach_namespace)
 
 from azure.cli.command_modules.vm._image_builder import (
     process_image_template_create_namespace, process_img_tmpl_output_add_namespace,
@@ -227,6 +228,16 @@ def load_command_table(self, _):
         client_factory=cf_capacity_reservations
     )
 
+    restore_point = CliCommandType(
+        operations_tmpl='azure.mgmt.compute.operations#RestorePointsOperations.{}',
+        client_factory=cf_restore_point
+    )
+
+    restore_point_collection = CliCommandType(
+        operations_tmpl='azure.mgmt.compute.operations#RestorePointCollectionsOperations.{}',
+        client_factory=cf_restore_point_collection
+    )
+
     with self.command_group('disk', compute_disk_sdk, operation_group='disks', min_api='2017-03-30') as g:
         g.custom_command('create', 'create_managed_disk', supports_no_wait=True, table_transformer=transform_disk_show_table_output, validator=process_disk_or_snapshot_create_namespace)
         g.command('delete', 'begin_delete', supports_no_wait=True, confirmation=True)
@@ -350,7 +361,7 @@ def load_command_table(self, _):
         g.custom_command('get-default-config', 'show_default_diagnostics_configuration')
 
     with self.command_group('vm disk', compute_vm_sdk, min_api='2017-03-30') as g:
-        g.custom_command('attach', 'attach_managed_data_disk')
+        g.custom_command('attach', 'attach_managed_data_disk', validator=process_vm_disk_attach_namespace)
         g.custom_command('detach', 'detach_data_disk')
 
     with self.command_group('vm encryption', custom_command_type=compute_disk_encryption_custom) as g:
@@ -360,7 +371,7 @@ def load_command_table(self, _):
 
     with self.command_group('vm extension', compute_vm_extension_sdk) as g:
         g.command('delete', 'begin_delete', supports_no_wait=True)
-        g.show_command('show', 'get', table_transformer=transform_extension_show_table_output)
+        g.custom_show_command('show', 'show_extensions', table_transformer=transform_extension_show_table_output)
         g.custom_command('set', 'set_extension', supports_no_wait=True)
         g.custom_command('list', 'list_extensions', table_transformer='[].' + transform_extension_show_table_output)
         g.wait_command('wait')
@@ -424,6 +435,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_dedicated_host')
         g.command('list', 'list_by_host_group')
         g.generic_update_command('update', setter_name='begin_create_or_update')
+        g.command('restart', 'begin_restart', min_api='2021-07-01')
         g.command('delete', 'begin_delete', confirmation=True)
 
     with self.command_group('vm host group', compute_dedicated_host_groups_sdk, client_factory=cf_dedicated_host_groups,
@@ -511,7 +523,7 @@ def load_command_table(self, _):
 
     with self.command_group('sig', compute_galleries_sdk, operation_group='galleries', min_api='2018-06-01') as g:
         g.custom_command('create', 'create_image_gallery')
-        g.show_command('show', 'get')
+        g.custom_show_command('show', 'show_image_gallery')
         g.custom_command('list', 'list_image_galleries')
         g.command('delete', 'begin_delete')
         g.generic_update_command('update', setter_type=compute_custom, setter_name='update_image_galleries', setter_arg_name='gallery')
@@ -578,7 +590,7 @@ def load_command_table(self, _):
         g.custom_command('list-shared', 'sig_shared_image_version_list', is_experimental=True)
         g.command('show-shared', 'get', is_experimental=True)
 
-    with self.command_group('sig gallery-application', compute_gallery_application_sdk, client_factory=cf_gallery_application, min_api='2021-07-01') as g:
+    with self.command_group('sig gallery-application', compute_gallery_application_sdk, client_factory=cf_gallery_application, min_api='2021-07-01', operation_group='gallery_applications') as g:
         g.command('list', 'list_by_gallery')
         g.show_command('show', 'get')
         g.custom_command('create', 'gallery_application_create', supports_no_wait=True)
@@ -586,7 +598,7 @@ def load_command_table(self, _):
         g.command('delete', 'begin_delete', supports_no_wait=True, confirmation=True)
         g.wait_command('wait')
 
-    with self.command_group('sig gallery-application version', compute_gallery_application_version_sdk, client_factory=cf_gallery_application_version, min_api='2021-07-01') as g:
+    with self.command_group('sig gallery-application version', compute_gallery_application_version_sdk, client_factory=cf_gallery_application_version, min_api='2021-07-01', operation_group='gallery_application_versions') as g:
         g.command('list', 'list_by_gallery_application')
         g.show_command('show', 'get')
         g.custom_command('create', 'gallery_application_version_create', supports_no_wait=True)
@@ -627,3 +639,19 @@ def load_command_table(self, _):
         g.command('delete', 'begin_delete', supports_no_wait=True, confirmation=True)
         g.custom_show_command('show', 'show_capacity_reservation')
         g.custom_command('list', 'list_capacity_reservation')
+
+    with self.command_group('restore-point', restore_point, client_factory=cf_restore_point, min_api='2021-03-01') as g:
+        g.custom_show_command('show', 'restore_point_show')
+        g.custom_command('create', 'restore_point_create', supports_no_wait=True)
+        g.command('delete', 'begin_delete', supports_no_wait=True, confirmation=True)
+        g.wait_command('wait')
+
+    with self.command_group('restore-point collection', restore_point_collection, min_api='2021-03-01',
+                            client_factory=cf_restore_point_collection) as g:
+        g.command('list', 'list')
+        g.custom_show_command('show', 'restore_point_collection_show')
+        g.custom_command('create', 'restore_point_collection_create')
+        g.custom_command('update', 'restore_point_collection_update')
+        g.command('delete', 'begin_delete', supports_no_wait=True, confirmation=True)
+        g.command('list-all', 'list_all')
+        g.wait_command('wait')
