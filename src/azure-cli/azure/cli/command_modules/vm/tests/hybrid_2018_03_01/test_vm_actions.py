@@ -207,7 +207,7 @@ class TestActions(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.vm._validators._compute_client_factory', autospec=True)
     @mock.patch('azure.cli.command_modules.vm._validators.logger.warning', autospec=True)
     def test_parse_staging_image_argument(self, logger_mock, client_factory_mock):
-        from msrestazure.azure_exceptions import CloudError
+        from azure.core.exceptions import ResourceNotFoundError
         compute_client = mock.MagicMock()
         resp = mock.MagicMock()
         cmd = mock.MagicMock()
@@ -215,7 +215,7 @@ class TestActions(unittest.TestCase):
         resp.status_code = 404
         resp.text = '{"Message": "Not Found"}'
 
-        compute_client.virtual_machine_images.get.side_effect = CloudError(resp, error='image not found')
+        compute_client.virtual_machine_images.get.side_effect = ResourceNotFoundError('image not found')
         client_factory_mock.return_value = compute_client
 
         np = mock.MagicMock()

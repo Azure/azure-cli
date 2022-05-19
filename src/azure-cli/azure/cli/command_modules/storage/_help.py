@@ -1193,6 +1193,8 @@ short-summary: Download a blob to a file path.
 examples:
   - name: Download a blob.
     text: az storage blob download -f /path/to/file -c mycontainer -n MyBlob
+  - name: Download a blob content to stdout(pipe support).
+    text: az storage blob download -c mycontainer -n myblob --account-name mystorageaccount --account-key myaccountkey
 """
 
 helps['storage blob url'] = """
@@ -1652,6 +1654,21 @@ type: group
 short-summary: Manage file storage directories.
 """
 
+helps['storage directory create'] = """
+type: command
+short-summary: Create a new directory under the specified share or parent directory.
+"""
+
+helps['storage directory delete'] = """
+type: command
+short-summary: Delete the specified empty directory.
+"""
+
+helps['storage directory show'] = """
+type: command
+short-summary: Get all user-defined metadata and system properties for the specified directory
+"""
+
 helps['storage directory exists'] = """
 type: command
 short-summary: Check for the existence of a storage directory.
@@ -1675,6 +1692,16 @@ examples:
 helps['storage directory metadata'] = """
 type: group
 short-summary: Manage file storage directory metadata.
+"""
+
+helps['storage directory metadata show'] = """
+type: command
+short-summary: Get all user-defined metadata for the specified directory.
+"""
+
+helps['storage directory metadata update'] = """
+type: command
+short-summary: Set one or more user-defined name-value pairs for the specified directory.
 """
 
 helps['storage entity'] = """

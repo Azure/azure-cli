@@ -63,15 +63,15 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     DATA_KEYVAULT_ADMINISTRATION_BACKUP = ('azure.keyvault.administration', 'KeyVaultBackupClient')
     DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL = ('azure.keyvault.administration', 'KeyVaultAccessControlClient')
     MGMT_EVENTHUB = ('azure.mgmt.eventhub', 'EventHubManagementClient')
+    MGMT_SERVICEBUS = ('azure.mgmt.servicebus', 'ServiceBusManagementClient')
     MGMT_APPSERVICE = ('azure.mgmt.web', 'WebSiteManagementClient')
     MGMT_IOTCENTRAL = ('azure.mgmt.iotcentral', 'IotCentralClient')
     MGMT_IOTHUB = ('azure.mgmt.iothub', 'IotHubClient')
     MGMT_IOTDPS = ('azure.mgmt.iothubprovisioningservices', 'IotDpsClient')
-    MGMT_ARO = ('azure.mgmt.redhatopenshift', 'AzureRedHatOpenShift4Client')
+    MGMT_ARO = ('azure.mgmt.redhatopenshift', 'AzureRedHatOpenShiftClient')
     MGMT_DATABOXEDGE = ('azure.mgmt.databoxedge', 'DataBoxEdgeManagementClient')
     MGMT_CUSTOMLOCATION = ('azure.mgmt.extendedlocation', 'CustomLocations')
     MGMT_CONTAINERSERVICE = ('azure.mgmt.containerservice', 'ContainerServiceClient')
-    MGMT_SERVICEBUS = ('azure.mgmt.servicebus', 'ServiceBusManagementClient')
     # the "None" below will stay till a command module fills in the type so "get_mgmt_service_client"
     # can be provided with "ResourceType.XXX" to initialize the client object. This usually happens
     # when related commands start to support Multi-API
@@ -147,14 +147,14 @@ class SDKProfile:  # pylint: disable=too-few-public-methods
 AZURE_API_PROFILES = {
     'latest': {
         ResourceType.MGMT_STORAGE: '2021-09-01',
-        ResourceType.MGMT_NETWORK: '2021-05-01',
+        ResourceType.MGMT_NETWORK: '2021-08-01',
         ResourceType.MGMT_COMPUTE: SDKProfile('2021-11-01', {
             'resource_skus': '2019-04-01',
             'disks': '2021-12-01',
             'disk_encryption_sets': '2020-12-01',
             'disk_accesses': '2020-05-01',
             'snapshots': '2021-12-01',
-            'galleries': '2021-07-01',
+            'galleries': '2021-10-01',
             'gallery_images': '2021-10-01',
             'gallery_image_versions': '2021-10-01',
             'gallery_applications': '2021-07-01',
@@ -194,12 +194,13 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP: '7.2-preview',
         ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL: '7.2-preview',
         ResourceType.DATA_STORAGE: '2018-11-09',
-        ResourceType.DATA_STORAGE_BLOB: '2021-04-10',
-        ResourceType.DATA_STORAGE_FILEDATALAKE: '2020-10-02',
-        ResourceType.DATA_STORAGE_FILESHARE: '2019-07-07',
+        ResourceType.DATA_STORAGE_BLOB: '2021-06-08',
+        ResourceType.DATA_STORAGE_FILEDATALAKE: '2021-06-08',
+        ResourceType.DATA_STORAGE_FILESHARE: '2021-06-08',
         ResourceType.DATA_STORAGE_QUEUE: '2018-03-28',
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
-        ResourceType.MGMT_EVENTHUB: '2021-06-01-preview',
+        ResourceType.MGMT_SERVICEBUS: '2021-06-01-preview',
+        ResourceType.MGMT_EVENTHUB: '2021-11-01',
         ResourceType.MGMT_MONITOR: SDKProfile('2019-06-01', {
             'action_groups': '2021-09-01',
             'activity_log_alerts': '2017-04-01',
@@ -233,19 +234,18 @@ AZURE_API_PROFILES = {
             'private_endpoint_connections': '2019-10-17-preview',
             'subscription_diagnostic_settings': '2017-05-01-preview'
         }),
-        ResourceType.MGMT_MSI: '2018-11-30',
+        ResourceType.MGMT_MSI: '2021-09-30-preview',
         ResourceType.MGMT_APPSERVICE: '2021-03-01',
         ResourceType.MGMT_IOTHUB: '2021-07-02',
         ResourceType.MGMT_IOTDPS: '2021-10-15',
         ResourceType.MGMT_IOTCENTRAL: '2018-09-01',
-        ResourceType.MGMT_ARO: '2020-04-30',
+        ResourceType.MGMT_ARO: '2022-04-01',
         ResourceType.MGMT_DATABOXEDGE: '2021-02-01-preview',
         ResourceType.MGMT_CUSTOMLOCATION: '2021-03-15-preview',
-        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2022-03-01', {
+        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2022-04-01', {
             'container_services': '2017-07-01',
             'open_shift_managed_clusters': '2019-09-30-preview'
-        }),
-        ResourceType.MGMT_SERVICEBUS: '2021-06-01-preview'
+        })
     },
     '2020-09-01-hybrid': {
         ResourceType.MGMT_STORAGE: '2019-06-01',
@@ -288,7 +288,7 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_STORAGE_QUEUE: '2019-07-07',
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
         ResourceType.MGMT_APPSERVICE: '2018-02-01',
-        ResourceType.MGMT_EVENTHUB: '2021-06-01-preview',
+        ResourceType.MGMT_EVENTHUB: '2021-11-01',
         ResourceType.MGMT_SERVICEBUS: '2021-06-01-preview',
         ResourceType.MGMT_IOTHUB: '2019-07-01-preview',
         ResourceType.MGMT_DATABOXEDGE: '2019-08-01',
@@ -335,7 +335,7 @@ AZURE_API_PROFILES = {
         # to have commands show up in the hybrid profile which happens to have the latest
         # API versions
         ResourceType.MGMT_APPSERVICE: '2018-02-01',
-        ResourceType.MGMT_EVENTHUB: '2021-06-01-preview',
+        ResourceType.MGMT_EVENTHUB: '2021-11-01',
         ResourceType.MGMT_SERVICEBUS: '2021-06-01-preview',
         ResourceType.MGMT_IOTHUB: '2019-03-22',
         ResourceType.MGMT_DATABOXEDGE: '2019-08-01'

@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=too-many-lines
+import unittest
 
 from azure.cli.testsdk import JMESPathCheck, ScenarioTest, ResourceGroupPreparer, KeyVaultPreparer
 from knack.util import CLIError
@@ -1464,6 +1465,7 @@ class CosmosDBTests(ScenarioTest):
         db_througput_update = self.cmd('az cosmosdb table throughput update -g {rg} -a {acc} -n {tb_name} --throughput {tp2}').get_output_in_json()
         assert db_througput_update["resource"]["throughput"] == tp2
 
+    @unittest.skip('Cannot record due to https://github.com/Azure/azure-cli/issues/22174')
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_key_vault_key_uri')
     @KeyVaultPreparer(name_prefix='cli', name_len=15, location='eastus2', additional_params='--enable-purge-protection')
     def test_cosmosdb_key_vault_key_uri(self, resource_group, key_vault):
@@ -1485,6 +1487,7 @@ class CosmosDBTests(ScenarioTest):
 
         assert cmk_output["keyVaultKeyUri"] == key_uri
 
+    @unittest.skip('Cannot record due to https://github.com/Azure/azure-cli/issues/22174')
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_managed_service_identity')
     @KeyVaultPreparer(name_prefix='cli', name_len=15, location='eastus2', additional_params='--enable-purge-protection')
     def test_cosmosdb_managed_service_identity(self, resource_group, key_vault):
