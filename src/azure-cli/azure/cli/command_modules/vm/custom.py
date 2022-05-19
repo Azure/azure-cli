@@ -372,10 +372,8 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
             namespace='Microsoft.Compute', type='diskAccesses', name=disk_access)
 
     encryption = None
-    if disk_encryption_set:
+    if disk_encryption_set or encryption_type:
         encryption = Encryption(type=encryption_type, disk_encryption_set_id=disk_encryption_set)
-    elif encryption_type:
-        encryption = Encryption(type=encryption_type)
 
     disk = Disk(location=location, creation_data=creation_data, tags=(tags or {}),
                 sku=_get_sku_object(cmd, sku), disk_size_gb=size_gb, os_type=os_type, encryption=encryption)
