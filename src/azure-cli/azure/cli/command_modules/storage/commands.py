@@ -394,9 +394,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         # g.storage_command_oauth(
         #     'download', 'get_blob_to_path', table_transformer=transform_blob_output,
         #     exception_handler=file_related_exception_handler)
-        # g.storage_custom_command_oauth('download-batch', 'storage_blob_download_batch',
-        #                                validator=process_blob_download_batch_parameters,
-        #                                exception_handler=file_related_exception_handler)
         g.storage_command_oauth(
             'metadata show', 'get_blob_metadata', exception_handler=show_exception_handler)
         g.storage_command_oauth('metadata update', 'set_blob_metadata')
