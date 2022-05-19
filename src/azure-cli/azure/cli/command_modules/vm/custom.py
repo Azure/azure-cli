@@ -469,8 +469,7 @@ def update_managed_disk(cmd, resource_group_name, instance, size_gb=None, sku=No
         instance.encryption.disk_encryption_set_id = disk_encryption_set
     if encryption_type is not None:
         instance.encryption.type = encryption_type
-        if instance.encryption.type != 'EncryptionAtRestWithCustomerKey' and \
-                encryption_type != 'EncryptionAtRestWithCustomerKey':
+        if encryption_type != 'EncryptionAtRestWithCustomerKey':
             instance.encryption.disk_encryption_set_id = None
     if network_access_policy is not None:
         instance.network_access_policy = network_access_policy
