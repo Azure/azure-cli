@@ -552,7 +552,7 @@ examples:
     crafted: true
   - name: Update settings to use a new port.
     text: |
-        az network application-gateway settings update --gateway-name MyAppGateway --host-name-from-backend-pool true --name MySettings --port 80 --probe MyNewProbe --resource-group MyResourceGroup
+        az network application-gateway settings update --gateway-name MyAppGateway --backend-pool-host-name true --name MySettings --port 80 --probe MyNewProbe --resource-group MyResourceGroup
     crafted: true
 """
 
