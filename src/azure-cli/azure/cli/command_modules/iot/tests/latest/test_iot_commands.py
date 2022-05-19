@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 # pylint: disable=too-many-statements
-import unittest
 from unittest import mock
 
 from azure.cli.testsdk import ResourceGroupPreparer, ScenarioTest, StorageAccountPreparer
@@ -175,7 +174,7 @@ class IoTHubTest(ScenarioTest):
         policy = self.cmd('iot hub policy renew-key --hub-name {0} -n {1} --renew-key Primary'.format(hub, policy_name),
                           checks=[self.check('keyName', policy_name)]).get_output_in_json()
 
-        policy_name_conn_str_pattern = r'HostName={0}.azure-devices.net;SharedAccessKeyName={1};SharedAccessKey={2}'.format(
+        policy_name_conn_str_pattern = r'^HostName={0}.azure-devices.net;SharedAccessKeyName={1};SharedAccessKey={2}'.format(
             hub, policy_name, policy['primaryKey'])
 
         # Test policy_name connection-string 'az iot hub show-connection-string'
@@ -428,7 +427,6 @@ class IoTHubTest(ScenarioTest):
                          self.check('properties.enableDataResidency', True)])
         self.cmd('az iot hub delete -n {}'.format(dr_hub_name))
 
-    @unittest.skip('Will be recorded in https://github.com/Azure/azure-cli/pull/22262')
     @AllowLargeResponse()
     @ResourceGroupPreparer(location='westus2')
     @StorageAccountPreparer()
@@ -689,7 +687,6 @@ class IoTHubTest(ScenarioTest):
                      self.check('userAssignedIdentities', None),
                      self.check('type', IdentityType.none.value)])
 
-    @unittest.skip('Will be recorded in https://github.com/Azure/azure-cli/pull/22262')
     @AllowLargeResponse()
     @ResourceGroupPreparer(location='westus2')
     @StorageAccountPreparer()
