@@ -149,7 +149,7 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
                                frontend_port=None, http_settings_cookie_based_affinity='disabled',
                                http_settings_port=80, http_settings_protocol='Http',
                                routing_rule_type='Basic', servers=None,
-                               sku=None,
+                               sku=None, priority=None,
                                private_ip_address=None, public_ip_address=None,
                                public_ip_address_allocation=None,
                                subnet='default', subnet_address_prefix='10.0.0.0/24',
@@ -231,7 +231,7 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
 
     app_gateway_resource = build_application_gateway_resource(
         cmd, application_gateway_name, location, tags, sku, sku_tier, capacity, servers, frontend_port,
-        private_ip_address, private_ip_allocation, cert_data, cert_password, key_vault_secret_id,
+        private_ip_address, private_ip_allocation, priority, cert_data, cert_password, key_vault_secret_id,
         http_settings_cookie_based_affinity, http_settings_protocol, http_settings_port,
         http_listener_protocol, routing_rule_type, public_ip_id, subnet_id,
         connection_draining_timeout, enable_http2, min_capacity, zones, custom_error_pages,
@@ -442,6 +442,50 @@ def update_ag_http_listener(cmd, instance, parent, item_name, frontend_ip=None, 
         instance.host_names = host_names or None
 
     instance.require_server_name_indication = instance.host_name and instance.protocol.lower() == 'https'
+    return parent
+
+
+def create_ag_listener(cmd, resource_group_name, application_gateway_name, item_name,
+                       frontend_port, frontend_ip=None, ssl_cert=None,
+                       ssl_profile_id=None, no_wait=False):
+    ApplicationGatewayListener, SubResource = cmd.get_models('ApplicationGatewayListener', 'SubResource')
+    ncf = network_client_factory(cmd.cli_ctx)
+    ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
+    if not frontend_ip:
+        frontend_ip = _get_default_id(ag, 'frontend_ip_configurations', '--frontend-ip')
+    new_listener = ApplicationGatewayListener(
+        name=item_name,
+        frontend_ip_configuration=SubResource(id=frontend_ip),
+        frontend_port=SubResource(id=frontend_port),
+        protocol='tls' if ssl_cert else 'tcp',
+        ssl_certificate=SubResource(id=ssl_cert) if ssl_cert else None,
+    )
+
+    new_listener.ssl_profile = SubResource(id=ssl_profile_id) if ssl_profile_id else None
+
+    upsert_to_collection(ag, 'listeners', new_listener, 'name')
+    return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update,
+                       resource_group_name, application_gateway_name, ag)
+
+
+def update_ag_listener(cmd, instance, parent, item_name, frontend_ip=None, frontend_port=None,
+                       ssl_cert=None, ssl_profile_id=None):
+    SubResource = cmd.get_models('SubResource')
+    if frontend_ip is not None:
+        instance.frontend_ip_configuration = SubResource(id=frontend_ip)
+    if frontend_port is not None:
+        instance.frontend_port = SubResource(id=frontend_port)
+    if ssl_cert is not None:
+        if ssl_cert:
+            instance.ssl_certificate = SubResource(id=ssl_cert)
+            instance.protocol = 'tls'
+        else:
+            instance.ssl_certificate = None
+            instance.protocol = 'tcp'
+
+    if ssl_profile_id is not None:
+        instance.ssl_profile = SubResource(id=ssl_profile_id)
+
     return parent
 
 
@@ -1080,6 +1124,56 @@ def update_ag_backend_http_settings_collection(cmd, instance, parent, item_name,
     return parent
 
 
+def create_ag_backend_settings_collection(cmd, resource_group_name, application_gateway_name, item_name, port,
+                                          probe=None, protocol='tcp', timeout=None,
+                                          no_wait=False,
+                                          host_name=None, host_name_from_backend_pool=None,
+                                          path=None, root_certs=None):
+    ApplicationGatewayBackendSettings, SubResource = cmd.get_models(
+        'ApplicationGatewayBackendSettings', 'SubResource')
+    ncf = network_client_factory(cmd.cli_ctx)
+    ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
+    new_settings = ApplicationGatewayBackendSettings(
+        port=port,
+        protocol=protocol,
+        timeout=timeout,
+        probe=SubResource(id=probe) if probe else None,
+        name=item_name)
+    new_settings.host_name = host_name
+    new_settings.pick_host_name_from_backend_address = host_name_from_backend_pool
+    new_settings.path = path
+    new_settings.trusted_root_certificates = [SubResource(id=x) for x in root_certs or []]
+    upsert_to_collection(ag, 'backend_settings_collection', new_settings, 'name')
+    return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update,
+                       resource_group_name, application_gateway_name, ag)
+
+
+def update_ag_backend_settings_collection(cmd, instance, parent, item_name, port=None, probe=None, protocol=None,
+                                          timeout=None,
+                                          host_name=None, host_name_from_backend_pool=None,
+                                          path=None, root_certs=None):
+    SubResource = cmd.get_models('SubResource')
+    if root_certs == "":
+        instance.trusted_root_certificates = None
+    elif root_certs is not None:
+        instance.trusted_root_certificates = [SubResource(id=x) for x in root_certs]
+    if port is not None:
+        instance.port = port
+    if probe is not None:
+        instance.probe = SubResource(id=probe)
+    if protocol is not None:
+        instance.protocol = protocol
+    if timeout is not None:
+        instance.timeout = timeout
+    if host_name is not None:
+        instance.host_name = host_name
+    if host_name_from_backend_pool is not None:
+        instance.pick_host_name_from_backend_address = host_name_from_backend_pool
+    if path is not None:
+        instance.path = path
+    return parent
+
+
 def create_ag_redirect_configuration(cmd, resource_group_name, application_gateway_name, item_name, redirect_type,
                                      target_listener=None, target_url=None, include_path=None,
                                      include_query_string=None, no_wait=False):
@@ -1268,9 +1362,9 @@ def delete_ag_rewrite_rule_condition(cmd, resource_group_name, application_gatew
     sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, application_gateway_name, gateway)
 
 
-def create_ag_probe(cmd, resource_group_name, application_gateway_name, item_name, protocol, host,
-                    path, interval=30, timeout=120, threshold=8, no_wait=False, host_name_from_http_settings=None,
-                    min_servers=None, match_body=None, match_status_codes=None, port=None):
+def create_ag_probe(cmd, resource_group_name, application_gateway_name, item_name, protocol, host, path, interval=30,
+                    timeout=120, threshold=8, no_wait=False, host_name_from_http_settings=None, min_servers=None,
+                    match_body=None, match_status_codes=None, host_name_from_settings=None, port=None):
     ApplicationGatewayProbe, ProbeMatchCriteria = cmd.get_models(
         'ApplicationGatewayProbe', 'ApplicationGatewayProbeHealthResponseMatch')
     ncf = network_client_factory(cmd.cli_ctx)
@@ -1289,6 +1383,8 @@ def create_ag_probe(cmd, resource_group_name, application_gateway_name, item_nam
         new_probe.match = ProbeMatchCriteria(body=match_body, status_codes=match_status_codes)
     if cmd.supported_api_version(min_api='2019-04-01'):
         new_probe.port = port
+    if cmd.supported_api_version(min_api='2021-08-01'):
+        new_probe.pick_host_name_from_backend_settings = host_name_from_settings
 
     upsert_to_collection(ag, 'probes', new_probe, 'name')
     return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update,
@@ -1296,8 +1392,8 @@ def create_ag_probe(cmd, resource_group_name, application_gateway_name, item_nam
 
 
 def update_ag_probe(cmd, instance, parent, item_name, protocol=None, host=None, path=None,
-                    interval=None, timeout=None, threshold=None, host_name_from_http_settings=None,
-                    min_servers=None, match_body=None, match_status_codes=None, port=None):
+                    interval=None, timeout=None, threshold=None, host_name_from_http_settings=None, min_servers=None,
+                    match_body=None, match_status_codes=None, host_name_from_settings=None, port=None):
     if protocol is not None:
         instance.protocol = protocol
     if host is not None:
@@ -1312,6 +1408,8 @@ def update_ag_probe(cmd, instance, parent, item_name, protocol=None, host=None, 
         instance.unhealthy_threshold = threshold
     if host_name_from_http_settings is not None:
         instance.pick_host_name_from_backend_http_settings = host_name_from_http_settings
+    if host_name_from_settings is not None:
+        instance.pick_host_name_from_backend_settings = host_name_from_settings
     if min_servers is not None:
         instance.min_servers = min_servers
     if match_body is not None or match_status_codes is not None:
@@ -1378,6 +1476,50 @@ def update_ag_request_routing_rule(cmd, instance, parent, item_name, address_poo
         instance.rule_type = rule_type
     if rewrite_rule_set is not None:
         instance.rewrite_rule_set = SubResource(id=rewrite_rule_set)
+    with cmd.update_context(instance) as c:
+        c.set_param('priority', priority)
+    return parent
+
+
+def create_ag_routing_rule(cmd, resource_group_name, application_gateway_name, item_name,
+                           address_pool=None, settings=None, listener=None,
+                           rule_type='Basic', no_wait=False,
+                           priority=None):
+    ApplicationGatewayRoutingRule, SubResource = cmd.get_models(
+        'ApplicationGatewayRoutingRule', 'SubResource')
+    ncf = network_client_factory(cmd.cli_ctx)
+    ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
+    if not address_pool:
+        address_pool = _get_default_id(ag, 'backend_address_pools', '--address-pool')
+    if not settings:
+        settings = _get_default_id(ag, 'backend_settings_collection', '--settings')
+    if not listener:
+        listener = _get_default_id(ag, 'listeners', '--listener')
+    new_rule = ApplicationGatewayRoutingRule(
+        name=item_name,
+        rule_type=rule_type,
+        priority=priority,
+        backend_address_pool=SubResource(id=address_pool) if address_pool else None,
+        backend_settings=SubResource(id=settings) if settings else None,
+        listener=SubResource(id=listener))
+
+    upsert_to_collection(ag, 'routing_rules', new_rule, 'name')
+    return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update,
+                       resource_group_name, application_gateway_name, ag)
+
+
+def update_ag_routing_rule(cmd, instance, parent, item_name, address_pool=None,
+                           settings=None, listener=None,
+                           rule_type=None, priority=None):
+    SubResource = cmd.get_models('SubResource')
+    if address_pool is not None:
+        instance.backend_address_pool = SubResource(id=address_pool)
+    if settings is not None:
+        instance.backend_settings = SubResource(id=settings)
+    if listener is not None:
+        instance.listener = SubResource(id=listener)
+    if rule_type is not None:
+        instance.rule_type = rule_type
     with cmd.update_context(instance) as c:
         c.set_param('priority', priority)
     return parent
@@ -2266,7 +2408,7 @@ def _type_to_property_name(key):
     return type_dict[key.lower()]
 
 
-def export_zone(cmd, resource_group_name, zone_name, file_name=None):
+def export_zone(cmd, resource_group_name, zone_name, file_name=None):  # pylint: disable=too-many-branches
     from time import localtime, strftime
 
     client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK_DNS)
@@ -2292,10 +2434,11 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):
         if record_set_name not in zone_obj:
             zone_obj[record_set_name] = OrderedDict()
 
-        zone_obj[record_set_name][record_type] = []
-
         for record in record_data:
             record_obj = {'ttl': record_set.ttl}
+
+            if record_type not in zone_obj[record_set_name]:
+                zone_obj[record_set_name][record_type] = []
             if record_type == 'aaaa':
                 record_obj.update({'ip': record.ipv6_address})
             elif record_type == 'a':
@@ -2328,6 +2471,9 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):
 
         if len(record_data) == 0:
             record_obj = {'ttl': record_set.ttl}
+
+            if record_type not in zone_obj[record_set_name]:
+                zone_obj[record_set_name][record_type] = []
             if record_type == 'aaaa' or record_type == 'a':
                 record_obj.update({'ip': ''})
             elif record_type == 'cname':

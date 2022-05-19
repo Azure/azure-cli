@@ -139,6 +139,7 @@ def load_arguments(self, _):
         c.argument('zones', zones_type)
         c.argument('custom_error_pages', min_api='2018-08-01', nargs='+', help='Space-separated list of custom error pages in `STATUS_CODE=URL` format.', validator=validate_custom_error_pages)
         c.argument('firewall_policy', options_list='--waf-policy', min_api='2018-12-01', help='Name or ID of a web application firewall (WAF) policy.', validator=validate_waf_policy)
+        c.argument('priority', min_api='2021-08-01', type=int, help='Priority of the request routing rule. Supported SKU tiers are Standard_v2, WAF_v2.')
 
     with self.argument_context('network application-gateway', arg_group='Identity') as c:
         c.argument('user_assigned_identity', options_list='--identity', help="Name or ID of the ManagedIdentity Resource", validator=validate_user_assigned_identity)
@@ -216,6 +217,10 @@ def load_arguments(self, _):
         ag_subresources.append({'name': 'root-cert', 'display': 'trusted root certificate', 'ref': 'trusted_root_certificates'})
     if self.supported_api_version(min_api='2018-12-01'):
         ag_subresources.append({'name': 'rewrite-rule set', 'display': 'rewrite rule set', 'ref': 'rewrite_rule_sets'})
+    if self.supported_api_version(min_api='2021-08-01'):
+        ag_subresources.append({'name': 'settings', 'display': 'backed settings', 'ref': 'backend_settings_collection'})
+        ag_subresources.append({'name': 'listener', 'display': 'listener', 'ref': 'listeners'})
+        ag_subresources.append({'name': 'routing-rule', 'display': 'routing rule', 'ref': 'routing_rules'})
 
     for item in ag_subresources:
         with self.argument_context('network application-gateway {}'.format(item['name'])) as c:
@@ -256,25 +261,29 @@ def load_arguments(self, _):
     with self.argument_context('network application-gateway frontend-ip update') as c:
         c.argument('public_ip_address', validator=get_public_ip_validator(), help='The name or ID of the public IP address.', completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'), deprecate_info=c.deprecate(hide=True))
 
-    for item in ['frontend-port', 'http-settings']:
+    for item in ['frontend-port', 'http-settings', 'settings']:
         with self.argument_context('network application-gateway {}'.format(item)) as c:
             c.argument('port', help='The port number.', type=int)
 
-    for item in ['http-settings', 'probe']:
+    for item in ['http-settings', 'settings', 'probe']:
         with self.argument_context('network application-gateway {}'.format(item)) as c:
-            c.argument('protocol', http_protocol_type, help='The HTTP settings protocol.')
+            c.argument('protocol', http_protocol_type, help='The settings protocol.')
+
+    for item in ['http-listener', 'listener']:
+        with self.argument_context('network application-gateway {}'.format(item)) as c:
+            c.argument('frontend_ip', help='The name or ID of the frontend IP configuration.', completer=get_ag_subresource_completion_list('frontend_ip_configurations'))
+            c.argument('frontend_port', help='The name or ID of the frontend port.', completer=get_ag_subresource_completion_list('frontend_ports'))
+            c.argument('ssl_cert', help='The name or ID of the SSL certificate to use.', completer=get_ag_subresource_completion_list('ssl_certificates'))
+            c.ignore('protocol')
 
     with self.argument_context('network application-gateway http-listener') as c:
-        c.argument('frontend_ip', help='The name or ID of the frontend IP configuration.', completer=get_ag_subresource_completion_list('frontend_ip_configurations'))
-        c.argument('frontend_port', help='The name or ID of the frontend port.', completer=get_ag_subresource_completion_list('frontend_ports'))
-        c.argument('ssl_cert', help='The name or ID of the SSL certificate to use.', completer=get_ag_subresource_completion_list('ssl_certificates'))
-        c.ignore('protocol')
         c.argument('host_name', help='Host name to use for multisite gateways.')
         c.argument('host_names', nargs='+', is_preview=True, help='Space-separated list of host names that allows special wildcard characters as well.', min_api='2019-11-01')
         c.argument('firewall_policy', min_api='2019-09-01', help='Name or ID of a Firewall Policy resource.')
 
-    with self.argument_context('network application-gateway http-listener create') as c:
-        c.argument('frontend_ip', help='The name or ID of the frontend IP configuration. {}'.format(default_existing))
+    for item in ['http-listener', 'listener']:
+        with self.argument_context('network application-gateway {} create'.format(item)) as c:
+            c.argument('frontend_ip', help='The name or ID of the frontend IP configuration. {}'.format(default_existing))
 
     with self.argument_context('network application-gateway private-link', arg_group=None) as c:
         c.argument('frontend_ip', help='The frontend IP which the Private Link will associate to')
@@ -321,6 +330,11 @@ def load_arguments(self, _):
         c.argument('http_settings', help='The name or ID of the HTTP settings. {}'.format(default_existing))
         c.argument('http_listener', help='The name or ID of the HTTP listener. {}'.format(default_existing))
 
+    with self.argument_context('network application-gateway routing-rule create') as c:
+        c.argument('address_pool', help='The name or ID of the backend address pool. {}'.format(default_existing))
+        c.argument('settings', help='The name or ID of the settings. {}'.format(default_existing))
+        c.argument('listener', help='The name or ID of the listener. {}'.format(default_existing))
+
     for scope in ['rewrite-rule list', 'rewrite-rule condition list']:
         with self.argument_context('network application-gateway {}'.format(scope)) as c:
             c.argument('application_gateway_name', app_gateway_name_type, id_part=None)
@@ -332,9 +346,17 @@ def load_arguments(self, _):
         c.argument('auth_certs', nargs='+', min_api='2016-09-01', help='Space-separated list of authentication certificates (names or IDs) to associate with the HTTP settings.')
         c.argument('root_certs', nargs='+', min_api='2019-04-01', help='Space-separated list of trusted root certificates (names or IDs) to associate with the HTTP settings. --host-name or --host-name-from-backend-pool is required when this field is set.')
 
+    with self.argument_context('network application-gateway settings') as c:
+        c.argument('timeout', help='Request timeout in seconds.')
+        c.argument('probe', help='Name or ID of the probe to associate with the settings.', completer=get_ag_subresource_completion_list('probes'))
+        c.argument('root_certs', nargs='+', help='Space-separated list of trusted root certificates (names or IDs) to associate with the settings. --host-name or --host-name-from-backend-pool is required when this field is set.')
+        c.argument('host_name', help='Host header sent to the backend servers.')
+        c.argument('host_name_from_backend_pool', options_list=['--backend-pool-host-name'], help='Use host name of the backend server as the host header.', arg_type=get_three_state_flag())
+        c.argument('path', help='Path that will prefix all requests.')
+
     with self.argument_context('network application-gateway probe') as c:
         c.argument('host', help='The name of the host to send the probe.')
-        c.argument('path', help='The relative path of the probe. Valid paths start from "/"')
+        c.argument('path', required=False, help='The relative path of the probe. Valid paths start from "/"')
         c.argument('interval', help='The time interval in seconds between consecutive probes.')
         c.argument('threshold', help='The number of failed probes after which the back end server is marked down.')
         c.argument('timeout', help='The probe timeout in seconds.')
@@ -343,15 +365,24 @@ def load_arguments(self, _):
                         'The valid value ranges from 1 to 65535. '
                         'In case not set, port from http settings will be used. '
                         'This property is valid for Standard_v2 and WAF_v2 only.')
+        c.argument('host_name_from_settings', min_api='2021-08-01', options_list=['--host-name-from-settings', '-s'], help='Use host header from settings. Pick hostname from settings is currently not supported, now only support false', arg_type=get_three_state_flag())
+
+    for scope in ['rule', 'routing-rule']:
+        with self.argument_context('network application-gateway {}'.format(scope)) as c:
+            c.argument('address_pool', help='The name or ID of the backend address pool.',
+                       completer=get_ag_subresource_completion_list('backend_address_pools'))
+            c.argument('rule_type', help='The rule type (Basic, PathBasedRouting).')
+            c.argument('priority', type=int, help='Priority of the rule.')
 
     with self.argument_context('network application-gateway rule') as c:
-        c.argument('address_pool', help='The name or ID of the backend address pool.', completer=get_ag_subresource_completion_list('backend_address_pools'))
         c.argument('http_listener', help='The name or ID of the HTTP listener.', completer=get_ag_subresource_completion_list('http_listeners'))
         c.argument('http_settings', help='The name or ID of the backend HTTP settings.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'))
-        c.argument('rule_type', help='The rule type (Basic, PathBasedRouting).')
         c.argument('url_path_map', help='The name or ID of the URL path map.', completer=get_ag_subresource_completion_list('url_path_maps'))
         c.argument('rewrite_rule_set', min_api='2019-04-01', help='The name or ID of the rewrite rule set.')
-        c.argument('priority', type=int, help='Priority of the request routing rule. Range from 1 to 2000')
+
+    with self.argument_context('network application-gateway routing-rule') as c:
+        c.argument('listener', help='The name or ID of the listener.', completer=get_ag_subresource_completion_list('listeners'))
+        c.argument('settings', help='The name or ID of the settings.', completer=get_ag_subresource_completion_list('backend_settings_collection'))
 
     with self.argument_context('network application-gateway ssl-cert') as c:
         c.argument('cert_data', options_list='--cert-file', type=file_type, completer=FilesCompleter(), help='The path to the PFX certificate file.', validator=validate_ssl_cert)
