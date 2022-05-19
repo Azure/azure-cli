@@ -237,17 +237,15 @@ class AAZHttpOperation(AAZOperation):
     def make_request(self):
         """ Make http request based on the properties.
         """
-        if self.method in ("GET", ):
+        if self.ctx.next_link:
             # support making request for next link
-            if self.ctx.next_link:
-                url = self.ctx.next_link
-                query_parameters = {}
-            else:
-                url = self.url
-                query_parameters = self.query_parameters
-
             request = self.client._request(
-                self.method, url, query_parameters, self.header_parameters,
+                "GET", self.ctx.next_link, {}, self.header_parameters,
+                self.content, self.form_content, None)
+
+        elif self.method in ("GET", ):
+            request = self.client._request(
+                self.method, self.url, self.query_parameters, self.header_parameters,
                 self.content, self.form_content, None)
 
         elif self.method in ("DELETE", "MERGE", "OPTIONS"):
