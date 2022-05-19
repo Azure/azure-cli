@@ -1710,22 +1710,6 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             self.cmd,
             AKSManagedClusterParamDict(
                 {
-                    "network_plugin": "azure",
-                    "pod_cidr": "test_pod_cidr",
-                }
-            ),
-            self.models,
-            DecoratorMode.CREATE,
-        )
-        # fail on invalid network_plugin (azure) when pod_cidr is specified
-        with self.assertRaises(InvalidArgumentValueError):
-            ctx_2.get_network_plugin()
-
-        # invalid parameter
-        ctx_3 = AKSManagedClusterContext(
-            self.cmd,
-            AKSManagedClusterParamDict(
-                {
                     "pod_cidr": "test_pod_cidr",
                 }
             ),
@@ -1734,7 +1718,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         )
         # fail on network_plugin not specified
         with self.assertRaises(RequiredArgumentMissingError):
-            ctx_3.get_network_plugin()
+            ctx_2.get_network_plugin()
 
     def test_get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy(
         self,
