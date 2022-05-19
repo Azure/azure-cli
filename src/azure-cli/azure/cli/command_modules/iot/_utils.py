@@ -3,9 +3,13 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import datetime
 from os.path import exists, join
 import base64
-from OpenSSL import crypto
+from cryptography import x509
+from cryptography.x509.oid import NameOID
+from cryptography.hazmat.primitives import serialization, hashes
+from cryptography.hazmat.primitives.asymmetric import rsa
 
 
 def create_self_signed_certificate(device_id, valid_days, cert_output_dir):
@@ -13,26 +17,38 @@ def create_self_signed_certificate(device_id, valid_days, cert_output_dir):
     key_file = device_id + '-key.pem'
 
     # create a key pair
-    key = crypto.PKey()
-    key.generate_key(crypto.TYPE_RSA, 2048)
+    key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
 
     # create a self-signed cert
-    cert = crypto.X509()
-    cert.get_subject().CN = device_id
-    cert.gmtime_adj_notBefore(0)
-    cert.gmtime_adj_notAfter(valid_days * 24 * 60 * 60)
-    cert.set_issuer(cert.get_subject())
-    cert.set_pubkey(key)
-    cert.sign(key, 'sha256')
+    subject_name = x509.Name(
+        [
+            x509.NameAttribute(NameOID.COMMON_NAME, device_id),
+        ]
+    )
+    cert = (
+        x509.CertificateBuilder()
+        .subject_name(subject_name)
+        .issuer_name(subject_name)
+        .public_key(key.public_key())
+        .serial_number(x509.random_serial_number())
+        .not_valid_before(datetime.datetime.utcnow())
+        .not_valid_after(
+            datetime.datetime.utcnow() + datetime.timedelta(days=valid_days)
+        )
+        .sign(key, hashes.SHA256())
+    )
 
-    cert_dump = crypto.dump_certificate(crypto.FILETYPE_PEM, cert).decode('utf-8')
-    key_dump = crypto.dump_privatekey(crypto.FILETYPE_PEM, key).decode('utf-8')
-    thumbprint = cert.digest('sha1').replace(b':', b'').decode('utf-8')
+    key_dump = key.private_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PrivateFormat.TraditionalOpenSSL,
+        encryption_algorithm=serialization.NoEncryption(),
+    ).decode("utf-8")
+    cert_dump = cert.public_bytes(serialization.Encoding.PEM).decode("utf-8")
+    thumbprint = cert.fingerprint(hashes.SHA1()).hex().upper()
 
     if cert_output_dir is not None and exists(cert_output_dir):
         open(join(cert_output_dir, cert_file), "wt").write(cert_dump)
         open(join(cert_output_dir, key_file), "wt").write(key_dump)
-
     return {
         'certificate': cert_dump,
         'privateKey': key_dump,
@@ -45,8 +61,14 @@ def open_certificate(certificate_path):
     if certificate_path.endswith('.pem') or certificate_path.endswith('.cer'):
         with open(certificate_path, "rb") as cert_file:
             certificate = cert_file.read()
-        certificate = base64.b64encode(certificate).decode("utf-8")
-    return certificate
+        try:
+            certificate = certificate.decode("utf-8")
+        except UnicodeError:
+            certificate = base64.b64encode(certificate).decode("utf-8")
+    else:
+        raise ValueError("Certificate file type must be either '.pem' or '.cer'.")
+    # Remove trailing white space from the certificate content
+    return certificate.rstrip()
 
 
 def generate_key(byte_length=32):

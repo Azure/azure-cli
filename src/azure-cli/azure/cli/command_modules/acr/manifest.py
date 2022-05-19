@@ -118,7 +118,8 @@ def _obtain_referrers_from_registry(login_server,
 
 def _parse_fqdn(cmd, fqdn, is_manifest=True):
     try:
-        fqdn = fqdn.lstrip('https://')
+        if fqdn.startswith('https://'):
+            fqdn = fqdn[len('https://'):]
         reg_addr = fqdn.split('/', 1)[0]
         registry_name = reg_addr.split('.', 1)[0]
         reg_suffix = '.' + reg_addr.split('.', 1)[1]
@@ -254,7 +255,7 @@ def acr_manifest_list_referrers(cmd,
 
     if not manifest:
         image = repository + ':' + tag
-        repository, tag, manifest = get_image_digest(cmd, registry_name, image)
+        repository, tag, manifest = get_image_digest(cmd, registry_name, image, tenant_suffix, username, password)
 
     login_server, username, password = get_access_credentials(
         cmd=cmd,
@@ -306,7 +307,7 @@ def acr_manifest_show(cmd,
 
     if not manifest:
         image = repository + ':' + tag
-        repository, tag, manifest = get_image_digest(cmd, registry_name, image)
+        repository, tag, manifest = get_image_digest(cmd, registry_name, image, tenant_suffix, username, password)
 
     login_server, username, password = get_access_credentials(
         cmd=cmd,
@@ -432,7 +433,7 @@ def acr_manifest_delete(cmd,
 
     if not manifest:
         image = repository + ':' + tag
-        repository, tag, manifest = get_image_digest(cmd, registry_name, image)
+        repository, tag, manifest = get_image_digest(cmd, registry_name, image, tenant_suffix, username, password)
 
     login_server, username, password = get_access_credentials(
         cmd=cmd,

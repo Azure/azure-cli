@@ -100,12 +100,9 @@ from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import in_cloud_console, sdk_no_wait
 from azure.graphrbac.models import (
     ApplicationCreateParameters,
-    ApplicationUpdateParameters,
     GetObjectsParameters,
     KeyCredential,
     PasswordCredential,
-    RequiredResourceAccess,
-    ResourceAccess,
     ServicePrincipalCreateParameters,
 )
 from dateutil.relativedelta import relativedelta
@@ -1497,6 +1494,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,
                no_wait=False,
                yes=False,
                aks_custom_headers=None,
+               enable_defender=False,
+               defender_config=None,
                ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -1539,6 +1538,7 @@ def aks_update(cmd, client, resource_group_name, name,
                disable_public_fqdn=False,
                enable_managed_identity=False,
                assign_identity=None,
+               assign_kubelet_identity=None,
                enable_aad=False,
                enable_azure_rbac=False,
                disable_azure_rbac=False,
@@ -1564,7 +1564,11 @@ def aks_update(cmd, client, resource_group_name, name,
                nodepool_labels=None,
                no_wait=False,
                yes=False,
-               aks_custom_headers=None):
+               aks_custom_headers=None,
+               enable_defender=False,
+               disable_defender=False,
+               defender_config=None,
+               ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
 
@@ -3097,355 +3101,6 @@ def aks_nodepool_snapshot_list(cmd, client, resource_group_name=None):  # pylint
         return client.list()
 
     return client.list_by_resource_group(resource_group_name)
-
-
-# legacy: osa command
-def _ensure_osa_aad(cmd,
-                    cli_ctx,
-                    aad_client_app_id=None,
-                    aad_client_app_secret=None,
-                    aad_tenant_id=None,
-                    identifier=None,
-                    name=None, create=False,
-                    customer_admin_group_id=None):
-    OpenShiftManagedClusterAADIdentityProvider = cmd.get_models('OpenShiftManagedClusterAADIdentityProvider',
-                                                                resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                                                operation_group='open_shift_managed_clusters')
-    rbac_client = get_graph_rbac_management_client(cli_ctx)
-    if create:
-        # This reply_url is temporary set since Azure need one to create the AAD.
-        app_id_name = 'https://{}'.format(name)
-        if not aad_client_app_secret:
-            aad_client_app_secret = _create_client_secret()
-
-        # Delegate Sign In and Read User Profile permissions on Windows Azure Active Directory API
-        resource_access = ResourceAccess(id="311a71cc-e848-46a1-bdf8-97ff7156d8e6",
-                                         additional_properties=None, type="Scope")
-        # Read directory permissions on Windows Azure Active Directory API
-        directory_access = ResourceAccess(id="5778995a-e1bf-45b8-affa-663a9f3f4d04",
-                                          additional_properties=None, type="Role")
-
-        required_osa_aad_access = RequiredResourceAccess(resource_access=[resource_access, directory_access],
-                                                         additional_properties=None,
-                                                         resource_app_id="00000002-0000-0000-c000-000000000000")
-
-        list_aad_filtered = list(rbac_client.applications.list(filter="identifierUris/any(s:s eq '{}')"
-                                                               .format(app_id_name)))
-        if list_aad_filtered:
-            aad_client_app_id = list_aad_filtered[0].app_id
-            # Updating reply_url with the correct FQDN information returned by the RP
-            reply_url = 'https://{}/oauth2callback/Azure%20AD'.format(
-                identifier)
-            update_application(client=rbac_client.applications,
-                               object_id=list_aad_filtered[0].object_id,
-                               display_name=name,
-                               identifier_uris=[app_id_name],
-                               reply_urls=[reply_url],
-                               homepage=app_id_name,
-                               password=aad_client_app_secret,
-                               required_resource_accesses=[required_osa_aad_access])
-            logger.info('Updated AAD: %s', aad_client_app_id)
-        else:
-            result, _aad_session_key = create_application(client=rbac_client.applications,
-                                                          display_name=name,
-                                                          identifier_uris=[
-                                                              app_id_name],
-                                                          homepage=app_id_name,
-                                                          password=aad_client_app_secret,
-                                                          required_resource_accesses=[required_osa_aad_access])
-            aad_client_app_id = result.app_id
-            logger.info('Created an AAD: %s', aad_client_app_id)
-        # Get the TenantID
-        if aad_tenant_id is None:
-            profile = Profile(cli_ctx=cli_ctx)
-            _, _, aad_tenant_id = profile.get_login_credentials()
-    return OpenShiftManagedClusterAADIdentityProvider(
-        client_id=aad_client_app_id,
-        secret=aad_client_app_secret,
-        tenant_id=aad_tenant_id,
-        kind='AADIdentityProvider',
-        customer_admin_group_id=customer_admin_group_id)
-
-
-# legacy: osa command
-def update_application(client, object_id, display_name, homepage, identifier_uris,
-                       available_to_other_tenants=False, password=None, reply_urls=None,
-                       key_value=None, key_type=None, key_usage=None, start_date=None,
-                       end_date=None, required_resource_accesses=None):
-    from azure.graphrbac.models import GraphErrorException
-    password_creds, key_creds = _build_application_creds(password, key_value, key_type,
-                                                         key_usage, start_date, end_date)
-    try:
-        if key_creds:
-            client.update_key_credentials(object_id, key_creds)
-        if password_creds:
-            client.update_password_credentials(object_id, password_creds)
-        if reply_urls:
-            client.patch(object_id, ApplicationUpdateParameters(
-                reply_urls=reply_urls))
-        return
-    except GraphErrorException as ex:
-        if 'insufficient privileges' in str(ex).lower():
-            link = 'https://docs.microsoft.com/azure/azure-resource-manager/resource-group-create-service-principal-portal'  # pylint: disable=line-too-long
-            raise CLIError("Directory permission is needed for the current user to register the application. "
-                           "For how to configure, please refer '{}'. Original error: {}".format(link, ex))
-        raise
-
-
-# legacy: osa command
-def _format_workspace_id(workspace_id):
-    workspace_id = workspace_id.strip()
-    if not workspace_id.startswith('/'):
-        workspace_id = '/' + workspace_id
-    if workspace_id.endswith('/'):
-        workspace_id = workspace_id.rstrip('/')
-    return workspace_id
-
-
-# legacy: osa command
-def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=too-many-locals
-                     location=None,
-                     compute_vm_size="Standard_D4s_v3",
-                     compute_count=3,
-                     aad_client_app_id=None,
-                     aad_client_app_secret=None,
-                     aad_tenant_id=None,
-                     vnet_prefix="10.0.0.0/8",
-                     subnet_prefix="10.0.0.0/24",
-                     vnet_peer=None,
-                     tags=None,
-                     no_wait=False,
-                     workspace_id=None,
-                     customer_admin_group_id=None):
-    OpenShiftManagedClusterAgentPoolProfile = cmd.get_models('OpenShiftManagedClusterAgentPoolProfile',
-                                                             resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                                             operation_group='open_shift_managed_clusters')
-    OpenShiftAgentPoolProfileRole = cmd.get_models('OpenShiftAgentPoolProfileRole',
-                                                   resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                                   operation_group='open_shift_managed_clusters')
-    OpenShiftManagedClusterIdentityProvider = cmd.get_models('OpenShiftManagedClusterIdentityProvider',
-                                                             resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                                             operation_group='open_shift_managed_clusters')
-    OpenShiftManagedCluster = cmd.get_models('OpenShiftManagedCluster',
-                                             resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                             operation_group='open_shift_managed_clusters')
-    OpenShiftRouterProfile = cmd.get_models('OpenShiftRouterProfile',
-                                            resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                            operation_group='open_shift_managed_clusters')
-    NetworkProfile = cmd.get_models('NetworkProfile',
-                                    resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                    operation_group='open_shift_managed_clusters')
-    OpenShiftManagedClusterAuthProfile = cmd.get_models('OpenShiftManagedClusterAuthProfile',
-                                                        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                                        operation_group='open_shift_managed_clusters')
-    OpenShiftManagedClusterMonitorProfile = cmd.get_models('OpenShiftManagedClusterMonitorProfile',
-                                                           resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                                           operation_group='open_shift_managed_clusters')
-    logger.warning('Support for the creation of ARO 3.11 clusters ends 30 Nov 2020. Please see aka.ms/aro/4 for information on switching to ARO 4.')  # pylint: disable=line-too-long
-
-    if location is None:
-        location = get_rg_location(cmd.cli_ctx, resource_group_name)
-    agent_pool_profiles = []
-    agent_node_pool_profile = OpenShiftManagedClusterAgentPoolProfile(
-        name='compute',  # Must be 12 chars or less before ACS RP adds to it
-        count=int(compute_count),
-        vm_size=compute_vm_size,
-        os_type="Linux",
-        role=OpenShiftAgentPoolProfileRole.compute,
-        subnet_cidr=subnet_prefix
-    )
-
-    agent_infra_pool_profile = OpenShiftManagedClusterAgentPoolProfile(
-        name='infra',  # Must be 12 chars or less before ACS RP adds to it
-        count=int(3),
-        vm_size="Standard_D4s_v3",
-        os_type="Linux",
-        role=OpenShiftAgentPoolProfileRole.infra,
-        subnet_cidr=subnet_prefix
-    )
-
-    agent_pool_profiles.append(agent_node_pool_profile)
-    agent_pool_profiles.append(agent_infra_pool_profile)
-
-    agent_master_pool_profile = OpenShiftManagedClusterAgentPoolProfile(
-        name='master',  # Must be 12 chars or less before ACS RP adds to it
-        count=int(3),
-        vm_size="Standard_D4s_v3",
-        os_type="Linux",
-        subnet_cidr=subnet_prefix
-    )
-    identity_providers = []
-
-    create_aad = False
-
-    # Validating if the cluster is not existing since we are not supporting the AAD rotation on OSA for now
-    try:
-        client.get(resource_group_name, name)
-    except CloudError:
-        # Validating if aad_client_app_id aad_client_app_secret aad_tenant_id are set
-        if aad_client_app_id is None and aad_client_app_secret is None and aad_tenant_id is None:
-            create_aad = True
-
-    osa_aad_identity = _ensure_osa_aad(cmd,
-                                       cmd.cli_ctx,
-                                       aad_client_app_id=aad_client_app_id,
-                                       aad_client_app_secret=aad_client_app_secret,
-                                       aad_tenant_id=aad_tenant_id, identifier=None,
-                                       name=name, create=create_aad,
-                                       customer_admin_group_id=customer_admin_group_id)
-    identity_providers.append(
-        OpenShiftManagedClusterIdentityProvider(
-            name='Azure AD',
-            provider=osa_aad_identity
-        )
-    )
-    auth_profile = OpenShiftManagedClusterAuthProfile(
-        identity_providers=identity_providers)
-
-    default_router_profile = OpenShiftRouterProfile(name='default')
-
-    if vnet_peer is not None:
-        from msrestazure.tools import is_valid_resource_id, resource_id
-        if not is_valid_resource_id(vnet_peer):
-            vnet_peer = resource_id(
-                subscription=get_subscription_id(cmd.cli_ctx),
-                resource_group=resource_group_name,
-                namespace='Microsoft.Network', type='virtualNetwork',
-                name=vnet_peer
-            )
-    if workspace_id is not None:
-        workspace_id = _format_workspace_id(workspace_id)
-        monitor_profile = OpenShiftManagedClusterMonitorProfile(
-            enabled=True, workspace_resource_id=workspace_id)  # pylint: disable=line-too-long
-    else:
-        monitor_profile = None
-
-    network_profile = NetworkProfile(
-        vnet_cidr=vnet_prefix, peer_vnet_id=vnet_peer)
-    osamc = OpenShiftManagedCluster(
-        location=location, tags=tags,
-        open_shift_version="v3.11",
-        network_profile=network_profile,
-        auth_profile=auth_profile,
-        agent_pool_profiles=agent_pool_profiles,
-        master_pool_profile=agent_master_pool_profile,
-        router_profiles=[default_router_profile],
-        monitor_profile=monitor_profile)
-
-    try:
-        # long_running_operation_timeout=300
-        result = sdk_no_wait(no_wait, client.begin_create_or_update,
-                             resource_group_name=resource_group_name, resource_name=name, parameters=osamc)
-        result = LongRunningOperation(cmd.cli_ctx)(result)
-        instance = client.get(resource_group_name, name)
-        _ensure_osa_aad(cmd,
-                        cmd.cli_ctx,
-                        aad_client_app_id=osa_aad_identity.client_id,
-                        aad_client_app_secret=osa_aad_identity.secret,
-                        aad_tenant_id=osa_aad_identity.tenant_id, identifier=instance.public_hostname,
-                        name=name, create=create_aad)
-    except CloudError as ex:
-        if "The resource type could not be found in the namespace 'Microsoft.ContainerService" in ex.message:
-            raise CLIError(
-                'Please make sure your subscription is whitelisted to use this service. https://aka.ms/openshift/managed')  # pylint: disable=line-too-long
-        if "No registered resource provider found for location" in ex.message:
-            raise CLIError(
-                'Please make sure your subscription is whitelisted to use this service. https://aka.ms/openshift/managed')  # pylint: disable=line-too-long
-        raise ex
-
-
-# legacy: osa command
-def openshift_scale(cmd, client, resource_group_name, name, compute_count, no_wait=False):
-    logger.warning('The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters.  See http://aka.ms/aro/4 for information on switching to ARO 4.')  # pylint: disable=line-too-long
-
-    instance = client.get(resource_group_name, name)
-    # TODO: change this approach when we support multiple agent pools.
-    idx = 0
-    for i in range(len(instance.agent_pool_profiles)):
-        if instance.agent_pool_profiles[i].name.lower() == "compute":
-            idx = i
-            break
-
-    instance.agent_pool_profiles[idx].count = int(
-        compute_count)  # pylint: disable=no-member
-
-    # null out the AAD profile and add manually the masterAP name because otherwise validation complains
-    instance.master_pool_profile.name = "master"
-    instance.auth_profile = None
-
-    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, name, instance)
-
-
-# legacy: osa command
-def openshift_show(cmd, client, resource_group_name, name):
-    logger.warning('The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters.  See http://aka.ms/aro/4 for information on switching to ARO 4.')  # pylint: disable=line-too-long
-
-    mc = client.get(resource_group_name, name)
-    return _remove_osa_nulls([mc])[0]
-
-
-# legacy: osa command
-def osa_list(cmd, client, resource_group_name=None):
-    if resource_group_name:
-        managed_clusters = client.list_by_resource_group(resource_group_name)
-    else:
-        managed_clusters = client.list()
-    return _remove_osa_nulls(list(managed_clusters))
-
-
-# legacy: osa command
-def _remove_osa_nulls(managed_clusters):
-    """
-    Remove some often-empty fields from a list of OpenShift ManagedClusters, so the JSON representation
-    doesn't contain distracting null fields.
-
-    This works around a quirk of the SDK for python behavior. These fields are not sent
-    by the server, but get recreated by the CLI's own "to_dict" serialization.
-    """
-    attrs = ['tags', 'plan', 'type', 'id']
-    ap_master_attrs = ['name', 'os_type']
-    net_attrs = ['peer_vnet_id']
-    for managed_cluster in managed_clusters:
-        for attr in attrs:
-            if hasattr(managed_cluster, attr) and getattr(managed_cluster, attr) is None:
-                delattr(managed_cluster, attr)
-        for attr in ap_master_attrs:
-            if getattr(managed_cluster.master_pool_profile, attr, None) is None:
-                delattr(managed_cluster.master_pool_profile, attr)
-        for attr in net_attrs:
-            if getattr(managed_cluster.network_profile, attr, None) is None:
-                delattr(managed_cluster.network_profile, attr)
-    return managed_clusters
-
-
-# legacy: osa command
-def openshift_monitor_enable(cmd, client, resource_group_name, name, workspace_id, no_wait=False):
-    OpenShiftManagedClusterMonitorProfile = cmd.get_models('OpenShiftManagedClusterMonitorProfile',
-                                                           resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                                           operation_group='open_shift_managed_clusters')
-    logger.warning('The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters.  See http://aka.ms/aro/4 for information on switching to ARO 4.')  # pylint: disable=line-too-long
-
-    instance = client.get(resource_group_name, name)
-    workspace_id = _format_workspace_id(workspace_id)
-    monitor_profile = OpenShiftManagedClusterMonitorProfile(
-        enabled=True, workspace_resource_id=workspace_id)  # pylint: disable=line-too-long
-    instance.monitor_profile = monitor_profile
-
-    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, name, instance)
-
-
-# legacy: osa command
-def openshift_monitor_disable(cmd, client, resource_group_name, name, no_wait=False):
-    OpenShiftManagedClusterMonitorProfile = cmd.get_models('OpenShiftManagedClusterMonitorProfile',
-                                                           resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                                           operation_group='open_shift_managed_clusters')
-    logger.warning('The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters.  See http://aka.ms/aro/4 for information on switching to ARO 4.')  # pylint: disable=line-too-long
-
-    instance = client.get(resource_group_name, name)
-    monitor_profile = OpenShiftManagedClusterMonitorProfile(
-        enabled=False, workspace_resource_id=None)  # pylint: disable=line-too-long
-    instance.monitor_profile = monitor_profile
-    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, name, instance)
 
 
 # TODO: remove in cli June release

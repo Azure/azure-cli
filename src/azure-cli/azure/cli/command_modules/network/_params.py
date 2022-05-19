@@ -443,8 +443,8 @@ def load_arguments(self, _):
 
     with self.argument_context('network application-gateway redirect-config', min_api='2017-06-01') as c:
         c.argument('redirect_type', options_list=['--type', '-t'], help='HTTP redirection type', arg_type=get_enum_type(ApplicationGatewayRedirectType))
-        c.argument('include_path', arg_type=get_three_state_flag())
-        c.argument('include_query_string', arg_type=get_three_state_flag())
+        c.argument('include_path', arg_type=get_three_state_flag(), help='Include path in the redirected url.')
+        c.argument('include_query_string', arg_type=get_three_state_flag(), help='Include query string in the redirected url.')
         c.argument('target_listener', validator=validate_target_listener, help='Name or ID of the HTTP listener to redirect the request to.')
         c.argument('target_url', help='URL to redirect the request to.')
 
@@ -452,9 +452,10 @@ def load_arguments(self, _):
         c.argument('predefined_policy_name', name_arg_type)
 
     with self.argument_context('network application-gateway ssl-policy', min_api='2017-06-01') as c:
-        c.argument('policy_name', name_arg_type)
-        c.argument('cipher_suites', nargs='+')
-        c.argument('min_protocol_version')
+        c.argument('policy_name', name_arg_type, help='Name of SSL policy.')
+        c.argument('policy_type', help='Type of SSL Policy.', choices=['Custom', 'Predefined'])
+        c.argument('cipher_suites', nargs='+', help='SSL cipher suites to be enabled in the specified order to application gateway.')
+        c.argument('min_protocol_version', help='Minimum version of SSL protocol to be supported on application gateway.')
         c.argument('disabled_ssl_protocols', nargs='+', help='Space-separated list of protocols to disable.')
 
     with self.argument_context('network application-gateway http-settings', min_api='2017-06-01') as c:
