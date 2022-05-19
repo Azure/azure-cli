@@ -1805,8 +1805,9 @@ class AKSManagedClusterContext(BaseAKSContext):
             if network_plugin:
                 if network_plugin == "azure" and pod_cidr:
                     logger.warning(
-                        "When using `--network-plugin azure` without the preview feature `--network-plugin-mode overlay` the " +
-                        f"provided pod CIDR {pod_cidr} will be overwritten with the subnet CIDR."
+                        "When using `--network-plugin azure` without the preview feature  " +
+                        "`--network-plugin-mode overlay` the provided pod CIDR '%s' will be " +
+                        "overwritten with the subnet CIDR.", pod_cidr
                     )
             else:
                 if (
