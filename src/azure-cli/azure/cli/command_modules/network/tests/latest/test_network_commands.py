@@ -1758,12 +1758,12 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
                  '-n testFrontendPort02 --port {port2}')
 
         self.cmd('network {res} create -g {rg} --gateway-name {appgw} --frontend-port {appgw_frontend_port} '
-                 '-n {appgw_listener} --frontend-ip appGatewayFrontendIP --no-wait ')
+                 '-n {appgw_listener} --frontend-ip appGatewayFrontendIP')
 
         self.cmd('network {res} show -g {rg} --gateway-name {appgw} -n {appgw_listener}',
                  checks=(self.check('name', '{appgw_listener}')))
 
-        self.cmd('network {res} update -g {rg} --gateway-name {appgw} --frontend-port testFrontendPort02 -n {appgw_listener} --no-wait')
+        self.cmd('network {res} update -g {rg} --gateway-name {appgw} --frontend-port testFrontendPort02 -n {appgw_listener}')
 
         listener = self.cmd('network {res} show -g {rg} --gateway-name {appgw} -n {appgw_listener}').get_output_in_json()
         self.assertTrue(listener['frontendPort']['id'].endswith('testFrontendPort02'))
@@ -1771,7 +1771,7 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
         self.cmd('network {res} list -g {rg} --gateway-name {appgw}',
                  checks=(self.check('length(@)', 1)))
 
-        self.cmd('network {res} delete -g {rg} --gateway-name {appgw} --no-wait -n {appgw_listener}')
+        self.cmd('network {res} delete -g {rg} --gateway-name {appgw} -n {appgw_listener}')
 
         self.cmd('network {res} list -g {rg} --gateway-name {appgw}',
                  checks=(self.check('length(@)', 0)))
@@ -1802,13 +1802,13 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
         self.cmd('network application-gateway frontend-port create -g {rg} --gateway-name {appgw} '
                  '-n {appgw_frontend_port2} --port {port2}')
 
-        self.cmd('network {res} create -g {rg} --gateway-name {appgw} --no-wait '
+        self.cmd('network {res} create -g {rg} --gateway-name {appgw} '
                  '--name {appgw_settings} --port {port1} ')
 
         self.cmd('network {res} show -g {rg} --gateway-name {appgw} -n {appgw_settings}',
                  checks=(self.check('name', '{appgw_settings}')))
 
-        self.cmd('network {res} update -g {rg} --gateway-name {appgw} --no-wait '
+        self.cmd('network {res} update -g {rg} --gateway-name {appgw} '
                  '--name {appgw_settings} --port {port2}')
 
         self.cmd('network {res} show -g {rg} --gateway-name {appgw} -n {appgw_settings}',
@@ -1817,7 +1817,7 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
         self.cmd('network {res} list -g {rg} --gateway-name {appgw}',
                  checks=(self.check('length(@)', 1)))
 
-        self.cmd('network {res} delete --gateway-name {appgw} --name {appgw_settings} --resource-group {rg} --no-wait')
+        self.cmd('network {res} delete --gateway-name {appgw} --name {appgw_settings} --resource-group {rg}')
 
         self.cmd('network {res} list -g {rg} --gateway-name {appgw}',
                  checks=(self.check('length(@)', 0)))
@@ -1866,7 +1866,7 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
         self.cmd(
             'network application-gateway address-pool create -g {rg} --gateway-name {appgw} -n {appgw_address_pool} '
             '--servers 10.0.0.4 10.0.0.5')
-        self.cmd('network {res} create -g {rg} --gateway-name {appgw} --no-wait '
+        self.cmd('network {res} create -g {rg} --gateway-name {appgw} '
                  '--name {appgw_routing_rule} --listener {appgw_listener1} --rule-type {appgw_rule_type} '
                  '--address-pool {appgw_address_pool} --settings {appgw_settings}')
 
@@ -1875,14 +1875,14 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
 
         self.cmd('network {res} update -g {rg} --gateway-name {appgw} --name {appgw_routing_rule} '
                  '--listener {appgw_listener2} --rule-type {appgw_rule_type} '
-                 '--address-pool {appgw_address_pool} --no-wait')
+                 '--address-pool {appgw_address_pool}')
 
         routing_rule = self.cmd('network {res} show -g {rg} --gateway-name {appgw} -n {appgw_routing_rule}').get_output_in_json()
         self.assertTrue(routing_rule['listener']['id'].endswith('testListener02'))
 
         self.cmd('network {res} list -g {rg} --gateway-name {appgw}',
                  checks=(self.check('length(@)', 1)))
-        self.cmd('network {res} delete --gateway-name {appgw} --resource-group {rg} -n {appgw_routing_rule} --no-wait ')
+        self.cmd('network {res} delete --gateway-name {appgw} --resource-group {rg} -n {appgw_routing_rule}')
         self.cmd('network {res} list -g {rg} --gateway-name {appgw}',
                  checks=(self.check('length(@)', 0)))
 

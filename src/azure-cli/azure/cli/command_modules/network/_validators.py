@@ -799,7 +799,7 @@ def process_ag_http_listener_create_namespace(cmd, namespace):  # pylint: disabl
 
 
 def process_ag_listener_create_namespace(cmd, namespace):  # pylint: disable=unused-argument
-    from msrestazure.tools import is_valid_resource_id, resource_id
+    from msrestazure.tools import is_valid_resource_id
     if namespace.frontend_ip and not is_valid_resource_id(namespace.frontend_ip):
         namespace.frontend_ip = _generate_ag_subproperty_id(
             cmd.cli_ctx, namespace, 'frontendIpConfigurations', namespace.frontend_ip)

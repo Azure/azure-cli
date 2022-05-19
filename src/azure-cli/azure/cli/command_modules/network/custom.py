@@ -2408,7 +2408,7 @@ def _type_to_property_name(key):
     return type_dict[key.lower()]
 
 
-def export_zone(cmd, resource_group_name, zone_name, file_name=None):
+def export_zone(cmd, resource_group_name, zone_name, file_name=None):  # pylint: disable=too-many-branches
     from time import localtime, strftime
 
     client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK_DNS)

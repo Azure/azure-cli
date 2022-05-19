@@ -365,7 +365,7 @@ def load_arguments(self, _):
                         'The valid value ranges from 1 to 65535. '
                         'In case not set, port from http settings will be used. '
                         'This property is valid for Standard_v2 and WAF_v2 only.')
-        c.argument('host_name_from_settings', min_api='2021-08-01', options_list=['--host-name-from-settings', '-settings'], help='Use host header from settings. Pick hostname from settings is currently not supported, now only support false', arg_type=get_three_state_flag())
+        c.argument('host_name_from_settings', min_api='2021-08-01', options_list=['--host-name-from-settings', '-s'], help='Use host header from settings. Pick hostname from settings is currently not supported, now only support false', arg_type=get_three_state_flag())
 
     for scope in ['rule', 'routing-rule']:
         with self.argument_context('network application-gateway {}'.format(scope)) as c:
