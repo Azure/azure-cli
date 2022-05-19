@@ -25,7 +25,7 @@ class IoTCentralTest(ScenarioTest):
             self.check('location', location),
             self.check('subdomain', app_name),
             self.check('displayName', app_name),
-            self.check('sku.name', 'ST2')])
+            self.check('sku.name', 'ST2')]).get_output_in_json()
 
         # Test 'az iot central app create with template and display name'
         self.cmd('iot central app create -n {0} -g {1} --subdomain {2} --template {3} --display-name \"{4}\" --sku {5}'
@@ -113,3 +113,113 @@ class IoTCentralTest(ScenarioTest):
         # Test 'az iot central app delete'
         self.cmd('iot central app delete -n {0} -g {1} --yes'.format(app_name, rg), checks=[
             self.is_empty()])
+
+    @ResourceGroupPreparer()  # name_prefix not required, but can be useful
+    def test_iot_central_private_link_and_private_endpoint(self, resource_group):
+        from msrestazure.azure_exceptions import CloudError
+        name = self.create_random_name(prefix='iotc-cli-test', length=24)
+        self.kwargs.update({
+            'app_name': name,
+            'loc': 'westus',
+            'vnet': self.create_random_name('cli-vnet-', 24),
+            'subnet': self.create_random_name('cli-subnet-', 24),
+            'pe': self.create_random_name('cli-pe-', 24),
+            'pe_connection': self.create_random_name('cli-pec-', 24),
+            'rg' : resource_group,
+            'sku' : 'ST2',
+            'type' : 'Microsoft.IoTCentral/iotApps',
+            'approve_description' : 'Approved!',
+            'reject_description' : 'Rejected!'
+        })
+
+        # Setup for Tests
+
+        # Create an iotc app
+        result = self.cmd('iot central app create -n {app_name} -g {rg} --subdomain {app_name} --sku {sku}').get_output_in_json()
+        self.kwargs['iotc_id'] = result['id']
+
+        # Prepare network for private endpoint connection
+        self.cmd('network vnet create -n {vnet} -g {rg} -l {loc} --subnet-name {subnet}',
+                        checks=self.check('length(newVNet.subnets)', 1))
+        self.cmd('network vnet subnet update -n {subnet} --vnet-name {vnet} -g {rg} '
+                '--disable-private-endpoint-network-policies true',
+                checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
+
+        # Test Private Link Resource
+
+        # Test `az iot central app private-link-resource list` with app name and resource group 
+        self.cmd('iot central app private-link-resource list -n {app_name} -g {rg} --type {type}', checks=[
+            self.check('length(@)', 1)])
+
+        # Test 'az iot central app private-link-resource list` with private link resource id
+        self.cmd('iot central app private-link-resource list --id {iotc_id}', checks=[
+            self.check('length(@)', 1)])
+        
+
+        # Test Private Endpoint Connection
+
+        # Create a private endpoint connection
+        pr = self.cmd('az iot central app private-link-resource list -n {app_name} -g {rg} --type {type}').get_output_in_json()
+        self.kwargs['group_id'] = pr[0]['groupId']
+        self.kwargs['iotc_pr_id'] = pr[0]['id']
+
+        private_endpoint = self.cmd(
+            'network private-endpoint create -g {rg} -n {pe} --vnet-name {vnet} --subnet {subnet} -l {loc} '
+            '--connection-name {pe_connection} --private-connection-resource-id {iotc_id} '
+            '--group-id {group_id}').get_output_in_json()
+        self.assertEqual(private_endpoint['name'], self.kwargs['pe'])
+        self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['name'], self.kwargs['pe_connection'])
+        self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['privateLinkServiceConnectionState']['status'], 'Approved')
+        self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['provisioningState'], 'Succeeded')
+        self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['groupIds'][0], self.kwargs['group_id'])
+        self.kwargs['pe_id'] = private_endpoint['privateLinkServiceConnections'][0]['id']
+
+        # Show the connection at iot central app
+        iotcApp = self.cmd('iot central app show -n {app_name} -g {rg}').get_output_in_json()
+        self.assertIn('privateEndpointConnections', iotcApp)
+        self.assertEqual(len(iotcApp['privateEndpointConnections']), 1)
+        self.assertEqual(iotcApp['privateEndpointConnections'][0]['privateLinkServiceConnectionState']['status'],
+                         'Approved')
+
+        self.kwargs['iotc_pec_id'] = iotcApp['privateEndpointConnections'][0]['id']
+        
+        self.kwargs['iotc_pec_name'] = iotcApp['privateEndpointConnections'][0]['name']
+
+        self.cmd('az iot central app private-link-resource show -n {app_name} -g {rg} --group-id {group_id}',
+                 checks=self.check('id','{iotc_pr_id}'))
+        
+        self.cmd('az iot central app private-link-resource show --id {iotc_pr_id}',
+                 checks=self.check('id','{iotc_pr_id}'))
+
+        self.cmd('iot central app private-endpoint-connection show --id {iotc_pec_id}',
+                 checks=self.check('id', '{iotc_pec_id}'))
+
+        self.cmd('iot central app private-endpoint-connection list --account-name {app_name} --resource-group {rg}',
+                 checks=self.check('length(@)', 1))
+
+        self.cmd('iot central app private-endpoint-connection list --id {iotc_pec_id}',
+                 checks=self.check('length(@)', 1))
+
+        self.cmd('iot central app private-endpoint-connection show --account-name {app_name} --name {iotc_pec_name} --resource-group {rg}',
+                 checks=self.check('name', '{iotc_pec_name}'))
+
+        self.cmd('iot central app private-endpoint-connection show --account-name {app_name} -n {iotc_pec_name} -g {rg}',
+                 checks=self.check('name', '{iotc_pec_name}'))
+
+        self.cmd('iot central app private-endpoint-connection approve --account-name {app_name} -g {rg} --name {iotc_pec_name} --description {approve_description}',
+                 checks=[self.check('privateLinkServiceConnectionState.status', 'Approved')])
+
+        # self.cmd('iot central app private-endpoint-connection approve --id {iotc_pec_id}',
+        #          checks=[self.check('privateLinkServiceConnectionState.status', 'Approved')])
+
+        self.cmd('iot central app private-endpoint-connection reject --account-name {app_name} -g {rg} --name {iotc_pec_name} --description {reject_description}',
+                 checks=[self.check('privateLinkServiceConnectionState.status', 'Rejected')])
+
+        # self.cmd('iot central app private-endpoint-connection reject --id {iotc_pec_id}',
+        #          checks=[self.check('privateLinkServiceConnectionState.status', 'Rejected')])
+
+        # with self.assertRaisesRegexp(CloudError, 'You cannot approve the connection request after rejection.'):
+        #     self.cmd('iot central app private-endpoint-connection approve --account-name {app_name} -g {rg} --name {iotc_pec_name}')
+
+        self.cmd('iot central app private-endpoint-connection delete --id {iotc_pec_id} -y')
+     
