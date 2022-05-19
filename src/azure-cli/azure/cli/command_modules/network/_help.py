@@ -912,7 +912,7 @@ examples:
 
 helps['network application-gateway rule'] = """
 type: group
-short-summary: Evaluate probe information and define routing rules.
+short-summary: Evaluate probe information and define http/https routing rules.
 long-summary: >
     For more information, visit, https://docs.microsoft.com/azure/application-gateway/application-gateway-customize-waf-rules-cli
 """
@@ -968,7 +968,7 @@ examples:
 
 helps['network application-gateway routing-rule'] = """
 type: group
-short-summary: Evaluate probe information and define routing rules.
+short-summary: Evaluate probe information and define tcp/tls routing rules.
 """
 
 helps['network application-gateway routing-rule create'] = """
