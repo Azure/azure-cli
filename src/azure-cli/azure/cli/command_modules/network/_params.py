@@ -63,7 +63,7 @@ def load_arguments(self, _):
      ExpressRouteLinkMacSecCipher,
      ConnectionMonitorEndpointFilterType, ConnectionMonitorTestConfigurationProtocol,
      PreferredIPVersion, HTTPConfigurationMethod, OutputType, DestinationPortBehavior, CoverageLevel, EndpointType, GatewayLoadBalancerTunnelProtocol,
-     GatewayLoadBalancerTunnelInterfaceType, VpnNatRuleType, VpnNatRuleMode) = self.get_models(
+     GatewayLoadBalancerTunnelInterfaceType, VpnNatRuleType, VpnNatRuleMode, LoadBalancerBackendAddressAdminState) = self.get_models(
          'Access', 'ApplicationGatewayFirewallMode', 'ApplicationGatewayProtocol', 'ApplicationGatewayRedirectType',
          'ApplicationGatewayRequestRoutingRuleType', 'ApplicationGatewaySkuName', 'ApplicationGatewaySslProtocol', 'AuthenticationMethod',
          'Direction', 'VpnAuthenticationType',
@@ -75,7 +75,7 @@ def load_arguments(self, _):
          'ExpressRouteLinkMacSecCipher',
          'ConnectionMonitorEndpointFilterType', 'ConnectionMonitorTestConfigurationProtocol',
          'PreferredIPVersion', 'HTTPConfigurationMethod', 'OutputType', 'DestinationPortBehavior', 'CoverageLevel', 'EndpointType', 'GatewayLoadBalancerTunnelProtocol',
-         'GatewayLoadBalancerTunnelInterfaceType', 'VpnNatRuleType', 'VpnNatRuleMode')
+         'GatewayLoadBalancerTunnelInterfaceType', 'VpnNatRuleType', 'VpnNatRuleMode', 'LoadBalancerBackendAddressAdminState')
 
     ZoneType = self.get_models('ZoneType', resource_type=ResourceType.MGMT_NETWORK_DNS)
 
@@ -1059,6 +1059,8 @@ def load_arguments(self, _):
         c.argument('backend_addresses', options_list=['--backend-address'], nargs='+', action=AddBackendAddressCreate, is_preview=True)
         c.argument('backend_addresses_config_file', type=get_json_object, is_preview=True)
         c.argument('vnet', help='Name or Id of the virtual network applied to all backend addresses.', validator=process_vnet_name_or_id)
+        c.argument('admin_state', arg_type=get_enum_type(LoadBalancerBackendAddressAdminState), help='Administrative state which once set can override health probe so that Load Balancer will always forward new connections to backend, or deny new connections and reset existing connections.', min_api='2021-08-01')
+        c.argument('drain_period', type=int, help='Amount of seconds Load Balancer waits for before sending RESET to client and backend address.', min_api='2021-08-01')
 
     with self.argument_context('network lb address-pool address') as c:
         c.argument('backend_address_pool_name',

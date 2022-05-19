@@ -464,3 +464,7 @@ class AAZGenericUpdateRemoveArg(AAZGenericUpdateArg):
 
     def _build_cmd_action(self):
         return AAZGenericUpdateAction
+
+
+def has_value(arg_value):
+    return arg_value != AAZUndefined
