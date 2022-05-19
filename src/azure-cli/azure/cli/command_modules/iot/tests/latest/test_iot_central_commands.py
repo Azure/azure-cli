@@ -3,11 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, live_only
 
 
 class IoTCentralTest(ScenarioTest):
-
+    @live_only()
     @ResourceGroupPreparer()  # name_prefix not required, but can be useful
     def test_iot_central_app(self, resource_group, resource_group_location):
         app_name = self.create_random_name(prefix='iotc-cli-test', length=24)
@@ -114,6 +114,7 @@ class IoTCentralTest(ScenarioTest):
         self.cmd('iot central app delete -n {0} -g {1} --yes'.format(app_name, rg), checks=[
             self.is_empty()])
 
+    @live_only()
     @ResourceGroupPreparer()  # name_prefix not required, but can be useful
     def test_iot_central_private_link_and_private_endpoint(self, resource_group):
         from msrestazure.azure_exceptions import CloudError
