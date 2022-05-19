@@ -139,7 +139,7 @@ def load_arguments(self, _):
         c.argument('zones', zones_type)
         c.argument('custom_error_pages', min_api='2018-08-01', nargs='+', help='Space-separated list of custom error pages in `STATUS_CODE=URL` format.', validator=validate_custom_error_pages)
         c.argument('firewall_policy', options_list='--waf-policy', min_api='2018-12-01', help='Name or ID of a web application firewall (WAF) policy.', validator=validate_waf_policy)
-        c.argument('priority', min_api='2021-08-01', type=int, help='Priority of the request routing rule. Supported SKU tiers are Standard_v2,WAF_v2')
+        c.argument('priority', min_api='2021-08-01', type=int, help='Priority of the request routing rule. Supported SKU tiers are Standard_v2, WAF_v2.')
 
     with self.argument_context('network application-gateway', arg_group='Identity') as c:
         c.argument('user_assigned_identity', options_list='--identity', help="Name or ID of the ManagedIdentity Resource", validator=validate_user_assigned_identity)
@@ -365,6 +365,7 @@ def load_arguments(self, _):
                         'The valid value ranges from 1 to 65535. '
                         'In case not set, port from http settings will be used. '
                         'This property is valid for Standard_v2 and WAF_v2 only.')
+        c.argument('host_name_from_settings', min_api='2021-08-01', options_list=['--host-name-from-settings', '-settings'], help='Use host header from settings. Pick hostname from settings is currently not supported, now only support false', arg_type=get_three_state_flag())
 
     for scope in ['rule', 'routing-rule']:
         with self.argument_context('network application-gateway {}'.format(scope)) as c:
@@ -466,7 +467,6 @@ def load_arguments(self, _):
     with self.argument_context('network application-gateway probe', min_api='2017-06-01') as c:
         c.argument('host', default=None, required=False, help='The name of the host to send the probe.')
         c.argument('host_name_from_http_settings', help='Use host header from HTTP settings.', arg_type=get_three_state_flag())
-        c.argument('host_name_from_settings', options_list=['--settings'], min_api='2021-08-01', help='Use host header from settings.', arg_type=get_three_state_flag())
         c.argument('min_servers', type=int, help='Minimum number of servers that are always marked healthy.')
         c.argument('match_body', help='Body that must be contained in the health response.')
         c.argument('match_status_codes', nargs='+', help='Space-separated list of allowed ranges of healthy status codes for the health response.')

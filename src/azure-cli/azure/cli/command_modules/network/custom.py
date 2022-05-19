@@ -1363,7 +1363,7 @@ def delete_ag_rewrite_rule_condition(cmd, resource_group_name, application_gatew
 
 
 def create_ag_probe(cmd, resource_group_name, application_gateway_name, item_name, protocol, host, path, interval=30,
-                    timeout=120, threshold=8,  no_wait=False, host_name_from_http_settings=None, min_servers=None,
+                    timeout=120, threshold=8, no_wait=False, host_name_from_http_settings=None, min_servers=None,
                     match_body=None, match_status_codes=None, host_name_from_settings=None, port=None):
     ApplicationGatewayProbe, ProbeMatchCriteria = cmd.get_models(
         'ApplicationGatewayProbe', 'ApplicationGatewayProbeHealthResponseMatch')
