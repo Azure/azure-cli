@@ -3986,7 +3986,8 @@ def _process_subnet_name_and_id(subnet, vnet, cmd, resource_group_name):
 
 # pylint: disable=too-many-branches
 def create_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name, backend_address_pool_name,
-                                   vnet=None, backend_addresses=None, backend_addresses_config_file=None):
+                                   vnet=None, backend_addresses=None, backend_addresses_config_file=None,
+                                   admin_state=None, drain_period=None):
     if backend_addresses and backend_addresses_config_file:
         raise CLIError('usage error: Only one of --backend-address and --backend-addresses-config-file can be provided at the same time.')  # pylint: disable=line-too-long
     if backend_addresses_config_file:
@@ -4032,14 +4033,27 @@ def create_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name,
                     # name/id   | name/id/null  |    ok
                     # null      | id            |    ok
                     if 'virtual_network' in addr:
-                        address = LoadBalancerBackendAddress(name=addr['name'],
-                                                             virtual_network=VirtualNetwork(id=_process_vnet_name_and_id(addr['virtual_network'], cmd, resource_group_name)),
-                                                             subnet=Subnet(id=_process_subnet_name_and_id(addr['subnet'], addr['virtual_network'], cmd, resource_group_name)) if 'subnet' in addr else None,
-                                                             ip_address=addr['ip_address'])
+                        if admin_state is not None:
+                            address = LoadBalancerBackendAddress(name=addr['name'],
+                                                                 virtual_network=VirtualNetwork(id=_process_vnet_name_and_id(addr['virtual_network'], cmd, resource_group_name)),
+                                                                 subnet=Subnet(id=_process_subnet_name_and_id(addr['subnet'], addr['virtual_network'], cmd, resource_group_name)) if 'subnet' in addr else None,
+                                                                 ip_address=addr['ip_address'],
+                                                                 admin_state=admin_state)
+                        else:
+                            address = LoadBalancerBackendAddress(name=addr['name'],
+                                                                 virtual_network=VirtualNetwork(id=_process_vnet_name_and_id(addr['virtual_network'], cmd, resource_group_name)),
+                                                                 subnet=Subnet(id=_process_subnet_name_and_id(addr['subnet'], addr['virtual_network'], cmd, resource_group_name)) if 'subnet' in addr else None,
+                                                                 ip_address=addr['ip_address'])
                     elif 'subnet' in addr and is_valid_resource_id(addr['subnet']):
-                        address = LoadBalancerBackendAddress(name=addr['name'],
-                                                             subnet=Subnet(id=addr['subnet']),
-                                                             ip_address=addr['ip_address'])
+                        if admin_state is not None:
+                            address = LoadBalancerBackendAddress(name=addr['name'],
+                                                                 subnet=Subnet(id=addr['subnet']),
+                                                                 ip_address=addr['ip_address'],
+                                                                 admin_state=admin_state)
+                        else:
+                            address = LoadBalancerBackendAddress(name=addr['name'],
+                                                                 subnet=Subnet(id=addr['subnet']),
+                                                                 ip_address=addr['ip_address'])
                     else:
                         raise KeyError
 
@@ -4057,10 +4071,15 @@ def create_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name,
         except KeyError:
             raise UnrecognizedArgumentError('Each backend address must have name, vnet and ip-address information.')
 
-    new_pool = BackendAddressPool(name=backend_address_pool_name,
-                                  load_balancer_backend_addresses=new_addresses)
+    if drain_period is not None:
+        new_pool = BackendAddressPool(name=backend_address_pool_name,
+                                      load_balancer_backend_addresses=new_addresses,
+                                      drain_period_in_seconds=drain_period)
+    else:
+        new_pool = BackendAddressPool(name=backend_address_pool_name,
+                                      load_balancer_backend_addresses=new_addresses)
 
-    # when sku is 'gateway', 'tunnelInterfaces' can't be None. Otherwise service will response error
+    # when sku is 'gateway', 'tunnelInterfaces' can't be None. Otherwise, service will respond error
     if cmd.supported_api_version(min_api='2021-02-01') and lb.sku.name.lower() == 'gateway':
         GatewayLoadBalancerTunnelInterface = cmd.get_models('GatewayLoadBalancerTunnelInterface')
         new_pool.tunnel_interfaces = [
@@ -4072,7 +4091,7 @@ def create_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name,
 
 
 def set_lb_backend_address_pool(cmd, instance, resource_group_name, vnet=None, backend_addresses=None,
-                                backend_addresses_config_file=None):
+                                backend_addresses_config_file=None, admin_state=None, drain_period=None):
 
     if backend_addresses and backend_addresses_config_file:
         raise CLIError('usage error: Only one of --backend-address and --backend-addresses-config-file can be provided at the same time.')  # pylint: disable=line-too-long
@@ -4108,14 +4127,26 @@ def set_lb_backend_address_pool(cmd, instance, resource_group_name, vnet=None, b
                     # name/id   | name/id/null  |    ok
                     # null      | id            |    ok
                     if 'virtual_network' in addr:
-                        address = LoadBalancerBackendAddress(name=addr['name'],
-                                                             virtual_network=VirtualNetwork(id=_process_vnet_name_and_id(addr['virtual_network'], cmd, resource_group_name)),
-                                                             subnet=Subnet(id=_process_subnet_name_and_id(addr['subnet'], addr['virtual_network'], cmd, resource_group_name)) if 'subnet' in addr else None,
-                                                             ip_address=addr['ip_address'])
+                        if admin_state is not None:
+                            address = LoadBalancerBackendAddress(name=addr['name'], virtual_network=VirtualNetwork(id=_process_vnet_name_and_id(addr['virtual_network'], cmd, resource_group_name)),
+                                                                 subnet=Subnet(id=_process_subnet_name_and_id(addr['subnet'], addr['virtual_network'], cmd, resource_group_name)) if 'subnet' in addr else None,
+                                                                 ip_address=addr['ip_address'],
+                                                                 admin_state=admin_state)
+                        else:
+                            address = LoadBalancerBackendAddress(name=addr['name'],
+                                                                 virtual_network=VirtualNetwork(id=_process_vnet_name_and_id(addr['virtual_network'], cmd, resource_group_name)),
+                                                                 subnet=Subnet(id=_process_subnet_name_and_id(addr['subnet'], addr['virtual_network'], cmd, resource_group_name)) if 'subnet' in addr else None,
+                                                                 ip_address=addr['ip_address'])
                     elif 'subnet' in addr and is_valid_resource_id(addr['subnet']):
-                        address = LoadBalancerBackendAddress(name=addr['name'],
-                                                             subnet=Subnet(id=addr['subnet']),
-                                                             ip_address=addr['ip_address'])
+                        if admin_state is not None:
+                            address = LoadBalancerBackendAddress(name=addr['name'],
+                                                                 subnet=Subnet(id=addr['subnet']),
+                                                                 ip_address=addr['ip_address'],
+                                                                 admin_state=admin_state)
+                        else:
+                            address = LoadBalancerBackendAddress(name=addr['name'],
+                                                                 subnet=Subnet(id=addr['subnet']),
+                                                                 ip_address=addr['ip_address'])
                     else:
                         raise KeyError
 
@@ -4133,6 +4164,8 @@ def set_lb_backend_address_pool(cmd, instance, resource_group_name, vnet=None, b
         except KeyError:
             raise UnrecognizedArgumentError('Each backend address must have name, vnet and ip-address information.')
 
+    if drain_period is not None:
+        instance.drain_period_in_seconds = drain_period
     if new_addresses:
         instance.load_balancer_backend_addresses = new_addresses
 
@@ -4402,7 +4435,7 @@ def set_cross_region_lb_rule(
 
 # pylint: disable=line-too-long
 def add_lb_backend_address_pool_address(cmd, resource_group_name, load_balancer_name, backend_address_pool_name,
-                                        address_name, ip_address, vnet=None, subnet=None):
+                                        address_name, ip_address, vnet=None, subnet=None, admin_state=None):
     client = network_client_factory(cmd.cli_ctx).load_balancer_backend_address_pools
     address_pool = client.get(resource_group_name, load_balancer_name, backend_address_pool_name)
     (LoadBalancerBackendAddress,
@@ -4412,14 +4445,27 @@ def add_lb_backend_address_pool_address(cmd, resource_group_name, load_balancer_
                                       'VirtualNetwork')
     if cmd.supported_api_version(min_api='2020-11-01'):
         if vnet:
-            new_address = LoadBalancerBackendAddress(name=address_name,
-                                                     subnet=Subnet(id=_process_subnet_name_and_id(subnet, vnet, cmd, resource_group_name)) if subnet else None,
-                                                     virtual_network=VirtualNetwork(id=vnet),
-                                                     ip_address=ip_address if ip_address else None)
+            if admin_state is not None:
+                new_address = LoadBalancerBackendAddress(name=address_name,
+                                                         subnet=Subnet(id=_process_subnet_name_and_id(subnet, vnet, cmd, resource_group_name)) if subnet else None,
+                                                         virtual_network=VirtualNetwork(id=vnet),
+                                                         ip_address=ip_address if ip_address else None,
+                                                         admin_state=admin_state)
+            else:
+                new_address = LoadBalancerBackendAddress(name=address_name,
+                                                         subnet=Subnet(id=_process_subnet_name_and_id(subnet, vnet, cmd, resource_group_name)) if subnet else None,
+                                                         virtual_network=VirtualNetwork(id=vnet),
+                                                         ip_address=ip_address if ip_address else None)
         elif is_valid_resource_id(subnet):
-            new_address = LoadBalancerBackendAddress(name=address_name,
-                                                     subnet=Subnet(id=subnet),
-                                                     ip_address=ip_address if ip_address else None)
+            if admin_state is not None:
+                new_address = LoadBalancerBackendAddress(name=address_name,
+                                                         subnet=Subnet(id=subnet),
+                                                         ip_address=ip_address if ip_address else None,
+                                                         admin_state=admin_state)
+            else:
+                new_address = LoadBalancerBackendAddress(name=address_name,
+                                                         subnet=Subnet(id=subnet),
+                                                         ip_address=ip_address if ip_address else None)
         else:
             raise UnrecognizedArgumentError('Each backend address must have name, ip-address, (vnet name and subnet name | subnet id) information.')
 
