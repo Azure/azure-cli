@@ -196,12 +196,12 @@ class LocalContextScenarioTest(ScenarioTest):
         super(LocalContextScenarioTest, self).setUp()
         self.cli_ctx.local_context.initialize()
         os.chdir(self.working_dir)
-        self.cmd('local-context on')
+        self.cmd('config param-persist on')
 
     def tearDown(self):
         super(LocalContextScenarioTest, self).tearDown()
-        self.cmd('local-context off')
-        self.cmd('local-context delete --all --purge -y')
+        self.cmd('config param-persist off')
+        self.cmd('config param-persist delete --all --purge -y')
         os.chdir(self.original_working_dir)
         if os.path.exists(self.working_dir):
             import shutil
