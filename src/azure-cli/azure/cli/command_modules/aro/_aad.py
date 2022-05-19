@@ -23,6 +23,7 @@ logger = get_logger(__name__)
 class AADManager:
     def __init__(self, cli_ctx):
         profile = Profile(cli_ctx=cli_ctx)
+        self.cli_ctx = cli_ctx
         credentials, _, tenant_id = profile.get_login_credentials(
             resource=cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
         self.client = GraphRbacManagementClient(
@@ -51,14 +52,14 @@ class AADManager:
 
     def get_service_principal(self, app_id):
         sps = list(self.client.service_principals.list(
-            filter="appId eq '%s'" % app_id))
+            filter=f"appId eq '{app_id}'"))
         if sps:
             return sps[0]
         return None
 
     def get_application_by_client_id(self, client_id):
         apps = list(self.client.applications.list(
-            filter="appId eq '%s'" % client_id))
+            filter=f"appId eq '{client_id}'"))
         if apps:
             return apps[0]
         return None

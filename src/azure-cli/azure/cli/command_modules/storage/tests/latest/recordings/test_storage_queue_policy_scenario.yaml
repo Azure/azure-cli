@@ -15,12 +15,12 @@ interactions:
       ParameterSetName:
       - -n -g --query -o
       User-Agent:
-      - AZURECLI/2.35.0 azsdk-python-azure-mgmt-storage/20.0.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-storage/20.0.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.Storage/storageAccounts/queue000002/listKeys?api-version=2021-09-01&$expand=kerb
   response:
     body:
-      string: '{"keys":[{"creationTime":"2022-04-11T14:17:37.8283749Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2022-04-11T14:17:37.8283749Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+      string: '{"keys":[{"creationTime":"2022-05-05T09:06:42.8719374Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2022-05-05T09:06:42.8719374Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
     headers:
       cache-control:
       - no-cache
@@ -29,7 +29,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 11 Apr 2022 14:18:01 GMT
+      - Thu, 05 May 2022 09:07:03 GMT
       expires:
       - '-1'
       pragma:
@@ -65,12 +65,12 @@ interactions:
       ParameterSetName:
       - -n -g --query -o
       User-Agent:
-      - AZURECLI/2.35.0 azsdk-python-azure-mgmt-storage/20.0.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-storage/20.0.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.Storage/storageAccounts/queue000002/listKeys?api-version=2021-09-01&$expand=kerb
   response:
     body:
-      string: '{"keys":[{"creationTime":"2022-04-11T14:17:37.8283749Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2022-04-11T14:17:37.8283749Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+      string: '{"keys":[{"creationTime":"2022-05-05T09:06:42.8719374Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2022-05-05T09:06:42.8719374Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
     headers:
       cache-control:
       - no-cache
@@ -79,7 +79,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 11 Apr 2022 14:18:03 GMT
+      - Thu, 05 May 2022 09:07:04 GMT
       expires:
       - '-1'
       pragma:
@@ -103,6 +103,52 @@ interactions:
     body: null
     headers:
       Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account show-connection-string
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --query -o
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-storage/20.0.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.Storage/storageAccounts/queue000002?api-version=2021-09-01
+  response:
+    body:
+      string: '{"sku":{"name":"Standard_RAGRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.Storage/storageAccounts/queue000002","name":"queue000002","type":"Microsoft.Storage/storageAccounts","location":"eastus2","tags":{},"properties":{"keyCreationTime":{"key1":"2022-05-05T09:06:42.8719374Z","key2":"2022-05-05T09:06:42.8719374Z"},"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":true,"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2022-05-05T09:06:42.8719374Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2022-05-05T09:06:42.8719374Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2022-05-05T09:06:42.7313046Z","primaryEndpoints":{"dfs":"https://queue000002.dfs.core.windows.net/","web":"https://queue000002.z20.web.core.windows.net/","blob":"https://queue000002.blob.core.windows.net/","queue":"https://queue000002.queue.core.windows.net/","table":"https://queue000002.table.core.windows.net/","file":"https://queue000002.file.core.windows.net/"},"primaryLocation":"eastus2","statusOfPrimary":"available","secondaryLocation":"centralus","statusOfSecondary":"available","secondaryEndpoints":{"dfs":"https://queue000002-secondary.dfs.core.windows.net/","web":"https://queue000002-secondary.z20.web.core.windows.net/","blob":"https://queue000002-secondary.blob.core.windows.net/","queue":"https://queue000002-secondary.queue.core.windows.net/","table":"https://queue000002-secondary.table.core.windows.net/"}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1784'
+      content-type:
+      - application/json
+      date:
+      - Thu, 05 May 2022 09:07:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
       - application/xml
       Accept-Encoding:
       - gzip, deflate
@@ -115,9 +161,9 @@ interactions:
       ParameterSetName:
       - -n --account-name --account-key
       User-Agent:
-      - AZURECLI/2.35.0 azsdk-python-storage-queue/12.2.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.36.0 azsdk-python-storage-queue/12.2.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
       x-ms-date:
-      - Mon, 11 Apr 2022 14:18:03 GMT
+      - Thu, 05 May 2022 09:07:05 GMT
       x-ms-version:
       - '2021-02-12'
     method: PUT
@@ -129,7 +175,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Mon, 11 Apr 2022 14:18:04 GMT
+      - Thu, 05 May 2022 09:07:06 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
@@ -151,9 +197,9 @@ interactions:
       ParameterSetName:
       - -q --account-name --account-key
       User-Agent:
-      - AZURECLI/2.35.0 azsdk-python-storage-queue/12.2.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.36.0 azsdk-python-storage-queue/12.2.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
       x-ms-date:
-      - Mon, 11 Apr 2022 14:18:05 GMT
+      - Thu, 05 May 2022 09:07:06 GMT
       x-ms-version:
       - '2021-02-12'
     method: GET
@@ -168,7 +214,7 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Mon, 11 Apr 2022 14:18:05 GMT
+      - Thu, 05 May 2022 09:07:06 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -192,9 +238,9 @@ interactions:
       ParameterSetName:
       - -n -q --permissions --account-name --account-key
       User-Agent:
-      - AZURECLI/2.35.0 azsdk-python-storage-queue/12.2.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.36.0 azsdk-python-storage-queue/12.2.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
       x-ms-date:
-      - Mon, 11 Apr 2022 14:18:06 GMT
+      - Thu, 05 May 2022 09:07:07 GMT
       x-ms-version:
       - '2021-02-12'
     method: GET
@@ -209,7 +255,7 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Mon, 11 Apr 2022 14:18:06 GMT
+      - Thu, 05 May 2022 09:07:08 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -222,7 +268,7 @@ interactions:
 - request:
     body: '<?xml version=''1.0'' encoding=''utf-8''?>
 
-      <SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-04-11T14:18:08Z</Start><Expiry>9999-12-31T23:59:59Z</Expiry><Permission>raup</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>'
+      <SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-05-05T09:07:09Z</Start><Expiry>9999-12-31T23:59:59Z</Expiry><Permission>raup</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>'
     headers:
       Accept:
       - application/xml
@@ -239,9 +285,9 @@ interactions:
       ParameterSetName:
       - -n -q --permissions --account-name --account-key
       User-Agent:
-      - AZURECLI/2.35.0 azsdk-python-storage-queue/12.2.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.36.0 azsdk-python-storage-queue/12.2.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
       x-ms-date:
-      - Mon, 11 Apr 2022 14:18:08 GMT
+      - Thu, 05 May 2022 09:07:09 GMT
       x-ms-version:
       - '2021-02-12'
     method: PUT
@@ -253,7 +299,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Mon, 11 Apr 2022 14:18:07 GMT
+      - Thu, 05 May 2022 09:07:08 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
@@ -275,23 +321,23 @@ interactions:
       ParameterSetName:
       - -n -q --start --connection-string
       User-Agent:
-      - AZURECLI/2.35.0 azsdk-python-storage-queue/12.2.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.36.0 azsdk-python-storage-queue/12.2.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
       x-ms-date:
-      - Mon, 11 Apr 2022 14:18:08 GMT
+      - Thu, 05 May 2022 09:07:09 GMT
       x-ms-version:
       - '2021-02-12'
     method: GET
     uri: https://queue000002.queue.core.windows.net/queue000003?comp=acl
   response:
     body:
-      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-04-11T14:18:08.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry><Permission>raup</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-05-05T09:07:09.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry><Permission>raup</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"
     headers:
       cache-control:
       - no-cache
       content-type:
       - application/xml
       date:
-      - Mon, 11 Apr 2022 14:18:09 GMT
+      - Thu, 05 May 2022 09:07:10 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -304,7 +350,7 @@ interactions:
 - request:
     body: '<?xml version=''1.0'' encoding=''utf-8''?>
 
-      <SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-04-11T14:18:08Z</Start><Expiry>9999-12-31T23:59:59Z</Expiry><Permission>raup</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2020-01-01T00:00:00Z</Start><Expiry>9999-12-31T23:59:59Z</Expiry><Permission
+      <SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-05-05T09:07:09Z</Start><Expiry>9999-12-31T23:59:59Z</Expiry><Permission>raup</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2020-01-01T00:00:00Z</Start><Expiry>9999-12-31T23:59:59Z</Expiry><Permission
       /></AccessPolicy></SignedIdentifier></SignedIdentifiers>'
     headers:
       Accept:
@@ -322,9 +368,9 @@ interactions:
       ParameterSetName:
       - -n -q --start --connection-string
       User-Agent:
-      - AZURECLI/2.35.0 azsdk-python-storage-queue/12.2.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.36.0 azsdk-python-storage-queue/12.2.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
       x-ms-date:
-      - Mon, 11 Apr 2022 14:18:10 GMT
+      - Thu, 05 May 2022 09:07:10 GMT
       x-ms-version:
       - '2021-02-12'
     method: PUT
@@ -336,7 +382,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Mon, 11 Apr 2022 14:18:10 GMT
+      - Thu, 05 May 2022 09:07:10 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
@@ -358,23 +404,23 @@ interactions:
       ParameterSetName:
       - -n -q --expiry --account-name --account-key
       User-Agent:
-      - AZURECLI/2.35.0 azsdk-python-storage-queue/12.2.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.36.0 azsdk-python-storage-queue/12.2.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
       x-ms-date:
-      - Mon, 11 Apr 2022 14:18:11 GMT
+      - Thu, 05 May 2022 09:07:11 GMT
       x-ms-version:
       - '2021-02-12'
     method: GET
     uri: https://queue000002.queue.core.windows.net/queue000003?comp=acl
   response:
     body:
-      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-04-11T14:18:08.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry><Permission>raup</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2020-01-01T00:00:00.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry></AccessPolicy></SignedIdentifier></SignedIdentifiers>"
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-05-05T09:07:09.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry><Permission>raup</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2020-01-01T00:00:00.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry></AccessPolicy></SignedIdentifier></SignedIdentifiers>"
     headers:
       cache-control:
       - no-cache
       content-type:
       - application/xml
       date:
-      - Mon, 11 Apr 2022 14:18:11 GMT
+      - Thu, 05 May 2022 09:07:11 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -387,8 +433,8 @@ interactions:
 - request:
     body: '<?xml version=''1.0'' encoding=''utf-8''?>
 
-      <SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-04-11T14:18:08Z</Start><Expiry>9999-12-31T23:59:59Z</Expiry><Permission>raup</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2020-01-01T00:00:00Z</Start><Expiry>9999-12-31T23:59:59Z</Expiry><Permission
-      /></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Start>2022-04-11T14:18:12Z</Start><Expiry>2021-01-01T00:00:00Z</Expiry><Permission
+      <SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-05-05T09:07:09Z</Start><Expiry>9999-12-31T23:59:59Z</Expiry><Permission>raup</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2020-01-01T00:00:00Z</Start><Expiry>9999-12-31T23:59:59Z</Expiry><Permission
+      /></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Start>2022-05-05T09:07:12Z</Start><Expiry>2021-01-01T00:00:00Z</Expiry><Permission
       /></AccessPolicy></SignedIdentifier></SignedIdentifiers>'
     headers:
       Accept:
@@ -406,9 +452,9 @@ interactions:
       ParameterSetName:
       - -n -q --expiry --account-name --account-key
       User-Agent:
-      - AZURECLI/2.35.0 azsdk-python-storage-queue/12.2.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.36.0 azsdk-python-storage-queue/12.2.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
       x-ms-date:
-      - Mon, 11 Apr 2022 14:18:12 GMT
+      - Thu, 05 May 2022 09:07:12 GMT
       x-ms-version:
       - '2021-02-12'
     method: PUT
@@ -420,7 +466,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Mon, 11 Apr 2022 14:18:11 GMT
+      - Thu, 05 May 2022 09:07:12 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
@@ -442,23 +488,23 @@ interactions:
       ParameterSetName:
       - -q --connection-string
       User-Agent:
-      - AZURECLI/2.35.0 azsdk-python-storage-queue/12.2.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.36.0 azsdk-python-storage-queue/12.2.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
       x-ms-date:
-      - Mon, 11 Apr 2022 14:18:12 GMT
+      - Thu, 05 May 2022 09:07:12 GMT
       x-ms-version:
       - '2021-02-12'
     method: GET
     uri: https://queue000002.queue.core.windows.net/queue000003?comp=acl
   response:
     body:
-      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-04-11T14:18:08.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry><Permission>raup</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2020-01-01T00:00:00.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Start>2022-04-11T14:18:12.0000000Z</Start><Expiry>2021-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier></SignedIdentifiers>"
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-05-05T09:07:09.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry><Permission>raup</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2020-01-01T00:00:00.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Start>2022-05-05T09:07:12.0000000Z</Start><Expiry>2021-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier></SignedIdentifiers>"
     headers:
       cache-control:
       - no-cache
       content-type:
       - application/xml
       date:
-      - Mon, 11 Apr 2022 14:18:12 GMT
+      - Thu, 05 May 2022 09:07:13 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -482,23 +528,23 @@ interactions:
       ParameterSetName:
       - -n -q --account-name --account-key
       User-Agent:
-      - AZURECLI/2.35.0 azsdk-python-storage-queue/12.2.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.36.0 azsdk-python-storage-queue/12.2.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
       x-ms-date:
-      - Mon, 11 Apr 2022 14:18:14 GMT
+      - Thu, 05 May 2022 09:07:13 GMT
       x-ms-version:
       - '2021-02-12'
     method: GET
     uri: https://queue000002.queue.core.windows.net/queue000003?comp=acl
   response:
     body:
-      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-04-11T14:18:08.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry><Permission>raup</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2020-01-01T00:00:00.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Start>2022-04-11T14:18:12.0000000Z</Start><Expiry>2021-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier></SignedIdentifiers>"
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-05-05T09:07:09.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry><Permission>raup</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2020-01-01T00:00:00.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Start>2022-05-05T09:07:12.0000000Z</Start><Expiry>2021-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier></SignedIdentifiers>"
     headers:
       cache-control:
       - no-cache
       content-type:
       - application/xml
       date:
-      - Mon, 11 Apr 2022 14:18:14 GMT
+      - Thu, 05 May 2022 09:07:14 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -522,23 +568,23 @@ interactions:
       ParameterSetName:
       - -n -q --connection-string
       User-Agent:
-      - AZURECLI/2.35.0 azsdk-python-storage-queue/12.2.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.36.0 azsdk-python-storage-queue/12.2.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
       x-ms-date:
-      - Mon, 11 Apr 2022 14:18:15 GMT
+      - Thu, 05 May 2022 09:07:15 GMT
       x-ms-version:
       - '2021-02-12'
     method: GET
     uri: https://queue000002.queue.core.windows.net/queue000003?comp=acl
   response:
     body:
-      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-04-11T14:18:08.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry><Permission>raup</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2020-01-01T00:00:00.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Start>2022-04-11T14:18:12.0000000Z</Start><Expiry>2021-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier></SignedIdentifiers>"
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-05-05T09:07:09.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry><Permission>raup</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2020-01-01T00:00:00.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Start>2022-05-05T09:07:12.0000000Z</Start><Expiry>2021-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier></SignedIdentifiers>"
     headers:
       cache-control:
       - no-cache
       content-type:
       - application/xml
       date:
-      - Mon, 11 Apr 2022 14:18:15 GMT
+      - Thu, 05 May 2022 09:07:15 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -562,23 +608,23 @@ interactions:
       ParameterSetName:
       - -n -q --account-name --account-key
       User-Agent:
-      - AZURECLI/2.35.0 azsdk-python-storage-queue/12.2.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.36.0 azsdk-python-storage-queue/12.2.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
       x-ms-date:
-      - Mon, 11 Apr 2022 14:18:17 GMT
+      - Thu, 05 May 2022 09:07:16 GMT
       x-ms-version:
       - '2021-02-12'
     method: GET
     uri: https://queue000002.queue.core.windows.net/queue000003?comp=acl
   response:
     body:
-      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-04-11T14:18:08.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry><Permission>raup</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2020-01-01T00:00:00.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Start>2022-04-11T14:18:12.0000000Z</Start><Expiry>2021-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier></SignedIdentifiers>"
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-05-05T09:07:09.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry><Permission>raup</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2020-01-01T00:00:00.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Start>2022-05-05T09:07:12.0000000Z</Start><Expiry>2021-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier></SignedIdentifiers>"
     headers:
       cache-control:
       - no-cache
       content-type:
       - application/xml
       date:
-      - Mon, 11 Apr 2022 14:18:17 GMT
+      - Thu, 05 May 2022 09:07:16 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -602,23 +648,23 @@ interactions:
       ParameterSetName:
       - -n -q --permission --expiry --account-name --account-key
       User-Agent:
-      - AZURECLI/2.35.0 azsdk-python-storage-queue/12.2.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.36.0 azsdk-python-storage-queue/12.2.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
       x-ms-date:
-      - Mon, 11 Apr 2022 14:18:18 GMT
+      - Thu, 05 May 2022 09:07:17 GMT
       x-ms-version:
       - '2021-02-12'
     method: GET
     uri: https://queue000002.queue.core.windows.net/queue000003?comp=acl
   response:
     body:
-      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-04-11T14:18:08.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry><Permission>raup</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2020-01-01T00:00:00.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Start>2022-04-11T14:18:12.0000000Z</Start><Expiry>2021-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier></SignedIdentifiers>"
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-05-05T09:07:09.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry><Permission>raup</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2020-01-01T00:00:00.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Start>2022-05-05T09:07:12.0000000Z</Start><Expiry>2021-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier></SignedIdentifiers>"
     headers:
       cache-control:
       - no-cache
       content-type:
       - application/xml
       date:
-      - Mon, 11 Apr 2022 14:18:18 GMT
+      - Thu, 05 May 2022 09:07:18 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -631,7 +677,7 @@ interactions:
 - request:
     body: '<?xml version=''1.0'' encoding=''utf-8''?>
 
-      <SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-04-11T14:18:08Z</Start><Expiry>9999-12-31T23:59:59Z</Expiry><Permission>raup</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2020-01-01T00:00:00Z</Start><Expiry>2020-12-31T23:59:00Z</Expiry><Permission>r</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Start>2022-04-11T14:18:12Z</Start><Expiry>2021-01-01T00:00:00Z</Expiry><Permission
+      <SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-05-05T09:07:09Z</Start><Expiry>9999-12-31T23:59:59Z</Expiry><Permission>raup</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2020-01-01T00:00:00Z</Start><Expiry>2020-12-31T23:59:00Z</Expiry><Permission>r</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Start>2022-05-05T09:07:12Z</Start><Expiry>2021-01-01T00:00:00Z</Expiry><Permission
       /></AccessPolicy></SignedIdentifier></SignedIdentifiers>'
     headers:
       Accept:
@@ -649,9 +695,9 @@ interactions:
       ParameterSetName:
       - -n -q --permission --expiry --account-name --account-key
       User-Agent:
-      - AZURECLI/2.35.0 azsdk-python-storage-queue/12.2.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.36.0 azsdk-python-storage-queue/12.2.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
       x-ms-date:
-      - Mon, 11 Apr 2022 14:18:19 GMT
+      - Thu, 05 May 2022 09:07:18 GMT
       x-ms-version:
       - '2021-02-12'
     method: PUT
@@ -663,7 +709,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Mon, 11 Apr 2022 14:18:19 GMT
+      - Thu, 05 May 2022 09:07:18 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
@@ -685,23 +731,23 @@ interactions:
       ParameterSetName:
       - -n -q --account-name --account-key
       User-Agent:
-      - AZURECLI/2.35.0 azsdk-python-storage-queue/12.2.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.36.0 azsdk-python-storage-queue/12.2.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
       x-ms-date:
-      - Mon, 11 Apr 2022 14:18:20 GMT
+      - Thu, 05 May 2022 09:07:19 GMT
       x-ms-version:
       - '2021-02-12'
     method: GET
     uri: https://queue000002.queue.core.windows.net/queue000003?comp=acl
   response:
     body:
-      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-04-11T14:18:08.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry><Permission>raup</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2020-01-01T00:00:00.0000000Z</Start><Expiry>2020-12-31T23:59:00.0000000Z</Expiry><Permission>r</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Start>2022-04-11T14:18:12.0000000Z</Start><Expiry>2021-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier></SignedIdentifiers>"
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-05-05T09:07:09.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry><Permission>raup</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2020-01-01T00:00:00.0000000Z</Start><Expiry>2020-12-31T23:59:00.0000000Z</Expiry><Permission>r</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Start>2022-05-05T09:07:12.0000000Z</Start><Expiry>2021-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier></SignedIdentifiers>"
     headers:
       cache-control:
       - no-cache
       content-type:
       - application/xml
       date:
-      - Mon, 11 Apr 2022 14:18:20 GMT
+      - Thu, 05 May 2022 09:07:19 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -725,23 +771,23 @@ interactions:
       ParameterSetName:
       - -n -q --account-name --account-key
       User-Agent:
-      - AZURECLI/2.35.0 azsdk-python-storage-queue/12.2.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.36.0 azsdk-python-storage-queue/12.2.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
       x-ms-date:
-      - Mon, 11 Apr 2022 14:18:21 GMT
+      - Thu, 05 May 2022 09:07:20 GMT
       x-ms-version:
       - '2021-02-12'
     method: GET
     uri: https://queue000002.queue.core.windows.net/queue000003?comp=acl
   response:
     body:
-      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-04-11T14:18:08.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry><Permission>raup</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2020-01-01T00:00:00.0000000Z</Start><Expiry>2020-12-31T23:59:00.0000000Z</Expiry><Permission>r</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Start>2022-04-11T14:18:12.0000000Z</Start><Expiry>2021-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier></SignedIdentifiers>"
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-05-05T09:07:09.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry><Permission>raup</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2020-01-01T00:00:00.0000000Z</Start><Expiry>2020-12-31T23:59:00.0000000Z</Expiry><Permission>r</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Start>2022-05-05T09:07:12.0000000Z</Start><Expiry>2021-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier></SignedIdentifiers>"
     headers:
       cache-control:
       - no-cache
       content-type:
       - application/xml
       date:
-      - Mon, 11 Apr 2022 14:18:21 GMT
+      - Thu, 05 May 2022 09:07:21 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -754,7 +800,7 @@ interactions:
 - request:
     body: '<?xml version=''1.0'' encoding=''utf-8''?>
 
-      <SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-04-11T14:18:08Z</Start><Expiry>9999-12-31T23:59:59Z</Expiry><Permission>raup</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2020-01-01T00:00:00Z</Start><Expiry>2020-12-31T23:59:00Z</Expiry><Permission>r</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>'
+      <SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-05-05T09:07:09Z</Start><Expiry>9999-12-31T23:59:59Z</Expiry><Permission>raup</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2020-01-01T00:00:00Z</Start><Expiry>2020-12-31T23:59:00Z</Expiry><Permission>r</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>'
     headers:
       Accept:
       - application/xml
@@ -771,9 +817,9 @@ interactions:
       ParameterSetName:
       - -n -q --account-name --account-key
       User-Agent:
-      - AZURECLI/2.35.0 azsdk-python-storage-queue/12.2.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.36.0 azsdk-python-storage-queue/12.2.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
       x-ms-date:
-      - Mon, 11 Apr 2022 14:18:23 GMT
+      - Thu, 05 May 2022 09:07:21 GMT
       x-ms-version:
       - '2021-02-12'
     method: PUT
@@ -785,7 +831,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Mon, 11 Apr 2022 14:18:22 GMT
+      - Thu, 05 May 2022 09:07:21 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
@@ -807,23 +853,23 @@ interactions:
       ParameterSetName:
       - -q --connection-string
       User-Agent:
-      - AZURECLI/2.35.0 azsdk-python-storage-queue/12.2.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.36.0 azsdk-python-storage-queue/12.2.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
       x-ms-date:
-      - Mon, 11 Apr 2022 14:18:23 GMT
+      - Thu, 05 May 2022 09:07:21 GMT
       x-ms-version:
       - '2021-02-12'
     method: GET
     uri: https://queue000002.queue.core.windows.net/queue000003?comp=acl
   response:
     body:
-      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-04-11T14:18:08.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry><Permission>raup</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2020-01-01T00:00:00.0000000Z</Start><Expiry>2020-12-31T23:59:00.0000000Z</Expiry><Permission>r</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-05-05T09:07:09.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry><Permission>raup</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2020-01-01T00:00:00.0000000Z</Start><Expiry>2020-12-31T23:59:00.0000000Z</Expiry><Permission>r</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"
     headers:
       cache-control:
       - no-cache
       content-type:
       - application/xml
       date:
-      - Mon, 11 Apr 2022 14:18:24 GMT
+      - Thu, 05 May 2022 09:07:22 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:

@@ -62,6 +62,18 @@ alias_json = """
           }
         },
         "Windows": {
+          "Win2022Datacenter": {
+            "publisher": "MicrosoftWindowsServer",
+            "offer": "WindowsServer",
+            "sku": "2022-Datacenter",
+            "version": "latest"
+          },
+          "Win2022AzureEditionCore": {
+            "publisher": "MicrosoftWindowsServer",
+            "offer": "WindowsServer",
+            "sku": "2022-datacenter-azure-edition-core",
+            "version": "latest"
+          },
           "Win2019Datacenter": {
             "publisher": "MicrosoftWindowsServer",
             "offer": "WindowsServer",

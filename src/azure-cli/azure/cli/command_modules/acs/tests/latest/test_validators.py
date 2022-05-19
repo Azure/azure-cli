@@ -95,9 +95,10 @@ class TestValidateIPRanges(unittest.TestCase):
 
 
 class Namespace:
-    def __init__(self, api_server_authorized_ip_ranges=None, cluster_autoscaler_profile=None):
+    def __init__(self, api_server_authorized_ip_ranges=None, cluster_autoscaler_profile=None, kubernetes_version=None):
         self.api_server_authorized_ip_ranges = api_server_authorized_ip_ranges
         self.cluster_autoscaler_profile = cluster_autoscaler_profile
+        self.kubernetes_version = kubernetes_version
 
 
 class TestVNetSubnetId(unittest.TestCase):
@@ -418,6 +419,45 @@ class TestCredentialFormat(unittest.TestCase):
         namespace = CredentialFormatNamespace(credential_format)
 
         validators.validate_credential_format(namespace)
+
+class TestValidateKubernetesVersion(unittest.TestCase):
+
+     def test_valid_full_kubernetes_version(self):
+         kubernetes_version = "1.11.8"
+         namespace = Namespace(kubernetes_version=kubernetes_version)
+
+         validators.validate_k8s_version(namespace)
+
+     def test_valid_alias_minor_version(self):
+         kubernetes_version = "1.11"
+         namespace = Namespace(kubernetes_version=kubernetes_version)
+
+         validators.validate_k8s_version(namespace)
+
+     def test_valid_empty_kubernetes_version(self):
+         kubernetes_version = ""
+         namespace = Namespace(kubernetes_version=kubernetes_version)
+
+         validators.validate_k8s_version(namespace)
+
+     def test_invalid_kubernetes_version(self):
+         kubernetes_version = "1.2.3.4"
+
+         namespace = Namespace(kubernetes_version=kubernetes_version)
+         err = ("--kubernetes-version should be the full version number or major.minor version number, "
+                "such as \"1.7.12\" or \"1.7\"")
+
+         with self.assertRaises(CLIError) as cm:
+             validators.validate_k8s_version(namespace)
+         self.assertEqual(str(cm.exception), err)
+
+         kubernetes_version = "1."
+
+         namespace = Namespace(kubernetes_version=kubernetes_version)
+
+         with self.assertRaises(CLIError) as cm:
+             validators.validate_k8s_version(namespace)
+         self.assertEqual(str(cm.exception), err)
 
 
 if __name__ == "__main__":

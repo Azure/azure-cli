@@ -22,8 +22,8 @@ jobs:
     matrix:
       Python36:
         python.version: '3.6'
-      Python38:
-        python.version: '3.8'
+      Python39:
+        python.version: '3.9'
       Python310:
         python.version: '3.10'
   steps:
@@ -42,8 +42,8 @@ jobs:
     matrix:
       Python36:
         python.version: '3.6'
-      Python38:
-        python.version: '3.8'
+      Python39:
+        python.version: '3.9'
       Python310:
         python.version: '3.10'
   steps:
@@ -62,8 +62,8 @@ jobs:
     matrix:
       Python36:
         python.version: '3.6'
-      Python38:
-        python.version: '3.8'
+      Python39:
+        python.version: '3.9'
       Python310:
         python.version: '3.10'
   steps:
@@ -106,8 +106,8 @@ jobs:
         instance_idx: '$(Instance_idx)'
         fullTest: true
 
-- job: AutomationFullTestPython38ProfileLatest
-  displayName: Automation Full Test Python38 Profile Latest
+- job: AutomationFullTestPython39ProfileLatest
+  displayName: Automation Full Test Python39 Profile Latest
   timeoutInMinutes: 9999
   strategy:
     maxParallel: 8
@@ -133,7 +133,7 @@ jobs:
   steps:
     - template: .azure-pipelines/templates/automation_test.yml
       parameters:
-        pythonVersion: '3.8'
+        pythonVersion: '3.9'
         profile: 'latest'
         instance_cnt: '8'
         instance_idx: '$(Instance_idx)'

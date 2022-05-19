@@ -9,7 +9,7 @@ from knack.help_files import helps  # pylint: disable=unused-import
 
 helps['security'] = """
 type: group
-short-summary: Manage your security posture with Azure Security Center.
+short-summary: Manage your security posture with Microsoft Defender for Cloud.
 """
 
 helps['security alert'] = """
@@ -57,6 +57,65 @@ examples:
   - name: Activate a security alert on a resource group scope.
     text: >
         az security alert update -g "myRg" --location "centralus" -n "alertName" --status "activate"
+"""
+
+helps['security alerts-suppression-rule'] = """
+type: group
+short-summary: View and manage alerts suppression rules.
+"""
+
+helps['security alerts-suppression-rule list'] = """
+type: command
+short-summary: List all alerts suppression rule on a subscription scope.
+examples:
+  - name: List alerts suppression rules.
+    text: >
+        az security alerts-suppression-rule list
+"""
+
+helps['security alerts-suppression-rule show'] = """
+type: command
+short-summary: Shows an alerts suppression rule.
+examples:
+  - name: Get an alerts suppression rule on a subscription scope.
+    text: >
+        az security alerts-suppression-rule show --rule-name RuleName
+"""
+
+helps['security alerts-suppression-rule update'] = """
+type: command
+short-summary: Updates or create an alerts suppression rule.
+examples:
+  - name: Create suppression rule with entities.
+    text: >
+        az security alerts-suppression-rule update --rule-name RuleName --alert-type "Test" --reason "Other" --comment "Test comment" --state "Enabled"
+"""
+
+helps['security alerts-suppression-rule delete'] = """
+type: command
+short-summary: Delete an alerts suppression rule.
+examples:
+  - name: Delete an alerts suppression rule.
+    text: >
+        az security alerts-suppression-rule delete --rule-name RuleName
+"""
+
+helps['security alerts-suppression-rule upsert_scope'] = """
+type: command
+short-summary: Update an alerts suppression rule with scope element.
+examples:
+  - name: Add "entities.host.dnsdomain" scope to an alerts suppression rule.
+    text: >
+        az security alerts-suppression-rule upsert_scope --field "entities.process.commandline" --contains-substring "example" --rule-name RuleName
+"""
+
+helps['security alerts-suppression-rule delete_scope'] = """
+type: command
+short-summary: Delete an alerts suppression rule scope.
+examples:
+  - name: Delete an alerts suppression rule scope.
+    text: >
+        az security alerts-suppression-rule delete_scope --rule-name RuleName --field "entities.process.commandline"
 """
 
 helps['security atp'] = """
@@ -386,23 +445,23 @@ examples:
 
 helps['security location'] = """
 type: group
-short-summary: Shows the Azure Security Center Home region location.
+short-summary: Shows the Microsoft Defender for Cloud Home region location.
 """
 
 helps['security location list'] = """
 type: command
-short-summary: Shows the Azure Security Center Home region location.
+short-summary: Shows the Microsoft Defender for Cloud Home region location.
 examples:
-  - name: Shows the Azure Security Center Home region location.
+  - name: Shows the Microsoft Defender for Cloud Home region location.
     text: >
         az security location list
 """
 
 helps['security location show'] = """
 type: command
-short-summary: Shows the Azure Security Center Home region location.
+short-summary: Shows the Microsoft Defender for Cloud Home region location.
 examples:
-  - name: Shows the Azure Security Center Home region location.
+  - name: Shows the Microsoft Defender for Cloud Home region location.
     text: >
         az security location show -n centralus
 """

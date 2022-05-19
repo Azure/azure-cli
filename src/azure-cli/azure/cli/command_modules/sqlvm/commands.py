@@ -44,6 +44,7 @@ def load_command_table(self, _):
         g.custom_command('remove-from-group', 'sqlvm_remove_from_group', transform=transform_sqlvm_output)
         g.command('delete', 'begin_delete', confirmation=True)
         g.custom_command('create', 'sqlvm_create', transform=transform_sqlvm_output, table_transformer=deployment_validate_table_format, exception_handler=handle_template_based_exception)
+        g.command('start-assessment', 'begin_start_assessment')
 
     ###############################################
     #      sql virtual machine groups             #
