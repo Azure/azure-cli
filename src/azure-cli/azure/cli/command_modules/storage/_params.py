@@ -869,11 +869,16 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                 'configured to allow overrides. Otherwise an error will be raised.')
 
     with self.argument_context('storage blob update') as c:
-        t_blob_content_settings = self.get_sdk('blob.models#ContentSettings')
+        c.register_blob_arguments()
+        c.register_precondition_options()
+        t_blob_content_settings = self.get_sdk('_models#ContentSettings', resource_type=ResourceType.DATA_STORAGE_BLOB)
         c.register_content_settings_argument(t_blob_content_settings, update=True)
+        c.extra('lease', options_list=['--lease-id'], help='Required if the blob has an active lease.')
 
     with self.argument_context('storage blob exists') as c:
-        c.argument('blob_name', required=True)
+        c.register_blob_arguments()
+        c.extra('snapshot', help='The snapshot parameter is an opaque DateTime value that, when present, '
+                                 'specifies the snapshot.')
 
     with self.argument_context('storage blob url') as c:
         from ._validators import get_not_none_validator
@@ -882,6 +887,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.extra('protocol', arg_type=get_enum_type(['http', 'https'], 'https'), help='Protocol to use.')
         c.extra('snapshot', help='An string value that uniquely identifies the snapshot. The value of this query '
                                  'parameter indicates the snapshot version.')
+
+    with self.argument_context('storage blob snapshot') as c:
+        c.register_blob_arguments()
+        c.register_precondition_options()
+        c.extra('lease', options_list=['--lease-id'], help='Required if the blob has an active lease.')
 
     with self.argument_context('storage blob set-tier') as c:
         from azure.cli.command_modules.storage._validators import (blob_rehydrate_priority_validator)
@@ -1046,7 +1056,18 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage blob delete') as c:
         from .sdkutil import get_delete_blob_snapshot_type_names
-        c.argument('delete_snapshots', arg_type=get_enum_type(get_delete_blob_snapshot_type_names()))
+        c.register_blob_arguments()
+        c.register_precondition_options()
+        c.argument('delete_snapshots', arg_type=get_enum_type(get_delete_blob_snapshot_type_names()),
+                   help='Required if the blob has associated snapshots. '
+                        'Values include: "only": Deletes only the blobs snapshots. '
+                        '"include": Deletes the blob along with all snapshots.')
+        c.extra('lease', options_list='--lease-id', help='Required if the blob has an active lease.')
+        c.extra('snapshot', help='The snapshot parameter is an opaque DateTime value that, when present, '
+                                 'specifies the blob snapshot to delete.')
+
+    with self.argument_context('storage blob undelete') as c:
+        c.register_blob_arguments()
 
     with self.argument_context('storage blob delete-batch') as c:
         c.ignore('source_container_name')
