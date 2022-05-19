@@ -114,7 +114,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
              JMESPathCheck('properties.contentLength', file_size_kb * 1024)])
 
         # check that blob properties can be set back to null
-        #TODO: add back this test after sdk fix
+        #TODO: add back this test after sdk fix https://github.com/Azure/azure-sdk-for-python/issues/24515
 
         # self.storage_cmd('storage blob update -n {} -c {} --content-type ""',
         #                  account_info, blob_name, container)

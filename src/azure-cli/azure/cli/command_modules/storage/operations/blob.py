@@ -729,8 +729,8 @@ def storage_blob_delete_batch(client, source, source_container_name, pattern=Non
         try:
             container_client.delete_blob(**delete_blob_args)
             return blob_name
-        except HttpResponseError:
-            logger.debug(f"delete blob failure: {error}")
+        except HttpResponseError as ex:
+            logger.debug(f"delete blob failure: {ex.exc_msg}")
             return None
 
     source_blobs = list(collect_blob_objects(client, source_container_name, pattern))
