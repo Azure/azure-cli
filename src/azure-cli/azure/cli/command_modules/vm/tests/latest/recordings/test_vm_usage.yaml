@@ -13,9 +13,9 @@ interactions:
       ParameterSetName:
       - --location
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-compute/26.1.0 Python/3.8.10 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-compute/27.0.0 Python/3.8.10 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/usages?api-version=2021-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/usages?api-version=2022-03-01
   response:
     body:
       string: "{\r\n  \"value\": [\r\n    {\r\n      \"limit\": 2500,\r\n      \"unit\":
@@ -30,7 +30,7 @@ interactions:
         \     \"unit\": \"Count\",\r\n      \"currentValue\": 0,\r\n      \"name\":
         {\r\n        \"value\": \"virtualMachineScaleSets\",\r\n        \"localizedValue\":
         \"Virtual Machine Scale Sets\"\r\n      }\r\n    },\r\n    {\r\n      \"limit\":
-        3000,\r\n      \"unit\": \"Count\",\r\n      \"currentValue\": 0,\r\n      \"name\":
+        3000,\r\n      \"unit\": \"Count\",\r\n      \"currentValue\": 64,\r\n      \"name\":
         {\r\n        \"value\": \"dedicatedVCpus\",\r\n        \"localizedValue\":
         \"Dedicated vCPUs\"\r\n      }\r\n    },\r\n    {\r\n      \"limit\": 2500,\r\n
         \     \"unit\": \"Count\",\r\n      \"currentValue\": 0,\r\n      \"name\":
@@ -39,24 +39,24 @@ interactions:
         \     \"unit\": \"Count\",\r\n      \"currentValue\": 0,\r\n      \"name\":
         {\r\n        \"value\": \"lowPriorityCores\",\r\n        \"localizedValue\":
         \"Total Regional Low-priority vCPUs\"\r\n      }\r\n    },\r\n    {\r\n      \"limit\":
+        100,\r\n      \"unit\": \"Count\",\r\n      \"currentValue\": 64,\r\n      \"name\":
+        {\r\n        \"value\": \"standardDSv3Family\",\r\n        \"localizedValue\":
+        \"Standard DSv3 Family vCPUs\"\r\n      }\r\n    },\r\n    {\r\n      \"limit\":
         100,\r\n      \"unit\": \"Count\",\r\n      \"currentValue\": 0,\r\n      \"name\":
+        {\r\n        \"value\": \"standardDSv2Family\",\r\n        \"localizedValue\":
+        \"Standard DSv2 Family vCPUs\"\r\n      }\r\n    },\r\n    {\r\n      \"limit\":
+        100,\r\n      \"unit\": \"Count\",\r\n      \"currentValue\": 0,\r\n      \"name\":
+        {\r\n        \"value\": \"standardDSFamily\",\r\n        \"localizedValue\":
+        \"Standard DS Family vCPUs\"\r\n      }\r\n    },\r\n    {\r\n      \"limit\":
+        100,\r\n      \"unit\": \"Count\",\r\n      \"currentValue\": 0,\r\n      \"name\":
+        {\r\n        \"value\": \"basicAFamily\",\r\n        \"localizedValue\": \"Basic
+        A Family vCPUs\"\r\n      }\r\n    },\r\n    {\r\n      \"limit\": 100,\r\n
+        \     \"unit\": \"Count\",\r\n      \"currentValue\": 0,\r\n      \"name\":
         {\r\n        \"value\": \"standardDv2Family\",\r\n        \"localizedValue\":
         \"Standard Dv2 Family vCPUs\"\r\n      }\r\n    },\r\n    {\r\n      \"limit\":
         100,\r\n      \"unit\": \"Count\",\r\n      \"currentValue\": 0,\r\n      \"name\":
         {\r\n        \"value\": \"standardA0_A7Family\",\r\n        \"localizedValue\":
         \"Standard A0-A7 Family vCPUs\"\r\n      }\r\n    },\r\n    {\r\n      \"limit\":
-        100,\r\n      \"unit\": \"Count\",\r\n      \"currentValue\": 0,\r\n      \"name\":
-        {\r\n        \"value\": \"standardDSFamily\",\r\n        \"localizedValue\":
-        \"Standard DS Family vCPUs\"\r\n      }\r\n    },\r\n    {\r\n      \"limit\":
-        100,\r\n      \"unit\": \"Count\",\r\n      \"currentValue\": 0,\r\n      \"name\":
-        {\r\n        \"value\": \"standardDSv2Family\",\r\n        \"localizedValue\":
-        \"Standard DSv2 Family vCPUs\"\r\n      }\r\n    },\r\n    {\r\n      \"limit\":
-        100,\r\n      \"unit\": \"Count\",\r\n      \"currentValue\": 0,\r\n      \"name\":
-        {\r\n        \"value\": \"basicAFamily\",\r\n        \"localizedValue\": \"Basic
-        A Family vCPUs\"\r\n      }\r\n    },\r\n    {\r\n      \"limit\": 100,\r\n
-        \     \"unit\": \"Count\",\r\n      \"currentValue\": 0,\r\n      \"name\":
-        {\r\n        \"value\": \"standardDSv3Family\",\r\n        \"localizedValue\":
-        \"Standard DSv3 Family vCPUs\"\r\n      }\r\n    },\r\n    {\r\n      \"limit\":
         100,\r\n      \"unit\": \"Count\",\r\n      \"currentValue\": 0,\r\n      \"name\":
         {\r\n        \"value\": \"standardA8_A11Family\",\r\n        \"localizedValue\":
         \"Standard A8-A11 Family vCPUs\"\r\n      }\r\n    },\r\n    {\r\n      \"limit\":
@@ -378,7 +378,7 @@ interactions:
         32768,\r\n      \"unit\": \"Count\",\r\n      \"currentValue\": 0,\r\n      \"name\":
         {\r\n        \"value\": \"UltraSSDDiskSizeInGB\",\r\n        \"localizedValue\":
         \"UltraSSDTotalSizeInGB\"\r\n      }\r\n    },\r\n    {\r\n      \"limit\":
-        32768,\r\n      \"unit\": \"Count\",\r\n      \"currentValue\": 0,\r\n      \"name\":
+        65536,\r\n      \"unit\": \"Count\",\r\n      \"currentValue\": 0,\r\n      \"name\":
         {\r\n        \"value\": \"PremiumV2DiskSizeInGB\",\r\n        \"localizedValue\":
         \"PremiumV2TotalDiskSizeInGB\"\r\n      }\r\n    },\r\n    {\r\n      \"limit\":
         1000,\r\n      \"unit\": \"Count\",\r\n      \"currentValue\": 0,\r\n      \"name\":
@@ -400,11 +400,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '26297'
+      - '26299'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 10:17:29 GMT
+      - Thu, 19 May 2022 02:34:24 GMT
       expires:
       - '-1'
       pragma:
