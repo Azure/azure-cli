@@ -23,6 +23,7 @@ class TestIdentity(ScenarioTest):
             self.check('name', '{identity}'),
             self.check('resourceGroup', '{rg}')
         ])
+        self.cmd('identity list-resources -g {rg} -n {identity}')
 
         self.cmd('identity list -g {rg}', checks=self.check('length(@)', 1))
         self.cmd('identity delete -n {identity} -g {rg}')
