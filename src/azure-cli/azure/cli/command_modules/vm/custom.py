@@ -467,11 +467,11 @@ def update_managed_disk(cmd, resource_group_name, instance, size_gb=None, sku=No
                 subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
                 namespace='Microsoft.Compute', type='diskEncryptionSets', name=disk_encryption_set)
         instance.encryption.disk_encryption_set_id = disk_encryption_set
-    if instance.encryption.type != 'EncryptionAtRestWithCustomerKey' and \
-                encryption_type != 'EncryptionAtRestWithCustomerKey':
-        instance.encryption.disk_encryption_set_id = None
     if encryption_type is not None:
         instance.encryption.type = encryption_type
+        if instance.encryption.type != 'EncryptionAtRestWithCustomerKey' and \
+                encryption_type != 'EncryptionAtRestWithCustomerKey':
+            instance.encryption.disk_encryption_set_id = None
     if network_access_policy is not None:
         instance.network_access_policy = network_access_policy
     if disk_access is not None:
