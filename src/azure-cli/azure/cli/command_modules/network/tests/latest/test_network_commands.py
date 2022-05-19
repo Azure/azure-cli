@@ -5489,6 +5489,8 @@ class NetworkWatcherScenarioTest(ScenarioTest):
         self.cmd('network watcher show-security-group-view -g {rg} --vm {vm}')
         self.cmd('network watcher show-next-hop -g {rg} --vm {vm} --source-ip 10.0.0.9 --dest-ip 10.0.0.6')
 
+    @live_only()
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_nw_flow_log', location='westus')
     @StorageAccountPreparer(name_prefix='clitestnw', location='westus', kind='StorageV2')
     def test_network_watcher_flow_log(self, resource_group, resource_group_location, storage_account):
@@ -5817,7 +5819,6 @@ class NetworkSecurityPartnerProviderScenarioTest(ScenarioTest):
         super(NetworkSecurityPartnerProviderScenarioTest, self).__init__(method_name)
         self.cmd('extension add -n virtual-wan')
 
-    @live_only()
     @ResourceGroupPreparer()
     def test_network_security_partner_provider(self, resource_group):
         self.kwargs.update({
@@ -5862,7 +5863,6 @@ class NetworkVirtualApplianceScenarioTest(ScenarioTest):
         # self.cmd('extension remove -n virtual-wan')
         super(NetworkVirtualApplianceScenarioTest, self).tearDown()
 
-    @live_only()
     @ResourceGroupPreparer(location='westcentralus', name_prefix='test_network_virtual_appliance')
     def test_network_virtual_appliance(self, resource_group):
         self.kwargs.update({

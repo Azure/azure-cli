@@ -11,14 +11,11 @@ logger = get_logger(__name__)
 
 
 # region ActivityLog
-def list_activity_log(client, filters=None, correlation_id=None, resource_group=None, resource_id=None,
+def list_activity_log(client, correlation_id=None, resource_group=None, resource_id=None,
                       resource_provider=None, start_time=None, end_time=None, caller=None, status=None, max_events=50,
                       select=None, offset='6h'):
-    if filters:
-        odata_filters = filters
-    else:
-        odata_filters = _build_activity_log_odata_filter(correlation_id, resource_group, resource_id, resource_provider,
-                                                         start_time, end_time, caller, status, offset)
+    odata_filters = _build_activity_log_odata_filter(correlation_id, resource_group, resource_id, resource_provider,
+                                                     start_time, end_time, caller, status, offset)
 
     select_filters = _activity_log_select_filter_builder(select)
     logger.info('OData Filter: %s', odata_filters)

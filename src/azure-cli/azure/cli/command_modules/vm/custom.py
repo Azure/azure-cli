@@ -2890,6 +2890,16 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                                                                 build_vmss_storage_account_pool_resource,
                                                                 build_application_gateway_resource,
                                                                 build_msi_role_assignment, build_nsg_resource)
+
+    # The default load balancer will be expected to be changed from Basic to Standard.
+    # In order to avoid breaking change which has a big impact to users,
+    # we use the hint to guide users to use Standard load balancer to create VMSS in the first stage.
+    if load_balancer_sku is None:
+        logger.warning(
+            'It is recommended to use parameter "--lb-sku Standard" to create new VMSS with Standard load balancer. '
+            'Please note that the default load balancer used for VMSS creation will be changed from Basic to Standard '
+            'in the future.')
+
     # Build up the ARM template
     master_template = ArmTemplateBuilder()
 
@@ -4099,6 +4109,13 @@ def update_image_galleries(cmd, resource_group_name, gallery_name, gallery, perm
     client = _compute_client_factory(cmd.cli_ctx)
 
     return client.galleries.begin_create_or_update(resource_group_name, gallery_name, gallery, **kwargs)
+
+
+def show_image_gallery(cmd, resource_group_name, gallery_name, select=None, sharing_groups=None):
+    if sharing_groups:
+        sharing_groups = 'sharingProfile/Groups'
+    client = _compute_client_factory(cmd.cli_ctx)
+    return client.galleries.get(resource_group_name, gallery_name, select=select, expand=sharing_groups)
 
 
 def create_image_gallery(cmd, resource_group_name, gallery_name, description=None,

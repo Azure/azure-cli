@@ -1055,7 +1055,7 @@ def process_blob_download_batch_parameters(cmd, namespace):
     _process_blob_batch_container_parameters(cmd, namespace)
 
     # 3. Call validators
-    add_download_progress_callback(cmd, namespace)
+    add_progress_callback(cmd, namespace)
 
 
 def process_blob_upload_batch_parameters(cmd, namespace):
@@ -1094,7 +1094,7 @@ def process_blob_upload_batch_parameters(cmd, namespace):
     validate_metadata(namespace)
     t_blob_content_settings = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_BLOB, '_models#ContentSettings')
     get_content_setting_validator(t_blob_content_settings, update=False)(cmd, namespace)
-    add_upload_progress_callback(cmd, namespace)
+    add_progress_callback(cmd, namespace)
     blob_tier_validator_track2(cmd, namespace)
 
 
@@ -2044,52 +2044,6 @@ def validate_upload_blob(namespace):
         raise InvalidArgumentValueError("usage error: please only specify one of --file and --data to upload.")
     if not namespace.file_path and not namespace.data:
         raise InvalidArgumentValueError("usage error: please specify one of --file and --data to upload.")
-
-
-def add_upload_progress_callback(cmd, namespace):
-    def _update_progress(response):
-        if response.http_response.status_code not in [200, 201]:
-            return
-
-        message = getattr(_update_progress, 'message', 'Alive')
-        reuse = getattr(_update_progress, 'reuse', False)
-        current = response.context['upload_stream_current']
-        total = response.context['data_stream_total']
-
-        if total:
-            hook.add(message=message, value=current, total_val=total)
-            if total == current and not reuse:
-                hook.end()
-
-    hook = cmd.cli_ctx.get_progress_controller(det=True)
-    _update_progress.hook = hook
-
-    if not namespace.no_progress:
-        namespace.progress_callback = _update_progress
-    del namespace.no_progress
-
-
-def add_download_progress_callback(cmd, namespace):
-    def _update_progress(response):
-        if response.http_response.status_code not in [200, 201, 206]:
-            return
-
-        message = getattr(_update_progress, 'message', 'Alive')
-        reuse = getattr(_update_progress, 'reuse', False)
-        current = response.context['download_stream_current']
-        total = response.context['data_stream_total']
-
-        if total:
-            hook.add(message=message, value=current, total_val=total)
-            if total == current and not reuse:
-                hook.end()
-
-    hook = cmd.cli_ctx.get_progress_controller(det=True)
-    _update_progress.hook = hook
-
-    if not namespace.no_progress:
-        namespace.progress_callback = _update_progress
-    del namespace.no_progress
 
 
 def validate_blob_arguments(namespace):

@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import base64
+from uuid import UUID
 
 from dateutil import parser
 from knack.log import get_logger
@@ -89,6 +90,8 @@ def transform_entity_result(entity):
             entity_property.value = base64.b64encode(entity_property.value).decode()
         if isinstance(entity_property, bytes):
             entity[key] = base64.b64encode(entity_property).decode()
+        if isinstance(entity_property, UUID):
+            entity[key] = str(entity_property)
     if hasattr(entity, 'metadata'):
         entity['Timestamp'] = entity.metadata['timestamp']
         entity['etag'] = entity.metadata['etag']
@@ -388,6 +391,40 @@ def transform_file_share_json_output(result):
             "quota": result.pop('quota', None)
         },
         "snapshot": result.pop('snapshot', None)
+    }
+    new_result.update(result)
+    return new_result
+
+
+def transform_share_directory_json_output(result):
+    result = todict(result)
+    new_result = {
+        "metadata": result.pop('metadata', None),
+        "name": result.pop('name', None),
+        "properties": {
+            "etag": result.pop('etag', None),
+            "lastModified": result.pop('lastModified', None),
+            "serverEncrypted": result.pop('serverEncrypted', None)
+        }
+    }
+    new_result.update(result)
+    return new_result
+
+
+def transform_share_file_json_output(result):
+    result = todict(result)
+    new_result = {
+        "metadata": result.pop('metadata', None),
+        "name": result.pop('name', None),
+        "properties": {
+            "etag": result.pop('etag', None),
+            "lastModified": result.pop('lastModified', None),
+            "serverEncrypted": result.pop('serverEncrypted', None),
+            "contentLength": result.pop('size', None),
+            "contentRange": result.pop('contentRange', None),
+            "contentSettings": result.pop('contentSettings', None),
+            "copy": result.pop("copy", None)
+        }
     }
     new_result.update(result)
     return new_result
