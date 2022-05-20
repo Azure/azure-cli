@@ -79,8 +79,11 @@ def main():
 
 
 def check_pull_request(title, body):
-    if title.startswith('['):
-        error_flag = regex_line(title)
+    if title.startswith('[') or title.startswith('{'):
+        if title.startswith('['):
+            error_flag = regex_line(title)
+        else:
+            error_flag = False
         is_edit_history_note = False
         history_note_error_flag = False
         for line in body:
@@ -90,10 +93,8 @@ def check_pull_request(title, body):
                 if ref and ref[0] not in ['Component Name 1', 'Component Name 2']:
                     is_edit_history_note = True
                     history_note_error_flag = regex_line(line) or history_note_error_flag
-		# If edit history notes, ignore title check result
+        # If edit history notes, ignore title check result
         error_flag = error_flag if not is_edit_history_note else history_note_error_flag
-    elif title.startswith('{'):
-        error_flag = False
     else:
         logger.error('Pull Request title should start with [ or { , Please follow https://aka.ms/submitAzPR')
         error_flag = True
