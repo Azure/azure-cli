@@ -1351,16 +1351,16 @@ short-summary: Creates a new route within the specified endpoint.
 examples:
   - name: Creates a route to assoicate the endpoint's default domain with an origin group for all HTTPS requests.
     text: >
-        az afd route create -g group --endpoint-name endpoint1 --profile-name profile --route-name route1 --https-redirect False
+        az afd route create -g group --endpoint-name endpoint1 --profile-name profile --route-name route1 --https-redirect Disabled
         --origin-group og001 --supported-protocols Https --link-to-default-domain Enabled --forwarding-protocol MatchRequest
   - name: Creates a route to assoicate the endpoint's default domain with an origin group for all requests and use the specified rule sets to customize the route behavior.
     text: >
         az afd route create -g group --endpoint-name endpoint1 --profile-name profile --route-name route1 --rule-sets ruleset1 rulseset2
-        --origin-group og001 --supported-protocols Http Https --link-to-default-domain Enabled --forwarding-protocol MatchRequest --https-redirect False
+        --origin-group og001 --supported-protocols Http Https --link-to-default-domain Enabled --forwarding-protocol MatchRequest --https-redirect Disabled
   - name: Creates a route to assoicate the endpoint's default domain and a custom domain with an origin group for all requests with the specified path patterns and redirect all trafic to use Https.
     text: >
         az afd route create -g group --endpoint-name endpoint1 --profile-name profile --route-name route1 --patterns-to-match /test1/* /tes2/*
-        --origin-group og001 --supported-protocols Http Https --custom-domains cd001 --forwarding-protocol MatchRequest --https-redirect True --link-to-default-domain Enabled
+        --origin-group og001 --supported-protocols Http Https --custom-domains cd001 --forwarding-protocol MatchRequest --https-redirect Enabled --link-to-default-domain Enabled
 """
 
 helps['afd route update'] = """
@@ -1370,7 +1370,7 @@ examples:
   - name: Update a route to accept both Http and Https requests and redirect all trafic to use Https.
     text: >
         az afd route update -g group --endpoint-name endpoint1 --profile-name profile --route-name route1
-        --supported-protocols Http Https --https-redirect True
+        --supported-protocols Http Https --https-redirect Enabled
   - name: Update a route's rule sets settings to customize the route behavior.
     text: >
         az afd route update -g group --endpoint-name endpoint1 --profile-name profile --route-name route1 --rule-sets ruleset1 rulseset2
