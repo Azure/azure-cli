@@ -238,7 +238,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_APPSERVICE: '2021-03-01',
         ResourceType.MGMT_IOTHUB: '2021-07-02',
         ResourceType.MGMT_IOTDPS: '2021-10-15',
-        ResourceType.MGMT_IOTCENTRAL: '2018-09-01',
+        ResourceType.MGMT_IOTCENTRAL: '2021-11-01-preview',
         ResourceType.MGMT_ARO: '2022-04-01',
         ResourceType.MGMT_DATABOXEDGE: '2021-02-01-preview',
         ResourceType.MGMT_CUSTOMLOCATION: '2021-03-15-preview',
