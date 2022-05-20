@@ -80,10 +80,10 @@ def main():
 
 def check_pull_request(title, body):
     if title.startswith('[') or title.startswith('{'):
+        error_flag = False
+        # only check title which start with `[`
         if title.startswith('['):
-            error_flag = regex_line(title)
-        else:
-            error_flag = False
+            error_flag = check_line(title)
         is_edit_history_note = False
         history_note_error_flag = False
         for line in body:
@@ -92,8 +92,9 @@ def check_pull_request(title, body):
                 ref = re.findall(r'[\[](.*?)[\]]', line)
                 if ref and ref[0] not in ['Component Name 1', 'Component Name 2']:
                     is_edit_history_note = True
-                    history_note_error_flag = regex_line(line) or history_note_error_flag
-        # If edit history notes, ignore title check result
+                    history_note_error_flag = check_line(line) or history_note_error_flag
+        # If the `History Notes` is edited:
+        # Use the history notes check result (history_note_error_flag), ignore the title check result (error_flag).
         error_flag = error_flag if not is_edit_history_note else history_note_error_flag
     else:
         logger.error('Pull Request title should start with [ or { , Please follow https://aka.ms/submitAzPR')
@@ -101,7 +102,8 @@ def check_pull_request(title, body):
     return error_flag
 
 
-def regex_line(line):
+def check_line(line):
+    # check every line
     error_flag = False
     # Check Fix #number in title, just give a warning here, because it is not necessarily.
     if 'Fix' in line:
