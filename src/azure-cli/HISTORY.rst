@@ -144,7 +144,7 @@ Release History
 **Service Bus**
 
 * `az servicebus queue update`: Fix message time to live (#22218)
-* : `az servicebus queue`: Adding ReceiveDisabled to --status (#22460)
+* `az servicebus queue`: Adding ReceiveDisabled to --status (#22460)
 * `az servicebus namespace create/update`: Add `--disable-local-auth` to enable or disable SAS authentication (#19741)
 * `az servicebus namespace private-endpoint-connection/private-link-resource`: New command groups (#19741)
 
