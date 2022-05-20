@@ -97,10 +97,10 @@ Release History
 
 **Monitor**
 
-* [BREAKING CHANGE] `az monitor alert`: deprecate whole command group, please use `monitor metrics alert` (#22507)
-* [BREAKING CHANGE] `az monitor autoscale-settings`: deprecate whole command group, please use `az monitor autoscale` (#22507)
-* [BREAKING CHANGE] `az monitor activity-log list`: deprecate parameter `--filters`. (#22507)
-* [BREAKING CHANGE] `az monitor activity-log list`: deprecate parameter flag `--resource-provider`, please use `--namespace` (#22507)
+* [BREAKING CHANGE] `az monitor alert`: Deprecate whole command group, please use `monitor metrics alert` (#22507)
+* [BREAKING CHANGE] `az monitor autoscale-settings`: Deprecate whole command group, please use `az monitor autoscale` (#22507)
+* [BREAKING CHANGE] `az monitor activity-log list`: Deprecate parameter `--filters`. (#22507)
+* [BREAKING CHANGE] `az monitor activity-log list`: Deprecate parameter flag `--resource-provider`, please use `--namespace` (#22507)
 
 **NetAppFiles**
 
