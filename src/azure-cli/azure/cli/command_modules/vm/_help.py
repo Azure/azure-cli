@@ -1474,7 +1474,7 @@ examples:
 
 helps['vm deallocate'] = """
 type: command
-short-summary: Deallocate a VM so that computing resources are not longer allocated (charged no longer apply).  The status will change from 'Stopped' to 'Stopped (Deallocated'.
+short-summary: Deallocate a VM so that computing resources are no longer allocated (charged no longer apply). The status will change from 'Stopped' to 'Stopped (Deallocated)'.
 long-summary: 'For an end-to-end tutorial, see https://docs.microsoft.com/azure/virtual-machines/linux/capture-image'
 examples:
   - name: Deallocate, generalize, and capture a stopped virtual machine.
