@@ -114,6 +114,7 @@ Release History
 * `az network application-gateway`: Add `settings`, `listener` and `routing-rule` command groups (#22489)
 * `az network application-gateway create`: Add parameter `--priority` (#22489)
 * `az network application-gateway probe`: Add parameter `--host-name-from-settings` (#22489)
+* [BREAKING CHANGE] `az network vnet peering`: Deprecate parameter flag `--remote-vnet-id` (#22522)
 
 **Packaging**
 
