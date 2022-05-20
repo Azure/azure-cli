@@ -63,7 +63,7 @@ Release History
 * `az vm update`: Add additional license type SLES for `--license-type` (#22336)
 * `az vmss create`: Support enabling single placement group for Flexible VMSS (#22291)
 * `az disk create/update`: Add new parameter `--data-access-auth-mode` to support data access authentication mode (#22175)
-* `az sig show`: Add new parameters `--sharing-groups` to support query shared gallery group (#22371)
+* `az sig show`: Add new parameter `--sharing-groups` to support query shared gallery group (#22371)
 * `az vm host group create`: Add new parameter `--ultra-ssd-enabled` to support Ultra SSD (#22176)
 
 **Cosmos DB**
