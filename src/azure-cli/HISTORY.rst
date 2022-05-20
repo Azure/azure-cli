@@ -51,10 +51,6 @@ Release History
 
 * `az aro create`: Add support for FIPS modules, host encryption, and disk encryption for master and worker nodes (#22320)
 
-**Azure/azure-cli**
-
-* [Service Connector] `--secret name=xx keyVaultSecretUri=xx`: Add new parameter key value pair to support password from KeyVault (#22319)
-
 **Backup**
 
 * `az backup vault resource-guard-mapping`: Add support for updating, showing, and deleting ResourceGuardProxy (#22472)
