@@ -74,10 +74,6 @@ Release History
 
 * `az eventhubs namespace schema-registry`: Add cmdlets for schema registry (#22100)
 
-**HDInsight**
-
-* Migrate adal graph sdk to msgraph sdk in HDInsight module (#22503)
-
 **Identity**
 
 * `az identity list-resources`: Add new command to support list the associated resources for identity (#22519)
