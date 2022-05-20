@@ -159,6 +159,7 @@ Release History
 * `az containerapp connection`: Add new command group to support container app connection (#22290)
 * `az containerapp connection create`: Add `--container` parameter in interactive mode (#22311)
 * `az spring connection`: Add support for `az sping-cloud` renaming (#22356)
+Add new parameter key value pair to support password from KeyVault (#22319)
 
 **Service Fabric**
 
