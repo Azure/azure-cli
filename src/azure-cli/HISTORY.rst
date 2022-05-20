@@ -85,7 +85,6 @@ Release History
 **IoT**
 
 * `az iot dps policy` and `az iot dps linked-hub`: Fix DPS state updating (#22259)
-* Test updates for beta branch (#22262)
 * `az iot central app private-link-resource list`: Add a new command to support listing private link resources (#22273)
 * `az iot central app private-endpoint-connection show`: Add a new command to support showing details of a private endpoint connection of the IoT Central app (#22273)
 * `az iot central app private-endpoint-connection approve`: Add a new command to support approving a private endpoint connection for the IoT Central app (#22273)
