@@ -89,7 +89,7 @@ Release History
 
 **Key Vault**
 
-* Fix#22457: `az keyvault key decrypt/encrypt`: Fix returning bytes for `--output tsv` (#22464)
+* Fix #22457: `az keyvault key decrypt/encrypt`: Fix returning bytes for `--output tsv` (#22464)
 
 **Monitor**
 
