@@ -304,15 +304,9 @@ def list_vault(client, resource_group_name=None):
     return list(vault_list)
 
 
-# pylint: disable=inconsistent-return-statements
 def _get_current_user_object_id(graph_client):
-    from azure.cli.command_modules.role import GraphError
-    try:
-        current_user = graph_client.signed_in_user_get()
-        if current_user and current_user.get('id', None):  # pylint:disable=no-member
-            return current_user['id']  # pylint:disable=no-member
-    except GraphError:
-        pass
+    current_user = graph_client.signed_in_user_get()
+    return current_user['id']
 
 
 def _get_object_id_by_spn(graph_client, spn):
