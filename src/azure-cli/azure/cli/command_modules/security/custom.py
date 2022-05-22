@@ -459,16 +459,25 @@ def delete_security_workspace_setting(client, resource_name):
 
 def get_atp_setting(cmd, client, resource_group_name, storage_account_name):
 
-    return client.get(_construct_resource_id(cmd, resource_group_name, storage_account_name))
+    return client.get(_construct_storage_resource_id(cmd, resource_group_name, storage_account_name))
+
+def get_atp_setting(cmd, client, resource_group_name, cosmos_db_account_name):
+
+    return client.get(_construct_cosmosdb_resource_id(cmd, resource_group_name, cosmos_db_account_name))
 
 
 def update_atp_setting(cmd, client, resource_group_name, storage_account_name, is_enabled):
 
-    return client.create(_construct_resource_id(cmd, resource_group_name, storage_account_name),
+    return client.create(_construct_storage_resource_id(cmd, resource_group_name, storage_account_name),
+                         AdvancedThreatProtectionSetting(is_enabled=is_enabled))
+
+def update_atp_setting(cmd, client, resource_group_name, cosmos_db_account_name, is_enabled):
+
+    return client.create(_construct_cosmosdb_resource_id(cmd, resource_group_name, cosmos_db_account_name),
                          AdvancedThreatProtectionSetting(is_enabled=is_enabled))
 
 
-def _construct_resource_id(cmd, resource_group_name, storage_account_name):
+def _construct_storage_resource_id(cmd, resource_group_name, storage_account_name):
 
     return resource_id(
         subscription=get_subscription_id(cmd.cli_ctx),
@@ -476,6 +485,16 @@ def _construct_resource_id(cmd, resource_group_name, storage_account_name):
         namespace='Microsoft.Storage',
         type='storageAccounts',
         name=storage_account_name)
+
+
+def _construct_cosmosdb_resource_id(cmd, resource_group_name, cosmos_db_account_name):
+
+    return resource_id(
+        subscription=get_subscription_id(cmd.cli_ctx),
+        resource_group=resource_group_name,
+        namespace='Microsoft.DocumentDb',
+        type='databaseAccounts',
+        name=cosmos_db_account_name)
 
 
 # --------------------------------------------------------------------------------------------

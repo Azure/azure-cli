@@ -289,6 +289,12 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'get_atp_setting')
         g.custom_command('update', 'update_atp_setting')
 
+    with self.command_group('security atp cosmosdb',
+                            security_advanced_threat_protection_sdk,
+                            client_factory=cf_security_advanced_threat_protection) as g:
+        g.custom_show_command('show', 'get_atp_setting')
+        g.custom_command('update', 'update_atp_setting')
+
     with self.command_group('security va sql scans',
                             security_sql_vulnerability_assessment_scans_sdk,
                             client_factory=cf_sql_vulnerability_assessment_scans) as g:
