@@ -7,7 +7,7 @@ import json
 from azure.cli.core._profile import Profile
 from azure.cli.core.util import send_raw_request
 from azure.cli.core.auth.util import resource_to_scopes
-from knack.util import CLIError
+from azure.cli.core.azclierror import HTTPError
 
 
 # pylint: disable=redefined-builtin, too-many-public-methods
@@ -36,8 +36,9 @@ class GraphClient:
         while True:
             try:
                 r = send_raw_request(self.cli_ctx, method, url, resource=self.resource, uri_parameters=param, body=body)
-            except CLIError as ex:
+            except HTTPError as ex:
                 raise GraphError(ex.response.json()['error']['message'], ex.response) from ex
+            # Other exceptions like AuthenticationError should not be handled here, so we don't catch CLIError
 
             if r.text:
                 dic = r.json()
