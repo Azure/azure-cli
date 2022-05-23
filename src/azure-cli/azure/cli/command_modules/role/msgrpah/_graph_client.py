@@ -19,10 +19,12 @@ class GraphClient:
         self.scopes = resource_to_scopes(cli_ctx.cloud.endpoints.microsoft_graph_resource_id)
 
         # https://graph.microsoft.com/ (AzureCloud)
+        # https://microsoftgraph.chinacloudapi.cn (AzureChinaCloud)
         self.resource = cli_ctx.cloud.endpoints.microsoft_graph_resource_id
 
         # https://graph.microsoft.com/v1.0
-        self.base_url = cli_ctx.cloud.endpoints.microsoft_graph_resource_id + 'v1.0'
+        # https://microsoftgraph.chinacloudapi.cn/v1.0
+        self.base_url = cli_ctx.cloud.endpoints.microsoft_graph_resource_id.rstrip('/') + '/v1.0'
 
     def _send(self, method, url, param=None, body=None):
         url = self.base_url + url
