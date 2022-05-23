@@ -40,7 +40,7 @@ suppression_rule_scope_any_of_arg_type = CLIArgumentType(options_list=('--any-of
 
 # Atp
 storage_account_arg_type = CLIArgumentType(options_list=('--storage-account'), metavar='NAME', help='Name of an existing storage account.')
-cosmos_db_account_arg_type = CLIArgumentType(options_list=('--cosmos-db-account'), metavar='NAME', help='Name of an existing cosmos db account.')
+cosmos_db_account_arg_type = CLIArgumentType(options_list=('--cosmosdb-account'), metavar='NAME', help='Name of an existing cosmos db account.')
 
 # Sql Vulnerability Assessment
 va_sql_vm_resource_id_arg_type = CLIArgumentType(options_list=('--vm-resource-id'), metavar='VMRESOURCEID', help='Resource ID of the scanned machine. For On-Premise machines, please provide your workspace resource ID')
@@ -177,12 +177,6 @@ def load_arguments(self, _):
                 'location',
                 arg_type=location_arg_type)
             c.argument(
-                'storage_account_name',
-                arg_type=storage_account_arg_type)
-            c.argument(
-                'cosmos_db_account_name',
-                arg_type=cosmos_db_account_arg_type)
-            c.argument(
                 'vm_resource_id',
                 arg_type=va_sql_vm_resource_id_arg_type)
             c.argument(
@@ -203,6 +197,15 @@ def load_arguments(self, _):
             c.argument(
                 'vm_uuid',
                 arg_type=va_sql_vm_uuid_arg_type)
+
+    with self.argument_context('security atp storage') as c:
+            c.argument(
+                'storage_account_name',
+                arg_type=storage_account_arg_type)
+    with self.argument_context('security atp cosmosdb') as c:
+            c.argument(
+                'cosmos_db_account_name',
+                arg_type=cosmos_db_account_arg_type)
 
     for scope in ['regulatory-compliance-controls']:
         with self.argument_context('security {}'.format(scope)) as c:

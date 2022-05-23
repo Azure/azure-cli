@@ -283,17 +283,12 @@ def load_command_table(self, _):
         g.custom_command('upsert_scope', 'upsert_security_alerts_suppression_rule_scope')
         g.custom_command('delete_scope', 'delete_security_alerts_suppression_rule_scope')
 
-    with self.command_group('security atp storage',
-                            security_advanced_threat_protection_sdk,
-                            client_factory=cf_security_advanced_threat_protection) as g:
-        g.custom_show_command('show', 'get_atp_setting')
-        g.custom_command('update', 'update_atp_setting')
-
-    with self.command_group('security atp cosmosdb',
-                            security_advanced_threat_protection_sdk,
-                            client_factory=cf_security_advanced_threat_protection) as g:
-        g.custom_show_command('show', 'get_atp_setting')
-        g.custom_command('update', 'update_atp_setting')
+    for scope in ['storage', 'cosmosdb']:
+        with self.command_group(f"security atp {scope}",
+                                security_advanced_threat_protection_sdk,
+                                client_factory=cf_security_advanced_threat_protection) as g:
+            g.custom_command('show', f"get_{scope}_atp_setting")
+            g.custom_command('update', f"update_{scope}_atp_setting")
 
     with self.command_group('security va sql scans',
                             security_sql_vulnerability_assessment_scans_sdk,

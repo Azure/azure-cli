@@ -457,21 +457,23 @@ def delete_security_workspace_setting(client, resource_name):
 # Security ATP
 # --------------------------------------------------------------------------------------------
 
-def get_atp_setting(cmd, client, resource_group_name, storage_account_name):
+def get_storage_atp_setting(cmd, client, resource_group_name, storage_account_name):
 
     return client.get(_construct_storage_resource_id(cmd, resource_group_name, storage_account_name))
 
-def get_atp_setting(cmd, client, resource_group_name, cosmos_db_account_name):
+
+def get_cosmosdb_atp_setting(cmd, client, resource_group_name, cosmos_db_account_name):
 
     return client.get(_construct_cosmosdb_resource_id(cmd, resource_group_name, cosmos_db_account_name))
 
 
-def update_atp_setting(cmd, client, resource_group_name, storage_account_name, is_enabled):
+def update_storage_atp_setting(cmd, client, resource_group_name, storage_account_name, is_enabled):
 
     return client.create(_construct_storage_resource_id(cmd, resource_group_name, storage_account_name),
                          AdvancedThreatProtectionSetting(is_enabled=is_enabled))
 
-def update_atp_setting(cmd, client, resource_group_name, cosmos_db_account_name, is_enabled):
+
+def update_cosmosdb_atp_setting(cmd, client, resource_group_name, cosmos_db_account_name, is_enabled):
 
     return client.create(_construct_cosmosdb_resource_id(cmd, resource_group_name, cosmos_db_account_name),
                          AdvancedThreatProtectionSetting(is_enabled=is_enabled))

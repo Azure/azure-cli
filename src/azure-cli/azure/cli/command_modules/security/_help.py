@@ -148,7 +148,7 @@ short-summary: Display Advanced Threat Protection settings for an Azure Cosmos D
 examples:
   - name: Retrieve Advanced Threat Protection settings for an Azure Cosmos DB account on a subscription scope.
     text: >
-        az security atp cosmosdb show --resource-group MyResourceGroup --cosmos-db-account MyCosmosDbAccount
+        az security atp cosmosdb show --resource-group MyResourceGroup --cosmosdb-account MyCosmosDbAccount
 """
 
 helps['security atp storage update'] = """
@@ -169,10 +169,10 @@ short-summary: Toggle status of Advanced Threat Protection for an Azure Cosmos D
 examples:
   - name: Enable Advanced Threat Protection for an Azure Cosmos DB account on a subscription scope.
     text: >
-        az security atp cosmosdb update --resource-group MyResourceGroup --cosmos-db-account MyCosmosDbAccount --is-enabled true
+        az security atp cosmosdb update --resource-group MyResourceGroup --cosmosdb-account MyCosmosDbAccount --is-enabled true
   - name: Disable Advanced Threat Protection for an Azure Cosmos DB account on a subscription scope.
     text: >
-        az security atp cosmosdb update --resource-group MyResourceGroup --cosmos-db-account MyCosmosDbAccount --is-enabled false
+        az security atp cosmosdb update --resource-group MyResourceGroup --cosmosdb-account MyCosmosDbAccount --is-enabled false
 """
 
 helps['security va'] = """
