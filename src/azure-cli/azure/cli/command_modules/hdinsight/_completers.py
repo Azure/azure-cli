@@ -42,7 +42,7 @@ def cluster_admin_account_completion_list(cmd, prefix, namespace, **kwargs):  # 
         client = cf_graph(cmd.cli_ctx)
         filter_str = "startswith(userPrincipalName, '{0}') or startswith(mail, '{0}')" \
                      .format(prefix) if prefix else None
-        users = client.users.list(filter=filter_str).advance_page()
+        users = client.user_list(filter=filter_str).advance_page()
         return [user.mail if ("#EXT#" in user.user_principal_name) else user.user_principal_name for user in users]
 
     return HDInsightCompleter(worker=worker).complete(cmd, prefix, namespace)
@@ -54,7 +54,7 @@ def cluster_user_group_completion_list(cmd, prefix, namespace, **kwargs):  # pyl
     def worker(cmd, prefix, namespace):  # pylint: disable=unused-argument
         client = cf_graph(cmd.cli_ctx)
         filter_str = "startswith(displayName, '{}')".format(prefix) if prefix else None
-        groups = client.groups.list(filter=filter_str).advance_page()
+        groups = client.group_list(filter=filter_str).advance_page()
         return [group.display_name for group in groups]
 
     return HDInsightCompleter(worker=worker).complete(cmd, prefix, namespace)

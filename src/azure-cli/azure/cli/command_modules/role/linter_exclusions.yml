@@ -1,0 +1,42 @@
+---
+# exclusions for the role module
+
+ad app create:
+    parameters:
+        enable_access_token_issuance:
+            rule_exclusions:
+            - option_length_too_long
+        enable_id_token_issuance:
+            rule_exclusions:
+            - option_length_too_long
+        is_fallback_public_client:
+            rule_exclusions:
+            - option_length_too_long
+        public_client_redirect_uris:
+            rule_exclusions:
+            - option_length_too_long
+ad app update:
+    parameters:
+        enable_access_token_issuance:
+            rule_exclusions:
+            - option_length_too_long
+        enable_id_token_issuance:
+            rule_exclusions:
+            - option_length_too_long
+        is_fallback_public_client:
+            rule_exclusions:
+            - option_length_too_long
+        public_client_redirect_uris:
+            rule_exclusions:
+            - option_length_too_long
+ad user create:
+    parameters:
+        force_change_password_next_sign_in:
+            rule_exclusions:
+            - option_length_too_long
+ad user update:
+    parameters:
+        force_change_password_next_sign_in:
+            rule_exclusions:
+            - option_length_too_long
+...

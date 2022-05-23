@@ -321,24 +321,29 @@ def load_arguments(self, _):
                    help='Enable or disable R services (SQL 2016 onwards).',
                    arg_type=get_three_state_flag())
 
-    with self.argument_context('sql vm', arg_group='Assessment Settings') as c:
+    with self.argument_context('sql vm update', arg_group='Assessment Settings') as c:
         c.argument('enable_assessment',
                    help='Enable or disable assessment feature. If any assessment settings provided, parameter automatically sets to true.',
                    validator=validate_assessment,
                    arg_type=get_three_state_flag())
         c.argument('enable_assessment_schedule',
+                   options_list=['--enable-assessment-schedule', '--am-schedule'],
                    help='Enable or disable assessment Schedule. If any assessment schedule settings provided, parameter automatically sets to true.',
                    arg_type=get_three_state_flag())
         c.argument('assessment_weekly_interval',
+                   options_list=['--assessment-weekly-interval', '--am-week-int'],
                    help='Number of weeks to schedule between 2 assessment runs. Supports value from 1-6.',
                    arg_type=get_enum_type(['1', '2', '3', '4', '5', '6']))
         c.argument('assessment_monthly_occurrence',
+                   options_list=['--assessment-monthly-occurrence', '--am-month-occ'],
                    help='Occurence of the DayOfWeek day within a month to schedule assessment. Supports values 1,2,3,4 and -1. Use -1 for last DayOfWeek day of the month (for example - last Tuesday of the month).',
                    arg_type=get_enum_type(['1', '2', '3', '4', '-1']))
         c.argument('assessment_day_of_week',
+                   options_list=['--assessment-day-of-week', '--am-day'],
                    help='Day of the week to run assessment.',
                    arg_type=get_enum_type(DayOfWeek))
         c.argument('assessment_start_time_local',
+                   options_list=['--assessment-start-time-local', '--am-time'],
                    help='Time of the day in HH:mm format. Examples include 17:30, 05:13.',
                    validator=validate_assessment_start_time_local)
 
@@ -348,3 +353,4 @@ def load_arguments(self, _):
         c.argument('workspace_rg',
                    help='Workspace resource group')
               
+

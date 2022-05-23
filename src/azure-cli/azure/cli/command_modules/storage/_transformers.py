@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import base64
+from uuid import UUID
 
 from dateutil import parser
 from knack.log import get_logger
@@ -31,7 +32,7 @@ def transform_acl_list_output(result):
 
 
 def transform_container_permission_output(result):
-    return {'publicAccess': result.public_access or 'off'}
+    return {'publicAccess': result.get('public_access', None) or 'off'}
 
 
 def transform_cors_list_output(result):
@@ -42,11 +43,10 @@ def transform_cors_list_output(result):
             new_entry = OrderedDict()
             new_entry['Service'] = service
             new_entry['Rule'] = i + 1
-
-            new_entry['AllowedMethods'] = ', '.join((x for x in rule.allowed_methods))
-            new_entry['AllowedOrigins'] = ', '.join((x for x in rule.allowed_origins))
-            new_entry['ExposedHeaders'] = ', '.join((x for x in rule.exposed_headers))
-            new_entry['AllowedHeaders'] = ', '.join((x for x in rule.allowed_headers))
+            new_entry['AllowedMethods'] = rule.allowed_methods
+            new_entry['AllowedOrigins'] = rule.allowed_origins
+            new_entry['ExposedHeaders'] = rule.exposed_headers
+            new_entry['AllowedHeaders'] = rule.allowed_headers
             new_entry['MaxAgeInSeconds'] = rule.max_age_in_seconds
             new_result.append(new_entry)
     return new_result
@@ -90,6 +90,8 @@ def transform_entity_result(entity):
             entity_property.value = base64.b64encode(entity_property.value).decode()
         if isinstance(entity_property, bytes):
             entity[key] = base64.b64encode(entity_property).decode()
+        if isinstance(entity_property, UUID):
+            entity[key] = str(entity_property)
     if hasattr(entity, 'metadata'):
         entity['Timestamp'] = entity.metadata['timestamp']
         entity['etag'] = entity.metadata['etag']
@@ -148,6 +150,14 @@ def transform_url(result):
     result = re.sub('//', '/', result)
     result = re.sub('/', '//', result, count=1)
     return encode_url_path(result)
+
+
+def transform_url_without_encode(result):
+    """ Ensures the resulting URL string does not contain extra / characters """
+    import re
+    result = re.sub('//', '/', result)
+    result = re.sub('/', '//', result, count=1)
+    return result
 
 
 def transform_fs_access_output(result):
@@ -210,6 +220,8 @@ def transform_blob_list_output(result):
 
 
 def transform_blob_json_output(result):
+    if result is None:
+        return
     result = todict(result)
     new_result = {
         "content": "",
@@ -366,3 +378,53 @@ def transform_queue_policy_output(result):
     if result['expiry']:
         result['expiry'] = parser.parse(result['expiry'])
     return result
+
+
+def transform_file_share_json_output(result):
+    result = todict(result)
+    new_result = {
+        "metadata": result.pop('metadata', None),
+        "name": result.pop('name', None),
+        "properties": {
+            "etag": result.pop('etag', None),
+            "lastModified": result.pop('lastModified', None),
+            "quota": result.pop('quota', None)
+        },
+        "snapshot": result.pop('snapshot', None)
+    }
+    new_result.update(result)
+    return new_result
+
+
+def transform_share_directory_json_output(result):
+    result = todict(result)
+    new_result = {
+        "metadata": result.pop('metadata', None),
+        "name": result.pop('name', None),
+        "properties": {
+            "etag": result.pop('etag', None),
+            "lastModified": result.pop('lastModified', None),
+            "serverEncrypted": result.pop('serverEncrypted', None)
+        }
+    }
+    new_result.update(result)
+    return new_result
+
+
+def transform_share_file_json_output(result):
+    result = todict(result)
+    new_result = {
+        "metadata": result.pop('metadata', None),
+        "name": result.pop('name', None),
+        "properties": {
+            "etag": result.pop('etag', None),
+            "lastModified": result.pop('lastModified', None),
+            "serverEncrypted": result.pop('serverEncrypted', None),
+            "contentLength": result.pop('size', None),
+            "contentRange": result.pop('contentRange', None),
+            "contentSettings": result.pop('contentSettings', None),
+            "copy": result.pop("copy", None)
+        }
+    }
+    new_result.update(result)
+    return new_result

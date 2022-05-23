@@ -594,6 +594,11 @@ examples:
         az sig create --resource-group MyResourceGroup --gallery-name MyGallery
 """
 
+helps['sig show'] = """
+type: command
+short-summary: Retrieve information about a Shared Image Gallery.
+"""
+
 helps['sig image-definition'] = """
 type: group
 short-summary: Manage shared gallery image with VM
@@ -1474,7 +1479,7 @@ examples:
 
 helps['vm deallocate'] = """
 type: command
-short-summary: Deallocate a VM.
+short-summary: Deallocate a VM so that computing resources are no longer allocated (charged no longer apply). The status will change from 'Stopped' to 'Stopped (Deallocated)'.
 long-summary: 'For an end-to-end tutorial, see https://docs.microsoft.com/azure/virtual-machines/linux/capture-image'
 examples:
   - name: Deallocate, generalize, and capture a stopped virtual machine.

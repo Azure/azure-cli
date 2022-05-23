@@ -342,6 +342,7 @@ def format_sql_workload_type_update_settings(result):
 
     return order_dict
 
+
 def format_assessment_settings(result):
     '''
     Formats the AssessmentSettings object removing arguments that are empty
@@ -358,6 +359,7 @@ def format_assessment_settings(result):
         order_dict['schedule'] = schedule
 
     return order_dict
+
 
 def format_assessment_schedule(result):
     '''

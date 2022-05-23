@@ -277,6 +277,20 @@ class SqlVmScenarioTest(ScenarioTest):
                      JMESPathCheck('id', sqlvm_1['id'])
                  ])
 
+        # test start-assessment succeeds
+        self.cmd('sql vm start-assessment -n {} -g {}'
+                 .format(sqlvm, resource_group))
+
+        # verify start-assessment succeeded
+        self.cmd('sql vm show -n {} -g {}'
+                 .format(sqlvm, resource_group),
+                 checks=[
+                     JMESPathCheck('name', sqlvm),
+                     JMESPathCheck('location', loc),
+                     JMESPathCheck('provisioningState', "Succeeded"),
+                     JMESPathCheck('id', sqlvm_1['id'])
+                 ])
+
         # test assessment disabling succeeds
         self.cmd('sql vm update -n {} -g {} --enable-assessment {}'
                  .format(sqlvm, resource_group, False),

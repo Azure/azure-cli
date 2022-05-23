@@ -305,8 +305,8 @@ def sqlvm_update(cmd, instance, sql_virtual_machine_name, resource_group_name, s
                  full_backup_frequency=None, full_backup_start_time=None, full_backup_window_hours=None, log_backup_frequency=None,
                  enable_key_vault_credential=None, credential_name=None, azure_key_vault_url=None, service_principal_name=None,
                  service_principal_secret=None, connectivity_type=None, port=None, sql_workload_type=None, enable_r_services=None, tags=None,
-                 enable_assessment=None, enable_assessment_schedule = None, assessment_weekly_interval = None,
-                 assessment_monthly_occurrence = None, assessment_day_of_week = None, assessment_start_time_local = None,
+                 enable_assessment=None, enable_assessment_schedule=None, assessment_weekly_interval=None,
+                 assessment_monthly_occurrence=None, assessment_day_of_week=None, assessment_start_time_local=None,
                  workspace_name = None, workspace_rg = None):
     '''
     Updates a SQL virtual machine.
@@ -390,52 +390,13 @@ def sqlvm_update(cmd, instance, sql_virtual_machine_name, resource_group_name, s
             instance.server_configurations_management_settings.additional_features_server_configurations is None):
         instance.server_configurations_management_settings = None
 
-    # If assessment.schedule settings are provided but enable schedule is skipped, ensure schedule is enabled
-    if (enable_assessment_schedule is None and
-        (assessment_weekly_interval is not None or assessment_monthly_occurrence or assessment_day_of_week or assessment_start_time_local)):
-        enable_assessment_schedule = True
-
-    # If assessment.schedule setting is provided but enable assessment is skipped, ensure assessment is enabled
-    if (enable_assessment_schedule is not None and enable_assessment is None):
-        enable_assessment = True
-
-    # Build assessment settings
-    if enable_assessment is not None:
-        instance.assessment_settings = AssessmentSettings()
-        instance.assessment_settings.enable = enable_assessment
-
-        if enable_assessment_schedule is not None:
-            instance.assessment_settings.schedule = Schedule()
-            instance.assessment_settings.schedule.enable = enable_assessment_schedule
-
-            if enable_assessment_schedule:
-                instance.assessment_settings.schedule.weekly_interval = assessment_weekly_interval
-                instance.assessment_settings.schedule.monthly_occurrence = assessment_monthly_occurrence
-                instance.assessment_settings.schedule.day_of_week = assessment_day_of_week
-                instance.assessment_settings.schedule.start_time = assessment_start_time_local
-
-    if enable_assessment:
-        workspace_id = None
-
-        extensions = list_extensions(cmd, resource_group_name, sql_virtual_machine_name)
-        for ext in extensions:
-            if ext.publisher is 'Microsoft.EnterpriseCloud.Monitoring' and ext.type_properties_type is 'MicrosoftMonitoringAgent ':
-                workspace_id = ext.settings.get('workspaceId', None)
-                print(ext.publisher, ext.type_properties_type, workspace_id)
-    
-        # Log Analytics extension not found
-        if workspace_id is None:
-            if workspace_name is None or workspace_rg is None:
-                raise CLIError('Usage error: If VM is not connected to a Log Analytics workspace and Best practice Assessment is enabled,', 
-                        'then workspace name and resource group must be specified')
-
-            # Install extension as it is missing
-            set_windows_log_analytics_workspace_extension(cmd, resource_group_name, sql_virtual_machine_name, workspace_name, workspace_rg)
-
-        # Validate custom log definition on workspace
-        
-
-
+    set_assessment_properties(instance,
+                              enable_assessment,
+                              enable_assessment_schedule,
+                              assessment_weekly_interval,
+                              assessment_monthly_occurrence,
+                              assessment_day_of_week,
+                              assessment_start_time_local)
 
     return instance
 
@@ -483,3 +444,60 @@ def sqlvm_remove_from_group(client, cmd, sql_virtual_machine_name, resource_grou
                                                   resource_group_name, sql_virtual_machine_name, sqlvm_object))
 
     return client.get(resource_group_name, sql_virtual_machine_name)
+
+
+# region Helpers for custom commands
+def set_assessment_properties(instance, enable_assessment, enable_assessment_schedule,
+                              assessment_weekly_interval, assessment_monthly_occurrence,
+                              assessment_day_of_week, assessment_start_time_local):
+    '''
+    Set assessment properties to be sent in sql vm update
+    '''
+
+    # If assessment.schedule settings are provided but enable schedule is skipped, then ensure schedule is enabled
+    if (enable_assessment_schedule is None and
+            (assessment_weekly_interval is not None or assessment_monthly_occurrence or assessment_day_of_week or assessment_start_time_local)):
+        enable_assessment_schedule = True
+
+    # If assessment schedule is enabled but enable assessment is skipped, then ensure assessment is enabled
+    if (enable_assessment_schedule is not None and enable_assessment is None):
+        enable_assessment = True
+
+    if enable_assessment is not None:
+        instance.assessment_settings = AssessmentSettings()
+        instance.assessment_settings.enable = enable_assessment
+
+        if enable_assessment_schedule is not None:
+            instance.assessment_settings.schedule = Schedule()
+            instance.assessment_settings.schedule.enable = enable_assessment_schedule
+
+            if enable_assessment_schedule:
+                instance.assessment_settings.schedule.weekly_interval = assessment_weekly_interval
+                instance.assessment_settings.schedule.monthly_occurrence = assessment_monthly_occurrence
+                instance.assessment_settings.schedule.day_of_week = assessment_day_of_week
+                instance.assessment_settings.schedule.start_time = assessment_start_time_local
+
+    if enable_assessment:
+        workspace_id = None
+
+        extensions = list_extensions(cmd, resource_group_name, sql_virtual_machine_name)
+        for ext in extensions:
+            if ext.publisher is 'Microsoft.EnterpriseCloud.Monitoring' and ext.type_properties_type is 'MicrosoftMonitoringAgent ':
+                workspace_id = ext.settings.get('workspaceId', None)
+                print(ext.publisher, ext.type_properties_type, workspace_id)
+    
+        # Log Analytics extension not found
+        if workspace_id is None:
+            if workspace_name is None or workspace_rg is None:
+                raise CLIError('Usage error: If VM is not connected to a Log Analytics workspace and Best practice Assessment is enabled,', 
+                        'then workspace name and resource group must be specified')
+
+            # Install extension as it is missing
+            set_windows_log_analytics_workspace_extension(cmd, resource_group_name, sql_virtual_machine_name, workspace_name, workspace_rg)
+
+        # Validate custom log definition on workspace
+        
+
+
+
+# endRegion
