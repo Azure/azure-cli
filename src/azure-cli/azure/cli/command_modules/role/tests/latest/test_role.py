@@ -352,7 +352,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTestBase):
 
             if assignee_principal_type:
                 # No graph call
-                with mock.patch('azure.cli.command_modules.role.msgrpah._graph_client.GraphClient.directory_object_get_by_ids') \
+                with mock.patch('azure.cli.command_modules.role._msgrpah._graph_client.GraphClient.directory_object_get_by_ids') \
                         as directory_object_get_by_ids_mock:
                     self.cmd(
                         'role assignment create --assignee-object-id {object_id} '
@@ -367,7 +367,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTestBase):
                     mock_response.status_code = 403
                     mock_response.reason = 'Forbidden for url: https://...'
                     with mock.patch(
-                            'azure.cli.command_modules.role.msgrpah._graph_client.GraphClient.directory_object_get_by_ids',
+                            'azure.cli.command_modules.role._msgrpah._graph_client.GraphClient.directory_object_get_by_ids',
                             side_effect=GraphError('403', mock_response)):
                         self.cmd('role assignment create --assignee-object-id {object_id} --role Reader -g {rg}')
                 else:
