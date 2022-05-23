@@ -17,6 +17,6 @@ def _auth_client_factory(cli_ctx, scope=None):
 
 
 def _graph_client_factory(cli_ctx, **_):
-    from .msgrpah import GraphClient
+    from ._msgrpah import GraphClient
     client = GraphClient(cli_ctx)
     return client

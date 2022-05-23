@@ -17,7 +17,7 @@ from knack.util import CLIError
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, KeyVaultPreparer
-from azure.cli.command_modules.role.msgrpah import GraphError
+from azure.cli.command_modules.role._msgrpah import GraphError
 from ..util import retry
 from .test_graph import GraphScenarioTestBase
 

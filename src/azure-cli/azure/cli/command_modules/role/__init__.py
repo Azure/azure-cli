@@ -7,7 +7,7 @@ import azure.cli.command_modules.role._help  # pylint: disable=unused-import
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core.profiles import ResourceType
 from ._client_factory import _graph_client_factory as graph_client_factory
-from .msgrpah import GraphError
+from ._msgrpah import GraphError
 
 
 class RoleCommandsLoader(AzCommandsLoader):
