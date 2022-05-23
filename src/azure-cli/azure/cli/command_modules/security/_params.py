@@ -199,13 +199,13 @@ def load_arguments(self, _):
                 arg_type=va_sql_vm_uuid_arg_type)
 
     with self.argument_context('security atp storage') as c:
-            c.argument(
-                'storage_account_name',
-                arg_type=storage_account_arg_type)
+        c.argument(
+            'storage_account_name',
+            arg_type=storage_account_arg_type)
     with self.argument_context('security atp cosmosdb') as c:
-            c.argument(
-                'cosmos_db_account_name',
-                arg_type=cosmos_db_account_arg_type)
+        c.argument(
+            'cosmos_db_account_name',
+            arg_type=cosmos_db_account_arg_type)
 
     for scope in ['regulatory-compliance-controls']:
         with self.argument_context('security {}'.format(scope)) as c:
