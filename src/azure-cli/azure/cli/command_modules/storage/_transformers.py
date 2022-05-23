@@ -390,3 +390,11 @@ def transform_file_share_json_output(result):
     }
     new_result.update(result)
     return new_result
+
+
+def transform_url_without_encode(result):
+    """ Ensures the resulting URL string does not contain extra / characters """
+    import re
+    result = re.sub('//', '/', result)
+    result = re.sub('/', '//', result, count=1)
+    return result

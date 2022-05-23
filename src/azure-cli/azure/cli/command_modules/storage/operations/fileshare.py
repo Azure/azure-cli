@@ -93,3 +93,20 @@ def get_share_stats(client, timeout=None, **kwargs):
 def set_share_metadata(client, metadata=None, timeout=None, **kwargs):
     client.set_share_metadata(metadata=metadata, timeout=timeout, **kwargs)
     return True
+
+
+def create_share_url(client, share_name, unc=None, protocol='https'):
+    file_client = client.get_share_client(share=share_name)
+    url = file_client.url
+    if protocol == 'http':
+        url = url.replace('https', 'http', 1)
+    if unc:
+        url = ':'.join(url.split(':')[1:])
+    return url
+
+
+def create_snapshot(client, metadata=None, quota=None, timeout=None, **kwargs):
+    if quota is not None:
+        client.set_share_quota(quota=quota, **kwargs)
+    result = client.create_snapshot(metadata=metadata, timeout=timeout, **kwargs)
+    return result

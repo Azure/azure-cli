@@ -1620,8 +1620,16 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                            'than 0, and less than or equal to 5TB (5120).')
 
     with self.argument_context('storage share url') as c:
-        c.argument('unc', action='store_true', help='Output UNC network path.')
+        c.extra('unc', action='store_true', help='Output UNC network path.')
         c.argument('protocol', arg_type=get_enum_type(['http', 'https'], 'https'), help='Protocol to use.')
+        c.ignore('snapshot')
+
+    with self.argument_context('storage share snapshot') as c:
+        c.extra('metadata', nargs='+',
+                help='Metadata in space-separated key=value pairs. This overwrites any existing metadata.',
+                validator=validate_metadata)
+        c.extra('quota', help='Specifies the maximum size of the share, in gigabytes. Must be greater than 0, and '
+                'less than or equal to 5 TB (5120 GB).')
 
     with self.argument_context('storage share list') as c:
         c.argument('num_results', arg_type=num_results_type)
@@ -1650,7 +1658,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                     help='A string that represents the snapshot version, if applicable.')
             c.extra('timeout', timeout_type)
 
-    for item in ['stats', 'metadata update']:
+    for item in ['stats', 'snapshot', 'metadata update']:
         with self.argument_context('storage share {}'.format(item)) as c:
             c.extra('share_name', share_name_type, options_list=('--name', '-n'), required=True)
             c.extra('timeout', timeout_type)
