@@ -68,7 +68,7 @@ from .utils import (_normalize_sku,
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
                            check_resource_group_exists, set_location, get_site_availability, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
-                           detect_os_form_src, get_current_stack_from_runtime, generate_default_app_name)
+                           detect_os_from_src, get_current_stack_from_runtime, generate_default_app_name)
 from ._constants import (FUNCTIONS_STACKS_API_KEYS, FUNCTIONS_LINUX_RUNTIME_VERSION_REGEX,
                          FUNCTIONS_WINDOWS_RUNTIME_VERSION_REGEX, FUNCTIONS_NO_V2_REGIONS, PUBLIC_CLOUD,
                          LINUX_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH, WINDOWS_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH,
@@ -176,7 +176,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     webapp_def = Site(location=location, site_config=site_config, server_farm_id=plan_info.id, tags=tags,
                       https_only=https_only, virtual_network_subnet_id=subnet_resource_id)
     if runtime:
-        runtime = helper.remove_delimiters(runtime)
+        runtime = _StackRuntimeHelper.remove_delimiters(runtime)
 
     current_stack = None
     if is_linux:
@@ -2893,6 +2893,9 @@ class _AbstractStackRuntimeHelper:
 
 # WebApps stack class
 class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
+    DEFAULT_DELIMETER = "|"  # character that separates runtime name from version
+    ALLOWED_DELIMETERS = "|:"  # delimiters allowed: '|', ':'
+
     # pylint: disable=too-few-public-methods
     class Runtime:
         def __init__(self, display_name=None, configs=None, github_actions_properties=None, linux=False):
@@ -2911,16 +2914,14 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
             'dotnet': 'net_framework_version',
             'dotnetcore': None
         }
-        self.default_delimeter = "|"  # character that separates runtime name from version
-        self.allowed_delimeters = "|:"  # delimiters allowed: '|', ':'
         super().__init__(cmd, linux=linux, windows=windows)
 
     def get_stack_names_only(self, delimiter=None):
         windows_stacks = [s.display_name for s in self.stacks if not s.linux]
         linux_stacks = [s.display_name for s in self.stacks if s.linux]
         if delimiter is not None:
-            windows_stacks = [n.replace(self.default_delimeter, delimiter) for n in windows_stacks]
-            linux_stacks = [n.replace(self.default_delimeter, delimiter) for n in linux_stacks]
+            windows_stacks = [n.replace(self.DEFAULT_DELIMETER, delimiter) for n in windows_stacks]
+            linux_stacks = [n.replace(self.DEFAULT_DELIMETER, delimiter) for n in linux_stacks]
         if self._linux and not self._windows:
             return linux_stacks
         if self._windows and not self._linux:
@@ -2940,10 +2941,13 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                 if self._windows:
                     self._parse_major_version_windows(major_version, self._stacks, self.windows_config_mappings)
 
-    def remove_delimiters(self, runtime):
+    @classmethod
+    def remove_delimiters(cls, runtime):
+        if not runtime:
+            return runtime
         import re
-        runtime = re.split("[{}]".format(self.allowed_delimeters), runtime)
-        return self.default_delimeter.join(filter(None, runtime))
+        runtime = re.split("[{}]".format(cls.ALLOWED_DELIMETERS), runtime)
+        return cls.DEFAULT_DELIMETER.join(filter(None, runtime))
 
     def resolve(self, display_name, linux=False):
         display_name = display_name.lower()
@@ -4223,12 +4227,12 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
     _create_new_rg = False
     _site_availability = get_site_availability(cmd, name)
     _create_new_app = _site_availability.name_available
-    os_name = os_type if os_type else detect_os_form_src(src_dir, html)
+    runtime = _StackRuntimeHelper.remove_delimiters(runtime)
+    os_name = os_type if os_type else detect_os_from_src(src_dir, html, runtime)
     _is_linux = os_name.lower() == LINUX_OS_NAME
     helper = _StackRuntimeHelper(cmd, linux=_is_linux, windows=not _is_linux)
 
     if runtime:
-        runtime = helper.remove_delimiters(runtime)
         match = helper.resolve(runtime, _is_linux)
         if not match:
             raise ValidationError("{0} runtime '{1}' is not supported. Please check supported runtimes with: "
