@@ -1565,10 +1565,9 @@ def set_ag_ssl_policy_2017_06_01(cmd, resource_group_name, application_gateway_n
         'ApplicationGatewaySslPolicy', 'ApplicationGatewaySslPolicyType')
     ncf = network_client_factory(cmd.cli_ctx).application_gateways
     ag = ncf.get(resource_group_name, application_gateway_name)
-    policy_type = None
     if policy_name:
         policy_type = ApplicationGatewaySslPolicyType.predefined.value
-    elif cipher_suites or min_protocol_version:
+    elif policy_type == None and (cipher_suites or min_protocol_version) :
         policy_type = ApplicationGatewaySslPolicyType.custom.value
     ag.ssl_policy = ApplicationGatewaySslPolicy(
         policy_name=policy_name,
