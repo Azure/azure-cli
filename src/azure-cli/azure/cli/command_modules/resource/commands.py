@@ -541,6 +541,7 @@ def load_command_table(self, _):
         g.custom_command('upgrade', 'upgrade_bicep_cli')
         g.custom_command('build', 'build_bicep_file')
         g.custom_command('decompile', 'decompile_bicep_file')
+        g.custom_command('restore', 'restore_bicep_file')
         g.custom_command('publish', 'publish_bicep_file')
         g.custom_command('version', 'show_bicep_cli_version')
         g.custom_command('list-versions', 'list_bicep_cli_versions')

@@ -1540,12 +1540,12 @@ class NetworkVNetPeeringScenarioTest(ScenarioTest):
             'vnet2_id': vnet2_id
         })
         # set up gateway sharing from vnet1 to vnet2
-        self.cmd('network vnet peering create -g {rg} -n peering2 --vnet-name vnet2 --remote-vnet-id {vnet1_id} --allow-gateway-transit', checks=[
+        self.cmd('network vnet peering create -g {rg} -n peering2 --vnet-name vnet2 --remote-vnet {vnet1_id} --allow-gateway-transit', checks=[
             self.check('allowGatewayTransit', True),
             self.check('remoteVirtualNetwork.id', '{vnet1_id}'),
             self.check('peeringState', 'Initiated')
         ])
-        self.cmd('network vnet peering create -g {rg} -n peering1 --vnet-name vnet1 --remote-vnet-id {vnet2_id} --use-remote-gateways --allow-forwarded-traffic', checks=[
+        self.cmd('network vnet peering create -g {rg} -n peering1 --vnet-name vnet1 --remote-vnet {vnet2_id} --use-remote-gateways --allow-forwarded-traffic', checks=[
             self.check('useRemoteGateways', True),
             self.check('remoteVirtualNetwork.id', '{vnet2_id}'),
             self.check('peeringState', 'Connected'),

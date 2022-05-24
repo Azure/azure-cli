@@ -23,8 +23,7 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           validate_fs_public_access, validate_logging_version, validate_or_policy, validate_policy,
                           get_api_version_type, blob_download_file_path_validator, blob_tier_validator, validate_subnet,
                           validate_immutability_arguments, validate_blob_name_for_upload, validate_share_close_handle,
-                          add_upload_progress_callback, blob_tier_validator_track2, add_download_progress_callback,
-                          services_type_v2, resource_type_type_v2)
+                          blob_tier_validator_track2, services_type_v2, resource_type_type_v2)
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines, too-many-branches, line-too-long
@@ -869,11 +868,16 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                 'configured to allow overrides. Otherwise an error will be raised.')
 
     with self.argument_context('storage blob update') as c:
-        t_blob_content_settings = self.get_sdk('blob.models#ContentSettings')
+        c.register_blob_arguments()
+        c.register_precondition_options()
+        t_blob_content_settings = self.get_sdk('_models#ContentSettings', resource_type=ResourceType.DATA_STORAGE_BLOB)
         c.register_content_settings_argument(t_blob_content_settings, update=True)
+        c.extra('lease', options_list=['--lease-id'], help='Required if the blob has an active lease.')
 
     with self.argument_context('storage blob exists') as c:
-        c.argument('blob_name', required=True)
+        c.register_blob_arguments()
+        c.extra('snapshot', help='The snapshot parameter is an opaque DateTime value that, when present, '
+                                 'specifies the snapshot.')
 
     with self.argument_context('storage blob url') as c:
         from ._validators import get_not_none_validator
@@ -882,6 +886,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.extra('protocol', arg_type=get_enum_type(['http', 'https'], 'https'), help='Protocol to use.')
         c.extra('snapshot', help='An string value that uniquely identifies the snapshot. The value of this query '
                                  'parameter indicates the snapshot version.')
+
+    with self.argument_context('storage blob snapshot') as c:
+        c.register_blob_arguments()
+        c.register_precondition_options()
+        c.extra('lease', options_list=['--lease-id'], help='Required if the blob has an active lease.')
 
     with self.argument_context('storage blob set-tier') as c:
         from azure.cli.command_modules.storage._validators import (blob_rehydrate_priority_validator)
@@ -967,7 +976,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('blob_type', options_list=('--type', '-t'), validator=validate_blob_type,
                    arg_type=get_enum_type(get_blob_types()), arg_group="Additional Flags")
         c.argument('validate_content', action='store_true', min_api='2016-05-31', arg_group="Content Control")
-        c.extra('no_progress', progress_type, validator=add_upload_progress_callback, arg_group="Additional Flags")
+        c.extra('no_progress', progress_type, validator=add_progress_callback, arg_group="Additional Flags")
         c.extra('tier', tier_type, validator=blob_tier_validator_track2, arg_group="Additional Flags")
         c.argument('encryption_scope', validator=validate_encryption_scope_client_params,
                    help='A predefined encryption scope used to encrypt the data on the service.',
@@ -993,7 +1002,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('maxsize_condition', arg_group='Content Control')
         c.argument('validate_content', action='store_true', min_api='2016-05-31', arg_group='Content Control')
         c.argument('blob_type', options_list=('--type', '-t'), arg_type=get_enum_type(get_blob_types()))
-        c.extra('no_progress', progress_type, validator=add_upload_progress_callback)
+        c.extra('no_progress', progress_type, validator=add_progress_callback)
         c.extra('tier', tier_type, is_preview=True, validator=blob_tier_validator_track2)
         c.extra('overwrite', arg_type=get_three_state_flag(), is_preview=True,
                 help='Whether the blob to be uploaded should overwrite the current data. If True, blob upload '
@@ -1007,7 +1016,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.register_blob_arguments_track2()
         c.register_precondition_options()
         c.argument('file_path', options_list=('--file', '-f'), type=file_type, completer=FilesCompleter(),
-                   help='Path of file to write out to.', validator=blob_download_file_path_validator)
+                   help='Path of file to write out to. If not specified, stdout will be used '
+                        'and max_connections will be set to 1.', validator=blob_download_file_path_validator)
         c.argument('start_range', type=int,
                    help='Start of byte range to use for downloading a section of the blob. If no end_range is given, '
                         'all bytes after the start_range will be downloaded. The start_range and end_range params are '
@@ -1016,7 +1026,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='End of byte range to use for downloading a section of the blob. If end_range is given, '
                         'start_range must be provided. The start_range and end_range params are inclusive. '
                         'Ex: start_range=0, end_range=511 will download first 512 bytes of blob.')
-        c.extra('no_progress', progress_type, validator=add_download_progress_callback)
+        c.extra('no_progress', progress_type, validator=add_progress_callback)
         c.extra('snapshot', help='The snapshot parameter is an opaque DateTime value that, when present, '
                                  'specifies the blob snapshot to retrieve.')
         c.extra('lease', options_list=['--lease-id'], help='Required if the blob has an active lease.')
@@ -1045,7 +1055,18 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage blob delete') as c:
         from .sdkutil import get_delete_blob_snapshot_type_names
-        c.argument('delete_snapshots', arg_type=get_enum_type(get_delete_blob_snapshot_type_names()))
+        c.register_blob_arguments()
+        c.register_precondition_options()
+        c.argument('delete_snapshots', arg_type=get_enum_type(get_delete_blob_snapshot_type_names()),
+                   help='Required if the blob has associated snapshots. '
+                        'Values include: "only": Deletes only the blobs snapshots. '
+                        '"include": Deletes the blob along with all snapshots.')
+        c.extra('lease', options_list='--lease-id', help='Required if the blob has an active lease.')
+        c.extra('snapshot', help='The snapshot parameter is an opaque DateTime value that, when present, '
+                                 'specifies the blob snapshot to delete.')
+
+    with self.argument_context('storage blob undelete') as c:
+        c.register_blob_arguments()
 
     with self.argument_context('storage blob delete-batch') as c:
         c.ignore('source_container_name')
@@ -1748,12 +1769,28 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                      "Astrix (‘*’) is a wildcard that specifies all handles.")
         c.argument('snapshot', help="A string that represents the snapshot version, if applicable.")
 
-    with self.argument_context('storage directory') as c:
-        c.argument('directory_name', directory_type, options_list=('--name', '-n'))
+    for scope in ['create', 'delete', 'show', 'exists', 'metadata show', 'metadata update']:
+        with self.argument_context(f'storage directory {scope}') as c:
+            c.extra('share_name', share_name_type, required=True)
+            c.extra('snapshot', help="A string that represents the snapshot version, if applicable.")
+            c.extra('directory_path', directory_type, options_list=('--name', '-n'), required=True)
+            c.extra('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
 
-    with self.argument_context('storage directory exists') as c:
-        c.ignore('file_name')
-        c.argument('directory_name', required=True)
+    with self.argument_context('storage directory list') as c:
+        c.extra('share_name', share_name_type, required=True)
+        c.extra('directory_path', directory_type, options_list=('--name', '-n'))
+        c.argument('exclude_extended_info',
+                   help='Specify to exclude "timestamps", "Etag", "Attributes", "PermissionKey" info from response')
+        c.extra('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
+
+    with self.argument_context('storage directory create') as c:
+        c.argument('fail_on_exist', help='Throw an exception if the directory already exists.')
+
+    with self.argument_context('storage directory delete') as c:
+        c.argument('fail_not_exist', help='Throw an exception if the directory does not exist.')
+
+    with self.argument_context('storage directory metadata update') as c:
+        c.argument('metadata', required=False)
 
     with self.argument_context('storage file') as c:
         c.argument('file_name', file_name_type, options_list=('--name', '-n'))
@@ -1801,9 +1838,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage file list') as c:
         from .completers import dir_path_completer
+        c.extra('share_name', share_name_type, required=True)
+        c.extra('snapshot', help="A string that represents the snapshot version, if applicable.")
         c.argument('directory_name', options_list=('--path', '-p'), help='The directory path within the file share.',
                    completer=dir_path_completer)
         c.argument('num_results', arg_type=num_results_type)
+        c.argument('marker', arg_type=marker_type)
+        c.argument('exclude_extended_info',
+                   help='Specify to exclude "timestamps", "Etag", "Attributes", "PermissionKey" info from response')
 
     with self.argument_context('storage file metadata show') as c:
         c.register_path_argument()
@@ -1877,7 +1919,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('source_share')
 
     with self.argument_context('storage cors list') as c:
-        c.extra('services', validator=get_char_options_validator('bfqt', 'services'), default='bqft',
+        c.extra('services', validator=get_char_options_validator('bfqt', 'services'), default='bfqt',
                 options_list='--services', required=False)
 
     with self.argument_context('storage cors add') as c:

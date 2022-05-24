@@ -83,6 +83,44 @@ class ContainerAppConnectionScenarioTest(ScenarioTest):
         self.cmd('containerapp connection delete --id {} --yes'.format(connection_id))
 
 
+    def test_containerapp_mysql_e2e_kvsecret(self):
+        self.kwargs.update({
+            'subscription': get_subscription_id(self.cli_ctx),
+            'source_resource_group': 'servicelinker-test-linux-group',
+            'target_resource_group': 'servicelinker-test-linux-group',
+            'app': 'servicelinker-mysql-aca',
+            'server': 'servicelinker-mysql',
+            'database': 'mysqlDB'
+        })
+
+        # prepare password
+        user = 'servicelinker'
+        keyvaultUri = "https://cupertino-kv-test.vault.azure.net/secrets/TestDbPassword"
+
+        # prepare params
+        name = 'testconn'
+        source_id = SOURCE_RESOURCES.get(RESOURCE.ContainerApp).format(**self.kwargs)
+        target_id = TARGET_RESOURCES.get(RESOURCE.Mysql).format(**self.kwargs)
+
+        # create connection, test clientType=None
+        self.cmd('containerapp connection create mysql --connection {} --source-id {} --target-id {} '
+                 '--secret name={} secret-uri={} --client-type none -c {}'.format(name, source_id, target_id, user, keyvaultUri, self.default_container_name))
+
+        # list connection
+        connections = self.cmd(
+            'containerapp connection list --source-id {}'.format(source_id),
+            checks = [
+                self.check('length(@)', 1),
+                self.check('[0].authInfo.authType', 'secret'),
+                self.check('[0].clientType', 'none')
+            ]
+        ).get_output_in_json()
+        connection_id = connections[0].get('id')
+
+        # delete connection
+        self.cmd('containerapp connection delete --id {} --yes'.format(connection_id))
+
+
     # @record_only()
     def test_containerapp_storageblob_e2e(self):
         self.kwargs.update({

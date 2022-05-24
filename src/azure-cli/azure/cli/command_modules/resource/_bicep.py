@@ -160,6 +160,13 @@ def get_bicep_latest_release_tag():
         raise ClientRequestError(f"Error while attempting to retrieve the latest Bicep version: {err}.")
 
 
+def bicep_version_greater_than_or_equal_to(version):
+    system = platform.system()
+    installation_path = _get_bicep_installation_path(system)
+    installed_version = _get_bicep_installed_version(installation_path)
+    return semver.compare(installed_version, version) >= 0
+
+
 def supports_bicep_publish():
     system = platform.system()
     installation_path = _get_bicep_installation_path(system)
