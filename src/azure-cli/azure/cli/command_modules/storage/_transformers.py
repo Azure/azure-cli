@@ -4,7 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 import base64
+from datetime import datetime
 
+import pytz
 from dateutil import parser
 from knack.log import get_logger
 from knack.util import todict, to_camel_case
@@ -397,4 +399,40 @@ def transform_url_without_encode(result):
     import re
     result = re.sub('//', '/', result)
     result = re.sub('/', '//', result, count=1)
+    return result
+
+
+def transform_acl_edit(result):
+    if "last_modified" in result.keys():
+        result["lastModified"] = result.pop("last_modified")
+    return result
+
+
+def transform_acl_list_output_v2(result):
+    new_result = {}
+    for identifier in result['signed_identifiers']:
+        new_result[identifier.id] = identifier.access_policy
+    return new_result
+
+
+def transform_acl_datetime(result):
+    result = todict(result)
+    if result['start']:
+        try:
+            result['start'] = result["start"].split('.')[0]
+            time = datetime.strptime(result['start'], '%Y-%m-%dT%H:%M:%S')
+            tz = pytz.timezone('UTC')
+            start = datetime.strftime(tz.localize(time), '%Y-%m-%dT%H:%M:%S%z')
+            result['start'] = start[0:22] + ':' + start[22:24]
+        except OverflowError:
+            pass
+    if result['expiry']:
+        try:
+            result['expiry'] = result["expiry"].split('.')[0]
+            time = datetime.strptime(result['expiry'], '%Y-%m-%dT%H:%M:%S')
+            tz = pytz.timezone('UTC')
+            expiry = datetime.strftime(tz.localize(time), '%Y-%m-%dT%H:%M:%S%z')
+            result['expiry'] = expiry[0:22] + ':' + expiry[22:24]
+        except OverflowError:
+            pass
     return result

@@ -259,7 +259,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage') as c:
         c.argument('container_name', container_name_type)
         c.argument('directory_name', directory_type)
-        c.argument('share_name', share_name_type)
         c.argument('table_name', table_name_type)
         c.argument('retry_wait', options_list=('--retry-interval',))
         c.ignore('progress_callback')
@@ -1558,9 +1557,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('include_deleted', action='store_true',
                    help='Include soft deleted containers when specified.')
 
-    with self.argument_context('storage share') as c:
-        c.argument('share_name', share_name_type, options_list=('--name', '-n'))
-
     with self.argument_context('storage share-rm', resource_type=ResourceType.MGMT_STORAGE) as c:
         c.argument('resource_group_name', required=False)
         c.argument('account_name', storage_account_type)
@@ -1663,15 +1659,20 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
             c.extra('share_name', share_name_type, options_list=('--name', '-n'), required=True)
             c.extra('timeout', timeout_type)
 
+    for item in ['create', 'delete', 'show', 'list', 'update']:
+        with self.argument_context('storage share policy {}'.format(item)) as c:
+            c.extra('share_name', share_name_type, required=True)
+
     with self.argument_context('storage share policy') as c:
         from .completers import get_storage_acl_name_completion_list
 
-        t_file_svc = self.get_sdk('file#FileService')
-        t_share_permissions = self.get_sdk('file.models#SharePermissions')
+        t_share_permissions = self.get_sdk('_models#ShareSasPermissions',
+                                           resource_type=ResourceType.DATA_STORAGE_FILESHARE)
 
         c.argument('container_name', share_name_type)
         c.argument('policy_name', options_list=('--name', '-n'), help='The stored access policy name.',
-                   completer=get_storage_acl_name_completion_list(t_file_svc, 'container_name', 'get_share_acl'))
+                   completer=get_storage_acl_name_completion_list(t_share_service, 'container_name',
+                                                                  'get_share_access_policy'))
 
         help_str = 'Allowed values: {}. Can be combined'.format(get_permission_help_string(t_share_permissions))
         c.argument('permission', options_list='--permissions', help=help_str,
@@ -1680,6 +1681,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('start', type=get_datetime_type(True),
                    help='start UTC datetime (Y-m-d\'T\'H:M:S\'Z\'). Defaults to time of request.')
         c.argument('expiry', type=get_datetime_type(True), help='expiration UTC datetime in (Y-m-d\'T\'H:M:S\'Z\')')
+        c.ignore('auth_mode')
 
     with self.argument_context('storage share delete') as c:
         from .sdkutil import get_delete_file_snapshot_type_names
@@ -1726,10 +1728,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.extra('timeout', timeout_type)
 
     with self.argument_context('storage share list-handle') as c:
+        c.argument('share_name', share_name_type, options_list=('--name', '-n'))
         c.register_path_argument(default_file_param="")
         c.argument('recursive', arg_type=get_three_state_flag())
 
     with self.argument_context('storage share close-handle') as c:
+        c.argument('share_name', share_name_type, options_list=('--name', '-n'))
         c.register_path_argument(default_file_param="")
         c.argument('recursive', arg_type=get_three_state_flag(),
                    help="Boolean that specifies if operation should apply to the directory specified in the URI, its "
