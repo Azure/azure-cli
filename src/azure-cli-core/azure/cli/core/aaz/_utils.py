@@ -185,7 +185,7 @@ class AAZShortHandSyntaxParser:
         result = ''
         while idx < len(remain):
             if remain[idx] == quote:
-                if len(remain) > idx+1 and remain[idx+1] == '/':
+                if len(remain) > idx + 1 and remain[idx + 1] == '/':
                     # parse '/ as '
                     result += quote
                     idx += 2
@@ -200,4 +200,3 @@ class AAZShortHandSyntaxParser:
         if quote is not None:
             raise AAZInvalidShorthandSyntaxError(remain, idx, 1, f"Miss end quota character: {quote}")
         return result, idx
-
