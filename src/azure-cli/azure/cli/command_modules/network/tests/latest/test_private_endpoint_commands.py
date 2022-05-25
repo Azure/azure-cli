@@ -2313,8 +2313,7 @@ class NetworkPrivateLinkScenarioTest(ScenarioTest):
             'extra_create': '-l eastus --public-network-access Disabled',
         })
 
-        # Private Endpoint Connection of batch account doesn't have delete operation.
-        _test_private_endpoint(self, approve=False, rejected=False, delete=False)
+        _test_private_endpoint(self, approve=False, rejected=False)
 
     @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_media_service")
     @StorageAccountPreparer(name_prefix="testams")
@@ -2465,7 +2464,7 @@ class PowerBINetworkARMTemplateBasedScenarioTest(ScenarioTest):
             '--group-ids {group_ids}').get_output_in_json()
         self.kwargs['pe_id'] = pe['id']
         self.kwargs['pe_name'] = self.kwargs['pe_id'].split('/')[-1]
-        
+
         # List powerbi private link connection
         list_private_endpoint_conn = self.cmd('network private-endpoint-connection list --name {powerbi_resource_name} --resource-group {rg} --type {resource_type}').get_output_in_json()
 
@@ -2486,20 +2485,20 @@ class PowerBINetworkARMTemplateBasedScenarioTest(ScenarioTest):
             'approval_desc': 'You are approved!',
             'rejection_desc': 'You are rejected!'
         })
-        
+
         self.cmd(
             'network private-endpoint-connection approve --resource-name {powerbi_resource_name} --resource-group {rg} --name {pec_name} --type {resource_type} '
-            '--description "{approval_desc}"', 
+            '--description "{approval_desc}"',
                 checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Approved')
             ])
-        
+
         # Reject the private endpoint connection
         if reject: self.cmd(
             'network private-endpoint-connection reject --resource-name {powerbi_resource_name} --resource-group {rg} --name {pec_name} --type {resource_type} '
             '--description "{rejection_desc}"',
                 checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Rejected')
             ])
-        
+
         self.cmd(
             'network private-endpoint-connection list --name {powerbi_resource_name} --resource-group {rg} --type {resource_type}',
             checks=[
@@ -2508,7 +2507,7 @@ class PowerBINetworkARMTemplateBasedScenarioTest(ScenarioTest):
 
         # Delete the private endpoint connection
         self.cmd('network private-endpoint-connection delete --id {pec_id} -y')
-        
+
     @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_powerbi", location="eastus2")
     @unittest.skip('Test account subscription not registered')
     def test_private_endpoint_connection_powerbi(self, resource_group):
@@ -2653,7 +2652,7 @@ class NetworkPrivateLinkAzureCacheforRedisScenarioTest(ScenarioTest):
 
         self.cmd('network private-link-resource list --name {cache_name} -g {rg} --type Microsoft.Cache/Redis' , checks=[
             self.check('length(@)', 1)]) #####
-    
+
     @ResourceGroupPreparer(name_prefix='cli_test_acfr_pe')
     def test_private_endpoint_connection_acfr(self,resource_group):
         self.kwargs.update({
@@ -2667,28 +2666,28 @@ class NetworkPrivateLinkAzureCacheforRedisScenarioTest(ScenarioTest):
 
         # Prepare Redis Cache and network
         cache = self.cmd('az redis create --location {loc} --name {cache_name} --resource-group {rg} --sku Standard --vm-size c1').get_output_in_json()
-        self.kwargs['acfr_id'] = cache['id'] 
-    
+        self.kwargs['acfr_id'] = cache['id']
+
         self.cmd('az network vnet create -n {vnet} -g {rg} -l {loc} --subnet-name {subnet}',
                  checks=self.check('length(newVNet.subnets)', 1))
-        
+
         self.cmd('az network vnet subnet update -n {subnet} --vnet-name {vnet} -g {rg} '
                  '--disable-private-endpoint-network-policies true',
                  checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
-        
+
         # Waiting for Cache creation
         if self.is_live:
             time.sleep(25 * 60)
 
         # Creating Private Endpoint
-        pe = self.cmd('az network private-endpoint create -g {rg} -n {pe} --vnet-name {vnet} --subnet {subnet} -l {loc} --connection-name {pe_connection} --private-connection-resource-id {acfr_id} --group-id redisCache').get_output_in_json() 
+        pe = self.cmd('az network private-endpoint create -g {rg} -n {pe} --vnet-name {vnet} --subnet {subnet} -l {loc} --connection-name {pe_connection} --private-connection-resource-id {acfr_id} --group-id redisCache').get_output_in_json()
         self.kwargs['pe_id'] = pe['id']
         self.kwargs['pe_name'] = self.kwargs['pe_id'].split('/')[-1]
 
         # Test get details of private endpoint
         results = self.kwargs['pe_id'].split('/')
         self.kwargs['pec_id'] = '/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Network/privateEndpoints/{2}'.format(results[2], results[4], results[-1])
-        
+
         self.cmd('az network private-endpoint show --id {pec_id}',
                  checks=self.check('id', '{pec_id}'))
 
@@ -2696,7 +2695,7 @@ class NetworkPrivateLinkAzureCacheforRedisScenarioTest(ScenarioTest):
             'az network private-endpoint show --resource-group {rg} --name {pe_name}',
             checks=self.check('name', '{pe_name}'))
 
-    
+
         # Show the connection at azure cache for redis
 
         redis = self.cmd('az redis show -n {cache_name} -g {rg}').get_output_in_json()
@@ -2709,11 +2708,11 @@ class NetworkPrivateLinkAzureCacheforRedisScenarioTest(ScenarioTest):
         self.cmd('az network private-endpoint-connection list --id {red_pec_id}', checks=[
             self.check('length(@)', '1'),
         ])
-        
+
         self.cmd('az network private-endpoint-connection show --id {red_pec_id}', checks=self.check('id', '{red_pec_id}'))
 
         self.cmd('az network private-endpoint-connection reject --id {red_pec_id}', checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Rejected')])
-        
+
         # Test delete
         self.cmd('az network private-endpoint-connection delete --id {red_pec_id} -y')
 
@@ -2891,7 +2890,7 @@ class NetworkPrivateLinkDataFactoryScenarioTest(ScenarioTest):
         self.cmd('network private-endpoint-connection show --id {private-endpoint-connection-id}',
                  expect_failure=True)
 
-        
+
 class NetworkHybridComputePrivateLinkScopesTest(ScenarioTest):
     @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_hybridcompute_pe', random_name_length=40)
@@ -2984,7 +2983,7 @@ class NetworkHybridComputePrivateLinkScopesTest(ScenarioTest):
         ])
         self.cmd('network private-endpoint-connection delete -g {rg} --resource-name {scope} -n {private_endpoint_connection} --type Microsoft.HybridCompute/privateLinkScopes -y')
 
-        
+
 class NetworkPrivateLinkDatabricksScenarioTest(ScenarioTest):
     @live_only()
     @ResourceGroupPreparer(name_prefix='test_databricks_private_endpoint', random_name_length=40, location="westus")
