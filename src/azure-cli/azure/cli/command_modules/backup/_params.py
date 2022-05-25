@@ -103,6 +103,7 @@ def load_arguments(self, _):
         c.argument('soft_delete_feature_state', arg_type=get_enum_type(['Enable', 'Disable']), help='Set soft-delete feature state for a Recovery Services Vault.')
         c.argument('cross_region_restore_flag', arg_type=get_enum_type(['True', 'False']), help='Set cross-region-restore feature state for a Recovery Services Vault. Default: False.')
         c.argument('hybrid_backup_security_features', arg_type=get_enum_type(['Enable', 'Disable']), help='Use this field to set the security features for hybrid backups in a Recovery Services Vault.')
+        c.argument('tenant_id', help='ID of the tenant if the Resource Guard protecting the vault exists in a different tenant.')
 
     # Identity
     with self.argument_context('backup vault identity assign') as c:
@@ -178,6 +179,7 @@ def load_arguments(self, _):
         c.argument('policy_name', policy_name_type, help='Name of the Backup policy. You can use the backup policy list command to get the name of a backup policy.')
         c.argument('backup_management_type', backup_management_type)
         c.argument('workload_type', workload_type)
+        c.argument('tenant_id', help='ID of the tenant if the Resource Guard protecting the vault exists in a different tenant.')
 
     with self.argument_context('backup item list') as c:
         c.argument('vault_name', vault_name_type, id_part=None)
@@ -201,6 +203,7 @@ def load_arguments(self, _):
         c.argument('name', options_list=['--name', '-n'], help='Name of the Policy.', id_part='child_name_1')
         c.argument('fix_for_inconsistent_items', arg_type=get_three_state_flag(), options_list=['--fix-for-inconsistent-items'], help='Specify whether or not to retry Policy Update for failed items.')
         c.argument('backup_management_type', backup_management_type)
+        c.argument('tenant_id', help='ID of the tenant if the Resource Guard protecting the vault exists in a different tenant.')
 
     with self.argument_context('backup policy create') as c:
         c.argument('policy', type=file_type, help='JSON encoded policy definition. Use the show command with JSON output to obtain a policy object. Modify the values using a file editor and pass the object.', completer=FilesCompleter())
@@ -285,6 +288,7 @@ def load_arguments(self, _):
         c.argument('delete_backup_data', arg_type=get_three_state_flag(), help='Option to delete existing backed up data in the Recovery services vault.')
         c.argument('backup_management_type', backup_management_type)
         c.argument('workload_type', workload_type)
+        c.argument('tenant_id', help='ID of the tenant if the Resource Guard protecting the vault exists in a different tenant.')
 
     with self.argument_context('backup protection check-vm') as c:
         c.argument('vm_id', help='ID of the virtual machine to be checked for protection.', deprecate_info=c.deprecate(redirect='--vm', hide=True))
@@ -421,3 +425,11 @@ def load_arguments(self, _):
 
     with self.argument_context('backup job wait') as c:
         c.argument('timeout', type=int, help='Maximum time, in seconds, to wait before aborting.')
+
+    # ResourceGuardMapping
+    with self.argument_context('backup vault resource-guard-mapping update') as c:
+        c.argument('resource_guard_id', help='ARM ID of the Resource Guard to be associated with the vault.')
+
+    for command in ['delete', 'update']:
+        with self.argument_context('backup vault resource-guard-mapping ' + command) as c:
+            c.argument('tenant_id', help='ID of the tenant where the Resource Guard exists in Cross-Tenant scenarios.')

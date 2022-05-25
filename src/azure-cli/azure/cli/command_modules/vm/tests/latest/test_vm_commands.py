@@ -5086,11 +5086,12 @@ class VMGalleryImage(ScenarioTest):
             self.check('softDeletePolicy.isSoftDeleteEnabled', True)
         ])
 
-        self.cmd('sig show -g {rg} -r {gallery_name}', checks=[
+        self.cmd('sig show -g {rg} -r {gallery_name} --sharing-groups', checks=[
             self.check('location', 'westus'),
             self.check('name', '{gallery_name}'),
             self.check('resourceGroup', '{rg}'),
-            self.check('softDeletePolicy.isSoftDeleteEnabled', True)
+            self.check('softDeletePolicy.isSoftDeleteEnabled', True),
+            self.check('sharingProfile.groups', None)
         ])
 
         self.cmd('sig update -g {rg} -r {gallery_name} --soft-delete False', checks=[
@@ -5386,7 +5387,7 @@ class DedicatedHostScenarioTest(ScenarioTest):
     def test_vm_host_management(self, resource_group):
         self.kwargs.update({
             'host-group': 'my-host-group',
-            'host': 'my-host'
+            'host': 'my-host',
         })
 
         self.cmd('vm host group create -n {host-group} -c 3 -g {rg}')
@@ -5409,6 +5410,15 @@ class DedicatedHostScenarioTest(ScenarioTest):
 
         self.cmd('vm host delete -n {host} --host-group {host-group} -g {rg} --yes')
         self.cmd('vm host group delete -n {host-group} -g {rg} --yes')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_host_ultra_ssd_')
+    def test_vm_host_ultra_ssd(self, resource_group):
+        self.kwargs.update({
+            'host-group': self.create_random_name('host', 10)
+        })
+        self.cmd('vm host group create -n {host-group} -g {rg} --ultra-ssd-enabled true -c 1 -l eastus2euap --zone 3', checks=[
+            self.check('additionalCapabilities.ultraSsdEnabled', True)
+        ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_dedicated_host_', location='westeurope')
     @ResourceGroupPreparer(name_prefix='cli_test_dedicated_host2_', location='centraluseuap', key='rg2')
@@ -7100,6 +7110,19 @@ class DiskHibernationScenarioTest(ScenarioTest):
             self.check('supportsHibernation', True)
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_disk_data_access_auth_mode_', location='eastus2euap')
+    def test_disk_data_access_auth_mode(self):
+        self.kwargs.update({
+            'disk': self.create_random_name('disk-', 10),
+            'disk1': self.create_random_name('disk-', 10)
+        })
+        self.cmd('disk create -g {rg} -n {disk} --size-gb 10 --data-access-auth-mode AzureActiveDirectory', checks=[
+            self.check('dataAccessAuthMode', 'AzureActiveDirectory')
+        ])
+        self.cmd('disk create -g {rg} -n {disk1} --size-gb 10 --data-access-auth-mode None', checks=[
+            self.check('dataAccessAuthMode', 'None')
+        ])
+
 
 class VMCreateCountScenarioTest(ScenarioTest):
     @AllowLargeResponse()
@@ -7190,7 +7213,7 @@ class ExtendedLocation(ScenarioTest):
 
 class DiskZRSScenarioTest(ScenarioTest):
     @AllowLargeResponse(size_kb=99999)
-    @ResourceGroupPreparer(name_prefix='cli_test_disk_zrs_', location='eastus2euap')
+    @ResourceGroupPreparer(name_prefix='cli_test_disk_zrs_', location='westus2')
     def test_disk_zrs(self, resource_group):
         # az feature register --namespace Microsoft.Compute -n SharedDisksForStandardSSD
         # az provider register -n Microsoft.Compute
