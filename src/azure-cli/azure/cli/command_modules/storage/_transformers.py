@@ -432,7 +432,7 @@ def transform_share_file_json_output(result):
 
 def transform_share_list_handle(result):
     new_result = {}
-    if len(result)>1 and isinstance(result[-1], dict):
+    if len(result) > 1 and isinstance(result[-1], dict):
         new_result["items"] = result[:-1]
         new_result["nextMarker"] = result[-1]["nextMarker"]
     else:

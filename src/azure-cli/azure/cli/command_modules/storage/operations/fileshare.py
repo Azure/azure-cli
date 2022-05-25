@@ -99,11 +99,11 @@ def list_handle(client, marker, num_results, **kwargs):
     from ..track2_util import list_generator
     directory_path = kwargs.pop("directory_name", None)
     if directory_path and directory_path.startswith('./'):
-        directory_path = directory_path.replace('./','',1)
+        directory_path = directory_path.replace('./', '', 1)
     dir_client = client.get_directory_client(directory_path=directory_path)
     file_name = kwargs.pop("file_name", None)
     if file_name:
-        total_path = directory_path+'/'+file_name if directory_path else file_name
+        total_path = directory_path + '/' + file_name if directory_path else file_name
         dir_client = client.get_directory_client(directory_path=total_path)
         if not dir_client.exists():
             dir_client = client.get_directory_client(directory_path=directory_path)
@@ -144,6 +144,6 @@ def close_handle(client, **kwargs):
         client = dir_client
 
     handle = kwargs.pop("handle", None)
-    if kwargs.pop("close_all", None) or handle =='*':
+    if kwargs.pop("close_all", None) or handle == '*':
         return client.close_all_handles(**kwargs)
     return client.close_handle(handle=handle, **kwargs)

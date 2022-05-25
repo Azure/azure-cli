@@ -1762,10 +1762,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.register_path_argument(default_file_param="", fileshare=True)
         c.extra('share_name', share_name_type, options_list=('--name', '-n'), required=True)
         c.extra('recursive', arg_type=get_three_state_flag(),
-                   help="Boolean that specifies if operation should apply to the directory specified in the URI, its "
-                        "files, with its subdirectories and their files.")
+                help="Boolean that specifies if operation should apply to the directory specified in the URI, its "
+                     "files, with its subdirectories and their files.")
         c.extra('close_all', arg_type=get_three_state_flag(), validator=validate_share_close_handle,
-                   help="Whether or not to close all the file handles. Specify close-all or a specific handle-id.")
+                help="Whether or not to close all the file handles. Specify close-all or a specific handle-id.")
         c.extra('handle', options_list='--handle-id',
                 help="Specifies handle ID opened on the file or directory to be closed. "
                      "Astrix (‘*’) is a wildcard that specifies all handles.")
