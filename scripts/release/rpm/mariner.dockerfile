@@ -5,7 +5,7 @@ FROM ${image}:${tag} AS build-env
 ARG cli_version=dev
 
 RUN tdnf update -y
-RUN tdnf install -y binutils file rpm-build gcc libffi-devel python3-devel openssl-devel make diffutils patch dos2unix python3-virtualenv perl
+RUN tdnf install -y binutils file rpm-build gcc libffi-devel python3-devel openssl-devel make diffutils patch dos2unix perl sed
 
 WORKDIR /azure-cli
 
@@ -22,7 +22,7 @@ RUN dos2unix ./scripts/release/rpm/azure-cli.spec && \
 FROM ${image}:${tag} AS execution-env
 
 RUN tdnf update -y
-RUN tdnf install -y python3 python3-virtualenv rpm
+RUN tdnf install -y python3 rpm
 
 COPY --from=build-env /azure-cli-dev.rpm ./
 RUN rpm -i ./azure-cli-dev.rpm && \
