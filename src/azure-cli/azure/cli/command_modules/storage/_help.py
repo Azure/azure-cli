@@ -789,6 +789,19 @@ examples:
     text: az storage blob delete -c mycontainer -n MyBlob --account-name mystorageaccount --auth-mode login
 """
 
+helps['storage blob undelete'] = """
+type: command
+short-summary: Restore soft deleted blob or snapshot.
+long-summary: >
+    Operation will only be successful if used within the specified number of days set in the delete retention policy.
+    Attempting to undelete a blob or snapshot that is not soft deleted will succeed without any changes.
+examples:
+  - name: Undelete a blob.
+    text: az storage blob undelete -c mycontainer -n MyBlob
+  - name: Undelete a blob using login credentials.
+    text: az storage blob undelete -c mycontainer -n MyBlob --account-name mystorageaccount --auth-mode login
+"""
+
 helps['storage blob delete-batch'] = """
 type: command
 short-summary: Delete blobs from a blob container recursively.

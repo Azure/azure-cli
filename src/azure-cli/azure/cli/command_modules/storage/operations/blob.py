@@ -18,7 +18,7 @@ from azure.cli.command_modules.storage.util import (create_blob_service_from_sto
                                                     filter_none, collect_blobs, collect_blob_objects, collect_files,
                                                     mkdir_p, guess_content_type, normalize_blob_file_path,
                                                     check_precondition_success)
-from azure.core.exceptions import ResourceExistsError, ResourceModifiedError
+from azure.core.exceptions import ResourceExistsError, ResourceModifiedError, HttpResponseError
 
 from knack.log import get_logger
 from knack.util import CLIError
@@ -119,7 +119,6 @@ def list_container_rm(cmd, client, resource_group_name, account_name, include_de
 
 
 def container_rm_exists(client, resource_group_name, account_name, container_name):
-    from azure.core.exceptions import HttpResponseError
     try:
         container = client.get(resource_group_name=resource_group_name,
                                account_name=account_name, container_name=container_name)
@@ -713,12 +712,13 @@ def show_blob(cmd, client, container_name, blob_name, snapshot=None, lease_id=No
 def storage_blob_delete_batch(client, source, source_container_name, pattern=None, lease_id=None,
                               delete_snapshots=None, if_modified_since=None, if_unmodified_since=None, if_match=None,
                               if_none_match=None, timeout=None, dryrun=False):
+    container_client = client.get_container_client(source_container_name)
+
     @check_precondition_success
     def _delete_blob(blob_name):
         delete_blob_args = {
-            'container_name': source_container_name,
-            'blob_name': blob_name,
-            'lease_id': lease_id,
+            'blob': blob_name,
+            'lease': lease_id,
             'delete_snapshots': delete_snapshots,
             'if_modified_since': if_modified_since,
             'if_unmodified_since': if_unmodified_since,
@@ -726,7 +726,12 @@ def storage_blob_delete_batch(client, source, source_container_name, pattern=Non
             'if_none_match': if_none_match,
             'timeout': timeout
         }
-        return client.delete_blob(**delete_blob_args)
+        try:
+            container_client.delete_blob(**delete_blob_args)
+            return blob_name
+        except HttpResponseError as ex:
+            logger.debug(ex.exc_msg)
+            return None
 
     source_blobs = list(collect_blob_objects(client, source_container_name, pattern))
 
@@ -736,8 +741,8 @@ def storage_blob_delete_batch(client, source, source_container_name, pattern=Non
         if_modified_since_utc = if_modified_since.replace(tzinfo=timezone.utc) if if_modified_since else None
         if_unmodified_since_utc = if_unmodified_since.replace(tzinfo=timezone.utc) if if_unmodified_since else None
         for blob in source_blobs:
-            if not if_modified_since or blob[1].properties.last_modified >= if_modified_since_utc:
-                if not if_unmodified_since or blob[1].properties.last_modified <= if_unmodified_since_utc:
+            if not if_modified_since or blob[1].last_modified >= if_modified_since_utc:
+                if not if_unmodified_since or blob[1].last_modified <= if_unmodified_since_utc:
                     delete_blobs.append(blob[0])
         logger.warning('delete action: from %s', source)
         logger.warning('    pattern %s', pattern)
@@ -748,7 +753,7 @@ def storage_blob_delete_batch(client, source, source_container_name, pattern=Non
             logger.warning('  - %s', blob)
         return []
 
-    results = [result for include, result in (_delete_blob(blob[0]) for blob in source_blobs) if include]
+    results = [result for (include, result) in (_delete_blob(blob[0]) for blob in source_blobs) if result]
     num_failures = len(source_blobs) - len(results)
     if num_failures:
         logger.warning('%s of %s blobs not deleted due to "Failed Precondition"', num_failures, len(source_blobs))
@@ -945,3 +950,11 @@ def copy_blob(client, source_url, metadata=None, **kwargs):
     if not kwargs['requires_sync']:
         kwargs.pop('requires_sync')
     return client.start_copy_from_url(source_url=source_url, metadata=metadata, incremental_copy=False, **kwargs)
+
+
+def exists(client, container_name, blob_name, snapshot, timeout):
+    if blob_name:
+        client = client.get_blob_client(container=container_name, blob=blob_name, snapshot=snapshot)
+    else:
+        client = client.get_container_client(container=container_name)
+    return client.exists(timeout=timeout)

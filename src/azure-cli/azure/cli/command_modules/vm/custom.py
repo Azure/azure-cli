@@ -4386,12 +4386,15 @@ def list_proximity_placement_groups(client, resource_group_name=None):
 
 # region dedicated host
 def create_dedicated_host_group(cmd, client, host_group_name, resource_group_name, platform_fault_domain_count,
-                                automatic_placement=None, location=None, zones=None, tags=None):
+                                automatic_placement=None, location=None, zones=None, tags=None, ultra_ssd_enabled=None):
     DedicatedHostGroup = cmd.get_models('DedicatedHostGroup')
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
 
     host_group_params = DedicatedHostGroup(location=location, platform_fault_domain_count=platform_fault_domain_count,
                                            support_automatic_placement=automatic_placement, zones=zones, tags=tags)
+    if ultra_ssd_enabled is not None:
+        additionalCapabilities = {'ultraSSDEnabled': ultra_ssd_enabled}
+        host_group_params.additional_capabilities = additionalCapabilities
 
     return client.create_or_update(resource_group_name, host_group_name, parameters=host_group_params)
 
