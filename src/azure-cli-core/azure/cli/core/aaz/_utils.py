@@ -185,36 +185,19 @@ class AAZShortHandSyntaxParser:
         result = ''
         while idx < len(remain):
             if remain[idx] == quote:
-                quote = None
-                idx += 1
-                break
-
-            if remain[idx] == '/':
-                try:
-                    c, length = self.parse_escape_character(remain[idx:])
-                except AAZInvalidShorthandSyntaxError as ex:
-                    ex.error_data = remain
-                    ex.error_at += idx
-                    raise ex
-
-                result += c
-                idx += length
+                if len(remain) > idx+1 and remain[idx+1] == '/':
+                    # parse '/ as '
+                    result += quote
+                    idx += 2
+                else:
+                    quote = None
+                    idx += 1
+                    break
             else:
                 result += remain[idx]
                 idx += 1
+
         if quote is not None:
             raise AAZInvalidShorthandSyntaxError(remain, idx, 1, f"Miss end quota character: {quote}")
         return result, idx
 
-    @staticmethod
-    def parse_escape_character(remain):
-        assert remain[0] == '/'
-        if len(remain) < 2:
-            raise AAZInvalidShorthandSyntaxError(remain, 0, 1, f"Invalid escape character: {remain}")
-        if remain[1] == "'":
-            return "'", 2
-        if remain[1] == '/':
-            return '/', 2
-        if remain[1] == '\\':
-            return '\\', 2
-        raise AAZInvalidShorthandSyntaxError(remain, 0, 2, f"Invalid escape character: {remain[:2]}")
