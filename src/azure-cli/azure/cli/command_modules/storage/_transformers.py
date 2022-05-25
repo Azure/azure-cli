@@ -394,14 +394,6 @@ def transform_file_share_json_output(result):
     return new_result
 
 
-def transform_url_without_encode(result):
-    """ Ensures the resulting URL string does not contain extra / characters """
-    import re
-    result = re.sub('//', '/', result)
-    result = re.sub('/', '//', result, count=1)
-    return result
-
-
 def transform_acl_edit(result):
     if "last_modified" in result.keys():
         result["lastModified"] = result.pop("last_modified")

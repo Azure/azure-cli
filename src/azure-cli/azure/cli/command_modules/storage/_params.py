@@ -259,6 +259,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage') as c:
         c.argument('container_name', container_name_type)
         c.argument('directory_name', directory_type)
+        c.argument('share_name', share_name_type)
         c.argument('table_name', table_name_type)
         c.argument('retry_wait', options_list=('--retry-interval',))
         c.ignore('progress_callback')
@@ -1557,6 +1558,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('include_deleted', action='store_true',
                    help='Include soft deleted containers when specified.')
 
+    with self.argument_context('storage share') as c:
+        c.argument('share_name', share_name_type, options_list=('--name', '-n'))
+
     with self.argument_context('storage share-rm', resource_type=ResourceType.MGMT_STORAGE) as c:
         c.argument('resource_group_name', required=False)
         c.argument('account_name', storage_account_type)
@@ -1609,7 +1613,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='A new file share name to be restored. If not specified, deleted share name will be used.')
 
     with self.argument_context('storage share create') as c:
-        c.extra('share_name', share_name_type, options_list=('--name', '-n'), required=True)
+        c.extra('s_name', share_name_type, options_list=('--name', '-n'), required=True)
         c.argument('fail_on_exist', help='Specify whether to throw an exception when the share exists. False by '
                                          'default.')
         c.argument('quota', type=int, help='Specifies the maximum size of the share, in gigabytes. Must be greater '
@@ -1641,7 +1645,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.ignore('name_starts_with')
 
     with self.argument_context('storage share exists') as c:
-        c.extra('share_name', share_name_type, options_list=('--name', '-n'), required=True)
+        c.extra('s_name', share_name_type, options_list=('--name', '-n'), required=True)
         c.extra('snapshot', options_list=['--snapshot'],
                 help='A string that represents the snapshot version, if applicable.')
         c.ignore('directory_name', 'file_name')
@@ -1649,19 +1653,19 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     for item in ['show', 'metadata show']:
         with self.argument_context('storage share {}'.format(item)) as c:
-            c.extra('share_name', share_name_type, options_list=('--name', '-n'), required=True)
+            c.extra('s_name', share_name_type, options_list=('--name', '-n'), required=True)
             c.extra('snapshot', options_list=['--snapshot'],
                     help='A string that represents the snapshot version, if applicable.')
             c.extra('timeout', timeout_type)
 
     for item in ['stats', 'snapshot', 'metadata update']:
         with self.argument_context('storage share {}'.format(item)) as c:
-            c.extra('share_name', share_name_type, options_list=('--name', '-n'), required=True)
+            c.extra('s_name', share_name_type, options_list=('--name', '-n'), required=True)
             c.extra('timeout', timeout_type)
 
     for item in ['create', 'delete', 'show', 'list', 'update']:
         with self.argument_context('storage share policy {}'.format(item)) as c:
-            c.extra('share_name', share_name_type, required=True)
+            c.extra('s_name', share_name_type, required=True)
 
     with self.argument_context('storage share policy') as c:
         from .completers import get_storage_acl_name_completion_list
@@ -1685,7 +1689,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage share delete') as c:
         from .sdkutil import get_delete_file_snapshot_type_names
-        c.extra('share_name', share_name_type, options_list=('--name', '-n'), required=True)
+        c.extra('s_name', share_name_type, options_list=('--name', '-n'), required=True)
         c.argument('delete_snapshots', arg_type=get_enum_type(get_delete_file_snapshot_type_names()),
                    help='Specify the deletion strategy when the share has snapshots.')
         c.argument('fail_not_exist', help="Specify whether to throw an exception when the share doesn't exists. False "
@@ -1701,7 +1705,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         t_share_permissions = self.get_sdk('_models#ShareSasPermissions',
                                            resource_type=ResourceType.DATA_STORAGE_FILESHARE)
         c.register_sas_arguments()
-        c.extra('share_name', share_name_type, options_list=('--name', '-n'), required=True)
+        c.extra('s_name', share_name_type, options_list=('--name', '-n'), required=True)
         c.argument('cache_control', help='Response header value for Cache-Control when resource is accessed using this '
                                          'shared access signature.')
         c.argument('content_disposition', help='Response header value for Content-Disposition when resource is '
@@ -1722,18 +1726,16 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.ignore('sas_token')
 
     with self.argument_context('storage share update') as c:
-        c.extra('share_name', share_name_type, options_list=('--name', '-n'), required=True)
+        c.extra('s_name', share_name_type, options_list=('--name', '-n'), required=True)
         c.argument('quota', help='Specifies the maximum size of the share, in gigabytes. Must be greater than 0, and '
                                  'less than or equal to 5 TB (5120 GB).')
         c.extra('timeout', timeout_type)
 
     with self.argument_context('storage share list-handle') as c:
-        c.argument('share_name', share_name_type, options_list=('--name', '-n'))
         c.register_path_argument(default_file_param="")
         c.argument('recursive', arg_type=get_three_state_flag())
 
     with self.argument_context('storage share close-handle') as c:
-        c.argument('share_name', share_name_type, options_list=('--name', '-n'))
         c.register_path_argument(default_file_param="")
         c.argument('recursive', arg_type=get_three_state_flag(),
                    help="Boolean that specifies if operation should apply to the directory specified in the URI, its "

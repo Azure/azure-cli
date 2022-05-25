@@ -398,7 +398,7 @@ def cf_share_service(cli_ctx, kwargs):
 
 
 def cf_share_client(cli_ctx, kwargs):
-    return cf_share_service(cli_ctx, kwargs).get_share_client(share=kwargs.pop('share_name'),
+    return cf_share_service(cli_ctx, kwargs).get_share_client(share=kwargs.pop('s_name'),
                                                               snapshot=kwargs.pop('snapshot', None))
 
 
