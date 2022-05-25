@@ -199,7 +199,7 @@ msbuild /t:rebuild /p:Configuration=Release %REPO_ROOT%\build_scripts\windows\az
 
 if %errorlevel% neq 0 goto ERROR
 
-start %OUTPUT_DIR%
+REM start %OUTPUT_DIR%
 
 goto END
 
