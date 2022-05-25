@@ -428,3 +428,17 @@ def transform_share_file_json_output(result):
     }
     new_result.update(result)
     return new_result
+
+
+def transform_share_list_handle(result):
+    new_result = {}
+    if len(result)>1 and isinstance(result[-1], dict):
+        new_result["items"] = result[:-1]
+        new_result["nextMarker"] = result[-1]["nextMarker"]
+    else:
+        new_result["items"] = result
+        new_result["nextMarker"] = None
+    for item in new_result["items"]:
+        item["handleId"] = item.id
+        delattr(item, "id")
+    return new_result
