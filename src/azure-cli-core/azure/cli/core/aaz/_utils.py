@@ -26,28 +26,28 @@ class AAZShortHandSyntaxParser:
             elif data in self.HELP_EXPRESSIONS:
                 raise AAZShowHelp()
             elif len(data) and data[0] == "'":
-                result, length = self.parse_shorthand_quote_string(data)
+                result, length = self.parse_single_quotes_string(data)
                 if length != len(data):
                     raise AAZInvalidShorthandSyntaxError(
                         data, length, len(data) - length, "Redundant tail for quota expression")
             else:
                 result = data
         else:
-            result, length = self.parse_shorthand_value(data)
+            result, length = self.parse_value(data)
             if length != len(data):
                 raise AAZInvalidShorthandSyntaxError(data, length, len(data) - length, "Redundant tail")
         return result
 
-    def parse_shorthand_value(self, remain):
+    def parse_value(self, remain):
         if remain.startswith('{'):
-            return self.parse_shorthand_dict(remain)
+            return self.parse_dict(remain)
 
         if remain.startswith('['):
-            return self.parse_shorthand_list(remain)
+            return self.parse_list(remain)
 
-        return self.parse_shorthand_string(remain)
+        return self.parse_string(remain)
 
-    def parse_shorthand_dict(self, remain):  # pylint: disable=too-many-statements
+    def parse_dict(self, remain):  # pylint: disable=too-many-statements
         result = OrderedDict()
         assert remain.startswith('{')
         idx = 1
@@ -58,7 +58,7 @@ class AAZShortHandSyntaxParser:
 
         while idx < len(remain):
             try:
-                key, length = self.parse_shorthand_string(remain[idx:])
+                key, length = self.parse_string(remain[idx:])
             except AAZInvalidShorthandSyntaxError as ex:
                 ex.error_data = remain
                 ex.error_at += idx
@@ -85,7 +85,7 @@ class AAZShortHandSyntaxParser:
                 raise AAZInvalidShorthandSyntaxError(remain, idx, 1, "Cannot parse empty")
 
             try:
-                value, length = self.parse_shorthand_value(remain[idx:])
+                value, length = self.parse_value(remain[idx:])
             except AAZInvalidShorthandSyntaxError as ex:
                 ex.error_data = remain
                 ex.error_at += idx
@@ -113,7 +113,7 @@ class AAZShortHandSyntaxParser:
 
         return result, idx
 
-    def parse_shorthand_list(self, remain):
+    def parse_list(self, remain):
         result = []
         assert remain.startswith('[')
         idx = 1
@@ -124,7 +124,7 @@ class AAZShortHandSyntaxParser:
 
         while idx < len(remain):
             try:
-                value, length = self.parse_shorthand_value(remain[idx:])
+                value, length = self.parse_value(remain[idx:])
             except AAZInvalidShorthandSyntaxError as ex:
                 ex.error_data = remain
                 ex.error_at += idx
@@ -150,10 +150,10 @@ class AAZShortHandSyntaxParser:
             raise AAZInvalidShorthandSyntaxError(remain, idx, 1, "Expect character ']'")
         return result, idx
 
-    def parse_shorthand_string(self, remain):
+    def parse_string(self, remain):
         idx = 0
         if len(remain) and remain[0] == "'":
-            return self.parse_shorthand_quote_string(remain)
+            return self.parse_single_quotes_string(remain)
 
         while idx < len(remain):
             if remain[idx] in (',', ':', ']', '}'):
@@ -178,7 +178,8 @@ class AAZShortHandSyntaxParser:
 
         return remain[:idx], idx
 
-    def parse_shorthand_quote_string(self, remain):
+    @staticmethod
+    def parse_single_quotes_string(remain):
         assert remain[0] == "'"
         quote = remain[0]
         idx = 1
