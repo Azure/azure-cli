@@ -385,7 +385,7 @@ def upload_workspace_package(cmd, workspace_name, package, progress_callback=Non
     chunk_size = 4 * 1024 * 1024
     if progress_callback is not None:
         progress_callback(0, package_size)
-    with open(package, 'rb') as stream:
+    with open(package, 'r', encoding = "ISO-8859-1") as stream:
         index = 0
         while True:
             read_size = min(chunk_size, package_size - index)
