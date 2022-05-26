@@ -6658,11 +6658,20 @@ def create_public_ip_prefix(cmd, client, resource_group_name, public_ip_prefix_n
         prefix.public_ip_address_version = version if version is not None else 'ipv4'
 
     if cmd.supported_api_version(min_api='2020-06-01') and custom_ip_prefix_name:
-        cip_client = network_client_factory(cmd.cli_ctx).custom_ip_prefixes
+        if is_valid_resource_id(custom_ip_prefix_name):
+            resource_group = parse_resource_id(custom_ip_prefix_name)['resource_group']
+            custom_ip = parse_resource_id(custom_ip_prefix_name)['resource_name']
+            # support cross-subscription
+            subscription_id = parse_resource_id(custom_ip_prefix_name)['subscription']
+            cip_client = network_client_factory(cmd.cli_ctx, subscription_id=subscription_id).custom_ip_prefixes
+        else:
+            resource_group = resource_group_name
+            custom_ip = custom_ip_prefix_name
+            cip_client = network_client_factory(cmd.cli_ctx).custom_ip_prefixes
         try:
-            prefix.custom_ip_prefix = cip_client.get(resource_group_name, custom_ip_prefix_name)
+            prefix.custom_ip_prefix = cip_client.get(resource_group, custom_ip)
         except ResourceNotFoundError:
-            raise ResourceNotFoundError('Custom ip prefix {} doesn\'t exist.'.format(custom_ip_prefix_name))
+            raise ResourceNotFoundError("Custom ip prefix {} doesn't exist.".format(custom_ip))
 
     if edge_zone:
         prefix.extended_location = _edge_zone_model(cmd, edge_zone)
