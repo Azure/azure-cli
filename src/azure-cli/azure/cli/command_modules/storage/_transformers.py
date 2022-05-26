@@ -415,23 +415,9 @@ def transform_acl_list_output_v2(result):
 def transform_acl_datetime(result):
     result = todict(result)
     if result['start']:
-        try:
-            result['start'] = result["start"].split('.')[0]
-            time = datetime.strptime(result['start'], '%Y-%m-%dT%H:%M:%S')
-            tz = pytz.timezone('UTC')
-            start = datetime.strftime(tz.localize(time), '%Y-%m-%dT%H:%M:%S%z')
-            result['start'] = start[0:22] + ':' + start[22:24]
-        except OverflowError:
-            pass
+        result['start'] = result["start"].split('.')[0] + '+00:00'
     if result['expiry']:
-        try:
-            result['expiry'] = result["expiry"].split('.')[0]
-            time = datetime.strptime(result['expiry'], '%Y-%m-%dT%H:%M:%S')
-            tz = pytz.timezone('UTC')
-            expiry = datetime.strftime(tz.localize(time), '%Y-%m-%dT%H:%M:%S%z')
-            result['expiry'] = expiry[0:22] + ':' + expiry[22:24]
-        except OverflowError:
-            pass
+        result['expiry'] = result["expiry"].split('.')[0] + '+00:00'
     return result
 
 
