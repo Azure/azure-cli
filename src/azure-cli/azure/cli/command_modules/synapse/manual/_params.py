@@ -226,6 +226,7 @@ def load_arguments(self, _):
                    arg_group=storage_arg_group,
                    help='The Storage Account Type.',
                    arg_type=get_enum_type(['GRS', 'LRS']))
+        c.argument('collation', help='The database collation.')
 
     with self.argument_context('synapse sql pool update') as c:
         c.argument('sku_name', options_list=['--performance-level'], help='The performance level.')

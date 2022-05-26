@@ -310,7 +310,7 @@ examples:
   - name: Create a SQL pool.
     text: |-
         az synapse sql pool create --name sqlpool --performance-level "DW1000c" \\
-        --workspace-name testsynapseworkspace --resource-group rg
+        --workspace-name testsynapseworkspace --resource-group rg --collation "SQL_Latin1_General_CP1_CS_AS"
 """
 
 helps['synapse sql pool show'] = """
