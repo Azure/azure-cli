@@ -5,10 +5,7 @@
 
 import base64
 
-from datetime import datetime
 from uuid import UUID
-
-import pytz
 from dateutil import parser
 from knack.log import get_logger
 from knack.util import todict, to_camel_case
