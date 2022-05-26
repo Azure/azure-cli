@@ -114,6 +114,7 @@ def _get_client(client, kwargs):
         client = dir_client
     return client
 
+
 def list_handle(client, marker, num_results, **kwargs):
     from ..track2_util import list_generator
     client = _get_client(client, kwargs)
