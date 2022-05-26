@@ -1836,10 +1836,17 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Specify to exclude "timestamps", "Etag", "Attributes", "PermissionKey" info from response')
 
     with self.argument_context('storage file metadata show') as c:
-        c.register_path_argument()
+        c.extra('file_path', options_list=('--path', '-p'), help='The file path within the file share.',
+                   completer=dir_path_completer, required=True)
+        c.extra('share_name', share_name_type, required=True)
+        c.extra('snapshot', help="A string that represents the snapshot version, if applicable.")
+        c.extra('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
 
     with self.argument_context('storage file metadata update') as c:
-        c.register_path_argument()
+        c.extra('file_path', options_list=('--path', '-p'), help='The file path within the file share.',
+                completer=dir_path_completer, required=True)
+        c.extra('share_name', share_name_type, required=True)
+        c.extra('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
 
     with self.argument_context('storage file resize') as c:
         c.register_path_argument()

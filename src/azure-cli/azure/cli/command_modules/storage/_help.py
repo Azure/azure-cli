@@ -1954,6 +1954,22 @@ type: group
 short-summary: Manage file metadata.
 """
 
+helps['storage file metadata show'] = """
+type: command
+short-summary:  Returns all user-defined metadata for the file.
+examples:
+  - name: Show metadata for the file
+    text: az storage file metadata show -s MyShare --path /path/to/file
+"""
+
+helps['storage file metadata update'] = """
+type: command
+short-summary:  Returns all user-defined metadata for the file.
+examples:
+  - name: Show metadata for the file
+    text: az storage file metadata show -s MyShare --path /path/to/file
+"""
+
 helps['storage file upload'] = """
 type: command
 short-summary: Upload a file to a share that uses the SMB 3.0 protocol.
