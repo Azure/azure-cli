@@ -63,8 +63,8 @@ def get_auth_management_client(cli_ctx, scope=None, **_):
 
 
 def cf_graph_client(cli_ctx):
-    from azure.cli.command_modules.role._graph_client import GraphClient
-    return GraphClient(cli_ctx)
+    from azure.cli.command_modules.role import graph_client_factory
+    return graph_client_factory(cli_ctx)
 
 
 def get_graph_rbac_management_client(cli_ctx, **_):
