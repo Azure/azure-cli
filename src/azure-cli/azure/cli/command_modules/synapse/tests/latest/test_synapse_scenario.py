@@ -2636,8 +2636,8 @@ class SynapseScenarioTests(ScenarioTest):
     @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_workspace_package(self):
         self.kwargs.update({
-            'name': 'wordcount.jar',
-            'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'wordcount.jar')
+            'name': 'urllib3-1.26.9-py2.py3-none-any.whl',
+            'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'urllib3-1.26.9-py2.py3-none-any.whl')
         })
 
         # create a workspace
