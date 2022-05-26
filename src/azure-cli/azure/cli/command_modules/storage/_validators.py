@@ -1290,12 +1290,20 @@ def resource_type_type(loader):
 def resource_type_type_v2(loader):
     """ Returns a function which validates that resource types string contains only a combination of service,
     container, and object. Their shorthand representations are s, c, and o. """
+    def _get_ordered_set(string):
+        if not string:
+            return string
+        result = []
+        for item in string:
+            if item not in result:
+                result.append(item)
+        return ''.join(result)
 
     def impl(string):
         t_resources = loader.get_models('_shared.models#ResourceTypes', resource_type=ResourceType.DATA_STORAGE_BLOB)
         if set(string) - set("sco"):
             raise ValueError
-        return t_resources.from_string(''.join(set(string)))
+        return t_resources.from_string(_get_ordered_set(string))
 
     return impl
 
