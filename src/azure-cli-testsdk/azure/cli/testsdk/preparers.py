@@ -205,7 +205,75 @@ class KeyVaultPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
         except KeyError:
             template = 'To create a KeyVault a resource group is required. Please add ' \
                        'decorator @{} in front of this KeyVault preparer.'
-            raise CliTestError(template.format(KeyVaultPreparer.__name__))
+            raise CliTestError(template.format(ResourceGroupPreparer.__name__))
+
+
+# Managed HSM Preparer and its shorthand decorator
+
+# pylint: disable=too-many-instance-attributes
+class ManagedHSMPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
+    def __init__(self, certs_path, name_prefix='clitest', location='uksouth', key='hsm', name_len=24,
+                 parameter_name='managed_hsm', resource_group_parameter_name='resource_group',
+                 administrators=None, additional_params=None):
+        super(ManagedHSMPreparer, self).__init__(name_prefix, name_len)
+        self.cli_ctx = get_dummy_cli()
+        self.location = location
+        self.resource_group_parameter_name = resource_group_parameter_name
+        self.parameter_name = parameter_name
+        self.key = key
+        self.certs_path = certs_path
+        self.administrators = administrators
+        self.additional_params = additional_params
+
+    def create_resource(self, name, **kwargs):
+        group = self._get_resource_group(**kwargs)
+        administrators = self.administrators or self._get_signed_in_user()
+        if not administrators:
+            raise CliTestError('To create a Managed HSM, at least one administrator is required. '
+                               'Please run the test with a user account or specify administrators manually')
+        template = 'az keyvault create --hsm-name {} -g {} -l {} --administrators {} --retention-days 7'
+        if self.additional_params:
+            template += self.additional_params
+        self.live_only_execute(self.cli_ctx, template.format(name, group, self.location, administrators))
+        # After creating MHSM, All data plane commands are disabled until the HSM is activated.
+        # To activate the HSM, we must download the Security Domain.
+        if self.certs_path:
+            cert0 = os.path.join(self.certs_path, 'cert_0.cer').replace('\\', '\\\\')
+            cert1 = os.path.join(self.certs_path, 'cert_1.cer').replace('\\', '\\\\')
+            cert2 = os.path.join(self.certs_path, 'cert_2.cer').replace('\\', '\\\\')
+            security_domain = os.path.join(self.certs_path, f'{name}-SD.json').replace('\\', '\\\\')
+            activate_template = f'az keyvault security-domain download --hsm-name {name} --sd-wrapping-keys {cert0} {cert1} {cert2} --sd-quorum 2 --security-domain-file {security_domain}'
+            self.live_only_execute(self.cli_ctx, activate_template)
+        self.test_class_instance.kwargs[self.key] = name
+        return {self.parameter_name: name}
+
+    def remove_resource(self, name, **kwargs):
+        security_domain = os.path.join(self.certs_path, f'{name}-SD.json').replace('\\', '\\\\')
+        if os.path.exists(security_domain):
+            os.remove(security_domain)
+        group = self._get_resource_group(**kwargs)
+        self.live_only_execute(self.cli_ctx, 'az keyvault delete --hsm-name {} -g {}'.format(name, group))
+        from azure.core.exceptions import HttpResponseError
+        try:
+            self.live_only_execute(self.cli_ctx, 'az keyvault purge --hsm-name {} -l {}'.format(name, self.location))
+        except HttpResponseError:
+            # purge operation will fail with HttpResponseError when --enable-purge-protection
+            pass
+
+    def _get_signed_in_user(self):
+        try:
+            user_info = self.live_only_execute(self.cli_ctx, 'ad signed-in-user show').get_output_in_json()
+            return user_info['id'] if user_info else None
+        except Exception:
+            return None
+
+    def _get_resource_group(self, **kwargs):
+        try:
+            return kwargs.get(self.resource_group_parameter_name)
+        except KeyError:
+            template = 'To create a Managed HSM, a resource group is required. Please add ' \
+                       'decorator @{} in front of this ManagedHSM preparer.'
+            raise CliTestError(template.format(ResourceGroupPreparer.__name__))
 
 
 # Role based access control service principal preparer

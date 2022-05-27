@@ -1987,7 +1987,7 @@ def _get_principal_dics(cli_ctx, role_assignments):
 
             graph_client = graph_client_factory(cli_ctx)
             principals = _get_object_stubs(graph_client, principal_ids)
-            return {i.object_id: (_get_displayable_name(i), i.object_type) for i in principals}
+            return {i['id']: (_get_displayable_name(i), i['@odata.type']) for i in principals}
 
         except GraphError as ex:
             # failure on resolving principal due to graph permission should not fail the whole thing
