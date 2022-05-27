@@ -10,7 +10,7 @@ from azure.cli.core.commands import CliCommandType
 from azure.cli.command_modules.apim._format import (service_output_format)
 from azure.cli.command_modules.apim._client_factory import (cf_service, cf_api, cf_product, cf_nv, cf_apiops,
                                                             cf_apirelease, cf_apirevision, cf_apiversionset,
-                                                            cf_apischema)
+                                                            cf_apischema, cf_ds)
 
 
 def load_command_table(self, _):
@@ -57,6 +57,11 @@ def load_command_table(self, _):
     apivs_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.apimanagement.operations#ApiVersionSetOperations.{}',
         client_factory=cf_apiversionset
+    )
+
+    apids_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.apimanagement.operations#DeletedServicesOperations.{}',
+        client_factory=cf_ds
     )
 
     # pylint: disable=line-too-long
@@ -143,3 +148,8 @@ def load_command_table(self, _):
         g.custom_command('create', 'apim_api_vs_create')
         g.generic_update_command('update', custom_func_name='apim_api_vs_update')
         g.custom_command('delete', 'apim_api_vs_delete')
+
+    with self.command_group('apim deletedservice', apids_sdk) as g:
+        g.custom_command('list', 'apim_ds_list')
+        g.custom_show_command('show', 'apim_ds_get')
+        g.custom_command('purge', 'apim_ds_purge')

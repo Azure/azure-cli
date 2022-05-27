@@ -68,6 +68,11 @@ type: group
 short-summary: Manage Azure API Management API Schema's.
 """
 
+helps['apim deletedservice'] = """
+type: group
+short-summary: Manage soft-deleted Azure API Management services.
+"""
+
 helps['apim backup'] = """
 type: command
 short-summary: Creates a backup of the API Management service to the given Azure Storage Account. This is long running operation and could take several minutes to complete.
@@ -611,4 +616,31 @@ examples:
     text: |
         az apim api schema wait --created --api-id MyApi --name MyApim --schema-id schemaId -g MyResourceGroup
     crafted: true
+"""
+
+helps['apim deletedservice show'] = """
+type: command
+short-summary: Get soft-deleted Api Management service instances available for undelete by name.
+examples:
+  - name: Get a soft-deleted services with its name.
+    text: |
+        az apim deletedservice get --name MyApim -g MyResourceGroup  
+"""
+
+helps['apim deletedservice list'] = """
+type: command
+short-summary: Lists all soft-deleted Api Management services instances available for undelete for the given subscription.
+examples:
+  - name: List all soft-deleted services in a subscription.
+    text: |
+        az apim deletedservice list -g MyResourceGroup 
+"""
+
+helps['apim deletedservice purge'] = """
+type: command
+short-summary: Purges soft-deleted Api Management service instance (deletes it with no option to undelete)
+examples:
+  - name: Purge a soft-deleted serivce.
+    text: |
+        az apim deletedservice purge --name MyApim -g MyResourceGroup 
 """

@@ -400,3 +400,15 @@ def load_arguments(self, _):
             'version_header_name',
             help="Name of HTTP header parameter that indicates the API Version if versioningScheme is set to `header`.")
         c.argument('if_match', help='ETag of the Entity.')
+
+    with self.argument_context('apim deletedservice show') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx),
+            validator=get_default_location_from_resource_group)
+        c.argument('service_name', options_list=['--service-name', '-n'],
+                   help="The name of the soft deleted API Management service instance.")
+
+    with self.argument_context('apim deletedservice purge') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx),
+            validator=get_default_location_from_resource_group)
+        c.argument('service_name', options_list=['--service-name', '-n'],
+            help="The name of the soft deleted API Management service instance.")
