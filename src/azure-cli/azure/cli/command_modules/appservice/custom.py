@@ -18,11 +18,10 @@ import ssl
 import sys
 import uuid
 from functools import reduce
-import invoke
 from nacl import encoding, public
 
 import OpenSSL.crypto
-from fabric import Connection
+import pssh
 
 from knack.prompting import prompt_pass, NoTTYException, prompt_y_n
 from knack.util import CLIError
@@ -4797,11 +4796,11 @@ def _start_ssh_session(hostname, port, username, password):
     tries = 0
     while True:
         try:
-            c = Connection(host=hostname,
-                           port=port,
-                           user=username,
-                           # connect_timeout=60*10,
-                           connect_kwargs={"password": password})
+            c = pssh.clients.SSHClient(host=hostname,
+                                       port=port,
+                                       user=username,
+                                       # timeout=60*10,
+                                       password=password)
             break
         except Exception as ex:  # pylint: disable=broad-except
             logger.info(ex)
@@ -4814,15 +4813,15 @@ def _start_ssh_session(hostname, port, username, password):
             time.sleep(1)
     try:
         try:
-            c.run('cat /etc/motd', pty=True)
-        except invoke.exceptions.UnexpectedExit:
+            c.run_command("cat /etc/motd", use_pty=True)
+        except pssh.exceptions.ShellError:
             # Don't crash over a non-existing /etc/motd.
             pass
-        c.run('source /etc/profile; exec $SHELL -l', pty=True)
+        c.run_command("source /etc/profile; exec $SHELL -l", use_pty=True)
     except Exception as ex:  # pylint: disable=broad-except
         logger.info(ex)
     finally:
-        c.close()
+        c.close_channel()
 
 
 def ssh_webapp(cmd, resource_group_name, name, port=None, slot=None, timeout=None, instance=None):  # pylint: disable=too-many-statements

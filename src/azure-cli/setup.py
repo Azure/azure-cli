@@ -140,10 +140,10 @@ DEPENDENCIES = [
     'colorama~=0.4.4',
     # On Linux, the distribution (Ubuntu, Debian, etc) and version are checked for `az feedback`
     'distro; sys_platform == "linux"',
-    'fabric~=2.4',
     'javaproperties~=0.5.1',
     'jsondiff~=2.0.0',
     'packaging>=20.9,<22.0',
+    'parallel-ssh~=2.10.0',
     'PyGithub~=1.38',
     'PyNaCl~=1.5.0',
     'scp~=0.13.2',
