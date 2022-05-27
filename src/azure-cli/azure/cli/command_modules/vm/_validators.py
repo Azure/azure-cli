@@ -1992,6 +1992,33 @@ def _disk_encryption_set_format(cmd, namespace, name):
 # endregion
 
 
+def process_image_version_create_namespace(cmd, namespace):
+    """
+    Validate the resource id from different sources
+    Only one of these arguments is allowed to provide
+    Check the format of resource id whether meets requirement
+    """
+    process_gallery_image_version_namespace(cmd, namespace)
+
+    input_num = (1 if namespace.managed_image else 0) + (1 if namespace.virtual_machine else 0) + \
+                (1 if namespace.image_version else 0)
+    if input_num > 1:
+        raise ArgumentUsageError(
+            r'usage error: only one of --managed-image\--virtual-machine\--image-version argument is allowed to provide')
+
+    if namespace.managed_image or input_num == 0:
+        return
+
+    is_vm = True if namespace.virtual_machine else False
+    resource_id = namespace.virtual_machine if is_vm else namespace.image_version
+
+    from ._vm_utils import is_valid_image_id
+    if not is_valid_image_id(resource_id, is_vm):
+        raise ArgumentUsageError('usage error: {} is an invalid {} id'
+                                 .format(resource_id, 'VM resource' if is_vm else 'gallery image version'))
+    namespace.managed_image = resource_id
+
+
 def process_vm_vmss_stop(cmd, namespace):  # pylint: disable=unused-argument
     if "vmss" in cmd.name:
         logger.warning("About to power off the VMSS instances...\nThey will continue to be billed. "

@@ -4199,7 +4199,8 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                          os_snapshot=None, data_snapshots=None, managed_image=None, data_snapshot_luns=None,
                          target_region_encryption=None, os_vhd_uri=None, os_vhd_storage_account=None,
                          data_vhds_uris=None, data_vhds_luns=None, data_vhds_storage_accounts=None,
-                         replication_mode=None, target_region_cvm_encryption=None):
+                         replication_mode=None, target_region_cvm_encryption=None, virtual_machine=None,
+                         image_version=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 

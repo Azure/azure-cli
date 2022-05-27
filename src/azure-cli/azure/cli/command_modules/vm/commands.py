@@ -29,7 +29,8 @@ from azure.cli.command_modules.vm._validators import (
     process_vm_create_namespace, process_vmss_create_namespace, process_image_create_namespace,
     process_disk_or_snapshot_create_namespace, process_disk_encryption_namespace, process_assign_identity_namespace,
     process_remove_identity_namespace, process_vm_secret_format, process_vm_vmss_stop, validate_vmss_update_namespace,
-    process_vm_update_namespace, process_set_applications_namespace, process_vm_disk_attach_namespace)
+    process_vm_update_namespace, process_set_applications_namespace, process_vm_disk_attach_namespace,
+    process_image_version_create_namespace)
 
 from azure.cli.command_modules.vm._image_builder import (
     process_image_template_create_namespace, process_img_tmpl_output_add_namespace,
@@ -539,7 +540,7 @@ def load_command_table(self, _):
         g.command('delete', 'begin_delete')
         g.show_command('show', 'get', table_transformer='{Name:name, ResourceGroup:resourceGroup, ProvisioningState:provisioningState, TargetRegions: publishingProfile.targetRegions && join(`, `, publishingProfile.targetRegions[*].name), ReplicationState:replicationStatus.aggregatedState}')
         g.command('list', 'list_by_gallery_image')
-        g.custom_command('create', 'create_image_version', supports_no_wait=True)
+        g.custom_command('create', 'create_image_version', supports_no_wait=True, validator=process_image_version_create_namespace)
         g.generic_update_command('update', getter_name='get_image_version_to_update', setter_arg_name='gallery_image_version', setter_name='update_image_version', setter_type=compute_custom, command_type=compute_custom, supports_no_wait=True)
         g.wait_command('wait')
 

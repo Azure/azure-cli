@@ -19,7 +19,6 @@ from knack.util import CLIError
 
 logger = get_logger(__name__)
 
-
 MSI_LOCAL_ID = '[system]'
 
 
@@ -61,7 +60,7 @@ def _resolve_api_version(cli_ctx, provider_namespace, resource_type, parent_path
         return npv[0] if npv else rt[0].api_versions[0]
     raise CLIError(
         'API version is required and could not be resolved for resource {}'
-        .format(resource_type))
+            .format(resource_type))
 
 
 def log_pprint_template(template):
@@ -149,7 +148,8 @@ def normalize_disk_info(image_data_disks=None,
         if attach_data_disks:
             data_disk_delete_option = validate_delete_options(attach_data_disks, data_disk_delete_option)
         else:
-            if isinstance(data_disk_delete_option, list) and len(data_disk_delete_option) == 1 and len(data_disk_delete_option[0].split('=')) == 1:  # pylint: disable=line-too-long
+            if isinstance(data_disk_delete_option, list) and len(data_disk_delete_option) == 1 and len(
+                    data_disk_delete_option[0].split('=')) == 1:  # pylint: disable=line-too-long
                 data_disk_delete_option = data_disk_delete_option[0]
     info['os'] = {}
     # update os diff disk settings
@@ -254,7 +254,6 @@ def normalize_disk_info(image_data_disks=None,
 
 
 def update_disk_caching(model, caching_settings):
-
     def _update(model, lun, value):
         if isinstance(model, dict):
             luns = model.keys() if lun is None else [lun]
@@ -289,7 +288,6 @@ def update_disk_caching(model, caching_settings):
 
 
 def update_write_accelerator_settings(model, write_accelerator_settings):
-
     def _update(model, lun, value):
         if isinstance(model, dict):
             luns = model.keys() if lun is None else [lun]
@@ -375,6 +373,23 @@ def is_shared_gallery_image_id(image_reference):
 
     shared_gallery_id_pattern = re.compile(r'^/SharedGalleries/[^/]*/Images/[^/]*/Versions/.*$', re.IGNORECASE)
     if shared_gallery_id_pattern.match(image_reference):
+        return True
+
+    return False
+
+
+_VM_IMAGE_ID_PATTERN = r'^/subscriptions/[^/]*/resourceGroups/[^/]*/providers/Microsoft.Compute/virtualMachines/.*$'
+_IMAGE_VERSION_ID_PATTERN = r'^/subscriptions/[^/]*/resourceGroups/[^/]*/providers/Microsoft.Compute/galleries/' \
+                            r'[^/]*/images/[^/]*/versions/.*$'
+
+
+def is_valid_image_id(image_id, is_vm):
+    if not image_id:
+        return True
+
+    image_id_pattern = re.compile(_VM_IMAGE_ID_PATTERN if is_vm else _IMAGE_VERSION_ID_PATTERN, re.IGNORECASE)
+
+    if image_id_pattern.match(image_id):
         return True
 
     return False
