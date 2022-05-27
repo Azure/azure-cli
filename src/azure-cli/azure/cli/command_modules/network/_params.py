@@ -453,8 +453,8 @@ def load_arguments(self, _):
 
     with self.argument_context('network application-gateway ssl-policy', min_api='2017-06-01') as c:
         c.argument('policy_name', name_arg_type, help='Name of SSL policy.')
-        c.argument('policy_type', help='Type of SSL Policy.', choices=['Custom', 'Predefined'])
-        c.argument('cipher_suites', nargs='+', help='SSL cipher suites to be enabled in the specified order to application gateway.')
+        c.argument('policy_type', help='Type of SSL Policy.', choices=['Custom', 'Predefined', 'CustomV2'])
+        c.argument('cipher_suites', nargs='*', help='SSL cipher suites to be enabled in the specified order to application gateway.')
         c.argument('min_protocol_version', help='Minimum version of SSL protocol to be supported on application gateway.')
         c.argument('disabled_ssl_protocols', nargs='+', help='Space-separated list of protocols to disable.')
 
@@ -496,9 +496,9 @@ def load_arguments(self, _):
         c.argument('application_gateway_name', app_gateway_name_type)
         c.argument('ssl_profile_name', options_list='--name', help='Name of the SSL profile that is unique within an Application Gateway.')
         c.argument('policy_name', help='Name of Ssl Policy.')
-        c.argument('policy_type', help='Type of Ssl Policy.', choices=['Custom', 'Predefined'])
+        c.argument('policy_type', help='Type of Ssl Policy.', choices=['Custom', 'Predefined', 'CustomV2'])
         c.argument('min_protocol_version', help='Minimum version of Ssl protocol to be supported on application gateway.')
-        c.argument('cipher_suites', nargs='+', help='Ssl cipher suites to be enabled in the specified order to application gateway.')
+        c.argument('cipher_suites', nargs='*', help='Ssl cipher suites to be enabled in the specified order to application gateway.')
         c.argument('disabled_ssl_protocols', options_list=['--disabled-ssl-protocols', '--disabled-protocols'], nargs='+', help='Space-separated list of protocols to disable.')
         c.argument('trusted_client_certificates', options_list=['--trusted-client-certificates', '--trusted-client-cert'], nargs='+', help='Array of references to application gateway trusted client certificates.')
         c.argument('client_auth_configuration', options_list=['--client-auth-configuration', '--client-auth-config'], help='Client authentication configuration of the application gateway resource.', choices=['True', 'False'])

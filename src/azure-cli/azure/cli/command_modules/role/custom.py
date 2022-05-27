@@ -29,7 +29,7 @@ from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import get_file_json, shell_safe_json_parse, is_guid
 from ._client_factory import _auth_client_factory, _graph_client_factory
 from ._multi_api_adaptor import MultiAPIAdaptor
-from .msgrpah import GraphError, set_object_properties
+from ._msgrpah import GraphError, set_object_properties
 
 # ARM RBAC's principalType
 USER = 'User'

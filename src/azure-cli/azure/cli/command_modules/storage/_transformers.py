@@ -428,3 +428,10 @@ def transform_share_file_json_output(result):
     }
     new_result.update(result)
     return new_result
+
+
+def transform_share_list_handle(result):
+    for item in result["items"]:
+        item["handleId"] = item.id
+        delattr(item, "id")
+    return result

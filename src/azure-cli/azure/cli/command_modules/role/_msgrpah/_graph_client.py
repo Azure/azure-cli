@@ -13,16 +13,25 @@ from azure.cli.core.azclierror import HTTPError
 # pylint: disable=redefined-builtin, too-many-public-methods
 
 class GraphClient:
+    """A lightweight Microsoft Graph API client.
+
+    GraphClient should NEVER be instantiated directly, but always through the client factory
+    azure.cli.command_modules.role.graph_client_factory.
+
+    For full documentation, see doc/microsoft_graph_client.md in this repo.
+    """
     def __init__(self, cli_ctx):
         self.cli_ctx = cli_ctx
         self.tenant = Profile(cli_ctx).get_login_credentials()[2]
         self.scopes = resource_to_scopes(cli_ctx.cloud.endpoints.microsoft_graph_resource_id)
 
         # https://graph.microsoft.com/ (AzureCloud)
+        # https://microsoftgraph.chinacloudapi.cn (AzureChinaCloud)
         self.resource = cli_ctx.cloud.endpoints.microsoft_graph_resource_id
 
         # https://graph.microsoft.com/v1.0
-        self.base_url = cli_ctx.cloud.endpoints.microsoft_graph_resource_id + 'v1.0'
+        # https://microsoftgraph.chinacloudapi.cn/v1.0
+        self.base_url = cli_ctx.cloud.endpoints.microsoft_graph_resource_id.rstrip('/') + '/v1.0'
 
     def _send(self, method, url, param=None, body=None):
         url = self.base_url + url
