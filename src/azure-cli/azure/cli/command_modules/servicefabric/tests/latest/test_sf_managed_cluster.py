@@ -36,7 +36,7 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
             self.cmd('az sf managed-node-type delete -g {rg} -c {cluster_name} -n pnt')
 
         self.cmd('az sf managed-cluster show -g {rg} -c {cluster_name}',
-                 checks=[self.check('clusterState', 'Deploying')])
+                 checks=[self.check('clusterState', 'Ready')])
 
         self.cmd('az sf managed-cluster delete -g {rg} -c {cluster_name}')
 

@@ -1564,7 +1564,7 @@ def aks_update(cmd, client, resource_group_name, name,
                nodepool_labels=None,
                no_wait=False,
                yes=False,
-               aks_custom_headers=None,
+               # aks_custom_headers
                enable_defender=False,
                disable_defender=False,
                defender_config=None,

@@ -4378,23 +4378,30 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'ssh_key_value': self.generate_ssh_keys()
         })
 
-        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
-                     '--vm-set-type VirtualMachineScaleSets --node-count=1 --ssh-key-value={ssh_key_value} ' \
-                     '--aad-server-app-id 00000000-0000-0000-0000-000000000001 ' \
-                     '--aad-server-app-secret fake-secret ' \
-                     '--aad-client-app-id 00000000-0000-0000-0000-000000000002 ' \
-                     '--aad-tenant-id d5b55040-0c14-48cc-a028-91457fc190d9 ' \
-                     '-o json'
-        self.cmd(create_cmd, checks=[
-            self.check('provisioningState', 'Succeeded'),
-            self.check('aadProfile.managed', None),
-            self.check('aadProfile.serverAppId',
-                       '00000000-0000-0000-0000-000000000001'),
-            self.check('aadProfile.clientAppId',
-                       '00000000-0000-0000-0000-000000000002'),
-            self.check('aadProfile.tenantId',
-                       'd5b55040-0c14-48cc-a028-91457fc190d9')
-        ])
+        # create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+        #              '--vm-set-type VirtualMachineScaleSets --node-count=1 --ssh-key-value={ssh_key_value} ' \
+        #              '--aad-server-app-id 00000000-0000-0000-0000-000000000001 ' \
+        #              '--aad-server-app-secret fake-secret ' \
+        #              '--aad-client-app-id 00000000-0000-0000-0000-000000000002 ' \
+        #              '--aad-tenant-id d5b55040-0c14-48cc-a028-91457fc190d9 ' \
+        #              '-o json'
+        self.cmd('aks create --resource-group={resource_group} --name={name} '
+                 '--vm-set-type VirtualMachineScaleSets --node-count=1 --ssh-key-value={ssh_key_value} '
+                 '--aad-server-app-id 00000000-0000-0000-0000-000000000001 '
+                 '--aad-server-app-secret fake-secret '
+                 '--aad-client-app-id 00000000-0000-0000-0000-000000000002 '
+                 '--aad-tenant-id d5b55040-0c14-48cc-a028-91457fc190d9 '
+                 '-o json',
+                 checks=[
+                     self.check('provisioningState', 'Succeeded'),
+                     self.check('aadProfile.managed', None),
+                     self.check('aadProfile.serverAppId',
+                                '00000000-0000-0000-0000-000000000001'),
+                     self.check('aadProfile.clientAppId',
+                                '00000000-0000-0000-0000-000000000002'),
+                     self.check('aadProfile.tenantId',
+                                'd5b55040-0c14-48cc-a028-91457fc190d9')
+                 ])
 
         update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
                      '--enable-aad ' \
@@ -6394,8 +6401,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                      '--dns-name-prefix={dns_name_prefix} --node-count=1 ' \
                      '--windows-admin-username={windows_admin_username} --windows-admin-password={windows_admin_password} ' \
                      '--load-balancer-sku=standard --vm-set-type=virtualmachinescalesets --network-plugin=azure ' \
-                     '--ssh-key-value={ssh_key_value} --enable-windows-gmsa --yes ' \
-                     '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AKSWindowsGmsaPreview'
+                     '--ssh-key-value={ssh_key_value} --enable-windows-gmsa --yes '
+                     # '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AKSWindowsGmsaPreview'
         self.cmd(create_cmd, checks=[
             self.exists('fqdn'),
             self.exists('nodeResourceGroup'),
@@ -6456,8 +6463,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
         # update Windows gmsa
-        update_cmd = "aks update --resource-group={resource_group} --name={name} --enable-windows-gmsa --yes " \
-                     "--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AKSWindowsGmsaPreview"
+        update_cmd = "aks update --resource-group={resource_group} --name={name} --enable-windows-gmsa --yes "
+                     # "--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AKSWindowsGmsaPreview"
         self.cmd(update_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('windowsProfile.gmsaProfile.enabled', 'True')
@@ -6735,7 +6742,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.test_resources_count = 0
         # kwargs for string formatting
         aks_name = self.create_random_name('cliakstest', 16)
-        kubernetes_version = "1.20.7"
+        kubernetes_version = "1.23.5"
 
         self.kwargs.update({
             'resource_group': resource_group,
