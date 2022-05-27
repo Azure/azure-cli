@@ -2040,9 +2040,9 @@ def validate_blob_name_for_upload(namespace):
 
 def validate_share_close_handle(namespace):
     from azure.cli.core.azclierror import InvalidArgumentValueError
-    if namespace.close_all and namespace.handle_id:
+    if namespace.close_all and namespace.handle:
         raise InvalidArgumentValueError("usage error: Please only specify either --handle-id or --close-all, not both.")
-    if not namespace.close_all and not namespace.handle_id:
+    if not namespace.close_all and not namespace.handle:
         raise InvalidArgumentValueError("usage error: Please specify either --handle-id or --close-all.")
 
 

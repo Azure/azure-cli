@@ -122,10 +122,15 @@ class StorageFileShareScenarios(StorageScenarioMixin, ScenarioTest):
         file_share = 'file-share'
         self.storage_cmd('storage share list-handle --name {} --recursive', account_info, file_share).\
             assert_with_checks(JMESPathCheck("length(items[?path=='Book1.csv'])",2),
-                               JMESPathCheck("length(items[?path=='dir1/testjson.json'])",2))
+                               JMESPathCheck("length(items[?path=='dir1/testjson.json'])",2),
+                               JMESPathCheck("length(items[?path=='dir1/dir2/1.png'])",2))
 
         self.storage_cmd("storage share list-handle --name {} --recursive --path dir1",  account_info, file_share).\
-            assert_with_checks(JMESPathCheck("length(items[?path=='dir1/testjson.json'])", 2))
+            assert_with_checks(JMESPathCheck("length(items[?path=='dir1/testjson.json'])", 2),
+                               JMESPathCheck("length(items[?path=='dir1/dir2/1.png'])",2))
+
+        self.storage_cmd("storage share list-handle --name {} --recursive --path ./dir1/dir2/1.png", account_info, file_share). \
+            assert_with_checks(JMESPathCheck("length(items[?path=='dir1/dir2/1.png'])", 2))
 
         result = self.storage_cmd("storage share list-handle --name {} --path 'Book1.csv'", account_info, file_share).\
             get_output_in_json()['items']
