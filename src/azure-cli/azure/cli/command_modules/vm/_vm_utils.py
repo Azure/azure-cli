@@ -378,18 +378,25 @@ def is_shared_gallery_image_id(image_reference):
     return False
 
 
-_VM_IMAGE_ID_PATTERN = r'^/subscriptions/[^/]*/resourceGroups/[^/]*/providers/Microsoft.Compute/virtualMachines/.*$'
-_IMAGE_VERSION_ID_PATTERN = r'^/subscriptions/[^/]*/resourceGroups/[^/]*/providers/Microsoft.Compute/galleries/' \
-                            r'[^/]*/images/[^/]*/versions/.*$'
+def is_valid_vm_resource_id(vm_resource_id):
+    if not vm_resource_id:
+        return False
 
-
-def is_valid_image_id(image_id, is_vm):
-    if not image_id:
+    vm_id_pattern = re.compile(r'^/subscriptions/[^/]*/resourceGroups/[^/]*/providers/Microsoft.Compute/'
+                               r'virtualMachines/.*$', re.IGNORECASE)
+    if vm_id_pattern.match(vm_resource_id):
         return True
 
-    image_id_pattern = re.compile(_VM_IMAGE_ID_PATTERN if is_vm else _IMAGE_VERSION_ID_PATTERN, re.IGNORECASE)
+    return False
 
-    if image_id_pattern.match(image_id):
+
+def is_valid_image_version_id(image_version_id):
+    if not image_version_id:
+        return False
+
+    image_version_id_pattern = re.compile(r'^/subscriptions/[^/]*/resourceGroups/[^/]*/providers/Microsoft.Compute/'
+                                          r'galleries/[^/]*/images/[^/]*/versions/.*$', re.IGNORECASE)
+    if image_version_id_pattern.match(image_version_id):
         return True
 
     return False

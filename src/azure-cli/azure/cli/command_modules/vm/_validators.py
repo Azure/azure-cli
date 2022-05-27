@@ -16,7 +16,7 @@ from knack.log import get_logger
 from knack.util import CLIError
 
 from azure.cli.core.azclierror import (ValidationError, ArgumentUsageError, RequiredArgumentMissingError,
-                                       MutuallyExclusiveArgumentError, CLIInternalError)
+                                       MutuallyExclusiveArgumentError, CLIInternalError, InvalidArgumentValueError)
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_file_or_dict, validate_parameter_set, validate_tags)
 from azure.cli.core.util import (hash_string, DISALLOWED_USER_NAMES, get_default_admin_username)
@@ -1993,30 +1993,36 @@ def _disk_encryption_set_format(cmd, namespace, name):
 
 
 def process_image_version_create_namespace(cmd, namespace):
+    process_gallery_image_version_namespace(cmd, namespace)
+    process_image_resource_id_namespace(cmd, namespace)
+# endregion
+
+
+def process_image_resource_id_namespace(cmd, namespace):
     """
     Validate the resource id from different sources
     Only one of these arguments is allowed to provide
     Check the format of resource id whether meets requirement
     """
-    process_gallery_image_version_namespace(cmd, namespace)
-
     input_num = (1 if namespace.managed_image else 0) + (1 if namespace.virtual_machine else 0) + \
                 (1 if namespace.image_version else 0)
     if input_num > 1:
-        raise ArgumentUsageError(
-            r'usage error: only one of --managed-image\--virtual-machine\--image-version argument is allowed to provide')
+        raise MutuallyExclusiveArgumentError(
+            r'usage error: please specify only one of the --managed-image\--virtual-machine\--image-version arguments')
 
     if namespace.managed_image or input_num == 0:
         return
 
+    from ._vm_utils import is_valid_vm_resource_id, is_valid_image_version_id
     is_vm = True if namespace.virtual_machine else False
+    is_valid_function = is_valid_vm_resource_id if is_vm else is_valid_image_version_id
     resource_id = namespace.virtual_machine if is_vm else namespace.image_version
 
-    from ._vm_utils import is_valid_image_id
-    if not is_valid_image_id(resource_id, is_vm):
-        raise ArgumentUsageError('usage error: {} is an invalid {} id'
-                                 .format(resource_id, 'VM resource' if is_vm else 'gallery image version'))
+    if not is_valid_function(resource_id):
+        raise InvalidArgumentValueError('usage error: {} is an invalid {} id'
+                                        .format(resource_id, 'VM resource' if is_vm else 'gallery image version'))
     namespace.managed_image = resource_id
+# endregion
 
 
 def process_vm_vmss_stop(cmd, namespace):  # pylint: disable=unused-argument
