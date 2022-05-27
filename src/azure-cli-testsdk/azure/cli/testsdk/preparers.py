@@ -228,9 +228,6 @@ class ManagedHSMPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
     def create_resource(self, name, **kwargs):
         group = self._get_resource_group(**kwargs)
         administrators = self.administrators or self._get_signed_in_user()
-        if not administrators:
-            raise CliTestError('To create a Managed HSM, at least one administrator is required. '
-                               'Please run the test with a user account or specify administrators manually')
         template = 'az keyvault create --hsm-name {} -g {} -l {} --administrators {} --retention-days 7'
         if self.additional_params:
             template += self.additional_params

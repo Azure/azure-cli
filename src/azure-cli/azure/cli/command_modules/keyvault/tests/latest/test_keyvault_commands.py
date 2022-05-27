@@ -8,6 +8,7 @@ import os
 import pytest
 import tempfile
 import time
+from unittest import mock
 import unittest
 from datetime import datetime, timedelta
 from dateutil import tz
@@ -710,49 +711,50 @@ class KeyVaultHSMRoleScenarioTest(ScenarioTest):
             'user_role_id': user_role_def['id']
         })
 
-        # user1 + role1/role2
-        role_assignment1 = self.cmd('keyvault role assignment create --id {hsm_url} --role "{officer_role}" '
-                                    '--assignee {user1}@{domain} --scope keys',
-                                    checks=[
-                                        self.check('roleDefinitionId', '{officer_role_id}'),
-                                        self.check('roleName', '{officer_role}'),
-                                        self.check('principalId', '{user1_id}'),
-                                        self.check('scope', '/keys')
-                                    ]).get_output_in_json()
-        self.kwargs['role_assignment_id1'] = role_assignment1['id']
-        self.kwargs['role_assignment_name1'] = role_assignment1['name']
+        with mock.patch('azure.cli.command_modules.keyvault.custom._gen_guid', side_effect=self.create_guid):
+            # user1 + role1/role2
+            role_assignment1 = self.cmd('keyvault role assignment create --id {hsm_url} --role "{officer_role}" '
+                                        '--assignee {user1}@{domain} --scope keys',
+                                        checks=[
+                                            self.check('roleDefinitionId', '{officer_role_id}'),
+                                            self.check('roleName', '{officer_role}'),
+                                            self.check('principalId', '{user1_id}'),
+                                            self.check('scope', '/keys')
+                                        ]).get_output_in_json()
+            self.kwargs['role_assignment_id1'] = role_assignment1['id']
+            self.kwargs['role_assignment_name1'] = role_assignment1['name']
 
-        role_assignment2 = self.cmd('keyvault role assignment create --hsm-name {hsm_name} --role "{user_role}" '
-                                    '--assignee {user1}@{domain} --scope "/"',
-                                    checks=[
-                                        self.check('roleDefinitionId', '{user_role_id}'),
-                                        self.check('roleName', '{user_role}'),
-                                        self.check('principalId', '{user1_id}'),
-                                        self.check('scope', '/')
-                                    ]).get_output_in_json()
-        self.kwargs['role_assignment_id2'] = role_assignment2['id']
-        self.kwargs['role_assignment_name2'] = role_assignment2['name']
+            role_assignment2 = self.cmd('keyvault role assignment create --hsm-name {hsm_name} --role "{user_role}" '
+                                        '--assignee {user1}@{domain} --scope "/"',
+                                        checks=[
+                                            self.check('roleDefinitionId', '{user_role_id}'),
+                                            self.check('roleName', '{user_role}'),
+                                            self.check('principalId', '{user1_id}'),
+                                            self.check('scope', '/')
+                                        ]).get_output_in_json()
+            self.kwargs['role_assignment_id2'] = role_assignment2['id']
+            self.kwargs['role_assignment_name2'] = role_assignment2['name']
 
-        # user2 + role1/role2
-        role_assignment3 = self.cmd('keyvault role assignment create --id {hsm_url} --role "{officer_role}" '
-                                    '--assignee {user2_id} --scope keys',
-                                    checks=[
-                                        self.check('roleDefinitionId', '{officer_role_id}'),
-                                        self.check('roleName', '{officer_role}'),
-                                        self.check('principalId', '{user2_id}'),
-                                        self.check('scope', '/keys')
-                                    ]).get_output_in_json()
-        self.kwargs['role_assignment_id3'] = role_assignment3['id']
-        self.kwargs['role_assignment_name3'] = role_assignment3['name']
+            # user2 + role1/role2
+            role_assignment3 = self.cmd('keyvault role assignment create --id {hsm_url} --role "{officer_role}" '
+                                        '--assignee {user2_id} --scope keys',
+                                        checks=[
+                                            self.check('roleDefinitionId', '{officer_role_id}'),
+                                            self.check('roleName', '{officer_role}'),
+                                            self.check('principalId', '{user2_id}'),
+                                            self.check('scope', '/keys')
+                                        ]).get_output_in_json()
+            self.kwargs['role_assignment_id3'] = role_assignment3['id']
+            self.kwargs['role_assignment_name3'] = role_assignment3['name']
 
-        self.cmd('keyvault role assignment create --id {hsm_url} --role "{user_role}" '
-                 '--assignee-object-id {user2_id} --scope "/"',
-                 checks=[
-                     self.check('roleDefinitionId', '{user_role_id}'),
-                     self.check('roleName', '{user_role}'),
-                     self.check('principalId', '{user2_id}'),
-                     self.check('scope', '/')
-                 ]).get_output_in_json()
+            self.cmd('keyvault role assignment create --id {hsm_url} --role "{user_role}" '
+                     '--assignee-object-id {user2_id} --scope "/"',
+                     checks=[
+                         self.check('roleDefinitionId', '{user_role_id}'),
+                         self.check('roleName', '{user_role}'),
+                         self.check('principalId', '{user2_id}'),
+                         self.check('scope', '/')
+                     ]).get_output_in_json()
 
         time.sleep(10)
 
