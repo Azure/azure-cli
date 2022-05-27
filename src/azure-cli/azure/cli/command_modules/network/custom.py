@@ -6660,18 +6660,18 @@ def create_public_ip_prefix(cmd, client, resource_group_name, public_ip_prefix_n
     if cmd.supported_api_version(min_api='2020-06-01') and custom_ip_prefix_name:
         if is_valid_resource_id(custom_ip_prefix_name):
             resource_group = parse_resource_id(custom_ip_prefix_name)['resource_group']
-            custom_ip = parse_resource_id(custom_ip_prefix_name)['resource_name']
+            custom_ip_prefix = parse_resource_id(custom_ip_prefix_name)['resource_name']
             # support cross-subscription
             subscription_id = parse_resource_id(custom_ip_prefix_name)['subscription']
             cip_client = network_client_factory(cmd.cli_ctx, subscription_id=subscription_id).custom_ip_prefixes
         else:
             resource_group = resource_group_name
-            custom_ip = custom_ip_prefix_name
+            custom_ip_prefix = custom_ip_prefix_name
             cip_client = network_client_factory(cmd.cli_ctx).custom_ip_prefixes
         try:
-            prefix.custom_ip_prefix = cip_client.get(resource_group, custom_ip)
+            prefix.custom_ip_prefix = cip_client.get(resource_group, custom_ip_prefix)
         except ResourceNotFoundError:
-            raise ResourceNotFoundError("Custom ip prefix {} doesn't exist.".format(custom_ip))
+            raise ResourceNotFoundError("Custom ip prefix {} doesn't exist.".format(custom_ip_prefix))
 
     if edge_zone:
         prefix.extended_location = _edge_zone_model(cmd, edge_zone)
