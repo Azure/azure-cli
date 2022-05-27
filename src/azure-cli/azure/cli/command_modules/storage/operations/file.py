@@ -227,7 +227,16 @@ def storage_file_download_batch(cmd, client, source, destination, pattern=None, 
     return list(_download_action(f) for f in source_files)
 
 
-def storage_file_copy_batch(cmd, client, source_client, destination_share=None, destination_path=None,
+def storage_file_copy(client, copy_source, **kwargs):
+    result = client.start_copy_from_url(source_url=copy_source, **kwargs)
+    result['id'] = result['copy_id']
+    result['status'] = result['copy_status']
+    del result['copy_id']
+    del result['copy_status']
+    return result
+
+
+def storage_file_copy_batch(cmd, client, source_client, share_name=None, destination_path=None,
                             source_container=None, source_share=None, source_sas=None, pattern=None, dryrun=False,
                             metadata=None, timeout=None):
     """
@@ -236,7 +245,7 @@ def storage_file_copy_batch(cmd, client, source_client, destination_share=None, 
     if dryrun:
         logger.warning('copy files or blobs to file share')
         logger.warning('    account %s', client.account_name)
-        logger.warning('      share %s', destination_share)
+        logger.warning('      share %s', share_name)
         logger.warning('       path %s', destination_path)
         logger.warning('     source %s', source_container or source_share)
         logger.warning('source type %s', 'blob' if source_container else 'file')
@@ -262,7 +271,7 @@ def storage_file_copy_batch(cmd, client, source_client, destination_share=None, 
             if dryrun:
                 logger.warning('  - copy blob %s', blob_name)
             else:
-                return _create_file_and_directory_from_blob(client, source_client, destination_share, source_container,
+                return _create_file_and_directory_from_blob(client, source_client, share_name, source_container,
                                                             source_sas, blob_name, destination_dir=destination_path,
                                                             metadata=metadata, timeout=timeout,
                                                             existing_dirs=existing_dirs)
@@ -291,7 +300,7 @@ def storage_file_copy_batch(cmd, client, source_client, destination_share=None, 
             if dryrun:
                 logger.warning('  - copy file %s', os.path.join(dir_name, file_name))
             else:
-                return _create_file_and_directory_from_file(client, source_client, destination_share, source_share,
+                return _create_file_and_directory_from_file(client, source_client, share_name, source_share,
                                                             source_sas, dir_name, file_name,
                                                             destination_dir=destination_path, metadata=metadata,
                                                             timeout=timeout, existing_dirs=existing_dirs)

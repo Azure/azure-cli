@@ -1786,6 +1786,18 @@ short-summary: Manage file copy operations.
 helps['storage file copy start'] = """
 type: command
 short-summary: Copy a file asynchronously.
+parameters:
+  - name: --source-uri -u
+    type: string
+    short-summary: >
+        A URL of up to 2 KB in length that specifies an Azure file or blob.
+        The value should be URL-encoded as it would appear in a request URI.
+        If the source is in another account, the source must either be public
+        or must be authenticated via a shared access signature. If the source
+        is public, no authentication is required.
+        Examples:
+        https://myaccount.file.core.windows.net/myshare/mydir/myfile
+        https://otheraccount.file.core.windows.net/myshare/mydir/myfile?sastoken.
 examples:
     - name: Copy a file asynchronously.
       text: |
