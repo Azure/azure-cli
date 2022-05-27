@@ -36,11 +36,11 @@ ARG cli_version_revision=1
 RUN mkdir -p ./debian && \
     CLI_VERSION=${cli_version} CLI_VERSION_REVISION=${cli_version_revision} ./scripts/release/debian/prepare.sh ./debian ./az.completion ./ && \
     dpkg-buildpackage -us -uc && \
-    cp /azure-cli_${cli_version}-${cli_version_revision}_all.deb /azure-cli_all.deb
+    cp /azure-cli_${cli_version}-${cli_version_revision}_*.deb /azure-cli_$(dpkg --print-architecture).deb
 
 FROM $base_image AS execution-env
 
-COPY --from=build-env /azure-cli_all.deb /azure-cli_all.deb
+COPY --from=build-env /azure-cli_*.deb /
 
-RUN dpkg -i /azure-cli_all.deb && \
-    rm /azure-cli_all.deb
+RUN dpkg -i /azure-cli_$(dpkg --print-architecture).deb && \
+    rm /azure-cli_$(dpkg --print-architecture).deb

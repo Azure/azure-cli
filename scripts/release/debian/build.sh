@@ -51,5 +51,5 @@ $SCRIPT_DIR/prepare.sh $WORKDIR/debian $WORKDIR/az.completion $WORKDIR
 cd $WORKDIR
 dpkg-buildpackage -us -uc
 
-deb_file=$WORKDIR/../azure-cli_${CLI_VERSION}-${CLI_VERSION_REVISION:=1}_all.deb
+deb_file="${WORKDIR}/../azure-cli_${CLI_VERSION}-${CLI_VERSION_REVISION:=1}_$(dpkg --print-architecture).deb"
 cp $deb_file /mnt/output/

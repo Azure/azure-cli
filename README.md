@@ -170,7 +170,7 @@ brew install $(curl -Ls -o /dev/null -w %{url_effective} https://aka.ms/InstallA
 You can install the edge build on Ubuntu Xenial with the following command:
 
 ```bash
-curl -Ls -o azure-cli_xenial_all.deb https://aka.ms/InstallAzureCliXenialEdge && dpkg -i azure-cli_xenial_all.deb
+curl -Ls -o azure-cli_xenial_$(dpkg --print-architecture).deb https://aka.ms/InstallAzureCliXenialEdge && dpkg -i azure-cli_xenial_$(dpkg --print-architecture).deb
 ```
 
 And install the edge build with rpm package on CentOS/RHEL/Fedora:

@@ -57,7 +57,7 @@ Standards-Version: 3.9.5
 Homepage: https://github.com/azure/azure-cli
 
 Package: azure-cli
-Architecture: all
+Architecture: linux-any
 Depends: \${shlibs:Depends}, \${misc:Depends}
 Description: Azure CLI
  A great cloud needs great tools; we're excited to introduce Azure CLI,
