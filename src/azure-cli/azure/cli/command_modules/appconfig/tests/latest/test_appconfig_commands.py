@@ -1076,7 +1076,7 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
         _create_config_store(self, self.kwargs)
 
         import_hyphen_path = os.path.join(TEST_DIR, 'import_features_hyphen.json')
-        exported_file_path = os.path.join(TEST_DIR, 'export_features.json')
+        exported_file_path = os.path.join(TEST_DIR, 'export_features_naming.json')
         export_underscore_path = os.path.join(TEST_DIR, 'export_features_underscore.json')
         import_multiple_feature_sections_path = os.path.join(TEST_DIR, 'import_multiple_feature_sections.json')
         import_wrong_enabledfor_format_path = os.path.join(TEST_DIR, 'import_wrong_enabledfor_format.json')
