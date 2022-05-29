@@ -2769,6 +2769,14 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('provisioningState', 'Succeeded')
         ])
 
+        # clean up nsg set by policy, otherwise would block creating appgw
+        update_subnet = 'network vnet subnet update -n appgw-subnet --resource-group={resource_group} --vnet-name {vnet_name} ' \
+                        '--nsg ""'
+        self.cmd(update_subnet, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('networkSecurityGroup', None),
+        ])
+
         vnet_id = vnet['newVNet']["id"]
         assert vnet_id is not None
         self.kwargs.update({
@@ -2783,8 +2791,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
         # create app gateway
+        # add priority since this is a mandatory parameter since 2021-08-01 API version for network operations
         create_appgw = 'network application-gateway create -n appgw -g {resource_group} ' \
-                       '--sku Standard_v2 --public-ip-address appgw-ip --subnet {vnet_id}/subnets/appgw-subnet'
+                       '--sku Standard_v2 --public-ip-address appgw-ip --subnet {vnet_id}/subnets/appgw-subnet --priority 1001'
         self.cmd(create_appgw)
 
         # construct group id
