@@ -39,8 +39,8 @@ suppression_rule_scope_contains_arg_type = CLIArgumentType(options_list=('--cont
 suppression_rule_scope_any_of_arg_type = CLIArgumentType(options_list=('--any-of'), metavar='ANYOF', help='A list of strings to scope the suppression rule by.')
 
 # Atp
-storage_account_arg_type = CLIArgumentType(options_list=('--storage-account'), metavar='NAME', help='Name of an existing storage account.')
-cosmos_db_account_arg_type = CLIArgumentType(options_list=('--cosmosdb-account'), metavar='NAME', help='Name of an existing cosmos db account.')
+storage_account_arg_type = CLIArgumentType(options_list=('--storage-account'), metavar='NAME', help='Name of an existing Storage account.')
+cosmos_db_account_arg_type = CLIArgumentType(options_list=('--cosmosdb-account'), metavar='NAME', help='Name of an existing Cosmos DB account.')
 
 # Sql Vulnerability Assessment
 va_sql_vm_resource_id_arg_type = CLIArgumentType(options_list=('--vm-resource-id'), metavar='VMRESOURCEID', help='Resource ID of the scanned machine. For On-Premise machines, please provide your workspace resource ID')
