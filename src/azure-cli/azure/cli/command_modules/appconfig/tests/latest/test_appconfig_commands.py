@@ -561,6 +561,7 @@ class AppConfigKVScenarioTest(ScenarioTest):
 
         assert len(exported_kvs) == 1
         assert exported_kvs[secret_name] == secret_value
+        os.remove(exported_file_path)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
@@ -692,6 +693,7 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
         with open(exported_file_path) as json_file:
             exported_kvs = json.load(json_file)
         assert imported_kvs == exported_kvs
+        os.remove(exported_file_path)
 
         # Feature flags test
         imported_file_path = os.path.join(TEST_DIR, 'import_features.json')
@@ -804,6 +806,7 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
         with open(exported_file_path) as json_file:
             exported_kvs = json.load(json_file)
         assert imported_kvs == exported_kvs
+        os.remove(exported_file_path)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
@@ -855,6 +858,7 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
         with open(no_features_file_path) as json_file:
             expected_kvs = json.load(json_file)
         assert exported_kvs == expected_kvs
+        os.remove(exported_file_path)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
@@ -895,6 +899,8 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
         with open(exported_file_path) as json_file:
             exported_kvs = json.load(json_file)
         assert expected_kvs == exported_kvs
+        os.remove(exported_file_path)
+
 
 
 class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
@@ -1098,6 +1104,7 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
         with open(exported_file_path) as json_file:
             exported_kvs = json.load(json_file)
         assert export_underscore_path == exported_kvs
+        os.remove(exported_file_path)
 
         # Error if imported file has multiple feature sections
         self.kwargs.update({
@@ -1138,6 +1145,7 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
             for yaml_data in list(yaml.safe_load_all(yaml_file)):
                 exported_hyphen_yaml_file.update(yaml_data)
         assert exported_yaml_file == exported_hyphen_yaml_file
+        os.remove(exported_yaml_file_path)
 
         # Import/Export properties file
         imported_prop_file_path = os.path.join(TEST_DIR, 'import_features_prop.json')
@@ -1159,6 +1167,7 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
         with open(exported_as_kv_prop_file_path) as prop_file:
             exported_kv_prop_file = javaproperties.load(prop_file)
         assert exported_prop_file == exported_kv_prop_file
+        os.remove(exported_prop_file_path)
 
 
 class AppConfigToAppConfigImportExportScenarioTest(ScenarioTest):
@@ -1720,6 +1729,8 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
         with open(exported_dest_file_path) as json_file:
             dest_kvs = json.load(json_file)
         assert src_kvs == dest_kvs
+        os.remove(exported_dest_file_path)
+        os.remove(exported_src_file_path)
 
         # Delete all settings from both config stores
         self.cmd('appconfig kv delete --connection-string {src_connection_string} --key {key} --label {label} -y')
@@ -1780,6 +1791,8 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
         with open(exported_file_path) as json_file:
             exported_json_file = json.load(json_file)
         assert exported_yaml_file == exported_json_file
+        os.remove(exported_yaml_file_path)
+        os.remove(exported_file_path)
 
 
 class AppConfigFeatureScenarioTest(ScenarioTest):
@@ -2483,6 +2496,7 @@ class AppConfigKeyValidationScenarioTest(ScenarioTest):
         with open(actual_export_file_path) as json_file:
             actual_export = json.load(json_file)
         assert expected_export == actual_export
+        os.remove(actual_export_file_path)
 
 
 class AppConfigAadAuthLiveScenarioTest(ScenarioTest):
@@ -2597,6 +2611,7 @@ class AppConfigAadAuthLiveScenarioTest(ScenarioTest):
         with open(exported_file_path) as json_file:
             exported_kvs = json.load(json_file)
         assert expected_exported_kvs == exported_kvs
+        os.remove(exported_file_path)
 
         # Assign data owner role to current user
         self.cmd('role assignment create --assignee {user_id} --role "App Configuration Data Owner" --scope {appconfig_id}')
@@ -2639,6 +2654,7 @@ class AppConfigAadAuthLiveScenarioTest(ScenarioTest):
         with open(exported_file_path) as json_file:
             exported_kvs = json.load(json_file)
         assert expected_exported_kvs == exported_kvs
+        os.remove(exported_file_path)
 
 
 def _create_config_store(test, kwargs):
