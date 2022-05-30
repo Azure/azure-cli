@@ -16,19 +16,6 @@ def collect_blobs(blob_service, container, pattern=None):
     return [name for (name, _) in collect_blob_objects(blob_service, container, pattern)]
 
 
-def collect_blobs_track2(blob_service, container, pattern=None):
-    """
-    List the blobs in the given blob container, filter the blob by comparing their path to the given pattern.
-    Return files only.
-    """
-    blobs = collect_blob_objects(blob_service, container, pattern)
-    r = []
-    for name, blob in blobs:
-        if blob.content_settings.content_md5 is not None:
-            r.append(name)
-    return r
-
-
 def collect_blob_objects(blob_service, container, pattern=None):
     """
     List the blob name and blob in the given blob container, filter the blob by comparing their path to

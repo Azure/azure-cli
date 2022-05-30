@@ -11,9 +11,8 @@ from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.core.util import sdk_no_wait
 from azure.cli.core.azclierror import AzureResponseError
 from azure.cli.command_modules.storage.util import (filter_none, collect_blobs, collect_blob_objects,
-                                                    collect_blobs_track2, collect_files_track2,
-                                                    mkdir_p, guess_content_type, normalize_blob_file_path,
-                                                    check_precondition_success)
+                                                    collect_files_track2, mkdir_p, guess_content_type,
+                                                    normalize_blob_file_path, check_precondition_success)
 from azure.core.exceptions import ResourceExistsError, ResourceModifiedError, HttpResponseError
 
 from knack.log import get_logger
@@ -386,9 +385,9 @@ def storage_blob_copy_batch(cmd, client, source_client, container_name=None, des
                                                     source_container=source_container,
                                                     source_blob_name=blob_name,
                                                     source_sas=source_sas)
-        return list(filter_none(action_blob_copy(blob) for blob in collect_blobs_track2(source_client,
-                                                                                        source_container,
-                                                                                        pattern)))
+        return list(filter_none(action_blob_copy(blob) for blob, _ in collect_blob_objects(source_client,
+                                                                                           source_container,
+                                                                                           pattern)))
 
     if source_share:
         # copy blob from file share, skip empty dir
@@ -895,8 +894,12 @@ def _copy_blob_to_blob_container(cmd, blob_service, source_blob_service, destina
         blob_client.start_copy_from_url(source_url=source_blob_url, incremental_copy=False)
         return blob_client.url
     except HttpResponseError as ex:
-        error_template = 'Failed to copy blob {} to container {}. {}'
-        raise CLIError(error_template.format(source_blob_name, destination_container, ex))
+        if 'One of the request inputs is not valid' in str(ex):
+            # ignore error if source blob is directory in Data Lake Gen2.
+            pass
+        else:
+            error_template = 'Failed to copy blob {} to container {}. {}'
+            raise CLIError(error_template.format(source_blob_name, destination_container, ex))
 
 
 def _copy_file_to_blob_container(blob_service, source_file_service, destination_container, destination_path,
