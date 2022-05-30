@@ -574,7 +574,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
                 "the os type of this image should be {}".format(community_gallery_image_info.os_type))
         namespace.os_type = community_gallery_image_info.os_type
 
-    if getattr(namespace, 'security_type'):
+    if getattr(namespace, 'security_type', None):
         if namespace.security_type.lower() == 'confidentialvm' and namespace.os_disk_security_encryption_type is None:
             raise ArgumentUsageError('usage error: --os-disk-security-encryption-type is required'
                                      ' when os is specified as ConfidentialVM')
