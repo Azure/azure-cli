@@ -971,7 +971,7 @@ short-summary: Manage blob metadata.
 
 helps['storage blob metadata show'] = """
 type: command
-short-summary: Returns all user-defined metadata for the specified blob or snapshot.
+short-summary: Return all user-defined metadata for the specified blob or snapshot.
 examples:
   - name: Show user-defined metadata for blob.
     text: az storage blob metadata show --container-name mycontainer --name myblob
