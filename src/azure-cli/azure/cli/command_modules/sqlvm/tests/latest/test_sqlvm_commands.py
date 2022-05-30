@@ -3,12 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import time
-import os
-import unittest
-
-from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-
+from azure.cli.core.azclierror import (
+    RequiredArgumentMissingError
+)
 from azure.cli.core.util import CLIError
 from azure.cli.core.mock import DummyCli
 from azure.cli.testsdk.base import execute
@@ -16,17 +13,13 @@ from azure.cli.testsdk.exceptions import CliTestError
 from azure.cli.testsdk import (
     JMESPathCheck,
     JMESPathCheckExists,
-    JMESPathCheckGreaterThan,
     NoneCheck,
     ResourceGroupPreparer,
     ScenarioTest,
-    StorageAccountPreparer,
-    LiveScenarioTest,
-    record_only)
+    StorageAccountPreparer)
 from azure.cli.testsdk.preparers import (
     AbstractPreparer,
     SingleValueReplacer)
-from datetime import datetime, timedelta
 from time import sleep
 
 
@@ -35,7 +28,8 @@ sqlvm_name_prefix = 'clisqlvm'
 sqlvm_domain_prefix = 'domainvm'
 sqlvm_group_prefix = 'sqlgroup'
 sqlvm_max_length = 15
-
+la_workspace_name_prefix = 'laworkspace'
+la_workspace_max_length = 15
 
 class SqlVirtualMachinePreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix=sqlvm_name_prefix, location='westus',
@@ -115,7 +109,90 @@ class DomainPreparer(AbstractPreparer, SingleValueReplacer):
                                                self.resource_group_parameter_name))
 
 
+class LogAnalyticsWorkspacePreparer(AbstractPreparer, SingleValueReplacer):
+    def __init__(self, name_prefix=la_workspace_name_prefix, location='westus', parameter_name='laworkspace',
+                 resource_group_parameter_name='resource_group', skip_delete=False):
+        super(LogAnalyticsWorkspacePreparer, self).__init__(name_prefix, la_workspace_max_length)
+        self.location = location
+        self.parameter_name = parameter_name
+        self.resource_group_parameter_name = resource_group_parameter_name
+        self.skip_delete = skip_delete
+
+    def create_resource(self, name, **kwargs):
+        group = self._get_resource_group(**kwargs)
+        template = ('az monitor log-analytics workspace create -l {} -g {} -n {}')
+        execute(DummyCli(), template.format(self.location, group, name))
+        return {self.parameter_name: name}
+
+    def remove_resource(self, name, **kwargs):
+        if not self.skip_delete:
+            group = self._get_resource_group(**kwargs)
+            template = ('az monitor log-analytics workspace delete -g {} -n {} --yes')
+            execute(DummyCli(), template.format(group, name))
+
+    def _get_resource_group(self, **kwargs):
+        try:
+            return kwargs.get(self.resource_group_parameter_name)
+        except KeyError:
+            template = 'To create a log analytics workspace a resource group is required. Please add ' \
+                       'decorator @{} in front of this preparer.'
+            raise CliTestError(template.format(ResourceGroupPreparer.__name__,
+                                               self.resource_group_parameter_name))
+
+
 class SqlVmScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer()
+    @SqlVirtualMachinePreparer()
+    @LogAnalyticsWorkspacePreparer()
+    def test_sqlvm_mgmt_assessment(self, resource_group, resource_group_location, sqlvm, laworkspace):
+        
+        # create sqlvm1 with minimal required parameters
+        self.cmd('sql vm create -n {} -g {} -l {} --license-type {} --sql-mgmt-type {}'
+                 .format(sqlvm, resource_group, resource_group_location, 'PAYG', 'Full'),
+                 checks=[
+                     JMESPathCheck('name', sqlvm),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('provisioningState', "Succeeded"),
+                     JMESPathCheck('sqlServerLicenseType', 'PAYG')
+                 ])
+
+        # test assessment schedule enabling succeeds
+        with self.assertRaisesRegex(RequiredArgumentMissingError, "Assessment requires a Log Analytics workspace and Log Analytics extension on VM"):
+            self.cmd('sql vm update -n {} -g {} --assessment-weekly-interval {} --assessment-day-of-week {} --assessment-start-time-local {} '
+                 .format(sqlvm, resource_group, 1, 'Monday', '20:30'))
+
+        # test assessment schedule enabling succeeds
+        self.cmd('sql vm update -n {} -g {} --assessment-weekly-interval {} --assessment-day-of-week {} --assessment-start-time-local {} '
+                 '--workspace-rg {} --workspace-name {}'
+                 .format(sqlvm, resource_group, 1, 'Monday', '20:30', resource_group, laworkspace),
+                 checks=[
+                     JMESPathCheck('name', sqlvm),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('provisioningState', "Succeeded")
+                 ])
+
+        # test start-assessment succeeds
+        self.cmd('sql vm start-assessment -n {} -g {}'
+                 .format(sqlvm, resource_group))
+
+        # verify start-assessment succeeded
+        self.cmd('sql vm show -n {} -g {}'
+                 .format(sqlvm, resource_group),
+                 checks=[
+                     JMESPathCheck('name', sqlvm),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('provisioningState', "Succeeded")
+                 ])
+
+        # test assessment disabling succeeds
+        self.cmd('sql vm update -n {} -g {} --enable-assessment {}'
+                 .format(sqlvm, resource_group, False),
+                 checks=[
+                     JMESPathCheck('name', sqlvm),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('provisioningState', "Succeeded")
+                 ])
+
     @ResourceGroupPreparer()
     @SqlVirtualMachinePreparer()
     @StorageAccountPreparer()
@@ -260,40 +337,6 @@ class SqlVmScenarioTest(ScenarioTest):
         self.cmd('sql vm update -n {} -g {} --backup-schedule-type {} --full-backup-frequency {} --full-backup-start-hour {} --full-backup-duration {} '
                  '--sa-key {} --storage-account {} --retention-period {} --log-backup-frequency {}'
                  .format(sqlvm, resource_group, 'Manual', 'Weekly', 2, 2, key[0]['value'], sa['primaryEndpoints']['blob'], 30, 60),
-                 checks=[
-                     JMESPathCheck('name', sqlvm),
-                     JMESPathCheck('location', loc),
-                     JMESPathCheck('provisioningState', "Succeeded"),
-                     JMESPathCheck('id', sqlvm_1['id'])
-                 ])
-
-        # test assessment schedule enabling succeeds
-        self.cmd('sql vm update -n {} -g {} --assessment-weekly-interval {} --assessment-day-of-week {} --assessment-start-time-local {}'
-                 .format(sqlvm, resource_group, 1, 'Monday', '20:30'),
-                 checks=[
-                     JMESPathCheck('name', sqlvm),
-                     JMESPathCheck('location', loc),
-                     JMESPathCheck('provisioningState', "Succeeded"),
-                     JMESPathCheck('id', sqlvm_1['id'])
-                 ])
-
-        # test start-assessment succeeds
-        self.cmd('sql vm start-assessment -n {} -g {}'
-                 .format(sqlvm, resource_group))
-
-        # verify start-assessment succeeded
-        self.cmd('sql vm show -n {} -g {}'
-                 .format(sqlvm, resource_group),
-                 checks=[
-                     JMESPathCheck('name', sqlvm),
-                     JMESPathCheck('location', loc),
-                     JMESPathCheck('provisioningState', "Succeeded"),
-                     JMESPathCheck('id', sqlvm_1['id'])
-                 ])
-
-        # test assessment disabling succeeds
-        self.cmd('sql vm update -n {} -g {} --enable-assessment {}'
-                 .format(sqlvm, resource_group, False),
                  checks=[
                      JMESPathCheck('name', sqlvm),
                      JMESPathCheck('location', loc),

@@ -3,13 +3,19 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from msrestazure.tools import is_valid_resource_id, resource_id
+from msrestazure.tools import is_valid_resource_id, resource_id, parse_resource_id
 from knack.prompting import prompt_pass
-from knack.util import CLIError
+from azure.cli.core.azclierror import (
+    InvalidArgumentValueError,
+    RequiredArgumentMissingError,
+    ResourceNotFoundError,
+    AzureInternalError
+)
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.util import (
     sdk_no_wait
 )
+from azure.core.exceptions import HttpResponseError
 
 from azure.mgmt.sqlvirtualmachine.models import (
     WsfcDomainProfile,
@@ -30,15 +36,13 @@ from azure.mgmt.sqlvirtualmachine.models import (
     SqlVirtualMachine
 )
 
-from azure.cli.command_modules.vm.custom import (
-    show_extensions,
-    list_extensions,
-    _compute_client_factory,
+from ._util import (
+    get_workspace_id_from_log_analytics_extension,
+    get_workspace_in_sub,
+    set_log_analytics_extension,
+    validate_and_set_assessment_custom_log
 )
 
-from ._util import (
-    set_windows_log_analytics_workspace_extension
-)
 
 def sqlvm_list(
         client,
@@ -187,9 +191,7 @@ def sqlvm_create(client, cmd, sql_virtual_machine_name, resource_group_name, sql
                  full_backup_frequency=None, full_backup_start_time=None, full_backup_window_hours=None, log_backup_frequency=None,
                  enable_key_vault_credential=None, credential_name=None, azure_key_vault_url=None, service_principal_name=None,
                  service_principal_secret=None, connectivity_type=None, port=None, sql_auth_update_username=None,
-                 sql_auth_update_password=None, sql_workload_type=None, enable_r_services=None, tags=None, sql_image_offer=None,
-                 enable_assessment=None, enable_assessment_schedule = None, assessment_weekly_interval = None,
-                 assessment_monthly_occurrence = None, assessment_day_of_week = None, assessment_start_time_local = None):
+                 sql_auth_update_password=None, sql_workload_type=None, enable_r_services=None, tags=None, sql_image_offer=None):
     '''
     Creates a SQL virtual machine.
     '''
@@ -241,14 +243,6 @@ def sqlvm_create(client, cmd, sql_virtual_machine_name, resource_group_name, sql
         if not service_principal_secret:
             service_principal_secret = prompt_pass('Service Principal Secret: ', confirm=True)
 
-    # If customer has provided any assessment.schedule settings, enabling assessment.schedule should be True
-    if (assessment_weekly_interval or assessment_monthly_occurrence or assessment_day_of_week or assessment_start_time_local):
-        enable_assessment_schedule = True
-
-    # If customer has enabled assessment.schedule, enabling assessment should be True
-    if enable_assessment_schedule:
-        enable_assessment = True
-
     keyvault_object = KeyVaultCredentialSettings(enable=enable_key_vault_credential,
                                                  credential_name=credential_name,
                                                  azure_key_vault_url=azure_key_vault_url,
@@ -262,20 +256,11 @@ def sqlvm_create(client, cmd, sql_virtual_machine_name, resource_group_name, sql
 
     workload_type_object = SqlWorkloadTypeUpdateSettings(sql_workload_type=sql_workload_type)
 
-    additional_features_object = AdditionalFeaturesServerConfigurations(is_rservices_enabled=enable_r_services)
+    additional_features_object = AdditionalFeaturesServerConfigurations(is_r_services_enabled=enable_r_services)
 
     server_configuration_object = ServerConfigurationsManagementSettings(sql_connectivity_update_settings=connectivity_object,
                                                                          sql_workload_type_update_settings=workload_type_object,
                                                                          additional_features_server_configurations=additional_features_object)
-
-    assessment_schedule_object = Schedule(enable=enable_assessment_schedule,
-                                          weekly_interval=assessment_weekly_interval,
-                                          monthly_occurrence=assessment_monthly_occurrence,
-                                          day_of_week=assessment_day_of_week,
-                                          start_time=assessment_start_time_local)
-
-    assessment_object = AssessmentSettings(enable=enable_assessment,
-                                           schedule=assessment_schedule_object)
 
     sqlvm_object = SqlVirtualMachine(location=location,
                                      virtual_machine_resource_id=virtual_machine_resource_id,
@@ -287,7 +272,6 @@ def sqlvm_create(client, cmd, sql_virtual_machine_name, resource_group_name, sql
                                      auto_backup_settings=auto_backup_object,
                                      key_vault_credential_settings=keyvault_object,
                                      server_configurations_management_settings=server_configuration_object,
-                                     assessment_settings=assessment_object,
                                      tags=tags)
 
     # Since it's a running operation, we will do the put and then the get to display the instance.
@@ -307,7 +291,7 @@ def sqlvm_update(cmd, instance, sql_virtual_machine_name, resource_group_name, s
                  service_principal_secret=None, connectivity_type=None, port=None, sql_workload_type=None, enable_r_services=None, tags=None,
                  enable_assessment=None, enable_assessment_schedule=None, assessment_weekly_interval=None,
                  assessment_monthly_occurrence=None, assessment_day_of_week=None, assessment_start_time_local=None,
-                 workspace_name = None, workspace_rg = None):
+                 workspace_name=None, workspace_rg=None):
     '''
     Updates a SQL virtual machine.
     '''
@@ -381,7 +365,7 @@ def sqlvm_update(cmd, instance, sql_virtual_machine_name, resource_group_name, s
         instance.server_configurations_management_settings.sql_workload_type_update_settings = SqlWorkloadTypeUpdateSettings(sql_workload_type=sql_workload_type)
 
     if enable_r_services is not None:
-        instance.server_configurations_management_settings.additional_features_server_configurations = AdditionalFeaturesServerConfigurations(is_rservices_enabled=enable_r_services)
+        instance.server_configurations_management_settings.additional_features_server_configurations = AdditionalFeaturesServerConfigurations(is_r_services_enabled=enable_r_services)
 
     # If none of the settings was modified, reset server_configurations_management_settings to be null
     if (instance.server_configurations_management_settings.sql_connectivity_update_settings is None and
@@ -390,13 +374,18 @@ def sqlvm_update(cmd, instance, sql_virtual_machine_name, resource_group_name, s
             instance.server_configurations_management_settings.additional_features_server_configurations is None):
         instance.server_configurations_management_settings = None
 
-    set_assessment_properties(instance,
+    set_assessment_properties(cmd,
+                              instance,
                               enable_assessment,
                               enable_assessment_schedule,
                               assessment_weekly_interval,
                               assessment_monthly_occurrence,
                               assessment_day_of_week,
-                              assessment_start_time_local)
+                              assessment_start_time_local,
+                              resource_group_name,
+                              sql_virtual_machine_name,
+                              workspace_rg,
+                              workspace_name)
 
     return instance
 
@@ -447,9 +436,11 @@ def sqlvm_remove_from_group(client, cmd, sql_virtual_machine_name, resource_grou
 
 
 # region Helpers for custom commands
-def set_assessment_properties(instance, enable_assessment, enable_assessment_schedule,
+def set_assessment_properties(cmd, instance, enable_assessment, enable_assessment_schedule,
                               assessment_weekly_interval, assessment_monthly_occurrence,
-                              assessment_day_of_week, assessment_start_time_local):
+                              assessment_day_of_week, assessment_start_time_local,
+                              resource_group_name, sql_virtual_machine_name,
+                              workspace_rg, workspace_name):
     '''
     Set assessment properties to be sent in sql vm update
     '''
@@ -477,27 +468,62 @@ def set_assessment_properties(instance, enable_assessment, enable_assessment_sch
                 instance.assessment_settings.schedule.day_of_week = assessment_day_of_week
                 instance.assessment_settings.schedule.start_time = assessment_start_time_local
 
+    # Validate and deploy pre-requisites if necessary
+    # 1. Log Analytics extension for given workspace
+    # 2. Custom log definition on workspace
     if enable_assessment:
         workspace_id = None
 
-        extensions = list_extensions(cmd, resource_group_name, sql_virtual_machine_name)
-        for ext in extensions:
-            if ext.publisher is 'Microsoft.EnterpriseCloud.Monitoring' and ext.type_properties_type is 'MicrosoftMonitoringAgent ':
-                workspace_id = ext.settings.get('workspaceId', None)
-                print(ext.publisher, ext.type_properties_type, workspace_id)
-    
-        # Log Analytics extension not found
-        if workspace_id is None:
-            if workspace_name is None or workspace_rg is None:
-                raise CLIError('Usage error: If VM is not connected to a Log Analytics workspace and Best practice Assessment is enabled,', 
-                        'then workspace name and resource group must be specified')
+        # Check if Log Analytics extension is provisioned on VM and get workspace id (also called customer id)
+        try:
+            workspace_id = get_workspace_id_from_log_analytics_extension(cmd, resource_group_name, sql_virtual_machine_name)
+        except HttpResponseError as err:
+            raise AzureInternalError(f"Failed to validate and deploy assessment pre-requisities. Error: {err}")
 
-            # Install extension as it is missing
-            set_windows_log_analytics_workspace_extension(cmd, resource_group_name, sql_virtual_machine_name, workspace_name, workspace_rg)
+        # Log Analytics extension was not found, lets deploy it
+        if workspace_id is None:
+            # Raise error if workspace arguments not provided by user
+            if workspace_name is None or workspace_rg is None:
+                raise RequiredArgumentMissingError('Assessment requires a Log Analytics workspace and Log Analytics extension on VM - '
+                                                   'workspace name and workspace resource group must be specified to deploy pre-requisites.')
+
+            # Install extension using workspace arguments provided by user
+            _, workspace_id = set_log_analytics_extension(cmd,
+                                                          resource_group_name,
+                                                          sql_virtual_machine_name,
+                                                          workspace_rg,
+                                                          workspace_name)
+
+        # Get workspace details using workspace id fetched from extension
+        try:
+            workspace = get_workspace_in_sub(cmd, workspace_id)
+        except HttpResponseError as err:
+            raise AzureInternalError(f"Failed to validate and deploy assessment pre-requisities. Error: {err}")
+
+        if not workspace:
+            raise ResourceNotFoundError("Log Analytics workspace associated with VM does not exist in current subscription.")
+
+        workspace_resource_id_parts = parse_resource_id(workspace.id)
+        workspace_rg_found = workspace_resource_id_parts['resource_group']
+        workspace_name_found = workspace_resource_id_parts['name']
+
+        # In case workspace arguments provided by customer, verify they match with workspace associated with VM
+        if workspace_name is None:
+            workspace_name = workspace_name_found
+        elif workspace_name != workspace_name_found:
+            raise InvalidArgumentValueError(f"VM is already associated with worksapce '{workspace.id}'. "
+                                            "Skip workspace arguments to continue with associated workspace or dissociate workspace using Azure Portal first.")
+
+        if workspace_rg is None:
+            workspace_rg = workspace_rg_found
+        elif workspace_rg != workspace_rg_found:
+            raise InvalidArgumentValueError(f"VM is already associated with worksapce {workspace.id}. "
+                                            "Skip workspace arguments to continue with associated workspace or dissociate workspace from Azure Portal.")
 
         # Validate custom log definition on workspace
-        
-
-
+        try:
+            validate_and_set_assessment_custom_log(cmd, workspace_name, workspace_rg)
+        except BaseException as err:
+            raise AzureInternalError(f"Failed to validate and deploy assessment pre-requisities. Error: {err}")
 
 # endRegion
