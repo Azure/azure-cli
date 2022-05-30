@@ -372,7 +372,7 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
             namespace='Microsoft.Compute', type='diskAccesses', name=disk_access)
 
     encryption = None
-    if disk_encryption_set:
+    if disk_encryption_set or encryption_type:
         encryption = Encryption(type=encryption_type, disk_encryption_set_id=disk_encryption_set)
 
     disk = Disk(location=location, creation_data=creation_data, tags=(tags or {}),
@@ -436,7 +436,7 @@ def list_managed_disks(cmd, resource_group_name=None):
     return client.disks.list()
 
 
-def update_managed_disk(cmd, resource_group_name, instance, size_gb=None, sku=None, disk_iops_read_write=None,
+def update_managed_disk(cmd, resource_group_name, instance, size_gb=None, sku=None, disk_iops_read_write=None,  # pylint: disable=too-many-branches
                         disk_mbps_read_write=None, encryption_type=None, disk_encryption_set=None,
                         network_access_policy=None, disk_access=None, max_shares=None, disk_iops_read_only=None,
                         disk_mbps_read_only=None, enable_bursting=None, public_network_access=None,
@@ -469,6 +469,8 @@ def update_managed_disk(cmd, resource_group_name, instance, size_gb=None, sku=No
         instance.encryption.disk_encryption_set_id = disk_encryption_set
     if encryption_type is not None:
         instance.encryption.type = encryption_type
+        if encryption_type != 'EncryptionAtRestWithCustomerKey':
+            instance.encryption.disk_encryption_set_id = None
     if network_access_policy is not None:
         instance.network_access_policy = network_access_policy
     if disk_access is not None:

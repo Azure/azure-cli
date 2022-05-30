@@ -3,10 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from pprint import pprint
 from azure.cli.core.azclierror import (
     RequiredArgumentMissingError
 )
-from azure.cli.core.util import CLIError
 from azure.cli.core.mock import DummyCli
 from azure.cli.testsdk.base import execute
 from azure.cli.testsdk.exceptions import CliTestError
@@ -16,7 +16,8 @@ from azure.cli.testsdk import (
     NoneCheck,
     ResourceGroupPreparer,
     ScenarioTest,
-    StorageAccountPreparer)
+    StorageAccountPreparer,
+    LogAnalyticsWorkspacePreparer)
 from azure.cli.testsdk.preparers import (
     AbstractPreparer,
     SingleValueReplacer)
@@ -109,41 +110,10 @@ class DomainPreparer(AbstractPreparer, SingleValueReplacer):
                                                self.resource_group_parameter_name))
 
 
-class LogAnalyticsWorkspacePreparer(AbstractPreparer, SingleValueReplacer):
-    def __init__(self, name_prefix=la_workspace_name_prefix, location='westus', parameter_name='laworkspace',
-                 resource_group_parameter_name='resource_group', skip_delete=False):
-        super(LogAnalyticsWorkspacePreparer, self).__init__(name_prefix, la_workspace_max_length)
-        self.location = location
-        self.parameter_name = parameter_name
-        self.resource_group_parameter_name = resource_group_parameter_name
-        self.skip_delete = skip_delete
-
-    def create_resource(self, name, **kwargs):
-        group = self._get_resource_group(**kwargs)
-        template = ('az monitor log-analytics workspace create -l {} -g {} -n {}')
-        execute(DummyCli(), template.format(self.location, group, name))
-        return {self.parameter_name: name}
-
-    def remove_resource(self, name, **kwargs):
-        if not self.skip_delete:
-            group = self._get_resource_group(**kwargs)
-            template = ('az monitor log-analytics workspace delete -g {} -n {} --yes')
-            execute(DummyCli(), template.format(group, name))
-
-    def _get_resource_group(self, **kwargs):
-        try:
-            return kwargs.get(self.resource_group_parameter_name)
-        except KeyError:
-            template = 'To create a log analytics workspace a resource group is required. Please add ' \
-                       'decorator @{} in front of this preparer.'
-            raise CliTestError(template.format(ResourceGroupPreparer.__name__,
-                                               self.resource_group_parameter_name))
-
-
 class SqlVmScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
     @SqlVirtualMachinePreparer()
-    @LogAnalyticsWorkspacePreparer()
+    @LogAnalyticsWorkspacePreparer(location="westus")
     def test_sqlvm_mgmt_assessment(self, resource_group, resource_group_location, sqlvm, laworkspace):
         
         # create sqlvm1 with minimal required parameters
@@ -170,6 +140,17 @@ class SqlVmScenarioTest(ScenarioTest):
                      JMESPathCheck('location', resource_group_location),
                      JMESPathCheck('provisioningState', "Succeeded")
                  ])
+
+        # verify assessment settings were processed
+        expand_all = self.cmd('sql vm show -n {} -g {} --expand {}'
+                              .format(sqlvm, resource_group, 'AssessmentSettings')
+                              ).get_output_in_json()
+        assessment_settings = expand_all['assessmentSettings']
+        self.assertTrue(assessment_settings['enable'])
+        self.assertTrue(assessment_settings['schedule']['enable'])
+        self.assertEqual(1, assessment_settings['schedule']['weeklyInterval'])
+        self.assertEqual("Monday", assessment_settings['schedule']['dayOfWeek'])
+        self.assertEqual("20:30", assessment_settings['schedule']['startTimeLocal'])
 
         # test start-assessment succeeds
         self.cmd('sql vm start-assessment -n {} -g {}'
@@ -208,7 +189,7 @@ class SqlVmScenarioTest(ScenarioTest):
                        .format(storage_account, resource_group)).get_output_in_json()
 
         # Assert customer cannot create a SQL vm with no agent and do not provide offer and sku
-        with self.assertRaisesRegex(CLIError, "usage error: --sql-mgmt-type NoAgent --image-sku NAME --image-offer NAME"):
+        with self.assertRaisesRegex(RequiredArgumentMissingError, "usage error: --sql-mgmt-type NoAgent --image-sku NAME --image-offer NAME"):
             self.cmd('sql vm create -n {} -g {} -l {} --license-type {} --sql-mgmt-type {}'
                      .format(sqlvm, resource_group, loc, 'PAYG', 'NoAgent'))
 
