@@ -1860,8 +1860,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.register_path_argument()
 
     with self.argument_context('storage file resize') as c:
-        c.register_path_argument()
-        c.argument('content_length', options_list='--size')
+        c.extra('file_path', type=file_type, required=True, options_list=('--path', '-p'),
+                help='The path to the file within the file share.')
+        c.extra('share_name', share_name_type, required=True)
+        c.extra('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
+        c.argument('content_length', options_list='--size', type=int)
 
     with self.argument_context('storage file show') as c:
         c.register_path_argument()

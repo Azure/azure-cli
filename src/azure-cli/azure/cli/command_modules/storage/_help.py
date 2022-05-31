@@ -1955,6 +1955,16 @@ short-summary: Marks the specified file for deletion.
 long-summary: The file is later deleted during garbage collection.
 """
 
+helps['storage file resize'] = """
+type: command
+short-summary: Resizes a file to the specified size.
+long-summary: If the specified byte value is less than the current size of the file, then all ranges above
+        the specified byte value are cleared.
+parameters:
+    - name: --size
+      short-summary: Size to resize file to (in bytes).
+"""
+
 helps['storage file metadata'] = """
 type: group
 short-summary: Manage file metadata.
