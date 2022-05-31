@@ -3684,7 +3684,7 @@ def build_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, no_resto
         args += ["--stdout"]
 
     output = run_bicep_command(args)
-    
+
     if stdout:
         print(output)
 
