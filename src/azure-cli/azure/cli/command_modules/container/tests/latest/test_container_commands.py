@@ -243,6 +243,41 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
                          self.exists('ipAddress.ip'),
                          self.check('containers[0].image', '{image}')])
 
+
+    # Test create container using auto generated domain name label scope.
+    @live_only()
+    @ResourceGroupPreparer()
+    def test_container_create_with_auto_generated_domain_name_label_scope(self, resource_group, resource_group_location):
+        container_group_name = self.create_random_name('clicontainer', 16)
+        image = 'alpine:latest'
+        os_type = 'Linux'
+        ip_address_type = 'Public'
+        dns_name_label = container_group_name
+        fqdn = '{}.{}.azurecontainer.io'.format(
+            container_group_name, resource_group_location)
+        port1 = 8000
+        auto_generated_domain_name_label_scope = 'FreeReuse'
+
+        self.kwargs.update({
+            'container_group_name1': container_group_name,
+            'resource_group_location': resource_group_location,
+            'image': image,
+            'os_type': os_type,
+            'ip_address_type': ip_address_type,
+            'auto_generated_domain_name_label_scope': auto_generated_domain_name_label_scope
+        })
+
+        # Test create system assigned domain name label scope
+        self.cmd('container create -g {rg} -n {container_group_name1} --image {image} --os-type {os_type} '
+                 '--ip-address {ip_address_type} --auto-generated-domain-name-label-scope {auto_generated_domain_name_label_scope}',
+                 checks=[self.check('name', '{container_group_name1}'),
+                         self.check('location', '{resource_group_location}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('osType', '{os_type}'),
+                         self.check('identity.type', 'SystemAssigned'),
+                         self.exists('ipAddress.ip'),
+                         self.check('containers[0].image', '{image}')])
+
     # Test create container with azure container registry image.
     # An ACR instance is required to re-record this test with 'nginx:latest' image available in the url.
     # see https://docs.microsoft.com/azure/container-registry/container-registry-get-started-docker-cli

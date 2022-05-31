@@ -81,6 +81,7 @@ def create_container(cmd,
                      os_type='Linux',
                      ip_address=None,
                      dns_name_label=None,
+                     auto_generated_domain_name_label_scope='FreeReuse',
                      command_line=None,
                      environment_variables=None,
                      secure_environment_variables=None,
@@ -198,7 +199,7 @@ def create_container(cmd,
         subnet_id = _get_subnet_id(cmd, location, resource_group_name, vnet, vnet_address_prefix, subnet, subnet_address_prefix)
         cgroup_subnet = [ContainerGroupSubnetId(id=subnet_id)]
 
-    cgroup_ip_address = _create_ip_address(ip_address, ports, protocol, dns_name_label, subnet_id)
+    cgroup_ip_address = _create_ip_address(ip_address, ports, protocol, dns_name_label, subnet_id, auto_generated_domain_name_label_scope)
 
     # Setup zones, validation done in control plane so check is not needed here
     zones = None
@@ -534,11 +535,11 @@ def _create_gitrepo_volume_mount(gitrepo_volume, gitrepo_mount_path):
 
 
 # pylint: disable=inconsistent-return-statements
-def _create_ip_address(ip_address, ports, protocol, dns_name_label, subnet_id):
+def _create_ip_address(ip_address, ports, protocol, dns_name_label, subnet_id, auto_generated_domain_name_label_scope):
     """Create IP address. """
     if (ip_address and ip_address.lower() == 'public') or dns_name_label:
         return IpAddress(ports=[Port(protocol=protocol, port=p) for p in ports],
-                         dns_name_label=dns_name_label, type=ContainerGroupIpAddressType.public)
+                         dns_name_label=dns_name_label, type=ContainerGroupIpAddressType.public, auto_generated_domain_name_label_scope=auto_generated_domain_name_label_scope)
     if subnet_id:
         return IpAddress(ports=[Port(protocol=protocol, port=p) for p in ports],
                          type=ContainerGroupIpAddressType.private)
