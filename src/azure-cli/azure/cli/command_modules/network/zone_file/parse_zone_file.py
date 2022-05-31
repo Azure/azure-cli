@@ -202,7 +202,7 @@ def _serialize(tokens):
     """
     ret = []
     for tok in tokens:
-        if tok == None:
+        if tok is None:
             continue
         elif " " in tok:
             tok = '"%s"' % tok
