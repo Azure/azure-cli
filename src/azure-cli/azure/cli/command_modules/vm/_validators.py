@@ -16,7 +16,7 @@ from knack.log import get_logger
 from knack.util import CLIError
 
 from azure.cli.core.azclierror import (ValidationError, ArgumentUsageError, RequiredArgumentMissingError,
-                                       MutuallyExclusiveArgumentError, CLIInternalError, InvalidArgumentValueError)
+                                       MutuallyExclusiveArgumentError, CLIInternalError)
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_file_or_dict, validate_parameter_set, validate_tags)
 from azure.cli.core.util import (hash_string, DISALLOWED_USER_NAMES, get_default_admin_username)
@@ -1994,11 +1994,11 @@ def _disk_encryption_set_format(cmd, namespace, name):
 
 def process_image_version_create_namespace(cmd, namespace):
     process_gallery_image_version_namespace(cmd, namespace)
-    process_image_resource_id_namespace(cmd, namespace)
+    process_image_resource_id_namespace(namespace)
 # endregion
 
 
-def process_image_resource_id_namespace(cmd, namespace):
+def process_image_resource_id_namespace(namespace):
     """
     Validate the resource id from different sources
     Only one of these arguments is allowed to provide
@@ -2014,11 +2014,12 @@ def process_image_resource_id_namespace(cmd, namespace):
         return
 
     from ._vm_utils import is_valid_vm_resource_id, is_valid_image_version_id
-    is_vm = True if namespace.virtual_machine else False
+    is_vm = namespace.virtual_machine is not None
     is_valid_function = is_valid_vm_resource_id if is_vm else is_valid_image_version_id
     resource_id = namespace.virtual_machine if is_vm else namespace.image_version
 
     if not is_valid_function(resource_id):
+        from azure.cli.core.parser import InvalidArgumentValueError
         raise InvalidArgumentValueError('usage error: {} is an invalid {} id'
                                         .format(resource_id, 'VM resource' if is_vm else 'gallery image version'))
     namespace.managed_image = resource_id
