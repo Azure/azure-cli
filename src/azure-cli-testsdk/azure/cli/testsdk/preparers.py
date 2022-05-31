@@ -18,8 +18,7 @@ from .utilities import StorageAccountKeyReplacer, GraphClientPasswordReplacer
 KEY_RESOURCE_GROUP = 'rg'
 KEY_VIRTUAL_NETWORK = 'vnet'
 KEY_VNET_NIC = 'nic'
-la_workspace_name_prefix = 'laworkspace'
-la_workspace_max_length = 15
+
 
 # This preparer's traffic is not recorded.
 # As a result when tests are run in record mode, sdk calls cannot be made to return the prepared resource group.
@@ -404,9 +403,9 @@ class VnetNicPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
 
 
 class LogAnalyticsWorkspacePreparer(AbstractPreparer, SingleValueReplacer):
-    def __init__(self, name_prefix=la_workspace_name_prefix, location='eastus2euap', parameter_name='laworkspace',
+    def __init__(self, name_prefix='laworkspace', location='eastus2euap', parameter_name='laworkspace',
                  resource_group_parameter_name='resource_group', skip_delete=False):
-        super(LogAnalyticsWorkspacePreparer, self).__init__(name_prefix, la_workspace_max_length)
+        super(LogAnalyticsWorkspacePreparer, self).__init__(name_prefix, 15)
         self.location = location
         self.parameter_name = parameter_name
         self.resource_group_parameter_name = resource_group_parameter_name

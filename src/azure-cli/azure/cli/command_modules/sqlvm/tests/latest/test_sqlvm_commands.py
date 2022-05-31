@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from pprint import pprint
 from azure.cli.core.azclierror import (
     RequiredArgumentMissingError
 )
