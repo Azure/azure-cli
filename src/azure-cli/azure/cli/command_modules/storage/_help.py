@@ -1949,6 +1949,12 @@ examples:
     crafted: true
 """
 
+helps['storage file delete'] = """
+type: command
+short-summary: Marks the specified file for deletion.
+long-summary: The file is later deleted during garbage collection.
+"""
+
 helps['storage file metadata'] = """
 type: group
 short-summary: Manage file metadata.

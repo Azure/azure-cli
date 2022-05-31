@@ -689,8 +689,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         from ._format import transform_boolean_for_table, transform_file_output
         from ._transformers import transform_url
         from ._exception_handler import file_related_exception_handler
-        g.storage_command('delete', 'delete_file', transform=create_boolean_result_output_transformer('deleted'),
-                          table_transformer=transform_boolean_for_table)
         g.storage_command('resize', 'resize_file')
         g.storage_custom_command(
             'url', 'create_file_url', transform=transform_url)
@@ -719,6 +717,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_custom_command('list', 'list_share_files', client_factory=cf_share_client,
                                  transform=transform_file_directory_result,
                                  table_transformer=transform_file_output)
+        g.storage_command('delete', 'delete_file', transform=create_boolean_result_output_transformer('deleted'),
+                          table_transformer=transform_boolean_for_table)
 
     with self.command_group('storage cors', get_custom_sdk('cors', multi_service_properties_factory)) as g:
         from ._transformers import transform_cors_list_output
