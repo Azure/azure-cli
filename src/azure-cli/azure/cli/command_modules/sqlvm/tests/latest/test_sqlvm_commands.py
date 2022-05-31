@@ -29,8 +29,7 @@ sqlvm_name_prefix = 'clisqlvm'
 sqlvm_domain_prefix = 'domainvm'
 sqlvm_group_prefix = 'sqlgroup'
 sqlvm_max_length = 15
-la_workspace_name_prefix = 'laworkspace'
-la_workspace_max_length = 15
+
 
 class SqlVirtualMachinePreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix=sqlvm_name_prefix, location='westus',
