@@ -385,9 +385,9 @@ def storage_blob_copy_batch(cmd, client, source_client, container_name=None, des
                                                     source_container=source_container,
                                                     source_blob_name=blob_name,
                                                     source_sas=source_sas)
-        return list(filter_none(action_blob_copy(blob) for blob, _ in collect_blob_objects(source_client,
-                                                                                           source_container,
-                                                                                           pattern)))
+        return list(filter_none(action_blob_copy(blob) for blob in collect_blobs(source_client,
+                                                                                 source_container,
+                                                                                 pattern)))
 
     if source_share:
         # copy blob from file share, skip empty dir
