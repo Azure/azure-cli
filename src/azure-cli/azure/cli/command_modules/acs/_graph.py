@@ -15,16 +15,16 @@ def resolve_object_id(cli_ctx, assignee):
     result = None
     if assignee is None:
         raise AzCLIError('Inputted parameter "assignee" is None.')
-    # looks like a user principal name, find by upn
+    # looks like a user principal name, find by upn (e.g., xxx@xxx.xxx)
     if assignee.find("@") >= 0:
         result = list(client.user_list(filter="userPrincipalName eq '{}'".format(assignee)))
-    # find by spn
+    # find by spn (e.g., appId like xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)
     if not result:
         result = list(client.service_principal_list(filter="servicePrincipalNames/any(c:c eq '{}')".format(assignee)))
-    # find by display name
+    # find by display name (e.g., my-aks-sp)
     if not result:
         result = list(client.service_principal_list(filter="displayName eq '{}'".format(assignee)))
-    # find by object id
+    # find by object id (e.g., (object) id like xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)
     if not result:
         body = {"ids": [assignee], "types": ["user", "group", "servicePrincipal", "directoryObjectPartnerReference"]}
         result = list(client.directory_object_get_by_ids(body))
