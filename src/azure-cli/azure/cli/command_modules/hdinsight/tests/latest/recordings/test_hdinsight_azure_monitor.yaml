@@ -138,7 +138,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:21:22 GMT
+      - Mon, 30 May 2022 01:09:13 GMT
       expires:
       - '-1'
       pragma:
@@ -171,7 +171,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/hdicli-000001?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001","name":"hdicli-000001","type":"Microsoft.Resources/resourceGroups","location":"southcentralus","tags":{"product":"azurecli","cause":"automation","date":"2022-05-26T08:20:51Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001","name":"hdicli-000001","type":"Microsoft.Resources/resourceGroups","location":"southcentralus","tags":{"product":"azurecli","cause":"automation","date":"2022-05-30T01:08:41Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -180,7 +180,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:21:22 GMT
+      - Mon, 30 May 2022 01:09:14 GMT
       expires:
       - '-1'
       pragma:
@@ -197,7 +197,8 @@ interactions:
 - request:
     body: '{"location": "southcentralus", "properties": {"features": {"legacy": "0",
       "searchVersion": "1"}, "portalUrl": "https://eus.mms.microsoft.com/Account?tenant=72f988bf-86f1-41af-91ab-2d7cd011db47&resource=%2fsubscriptions%2fc9cbd920-c00c-427c-852b-8aaf38badaeb%2fresourcegroups%2ftjp-nw%2fproviders%2fmicrosoft.operationalinsights%2fworkspaces%2ftjpws1",
-      "retentionInDays": "7", "sku": {"name": "free"}, "source": "Azure"}}'
+      "retentionInDays": "7", "sku": {"name": "BASIC", "tier": "Pay-as-you-go"}, "source":
+      "Azure"}}'
     headers:
       Accept:
       - application/json
@@ -208,7 +209,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '420'
+      - '446'
       Content-Type:
       - application/json
       ParameterSetName:
@@ -219,9 +220,8 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/hdicli-000001/providers/Microsoft.OperationalInsights/workspaces/testws000003?api-version=2021-06-01
   response:
     body:
-      string: '{"error":{"code":"InvalidParameter","message":"Pricing tier doesn''t
-        match the subscription''s billing model. Read http://aka.ms/PricingTierWarning
-        for more details. Operation Id: ''646018cf009e5f4aa395f57dbd99687f''"}}'
+      string: '{"error":{"code":"InvalidParameter","message":"Sku name could not be
+        parsed to a valid sku type. Operation Id: ''713f715f9c36bb4cb8f976a48e867209''"}}'
     headers:
       access-control-allow-origin:
       - '*'
@@ -230,13 +230,13 @@ interactions:
       cache-control:
       - no-store, no-cache
       content-length:
-      - '215'
+      - '148'
       content-type:
       - application/json
       date:
-      - Thu, 26 May 2022 08:21:38 GMT
+      - Mon, 30 May 2022 01:09:28 GMT
       diagnostic-context:
-      - 646018cf009e5f4aa395f57dbd99687f
+      - 713f715f9c36bb4cb8f976a48e867209
       expires:
       - '-1'
       pragma:
@@ -250,7 +250,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1164'
+      - '1198'
       x-powered-by:
       - ASP.NET
     status:
