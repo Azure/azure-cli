@@ -646,11 +646,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                  table_transformer=transform_share_list)
         g.storage_custom_command('url', 'create_share_url', transform=transform_url_without_encode)
 
-    with self.command_group('storage share', command_type=file_sdk,
-                            custom_command_type=get_custom_sdk('file', file_data_service_factory)) as g:
-        g.storage_command('list-handle', 'list_handles')
-        g.storage_custom_command('close-handle', 'close_handle')
-
     with self.command_group('storage share policy',
                             custom_command_type=get_custom_sdk('access_policy', cf_share_client,
                                                                ResourceType.DATA_STORAGE_FILESHARE),
