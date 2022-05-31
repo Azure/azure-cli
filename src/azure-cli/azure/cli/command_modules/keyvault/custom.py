@@ -1983,12 +1983,19 @@ def _get_principal_dics(cli_ctx, role_assignments):
     if principal_ids:
         from azure.cli.command_modules.role import graph_client_factory, GraphError
         try:
-            from azure.cli.command_modules.role.custom import _get_displayable_name, _get_object_stubs
+            from azure.cli.command_modules.role.custom import (_get_displayable_name, _get_object_stubs,
+                                                               _odata_type_to_arm_principal_type)
 
             graph_client = graph_client_factory(cli_ctx)
             principals = _get_object_stubs(graph_client, principal_ids)
-            return {i['id']: (_get_displayable_name(i), i['@odata.type']) for i in principals}
 
+            results = {}
+            for i in principals:
+                object_id = i['id']
+                display_name = _get_displayable_name(i)
+                principal_type = _odata_type_to_arm_principal_type(i['@odata.type'])
+                results[object_id] = (display_name, principal_type)
+            return results
         except GraphError as ex:
             # failure on resolving principal due to graph permission should not fail the whole thing
             logger.info("Failed to resolve graph object information per error '%s'", ex)

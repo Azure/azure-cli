@@ -234,6 +234,7 @@ class ManagedHSMPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
         self.live_only_execute(self.cli_ctx, template.format(name, group, self.location, administrators))
         # After creating MHSM, All data plane commands are disabled until the HSM is activated.
         # To activate the HSM, we must download the Security Domain.
+        # See https://docs.microsoft.com/en-us/azure/key-vault/managed-hsm/quick-create-cli#activate-your-managed-hsm for details
         if self.certs_path:
             cert0 = os.path.join(self.certs_path, 'cert_0.cer').replace('\\', '\\\\')
             cert1 = os.path.join(self.certs_path, 'cert_1.cer').replace('\\', '\\\\')
