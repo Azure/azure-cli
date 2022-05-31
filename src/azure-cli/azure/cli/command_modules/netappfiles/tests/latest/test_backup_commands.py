@@ -4,8 +4,8 @@
 # --------------------------------------------------------------------------------------------
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 import time
-# LOCATION = "southcentralusstage"
-LOCATION = "southcentralus"
+LOCATION = "southcentralusstage"
+# LOCATION = "southcentralus"
 VNET_LOCATION = "southcentralus"
 # VNET_LOCATION = "eastus"
 
