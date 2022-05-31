@@ -1558,8 +1558,7 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
                                                resource_group_name=resource_group_name,
                                                vm=vm,
                                                vm_name=vm_name,
-                                               workspace_name=workspace_name,
-                                               workspace_rg=resource_group_name)
+                                               workspace_name=workspace_name)
         os_type = vm.storage_profile.os_disk.os_type if vm.storage_profile.os_disk.os_type else None
         _set_data_source_for_workspace(cmd, os_type, resource_group_name, workspace_name)
 
@@ -4522,11 +4521,11 @@ def execute_query_for_vm(cmd, client, resource_group_name, vm_name, analytics_qu
     return client.query(workspace, QueryBody(query=analytics_query, timespan=timespan))
 
 
-def _set_log_analytics_workspace_extension(cmd, resource_group_name, vm, vm_name, workspace_name, workspace_rg):
+def _set_log_analytics_workspace_extension(cmd, resource_group_name, vm, vm_name, workspace_name):
     is_linux_os = _is_linux_os(vm)
     vm_extension_name = _LINUX_OMS_AGENT_EXT if is_linux_os else _WINDOWS_OMS_AGENT_EXT
     log_client = _get_log_analytics_client(cmd)
-    customer_id = log_client.workspaces.get(workspace_rg, workspace_name).customer_id
+    customer_id = log_client.workspaces.get(resource_group_name, workspace_name).customer_id
     settings = {
         'workspaceId': customer_id,
         'stopOnMultipleConnections': 'true'
