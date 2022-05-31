@@ -174,6 +174,7 @@ class StorageSASScenario(StorageScenarioMixin, LiveScenarioTest):
 
         self.assertIn('sig=', sas, 'SAS token {} does not contain sig segment'.format(sas))
         self.assertIn('se=', sas, 'SAS token {} does not contain se segment'.format(sas))
+        self.assertIn('srt=co', sas, 'SAS token {} does not match srt segment'.format(sas))
 
         account_info = self.get_account_info(resource_group, storage_account)
         container = self.create_container(account_info)

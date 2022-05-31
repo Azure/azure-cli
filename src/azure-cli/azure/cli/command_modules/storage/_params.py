@@ -1753,23 +1753,38 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.extra('timeout', timeout_type)
 
     with self.argument_context('storage share list-handle') as c:
-        c.register_path_argument(default_file_param="")
-        c.argument('recursive', arg_type=get_three_state_flag())
+        c.register_path_argument(default_file_param="", fileshare=True)
+        c.extra('share_name', share_name_type, options_list=('--name', '-n'), required=True)
+        c.extra('marker', help='An opaque continuation token. This value can be retrieved from the '
+                               'next_marker field of a previous generator object if max_results was '
+                               'specified and that generator has finished enumerating results. If '
+                               'specified, this generator will begin returning results from the point '
+                               'where the previous generator stopped.')
+        c.extra('num_results', options_list='--max-results', type=int,
+                help='Specifies the maximum number of handles taken on files and/or directories '
+                     'to return. If the request does not specify max_results or specifies a '
+                     'value greater than 5,000, the server will return up to 5,000 items. '
+                     'Setting max_results to a value less than or equal to zero results in '
+                     'error response code 400 (Bad Request).')
+        c.extra('recursive', arg_type=get_three_state_flag(),
+                help='Boolean that specifies if operation should apply to the directory specified in the URI, '
+                     'its files, with its subdirectories and their files.')
+        c.extra('snapshot', help="A string that represents the snapshot version, if applicable.")
+        c.extra('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
 
     with self.argument_context('storage share close-handle') as c:
-        c.register_path_argument(default_file_param="")
-        c.argument('recursive', arg_type=get_three_state_flag(),
-                   help="Boolean that specifies if operation should apply to the directory specified in the URI, its "
-                        "files, its subdirectories and their files.")
-        c.argument('close_all', arg_type=get_three_state_flag(), validator=validate_share_close_handle,
-                   help="Whether or not to close all the file handles. Specify close-all or a specific handle-id.")
-        c.argument('marker', help="An opaque continuation token. This value can be retrieved from the next_marker field"
-                                  " of a previous generator object if it has not finished closing handles. "
-                                  "If specified, this generator will begin closing handles from the point where the "
-                                  "previous generator stopped.")
-        c.argument('handle_id', help="Specifies handle ID opened on the file or directory to be closed. "
-                                     "Astrix (‘*’) is a wildcard that specifies all handles.")
-        c.argument('snapshot', help="A string that represents the snapshot version, if applicable.")
+        c.register_path_argument(default_file_param="", fileshare=True)
+        c.extra('share_name', share_name_type, options_list=('--name', '-n'), required=True)
+        c.extra('recursive', arg_type=get_three_state_flag(),
+                help="Boolean that specifies if operation should apply to the directory specified in the URI, its "
+                     "files, with its subdirectories and their files.")
+        c.extra('close_all', arg_type=get_three_state_flag(), validator=validate_share_close_handle,
+                help="Whether or not to close all the file handles. Specify close-all or a specific handle-id.")
+        c.extra('handle', options_list='--handle-id',
+                help="Specifies handle ID opened on the file or directory to be closed. "
+                     "Astrix (‘*’) is a wildcard that specifies all handles.")
+        c.extra('snapshot', help="A string that represents the snapshot version, if applicable.")
+        c.extra('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
 
     for scope in ['create', 'delete', 'show', 'exists', 'metadata show', 'metadata update']:
         with self.argument_context(f'storage directory {scope}') as c:

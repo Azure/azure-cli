@@ -6064,14 +6064,16 @@ class DiskEncryptionSetTest(ScenarioTest):
             self.check('rotationToLatestKeyVersionEnabled', False)
         ])
 
-    @ResourceGroupPreparer(name_prefix='cli_test_disk_encryption_set_disk_update_', location='westcentralus')
-    @KeyVaultPreparer(name_prefix='vault3-', name_len=20, key='vault', location='westcentralus', additional_params='--enable-purge-protection')
+    @ResourceGroupPreparer(name_prefix='cli_test_disk_encryption_set_disk_update_', location='eastus')
+    @KeyVaultPreparer(name_prefix='vault3-', name_len=20, key='vault', location='eastus', additional_params='--enable-purge-protection')
     @AllowLargeResponse(size_kb=99999)
     def test_disk_encryption_set_disk_update(self, resource_group, key_vault):
         self.kwargs.update({
             'key': self.create_random_name(prefix='key-', length=20),
             'des1': self.create_random_name(prefix='des1-', length=20),
+            'image-reference': 'Debian:debian-10:10:latest',
             'disk': self.create_random_name(prefix='disk-', length=20),
+            'disk2': self.create_random_name(prefix='disk-', length=20),
         })
 
         vault_id = self.cmd('keyvault show -g {rg} -n {vault}').get_output_in_json()['id']
@@ -6103,10 +6105,19 @@ class DiskEncryptionSetTest(ScenarioTest):
             'des1_pattern': '.*/{}$'.format(self.kwargs['des1'])
         })
 
-        self.cmd('disk create -g {rg} -n {disk} --size-gb 10')
+        self.cmd('disk create -g {rg} -n {disk} --image-reference {image-reference}')
         self.cmd('disk update -g {rg} -n {disk} --disk-encryption-set {des1} --encryption-type EncryptionAtRestWithCustomerKey', checks=[
             self.check_pattern('encryption.diskEncryptionSetId', self.kwargs['des1_pattern']),
             self.check('encryption.type', 'EncryptionAtRestWithCustomerKey')
+        ])
+
+        self.cmd('disk create -g {rg} -n {disk2} --source {disk} --encryption-type EncryptionAtRestWithPlatformKey', checks=[
+            self.check('encryption.diskEncryptionSetId', 'None'),
+            self.check('encryption.type', 'EncryptionAtRestWithPlatformKey')
+        ])
+        self.cmd('disk update -g {rg} -n {disk} --encryption-type EncryptionAtRestWithPlatformKey', checks=[
+            self.check('encryption.diskEncryptionSetId', 'None'),
+            self.check('encryption.type', 'EncryptionAtRestWithPlatformKey')
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_disk_encryption_set_snapshot_', location='westcentralus')
