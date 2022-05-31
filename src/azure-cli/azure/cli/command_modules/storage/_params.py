@@ -1754,7 +1754,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage share list-handle') as c:
         c.register_path_argument(default_file_param="", fileshare=True)
-        c.extra('share_name', share_name_type, options_list=('--name', '-n'), required=True)
+        c.extra('s_name', share_name_type, options_list=('--name', '-n'), required=True)
         c.extra('marker', help='An opaque continuation token. This value can be retrieved from the '
                                'next_marker field of a previous generator object if max_results was '
                                'specified and that generator has finished enumerating results. If '
@@ -1774,7 +1774,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage share close-handle') as c:
         c.register_path_argument(default_file_param="", fileshare=True)
-        c.extra('share_name', share_name_type, options_list=('--name', '-n'), required=True)
+        c.extra('s_name', share_name_type, options_list=('--name', '-n'), required=True)
         c.extra('recursive', arg_type=get_three_state_flag(),
                 help="Boolean that specifies if operation should apply to the directory specified in the URI, its "
                      "files, with its subdirectories and their files.")
