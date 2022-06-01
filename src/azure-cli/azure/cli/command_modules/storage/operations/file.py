@@ -16,6 +16,7 @@ from azure.cli.command_modules.storage.util import (filter_none, collect_blobs, 
                                                     guess_content_type)
 from azure.cli.command_modules.storage.url_quote_util import encode_for_url, make_encoded_file_url_and_params
 from azure.cli.core.profiles import ResourceType
+from .fileshare import _get_client
 
 logger = get_logger(__name__)
 
@@ -109,9 +110,14 @@ def create_share_url(client, share_name, unc=None, protocol=None):
     return url
 
 
-def create_file_url(client, share_name, directory_name, file_name, protocol=None):
-    return client.make_file_url(
-        share_name, directory_name, file_name, protocol=protocol, sas_token=client.sas_token)
+def create_file_url(client, protocol=None, **kwargs):
+    client = _get_client(client, kwargs)
+    url = client.url
+    if url.endswith(client.share_name):
+        url = url+'/'
+    if protocol == 'http':
+        return url.replace('https', 'http', 1)
+    return url
 
 
 def list_share_files(cmd, client, directory_name=None, timeout=None, exclude_dir=False, exclude_extended_info=False,
@@ -129,7 +135,7 @@ def list_share_files(cmd, client, directory_name=None, timeout=None, exclude_dir
 
     if exclude_dir:
         t_file_properties = cmd.get_models('_models#FileProperties', resource_type=ResourceType.DATA_STORAGE_FILESHARE)
-        return list(f for f in results if isinstance(f.properties, t_file_properties))
+        return list(f for f in results if isinstance(f, t_file_properties))
     return results
 
 

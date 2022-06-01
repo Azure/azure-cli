@@ -107,7 +107,8 @@ def _get_client(client, kwargs):
         if not dir_client.exists():
             dir_client = client.get_directory_client(directory_path=directory_path)
             client = dir_client.get_file_client(file_name=file_name)
-            kwargs.pop("recursive")
+            if "recursive" in kwargs:
+                kwargs.pop("recursive")
         else:
             client = dir_client
     else:

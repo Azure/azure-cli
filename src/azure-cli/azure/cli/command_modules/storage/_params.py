@@ -1885,7 +1885,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('max_connections', type=int)
 
     with self.argument_context('storage file url') as c:
-        c.register_path_argument()
+        c.register_path_argument(fileshare=True)
+        c.extra('share_name', share_name_type, required=True)
         c.argument('protocol', arg_type=get_enum_type(['http', 'https'], 'https'), help='Protocol to use.')
 
     with self.argument_context('storage file upload-batch') as c:
