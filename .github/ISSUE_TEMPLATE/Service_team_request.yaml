@@ -1,0 +1,68 @@
+name: Microsoft Internal / Service Team Feature Request
+description: Use this template to create a feature request for microsoft internal or service team
+body:
+  - type: markdown
+    id: example
+    attributes:
+      value: |
+        [How to Request a Feature in CLI](https://github.com/Azure/azure-cli/blob/dev/doc/how_to_request_a_feature_in_cli.md)
+  - type: input
+    id: command
+    attributes:
+      label: Related command
+      description: Please provide the related command with az {command} if you can, so that we can quickly route to the related team for help.
+      placeholder: e.g., `az vm create`
+    validations:
+      required: false
+  - type: input
+    id: provider
+    attributes:
+      label: Resource Provider
+      description: What is the Azure resource provider your feature is part of?
+      placeholder: e.g., Microsoft.Compute/DiskRP
+    validations:
+      required: true
+  - type: textarea
+    id: feature-desc
+    attributes:
+      label: Description of Feature or Work Requested
+      description: Provide a brief description of the feature or problem. A link to conceptual documentation may be helpful too.
+      placeholder:
+      value:
+      render: shell
+    validations:
+      required: true
+  - type: input
+    id: mini-api
+    attributes:
+      label: Minimum API Version Required
+      description: What is the minimum API version of your service required to implement your feature?
+      placeholder: e.g., 2021_04_01
+    validations:
+      required: true
+  - type: input
+    id: swagger
+    attributes:
+      label: Swagger Link
+      description: Provide a link to the location of your feature(s) in the REST API specs repo. If your feature(s) has corresponding commit or pull request in the REST API specs repo, provide them. This should be on the master branch of the REST API specs repo.
+      placeholder: e.g., https://github.com/Azure/azure-rest-api-specs/pull/16629
+    validations:
+      required: true
+  - type: input
+    id: date
+    attributes:
+      label: Target Date
+      description: If you have a target date for release of this feature/work, please provide it. While we can't guarantee these dates, it will help us prioritize your request against other requests.
+      placeholder: e.g., November, 2021
+    validations:
+      required: true
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional context
+      description: Add any other context about the feature.
+      placeholder:
+      value:
+      render: shell
+    validations:
+      required: false
