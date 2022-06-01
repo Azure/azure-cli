@@ -29,13 +29,12 @@ logger = get_logger(__name__)
 
 
 def reset_sp_credentials_for_mediaservice(cmd, client, account_name, resource_group_name, sp_name=None,
-                                          role='Contributor', sp_password=None, xml=False, years=None):
+                                          password_display_name=None, xml=False, years=1):
     ams = client.get(resource_group_name, account_name)
 
     graph_client = _graph_client_factory(cmd.cli_ctx)
 
     sp_name = _create_sp_name(account_name, sp_name) if sp_name is None else sp_name
-    sp_password = _create_sp_password(sp_password)
 
     app_display_name = sp_name.replace('http://', '')
 
@@ -43,29 +42,30 @@ def reset_sp_credentials_for_mediaservice(cmd, client, account_name, resource_gr
     if not aad_sp:
         raise CLIError("Can't find a service principal matching '{}'".format(app_display_name))
 
+    app_id = aad_sp['appId']
+    sp_oid = aad_sp['id']
+
     profile = Profile(cli_ctx=cmd.cli_ctx)
     _, _, tenant_id = profile.get_login_credentials(
         resource=cmd.cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
-    sp_oid = aad_sp.object_id
-    app_id = aad_sp.app_id
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
-    app_object_id = _get_application_object_id(graph_client.applications, app_id)
+    app_object_id = _get_application_object_id(graph_client, app_id)
 
-    _update_password_credentials(graph_client, app_object_id, sp_password, years)
+    new_password = add_sp_password(graph_client, app_object_id, password_display_name, years)
 
-    _assign_role(cmd, role, sp_oid, ams.id)
+    #_assign_role(cmd, role, sp_oid, ams.id)
 
     return _build_sp_result(subscription_id, ams.location, resource_group_name, account_name,
-                            tenant_id, app_id, app_display_name, sp_password, cmd.cli_ctx.cloud.endpoints.management,
+                            tenant_id, app_id, app_display_name, new_password, password_display_name, cmd.cli_ctx.cloud.endpoints.management,
                             cmd.cli_ctx.cloud.endpoints.active_directory,
-                            cmd.cli_ctx.cloud.endpoints.resource_manager, role, xml)
+                            cmd.cli_ctx.cloud.endpoints.resource_manager, '', xml)
 
 
 def create_or_update_assign_sp_to_mediaservice(cmd, client, account_name, resource_group_name, sp_name=None,
                                                new_sp_name=None, role=None, password_display_name=None,
-                                               xml=False, years=None):
+                                               xml=False, years=1):
     ams = client.get(resource_group_name, account_name)
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
@@ -89,7 +89,7 @@ def create_or_update_assign_sp_to_mediaservice(cmd, client, account_name, resour
     profile = Profile(cli_ctx=cmd.cli_ctx)
     _, _, tenant_id = profile.get_login_credentials(
         resource=cmd.cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
-    created_password = _create_sp_password(graph_client, app_object_id, password_display_name, years)
+    created_password = add_sp_password(graph_client, app_object_id, password_display_name, years)
 
     sp_oid = _create_service_principal(graph_client, name=sp_name,
                                        app_id=app_id)
@@ -129,13 +129,6 @@ def _update_sp(cmd, graph_client, aad_sp, ams, account_name, resource_group_name
                             tenant=tenant_id,app_id=app_id,sp_name=display_name,sp_password=None,password_friendly=None,management_endpoint=cmd.cli_ctx.cloud.endpoints.management,
                             active_directory_endpoint=cmd.cli_ctx.cloud.endpoints.active_directory,
                             resource_manager_endpoint=cmd.cli_ctx.cloud.endpoints.resource_manager,role=role,xml=xml)
-
-
-def _update_password_credentials(client, app_object_id, sp_password, years):
-    app_creds = list(client.applications.list_password_credentials(app_object_id))
-    app_creds.append(_build_password_credential(sp_password, years))
-    client.applications.update_password_credentials(app_object_id, app_creds)
-
 
 def _get_displayable_name(graph_object):
     if getattr(graph_object, 'user_principal_name', None):
@@ -357,7 +350,6 @@ def _build_sp_result(subscription_id, location, resource_group_name, account_nam
         'Region': location,
         'Location': location,
         'ResourceGroup': resource_group_name,
-        'Role': role,
         'AccountName': account_name,
         'AadTenantId': tenant,
         'AadClientId': app_id,
@@ -369,6 +361,8 @@ def _build_sp_result(subscription_id, location, resource_group_name, account_nam
 
     if password_friendly:
         result['AadSecretFriendlyName'] = password_friendly
+    if role:
+        result['Role'] = role
 
     format_xml_fn = getattr(importlib.import_module('azure.cli.command_modules.ams._format'),
                             'get_sp_create_output_{}'.format('xml'))
@@ -382,9 +376,7 @@ def _get_service_principal(graph_client, sp_name):
     return aad_sps[0] if aad_sps else None
 
 
-def _create_sp_password(graph_client, app_id, password_display_name, years):
-    years = years or 1
-
+def add_sp_password(graph_client, app_id, password_display_name, years):
     start_date = datetime.datetime.now(TZ_UTC)
     end_date = start_date + relativedelta(years=years)
     start_date = start_date.isoformat()
