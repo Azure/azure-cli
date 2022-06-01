@@ -902,7 +902,6 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
         os.remove(exported_file_path)
 
 
-
 class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
 
     @ResourceGroupPreparer(parameter_name_for_location='location')
