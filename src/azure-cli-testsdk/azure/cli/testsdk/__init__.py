@@ -7,8 +7,7 @@ from .scenario_tests import live_only, record_only, get_sha1_hash
 
 from .base import ScenarioTest, LiveScenarioTest, LocalContextScenarioTest
 from .preparers import (StorageAccountPreparer, ResourceGroupPreparer, RoleBasedServicePrincipalPreparer,
-                        KeyVaultPreparer, ManagedApplicationPreparer, VirtualNetworkPreparer, VnetNicPreparer,
-                        KeyVaultPreparer, ManagedHSMPreparer, ManagedApplicationPreparer, VirtualNetworkPreparer, 
+                        KeyVaultPreparer, ManagedHSMPreparer, ManagedApplicationPreparer, VirtualNetworkPreparer,
                         VnetNicPreparer, LogAnalyticsWorkspacePreparer)
 from .exceptions import CliTestError
 from .checkers import (JMESPathCheck, JMESPathCheckExists, JMESPathCheckGreaterThan, NoneCheck, StringCheck,
