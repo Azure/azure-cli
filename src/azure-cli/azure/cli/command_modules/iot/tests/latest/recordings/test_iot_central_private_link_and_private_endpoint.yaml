@@ -1,0 +1,2684 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot central app create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --subdomain --sku
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-05-19T20:55:12Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '310'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 19 May 2022 20:55:13 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "sku": {"name": "ST2"}, "properties": {"displayName":
+      "iotc-cli-test000002", "subdomain": "iotc-cli-test000002"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot central app create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '136'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --subdomain --sku
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-iotcentral/10.0.0b1 Python/3.8.10 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/iotApps/iotc-cli-test000002?api-version=2021-11-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/iotApps/iotc-cli-test000002","name":"iotc-cli-test000002","type":"Microsoft.IoTCentral/IoTApps","location":"westus","tags":{},"properties":{"state":"created","provisioningState":"Creating","applicationId":"cd328a5f-e660-4649-a5b4-533f01ea51c8","displayName":"iotc-cli-test000002","subdomain":"iotc-cli-test000002","template":"iotc-pnp-preview@1.0.0","publicNetworkAccess":"Enabled","networkRuleSets":{"defaultAction":"Allow","applyToDevices":false,"applyToIoTCentral":false,"ipRules":[]},"privateEndpointConnections":[]},"sku":{"name":"ST2"},"identity":{"type":"None"}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.IoTCentral/locations/westus/operationResults/efe757db-fac2-41bf-a2bf-1eb2a51b1aba?api-version=2021-11-01-preview&type=createOrUpdateIotApplication&x-iot-region=westus&asyncinfo
+      cache-control:
+      - no-store, must-revalidate, no-cache, max-stale=0, private, post-check=0, pre-check=0
+      content-length:
+      - '691'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 19 May 2022 20:55:19 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - deny
+      x-iot-cluster:
+      - iotcprodwestus01
+      x-iot-correlation:
+      - 91u4atq5.0
+      x-iot-version:
+      - 050522.0001-release
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-msedge-ref:
+      - 'Ref A: EA9ACA4B5632484581E95DBB164F7ACB Ref B: BY3EDGE0311 Ref C: 2022-05-19T20:55:14Z'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot central app create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --subdomain --sku
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-iotcentral/10.0.0b1 Python/3.8.10 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.IoTCentral/locations/westus/operationResults/efe757db-fac2-41bf-a2bf-1eb2a51b1aba?api-version=2021-11-01-preview&type=createOrUpdateIotApplication&x-iot-region=westus&asyncinfo
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-store, must-revalidate, no-cache, max-stale=0, private, post-check=0, pre-check=0
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 19 May 2022 20:55:30 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - deny
+      x-iot-cluster:
+      - iotcprodwestus01
+      x-iot-correlation:
+      - a2hchcws.0
+      x-iot-version:
+      - 050522.0001-release
+      x-msedge-ref:
+      - 'Ref A: 9D27659769B84367B8D43DDDC26E9070 Ref B: BY3EDGE0311 Ref C: 2022-05-19T20:55:30Z'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot central app create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --subdomain --sku
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-iotcentral/10.0.0b1 Python/3.8.10 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/iotApps/iotc-cli-test000002?api-version=2021-11-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/iotApps/iotc-cli-test000002","name":"iotc-cli-test000002","type":"Microsoft.IoTCentral/IoTApps","location":"westus","tags":{},"properties":{"state":"created","provisioningState":"Succeeded","applicationId":"cd328a5f-e660-4649-a5b4-533f01ea51c8","displayName":"iotc-cli-test000002","subdomain":"iotc-cli-test000002","template":"iotc-pnp-preview@1.0.0","publicNetworkAccess":"Enabled","networkRuleSets":{"defaultAction":"Allow","applyToDevices":false,"applyToIoTCentral":false,"ipRules":[]},"privateEndpointConnections":[]},"sku":{"name":"ST2"},"identity":{"type":"None"}}'
+    headers:
+      cache-control:
+      - no-store, must-revalidate, no-cache, max-stale=0, private, post-check=0, pre-check=0
+      content-length:
+      - '692'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 19 May 2022 20:55:30 GMT
+      etag:
+      - W/"4701fba9-0000-0100-0000-6286aeb90000"
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - deny
+      x-iot-cluster:
+      - iotcprodwestus01
+      x-iot-correlation:
+      - 14agw8vv.0
+      x-iot-version:
+      - 050522.0001-release
+      x-msedge-ref:
+      - 'Ref A: AC6F24FC4A2047AF9DF54CCACB8DD0FC Ref B: BY3EDGE0311 Ref C: 2022-05-19T20:55:30Z'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "tags": {}, "properties": {"addressSpace": {"addressPrefixes":
+      ["10.0.0.0/16"]}, "dhcpOptions": {}, "subnets": [{"name": "cli-subnet-000004",
+      "properties": {"addressPrefix": "10.0.0.0/24", "privateEndpointNetworkPolicies":
+      "Enabled", "privateLinkServiceNetworkPolicies": "Enabled"}}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '308'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g -l --subnet-name
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"cli-vnet-000003\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003\",\r\n
+        \ \"etag\": \"W/\\\"ade25663-f073-472e-9792-62f49c725537\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
+        \   \"resourceGuid\": \"50ca05ba-70ed-46a6-9373-64940004ff62\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [\r\n      {\r\n        \"name\": \"cli-subnet-000004\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\",\r\n
+        \       \"etag\": \"W/\\\"ade25663-f073-472e-9792-62f49c725537\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
+        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false\r\n  }\r\n}"
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/235ad03a-e5ed-4f9b-8a40-a4bb409a9863?api-version=2021-08-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1335'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 19 May 2022 20:55:31 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 6d6d41b4-19f4-43e9-bf3e-539925528b74
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -l --subnet-name
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/235ad03a-e5ed-4f9b-8a40-a4bb409a9863?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 19 May 2022 20:55:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 9f1c4834-5f58-404b-86c7-c183c0527884
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -l --subnet-name
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"cli-vnet-000003\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003\",\r\n
+        \ \"etag\": \"W/\\\"47d54334-d5a4-4cf6-bdd3-f3ebd2d75d9c\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"50ca05ba-70ed-46a6-9373-64940004ff62\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [\r\n      {\r\n        \"name\": \"cli-subnet-000004\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\",\r\n
+        \       \"etag\": \"W/\\\"47d54334-d5a4-4cf6-bdd3-f3ebd2d75d9c\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1337'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 19 May 2022 20:55:34 GMT
+      etag:
+      - W/"47d54334-d5a4-4cf6-bdd3-f3ebd2d75d9c"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - d5e12444-3cf4-4901-bfac-2c1bdc7ecfc2
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --vnet-name -g --disable-private-endpoint-network-policies
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"cli-subnet-000004\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\",\r\n
+        \ \"etag\": \"W/\\\"47d54334-d5a4-4cf6-bdd3-f3ebd2d75d9c\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '557'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 19 May 2022 20:55:35 GMT
+      etag:
+      - W/"47d54334-d5a4-4cf6-bdd3-f3ebd2d75d9c"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - b08d3784-7c96-4b64-9299-83d827664a5a
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004",
+      "name": "cli-subnet-000004", "type": "Microsoft.Network/virtualNetworks/subnets",
+      "properties": {"addressPrefix": "10.0.0.0/24", "delegations": [], "privateEndpointNetworkPolicies":
+      "Disabled", "privateLinkServiceNetworkPolicies": "Enabled"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '422'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n --vnet-name -g --disable-private-endpoint-network-policies
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"cli-subnet-000004\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\",\r\n
+        \ \"etag\": \"W/\\\"2c9596b8-c41d-4ba6-947e-9d9ad14b45a2\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Updating\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/b899e01c-3f51-461f-8758-54dfae79c8d3?api-version=2021-08-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '557'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 19 May 2022 20:55:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 1ad6b18b-ae20-48d6-9a28-a35e579d256f
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --vnet-name -g --disable-private-endpoint-network-policies
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/b899e01c-3f51-461f-8758-54dfae79c8d3?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 19 May 2022 20:55:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 3c31f98b-48f1-4067-9de9-2937a2b74874
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --vnet-name -g --disable-private-endpoint-network-policies
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"cli-subnet-000004\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\",\r\n
+        \ \"etag\": \"W/\\\"7caf9372-90b1-4f2d-9e5d-c8be73ffa588\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '558'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 19 May 2022 20:55:37 GMT
+      etag:
+      - W/"7caf9372-90b1-4f2d-9e5d-c8be73ffa588"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 2f3698bc-e727-4992-a968-e5b69591b4b1
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot central app private-link-resource list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --type
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-iotcentral/10.0.0b1 Python/3.8.10 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/iotApps/iotc-cli-test000002/privateLinkResources?api-version=2021-11-01-preview
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/iotApps/iotc-cli-test000002/privateLinkResources/iotApp","name":"iotApp","type":"Microsoft.IoTCentral/IoTApps/privateLinkResources","properties":{"groupId":"iotApp","requiredMembers":["iotc-cli-test000002","iotc-b21d481a-8349-43b9-bbf4-453616ea43a9","iothub-ns-iotc-b21d4-19222067-df46ec888d","iotc-0232b084-354d-4ae4-80b1-9efd270434fe","iothub-ns-iotc-0232b-19222041-ce427cca3f","saas-dps-663c160d-a3cb-48c9-be51-0ae6dbc1f078"],"requiredZoneNames":["privatelink.azureiotcentral.com","privatelink.azure-devices.net","privatelink.servicebus.windows.net","privatelink.azure-devices-provisioning.net"]}}]}'
+    headers:
+      cache-control:
+      - no-store, must-revalidate, no-cache, max-stale=0, private, post-check=0, pre-check=0
+      content-length:
+      - '734'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 19 May 2022 20:55:39 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - deny
+      x-iot-cluster:
+      - iotcprodwestus01
+      x-iot-correlation:
+      - 3hhr0y91.0
+      x-iot-version:
+      - 050522.0001-release
+      x-msedge-ref:
+      - 'Ref A: FDD89CF72A3146718FFB5BCD2D4B930C Ref B: BY3EDGE0119 Ref C: 2022-05-19T20:55:38Z'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot central app private-link-resource list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-iotcentral/10.0.0b1 Python/3.8.10 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/iotApps/iotc-cli-test000002/privateLinkResources?api-version=2021-11-01-preview
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/iotApps/iotc-cli-test000002/privateLinkResources/iotApp","name":"iotApp","type":"Microsoft.IoTCentral/IoTApps/privateLinkResources","properties":{"groupId":"iotApp","requiredMembers":["iotc-cli-test000002","iotc-b21d481a-8349-43b9-bbf4-453616ea43a9","iothub-ns-iotc-b21d4-19222067-df46ec888d","iotc-0232b084-354d-4ae4-80b1-9efd270434fe","iothub-ns-iotc-0232b-19222041-ce427cca3f","saas-dps-663c160d-a3cb-48c9-be51-0ae6dbc1f078"],"requiredZoneNames":["privatelink.azureiotcentral.com","privatelink.azure-devices.net","privatelink.servicebus.windows.net","privatelink.azure-devices-provisioning.net"]}}]}'
+    headers:
+      cache-control:
+      - no-store, must-revalidate, no-cache, max-stale=0, private, post-check=0, pre-check=0
+      content-length:
+      - '734'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 19 May 2022 20:55:38 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - deny
+      x-iot-cluster:
+      - iotcprodwestus01
+      x-iot-correlation:
+      - ar121jp1.0
+      x-iot-version:
+      - 050522.0001-release
+      x-msedge-ref:
+      - 'Ref A: 4145ABC1233B4FBD8F0ED34F8BEAEEAA Ref B: BY3EDGE0217 Ref C: 2022-05-19T20:55:39Z'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot central app private-link-resource list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --type
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-iotcentral/10.0.0b1 Python/3.8.10 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/iotApps/iotc-cli-test000002/privateLinkResources?api-version=2021-11-01-preview
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/iotApps/iotc-cli-test000002/privateLinkResources/iotApp","name":"iotApp","type":"Microsoft.IoTCentral/IoTApps/privateLinkResources","properties":{"groupId":"iotApp","requiredMembers":["iotc-cli-test000002","iotc-b21d481a-8349-43b9-bbf4-453616ea43a9","iothub-ns-iotc-b21d4-19222067-df46ec888d","iotc-0232b084-354d-4ae4-80b1-9efd270434fe","iothub-ns-iotc-0232b-19222041-ce427cca3f","saas-dps-663c160d-a3cb-48c9-be51-0ae6dbc1f078"],"requiredZoneNames":["privatelink.azureiotcentral.com","privatelink.azure-devices.net","privatelink.servicebus.windows.net","privatelink.azure-devices-provisioning.net"]}}]}'
+    headers:
+      cache-control:
+      - no-store, must-revalidate, no-cache, max-stale=0, private, post-check=0, pre-check=0
+      content-length:
+      - '734'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 19 May 2022 20:55:39 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - deny
+      x-iot-cluster:
+      - iotcprodwestus01
+      x-iot-correlation:
+      - 8f1ptrjh.0
+      x-iot-version:
+      - 050522.0001-release
+      x-msedge-ref:
+      - 'Ref A: 60C17A49DA054D1B9E4501FA9DC27578 Ref B: BY3EDGE0406 Ref C: 2022-05-19T20:55:39Z'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "properties": {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004",
+      "properties": {"privateEndpointNetworkPolicies": "Enabled", "privateLinkServiceNetworkPolicies":
+      "Enabled"}}, "privateLinkServiceConnections": [{"name": "cli-pec-000006", "properties":
+      {"privateLinkServiceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/iotApps/iotc-cli-test000002",
+      "groupIds": ["iotApp"]}}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '611'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
+        --group-id
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"cli-pe-000005\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005\",\r\n
+        \ \"etag\": \"W/\\\"29fd21b3-8b22-42eb-8a15-4f0126c99ed4\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"westus\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\":
+        \"d5dfa319-32cc-4897-9c63-7eedc8122614\",\r\n    \"privateLinkServiceConnections\":
+        [\r\n      {\r\n        \"name\": \"cli-pec-000006\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateLinkServiceConnections/cli-pec-000006\",\r\n
+        \       \"etag\": \"W/\\\"29fd21b3-8b22-42eb-8a15-4f0126c99ed4\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/iotApps/iotc-cli-test000002\",\r\n
+        \         \"groupIds\": [\r\n            \"iotApp\"\r\n          ],\r\n          \"privateLinkServiceConnectionState\":
+        {\r\n            \"status\": \"Approved\",\r\n            \"description\":
+        \"Auto Approved\",\r\n            \"actionsRequired\": \"None\"\r\n          }\r\n
+        \       },\r\n        \"type\": \"Microsoft.Network/privateEndpoints/privateLinkServiceConnections\"\r\n
+        \     }\r\n    ],\r\n    \"manualPrivateLinkServiceConnections\": [],\r\n
+        \   \"customNetworkInterfaceName\": \"\",\r\n    \"subnet\": {\r\n      \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\"\r\n
+        \   },\r\n    \"ipConfigurations\": [],\r\n    \"networkInterfaces\": [\r\n
+        \     {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000005.nic.cfdf35dd-f8a7-4017-b3ae-ed153cc39308\"\r\n
+        \     }\r\n    ],\r\n    \"customDnsConfigs\": []\r\n  }\r\n}"
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/b5e80f64-9bba-4e37-aef5-e93d535c789f?api-version=2021-08-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '2011'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 19 May 2022 20:55:40 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 2bb48700-37c3-4735-b170-df2e28250ef3
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
+        --group-id
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/b5e80f64-9bba-4e37-aef5-e93d535c789f?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 19 May 2022 20:55:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - b0feed41-f4e7-49aa-a966-72f799ae7832
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
+        --group-id
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/b5e80f64-9bba-4e37-aef5-e93d535c789f?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 19 May 2022 20:56:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - c7d5d62c-ca6a-49b1-8e26-0ca3930aabb4
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
+        --group-id
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/b5e80f64-9bba-4e37-aef5-e93d535c789f?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 19 May 2022 20:56:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 2bab58c4-350a-42ae-85bf-4e8c46a1b87f
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
+        --group-id
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/b5e80f64-9bba-4e37-aef5-e93d535c789f?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 19 May 2022 20:56:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - a9a9ae4b-c234-4476-b6e4-6c4662b3bb1c
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
+        --group-id
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/b5e80f64-9bba-4e37-aef5-e93d535c789f?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 19 May 2022 20:57:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 4021499e-7dea-41aa-9a41-6a7530b11b6b
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
+        --group-id
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/b5e80f64-9bba-4e37-aef5-e93d535c789f?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 19 May 2022 20:58:01 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - b11f3dc9-eb27-4b3d-962e-dbd7013ef6e9
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
+        --group-id
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"cli-pe-000005\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005\",\r\n
+        \ \"etag\": \"W/\\\"2fcff267-f5cb-4865-ac8a-7d4cf1ee8dc7\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"westus\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
+        \"d5dfa319-32cc-4897-9c63-7eedc8122614\",\r\n    \"privateLinkServiceConnections\":
+        [\r\n      {\r\n        \"name\": \"cli-pec-000006\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateLinkServiceConnections/cli-pec-000006\",\r\n
+        \       \"etag\": \"W/\\\"2fcff267-f5cb-4865-ac8a-7d4cf1ee8dc7\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/iotApps/iotc-cli-test000002\",\r\n
+        \         \"groupIds\": [\r\n            \"iotApp\"\r\n          ],\r\n          \"privateLinkServiceConnectionState\":
+        {\r\n            \"status\": \"Approved\",\r\n            \"description\":
+        \"Auto-approved\",\r\n            \"actionsRequired\": \"None\"\r\n          }\r\n
+        \       },\r\n        \"type\": \"Microsoft.Network/privateEndpoints/privateLinkServiceConnections\"\r\n
+        \     }\r\n    ],\r\n    \"manualPrivateLinkServiceConnections\": [],\r\n
+        \   \"customNetworkInterfaceName\": \"\",\r\n    \"subnet\": {\r\n      \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\"\r\n
+        \   },\r\n    \"ipConfigurations\": [],\r\n    \"networkInterfaces\": [\r\n
+        \     {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000005.nic.cfdf35dd-f8a7-4017-b3ae-ed153cc39308\"\r\n
+        \     }\r\n    ],\r\n    \"customDnsConfigs\": [\r\n      {\r\n        \"fqdn\":
+        \"iotc-cli-test000002.azureiotcentral.com\",\r\n        \"ipAddresses\": [\r\n
+        \         \"10.0.0.4\"\r\n        ]\r\n      },\r\n      {\r\n        \"fqdn\":
+        \"iotc-b21d481a-8349-43b9-bbf4-453616ea43a9.azure-devices.net\",\r\n        \"ipAddresses\":
+        [\r\n          \"10.0.0.5\"\r\n        ]\r\n      },\r\n      {\r\n        \"fqdn\":
+        \"iothub-ns-iotc-b21d4-19222067-df46ec888d.servicebus.windows.net\",\r\n        \"ipAddresses\":
+        [\r\n          \"10.0.0.6\"\r\n        ]\r\n      },\r\n      {\r\n        \"fqdn\":
+        \"iotc-0232b084-354d-4ae4-80b1-9efd270434fe.azure-devices.net\",\r\n        \"ipAddresses\":
+        [\r\n          \"10.0.0.7\"\r\n        ]\r\n      },\r\n      {\r\n        \"fqdn\":
+        \"iothub-ns-iotc-0232b-19222041-ce427cca3f.servicebus.windows.net\",\r\n        \"ipAddresses\":
+        [\r\n          \"10.0.0.8\"\r\n        ]\r\n      },\r\n      {\r\n        \"fqdn\":
+        \"saas-dps-663c160d-a3cb-48c9-be51-0ae6dbc1f078.azure-devices-provisioning.net\",\r\n
+        \       \"ipAddresses\": [\r\n          \"10.0.0.9\"\r\n        ]\r\n      }\r\n
+        \   ]\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2970'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 19 May 2022 20:58:01 GMT
+      etag:
+      - W/"2fcff267-f5cb-4865-ac8a-7d4cf1ee8dc7"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 716d1bdb-98fb-4b75-87d0-abb27efdbeeb
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot central app show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-iotcentral/10.0.0b1 Python/3.8.10 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/iotApps/iotc-cli-test000002?api-version=2021-11-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/iotApps/iotc-cli-test000002","name":"iotc-cli-test000002","type":"Microsoft.IoTCentral/IoTApps","location":"westus","tags":{},"properties":{"state":"created","provisioningState":"Succeeded","applicationId":"cd328a5f-e660-4649-a5b4-533f01ea51c8","displayName":"iotc-cli-test000002","subdomain":"iotc-cli-test000002","template":"iotc-pnp-preview@1.0.0","publicNetworkAccess":"Enabled","networkRuleSets":{"defaultAction":"Allow","applyToDevices":false,"applyToIoTCentral":false,"ipRules":[]},"privateEndpointConnections":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/iotApps/iotc-cli-test000002/privateEndpointConnections/iotc-cli-test000002.7cb9f201-6a1e-45ca-aa37-d7ab339dbca7","name":"iotc-cli-test000002.7cb9f201-6a1e-45ca-aa37-d7ab339dbca7","type":"Microsoft.IoTCentral/IoTApps/privateEndpointConnections","properties":{"groupIds":["iotApp"],"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"Auto-approved","actionsRequired":"None"}}}]},"sku":{"name":"ST2"},"identity":{"type":"None"}}'
+    headers:
+      cache-control:
+      - no-store, must-revalidate, no-cache, max-stale=0, private, post-check=0, pre-check=0
+      content-length:
+      - '1378'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 19 May 2022 20:58:01 GMT
+      etag:
+      - W/"47010eb2-0000-0100-0000-6286af3c0000"
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - deny
+      x-iot-cluster:
+      - iotcprodcentralus04
+      x-iot-correlation:
+      - 9x4zntui.0
+      x-iot-version:
+      - 050522.0001-release
+      x-msedge-ref:
+      - 'Ref A: 45B2E39076024004AB812FC32A129399 Ref B: DEN301000108009 Ref C: 2022-05-19T20:58:01Z'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot central app private-link-resource show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --group-id
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-iotcentral/10.0.0b1 Python/3.8.10 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/iotApps/iotc-cli-test000002/privateLinkResources/iotApp?api-version=2021-11-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/iotApps/iotc-cli-test000002/privateLinkResources/iotApp","name":"iotApp","type":"Microsoft.IoTCentral/IoTApps/privateLinkResources","properties":{"groupId":"iotApp","requiredMembers":["iotc-cli-test000002","iotc-b21d481a-8349-43b9-bbf4-453616ea43a9","iothub-ns-iotc-b21d4-19222067-df46ec888d","iotc-0232b084-354d-4ae4-80b1-9efd270434fe","iothub-ns-iotc-0232b-19222041-ce427cca3f","saas-dps-663c160d-a3cb-48c9-be51-0ae6dbc1f078"],"requiredZoneNames":["privatelink.azureiotcentral.com","privatelink.azure-devices.net","privatelink.servicebus.windows.net","privatelink.azure-devices-provisioning.net"]}}'
+    headers:
+      cache-control:
+      - no-store, must-revalidate, no-cache, max-stale=0, private, post-check=0, pre-check=0
+      content-length:
+      - '722'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 19 May 2022 20:58:03 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - DENY
+      x-iot-cluster:
+      - iotcprodcentralus01
+      x-iot-correlation:
+      - abh4gaxf.1.0
+      x-iot-version:
+      - 050522.0001-release
+      x-msedge-ref:
+      - 'Ref A: 780251E3835048369A0A2C8612E5B443 Ref B: DEN301000102019 Ref C: 2022-05-19T20:58:02Z'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot central app private-link-resource show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-iotcentral/10.0.0b1 Python/3.8.10 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/iotApps/iotc-cli-test000002/privateLinkResources/iotApp?api-version=2021-11-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/iotApps/iotc-cli-test000002/privateLinkResources/iotApp","name":"iotApp","type":"Microsoft.IoTCentral/IoTApps/privateLinkResources","properties":{"groupId":"iotApp","requiredMembers":["iotc-cli-test000002","iotc-b21d481a-8349-43b9-bbf4-453616ea43a9","iothub-ns-iotc-b21d4-19222067-df46ec888d","iotc-0232b084-354d-4ae4-80b1-9efd270434fe","iothub-ns-iotc-0232b-19222041-ce427cca3f","saas-dps-663c160d-a3cb-48c9-be51-0ae6dbc1f078"],"requiredZoneNames":["privatelink.azureiotcentral.com","privatelink.azure-devices.net","privatelink.servicebus.windows.net","privatelink.azure-devices-provisioning.net"]}}'
+    headers:
+      cache-control:
+      - no-store, must-revalidate, no-cache, max-stale=0, private, post-check=0, pre-check=0
+      content-length:
+      - '722'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 19 May 2022 20:58:04 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - DENY
+      x-iot-cluster:
+      - iotcprodcentralus01
+      x-iot-correlation:
+      - 8zxkewso.1.0
+      x-iot-version:
+      - 050522.0001-release
+      x-msedge-ref:
+      - 'Ref A: D6E88E9CC0904232AFF28591FE8D9186 Ref B: DEN301000101045 Ref C: 2022-05-19T20:58:04Z'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot central app private-endpoint-connection show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-iotcentral/10.0.0b1 Python/3.8.10 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/iotApps/iotc-cli-test000002/privateEndpointConnections/iotc-cli-test000002.7cb9f201-6a1e-45ca-aa37-d7ab339dbca7?api-version=2021-11-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/iotApps/iotc-cli-test000002/privateEndpointConnections/iotc-cli-test000002.7cb9f201-6a1e-45ca-aa37-d7ab339dbca7","name":"iotc-cli-test000002.7cb9f201-6a1e-45ca-aa37-d7ab339dbca7","type":"Microsoft.IoTCentral/IoTApps/privateEndpointConnections","properties":{"groupIds":["iotApp"],"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"Auto-approved","actionsRequired":"None"}}}'
+    headers:
+      cache-control:
+      - no-store, must-revalidate, no-cache, max-stale=0, private, post-check=0, pre-check=0
+      content-length:
+      - '686'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 19 May 2022 20:58:05 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - DENY
+      x-iot-cluster:
+      - iotcprodcentralus01
+      x-iot-correlation:
+      - a4wlcyst.4.0
+      x-iot-version:
+      - 050522.0001-release
+      x-msedge-ref:
+      - 'Ref A: 5B6076E321724AF4B6FD6AC6EDAB5A31 Ref B: DEN301000105033 Ref C: 2022-05-19T20:58:05Z'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot central app private-endpoint-connection list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --account-name --resource-group
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-iotcentral/10.0.0b1 Python/3.8.10 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/iotApps/iotc-cli-test000002/privateEndpointConnections?api-version=2021-11-01-preview
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/iotApps/iotc-cli-test000002/privateEndpointConnections/iotc-cli-test000002.7cb9f201-6a1e-45ca-aa37-d7ab339dbca7","name":"iotc-cli-test000002.7cb9f201-6a1e-45ca-aa37-d7ab339dbca7","type":"Microsoft.IoTCentral/IoTApps/privateEndpointConnections","properties":{"groupIds":["iotApp"],"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"Auto-approved","actionsRequired":"None"}}}]}'
+    headers:
+      cache-control:
+      - no-store, must-revalidate, no-cache, max-stale=0, private, post-check=0, pre-check=0
+      content-length:
+      - '698'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 19 May 2022 20:58:06 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - DENY
+      x-iot-cluster:
+      - iotcprodcentralus01
+      x-iot-correlation:
+      - 6webusm1.1.0
+      x-iot-version:
+      - 050522.0001-release
+      x-msedge-ref:
+      - 'Ref A: 6EF3D5F649E7474599432006E90118C1 Ref B: DEN301000101029 Ref C: 2022-05-19T20:58:05Z'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot central app private-endpoint-connection list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-iotcentral/10.0.0b1 Python/3.8.10 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/iotApps/iotc-cli-test000002/privateEndpointConnections?api-version=2021-11-01-preview
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/iotApps/iotc-cli-test000002/privateEndpointConnections/iotc-cli-test000002.7cb9f201-6a1e-45ca-aa37-d7ab339dbca7","name":"iotc-cli-test000002.7cb9f201-6a1e-45ca-aa37-d7ab339dbca7","type":"Microsoft.IoTCentral/IoTApps/privateEndpointConnections","properties":{"groupIds":["iotApp"],"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"Auto-approved","actionsRequired":"None"}}}]}'
+    headers:
+      cache-control:
+      - no-store, must-revalidate, no-cache, max-stale=0, private, post-check=0, pre-check=0
+      content-length:
+      - '698'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 19 May 2022 20:58:06 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - deny
+      x-iot-cluster:
+      - iotcprodwestus01
+      x-iot-correlation:
+      - 7hdx64mb.0
+      x-iot-version:
+      - 050522.0001-release
+      x-msedge-ref:
+      - 'Ref A: 8E3ED40C2371432697E525C1F5693370 Ref B: BY3EDGE0416 Ref C: 2022-05-19T20:58:07Z'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot central app private-endpoint-connection show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --account-name --name --resource-group
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-iotcentral/10.0.0b1 Python/3.8.10 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/iotApps/iotc-cli-test000002/privateEndpointConnections/iotc-cli-test000002.7cb9f201-6a1e-45ca-aa37-d7ab339dbca7?api-version=2021-11-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/iotApps/iotc-cli-test000002/privateEndpointConnections/iotc-cli-test000002.7cb9f201-6a1e-45ca-aa37-d7ab339dbca7","name":"iotc-cli-test000002.7cb9f201-6a1e-45ca-aa37-d7ab339dbca7","type":"Microsoft.IoTCentral/IoTApps/privateEndpointConnections","properties":{"groupIds":["iotApp"],"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"Auto-approved","actionsRequired":"None"}}}'
+    headers:
+      cache-control:
+      - no-store, must-revalidate, no-cache, max-stale=0, private, post-check=0, pre-check=0
+      content-length:
+      - '686'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 19 May 2022 20:58:06 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - deny
+      x-iot-cluster:
+      - iotcprodwestus01
+      x-iot-correlation:
+      - 4nfjzsv2.0
+      x-iot-version:
+      - 050522.0001-release
+      x-msedge-ref:
+      - 'Ref A: 8414E90483AE40478E1A34B913068BC6 Ref B: BY3EDGE0415 Ref C: 2022-05-19T20:58:07Z'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot central app private-endpoint-connection show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --account-name -n -g
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-iotcentral/10.0.0b1 Python/3.8.10 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/iotApps/iotc-cli-test000002/privateEndpointConnections/iotc-cli-test000002.7cb9f201-6a1e-45ca-aa37-d7ab339dbca7?api-version=2021-11-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/iotApps/iotc-cli-test000002/privateEndpointConnections/iotc-cli-test000002.7cb9f201-6a1e-45ca-aa37-d7ab339dbca7","name":"iotc-cli-test000002.7cb9f201-6a1e-45ca-aa37-d7ab339dbca7","type":"Microsoft.IoTCentral/IoTApps/privateEndpointConnections","properties":{"groupIds":["iotApp"],"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"Auto-approved","actionsRequired":"None"}}}'
+    headers:
+      cache-control:
+      - no-store, must-revalidate, no-cache, max-stale=0, private, post-check=0, pre-check=0
+      content-length:
+      - '686'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 19 May 2022 20:58:07 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - deny
+      x-iot-cluster:
+      - iotcprodwestus01
+      x-iot-correlation:
+      - 7mm67grb.0
+      x-iot-version:
+      - 050522.0001-release
+      x-msedge-ref:
+      - 'Ref A: AF8C2A04AA7246CAAA8B5E8BA7D2BD91 Ref B: BY3EDGE0112 Ref C: 2022-05-19T20:58:07Z'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot central app private-endpoint-connection approve
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --account-name -g --name --description
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-iotcentral/10.0.0b1 Python/3.8.10 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/iotApps/iotc-cli-test000002/privateEndpointConnections/iotc-cli-test000002.7cb9f201-6a1e-45ca-aa37-d7ab339dbca7?api-version=2021-11-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/iotApps/iotc-cli-test000002/privateEndpointConnections/iotc-cli-test000002.7cb9f201-6a1e-45ca-aa37-d7ab339dbca7","name":"iotc-cli-test000002.7cb9f201-6a1e-45ca-aa37-d7ab339dbca7","type":"Microsoft.IoTCentral/IoTApps/privateEndpointConnections","properties":{"groupIds":["iotApp"],"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"Auto-approved","actionsRequired":"None"}}}'
+    headers:
+      cache-control:
+      - no-store, must-revalidate, no-cache, max-stale=0, private, post-check=0, pre-check=0
+      content-length:
+      - '686'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 19 May 2022 20:58:07 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - deny
+      x-iot-cluster:
+      - iotcprodwestus01
+      x-iot-correlation:
+      - 2u2juoh1.0
+      x-iot-version:
+      - 050522.0001-release
+      x-msedge-ref:
+      - 'Ref A: F65FF88CC7D847F5BAC65021146AE16B Ref B: BY3EDGE0106 Ref C: 2022-05-19T20:58:07Z'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"privateEndpoint": {}, "privateLinkServiceConnectionState":
+      {"status": "Approved", "description": "Approved!", "actionsRequired": "None"}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot central app private-endpoint-connection approve
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '155'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --account-name -g --name --description
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-iotcentral/10.0.0b1 Python/3.8.10 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/iotApps/iotc-cli-test000002/privateEndpointConnections/iotc-cli-test000002.7cb9f201-6a1e-45ca-aa37-d7ab339dbca7?api-version=2021-11-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/iotApps/iotc-cli-test000002/privateEndpointConnections/iotc-cli-test000002.7cb9f201-6a1e-45ca-aa37-d7ab339dbca7","name":"iotc-cli-test000002.7cb9f201-6a1e-45ca-aa37-d7ab339dbca7","type":"Microsoft.IoTCentral/IoTApps/privateEndpointConnections","properties":{"groupIds":["iotApp"],"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"Approved!","actionsRequired":"None"}}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.IoTCentral/locations/westus/operationResults/508ae0d2-99e7-4430-85f6-0060ab45a47a?api-version=2021-11-01-preview&type=updatePrivateEndpointConnection&x-iot-region=westus&asyncinfo
+      cache-control:
+      - no-store, must-revalidate, no-cache, max-stale=0, private, post-check=0, pre-check=0
+      content-length:
+      - '682'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 19 May 2022 20:58:08 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - deny
+      x-iot-cluster:
+      - iotcprodwestus01
+      x-iot-correlation:
+      - 5uo3j2ju.0
+      x-iot-version:
+      - 050522.0001-release
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-msedge-ref:
+      - 'Ref A: A5D6D5CCB26949B1A578EDBA641959A9 Ref B: BY3EDGE0106 Ref C: 2022-05-19T20:58:07Z'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot central app private-endpoint-connection approve
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --account-name -g --name --description
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-iotcentral/10.0.0b1 Python/3.8.10 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.IoTCentral/locations/westus/operationResults/508ae0d2-99e7-4430-85f6-0060ab45a47a?api-version=2021-11-01-preview&type=updatePrivateEndpointConnection&x-iot-region=westus&asyncinfo
+  response:
+    body:
+      string: '{"status":"Updating"}'
+    headers:
+      cache-control:
+      - no-store, must-revalidate, no-cache, max-stale=0, private, post-check=0, pre-check=0
+      content-length:
+      - '21'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 19 May 2022 20:58:18 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - deny
+      x-iot-cluster:
+      - iotcprodwestus01
+      x-iot-correlation:
+      - 883mvx7h.0
+      x-iot-version:
+      - 050522.0001-release
+      x-msedge-ref:
+      - 'Ref A: 1E8A820A310C41DCB742700BA6B2C09F Ref B: BY3EDGE0106 Ref C: 2022-05-19T20:58:18Z'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot central app private-endpoint-connection approve
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --account-name -g --name --description
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-iotcentral/10.0.0b1 Python/3.8.10 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.IoTCentral/locations/westus/operationResults/508ae0d2-99e7-4430-85f6-0060ab45a47a?api-version=2021-11-01-preview&type=updatePrivateEndpointConnection&x-iot-region=westus&asyncinfo
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-store, must-revalidate, no-cache, max-stale=0, private, post-check=0, pre-check=0
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 19 May 2022 20:58:48 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - deny
+      x-iot-cluster:
+      - iotcprodwestus01
+      x-iot-correlation:
+      - 2klxmt8t.0
+      x-iot-version:
+      - 050522.0001-release
+      x-msedge-ref:
+      - 'Ref A: FD153245165844BDAA1FD076E87CBF04 Ref B: BY3EDGE0106 Ref C: 2022-05-19T20:58:48Z'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot central app private-endpoint-connection approve
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --account-name -g --name --description
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-iotcentral/10.0.0b1 Python/3.8.10 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/iotApps/iotc-cli-test000002/privateEndpointConnections/iotc-cli-test000002.7cb9f201-6a1e-45ca-aa37-d7ab339dbca7?api-version=2021-11-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/iotApps/iotc-cli-test000002/privateEndpointConnections/iotc-cli-test000002.7cb9f201-6a1e-45ca-aa37-d7ab339dbca7","name":"iotc-cli-test000002.7cb9f201-6a1e-45ca-aa37-d7ab339dbca7","type":"Microsoft.IoTCentral/IoTApps/privateEndpointConnections","properties":{"groupIds":["iotApp"],"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"Approved!","actionsRequired":"None"}}}'
+    headers:
+      cache-control:
+      - no-store, must-revalidate, no-cache, max-stale=0, private, post-check=0, pre-check=0
+      content-length:
+      - '682'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 19 May 2022 20:58:48 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - deny
+      x-iot-cluster:
+      - iotcprodwestus01
+      x-iot-correlation:
+      - 1vkzlbit.0
+      x-iot-version:
+      - 050522.0001-release
+      x-msedge-ref:
+      - 'Ref A: 529F7DB610D944578F6D68CCFC5E2587 Ref B: BY3EDGE0106 Ref C: 2022-05-19T20:58:48Z'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot central app private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --account-name -g --name --description
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-iotcentral/10.0.0b1 Python/3.8.10 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/iotApps/iotc-cli-test000002/privateEndpointConnections/iotc-cli-test000002.7cb9f201-6a1e-45ca-aa37-d7ab339dbca7?api-version=2021-11-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/iotApps/iotc-cli-test000002/privateEndpointConnections/iotc-cli-test000002.7cb9f201-6a1e-45ca-aa37-d7ab339dbca7","name":"iotc-cli-test000002.7cb9f201-6a1e-45ca-aa37-d7ab339dbca7","type":"Microsoft.IoTCentral/IoTApps/privateEndpointConnections","properties":{"groupIds":["iotApp"],"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"Approved!","actionsRequired":"None"}}}'
+    headers:
+      cache-control:
+      - no-store, must-revalidate, no-cache, max-stale=0, private, post-check=0, pre-check=0
+      content-length:
+      - '682'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 19 May 2022 20:58:49 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - DENY
+      x-iot-cluster:
+      - iotcprodcentralus01
+      x-iot-correlation:
+      - 4ayr4kiq.4.0
+      x-iot-version:
+      - 050522.0001-release
+      x-msedge-ref:
+      - 'Ref A: D294F2ED68924983A6175150EC71E9AB Ref B: DEN301000106019 Ref C: 2022-05-19T20:58:49Z'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"privateEndpoint": {}, "privateLinkServiceConnectionState":
+      {"status": "Rejected", "description": "Rejected!", "actionsRequired": "None"}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot central app private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '155'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --account-name -g --name --description
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-iotcentral/10.0.0b1 Python/3.8.10 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/iotApps/iotc-cli-test000002/privateEndpointConnections/iotc-cli-test000002.7cb9f201-6a1e-45ca-aa37-d7ab339dbca7?api-version=2021-11-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/iotApps/iotc-cli-test000002/privateEndpointConnections/iotc-cli-test000002.7cb9f201-6a1e-45ca-aa37-d7ab339dbca7","name":"iotc-cli-test000002.7cb9f201-6a1e-45ca-aa37-d7ab339dbca7","type":"Microsoft.IoTCentral/IoTApps/privateEndpointConnections","properties":{"groupIds":["iotApp"],"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Rejected","description":"Rejected!","actionsRequired":"None"}}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.IoTCentral/locations/westus/operationResults/83fb60fd-aba4-4f43-8a7d-0ed7175ba0e2?api-version=2021-11-01-preview&type=updatePrivateEndpointConnection&x-iot-region=westus&asyncinfo
+      cache-control:
+      - no-store, must-revalidate, no-cache, max-stale=0, private, post-check=0, pre-check=0
+      content-length:
+      - '682'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 19 May 2022 20:58:51 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - DENY
+      x-iot-cluster:
+      - iotcprodcentralus01
+      x-iot-correlation:
+      - 99jklea7.1.0
+      x-iot-version:
+      - 050522.0001-release
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-msedge-ref:
+      - 'Ref A: CBEF51E1ED1543BB9B7B08EBF6729C28 Ref B: DEN301000106019 Ref C: 2022-05-19T20:58:50Z'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot central app private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --account-name -g --name --description
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-iotcentral/10.0.0b1 Python/3.8.10 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.IoTCentral/locations/westus/operationResults/83fb60fd-aba4-4f43-8a7d-0ed7175ba0e2?api-version=2021-11-01-preview&type=updatePrivateEndpointConnection&x-iot-region=westus&asyncinfo
+  response:
+    body:
+      string: '{"status":"Updating"}'
+    headers:
+      cache-control:
+      - no-store, must-revalidate, no-cache, max-stale=0, private, post-check=0, pre-check=0
+      content-length:
+      - '21'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 19 May 2022 20:59:02 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - deny
+      x-iot-cluster:
+      - iotcprodwestus01
+      x-iot-correlation:
+      - 29l28wxb.0
+      x-iot-version:
+      - 050522.0001-release
+      x-msedge-ref:
+      - 'Ref A: E2E4378CB6F746038032030CAA159938 Ref B: DEN301000106019 Ref C: 2022-05-19T20:59:02Z'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot central app private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --account-name -g --name --description
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-iotcentral/10.0.0b1 Python/3.8.10 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.IoTCentral/locations/westus/operationResults/83fb60fd-aba4-4f43-8a7d-0ed7175ba0e2?api-version=2021-11-01-preview&type=updatePrivateEndpointConnection&x-iot-region=westus&asyncinfo
+  response:
+    body:
+      string: '{"status":"Updating"}'
+    headers:
+      cache-control:
+      - no-store, must-revalidate, no-cache, max-stale=0, private, post-check=0, pre-check=0
+      content-length:
+      - '21'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 19 May 2022 20:59:32 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - deny
+      x-iot-cluster:
+      - iotcprodwestus01
+      x-iot-correlation:
+      - bmnz0fhn.0
+      x-iot-version:
+      - 050522.0001-release
+      x-msedge-ref:
+      - 'Ref A: 7D0F4E5EFFB4450499EB9D3EA830CB0A Ref B: DEN301000106019 Ref C: 2022-05-19T20:59:32Z'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot central app private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --account-name -g --name --description
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-iotcentral/10.0.0b1 Python/3.8.10 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.IoTCentral/locations/westus/operationResults/83fb60fd-aba4-4f43-8a7d-0ed7175ba0e2?api-version=2021-11-01-preview&type=updatePrivateEndpointConnection&x-iot-region=westus&asyncinfo
+  response:
+    body:
+      string: '{"status":"Updating"}'
+    headers:
+      cache-control:
+      - no-store, must-revalidate, no-cache, max-stale=0, private, post-check=0, pre-check=0
+      content-length:
+      - '21'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 19 May 2022 21:00:03 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - deny
+      x-iot-cluster:
+      - iotcprodwestus01
+      x-iot-correlation:
+      - 4ooqspia.0
+      x-iot-version:
+      - 050522.0001-release
+      x-msedge-ref:
+      - 'Ref A: 2B5899C4113541769BA1148AEF0E97A3 Ref B: DEN301000106019 Ref C: 2022-05-19T21:00:03Z'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot central app private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --account-name -g --name --description
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-iotcentral/10.0.0b1 Python/3.8.10 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.IoTCentral/locations/westus/operationResults/83fb60fd-aba4-4f43-8a7d-0ed7175ba0e2?api-version=2021-11-01-preview&type=updatePrivateEndpointConnection&x-iot-region=westus&asyncinfo
+  response:
+    body:
+      string: '{"status":"Updating"}'
+    headers:
+      cache-control:
+      - no-store, must-revalidate, no-cache, max-stale=0, private, post-check=0, pre-check=0
+      content-length:
+      - '21'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 19 May 2022 21:00:33 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - deny
+      x-iot-cluster:
+      - iotcprodwestus01
+      x-iot-correlation:
+      - 3mtsxdgx.0
+      x-iot-version:
+      - 050522.0001-release
+      x-msedge-ref:
+      - 'Ref A: 9EE62B0E237245BF98310B86990EA835 Ref B: DEN301000106019 Ref C: 2022-05-19T21:00:33Z'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot central app private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --account-name -g --name --description
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-iotcentral/10.0.0b1 Python/3.8.10 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.IoTCentral/locations/westus/operationResults/83fb60fd-aba4-4f43-8a7d-0ed7175ba0e2?api-version=2021-11-01-preview&type=updatePrivateEndpointConnection&x-iot-region=westus&asyncinfo
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-store, must-revalidate, no-cache, max-stale=0, private, post-check=0, pre-check=0
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 19 May 2022 21:01:03 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - deny
+      x-iot-cluster:
+      - iotcprodwestus01
+      x-iot-correlation:
+      - 35owurfr.0
+      x-iot-version:
+      - 050522.0001-release
+      x-msedge-ref:
+      - 'Ref A: B76F903B3BCA4180BE50345F07AC8E8F Ref B: DEN301000106019 Ref C: 2022-05-19T21:01:03Z'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot central app private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --account-name -g --name --description
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-iotcentral/10.0.0b1 Python/3.8.10 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/iotApps/iotc-cli-test000002/privateEndpointConnections/iotc-cli-test000002.7cb9f201-6a1e-45ca-aa37-d7ab339dbca7?api-version=2021-11-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/iotApps/iotc-cli-test000002/privateEndpointConnections/iotc-cli-test000002.7cb9f201-6a1e-45ca-aa37-d7ab339dbca7","name":"iotc-cli-test000002.7cb9f201-6a1e-45ca-aa37-d7ab339dbca7","type":"Microsoft.IoTCentral/IoTApps/privateEndpointConnections","properties":{"groupIds":["iotApp"],"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Rejected","description":"Rejected!","actionsRequired":"None"}}}'
+    headers:
+      cache-control:
+      - no-store, must-revalidate, no-cache, max-stale=0, private, post-check=0, pre-check=0
+      content-length:
+      - '682'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 19 May 2022 21:01:04 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - DENY
+      x-iot-cluster:
+      - iotcprodcentralus04
+      x-iot-correlation:
+      - 3xz7rciz.1.0
+      x-iot-version:
+      - 050522.0001-release
+      x-msedge-ref:
+      - 'Ref A: 75CE03E130F14866B6CC043076A668C9 Ref B: DEN301000106019 Ref C: 2022-05-19T21:01:03Z'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot central app private-endpoint-connection delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id -y
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-iotcentral/10.0.0b1 Python/3.8.10 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/iotApps/iotc-cli-test000002/privateEndpointConnections/iotc-cli-test000002.7cb9f201-6a1e-45ca-aa37-d7ab339dbca7?api-version=2021-11-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/iotApps/iotc-cli-test000002/privateEndpointConnections/iotc-cli-test000002.7cb9f201-6a1e-45ca-aa37-d7ab339dbca7","name":"iotc-cli-test000002.7cb9f201-6a1e-45ca-aa37-d7ab339dbca7","type":"Microsoft.IoTCentral/IoTApps/privateEndpointConnections","properties":{"groupIds":["iotApp"],"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Rejected","description":"Rejected!","actionsRequired":"None"}}}'
+    headers:
+      cache-control:
+      - no-store, must-revalidate, no-cache, max-stale=0, private, post-check=0, pre-check=0
+      content-length:
+      - '682'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 19 May 2022 21:01:04 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - deny
+      x-iot-cluster:
+      - iotcprodwestus01
+      x-iot-correlation:
+      - cn04wulg.0
+      x-iot-version:
+      - 050522.0001-release
+      x-msedge-ref:
+      - 'Ref A: FBC2B301DD424CCCA3BE00FBBD622038 Ref B: BY3EDGE0310 Ref C: 2022-05-19T21:01:05Z'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot central app private-endpoint-connection delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --id -y
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-iotcentral/10.0.0b1 Python/3.8.10 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/iotApps/iotc-cli-test000002/privateEndpointConnections/iotc-cli-test000002.7cb9f201-6a1e-45ca-aa37-d7ab339dbca7?api-version=2021-11-01-preview
+  response:
+    body:
+      string: ''
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.IoTCentral/locations/westus/operationResults/7fcad825-e0fe-42b3-8ff5-99612b6f8b9b?api-version=2021-11-01-preview&type=deletePrivateEndpointConnection&x-iot-region=westus&asyncinfo
+      cache-control:
+      - no-store, must-revalidate, no-cache, max-stale=0, private, post-check=0, pre-check=0
+      content-length:
+      - '0'
+      date:
+      - Thu, 19 May 2022 21:01:05 GMT
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.IoTCentral/locations/westus/operationResults/7fcad825-e0fe-42b3-8ff5-99612b6f8b9b?api-version=2021-11-01-preview&type=deletePrivateEndpointConnection&x-iot-region=westus
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - deny
+      x-iot-cluster:
+      - iotcprodwestus01
+      x-iot-correlation:
+      - 5h4rbph2.0
+      x-iot-version:
+      - 050522.0001-release
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+      x-msedge-ref:
+      - 'Ref A: 1477967F1FBC4817A71838B054BA32F7 Ref B: BY3EDGE0310 Ref C: 2022-05-19T21:01:05Z'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot central app private-endpoint-connection delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id -y
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-iotcentral/10.0.0b1 Python/3.8.10 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.IoTCentral/locations/westus/operationResults/7fcad825-e0fe-42b3-8ff5-99612b6f8b9b?api-version=2021-11-01-preview&type=deletePrivateEndpointConnection&x-iot-region=westus&asyncinfo
+  response:
+    body:
+      string: '{"status":"Deleting"}'
+    headers:
+      cache-control:
+      - no-store, must-revalidate, no-cache, max-stale=0, private, post-check=0, pre-check=0
+      content-length:
+      - '21'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 19 May 2022 21:01:15 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - deny
+      x-iot-cluster:
+      - iotcprodwestus01
+      x-iot-correlation:
+      - gjni8u.0
+      x-iot-version:
+      - 050522.0001-release
+      x-msedge-ref:
+      - 'Ref A: 3A90C817EFC048AB98BC3101DA878331 Ref B: BY3EDGE0310 Ref C: 2022-05-19T21:01:16Z'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot central app private-endpoint-connection delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id -y
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-iotcentral/10.0.0b1 Python/3.8.10 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.IoTCentral/locations/westus/operationResults/7fcad825-e0fe-42b3-8ff5-99612b6f8b9b?api-version=2021-11-01-preview&type=deletePrivateEndpointConnection&x-iot-region=westus&asyncinfo
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-store, must-revalidate, no-cache, max-stale=0, private, post-check=0, pre-check=0
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 19 May 2022 21:01:46 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - deny
+      x-iot-cluster:
+      - iotcprodwestus01
+      x-iot-correlation:
+      - 8oazyjll.0
+      x-iot-version:
+      - 050522.0001-release
+      x-msedge-ref:
+      - 'Ref A: F1715EC47C37447A84372C26014B6A3C Ref B: BY3EDGE0310 Ref C: 2022-05-19T21:01:46Z'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+version: 1

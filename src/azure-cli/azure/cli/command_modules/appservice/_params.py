@@ -279,7 +279,7 @@ def load_arguments(self, _):
             c.argument('repository_type', help='repository type',
                        arg_type=get_enum_type(['git', 'mercurial', 'github', 'externalgit', 'localgit']))
             c.argument('git_token', help='Git access token required for auto sync')
-            c.argument('github_action', options_list=['--github-action'], help='If using github action, default to False')
+            c.argument('github_action', options_list=['--github-action'], help='If using GitHub action, default to False')
         with self.argument_context(scope + ' identity') as c:
             c.argument('scope', help="The scope the managed identity has access to")
             c.argument('role', help="Role name or id the managed identity will be assigned")
@@ -415,7 +415,7 @@ def load_arguments(self, _):
         c.argument('token', help='A Personal Access Token with write access to the specified repository. For more information: https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line')
         c.argument('slot', options_list=['--slot', '-s'], help='The name of the slot. Default to the production slot if not specified.')
         c.argument('branch', options_list=['--branch', '-b'], help='The branch to which the workflow file will be added. Defaults to "master" if not specified.')
-        c.argument('login_with_github', help='Interactively log in with Github to retrieve the Personal Access Token', action='store_true')
+        c.argument('login_with_github', help='Interactively log in with GitHub to retrieve the Personal Access Token', action='store_true')
 
     with self.argument_context('webapp deployment github-actions add')as c:
         c.argument('runtime', options_list=['--runtime', '-r'], help='Canonicalized web runtime in the format of Framework|Version, e.g. "PHP|5.6". Use "az webapp list-runtimes" for available list.')
@@ -986,16 +986,16 @@ def load_arguments(self, _):
         c.argument('hostname', options_list=['--hostname', '-n'], help='Name of the custom domain')
 
     with self.argument_context('staticwebapp', validator=validate_public_cloud) as c:
-        c.ignore('format_output')
-        c.argument('name', options_list=['--name', '-n'], metavar='NAME', help="Name of the static site")
-        c.argument('source', options_list=['--source', '-s'], help="URL for the repository of the static site.")
-        c.argument('token', options_list=['--token', '-t'],
-                   help="A user's github repository token. This is used to setup the Github Actions workflow file and "
+        c.argument('source', options_list=['--source', '-s'], help="URL for the repository of the static site.", arg_group="Github")
+        c.argument('token', options_list=['--token', '-t'], arg_group="Github",
+                   help="A user's GitHub repository token. This is used to setup the Github Actions workflow file and "
                         "API secrets. If you need to create a Github Personal Access Token, "
                         "please run with the '--login-with-github' flag or follow the steps found at the following link:\n"
                         "https://help.github.com/en/articles/creating-a-personal-access-token-for-the-command-line")
-        c.argument('login_with_github', help="Interactively log in with Github to retrieve the Personal Access Token")
-        c.argument('branch', options_list=['--branch', '-b'], help="The target branch in the repository.")
+        c.argument('login_with_github', help="Interactively log in with Github to retrieve the Personal Access Token", arg_group="Github")
+        c.argument('branch', options_list=['--branch', '-b'], help="The target branch in the repository.", arg_group="Github")
+        c.ignore('format_output')
+        c.argument('name', options_list=['--name', '-n'], metavar='NAME', help="Name of the static site")
     with self.argument_context('staticwebapp environment') as c:
         c.argument('environment_name',
                    options_list=['--environment-name'], help="Name of the environment of static site")

@@ -28,15 +28,12 @@ from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumen
     MutuallyExclusiveArgumentError
 from azure.cli.core.profiles import ResourceType, AZURE_API_PROFILES, SDKProfile
 from azure.cli.core.util import sdk_no_wait
-from azure.graphrbac.models import GraphErrorException
 
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import rsa, ec
 from cryptography.hazmat.primitives.serialization import load_pem_private_key, Encoding, PublicFormat
 from cryptography.exceptions import UnsupportedAlgorithm
 from cryptography.x509 import load_pem_x509_certificate
-
-from msrestazure.azure_exceptions import CloudError
 
 from knack.log import get_logger
 from knack.util import CLIError
@@ -307,18 +304,13 @@ def list_vault(client, resource_group_name=None):
     return list(vault_list)
 
 
-# pylint: disable=inconsistent-return-statements
 def _get_current_user_object_id(graph_client):
-    try:
-        current_user = graph_client.signed_in_user.get()
-        if current_user and current_user.object_id:  # pylint:disable=no-member
-            return current_user.object_id  # pylint:disable=no-member
-    except CloudError:
-        pass
+    current_user = graph_client.signed_in_user_get()
+    return current_user['id']
 
 
 def _get_object_id_by_spn(graph_client, spn):
-    accounts = list(graph_client.service_principals.list(
+    accounts = list(graph_client.service_principal_list(
         filter="servicePrincipalNames/any(c:c eq '{}')".format(spn)))
     if not accounts:
         logger.warning("Unable to find user with spn '%s'", spn)
@@ -327,11 +319,11 @@ def _get_object_id_by_spn(graph_client, spn):
         logger.warning("Multiple service principals found with spn '%s'. "
                        "You can avoid this by specifying object id.", spn)
         return None
-    return accounts[0].object_id
+    return accounts[0]['id']
 
 
 def _get_object_id_by_upn(graph_client, upn):
-    accounts = list(graph_client.users.list(filter="userPrincipalName eq '{}'".format(upn)))
+    accounts = list(graph_client.user_list(filter="userPrincipalName eq '{}'".format(upn)))
     if not accounts:
         logger.warning("Unable to find user with upn '%s'", upn)
         return None
@@ -339,7 +331,7 @@ def _get_object_id_by_upn(graph_client, upn):
         logger.warning("Multiple users principals found with upn '%s'. "
                        "You can avoid this by specifying object id.", upn)
         return None
-    return accounts[0].object_id
+    return accounts[0]['id']
 
 
 def _get_object_id_from_subscription(graph_client, subscription):
@@ -665,7 +657,7 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
         # just continue the normal creation process
         pass
     from azure.cli.core._profile import Profile
-    from azure.graphrbac import GraphRbacManagementClient
+    from azure.cli.command_modules.role import graph_client_factory, GraphError
 
     VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters',
                                                    resource_type=ResourceType.MGMT_KEYVAULT)
@@ -679,13 +671,10 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
     VaultProperties = cmd.get_models('VaultProperties', resource_type=ResourceType.MGMT_KEYVAULT)
 
     profile = Profile(cli_ctx=cmd.cli_ctx)
-    cred, _, tenant_id = profile.get_login_credentials(
+    _, _, tenant_id = profile.get_login_credentials(
         resource=cmd.cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
 
-    graph_client = GraphRbacManagementClient(
-        cred,
-        tenant_id,
-        base_url=cmd.cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
+    graph_client = graph_client_factory(cmd.cli_ctx)
     subscription = profile.get_subscription()
 
     # if bypass or default_action was specified create a NetworkRuleSet
@@ -751,7 +740,7 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
 
         try:
             object_id = _get_current_user_object_id(graph_client)
-        except GraphErrorException:
+        except GraphError:
             object_id = _get_object_id(graph_client, subscription=subscription)
         if not object_id:
             raise CLIError('Cannot create vault.\nUnable to query active directory for information '
@@ -899,15 +888,9 @@ def update_hsm(cmd, instance,
 
 def _object_id_args_helper(cli_ctx, object_id, spn, upn):
     if not object_id:
-        from azure.cli.core._profile import Profile
-        from azure.graphrbac import GraphRbacManagementClient
+        from azure.cli.command_modules.role import graph_client_factory
 
-        profile = Profile(cli_ctx=cli_ctx)
-        cred, _, tenant_id = profile.get_login_credentials(
-            resource=cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
-        graph_client = GraphRbacManagementClient(cred,
-                                                 tenant_id,
-                                                 base_url=cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
+        graph_client = graph_client_factory(cli_ctx)
         object_id = _get_object_id(graph_client, spn=spn, upn=upn)
         if not object_id:
             raise CLIError('Unable to get object id from principal name.')
@@ -1068,7 +1051,8 @@ def remove_network_rule(cmd, client, resource_group_name, vault_name, ip_address
             rules.virtual_network_rules = new_rules
 
     if ip_address and rules.ip_rules:
-        new_rules = [x for x in rules.ip_rules if ip_network(x.value) != ip_network(ip_address)]
+        to_remove = [ip_network(x) for x in ip_address]
+        new_rules = list(filter(lambda x: all(ip_network(x.value) != i for i in to_remove), rules.ip_rules))
         to_modify |= len(new_rules) != len(rules.ip_rules)
         if to_modify:
             rules.ip_rules = new_rules
@@ -1473,7 +1457,7 @@ def get_policy_template():
     return policy
 
 
-def update_key_rotation_policy(cmd, client, value, name=None):
+def update_key_rotation_policy(cmd, client, value, key_name=None):
     from azure.cli.core.util import read_file_content, get_json_object
     if os.path.exists(value):
         value = read_file_content(value)
@@ -1484,6 +1468,8 @@ def update_key_rotation_policy(cmd, client, value, name=None):
 
     KeyRotationLifetimeAction = cmd.loader.get_sdk('KeyRotationLifetimeAction', mod='_models',
                                                    resource_type=ResourceType.DATA_KEYVAULT_KEYS)
+    KeyRotationPolicy = cmd.loader.get_sdk('KeyRotationPolicy', mod='_models',
+                                           resource_type=ResourceType.DATA_KEYVAULT_KEYS)
     lifetime_actions = []
     if policy.get('lifetime_actions', None):
         for action in policy['lifetime_actions']:
@@ -1502,7 +1488,9 @@ def update_key_rotation_policy(cmd, client, value, name=None):
     expires_in = policy.get('expires_in', None) or policy.get('expiry_time', None)
     if policy.get('attributes', None):
         expires_in = policy['attributes'].get('expires_in', None) or policy['attributes'].get('expiry_time', None)
-    return client.update_key_rotation_policy(name=name, lifetime_actions=lifetime_actions, expires_in=expires_in)
+    return client.update_key_rotation_policy(key_name=key_name,
+                                             policy=KeyRotationPolicy(lifetime_actions=lifetime_actions,
+                                                                      expires_in=expires_in))
 # endregion
 
 
@@ -1993,15 +1981,22 @@ def _get_role_dics(role_defs):
 def _get_principal_dics(cli_ctx, role_assignments):
     principal_ids = {i.principal_id for i in role_assignments if getattr(i, 'principal_id', None)}
     if principal_ids:
+        from azure.cli.command_modules.role import graph_client_factory, GraphError
         try:
-            from azure.cli.command_modules.role._client_factory import _graph_client_factory
-            from azure.cli.command_modules.role.custom import _get_displayable_name, _get_object_stubs
+            from azure.cli.command_modules.role.custom import (_get_displayable_name, _get_object_stubs,
+                                                               _odata_type_to_arm_principal_type)
 
-            graph_client = _graph_client_factory(cli_ctx)
+            graph_client = graph_client_factory(cli_ctx)
             principals = _get_object_stubs(graph_client, principal_ids)
-            return {i.object_id: (_get_displayable_name(i), i.object_type) for i in principals}
 
-        except (CloudError, GraphErrorException) as ex:
+            results = {}
+            for i in principals:
+                object_id = i['id']
+                display_name = _get_displayable_name(i)
+                principal_type = _odata_type_to_arm_principal_type(i['@odata.type'])
+                results[object_id] = (display_name, principal_type)
+            return results
+        except GraphError as ex:
             # failure on resolving principal due to graph permission should not fail the whole thing
             logger.info("Failed to resolve graph object information per error '%s'", ex)
 
@@ -2035,6 +2030,11 @@ def _reconstruct_role_assignment(role_dics, principal_dics, role_assignment):
     return ret
 
 
+# for injecting test seems to produce predictable role assignment id for playback
+def _gen_guid():
+    return uuid.uuid4()
+
+
 # pylint: disable=unused-argument
 def create_role_assignment(cmd, client, role, scope, assignee_object_id=None,
                            role_assignment_name=None, assignee=None,
@@ -2057,7 +2057,7 @@ def create_role_assignment(cmd, client, role, scope, assignee_object_id=None,
                        'to check whether the role is existing.'.format(role))
 
     if role_assignment_name is None:
-        role_assignment_name = str(uuid.uuid4())
+        role_assignment_name = str(_gen_guid())
 
     if scope is None:
         scope = ''

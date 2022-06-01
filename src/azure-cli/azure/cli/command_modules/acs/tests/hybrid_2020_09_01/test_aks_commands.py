@@ -25,8 +25,7 @@ from .recording_processors import KeyReplacer
 # is set with the environment varibale for sp_name. This method is compatible with
 # both cases.
 def _process_sp_name(sp_name):
-    from azure.cli.core.util import is_guid
-    return sp_name if is_guid(sp_name) else 'http://{}'.format(sp_name)
+    return sp_name
 
 
 class AzureKubernetesServiceScenarioTest(ScenarioTest):
@@ -493,7 +492,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             resource_group, identity_name)).get_output_in_json()
         return identity.get("id")
 
-    
+
         # reset the count so in replay mode the random names will start with 0
         self.test_resources_count = 0
         # kwargs for string formatting

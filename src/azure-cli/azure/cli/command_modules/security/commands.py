@@ -6,6 +6,7 @@
 from azure.cli.core.commands import CliCommandType
 from ._client_factory import (cf_security_tasks,
                               cf_security_alerts,
+                              cf_security_alerts_suppression_rule,
                               cf_security_settings,
                               cf_security_contacts,
                               cf_security_auto_provisioning_settings,
@@ -35,7 +36,8 @@ from ._client_factory import (cf_security_tasks,
                               cf_security_regulatory_compliance_assessment,
                               cf_security_secure_scores,
                               cf_security_secure_score_controls,
-                              cf_security_secure_score_control_definitions)
+                              cf_security_secure_score_control_definitions,
+                              cf_security_automations)
 
 
 # pylint: disable=line-too-long
@@ -83,6 +85,12 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.security.operations#AlertsOperations.{}',
         client_factory=cf_security_alerts,
         operation_group='security_alerts'
+    )
+
+    security_alerts_suppression_rule_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.security.operations#AlertsSuppressionRulesOperations.{}',
+        client_factory=cf_security_alerts_suppression_rule,
+        operation_group='security_alerts_suppression_rule'
     )
 
     security_settings_sdk = CliCommandType(
@@ -218,6 +226,12 @@ def load_command_table(self, _):
         client_factory=cf_security_iot_recommendations
     )
 
+    security_automations_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.security.operations#AutomationsOperations.{}',
+        client_factory=cf_security_automations,
+        operation_group='security_automations'
+    )
+
     with self.command_group('security secure-scores',
                             security_secure_scores_sdk,
                             client_factory=cf_security_secure_scores) as g:
@@ -258,6 +272,16 @@ def load_command_table(self, _):
                             client_factory=cf_security_tasks) as g:
         g.custom_command('list', 'list_security_tasks')
         g.custom_show_command('show', 'get_security_task')
+
+    with self.command_group('security alerts-suppression-rule',
+                            security_alerts_suppression_rule_sdk,
+                            client_factory=cf_security_alerts_suppression_rule) as g:
+        g.custom_command('list', 'list_security_alerts_suppression_rule')
+        g.custom_show_command('show', 'show_security_alerts_suppression_rule')
+        g.custom_command('delete', 'delete_security_alerts_suppression_rule')
+        g.custom_command('update', 'update_security_alerts_suppression_rule')
+        g.custom_command('upsert_scope', 'upsert_security_alerts_suppression_rule_scope')
+        g.custom_command('delete_scope', 'delete_security_alerts_suppression_rule_scope')
 
     with self.command_group('security atp storage',
                             security_advanced_threat_protection_sdk,
@@ -427,6 +451,48 @@ def load_command_table(self, _):
                             client_factory=cf_security_iot_recommendations) as g:
         g.custom_command('list', 'list_security_iot_recommendations')
         g.custom_show_command('show', 'show_security_iot_recommendations')
+
+    with self.command_group('security automation',
+                            security_automations_sdk,
+                            client_factory=cf_security_automations) as g:
+        g.custom_command('list', 'list_security_automations')
+        g.custom_show_command('show', 'get_security_automation')
+        g.custom_command('delete', 'delete_security_automation')
+        g.custom_command('create_or_update', 'create_or_update_security_automation')
+        g.custom_command('validate', 'validate_security_automation')
+
+    with self.command_group('security automation-scope',
+                            security_automations_sdk,
+                            client_factory=cf_security_automations) as g:
+        g.custom_command('create', 'create_security_automation_scope')
+
+    with self.command_group('security automation-rule',
+                            security_automations_sdk,
+                            client_factory=cf_security_automations) as g:
+        g.custom_command('create', 'create_security_automation_rule')
+
+    with self.command_group('security automation-rule-set',
+                            security_automations_sdk,
+                            client_factory=cf_security_automations) as g:
+        g.custom_command('create', 'create_security_automation_rule_set')
+
+    with self.command_group('security automation-source',
+                            security_automations_sdk,
+                            client_factory=cf_security_automations) as g:
+        g.custom_command('create', 'create_security_automation_source')
+
+    with self.command_group('security automation-action-logic-app',
+                            security_automations_sdk,
+                            client_factory=cf_security_automations) as g:
+        g.custom_command('create', 'create_security_automation_action_logic_app')
+    with self.command_group('security automation-action-event-hub',
+                            security_automations_sdk,
+                            client_factory=cf_security_automations) as g:
+        g.custom_command('create', 'create_security_automation_action_event_hub')
+    with self.command_group('security automation-action-workspace',
+                            security_automations_sdk,
+                            client_factory=cf_security_automations) as g:
+        g.custom_command('create', 'create_security_automation_action_workspace')
 
     with self.command_group('security'):
         pass

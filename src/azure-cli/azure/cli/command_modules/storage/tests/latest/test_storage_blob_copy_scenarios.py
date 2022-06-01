@@ -29,7 +29,7 @@ class StorageBlobCopyTests(StorageScenarioMixin, LiveScenarioTest):
                                     source_container).get_output_in_json()['snapshot']
 
         source_file = self.create_temp_file(24, full_random=True)
-        self.storage_cmd('storage blob upload -c {} -f "{}" -n src', source_account_info,
+        self.storage_cmd('storage blob upload -c {} -f "{}" -n src --overwrite', source_account_info,
                          source_container, source_file)
 
         from datetime import datetime, timedelta
