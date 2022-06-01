@@ -639,7 +639,7 @@ class NetworkPublicIpPrefix(ScenarioTest):
             self.check('publicIpAddressVersion', 'IPv4')
         ]).get_output_in_json()
 
-        ip_address = '.'.join(ip_prefix['ipPrefix'].split('.')[:3]) + '10'
+        ip_address = ip_prefix['ipPrefix'][:-3]
 
         # Create public ip with ip address
         self.cmd('network public-ip create -g {rg} -n {pip} --public-ip-prefix {prefix_name_ipv4} --sku Standard --ip-address ' + ip_address,
