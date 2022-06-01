@@ -1998,6 +1998,11 @@ def process_image_version_create_namespace(cmd, namespace):
 # endregion
 
 
+def process_image_version_update_namespace(cmd, namespace):
+    process_gallery_image_version_namespace(cmd, namespace)
+# endregion
+
+
 def process_image_resource_id_namespace(namespace):
     """
     Validate the resource id from different sources
