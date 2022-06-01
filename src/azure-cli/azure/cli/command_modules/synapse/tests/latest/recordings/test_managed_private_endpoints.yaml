@@ -1022,9 +1022,11 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-ms-failure-cause:
+      - gateway
     status:
-      code: 200
-      message: OK
+      code: 500
+      message: Internal Server Error
 - request:
     body: null
     headers:
@@ -1074,19 +1076,73 @@ interactions:
     uri: https://clitest000003.dev.azuresynapse.net/managedVirtualNetworks/default/managedPrivateEndpoints/AzureDataLakeStoragePE?api-version=2019-06-01-preview
   response:
     body:
-      string: ''
+      string: '{"error":{"code":"HttpWrapOperationAsyncFailed","message":"Newtonsoft.Json.JsonReaderException
+        : Unexpected character encountered while parsing value: {. Path ''error'',
+        line 1, position 81.\r\n   at Newtonsoft.Json.JsonTextReader.ReadStringValue(ReadType
+        readType)\r\n   at Newtonsoft.Json.JsonTextReader.ReadAsString()\r\n   at
+        Newtonsoft.Json.JsonReader.ReadForType(JsonContract contract, Boolean hasConverter)\r\n   at
+        Newtonsoft.Json.Serialization.JsonSerializerInternalReader.PopulateObject(Object
+        newObject, JsonReader reader, JsonObjectContract contract, JsonProperty member,
+        String id)\r\n   at Newtonsoft.Json.Serialization.JsonSerializerInternalReader.CreateObject(JsonReader
+        reader, Type objectType, JsonContract contract, JsonProperty member, JsonContainerContract
+        containerContract, JsonProperty containerMember, Object existingValue)\r\n   at
+        Newtonsoft.Json.Serialization.JsonSerializerInternalReader.Deserialize(JsonReader
+        reader, Type objectType, Boolean checkAdditionalContent)\r\n   at Newtonsoft.Json.JsonSerializer.DeserializeInternal(JsonReader
+        reader, Type objectType)\r\n   at System.Net.Http.Formatting.BaseJsonMediaTypeFormatter.ReadFromStream(Type
+        type, Stream readStream, Encoding effectiveEncoding, IFormatterLogger formatterLogger)\r\n   at
+        System.Net.Http.Formatting.BaseJsonMediaTypeFormatter.ReadFromStream(Type
+        type, Stream readStream, HttpContent content, IFormatterLogger formatterLogger)\r\n   at
+        System.Net.Http.Formatting.BaseJsonMediaTypeFormatter.ReadFromStreamAsync(Type
+        type, Stream readStream, HttpContent content, IFormatterLogger formatterLogger)\r\n---
+        End of stack trace from previous location where exception was thrown ---\r\n   at
+        System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task
+        task)\r\n   at System.Net.Http.HttpContentExtensions.<ReadAsAsyncCore>d__17`1.MoveNext()\r\n---
+        End of stack trace from previous location where exception was thrown ---\r\n   at
+        System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task
+        task)\r\n   at Microsoft.Analytics.Common.Http.HttpApiResponse`1.<CreateAsync>d__2.MoveNext()
+        in S:\\src\\common\\Microsoft.Analytics.Common\\Http\\HttpApiResponse.cs:line
+        0\r\n--- End of stack trace from previous location where exception was thrown
+        ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at
+        System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task
+        task)\r\n   at Microsoft.Analytics.Common.NetworkManagementApi.Client.WorkspaceNetworkManagementApiClient.<GetPrivateEndpoint>d__16.MoveNext()
+        in S:\\src\\common\\Microsoft.Analytics.Common\\NetworkManagementApi\\Client\\WorkspaceNetworkManagementApiClient.cs:line
+        127\r\n--- End of stack trace from previous location where exception was thrown
+        ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at
+        System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task
+        task)\r\n   at Microsoft.Analytics.Common.ManagedPrivateEndpoints.ManagedPrivateEndpointControllerImpl.<GetManagedPrivateEndpoint>d__6.MoveNext()
+        in S:\\src\\common\\Microsoft.Analytics.Common\\ManagedPrivateEndpoints\\ManagedPrivateEndpointControllerImpl.cs:line
+        106\r\n--- End of stack trace from previous location where exception was thrown
+        ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at
+        System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task
+        task)\r\n   at Microsoft.Analytics.WorkspaceApiSvc.Controllers.ManagedPrivateEndpointController.<>c__DisplayClass5_0.<<GetManagedPrivateEndpoint>b__0>d.MoveNext()
+        in S:\\src\\services\\workspace\\Microsoft.Analytics.WorkspaceApiSvc\\Controllers\\ManagedPrivateEndpointController.cs:line
+        65\r\n--- End of stack trace from previous location where exception was thrown
+        ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at
+        System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task
+        task)\r\n   at Microsoft.Analytics.WorkspaceApiSvc.Controllers.WorkspaceApiBaseController.<>c__DisplayClass16_0.<<HttpWrapOperationAsync>b__0>d.MoveNext()
+        in S:\\src\\services\\workspace\\Microsoft.Analytics.WorkspaceApiSvc\\Controllers\\WorkspaceApiBaseController.cs:line
+        123\r\n--- End of stack trace from previous location where exception was thrown
+        ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at
+        System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task
+        task)\r\n   at Microsoft.Analytics.Common.Http.BaseController.<HttpWrapOperationAsync>d__4.MoveNext()
+        in S:\\src\\common\\Microsoft.Analytics.Common\\Http\\BaseController.cs:line
+        41"}}'
     headers:
       content-length:
-      - '0'
+      - '4893'
+      content-type:
+      - application/json; charset=utf-8
       date:
       - Wed, 18 May 2022 09:16:34 GMT
       server:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-ms-failure-cause:
+      - gateway
     status:
-      code: 202
-      message: Accepted
+      code: 500
+      message: Internal Server Error
 - request:
     body: null
     headers:
@@ -1148,7 +1204,91 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-ms-failure-cause:
+      - gateway
     status:
-      code: 404
-      message: Not Found
+      code: 500
+      message: Internal Server Error
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - azsdk-python-synapse-managedprivateendpoints/0.3.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://clitest000003.dev.azuresynapse.net/managedVirtualNetworks/default/managedPrivateEndpoints/AzureDataLakeStoragePE?api-version=2019-06-01-preview
+  response:
+    body:
+      string: '{"error":{"code":"HttpWrapOperationAsyncFailed","message":"Newtonsoft.Json.JsonReaderException
+        : Unexpected character encountered while parsing value: {. Path ''error'',
+        line 1, position 81.\r\n   at Newtonsoft.Json.JsonTextReader.ReadStringValue(ReadType
+        readType)\r\n   at Newtonsoft.Json.JsonTextReader.ReadAsString()\r\n   at
+        Newtonsoft.Json.JsonReader.ReadForType(JsonContract contract, Boolean hasConverter)\r\n   at
+        Newtonsoft.Json.Serialization.JsonSerializerInternalReader.PopulateObject(Object
+        newObject, JsonReader reader, JsonObjectContract contract, JsonProperty member,
+        String id)\r\n   at Newtonsoft.Json.Serialization.JsonSerializerInternalReader.CreateObject(JsonReader
+        reader, Type objectType, JsonContract contract, JsonProperty member, JsonContainerContract
+        containerContract, JsonProperty containerMember, Object existingValue)\r\n   at
+        Newtonsoft.Json.Serialization.JsonSerializerInternalReader.Deserialize(JsonReader
+        reader, Type objectType, Boolean checkAdditionalContent)\r\n   at Newtonsoft.Json.JsonSerializer.DeserializeInternal(JsonReader
+        reader, Type objectType)\r\n   at System.Net.Http.Formatting.BaseJsonMediaTypeFormatter.ReadFromStream(Type
+        type, Stream readStream, Encoding effectiveEncoding, IFormatterLogger formatterLogger)\r\n   at
+        System.Net.Http.Formatting.BaseJsonMediaTypeFormatter.ReadFromStream(Type
+        type, Stream readStream, HttpContent content, IFormatterLogger formatterLogger)\r\n   at
+        System.Net.Http.Formatting.BaseJsonMediaTypeFormatter.ReadFromStreamAsync(Type
+        type, Stream readStream, HttpContent content, IFormatterLogger formatterLogger)\r\n---
+        End of stack trace from previous location where exception was thrown ---\r\n   at
+        System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task
+        task)\r\n   at System.Net.Http.HttpContentExtensions.<ReadAsAsyncCore>d__17`1.MoveNext()\r\n---
+        End of stack trace from previous location where exception was thrown ---\r\n   at
+        System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task
+        task)\r\n   at Microsoft.Analytics.Common.Http.HttpApiResponse`1.<CreateAsync>d__2.MoveNext()
+        in S:\\src\\common\\Microsoft.Analytics.Common\\Http\\HttpApiResponse.cs:line
+        0\r\n--- End of stack trace from previous location where exception was thrown
+        ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at
+        System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task
+        task)\r\n   at Microsoft.Analytics.Common.NetworkManagementApi.Client.WorkspaceNetworkManagementApiClient.<GetPrivateEndpoint>d__16.MoveNext()
+        in S:\\src\\common\\Microsoft.Analytics.Common\\NetworkManagementApi\\Client\\WorkspaceNetworkManagementApiClient.cs:line
+        127\r\n--- End of stack trace from previous location where exception was thrown
+        ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at
+        System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task
+        task)\r\n   at Microsoft.Analytics.Common.ManagedPrivateEndpoints.ManagedPrivateEndpointControllerImpl.<GetManagedPrivateEndpoint>d__6.MoveNext()
+        in S:\\src\\common\\Microsoft.Analytics.Common\\ManagedPrivateEndpoints\\ManagedPrivateEndpointControllerImpl.cs:line
+        106\r\n--- End of stack trace from previous location where exception was thrown
+        ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at
+        System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task
+        task)\r\n   at Microsoft.Analytics.WorkspaceApiSvc.Controllers.ManagedPrivateEndpointController.<>c__DisplayClass5_0.<<GetManagedPrivateEndpoint>b__0>d.MoveNext()
+        in S:\\src\\services\\workspace\\Microsoft.Analytics.WorkspaceApiSvc\\Controllers\\ManagedPrivateEndpointController.cs:line
+        65\r\n--- End of stack trace from previous location where exception was thrown
+        ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at
+        System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task
+        task)\r\n   at Microsoft.Analytics.WorkspaceApiSvc.Controllers.WorkspaceApiBaseController.<>c__DisplayClass16_0.<<HttpWrapOperationAsync>b__0>d.MoveNext()
+        in S:\\src\\services\\workspace\\Microsoft.Analytics.WorkspaceApiSvc\\Controllers\\WorkspaceApiBaseController.cs:line
+        123\r\n--- End of stack trace from previous location where exception was thrown
+        ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at
+        System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task
+        task)\r\n   at Microsoft.Analytics.Common.Http.BaseController.<HttpWrapOperationAsync>d__4.MoveNext()
+        in S:\\src\\common\\Microsoft.Analytics.Common\\Http\\BaseController.cs:line
+        41"}}'
+    headers:
+      content-length:
+      - '4893'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 17 May 2022 12:48:24 GMT
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ms-failure-cause:
+      - gateway
+    status:
+      code: 500
+      message: Internal Server Error
 version: 1
