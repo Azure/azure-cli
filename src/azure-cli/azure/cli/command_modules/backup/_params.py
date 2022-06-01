@@ -361,6 +361,7 @@ def load_arguments(self, _):
         c.argument('target_vnet_name', help='Name of the VNet in which the target VM should be created, in the case of Alternate Location restore to a new VM.')
         c.argument('target_vnet_resource_group', help='Name of the resource group which contains the target VNet, in the case of Alternate Location restore to a new VM.')
         c.argument('target_subnet_name', help='Name of the subnet in which the target VM should be created, in the case of Alternate Location restore a new VM')
+        c.argument('target_subscription_id', help='ID of the subscription to which the resource should be restored')
 
     with self.argument_context('backup restore restore-azurefileshare') as c:
         c.argument('resolve_conflict', resolve_conflict_type)
