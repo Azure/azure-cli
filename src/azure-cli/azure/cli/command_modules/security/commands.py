@@ -287,7 +287,7 @@ def load_command_table(self, _):
         with self.command_group(f"security atp {scope}",
                                 security_advanced_threat_protection_sdk,
                                 client_factory=cf_security_advanced_threat_protection) as g:
-            g.custom_command('show', f"get_{scope}_atp_setting")
+            g.custom_show_command('show', f"get_{scope}_atp_setting")
             g.custom_command('update', f"update_{scope}_atp_setting")
 
     with self.command_group('security va sql scans',
