@@ -969,30 +969,6 @@ class StorageBlobCopyTestScenario(StorageScenarioMixin, ScenarioTest):
             .assert_with_checks(JMESPathCheck('properties.blobTier', 'Archive'),
                                 JMESPathCheck('properties.rehydrationStatus', 'rehydrate-pending-to-cool'))
 
-    @ResourceGroupPreparer()
-    @StorageAccountPreparer(kind='StorageV2', hns=True)
-    def test_storage_blob_copy_batch(self, storage_account_info):
-        src_container = self.create_container(storage_account_info)
-        dst_container = self.create_container(storage_account_info)
-
-        source_file = self.create_temp_file(16, full_random=False)
-        blobs = ['blobğşŞ', 'blogÉ®']
-
-        for blob_name in blobs:
-            self.storage_cmd('storage blob upload -c {} -f "{}" -n {}', storage_account_info,
-                             src_container, source_file, blob_name)
-
-        # Empty dir will be skipped when start-batch
-        self.storage_cmd('storage fs directory create -f {} -n newdir', storage_account_info, src_container)
-
-        self.storage_cmd('storage blob copy start-batch --destination-container {} --source-container {}',
-                         storage_account_info, dst_container, src_container).assert_with_checks(
-            JMESPathCheck('length(@)', 2))
-        self.storage_cmd('storage blob copy start-batch --destination-container {} --pattern "blob*" '
-                         '--source-container {}',
-                         storage_account_info, dst_container, src_container).assert_with_checks(
-            JMESPathCheck('length(@)', 1))
-
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='clitest')
     @StorageAccountPreparer(kind='StorageV2', name_prefix='clitest', location='centraluseuap')
