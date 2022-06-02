@@ -179,6 +179,7 @@ class SqlVmScenarioTest(ScenarioTest):
         expand_all = self.cmd('sql vm show -n {} -g {} --expand {}'
                               .format(sqlvm, resource_group, '*')
                               ).get_output_in_json()
+        assert 'assessmentSettings' in expand_all
         assert 'autoBackupSettings' in expand_all
         assert 'autoPatchingSettings' in expand_all
         assert 'keyVaultCredentialSettings' in expand_all
@@ -188,6 +189,7 @@ class SqlVmScenarioTest(ScenarioTest):
         expand_one = self.cmd('sql vm show -n {} -g {} --expand {}'
                               .format(sqlvm, resource_group, 'AutoBackupSettings')
                               ).get_output_in_json()
+        assert 'assessmentSettings' not in expand_one
         assert 'autoBackupSettings' in expand_one
         assert 'autoPatchingSettings' not in expand_one
         assert 'keyVaultCredentialSettings' not in expand_one
@@ -197,6 +199,7 @@ class SqlVmScenarioTest(ScenarioTest):
         expand_comma = self.cmd('sql vm show -n {} -g {} --expand {}'
                                 .format(sqlvm, resource_group, 'AutoPatchingSettings AutoBackupSettings')
                                 ).get_output_in_json()
+        assert 'assessmentSettings' not in expand_comma
         assert 'autoBackupSettings' in expand_comma
         assert 'autoPatchingSettings' in expand_comma
         assert 'keyVaultCredentialSettings' not in expand_comma
@@ -206,6 +209,7 @@ class SqlVmScenarioTest(ScenarioTest):
         expand_comma_all = self.cmd('sql vm show -n {} -g {} --expand {}'
                                     .format(sqlvm, resource_group, 'AutoPatchingSettings * AutoBackupSettings')
                                     ).get_output_in_json()
+        assert 'assessmentSettings' in expand_comma_all
         assert 'autoBackupSettings' in expand_comma_all
         assert 'autoPatchingSettings' in expand_comma_all
         assert 'keyVaultCredentialSettings' in expand_comma_all
@@ -256,6 +260,40 @@ class SqlVmScenarioTest(ScenarioTest):
         self.cmd('sql vm update -n {} -g {} --backup-schedule-type {} --full-backup-frequency {} --full-backup-start-hour {} --full-backup-duration {} '
                  '--sa-key {} --storage-account {} --retention-period {} --log-backup-frequency {}'
                  .format(sqlvm, resource_group, 'Manual', 'Weekly', 2, 2, key[0]['value'], sa['primaryEndpoints']['blob'], 30, 60),
+                 checks=[
+                     JMESPathCheck('name', sqlvm),
+                     JMESPathCheck('location', loc),
+                     JMESPathCheck('provisioningState', "Succeeded"),
+                     JMESPathCheck('id', sqlvm_1['id'])
+                 ])
+
+        # test assessment schedule enabling succeeds
+        self.cmd('sql vm update -n {} -g {} --assessment-weekly-interval {} --assessment-day-of-week {} --assessment-start-time-local {}'
+                 .format(sqlvm, resource_group, 1, 'Monday', '20:30'),
+                 checks=[
+                     JMESPathCheck('name', sqlvm),
+                     JMESPathCheck('location', loc),
+                     JMESPathCheck('provisioningState', "Succeeded"),
+                     JMESPathCheck('id', sqlvm_1['id'])
+                 ])
+
+        # test start-assessment succeeds
+        self.cmd('sql vm start-assessment -n {} -g {}'
+                 .format(sqlvm, resource_group))
+
+        # verify start-assessment succeeded
+        self.cmd('sql vm show -n {} -g {}'
+                 .format(sqlvm, resource_group),
+                 checks=[
+                     JMESPathCheck('name', sqlvm),
+                     JMESPathCheck('location', loc),
+                     JMESPathCheck('provisioningState', "Succeeded"),
+                     JMESPathCheck('id', sqlvm_1['id'])
+                 ])
+
+        # test assessment disabling succeeds
+        self.cmd('sql vm update -n {} -g {} --enable-assessment {}'
+                 .format(sqlvm, resource_group, False),
                  checks=[
                      JMESPathCheck('name', sqlvm),
                      JMESPathCheck('location', loc),

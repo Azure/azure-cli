@@ -275,6 +275,17 @@ def show_storage_account_connection_string(cmd, resource_group_name, account_nam
             # Older API versions have a slightly different structure
             keys = [obj.key1, obj.key2]  # pylint: disable=no-member
 
+        sa = scf.get_properties(resource_group_name, account_name)
+        if getattr(sa, 'primary_endpoints') is not None:
+            if not blob_endpoint:
+                blob_endpoint = getattr(sa.primary_endpoints, 'blob', None)
+            if not file_endpoint:
+                file_endpoint = getattr(sa.primary_endpoints, 'file', None)
+            if not queue_endpoint:
+                queue_endpoint = getattr(sa.primary_endpoints, 'queue', None)
+            if not table_endpoint:
+                table_endpoint = getattr(sa.primary_endpoints, 'table', None)
+
         connection_string = '{}{}{}'.format(
             connection_string,
             ';AccountName={}'.format(account_name),

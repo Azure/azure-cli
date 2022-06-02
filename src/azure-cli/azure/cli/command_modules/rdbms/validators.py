@@ -192,8 +192,8 @@ def _mysql_sku_name_validator(sku_name, sku_info, tier, instance):
         if sku_name not in skus:
             raise CLIError('Incorrect value for --sku-name. The SKU name does not match tier selection. '
                            'Default value for --tier is Burstable. '
-                           'For Memory Optimized and General Purpose you need to specify --tier value explicitly. '
-                           'Allowed values for {} tier: {}'.format(tier, skus))
+                           'For Business Critical and General Purpose you need to specify --tier value explicitly. '
+                           'Allowed values for given tier: {}'.format(skus))
 
 
 def _mysql_version_validator(version, sku_info, tier, instance):
