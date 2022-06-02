@@ -3876,32 +3876,6 @@ class AKSManagedClusterContext(BaseAKSContext):
         # this parameter does not need validation
         return aks_custom_headers
 
-    # def get_zones(self) -> Union[List[str], None]:
-    #     """Obtain the value of zones.
-#
-    #     :return: list of strings or None
-    #     """
-    #     # read the original value passed by the command
-    #     raw_value = self.raw_param.get("zones")
-    #     # try to read the property value corresponding to the parameter from the `mc` object
-    #     value_obtained_from_mc = None
-    #     if self.mc and self.mc.agent_pool_profiles:
-    #         agent_pool_profile = safe_list_get(
-    #             self.mc.agent_pool_profiles, 0, None
-    #         )
-    #         if agent_pool_profile:
-    #             value_obtained_from_mc = agent_pool_profile.availability_zones
-#
-    #     # set default value
-    #     if value_obtained_from_mc is not None:
-    #         zones = value_obtained_from_mc
-    #     else:
-    #         zones = raw_value
-#
-    #     # this parameter does not need dynamic completion
-    #     # this parameter does not need validation
-    #     return zones
-
 
 class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
     def __init__(

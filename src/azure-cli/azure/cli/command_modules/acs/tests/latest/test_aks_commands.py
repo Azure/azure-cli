@@ -4387,30 +4387,23 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'ssh_key_value': self.generate_ssh_keys()
         })
 
-        # create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
-        #              '--vm-set-type VirtualMachineScaleSets --node-count=1 --ssh-key-value={ssh_key_value} ' \
-        #              '--aad-server-app-id 00000000-0000-0000-0000-000000000001 ' \
-        #              '--aad-server-app-secret fake-secret ' \
-        #              '--aad-client-app-id 00000000-0000-0000-0000-000000000002 ' \
-        #              '--aad-tenant-id d5b55040-0c14-48cc-a028-91457fc190d9 ' \
-        #              '-o json'
-        self.cmd('aks create --resource-group={resource_group} --name={name} '
-                 '--vm-set-type VirtualMachineScaleSets --node-count=1 --ssh-key-value={ssh_key_value} '
-                 '--aad-server-app-id 00000000-0000-0000-0000-000000000001 '
-                 '--aad-server-app-secret fake-secret '
-                 '--aad-client-app-id 00000000-0000-0000-0000-000000000002 '
-                 '--aad-tenant-id d5b55040-0c14-48cc-a028-91457fc190d9 '
-                 '-o json',
-                 checks=[
-                     self.check('provisioningState', 'Succeeded'),
-                     self.check('aadProfile.managed', None),
-                     self.check('aadProfile.serverAppId',
-                                '00000000-0000-0000-0000-000000000001'),
-                     self.check('aadProfile.clientAppId',
-                                '00000000-0000-0000-0000-000000000002'),
-                     self.check('aadProfile.tenantId',
-                                'd5b55040-0c14-48cc-a028-91457fc190d9')
-                 ])
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--vm-set-type VirtualMachineScaleSets --node-count=1 --ssh-key-value={ssh_key_value} ' \
+                     '--aad-server-app-id 00000000-0000-0000-0000-000000000001 ' \
+                     '--aad-server-app-secret fake-secret ' \
+                     '--aad-client-app-id 00000000-0000-0000-0000-000000000002 ' \
+                     '--aad-tenant-id d5b55040-0c14-48cc-a028-91457fc190d9 ' \
+                     '-o json'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('aadProfile.managed', None),
+            self.check('aadProfile.serverAppId',
+                       '00000000-0000-0000-0000-000000000001'),
+            self.check('aadProfile.clientAppId',
+                       '00000000-0000-0000-0000-000000000002'),
+            self.check('aadProfile.tenantId',
+                       'd5b55040-0c14-48cc-a028-91457fc190d9')
+        ])
 
         update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
                      '--enable-aad ' \
@@ -6205,7 +6198,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # the content specified by the custom header is deprecated, we are only testing the option
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
                      '--ssh-key-value={ssh_key_value} --auto-upgrade-channel rapid ' \
-                     # '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AutoUpgradePreview'
+                     '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AutoUpgradePreview'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('autoUpgradeProfile.upgradeChannel', 'rapid')
@@ -6215,7 +6208,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # the content specified by the custom header is deprecated, we are only testing the option
         update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
                      '--auto-upgrade-channel stable ' \
-                     # '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AutoUpgradePreview'
+                     '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AutoUpgradePreview'
         self.cmd(update_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('autoUpgradeProfile.upgradeChannel', 'stable')
@@ -6410,8 +6403,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                      '--dns-name-prefix={dns_name_prefix} --node-count=1 ' \
                      '--windows-admin-username={windows_admin_username} --windows-admin-password={windows_admin_password} ' \
                      '--load-balancer-sku=standard --vm-set-type=virtualmachinescalesets --network-plugin=azure ' \
-                     '--ssh-key-value={ssh_key_value} --enable-windows-gmsa --yes '
-                     # '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AKSWindowsGmsaPreview'
+                     '--ssh-key-value={ssh_key_value} --enable-windows-gmsa --yes ' \
+                     '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AKSWindowsGmsaPreview'
         self.cmd(create_cmd, checks=[
             self.exists('fqdn'),
             self.exists('nodeResourceGroup'),
@@ -6472,8 +6465,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
         # update Windows gmsa
-        update_cmd = "aks update --resource-group={resource_group} --name={name} --enable-windows-gmsa --yes "
-                     # "--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AKSWindowsGmsaPreview"
+        update_cmd = "aks update --resource-group={resource_group} --name={name} --enable-windows-gmsa --yes " \
+                     "--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AKSWindowsGmsaPreview"
         self.cmd(update_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('windowsProfile.gmsaProfile.enabled', 'True')
@@ -6724,7 +6717,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # use custom feature so it does not require subscription to regiter the feature
         create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
-                     '--kubelet-config={kc_path} --linux-os-config={oc_path} ' \
+                     '--kubelet-config=\'{kc_path}\' --linux-os-config=\'{oc_path}\' ' \
                      '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/CustomNodeConfigPreview ' \
                      '--ssh-key-value={ssh_key_value} -o json'
         self.cmd(create_cmd, checks=[
@@ -6736,7 +6729,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # nodepool add
         nodepool_cmd = 'aks nodepool add --resource-group={resource_group} --cluster-name={name} ' \
-                       '--name=nodepool2 --node-count=1 --kubelet-config={kc_path} --linux-os-config={oc_path} ' \
+                       '--name=nodepool2 --node-count=1 --kubelet-config=\'{kc_path}\' --linux-os-config=\'{oc_path}\' ' \
                        '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/CustomNodeConfigPreview'
         self.cmd(nodepool_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
