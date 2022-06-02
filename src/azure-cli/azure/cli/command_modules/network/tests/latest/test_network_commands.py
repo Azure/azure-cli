@@ -811,7 +811,7 @@ class NetworkAppGatewayIndentityScenarioTest(ScenarioTest):
         self.cmd('network application-gateway create '
                  '-g {rg} -n {gw} '
                  '--sku Standard_v2 --public-ip-address {ip} '
-                 '--identity {one_off_identity} ')
+                 '--identity {one_off_identity} --priority 15')
         self.cmd('network application-gateway show -g {rg} -n {gw}', checks=[
             self.check('identity.type', 'userAssigned')
         ])
@@ -884,7 +884,7 @@ class NetworkAppGatewayIndentityScenarioTest(ScenarioTest):
                  '--identity {access_identity} '
                  '--frontend-port 1000 '
                  '--key-vault-secret-id {secret_id} '
-                 '--ssl-certificate-name {ssl_cert_name}', checks=[
+                 '--ssl-certificate-name {ssl_cert_name} --priority 15', checks=[
             self.check('applicationGateway.sslCertificates[0].name', self.kwargs['ssl_cert_name']),
             self.check('applicationGateway.sslCertificates[0].properties.keyVaultSecretId', self.kwargs['secret_id']),
         ])

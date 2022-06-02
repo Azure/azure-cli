@@ -287,7 +287,7 @@ class KeyVaultHSMMgmtScenarioTest(ScenarioTest):
         self.kwargs.update({
             'hsm_name': self.create_random_name('clitest-mhsm-', 24),
             'rg': 'clitest-mhsm-rg',
-            'loc': 'eastus2',
+            'loc': 'centralus',
             'init_admin': '3707fb2f-ac10-4591-a04f-8b0d786ea37d'
         })
 
@@ -477,7 +477,7 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
         self.kwargs.update({
             'kv': self.create_random_name('cli-test-kv-mgmt-', 24),
             'hsm': self.create_random_name('cli-test-hsm-mgmt-', 24),
-            'loc': 'eastus'
+            'loc': 'centralus'
         })
         _create_keyvault(self, self.kwargs, additional_args='--enable-soft-delete')
         _create_hsm(self)
@@ -1106,7 +1106,6 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
         keyvault = self.cmd('keyvault show -n {kv} -g {rg}').get_output_in_json()
         self.kwargs['obj_id'] = keyvault['properties']['accessPolicies'][0]['objectId']
         key_perms = keyvault['properties']['accessPolicies'][0]['permissions']['keys']
-        key_perms.extend(['rotate'])
         self.kwargs['key_perms'] = ' '.join(key_perms)
         self.cmd('keyvault set-policy -n {kv} --object-id {obj_id} --key-permissions {key_perms}')
 

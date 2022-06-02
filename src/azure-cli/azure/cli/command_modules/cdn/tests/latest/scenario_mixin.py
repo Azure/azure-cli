@@ -397,7 +397,7 @@ class CdnScenarioMixin:
 
         self.cmd(f'keyvault set-policy --name {key_vault_name} '
                  f'--secret-permissions get list --certificate-permissions list get '
-                 f'--object-id 4dbab725-22a4-44d5-ad44-c267ca38a954')
+                 f'--object-id 128dfeb9-0b7e-4d6b-9ee4-ec2cdf7bb02d')
 
         return self.cmd(f'keyvault certificate create --vault-name {key_vault_name} '
                         f'-n {cert_name} --policy "@{default_cert_policy}"')

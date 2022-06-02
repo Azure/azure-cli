@@ -938,6 +938,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.assertEqual(result['encryption']['keyVaultProperties']['keyVersion'], None)
         self.assertIn('lastKeyRotationTimestamp', result['encryption']['keyVaultProperties'])
 
+        time.sleep(5)
         # Clear a UserAssigned identity when in use with CMK will break access to the account
         result = self.cmd('az storage account update -n {sa1} -g {rg} --identity-type None ').get_output_in_json()
 
