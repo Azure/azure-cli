@@ -28,13 +28,11 @@ def _auth_client_factory(cli_ctx, scope=None):
 
 def _graph_client_factory(cli_ctx, **_):
     from azure.cli.core._profile import Profile
-    from azure.cli.core.commands.client_factory import configure_common_settings
     from azure.cli.command_modules.role import graph_client_factory
     profile = Profile(cli_ctx=cli_ctx)
-    cred, _, tenant_id = profile.get_login_credentials(
+    cred, _, tenant_id = profile.get_login_credentials(  # pylint: disable=unused-variable
         resource=cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
     client = graph_client_factory(cli_ctx)
-    #configure_common_settings(cli_ctx, client)
     return client
 
 

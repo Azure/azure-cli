@@ -15,10 +15,6 @@ from knack.log import get_logger
 from msrest.serialization import TZ_UTC
 from azure.core.exceptions import HttpResponseError
 from azure.cli.core._profile import Profile
-# from azure.graphrbac.models import (ApplicationCreateParameters,
-#                                     ApplicationUpdateParameters,
-#                                     GraphErrorException,
-#                                     ServicePrincipalCreateParameters)
 
 from azure.cli.command_modules.ams._client_factory import (_graph_client_factory, _auth_client_factory)
 from azure.cli.command_modules.ams._utils import (_gen_guid, _is_guid)
@@ -42,8 +38,7 @@ def reset_sp_credentials_for_mediaservice(cmd, client, account_name, resource_gr
     if not aad_sp:
         raise CLIError("Can't find a service principal matching '{}'".format(app_display_name))
 
-    app_id = aad_sp['appId']
-    sp_oid = aad_sp['id']
+    app_id = aad_sp['appId']  # pylint: disable=unsubscriptable-object
 
     profile = Profile(cli_ctx=cmd.cli_ctx)
     _, _, tenant_id = profile.get_login_credentials(
@@ -53,19 +48,18 @@ def reset_sp_credentials_for_mediaservice(cmd, client, account_name, resource_gr
 
     app_object_id = _get_application_object_id(graph_client, app_id)
 
-    new_password = add_sp_password(graph_client, app_object_id, password_display_name, years)
-
-    #_assign_role(cmd, role, sp_oid, ams.id)
+    new_password = add_sp_password(graph_client, entity_name_string='password', app_id=app_object_id,
+                                   password_display_name=password_display_name, years=years)
 
     return _build_sp_result(subscription_id, ams.location, resource_group_name, account_name,
-                            tenant_id, app_id, app_display_name, new_password, password_display_name, cmd.cli_ctx.cloud.endpoints.management,
-                            cmd.cli_ctx.cloud.endpoints.active_directory,
+                            tenant_id, app_id, app_display_name, new_password, password_display_name,
+                            cmd.cli_ctx.cloud.endpoints.management, cmd.cli_ctx.cloud.endpoints.active_directory,
                             cmd.cli_ctx.cloud.endpoints.resource_manager, '', xml)
 
 
 def create_or_update_assign_sp_to_mediaservice(cmd, client, account_name, resource_group_name, sp_name=None,
                                                new_sp_name=None, role=None, password_display_name=None,
-                                               xml=False, years=1):
+                                               xml=False, years=None):
     ams = client.get(resource_group_name, account_name)
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
@@ -89,18 +83,18 @@ def create_or_update_assign_sp_to_mediaservice(cmd, client, account_name, resour
     profile = Profile(cli_ctx=cmd.cli_ctx)
     _, _, tenant_id = profile.get_login_credentials(
         resource=cmd.cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
-    created_password = add_sp_password(graph_client, app_object_id, password_display_name, years)
+    created_password = add_sp_password(graph_client, entity_name_string='password', app_id=app_object_id,
+                                       password_display_name=password_display_name, years=years)
 
-    sp_oid = _create_service_principal(graph_client, name=sp_name,
-                                       app_id=app_id)
+    sp_oid = _create_service_principal(graph_client, entity_name_string='service principal', app_id=app_id)
 
     if role is None:
         role = 'Contributor'
-    _assign_role(cmd, role, sp_oid, ams.id)
+    _assign_role(cmd, entity_name_string="role assignment", role=role, sp_oid=sp_oid, scope=ams.id)
 
     return _build_sp_result(subscription_id, ams.location, resource_group_name, account_name,
-                            tenant_id, app_id, app_display_name, created_password, password_display_name, cmd.cli_ctx.cloud.endpoints.management,
-                            cmd.cli_ctx.cloud.endpoints.active_directory,
+                            tenant_id, app_id, app_display_name, created_password, password_display_name,
+                            cmd.cli_ctx.cloud.endpoints.management, cmd.cli_ctx.cloud.endpoints.active_directory,
                             cmd.cli_ctx.cloud.endpoints.resource_manager, role, xml)
 
 
@@ -123,12 +117,15 @@ def _update_sp(cmd, graph_client, aad_sp, ams, account_name, resource_group_name
         update_application(graph_client, app_object_id, display_name)
 
     if role:
-        _assign_role(cmd, role, sp_oid, ams.id)
+        _assign_role(cmd, entity_name_string="role assignment", role=role, sp_oid=sp_oid, scope=ams.id)
 
-    return _build_sp_result(subscription_id=subscription_id, location=ams.location, resource_group_name=resource_group_name, account_name=account_name,
-                            tenant=tenant_id,app_id=app_id,sp_name=display_name,sp_password=None,password_friendly=None,management_endpoint=cmd.cli_ctx.cloud.endpoints.management,
+    return _build_sp_result(subscription_id=subscription_id, location=ams.location,
+                            resource_group_name=resource_group_name, account_name=account_name,
+                            tenant=tenant_id, app_id=app_id, sp_name=display_name, sp_password=None,
+                            password_friendly=None, management_endpoint=cmd.cli_ctx.cloud.endpoints.management,
                             active_directory_endpoint=cmd.cli_ctx.cloud.endpoints.active_directory,
-                            resource_manager_endpoint=cmd.cli_ctx.cloud.endpoints.resource_manager,role=role,xml=xml)
+                            resource_manager_endpoint=cmd.cli_ctx.cloud.endpoints.resource_manager, role=role, xml=xml)
+
 
 def _get_displayable_name(graph_object):
     if getattr(graph_object, 'user_principal_name', None):
@@ -230,8 +227,6 @@ def _resolve_role_id(cli_ctx, role, scope, definitions_client):
 
 
 def _get_object_stubs(graph_client, assignees):
-    #from azure.graphrbac.models import GetObjectsParameters
-    #params = GetObjectsParameters(include_directory_object_references=True, object_ids=assignees)
     return list(graph_client.directory_object_get_by_ids({'ids': list(assignees)}))
 
 
@@ -239,50 +234,40 @@ def _get_application_object_id(client, identifier):
     return list(client.application_list(filter="appId eq '{}'".format(identifier)))[0]['id']
 
 
-def _build_password_credential(password, years):
-    years = years or 1
+def retry(func):
 
-    start_date = datetime.datetime.now(TZ_UTC)
-    end_date = start_date + relativedelta(years=years)
-    start_date = start_date.isoformat()
-    end_date = end_date.isoformat()
+    def inner(*args, **kwargs):
+        _RETRY_TIMES = 36
+        # retry till server replication is done
+        for retry_time in range(0, _RETRY_TIMES):
+            try:
+                return func(*args, **kwargs)
+                break  # pylint: disable=unreachable
+            except Exception as ex:  # pylint: disable=broad-except
+                if retry_time < _RETRY_TIMES:
+                    time.sleep(5)
+                    logger.warning('Retrying %s creation: %s/%s', kwargs['entity_name_string'],
+                                   retry_time + 1, _RETRY_TIMES)
+                else:
+                    logger.warning("Creating %s failed for appid. Trace followed:\n%s",
+                                   kwargs['entity_name_string'], ex.response.headers if hasattr(ex, 'response') else ex)
+                    # pylint: disable=no-member
+                    raise
 
-    password_body = {
-      "endDateTime": end_date,
-      "keyId": str(_gen_guid()),
-      "startDateTime": start_date
-    }
-    return password_body
+    return inner
 
 
-def _create_service_principal(
-        graph_client, name, app_id):
-    _RETRY_TIMES = 36
-    # retry till server replication is done
-    for retry_time in range(0, _RETRY_TIMES):
-        try:
-            aad_sp = graph_client.service_principal_create({"appId": app_id, 'accountEnabled': True})
-            break
-        except Exception as ex:  # pylint: disable=broad-except
-            if retry_time < _RETRY_TIMES and (
-                    ' does not reference ' in str(ex) or ' does not exist ' in str(ex)):
-                time.sleep(5)
-                logger.warning('Retrying service principal creation: %s/%s', retry_time + 1, _RETRY_TIMES)
-            else:
-                logger.warning(
-                    "Creating service principal failed for appid '%s'. Trace followed:\n%s",
-                    name, ex.response.headers if hasattr(ex, 'response') else ex)   # pylint: disable=no-member
-                raise
-
+@retry
+def _create_service_principal(graph_client, entity_name_string, app_id):  # pylint: disable=unused-argument
+    aad_sp = graph_client.service_principal_create({"appId": app_id, 'accountEnabled': True})
     return aad_sp['id']
 
 
 def create_application(client, display_name):
-
     app_create_param = {
-            "signInAudience": "AzureADMyOrg",
-            "displayName": display_name,
-            "identifierUris":[]
+        "signInAudience": "AzureADMyOrg",
+        "displayName": display_name,
+        "identifierUris": []
     }
 
     try:
@@ -312,30 +297,14 @@ def _search_role_assignments(assignments_client, assignee_object_id):
     return assignments
 
 
-def _assign_role(cmd, role, sp_oid, scope):
+@retry
+def _assign_role(cmd, entity_name_string, role, sp_oid, scope):  # pylint: disable=unused-argument
     assignments = list_role_assignments(cmd, sp_oid, scope)
 
     if assignments and list(filter(lambda x: x['roleDefinitionName'] == role, assignments)):
         return
 
-    _RETRY_TIMES = 36
-    for retry_time in range(0, _RETRY_TIMES):
-        try:
-            _create_role_assignment(cmd.cli_ctx, role, sp_oid, scope)
-            break
-        except Exception as ex:  # pylint: disable=broad-except
-            if retry_time < _RETRY_TIMES and ' does not exist in the directory ' in str(ex):
-                time.sleep(5)
-                logger.warning('Retrying role assignment creation: %s/%s', retry_time + 1,
-                               _RETRY_TIMES)
-                continue
-
-            # dump out history for diagnoses
-            logger.warning('Role assignment creation failed.\n')
-            if getattr(ex, 'response', None) is not None:
-                logger.warning('role assignment response headers: %s\n',
-                               ex.response.headers)  # pylint: disable=no-member
-            raise
+    _create_role_assignment(cmd.cli_ctx, role, sp_oid, scope)
 
 
 def _build_sp_result(subscription_id, location, resource_group_name, account_name,
@@ -376,7 +345,10 @@ def _get_service_principal(graph_client, sp_name):
     return aad_sps[0] if aad_sps else None
 
 
-def add_sp_password(graph_client, app_id, password_display_name, years):
+@retry
+def add_sp_password(graph_client, entity_name_string, app_id, password_display_name, years=1):
+    # pylint: disable=unused-argument
+    years = 1 if years is None else years
     start_date = datetime.datetime.now(TZ_UTC)
     end_date = start_date + relativedelta(years=years)
     start_date = start_date.isoformat()
@@ -391,24 +363,9 @@ def add_sp_password(graph_client, app_id, password_display_name, years):
         }
 
     }
-    secretText = ''
-    _RETRY_TIMES = 36
-    for retry_time in range(0, _RETRY_TIMES):
-        try:
-            secretText = graph_client.application_add_password(app_id, password_body)['secretText']
-            break
-        except Exception as ex:  # pylint: disable=broad-except
-            if retry_time < _RETRY_TIMES and (
-                    ' does not reference ' in str(ex) or ' does not exist ' in str(ex)):
-                time.sleep(5)
-                logger.warning('Retrying password creation: %s/%s', retry_time + 1, _RETRY_TIMES)
-            else:
-                logger.warning(
-                    "Creating password failed for appid '%s'. Trace followed:\n%s",
-                    app_id, ex.response.headers if hasattr(ex, 'response') else ex)   # pylint: disable=no-member
-                raise
 
-    return secretText
+    password = graph_client.application_add_password(app_id, password_body)['secretText']
+    return password
 
 
 def _create_sp_name(account_name, sp_name):
