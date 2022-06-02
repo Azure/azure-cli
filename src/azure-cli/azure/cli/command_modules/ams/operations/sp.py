@@ -25,7 +25,7 @@ logger = get_logger(__name__)
 
 
 def reset_sp_credentials_for_mediaservice(cmd, client, account_name, resource_group_name, sp_name=None,
-                                          password_display_name=None, xml=False, years=1):
+                                          role='Contributor', password_display_name=None, xml=False, years=1):
     ams = client.get(resource_group_name, account_name)
 
     graph_client = _graph_client_factory(cmd.cli_ctx)
@@ -39,6 +39,7 @@ def reset_sp_credentials_for_mediaservice(cmd, client, account_name, resource_gr
         raise CLIError("Can't find a service principal matching '{}'".format(app_display_name))
 
     app_id = aad_sp['appId']  # pylint: disable=unsubscriptable-object
+    sp_oid = aad_sp['id']  # pylint: disable=unsubscriptable-object
 
     profile = Profile(cli_ctx=cmd.cli_ctx)
     _, _, tenant_id = profile.get_login_credentials(
@@ -51,10 +52,12 @@ def reset_sp_credentials_for_mediaservice(cmd, client, account_name, resource_gr
     new_password = add_sp_password(graph_client, entity_name_string='password', app_id=app_object_id,
                                    password_display_name=password_display_name, years=years)
 
+    _assign_role(cmd, entity_name_string="role assignment", role=role, sp_oid=sp_oid, scope=ams.id)
+
     return _build_sp_result(subscription_id, ams.location, resource_group_name, account_name,
                             tenant_id, app_id, app_display_name, new_password, password_display_name,
                             cmd.cli_ctx.cloud.endpoints.management, cmd.cli_ctx.cloud.endpoints.active_directory,
-                            cmd.cli_ctx.cloud.endpoints.resource_manager, '', xml)
+                            cmd.cli_ctx.cloud.endpoints.resource_manager, role, xml)
 
 
 def create_or_update_assign_sp_to_mediaservice(cmd, client, account_name, resource_group_name, sp_name=None,
