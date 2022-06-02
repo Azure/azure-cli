@@ -2260,11 +2260,12 @@ def load_arguments(self, _):
         c.argument('sku', arg_type=get_enum_type(['Basic', 'Standard']), default='Standard', min_api='2021-03-01',
                    options_list=['--sku'], help='The SKU of this Bastion Host.')
         c.ignore('subnet')
-    for item in ['ssh', 'rdp']:
-        with self.argument_context('network bastion {}'.format(item)) as c:
+    with self.argument_context('network bastion ssh') as c:
             c.argument('auth_type', help='Auth type to use for SSH connections.', options_list=['--auth-type'])
             c.argument('username', help='User name for SSH connections.', options_list=['--username'])
             c.argument('ssh_key', help='SSH key file location for SSH connections.', options_list=['--ssh-key'])
+    with self.argument_context('network bastion rdp') as c:
+            c.argument('disable_gateway', arg_type=get_three_state_flag(), help='Flag to control breakout of o365 allow category.')
     with self.argument_context('network bastion tunnel') as c:
         c.argument('port', help='Local port to use for the tunneling.', options_list=['--port'])
         c.argument('timeout', help='Timeout for connection to bastion host tunnel.', options_list=['--timeout'])
