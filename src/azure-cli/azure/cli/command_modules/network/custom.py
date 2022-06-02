@@ -6561,18 +6561,8 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
                      allocation_method=None, dns_name=None,
                      idle_timeout=4, reverse_fqdn=None, version=None, sku=None, tier=None, zone=None, ip_tags=None,
                      public_ip_prefix=None, edge_zone=None, ip_address=None):
-    if sku is None:
-        logger.warning(
-            "Please note that the default public IP used for creation will be changed from Basic to Standard "
-            "in the future."
-        )
-
     IPAllocationMethod, PublicIPAddress, PublicIPAddressDnsSettings, SubResource = cmd.get_models(
         'IPAllocationMethod', 'PublicIPAddress', 'PublicIPAddressDnsSettings', 'SubResource')
-    client = network_client_factory(cmd.cli_ctx).public_ip_addresses
-    if not allocation_method:
-        allocation_method = IPAllocationMethod.static.value if (sku and sku.lower() == 'standard') \
-            else IPAllocationMethod.dynamic.value
 
     public_ip_args = {
         'location': location,
@@ -6582,14 +6572,48 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
         'ip_address': ip_address,
         'dns_settings': None
     }
+
+    if cmd.supported_api_version(min_api='2018-07-01') and public_ip_prefix:
+        if is_valid_resource_id(public_ip_prefix):
+            public_ip_prefix_id = public_ip_prefix
+            public_ip_prefix_name = parse_resource_id(public_ip_prefix)['resource_name']
+        else:
+            public_ip_prefix_id = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx),
+                resource_group=resource_group_name,
+                namespace='Microsoft.Network',
+                type='publicIPPrefixes',
+                name=public_ip_prefix
+            )
+            public_ip_prefix_name = public_ip_prefix
+        public_ip_args['public_ip_prefix'] = SubResource(id=public_ip_prefix_id)
+
+        # reuse prefix information
+        pip_client = network_client_factory(cmd.cli_ctx).public_ip_prefixes
+        pip_obj = pip_client.get(resource_group_name, public_ip_prefix_name)
+        version = pip_obj.public_ip_address_version
+        sku, tier = pip_obj.sku.name, pip_obj.sku.tier
+        zone = pip_obj.zones
+
+    if sku is None:
+        logger.warning(
+            "Please note that the default public IP used for creation will be changed from Basic to Standard "
+            "in the future."
+        )
+
+    client = network_client_factory(cmd.cli_ctx).public_ip_addresses
+    if not allocation_method:
+        if sku and sku.lower() == 'standard':
+            public_ip_args['public_ip_allocation_method'] = IPAllocationMethod.static.value
+        else:
+            public_ip_args['public_ip_allocation_method'] = IPAllocationMethod.dynamic.value
+
     if cmd.supported_api_version(min_api='2016-09-01'):
         public_ip_args['public_ip_address_version'] = version
     if cmd.supported_api_version(min_api='2017-06-01'):
         public_ip_args['zones'] = zone
     if cmd.supported_api_version(min_api='2017-11-01'):
         public_ip_args['ip_tags'] = ip_tags
-    if cmd.supported_api_version(min_api='2018-07-01') and public_ip_prefix:
-        public_ip_args['public_ip_prefix'] = SubResource(id=public_ip_prefix)
 
     if sku:
         public_ip_args['sku'] = {'name': sku}

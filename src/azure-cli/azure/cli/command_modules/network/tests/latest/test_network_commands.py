@@ -561,7 +561,9 @@ class NetworkPublicIpPrefix(ScenarioTest):
 
         self.kwargs.update({
             'prefix': 'prefix1',
-            'pip': 'pip1'
+            'pip': 'pip1',
+            'prefix_v6': self.create_random_name('public-ip-prefix-', 24),
+            'pip_v6': self.create_random_name('public-ip-', 16)
         })
 
         # Test prefix CRUD
@@ -583,6 +585,15 @@ class NetworkPublicIpPrefix(ScenarioTest):
         self.cmd('network public-ip prefix create -g {rg} -n {prefix} --length 30')
         self.cmd('network public-ip create -g {rg} -n {pip} --public-ip-prefix {prefix} --sku Standard',
                  checks=self.check("publicIp.publicIpPrefix.id.contains(@, '{prefix}')", True))
+        self.cmd('network public-ip prefix create -n {prefix_v6} -g {rg} --version IPv6 --length 126 -z 1 3 2')
+        self.cmd(
+            'network public-ip create -n {pip_v6} -g {rg} --public-ip-prefix {prefix_v6}',
+            checks=[
+                self.check('publicIp.name', '{pip_v6}'),
+                self.check('publicIp.publicIpAddressVersion', 'IPv6'),
+                self.check('publicIp.zones', ['1', '3', '2'])
+            ]
+        )
 
         # Test IP address version
         self.kwargs.update({
@@ -629,7 +640,7 @@ class NetworkPublicIpPrefix(ScenarioTest):
             self.check('publicIpAddressVersion', 'IPv4')
         ]).get_output_in_json()
 
-        ip_address = '.'.join(ip_prefix['ipPrefix'].split('.')[:3]) + '10'
+        ip_address = ip_prefix['ipPrefix'][:-3]
 
         # Create public ip with ip address
         self.cmd('network public-ip create -g {rg} -n {pip} --public-ip-prefix {prefix_name_ipv4} --sku Standard --ip-address ' + ip_address,
