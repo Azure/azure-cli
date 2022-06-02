@@ -2925,7 +2925,7 @@ short-summary: Set service-defined properties for the specified share.
 
 helps['storage share snapshot'] = """
 type: command
-short-summary: Creates a snapshot of an existing share under the specified account.
+short-summary: Create a snapshot of an existing share under the specified account.
 """
 
 helps['storage share metadata'] = """
