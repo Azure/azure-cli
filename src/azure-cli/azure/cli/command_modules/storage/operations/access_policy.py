@@ -7,15 +7,6 @@ from datetime import datetime
 from azure.cli.core.profiles import ResourceType
 
 
-def _str_to_datetime(time):
-    form = '%Y-%m-%d'
-    try:
-        return datetime.strptime(time, form)
-    except ValueError:
-        pass
-    return time
-
-
 def create_acl_policy(cmd, client, policy_name, start=None, expiry=None, permission=None, **kwargs):
     """Create a stored access policy on the containing object"""
     t_access_policy = cmd.get_models('_models#AccessPolicy', resource_type=ResourceType.DATA_STORAGE_BLOB)
@@ -26,8 +17,8 @@ def create_acl_policy(cmd, client, policy_name, start=None, expiry=None, permiss
             signed_identifiers[identifier.id] = identifier.access_policy
         acl = signed_identifiers
     acl[policy_name] = t_access_policy(permission if permission else '',
-                                       _str_to_datetime(expiry) if expiry else datetime.max,
-                                       _str_to_datetime(start) if start else datetime.utcnow())
+                                       expiry if expiry else datetime.max,
+                                       start if start else datetime.utcnow())
     if hasattr(acl, 'public_access'):
         kwargs['public_access'] = getattr(acl, 'public_access')
 
@@ -71,8 +62,8 @@ def set_acl_policy(cmd, client, policy_name, start=None, expiry=None, permission
                 raise KeyError()
         else:
             policy = acl[policy_name]
-        policy.start = _str_to_datetime(start) if start else policy.start
-        policy.expiry = _str_to_datetime(expiry) if expiry else policy.expiry
+        policy.start = start if start else policy.start
+        policy.expiry = expiry if expiry else policy.expiry
         policy.permission = permission or policy.permission
         if hasattr(acl, 'public_access'):
             kwargs['public_access'] = getattr(acl, 'public_access')
