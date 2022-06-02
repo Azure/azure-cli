@@ -15,7 +15,7 @@ from azure.cli.command_modules.storage.util import (filter_none, collect_blobs, 
                                                     create_short_lived_container_sas, create_short_lived_share_sas,
                                                     guess_content_type)
 from azure.cli.command_modules.storage.url_quote_util import encode_for_url, make_encoded_file_url_and_params
-from azure.cli.core.profiles import ResourceType
+from azure.cli.core.profiles import ResourceType, get_sdk
 from .fileshare import _get_client
 
 logger = get_logger(__name__)
@@ -419,3 +419,12 @@ def _file_share_exists(client, resource_group_name, account_name, share_name):
         return file_share is not None
     except HttpResponseError:
         return False
+
+
+def generate_sas_file(cmd, client, file_path, permission=None, expiry=None, start=None, id=None, ip=None,
+                      protocol=None, **kwargs):
+    t_generate_file_sas = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_FILESHARE,
+                                  '_shared_access_signature#generate_file_sas')
+    return t_generate_file_sas(account_name=client.account_name, share_name=client.share_name, file_path=file_path,
+                               account_key=client.credential.account_key, permission=permission, expiry=expiry,
+                               start=start, policy_id=id, ip=ip, protocol=protocol, **kwargs)

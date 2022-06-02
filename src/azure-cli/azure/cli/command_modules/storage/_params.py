@@ -1829,17 +1829,29 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage file generate-sas') as c:
         from .completers import get_storage_acl_name_completion_list
 
-        c.register_path_argument()
+        c.argument('file_path', type=file_type, required=True, options_list=('--path', '-p'),
+                help='The path to the file within the file share.')
         c.register_sas_arguments()
-
+        c.extra('share_name', share_name_type, required=True)
         t_file_svc = self.get_sdk('file.fileservice#FileService')
-        t_file_permissions = self.get_sdk('file.models#FilePermissions')
+        t_file_permissions = self.get_sdk('_models#FileSasPermissions',
+                                          resource_type=ResourceType.DATA_STORAGE_FILESHARE)
         c.argument('id', options_list='--policy-name',
                    help='The name of a stored access policy within the container\'s ACL.',
                    completer=get_storage_acl_name_completion_list(t_file_svc, 'container_name', 'get_container_acl'))
         c.argument('permission', options_list='--permissions',
                    help=sas_help.format(get_permission_help_string(t_file_permissions)),
                    validator=get_permission_validator(t_file_permissions))
+        c.extra('cache_control', help='Response header value for Cache-Control when resource is accessed '
+                                         'using this shared access signature.')
+        c.extra('content_disposition', help='Response header value for Content-Disposition when resource is accessed '
+                                               'using this shared access signature.')
+        c.extra('content_encoding', help='Response header value for Content-Encoding when resource is accessed '
+                                            'using this shared access signature.')
+        c.extra('content_language', help='Response header value for Content-Language when resource is accessed '
+                                            'using this shared access signature.')
+        c.extra('content_type', help='Response header value for Content-Type when resource is accessed '
+                                        'using this shared access signature.')
         c.ignore('sas_token')
 
     with self.argument_context('storage file list') as c:

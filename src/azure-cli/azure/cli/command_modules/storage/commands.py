@@ -688,8 +688,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                             custom_command_type=get_custom_sdk('file', file_data_service_factory)) as g:
         from ._format import transform_boolean_for_table, transform_file_output
         from ._exception_handler import file_related_exception_handler
-        g.storage_command(
-            'generate-sas', 'generate_file_shared_access_signature')
         g.storage_command('show', 'get_file_properties', table_transformer=transform_file_output,
                           exception_handler=show_exception_handler)
         g.storage_command('update', 'set_file_properties')
@@ -718,6 +716,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command('resize', 'resize_file')
         g.storage_custom_command('url', 'create_file_url', transform=transform_url_without_encode,
                                  client_factory=cf_share_client)
+        g.storage_custom_command('generate-sas', 'generate_sas_file', client_factory=cf_share_client)
 
     with self.command_group('storage cors', get_custom_sdk('cors', multi_service_properties_factory)) as g:
         from ._transformers import transform_cors_list_output

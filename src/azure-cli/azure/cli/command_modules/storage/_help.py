@@ -1920,6 +1920,7 @@ examples:
 
 helps['storage file generate-sas'] = """
 type: command
+short-summary: Generates a shared access signature for the file.
 examples:
   - name: Generate a sas token for a file.
     text: |
