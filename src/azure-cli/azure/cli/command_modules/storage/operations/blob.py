@@ -598,9 +598,15 @@ def upload_blob(cmd, client, file_path=None, container_name=None, blob_name=None
                                               **upload_args, **kwargs)
         if data is not None:
             _adjust_block_blob_size(client, blob_type, length)
-            response = client.upload_blob(data=data, length=length, metadata=metadata,
-                                          encryption_scope=encryption_scope,
-                                          **upload_args, **kwargs)
+            try:
+                response = client.upload_blob(data=data, length=length, metadata=metadata,
+                                              encryption_scope=encryption_scope,
+                                              **upload_args, **kwargs)
+            except UnicodeEncodeError:
+                response = client.upload_blob(data=data.encode('UTF-8', 'ignore').decode('UTF-8'),
+                                              length=length, metadata=metadata,
+                                              encryption_scope=encryption_scope,
+                                              **upload_args, **kwargs)
     except ResourceExistsError as ex:
         raise AzureResponseError(
             "{}\nIf you want to overwrite the existing one, please add --overwrite in your command.".format(ex.message))
