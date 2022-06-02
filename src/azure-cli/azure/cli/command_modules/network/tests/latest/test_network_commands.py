@@ -5840,6 +5840,7 @@ class NetworkSecurityPartnerProviderScenarioTest(ScenarioTest):
         self.cmd('extension add -n virtual-wan')
 
     @ResourceGroupPreparer()
+    @AllowLargeResponse()
     def test_network_security_partner_provider(self, resource_group):
         self.kwargs.update({
             'vwan': 'clitestvwan',
@@ -5884,6 +5885,7 @@ class NetworkVirtualApplianceScenarioTest(ScenarioTest):
         super(NetworkVirtualApplianceScenarioTest, self).tearDown()
 
     @ResourceGroupPreparer(location='westcentralus', name_prefix='test_network_virtual_appliance')
+    @AllowLargeResponse()
     def test_network_virtual_appliance(self, resource_group):
         self.kwargs.update({
             'vwan': 'clitestvwan',

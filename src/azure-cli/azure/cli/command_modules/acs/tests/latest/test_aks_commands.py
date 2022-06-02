@@ -6205,7 +6205,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # the content specified by the custom header is deprecated, we are only testing the option
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
                      '--ssh-key-value={ssh_key_value} --auto-upgrade-channel rapid ' \
-                     '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AutoUpgradePreview'
+                     # '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AutoUpgradePreview'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('autoUpgradeProfile.upgradeChannel', 'rapid')
@@ -6215,7 +6215,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # the content specified by the custom header is deprecated, we are only testing the option
         update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
                      '--auto-upgrade-channel stable ' \
-                     '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AutoUpgradePreview'
+                     # '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AutoUpgradePreview'
         self.cmd(update_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('autoUpgradeProfile.upgradeChannel', 'stable')
