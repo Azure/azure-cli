@@ -15,12 +15,12 @@ interactions:
       ParameterSetName:
       - -n -g --query -o
       User-Agent:
-      - AZURECLI/2.35.0 azsdk-python-azure-mgmt-storage/20.0.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-storage/20.0.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2021-09-01&$expand=kerb
   response:
     body:
-      string: '{"keys":[{"creationTime":"2022-04-11T13:46:32.9311894Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2022-04-11T13:46:32.9311894Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+      string: '{"keys":[{"creationTime":"2022-06-02T04:10:46.5988384Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2022-06-02T04:10:46.5988384Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
     headers:
       cache-control:
       - no-cache
@@ -29,7 +29,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 11 Apr 2022 13:46:55 GMT
+      - Thu, 02 Jun 2022 04:11:07 GMT
       expires:
       - '-1'
       pragma:
@@ -52,16 +52,24 @@ interactions:
 - request:
     body: null
     headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage container create
       Connection:
       - keep-alive
       Content-Length:
       - '0'
+      ParameterSetName:
+      - -n --account-name --account-key
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.9.6; Windows 10) AZURECLI/2.35.0
+      - AZURECLI/2.37.0 azsdk-python-storage-blob/12.12.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
       x-ms-date:
-      - Mon, 11 Apr 2022 13:46:56 GMT
+      - Thu, 02 Jun 2022 04:11:06 GMT
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     method: PUT
     uri: https://clitest000002.blob.core.windows.net/cont000003?restype=container
   response:
@@ -71,29 +79,37 @@ interactions:
       content-length:
       - '0'
       date:
-      - Mon, 11 Apr 2022 13:46:56 GMT
+      - Thu, 02 Jun 2022 04:11:08 GMT
       etag:
-      - '"0x8DA1BC1BEB675C1"'
+      - '"0x8DA444DEBDD6BEE"'
       last-modified:
-      - Mon, 11 Apr 2022 13:46:56 GMT
+      - Thu, 02 Jun 2022 04:11:08 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     status:
       code: 201
       message: Created
 - request:
     body: null
     headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage container policy list
       Connection:
       - keep-alive
+      ParameterSetName:
+      - --container-name --account-name --account-key
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.9.6; Windows 10) AZURECLI/2.35.0
+      - AZURECLI/2.37.0 azsdk-python-storage-blob/12.12.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
       x-ms-date:
-      - Mon, 11 Apr 2022 13:46:57 GMT
+      - Thu, 02 Jun 2022 04:11:07 GMT
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     method: GET
     uri: https://clitest000002.blob.core.windows.net/cont000003?restype=container&comp=acl
   response:
@@ -104,31 +120,39 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Mon, 11 Apr 2022 13:46:57 GMT
+      - Thu, 02 Jun 2022 04:11:09 GMT
       etag:
-      - '"0x8DA1BC1BEB675C1"'
+      - '"0x8DA444DEBDD6BEE"'
       last-modified:
-      - Mon, 11 Apr 2022 13:46:56 GMT
+      - Thu, 02 Jun 2022 04:11:08 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     status:
       code: 200
       message: OK
 - request:
     body: null
     headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage container policy create
       Connection:
       - keep-alive
+      ParameterSetName:
+      - --container-name -n --permission --account-name --account-key
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.9.6; Windows 10) AZURECLI/2.35.0
+      - AZURECLI/2.37.0 azsdk-python-storage-blob/12.12.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
       x-ms-date:
-      - Mon, 11 Apr 2022 13:46:58 GMT
+      - Thu, 02 Jun 2022 04:11:08 GMT
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     method: GET
     uri: https://clitest000002.blob.core.windows.net/cont000003?restype=container&comp=acl
   response:
@@ -139,35 +163,45 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Mon, 11 Apr 2022 13:46:58 GMT
+      - Thu, 02 Jun 2022 04:11:10 GMT
       etag:
-      - '"0x8DA1BC1BEB675C1"'
+      - '"0x8DA444DEBDD6BEE"'
       last-modified:
-      - Mon, 11 Apr 2022 13:46:56 GMT
+      - Thu, 02 Jun 2022 04:11:08 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     status:
       code: 200
       message: OK
 - request:
     body: '<?xml version=''1.0'' encoding=''utf-8''?>
 
-      <SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>l</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>'
+      <SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-06-02T04:11:09Z</Start><Expiry>9999-12-31T23:59:59Z</Expiry><Permission>l</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>'
     headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage container policy create
       Connection:
       - keep-alive
       Content-Length:
-      - '184'
+      - '256'
+      Content-Type:
+      - application/xml
+      ParameterSetName:
+      - --container-name -n --permission --account-name --account-key
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.9.6; Windows 10) AZURECLI/2.35.0
+      - AZURECLI/2.37.0 azsdk-python-storage-blob/12.12.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
       x-ms-date:
-      - Mon, 11 Apr 2022 13:46:59 GMT
+      - Thu, 02 Jun 2022 04:11:09 GMT
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     method: PUT
     uri: https://clitest000002.blob.core.windows.net/cont000003?restype=container&comp=acl
   response:
@@ -177,67 +211,86 @@ interactions:
       content-length:
       - '0'
       date:
-      - Mon, 11 Apr 2022 13:46:58 GMT
+      - Thu, 02 Jun 2022 04:11:11 GMT
       etag:
-      - '"0x8DA1BC1C036A09B"'
+      - '"0x8DA444DED5D7CAC"'
       last-modified:
-      - Mon, 11 Apr 2022 13:46:59 GMT
+      - Thu, 02 Jun 2022 04:11:11 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     status:
       code: 200
       message: OK
 - request:
     body: null
     headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage container policy create
       Connection:
       - keep-alive
+      ParameterSetName:
+      - --container-name -n --start --account-name --account-key
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.9.6; Windows 10) AZURECLI/2.35.0
+      - AZURECLI/2.37.0 azsdk-python-storage-blob/12.12.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
       x-ms-date:
-      - Mon, 11 Apr 2022 13:47:00 GMT
+      - Thu, 02 Jun 2022 04:11:10 GMT
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     method: GET
     uri: https://clitest000002.blob.core.windows.net/cont000003?restype=container&comp=acl
   response:
     body:
-      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>l</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-06-02T04:11:09.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry><Permission>l</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"
     headers:
       content-type:
       - application/xml
       date:
-      - Mon, 11 Apr 2022 13:46:59 GMT
+      - Thu, 02 Jun 2022 04:11:12 GMT
       etag:
-      - '"0x8DA1BC1C036A09B"'
+      - '"0x8DA444DED5D7CAC"'
       last-modified:
-      - Mon, 11 Apr 2022 13:46:59 GMT
+      - Thu, 02 Jun 2022 04:11:11 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     status:
       code: 200
       message: OK
 - request:
     body: '<?xml version=''1.0'' encoding=''utf-8''?>
 
-      <SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>l</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00Z</Start></AccessPolicy></SignedIdentifier></SignedIdentifiers>'
+      <SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-06-02T04:11:09Z</Start><Expiry>9999-12-31T23:59:59Z</Expiry><Permission>l</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00Z</Start><Expiry>9999-12-31T23:59:59Z</Expiry><Permission
+      /></AccessPolicy></SignedIdentifier></SignedIdentifiers>'
     headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage container policy create
       Connection:
       - keep-alive
       Content-Length:
-      - '296'
+      - '422'
+      Content-Type:
+      - application/xml
+      ParameterSetName:
+      - --container-name -n --start --account-name --account-key
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.9.6; Windows 10) AZURECLI/2.35.0
+      - AZURECLI/2.37.0 azsdk-python-storage-blob/12.12.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
       x-ms-date:
-      - Mon, 11 Apr 2022 13:47:01 GMT
+      - Thu, 02 Jun 2022 04:11:11 GMT
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     method: PUT
     uri: https://clitest000002.blob.core.windows.net/cont000003?restype=container&comp=acl
   response:
@@ -247,67 +300,86 @@ interactions:
       content-length:
       - '0'
       date:
-      - Mon, 11 Apr 2022 13:47:00 GMT
+      - Thu, 02 Jun 2022 04:11:12 GMT
       etag:
-      - '"0x8DA1BC1C10A7367"'
+      - '"0x8DA444DEE3EC8D8"'
       last-modified:
-      - Mon, 11 Apr 2022 13:47:00 GMT
+      - Thu, 02 Jun 2022 04:11:12 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     status:
       code: 200
       message: OK
 - request:
     body: null
     headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage container policy create
       Connection:
       - keep-alive
+      ParameterSetName:
+      - --container-name -n --expiry --account-name --account-key
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.9.6; Windows 10) AZURECLI/2.35.0
+      - AZURECLI/2.37.0 azsdk-python-storage-blob/12.12.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
       x-ms-date:
-      - Mon, 11 Apr 2022 13:47:01 GMT
+      - Thu, 02 Jun 2022 04:11:11 GMT
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     method: GET
     uri: https://clitest000002.blob.core.windows.net/cont000003?restype=container&comp=acl
   response:
     body:
-      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>l</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start></AccessPolicy></SignedIdentifier></SignedIdentifiers>"
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-06-02T04:11:09.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry><Permission>l</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry></AccessPolicy></SignedIdentifier></SignedIdentifiers>"
     headers:
       content-type:
       - application/xml
       date:
-      - Mon, 11 Apr 2022 13:47:01 GMT
+      - Thu, 02 Jun 2022 04:11:13 GMT
       etag:
-      - '"0x8DA1BC1C10A7367"'
+      - '"0x8DA444DEE3EC8D8"'
       last-modified:
-      - Mon, 11 Apr 2022 13:47:00 GMT
+      - Thu, 02 Jun 2022 04:11:12 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     status:
       code: 200
       message: OK
 - request:
     body: '<?xml version=''1.0'' encoding=''utf-8''?>
 
-      <SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>l</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00Z</Start></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00Z</Expiry></AccessPolicy></SignedIdentifier></SignedIdentifiers>'
+      <SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-06-02T04:11:09Z</Start><Expiry>9999-12-31T23:59:59Z</Expiry><Permission>l</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00Z</Start><Expiry>9999-12-31T23:59:59Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Start>2022-06-02T04:11:12Z</Start><Expiry>2018-01-01T00:00:00Z</Expiry><Permission
+      /></AccessPolicy></SignedIdentifier></SignedIdentifiers>'
     headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage container policy create
       Connection:
       - keep-alive
       Content-Length:
-      - '413'
+      - '574'
+      Content-Type:
+      - application/xml
+      ParameterSetName:
+      - --container-name -n --expiry --account-name --account-key
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.9.6; Windows 10) AZURECLI/2.35.0
+      - AZURECLI/2.37.0 azsdk-python-storage-blob/12.12.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
       x-ms-date:
-      - Mon, 11 Apr 2022 13:47:02 GMT
+      - Thu, 02 Jun 2022 04:11:12 GMT
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     method: PUT
     uri: https://clitest000002.blob.core.windows.net/cont000003?restype=container&comp=acl
   response:
@@ -317,67 +389,85 @@ interactions:
       content-length:
       - '0'
       date:
-      - Mon, 11 Apr 2022 13:47:01 GMT
+      - Thu, 02 Jun 2022 04:11:13 GMT
       etag:
-      - '"0x8DA1BC1C1DFF3B0"'
+      - '"0x8DA444DEF11F432"'
       last-modified:
-      - Mon, 11 Apr 2022 13:47:02 GMT
+      - Thu, 02 Jun 2022 04:11:14 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     status:
       code: 200
       message: OK
 - request:
     body: null
     headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage container policy create
       Connection:
       - keep-alive
+      ParameterSetName:
+      - --container-name -n --permission --start --expiry --account-name --account-key
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.9.6; Windows 10) AZURECLI/2.35.0
+      - AZURECLI/2.37.0 azsdk-python-storage-blob/12.12.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
       x-ms-date:
-      - Mon, 11 Apr 2022 13:47:02 GMT
+      - Thu, 02 Jun 2022 04:11:13 GMT
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     method: GET
     uri: https://clitest000002.blob.core.windows.net/cont000003?restype=container&comp=acl
   response:
     body:
-      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>l</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier></SignedIdentifiers>"
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-06-02T04:11:09.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry><Permission>l</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Start>2022-06-02T04:11:12.0000000Z</Start><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier></SignedIdentifiers>"
     headers:
       content-type:
       - application/xml
       date:
-      - Mon, 11 Apr 2022 13:47:03 GMT
+      - Thu, 02 Jun 2022 04:11:14 GMT
       etag:
-      - '"0x8DA1BC1C1DFF3B0"'
+      - '"0x8DA444DEF11F432"'
       last-modified:
-      - Mon, 11 Apr 2022 13:47:02 GMT
+      - Thu, 02 Jun 2022 04:11:14 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     status:
       code: 200
       message: OK
 - request:
     body: '<?xml version=''1.0'' encoding=''utf-8''?>
 
-      <SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>l</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00Z</Start></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00Z</Start><Expiry>2016-05-01T00:00Z</Expiry><Permission>rwdl</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>'
+      <SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-06-02T04:11:09Z</Start><Expiry>9999-12-31T23:59:59Z</Expiry><Permission>l</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00Z</Start><Expiry>9999-12-31T23:59:59Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Start>2022-06-02T04:11:12Z</Start><Expiry>2018-01-01T00:00:00Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00Z</Start><Expiry>2016-05-01T00:00:00Z</Expiry><Permission>rwdl</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>'
     headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage container policy create
       Connection:
       - keep-alive
       Content-Length:
-      - '591'
+      - '741'
+      Content-Type:
+      - application/xml
+      ParameterSetName:
+      - --container-name -n --permission --start --expiry --account-name --account-key
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.9.6; Windows 10) AZURECLI/2.35.0
+      - AZURECLI/2.37.0 azsdk-python-storage-blob/12.12.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
       x-ms-date:
-      - Mon, 11 Apr 2022 13:47:03 GMT
+      - Thu, 02 Jun 2022 04:11:14 GMT
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     method: PUT
     uri: https://clitest000002.blob.core.windows.net/cont000003?restype=container&comp=acl
   response:
@@ -387,237 +477,295 @@ interactions:
       content-length:
       - '0'
       date:
-      - Mon, 11 Apr 2022 13:47:03 GMT
+      - Thu, 02 Jun 2022 04:11:14 GMT
       etag:
-      - '"0x8DA1BC1C2B5E8FD"'
+      - '"0x8DA444DEFED05D1"'
       last-modified:
-      - Mon, 11 Apr 2022 13:47:03 GMT
+      - Thu, 02 Jun 2022 04:11:15 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     status:
       code: 200
       message: OK
 - request:
     body: null
     headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage container policy list
       Connection:
       - keep-alive
+      ParameterSetName:
+      - --container-name --account-name --account-key
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.9.6; Windows 10) AZURECLI/2.35.0
+      - AZURECLI/2.37.0 azsdk-python-storage-blob/12.12.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
       x-ms-date:
-      - Mon, 11 Apr 2022 13:47:04 GMT
+      - Thu, 02 Jun 2022 04:11:14 GMT
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     method: GET
     uri: https://clitest000002.blob.core.windows.net/cont000003?restype=container&comp=acl
   response:
     body:
-      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>l</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>2016-05-01T00:00:00.0000000Z</Expiry><Permission>rwdl</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-06-02T04:11:09.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry><Permission>l</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Start>2022-06-02T04:11:12.0000000Z</Start><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>2016-05-01T00:00:00.0000000Z</Expiry><Permission>rwdl</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"
     headers:
       content-type:
       - application/xml
       date:
-      - Mon, 11 Apr 2022 13:47:03 GMT
+      - Thu, 02 Jun 2022 04:11:16 GMT
       etag:
-      - '"0x8DA1BC1C2B5E8FD"'
+      - '"0x8DA444DEFED05D1"'
       last-modified:
-      - Mon, 11 Apr 2022 13:47:03 GMT
+      - Thu, 02 Jun 2022 04:11:15 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     status:
       code: 200
       message: OK
 - request:
     body: null
     headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage container policy show
       Connection:
       - keep-alive
+      ParameterSetName:
+      - --container-name -n --account-name --account-key
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.9.6; Windows 10) AZURECLI/2.35.0
+      - AZURECLI/2.37.0 azsdk-python-storage-blob/12.12.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
       x-ms-date:
-      - Mon, 11 Apr 2022 13:47:05 GMT
+      - Thu, 02 Jun 2022 04:11:15 GMT
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     method: GET
     uri: https://clitest000002.blob.core.windows.net/cont000003?restype=container&comp=acl
   response:
     body:
-      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>l</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>2016-05-01T00:00:00.0000000Z</Expiry><Permission>rwdl</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-06-02T04:11:09.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry><Permission>l</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Start>2022-06-02T04:11:12.0000000Z</Start><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>2016-05-01T00:00:00.0000000Z</Expiry><Permission>rwdl</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"
     headers:
       content-type:
       - application/xml
       date:
-      - Mon, 11 Apr 2022 13:47:04 GMT
+      - Thu, 02 Jun 2022 04:11:16 GMT
       etag:
-      - '"0x8DA1BC1C2B5E8FD"'
+      - '"0x8DA444DEFED05D1"'
       last-modified:
-      - Mon, 11 Apr 2022 13:47:03 GMT
+      - Thu, 02 Jun 2022 04:11:15 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     status:
       code: 200
       message: OK
 - request:
     body: null
     headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage container policy show
       Connection:
       - keep-alive
+      ParameterSetName:
+      - --container-name -n --account-name --account-key
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.9.6; Windows 10) AZURECLI/2.35.0
+      - AZURECLI/2.37.0 azsdk-python-storage-blob/12.12.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
       x-ms-date:
-      - Mon, 11 Apr 2022 13:47:06 GMT
+      - Thu, 02 Jun 2022 04:11:16 GMT
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     method: GET
     uri: https://clitest000002.blob.core.windows.net/cont000003?restype=container&comp=acl
   response:
     body:
-      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>l</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>2016-05-01T00:00:00.0000000Z</Expiry><Permission>rwdl</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-06-02T04:11:09.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry><Permission>l</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Start>2022-06-02T04:11:12.0000000Z</Start><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>2016-05-01T00:00:00.0000000Z</Expiry><Permission>rwdl</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"
     headers:
       content-type:
       - application/xml
       date:
-      - Mon, 11 Apr 2022 13:47:06 GMT
+      - Thu, 02 Jun 2022 04:11:18 GMT
       etag:
-      - '"0x8DA1BC1C2B5E8FD"'
+      - '"0x8DA444DEFED05D1"'
       last-modified:
-      - Mon, 11 Apr 2022 13:47:03 GMT
+      - Thu, 02 Jun 2022 04:11:15 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     status:
       code: 200
       message: OK
 - request:
     body: null
     headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage container policy show
       Connection:
       - keep-alive
+      ParameterSetName:
+      - --container-name -n --account-name --account-key
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.9.6; Windows 10) AZURECLI/2.35.0
+      - AZURECLI/2.37.0 azsdk-python-storage-blob/12.12.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
       x-ms-date:
-      - Mon, 11 Apr 2022 13:47:07 GMT
+      - Thu, 02 Jun 2022 04:11:17 GMT
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     method: GET
     uri: https://clitest000002.blob.core.windows.net/cont000003?restype=container&comp=acl
   response:
     body:
-      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>l</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>2016-05-01T00:00:00.0000000Z</Expiry><Permission>rwdl</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-06-02T04:11:09.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry><Permission>l</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Start>2022-06-02T04:11:12.0000000Z</Start><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>2016-05-01T00:00:00.0000000Z</Expiry><Permission>rwdl</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"
     headers:
       content-type:
       - application/xml
       date:
-      - Mon, 11 Apr 2022 13:47:07 GMT
+      - Thu, 02 Jun 2022 04:11:19 GMT
       etag:
-      - '"0x8DA1BC1C2B5E8FD"'
+      - '"0x8DA444DEFED05D1"'
       last-modified:
-      - Mon, 11 Apr 2022 13:47:03 GMT
+      - Thu, 02 Jun 2022 04:11:15 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     status:
       code: 200
       message: OK
 - request:
     body: null
     headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage container policy show
       Connection:
       - keep-alive
+      ParameterSetName:
+      - --container-name -n --account-name --account-key
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.9.6; Windows 10) AZURECLI/2.35.0
+      - AZURECLI/2.37.0 azsdk-python-storage-blob/12.12.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
       x-ms-date:
-      - Mon, 11 Apr 2022 13:47:08 GMT
+      - Thu, 02 Jun 2022 04:11:19 GMT
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     method: GET
     uri: https://clitest000002.blob.core.windows.net/cont000003?restype=container&comp=acl
   response:
     body:
-      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>l</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>2016-05-01T00:00:00.0000000Z</Expiry><Permission>rwdl</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-06-02T04:11:09.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry><Permission>l</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Start>2022-06-02T04:11:12.0000000Z</Start><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>2016-05-01T00:00:00.0000000Z</Expiry><Permission>rwdl</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"
     headers:
       content-type:
       - application/xml
       date:
-      - Mon, 11 Apr 2022 13:47:08 GMT
+      - Thu, 02 Jun 2022 04:11:20 GMT
       etag:
-      - '"0x8DA1BC1C2B5E8FD"'
+      - '"0x8DA444DEFED05D1"'
       last-modified:
-      - Mon, 11 Apr 2022 13:47:03 GMT
+      - Thu, 02 Jun 2022 04:11:15 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     status:
       code: 200
       message: OK
 - request:
     body: null
     headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage container policy update
       Connection:
       - keep-alive
+      ParameterSetName:
+      - --container-name -n --permission --account-name --account-key
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.9.6; Windows 10) AZURECLI/2.35.0
+      - AZURECLI/2.37.0 azsdk-python-storage-blob/12.12.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
       x-ms-date:
-      - Mon, 11 Apr 2022 13:47:09 GMT
+      - Thu, 02 Jun 2022 04:11:20 GMT
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     method: GET
     uri: https://clitest000002.blob.core.windows.net/cont000003?restype=container&comp=acl
   response:
     body:
-      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>l</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>2016-05-01T00:00:00.0000000Z</Expiry><Permission>rwdl</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-06-02T04:11:09.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry><Permission>l</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Start>2022-06-02T04:11:12.0000000Z</Start><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>2016-05-01T00:00:00.0000000Z</Expiry><Permission>rwdl</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"
     headers:
       content-type:
       - application/xml
       date:
-      - Mon, 11 Apr 2022 13:47:09 GMT
+      - Thu, 02 Jun 2022 04:11:21 GMT
       etag:
-      - '"0x8DA1BC1C2B5E8FD"'
+      - '"0x8DA444DEFED05D1"'
       last-modified:
-      - Mon, 11 Apr 2022 13:47:03 GMT
+      - Thu, 02 Jun 2022 04:11:15 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     status:
       code: 200
       message: OK
 - request:
     body: '<?xml version=''1.0'' encoding=''utf-8''?>
 
-      <SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>r</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00Z</Start></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00Z</Start><Expiry>2016-05-01T00:00:00Z</Expiry><Permission>rwdl</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>'
+      <SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-06-02T04:11:09Z</Start><Expiry>9999-12-31T23:59:59Z</Expiry><Permission>r</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00Z</Start><Expiry>9999-12-31T23:59:59Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Start>2022-06-02T04:11:12Z</Start><Expiry>2018-01-01T00:00:00Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00Z</Start><Expiry>2016-05-01T00:00:00Z</Expiry><Permission>rwdl</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>'
     headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage container policy update
       Connection:
       - keep-alive
       Content-Length:
-      - '597'
+      - '741'
+      Content-Type:
+      - application/xml
+      ParameterSetName:
+      - --container-name -n --permission --account-name --account-key
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.9.6; Windows 10) AZURECLI/2.35.0
+      - AZURECLI/2.37.0 azsdk-python-storage-blob/12.12.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
       x-ms-date:
-      - Mon, 11 Apr 2022 13:47:10 GMT
+      - Thu, 02 Jun 2022 04:11:21 GMT
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     method: PUT
     uri: https://clitest000002.blob.core.windows.net/cont000003?restype=container&comp=acl
   response:
@@ -627,101 +775,127 @@ interactions:
       content-length:
       - '0'
       date:
-      - Mon, 11 Apr 2022 13:47:10 GMT
+      - Thu, 02 Jun 2022 04:11:21 GMT
       etag:
-      - '"0x8DA1BC1C6D7327A"'
+      - '"0x8DA444DF425060D"'
       last-modified:
-      - Mon, 11 Apr 2022 13:47:10 GMT
+      - Thu, 02 Jun 2022 04:11:22 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     status:
       code: 200
       message: OK
 - request:
     body: null
     headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage container policy show
       Connection:
       - keep-alive
+      ParameterSetName:
+      - --container-name -n --account-name --account-key
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.9.6; Windows 10) AZURECLI/2.35.0
+      - AZURECLI/2.37.0 azsdk-python-storage-blob/12.12.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
       x-ms-date:
-      - Mon, 11 Apr 2022 13:47:11 GMT
+      - Thu, 02 Jun 2022 04:11:21 GMT
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     method: GET
     uri: https://clitest000002.blob.core.windows.net/cont000003?restype=container&comp=acl
   response:
     body:
-      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>r</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>2016-05-01T00:00:00.0000000Z</Expiry><Permission>rwdl</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-06-02T04:11:09.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry><Permission>r</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Start>2022-06-02T04:11:12.0000000Z</Start><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>2016-05-01T00:00:00.0000000Z</Expiry><Permission>rwdl</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"
     headers:
       content-type:
       - application/xml
       date:
-      - Mon, 11 Apr 2022 13:47:10 GMT
+      - Thu, 02 Jun 2022 04:11:23 GMT
       etag:
-      - '"0x8DA1BC1C6D7327A"'
+      - '"0x8DA444DF425060D"'
       last-modified:
-      - Mon, 11 Apr 2022 13:47:10 GMT
+      - Thu, 02 Jun 2022 04:11:22 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     status:
       code: 200
       message: OK
 - request:
     body: null
     headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage container policy delete
       Connection:
       - keep-alive
+      ParameterSetName:
+      - --container-name -n --account-name --account-key
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.9.6; Windows 10) AZURECLI/2.35.0
+      - AZURECLI/2.37.0 azsdk-python-storage-blob/12.12.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
       x-ms-date:
-      - Mon, 11 Apr 2022 13:47:12 GMT
+      - Thu, 02 Jun 2022 04:11:22 GMT
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     method: GET
     uri: https://clitest000002.blob.core.windows.net/cont000003?restype=container&comp=acl
   response:
     body:
-      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>r</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>2016-05-01T00:00:00.0000000Z</Expiry><Permission>rwdl</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-06-02T04:11:09.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry><Permission>r</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Start>2022-06-02T04:11:12.0000000Z</Start><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>2016-05-01T00:00:00.0000000Z</Expiry><Permission>rwdl</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"
     headers:
       content-type:
       - application/xml
       date:
-      - Mon, 11 Apr 2022 13:47:12 GMT
+      - Thu, 02 Jun 2022 04:11:24 GMT
       etag:
-      - '"0x8DA1BC1C6D7327A"'
+      - '"0x8DA444DF425060D"'
       last-modified:
-      - Mon, 11 Apr 2022 13:47:10 GMT
+      - Thu, 02 Jun 2022 04:11:22 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     status:
       code: 200
       message: OK
 - request:
     body: '<?xml version=''1.0'' encoding=''utf-8''?>
 
-      <SignedIdentifiers><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00Z</Start></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00Z</Start><Expiry>2016-05-01T00:00:00Z</Expiry><Permission>rwdl</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>'
+      <SignedIdentifiers><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00Z</Start><Expiry>9999-12-31T23:59:59Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Start>2022-06-02T04:11:12Z</Start><Expiry>2018-01-01T00:00:00Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00Z</Start><Expiry>2016-05-01T00:00:00Z</Expiry><Permission>rwdl</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>'
     headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage container policy delete
       Connection:
       - keep-alive
       Content-Length:
-      - '491'
+      - '563'
+      Content-Type:
+      - application/xml
+      ParameterSetName:
+      - --container-name -n --account-name --account-key
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.9.6; Windows 10) AZURECLI/2.35.0
+      - AZURECLI/2.37.0 azsdk-python-storage-blob/12.12.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
       x-ms-date:
-      - Mon, 11 Apr 2022 13:47:13 GMT
+      - Thu, 02 Jun 2022 04:11:23 GMT
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     method: PUT
     uri: https://clitest000002.blob.core.windows.net/cont000003?restype=container&comp=acl
   response:
@@ -731,49 +905,57 @@ interactions:
       content-length:
       - '0'
       date:
-      - Mon, 11 Apr 2022 13:47:12 GMT
+      - Thu, 02 Jun 2022 04:11:25 GMT
       etag:
-      - '"0x8DA1BC1C84C5DC3"'
+      - '"0x8DA444DF5AA8C16"'
       last-modified:
-      - Mon, 11 Apr 2022 13:47:12 GMT
+      - Thu, 02 Jun 2022 04:11:25 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     status:
       code: 200
       message: OK
 - request:
     body: null
     headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage container policy list
       Connection:
       - keep-alive
+      ParameterSetName:
+      - --container-name --account-name --account-key
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.9.6; Windows 10) AZURECLI/2.35.0
+      - AZURECLI/2.37.0 azsdk-python-storage-blob/12.12.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
       x-ms-date:
-      - Mon, 11 Apr 2022 13:47:13 GMT
+      - Thu, 02 Jun 2022 04:11:24 GMT
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     method: GET
     uri: https://clitest000002.blob.core.windows.net/cont000003?restype=container&comp=acl
   response:
     body:
-      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>2016-05-01T00:00:00.0000000Z</Expiry><Permission>rwdl</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Start>2022-06-02T04:11:12.0000000Z</Start><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>2016-05-01T00:00:00.0000000Z</Expiry><Permission>rwdl</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"
     headers:
       content-type:
       - application/xml
       date:
-      - Mon, 11 Apr 2022 13:47:13 GMT
+      - Thu, 02 Jun 2022 04:11:25 GMT
       etag:
-      - '"0x8DA1BC1C84C5DC3"'
+      - '"0x8DA444DF5AA8C16"'
       last-modified:
-      - Mon, 11 Apr 2022 13:47:12 GMT
+      - Thu, 02 Jun 2022 04:11:25 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     status:
       code: 200
       message: OK
