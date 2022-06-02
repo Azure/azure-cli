@@ -167,104 +167,47 @@ class StorageBlobCopyTests(StorageScenarioMixin, LiveScenarioTest):
                                   target_container1, source_uri)
 
     @ResourceGroupPreparer()
-    @StorageAccountPreparer(kind='StorageV2', hns=True)
-    def test_storage_blob_copy_batch_hns(self, storage_account_info):
-        src_container = self.create_container(storage_account_info)
-        dst_container = self.create_container(storage_account_info)
-
-        source_file = self.create_temp_file(16, full_random=False)
-        blobs = ['blobğşŞ', 'blogÉ®']
-
-        for blob_name in blobs:
-            self.storage_cmd('storage blob upload -c {} -f "{}" -n {}', storage_account_info,
-                             src_container, source_file, blob_name)
-
-        # Empty dir will be skipped
-        self.storage_cmd('storage fs directory create -f {} -n newdir', storage_account_info, src_container)
-
-        self.storage_cmd('storage blob copy start-batch --destination-container {} --source-container {}',
-                         storage_account_info, dst_container, src_container).assert_with_checks(
-            JMESPathCheck('length(@)', 2))
-        self.storage_cmd('storage blob copy start-batch --destination-container {} --pattern "blob*" '
-                         '--source-container {}',
-                         storage_account_info, dst_container, src_container).assert_with_checks(
-            JMESPathCheck('length(@)', 1))
-
-    @ResourceGroupPreparer()
-    @StorageAccountPreparer(kind='StorageV2')
-    def test_storage_blob_copy_batch_non_hns(self, storage_account_info):
-        src_container = self.create_container(storage_account_info)
-        dst_container = self.create_container(storage_account_info)
-
-        source_file = self.create_temp_file(16, full_random=False)
-        blobs = ['blobğşŞ', 'blogÉ®']
-
-        for blob_name in blobs:
-            self.storage_cmd('storage blob upload -c {} -f "{}" -n {}', storage_account_info,
-                             src_container, source_file, blob_name)
-
-        self.storage_cmd('storage fs directory create -f {} -n newdir', storage_account_info, src_container)
-
-        self.storage_cmd('storage blob copy start-batch --destination-container {} --source-container {}',
-                         storage_account_info, dst_container, src_container).assert_with_checks(
-            JMESPathCheck('length(@)', 3))
-        self.storage_cmd('storage blob copy start-batch --destination-container {} --pattern "blob*" '
-                         '--source-container {}',
-                         storage_account_info, dst_container, src_container).assert_with_checks(
-            JMESPathCheck('length(@)', 1))
-
-    @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='account1', kind='StorageV2', hns=True)
     @StorageAccountPreparer(parameter_name='account2', kind='StorageV2')
-    def test_storage_blob_copy_batch_mixed(self, resource_group, account1, account2):
-        src_account_info = self.get_account_info(resource_group, account1)
-        dst_account_info = self.get_account_info(resource_group, account2)
-
-        # copy hns to non-hns
-        src_container = self.create_container(src_account_info)
-        dst_container = self.create_container(dst_account_info)
-
+    def test_storage_blob_copy_batch(self, resource_group, account1, account2):
         source_file = self.create_temp_file(16, full_random=False)
-        blobs = ['blobğşŞ', 'blogÉ®']
+        source_file2 = self.create_temp_file(16, full_random=False)
 
-        for blob_name in blobs:
-            self.storage_cmd('storage blob upload -c {} -f "{}" -n {}', src_account_info,
-                             src_container, source_file, blob_name)
+        for src_account, dst_account in [(account1, account1), (account2, account2), (account1, account2),
+                                         (account2, account1)]:
+            src_account_info = self.get_account_info(resource_group, src_account)
+            dst_account_info = self.get_account_info(resource_group, dst_account)
+            src_container = self.create_container(src_account_info)
+            dst_container = self.create_container(dst_account_info)
+            src_share = self.create_share(src_account_info)
 
-        self.storage_cmd('storage fs directory create -f {} -n newdir', src_account_info, src_container)
+            blobs = ['blobğşŞ', 'blogÉ®']
+            for blob_name in blobs:
+                self.storage_cmd('storage blob upload -c {} -f "{}" -n {}', src_account_info,
+                                 src_container, source_file, blob_name)
 
-        self.storage_cmd('storage blob copy start-batch --destination-container {} --source-container {} '
-                         '--source-account-name {} --source-account-key {}',
-                         dst_account_info, dst_container, src_container, src_account_info[0],
-                         src_account_info[1]).assert_with_checks(
-            JMESPathCheck('length(@)', 3))
-        self.storage_cmd('storage blob copy start-batch --destination-container {} --pattern "blob*" '
-                         '--source-container {} --source-account-name {} --source-account-key {}',
-                         dst_account_info, dst_container, src_container, src_account_info[0],
-                         src_account_info[1]).assert_with_checks(
-            JMESPathCheck('length(@)', 1))
+            self.storage_cmd('storage fs directory create -f {} -n newdir', src_account_info, src_container)
 
-        # copy non-hns to hns
-        src_account_info, dst_account_info = dst_account_info, src_account_info
-        src_container = self.create_container(src_account_info)
-        dst_container = self.create_container(dst_account_info)
+            # empty dir will be skipped when copy from hns to hns
+            copied_file = 2 if (src_account, dst_account) == (account1, account1) else 3
+            self.storage_cmd('storage blob copy start-batch --destination-container {} --source-container {} '
+                             '--source-account-name {} --source-account-key {}',
+                             dst_account_info, dst_container, src_container, src_account_info[0],
+                             src_account_info[1]).assert_with_checks(
+                JMESPathCheck('length(@)', copied_file))
+            self.storage_cmd('storage blob copy start-batch --destination-container {} --pattern "blob*" '
+                             '--source-container {} --source-account-name {} --source-account-key {}',
+                             dst_account_info, dst_container, src_container, src_account_info[0],
+                             src_account_info[1]).assert_with_checks(
+                JMESPathCheck('length(@)', 1))
 
-        source_file = self.create_temp_file(16, full_random=False)
-        blobs = ['blobğşŞ', 'blogÉ®']
+            # copy from share
+            for file in [source_file, source_file2]:
+                self.storage_cmd('storage file upload -s {} --source "{}"', src_account_info,
+                                 src_share, file)
 
-        for blob_name in blobs:
-            self.storage_cmd('storage blob upload -c {} -f "{}" -n {}', src_account_info,
-                             src_container, source_file, blob_name)
-
-        self.storage_cmd('storage fs directory create -f {} -n newdir', src_account_info, src_container)
-
-        self.storage_cmd('storage blob copy start-batch --destination-container {} --source-container {} '
-                         '--source-account-name {} --source-account-key {}',
-                         dst_account_info, dst_container, src_container, src_account_info[0],
-                         src_account_info[1]).assert_with_checks(
-            JMESPathCheck('length(@)', 3))
-        self.storage_cmd('storage blob copy start-batch --destination-container {} --pattern "blob*" '
-                         '--source-container {} --source-account-name {} --source-account-key {}',
-                         dst_account_info, dst_container, src_container, src_account_info[0],
-                         src_account_info[1]).assert_with_checks(
-            JMESPathCheck('length(@)', 1))
+            self.storage_cmd('storage blob copy start-batch --destination-container {} --source-share {} '
+                             '--source-account-name {} --source-account-key {}',
+                             dst_account_info, dst_container, src_share, src_account_info[0],
+                             src_account_info[1]).assert_with_checks(
+                JMESPathCheck('length(@)', 2))

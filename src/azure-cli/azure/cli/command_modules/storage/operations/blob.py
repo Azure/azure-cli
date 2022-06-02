@@ -895,7 +895,7 @@ def _copy_blob_to_blob_container(cmd, blob_service, source_blob_service, destina
         return blob_client.url
     except HttpResponseError as ex:
         if 'One of the request inputs is not valid' in str(ex):
-            # ignore error if source blob is directory in Data Lake Gen2.
+            # ignore error when copy from Data Lake Gen2 to Data Lake Gen2 and source blob is directory
             pass
         else:
             error_template = 'Failed to copy blob {} to container {}. {}'
