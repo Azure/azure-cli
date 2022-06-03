@@ -29,7 +29,7 @@ class StorageBlobCopyTests(StorageScenarioMixin, LiveScenarioTest):
                                     source_container).get_output_in_json()['snapshot']
 
         source_file = self.create_temp_file(24, full_random=True)
-        self.storage_cmd('storage blob upload -c {} -f "{}" -n src', source_account_info,
+        self.storage_cmd('storage blob upload -c {} -f "{}" -n src --overwrite', source_account_info,
                          source_container, source_file)
 
         from datetime import datetime, timedelta
@@ -166,4 +166,48 @@ class StorageBlobCopyTests(StorageScenarioMixin, LiveScenarioTest):
         self.storage_cmd_negative('storage blob copy start -b dst -c {} --source-uri {} --requires-sync', account1_info,
                                   target_container1, source_uri)
 
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(parameter_name='account1', kind='StorageV2', hns=True)
+    @StorageAccountPreparer(parameter_name='account2', kind='StorageV2')
+    def test_storage_blob_copy_batch(self, resource_group, account1, account2):
+        source_file = self.create_temp_file(16, full_random=False)
+        source_file2 = self.create_temp_file(16, full_random=False)
 
+        for src_account, dst_account in [(account1, account1), (account2, account2), (account1, account2),
+                                         (account2, account1)]:
+            src_account_info = self.get_account_info(resource_group, src_account)
+            dst_account_info = self.get_account_info(resource_group, dst_account)
+            src_container = self.create_container(src_account_info)
+            dst_container = self.create_container(dst_account_info)
+            src_share = self.create_share(src_account_info)
+
+            blobs = ['blobğşŞ', 'blogÉ®']
+            for blob_name in blobs:
+                self.storage_cmd('storage blob upload -c {} -f "{}" -n {}', src_account_info,
+                                 src_container, source_file, blob_name)
+
+            self.storage_cmd('storage fs directory create -f {} -n newdir', src_account_info, src_container)
+
+            # empty dir will be skipped when copy from hns to hns
+            copied_file = 2 if (src_account, dst_account) == (account1, account1) else 3
+            self.storage_cmd('storage blob copy start-batch --destination-container {} --source-container {} '
+                             '--source-account-name {} --source-account-key {}',
+                             dst_account_info, dst_container, src_container, src_account_info[0],
+                             src_account_info[1]).assert_with_checks(
+                JMESPathCheck('length(@)', copied_file))
+            self.storage_cmd('storage blob copy start-batch --destination-container {} --pattern "blob*" '
+                             '--source-container {} --source-account-name {} --source-account-key {}',
+                             dst_account_info, dst_container, src_container, src_account_info[0],
+                             src_account_info[1]).assert_with_checks(
+                JMESPathCheck('length(@)', 1))
+
+            # copy from share
+            for file in [source_file, source_file2]:
+                self.storage_cmd('storage file upload -s {} --source "{}"', src_account_info,
+                                 src_share, file)
+
+            self.storage_cmd('storage blob copy start-batch --destination-container {} --source-share {} '
+                             '--source-account-name {} --source-account-key {}',
+                             dst_account_info, dst_container, src_share, src_account_info[0],
+                             src_account_info[1]).assert_with_checks(
+                JMESPathCheck('length(@)', 2))

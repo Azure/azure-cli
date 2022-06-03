@@ -62,9 +62,8 @@ class StorageBlobShareScenarios(StorageScenarioMixin, LiveScenarioTest):
             'storage blob generate-sas -c {} -n "{}" --permissions rw --https-only --expiry {} --account-name {} -otsv',
             account_info, container, blob, expiry, storage_account).output.strip()
         # print(sas_token
-        blob_url = self.storage_cmd(
-            'storage blob url -c {} -n "{}" --account-name {} --sas-token "{}" -otsv', account_info,
-            container, blob, storage_account, sas_token).output.strip()
+        blob_url = self.cmd(f'storage blob url -c {container} -n "{blob}" --account-name {storage_account} '
+                            f'--sas-token "{sas_token}" -otsv').output.strip()
         self.assertIn('?' + sas_token, blob_url)
         self.assertEqual(requests.get(blob_url).status_code, 200)
 

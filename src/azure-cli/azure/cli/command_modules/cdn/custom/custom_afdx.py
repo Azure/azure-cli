@@ -267,7 +267,8 @@ def create_afd_origin(client: AFDOriginsOperations,
                       https_port: int = 443,
                       origin_host_header: Optional[str] = None,
                       priority: int = 1,
-                      weight: int = 1000):
+                      weight: int = 1000,
+                      enforce_certificate_name_check: bool = True):
 
     shared_private_link_resource = None
     if enable_private_link:
@@ -289,7 +290,8 @@ def create_afd_origin(client: AFDOriginsOperations,
                                    priority=priority,
                                    weight=weight,
                                    shared_private_link_resource=shared_private_link_resource,
-                                   enabled_state=enabled_state))
+                                   enabled_state=enabled_state,
+                                   enforce_certificate_name_check=enforce_certificate_name_check))
 
 
 def update_afd_origin(client: AFDOriginsOperations,
@@ -308,7 +310,8 @@ def update_afd_origin(client: AFDOriginsOperations,
                       private_link_resource: str = None,
                       private_link_location: str = None,
                       private_link_sub_resource_type: str = None,
-                      private_link_request_message: str = None):
+                      private_link_request_message: str = None,
+                      enforce_certificate_name_check: bool = None):
 
     existing = client.get(resource_group_name, profile_name, origin_group_name, origin_name)
     origin = AFDOrigin(
@@ -318,12 +321,14 @@ def update_afd_origin(client: AFDOriginsOperations,
         origin_host_header=origin_host_header,
         priority=priority,
         weight=weight,
-        enabled_state=enabled_state)
+        enabled_state=enabled_state,
+        enforce_certificate_name_check=enforce_certificate_name_check)
 
     _update_mapper(
         existing,
         origin,
-        ["host_name", "http_port", "https_port", "origin_host_header", "priority", "weight", "enabled_state"])
+        ["host_name", "http_port", "https_port", "origin_host_header",
+         "priority", "weight", "enabled_state", "enforce_certificate_name_check"])
 
     if enable_private_link is not None and not enable_private_link:
         origin.shared_private_link_resource = None
@@ -373,7 +378,7 @@ def create_afd_route(cmd,
                      origin_group: str,
                      forwarding_protocol: ForwardingProtocol,
                      enabled_state: EnabledState = EnabledState.ENABLED.value,
-                     link_to_default_domain: LinkToDefaultDomain = None,
+                     link_to_default_domain: LinkToDefaultDomain = LinkToDefaultDomain.DISABLED.value,
                      is_compression_enabled: bool = False,
                      content_types_to_compress: List[str] = None,
                      enable_caching: bool = False,
@@ -439,8 +444,7 @@ def create_afd_route(cmd,
                                    rule_sets=formatted_rule_sets,
                                    enabled_state=enabled_state,
                                    cache_configuration=cache_configuration,
-                                   link_to_default_domain=LinkToDefaultDomain.enabled if link_to_default_domain else
-                                   LinkToDefaultDomain.disabled))
+                                   link_to_default_domain=link_to_default_domain))
 
 
 # pylint: disable=too-many-locals
@@ -495,7 +499,7 @@ def update_afd_route(cmd,
             origin_group = f'/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}' \
                            f'/providers/Microsoft.Cdn/profiles/{profile_name}/originGroups/{origin_group}'
 
-        route.origin_group = origin_group
+        route.origin_group = ResourceReference(id=origin_group)
 
     if rule_sets is not None:
         formatted_rule_sets = []
@@ -565,7 +569,7 @@ def create_afd_rule(cmd, client: RulesOperations, resource_group_name, profile_n
                     header_name=None, header_value=None, query_parameters=None,
                     redirect_type=None, redirect_protocol=None, custom_hostname=None, custom_path=None,
                     custom_querystring=None, custom_fragment=None, source_pattern=None,
-                    destination=None, preserve_unmatched_path=None,
+                    destination=None, preserve_unmatched_path=None, origin_group=None,
                     enable_caching=None, is_compression_enabled=None, query_string_caching_behavior=None,
                     match_processing_behavior: MatchProcessingBehavior = None,
                     forwarding_protocol: ForwardingProtocol = None):
@@ -583,6 +587,7 @@ def create_afd_rule(cmd, client: RulesOperations, resource_group_name, profile_n
                            header_value, None, None if query_parameters is None else ",".join(query_parameters),
                            redirect_type, redirect_protocol, custom_hostname, custom_path, custom_querystring,
                            custom_fragment, source_pattern, destination, preserve_unmatched_path,
+                           origin_group=origin_group,
                            cmd=cmd,
                            enable_caching=enable_caching,
                            resource_group_name=resource_group_name,

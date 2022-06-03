@@ -18,8 +18,11 @@ from .action import (
 # The enum value will be used in command name
 class RESOURCE(Enum):
     WebApp = 'webapp'
-    SpringCloud = 'spring-cloud'
+    # `az spring-cloud` migrated to `az spring`
+    SpringCloud = 'spring'
+    SpringCloudDeprecated = 'spring-cloud'
     KubernetesCluster = 'aks'
+    ContainerApp = 'containerapp'
     CosmosCassandra = 'cosmos-cassandra'
     CosmosGremlin = 'cosmos-gremlin'
     CosmosMongo = 'cosmos-mongo'
@@ -33,7 +36,7 @@ class RESOURCE(Enum):
     PostgresFlexible = 'postgres-flexible'
     Mysql = 'mysql'
     MysqlFlexible = 'mysql-flexible'
-    # Sql = 'sql'
+    Sql = 'sql'
     Redis = 'redis'
     RedisEnterprise = 'redis-enterprise'
     KeyVault = 'keyvault'
@@ -41,6 +44,7 @@ class RESOURCE(Enum):
     AppConfig = 'appconfig'
     ServiceBus = 'servicebus'
     SignalR = 'signalr'
+    WebPubSub = 'webpubsub'
     ConfluentKafka = 'confluent-cloud'
 
 
@@ -68,7 +72,10 @@ class CLIENT_TYPE(Enum):
 
 
 # The source resources released as CLI extensions
-SOURCE_RESOURCES_IN_EXTENSION = [RESOURCE.SpringCloud]
+SOURCE_RESOURCES_IN_EXTENSION = [RESOURCE.SpringCloud, RESOURCE.SpringCloudDeprecated, RESOURCE.ContainerApp]
+
+# The source resources using user token
+SOURCE_RESOURCES_USERTOKEN = [RESOURCE.KubernetesCluster]
 
 # The target resources using user token
 TARGET_RESOURCES_USERTOKEN = [RESOURCE.PostgresFlexible, RESOURCE.MysqlFlexible, RESOURCE.KeyVault]
@@ -77,8 +84,9 @@ TARGET_RESOURCES_USERTOKEN = [RESOURCE.PostgresFlexible, RESOURCE.MysqlFlexible,
 SOURCE_RESOURCES = {
     RESOURCE.WebApp: '/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/Microsoft.Web/sites/{site}',
     RESOURCE.SpringCloud: '/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/Microsoft.AppPlatform/Spring/{spring}/apps/{app}/deployments/{deployment}',
-    # TODO: Houk, uncomment this when AKS is officially supported
+    RESOURCE.SpringCloudDeprecated: '/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/Microsoft.AppPlatform/Spring/{spring}/apps/{app}/deployments/{deployment}',
     # RESOURCE.KubernetesCluster: '/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/Microsoft.ContainerService/managedClusters/{cluster}',
+    RESOURCE.ContainerApp: '/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/Microsoft.App/containerApps/{app}'
 }
 
 
@@ -88,7 +96,7 @@ TARGET_RESOURCES = {
     RESOURCE.PostgresFlexible: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{server}/databases/{database}',
     RESOURCE.MysqlFlexible: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.DBforMySQL/flexibleServers/{server}/databases/{database}',
     RESOURCE.Mysql: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.DBForMySQL/servers/{server}/databases/{database}',
-    # RESOURCE.Sql: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.Sql/servers/{server}/databases/{database}',
+    RESOURCE.Sql: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.Sql/servers/{server}/databases/{database}',
     RESOURCE.Redis: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.Cache/redis/{server}/databases/{database}',
     RESOURCE.RedisEnterprise: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.Cache/redisEnterprise/{server}/databases/{database}',
 
@@ -108,6 +116,7 @@ TARGET_RESOURCES = {
     RESOURCE.EventHub: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.EventHub/namespaces/{namespace}',
     RESOURCE.ServiceBus: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.ServiceBus/namespaces/{namespace}',
     RESOURCE.SignalR: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.SignalRService/SignalR/{signalr}',
+    RESOURCE.WebPubSub: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.SignalRService/WebPubSub/{webpubsub}',
     RESOURCE.ConfluentKafka: '#',  # special target resource, no arm resource id
 }
 
@@ -150,6 +159,28 @@ SOURCE_RESOURCES_PARAMS = {
             'placeholder': 'MyDeployment'
         }
     },
+    RESOURCE.SpringCloudDeprecated: {
+        'source_resource_group': {
+            'options': ['--resource-group', '-g'],
+            'help': 'The resource group which contains the spring-cloud',
+            'placeholder': 'SpringCloudRG'
+        },
+        'spring': {
+            'options': ['--service'],
+            'help': 'Name of the spring-cloud service',
+            'placeholder': 'MySpringService'
+        },
+        'app': {
+            'options': ['--app'],
+            'help': 'Name of the spring-cloud app',
+            'placeholder': 'MyApp'
+        },
+        'deployment': {
+            'options': ['--deployment'],
+            'help': 'The deployment name of the app',
+            'placeholder': 'MyDeployment'
+        }
+    },
     RESOURCE.KubernetesCluster: {
         'source_resource_group': {
             'options': ['--resource-group', '-g'],
@@ -161,7 +192,31 @@ SOURCE_RESOURCES_PARAMS = {
             'help': 'Name of the managed cluster',
             'placeholder': 'MyCluster'
         }
+    },
+    RESOURCE.ContainerApp: {
+        'source_resource_group': {
+            'options': ['--resource-group', '-g'],
+            'help': 'The resource group which contains the container app',
+            'placeholder': 'ContainerAppRG'
+        },
+        'app': {
+            'options': ['--name', '-n'],
+            'help': 'Name of the container app',
+            'placeholder': 'MyContainerApp'
+        }
     }
+}
+
+
+# The dict defines the required parameters used in the source resources for creation.
+SOURCE_RESOURCES_CREATE_PARAMS = {
+    RESOURCE.ContainerApp: {
+        'scope': {
+            'options': ['--container', '-c'],
+            'help': 'The container where the connection information will be saved (as environment variables).',
+            'placeholder': 'MyContainer'
+        },
+    },
 }
 
 
@@ -237,23 +292,23 @@ TARGET_RESOURCES_PARAMS = {
             'placeholder': 'MyDB'
         }
     },
-    # RESOURCE.Sql: {
-    #     'target_resource_group': {
-    #         'options': ['--target-resource-group', '--tg'],
-    #         'help': 'The resource group which contains the sql server',
-    #         'placeholder': 'SqlRG'
-    #     },
-    #     'server': {
-    #         'options': ['--server'],
-    #         'help': 'Name of the sql server',
-    #         'placeholder': 'MyServer'
-    #     },
-    #     'database': {
-    #         'options': ['--database'],
-    #         'help': 'Name of the sql database',
-    #         'placeholder': 'MyDB'
-    #     }
-    # },
+    RESOURCE.Sql: {
+        'target_resource_group': {
+            'options': ['--target-resource-group', '--tg'],
+            'help': 'The resource group which contains the sql server',
+            'placeholder': 'SqlRG'
+        },
+        'server': {
+            'options': ['--server'],
+            'help': 'Name of the sql server',
+            'placeholder': 'MyServer'
+        },
+        'database': {
+            'options': ['--database'],
+            'help': 'Name of the sql database',
+            'placeholder': 'MyDB'
+        }
+    },
     RESOURCE.Redis: {
         'target_resource_group': {
             'options': ['--target-resource-group', '--tg'],
@@ -485,6 +540,18 @@ TARGET_RESOURCES_PARAMS = {
             'help': 'Name of the signalr service',
             'placeholder': 'MySignalR'
         }
+    },
+    RESOURCE.WebPubSub: {
+        'target_resource_group': {
+            'options': ['--target-resource-group', '--tg'],
+            'help': 'The resource group which contains the webpubsub',
+            'placeholder': 'WebpubsubRG'
+        },
+        'webpubsub': {
+            'options': ['--webpubsub'],
+            'help': 'Name of the webpubsub service',
+            'placeholder': 'MyWebPubSub'
+        }
     }
 }
 
@@ -493,6 +560,7 @@ TARGET_RESOURCES_PARAMS = {
 TARGET_SUPPORT_SERVICE_ENDPOINT = {
     RESOURCE.Postgres: True,
     RESOURCE.Mysql: True,
+    RESOURCE.Sql: True,
     RESOURCE.StorageBlob: True,
     RESOURCE.StorageQueue: True,
     RESOURCE.StorageFile: True,
@@ -505,7 +573,6 @@ TARGET_SUPPORT_SERVICE_ENDPOINT = {
     RESOURCE.CosmosTable: True,
     RESOURCE.ServiceBus: True,
     RESOURCE.EventHub: True,
-    # RESOURCE.Sql: True
 }
 
 # The dict defines the parameters used to provide auth info
@@ -556,7 +623,7 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.PostgresFlexible: [AUTH_TYPE.Secret],
         RESOURCE.Mysql: [AUTH_TYPE.Secret],
         RESOURCE.MysqlFlexible: [AUTH_TYPE.Secret],
-        # RESOURCE.Sql: [AUTH_TYPE.Secret],
+        RESOURCE.Sql: [AUTH_TYPE.Secret],
         RESOURCE.Redis: [AUTH_TYPE.SecretAuto],
         RESOURCE.RedisEnterprise: [AUTH_TYPE.SecretAuto],
 
@@ -576,6 +643,7 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.EventHub: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.ServiceBus: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.SignalR: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.WebPubSub: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.ConfluentKafka: [AUTH_TYPE.Secret],
     },
     RESOURCE.SpringCloud: {
@@ -583,7 +651,7 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.PostgresFlexible: [AUTH_TYPE.Secret],
         RESOURCE.Mysql: [AUTH_TYPE.Secret],
         RESOURCE.MysqlFlexible: [AUTH_TYPE.Secret],
-        # RESOURCE.Sql: [AUTH_TYPE.Secret],
+        RESOURCE.Sql: [AUTH_TYPE.Secret],
         RESOURCE.Redis: [AUTH_TYPE.SecretAuto],
         RESOURCE.RedisEnterprise: [AUTH_TYPE.SecretAuto],
 
@@ -602,6 +670,8 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.AppConfig: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.EventHub: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.ServiceBus: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.SignalR: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.WebPubSub: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.ConfluentKafka: [AUTH_TYPE.Secret],
     },
     RESOURCE.KubernetesCluster: {
@@ -609,7 +679,7 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.PostgresFlexible: [AUTH_TYPE.Secret],
         RESOURCE.Mysql: [AUTH_TYPE.Secret],
         RESOURCE.MysqlFlexible: [AUTH_TYPE.Secret],
-        # RESOURCE.Sql: [AUTH_TYPE.Secret],
+        RESOURCE.Sql: [AUTH_TYPE.Secret],
         RESOURCE.Redis: [AUTH_TYPE.SecretAuto],
         RESOURCE.RedisEnterprise: [AUTH_TYPE.SecretAuto],
 
@@ -629,9 +699,39 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.EventHub: [AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.ServiceBus: [AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.SignalR: [AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.WebPubSub: [AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.ConfluentKafka: [AUTH_TYPE.Secret],
+    },
+    RESOURCE.ContainerApp: {
+        RESOURCE.Postgres: [AUTH_TYPE.Secret],
+        RESOURCE.PostgresFlexible: [AUTH_TYPE.Secret],
+        RESOURCE.Mysql: [AUTH_TYPE.Secret],
+        RESOURCE.MysqlFlexible: [AUTH_TYPE.Secret],
+        RESOURCE.Sql: [AUTH_TYPE.Secret],
+        RESOURCE.Redis: [AUTH_TYPE.SecretAuto],
+        RESOURCE.RedisEnterprise: [AUTH_TYPE.SecretAuto],
+
+        RESOURCE.CosmosCassandra: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.CosmosGremlin: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.CosmosMongo: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.CosmosTable: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.CosmosSql: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
+
+        RESOURCE.StorageBlob: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.StorageQueue: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.StorageFile: [AUTH_TYPE.SecretAuto],
+        RESOURCE.StorageTable: [AUTH_TYPE.SecretAuto],
+
+        RESOURCE.KeyVault: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.AppConfig: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.EventHub: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.ServiceBus: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.SignalR: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.WebPubSub: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.ConfluentKafka: [AUTH_TYPE.Secret],
     },
 }
+SUPPORTED_AUTH_TYPE[RESOURCE.SpringCloudDeprecated] = SUPPORTED_AUTH_TYPE[RESOURCE.SpringCloud]
 
 
 # The dict defines the supported client types of each source-target resource pair
@@ -686,18 +786,18 @@ SUPPORTED_CLIENT_TYPE = {
             CLIENT_TYPE.SpringBoot,
             CLIENT_TYPE.Blank
         ],
-        # RESOURCE.Sql: [
-        #     CLIENT_TYPE.Dotnet,
-        #     CLIENT_TYPE.Java,
-        #     CLIENT_TYPE.Python,
-        #     CLIENT_TYPE.Nodejs,
-        #     CLIENT_TYPE.Go,
-        #     CLIENT_TYPE.Php,
-        #     CLIENT_TYPE.Ruby,
-        #     CLIENT_TYPE.Django,
-        #     CLIENT_TYPE.SpringBoot,
-        #     CLIENT_TYPE.Blank
-        # ],
+        RESOURCE.Sql: [
+            CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.Java,
+            CLIENT_TYPE.Python,
+            CLIENT_TYPE.Nodejs,
+            CLIENT_TYPE.Go,
+            CLIENT_TYPE.Php,
+            CLIENT_TYPE.Ruby,
+            CLIENT_TYPE.Django,
+            CLIENT_TYPE.SpringBoot,
+            CLIENT_TYPE.Blank
+        ],
         RESOURCE.Redis: [
             CLIENT_TYPE.Dotnet,
             CLIENT_TYPE.Java,
@@ -826,6 +926,13 @@ SUPPORTED_CLIENT_TYPE = {
             CLIENT_TYPE.Dotnet,
             CLIENT_TYPE.Blank
         ],
+        RESOURCE.WebPubSub: [
+            CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.Java,
+            CLIENT_TYPE.Python,
+            CLIENT_TYPE.Nodejs,
+            CLIENT_TYPE.Blank
+        ],
         RESOURCE.ConfluentKafka: [
             CLIENT_TYPE.Dotnet,
             CLIENT_TYPE.Java,
@@ -860,12 +967,12 @@ SUPPORTED_CLIENT_TYPE = {
             CLIENT_TYPE.Dotnet,
             CLIENT_TYPE.Blank
         ],
-        # RESOURCE.Sql: [
-        #     CLIENT_TYPE.Java,
-        #     CLIENT_TYPE.SpringBoot,
-        #     CLIENT_TYPE.Dotnet
-        #     CLIENT_TYPE.Blank
-        # ],
+        RESOURCE.Sql: [
+            CLIENT_TYPE.Java,
+            CLIENT_TYPE.SpringBoot,
+            CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.Blank
+        ],
         RESOURCE.Redis: [
             CLIENT_TYPE.Java,
             CLIENT_TYPE.SpringBoot,
@@ -960,4 +1067,6 @@ SUPPORTED_CLIENT_TYPE = {
         ]
     }
 }
+SUPPORTED_CLIENT_TYPE[RESOURCE.SpringCloudDeprecated] = SUPPORTED_CLIENT_TYPE[RESOURCE.SpringCloud]
 SUPPORTED_CLIENT_TYPE[RESOURCE.KubernetesCluster] = SUPPORTED_CLIENT_TYPE[RESOURCE.WebApp]
+SUPPORTED_CLIENT_TYPE[RESOURCE.ContainerApp] = SUPPORTED_CLIENT_TYPE[RESOURCE.WebApp]

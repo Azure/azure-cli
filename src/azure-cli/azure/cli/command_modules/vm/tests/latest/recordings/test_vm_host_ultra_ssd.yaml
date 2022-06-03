@@ -1,0 +1,58 @@
+interactions:
+- request:
+    body: '{"location": "eastus2euap", "zones": ["3"], "properties": {"platformFaultDomainCount":
+      1, "additionalCapabilities": {"ultraSSDEnabled": true}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm host group create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '143'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --ultra-ssd-enabled -c -l --zone
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-compute/27.0.0 Python/3.8.10 (Windows-10-10.0.22000-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_host_ultra_ssd_000001/providers/Microsoft.Compute/hostGroups/host000002?api-version=2022-03-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"host000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI_TEST_VM_HOST_ULTRA_SSD_MUPCH2WFR743QE4DSFPHW4JIIQFXXSMQYU6XY33B5RY2GTMM/providers/Microsoft.Compute/hostGroups/host000002\",\r\n
+        \ \"type\": \"Microsoft.Compute/hostGroups\",\r\n  \"location\": \"eastus2euap\",\r\n
+        \ \"zones\": [\r\n    \"3\"\r\n  ],\r\n  \"properties\": {\r\n    \"platformFaultDomainCount\":
+        1,\r\n    \"supportAutomaticPlacement\": false,\r\n    \"additionalCapabilities\":
+        {\r\n      \"ultraSSDEnabled\": true\r\n    }\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '508'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 19 May 2022 01:56:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/PutDeleteDedicatedHost3Min;119,Microsoft.Compute/PutDeleteDedicatedHost30Min;593
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+version: 1

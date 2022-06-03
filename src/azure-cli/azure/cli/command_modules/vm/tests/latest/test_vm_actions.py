@@ -219,7 +219,7 @@ class TestActions(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.vm._validators._compute_client_factory', autospec=True)
     @mock.patch('azure.cli.command_modules.vm._validators.logger.warning', autospec=True)
     def test_parse_staging_image_argument(self, logger_mock, client_factory_mock):
-        from msrestazure.azure_exceptions import CloudError
+        from azure.core.exceptions import ResourceNotFoundError
         compute_client = mock.MagicMock()
         resp = mock.MagicMock()
         cmd = mock.MagicMock()
@@ -227,7 +227,7 @@ class TestActions(unittest.TestCase):
         resp.status_code = 404
         resp.text = '{"Message": "Not Found"}'
 
-        compute_client.virtual_machine_images.get.side_effect = CloudError(resp, error='image not found')
+        compute_client.virtual_machine_images.get.side_effect = ResourceNotFoundError('image not found')
         client_factory_mock.return_value = compute_client
 
         np = mock.MagicMock()
@@ -678,10 +678,11 @@ class TestActions(unittest.TestCase):
         EncryptionImages = self._get_compute_model('EncryptionImages', api_version)
         OSDiskImageEncryption = self._get_compute_model('OSDiskImageEncryption', api_version)
         DataDiskImageEncryption = self._get_compute_model('DataDiskImageEncryption', api_version)
+        ConfidentialVMEncryptionType = self._get_compute_model('ConfidentialVMEncryptionType', api_version)
         cmd = mock.MagicMock()
-        cmd.get_models.return_value = [TargetRegion, EncryptionImages, OSDiskImageEncryption, DataDiskImageEncryption]
+        cmd.get_models.return_value = [TargetRegion, EncryptionImages, OSDiskImageEncryption, DataDiskImageEncryption, ConfidentialVMEncryptionType]
 
-        target_regions_list = ["southcentralus", "westus=1", "westus2=standard_zrs", "eastus=2=standard_lrs"]
+        target_regions_list = ["southcentralus", "westus=1", "westus2=standard_zrs", "eastus=2=standard_lrs", 'CentralUSEUAP=1']
         np.target_regions = target_regions_list
 
         process_gallery_image_version_namespace(cmd, np)

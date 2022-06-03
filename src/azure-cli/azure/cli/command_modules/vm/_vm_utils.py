@@ -19,7 +19,6 @@ from knack.util import CLIError
 
 logger = get_logger(__name__)
 
-
 MSI_LOCAL_ID = '[system]'
 
 
@@ -149,7 +148,8 @@ def normalize_disk_info(image_data_disks=None,
         if attach_data_disks:
             data_disk_delete_option = validate_delete_options(attach_data_disks, data_disk_delete_option)
         else:
-            if isinstance(data_disk_delete_option, list) and len(data_disk_delete_option) == 1 and len(data_disk_delete_option[0].split('=')) == 1:  # pylint: disable=line-too-long
+            if isinstance(data_disk_delete_option, list) and len(data_disk_delete_option) == 1 and len(
+                    data_disk_delete_option[0].split('=')) == 1:  # pylint: disable=line-too-long
                 data_disk_delete_option = data_disk_delete_option[0]
     info['os'] = {}
     # update os diff disk settings
@@ -254,7 +254,6 @@ def normalize_disk_info(image_data_disks=None,
 
 
 def update_disk_caching(model, caching_settings):
-
     def _update(model, lun, value):
         if isinstance(model, dict):
             luns = model.keys() if lun is None else [lun]
@@ -289,7 +288,6 @@ def update_disk_caching(model, caching_settings):
 
 
 def update_write_accelerator_settings(model, write_accelerator_settings):
-
     def _update(model, lun, value):
         if isinstance(model, dict):
             luns = model.keys() if lun is None else [lun]
@@ -380,6 +378,30 @@ def is_shared_gallery_image_id(image_reference):
     return False
 
 
+def is_valid_vm_resource_id(vm_resource_id):
+    if not vm_resource_id:
+        return False
+
+    vm_id_pattern = re.compile(r'^/subscriptions/[^/]*/resourceGroups/[^/]*/providers/Microsoft.Compute/'
+                               r'virtualMachines/.*$', re.IGNORECASE)
+    if vm_id_pattern.match(vm_resource_id):
+        return True
+
+    return False
+
+
+def is_valid_image_version_id(image_version_id):
+    if not image_version_id:
+        return False
+
+    image_version_id_pattern = re.compile(r'^/subscriptions/[^/]*/resourceGroups/[^/]*/providers/Microsoft.Compute/'
+                                          r'galleries/[^/]*/images/[^/]*/versions/.*$', re.IGNORECASE)
+    if image_version_id_pattern.match(image_version_id):
+        return True
+
+    return False
+
+
 def parse_shared_gallery_image_id(image_reference):
     from azure.cli.core.azclierror import InvalidArgumentValueError
 
@@ -394,6 +416,34 @@ def parse_shared_gallery_image_id(image_reference):
             '"/SharedGalleries/{gallery_unique_name}/Images/{gallery_image_name}/Versions/{image_version}"')
 
     # Return the gallery unique name and gallery image name parsed from shared gallery image id
+    return image_info.group(1), image_info.group(2)
+
+
+def is_community_gallery_image_id(image_reference):
+    if not image_reference:
+        return False
+
+    community_gallery_id_pattern = re.compile(r'^/CommunityGalleries/[^/]*/Images/[^/]*/Versions/.*$', re.IGNORECASE)
+    if community_gallery_id_pattern.match(image_reference):
+        return True
+
+    return False
+
+
+def parse_community_gallery_image_id(image_reference):
+    from azure.cli.core.azclierror import InvalidArgumentValueError
+
+    if not image_reference:
+        raise InvalidArgumentValueError(
+            'Please pass in the community gallery image id through the parameter --image')
+
+    image_info = re.search(r'^/CommunityGalleries/([^/]*)/Images/([^/]*)/Versions/.*$', image_reference, re.IGNORECASE)
+    if not image_info or len(image_info.groups()) < 2:
+        raise InvalidArgumentValueError(
+            'The community gallery image id is invalid. The valid format should be '
+            '"/CommunityGalleries/{gallery_unique_name}/Images/{gallery_image_name}/Versions/{image_version}"')
+
+    # Return the gallery unique name and gallery image name parsed from community gallery image id
     return image_info.group(1), image_info.group(2)
 
 

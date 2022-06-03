@@ -112,7 +112,9 @@ def _obtain_data_from_registry(login_server,
             # like `Link: </v2/_catalog?last=hello-world&n=1>; rel="next"`
             # we should follow the next path indicated in the link header
             next_link_path = next_link[(next_link.index('<') + 1):next_link.index('>')]
-            tokens = next_link_path.split('?', 2)
+
+            tokens = next_link_path.split('?', 1)
+
             params = {y[0]: unquote(y[1]) for y in (x.split('=', 1) for x in tokens[1].split('&'))}
             execute_next_http_call = True
 
@@ -513,7 +515,7 @@ def _delete_manifest_confirmation(login_server,
     return manifest
 
 
-def get_image_digest(cmd, registry_name, image):
+def get_image_digest(cmd, registry_name, image, tenant_suffix=None, username=None, password=None):
     repository, tag, manifest = _parse_image_name(image, allow_digest=True)
 
     if manifest:
@@ -523,6 +525,9 @@ def get_image_digest(cmd, registry_name, image):
     login_server, username, password = get_access_credentials(
         cmd=cmd,
         registry_name=registry_name,
+        tenant_suffix=tenant_suffix,
+        username=username,
+        password=password,
         repository=repository,
         permission=RepoAccessTokenPermission.METADATA_READ.value)
 

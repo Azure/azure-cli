@@ -8,6 +8,7 @@
 import os
 from azure.cli.command_modules.storage._client_factory import storage_client_factory, cf_sa_for_keys
 from azure.cli.core.util import get_file_json, shell_safe_json_parse, find_child_item
+from azure.cli.core.profiles import ResourceType, get_sdk
 from knack.log import get_logger
 from knack.util import CLIError
 
@@ -26,9 +27,10 @@ def regenerate_key(cmd, client, account_name, key_name, resource_group_name=None
     return client.regenerate_key(resource_group_name, account_name, regenerate_key_parameters)
 
 
-def generate_sas(client, services, resource_types, permission, expiry, start=None, ip=None, protocol=None):
+def generate_sas(cmd, client, services, resource_types, permission, expiry, start=None,
+                 ip=None, protocol=None, **kwargs):
     from azure.cli.core.azclierror import RequiredArgumentMissingError
-    if not client.account_name or not client.account_key:
+    if not client.account_name or not client.credential or not client.credential.account_key:
         error_msg = """
         Missing/Invalid credentials to access storage service. The following variations are accepted:
             (1) account name and key (--account-name and --account-key options or
@@ -40,8 +42,13 @@ def generate_sas(client, services, resource_types, permission, expiry, start=Non
                 quoting to preserve literal character interpretation.
         """
         raise RequiredArgumentMissingError(error_msg)
-    return client.generate_shared_access_signature(services, resource_types, permission, expiry,
-                                                   start=start, ip=ip, protocol=protocol)
+
+    t_account_sas = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_BLOB,
+                            '_shared.shared_access_signature#SharedAccessSignature')
+
+    return t_account_sas(account_name=client.account_name, account_key=client.credential.account_key).\
+        generate_account(services=services, resource_types=resource_types, permission=permission, expiry=expiry,
+                         start=start, ip=ip, protocol=protocol, **kwargs)
 
 
 # pylint: disable=too-many-locals, too-many-statements, too-many-branches, unused-argument
@@ -267,6 +274,17 @@ def show_storage_account_connection_string(cmd, resource_group_name, account_nam
         except AttributeError:
             # Older API versions have a slightly different structure
             keys = [obj.key1, obj.key2]  # pylint: disable=no-member
+
+        sa = scf.get_properties(resource_group_name, account_name)
+        if getattr(sa, 'primary_endpoints') is not None:
+            if not blob_endpoint:
+                blob_endpoint = getattr(sa.primary_endpoints, 'blob', None)
+            if not file_endpoint:
+                file_endpoint = getattr(sa.primary_endpoints, 'file', None)
+            if not queue_endpoint:
+                queue_endpoint = getattr(sa.primary_endpoints, 'queue', None)
+            if not table_endpoint:
+                table_endpoint = getattr(sa.primary_endpoints, 'table', None)
 
         connection_string = '{}{}{}'.format(
             connection_string,

@@ -15,7 +15,7 @@ set -exv
 ls -Rl /mnt/artifacts
 
 WORKDIR=`cd $(dirname $0); cd ../../../; pwd`
-PYTHON_VERSION="3.8.12"
+PYTHON_VERSION="3.10.4"
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Update APT packages
@@ -23,6 +23,9 @@ apt-get update
 # uuid-dev is used to build _uuid module: https://github.com/python/cpython/pull/3796
 apt-get install -y libssl-dev libffi-dev python3-dev debhelper zlib1g-dev uuid-dev
 apt-get install -y wget
+# Git is not strictly necessary, but it would allow building an experimental package
+# with dependency which is currently only available in its git repo feature branch.
+apt-get install -y git
 
 # Download Python source code
 PYTHON_SRC_DIR=$(mktemp -d)

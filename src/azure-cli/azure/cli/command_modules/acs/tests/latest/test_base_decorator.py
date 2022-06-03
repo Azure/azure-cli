@@ -9,13 +9,15 @@ import unittest
 from azure.cli.command_modules.acs._consts import DecoratorMode
 from azure.cli.command_modules.acs.base_decorator import (
     BaseAKSContext,
+    BaseAKSManagedClusterDecorator,
     BaseAKSModels,
     BaseAKSParamDict,
     validate_decorator_mode,
 )
-from azure.cli.command_modules.acs.tests.latest.mocks import MockCLI, MockCmd
+from azure.cli.command_modules.acs.tests.latest.mocks import MockCLI, MockClient, MockCmd
 from azure.cli.core.azclierror import CLIInternalError
 from azure.cli.core.profiles import ResourceType
+from msrest.exceptions import ValidationError
 
 
 class BaseDecoratorHelperFunctionsTestCase(unittest.TestCase):
@@ -44,7 +46,19 @@ class BaseAKSModelsTestCase(unittest.TestCase):
         module = importlib.import_module(module_name)
 
         models = BaseAKSModels(self.cmd, ResourceType.MGMT_CONTAINERSERVICE)
-        self.assertEqual(models.raw_models, module)
+        self.assertEqual(models.model_module, module)
+        self.assertEqual(models.AgentPool, module.AgentPool)
+
+    def test_serialize(self):
+        models = BaseAKSModels(self.cmd, ResourceType.MGMT_CONTAINERSERVICE)
+
+        agentpool = models.AgentPool(os_disk_size_gb=2049)
+        # fail on os_disk_size_gb > 2048
+        with self.assertRaises(ValidationError):
+            models.serialize(agentpool, "AgentPool")
+
+        agentpool_upgrade_settings = models.AgentPoolUpgradeSettings()
+        self.assertEqual(models.serialize(agentpool_upgrade_settings, "AgentPoolUpgradeSettings"), {})
 
 
 class BaseAKSParamDictTestCase(unittest.TestCase):
@@ -57,8 +71,12 @@ class BaseAKSParamDictTestCase(unittest.TestCase):
         param_dict = BaseAKSParamDict({"abc": "xyz"})
         self.assertEqual(param_dict.get("abc"), "xyz")
 
-        param_dict_2 = BaseAKSParamDict({})
-        self.assertEqual(param_dict_2.get("abc", True), True)
+        param_dict_2 = BaseAKSParamDict({"a": None, "ab": False, "abc": ""})
+        self.assertEqual(param_dict_2.get("a", True), True)
+        self.assertEqual(param_dict_2.get("a", "xyz"), "xyz")
+        self.assertEqual(param_dict_2.get("ab", True), False)
+        self.assertEqual(param_dict_2.get("abc", True), "")
+        self.assertEqual(param_dict_2.get("abcd", True), True)
 
     def test_keys(self):
         param_dict = BaseAKSParamDict({"abc": "xyz"})
@@ -130,6 +148,51 @@ class BaseAKSContextTestCase(unittest.TestCase):
         ctx_1.remove_intermediate("test-intermediate")
         self.assertEqual(ctx_1.get_intermediate("test-intermediate"), None)
 
+class BaseAKSManagedClusterDecoratorTestCase(unittest.TestCase):
+    def setUp(self):
+        self.cli_ctx = MockCLI()
+        self.cmd = MockCmd(self.cli_ctx)
+        self.client = MockClient()
+        self.test_models = BaseAKSModels(self.cmd, ResourceType.MGMT_CONTAINERSERVICE)
+
+    def test_init(self):
+        dec_1 = BaseAKSManagedClusterDecorator(self.cmd, self.client)
+        self.assertEqual(dec_1.cmd, self.cmd)
+        self.assertEqual(dec_1.client, self.client)
+
+    def test_init_models(self):
+        dec_1 = BaseAKSManagedClusterDecorator(self.cmd, self.client)
+        with self.assertRaises(NotImplementedError):
+            dec_1.init_models()
+
+    def test_init_context(self):
+        dec_1 = BaseAKSManagedClusterDecorator(self.cmd, self.client)
+        with self.assertRaises(NotImplementedError):
+            dec_1.init_context()
+
+    def test_check_is_postprocessing_required(self):
+        dec_1 = BaseAKSManagedClusterDecorator(self.cmd, self.client)
+        mc_1 = self.test_models.ManagedCluster(location="test_location")
+        with self.assertRaises(NotImplementedError):
+            dec_1.check_is_postprocessing_required(mc_1)
+
+    def test_immediate_processing_after_request(self):
+        dec_1 = BaseAKSManagedClusterDecorator(self.cmd, self.client)
+        mc_1 = self.test_models.ManagedCluster(location="test_location")
+        with self.assertRaises(NotImplementedError):
+            dec_1.immediate_processing_after_request(mc_1)
+
+    def test_postprocessing_after_mc_created(self):
+        dec_1 = BaseAKSManagedClusterDecorator(self.cmd, self.client)
+        mc_1 = self.test_models.ManagedCluster(location="test_location")
+        with self.assertRaises(NotImplementedError):
+            dec_1.postprocessing_after_mc_created(mc_1)
+
+    def test_put_mc(self):
+        dec_1 = BaseAKSManagedClusterDecorator(self.cmd, self.client)
+        mc_1 = self.test_models.ManagedCluster(location="test_location")
+        with self.assertRaises(NotImplementedError):
+            dec_1.put_mc(mc_1)
 
 if __name__ == "__main__":
     unittest.main()

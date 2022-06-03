@@ -29,13 +29,16 @@ from azure.cli.command_modules.backup._validators import datetime_type, validate
 from azure.cli.command_modules.backup._client_factory import backup_workload_items_cf, \
     protectable_containers_cf, backup_protection_containers_cf, backup_protected_items_cf, recovery_points_crr_cf, \
     _backup_client_factory, recovery_points_cf, vaults_cf, aad_properties_cf, cross_region_restore_cf, \
-    backup_protection_intent_cf, recovery_points_passive_cf, protection_containers_cf
+    backup_protection_intent_cf, recovery_points_passive_cf, protection_containers_cf, protection_policies_cf
 
 import azure.cli.command_modules.backup.custom_help as cust_help
 import azure.cli.command_modules.backup.custom_common as common
 from azure.cli.command_modules.backup import custom
 from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError, ValidationError, \
     ResourceNotFoundError, ArgumentUsageError, MutuallyExclusiveArgumentError
+
+from azure.mgmt.recoveryservicesbackup.activestamp import RecoveryServicesBackupClient
+from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
 
 fabric_name = "Azure"
@@ -187,7 +190,8 @@ def unregister_wl_container(cmd, client, vault_name, resource_group_name, contai
     return cust_help.track_register_operation(cmd.cli_ctx, result, vault_name, resource_group_name, container_name)
 
 
-def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, policy):
+def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, policy, tenant_id=None,
+                           is_critical_operation=False):
     if item.properties.backup_management_type != policy.properties.backup_management_type:
         raise CLIError(
             """
@@ -206,7 +210,17 @@ def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, p
     item_properties.policy_id = policy.id
 
     param = ProtectedItemResource(properties=item_properties)
-
+    if is_critical_operation:
+        existing_policy_name = item.properties.policy_id.split('/')[-1]
+        existing_policy = common.show_policy(protection_policies_cf(cmd.cli_ctx), resource_group_name, vault_name,
+                                             existing_policy_name)
+        if cust_help.is_retention_duration_decreased(existing_policy, policy, "AzureWorkload"):
+            # update the payload with critical operation and add auxiliary header for cross tenant case
+            if tenant_id is not None:
+                client = get_mgmt_service_client(cmd.cli_ctx, RecoveryServicesBackupClient,
+                                                 aux_tenants=[tenant_id]).protected_items
+            param.properties.resource_guard_operation_requests = [cust_help.get_resource_guard_operation_request(
+                cmd.cli_ctx, resource_group_name, vault_name, "updateProtection")]
     # Update policy
     result = client.create_or_update(vault_name, resource_group_name, fabric_name,
                                      container_uri, item_uri, param, cls=cust_help.get_pipeline_response)
@@ -237,7 +251,8 @@ def create_policy(client, resource_group_name, vault_name, policy_name, policy, 
     return client.create_or_update(vault_name, resource_group_name, policy_name, policy_object)
 
 
-def set_policy(client, resource_group_name, vault_name, policy, policy_name, fix_for_inconsistent_items):
+def set_policy(cmd, client, resource_group_name, vault_name, policy, policy_name, fix_for_inconsistent_items,
+               tenant_id=None, is_critical_operation=False):
     if policy_name is None:
         raise CLIError(
             """
@@ -246,6 +261,16 @@ def set_policy(client, resource_group_name, vault_name, policy, policy_name, fix
 
     if policy is not None:
         policy_object = cust_help.get_policy_from_json(client, policy)
+        if is_critical_operation:
+            existing_policy = common.show_policy(client, resource_group_name, vault_name, policy_name)
+            if cust_help.is_retention_duration_decreased(existing_policy, policy_object, "AzureWorkload"):
+                # update the payload with critical operation and add auxiliary header for cross tenant case
+                if tenant_id is not None:
+                    client = get_mgmt_service_client(cmd.cli_ctx, RecoveryServicesBackupClient,
+                                                     aux_tenants=[tenant_id]).protection_policies
+                policy_object.properties.resource_guard_operation_requests = [
+                    cust_help.get_resource_guard_operation_request(cmd.cli_ctx, resource_group_name, vault_name,
+                                                                   "updatePolicy")]
     else:
         if fix_for_inconsistent_items:
             policy_object = common.show_policy(client, resource_group_name, vault_name, policy_name)
@@ -470,7 +495,7 @@ def backup_now(cmd, client, resource_group_name, vault_name, item, retain_until,
     return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
-def disable_protection(cmd, client, resource_group_name, vault_name, item, delete_backup_data):
+def disable_protection(cmd, client, resource_group_name, vault_name, item):
 
     container_uri = cust_help.get_protection_container_uri_from_id(item.id)
     item_uri = cust_help.get_protected_item_uri_from_id(item.id)
@@ -481,11 +506,6 @@ def disable_protection(cmd, client, resource_group_name, vault_name, item, delet
             """
             Item must be either of type SQLDataBase or SAPHanaDatabase.
             """)
-
-    if delete_backup_data:
-        result = client.delete(vault_name, resource_group_name, fabric_name, container_uri, item_uri,
-                               cls=cust_help.get_pipeline_response)
-        return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
     properties = _get_protected_item_instance(backup_item_type)
     properties.protection_state = 'ProtectionStopped'

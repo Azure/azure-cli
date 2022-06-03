@@ -4,8 +4,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.help_files import helps  # pylint: disable=import-error
-# pylint: disable=line-too-long, too-many-lines
+from knack.help_files import helps
+
 
 helps['acs'] = """
 type: group
@@ -158,6 +158,8 @@ short-summary: Validate an ACR is accessible from an AKS cluster.
 parameters:
   - name: --acr
     short-summary: The FQDN of the ACR.
+  - name: --node-name
+    short-summary: The name of a specific node to perform acr pull test checks. If not specified, it will be checked on a random node.
 examples:
   - name: Validate the ACR is accessible from the AKS cluster.
     text: az aks check-acr --name MyManagedCluster --resource-group MyResourceGroup --acr myacr.azurecr.io
@@ -289,7 +291,7 @@ parameters:
     long-summary: This address must not be in any Subnet IP ranges, or the Kubernetes service address range. For example, 172.17.0.1/16.
   - name: --load-balancer-sku
     type: string
-    short-summary: Azure Load Balancer SKU selection for your cluster. basic or standard.
+    short-summary: Azure Load Balancer SKU selection for your cluster. basic or standard. Defaults to 'standard'
     long-summary: Select between Basic or Standard Azure Load Balancer SKU for your AKS cluster.
   - name: --load-balancer-managed-outbound-ip-count
     type: int
@@ -311,10 +313,18 @@ parameters:
     type: int
     short-summary: Load balancer idle timeout in minutes.
     long-summary: Desired idle timeout for load balancer outbound flows, default is 30 minutes. Please specify a value in the range of [4, 100].
+  - name: --nat-gateway-managed-outbound-ip-count
+    type: int
+    short-summary: NAT gateway managed outbound IP count.
+    long-summary: Desired number of managed outbound IPs for NAT gateway outbound connection. Please specify a value in the range of [1, 16]. Valid for Standard SKU load balancer cluster with managedNATGateway outbound type only.
+  - name: --nat-gateway-idle-timeout
+    type: int
+    short-summary: NAT gateway idle timeout in minutes.
+    long-summary: Desired idle timeout for NAT gateway outbound flows, default is 4 minutes. Please specify a value in the range of [4, 120]. Valid for Standard SKU load balancer cluster with managedNATGateway outbound type only.
   - name: --outbound-type
     type: string
     short-summary: How outbound traffic will be configured for a cluster.
-    long-summary: Select between loadBalancer and userDefinedRouting. If not set, defaults to type loadBalancer. Requires --vnet-subnet-id to be provided with a preconfigured route table and --load-balancer-sku to be Standard.
+    long-summary: Select between loadBalancer, userDefinedRouting, managedNATGateway and userAssignedNATGateway. If not set, defaults to type loadBalancer. Requires --vnet-subnet-id to be provided with a preconfigured route table and --load-balancer-sku to be Standard.
   - name: --auto-upgrade-channel
     type: string
     short-summary: Specify the upgrade channel for autoupgrade.
@@ -330,7 +340,7 @@ parameters:
     short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 1000].
   - name: --vm-set-type
     type: string
-    short-summary: Agent pool vm set type. VirtualMachineScaleSets or AvailabilitySet.
+    short-summary: Agent pool vm set type. VirtualMachineScaleSets or AvailabilitySet. Defaults to 'VirtualMachineScaleSets'
   - name: --enable-addons -a
     type: string
     short-summary: Enable the Kubernetes addons in a comma-separated list.
@@ -352,9 +362,6 @@ parameters:
   - name: --disable-rbac
     type: bool
     short-summary: Disable Kubernetes Role-Based Access Control.
-  - name: --enable-rbac -r
-    type: bool
-    short-summary: "Enable Kubernetes Role-Based Access Control. Default: enabled."
   - name: --max-pods -m
     type: int
     short-summary: The maximum number of pods deployable to a node.
@@ -385,6 +392,9 @@ parameters:
   - name: --vnet-subnet-id
     type: string
     short-summary: The ID of a subnet in an existing VNet into which to deploy the cluster.
+  - name: --pod-subnet-id
+    type: string
+    short-summary: The ID of a subnet in an existing VNet into which to assign pods in the cluster (requires azure network-plugin).
   - name: --ppg
     type: string
     short-summary: The ID of a PPG.
@@ -503,6 +513,22 @@ parameters:
   - name: --snapshot-id
     type: string
     short-summary: The source snapshot id used to create this cluster.
+  - name: --kubelet-config
+    type: string
+    short-summary: Path to JSON file containing Kubelet configurations for agent nodes. https://aka.ms/aks/custom-node-config
+  - name: --linux-os-config
+    type: string
+    short-summary: Path to JSON file containing OS configurations for Linux agent nodes. https://aka.ms/aks/custom-node-config
+  - name: --node-resource-group
+    type: string
+    short-summary: The node resource group is the resource group where all customer's resources will be created in, such as virtual machines.
+  - name: --enable-defender
+    type: bool
+    short-summary: Enable Microsoft Defender security profile.
+  - name: --defender-config
+    type: string
+    short-summary: Path to JSON file containing Microsoft Defender profile configurations.
+
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --ssh-key-value /path/to/publickey
@@ -522,6 +548,8 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --load-balancer-outbound-ips <ip-resource-id-1,ip-resource-id-2>
   - name: Create a kubernetes cluster with standard SKU load balancer and use the provided public IP prefixes for the load balancer outbound connection usage.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --load-balancer-outbound-ip-prefixes <ip-prefix-resource-id-1,ip-prefix-resource-id-2>
+  - name: Create a kubernetes cluster with a AKS managed NAT gateway, with two outbound AKS managed IPs an idle flow timeout of 4 minutes
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --nat-gateway-managed-outbound-ip-count 2 --nat-gateway-idle-timeout 4 --outbound-type managedNATGateway --generate-ssh-keys
   - name: Create a kubernetes cluster with basic SKU load balancer and AvailabilitySet vm set type.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --load-balancer-sku basic --vm-set-type AvailabilitySet
   - name: Create a kubernetes cluster with authorized apiserver IP ranges.
@@ -594,15 +622,15 @@ parameters:
   - name: --load-balancer-managed-outbound-ip-count
     type: int
     short-summary: Load balancer managed outbound IP count.
-    long-summary: Desired number of managed outbound IPs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only. If updated, it will wipe off the existing setting on Load balancer managed outbound IP count; Load balancer outbound IP resource IDs and Load balancer outbound IP prefix resource IDs.
+    long-summary: Desired number of managed outbound IPs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only. --load-balancer-managed-outbound-ip-count, --load-balancer-outbound-ips and --load-balancer-outbound-ip-prefixes are mutually exclusive. If updated, it will wipe off the existing setting on Load balancer outbound IP resource IDs and Load balancer outbound IP prefix resource IDs. If the new value is greater than the original value, new additional outbound IPs will be created. If the value is less than the original value, existing outbound IPs will be deleted and outbound connections may fail due to configuration update.
   - name: --load-balancer-outbound-ips
     type: string
     short-summary: Load balancer outbound IP resource IDs.
-    long-summary: Comma-separated public IP resource IDs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only. If updated, it will wipe off the existing setting on Load balancer managed outbound IP count; Load balancer outbound IP resource IDs and Load balancer outbound IP prefix resource IDs.
+    long-summary: Comma-separated public IP resource IDs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only. --load-balancer-managed-outbound-ip-count, --load-balancer-outbound-ips and --load-balancer-outbound-ip-prefixes are mutually exclusive. If updated, it will wipe off the existing setting on Load balancer managed outbound IP count and Load balancer outbound IP prefix resource IDs.
   - name: --load-balancer-outbound-ip-prefixes
     type: string
     short-summary: Load balancer outbound IP prefix resource IDs.
-    long-summary: Comma-separated public IP prefix resource IDs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only. If updated, it will wipe off the existing setting on Load balancer managed outbound IP count; Load balancer outbound IP resource IDs and Load balancer outbound IP prefix resource IDs.
+    long-summary: Comma-separated public IP prefix resource IDs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only. --load-balancer-managed-outbound-ip-count, --load-balancer-outbound-ips and --load-balancer-outbound-ip-prefixes are mutually exclusive. If updated, it will wipe off the existing setting on Load balancer managed outbound IP count and Load balancer outbound IP resource IDs.
   - name: --load-balancer-outbound-ports
     type: int
     short-summary: Load balancer outbound allocated ports.
@@ -611,6 +639,14 @@ parameters:
     type: int
     short-summary: Load balancer idle timeout in minutes.
     long-summary: Desired idle timeout for load balancer outbound flows, default is 30 minutes. Please specify a value in the range of [4, 100].
+  - name: --nat-gateway-managed-outbound-ip-count
+    type: int
+    short-summary: NAT gateway managed outbound IP count.
+    long-summary: Desired number of managed outbound IPs for NAT gateway outbound connection. Please specify a value in the range of [1, 16]. Valid for Standard SKU load balancer cluster with managedNATGateway outbound type only.
+  - name: --nat-gateway-idle-timeout
+    type: int
+    short-summary: NAT gateway idle timeout in minutes.
+    long-summary: Desired idle timeout for NAT gateway outbound flows, default is 4 minutes. Please specify a value in the range of [4, 120]. Valid for Standard SKU load balancer cluster with managedNATGateway outbound type only.
   - name: --auto-upgrade-channel
     type: string
     short-summary: Specify the upgrade channel for autoupgrade.
@@ -658,6 +694,9 @@ parameters:
   - name: --assign-identity
     type: string
     short-summary: Specify an existing user assigned identity to manage cluster resource group.
+  - name: --assign-kubelet-identity
+    type: string
+    short-summary: Update cluster's kubelet identity to an existing user assigned identity. Please note this operation will recreate all agent nodes in the cluster.
   - name: --enable-azure-rbac
     type: bool
     short-summary: Enable Azure RBAC to control authorization checks on cluster.
@@ -706,6 +745,16 @@ parameters:
     long-summary: |-
         You do not need to set this if you have set DNS server in the VNET used by the cluster.
         You must set or not set --gmsa-dns-server and --gmsa-root-domain-name at the same time when setting --enable-windows-gmsa.
+  - name: --enable-defender
+    type: bool
+    short-summary: Enable Microsoft Defender security profile.
+  - name: --disable-defender
+    type: bool
+    short-summary: Disable defender profile.
+  - name: --defender-config
+    type: string
+    short-summary: Path to JSON file containing Microsoft Defender profile configurations.
+
 examples:
   - name: Update a kubernetes cluster with standard SKU load balancer to use two AKS created IPs for the load balancer outbound connection usage.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-managed-outbound-ip-count 2
@@ -715,6 +764,8 @@ examples:
     text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-managed-outbound-ip-count 2 --load-balancer-idle-timeout 5 --load-balancer-outbound-ports 8000
   - name: Update a kubernetes cluster with standard SKU load balancer to use the provided public IP prefixes for the load balancer outbound connection usage.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-outbound-ip-prefixes <ip-prefix-resource-id-1,ip-prefix-resource-id-2>
+  - name: Update a kubernetes cluster of managedNATGateway outbound type with two outbound AKS managed IPs an idle flow timeout of 4 minutes
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --nat-gateway-managed-outbound-ip-count 2 --nat-gateway-idle-timeout 4
   - name: Attach AKS cluster to ACR by name "acrName"
     text: az aks update -g MyResourceGroup -n MyManagedCluster --attach-acr acrName
   - name: Update a kubernetes cluster with authorized apiserver ip ranges.
@@ -829,7 +880,7 @@ examples:
     text: az aks enable-addons --addons virtual-node --name MyManagedCluster --resource-group MyResourceGroup --subnet MySubnetName
     crafted: true
   - name: Enable ingress-appgw addon with subnet prefix.
-    text: az aks enable-addons --name MyManagedCluster --resource-group MyResourceGroup --addons ingress-appgw --appgw-subnet-cidr 10.2.0.0/16 --appgw-name gateway
+    text: az aks enable-addons --name MyManagedCluster --resource-group MyResourceGroup --addons ingress-appgw --appgw-subnet-cidr 10.225.0.0/16 --appgw-name gateway
     crafted: true
   - name: Enable open-service-mesh addon.
     text: az aks enable-addons --name MyManagedCluster --resource-group MyResourceGroup --addons open-service-mesh
@@ -937,6 +988,9 @@ parameters:
   - name: --vnet-subnet-id
     type: string
     short-summary: The ID of a subnet in an existing VNet into which to deploy the cluster.
+  - name: --pod-subnet-id
+    type: string
+    short-summary: The ID of a subnet in an existing VNet into which to assign pods in the cluster (requires azure network-plugin).
   - name: --ppg
     type: string
     short-summary: The ID of a PPG.
@@ -951,10 +1005,10 @@ parameters:
     short-summary: Enable cluster autoscaler.
   - name: --min-count
     type: int
-    short-summary: Minimum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 1000]
+    short-summary: Minimum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [0, 1000] for user nodepool, and [1,1000] for system nodepool.
   - name: --max-count
     type: int
-    short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 1000]
+    short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [0, 1000] for user nodepool, and [1,1000] for system nodepool.
   - name: --scale-down-mode
     type: string
     short-summary: "Describe how VMs are added to or removed from nodepools."
@@ -994,6 +1048,12 @@ parameters:
   - name: --aks-custom-headers
     type: string
     short-summary: Comma-separated key-value pairs to specify custom headers.
+  - name: --kubelet-config
+    type: string
+    short-summary: Path to JSON file containing Kubelet configurations for agent nodes. https://aka.ms/aks/custom-node-config
+  - name: --linux-os-config
+    type: string
+    short-summary: Path to JSON file containing OS configurations for Linux agent nodes. https://aka.ms/aks/custom-node-config
 examples:
   - name: Create a nodepool in an existing AKS cluster with ephemeral os enabled.
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --node-osdisk-type Ephemeral --node-osdisk-size 48
@@ -1061,10 +1121,10 @@ parameters:
     short-summary: Update min-count or max-count for cluster autoscaler.
   - name: --min-count
     type: int
-    short-summary: Minimum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 1000]
+    short-summary: Minimum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [0, 1000] for user nodepool, and [1,1000] for system nodepool.
   - name: --max-count
     type: int
-    short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 1000]
+    short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [0, 1000] for user nodepool, and [1,1000] for system nodepool.
   - name: --scale-down-mode
     type: string
     short-summary: "Describe how VMs are added to or removed from nodepools."
@@ -1379,136 +1439,4 @@ helps['aks nodepool snapshot create'] = """
 helps['aks nodepool snapshot delete'] = """
     type: command
     short-summary: Delete a nodepool snapshot.
-"""
-
-helps['openshift'] = """
-type: group
-short-summary: Manage Azure Red Hat OpenShift 3.11 clusters.
-long-summary: The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters. See http://aka.ms/aro/4 for information on switching to ARO 4.
-"""
-
-helps['openshift create'] = """
-type: command
-short-summary: Create a new Azure Red Hat OpenShift 3.11 cluster.
-long-summary: Support for the creation of ARO 3.11 clusters ends 30 Nov 2020. Please see aka.ms/aro/4 for information on switching to ARO 4.
-parameters:
-  - name: --compute-vm-size -s
-    type: string
-    short-summary: Size of Virtual Machines to create as OpenShift nodes.
-  - name: --compute-count -c
-    type: int
-    short-summary: Number of nodes in the OpenShift node pool.
-  - name: --aad-client-app-id
-    type: string
-    short-summary: The ID of an Azure Active Directory client application. If not specified, a new Azure Active Directory client is created.
-  - name: --aad-client-app-secret
-    type: string
-    short-summary: The secret of an Azure Active Directory client application.
-  - name: --aad-tenant-id
-    type: string
-    short-summary: The ID of an Azure Active Directory tenant.
-  - name: --vnet-peer
-    type: string
-    short-summary: The ID or the name of a subnet in an existing VNet into which to peer the cluster.
-  - name: --vnet-prefix
-    type: string
-    short-summary: The CIDR used on the VNet into which to deploy the cluster.
-  - name: --subnet-prefix
-    type: string
-    short-summary: The CIDR used on the Subnet into which to deploy the cluster.
-  - name: --customer-admin-group-id
-    type: string
-    short-summary: The Object ID of an Azure Active Directory Group that memberships will get synced into the OpenShift group "osa-customer-admins". If not specified, no cluster admin access will be granted.
-  - name: --workspace-id
-    type: string
-    short-summary: The resource id of an existing Log Analytics Workspace to use for storing monitoring data.
-
-
-examples:
-  - name: Create an OpenShift cluster and auto create an AAD Client
-    text: az openshift create -g MyResourceGroup -n MyManagedCluster
-  - name: Create an OpenShift cluster and auto create an AAD Client and setup cluster admin group
-    text: az openshift create -g MyResourceGroup -n MyManagedCluster --customer-admin-group-id {GROUP_ID}
-  - name: Create an OpenShift cluster with 5 compute nodes and a custom AAD Client.
-    text: az openshift create -g MyResourceGroup -n MyManagedCluster --aad-client-app-id {APP_ID} --aad-client-app-secret {APP_SECRET} --aad-tenant-id {TENANT_ID} --compute-count 5
-  - name: Create an Openshift cluster using a custom vnet
-    text: az openshift create -g MyResourceGroup -n MyManagedCluster --vnet-peer "/subscriptions/0000000-0000-0000-0000-000000000000/resourceGroups/openshift-vnet/providers/Microsoft.Network/virtualNetworks/test"
-  - name: Create an Openshift cluster with Log Analytics monitoring enabled
-    text: az openshift create -g MyResourceGroup -n MyManagedCluster --workspace-id "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.OperationalInsights/workspaces/{workspace-id}"
-"""
-
-helps['openshift delete'] = """
-type: command
-short-summary: Delete an Azure Red Hat OpenShift 3.11 cluster.
-long-summary: The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters. See http://aka.ms/aro/4 for information on switching to ARO 4.
-examples:
-  - name: Delete an Azure Red Hat OpenShift 3.11 cluster.
-    text: az openshift delete --name MyManagedOpenShiftCluster --resource-group MyResourceGroup
-    crafted: true
-"""
-
-helps['openshift list'] = """
-type: command
-short-summary: List Azure Red Hat OpenShift 3.11 clusters.
-long-summary: The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters. See http://aka.ms/aro/4 for information on switching to ARO 4.
-"""
-
-helps['openshift scale'] = """
-type: command
-short-summary: Scale the compute pool in an Azure Red Hat OpenShift 3.11 cluster.
-long-summary: The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters. See http://aka.ms/aro/4 for information on switching to ARO 4.
-parameters:
-  - name: --compute-count -c
-    type: int
-    short-summary: Number of nodes in the OpenShift compute pool.
-examples:
-  - name: Scale the compute pool in an Azure Red Hat OpenShift 3.11 cluster.
-    text: az openshift scale --compute-count 5 --name MyManagedOpenShiftCluster --resource-group MyResourceGroup
-    crafted: true
-"""
-
-helps['openshift show'] = """
-type: command
-short-summary: Show the details for an Azure Red Hat OpenShift 3.11 cluster.
-long-summary: Support for existing ARO 3.11 clusters ends June 2022. Please see aka.ms/aro/4 for information on switching to ARO 4.
-examples:
-  - name: Show the details for an Azure Red Hat OpenShift 3.11 cluster.
-    text: az openshift show --name MyManagedOpenShiftCluster --resource-group MyResourceGroup
-    crafted: true
-"""
-
-helps['openshift wait'] = """
-type: command
-short-summary: Wait for an Azure Red Hat OpenShift 3.11 cluster to reach a desired state.
-long-summary: The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters. See http://aka.ms/aro/4 for information on switching to ARO 4.
-examples:
-  - name: Wait for a cluster to be upgraded, polling every minute for up to thirty minutes.
-    text: |-
-        az openshift wait -g MyResourceGroup -n MyManagedCluster --updated --interval 60 --timeout 1800
-"""
-
-helps['openshift monitor'] = """
-type: group
-short-summary: Commands to manage Log Analytics monitoring in an ARO 3.11 cluster.
-long-summary: The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters. See http://aka.ms/aro/4 for information on switching to ARO 4.
-"""
-
-helps['openshift monitor enable'] = """
-type: command
-short-summary: Enable Log Analytics monitoring in an ARO 3.11 cluster.
-long-summary: The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters. See http://aka.ms/aro/4 for information on switching to ARO 4.
-examples:
-  - name: Enable Log Analytics monitoring.
-    text: |-
-        az openshift monitor enable -g MyResourceGroup -n MyManagedCluster --workspace-id "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.OperationalInsights/workspaces/{workspace-id}"
-"""
-
-helps['openshift monitor disable'] = """
-type: command
-short-summary: Disable Log Analytics monitoring in an ARO 3.11 cluster.
-long-summary: The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters. See http://aka.ms/aro/4 for information on switching to ARO 4.
-examples:
-  - name: Disable Log Analytics monitoring.
-    text: |-
-        az openshift monitor disable -g MyResourceGroup -n MyManagedCluster
 """

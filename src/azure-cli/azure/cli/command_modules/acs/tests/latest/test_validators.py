@@ -3,17 +3,14 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import unittest
-from unittest import mock
-from azure.cli.core.azclierror import CLIInternalError, InvalidArgumentValueError
 
-from knack import CLI
-
-from azure.cli.core._config import GLOBAL_CONFIG_DIR, ENV_VAR_PREFIX
-from azure.cli.core.cloud import get_active_cloud
-from azure.cli.core.profiles import get_sdk, ResourceType, supported_api_version
-
-from azure.cli.core.util import CLIError
 from azure.cli.command_modules.acs import _validators as validators
+from azure.cli.core._config import ENV_VAR_PREFIX, GLOBAL_CONFIG_DIR
+from azure.cli.core.azclierror import InvalidArgumentValueError
+from azure.cli.core.cloud import get_active_cloud
+from azure.cli.core.profiles import ResourceType, get_sdk
+from azure.cli.core.util import CLIError
+from knack import CLI
 
 class MockCLI(CLI):
     def __init__(self):
@@ -98,9 +95,10 @@ class TestValidateIPRanges(unittest.TestCase):
 
 
 class Namespace:
-    def __init__(self, api_server_authorized_ip_ranges=None, cluster_autoscaler_profile=None):
+    def __init__(self, api_server_authorized_ip_ranges=None, cluster_autoscaler_profile=None, kubernetes_version=None):
         self.api_server_authorized_ip_ranges = api_server_authorized_ip_ranges
         self.cluster_autoscaler_profile = cluster_autoscaler_profile
+        self.kubernetes_version = kubernetes_version
 
 
 class TestVNetSubnetId(unittest.TestCase):
@@ -132,6 +130,36 @@ class TestVNetSubnetId(unittest.TestCase):
 class VnetSubnetIdNamespace:
     def __init__(self, vnet_subnet_id):
         self.vnet_subnet_id = vnet_subnet_id
+
+class TestPodSubnetId(unittest.TestCase):
+    def test_invalid_pod_subnet_id(self):
+        invalid_pod_subnet_id = "dummy subnet id"
+        namespace = PodSubnetIdNamespace(invalid_pod_subnet_id)
+        err = ("--pod-subnet-id is not a valid Azure resource ID.")
+
+        with self.assertRaises(CLIError) as cm:
+            validators.validate_pod_subnet_id(namespace)
+        self.assertEqual(str(cm.exception), err)
+
+    def test_valid_pod_subnet_id(self):
+        invalid_pod_subnet_id = "/subscriptions/testid/resourceGroups/MockedResourceGroup/providers/Microsoft.Network/virtualNetworks/MockedNetworkId/subnets/MockedSubNetId"
+        namespace = PodSubnetIdNamespace(invalid_pod_subnet_id)
+        validators.validate_pod_subnet_id(namespace)
+
+    def test_none_pod_subnet_id(self):
+        invalid_pod_subnet_id = None
+        namespace = PodSubnetIdNamespace(invalid_pod_subnet_id)
+        validators.validate_pod_subnet_id(namespace)
+
+    def test_empty_pod_subnet_id(self):
+        invalid_pod_subnet_id = ""
+        namespace = PodSubnetIdNamespace(invalid_pod_subnet_id)
+        validators.validate_pod_subnet_id(namespace)
+
+
+class PodSubnetIdNamespace:
+    def __init__(self, pod_subnet_id):
+        self.pod_subnet_id = pod_subnet_id
 
 
 class MaxSurgeNamespace:
@@ -391,6 +419,45 @@ class TestCredentialFormat(unittest.TestCase):
         namespace = CredentialFormatNamespace(credential_format)
 
         validators.validate_credential_format(namespace)
+
+class TestValidateKubernetesVersion(unittest.TestCase):
+
+     def test_valid_full_kubernetes_version(self):
+         kubernetes_version = "1.11.8"
+         namespace = Namespace(kubernetes_version=kubernetes_version)
+
+         validators.validate_k8s_version(namespace)
+
+     def test_valid_alias_minor_version(self):
+         kubernetes_version = "1.11"
+         namespace = Namespace(kubernetes_version=kubernetes_version)
+
+         validators.validate_k8s_version(namespace)
+
+     def test_valid_empty_kubernetes_version(self):
+         kubernetes_version = ""
+         namespace = Namespace(kubernetes_version=kubernetes_version)
+
+         validators.validate_k8s_version(namespace)
+
+     def test_invalid_kubernetes_version(self):
+         kubernetes_version = "1.2.3.4"
+
+         namespace = Namespace(kubernetes_version=kubernetes_version)
+         err = ("--kubernetes-version should be the full version number or major.minor version number, "
+                "such as \"1.7.12\" or \"1.7\"")
+
+         with self.assertRaises(CLIError) as cm:
+             validators.validate_k8s_version(namespace)
+         self.assertEqual(str(cm.exception), err)
+
+         kubernetes_version = "1."
+
+         namespace = Namespace(kubernetes_version=kubernetes_version)
+
+         with self.assertRaises(CLIError) as cm:
+             validators.validate_k8s_version(namespace)
+         self.assertEqual(str(cm.exception), err)
 
 
 if __name__ == "__main__":
