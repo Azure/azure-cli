@@ -144,6 +144,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('days', type=int, help='The number of days to retain an untagged manifest after which it gets purged (Range: 0 to 365). Value "0" will delete untagged manifests immediately.', validator=validate_retention_days, default=7)
         c.argument('policy_type', options_list=['--type'], help='The type of retention policy.', arg_type=get_enum_type(RetentionType))
 
+    with self.argument_context('acr config soft-delete') as c:
+        c.argument('status', help="Indicates whether soft-delete policy is enabled.", arg_type=get_enum_type(PolicyStatus))
+        c.argument('registry_name', options_list=['--registry', '-r'])
+        c.argument('days', type=int, help='The number of days to retain a soft-deleted manifest or tag after which it gets purged (Range: 1 to 90).', default=7)
+
     with self.argument_context('acr login') as c:
         c.argument('resource_group_name', deprecate_info=c.deprecate(hide=True))
         c.argument('expose_token', options_list=['--expose-token', '-t'], help='Expose access token instead of automatically logging in through Docker CLI', action='store_true')

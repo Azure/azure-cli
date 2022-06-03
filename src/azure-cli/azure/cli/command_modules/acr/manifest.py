@@ -3,6 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from datetime import datetime
+from datetime import timedelta
+
 try:
     from urllib.parse import unquote
 except ImportError:
@@ -272,7 +275,24 @@ def acr_manifest_deleted_list(cmd,
         password=password,
         result_index='manifests')
 
+    #todo get num days til expire
+    expire_days = 7
+    expire_ts_key = 'expiresAfter'
+    deleted_at_key = 'deletedAt'
+    for result in raw_result:
+        ts_string = result[deleted_at_key]
+        result[expire_ts_key] = _add_day_delta(ts_string, expire_days)
+
     return raw_result
+
+def _add_day_delta(ts_string, expire_days):
+    date_string = ts_string.split('T', 1)[0]
+    time_string = ts_string.split('T', 1)[1]
+    date_obj = datetime.strptime(date_string,"%Y-%m-%d")
+    expire_date_obj = date_obj + timedelta(days=expire_days)
+    expire_date_string = expire_date_obj.strftime("%Y-%m-%d")
+    expire_ts_string = expire_date_string + "T" + time_string
+    return expire_ts_string
 
 def acr_manifest_deleted_tags_list(cmd,
                                registry_name=None,
@@ -307,7 +327,14 @@ def acr_manifest_deleted_tags_list(cmd,
         result_index='tags')
 
     if tag:
-        return [x for x in raw_result if x['tag'] == tag]
+        raw_result = [x for x in raw_result if x['tag'] == tag]
+
+    expire_days = 7
+    deleted_at_key = 'deletedAt'
+    expire_ts_key = 'expiresAfter'
+    for result in raw_result:
+        ts_string = result[deleted_at_key]
+        result[expire_ts_key] = _add_day_delta(ts_string, expire_days)
 
     return raw_result
 

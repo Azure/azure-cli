@@ -114,6 +114,29 @@ examples:
         az acr config retention update -r MyRegistry --status Enabled --days 0 --type UntaggedManifests
 """
 
+helps['acr config soft-delete'] = """
+type: group
+short-summary: Manage soft-delete policy for Azure Container Registries.
+"""
+
+helps['acr config soft-delete show'] = """
+type: command
+short-summary: Show the configured soft-delete policy for an Azure Container Registry.
+examples:
+  - name: Show the configured soft-delete policy for an Azure Container Registry
+    text: >
+        az acr config soft-delete show -r myregistry
+"""
+
+helps['acr config soft-delete update'] = """
+type: command
+short-summary: Update soft-delete policy for an Azure Container Registry.
+examples:
+  - name: Enable soft-delete policy for an Azure Container Registry to purge a soft-deleted manifest after 30 days.
+    text: >
+        az acr config soft-delete update -r myregistry --status Enabled --days 30
+"""
+
 helps['acr create'] = """
 type: command
 short-summary: Create an Azure Container Registry.

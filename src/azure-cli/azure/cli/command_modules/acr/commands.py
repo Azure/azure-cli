@@ -69,7 +69,7 @@ def load_command_table(self, _):
 
     acr_policy_util = CliCommandType(
         operations_tmpl='azure.cli.command_modules.acr.policy#{}',
-        table_transformer=policy_output_format,
+        #table_transformer=policy_output_format,
         client_factory=cf_acr_registries
     )
 
@@ -318,6 +318,11 @@ def load_command_table(self, _):
     with self.command_group('acr config retention', acr_policy_util, is_preview=True) as g:
         g.show_command('show', 'acr_config_retention_show')
         g.command('update', 'acr_config_retention_update')
+
+    with self.command_group('acr config soft-delete', acr_policy_util, is_preview=True) as g:
+        g.show_command('show', 'acr_config_soft_delete_show')
+        g.command('update', 'acr_config_soft_delete_update')
+
 
     def _helm_deprecate_message(self):
         msg = "This {} has been deprecated and will be removed in future release.".format(self.object_type)
