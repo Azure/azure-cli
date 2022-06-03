@@ -38,7 +38,6 @@ from azure.cli.core._config import ENV_VAR_PREFIX, GLOBAL_CONFIG_DIR
 from azure.cli.core.cloud import get_active_cloud
 from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.core.util import CLIError
-from azure.graphrbac.models import GraphErrorException
 from azure.mgmt.containerservice.models import (
     ContainerService,
     ContainerServiceOrchestratorProfile,
@@ -606,27 +605,6 @@ class AcsCustomCommandTest(unittest.TestCase):
         ]
         self.assertEqual(merged['users'], expected_users)
         self.assertEqual(merged['current-context'], obj2['current-context'])
-
-    def test_acs_sp_create_failed_with_polished_error_if_due_to_permission(self):
-
-        class FakedError(object):
-            def __init__(self, message):
-                self.message = message
-
-        def _test_deserializer(resp_type, response):
-            err = FakedError('Insufficient privileges to complete the operation')
-            return err
-
-        client = mock.MagicMock()
-        client.create.side_effect = GraphErrorException(_test_deserializer, None)
-
-        # action
-        with self.assertRaises(CLIError) as context:
-            create_application(client, 'acs_sp', 'http://acs_sp', ['http://acs_sp'])
-
-        # assert we handled such error
-        self.assertTrue(
-            'https://docs.microsoft.com/azure/azure-resource-manager/resource-group-create-service-principal-portal' in str(context.exception))
 
     @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_rg_location', return_value='eastus')
     @mock.patch('azure.cli.command_modules.acs.addonconfiguration.cf_resource_groups', autospec=True)

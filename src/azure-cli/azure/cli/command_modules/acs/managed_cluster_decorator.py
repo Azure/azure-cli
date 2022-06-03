@@ -22,7 +22,6 @@ from azure.cli.command_modules.acs._consts import (
     DecoratorEarlyExitException,
     DecoratorMode,
 )
-from azure.cli.command_modules.acs._graph import ensure_aks_service_principal
 from azure.cli.command_modules.acs._helpers import (
     check_is_managed_aad_cluster,
     check_is_msi_cluster,
@@ -241,7 +240,6 @@ class AKSManagedClusterContext(BaseAKSContext):
                 "ensure_default_log_analytics_workspace_for_monitoring"
             ] = ensure_default_log_analytics_workspace_for_monitoring
             external_functions["ensure_aks_acr"] = ensure_aks_acr
-            external_functions["ensure_aks_service_principal"] = ensure_aks_service_principal
             external_functions[
                 "ensure_cluster_identity_permission_on_kubelet_identity"
             ] = ensure_cluster_identity_permission_on_kubelet_identity
@@ -1048,19 +1046,12 @@ class AKSManagedClusterContext(BaseAKSContext):
 
     # pylint: disable=too-many-statements
     def _get_service_principal_and_client_secret(
-        self, read_only: bool = False
+        self, enable_validation: bool = False, read_only: bool = False
     ) -> Tuple[Union[str, None], Union[str, None]]:
         """Internal function to dynamically obtain the values of service_principal and client_secret according to the
         context.
 
-        When service_principal and client_secret are not assigned and enable_managed_identity is True, dynamic
-        completion will not be triggered. For other cases, dynamic completion will be triggered.
-        When client_secret is given but service_principal is not, dns_name_prefix or fqdn_subdomain will be used to
-        create a service principal. The parameters subscription_id, location and name (cluster) are also required when
-        calling function "ensure_aks_service_principal", which internally used GraphRbacManagementClient to send
-        the request.
-        When service_principal is given but client_secret is not, function "ensure_aks_service_principal" would raise
-        CLIError.
+        This function supports the option of enable_validation.
 
         This function supports the option of read_only. When enabled, it will skip dynamic completion and validation.
 
@@ -1103,37 +1094,16 @@ class AKSManagedClusterContext(BaseAKSContext):
         if read_only:
             return service_principal, client_secret
 
-        # dynamic completion for service_principal and client_secret
-        dynamic_completion = False
-        # check whether the parameter meet the conditions of dynamic completion
-        enable_managed_identity = self._get_enable_managed_identity(read_only=True)
-        if not (
-            enable_managed_identity and
-            not service_principal and
-            not client_secret
-        ):
-            dynamic_completion = True
-        # disable dynamic completion if the value is read from `mc`
-        dynamic_completion = (
-            dynamic_completion and
-            not sp_read_from_mc and
-            not secret_read_from_mc
-        )
-        if dynamic_completion:
-            principal_obj = self.external_functions.ensure_aks_service_principal(
-                cli_ctx=self.cmd.cli_ctx,
-                service_principal=service_principal,
-                client_secret=client_secret,
-                subscription_id=self.get_subscription_id(),
-                dns_name_prefix=self._get_dns_name_prefix(enable_validation=False),
-                fqdn_subdomain=self._get_fqdn_subdomain(enable_validation=False),
-                location=self.get_location(),
-                name=self.get_name(),
-            )
-            service_principal = principal_obj.get("service_principal")
-            client_secret = principal_obj.get("client_secret")
+        # these parameters do not need dynamic completion
 
-        # these parameters do not need validation
+        # validation
+        if enable_validation:
+            # only one of service_principal and client_secret is provided, not both
+            if (service_principal or client_secret) and not (service_principal and client_secret):
+                raise RequiredArgumentMissingError(
+                    "Please provide both --service-principal and --client-secret to use sp as the cluster identity. "
+                    "An sp can be created using the 'az ad sp create-for-rbac' command."
+                )
         return service_principal, client_secret
 
     def get_service_principal_and_client_secret(
@@ -1141,19 +1111,10 @@ class AKSManagedClusterContext(BaseAKSContext):
     ) -> Tuple[Union[str, None], Union[str, None]]:
         """Dynamically obtain the values of service_principal and client_secret according to the context.
 
-        When service_principal and client_secret are not assigned and enable_managed_identity is True, dynamic
-        completion will not be triggered. For other cases, dynamic completion will be triggered.
-        When client_secret is given but service_principal is not, dns_name_prefix or fqdn_subdomain will be used to
-        create a service principal. The parameters subscription_id, location and name (cluster) are also required when
-        calling function "ensure_aks_service_principal", which internally used GraphRbacManagementClient to send
-        the request.
-        When service_principal is given but client_secret is not, function "ensure_aks_service_principal" would raise
-        CLIError.
-
         :return: a tuple containing two elements: service_principal of string type or None and client_secret of
         string type or None
         """
-        return self._get_service_principal_and_client_secret()
+        return self._get_service_principal_and_client_secret(enable_validation=True)
 
     def _get_enable_managed_identity(
         self, enable_validation: bool = False, read_only: bool = False
@@ -1804,8 +1765,10 @@ class AKSManagedClusterContext(BaseAKSContext):
             )
             if network_plugin:
                 if network_plugin == "azure" and pod_cidr:
-                    raise InvalidArgumentValueError(
-                        "Please use kubenet as the network plugin type when pod_cidr is specified"
+                    logger.warning(
+                        'When using `--network-plugin azure` without the preview feature '
+                        '`--network-plugin-mode overlay` the provided pod CIDR "%s" will be '
+                        'overwritten with the subnet CIDR.', pod_cidr
                     )
             else:
                 if (
@@ -1911,12 +1874,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         # validation
         if enable_validation:
             network_plugin = self._get_network_plugin(enable_validation=False)
-            if network_plugin:
-                if network_plugin == "azure" and pod_cidr:
-                    raise InvalidArgumentValueError(
-                        "Please use kubenet as the network plugin type when pod_cidr is specified"
-                    )
-            else:
+            if not network_plugin:
                 if (
                     pod_cidr or
                     service_cidr or
@@ -4105,9 +4063,6 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
 
     def set_up_service_principal_profile(self, mc: ManagedCluster) -> ManagedCluster:
         """Set up service principal profile for the ManagedCluster object.
-
-        The function "ensure_aks_service_principal" will be called if the user provides an incomplete sp and secret
-        pair, which internally used GraphRbacManagementClient to send the request to create sp.
 
         :return: the ManagedCluster object
         """

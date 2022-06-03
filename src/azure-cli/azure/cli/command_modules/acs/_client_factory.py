@@ -62,6 +62,13 @@ def get_auth_management_client(cli_ctx, scope=None, **_):
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_AUTHORIZATION, subscription_id=subscription_id)
 
 
+def cf_graph_client(cli_ctx):
+    from azure.cli.command_modules.role import graph_client_factory
+    return graph_client_factory(cli_ctx)
+
+
+# TODO: deprecated, will remove this after container service commands (acs) are removed during
+# the next breaking change window.
 def get_graph_rbac_management_client(cli_ctx, **_):
     from azure.cli.core.commands.client_factory import configure_common_settings
     from azure.cli.core._profile import Profile

@@ -22,7 +22,7 @@ from azure.cli.command_modules.role.custom import (create_role_definition,
                                                    list_service_principal_owners,
                                                    list_application_owners,
                                                    delete_role_assignments)
-from azure.cli.command_modules.role.msgrpah import GraphError
+from azure.cli.command_modules.role._msgrpah import GraphError
 from azure.cli.core.mock import DummyCli
 
 # pylint: disable=line-too-long
