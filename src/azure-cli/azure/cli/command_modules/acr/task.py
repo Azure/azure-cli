@@ -877,7 +877,14 @@ def acr_task_run(cmd,  # pylint: disable=too-many-locals
         update_trigger_token = base64.b64encode(update_trigger_token.encode()).decode()
 
     task_id = get_task_id_from_task_name(cmd.cli_ctx, resource_group_name, registry_name, task_name)
-    context_path = prepare_source_location(cmd, context_path, client_registries, registry_name, resource_group_name)
+    context_path = prepare_source_location(
+        cmd,
+        context_path,
+        file,
+        client_registries,
+        registry_name,
+        resource_group_name
+    )
 
     timeout = None
     task_details = get_task_details_by_name(cmd.cli_ctx, resource_group_name, registry_name, task_name)
