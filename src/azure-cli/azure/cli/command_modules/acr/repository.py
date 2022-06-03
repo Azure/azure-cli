@@ -112,7 +112,9 @@ def _obtain_data_from_registry(login_server,
             # like `Link: </v2/_catalog?last=hello-world&n=1>; rel="next"`
             # we should follow the next path indicated in the link header
             next_link_path = next_link[(next_link.index('<') + 1):next_link.index('>')]
+
             tokens = next_link_path.split('?', 1)
+
             params = {y[0]: unquote(y[1]) for y in (x.split('=', 1) for x in tokens[1].split('&'))}
             execute_next_http_call = True
 
@@ -140,6 +142,26 @@ def acr_repository_list(cmd,
         password=password,
         result_index='repositories',
         top=top)
+
+
+def acr_repository_deleted_list(cmd,
+                        registry_name,
+                        tenant_suffix=None,
+                        username=None,
+                        password=None):
+    login_server, username, password = get_access_credentials(
+        cmd=cmd,
+        registry_name=registry_name,
+        tenant_suffix=tenant_suffix,
+        username=username,
+        password=password)
+
+    return _obtain_data_from_registry(
+        login_server=login_server,
+        path='/acr/v1/_deleted/_catalog',
+        username=username,
+        password=password,
+        result_index='repositories')
 
 
 def acr_repository_show_tags(cmd,
@@ -430,21 +452,25 @@ def _validate_parameters(repository, image):
         raise CLIError('Usage error: --image IMAGE | --repository REPOSITORY')
 
 
-def _parse_image_name(image, allow_digest=False):
+def _parse_image_name(image, allow_digest=False, default_latest=True):
     if allow_digest and '@' in image:
         # This is probably an image name by manifest digest
         tokens = image.split('@')
         if len(tokens) == 2:
             return tokens[0], None, tokens[1]
 
-    if ':' in image:
+    if ':' in image and '@' not in image:
         # This is probably an image name by tag
         tokens = image.split(':')
         if len(tokens) == 2:
             return tokens[0], tokens[1], None
-    else:
+
+    if ':' not in image and '@' not in image:
         # This is probably an image with implicit latest tag
-        return image, 'latest', None
+        if default_latest:
+            return image, 'latest', None
+        else:
+            return image, None, None
 
     if allow_digest:
         raise CLIError("The name of the image to delete may include a tag in the"

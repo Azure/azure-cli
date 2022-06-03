@@ -39,7 +39,8 @@ from ._validators import (
     validate_expiration_time,
     validate_manifest_id,
     validate_repo_id,
-    validate_repository
+    validate_repository,
+    validate_permissive_repo_id
 )
 from .scope_map import RepoScopeMapActions, GatewayScopeMapActions
 
@@ -47,14 +48,21 @@ repo_id_type = CLIArgumentType(
     nargs='*',
     default=None,
     validator=validate_repo_id,
-    help="A fully qualified repository specifier such as 'MyRegistry.azurecr.io/hello-world'."
+    help="A fully qualified repository specifier such as 'myregistry.azurecr.io/hello-world'."
+)
+
+permissive_repo_id_type = CLIArgumentType(
+    nargs='*',
+    default=None,
+    validator=validate_permissive_repo_id,
+    help="A fully qualified repository specifier such as 'myregistry.azurecr.io/hello-world'. May include a tag such as myregistry.azurecr.io/hello-world:latest"
 )
 
 manifest_id_type = CLIArgumentType(
     nargs='*',
     default=None,
     validator=validate_manifest_id,
-    help="A fully qualified manifest specifier such as 'MyRegistry.azurecr.io/hello-world:latest'."
+    help="A fully qualified manifest specifier such as 'myregistry.azurecr.io/hello-world:latest'."
 )
 
 image_by_tag_or_digest_type = CLIArgumentType(
@@ -136,6 +144,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('days', type=int, help='The number of days to retain an untagged manifest after which it gets purged (Range: 0 to 365). Value "0" will delete untagged manifests immediately.', validator=validate_retention_days, default=7)
         c.argument('policy_type', options_list=['--type'], help='The type of retention policy.', arg_type=get_enum_type(RetentionType))
 
+    with self.argument_context('acr config soft-delete') as c:
+        c.argument('status', help="Indicates whether soft-delete policy is enabled.", arg_type=get_enum_type(PolicyStatus))
+        c.argument('registry_name', options_list=['--registry', '-r'])
+        c.argument('days', type=int, help='The number of days to retain a soft-deleted manifest or tag after which it gets purged (Range: 1 to 90).', default=7)
+
     with self.argument_context('acr login') as c:
         c.argument('resource_group_name', deprecate_info=c.deprecate(hide=True))
         c.argument('expose_token', options_list=['--expose-token', '-t'], help='Expose access token instead of automatically logging in through Docker CLI', action='store_true')
@@ -190,6 +203,20 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     with self.argument_context('acr manifest metadata show') as c:
         c.positional('manifest_id', arg_type=manifest_id_type)
+
+    with self.argument_context('acr manifest list-deleted') as c:
+        c.positional('repo_id', arg_type=repo_id_type)
+
+    with self.argument_context('acr manifest list-deleted-tags') as c:
+        c.positional('perm_repo_id', arg_type=permissive_repo_id_type)
+        c.argument('permissive_repo', help="The name of the repository. May include a tag in the format 'name:tag'", options_list=['--name', '-n'])
+
+    with self.argument_context('acr manifest restore') as c:
+        c.positional('manifest_id', arg_type=manifest_id_type)
+        c.argument('digest', options_list=['--digest', '-d'], help="The digest of the manifest such as 'sha256@abc123'.")
+        c.argument('force', options_list=['--force', '-f'], help='Overwrite the existing tag.', action='store_true')
+        c.argument('manifest_spec', help="The name of the artifact. May include a tag in the format 'name:tag'.", options_list=['--name', '-n'])
+
 
     with self.argument_context('acr manifest metadata list') as c:
         c.positional('repo_id', arg_type=repo_id_type)
