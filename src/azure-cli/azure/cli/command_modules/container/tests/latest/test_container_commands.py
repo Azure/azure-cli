@@ -245,14 +245,13 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
 
 
     # Test create container using auto generated domain name label scope.
-    @live_only()
     @ResourceGroupPreparer()
     def test_container_create_with_auto_gen_dnl_scope(self, resource_group, resource_group_location):
         container_group_name = self.create_random_name('clicontainer', 16)
         image = 'alpine:latest'
         os_type = 'Linux'
         ip_address_type = 'Public'
-        auto_gen_dnl_scope = 'FreeReuse'
+        auto_gen_dnl_scope = 'TenantReuse'
 
         self.kwargs.update({
             'container_group_name1': container_group_name,
