@@ -1,5 +1,14 @@
 Samples for kusto query
 =======================
+### Query for new schema
+CLI telemetry has different schema before and after version 2.0.28
+[Execute in Web](https://dataexplorer.azure.com/clusters/ddazureclients/databases/AzureCli?query=H4sIAAAAAAAAAwtKLHctS80rKXascs7J5KpRKM9ILUpVKC7IySzRCCjKTylNLglLLSrOzM/TUVDXU9eMNohVsLVVUE+sKi1KTc7JdDBSh+sqyc/MK9HAo9cwVlPBTsFAIb+IsFojsFojC6DpJYnZqQqmAIl8AharAAAA)
+```
+RawEventsAzCli
+| where split(ProductVersion, '.')[0] == 'azurecli@2'
+| where toint(split(ProductVersion, '.')[1]) > 0 or toint(split(ProductVersion, '.')[2]) > 28
+| take 5
+```
 
 ### Query for specific command
 e.g. `az account show` command:
@@ -71,17 +80,20 @@ RawEventsAzCli
 | where EventName == 'azurecli/command'
 | summarize count() by ActionResult
 ```
-Note: `where EventName == 'azurecli/command'` is necessary because in some cases one record will have adjunctive records whose `EventName` could be `azurecli/extension` or `azurecli/fault`. If you count these adjunctive records, some calls might be calculated twice or more times.
+Note: `where EventName == 'azurecli/command'` is necessary because in some cases one record will have additional records whose `EventName` could be `azurecli/extension` or `azurecli/fault`. If you count these additional records, some calls might be calculated twice or more times.
 
 ### Query failure details for specific command
 e.g. `az group create` command:
 
-[Execute in Web](https://dataexplorer.azure.com/clusters/ddazureclients/databases/AzureCli?query=H4sIAAAAAAAAA1XNwQrCMAyA4btPEU9T6MUHmDDGjsrYfIHQhVlZ15K0TsWHt5sw9BRIPv40OFV3GoMUr3IwmzdMV2KCZXcxliSg9XAE7N3u0O1X0OBUOmtx7CDPIevZRQ+aCQNlKyp0MG5sSOIQYJtYG7UmkVl4djfS4fvpjJbUT1NBjYxW1F8iiWW2MSF+Kqgemvx8P6Uo9ilRs/PEwZB8ANNzwnXZAAAA)
+[Execute in Web](https://dataexplorer.azure.com/clusters/ddazureclients/databases/AzureCli?query=H4sIAAAAAAAAA52Ry2rDMBBF9/0KdeUEhKEf4EJI3V1LcLIrJQzS1FGxHozGcRL68ZVtGseUbroV554Z3amgK4/oOK4u68bcfYnugIRieNsZi5HBBvEooPaLB728AhV0a28tOC2KQmQ1+TYIRQiM2RVaKTbeVRjbhsV9wratUhhjT+CJMYVFSeRpdw4oCsE+MhlXLzbkAxIbjG+Z8o4TnGv8gOTJ4dISqsbk2Cf3nKLZ+3IylieFoZ/7CvYf0p/03qX4TPzck08YFZmB+MtNGJGOqHMNqTyvscnHIXrKjuJA/hMVj23368qbXqXYAIGNclajnAqT86/KXwsm25DZtklI5xv+JR0B6hSZ9v4GVmNP5AkCAAA=)
 ```
 RawEventsAzCli
 | where EventTimestamp > ago(1d)
 | where RawCommand == 'group create'
 | where ActionResult != 'Success'
-| project EventName, RawCommand, Params, ActionResult, ResultSummary, ExceptionMessage, Properties
+| extend  ErrorType = tostring(Properties['context.default.azurecli.error_type'])
+| extend ExceptionName = tostring(Properties['context.default.azurecli.exception_name'])
+| extend FaultDescription = tostring(Properties['reserved.datamodel.fault.description'])
+| project EventName, RawCommand, Params, ActionResult, ErrorType, ExceptionName, FaultDescription, ResultSummary, ExceptionMessage, Properties
 ```
-Pay attention to `ResultSummary` and `ExceptionMessage` fields. Find `error_type` from `Properties['context.default.azurecli.error_type']` if you want
+Notes: `ResultSummary` and `ExceptionMessage` might be suppressed to meet security & privacy requirements.
