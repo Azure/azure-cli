@@ -7859,7 +7859,8 @@ def create_virtual_hub(cmd, client,
 
     SubResource = cmd.get_models('SubResource')
 
-    VirtualHub, HubIpConfiguration, PublicIPAddress= cmd.get_models('VirtualHub', 'HubIpConfiguration', 'PublicIPAddress')
+    VirtualHub, HubIpConfiguration, PublicIPAddress = cmd.get_models('VirtualHub', 'HubIpConfiguration',
+                                                                     'PublicIPAddress')
 
     hub = VirtualHub(tags=tags, location=location,
                      virtual_wan=None,
