@@ -308,7 +308,7 @@ def load_aaz_command_table(loader, aaz_pkg_name, args):
         fully_load = True
     else:
         arg_str = ' '.join(args)
-        fully_load = os.environ.get(AAZ_PACKAGE_FULL_LOAD_ENV_NAME, 'False').lower() == 'true'  # used to disable cut logic
+        fully_load = os.environ.get(AAZ_PACKAGE_FULL_LOAD_ENV_NAME, 'False').lower() == 'true'  # disable cut logic
     if profile_pkg is not None:
         _load_aaz_pkg(loader, profile_pkg, command_table, command_group_table, arg_str, fully_load)
 
