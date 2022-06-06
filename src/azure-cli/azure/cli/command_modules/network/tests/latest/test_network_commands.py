@@ -9,6 +9,7 @@ import os
 import unittest
 import tempfile
 
+from azure.cli.testsdk.constants import AUX_SUBSCRIPTION
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.profiles import supported_api_version, ResourceType
@@ -560,7 +561,9 @@ class NetworkPublicIpPrefix(ScenarioTest):
 
         self.kwargs.update({
             'prefix': 'prefix1',
-            'pip': 'pip1'
+            'pip': 'pip1',
+            'prefix_v6': self.create_random_name('public-ip-prefix-', 24),
+            'pip_v6': self.create_random_name('public-ip-', 16)
         })
 
         # Test prefix CRUD
@@ -582,6 +585,15 @@ class NetworkPublicIpPrefix(ScenarioTest):
         self.cmd('network public-ip prefix create -g {rg} -n {prefix} --length 30')
         self.cmd('network public-ip create -g {rg} -n {pip} --public-ip-prefix {prefix} --sku Standard',
                  checks=self.check("publicIp.publicIpPrefix.id.contains(@, '{prefix}')", True))
+        self.cmd('network public-ip prefix create -n {prefix_v6} -g {rg} --version IPv6 --length 126 -z 1 3 2')
+        self.cmd(
+            'network public-ip create -n {pip_v6} -g {rg} --public-ip-prefix {prefix_v6}',
+            checks=[
+                self.check('publicIp.name', '{pip_v6}'),
+                self.check('publicIp.publicIpAddressVersion', 'IPv6'),
+                self.check('publicIp.zones', ['1', '3', '2'])
+            ]
+        )
 
         # Test IP address version
         self.kwargs.update({
@@ -628,11 +640,31 @@ class NetworkPublicIpPrefix(ScenarioTest):
             self.check('publicIpAddressVersion', 'IPv4')
         ]).get_output_in_json()
 
-        ip_address = '.'.join(ip_prefix['ipPrefix'].split('.')[:3]) + '10'
+        ip_address = ip_prefix['ipPrefix'][:-3]
 
         # Create public ip with ip address
         self.cmd('network public-ip create -g {rg} -n {pip} --public-ip-prefix {prefix_name_ipv4} --sku Standard --ip-address ' + ip_address,
                  checks=self.check("publicIp.publicIpPrefix.id.contains(@, '{prefix_name_ipv4}')", True))
+
+    @live_only()
+    @ResourceGroupPreparer(name_prefix="cli_test_network_public_ip_prefix_", location="eastus2", subscription=AUX_SUBSCRIPTION)
+    def test_network_public_ip_prefix_with_aux_custom(self, resource_group):
+        self.kwargs.update({
+            "aux_rg": resource_group,
+            "aux_subscription": AUX_SUBSCRIPTION,
+            "public_prefix_name": self.create_random_name("public-prefix-", 20)
+        })
+
+        # previously created custom ip prefix
+        self.kwargs["custom_id"] = self.cmd("network custom-ip prefix show -n ethan-cip -g ethan-rg").get_output_in_json()["id"]
+        self.cmd(
+            "network public-ip prefix create -n {public_prefix_name} -g {aux_rg} --length 31 --zone 2 3 1 "
+            "--custom-ip-prefix-name {custom_id} --subscription {aux_subscription}",
+            checks=[
+                self.check("name", "{public_prefix_name}"),
+                self.check("type", "Microsoft.Network/publicIPPrefixes")
+            ]
+        )
 
 
 class NetworkMultiIdsShowScenarioTest(ScenarioTest):

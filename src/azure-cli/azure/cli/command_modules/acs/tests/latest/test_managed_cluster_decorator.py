@@ -791,13 +791,11 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             (None, None),
         )
 
-        # dynamic completion
+        # custom
         ctx_2 = AKSManagedClusterContext(
             self.cmd,
             AKSManagedClusterParamDict(
                 {
-                    "name": "test_name",
-                    "resource_group_name": "test_rg_name",
                     "enable_managed_identity": True,
                     "service_principal": "test_service_principal",
                     "client_secret": "test_client_secret",
@@ -806,26 +804,16 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             self.models,
             DecoratorMode.CREATE,
         )
-        ctx_2.set_intermediate("subscription_id", "1234-5678", overwrite_exists=True)
-        with patch(
-            "azure.cli.command_modules.acs.managed_cluster_decorator.get_rg_location",
-            return_value="test_location",
-        ), patch(
-            "azure.cli.command_modules.acs._graph.get_graph_rbac_management_client",
-            return_value=None,
-        ):
-            self.assertEqual(
-                ctx_2.get_service_principal_and_client_secret(),
-                ("test_service_principal", "test_client_secret"),
-            )
+        self.assertEqual(
+            ctx_2.get_service_principal_and_client_secret(),
+            ("test_service_principal", "test_client_secret"),
+        )
 
-        # dynamic completion
+        # custom
         ctx_3 = AKSManagedClusterContext(
             self.cmd,
             AKSManagedClusterParamDict(
                 {
-                    "name": "test_name",
-                    "resource_group_name": "test_rg_name",
                     "enable_managed_identity": True,
                     "service_principal": None,
                     "client_secret": "test_client_secret",
@@ -834,40 +822,15 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             self.models,
             DecoratorMode.CREATE,
         )
-        ctx_3.set_intermediate("subscription_id", "1234-5678", overwrite_exists=True)
-        with patch(
-            "azure.cli.command_modules.acs.managed_cluster_decorator.get_rg_location",
-            return_value="test_location",
-        ), patch("azure.cli.command_modules.acs._graph.get_graph_rbac_management_client", return_value=None), patch(
-            "azure.cli.command_modules.acs._graph.build_service_principal",
-            return_value=("test_service_principal", "test_aad_session_key"),
-        ):
-            self.assertEqual(
-                ctx_3.get_service_principal_and_client_secret(),
-                ("test_service_principal", "test_client_secret"),
-            )
-        service_principal_profile = self.models.ManagedClusterServicePrincipalProfile(
-            client_id="test_mc_service_principal",
-        )
-        mc = self.models.ManagedCluster(
-            location="test_location",
-            service_principal_profile=service_principal_profile,
-        )
-        ctx_3.attach_mc(mc)
-        # fail on inconsistent state
-        with self.assertRaises(CLIInternalError):
-            self.assertEqual(
-                ctx_3.get_service_principal_and_client_secret(),
-                ("test_mc_service_principal", "test_mc_client_secret"),
-            )
+        # fail on service_principal not specified
+        with self.assertRaises(RequiredArgumentMissingError):
+            ctx_3.get_service_principal_and_client_secret()
 
-        # dynamic completion
+        # custom
         ctx_4 = AKSManagedClusterContext(
             self.cmd,
             AKSManagedClusterParamDict(
                 {
-                    "name": "test_name",
-                    "resource_group_name": "test_rg_name",
                     "enable_managed_identity": True,
                     "service_principal": "test_service_principal",
                     "client_secret": None,
@@ -876,17 +839,31 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             self.models,
             DecoratorMode.CREATE,
         )
-        ctx_4.set_intermediate("subscription_id", "1234-5678", overwrite_exists=True)
-        with patch(
-            "azure.cli.command_modules.acs.managed_cluster_decorator.get_rg_location",
-            return_value="test_location",
-        ), patch(
-            "azure.cli.command_modules.acs._graph.get_graph_rbac_management_client",
-            return_value=None,
-        ):
-            # fail on client_secret not specified
-            with self.assertRaises(CLIError):
-                ctx_4.get_service_principal_and_client_secret()
+        # fail on client_secret not specified
+        with self.assertRaises(RequiredArgumentMissingError):
+            ctx_4.get_service_principal_and_client_secret()
+
+        # custom
+        ctx_5 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_managed_identity": True,
+                    "service_principal": "test_service_principal",
+                    "client_secret": None,
+                }
+            ),
+            self.models,
+            DecoratorMode.CREATE,
+        )
+        sp_profile_5 = self.models.ManagedClusterServicePrincipalProfile(
+            client_id=None, secret="test_client_secret"
+        )
+        mc_5 = self.models.ManagedCluster(location="test_location", service_principal_profile=sp_profile_5)
+        ctx_5.attach_mc(mc_5)
+        # fail on inconsistent state
+        with self.assertRaises(CLIInternalError):
+            ctx_5.get_service_principal_and_client_secret()
 
     def test_get_enable_managed_identity(self):
         # default
@@ -921,6 +898,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             self.models,
             DecoratorMode.CREATE,
         )
+        self.assertEqual(ctx_2._get_enable_managed_identity(read_only=True), True)
         self.assertEqual(ctx_2.get_enable_managed_identity(), False)
 
         # custom value
@@ -4283,8 +4261,6 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             self.cmd,
             self.client,
             {
-                "name": "test_name",
-                "resource_group_name": "test_rg_name",
                 "enable_managed_identity": True,
                 "service_principal": "test_service_principal",
                 "client_secret": "test_client_secret",
@@ -4293,16 +4269,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         )
         mc_2 = self.models.ManagedCluster(location="test_location")
         dec_2.context.attach_mc(mc_2)
-        dec_2.context.set_intermediate("subscription_id", "1234-5678", overwrite_exists=True)
-        with patch(
-            "azure.cli.command_modules.acs.managed_cluster_decorator.get_rg_location",
-            return_value="test_location",
-        ), patch(
-            "azure.cli.command_modules.acs._graph.get_graph_rbac_management_client",
-            return_value=None,
-        ):
-            dec_mc_2 = dec_2.set_up_service_principal_profile(mc_2)
-
+        dec_mc_2 = dec_2.set_up_service_principal_profile(mc_2)
         service_principal_profile_2 = self.models.ManagedClusterServicePrincipalProfile(
             client_id="test_service_principal", secret="test_client_secret"
         )
@@ -5411,6 +5378,25 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         # fail on enable_managed_identity not specified
         with self.assertRaises(RequiredArgumentMissingError):
             dec_4.set_up_identity(mc_4)
+
+        # custom, identity disabled by sp
+        dec_5 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_managed_identity": True,
+                "service_principal": "test_service_principal",
+                "client_secret": "test_client_secret",
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_5 = self.models.ManagedCluster(location="test_location")
+        dec_5.context.attach_mc(mc_5)
+        dec_mc_5 = dec_5.set_up_identity(mc_5)
+        ground_truth_mc_5 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        self.assertEqual(dec_mc_5, ground_truth_mc_5)
 
     def test_set_up_identity_profile(self):
         # default value in `aks_create`
