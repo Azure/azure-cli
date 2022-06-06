@@ -5,7 +5,7 @@ FAQ
 
 - CLI telemetry is client telemetry. It logs os, platform, command, parameter, result and other client info.
 - ARM telemetry is server telemetry. It tracks all HTTP requests and responses through ARM endpoint from different clients, including CLI, Powershell, SDK...
-- They share the same `clientRequestId` which you can leverage to join `HttpIncomingRequests`(ARM telemetry table) to `RawEventsAzCli`(CLI telemetry table)
+- They share the same `clientRequestId` which you can leverage to join `HttpIncomingRequests` (ARM telemetry table) with `RawEventsAzCli` (CLI telemetry table)
 
 
 ### How can I filter CLI requests from ARM telemetry?
@@ -18,15 +18,10 @@ HttpIncomingRequests
 | take 10
 ```
 
-### Should I use `ResultSummary` or `ExceptionMessage` in CLI telemetry to fetch error details?
-
-It's suggested to fetch `ResultSummary` first. If it's empty then try `ExceptionMessage`.
-
-
 ### How can I collect customized properties into CLI telemetry?
 
-You can utilize [`add_extension_event` function](https://github.com/Azure/azure-cli/blob/dev/src/azure-cli-core/azure/cli/core/telemetry.py#L418-L420) to collect properties for your extension.
+You can utilize `add_extension_event` [function](https://github.com/Azure/azure-cli/blob/dev/src/azure-cli-core/azure/cli/core/telemetry.py#L418-L420) to collect properties for your extension.
 
 When customers run command, in additional to general CLI record whose `EventName` is `azurecli/command`, there will be another record whose `EventName` is `azurecli/extension` recorded in CLI telemetry.
 
-And you can join the general `azurecli/command` record with `azurecli/extension` record on `Properties['reserved.datamodel.correlationid']`
+And you can join the general `azurecli/command` record with `azurecli/extension` record on `CorrelationId` field.
