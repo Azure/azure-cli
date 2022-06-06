@@ -9,6 +9,7 @@
 from azure.cli.core.commands import CliCommandType
 from ._client_factory import (
     topics_factory,
+    topic_event_subscriptions_factory,
     domains_factory,
     domain_topics_factory,
     system_topics_factory,
@@ -28,6 +29,12 @@ def load_command_table(self, _):
     topics_mgmt_util = CliCommandType(
         operations_tmpl='azure.mgmt.eventgrid.operations#TopicsOperations.{}',
         client_factory=topics_factory,
+        client_arg_name='self'
+    )
+
+    topic_event_subscriptions_mgmt_util = CliCommandType(
+        operations_tmpl='azure.mgmt.eventgrid.operations#TopicEventSubscriptionsOperations.{}',
+        client_factory=topic_event_subscriptions_factory,
         client_arg_name='self'
     )
 
@@ -105,6 +112,13 @@ def load_command_table(self, _):
         g.custom_command('list', 'cli_topic_list')
         g.custom_command('create', 'cli_topic_create_or_update')
         g.custom_command('update', 'cli_topic_update')
+
+    with self.command_group('eventgrid topic event-subscription', topic_event_subscriptions_mgmt_util, client_factory=topic_event_subscriptions_factory, is_preview=True) as g:
+        g.custom_show_command('show', 'cli_topic_event_subscription_get')
+        g.command('delete', 'begin_delete', confirmation=True)
+        g.custom_command('list', 'cli_topic_event_subscription_list')
+        g.custom_command('create', 'cli_topic_event_subscription_create_or_update')
+        g.custom_command('update', 'cli_topic_event_subscription_update')
 
     with self.command_group('eventgrid extension-topic', extension_topics_mgmt_util, client_factory=extension_topics_factory) as g:
         g.show_command('show', 'get')
