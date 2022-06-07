@@ -880,10 +880,10 @@ def acr_task_run(cmd,  # pylint: disable=too-many-locals
     context_path = prepare_source_location(
         cmd,
         context_path,
-        file,
         client_registries,
         registry_name,
-        resource_group_name
+        resource_group_name,
+        file
     )
 
     timeout = None

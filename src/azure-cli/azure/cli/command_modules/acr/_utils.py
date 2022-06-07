@@ -410,7 +410,7 @@ def prepare_source_location(cmd,
                             client_registries,
                             registry_name,
                             resource_group_name,
-                            docker_file_path):
+                            docker_file_path=None):
     if not source_location or source_location.lower() == ACR_NULL_CONTEXT:
         source_location = None
     elif os.path.exists(source_location):
