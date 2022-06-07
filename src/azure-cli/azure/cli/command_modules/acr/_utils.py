@@ -603,4 +603,3 @@ def get_task_details_by_name(cli_ctx, resource_group_name, registry_name, task_n
     from ._client_factory import cf_acr_tasks
     client = cf_acr_tasks(cli_ctx)
     return client.get_details(resource_group_name, registry_name, task_name)
-
