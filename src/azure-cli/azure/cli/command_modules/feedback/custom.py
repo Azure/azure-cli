@@ -36,7 +36,7 @@ _QUESTIONS_URL = "aka.ms/azcli/questions"
 _CLI_ISSUES_URL = "aka.ms/azcli/issues"
 _RAW_CLI_ISSUES_URL = "https://github.com/azure/azure-cli/issues/new"
 
-_EXTENSIONS_ISSUES_URL = "aka.ms/azcli/ext/issues"
+_EXTENSIONS_ISSUES_URL = "aka.ms/azcli/issues"
 _RAW_EXTENSIONS_ISSUES_URL = "https://github.com/azure/azure-cli-extensions/issues/new"
 
 _MSG_INTR = \
