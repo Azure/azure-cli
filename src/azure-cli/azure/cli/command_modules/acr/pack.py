@@ -49,7 +49,7 @@ def acr_pack_build(cmd,  # pylint: disable=too-many-locals
 
     client_registries = cf_acr_registries_tasks(cmd.cli_ctx)
     source_location = prepare_source_location(
-        cmd, source_location, client_registries, registry_name, resource_group_name, None)
+        cmd, source_location, client_registries, registry_name, resource_group_name)
     if not source_location:
         raise CLIError('Building with Buildpacks requires a valid source location.')
 
