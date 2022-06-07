@@ -420,21 +420,28 @@ def prepare_source_location(cmd,
 
         # NOTE: If docker_file_path is not specified, the default is Dockerfile in source_location.
         # Otherwise, it's based on current working directory.
-        if not docker_file_path:
+        if docker_file_path:
+            _check_local_docker_file(docker_file_path)
+        else:
             docker_file_path = os.path.join(source_location, "Dockerfile")
-            logger.info("'--file or -f' is not provided. '%s' is used.", docker_file_path)
-
-        _check_local_docker_file(docker_file_path)
+            if os.path.isfile(docker_file_path):
+                logger.info("'--file or -f' is not provided. '%s' is used.", docker_file_path)
+            else:
+                docker_file_path = ""
 
         tar_file_path = os.path.join(tempfile.gettempdir(
         ), 'cli_source_archive_{}.tar.gz'.format(uuid.uuid4().hex))
 
         try:
-            # NOTE: os.path.basename is unable to parse "\" in the file path
-            original_docker_file_name = os.path.basename(
-                docker_file_path.replace("\\", "/"))
-            docker_file_in_tar = '{}_{}'.format(
-                uuid.uuid4().hex, original_docker_file_name)
+            if docker_file_path:
+                # NOTE: os.path.basename is unable to parse "\" in the file path
+                original_docker_file_name = os.path.basename(
+                    docker_file_path.replace("\\", "/"))
+                docker_file_in_tar = '{}_{}'.format(
+                    uuid.uuid4().hex, original_docker_file_name)
+            else:
+                docker_file_in_tar = ""
+
             source_location = upload_source_code(
                 cmd, client_registries, registry_name, resource_group_name,
                 source_location, tar_file_path, docker_file_path, docker_file_in_tar)
