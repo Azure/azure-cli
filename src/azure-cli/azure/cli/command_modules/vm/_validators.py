@@ -1713,10 +1713,39 @@ def validate_vmss_disk(cmd, namespace):
         raise CLIError('usage error: --disk EXIST_DISK --instance-id ID')
 
 
+def _validate_gallery_image_reference(cmd, namespace):
+    from azure.cli.core.profiles import ResourceType
+    is_validate = 'gallery_image_reference' in namespace and namespace.gallery_image_reference is not None \
+                  and cmd.supported_api_version(resource_type=ResourceType.MGMT_COMPUTE,
+                                                operation_group='disks', min_api='2022-03-02')
+    if not is_validate:
+        return
+
+    from azure.cli.command_modules.vm._image_builder import GalleryImageReferenceType
+    from ._vm_utils import is_compute_gallery_image_id, is_community_gallery_image_id, \
+        is_shared_gallery_image_id
+
+    gallery_image_reference = namespace.gallery_image_reference
+    if is_compute_gallery_image_id(gallery_image_reference):
+        namespace.gallery_image_reference_backend = GalleryImageReferenceType.COMPUTE.backend_parameter
+        return
+    if is_community_gallery_image_id(gallery_image_reference):
+        namespace.gallery_image_reference_backend = GalleryImageReferenceType.COMMUNITY.backend_parameter
+        return
+    if is_shared_gallery_image_id(gallery_image_reference):
+        namespace.gallery_image_reference_backend = GalleryImageReferenceType.SHARED.backend_parameter
+        return
+
+    from azure.cli.core.parser import InvalidArgumentValueError
+    raise InvalidArgumentValueError('usage error: {} is an invalid gallery image reference, please provide valid '
+                                    'compute\shared\community gallery image version'.format(gallery_image_reference))
+
+
 def process_disk_or_snapshot_create_namespace(cmd, namespace):
     from azure.core.exceptions import HttpResponseError
     validate_tags(namespace)
     validate_edge_zone(cmd, namespace)
+    _validate_gallery_image_reference(cmd, namespace)
     if namespace.source:
         usage_error = 'usage error: --source {SNAPSHOT | DISK} | --source VHD_BLOB_URI [--source-storage-account-id ID]'
         try:

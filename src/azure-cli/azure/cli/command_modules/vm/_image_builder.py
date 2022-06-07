@@ -56,6 +56,16 @@ class ScriptType(Enum):
     FILE = "file"
 
 
+class GalleryImageReferenceType(Enum):
+    COMPUTE = (0, 'id')
+    COMMUNITY = (1, 'communityGalleryImageId')
+    SHARED = (2, 'sharedGalleryImageId')
+
+    def __init__(self, index, backend_parameter):
+        self.index = index
+        self.backend_parameter = backend_parameter
+
+
 # region Client Factories
 
 def image_builder_client_factory(cli_ctx, _):
