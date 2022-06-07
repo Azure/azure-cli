@@ -407,10 +407,10 @@ def get_task_id_from_task_name(cli_ctx, resource_group, registry_name, task_name
 
 def prepare_source_location(cmd,
                             source_location,
-                            docker_file_path,
                             client_registries,
                             registry_name,
-                            resource_group_name):
+                            resource_group_name,
+                            docker_file_path):
     if not source_location or source_location.lower() == ACR_NULL_CONTEXT:
         source_location = None
     elif os.path.exists(source_location):
