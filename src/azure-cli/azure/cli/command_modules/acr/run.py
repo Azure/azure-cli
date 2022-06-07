@@ -53,7 +53,7 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
 
     client_registries = cf_acr_registries_tasks(cmd.cli_ctx)
     source_location = prepare_source_location(
-        cmd, source_location, client_registries, registry_name, resource_group_name)
+        cmd, source_location, client_registries, registry_name, resource_group_name, file)
 
     platform_os, platform_arch, platform_variant = get_validate_platform(cmd, platform)
 
