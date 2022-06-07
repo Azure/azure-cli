@@ -140,3 +140,8 @@ def validate_repository(namespace):
         if ':' in namespace.repository:
             raise InvalidArgumentValueError("Parameter 'name' refers to a repository and"
                                             " should not include a tag or digest.")
+
+
+def validate_docker_file_path(docker_file_path):
+    if not os.path.isfile(docker_file_path):
+        raise CLIError("Unable to find '{}'.".format(docker_file_path))
