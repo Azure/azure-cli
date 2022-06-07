@@ -26,7 +26,8 @@ from ._stream_utils import stream_logs
 from ._constants import (
     ACR_NULL_CONTEXT,
     ACR_TASK_QUICKTASK,
-    ACR_RUN_DEFAULT_TIMEOUT_IN_SEC
+    ACR_RUN_DEFAULT_TIMEOUT_IN_SEC,
+    ALLOWED_TASK_FILE_TYPES
 )
 
 logger = get_logger(__name__)
@@ -37,8 +38,6 @@ DEFAULT_TOKEN_TYPE = 'PAT'
 IDENTITY_LOCAL_ID = '[system]'
 IDENTITY_GLOBAL_REMOVE = '[all]'
 DEFAULT_CPU = 2
-ALLOWED_TASK_FILE_TYPES = ('.yaml', '.yml', '.toml', '.json', '.sh', '.bash', '.zsh', '.ps1',
-                           '.ps', '.cmd', '.bat', '.ts', '.js', '.php', '.py', '.rb', '.lua')
 
 
 def acr_task_create(cmd,  # pylint: disable=too-many-locals

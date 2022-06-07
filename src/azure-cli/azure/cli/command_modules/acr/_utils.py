@@ -23,9 +23,12 @@ from ._constants import (
     get_valid_os,
     get_valid_architecture,
     get_valid_variant,
-    ACR_NULL_CONTEXT
+    ACR_NULL_CONTEXT,
+    ALLOWED_TASK_FILE_TYPES
 )
 from ._client_factory import cf_acr_registries
+
+from ._validators import validate_docker_file_path
 
 from ._archive_utils import upload_source_code, check_remote_source_code
 
@@ -421,10 +424,10 @@ def prepare_source_location(cmd,
         # NOTE: If docker_file_path is not specified, the default is Dockerfile in source_location.
         # Otherwise, it's based on current working directory.
         if docker_file_path:
-            if docker_file_path.endswith(('.yml', '.yaml')) or docker_file_path.startswith('-'):
+            if docker_file_path.endswith(ALLOWED_TASK_FILE_TYPES):
                 docker_file_path = ""
             else:
-                _check_local_docker_file(os.path.join(source_location, docker_file_path))
+                validate_docker_file_path(os.path.join(source_location, docker_file_path))
         else:
             docker_file_path = os.path.join(source_location, "Dockerfile")
             if os.path.isfile(docker_file_path):
@@ -601,7 +604,3 @@ def get_task_details_by_name(cli_ctx, resource_group_name, registry_name, task_n
     client = cf_acr_tasks(cli_ctx)
     return client.get_details(resource_group_name, registry_name, task_name)
 
-
-def _check_local_docker_file(docker_file_path):
-    if not os.path.isfile(docker_file_path):
-        raise CLIError("Unable to find '{}'.".format(docker_file_path))
