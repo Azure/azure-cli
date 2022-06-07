@@ -2630,7 +2630,6 @@ class SynapseScenarioTests(ScenarioTest):
             'az synapse notebook show --workspace-name {workspace} --name {name}',
             expect_failure=True)
 
-    @unittest.skip('UnicodeDecodeError')
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_workspace_package(self):
