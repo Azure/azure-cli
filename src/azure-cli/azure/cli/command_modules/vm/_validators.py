@@ -1738,7 +1738,8 @@ def _validate_gallery_image_reference(cmd, namespace):
 
     from azure.cli.core.parser import InvalidArgumentValueError
     raise InvalidArgumentValueError('usage error: {} is an invalid gallery image reference, please provide valid '
-                                    'compute\shared\community gallery image version'.format(gallery_image_reference))
+                                    'compute, shared or community gallery image version'
+                                    .format(gallery_image_reference))
 
 
 def process_disk_or_snapshot_create_namespace(cmd, namespace):
