@@ -43,6 +43,13 @@ def transform_acl_list_output_v2(result):
         new_result[identifier.id] = identifier.access_policy
     return new_result
 
+def transform_acl_datetime(result):
+    result = todict(result)
+    if result['start']:
+        result['start'] = result["start"].split('.')[0] + '+00:00'
+    if result['expiry']:
+        result['expiry'] = result["expiry"].split('.')[0] + '+00:00'
+    return result
 
 def transform_container_permission_output(result):
     return {'publicAccess': result.get('public_access', None) or 'off'}
