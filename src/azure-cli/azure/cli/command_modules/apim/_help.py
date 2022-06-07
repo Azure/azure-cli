@@ -624,7 +624,7 @@ short-summary: Get soft-deleted Api Management service instances available for u
 examples:
   - name: Get a soft-deleted services with its name.
     text: |
-        az apim deletedservice get --name MyApim -g MyResourceGroup  
+        az apim deletedservice get --name MyApim -g MyResourceGroup
 """
 
 helps['apim deletedservice list'] = """
@@ -633,7 +633,7 @@ short-summary: Lists all soft-deleted Api Management services instances availabl
 examples:
   - name: List all soft-deleted services in a subscription.
     text: |
-        az apim deletedservice list -g MyResourceGroup 
+        az apim deletedservice list -g MyResourceGroup
 """
 
 helps['apim deletedservice purge'] = """
@@ -642,5 +642,5 @@ short-summary: Purges soft-deleted Api Management service instance (deletes it w
 examples:
   - name: Purge a soft-deleted serivce.
     text: |
-        az apim deletedservice purge --name MyApim -g MyResourceGroup 
+        az apim deletedservice purge --name MyApim -g MyResourceGroup
 """

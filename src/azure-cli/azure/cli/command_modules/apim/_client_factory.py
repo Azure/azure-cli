@@ -45,5 +45,6 @@ def cf_apiversionset(cli_ctx, *_):
 def cf_apischema(cli_ctx, *_):
     return cf_apim(cli_ctx).api_schema
 
+
 def cf_ds(cli_ctx, *_):
     return cf_apim(cli_ctx).deleted_services
