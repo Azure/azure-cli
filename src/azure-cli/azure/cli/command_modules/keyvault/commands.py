@@ -91,7 +91,8 @@ def load_command_table(self, _):
 
     if not is_azure_stack_profile(self):
         with self.command_group('keyvault', mgmt_hsms_entity.command_type,
-                                client_factory=mgmt_hsms_entity.client_factory) as g:
+                                client_factory=mgmt_hsms_entity.client_factory,
+                                operation_group='managed_hsms') as g:
             g.generic_update_command(
                 'update-hsm', setter_name='update_hsm_setter', setter_type=kv_hsms_custom,
                 custom_func_name='update_hsm', supports_no_wait=True,

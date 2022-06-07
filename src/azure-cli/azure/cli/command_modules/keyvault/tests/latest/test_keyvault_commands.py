@@ -331,9 +331,10 @@ class KeyVaultHSMMgmtScenarioTest(ScenarioTest):
         self.cmd('keyvault show --hsm-name {hsm_name}', checks=show_checks)
         self.cmd('keyvault show --hsm-name {hsm_name} -g {rg}', checks=show_checks)
 
-        self.cmd('keyvault update-hsm --hsm-name {hsm_name} --bypass None', checks=[
-            self.check('properties.networkAcls.bypass', 'None')
-        ])
+        self.cmd('keyvault update-hsm --hsm-name {hsm_name} --bypass None')
+
+        self.cmd(r"keyvault list --resource-type hsm --query [?name==\'{hsm_name}\']", checks=[
+            self.check('[0].properties.networkAcls.bypass', 'None')])
 
         self.cmd(r"keyvault list --resource-type hsm --query [?name==\'{hsm_name}\']", checks=list_checks)
         self.cmd('keyvault list --resource-type hsm -g {rg}', checks=list_checks)
