@@ -11,11 +11,6 @@ def create_acl_policy(cmd, client, policy_name, start=None, expiry=None, permiss
     """Create a stored access policy on the containing object"""
     t_access_policy = cmd.get_models('_models#AccessPolicy', resource_type=ResourceType.DATA_STORAGE_BLOB)
     acl = _get_acl(cmd, client, **kwargs)
-    if _get_service_container_type(cmd, client) == 'container':
-        signed_identifiers = {}
-        for identifier in acl["signed_identifiers"]:
-            signed_identifiers[identifier.id] = identifier.access_policy
-        acl = signed_identifiers
     acl[policy_name] = t_access_policy(permission if permission else '',
                                        expiry if expiry else datetime.max,
                                        start if start else datetime.utcnow())
@@ -28,12 +23,7 @@ def create_acl_policy(cmd, client, policy_name, start=None, expiry=None, permiss
 def get_acl_policy(cmd, client, policy_name, **kwargs):
     """Show a stored access policy on a containing object"""
     acl = _get_acl(cmd, client, **kwargs)
-    if _get_service_container_type(cmd, client) == 'container':
-        for identifier in acl['signed_identifiers']:
-            if identifier.id == policy_name:
-                return identifier.access_policy
-    else:
-        return acl.get(policy_name)
+    return acl.get(policy_name)
 
 
 def list_acl_policies(cmd, client, **kwargs):
@@ -49,19 +39,7 @@ def set_acl_policy(cmd, client, policy_name, start=None, expiry=None, permission
 
     acl = _get_acl(cmd, client, **kwargs)
     try:
-        if _get_service_container_type(cmd, client) == 'container':
-            signed_identifiers = {}
-            found = False
-            for identifier in acl["signed_identifiers"]:
-                signed_identifiers[identifier.id] = identifier.access_policy
-                if identifier.id == policy_name:
-                    policy = identifier.access_policy
-                    found = True
-            acl = signed_identifiers
-            if not found:
-                raise KeyError()
-        else:
-            policy = acl[policy_name]
+        policy = acl[policy_name]
         policy.start = start if start else policy.start
         policy.expiry = expiry if expiry else policy.expiry
         policy.permission = permission or policy.permission
@@ -77,20 +55,7 @@ def set_acl_policy(cmd, client, policy_name, start=None, expiry=None, permission
 def delete_acl_policy(cmd, client, policy_name, **kwargs):
     """ Delete a stored access policy on a containing object """
     acl = _get_acl(cmd, client, **kwargs)
-    if _get_service_container_type(cmd, client) == 'container':
-        signed_identifiers = {}
-        found = False
-        for identifier in acl["signed_identifiers"]:
-            if identifier.id == policy_name:
-                found = True
-                continue
-            signed_identifiers[identifier.id] = identifier.access_policy
-        acl = signed_identifiers
-        if not found:
-            from knack.util import CLIError
-            raise CLIError('ACL does not contain {}'.format(policy_name))
-    else:
-        del acl[policy_name]
+    del acl[policy_name]
     if hasattr(acl, 'public_access'):
         kwargs['public_access'] = getattr(acl, 'public_access')
 
@@ -129,7 +94,10 @@ def convert_acl_permissions(result):
     if result is None:
         return None
     if 'signed_identifiers' in result:
-        return result
+        signed_identifiers = {}
+        for identifier in result["signed_identifiers"]:
+            signed_identifiers[identifier.id] = identifier.access_policy
+        result = signed_identifiers
     for policy in sorted(result.keys()):
         if getattr(result[policy], 'permission') is None:
             setattr(result[policy], 'permission', '')
