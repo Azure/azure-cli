@@ -182,26 +182,35 @@ class MSGraphClientPasswordReplacer(RecordingProcessor):
         return response
 
 
-class MSGraphUserReplacer(RecordingProcessor):
-    def __init__(self, test_user, mock_user):
-        self.test_user = test_user
-        self.mock_user = mock_user
+class MSGraphNameReplacer(RecordingProcessor):
+    """If a name appears in URL, it should be percent-encoded, e.g.
+      - test-name+/ is encoded as test-name%2B%2F
+      - example@example.com is encoded as example%40example.com
+
+    Theoretically, GeneralNameReplacer should also follow this pattern, but since we haven't seen any ARM name that
+    is percent-encoded, we only replace percent-encoded names for MS Graph for better test performance.
+    """
+    def __init__(self, live_test_name, mock_name):
+        from urllib.parse import quote
+        self.live_test_name = live_test_name
+        self.live_test_name_encoded = quote(live_test_name, safe='')
+        self.mock_name = mock_name
+        self.mock_name_encoded = quote(mock_name, safe='')
 
     def process_request(self, request):
-        if self.test_user in request.uri:
-            request.uri = request.uri.replace(self.test_user, self.mock_user)
+        if self.live_test_name in request.uri:
+            request.uri = request.uri.replace(self.live_test_name, self.mock_name)
 
         if request.body:
             body = _byte_to_str(request.body)
-            if self.test_user in body:
-                request.body = body.replace(self.test_user, self.mock_user)
+            if self.live_test_name in body:
+                request.body = body.replace(self.live_test_name, self.mock_name)
 
         return request
 
     def process_response(self, response):
         if response['body']['string']:
-            response['body']['string'] = response['body']['string'].replace(self.test_user,
-                                                                            self.mock_user)
+            response['body']['string'] = response['body']['string'].replace(self.live_test_name, self.mock_name)
         return response
 
 

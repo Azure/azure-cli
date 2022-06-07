@@ -12,7 +12,7 @@ from .exceptions import CliTestError
 from .checkers import (JMESPathCheck, JMESPathCheckExists, JMESPathCheckGreaterThan, NoneCheck, StringCheck,
                        StringContainCheck)
 from .decorators import api_version_constraint
-from .utilities import create_random_name, MSGraphUserReplacer
+from .utilities import create_random_name, MSGraphNameReplacer
 from .patches import MOCKED_USER_NAME
 
 __all__ = ['ScenarioTest', 'LiveScenarioTest', 'ResourceGroupPreparer', 'StorageAccountPreparer',
@@ -20,7 +20,7 @@ __all__ = ['ScenarioTest', 'LiveScenarioTest', 'ResourceGroupPreparer', 'Storage
            'ManagedApplicationPreparer', 'CliTestError', 'JMESPathCheck',
            'JMESPathCheckExists', 'NoneCheck', 'live_only', 'record_only', 'StringCheck', 'StringContainCheck',
            'get_sha1_hash', 'KeyVaultPreparer', 'JMESPathCheckGreaterThan', 'api_version_constraint',
-           'create_random_name', 'MOCKED_USER_NAME', 'MSGraphUserReplacer', 'LocalContextScenarioTest',
+           'create_random_name', 'MOCKED_USER_NAME', 'MSGraphNameReplacer', 'LocalContextScenarioTest',
            'VirtualNetworkPreparer', 'VnetNicPreparer']
 
 
