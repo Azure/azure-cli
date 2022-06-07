@@ -868,7 +868,14 @@ class MiscellaneousScenarioTest(GraphScenarioTestBase):
     def test_special_characters(self):
         # Test special characters in object names. Ensures these characters are correctly percent-encoded.
         # For example, displayName with +(%2B), /(%2F)
-        display_name = self.create_random_name(prefix='azure-cli-test-group+/', length=32)
+        from azure.cli.testsdk.scenario_tests.utilities import create_random_name
+        prefix = 'azure-cli-test-group+/'
+        if self.in_recording:
+            display_name = create_random_name(prefix=prefix, length=32)
+            self.recording_processors.append(MSGraphNameReplacer(display_name, prefix))
+        else:
+            display_name = prefix
+
         self.kwargs = {
             'display_name': display_name,
             'mail_nick_name': 'deleteme11'

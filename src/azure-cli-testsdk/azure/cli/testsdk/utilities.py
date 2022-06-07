@@ -190,27 +190,25 @@ class MSGraphNameReplacer(RecordingProcessor):
     Theoretically, GeneralNameReplacer should also follow this pattern, but since we haven't seen any ARM name that
     is percent-encoded, we only replace percent-encoded names for MS Graph for better test performance.
     """
-    def __init__(self, live_test_name, mock_name):
+    def __init__(self, test_name, mock_name):
         from urllib.parse import quote
-        self.live_test_name = live_test_name
-        self.live_test_name_encoded = quote(live_test_name, safe='')
+        self.test_name = test_name
+        self.test_name_encoded = quote(test_name, safe='')
         self.mock_name = mock_name
         self.mock_name_encoded = quote(mock_name, safe='')
 
     def process_request(self, request):
-        if self.live_test_name in request.uri:
-            request.uri = request.uri.replace(self.live_test_name, self.mock_name)
+        request.uri = request.uri.replace(self.test_name_encoded, self.mock_name_encoded)
 
         if request.body:
             body = _byte_to_str(request.body)
-            if self.live_test_name in body:
-                request.body = body.replace(self.live_test_name, self.mock_name)
+            request.body = body.replace(self.test_name, self.mock_name)
 
         return request
 
     def process_response(self, response):
         if response['body']['string']:
-            response['body']['string'] = response['body']['string'].replace(self.live_test_name, self.mock_name)
+            response['body']['string'] = response['body']['string'].replace(self.test_name, self.mock_name)
         return response
 
 
