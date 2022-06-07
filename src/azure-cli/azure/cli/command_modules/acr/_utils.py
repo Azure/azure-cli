@@ -424,7 +424,7 @@ def prepare_source_location(cmd,
         # NOTE: If docker_file_path is not specified, the default is Dockerfile in source_location.
         # Otherwise, it's based on current working directory.
         if docker_file_path:
-            if docker_file_path.endswith(ALLOWED_TASK_FILE_TYPES):
+            if docker_file_path.endswith(ALLOWED_TASK_FILE_TYPES) or docker_file_path.startswith('-'):
                 docker_file_path = ""
             else:
                 validate_docker_file_path(os.path.join(source_location, docker_file_path))
