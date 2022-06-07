@@ -421,7 +421,10 @@ def prepare_source_location(cmd,
         # NOTE: If docker_file_path is not specified, the default is Dockerfile in source_location.
         # Otherwise, it's based on current working directory.
         if docker_file_path:
-            _check_local_docker_file(docker_file_path)
+            if docker_file_path.endswith(('.yml', '.yaml')) or docker_file_path.startswith('-'):
+                docker_file_path = ""
+            else:
+                _check_local_docker_file(docker_file_path)
         else:
             docker_file_path = os.path.join(source_location, "Dockerfile")
             if os.path.isfile(docker_file_path):
