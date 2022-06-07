@@ -424,7 +424,7 @@ def prepare_source_location(cmd,
             if docker_file_path.endswith(('.yml', '.yaml')) or docker_file_path.startswith('-'):
                 docker_file_path = ""
             else:
-                _check_local_docker_file(docker_file_path)
+                _check_local_docker_file(os.path.join(source_location, docker_file_path))
         else:
             docker_file_path = os.path.join(source_location, "Dockerfile")
             if os.path.isfile(docker_file_path):
