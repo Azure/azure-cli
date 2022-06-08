@@ -40,7 +40,7 @@ It is a requirement for the command owner to maintain their test in live mode.
 
 * 100% commands coverage of module: Scenerio tests __MUST__ cover all commands in the module except the `wait` commands. Please use `azdev cmdcov {module}` to check command coverage of module. If cannot add a test because of some reason, please add missing_command_test_coverage in the linter_exclusions.yml.
 * 100% examples coverage of command: Scenerio tests __MUST__ coverage all examples of the command.
-* 100% arguments coverage of command: Scenerio tests should coverage all arguments in the command. Please use `azdev cmdcov {module} --level argument` to check argument coverage.
+* 100% arguments coverage of command: Scenerio tests should coverage all arguments in the command. Please use `azdev cmdcov {module} --level argument` to check argument coverage. If cannot add a test because of some reason, please add missing_parameter_test_coverage in the linter_exclusions.yml.
 * 100% boundary values coverage of argument: Scenerio tests should coverage boundary values of argument, especially ``(blank value), `null`, `0` and `False` values. These values have different meanings, but will all resolve to `False` in conditional expressions (`if {variable}`) of Python. It's important to make sure they work as expected.
 
 ## Recording Tests
