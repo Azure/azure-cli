@@ -756,6 +756,8 @@ def get_file_path_validator(default_file_param=None):
 
         path = namespace.path
         dir_name, file_name = os.path.split(path) if path else (None, '')
+        if dir_name and dir_name.startswith('./'):
+            dir_name = dir_name.replace('./', '', 1)
 
         if default_file_param and '.' not in file_name:
             dir_name = path

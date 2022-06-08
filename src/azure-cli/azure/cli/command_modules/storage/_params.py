@@ -1807,8 +1807,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.register_path_argument(options_list=('--destination-path', '-p'))
 
     with self.argument_context('storage file delete') as c:
-        c.extra('file_path', type=file_type, required=True, options_list=('--path', '-p'),
-                help='The path to the file within the file share.')
+        c.register_path_argument()
         c.extra('share_name', share_name_type, required=True)
         c.extra('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
 
@@ -1829,8 +1828,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage file generate-sas') as c:
         from .completers import get_storage_acl_name_completion_list
 
-        c.argument('file_path', type=file_type, required=True, options_list=('--path', '-p'),
-                help='The path to the file within the file share.')
+        c.register_path_argument()
         c.register_sas_arguments()
         c.extra('share_name', share_name_type, required=True)
         t_file_svc = self.get_sdk('file.fileservice#FileService')
@@ -1872,14 +1870,16 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.register_path_argument()
 
     with self.argument_context('storage file resize') as c:
-        c.extra('file_path', type=file_type, required=True, options_list=('--path', '-p'),
-                help='The path to the file within the file share.')
+        c.register_path_argument()
         c.extra('share_name', share_name_type, required=True)
         c.extra('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
         c.argument('content_length', options_list='--size', type=int)
 
     with self.argument_context('storage file show') as c:
         c.register_path_argument()
+        c.extra('share_name', share_name_type, required=True)
+        c.extra('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
+        c.extra('snapshot', help='A string that represents the snapshot version, if applicable.')
 
     with self.argument_context('storage file update') as c:
         t_file_content_settings = self.get_sdk('file.models#ContentSettings')

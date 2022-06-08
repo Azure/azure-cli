@@ -421,10 +421,14 @@ def _file_share_exists(client, resource_group_name, account_name, share_name):
         return False
 
 
-def generate_sas_file(cmd, client, file_path, permission=None, expiry=None, start=None, id=None, ip=None,
-                      protocol=None, **kwargs):
+def generate_sas_file(cmd, client, directory_name=None, file_name=None, permission=None, expiry=None, start=None,
+                      id=None, ip=None, protocol=None, **kwargs):
     t_generate_file_sas = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_FILESHARE,
                                   '_shared_access_signature#generate_file_sas')
+    file_path = file_name
+    if directory_name:
+        file_path = directory_name+'/'+file_path
+    file_path = file_path.split('/')
     return t_generate_file_sas(account_name=client.account_name, share_name=client.share_name, file_path=file_path,
                                account_key=client.credential.account_key, permission=permission, expiry=expiry,
                                start=start, policy_id=id, ip=ip, protocol=protocol, **kwargs)

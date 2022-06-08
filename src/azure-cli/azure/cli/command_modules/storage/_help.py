@@ -1936,6 +1936,15 @@ examples:
     crafted: true
 """
 
+helps['storage file show'] = """
+type: command
+short-summary: Returns all user-defined metadata, standard HTTP properties, and system properties for the file.
+examples:
+  - name:  Show properties of file in file share.
+    text: |
+        az storage file show -p dir/a.txt -s sharename --account-name myadlsaccount --account-key 0000-0000
+"""
+
 helps['storage file list'] = """
 type: command
 short-summary: List files and directories in a share.
