@@ -923,7 +923,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('days_retained', type=int,
                    help='Number of days that soft-deleted blob will be retained. Must be in range [1,365].')
 
-    with self.argument_context('storage blob service-properties update', min_api='2018-03-28') as c:
+    with self.argument_context('storage blob service-properties update') as c:
         c.argument('delete_retention', arg_type=get_three_state_flag(), arg_group='Soft Delete',
                    help='Enables soft-delete.')
         c.argument('delete_retention_period', type=int, arg_group='Soft Delete',
@@ -936,12 +936,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Represents the path to the error document that should be shown when an error 404 is issued,'
                         ' in other words, when a browser requests a page that does not exist.')
 
-    with self.argument_context('storage blob show') as c:
-        c.register_blob_arguments()
-        c.register_precondition_options()
-        c.extra('snapshot', help='The snapshot parameter is an opaque DateTime value that, when present, '
-                                 'specifies the blob snapshot to retrieve.')
-        c.argument('lease_id', help='Required if the blob has an active lease.')
+    for item in ['show', 'metadata show', 'metadata update']:
+        with self.argument_context('storage blob {}'.format(item)) as c:
+            c.register_blob_arguments()
+            c.register_precondition_options()
+            c.extra('snapshot', help='The snapshot parameter is an opaque DateTime value that, when present, '
+                                     'specifies the blob snapshot to retrieve.')
+            c.argument('lease_id', help='Required if the blob has an active lease.')
 
     # pylint: disable=line-too-long
     with self.argument_context('storage blob upload', resource_type=ResourceType.DATA_STORAGE_BLOB) as c:
@@ -1191,6 +1192,15 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Name of the destination blob. If the exists, it will be overwritten.')
         c.argument('source_lease_id', arg_group='Copy Source')
 
+    with self.argument_context('storage blob copy cancel') as c:
+        c.extra('container_name', container_name_type, options_list=('--destination-container', '-c'),
+                required=True)
+        c.extra('blob_name', blob_name_type, options_list=('--destination-blob', '-b'), required=True,
+                help='Name of the destination blob. If the exists, it will be overwritten.')
+        c.extra('timeout', timeout_type)
+        c.extra('lease', options_list='--lease-id',
+                help='Required if the destination blob has an active infinite lease.')
+
     with self.argument_context('storage blob copy start', resource_type=ResourceType.DATA_STORAGE_BLOB) as c:
         from ._validators import validate_source_url
 
@@ -1224,9 +1234,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.extra('tags', tags_type)
 
     with self.argument_context('storage blob copy start-batch', arg_group='Copy Source') as c:
-        from azure.cli.command_modules.storage._validators import get_source_file_or_blob_service_client
+        from azure.cli.command_modules.storage._validators import get_source_file_or_blob_service_client_track2
 
-        c.argument('source_client', ignore_type, validator=get_source_file_or_blob_service_client)
+        c.argument('source_client', ignore_type, validator=get_source_file_or_blob_service_client_track2)
 
         c.extra('source_account_name')
         c.extra('source_account_key')
@@ -1436,8 +1446,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage container policy') as c:
         from .completers import get_storage_acl_name_completion_list
-        t_container_permissions = self.get_sdk('blob.models#ContainerPermissions')
-
+        t_container_permissions = self.get_sdk('_models#ContainerSasPermissions',
+                                               resource_type=ResourceType.DATA_STORAGE_BLOB)
         c.argument('container_name', container_name_type)
         c.argument('policy_name', options_list=('--name', '-n'), help='The stored access policy name.',
                    completer=get_storage_acl_name_completion_list(t_base_blob_service, 'container_name',
@@ -1446,13 +1456,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('permission', options_list='--permissions', help=help_str,
                    validator=get_permission_validator(t_container_permissions))
 
-        c.argument('start', type=get_datetime_type(True),
+        c.argument('start', type=get_datetime_type(False),
                    help='start UTC datetime (Y-m-d\'T\'H:M:S\'Z\'). Defaults to time of request.')
-        c.argument('expiry', type=get_datetime_type(True), help='expiration UTC datetime in (Y-m-d\'T\'H:M:S\'Z\')')
+        c.argument('expiry', type=get_datetime_type(False), help='expiration UTC datetime in (Y-m-d\'T\'H:M:S\'Z\')')
 
     for item in ['create', 'delete', 'list', 'show', 'update']:
         with self.argument_context('storage container policy {}'.format(item)) as c:
-            c.extra('lease_id', options_list='--lease-id', help='The container lease ID.')
+            c.extra('container_name', container_name_type, required=True)
+            c.extra('lease', options_list='--lease-id', help='The container lease ID.')
 
     with self.argument_context('storage container generate-sas', resource_type=ResourceType.DATA_STORAGE_BLOB) as c:
         from .completers import get_storage_acl_name_completion_list

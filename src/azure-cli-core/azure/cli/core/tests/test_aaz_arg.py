@@ -25,15 +25,19 @@ class TestAAZArgShorthandSyntax(unittest.TestCase):
         assert parser("'None'", is_simple=True) == 'None'
 
         # test single quota
-        assert parser("'/''", is_simple=True) == "'"
+        assert parser("''/'", is_simple=True) == "'"
+        assert parser("'/'", is_simple=True) == "/"
         assert parser("'\"'", is_simple=True) == '"'
 
         assert parser('"\'"', is_simple=True) == '"\'"'
         assert parser('"\""', is_simple=True) == '"\""'
+        assert parser("'https://azure.microsoft.com/en-us/'", is_simple=True) == "https://azure.microsoft.com/en-us/"
+        assert parser("'C:\\Program Files (x86)\\'", is_simple=True) == "C:\\Program Files (x86)\\"
+        assert parser("'/usr/lib/python3.8/'", is_simple=True) == "/usr/lib/python3.8/"
 
         # test escape character
         assert parser("'\"'", is_simple=True) == "\""
-        assert parser("'/\''", is_simple=True) == "\'"
+        assert parser("'\'/'", is_simple=True) == "\'"
 
         assert parser("'\b'", is_simple=True) == "\b"
         assert parser("'\f'", is_simple=True) == "\f"
@@ -114,14 +118,19 @@ class TestAAZArgShorthandSyntax(unittest.TestCase):
             "c": "None",
             "d": ''
         }
-        assert parser("{a:1,b:'/''}") == {
+        assert parser("{a:1,b:''/'}") == {
             "a": "1",
             "b": "'"
         }
 
-        assert parser("{a:1,b:'//'}") == {
+        assert parser("{a:1,b:'/'}") == {
             "a": "1",
             "b": "/"
+        }
+
+        assert parser("{a:1,b:'//'}") == {
+            "a": "1",
+            "b": "//"
         }
 
         assert parser("{a:1,b:/}") == {
@@ -142,7 +151,7 @@ class TestAAZArgShorthandSyntax(unittest.TestCase):
             "d": ''
         }
 
-        assert parser("{a:{a1:' \n /\'',a2:2}}") == {
+        assert parser("{a:{a1:' \n '/',a2:2}}") == {
             "a": {
                 "a1": " \n '",
                 "a2": "2",
@@ -222,7 +231,10 @@ class TestAAZArgShorthandSyntax(unittest.TestCase):
             parser("{a:1,a:2}")
 
         with self.assertRaises(AAZInvalidShorthandSyntaxError):
-            parser("{a:1,b:'/'}")
+            parser("{a:1,b:'/''}")
+
+        with self.assertRaises(AAZInvalidShorthandSyntaxError):
+            parser("{a:1,b:''/}")
 
         with self.assertRaises(AAZInvalidShorthandSyntaxError):
             parser("{a:1,:1}")
@@ -267,7 +279,7 @@ class TestAAZArgShorthandSyntax(unittest.TestCase):
             parser("{a'1:1}")
 
         with self.assertRaises(AAZInvalidShorthandSyntaxError):
-            parser("{'a/'1':1}")
+            parser("{'a'/1':1}")
 
     def test_aaz_shorthand_syntax_list_value(self):
         from azure.cli.core.aaz._utils import AAZShortHandSyntaxParser

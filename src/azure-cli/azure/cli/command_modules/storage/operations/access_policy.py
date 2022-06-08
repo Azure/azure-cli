@@ -49,19 +49,7 @@ def set_acl_policy(cmd, client, policy_name, start=None, expiry=None, permission
 
     acl = _get_acl(cmd, client, **kwargs)
     try:
-        if _get_service_container_type(cmd, client) == 'share':
-            signed_identifiers = {}
-            found = False
-            for identifier in acl["signed_identifiers"]:
-                signed_identifiers[identifier.id] = identifier.access_policy
-                if identifier.id == policy_name:
-                    policy = identifier.access_policy
-                    found = True
-            acl = signed_identifiers
-            if not found:
-                raise KeyError()
-        else:
-            policy = acl[policy_name]
+        policy = acl[policy_name]
         policy.start = start if start else policy.start
         policy.expiry = expiry if expiry else policy.expiry
         policy.permission = permission or policy.permission
@@ -129,7 +117,10 @@ def convert_acl_permissions(result):
     if result is None:
         return None
     if 'signed_identifiers' in result:
-        return result
+        signed_identifiers = {}
+        for identifier in result["signed_identifiers"]:
+            signed_identifiers[identifier.id] = identifier.access_policy
+        result = signed_identifiers
     for policy in sorted(result.keys()):
         if getattr(result[policy], 'permission') is None:
             setattr(result[policy], 'permission', '')

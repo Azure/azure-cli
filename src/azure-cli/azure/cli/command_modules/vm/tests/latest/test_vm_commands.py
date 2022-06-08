@@ -4723,6 +4723,78 @@ class VMGalleryImage(ScenarioTest):
             self.check('sharingProfile.permissions', 'Private')
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_image_version_create_', location='westus')
+    def test_image_version_create_for_diff_source(self, resource_group_location):
+        self.kwargs.update({
+            'vm': 'vm1',
+            'gallery': self.create_random_name('gallery', 16),
+            'image1': 'image1',
+            'image2': 'image2',
+            'version1': '1.1.2',
+            'version2': '1.1.1',
+            'captured': 'managedImage1',
+            'subId': '0b1f6471-1bf0-4dda-aec3-cb9272f09590'
+            # share the gallery to tester's subscription, so the tester can get shared galleries
+        })
+
+        self.cmd('sig create -g {rg} --gallery-name {gallery}')
+        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image1} '
+                 '--os-type linux --os-state Specialized -p publisher1 -f offer1 -s sku1')
+        vm_id = self.cmd('vm create -g {rg} -n {vm} --image ubuntults --data-disk-sizes-gb 10 --admin-username clitest1'
+                         ' --generate-ssh-key --nsg-rule NONE').get_output_in_json()['id']
+        time.sleep(70)
+        self.kwargs.update({"vm_id": vm_id})
+
+        # test the result of creating image version for virtual machine source
+        image_version_id = self.cmd(
+            'sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image1} '
+            '--gallery-image-version {version1} --virtual-machine {vm_id}',
+            checks=[
+                self.check('location', resource_group_location),
+                self.check('name', self.kwargs['version1']),
+                self.check('provisioningState', 'Succeeded')
+            ]).get_output_in_json()['id']
+
+        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image2} '
+                 '--os-type linux -p publisher2 -f offer2 -s sku2')
+        self.kwargs.update({"image_version_id": image_version_id})
+
+        # test the format check of virtual machine source and image version source
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        with self.assertRaises(InvalidArgumentValueError):
+            self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image1} '
+                     '--gallery-image-version {version1} --image-version {vm_id}')
+        with self.assertRaises(InvalidArgumentValueError):
+            self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image2} '
+                     '--gallery-image-version {version1} --virtual-machine {image_version_id}')
+
+        # test the result of more than one source are provided
+        from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image1} '
+                     '--gallery-image-version {version1} --virtual-machine {vm_id} --image-version {image_version_id}')
+
+        # test the result of creating image version for gallery image version source
+        self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image1} '
+                 '--gallery-image-version {version2} --image-version {image_version_id}',
+                 checks=[
+                     self.check('location', resource_group_location),
+                     self.check('name', self.kwargs['version2']),
+                     self.check('provisioningState', 'Succeeded')
+                 ])
+
+        # test the result of creating image version for managed image source
+        self.cmd('vm deallocate -g {rg} -n {vm}')
+        self.cmd('vm generalize -g {rg} -n {vm}')
+        self.cmd('image create -g {rg} -n {captured} --source {vm}')
+        self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image2} '
+                 '--gallery-image-version {version1} --managed-image {captured}',
+                 checks=[
+                     self.check('location', resource_group_location),
+                     self.check('name', self.kwargs['version1']),
+                     self.check('provisioningState', 'Succeeded')
+                 ])
+
     @ResourceGroupPreparer(location='eastus2')
     @KeyVaultPreparer(name_prefix='vault-', name_len=20, key='vault', location='eastus2', additional_params='--enable-purge-protection true --enable-soft-delete true')
     def test_gallery_e2e(self, resource_group, resource_group_location, key_vault):
