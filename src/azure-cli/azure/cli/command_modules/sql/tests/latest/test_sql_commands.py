@@ -2949,8 +2949,8 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('databaseDtuMin', None),
                      JMESPathCheck('databaseDtuMax', None)])
 
-    @ResourceGroupPreparer(name_prefix='clitest-HSEP', location='northeurope')
-    @SqlServerPreparer(name_prefix='clitest-HSEP', location='northeurope')
+    @ResourceGroupPreparer(name_prefix='clitest-HSEP', location='eastus2')
+    @SqlServerPreparer(name_prefix='clitest-HSEP', location='eastus2')
     @AllowLargeResponse()
     def test_sql_elastic_pools_hyperscale_mgmt(self, resource_group, resource_group_location, server):
         pool_name = "cliautomationpool1"
