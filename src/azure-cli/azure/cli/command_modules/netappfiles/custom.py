@@ -28,6 +28,14 @@ gib_scale = 1024 * 1024 * 1024
 tib_scale = gib_scale * 1024
 
 
+def _get_location_from_resource_group(cli_ctx, resource_group_name):
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from azure.cli.core.profiles import ResourceType
+    client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
+    group = client.resource_groups.get(resource_group_name)
+    return group.location
+
+
 def _update_mapper(existing, new, keys):
     for key in keys:
         existing_value = getattr(existing, key)
@@ -38,9 +46,8 @@ def _update_mapper(existing, new, keys):
 # ---- ACCOUNT ----
 # pylint: disable=unused-argument
 # account update - active_directory is amended with subgroup commands
-def create_account(client, account_name, resource_group_name, location=None, tags=None, encryption=None):
-    if location is None:
-        location = client.resource_groups.get(resource_group_name).location
+def create_account(cmd, client, account_name, resource_group_name, location=None, tags=None, encryption=None):
+    location = location or _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
     account_encryption = AccountEncryption(key_source=encryption) if encryption is not None else None
     body = NetAppAccount(location=location, tags=tags, encryption=account_encryption)
     return client.begin_create_or_update(resource_group_name, account_name, body)
@@ -149,10 +156,9 @@ def list_accounts(client, resource_group_name=None):
 
 # ---- POOL ----
 # pylint: disable=no-required-location-param
-def create_pool(client, account_name, pool_name, resource_group_name, service_level, size, location=None, tags=None,
+def create_pool(cmd, client, account_name, pool_name, resource_group_name, service_level, size, location=None, tags=None,
                 qos_type=None, cool_access=None, encryption_type=None):
-    if location is None:
-        location = client.resource_groups.get(resource_group_name).location
+    location = location or _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
     body = CapacityPool(service_level=service_level,
                         size=int(size) * tib_scale,
                         location=location,
@@ -187,8 +193,7 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
                   allowed_clients=None, ldap_enabled=None, chown_mode=None, cool_access=None, coolness_period=None,
                   unix_permissions=None, is_def_quota_enabled=None, default_user_quota=None,
                   default_group_quota=None, avs_data_store=None, network_features=None, enable_subvolumes=None):
-    if location is None:
-        location = client.resource_groups.get(resource_group_name).location
+    location = location or _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
     subs_id = get_subscription_id(cmd.cli_ctx)
 
     # default the resource group of the subnet to the volume's rg unless the subnet is specified by id
@@ -420,10 +425,9 @@ def remove_export_policy_rule(instance, rule_index):
 
 
 # ---- SNAPSHOTS ----
-def create_snapshot(client, resource_group_name, account_name, pool_name, volume_name, snapshot_name, location=None):
-    if location is None:
-        location = client.resource_groups.get(resource_group_name).location
+def create_snapshot(cmd, client, resource_group_name, account_name, pool_name, volume_name, snapshot_name, location=None):
     body = Snapshot(location=location)
+    location = location or _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
     return client.begin_create(resource_group_name, account_name, pool_name, volume_name, snapshot_name, body)
 
 
@@ -437,14 +441,13 @@ def snapshot_restore_files(client, resource_group_name, account_name, pool_name,
 
 
 # ---- SNAPSHOT POLICIES ----
-def create_snapshot_policy(client, resource_group_name, account_name, snapshot_policy_name, location=None,
+def create_snapshot_policy(cmd, client, resource_group_name, account_name, snapshot_policy_name, location=None,
                            hourly_snapshots=None, hourly_minute=None,
                            daily_snapshots=None, daily_minute=None, daily_hour=None,
                            weekly_snapshots=None, weekly_minute=None, weekly_hour=None, weekly_day=None,
                            monthly_snapshots=None, monthly_minute=None, monthly_hour=None, monthly_days=None,
                            enabled=False, tags=None):
-    if location is None:
-        location = client.resource_groups.get(resource_group_name).location
+    location = location or _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
     body = SnapshotPolicy(
         location=location,
         hourly_schedule=HourlySchedule(snapshots_to_keep=hourly_snapshots, minute=hourly_minute),
@@ -458,14 +461,13 @@ def create_snapshot_policy(client, resource_group_name, account_name, snapshot_p
     return client.create(resource_group_name, account_name, snapshot_policy_name, body)
 
 
-def patch_snapshot_policy(client, resource_group_name, account_name, snapshot_policy_name, location=None,
+def patch_snapshot_policy(cmd, client, resource_group_name, account_name, snapshot_policy_name, location=None,
                           hourly_snapshots=None, hourly_minute=None,
                           daily_snapshots=None, daily_minute=None, daily_hour=None,
                           weekly_snapshots=None, weekly_minute=None, weekly_hour=None, weekly_day=None,
                           monthly_snapshots=None, monthly_minute=None, monthly_hour=None, monthly_days=None,
                           enabled=False):
-    if location is None:
-        location = client.resource_groups.get(resource_group_name).location
+    location = location or _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
     body = SnapshotPolicyPatch(
         location=location,
         hourly_schedule=HourlySchedule(snapshots_to_keep=hourly_snapshots, minute=hourly_minute),
@@ -479,10 +481,9 @@ def patch_snapshot_policy(client, resource_group_name, account_name, snapshot_po
 
 
 # ---- VOLUME BACKUPS ----
-def create_backup(client, resource_group_name, account_name, pool_name, volume_name, backup_name, location=None,
+def create_backup(cmd, client, resource_group_name, account_name, pool_name, volume_name, backup_name, location=None,
                   use_existing_snapshot=None):
-    if location is None:
-        location = client.resource_groups.get(resource_group_name).location
+    location = location or _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
     body = Backup(location=location, use_existing_snapshot=use_existing_snapshot)
     return client.begin_create(resource_group_name, account_name, pool_name, volume_name, backup_name, body)
 
@@ -494,10 +495,9 @@ def update_backup(client, resource_group_name, account_name, pool_name, volume_n
 
 
 # ---- BACKUP POLICIES ----
-def create_backup_policy(client, resource_group_name, account_name, backup_policy_name, location=None,
+def create_backup_policy(cmd, client, resource_group_name, account_name, backup_policy_name, location=None,
                          daily_backups=None, weekly_backups=None, monthly_backups=None, enabled=False, tags=None):
-    if location is None:
-        location = client.resource_groups.get(resource_group_name).location
+    location = location or _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
     body = BackupPolicy(
         location=location,
         daily_backups_to_keep=daily_backups,
@@ -542,7 +542,7 @@ def patch_subvolume(client, resource_group_name, account_name, pool_name, volume
 
 # ---- VOLUME GROUPS ----
 def create_volume_group(cmd, client, resource_group_name, account_name, pool_name, volume_group_name, vnet, ppg,
-                        sap_sid, subnet='default', location=None, tags=None, gp_rules=None, memory=100,
+                        sap_sid, location=None, subnet='default', tags=None, gp_rules=None, memory=100,
                         add_snapshot_capacity=50, start_host_id=1, number_of_hots=1, prefix="", system_role="PRIMARY",
                         data_size=None, data_throughput=None, log_size=None, log_throughput=None, shared_size=None,
                         shared_throughput=None, data_backup_size=None, data_backup_throughput=None,
@@ -559,6 +559,8 @@ def create_volume_group(cmd, client, resource_group_name, account_name, pool_nam
     if system_role == "DR" and number_of_hots != 1:
         raise ValidationError("Number of hosts must be 1 when creating a Disaster Recovery (DR) volume group")
 
+    location = location or _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
+
     if prefix == "":
         if system_role == "HA":
             prefix = "HA-"
@@ -567,8 +569,6 @@ def create_volume_group(cmd, client, resource_group_name, account_name, pool_nam
     else:
         prefix = prefix + "-"
 
-    if location is None:
-        location = client.resource_groups.get(resource_group_name).location
     rules = []
     if gp_rules is not None:
         for rule in gp_rules:
