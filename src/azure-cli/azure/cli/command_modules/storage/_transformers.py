@@ -438,13 +438,6 @@ def transform_acl_edit(result):
     return result
 
 
-def transform_acl_list_output_v2(result):
-    new_result = {}
-    for identifier in result['signed_identifiers']:
-        new_result[identifier.id] = identifier.access_policy
-    return new_result
-
-
 def transform_acl_datetime(result):
     result = todict(result)
     if result['start']:

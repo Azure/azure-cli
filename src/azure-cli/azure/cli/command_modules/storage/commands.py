@@ -634,15 +634,13 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                             custom_command_type=get_custom_sdk('access_policy', cf_share_client,
                                                                ResourceType.DATA_STORAGE_FILESHARE),
                             resource_type=ResourceType.DATA_STORAGE_FILESHARE, min_api='2019-02-02') as g:
-        from ._transformers import transform_acl_list_output, transform_acl_edit, transform_acl_list_output_v2,\
-            transform_acl_datetime
+        from ._transformers import transform_acl_list_output, transform_acl_edit, transform_acl_datetime
         g.storage_custom_command('create', 'create_acl_policy', transform=transform_acl_edit)
         g.storage_custom_command('delete', 'delete_acl_policy', transform=transform_acl_edit)
         g.storage_custom_command(
             'show', 'get_acl_policy', exception_handler=show_exception_handler, transform=transform_acl_datetime)
         g.storage_custom_command(
-            'list', 'list_acl_policies', transform=transform_acl_list_output_v2,
-            table_transformer=transform_acl_list_output)
+            'list', 'list_acl_policies', table_transformer=transform_acl_list_output)
         g.storage_custom_command('update', 'set_acl_policy', transform=transform_acl_edit)
 
     with self.command_group('storage directory', command_type=directory_client_sdk,
