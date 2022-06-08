@@ -4703,7 +4703,7 @@ def managed_db_update(
         resource_group_name=resource_group_name)
 
     # Create
-    return client.begin_create_or_update(
+    return client.begin_update(
         database_name=database_name,
         managed_instance_name=managed_instance_name,
         resource_group_name=resource_group_name,
