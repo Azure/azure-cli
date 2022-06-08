@@ -52,7 +52,7 @@ DEPENDENCIES = [
     'jmespath',
     'knack~=0.9.0',
     'msal-extensions~=1.0.0',
-    'msal==1.18.0b1',
+    'msal[broker] @ git+https://github.com/AzureAD/microsoft-authentication-library-for-python.git@wam',  # Temporary source
     'msrestazure~=0.6.4',
     'packaging>=20.9,<22.0',
     'paramiko>=2.0.8,<3.0.0',
