@@ -36,7 +36,7 @@ class UserCredential(PublicClientApplication):
         :param client_id: Client ID of the CLI.
         :param username: The username for user credential.
         """
-        super().__init__(client_id, **kwargs)
+        super().__init__(client_id, allow_broker=True, **kwargs)
 
         # Make sure username is specified, otherwise MSAL returns all accounts
         assert username, "username must be specified, got {!r}".format(username)
