@@ -44,7 +44,6 @@ def get_sqlvirtualmachine_operations(cli_ctx, _):
 
 
 def _get_log_analytics_client(cmd):
-
     subscription_id = get_subscription_id(cmd.cli_ctx)
     return cf_log_analytics(cmd.cli_ctx, subscription_id)
 
