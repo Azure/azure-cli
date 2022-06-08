@@ -769,6 +769,7 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.command('list', 'list_by_instance')
         g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
+        g.command('update', 'begin_update', supports_no_wait=True)
 
     managed_backup_short_term_retention_policies_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#ManagedBackupShortTermRetentionPoliciesOperations.{}',
