@@ -268,7 +268,7 @@ def identity_remove(client, resource_group_name, account_name):
     """
     params = CognitiveServicesAccount()
     params.identity = Identity(type=IdentityType.none)
-    client.begin_update(resource_group_name, account_name, params)
+    return client.begin_update(resource_group_name, account_name, params)
 
 
 def identity_show(client, resource_group_name, account_name):

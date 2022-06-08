@@ -116,3 +116,10 @@ def validate_czr(backup_config_response, recovery_point):
         Please ensure either the vault storage redundancy is ZoneRedundant or the vault has CRR enabled or try
         removing --target-zone argument.
         """)
+
+
+def validate_archive_restore(recovery_point, rehydration_priority):
+    if (recovery_point.tier_type is not None and recovery_point.tier_type == 'VaultArchive' and
+            rehydration_priority is None):
+        raise InvalidArgumentValueError("""The selected recovery point is in archive tier, provide additional
+        parameters of rehydration duration and rehydration priority.""")

@@ -1565,10 +1565,9 @@ def set_ag_ssl_policy_2017_06_01(cmd, resource_group_name, application_gateway_n
         'ApplicationGatewaySslPolicy', 'ApplicationGatewaySslPolicyType')
     ncf = network_client_factory(cmd.cli_ctx).application_gateways
     ag = ncf.get(resource_group_name, application_gateway_name)
-    policy_type = None
     if policy_name:
         policy_type = ApplicationGatewaySslPolicyType.predefined.value
-    elif cipher_suites or min_protocol_version:
+    elif policy_type is None and (cipher_suites or min_protocol_version):
         policy_type = ApplicationGatewaySslPolicyType.custom.value
     ag.ssl_policy = ApplicationGatewaySslPolicy(
         policy_name=policy_name,
@@ -6562,18 +6561,8 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
                      allocation_method=None, dns_name=None,
                      idle_timeout=4, reverse_fqdn=None, version=None, sku=None, tier=None, zone=None, ip_tags=None,
                      public_ip_prefix=None, edge_zone=None, ip_address=None):
-    if sku is None:
-        logger.warning(
-            "Please note that the default public IP used for creation will be changed from Basic to Standard "
-            "in the future."
-        )
-
     IPAllocationMethod, PublicIPAddress, PublicIPAddressDnsSettings, SubResource = cmd.get_models(
         'IPAllocationMethod', 'PublicIPAddress', 'PublicIPAddressDnsSettings', 'SubResource')
-    client = network_client_factory(cmd.cli_ctx).public_ip_addresses
-    if not allocation_method:
-        allocation_method = IPAllocationMethod.static.value if (sku and sku.lower() == 'standard') \
-            else IPAllocationMethod.dynamic.value
 
     public_ip_args = {
         'location': location,
@@ -6583,14 +6572,48 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
         'ip_address': ip_address,
         'dns_settings': None
     }
+
+    if cmd.supported_api_version(min_api='2018-07-01') and public_ip_prefix:
+        if is_valid_resource_id(public_ip_prefix):
+            public_ip_prefix_id = public_ip_prefix
+            public_ip_prefix_name = parse_resource_id(public_ip_prefix)['resource_name']
+        else:
+            public_ip_prefix_id = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx),
+                resource_group=resource_group_name,
+                namespace='Microsoft.Network',
+                type='publicIPPrefixes',
+                name=public_ip_prefix
+            )
+            public_ip_prefix_name = public_ip_prefix
+        public_ip_args['public_ip_prefix'] = SubResource(id=public_ip_prefix_id)
+
+        # reuse prefix information
+        pip_client = network_client_factory(cmd.cli_ctx).public_ip_prefixes
+        pip_obj = pip_client.get(resource_group_name, public_ip_prefix_name)
+        version = pip_obj.public_ip_address_version
+        sku, tier = pip_obj.sku.name, pip_obj.sku.tier
+        zone = pip_obj.zones
+
+    if sku is None:
+        logger.warning(
+            "Please note that the default public IP used for creation will be changed from Basic to Standard "
+            "in the future."
+        )
+
+    client = network_client_factory(cmd.cli_ctx).public_ip_addresses
+    if not allocation_method:
+        if sku and sku.lower() == 'standard':
+            public_ip_args['public_ip_allocation_method'] = IPAllocationMethod.static.value
+        else:
+            public_ip_args['public_ip_allocation_method'] = IPAllocationMethod.dynamic.value
+
     if cmd.supported_api_version(min_api='2016-09-01'):
         public_ip_args['public_ip_address_version'] = version
     if cmd.supported_api_version(min_api='2017-06-01'):
         public_ip_args['zones'] = zone
     if cmd.supported_api_version(min_api='2017-11-01'):
         public_ip_args['ip_tags'] = ip_tags
-    if cmd.supported_api_version(min_api='2018-07-01') and public_ip_prefix:
-        public_ip_args['public_ip_prefix'] = SubResource(id=public_ip_prefix)
 
     if sku:
         public_ip_args['sku'] = {'name': sku}
@@ -6645,7 +6668,7 @@ def update_public_ip(cmd, instance, dns_name=None, allocation_method=None, versi
 def create_public_ip_prefix(cmd, client, resource_group_name, public_ip_prefix_name, prefix_length,
                             version=None, location=None, tags=None, zone=None, edge_zone=None,
                             custom_ip_prefix_name=None):
-    PublicIPPrefix, PublicIPPrefixSku = cmd.get_models('PublicIPPrefix', 'PublicIPPrefixSku')
+    PublicIPPrefix, PublicIPPrefixSku, SubResource = cmd.get_models('PublicIPPrefix', 'PublicIPPrefixSku', 'SubResource')
     prefix = PublicIPPrefix(
         location=location,
         prefix_length=prefix_length,
@@ -6658,11 +6681,18 @@ def create_public_ip_prefix(cmd, client, resource_group_name, public_ip_prefix_n
         prefix.public_ip_address_version = version if version is not None else 'ipv4'
 
     if cmd.supported_api_version(min_api='2020-06-01') and custom_ip_prefix_name:
-        cip_client = network_client_factory(cmd.cli_ctx).custom_ip_prefixes
-        try:
-            prefix.custom_ip_prefix = cip_client.get(resource_group_name, custom_ip_prefix_name)
-        except ResourceNotFoundError:
-            raise ResourceNotFoundError('Custom ip prefix {} doesn\'t exist.'.format(custom_ip_prefix_name))
+        # support cross-subscription
+        if is_valid_resource_id(custom_ip_prefix_name):
+            custom_ip_prefix_id = custom_ip_prefix_name
+        else:
+            custom_ip_prefix_id = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx),
+                resource_group=resource_group_name,
+                namespace='Microsoft.Network',
+                type='customIPPrefixes',
+                name=custom_ip_prefix_name
+            )
+        prefix.custom_ip_prefix = SubResource(id=custom_ip_prefix_id)
 
     if edge_zone:
         prefix.extended_location = _edge_zone_model(cmd, edge_zone)
