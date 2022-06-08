@@ -3344,7 +3344,7 @@ def elastic_pool_update(
         cmd.cli_ctx,
         maintenance_configuration_id)
 
-    if high_availability_replica_count:
+    if high_availability_replica_count is not None:
         instance.high_availability_replica_count = high_availability_replica_count
 
     return instance
