@@ -1023,7 +1023,7 @@ class VMManagedDiskScenarioTest(ScenarioTest):
         })
 
         self.kwargs['vm_id'] = \
-            self.cmd('vm create -g {rg} -n {vm} --image ubuntults --data-disk-sizes-gb 10 --admin-username clitest1 '
+            self.cmd('vm create -g {rg} -n {vm} --image debian --data-disk-sizes-gb 10 --admin-username clitest1 '
                      '--generate-ssh-key --nsg-rule NONE').get_output_in_json()['id']
         time.sleep(70)
 

@@ -297,7 +297,7 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                         network_access_policy=None, disk_access=None, logical_sector_size=None,
                         tier=None, enable_bursting=None, edge_zone=None, security_type=None, support_hibernation=None,
                         public_network_access=None, accelerated_network=None, architecture=None,
-                        data_access_auth_mode=None, gallery_image_reference_backend=None):
+                        data_access_auth_mode=None, gallery_image_reference_type=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -347,7 +347,7 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
             image_reference['lun'] = image_reference_lun
 
     if gallery_image_reference is not None:
-        key = gallery_image_reference_backend if gallery_image_reference_backend else 'id'
+        key = gallery_image_reference_type if gallery_image_reference_type else 'id'
         gallery_image_reference = {key: gallery_image_reference}
         if gallery_image_reference_lun is not None:
             gallery_image_reference['lun'] = gallery_image_reference_lun

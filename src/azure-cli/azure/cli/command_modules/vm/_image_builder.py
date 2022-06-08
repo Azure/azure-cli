@@ -61,9 +61,9 @@ class GalleryImageReferenceType(Enum):
     COMMUNITY = (1, 'communityGalleryImageId')
     SHARED = (2, 'sharedGalleryImageId')
 
-    def __init__(self, index, backend_parameter):
+    def __init__(self, index, backend_key):
         self.index = index
-        self.backend_parameter = backend_parameter
+        self.backend_key = backend_key
 
 
 # region Client Factories

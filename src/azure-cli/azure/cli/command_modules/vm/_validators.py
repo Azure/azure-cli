@@ -1727,19 +1727,19 @@ def _validate_gallery_image_reference(cmd, namespace):
 
     gallery_image_reference = namespace.gallery_image_reference
     if is_compute_gallery_image_id(gallery_image_reference):
-        namespace.gallery_image_reference_backend = GalleryImageReferenceType.COMPUTE.backend_parameter
+        namespace.gallery_image_reference_type = GalleryImageReferenceType.COMPUTE.backend_key
         return
     if is_community_gallery_image_id(gallery_image_reference):
-        namespace.gallery_image_reference_backend = GalleryImageReferenceType.COMMUNITY.backend_parameter
+        namespace.gallery_image_reference_type = GalleryImageReferenceType.COMMUNITY.backend_key
         return
     if is_shared_gallery_image_id(gallery_image_reference):
-        namespace.gallery_image_reference_backend = GalleryImageReferenceType.SHARED.backend_parameter
+        namespace.gallery_image_reference_type = GalleryImageReferenceType.SHARED.backend_key
         return
 
     from azure.cli.core.parser import InvalidArgumentValueError
     raise InvalidArgumentValueError('usage error: {} is an invalid gallery image reference, please provide valid '
-                                    'compute, shared or community gallery image version'
-                                    .format(gallery_image_reference))
+                                    'compute, shared or community gallery image version. For details about valid '
+                                    'format, please refer to the help sample'.format(gallery_image_reference))
 
 
 def process_disk_or_snapshot_create_namespace(cmd, namespace):
