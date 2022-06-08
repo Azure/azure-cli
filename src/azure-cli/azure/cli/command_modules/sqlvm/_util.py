@@ -5,17 +5,18 @@
 
 from azure.core.exceptions import HttpResponseError
 from azure.core.paging import ItemPaged
-from azure.cli.command_modules.vm._client_factory import cf_log_analytics_data_sources
+from azure.cli.command_modules.vm._client_factory import cf_log_analytics_data_sources, cf_log_analytics
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.command_modules.vm.custom import (
     list_extensions,
-    _get_log_analytics_client,
-    set_extension,
-    extension_mappings,
-    _WINDOWS_OMS_AGENT_EXT
+    set_extension
 )
 from azure.mgmt.loganalytics.models import DataSource
 from ._assessment_data_source import data_source_name, data_source_kind, data_source_properties
+
+WINDOWS_LA_EXT_NAME = 'MicrosoftMonitoringAgent'
+WINDOWS_LA_EXT_PUBLISHER = 'Microsoft.EnterpriseCloud.Monitoring'
+WINDOWS_LA_EXT_VERSION = '1.0'
 
 
 def get_sqlvirtualmachine_management_client(cli_ctx):
@@ -42,14 +43,20 @@ def get_sqlvirtualmachine_operations(cli_ctx, _):
     return get_sqlvirtualmachine_management_client(cli_ctx).operations
 
 
+def _get_log_analytics_client(cmd):
+
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    return cf_log_analytics(cmd.cli_ctx, subscription_id)
+
+
 def get_workspace_id_from_log_analytics_extension(cmd, resource_group_name, sql_virtual_machine_name):
     '''
     Get workspace id from Log Analytics extension on VM
     '''
     extensions = list_extensions(cmd, resource_group_name, sql_virtual_machine_name)
     for ext in extensions:
-        if (ext.publisher == 'Microsoft.EnterpriseCloud.Monitoring' and
-                ext.type_properties_type == _WINDOWS_OMS_AGENT_EXT):
+        if (ext.publisher == WINDOWS_LA_EXT_PUBLISHER and
+                ext.type_properties_type == WINDOWS_LA_EXT_NAME):
             return ext.settings.get('workspaceId', None)
 
     return None
@@ -72,10 +79,10 @@ def set_log_analytics_extension(cmd, resource_group_name, vm_name, workspace_rg,
         'workspaceKey': primary_shared_key
     }
 
-    la_extension_name = _WINDOWS_OMS_AGENT_EXT
-    return set_extension(cmd, resource_group_name, vm_name, la_extension_name,
-                         extension_mappings[la_extension_name]['publisher'],
-                         extension_mappings[la_extension_name]['version'],
+    return set_extension(cmd, resource_group_name, vm_name,
+                         WINDOWS_LA_EXT_NAME,
+                         WINDOWS_LA_EXT_PUBLISHER,
+                         WINDOWS_LA_EXT_VERSION,
                          settings,
                          protected_settings), customer_id
 

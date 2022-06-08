@@ -6,9 +6,6 @@
 import os
 from datetime import datetime
 
-from azure.cli.testsdk.base import execute
-from azure.cli.core.mock import DummyCli
-
 from .scenario_tests import AbstractPreparer, SingleValueReplacer
 from .base import LiveScenarioTest
 from .exceptions import CliTestError
@@ -468,10 +465,11 @@ class VnetNicPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
             raise CliTestError(template.format(VnetNicPreparer.__name__))
 
 
-class LogAnalyticsWorkspacePreparer(AbstractPreparer, SingleValueReplacer):
+class LogAnalyticsWorkspacePreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
     def __init__(self, name_prefix='laworkspace', location='eastus2euap', parameter_name='laworkspace',
                  resource_group_parameter_name='resource_group', skip_delete=False):
         super(LogAnalyticsWorkspacePreparer, self).__init__(name_prefix, 15)
+        self.cli_ctx = get_dummy_cli()
         self.location = location
         self.parameter_name = parameter_name
         self.resource_group_parameter_name = resource_group_parameter_name
@@ -480,14 +478,14 @@ class LogAnalyticsWorkspacePreparer(AbstractPreparer, SingleValueReplacer):
     def create_resource(self, name, **kwargs):
         group = self._get_resource_group(**kwargs)
         template = ('az monitor log-analytics workspace create -l {} -g {} -n {}')
-        execute(DummyCli(), template.format(self.location, group, name))
+        self.live_only_execute(self.cli_ctx, template.format(self.location, group, name))
         return {self.parameter_name: name}
 
     def remove_resource(self, name, **kwargs):
         if not self.skip_delete:
             group = self._get_resource_group(**kwargs)
             template = ('az monitor log-analytics workspace delete -g {} -n {} --yes')
-            execute(DummyCli(), template.format(group, name))
+            self.live_only_execute(self.cli_ctx, template.format(group, name))
 
     def _get_resource_group(self, **kwargs):
         try:
