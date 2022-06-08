@@ -21,12 +21,13 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
             'cert_tp': '123BDACDCDFB2C7B250192C6078E47D1E1DB119B',
             'loc': 'eastasia',
             'cluster_name': self.create_random_name('sfrp-cli-', 24),
-            'vm_password': self.create_random_name('Pass@', 9)
+            'vm_password': self.create_random_name('Pass@', 9),
+            'tags': "key1=value1 key2=value2"
         })
 
-        self.cmd('az sf managed-cluster create -g {rg} -c {cluster_name} -l {loc} --cert-thumbprint {cert_tp} --cert-is-admin --admin-password {vm_password}',
+        cluster = self.cmd('az sf managed-cluster create -g {rg} -c {cluster_name} -l {loc} --cert-thumbprint {cert_tp} --cert-is-admin --admin-password {vm_password} --tags {tags}',
                  checks=[self.check('provisioningState', 'Succeeded'),
-                         self.check('clusterState', 'WaitingForNodes')])
+                         self.check('clusterState', 'WaitingForNodes')]).get_output_in_json()
 
         self.cmd('az sf managed-node-type create -g {rg} -c {cluster_name} -n pnt --instance-count 5 --primary',
                  checks=[self.check('provisioningState', 'Succeeded')])
@@ -36,7 +37,8 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
             self.cmd('az sf managed-node-type delete -g {rg} -c {cluster_name} -n pnt')
 
         self.cmd('az sf managed-cluster show -g {rg} -c {cluster_name}',
-                 checks=[self.check('clusterState', 'Ready')])
+                 checks=[self.check('clusterState', 'Ready'),
+                 self.check('tags', cluster["tags"])])
 
         self.cmd('az sf managed-cluster delete -g {rg} -c {cluster_name}')
 
@@ -50,7 +52,7 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
             'cert_tp': '123BDACDCDFB2C7B250192C6078E47D1E1DB119B',
             'loc': 'eastasia',
             'cluster_name': self.create_random_name('sfrp-cli-', 24),
-            'vm_password': self.create_random_name('Pass@', 9)
+            'vm_password': self.create_random_name('Pass@', 9),
         })
 
         self.cmd('az sf managed-cluster create -g {rg} -c {cluster_name} -l {loc} --cert-thumbprint {cert_tp} --cert-is-admin --admin-password {vm_password} --sku Standard --upgrade-mode Automatic --upgrade-cadence Wave1',

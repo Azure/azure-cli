@@ -1446,8 +1446,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage container policy') as c:
         from .completers import get_storage_acl_name_completion_list
-        t_container_permissions = self.get_sdk('blob.models#ContainerPermissions')
-
+        t_container_permissions = self.get_sdk('_models#ContainerSasPermissions',
+                                               resource_type=ResourceType.DATA_STORAGE_BLOB)
         c.argument('container_name', container_name_type)
         c.argument('policy_name', options_list=('--name', '-n'), help='The stored access policy name.',
                    completer=get_storage_acl_name_completion_list(t_base_blob_service, 'container_name',
@@ -1456,13 +1456,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('permission', options_list='--permissions', help=help_str,
                    validator=get_permission_validator(t_container_permissions))
 
-        c.argument('start', type=get_datetime_type(True),
+        c.argument('start', type=get_datetime_type(False),
                    help='start UTC datetime (Y-m-d\'T\'H:M:S\'Z\'). Defaults to time of request.')
-        c.argument('expiry', type=get_datetime_type(True), help='expiration UTC datetime in (Y-m-d\'T\'H:M:S\'Z\')')
+        c.argument('expiry', type=get_datetime_type(False), help='expiration UTC datetime in (Y-m-d\'T\'H:M:S\'Z\')')
 
     for item in ['create', 'delete', 'list', 'show', 'update']:
         with self.argument_context('storage container policy {}'.format(item)) as c:
-            c.extra('lease_id', options_list='--lease-id', help='The container lease ID.')
+            c.extra('container_name', container_name_type, required=True)
+            c.extra('lease', options_list='--lease-id', help='The container lease ID.')
 
     with self.argument_context('storage container generate-sas', resource_type=ResourceType.DATA_STORAGE_BLOB) as c:
         from .completers import get_storage_acl_name_completion_list
