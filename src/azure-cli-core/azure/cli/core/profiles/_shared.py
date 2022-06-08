@@ -78,6 +78,7 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
 
     DATA_COSMOS_TABLE = ('azure.multiapi.cosmosdb', None)
     MGMT_ADVISOR = ('azure.mgmt.advisor', None)
+    MGMT_APPCONTAINERS = ('azure.mgmt.appcontainers', None)
     MGMT_MEDIA = ('azure.mgmt.media', None)
     MGMT_BACKUP = ('azure.mgmt.recoveryservicesbackup', None)
     MGMT_BATCH = ('azure.mgmt.batch', None)
