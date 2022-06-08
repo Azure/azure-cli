@@ -432,21 +432,6 @@ def transform_file_share_json_output(result):
     return new_result
 
 
-def transform_acl_edit(result):
-    if "last_modified" in result.keys():
-        result["lastModified"] = result.pop("last_modified")
-    return result
-
-
-def transform_acl_datetime(result):
-    result = todict(result)
-    if result['start']:
-        result['start'] = result["start"].split('.')[0] + '+00:00'
-    if result['expiry']:
-        result['expiry'] = result["expiry"].split('.')[0] + '+00:00'
-    return result
-
-
 def transform_share_directory_json_output(result):
     result = todict(result)
     new_result = {
