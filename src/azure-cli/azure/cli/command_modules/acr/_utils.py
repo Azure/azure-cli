@@ -441,16 +441,14 @@ def prepare_source_location(cmd,
         try:
             if docker_file_path:
                 # NOTE: os.path.basename is unable to parse "\" in the file path
-                original_docker_file_name = os.path.basename(
+                docker_file_name = os.path.basename(
                     docker_file_path.replace("\\", "/"))
-                docker_file_in_tar = '{}_{}'.format(
-                    uuid.uuid4().hex, original_docker_file_name)
             else:
-                docker_file_in_tar = ""
+                docker_file_name = ""
 
             source_location = upload_source_code(
                 cmd, client_registries, registry_name, resource_group_name,
-                source_location, tar_file_path, docker_file_path, docker_file_in_tar)
+                source_location, tar_file_path, docker_file_path, docker_file_name)
         except Exception as err:
             raise CLIError(err)
         finally:
