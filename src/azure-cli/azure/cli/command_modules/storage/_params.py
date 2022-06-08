@@ -1882,10 +1882,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.extra('snapshot', help='A string that represents the snapshot version, if applicable.')
 
     with self.argument_context('storage file update') as c:
-        t_file_content_settings = self.get_sdk('file.models#ContentSettings')
-
+        t_file_content_settings = self.get_sdk('_models#ContentSettings',
+                                               resource_type=ResourceType.DATA_STORAGE_FILESHARE)
+        c.extra('share_name', share_name_type, required=True)
         c.register_path_argument()
         c.register_content_settings_argument(t_file_content_settings, update=True)
+        c.extra('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
 
     with self.argument_context('storage file upload') as c:
         t_file_content_settings = self.get_sdk('file.models#ContentSettings')

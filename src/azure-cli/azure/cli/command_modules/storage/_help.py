@@ -1980,6 +1980,16 @@ type: group
 short-summary: Manage file metadata.
 """
 
+helps['storage file update'] = """
+type: command
+short-summary: Sets system properties on the file.
+long-summary: If one property is set for the content_settings, all properties will be overriden.
+examples:
+  - name:  Sets system properties on the file.
+    text: |
+        az storage file update -p dir/a.txt -s sharename --account-name myadlsaccount --account-key 0000-0000
+"""
+
 helps['storage file upload'] = """
 type: command
 short-summary: Upload a file to a share that uses the SMB 3.0 protocol.
