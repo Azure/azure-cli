@@ -3678,13 +3678,15 @@ def build_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, no_resto
         args += ["--outdir", outdir]
     if outfile:
         args += ["--outfile", outfile]
-    if stdout:
-        args += ["--stdout"]
     if no_restore:
         args += ["--no-restore"]
-        print(run_bicep_command(args))
-        return
-    run_bicep_command(args)
+    if stdout:
+        args += ["--stdout"]
+
+    output = run_bicep_command(args)
+
+    if stdout:
+        print(output)
 
 
 def publish_bicep_file(cmd, file, target):

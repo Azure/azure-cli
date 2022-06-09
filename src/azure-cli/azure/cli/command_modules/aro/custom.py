@@ -18,7 +18,7 @@ from azure.cli.command_modules.aro._rbac import assign_role_to_resource, \
     has_role_assignment_on_resource
 from azure.cli.command_modules.aro._rbac import ROLE_NETWORK_CONTRIBUTOR, ROLE_READER
 from azure.cli.command_modules.aro._validators import validate_subnets
-from azure.graphrbac.models import GraphErrorException
+from azure.cli.command_modules.role import GraphError
 
 from knack.log import get_logger
 
@@ -75,15 +75,14 @@ def aro_create(cmd,  # pylint: disable=too-many-locals
 
     aad = AADManager(cmd.cli_ctx)
     if client_id is None:
-        app, client_secret = aad.create_application(cluster_resource_group or 'aro-' + random_id)
-        client_id = app.app_id
+        client_id, client_secret = aad.create_application(cluster_resource_group or 'aro-' + random_id)
 
-    client_sp = aad.get_service_principal(client_id)
-    if not client_sp:
-        client_sp = aad.create_service_principal(client_id)
+    client_sp_id = aad.get_service_principal_id(client_id)
+    if not client_sp_id:
+        client_sp_id = aad.create_service_principal(client_id)
 
-    rp_client_sp = aad.get_service_principal(resolve_rp_client_id())
-    if not rp_client_sp:
+    rp_client_sp_id = aad.get_service_principal_id(resolve_rp_client_id())
+    if not rp_client_sp_id:
         raise ResourceNotFoundError("RP service principal not found.")
 
     worker_vm_size = worker_vm_size or 'Standard_D4s_v3'
@@ -140,7 +139,7 @@ def aro_create(cmd,  # pylint: disable=too-many-locals
         ],
     )
 
-    sp_obj_ids = [client_sp.object_id, rp_client_sp.object_id]
+    sp_obj_ids = [client_sp_id, rp_client_sp_id]
     ensure_resource_permissions(cmd.cli_ctx, oc, True, sp_obj_ids)
 
     return sdk_no_wait(no_wait, client.begin_create_or_update,
@@ -151,7 +150,7 @@ def aro_create(cmd,  # pylint: disable=too-many-locals
 
 def aro_delete(cmd, client, resource_group_name, resource_name, no_wait=False):
     # TODO: clean up rbac
-    rp_client_sp = None
+    rp_client_sp_id = None
 
     try:
         oc = client.get(resource_group_name, resource_name)
@@ -166,16 +165,16 @@ def aro_delete(cmd, client, resource_group_name, resource_name, no_wait=False):
 
     # Best effort - assume the role assignments on the SP exist if exception raised
     try:
-        rp_client_sp = aad.get_service_principal(resolve_rp_client_id())
-        if not rp_client_sp:
+        rp_client_sp_id = aad.get_service_principal_id(resolve_rp_client_id())
+        if not rp_client_sp_id:
             raise ResourceNotFoundError("RP service principal not found.")
-    except GraphErrorException as e:
+    except GraphError as e:
         logger.info(e.message)
 
     # Customers frequently remove the Cluster or RP's service principal permissions.
     # Attempt to fix this before performing any action against the cluster
-    if rp_client_sp:
-        ensure_resource_permissions(cmd.cli_ctx, oc, False, [rp_client_sp.object_id])
+    if rp_client_sp_id:
+        ensure_resource_permissions(cmd.cli_ctx, oc, False, [rp_client_sp_id])
 
     return sdk_no_wait(no_wait, client.begin_delete,
                        resource_group_name=resource_group_name,
@@ -315,8 +314,8 @@ def cluster_application_update(cli_ctx,
                                refresh_cluster_credentials):
     # QUESTION: is there possible unification with the create path?
 
-    rp_client_sp = None
-    client_sp = None
+    rp_client_sp_id = None
+    client_sp_id = None
     random_id = generate_random_id()
 
     # if any of these are set - we expect users to have access to fix rbac so we fail
@@ -327,10 +326,10 @@ def cluster_application_update(cli_ctx,
 
     # check if we can see if RP service principal exists
     try:
-        rp_client_sp = aad.get_service_principal(resolve_rp_client_id())
-        if not rp_client_sp:
+        rp_client_sp_id = aad.get_service_principal_id(resolve_rp_client_id())
+        if not rp_client_sp_id:
             raise ResourceNotFoundError("RP service principal not found.")
-    except GraphErrorException as e:
+    except GraphError as e:
         if fail:
             logger.error(e.message)
             raise
@@ -341,33 +340,32 @@ def cluster_application_update(cli_ctx,
     # If application does not exist - creates new one
     if refresh_cluster_credentials:
         try:
-            app = aad.get_application_by_client_id(client_id or oc.service_principal_profile.client_id)
+            app = aad.get_application_object_id_by_client_id(client_id or oc.service_principal_profile.client_id)
             if not app:
                 # we were not able to find and applications, create new one
                 parts = parse_resource_id(oc.cluster_profile.resource_group_id)
                 cluster_resource_group = parts['resource_group']
 
-                app, client_secret = aad.create_application(cluster_resource_group or 'aro-' + random_id)
-                client_id = app.app_id
+                client_id, client_secret = aad.create_application(cluster_resource_group or 'aro-' + random_id)
             else:
-                client_secret = aad.refresh_application_credentials(app.object_id)
-        except GraphErrorException as e:
+                client_secret = aad.add_password(app)
+        except GraphError as e:
             logger.error(e.message)
             raise
 
     # attempt to get/create SP if one was not found.
     try:
-        client_sp = aad.get_service_principal(client_id or oc.service_principal_profile.client_id)
-    except GraphErrorException as e:
+        client_sp_id = aad.get_service_principal_id(client_id or oc.service_principal_profile.client_id)
+    except GraphError as e:
         if fail:
             logger.error(e.message)
             raise
         logger.info(e.message)
 
-    if fail and not client_sp:
-        client_sp = aad.create_service_principal(client_id or oc.service_principal_profile.client_id)
+    if fail and not client_sp_id:
+        client_sp_id = aad.create_service_principal(client_id or oc.service_principal_profile.client_id)
 
-    sp_obj_ids = [sp.object_id for sp in [rp_client_sp, client_sp] if sp]
+    sp_obj_ids = [sp for sp in [rp_client_sp_id, client_sp_id] if sp]
     ensure_resource_permissions(cli_ctx, oc, fail, sp_obj_ids)
 
     return client_id, client_secret

@@ -10,7 +10,10 @@
   %define dist .el%{?rhel}
 %endif
 
-%define python_cmd python3
+# The Python package name for dnf/yum/tdnf, such as python39, python3
+%define python_package %{getenv:PYTHON_PACKAGE}
+# The Python executable name, such as python3.9, python3
+%define python_cmd %{getenv:PYTHON_CMD}
 
 %define name           azure-cli
 %define release        1%{?dist}
@@ -25,12 +28,12 @@ Version:        %{version}
 Release:        %{release}
 Url:            https://docs.microsoft.com/cli/azure/install-azure-cli
 BuildArch:      x86_64
-Requires:       %{python_cmd}
+Requires:       %{python_package}
 Prefix:         /usr
 Prefix:         /etc
 
 BuildRequires:  gcc, libffi-devel, openssl-devel, perl
-BuildRequires:  %{python_cmd}-devel
+BuildRequires:  %{python_package}-devel
 
 %global _python_bytecompile_errors_terminate_build 0
 
@@ -66,6 +69,7 @@ for d in %{buildroot}%{cli_lib_dir}/bin/*; do perl -p -i -e "s#%{buildroot}##g" 
 # The only solution left is to hard-code 'lib64' as we only release 64-bit RPM packages.
 mkdir -p %{buildroot}%{_bindir}
 python_version=$(ls %{buildroot}%{cli_lib_dir}/lib/ | head -n 1)
+# We make %{python_cmd} the default executable, but if there is a more precise match, such as python3.9, we prefer that.
 printf "#!/usr/bin/env bash
 bin_dir=\`cd \"\$(dirname \"\$BASH_SOURCE[0]\")\"; pwd\`
 python_cmd=%{python_cmd}
