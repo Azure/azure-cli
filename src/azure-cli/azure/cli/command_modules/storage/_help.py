@@ -2002,7 +2002,7 @@ long-summary: If one property is set for the content_settings, all properties wi
 examples:
   - name:  Sets system properties on the file.
     text: |
-        az storage file update -p dir/a.txt -s sharename --account-name myadlsaccount --account-key 0000-0000
+        az storage file update -p dir/a.txt -s sharename --account-name myadlsaccount --account-key 0000-0000 --content-type test/type
 """
 
 helps['storage file upload'] = """

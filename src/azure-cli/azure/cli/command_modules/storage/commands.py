@@ -698,7 +698,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command('show', 'get_file_properties', transform=transform_file_show_result,
                           table_transformer=transform_file_output,
                           exception_handler=show_exception_handler)
-        g.storage_command('update', 'set_http_headers', resource_type=ResourceType.DATA_STORAGE_FILESHARE)
+        g.storage_custom_command('update', 'file_updates', resource_type=ResourceType.DATA_STORAGE_FILESHARE)
         g.storage_custom_command('exists', 'file_exists', transform=create_boolean_result_output_transformer('exists'))
 
     with self.command_group('storage cors', get_custom_sdk('cors', multi_service_properties_factory)) as g:

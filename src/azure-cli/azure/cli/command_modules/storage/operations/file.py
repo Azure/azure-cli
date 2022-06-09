@@ -440,3 +440,7 @@ def file_exists(cmd, client, **kwargs):
         return True if res else False
     except:
         return False
+
+
+def file_updates(cmd, client, **kwargs):
+    return client.set_http_headers(**kwargs)
