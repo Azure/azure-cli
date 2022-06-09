@@ -432,3 +432,10 @@ def generate_sas_file(cmd, client, directory_name=None, file_name=None, permissi
     return t_generate_file_sas(account_name=client.account_name, share_name=client.share_name, file_path=file_path,
                                account_key=client.credential.account_key, permission=permission, expiry=expiry,
                                start=start, policy_id=id, ip=ip, protocol=protocol, **kwargs)
+
+def file_exists(cmd, client, **kwargs):
+    try:
+        res = client.get_file_properties(**kwargs)
+        return True if res else False
+    except:
+        return False

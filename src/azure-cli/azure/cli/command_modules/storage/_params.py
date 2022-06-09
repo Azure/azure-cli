@@ -1835,6 +1835,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage file exists') as c:
         c.register_path_argument()
+        c.extra('share_name', share_name_type, required=True)
+        c.extra('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
+        c.extra('snapshot', help="A string that represents the snapshot version, if applicable.")
 
     with self.argument_context('storage file generate-sas') as c:
         from .completers import get_storage_acl_name_completion_list
