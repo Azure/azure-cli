@@ -270,8 +270,8 @@ examples:
         az backup protection enable-for-vm \\
           --resource-group myResourceGroup \\
           --vault-name myRecoveryServicesVault \\
-           --policy-name DefaultPolicy \\
-           --vm $(az vm show -g VMResourceGroup -n MyVm --query id | tr -d '"')
+          --policy-name DefaultPolicy \\
+          --vm "$(az vm show -g VMResourceGroup -n MyVm --query id)"
 """
 
 helps['backup protection enable-for-azurefileshare'] = """
