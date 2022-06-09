@@ -8,6 +8,7 @@ Commands for storage file share operations
 """
 
 import os
+from azure.core.exceptions import ResourceExistsError
 from knack.log import get_logger
 
 from azure.cli.command_modules.storage.util import (filter_none, collect_blobs, collect_files,
@@ -133,6 +134,30 @@ def list_share_files(cmd, client, directory_name=None, timeout=None, exclude_dir
     return results
 
 
+def storage_file_upload(client, local_file_path, content_settings=None,
+                        metadata=None, validate_content=False, progress_callback=None, max_connections=2, timeout=None,
+                        directory_name=None, file_name=None):
+
+    upload_args = {
+        'content_settings': content_settings,
+        'metadata': metadata,
+        'validate_content': validate_content,
+        'max_concurrency': max_connections,
+        'timeout': timeout
+    }
+
+    if progress_callback:
+        upload_args['raw_response_hook'] = progress_callback
+
+    # Because the contents of the uploaded file may be too large, it should be passed into the a stream object,
+    # upload_file() read file data in batches to avoid OOM problems
+    count = os.path.getsize(local_file_path)
+    with open(local_file_path, 'rb') as stream:
+        response = client.upload_file(data=stream, length=count, **upload_args)
+
+    return response
+
+
 def storage_file_upload_batch(cmd, client, destination, source, destination_path=None, pattern=None, dryrun=False,
                               validate_content=False, content_settings=None, max_connections=1, metadata=None,
                               progress_callback=None):
@@ -141,14 +166,14 @@ def storage_file_upload_batch(cmd, client, destination, source, destination_path
     from azure.cli.command_modules.storage.util import glob_files_locally, normalize_blob_file_path
 
     source_files = list(glob_files_locally(source, pattern))
-    settings_class = cmd.get_models('file.models#ContentSettings')
+    settings_class = cmd.get_models('_models#ContentSettings')
 
     if dryrun:
         logger.info('upload files to file share')
         logger.info('    account %s', client.account_name)
         logger.info('      share %s', destination)
         logger.info('      total %d', len(source_files))
-        return [{'File': client.make_file_url(destination, os.path.dirname(dst) or None, os.path.basename(dst)),
+        return [{'File': make_file_url(client, os.path.dirname(dst) or None, os.path.basename(dst)),
                  'Type': guess_content_type(src, content_settings, settings_class).content_type} for src, dst in
                 source_files]
 
@@ -160,20 +185,27 @@ def storage_file_upload_batch(cmd, client, destination, source, destination_path
         file_name = os.path.basename(dst)
 
         _make_directory_in_files_share(client, destination, dir_name)
-        create_file_args = {'share_name': destination, 'directory_name': dir_name, 'file_name': file_name,
-                            'local_file_path': src, 'progress_callback': progress_callback,
-                            'content_settings': guess_content_type(src, content_settings, settings_class),
-                            'metadata': metadata, 'max_connections': max_connections}
-
-        if cmd.supported_api_version(min_api='2016-05-31'):
-            create_file_args['validate_content'] = validate_content
 
         logger.warning('uploading %s', src)
-        client.create_file_from_path(**create_file_args)
+        storage_file_upload(client.get_file_client(dst), src, content_settings, metadata, validate_content,
+                            progress_callback, max_connections)
 
-        return client.make_file_url(destination, dir_name, file_name)
+        return make_file_url(client, dir_name, file_name)
 
     return list(_upload_action(src, dst) for src, dst in source_files)
+
+
+def make_file_url(client, directory_name, file_name, sas_token=None):
+
+    if not directory_name:
+        url = '{}/{}'.format(client.primary_endpoint, file_name)
+    else:
+        url = '{}/{}/{}'.format(client.primary_endpoint, directory_name, file_name)
+
+    if sas_token:
+        url += '?' + sas_token
+
+    return url
 
 
 def storage_file_download_batch(cmd, client, source, destination, pattern=None, dryrun=False, validate_content=False,
@@ -398,6 +430,11 @@ def _make_directory_in_files_share(file_service, file_share, directory_path, exi
 
         try:
             file_service.create_directory(share_name=file_share, directory_name=dir_name, fail_on_exist=False)
+        except TypeError:
+            try:
+                file_service.create_directory(directory_name=dir_name)
+            except ResourceExistsError:
+                pass
         except AzureHttpError:
             from knack.util import CLIError
             raise CLIError('Failed to create directory {}'.format(dir_name))

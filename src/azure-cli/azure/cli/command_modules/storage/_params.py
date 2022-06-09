@@ -1870,26 +1870,34 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.register_content_settings_argument(t_file_content_settings, update=True)
 
     with self.argument_context('storage file upload') as c:
+        from ._validators import validate_file_path, add_progress_callback_v2
         t_file_content_settings = self.get_sdk('file.models#ContentSettings')
 
         c.register_path_argument(default_file_param='local_file_path')
         c.register_content_settings_argument(t_file_content_settings, update=False, guess_from_file='local_file_path')
-        c.argument('local_file_path', options_list='--source', type=file_type, completer=FilesCompleter())
-        c.extra('no_progress', progress_type)
-        c.argument('max_connections', type=int)
+        c.argument('local_file_path', options_list='--source', type=file_type, completer=FilesCompleter(),
+                   help='Path of the local file to upload as the file content.')
+        c.extra('no_progress', progress_type, validator=add_progress_callback_v2)
+        c.argument('max_connections', type=int, help='Maximum number of parallel connections to use.')
+        c.extra('share_name', share_name_type, required=True, validator=validate_file_path)
+        c.argument('validate_content', action='store_true', min_api='2016-05-31',
+                   help='If true, calculates an MD5 hash for each range of the file. The storage service checks the '
+                        'hash of the content that has arrived with the hash that was sent. This is primarily valuable '
+                        'for detecting bitflips on the wire if using http instead of https as https (the default) will '
+                        'already validate. Note that this MD5 hash is not stored with the file.')
 
     with self.argument_context('storage file url') as c:
         c.register_path_argument()
         c.argument('protocol', arg_type=get_enum_type(['http', 'https'], 'https'), help='Protocol to use.')
 
     with self.argument_context('storage file upload-batch') as c:
-        from ._validators import process_file_upload_batch_parameters
+        from ._validators import process_file_upload_batch_parameters, add_progress_callback_v2
         c.argument('source', options_list=('--source', '-s'), validator=process_file_upload_batch_parameters)
         c.argument('destination', options_list=('--destination', '-d'))
         c.argument('max_connections', arg_group='Download Control', type=int)
         c.argument('validate_content', action='store_true', min_api='2016-05-31')
         c.register_content_settings_argument(t_file_content_settings, update=False, arg_group='Content Settings')
-        c.extra('no_progress', progress_type)
+        c.extra('no_progress', progress_type, validator=add_progress_callback_v2)
 
     with self.argument_context('storage file download-batch') as c:
         from ._validators import process_file_download_batch_parameters

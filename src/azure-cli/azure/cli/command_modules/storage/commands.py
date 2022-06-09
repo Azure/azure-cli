@@ -702,13 +702,11 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command(
             'exists', 'exists', transform=create_boolean_result_output_transformer('exists'))
         g.storage_command('download', 'get_file_to_path', exception_handler=file_related_exception_handler)
-        g.storage_command('upload', 'create_file_from_path', exception_handler=file_related_exception_handler)
         g.storage_command('metadata show', 'get_file_metadata',
                           exception_handler=show_exception_handler)
         g.storage_command('metadata update', 'set_file_metadata')
         g.storage_command('copy start', 'copy_file')
         g.storage_command('copy cancel', 'abort_copy_file')
-        g.storage_custom_command('upload-batch', 'storage_file_upload_batch')
         g.storage_custom_command(
             'download-batch', 'storage_file_download_batch')
         g.storage_custom_command('delete-batch', 'storage_file_delete_batch')
@@ -719,6 +717,12 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_custom_command('list', 'list_share_files', client_factory=cf_share_client,
                                  transform=transform_file_directory_result,
                                  table_transformer=transform_file_output)
+
+        from ._transformers import transform_file_upload
+        g.storage_custom_command('upload', 'storage_file_upload', transform=transform_file_upload,
+                                 exception_handler=file_related_exception_handler)
+        g.storage_custom_command('upload-batch', 'storage_file_upload_batch',
+                                 custom_command_type=get_custom_sdk('file', client_factory=cf_share_client))
 
     with self.command_group('storage cors', get_custom_sdk('cors', multi_service_properties_factory)) as g:
         from ._transformers import transform_cors_list_output

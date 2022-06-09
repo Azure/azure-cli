@@ -435,3 +435,8 @@ def transform_share_list_handle(result):
         item["handleId"] = item.id
         delattr(item, "id")
     return result
+
+
+# pylint: disable=unused-argument
+def transform_file_upload(result):
+    return None

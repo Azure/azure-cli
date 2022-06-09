@@ -1868,6 +1868,12 @@ examples:
     crafted: true
 """
 
+helps['storage file download'] = """
+type: command
+short-summary: Downloads a file to a file path, with automatic chunking and progress notifications.
+long-summary: Returns an instance of File with properties and metadata.
+"""
+
 helps['storage file download-batch'] = """
 type: command
 short-summary: Download files from an Azure Storage File Share to a local directory in a batch operation.
