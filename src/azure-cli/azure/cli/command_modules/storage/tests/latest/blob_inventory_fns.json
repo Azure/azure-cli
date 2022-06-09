@@ -1,0 +1,113 @@
+{
+    "enabled": true,
+    "type": "Inventory",
+    "rules": [
+        {
+            "enabled": true,
+            "name": "newfieldsblob",
+            "destination": "mycontainer",
+            "definition": {
+                "filters": {
+                    "blobTypes": [
+                        "blockBlob",
+                        "appendBlob",
+                        "pageBlob"
+                    ],
+                    "includeSnapshots": true,
+                    "includeDeleted": true,
+                    "includeBlobVersions": true,
+                    "prefixMatch": [
+                        "abc"
+                    ],
+                    "excludePrefix": [
+                        "ac"
+                    ]
+                },
+                "format": "Csv",
+                "schedule": "Daily",
+                "objectType": "Blob",
+                "schemaFields": [
+                    "Name",
+                    "Creation-Time",
+                    "Last-Modified",
+                    "ETag",
+                    "Content-Length",
+                    "Content-Type",
+                    "Content-Encoding",
+                    "Content-Language",
+                    "Content-CRC64",
+                    "Content-MD5",
+                    "Cache-Control",
+                    "Content-Disposition",
+                    "BlobType",
+                    "AccessTier",
+                    "AccessTierChangeTime",
+                    "AccessTierInferred",
+                    "LeaseStatus",
+                    "LeaseState",
+                    "LeaseDuration",
+                    "ServerEncrypted",
+                    "CustomerProvidedKeySha256",
+                    "RehydratePriority",
+                    "ArchiveStatus",
+                    "EncryptionScope",
+                    "IncrementalCopy",
+                    "Snapshot",
+                    "Metadata",
+                    "Deleted",
+                    "RemainingRetentionDays",
+                    "CopyId",
+                    "CopyStatus",
+                    "CopySource",
+                    "CopyProgress",
+                    "CopyCompletionTime",
+                    "CopyStatusDescription",
+                    "ImmutabilityPolicyUntilDate",
+                    "ImmutabilityPolicyMode",
+                    "LegalHold",
+                    "LastAccessTime",
+                    "x-ms-blob-sequence-number",
+                    "VersionId",
+                    "IsCurrentVersion",
+                    "TagCount",
+                    "Tags"
+                ]
+            }
+        },
+        {
+            "enabled": true,
+            "name": "newfieldscontainer",
+            "destination": "mycontainer",
+            "definition": {
+                "filters": {
+                    "prefixMatch": [
+                        "abc"
+                    ],
+                    "includeDeleted": true
+                },
+                "format": "Csv",
+                "schedule": "Daily",
+                "objectType": "Container",
+                "schemaFields": [
+                    "Name",
+                    "Last-Modified",
+                    "ETag",
+                    "LeaseStatus",
+                    "LeaseState",
+                    "LeaseDuration",
+                    "PublicAccess",
+                    "DefaultEncryptionScope",
+                    "DenyEncryptionScopeOverride",
+                    "ImmutableStorageWithVersioningEnabled",
+                    "HasImmutabilityPolicy",
+                    "HasLegalHold",
+                    "Deleted",
+                    "DeletedTime",
+                    "RemainingRetentionDays",
+                    "Version",
+                    "Metadata"
+                ]
+            }
+        }
+    ]
+}

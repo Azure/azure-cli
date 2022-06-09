@@ -40,6 +40,8 @@ parameters:
     short-summary: NetBIOS name of the SMB server. This name will be registered as a computer account in the AD and used to mount volumes. Must be 10 characters or less
   - name: --organizational-unit
     short-summary: The Organizational Unit (OU) within the Windows Active Directory
+  - name: --site
+    short-summary: The Active Directory site the service will limit Domain Controller discovery to
   - name: --kdc-ip
     short-summary: kdc server IP addresses for the active directory machine. This optional parameter is used only while creating kerberos volume
   - name: --ad-name
@@ -53,13 +55,13 @@ parameters:
   - name: --ldap-signing
     short-summary: Specifies whether or not the LDAP traffic needs to be signed
   - name: --security-operators
-    short-summary: Domain Users in the Active directory to be given SeSecurityPrivilege privilege (Needed for SMB Continuously available shares for SQL). A space seperated list of unique usernames without domain specifier
+    short-summary: Domain Users in the Active directory to be given SeSecurityPrivilege privilege (Needed for SMB Continuously available shares for SQL). A space separated list of unique usernames without domain specifier
   - name: --ldap-over-tls
     short-summary: Specifies whether or not the LDAP traffic needs to be secured via TLS
   - name: --allow-local-ldap-users
     short-summary: If enabled, NFS client local users can also (in addition to LDAP users) access the NFS volumes
   - name: --administrators
-    short-summary: Users to be added to the Built-in Administrators active directory group. A space seperated string of unique usernames without domain specifier.
+    short-summary: Users to be added to the Built-in Administrators active directory group. A space separated string of unique usernames without domain specifier.
   - name: --encrypt-dc-conn
     short-summary: If enabled, Traffic between the SMB server to Domain Controller (DC) will be encrypted
   - name: --user-dn
@@ -94,6 +96,8 @@ parameters:
     short-summary: NetBIOS name of the SMB server. This name will be registered as a computer account in the AD and used to mount volumes. Must be 10 characters or less
   - name: --organizational-unit
     short-summary: The Organizational Unit (OU) within the Windows Active Directory
+  - name: --site
+    short-summary: The Active Directory site the service will limit Domain Controller discovery to.
   - name: --kdc-ip
     short-summary: kdc server IP addresses for the active directory machine. This optional parameter is used only while creating kerberos volume
   - name: --ad-name
@@ -101,19 +105,19 @@ parameters:
   - name: --server-root-ca-cert
     short-summary: When LDAP over SSL/TLS is enabled, the LDAP client is required to have base64 encoded Active Directory Certificate Service's self-signed root CA certificate, this optional parameter is used only for dual protocol with LDAP user-mapping volumes.
   - name: --backup-operators
-    short-summary: Users to be added to the Built-in Backup Operator active directory group. A space seperated list of unique usernames without domain specifier
+    short-summary: Users to be added to the Built-in Backup Operator active directory group. A space separated list of unique usernames without domain specifier
   - name: --aes-encryption
     short-summary: If enabled, AES encryption will be enabled for SMB communication
   - name: --ldap-signing
     short-summary: Specifies whether or not the LDAP traffic needs to be signed
   - name: --security-operators
-    short-summary: Domain Users in the Active directory to be given SeSecurityPrivilege privilege (Needed for SMB Continuously available shares for SQL). A space seperated list of unique usernames without domain specifier
+    short-summary: Domain Users in the Active directory to be given SeSecurityPrivilege privilege (Needed for SMB Continuously available shares for SQL). A space separated list of unique usernames without domain specifier
   - name: --ldap-over-tls
     short-summary: Specifies whether or not the LDAP traffic needs to be secured via TLS
   - name: --allow-local-ldap-users
     short-summary: If enabled, NFS client local users can also (in addition to LDAP users) access the NFS volumes
   - name: --administrators
-    short-summary: Users to be added to the Built-in Administrators active directory group. A space seperated list of unique usernames without domain specifier.
+    short-summary: Users to be added to the Built-in Administrators active directory group. A space separated list of unique usernames without domain specifier.
   - name: --encrypt-dc-conn
     short-summary: If enabled, Traffic between the SMB server to Domain Controller (DC) will be encrypted
   - name: --user-dn
@@ -538,7 +542,7 @@ parameters:
   - name: --name --snapshot-name -n -s
     short-summary: The name of the ANF snapshot
   - name: --file-paths
-    short-summary: Required. A space seperated string of filed to be restored
+    short-summary: Required. A space separated string of filed to be restored
   - name: --destination-path
     short-summary: Destination folder where the files will be restored
 examples:
@@ -573,7 +577,7 @@ parameters:
   - name: --subnet
     short-summary: The ARM Id or name of the delegated subnet for the vnet. If omitted 'default' will be used
   - name: --protocol-types
-    short-summary: Space seperated list of protocols that the volume can use, available protocols are "NFSv4.1", "NFSv3", "CIFS"
+    short-summary: Space separated list of protocols that the volume can use, available protocols are "NFSv4.1", "NFSv3", "CIFS"
   - name: --volume-type
     short-summary: Whether the volume should be a data protection volume ("DataProtection"), empty if this is not a data protection volume
   - name: --endpoint-type
@@ -1381,4 +1385,76 @@ examples:
   - name: Get a metadata of an ANF subvolume
     text: >
         az netappfiles subvolume metadata show -g mygroup --account-name myaccountname  --pool-name mypoolname --volume-name myvolumename --subvolume-name mysubvolumename
+"""
+
+helps['netappfiles volume-group'] = """
+type: group
+short-summary: Manage Azure NetApp Files (ANF) Volume Group Resources.
+"""
+
+helps['netappfiles volume-group show'] = """
+type: command
+short-summary: Get the specified ANF Volume Group.
+examples:
+  - name: Get an ANF volume group
+    text: >
+        az netappfiles volume-group show -g mygroup --account-name myaccountname --volume-group-name myvolumegroupname
+"""
+
+helps['netappfiles volume-group list'] = """
+type: command
+short-summary: Get a list of ANF Volume Groups.
+examples:
+  - name: Get a list of ANF volume groups
+    text: >
+        az netappfiles volume-group list -g mygroup --account-name myaccountname
+"""
+
+helps['netappfiles volume-group create'] = """
+type: command
+short-summary: Create ANF Volume Groups.
+parameters:
+  - name: --vnet
+    short-summary: The ARM Id or name of the vnet for the volumes
+  - name: --ppg
+    short-summary: The resource id of the Proximity Placement Group for volume placement
+  - name: --sap-sid
+    short-summary: The SAP system ID. Three characters long alpha-numeric string
+  - name: --subnet
+    short-summary: The delegated Subnet name
+  - name: --location -l
+    short-summary: ANF Location. If the resource group location is different than ANF location, ANF location needs to be specified
+  - name: --tags
+    short-summary: Space-separated tags in `key=value` format
+  - name: --prefix
+    short-summary: All volume names will be prefixed with the given text. The default values for prefix text depends on system role. For PRIMARY it will be `""` and HA it will be `"HA-"`.
+  - name: --system-role
+    short-summary: Type of role for the storage account. Primary indicates first of a SAP HANA Replication (HSR) setup or No HSR. High Availability (HA) specifies local scenario. Default is PRIMARY
+  - name: --backup-nfsv3
+    short-summary: Indicates if NFS Protocol version 3 is preferred for data backup and log backup volumes. Default is false
+  - name: --data-repl-skd
+    short-summary: Replication Schedule for data volume
+  - name: --data-src-id
+    short-summary: ResourceId of the data source volume
+  - name: --shared-repl-skd
+    short-summary: Replication Schedule for shared volume
+  - name: --shared-src-id
+    short-summary: ResourceId of the shared source volume
+  - name: --data-backup-repl-skd
+    short-summary: Replication Schedule for data backup volume
+  - name: --data-backup-src-id
+    short-summary: ResourceId of the data backup source volume
+  - name: --log-backup-repl-skd
+    short-summary: Replication Schedule for log backup volume
+  - name: --log-backup-src-id
+    short-summary: ResourceId of the log backup source volume
+examples:
+  - name: Create ANF volume group
+    text: >
+        az netappfiles volume-group create -g mygroup --account-name myaccountname --pool-name mypoolname --volume-group-name myvolumegroupname --vnet myvnet --ppg myppg --sap-sid mysapsid
+"""
+
+helps['netappfiles volume-group wait'] = """
+type: command
+short-summary: Wait for a volume group to be created.
 """

@@ -623,6 +623,105 @@ examples:
     crafted: true
 """
 
+helps['servicebus namespace private-endpoint-connection'] = """
+type: group
+short-summary: Manage servicebus namespace private endpoint connection.
+"""
+
+helps['servicebus namespace private-endpoint-connection approve'] = """
+type: command
+short-summary: Approve a private endpoint connection request for servicebus namespace.
+examples:
+  - name: Approve a private endpoint connection request for servicebus namespace by ID.
+    text: |
+        az servicebus namespace private-endpoint-connection approve --id "/subscriptions/0000-0000-0000-0000/resourceGroups/MyResourceGroup/providers/Microsoft.ServiceBus/namesapces/mynamepsace/privateEndpointConnections/mynamespace.b56b5a95-0588-4f8b-b348-15db61590a6c"
+  - name: Approve a private endpoint connection request for servicebus namespace by ID.
+    text: |
+        id = (az servicebus namespace show -n mynamespace --query "privateEndpointConnections[0].id")
+        az servicebus namespace private-endpoint-connection approve --id $id
+  - name: Approve a private endpoint connection request for servicebus namespace using namespace name and connection name.
+    text: |
+        az servicebus namespace private-endpoint-connection approve -g myRg --namespace-name mynamespace --name myconnection
+  - name: Approve a private endpoint connection request for servicebus namespace using namespace name and connection name.
+    text: |
+        name = (az servicebus namespace show -n mynamespace --query "privateEndpointConnections[0].name")
+        az servicebus namespace private-endpoint-connection approve -g myRg --namespace-name mynamespace --name $name
+"""
+
+helps['servicebus namespace private-endpoint-connection delete'] = """
+type: command
+short-summary: Delete a private endpoint connection request for servicebus namespace.
+examples:
+  - name: Delete a private endpoint connection request for servicebus namespace by ID.
+    text: |
+        az servicebus namespace private-endpoint-connection delete --id "/subscriptions/0000-0000-0000-0000/resourceGroups/MyResourceGroup/providers/Microsoft.ServiceBus/namespaces/mynamespace/privateEndpointConnections/mynamespace.b56b5a95-0588-4f8b-b348-15db61590a6c"
+  - name: Delete a private endpoint connection request for servicebus namespace by ID.
+    text: |
+        id = (az servicebus namespace show -n mynamespace --query "privateEndpointConnections[0].id")
+        az servicebus namespace private-endpoint-connection delete --id $id
+  - name: Delete a private endpoint connection request for servicebus namespace using account name and connection name.
+    text: |
+        az servicebus namespace private-endpoint-connection delete -g myRg --namespace-name mynamespace --name myconnection
+  - name: Delete a private endpoint connection request for servicebus namespace using namespace name and connection name.
+    text: |
+        name = (az servicebus namespace show -n mynamespace --query "privateEndpointConnections[0].name")
+        az servicebus namespace private-endpoint-connection delete -g myRg --namespace-name mynamespace --name $name
+"""
+
+helps['servicebus namespace private-endpoint-connection reject'] = """
+type: command
+short-summary: Reject a private endpoint connection request for servicebus namespace.
+examples:
+  - name: Reject a private endpoint connection request for servicebus namespace by ID.
+    text: |
+        az servicebus namespace private-endpoint-connection reject --id "/subscriptions/0000-0000-0000-0000/resourceGroups/MyResourceGroup/providers/Microsoft.ServiceBus/namespaces/mynamespace/privateEndpointConnections/mynamespace.b56b5a95-0588-4f8b-b348-15db61590a6c"
+  - name: Reject a private endpoint connection request for servicebus namespace by ID.
+    text: |
+        id = (az servicebus namespace show -n mynamespace --query "privateEndpointConnections[0].id")
+        az servicebus namespace private-endpoint-connection reject --id $id
+  - name: Reject a private endpoint connection request for servicebus namespace using namespace name and connection name.
+    text: |
+        az servicebus namespace private-endpoint-connection reject -g myRg --namespace-name mynamespace --name myconnection
+  - name: Reject a private endpoint connection request for servicebus namespace using namespace name and connection name.
+    text: |
+        name = (az servicebus namespace show -n mynamespace --query "privateEndpointConnections[0].name")
+        az servicebus namespace private-endpoint-connection reject -g myRg --namespace-name mynamespace --name $name
+"""
+
+helps['servicebus namespace private-endpoint-connection show'] = """
+type: command
+short-summary: Show details of a private endpoint connection request for servicebus namespace.
+examples:
+  - name: Show details of a private endpoint connection request for servicebus namespace by ID.
+    text: |
+        az servicebus namespace private-endpoint-connection show --id "/subscriptions/0000-0000-0000-0000/resourceGroups/MyResourceGroup/providers/Microsoft.ServiceBus/namespaces/mynamespace/privateEndpointConnections/mynamespace.b56b5a95-0588-4f8b-b348-15db61590a6c"
+  - name: Show details of a private endpoint connection request for servicebus namespace by ID.
+    text: |
+        id = (az servicebus namespace show -n mynamespace --query "privateEndpointConnections[0].id")
+        az servicebus namespace private-endpoint-connection show --id $id
+  - name: Show details of a private endpoint connection request for servicebus namespace using namespace name and connection name.
+    text: |
+        az servicebus namespace private-endpoint-connection show -g myRg --namespace-name mynamespace --name myconnection
+  - name: Show details of a private endpoint connection request for servicebus namespace using namespace name and connection name.
+    text: |
+        name = (az servicebus namespace show -n mynamespace --query "privateEndpointConnections[0].name")
+        az servicebus namespace private-endpoint-connection show -g myRg --namespace-name mynamespace --name $name
+"""
+
+helps['servicebus namespace private-link-resource'] = """
+type: group
+short-summary: Manage servicebus namespace private link resources.
+"""
+
+helps['servicebus namespace private-link-resource show'] = """
+type: command
+short-summary: Get the private link resources that need to be created for a servicebus namespace.
+examples:
+  - name: Get the private link resources that need to be created for a servicebus namespace.
+    text: |
+        az servicebus namespace private-link-resource show --namespace-name mynamespace -g MyResourceGroup
+"""
+
 helps['servicebus namespace encryption'] = """
 type: group
 short-summary: Manage servicebus namespace encryption properties.

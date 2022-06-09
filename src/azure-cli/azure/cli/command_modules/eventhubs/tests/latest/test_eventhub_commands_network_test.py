@@ -63,7 +63,7 @@ class EHNetworkCURDScenarioTest(ScenarioTest):
 
         # Update Namespace
         self.cmd(
-            'eventhubs namespace update --resource-group {rg} --name {namespacename} --tags {tags} --default-action Deny',
+            'eventhubs namespace update --resource-group {rg} --name {namespacename} --tags {tags} --default-action Allow',
             checks=[self.check('sku.name', '{sku}')])
 
         # Get NetworkRule

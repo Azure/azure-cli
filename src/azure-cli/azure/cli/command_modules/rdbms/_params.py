@@ -71,7 +71,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('tags', tags_type)
 
             if command_group == 'mariadb':
-                c.ignore('minimal_tls_version')
                 c.ignore('assign_identity')
                 c.ignore('infrastructure_encryption')
 
