@@ -27,7 +27,7 @@ def load_arguments(self, _):
         c.argument('skip_authorization_header', action='store_true', help='Do not auto-append Authorization header')
         c.argument('body', options_list=['--body', '-b'],
                    help='Request body. Use @{file} to load from a file. For quoting issues in different terminals, '
-                        'see https://github.com/Azure/azure-cli/blob/dev/doc/use_cli_effectively.md#quoting-issues')
+                        'see https://docs.microsoft.com/en-us/cli/azure/use-cli-effectively#use-quotation-marks-in-arguments')
         c.argument('output_file', help='save response payload to a file')
         c.argument('resource',
                    help='Resource url for which CLI should acquire a token from AAD in order to access '
