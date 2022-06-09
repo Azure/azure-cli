@@ -1642,12 +1642,16 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_2.set_intermediate(
             "subscription_id", "1234-5678", overwrite_exists=True
         )
+        principal_obj_2 = {
+            "service_principal": "test_service_principal",
+            "client_secret": "test_client_secret",
+        }
         with patch(
             "azure.cli.command_modules.acs.decorator.get_rg_location",
             return_value="test_location",
         ), patch(
-            "azure.cli.command_modules.acs.custom.get_graph_rbac_management_client",
-            return_value=None,
+            "azure.cli.command_modules.acs.decorator.ensure_aks_service_principal",
+            return_value=principal_obj_2,
         ):
             self.assertEqual(
                 ctx_2.get_service_principal_and_client_secret(),
@@ -1670,15 +1674,16 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_3.set_intermediate(
             "subscription_id", "1234-5678", overwrite_exists=True
         )
+        principal_obj_3 = {
+            "service_principal": "test_service_principal",
+            "client_secret": "test_client_secret",
+        }
         with patch(
             "azure.cli.command_modules.acs.decorator.get_rg_location",
             return_value="test_location",
         ), patch(
-            "azure.cli.command_modules.acs.custom.get_graph_rbac_management_client",
-            return_value=None,
-        ), patch(
-            "azure.cli.command_modules.acs.custom._build_service_principal",
-            return_value=("test_service_principal", "test_aad_session_key"),
+            "azure.cli.command_modules.acs.decorator.ensure_aks_service_principal",
+            return_value=principal_obj_3,
         ):
             self.assertEqual(
                 ctx_3.get_service_principal_and_client_secret(),
@@ -1717,12 +1722,16 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_4.set_intermediate(
             "subscription_id", "1234-5678", overwrite_exists=True
         )
+        principal_obj_4 = {
+            "service_principal": "test_service_principal",
+            "client_secret": "test_client_secret",
+        }
         with patch(
             "azure.cli.command_modules.acs.decorator.get_rg_location",
             return_value="test_location",
         ), patch(
-            "azure.cli.command_modules.acs.custom.get_graph_rbac_management_client",
-            return_value=None,
+            "azure.cli.command_modules.acs.decorator.ensure_aks_service_principal",
+            side_effect=[CLIError],
         ):
             # fail on client_secret not specified
             with self.assertRaises(CLIError):
@@ -2508,20 +2517,6 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_2 = AKSContext(
             self.cmd,
             {
-                "network_plugin": "azure",
-                "pod_cidr": "test_pod_cidr",
-            },
-            self.models,
-            decorator_mode=DecoratorMode.CREATE,
-        )
-        # fail on invalid network_plugin (azure) when pod_cidr is specified
-        with self.assertRaises(InvalidArgumentValueError):
-            ctx_2.get_network_plugin()
-
-        # invalid parameter
-        ctx_3 = AKSContext(
-            self.cmd,
-            {
                 "pod_cidr": "test_pod_cidr",
             },
             self.models,
@@ -2529,7 +2524,7 @@ class AKSContextTestCase(unittest.TestCase):
         )
         # fail on network_plugin not specified
         with self.assertRaises(RequiredArgumentMissingError):
-            ctx_3.get_network_plugin()
+            ctx_2.get_network_plugin()
 
     def test_get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy(
         self,
@@ -2577,20 +2572,6 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_2 = AKSContext(
             self.cmd,
             {
-                "network_plugin": "azure",
-                "pod_cidr": "test_pod_cidr",
-            },
-            self.models,
-            decorator_mode=DecoratorMode.CREATE,
-        )
-        # fail on invalid network_plugin (azure) when pod_cidr is specified
-        with self.assertRaises(InvalidArgumentValueError):
-            ctx_2.get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy()
-
-        # invalid parameter
-        ctx_3 = AKSContext(
-            self.cmd,
-            {
                 "pod_cidr": "test_pod_cidr",
             },
             self.models,
@@ -2598,10 +2579,10 @@ class AKSContextTestCase(unittest.TestCase):
         )
         # fail on network_plugin not specified
         with self.assertRaises(RequiredArgumentMissingError):
-            ctx_3.get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy()
+            ctx_2.get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy()
 
         # invalid parameter
-        ctx_4 = AKSContext(
+        ctx_3 = AKSContext(
             self.cmd,
             {
                 "service_cidr": "test_service_cidr",
@@ -2614,7 +2595,7 @@ class AKSContextTestCase(unittest.TestCase):
         )
         # fail on network_plugin not specified
         with self.assertRaises(RequiredArgumentMissingError):
-            ctx_4.get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy()
+            ctx_3.get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy()
 
     def test_get_addon_consts(self):
         # default
@@ -5136,12 +5117,16 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         dec_2.context.set_intermediate(
             "subscription_id", "1234-5678", overwrite_exists=True
         )
+        principal_obj_2 = {
+            "service_principal": "test_service_principal",
+            "client_secret": "test_client_secret",
+        }
         with patch(
             "azure.cli.command_modules.acs.decorator.get_rg_location",
             return_value="test_location",
         ), patch(
-            "azure.cli.command_modules.acs.custom.get_graph_rbac_management_client",
-            return_value=None,
+            "azure.cli.command_modules.acs.decorator.ensure_aks_service_principal",
+            return_value=principal_obj_2,
         ):
             dec_mc_2 = dec_2.set_up_service_principal_profile(mc_2)
 
@@ -5376,10 +5361,10 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         )
         registry = Mock(id="test_registry_id")
         with patch(
-            "azure.cli.command_modules.acs.custom.get_resource_by_name",
+            "azure.cli.command_modules.acs._roleassignments.get_resource_by_name",
             return_value=registry,
         ), patch(
-            "azure.cli.command_modules.acs.custom._ensure_aks_acr_role_assignment"
+            "azure.cli.command_modules.acs._roleassignments.ensure_aks_acr_role_assignment"
         ) as ensure_assignment:
             dec_3.process_attach_acr(mc_3)
         ensure_assignment.assert_called_once_with(
@@ -6371,7 +6356,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             "azure.cli.command_modules.acs.decorator.AKSContext.get_identity_by_msi_client",
             side_effect=[identity_obj_1, identity_obj_2],
         ), patch(
-            "azure.cli.command_modules.acs.decorator._ensure_cluster_identity_permission_on_kubelet_identity"
+            "azure.cli.command_modules.acs.decorator.ensure_cluster_identity_permission_on_kubelet_identity"
         ) as mock_ensure_method:
             dec_2 = AKSCreateDecorator(
                 self.cmd,
@@ -7057,7 +7042,7 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
             "subscription_id", "test_subscription_id"
         )
         with patch(
-            "azure.cli.command_modules.acs.decorator._ensure_aks_acr"
+            "azure.cli.command_modules.acs.decorator.ensure_aks_acr"
         ) as ensure_acr:
             dec_2.process_attach_detach_acr(mc_2)
             ensure_acr.assert_has_calls(

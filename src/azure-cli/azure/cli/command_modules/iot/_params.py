@@ -5,7 +5,6 @@
 
 from argcomplete.completers import FilesCompleter
 from knack.arguments import CLIArgumentType
-
 from azure.cli.core.commands.parameters import (get_location_type,
                                                 file_type,
                                                 get_resource_name_completion_list,
@@ -22,18 +21,18 @@ from azure.cli.command_modules.iot.shared import (EndpointType,
                                                   EncodingFormat,
                                                   RenewKeyType,
                                                   AuthenticationType)
-from .custom import KeyType, SimpleAccessRights
-from ._validators import (validate_policy_permissions,
-                          validate_retention_days,
-                          validate_fileupload_notification_max_delivery_count,
-                          validate_fileupload_notification_ttl,
-                          validate_fileupload_sas_ttl,
-                          validate_feedback_ttl,
-                          validate_feedback_lock_duration,
-                          validate_fileupload_notification_lock_duration,
-                          validate_feedback_max_delivery_count,
-                          validate_c2d_max_delivery_count,
-                          validate_c2d_ttl)
+from azure.cli.command_modules.iot.custom import KeyType, SimpleAccessRights
+from azure.cli.command_modules.iot._validators import (validate_policy_permissions,
+                                                       validate_retention_days,
+                                                       validate_fileupload_notification_max_delivery_count,
+                                                       validate_fileupload_notification_ttl,
+                                                       validate_fileupload_sas_ttl,
+                                                       validate_feedback_ttl,
+                                                       validate_feedback_lock_duration,
+                                                       validate_fileupload_notification_lock_duration,
+                                                       validate_feedback_max_delivery_count,
+                                                       validate_c2d_max_delivery_count,
+                                                       validate_c2d_ttl)
 
 
 hub_name_type = CLIArgumentType(
@@ -405,3 +404,72 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     with self.argument_context('iot central app identity show') as c:
         c.argument('app_name', app_name_type, options_list=['--name', '-n'])
+
+    with self.argument_context('iot central app private-endpoint-connection') as c:
+        c.argument('private_endpoint_connection_name', options_list=['--name', '-n'],
+                   help='The name of the private endpoint connection associated with IoT Central application. '
+                        'Required if --id is not specified')
+        c.argument('account_name', app_name_type,
+                   help='Name of the IoT Central application. Required if --id is not specified')
+        c.argument('resource_group_name',
+                   help='The resource group name of specified IoT Central application. '
+                        'Required if --id is not specified', options_list=['--resource-group', '-g'])
+
+    for item in ['approve', 'reject']:
+        with self.argument_context('iot central app private-endpoint-connection {}'.format(item)) as c:
+            c.extra('connection_id', options_list=['--id'],
+                    help='The ID of the private endpoint connection associated with the IoT Central application. '
+                         'If --account-name --resource-group/-g and --name/-n are specified, this should be omitted.')
+            c.extra('description', options_list=['--description'],
+                    help='Comments for the {} operation.'.format(item))
+
+    with self.argument_context('iot central app private-endpoint-connection delete') as c:
+        c.argument('private_endpoint_connection_name', options_list=['--name', '-n'],
+                   help='The name of the private endpoint connection associated with IoT Central application. '
+                   'Required if --id is not specified')
+        c.argument('account_name', app_name_type,
+                   help='Name of the IoT Central application. Required if --id is not specified')
+        c.argument('resource_group_name',
+                   help='The resource group name of specified IoT Central application. '
+                        'Required if --id is not specified', options_list=['--resource-group', '-g'])
+        c.extra('connection_id', options_list=['--id'],
+                help='The ID of the private endpoint connection associated with the IoT Central application. '
+                'If --account-name --resource-group/-g and --name/-n are specified, this should be omitted.')
+
+    with self.argument_context('iot central app private-endpoint-connection show') as c:
+        c.argument('private_endpoint_connection_name', options_list=['--name', '-n'],
+                   help='The name of the private endpoint connection associated with IoT Central application. '
+                   'Required if --id is not specified')
+        c.argument('account_name', app_name_type,
+                   help='Name of the IoT Central application. Required if --id is not specified')
+        c.argument('resource_group_name',
+                   help='The resource group name of specified IoT Central application. '
+                        'Required if --id is not specified', options_list=['--resource-group', '-g'])
+        c.extra('connection_id', options_list=['--id'],
+                help='The ID of the private endpoint connection associated with the IoT Central application. '
+                     'If --account-name --resource-group/-g and --name/-n are specified, this should be omitted.')
+
+    with self.argument_context('iot central app private-endpoint-connection list') as c:
+        c.argument('account_name', app_name_type,
+                   help='Name of the IoT Central application. Required if --id is not specified')
+        c.argument('resource_group_name', help='Name of resource group. '
+                   'If provided, --name must be provided too', options_list=['--resource-group', '-g'])
+        c.extra('connection_id', help='ID of the resource', options_list=['--id'])
+
+    with self.argument_context('iot central app private-link-resource list') as c:
+        c.argument('name', help='Name of the resource. '
+                   'If provided, --type and --resource-group must be provided too', options_list=['--name', '-n'])
+        c.argument('resource_group_name', help='Name of resource group. '
+                   'If provided, --name and --type must be provided too', options_list=['--resource-group', '-g'])
+        c.argument('source_type', help='Type of the resource. '
+                   'If provided, --name and --resource-group must be provided too', options_list=['--type'])
+        c.extra('connection_id', help='ID of the resource', options_list=['--id'])
+
+    with self.argument_context('iot central app private-link-resource show') as c:
+        c.argument('name', help='Name of the resource. '
+                   'If provided, --type and --resource-group must be provided too', options_list=['--name', '-n'])
+        c.argument('resource_group_name', help='Name of resource group. '
+                   'If provided, --name and --type must be provided too', options_list=['--resource-group', '-g'])
+        c.argument('group_id', help='Name of the private link resource. '
+                   'If provided, --name and --type must be provided too', options_list=['--group-id'])
+        c.extra('connection_id', help='ID of the resource', options_list=['--id'])

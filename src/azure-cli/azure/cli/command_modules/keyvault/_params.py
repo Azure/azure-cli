@@ -244,8 +244,10 @@ def load_arguments(self, _):
         c.argument('subnet', help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
         c.argument('vnet_name', help='Name of a virtual network.', validator=validate_subnet)
 
-    with self.argument_context('keyvault network-rule add', min_api='2018-02-14') as c:
-        c.argument('ip_address', nargs='*', help='IPv4 address or CIDR range. Can supply a list: --ip-address ip1 [ip2]...', validator=validate_ip_address)
+    for item in ['add', 'remove']:
+        with self.argument_context('keyvault network-rule {}'.format(item), min_api='2018-02-14') as c:
+            c.argument('ip_address', nargs='*', help='IPv4 address or CIDR range. Can supply a list: --ip-address ip1 '
+                                                     '[ip2]...', validator=validate_ip_address)
 
     for item in ['approve', 'reject', 'delete', 'show', 'wait']:
         with self.argument_context('keyvault private-endpoint-connection {}'.format(item), min_api='2018-02-14') as c:
