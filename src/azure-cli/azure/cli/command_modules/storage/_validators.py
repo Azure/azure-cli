@@ -2191,3 +2191,4 @@ def validate_file_path(namespace):
         namespace.file_path = os.path.join(namespace.directory_name, namespace.file_name)
     if not namespace.directory_name and namespace.file_name:
         namespace.file_path = namespace.file_name
+    del namespace.file_name, namespace.directory_name

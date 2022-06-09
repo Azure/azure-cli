@@ -135,8 +135,7 @@ def list_share_files(cmd, client, directory_name=None, timeout=None, exclude_dir
 
 
 def storage_file_upload(client, local_file_path, content_settings=None,
-                        metadata=None, validate_content=False, progress_callback=None, max_connections=2, timeout=None,
-                        directory_name=None, file_name=None):
+                        metadata=None, validate_content=False, progress_callback=None, max_connections=2, timeout=None):
 
     upload_args = {
         'content_settings': content_settings,
