@@ -1755,6 +1755,25 @@ def create_functionapp_slot(cmd, resource_group_name, name, slot, configuration_
     return result
 
 
+def _resolve_storage_account_resource_group(cmd, name):
+    from azure.cli.command_modules.storage.operations.account import list_storage_accounts
+    accounts = [a for a in list_storage_accounts(cmd) if a.name == name]
+    if accounts:
+        return parse_resource_id(accounts[0].id).get("resource_group")
+
+def _set_site_config_storage_keys(cmd, site_config):
+    from azure.cli.command_modules.storage._client_factory import cf_sa_for_keys
+
+    for _, acct in site_config.azure_storage_accounts.items():
+        if acct.access_key is None:
+            scf = cf_sa_for_keys(cmd.cli_ctx, None)
+            acct_rg = _resolve_storage_account_resource_group(cmd, acct.account_name)
+            keys = scf.list_keys(acct_rg, acct.account_name, logging_enable=False).keys
+            if keys:
+                key = keys[0]
+                logger.info("Retreived key %s", key.key_name)
+                acct.access_key = key.value
+
 def update_slot_configuration_from_source(cmd, client, resource_group_name, webapp, slot, configuration_source=None,
                                           deployment_container_image_name=None, docker_registry_server_password=None,
                                           docker_registry_server_user=None, docker_registry_server_url=None):
@@ -1762,6 +1781,10 @@ def update_slot_configuration_from_source(cmd, client, resource_group_name, weba
     clone_from_prod = configuration_source.lower() == webapp.lower()
     site_config = get_site_configs(cmd, resource_group_name, webapp,
                                    None if clone_from_prod else configuration_source)
+    if site_config.azure_storage_accounts:
+        logger.warning("The configuration source has storage accounts. Looking up their access keys...")
+        _set_site_config_storage_keys(cmd, site_config)
+
     _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp,
                             'update_configuration', slot, site_config)
 
