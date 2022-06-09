@@ -155,6 +155,7 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals
                       service_principal_auth_info_secret=None,
                       key_vault_id=None,
                       service_endpoint=None,
+                      private_endpoint=None,
                       new_addon=False, no_wait=False,
                       cluster=None, scope=None, enable_csi=False,            # Resource.KubernetesCluster
                       site=None,                                             # Resource.WebApp
@@ -219,6 +220,11 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals
         parameters['v_net_solution'] = {
             'type': 'serviceEndpoint'
         }
+    if private_endpoint:
+        client = set_user_token_header(client, cmd.cli_ctx)
+        parameters['v_net_solution'] = {
+            'type': 'privateLink'
+        }
 
     if enable_csi:
         parameters['target_service']['resource_properties'] = {
@@ -263,6 +269,7 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals
                       service_principal_auth_info_secret=None,
                       key_vault_id=None,
                       service_endpoint=None,
+                      private_endpoint=None,
                       no_wait=False,
                       scope=None,
                       cluster=None, enable_csi=False,                         # Resource.Kubernetes
@@ -332,7 +339,13 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals
         parameters['v_net_solution'] = {
             'type': 'serviceEndpoint'
         }
+    if private_endpoint:
+        parameters['v_net_solution'] = {
+            'type': 'privateLink'
+        }
     elif service_endpoint is False and linker.get('vNetSolution').get('type') == 'serviceEndpoint':
+        parameters['v_net_solution'] = None
+    elif private_endpoint is False and linker.get('vNetSolution').get('type') == 'privateLink':
         parameters['v_net_solution'] = None
 
     return auto_register(sdk_no_wait, no_wait,
