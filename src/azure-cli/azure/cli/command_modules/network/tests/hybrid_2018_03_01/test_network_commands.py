@@ -1074,7 +1074,7 @@ class NetworkLocalGatewayScenarioTest(ScenarioTest):
             'lgw2': 'lgw2',
             'rt': 'Microsoft.Network/localNetworkGateways'
         })
-        self.cmd('network local-gateway create --resource-group {rg} --name {lgw1} --gateway-ip-address 10.1.1.1 --tags foo=doo')
+        self.cmd('network local-gateway create --resource-group {rg} --name {lgw1} --gateway-ip-address 10.1.1.1 --local-address-prefixes 10.0.1.0/24 --tags foo=doo')
         self.cmd('network local-gateway update --resource-group {rg} --name {lgw1} --tags foo=boo',
                  checks=self.check('tags.foo', 'boo'))
         self.cmd('network local-gateway show --resource-group {rg} --name {lgw1}', checks=[
@@ -1082,8 +1082,8 @@ class NetworkLocalGatewayScenarioTest(ScenarioTest):
             self.check('resourceGroup', '{rg}'),
             self.check('name', '{lgw1}')])
 
-        self.cmd('network local-gateway create --resource-group {rg} --name {lgw2} --gateway-ip-address 10.1.1.2 --local-address-prefixes 10.0.1.0/24',
-                 checks=self.check('localNetworkAddressSpace.addressPrefixes[0]', '10.0.1.0/24'))
+        self.cmd('network local-gateway create --resource-group {rg} --name {lgw2} --gateway-ip-address 10.1.1.2 --local-address-prefixes 10.0.2.0/24',
+                 checks=self.check('localNetworkAddressSpace.addressPrefixes[0]', '10.0.2.0/24'))
 
         self.cmd('network local-gateway list --resource-group {rg}',
                  checks=self.check('length(@)', 2))
