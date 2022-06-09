@@ -2674,11 +2674,15 @@ def aks_runcommand(cmd, client, resource_group_name, name, command_string="", co
         request_payload.cluster_token = _get_dataplane_aad_token(
             cmd.cli_ctx, "6dae42f8-4368-4678-94ff-3960e28e3630")
 
-    command_result_poller = sdk_no_wait(no_wait, client.begin_run_command, resource_group_name, name, request_payload, polling_interval=5, retry_total=0)
-    command_result_polling_url = command_result_poller.polling_method()._initial_response.http_response.headers["location"]
+    command_result_poller = sdk_no_wait(
+        no_wait, client.begin_run_command, resource_group_name, name, request_payload, polling_interval=5, retry_total=0
+    )
+    command_result_polling_url = command_result_poller.polling_method()._initial_response.http_response.headers[
+        "location"
+    ]   # pylint: disable=protected-access
     command_id_regex = re.compile(r'commandResults\/(\w*)\?')
     command_id = command_id_regex.findall(command_result_polling_url)[0]
-    logger.warning(f"command id: {command_id}")
+    logger.warning("command id: %s", command_id)
     return _print_command_result(cmd.cli_ctx, command_result_poller.result(300))
 
 
