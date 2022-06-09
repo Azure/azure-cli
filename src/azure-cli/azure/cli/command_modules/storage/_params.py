@@ -1652,8 +1652,16 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                            'than 0, and less than or equal to 5TB (5120).')
 
     with self.argument_context('storage share url') as c:
-        c.argument('unc', action='store_true', help='Output UNC network path.')
+        c.extra('unc', action='store_true', help='Output UNC network path.')
         c.argument('protocol', arg_type=get_enum_type(['http', 'https'], 'https'), help='Protocol to use.')
+        c.ignore('snapshot')
+
+    with self.argument_context('storage share snapshot') as c:
+        c.extra('metadata', nargs='+',
+                help='Metadata in space-separated key=value pairs. This overwrites any existing metadata.',
+                validator=validate_metadata)
+        c.extra('quota', help='Specifies the maximum size of the share, in gigabytes. Must be greater than 0, and '
+                'less than or equal to 5 TB (5120 GB).')
 
     with self.argument_context('storage share list') as c:
         c.argument('num_results', arg_type=num_results_type)
@@ -1682,20 +1690,25 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                     help='A string that represents the snapshot version, if applicable.')
             c.extra('timeout', timeout_type)
 
-    for item in ['stats', 'metadata update']:
+    for item in ['stats', 'snapshot', 'metadata update']:
         with self.argument_context('storage share {}'.format(item)) as c:
             c.extra('share_name', share_name_type, options_list=('--name', '-n'), required=True)
             c.extra('timeout', timeout_type)
 
+    for item in ['create', 'delete', 'show', 'list', 'update']:
+        with self.argument_context('storage share policy {}'.format(item)) as c:
+            c.extra('share_name', share_name_type, required=True)
+
     with self.argument_context('storage share policy') as c:
         from .completers import get_storage_acl_name_completion_list
 
-        t_file_svc = self.get_sdk('file#FileService')
-        t_share_permissions = self.get_sdk('file.models#SharePermissions')
+        t_share_permissions = self.get_sdk('_models#ShareSasPermissions',
+                                           resource_type=ResourceType.DATA_STORAGE_FILESHARE)
 
-        c.argument('container_name', share_name_type)
+        c.argument('share_name', share_name_type)
         c.argument('policy_name', options_list=('--name', '-n'), help='The stored access policy name.',
-                   completer=get_storage_acl_name_completion_list(t_file_svc, 'container_name', 'get_share_acl'))
+                   completer=get_storage_acl_name_completion_list(t_share_service, 'share_name',
+                                                                  'get_share_access_policy'))
 
         help_str = 'Allowed values: {}. Can be combined'.format(get_permission_help_string(t_share_permissions))
         c.argument('permission', options_list='--permissions', help=help_str,
