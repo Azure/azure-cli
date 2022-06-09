@@ -2655,7 +2655,7 @@ def aks_get_versions(cmd, client, location):
     return client.list_orchestrators(location, resource_type='managedClusters')
 
 
-def aks_runcommand(cmd, client, resource_group_name, name, command_string="", command_files=None):
+def aks_runcommand(cmd, client, resource_group_name, name, command_string="", command_files=None, no_wait=False):
     colorama.init()
 
     mc = client.get(resource_group_name, name)
@@ -2674,10 +2674,12 @@ def aks_runcommand(cmd, client, resource_group_name, name, command_string="", co
         request_payload.cluster_token = _get_dataplane_aad_token(
             cmd.cli_ctx, "6dae42f8-4368-4678-94ff-3960e28e3630")
 
-    commandResultFuture = client.begin_run_command(
-        resource_group_name, name, request_payload, polling_interval=5, retry_total=0)
-
-    return _print_command_result(cmd.cli_ctx, commandResultFuture.result(300))
+    command_result_poller = sdk_no_wait(no_wait, client.begin_run_command, resource_group_name, name, request_payload, polling_interval=5, retry_total=0)
+    command_result_polling_url = command_result_poller.polling_method()._initial_response.http_response.headers["location"]
+    command_id_regex = re.compile(r'commandResults\/(\w*)\?')
+    command_id = command_id_regex.findall(command_result_polling_url)[0]
+    logger.warning(f"command id: {command_id}")
+    return _print_command_result(cmd.cli_ctx, command_result_poller.result(300))
 
 
 def aks_command_result(cmd, client, resource_group_name, name, command_id=""):
@@ -2698,25 +2700,28 @@ def _print_command_result(cli_ctx, commandResult):
         # user specified output format, honor their choice, return object to render pipeline
         return commandResult
 
-    # user didn't specified any format, we can customize the print for best experience
-    if commandResult.provisioning_state == "Succeeded":
-        # succeed, print exitcode, and logs
-        print(
-            f"{colorama.Fore.GREEN}command started at {commandResult.started_at}, "
-            f"finished at {commandResult.finished_at} "
-            f"with exitcode={commandResult.exit_code}{colorama.Style.RESET_ALL}")
-        print(commandResult.logs)
-        return
+    if commandResult:
+        # user didn't specified any format, we can customize the print for best experience
+        if commandResult.provisioning_state == "Succeeded":
+            # succeed, print exitcode, and logs
+            print(
+                f"{colorama.Fore.GREEN}command started at {commandResult.started_at}, "
+                f"finished at {commandResult.finished_at} "
+                f"with exitcode={commandResult.exit_code}{colorama.Style.RESET_ALL}")
+            print(commandResult.logs)
+            return
 
-    if commandResult.provisioning_state == "Failed":
-        # failed, print reason in error
-        print(
-            f"{colorama.Fore.RED}command failed with reason: {commandResult.reason}{colorama.Style.RESET_ALL}")
-        return
+        if commandResult.provisioning_state == "Failed":
+            # failed, print reason in error
+            print(
+                f"{colorama.Fore.RED}command failed with reason: {commandResult.reason}{colorama.Style.RESET_ALL}")
+            return
 
-    # *-ing state
-    print(f"{colorama.Fore.BLUE}command is in : {commandResult.provisioning_state} state{colorama.Style.RESET_ALL}")
-    return None
+        # *-ing state
+        print(f"{colorama.Fore.BLUE}command is in : {commandResult.provisioning_state} state{colorama.Style.RESET_ALL}")
+    else:
+        logger.warning("command result is empty")
+    return
 
 
 def _get_command_context(command_files):
