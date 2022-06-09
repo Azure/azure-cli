@@ -23,7 +23,7 @@ from azure.cli.command_modules.storage.oauth_token_util import TokenUpdater
 
 from knack.log import get_logger
 from knack.util import CLIError
-from ._client_factory import cf_blob_service, cf_share_client
+from ._client_factory import cf_blob_service, cf_share_service, cf_share_client
 
 storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
 logger = get_logger(__name__)
@@ -241,7 +241,7 @@ def process_blob_source_uri(cmd, namespace):
     """
     Validate the parameters referenced to a blob source and create the source URI from them.
     """
-    from .util import create_short_lived_blob_sas
+    from .util import create_short_lived_blob_sas, create_short_lived_blob_sas_v2
     usage_string = \
         'Invalid usage: {}. Supply only one of the following argument sets to specify source:' \
         '\n\t   --source-uri' \
@@ -291,13 +291,16 @@ def process_blob_source_uri(cmd, namespace):
             except ValueError:
                 raise ValueError('Source storage account {} not found.'.format(source_account_name))
     # else: both source account name and key are given by user
-
     if not source_account_name:
         raise ValueError(usage_string.format('Storage account name not found'))
 
     if not sas:
-        sas = create_short_lived_blob_sas(cmd, source_account_name, source_account_key, container, blob)
-
+        prefix = cmd.command_kwargs['resource_type'].value[0]
+        if is_storagev2(prefix):
+            sas = create_short_lived_blob_sas_v2(cmd, source_account_name, source_account_key, container,
+                                                 blob)
+        else:
+            sas = create_short_lived_blob_sas(cmd, source_account_name, source_account_key, container, blob)
     query_params = []
     if sas:
         query_params.append(sas)
@@ -1022,6 +1025,105 @@ def get_source_file_or_blob_service_client(cmd, namespace):
                 ns['source_client'] = get_storage_data_service_client(
                     cmd.cli_ctx, t_file_svc, name=identifier.account_name, key=source_key,
                     sas_token=identifier.sas_token)
+
+
+def get_source_file_or_blob_service_client_track2(cmd, namespace):
+    """
+    Create the second file service or blob service client for batch copy command, which is used to
+    list the source files or blobs. If both the source account and source URI are omitted, it
+    indicates that user want to copy files or blobs in the same storage account.
+    """
+
+    usage_string = 'invalid usage: supply only one of the following argument sets:' + \
+                   '\n\t   --source-uri  [--source-sas]' + \
+                   '\n\tOR --source-container' + \
+                   '\n\tOR --source-container --source-account-name --source-account-key' + \
+                   '\n\tOR --source-container --source-account-name --source-sas' + \
+                   '\n\tOR --source-share' + \
+                   '\n\tOR --source-share --source-account-name --source-account-key' + \
+                   '\n\tOR --source-share --source-account-name --source-account-sas'
+
+    ns = vars(namespace)
+    source_account = ns.pop('source_account_name', None)
+    source_key = ns.pop('source_account_key', None)
+    source_uri = ns.pop('source_uri', None)
+    source_sas = ns.get('source_sas', None)
+    source_container = ns.get('source_container', None)
+    source_share = ns.get('source_share', None)
+
+    if source_uri and source_account:
+        raise ValueError(usage_string)
+    if not source_uri and bool(source_container) == bool(source_share):  # must be container or share
+        raise ValueError(usage_string)
+
+    if (not source_account) and (not source_uri):
+        # Set the source_client to None if neither source_account nor source_uri is given. This
+        # indicates the command that the source files share or blob container is in the same storage
+        # account as the destination file share or blob container.
+        #
+        # The command itself should create the source service client since the validator can't
+        # access the destination client through the namespace.
+        #
+        # A few arguments check will be made as well so as not to cause ambiguity.
+        if source_key or source_sas:
+            raise ValueError('invalid usage: --source-account-name is missing; the source account is assumed to be the'
+                             ' same as the destination account. Do not provide --source-sas or --source-account-key')
+
+        source_account, source_key, source_sas = ns['account_name'], ns['account_key'], ns['sas_token']
+
+    if source_account:
+        if not (source_key or source_sas):
+            # when neither storage account key nor SAS is given, try to fetch the key in the current
+            # subscription
+            source_key = _query_account_key(cmd.cli_ctx, source_account)
+
+    elif source_uri:
+        if source_key or source_container or source_share:
+            raise ValueError(usage_string)
+
+        from .storage_url_helpers import StorageResourceIdentifier
+        if source_sas:
+            source_uri = '{}{}{}'.format(source_uri, '?', source_sas.lstrip('?'))
+        identifier = StorageResourceIdentifier(cmd.cli_ctx.cloud, source_uri)
+        nor_container_or_share = not identifier.container and not identifier.share
+        if not identifier.is_url():
+            raise ValueError('incorrect usage: --source-uri expects a URI')
+        if identifier.blob or identifier.directory or identifier.filename or nor_container_or_share:
+            raise ValueError('incorrect usage: --source-uri has to be blob container or file share')
+
+        source_account = identifier.account_name
+        source_container = identifier.container
+        source_share = identifier.share
+
+        if identifier.sas_token:
+            source_sas = identifier.sas_token
+        else:
+            source_key = _query_account_key(cmd.cli_ctx, identifier.account_name)
+
+    # config source account credential
+    ns['source_account_name'] = source_account
+    ns['source_account_key'] = source_key
+    ns['source_container'] = source_container
+    ns['source_share'] = source_share
+    # get sas token for source
+    if not source_sas:
+        from .util import create_short_lived_container_sas_track2, create_short_lived_share_sas_track2
+        if source_container:
+            source_sas = create_short_lived_container_sas_track2(cmd, account_name=source_account,
+                                                                 account_key=source_key,
+                                                                 container=source_container)
+        if source_share:
+            source_sas = create_short_lived_share_sas_track2(cmd, account_name=source_account,
+                                                             account_key=source_key,
+                                                             share=source_share)
+    ns['source_sas'] = source_sas
+    client_kwargs = {'account_name': ns['source_account_name'],
+                     'account_key': ns['source_account_key'],
+                     'sas_token': ns['source_sas']}
+    if source_container:
+        ns['source_client'] = cf_blob_service(cmd.cli_ctx, client_kwargs)
+    if source_share:
+        ns['source_client'] = cf_share_service(cmd.cli_ctx, client_kwargs)
 
 
 def add_progress_callback(cmd, namespace):
