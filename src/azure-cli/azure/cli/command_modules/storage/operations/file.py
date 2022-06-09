@@ -414,7 +414,6 @@ def _make_directory_in_files_share(file_service, file_share, directory_path, exi
 
 
 def _file_share_exists(client, resource_group_name, account_name, share_name):
-    from azure.core.exceptions import HttpResponseError
     try:
         file_share = client.get(resource_group_name, account_name, share_name, expand=None)
         return file_share is not None
