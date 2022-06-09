@@ -114,7 +114,7 @@ def create_file_url(client, protocol=None, **kwargs):
     client = _get_client(client, kwargs)
     url = client.url
     if url.endswith(client.share_name):
-        url = url+'/'
+        url = url + '/'
     if protocol == 'http':
         return url.replace('https', 'http', 1)
     return url
@@ -427,11 +427,12 @@ def generate_sas_file(cmd, client, directory_name=None, file_name=None, permissi
                                   '_shared_access_signature#generate_file_sas')
     file_path = file_name
     if directory_name:
-        file_path = directory_name+'/'+file_path
+        file_path = directory_name + '/' + file_path
     file_path = file_path.split('/')
     return t_generate_file_sas(account_name=client.account_name, share_name=client.share_name, file_path=file_path,
                                account_key=client.credential.account_key, permission=permission, expiry=expiry,
                                start=start, policy_id=id, ip=ip, protocol=protocol, **kwargs)
+
 
 def file_exists(cmd, client, **kwargs):
     try:

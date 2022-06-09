@@ -108,7 +108,7 @@ def _get_client(client, kwargs):
         from azure.core.exceptions import ClientAuthenticationError
         try:
             exists = dir_client.exists()
-        except ClientAuthenticationError as ex:
+        except ClientAuthenticationError:
             exists = False
         if not exists:
             dir_client = client.get_directory_client(directory_path=directory_path)

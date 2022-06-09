@@ -1855,15 +1855,15 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help=sas_help.format(get_permission_help_string(t_file_permissions)),
                    validator=get_permission_validator(t_file_permissions))
         c.extra('cache_control', help='Response header value for Cache-Control when resource is accessed '
-                                         'using this shared access signature.')
+                                      'using this shared access signature.')
         c.extra('content_disposition', help='Response header value for Content-Disposition when resource is accessed '
-                                               'using this shared access signature.')
+                                            'using this shared access signature.')
         c.extra('content_encoding', help='Response header value for Content-Encoding when resource is accessed '
-                                            'using this shared access signature.')
+                                         'using this shared access signature.')
         c.extra('content_language', help='Response header value for Content-Language when resource is accessed '
-                                            'using this shared access signature.')
+                                         'using this shared access signature.')
         c.extra('content_type', help='Response header value for Content-Type when resource is accessed '
-                                        'using this shared access signature.')
+                                     'using this shared access signature.')
         c.ignore('sas_token')
 
     with self.argument_context('storage file list') as c:
