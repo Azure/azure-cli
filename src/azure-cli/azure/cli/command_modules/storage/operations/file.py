@@ -16,6 +16,7 @@ from azure.cli.command_modules.storage.util import (filter_none, collect_blobs, 
                                                     guess_content_type)
 from azure.cli.command_modules.storage.url_quote_util import encode_for_url, make_encoded_file_url_and_params
 from azure.cli.core.profiles import ResourceType, get_sdk
+from azure.core.exceptions import HttpResponseError
 from .fileshare import _get_client
 
 logger = get_logger(__name__)
@@ -421,6 +422,7 @@ def _file_share_exists(client, resource_group_name, account_name, share_name):
         return False
 
 
+# pylint: disable=redefined-builtin
 def generate_sas_file(cmd, client, directory_name=None, file_name=None, permission=None, expiry=None, start=None,
                       id=None, ip=None, protocol=None, **kwargs):
     t_generate_file_sas = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_FILESHARE,
@@ -434,13 +436,13 @@ def generate_sas_file(cmd, client, directory_name=None, file_name=None, permissi
                                start=start, policy_id=id, ip=ip, protocol=protocol, **kwargs)
 
 
-def file_exists(cmd, client, **kwargs):
+def file_exists(client, **kwargs):
     try:
         res = client.get_file_properties(**kwargs)
-        return True if res else False
-    except:
+        return bool(res)
+    except HttpResponseError:
         return False
 
 
-def file_updates(cmd, client, **kwargs):
+def file_updates(client, **kwargs):
     return client.set_http_headers(**kwargs)
