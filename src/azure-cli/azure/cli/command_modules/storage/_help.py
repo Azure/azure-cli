@@ -1885,8 +1885,8 @@ examples:
 
 helps['storage file download'] = """
 type: command
-short-summary: Downloads a file to a file path, with automatic chunking and progress notifications.
-long-summary: Returns an instance of File with properties and metadata.
+short-summary: Download a file to a file path, with automatic chunking and progress notifications.
+long-summary: Return an instance of File with properties and metadata.
 """
 
 helps['storage file download-batch'] = """
