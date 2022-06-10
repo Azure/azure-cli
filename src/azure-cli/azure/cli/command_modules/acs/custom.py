@@ -2715,7 +2715,6 @@ def _aks_command_result_in_progess_helper(client, resource_group_name, name, com
         else:
             print(f"failed to fetch command result for command id: {command_id}")
     client.get_command_result(resource_group_name, name, command_id, cls=command_result_direct_response_handler)
-    return
 
 
 def _print_command_result(cli_ctx, commandResult):
