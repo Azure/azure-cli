@@ -16,7 +16,7 @@ from azure.cli.command_modules.storage.util import (filter_none, collect_blobs, 
                                                     guess_content_type)
 from azure.cli.command_modules.storage.url_quote_util import encode_for_url, make_encoded_file_url_and_params
 from azure.cli.core.profiles import ResourceType, get_sdk
-from azure.core.exceptions import HttpResponseError
+from azure.core.exceptions import HttpResponseError, ResourceNotFoundError
 from .fileshare import _get_client
 
 logger = get_logger(__name__)
@@ -430,17 +430,21 @@ def generate_sas_file(cmd, client, directory_name=None, file_name=None, permissi
     if directory_name:
         file_path = directory_name + '/' + file_path
     file_path = file_path.split('/')
-    return t_generate_file_sas(account_name=client.account_name, share_name=client.share_name, file_path=file_path,
+    sas_token = t_generate_file_sas(account_name=client.account_name, share_name=client.share_name, file_path=file_path,
                                account_key=client.credential.account_key, permission=permission, expiry=expiry,
                                start=start, policy_id=id, ip=ip, protocol=protocol, **kwargs)
+    from urllib.parse import quote
+    return quote(sas_token, safe='&%()$=\',~')
 
 
 def file_exists(client, **kwargs):
     try:
         res = client.get_file_properties(**kwargs)
         return bool(res)
-    except HttpResponseError:
+    except ResourceNotFoundError:
         return False
+    except HttpResponseError as ex:
+        raise ex
 
 
 def file_updates(client, **kwargs):

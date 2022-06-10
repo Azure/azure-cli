@@ -36,8 +36,6 @@ class StorageFileShareScenarios(StorageScenarioMixin, LiveScenarioTest):
         file_url = self.cmd(
             'storage file url -s {} -p {} --account-name {} --sas-token "{}" -otsv'.format(
                 share, filename, storage_account, sas_token)).output.strip()
-        from urllib.parse import quote
-        sas_token = quote(sas_token, safe='&%()$=\',~')
         self.assertIn('?' + sas_token, file_url)
         self.assertEqual(requests.get(file_url).status_code, 200)
 

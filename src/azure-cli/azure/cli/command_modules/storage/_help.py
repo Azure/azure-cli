@@ -1953,7 +1953,7 @@ examples:
 
 helps['storage file show'] = """
 type: command
-short-summary: Returns all user-defined metadata, standard HTTP properties, and system properties for the file.
+short-summary: Return all user-defined metadata, standard HTTP properties, and system properties for the file.
 examples:
   - name:  Show properties of file in file share.
     text: |
@@ -1976,13 +1976,13 @@ examples:
 
 helps['storage file delete'] = """
 type: command
-short-summary: Marks the specified file for deletion.
+short-summary: Mark the specified file for deletion.
 long-summary: The file is later deleted during garbage collection.
 """
 
 helps['storage file resize'] = """
 type: command
-short-summary: Resizes a file to the specified size.
+short-summary: Resize a file to the specified size.
 long-summary: If the specified byte value is less than the current size of the file, then all ranges above
         the specified byte value are cleared.
 parameters:
@@ -1997,10 +1997,10 @@ short-summary: Manage file metadata.
 
 helps['storage file update'] = """
 type: command
-short-summary: Sets system properties on the file.
+short-summary: Set system properties on the file.
 long-summary: If one property is set for the content_settings, all properties will be overriden.
 examples:
-  - name:  Sets system properties on the file.
+  - name:  Set system properties on the file.
     text: |
         az storage file update -p dir/a.txt -s sharename --account-name myadlsaccount --account-key 0000-0000 --content-type test/type
 """
