@@ -866,15 +866,16 @@ class GroupScenarioTest(GraphScenarioTestBase):
 
 class MiscellaneousScenarioTest(GraphScenarioTestBase):
     def test_special_characters(self):
-        # Test special characters in object names. Ensures these characters are correctly percent-encoded.
+        # Test special characters in object names. Ensure these characters are correctly percent-encoded.
         # For example, displayName with +(%2B), /(%2F)
         from azure.cli.testsdk.scenario_tests.utilities import create_random_name
         prefix = 'azure-cli-test-group+/'
+        mock_name = prefix + '000001'
         if self.in_recording:
             display_name = create_random_name(prefix=prefix, length=32)
-            self.recording_processors.append(MSGraphNameReplacer(display_name, prefix))
+            self.recording_processors.append(MSGraphNameReplacer(display_name, mock_name))
         else:
-            display_name = prefix
+            display_name = mock_name
 
         self.kwargs = {
             'display_name': display_name,
