@@ -92,7 +92,7 @@ def __handle_failed_name_check(name_response, cmd, client, resource_group_name, 
         raise e
 
 
-def create(cmd, client, resource_group_name, resource_name, msa_app_id, description=None, display_name=None,
+def create(cmd, client, resource_group_name, resource_name, msa_app_id, app_type, description=None, display_name=None,
            endpoint=None, tags=None, location='global', sku_name='F0', cmek_key_vault_url=None):
     # Kind only support azure bot for now
     kind = "azurebot"
