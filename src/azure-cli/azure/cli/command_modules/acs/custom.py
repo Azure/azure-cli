@@ -2684,11 +2684,7 @@ def aks_runcommand(cmd, client, resource_group_name, name, command_string="", co
         ]
         command_id_regex = re.compile(r"commandResults\/(\w*)\?")
         command_id = command_id_regex.findall(command_result_polling_url)[0]
-        print("command id:", command_id)
-        print(
-            f"Please use command \"az aks command result -g {resource_group_name} -n {name} -i {command_id}\" "
-            "to fetch the execution result"
-        )
+        _aks_command_result_in_progess_helper(client, resource_group_name, name, command_id)
         return
     return _print_command_result(cmd.cli_ctx, command_result_poller.result(300))
 
@@ -2697,9 +2693,29 @@ def aks_command_result(cmd, client, resource_group_name, name, command_id=""):
     if not command_id:
         raise ValidationError('CommandID cannot be empty.')
 
-    commandResult = client.get_command_result(
-        resource_group_name, name, command_id)
+    commandResult = client.get_command_result(resource_group_name, name, command_id)
+    if commandResult is None:
+        _aks_command_result_in_progess_helper(client, resource_group_name, name, command_id)
+        return
     return _print_command_result(cmd.cli_ctx, commandResult)
+
+
+def _aks_command_result_in_progess_helper(client, resource_group_name, name, command_id):
+    # pylint: disable=unused-argument
+    def command_result_direct_response_handler(pipeline_response, *args, **kwargs):
+        deserialized_data = pipeline_response.context.get("deserialized_data", {})
+        if deserialized_data:
+            provisioning_state = deserialized_data.get("properties", {}).get("provisioningState", None)
+            started_at = deserialized_data.get("properties", {}).get("startedAt", None)
+            print(f"command id: {command_id}, started at: {started_at}, status: {provisioning_state}")
+            print(
+                f"Please use command \"az aks command result -g {resource_group_name} -n {name} -i {command_id}\" "
+                "to get the future execution result"
+            )
+        else:
+            print(f"failed to fetch command result for command id: {command_id}")
+    client.get_command_result(resource_group_name, name, command_id, cls=command_result_direct_response_handler)
+    return
 
 
 def _print_command_result(cli_ctx, commandResult):
@@ -2728,7 +2744,7 @@ def _print_command_result(cli_ctx, commandResult):
         return
 
     # *-ing state
-    print(f"{colorama.Fore.BLUE}command is in : {commandResult.provisioning_state} state{colorama.Style.RESET_ALL}")
+    print(f"{colorama.Fore.BLUE}command is in {commandResult.provisioning_state} state{colorama.Style.RESET_ALL}")
     return
 
 
