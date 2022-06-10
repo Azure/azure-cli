@@ -1642,12 +1642,16 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_2.set_intermediate(
             "subscription_id", "1234-5678", overwrite_exists=True
         )
+        principal_obj_2 = {
+            "service_principal": "test_service_principal",
+            "client_secret": "test_client_secret",
+        }
         with patch(
             "azure.cli.command_modules.acs.decorator.get_rg_location",
             return_value="test_location",
         ), patch(
-            "azure.cli.command_modules.acs._graph.get_graph_rbac_management_client",
-            return_value=None,
+            "azure.cli.command_modules.acs.decorator.ensure_aks_service_principal",
+            return_value=principal_obj_2,
         ):
             self.assertEqual(
                 ctx_2.get_service_principal_and_client_secret(),
@@ -1670,15 +1674,16 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_3.set_intermediate(
             "subscription_id", "1234-5678", overwrite_exists=True
         )
+        principal_obj_3 = {
+            "service_principal": "test_service_principal",
+            "client_secret": "test_client_secret",
+        }
         with patch(
             "azure.cli.command_modules.acs.decorator.get_rg_location",
             return_value="test_location",
         ), patch(
-            "azure.cli.command_modules.acs._graph.get_graph_rbac_management_client",
-            return_value=None,
-        ), patch(
-            "azure.cli.command_modules.acs._graph.build_service_principal",
-            return_value=("test_service_principal", "test_aad_session_key"),
+            "azure.cli.command_modules.acs.decorator.ensure_aks_service_principal",
+            return_value=principal_obj_3,
         ):
             self.assertEqual(
                 ctx_3.get_service_principal_and_client_secret(),
@@ -1717,12 +1722,16 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_4.set_intermediate(
             "subscription_id", "1234-5678", overwrite_exists=True
         )
+        principal_obj_4 = {
+            "service_principal": "test_service_principal",
+            "client_secret": "test_client_secret",
+        }
         with patch(
             "azure.cli.command_modules.acs.decorator.get_rg_location",
             return_value="test_location",
         ), patch(
-            "azure.cli.command_modules.acs._graph.get_graph_rbac_management_client",
-            return_value=None,
+            "azure.cli.command_modules.acs.decorator.ensure_aks_service_principal",
+            side_effect=[CLIError],
         ):
             # fail on client_secret not specified
             with self.assertRaises(CLIError):
@@ -5108,12 +5117,16 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         dec_2.context.set_intermediate(
             "subscription_id", "1234-5678", overwrite_exists=True
         )
+        principal_obj_2 = {
+            "service_principal": "test_service_principal",
+            "client_secret": "test_client_secret",
+        }
         with patch(
             "azure.cli.command_modules.acs.decorator.get_rg_location",
             return_value="test_location",
         ), patch(
-            "azure.cli.command_modules.acs._graph.get_graph_rbac_management_client",
-            return_value=None,
+            "azure.cli.command_modules.acs.decorator.ensure_aks_service_principal",
+            return_value=principal_obj_2,
         ):
             dec_mc_2 = dec_2.set_up_service_principal_profile(mc_2)
 
