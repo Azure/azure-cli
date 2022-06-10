@@ -623,7 +623,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                             custom_command_type=get_custom_sdk('fileshare', cf_share_service,
                                                                ResourceType.DATA_STORAGE_FILESHARE),
                             resource_type=ResourceType.DATA_STORAGE_FILESHARE, min_api='2019-02-02') as g:
-        from ._transformers import transform_storage_list_output, transform_url
+        from ._transformers import transform_storage_list_output
         from ._format import transform_share_list
         from ._transformers import transform_url_without_encode
         g.storage_custom_command('list', 'list_shares', transform=transform_storage_list_output,
