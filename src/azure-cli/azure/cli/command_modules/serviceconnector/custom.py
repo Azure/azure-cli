@@ -66,14 +66,15 @@ def connection_list_support_types(cmd, client,
     for target in supported_target_resources:
         auth_types = SUPPORTED_AUTH_TYPE.get(source).get(target)
         client_types = SUPPORTED_CLIENT_TYPE.get(source).get(target)
-        auth_types = [item.value for item in auth_types]
-        client_types = [item.value for item in client_types]
-        results.append({
-            'source': source.value,
-            'target': target.value,
-            'auth_types': auth_types,
-            'client_types': client_types
-        })
+        if auth_types and client_types:
+            auth_types = [item.value for item in auth_types]
+            client_types = [item.value for item in client_types]
+            results.append({
+                'source': source.value,
+                'target': target.value,
+                'auth_types': auth_types,
+                'client_types': client_types
+            })
 
     return results
 
@@ -234,12 +235,12 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals
 
     if new_addon:
         addon = AddonFactory.get(target_type)(cmd, source_id)
-        target_id, auth_info = addon.provision()
+        target_id, default_auth_info = addon.provision()
         parameters['target_service'] = {
             "type": "AzureResource",
             "id": target_id
         }
-        parameters['auth_info'] = auth_info
+        parameters['auth_info'] = auth_info or default_auth_info
         logger.warning('Start creating the connection')
 
         try:
