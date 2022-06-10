@@ -7176,6 +7176,10 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('virtualMachineProfile.securityProfile.uefiSettings.secureBootEnabled', True),
             self.check('virtualMachineProfile.securityProfile.uefiSettings.vTpmEnabled', True)
         ])
+        self.cmd('vmss list-instances -n {vmss1} -g {rg}', checks=[
+            self.check('[0].resources[0].name', 'GuestAttestation'),
+            self.check('[0].resources[0].publisher', 'Microsoft.Azure.Security.LinuxAttestation')
+        ])
         self.cmd('vmss create -g {rg} -n {vmss2} --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --admin-username azureuser --security-type TrustedLaunch --enable-secure-boot --enable-vtpm --disable-integrity-monitoring')
         self.cmd('vmss show -g {rg} -n {vmss2}', checks=[
             self.check('identity', None),
