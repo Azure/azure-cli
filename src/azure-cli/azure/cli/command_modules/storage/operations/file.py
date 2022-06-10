@@ -8,7 +8,6 @@ Commands for storage file share operations
 """
 
 import os
-from azure.core.exceptions import ResourceExistsError
 from knack.log import get_logger
 
 from azure.cli.command_modules.storage.util import (filter_none, collect_blobs, collect_files,
@@ -413,6 +412,7 @@ def _make_directory_in_files_share(file_service, file_share, directory_path, exi
     which already exists.
     """
     from azure.common import AzureHttpError
+    from azure.core.exceptions import ResourceExistsError
 
     if not directory_path:
         return
