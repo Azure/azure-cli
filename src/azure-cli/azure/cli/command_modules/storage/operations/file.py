@@ -431,8 +431,8 @@ def generate_sas_file(cmd, client, directory_name=None, file_name=None, permissi
         file_path = directory_name + '/' + file_path
     file_path = file_path.split('/')
     sas_token = t_generate_file_sas(account_name=client.account_name, share_name=client.share_name, file_path=file_path,
-                               account_key=client.credential.account_key, permission=permission, expiry=expiry,
-                               start=start, policy_id=id, ip=ip, protocol=protocol, **kwargs)
+                                    account_key=client.credential.account_key, permission=permission, expiry=expiry,
+                                    start=start, policy_id=id, ip=ip, protocol=protocol, **kwargs)
     from urllib.parse import quote
     return quote(sas_token, safe='&%()$=\',~')
 
