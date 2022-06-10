@@ -8613,5 +8613,4 @@ class ArchitectureScenarioTest(ScenarioTest):
 
 
 if __name__ == '__main__':
-    # unittest.main()
-    print(TEST_DIR)
+    unittest.main()
