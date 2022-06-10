@@ -1761,6 +1761,7 @@ def _resolve_storage_account_resource_group(cmd, name):
     if accounts:
         return parse_resource_id(accounts[0].id).get("resource_group")
 
+
 def _set_site_config_storage_keys(cmd, site_config):
     from azure.cli.command_modules.storage._client_factory import cf_sa_for_keys
 
@@ -1773,6 +1774,7 @@ def _set_site_config_storage_keys(cmd, site_config):
                 key = keys[0]
                 logger.info("Retreived key %s", key.key_name)
                 acct.access_key = key.value
+
 
 def update_slot_configuration_from_source(cmd, client, resource_group_name, webapp, slot, configuration_source=None,
                                           deployment_container_image_name=None, docker_registry_server_password=None,
