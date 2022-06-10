@@ -221,7 +221,7 @@ def process_key_release_policy(cmd, ns):
         del ns.immutable
 
     if not ns.release_policy and not default_cvm_policy:
-        if immutable:
+        if immutable is not None:
             raise InvalidArgumentValueError('Please provide policy when setting `--immutable`')
         return
 

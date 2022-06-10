@@ -48,14 +48,8 @@ def force_progress_logging():
     az_logger.handlers[0].level = old_az_level
 
 
-def _py3_byte_to_str(byte_or_str):
-    import logging
-    logger = logging.getLogger()
-    logger.warning(type(byte_or_str))
-    try:
-        return str(byte_or_str, 'utf-8') if isinstance(byte_or_str, bytes) else byte_or_str
-    except TypeError:  # python 2 doesn't allow decoding through str
-        return str(byte_or_str)
+def _byte_to_str(byte_or_str):
+    return str(byte_or_str, 'utf-8') if isinstance(byte_or_str, bytes) else byte_or_str
 
 
 class StorageAccountKeyReplacer(RecordingProcessor):
@@ -81,7 +75,7 @@ class StorageAccountKeyReplacer(RecordingProcessor):
             pass
         for candidate in self._candidates:
             if request.body:
-                body_string = _py3_byte_to_str(request.body)
+                body_string = _byte_to_str(request.body)
                 request.body = body_string.replace(candidate, self.KEY_REPLACEMENT)
         return request
 
@@ -99,7 +93,7 @@ class StorageAccountKeyReplacer(RecordingProcessor):
         for candidate in self._candidates:
             if response['body']['string']:
                 body = response['body']['string']
-                response['body']['string'] = _py3_byte_to_str(body)
+                response['body']['string'] = _byte_to_str(body)
                 response['body']['string'] = response['body']['string'].replace(candidate, self.KEY_REPLACEMENT)
         return response
 
@@ -127,11 +121,11 @@ class GraphClientPasswordReplacer(RecordingProcessor):
             pattern = r"[^/]+/applications$"
             if re.search(pattern, request.path, re.I) and request.method.lower() == 'post':
                 self._activated = True
-                body = _py3_byte_to_str(request.body)
+                body = _byte_to_str(request.body)
                 body = json.loads(body)
                 for password_cred in body['passwordCredentials']:
                     if password_cred['value']:
-                        body_string = _py3_byte_to_str(request.body)
+                        body_string = _byte_to_str(request.body)
                         request.body = body_string.replace(password_cred['value'], self.PWD_REPLACEMENT)
 
         except (AttributeError, KeyError):
@@ -157,18 +151,46 @@ class GraphClientPasswordReplacer(RecordingProcessor):
         return response
 
 
-class AADGraphUserReplacer:
+class MSGraphClientPasswordReplacer(RecordingProcessor):
+    """Replace 'secretText' property in 'addPassword' API's response."""
+
+    PWD_REPLACEMENT = 'replaced-microsoft-graph-password'
+
+    def __init__(self):
+        self._activated = False
+
+    def reset(self):
+        self._activated = False
+
+    def process_request(self, request):
+        if request.path.endswith('/addPassword') and request.method.lower() == 'post':
+            self._activated = True
+        return request
+
+    def process_response(self, response):
+        if self._activated:
+            import json
+
+            body = json.loads(response['body']['string'])
+            body['secretText'] = self.PWD_REPLACEMENT
+
+            response['body']['string'] = json.dumps(body)
+            self._activated = False
+
+        return response
+
+
+class MSGraphUserReplacer(RecordingProcessor):
     def __init__(self, test_user, mock_user):
         self.test_user = test_user
         self.mock_user = mock_user
 
     def process_request(self, request):
-        test_user_encoded = self.test_user.replace('@', '%40')
-        if test_user_encoded in request.uri:
-            request.uri = request.uri.replace(test_user_encoded, self.mock_user.replace('@', '%40'))
+        if self.test_user in request.uri:
+            request.uri = request.uri.replace(self.test_user, self.mock_user)
 
         if request.body:
-            body = _py3_byte_to_str(request.body)
+            body = _byte_to_str(request.body)
             if self.test_user in body:
                 request.body = body.replace(self.test_user, self.mock_user)
 

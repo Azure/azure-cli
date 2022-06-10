@@ -20,6 +20,9 @@ from azure.cli.command_modules.backup._client_factory import protection_containe
     resources_cf, backup_protected_items_cf
 from azure.cli.core.azclierror import ArgumentUsageError
 
+from azure.mgmt.recoveryservicesbackup.activestamp import RecoveryServicesBackupClient
+from azure.cli.core.commands.client_factory import get_mgmt_service_client
+
 fabric_name = "Azure"
 backup_management_type = "AzureStorage"
 workload_type = "AzureFileShare"
@@ -252,7 +255,8 @@ def list_recovery_points(cmd, client, resource_group_name, vault_name, item, sta
     return paged_recovery_points
 
 
-def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, policy):
+def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, policy, tenant_id=None,
+                           is_critical_operation=False):
     if item.properties.backup_management_type != policy.properties.backup_management_type:
         raise CLIError(
             """
@@ -269,24 +273,27 @@ def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, p
     afs_item_properties.policy_id = policy.id
     afs_item_properties.source_resource_id = item.properties.source_resource_id
     afs_item = ProtectedItemResource(properties=afs_item_properties)
-
+    if is_critical_operation:
+        existing_policy_name = item.properties.policy_id.split('/')[-1]
+        existing_policy = common.show_policy(protection_policies_cf(cmd.cli_ctx), resource_group_name, vault_name,
+                                             existing_policy_name)
+        if helper.is_retention_duration_decreased(existing_policy, policy, "AzureStorage"):
+            # update the payload with critical operation and add auxiliary header for cross tenant case
+            if tenant_id is not None:
+                client = get_mgmt_service_client(cmd.cli_ctx, RecoveryServicesBackupClient,
+                                                 aux_tenants=[tenant_id]).protected_items
+            afs_item.properties.resource_guard_operation_requests = [helper.get_resource_guard_operation_request(
+                cmd.cli_ctx, resource_group_name, vault_name, "updateProtection")]
     # Update policy
     result = client.create_or_update(vault_name, resource_group_name, fabric_name,
                                      container_uri, item_uri, afs_item, cls=helper.get_pipeline_response)
     return helper.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
-def disable_protection(cmd, client, resource_group_name, vault_name, item,
-                       delete_backup_data=False, **kwargs):
+def disable_protection(cmd, client, resource_group_name, vault_name, item):
     # Get container and item URIs
     container_uri = helper.get_protection_container_uri_from_id(item.id)
     item_uri = helper.get_protected_item_uri_from_id(item.id)
-
-    # Trigger disable protection and wait for completion
-    if delete_backup_data:
-        result = client.delete(vault_name, resource_group_name, fabric_name, container_uri, item_uri,
-                               cls=helper.get_pipeline_response)
-        return helper.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
     afs_item_properties = AzureFileshareProtectedItem()
     afs_item_properties.policy_id = ''
@@ -322,7 +329,8 @@ def _get_storage_account_id(cli_ctx, storage_account_name, storage_account_rg):
     return storage_account.id
 
 
-def set_policy(client, resource_group_name, vault_name, policy, policy_name):
+def set_policy(cmd, client, resource_group_name, vault_name, policy, policy_name, tenant_id=None,
+               is_critical_operation=False):
     if policy_name is None:
         raise CLIError(
             """
@@ -333,7 +341,14 @@ def set_policy(client, resource_group_name, vault_name, policy, policy_name):
     policy_object.properties.work_load_type = workload_type
     existing_policy = common.show_policy(client, resource_group_name, vault_name, policy_name)
     helper.validate_update_policy_request(existing_policy, policy_object)
-
+    if is_critical_operation:
+        if helper.is_retention_duration_decreased(existing_policy, policy_object, "AzureStorage"):
+            # update the payload with critical operation and add auxiliary header for cross tenant case
+            if tenant_id is not None:
+                client = get_mgmt_service_client(cmd.cli_ctx, RecoveryServicesBackupClient,
+                                                 aux_tenants=[tenant_id]).protection_policies
+            policy_object.properties.resource_guard_operation_requests = [helper.get_resource_guard_operation_request(
+                cmd.cli_ctx, resource_group_name, vault_name, "updatePolicy")]
     return client.create_or_update(vault_name, resource_group_name, policy_name, policy_object)
 
 

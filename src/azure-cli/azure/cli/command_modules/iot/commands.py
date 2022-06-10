@@ -4,10 +4,10 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.commands import LongRunningOperation, CliCommandType
-from ._client_factory import iot_hub_service_factory
-from ._client_factory import iot_service_provisioning_factory
-from ._client_factory import iot_central_service_factory
-from ._utils import _dps_certificate_response_transform
+from azure.cli.command_modules.iot._client_factory import (iot_hub_service_factory,
+                                                           iot_central_service_factory,
+                                                           iot_service_provisioning_factory)
+from azure.cli.command_modules.iot._utils import _dps_certificate_response_transform
 
 CS_DEPRECATION_INFO = 'IoT Extension (azure-iot) connection-string command (az iot hub connection-string show)'
 
@@ -48,7 +48,17 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
     update_custom_util = CliCommandType(operations_tmpl='azure.cli.command_modules.iot.custom#{}')
 
     iot_central_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.iotcentral.operations#IoTCentaralOperations.{}'
+        operations_tmpl='azure.mgmt.iotcentral.operations#IoTCentralOperations.{}'
+    )
+
+    private_endpoint_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.iotcentral.operations#PrivateEndpointConnectionsOperations.{}',
+        # client_factory=cf_private_endpoint,
+    )
+
+    private_link_resource_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.iotcentral.operations#PrivateLinksOperations.{}',
+        # client_factory=cf_private_link,
     )
 
     # iot dps commands
@@ -165,6 +175,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
                             min_api="2019-07-01-preview") as g:
         g.custom_show_command('show', 'iot_hub_devicestream_show')
 
+    # iot central commands
     with self.command_group('iot central app', iot_central_sdk, client_factory=iot_central_service_factory) as g:
         g.custom_command('create', 'iot_central_app_create', supports_no_wait=True)
         g.custom_command('list', 'iot_central_app_list')
@@ -175,3 +186,24 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.custom_command('identity assign', 'iot_central_app_assign_identity')
         g.custom_command('identity remove', 'iot_central_app_remove_identity')
         g.custom_show_command('identity show', 'iot_central_app_show_identity')
+
+    with self.command_group('iot central app private-endpoint-connection',
+                            private_endpoint_sdk,
+                            client_factory=iot_central_service_factory) as g:
+        from azure.cli.command_modules.iot._validators import validate_private_endpoint_connection_id
+        g.custom_command('delete', 'delete_private_endpoint_connection', confirmation=True,
+                         validator=validate_private_endpoint_connection_id)
+        g.custom_show_command('show', 'show_private_endpoint_connection',
+                              validator=validate_private_endpoint_connection_id)
+        g.custom_command('approve', 'approve_private_endpoint_connection',
+                         validator=validate_private_endpoint_connection_id)
+        g.custom_command('reject', 'reject_private_endpoint_connection',
+                         validator=validate_private_endpoint_connection_id)
+        g.custom_command('list', 'list_private_endpoint_connection')
+
+    with self.command_group('iot central app private-link-resource', private_link_resource_sdk,
+                            client_factory=iot_central_service_factory) as g:
+        from azure.cli.core.commands.transform import gen_dict_to_list_transform
+        g.custom_command('list', 'list_private_link_resource',
+                         transform=gen_dict_to_list_transform(key="value"))
+        g.custom_show_command('show', 'get_private_link_resource')

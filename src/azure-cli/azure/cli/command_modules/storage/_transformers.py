@@ -5,6 +5,7 @@
 
 import base64
 
+from uuid import UUID
 from dateutil import parser
 from knack.log import get_logger
 from knack.util import todict, to_camel_case
@@ -30,6 +31,21 @@ def transform_acl_list_output(result):
     return new_result
 
 
+def transform_acl_edit(result):
+    if "last_modified" in result.keys():
+        result["lastModified"] = result.pop("last_modified")
+    return result
+
+
+def transform_acl_datetime(result):
+    result = todict(result)
+    if result['start']:
+        result['start'] = result["start"].split('.')[0] + '+00:00'
+    if result['expiry']:
+        result['expiry'] = result["expiry"].split('.')[0] + '+00:00'
+    return result
+
+
 def transform_container_permission_output(result):
     return {'publicAccess': result.get('public_access', None) or 'off'}
 
@@ -42,11 +58,10 @@ def transform_cors_list_output(result):
             new_entry = OrderedDict()
             new_entry['Service'] = service
             new_entry['Rule'] = i + 1
-
-            new_entry['AllowedMethods'] = ', '.join((x for x in rule.allowed_methods))
-            new_entry['AllowedOrigins'] = ', '.join((x for x in rule.allowed_origins))
-            new_entry['ExposedHeaders'] = ', '.join((x for x in rule.exposed_headers))
-            new_entry['AllowedHeaders'] = ', '.join((x for x in rule.allowed_headers))
+            new_entry['AllowedMethods'] = rule.allowed_methods
+            new_entry['AllowedOrigins'] = rule.allowed_origins
+            new_entry['ExposedHeaders'] = rule.exposed_headers
+            new_entry['AllowedHeaders'] = rule.allowed_headers
             new_entry['MaxAgeInSeconds'] = rule.max_age_in_seconds
             new_result.append(new_entry)
     return new_result
@@ -90,6 +105,8 @@ def transform_entity_result(entity):
             entity_property.value = base64.b64encode(entity_property.value).decode()
         if isinstance(entity_property, bytes):
             entity[key] = base64.b64encode(entity_property).decode()
+        if isinstance(entity_property, UUID):
+            entity[key] = str(entity_property)
     if hasattr(entity, 'metadata'):
         entity['Timestamp'] = entity.metadata['timestamp']
         entity['etag'] = entity.metadata['etag']
@@ -218,6 +235,8 @@ def transform_blob_list_output(result):
 
 
 def transform_blob_json_output(result):
+    if result is None:
+        return
     result = todict(result)
     new_result = {
         "content": "",
@@ -293,6 +312,27 @@ def transform_share_rm_list_output(result):
     new_result = []
     for item in result:
         new_result.append(transform_share_rm_output(item))
+    return new_result
+
+
+def delete_blob_output_key(_, result):
+    result.pop('additionalProperties', None)
+    return result
+
+
+def transform_blob_json_output_track2(result):
+    result['logging'] = result.pop('analytics_logging')
+    result['deleteRetentionPolicy'] = result.pop('delete_retention_policy')
+    result['hourMetrics'] = result.pop('hour_metrics')
+    result['minuteMetrics'] = result.pop('minute_metrics')
+    result['staticWebsite'] = result.pop('static_website')
+    for i in result['cors']:
+        i.allowed_methods = i.allowed_methods.split(',') if i.allowed_methods else []
+        i.allowed_origins = i.allowed_origins.split(',') if i.allowed_origins else []
+        i.exposed_headers = i.exposed_headers.split(',') if i.exposed_headers else []
+        i.allowed_headers = i.allowed_headers.split(',') if i.allowed_headers else []
+    new_result = todict(result, delete_blob_output_key)
+    new_result['staticWebsite']['errorDocument_404Path'] = new_result['staticWebsite'].pop('errorDocument404Path')
     return new_result
 
 
@@ -373,4 +413,61 @@ def transform_queue_policy_output(result):
         result['start'] = parser.parse(result['start'])
     if result['expiry']:
         result['expiry'] = parser.parse(result['expiry'])
+    return result
+
+
+def transform_file_share_json_output(result):
+    result = todict(result)
+    new_result = {
+        "metadata": result.pop('metadata', None),
+        "name": result.pop('name', None),
+        "properties": {
+            "etag": result.pop('etag', None),
+            "lastModified": result.pop('lastModified', None),
+            "quota": result.pop('quota', None)
+        },
+        "snapshot": result.pop('snapshot', None)
+    }
+    new_result.update(result)
+    return new_result
+
+
+def transform_share_directory_json_output(result):
+    result = todict(result)
+    new_result = {
+        "metadata": result.pop('metadata', None),
+        "name": result.pop('name', None),
+        "properties": {
+            "etag": result.pop('etag', None),
+            "lastModified": result.pop('lastModified', None),
+            "serverEncrypted": result.pop('serverEncrypted', None)
+        }
+    }
+    new_result.update(result)
+    return new_result
+
+
+def transform_share_file_json_output(result):
+    result = todict(result)
+    new_result = {
+        "metadata": result.pop('metadata', None),
+        "name": result.pop('name', None),
+        "properties": {
+            "etag": result.pop('etag', None),
+            "lastModified": result.pop('lastModified', None),
+            "serverEncrypted": result.pop('serverEncrypted', None),
+            "contentLength": result.pop('size', None),
+            "contentRange": result.pop('contentRange', None),
+            "contentSettings": result.pop('contentSettings', None),
+            "copy": result.pop("copy", None)
+        }
+    }
+    new_result.update(result)
+    return new_result
+
+
+def transform_share_list_handle(result):
+    for item in result["items"]:
+        item["handleId"] = item.id
+        delattr(item, "id")
     return result

@@ -53,7 +53,7 @@ from ._bicep import (
     get_bicep_latest_release_tag,
     get_bicep_available_release_tags,
     validate_bicep_target_scope,
-    supports_bicep_publish
+    bicep_version_greater_than_or_equal_to
 )
 
 from ._utils import _build_preflight_error_message, _build_http_response_error_message
@@ -2310,7 +2310,7 @@ def _build_identities_info(cmd, identities, resourceGroupName):
         return ResourceIdentity(type=ResourceIdentityType.system_assigned)
 
     user_assigned_identities = [x for x in identities if x != MSI_LOCAL_ID]
-    if user_assigned_identities and len(user_assigned_identities) > 0:
+    if user_assigned_identities:
         msiId = _get_resource_id(cmd.cli_ctx, user_assigned_identities[0], resourceGroupName,
                                  'userAssignedIdentities', 'Microsoft.ManagedIdentity')
 
@@ -3672,28 +3672,51 @@ def upgrade_bicep_cli(cmd, target_platform=None):
     ensure_bicep_installation(release_tag=latest_release_tag, target_platform=target_platform)
 
 
-def build_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None):
+def build_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, no_restore=None):
     args = ["build", file]
     if outdir:
         args += ["--outdir", outdir]
     if outfile:
         args += ["--outfile", outfile]
+    if no_restore:
+        args += ["--no-restore"]
     if stdout:
         args += ["--stdout"]
-        print(run_bicep_command(args))
-        return
-    run_bicep_command(args)
+
+    output = run_bicep_command(args)
+
+    if stdout:
+        print(output)
 
 
 def publish_bicep_file(cmd, file, target):
-    if supports_bicep_publish():
+    ensure_bicep_installation()
+
+    minimum_supported_version = "0.4.1008"
+    if bicep_version_greater_than_or_equal_to(minimum_supported_version):
         run_bicep_command(["publish", file, "--target", target])
     else:
-        logger.error("az bicep publish could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v0.4.1008 or later.")
+        logger.error("az bicep publish could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version)
 
 
-def decompile_bicep_file(cmd, file):
-    run_bicep_command(["decompile", file])
+def restore_bicep_file(cmd, file, force=None):
+    ensure_bicep_installation()
+
+    minimum_supported_version = "0.4.1008"
+    if bicep_version_greater_than_or_equal_to(minimum_supported_version):
+        args = ["restore", file]
+        if force:
+            args += ["--force"]
+        run_bicep_command(args)
+    else:
+        logger.error("az bicep restore could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version)
+
+
+def decompile_bicep_file(cmd, file, force=None):
+    args = ["decompile", file]
+    if force:
+        args += ["--force"]
+    run_bicep_command(args)
 
 
 def show_bicep_cli_version(cmd):
