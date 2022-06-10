@@ -1849,17 +1849,19 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                 help='Name of the destination share. The share must exist.')
         c.extra('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
 
+    with self.argument_context('storage file copy start-batch') as c:
+        c.argument('share_name', share_name_type, options_list=('--destination-share'),
+                help='Name of the destination share. The share must exist.')
+
     with self.argument_context('storage file copy start-batch', arg_group='Copy Source') as c:
-        from ._validators import get_source_file_or_blob_service_client
-        c.argument('source_client', ignore_type, validator=get_source_file_or_blob_service_client)
+        from ._validators import get_source_file_or_blob_service_client_track2
+        c.argument('source_client', ignore_type, validator=get_source_file_or_blob_service_client_track2)
         c.extra('source_account_name')
         c.extra('source_account_key')
         c.extra('source_uri')
         c.argument('source_sas')
         c.argument('source_container')
         c.argument('source_share')
-        c.extra('share_name', share_name_type, options_list=('--destination-share'),
-                help='Name of the destination share. The share must exist.')
 
     with self.argument_context('storage file delete') as c:
         c.register_path_argument()
