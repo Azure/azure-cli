@@ -607,6 +607,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                  table_transformer=transform_boolean_for_table)
         g.storage_custom_command('generate-sas', 'generate_share_sas')
         g.storage_custom_command('stats', 'get_share_stats')
+        g.storage_custom_command('snapshot', 'create_snapshot')
         g.storage_command('show', 'get_share_properties', exception_handler=show_exception_handler,
                           transform=transform_file_share_json_output)
         g.storage_custom_command('exists', 'share_exists', transform=create_boolean_result_output_transformer('exists'))
@@ -624,23 +625,23 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                             resource_type=ResourceType.DATA_STORAGE_FILESHARE, min_api='2019-02-02') as g:
         from ._transformers import transform_storage_list_output, transform_url
         from ._format import transform_share_list
+        from ._transformers import transform_url_without_encode
         g.storage_custom_command('list', 'list_shares', transform=transform_storage_list_output,
                                  table_transformer=transform_share_list)
+        g.storage_custom_command('url', 'create_share_url', transform=transform_url_without_encode)
 
-    with self.command_group('storage share', command_type=file_sdk,
-                            custom_command_type=get_custom_sdk('file', file_data_service_factory)) as g:
-        g.storage_command('snapshot', 'snapshot_share', min_api='2017-04-17')
-        g.storage_custom_command('url', 'create_share_url', transform=transform_url)
-
-    with self.command_group('storage share policy', command_type=file_sdk,
-                            custom_command_type=get_custom_sdk('acl', file_data_service_factory)) as g:
-        g.storage_custom_command('create', 'create_acl_policy')
-        g.storage_custom_command('delete', 'delete_acl_policy')
+    with self.command_group('storage share policy',
+                            custom_command_type=get_custom_sdk('access_policy', cf_share_client,
+                                                               ResourceType.DATA_STORAGE_FILESHARE),
+                            resource_type=ResourceType.DATA_STORAGE_FILESHARE, min_api='2019-02-02') as g:
+        from ._transformers import transform_acl_list_output, transform_acl_edit, transform_acl_datetime
+        g.storage_custom_command('create', 'create_acl_policy', transform=transform_acl_edit)
+        g.storage_custom_command('delete', 'delete_acl_policy', transform=transform_acl_edit)
         g.storage_custom_command(
-            'show', 'get_acl_policy', exception_handler=show_exception_handler)
+            'show', 'get_acl_policy', exception_handler=show_exception_handler, transform=transform_acl_datetime)
         g.storage_custom_command(
             'list', 'list_acl_policies', table_transformer=transform_acl_list_output)
-        g.storage_custom_command('update', 'set_acl_policy')
+        g.storage_custom_command('update', 'set_acl_policy', transform=transform_acl_edit)
 
     with self.command_group('storage directory', command_type=directory_client_sdk,
                             custom_command_type=get_custom_sdk('directory', cf_share_directory_client)) as g:

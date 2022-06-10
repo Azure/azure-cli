@@ -95,3 +95,45 @@ class StorageShareScenarioTests(StorageScenarioMixin, ScenarioTest):
         self.cmd(
             'storage share metadata update -n {} --metadata newkey=newvalue oldkey=oldvalue --connection-string {}'
             .format(share_name, connection_string))
+
+    @ResourceGroupPreparer(name_prefix='clitest')
+    @StorageAccountPreparer(name_prefix='share', kind='StorageV2', location='eastus2', sku='Standard_RAGRS')
+    def test_storage_share_policy_scenario(self, resource_group, storage_account):
+        account_info = self.get_account_info(resource_group, storage_account)
+        connection_string = self.get_connection_string(resource_group, storage_account)
+
+        share = self.create_random_name('share', 24)
+        # prepare share
+        self.storage_cmd('storage share create -n {}', account_info, share) \
+            .assert_with_checks(JMESPathCheck('created', True))
+        # policy list
+        self.storage_cmd('storage share policy list -s {}', account_info, share).assert_with_checks(NoneCheck())
+        # policy create with --permission
+        self.storage_cmd('storage share policy create -n test1 -s {} --permissions r', account_info, share)
+        # policy create with --start
+        self.cmd('storage share policy create -n test2 -s {} --start 2020-01-01T00:00Z --connection-string {}'
+                 .format(share, connection_string))
+        # policy create with --expiry
+        self.storage_cmd('storage share policy create -n test3 -s {} --expiry 2021-01-01T00:00Z', account_info,
+                         share)
+        acl = self.cmd('storage share policy list -s {} --connection-string {}'.format(share, connection_string)) \
+            .get_output_in_json().keys()
+        self.assertSetEqual(set(acl), {'test1', 'test2', 'test3'})
+        # policy show
+        self.storage_cmd('storage share policy show -n test1 -s {}', account_info, share) \
+            .assert_with_checks(JMESPathCheck('permission', 'r'))
+        self.cmd('storage share policy show -n test2 -s {} --connection-string {}'.format(share, connection_string)) \
+            .assert_with_checks(JMESPathCheck('start', '2020-01-01T00:00:00+00:00'))
+        self.storage_cmd('storage share policy show -n test3 -s {}', account_info, share) \
+            .assert_with_checks(JMESPathCheck('expiry', '2021-01-01T00:00:00+00:00'))
+        # policy update
+        self.storage_cmd('storage share policy update -n test2 -s {} --permission r --expiry 2020-12-31T23:59Z',
+                         account_info, share)
+        self.storage_cmd('storage share policy show -n test2 -s {}', account_info, share) \
+            .assert_with_checks([JMESPathCheck('permission', 'r'),
+                                 JMESPathCheck('expiry', '2020-12-31T23:59:00+00:00')])
+        # policy delete
+        self.storage_cmd('storage share policy delete -n test3 -s {}', account_info, share)
+        acl = self.cmd('storage share policy list -s {} --connection-string {}'.format(share, connection_string)) \
+            .get_output_in_json().keys()
+        self.assertSetEqual(set(acl), {'test1', 'test2'})

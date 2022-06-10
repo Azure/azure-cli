@@ -7859,7 +7859,8 @@ def create_virtual_hub(cmd, client,
 
     SubResource = cmd.get_models('SubResource')
 
-    VirtualHub, HubIpConfiguration = cmd.get_models('VirtualHub', 'HubIpConfiguration')
+    VirtualHub, HubIpConfiguration, PublicIPAddress = cmd.get_models('VirtualHub', 'HubIpConfiguration',
+                                                                     'PublicIPAddress')
 
     hub = VirtualHub(tags=tags, location=location,
                      virtual_wan=None,
@@ -7869,7 +7870,7 @@ def create_virtual_hub(cmd, client,
 
     ip_config = HubIpConfiguration(
         subnet=SubResource(id=hosted_subnet),
-        public_ip_address=SubResource(id=public_ip_address),
+        public_ip_address=PublicIPAddress(id=public_ip_address)
     )
     vhub_ip_config_client = network_client_factory(cmd.cli_ctx).virtual_hub_ip_configuration
     try:

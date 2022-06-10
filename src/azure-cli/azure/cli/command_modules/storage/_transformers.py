@@ -4,8 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 import base64
-from uuid import UUID
 
+from uuid import UUID
 from dateutil import parser
 from knack.log import get_logger
 from knack.util import todict, to_camel_case
