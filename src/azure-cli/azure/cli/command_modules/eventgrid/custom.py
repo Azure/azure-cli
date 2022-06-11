@@ -361,6 +361,316 @@ def cli_topic_event_subscription_update(
         event_subscription_name,
         params)
 
+
+def cli_domain_event_subscription_create_or_update(    # pylint: disable=too-many-locals
+        client,
+        resource_group_name,
+        domain_name,
+        event_subscription_name,
+        endpoint=None,
+        endpoint_type=None,
+        included_event_types=None,
+        subject_begins_with=None,
+        subject_ends_with=None,
+        is_subject_case_sensitive=False,
+        max_delivery_attempts=30,
+        event_ttl=1440,
+        max_events_per_batch=None,
+        preferred_batch_size_in_kilobytes=None,
+        event_delivery_schema=None,
+        deadletter_endpoint=None,
+        labels=None,
+        expiration_date=None,
+        advanced_filter=None,
+        azure_active_directory_tenant_id=None,
+        azure_active_directory_application_id_or_uri=None,
+        storage_queue_msg_ttl=None,
+        enable_advanced_filtering_on_arrays=None,
+        delivery_attribute_mapping=None):
+
+    event_subscription_info = _get_event_subscription_info(
+        endpoint=endpoint,
+        endpoint_type=endpoint_type,
+        included_event_types=included_event_types,
+        subject_begins_with=subject_begins_with,
+        subject_ends_with=subject_ends_with,
+        is_subject_case_sensitive=is_subject_case_sensitive,
+        max_delivery_attempts=max_delivery_attempts,
+        event_ttl=event_ttl,
+        max_events_per_batch=max_events_per_batch,
+        preferred_batch_size_in_kilobytes=preferred_batch_size_in_kilobytes,
+        event_delivery_schema=event_delivery_schema,
+        deadletter_endpoint=deadletter_endpoint,
+        labels=labels,
+        expiration_date=expiration_date,
+        advanced_filter=advanced_filter,
+        azure_active_directory_tenant_id=azure_active_directory_tenant_id,
+        azure_active_directory_application_id_or_uri=azure_active_directory_application_id_or_uri,
+        delivery_identity=None,
+        delivery_identity_endpoint=None,
+        delivery_identity_endpoint_type=None,
+        deadletter_identity=None,
+        deadletter_identity_endpoint=None,
+        storage_queue_msg_ttl=storage_queue_msg_ttl,
+        enable_advanced_filtering_on_arrays=enable_advanced_filtering_on_arrays,
+        delivery_attribute_mapping=delivery_attribute_mapping)
+
+    return client.begin_create_or_update(
+        resource_group_name,
+        domain_name,
+        event_subscription_name,
+        event_subscription_info)
+
+
+def cli_eventgrid_domain_event_subscription_delete(
+        client,
+        resource_group_name,
+        domain_name,
+        event_subscription_name):
+    return client.delete(
+        resource_group_name,
+        domain_name,
+        event_subscription_name)
+
+
+def cli_domain_event_subscription_get(
+        client,
+        resource_group_name,
+        domain_name,
+        event_subscription_name,
+        include_full_endpoint_url=False,
+        include_static_delivery_attribute_secret=False):
+
+    retrieved_event_subscription = client.get(resource_group_name, domain_name, event_subscription_name)
+    destination = retrieved_event_subscription.destination
+    if include_full_endpoint_url and isinstance(destination, WebHookEventSubscriptionDestination):
+        full_endpoint_url = client.get_full_url(resource_group_name, domain_name, event_subscription_name)
+        destination.endpoint_url = full_endpoint_url.endpoint_url
+
+    if include_static_delivery_attribute_secret and \
+       not isinstance(destination, StorageQueueEventSubscriptionDestination):
+        delivery_attributes = client.get_delivery_attributes(
+            resource_group_name,
+            domain_name,
+            event_subscription_name)
+        destination.delivery_attribute_mappings = delivery_attributes
+
+    return retrieved_event_subscription
+
+
+def cli_domain_event_subscription_list(   # pylint: disable=too-many-return-statements
+        client,
+        resource_group_name,
+        domain_name,
+        odata_query=None):
+
+    return client.list_by_domain(resource_group_name, domain_name, odata_query, DEFAULT_TOP)
+
+
+def cli_domain_event_subscription_update(
+        client,
+        resource_group_name,
+        domain_name,
+        event_subscription_name,
+        endpoint=None,
+        endpoint_type=WEBHOOK_DESTINATION,
+        subject_begins_with=None,
+        subject_ends_with=None,
+        included_event_types=None,
+        advanced_filter=None,
+        labels=None,
+        deadletter_endpoint=None,
+        storage_queue_msg_ttl=None,
+        enable_advanced_filtering_on_arrays=None,
+        delivery_attribute_mapping=None):
+
+    instance = client.get(resource_group_name, domain_name, event_subscription_name)
+
+    params = _update_event_subscription_internal(
+        instance=instance,
+        endpoint=endpoint,
+        endpoint_type=endpoint_type,
+        subject_begins_with=subject_begins_with,
+        subject_ends_with=subject_ends_with,
+        included_event_types=included_event_types,
+        advanced_filter=advanced_filter,
+        labels=labels,
+        deadletter_endpoint=deadletter_endpoint,
+        delivery_identity=None,
+        delivery_identity_endpoint=None,
+        delivery_identity_endpoint_type=None,
+        deadletter_identity=None,
+        deadletter_identity_endpoint=None,
+        storage_queue_msg_ttl=storage_queue_msg_ttl,
+        enable_advanced_filtering_on_arrays=enable_advanced_filtering_on_arrays,
+        delivery_attribute_mapping=delivery_attribute_mapping)
+
+    return client.begin_update(
+        resource_group_name,
+        domain_name,
+        event_subscription_name,
+        params)
+
+
+def cli_domain_topic_event_subscription_create_or_update(    # pylint: disable=too-many-locals
+        client,
+        resource_group_name,
+        domain_name,
+        topic_name,
+        event_subscription_name,
+        endpoint=None,
+        endpoint_type=None,
+        included_event_types=None,
+        subject_begins_with=None,
+        subject_ends_with=None,
+        is_subject_case_sensitive=False,
+        max_delivery_attempts=30,
+        event_ttl=1440,
+        max_events_per_batch=None,
+        preferred_batch_size_in_kilobytes=None,
+        event_delivery_schema=None,
+        deadletter_endpoint=None,
+        labels=None,
+        expiration_date=None,
+        advanced_filter=None,
+        azure_active_directory_tenant_id=None,
+        azure_active_directory_application_id_or_uri=None,
+        storage_queue_msg_ttl=None,
+        enable_advanced_filtering_on_arrays=None,
+        delivery_attribute_mapping=None):
+
+    event_subscription_info = _get_event_subscription_info(
+        endpoint=endpoint,
+        endpoint_type=endpoint_type,
+        included_event_types=included_event_types,
+        subject_begins_with=subject_begins_with,
+        subject_ends_with=subject_ends_with,
+        is_subject_case_sensitive=is_subject_case_sensitive,
+        max_delivery_attempts=max_delivery_attempts,
+        event_ttl=event_ttl,
+        max_events_per_batch=max_events_per_batch,
+        preferred_batch_size_in_kilobytes=preferred_batch_size_in_kilobytes,
+        event_delivery_schema=event_delivery_schema,
+        deadletter_endpoint=deadletter_endpoint,
+        labels=labels,
+        expiration_date=expiration_date,
+        advanced_filter=advanced_filter,
+        azure_active_directory_tenant_id=azure_active_directory_tenant_id,
+        azure_active_directory_application_id_or_uri=azure_active_directory_application_id_or_uri,
+        delivery_identity=None,
+        delivery_identity_endpoint=None,
+        delivery_identity_endpoint_type=None,
+        deadletter_identity=None,
+        deadletter_identity_endpoint=None,
+        storage_queue_msg_ttl=storage_queue_msg_ttl,
+        enable_advanced_filtering_on_arrays=enable_advanced_filtering_on_arrays,
+        delivery_attribute_mapping=delivery_attribute_mapping)
+
+    return client.begin_create_or_update(
+        resource_group_name,
+        domain_name,
+        topic_name,
+        event_subscription_name,
+        event_subscription_info)
+
+
+def cli_eventgrid_domain_topic_event_subscription_delete(
+        client,
+        resource_group_name,
+        domain_name,
+        topic_name,
+        event_subscription_name):
+    return client.delete(
+        resource_group_name,
+        domain_name,
+        topic_name,
+        event_subscription_name)
+
+
+def cli_domain_topic_event_subscription_get(
+        client,
+        resource_group_name,
+        domain_name,
+        topic_name,
+        event_subscription_name,
+        include_full_endpoint_url=False,
+        include_static_delivery_attribute_secret=False):
+
+    retrieved_event_subscription = client.get(resource_group_name, domain_name, topic_name, event_subscription_name)
+    destination = retrieved_event_subscription.destination
+    if include_full_endpoint_url and isinstance(destination, WebHookEventSubscriptionDestination):
+        full_endpoint_url = client.get_full_url(resource_group_name, domain_name, topic_name, event_subscription_name)
+        destination.endpoint_url = full_endpoint_url.endpoint_url
+
+    if include_static_delivery_attribute_secret and \
+       not isinstance(destination, StorageQueueEventSubscriptionDestination):
+        delivery_attributes = client.get_delivery_attributes(
+            resource_group_name,
+            domain_name,
+            topic_name,
+            event_subscription_name)
+        destination.delivery_attribute_mappings = delivery_attributes
+
+    return retrieved_event_subscription
+
+
+def cli_domain_topic_event_subscription_list(   # pylint: disable=too-many-return-statements
+        client,
+        resource_group_name,
+        domain_name,
+        topic_name,
+        odata_query=None):
+
+    return client.list_by_domain_topic(resource_group_name, domain_name, topic_name, odata_query, DEFAULT_TOP)
+
+
+def cli_domain_topic_event_subscription_update(
+        client,
+        resource_group_name,
+        domain_name,
+        topic_name,
+        event_subscription_name,
+        endpoint=None,
+        endpoint_type=WEBHOOK_DESTINATION,
+        subject_begins_with=None,
+        subject_ends_with=None,
+        included_event_types=None,
+        advanced_filter=None,
+        labels=None,
+        deadletter_endpoint=None,
+        storage_queue_msg_ttl=None,
+        enable_advanced_filtering_on_arrays=None,
+        delivery_attribute_mapping=None):
+
+    instance = client.get(resource_group_name, domain_name, topic_name, event_subscription_name)
+
+    params = _update_event_subscription_internal(
+        instance=instance,
+        endpoint=endpoint,
+        endpoint_type=endpoint_type,
+        subject_begins_with=subject_begins_with,
+        subject_ends_with=subject_ends_with,
+        included_event_types=included_event_types,
+        advanced_filter=advanced_filter,
+        labels=labels,
+        deadletter_endpoint=deadletter_endpoint,
+        delivery_identity=None,
+        delivery_identity_endpoint=None,
+        delivery_identity_endpoint_type=None,
+        deadletter_identity=None,
+        deadletter_identity_endpoint=None,
+        storage_queue_msg_ttl=storage_queue_msg_ttl,
+        enable_advanced_filtering_on_arrays=enable_advanced_filtering_on_arrays,
+        delivery_attribute_mapping=delivery_attribute_mapping)
+
+    return client.begin_update(
+        resource_group_name,
+        domain_name,
+        topic_name,
+        event_subscription_name,
+        params)
+
+
 def cli_domain_update(
         client,
         resource_group_name,

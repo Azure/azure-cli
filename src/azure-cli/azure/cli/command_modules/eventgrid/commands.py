@@ -10,6 +10,8 @@ from azure.cli.core.commands import CliCommandType
 from ._client_factory import (
     topics_factory,
     topic_event_subscriptions_factory,
+    domain_event_subscriptions_factory,
+    domain_topic_event_subscriptions_factory,
     domains_factory,
     domain_topics_factory,
     system_topics_factory,
@@ -44,6 +46,12 @@ def load_command_table(self, _):
         client_arg_name='self'
     )
 
+    domain_event_subscriptions_mgmt_util = CliCommandType(
+        operations_tmpl='azure.mgmt.eventgrid.operations#DomainEventSubscriptionsOperations.{}',
+        client_factory=domain_event_subscriptions_factory,
+        client_arg_name='self'
+    )
+
     domains_mgmt_util = CliCommandType(
         operations_tmpl='azure.mgmt.eventgrid.operations#DomainsOperations.{}',
         client_factory=domains_factory,
@@ -53,6 +61,12 @@ def load_command_table(self, _):
     domain_topics_mgmt_util = CliCommandType(
         operations_tmpl='azure.mgmt.eventgrid.operations#DomainTopicsOperations.{}',
         client_factory=domain_topics_factory,
+        client_arg_name='self'
+    )
+
+    domain_topic_event_subscriptions_mgmt_util = CliCommandType(
+        operations_tmpl='azure.mgmt.eventgrid.operations#DomainTopicEventSubscriptionsOperations.{}',
+        client_factory=domain_topic_event_subscriptions_factory,
         client_arg_name='self'
     )
 
@@ -129,6 +143,13 @@ def load_command_table(self, _):
         g.custom_command('delete', 'cli_domain_topic_delete')
         g.custom_command('create', 'cli_domain_topic_create_or_update')
 
+    with self.command_group('eventgrid domain topic event-subscription', domain_topic_event_subscriptions_mgmt_util, client_factory=domain_topic_event_subscriptions_factory, is_preview=True) as g:
+        g.custom_show_command('show', 'cli_domain_topic_event_subscription_get')
+        g.command('delete', 'begin_delete', confirmation=True)
+        g.custom_command('list', 'cli_domain_topic_event_subscription_list')
+        g.custom_command('create', 'cli_domain_topic_event_subscription_create_or_update')
+        g.custom_command('update', 'cli_domain_topic_event_subscription_update')
+
     with self.command_group('eventgrid domain', domains_mgmt_util, client_factory=domains_factory) as g:
         g.show_command('show', 'get')
         g.command('key list', 'list_shared_access_keys')
@@ -137,6 +158,13 @@ def load_command_table(self, _):
         g.custom_command('create', 'cli_domain_create_or_update')
         g.command('delete', 'begin_delete')
         g.custom_command('update', 'cli_domain_update')
+
+    with self.command_group('eventgrid domain event-subscription', domain_event_subscriptions_mgmt_util, client_factory=domain_event_subscriptions_factory, is_preview=True) as g:
+        g.custom_show_command('show', 'cli_domain_event_subscription_get')
+        g.command('delete', 'begin_delete', confirmation=True)
+        g.custom_command('list', 'cli_domain_event_subscription_list')
+        g.custom_command('create', 'cli_domain_event_subscription_create_or_update')
+        g.custom_command('update', 'cli_domain_event_subscription_update')
 
     with self.command_group('eventgrid system-topic', system_topics_mgmt_util, client_factory=system_topics_factory) as g:
         g.show_command('show', 'get')

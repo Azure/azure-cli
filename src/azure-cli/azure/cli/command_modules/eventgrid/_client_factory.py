@@ -16,6 +16,15 @@ def topics_factory(cli_ctx, _):
 def topic_event_subscriptions_factory(cli_ctx, _):
     return cf_eventgrid(cli_ctx).topic_event_subscriptions
 
+
+def domain_topic_event_subscriptions_factory(cli_ctx, _):
+    return cf_eventgrid(cli_ctx).domain_topic_event_subscriptions
+
+
+def domain_event_subscriptions_factory(cli_ctx, _):
+    return cf_eventgrid(cli_ctx).domain_event_subscriptions
+
+
 def domains_factory(cli_ctx, _):
     return cf_eventgrid(cli_ctx).domains
 
