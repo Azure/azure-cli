@@ -1851,7 +1851,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage file copy start-batch') as c:
         c.argument('share_name', share_name_type, options_list=('--destination-share'),
-                help='Name of the destination share. The share must exist.')
+                   help='Name of the destination share. The share must exist.')
 
     with self.argument_context('storage file copy start-batch', arg_group='Copy Source') as c:
         from ._validators import get_source_file_or_blob_service_client_track2
@@ -1908,7 +1908,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage file metadata show') as c:
         c.extra('file_path', options_list=('--path', '-p'), help='The file path within the file share.',
-                   completer=dir_path_completer, required=True)
+                completer=dir_path_completer, required=True)
         c.extra('share_name', share_name_type, required=True)
         c.extra('snapshot', help="A string that represents the snapshot version, if applicable.")
         c.extra('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)

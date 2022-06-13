@@ -1991,10 +1991,10 @@ examples:
 
 helps['storage file metadata update'] = """
 type: command
-short-summary:  Returns all user-defined metadata for the file.
+short-summary:  Update file metadata.
 examples:
-  - name: Show metadata for the file
-    text: az storage file metadata show -s MyShare --path /path/to/file
+  - name: Update metadata for the file
+    text: az storage file metadata update -s MyShare --path /path/to/file --metadata key1=value1
 """
 
 helps['storage file upload'] = """

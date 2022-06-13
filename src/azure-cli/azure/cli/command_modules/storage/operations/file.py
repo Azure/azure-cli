@@ -330,7 +330,6 @@ def _create_file_and_directory_from_blob(cmd, file_service, blob_service, share,
     blob_url = source_client.url
 
     full_path = normalize_blob_file_path(destination_dir, blob_name)
-    file_name = os.path.basename(full_path)
     dir_name = os.path.dirname(full_path)
     _make_directory_in_files_share(file_service, share, dir_name, existing_dirs, V2=True)
 
