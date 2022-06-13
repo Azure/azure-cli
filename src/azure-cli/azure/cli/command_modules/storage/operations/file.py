@@ -14,7 +14,7 @@ from azure.cli.command_modules.storage.util import (filter_none, collect_blobs, 
                                                     create_blob_service_from_storage_client,
                                                     create_short_lived_container_sas, create_short_lived_share_sas,
                                                     guess_content_type)
-from azure.cli.command_modules.storage.url_quote_util import encode_for_url, make_encoded_file_url_and_params
+from azure.cli.command_modules.storage.url_quote_util import encode_for_url
 from azure.cli.core.profiles import ResourceType
 from azure.core.exceptions import ResourceExistsError
 
@@ -277,13 +277,13 @@ def storage_file_copy_batch(cmd, client, source_client, share_name=None, destina
             if dryrun:
                 logger.warning('  - copy file %s', os.path.join(dir_name, file_name))
             else:
-                return _create_file_and_directory_from_file(client, source_client, share_name, source_share,
+                return _create_file_and_directory_from_file(cmd, client, source_client, share_name, source_share,
                                                             source_sas, dir_name, file_name,
                                                             destination_dir=destination_path, metadata=metadata,
                                                             timeout=timeout, existing_dirs=existing_dirs)
 
         return list(filter_none(
-            action_file_copy(file) for file in collect_files(cmd, source_client, source_share, pattern)))
+            action_file_copy(file) for file in collect_files_track2(source_client, source_share, pattern)))
     # won't happen, the validator should ensure either source_container or source_share is set
     raise ValueError('Fail to find source. Neither blob container or file share is specified.')
 
@@ -332,7 +332,7 @@ def _create_file_and_directory_from_blob(cmd, file_service, blob_service, share,
     full_path = normalize_blob_file_path(destination_dir, blob_name)
     file_name = os.path.basename(full_path)
     dir_name = os.path.dirname(full_path)
-    _make_directory_in_files_share(file_service, share, dir_name, existing_dirs)
+    _make_directory_in_files_share(file_service, share, dir_name, existing_dirs, V2=True)
 
     try:
         file_client = file_service.get_file_client(full_path)
@@ -345,7 +345,7 @@ def _create_file_and_directory_from_blob(cmd, file_service, blob_service, share,
         raise CLIError(error_template.format(blob_name, share))
 
 
-def _create_file_and_directory_from_file(file_service, source_file_service, share, source_share, sas, source_file_dir,
+def _create_file_and_directory_from_file(cmd, file_service, source_file_service, share, source_share, sas, source_file_dir,
                                          source_file_name, destination_dir=None, metadata=None, timeout=None,
                                          existing_dirs=None):
     """
@@ -354,18 +354,23 @@ def _create_file_and_directory_from_file(file_service, source_file_service, shar
     from azure.common import AzureException
     from azure.cli.command_modules.storage.util import normalize_blob_file_path
 
-    file_url, source_file_dir, source_file_name = make_encoded_file_url_and_params(source_file_service, source_share,
-                                                                                   source_file_dir, source_file_name,
-                                                                                   sas_token=sas)
+    file_path = source_file_name
+    if source_file_dir:
+        file_path = source_file_dir + '/' + file_path
+    t_file_client = cmd.get_models('_file_client#ShareFileClient', resource_type=ResourceType.DATA_STORAGE_FILESHARE)
+    source_client = t_file_client(account_url=source_file_service.url, share_name=source_share, file_path=file_path,
+                                  credential=sas)
+    file_url = source_client.url
 
     full_path = normalize_blob_file_path(destination_dir, os.path.join(source_file_dir, source_file_name))
     file_name = os.path.basename(full_path)
     dir_name = os.path.dirname(full_path)
-    _make_directory_in_files_share(file_service, share, dir_name, existing_dirs)
+    _make_directory_in_files_share(file_service, share, dir_name, existing_dirs, V2=True)
 
     try:
-        file_service.copy_file(share, dir_name, file_name, file_url, metadata, timeout)
-        return file_service.make_file_url(share, dir_name or None, file_name)
+        file_client = file_service.get_file_client(full_path)
+        file_client.start_copy_from_url(source_url=file_url, metadata=metadata, timeout=timeout)
+        return file_client.url
     except AzureException:
         error_template = 'Failed to copy file {} from share {} to file share {}. Please check if ' \
                          'you have right permission to read source or set a correct sas token.'
@@ -373,7 +378,7 @@ def _create_file_and_directory_from_file(file_service, source_file_service, shar
         raise CLIError(error_template.format(file_name, source_share, share))
 
 
-def _make_directory_in_files_share(file_service, file_share, directory_path, existing_dirs=None):
+def _make_directory_in_files_share(file_service, file_share, directory_path, existing_dirs=None, V2=False):
     """
     Create directories recursively.
 
@@ -397,7 +402,10 @@ def _make_directory_in_files_share(file_service, file_share, directory_path, exi
             continue
 
         try:
-            file_service.create_directory(directory_name=dir_name)
+            if V2:
+                file_service.create_directory(directory_name=dir_name)
+            else:
+                file_service.create_directory(share_name=file_share, directory_name=dir_name, fail_on_exist=False)
         except ResourceExistsError:
             pass
         except AzureHttpError:
