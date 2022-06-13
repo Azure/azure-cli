@@ -47,7 +47,7 @@ def get_graph_object_transformer(object_type):
 
 def graph_err_handler(ex):
     # Convert GraphError to CLIError that can be printed
-    from .msgrpah import GraphError
+    from ._msgrpah import GraphError
     if isinstance(ex, GraphError):
         from knack.util import CLIError
         raise CLIError(ex)
@@ -111,7 +111,8 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_service_principals', table_transformer=get_graph_object_transformer('sp'))
         g.custom_show_command('show', 'show_service_principal')
         g.generic_update_command('update', getter_name='show_service_principal', getter_type=role_custom,
-                                 setter_name='patch_service_principal', setter_type=role_custom)
+                                 setter_name='patch_service_principal', setter_type=role_custom,
+                                 custom_func_name='update_service_principal', custom_func_type=role_custom)
 
     with self.command_group('ad sp owner', client_factory=get_graph_client, exception_handler=graph_err_handler) as g:
         g.custom_command('list', 'list_service_principal_owners')

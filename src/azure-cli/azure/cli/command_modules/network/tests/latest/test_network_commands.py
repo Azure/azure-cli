@@ -9,6 +9,7 @@ import os
 import unittest
 import tempfile
 
+from azure.cli.testsdk.constants import AUX_SUBSCRIPTION
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.profiles import supported_api_version, ResourceType
@@ -560,7 +561,9 @@ class NetworkPublicIpPrefix(ScenarioTest):
 
         self.kwargs.update({
             'prefix': 'prefix1',
-            'pip': 'pip1'
+            'pip': 'pip1',
+            'prefix_v6': self.create_random_name('public-ip-prefix-', 24),
+            'pip_v6': self.create_random_name('public-ip-', 16)
         })
 
         # Test prefix CRUD
@@ -582,6 +585,15 @@ class NetworkPublicIpPrefix(ScenarioTest):
         self.cmd('network public-ip prefix create -g {rg} -n {prefix} --length 30')
         self.cmd('network public-ip create -g {rg} -n {pip} --public-ip-prefix {prefix} --sku Standard',
                  checks=self.check("publicIp.publicIpPrefix.id.contains(@, '{prefix}')", True))
+        self.cmd('network public-ip prefix create -n {prefix_v6} -g {rg} --version IPv6 --length 126 -z 1 3 2')
+        self.cmd(
+            'network public-ip create -n {pip_v6} -g {rg} --public-ip-prefix {prefix_v6}',
+            checks=[
+                self.check('publicIp.name', '{pip_v6}'),
+                self.check('publicIp.publicIpAddressVersion', 'IPv6'),
+                self.check('publicIp.zones', ['1', '3', '2'])
+            ]
+        )
 
         # Test IP address version
         self.kwargs.update({
@@ -628,11 +640,31 @@ class NetworkPublicIpPrefix(ScenarioTest):
             self.check('publicIpAddressVersion', 'IPv4')
         ]).get_output_in_json()
 
-        ip_address = '.'.join(ip_prefix['ipPrefix'].split('.')[:3]) + '10'
+        ip_address = ip_prefix['ipPrefix'][:-3]
 
         # Create public ip with ip address
         self.cmd('network public-ip create -g {rg} -n {pip} --public-ip-prefix {prefix_name_ipv4} --sku Standard --ip-address ' + ip_address,
                  checks=self.check("publicIp.publicIpPrefix.id.contains(@, '{prefix_name_ipv4}')", True))
+
+    @live_only()
+    @ResourceGroupPreparer(name_prefix="cli_test_network_public_ip_prefix_", location="eastus2", subscription=AUX_SUBSCRIPTION)
+    def test_network_public_ip_prefix_with_aux_custom(self, resource_group):
+        self.kwargs.update({
+            "aux_rg": resource_group,
+            "aux_subscription": AUX_SUBSCRIPTION,
+            "public_prefix_name": self.create_random_name("public-prefix-", 20)
+        })
+
+        # previously created custom ip prefix
+        self.kwargs["custom_id"] = self.cmd("network custom-ip prefix show -n ethan-cip -g ethan-rg").get_output_in_json()["id"]
+        self.cmd(
+            "network public-ip prefix create -n {public_prefix_name} -g {aux_rg} --length 31 --zone 2 3 1 "
+            "--custom-ip-prefix-name {custom_id} --subscription {aux_subscription}",
+            checks=[
+                self.check("name", "{public_prefix_name}"),
+                self.check("type", "Microsoft.Network/publicIPPrefixes")
+            ]
+        )
 
 
 class NetworkMultiIdsShowScenarioTest(ScenarioTest):
@@ -718,7 +750,8 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
                  "--sku Standard_v2 "
                  "--enable-private-link "
                  "--private-ip-address 10.0.0.17 "
-                 "--public-ip-address {ip}")
+                 "--public-ip-address {ip} "
+                 "--priority 1001")
         show_data = self.cmd("network application-gateway show -g {rg} -n {appgw}").get_output_in_json()
 
         self.assertEqual(len(show_data["frontendIpConfigurations"]), 2)
@@ -779,7 +812,8 @@ class NetworkAppGatewayIndentityScenarioTest(ScenarioTest):
         self.cmd('network application-gateway create '
                  '-g {rg} -n {gw} '
                  '--sku Standard_v2 --public-ip-address {ip} '
-                 '--identity {one_off_identity} ')
+                 '--identity {one_off_identity} '
+                 '--priority 1001')
         self.cmd('network application-gateway show -g {rg} -n {gw}', checks=[
             self.check('identity.type', 'userAssigned')
         ])
@@ -2130,10 +2164,10 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
         self.cmd('network public-ip create -g {rg} -n {ip2} --sku standard')
 
         # create two application gateways and assign with the same waf-policy
-        self.cmd('network application-gateway create -g {rg} -n {ag1} '
-                 '--subnet subnet1 --vnet-name vnet1 --public-ip-address {ip1} --sku WAF_v2 --waf-policy {waf}')
-        self.cmd('network application-gateway create -g {rg} -n {ag2} '
-                 '--subnet subnet2 --vnet-name vnet2 --public-ip-address {ip2} --sku WAF_v2 --waf-policy {waf}')
+        self.cmd('network application-gateway create -g {rg} -n {ag1} --subnet subnet1 --vnet-name vnet1 '
+                 '--public-ip-address {ip1} --sku WAF_v2 --waf-policy {waf} --priority 1001')
+        self.cmd('network application-gateway create -g {rg} -n {ag2} --subnet subnet2 --vnet-name vnet2 '
+                 '--public-ip-address {ip2} --sku WAF_v2 --waf-policy {waf} --priority 1001')
 
         self.cmd('network application-gateway show -g {rg} -n {ag1}',
                  checks=self.check("firewallPolicy.contains(id, '{waf}')", True))
@@ -2581,7 +2615,7 @@ class NetworkPublicIpScenarioTest(ScenarioTest):
         self.kwargs.update({
             'ip1': 'pubipdns',
             'ip2': 'pubipnodns',
-            'dns': 'woot'
+            'dns': 'woot1'
         })
         self.cmd('network public-ip create -g {rg} -n {ip1} --dns-name {dns} --allocation-method static', checks=[
             self.check('publicIp.provisioningState', 'Succeeded'),
@@ -3130,6 +3164,7 @@ class NetworkCrossRegionLoadBalancerScenarioTest(ScenarioTest):
                  checks=self.check('length(@)', 2))
         self.cmd('network cross-region-lb address-pool show -g {rg} --lb-name {lb} -n {address_pool}',
                  checks=self.check('name', self.kwargs['address_pool']))
+        self.cmd('network cross-region-lb address-pool address remove -g {rg} --lb-name {lb} --pool-name {address_pool} --name {backend_address1}', checks=self.check('name', self.kwargs['address_pool']))
         self.cmd('network cross-region-lb address-pool delete -g {rg} --lb-name {lb} -n {address_pool}',
                  checks=self.is_empty())
         self.cmd('network cross-region-lb address-pool list -g {rg} --lb-name {lb}',
@@ -3678,7 +3713,7 @@ class NetworkLocalGatewayScenarioTest(ScenarioTest):
             'lgw2': 'lgw2',
             'rt': 'Microsoft.Network/localNetworkGateways'
         })
-        self.cmd('network local-gateway create --resource-group {rg} --name {lgw1} --gateway-ip-address 10.1.1.1 --tags foo=doo')
+        self.cmd('network local-gateway create --resource-group {rg} --name {lgw1} --gateway-ip-address 10.1.1.1 --local-address-prefixes 10.0.1.0/24 --tags foo=doo')
         self.cmd('network local-gateway update --resource-group {rg} --name {lgw1} --tags foo=boo',
                  checks=self.check('tags.foo', 'boo'))
         self.cmd('network local-gateway show --resource-group {rg} --name {lgw1}', checks=[
@@ -3686,8 +3721,8 @@ class NetworkLocalGatewayScenarioTest(ScenarioTest):
             self.check('resourceGroup', '{rg}'),
             self.check('name', '{lgw1}')])
 
-        self.cmd('network local-gateway create --resource-group {rg} --name {lgw2} --gateway-ip-address 10.1.1.2 --local-address-prefixes 10.0.1.0/24',
-                 checks=self.check('localNetworkAddressSpace.addressPrefixes[0]', '10.0.1.0/24'))
+        self.cmd('network local-gateway create --resource-group {rg} --name {lgw2} --gateway-ip-address 10.1.1.2 --local-address-prefixes 10.0.2.0/24',
+                 checks=self.check('localNetworkAddressSpace.addressPrefixes[0]', '10.0.2.0/24'))
 
         self.cmd('network local-gateway list --resource-group {rg}',
                  checks=self.check('length(@)', 2))
@@ -4829,7 +4864,7 @@ class NetworkVirtualHubRouter(ScenarioTest):
         # which will block subnet is assigned to the virtual router
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet1} --remove networkSecurityGroup')
         vnet = self.cmd('network vnet show -g {rg} -n {vnet}').get_output_in_json()
-        self.cmd('network public-ip create -g {rg} -n {vhr_ip1}')
+        self.cmd('network public-ip create -g {rg} -n {vhr_ip1} --sku Standard')
 
         self.kwargs.update({
             'subnet1_id': vnet['subnets'][0]['id']
@@ -5572,7 +5607,7 @@ class NetworkWatcherScenarioTest(ScenarioTest):
         self.cmd('network watcher flow-log configure -g {rg} --nsg {nsg} --enabled --retention 5 --storage-account {sa}')
 
     @mock.patch('azure.cli.command_modules.vm._actions._get_thread_count', _mock_thread_count)
-    @ResourceGroupPreparer(name_prefix='cli_test_nw_packet_capture', location='westus')
+    @ResourceGroupPreparer(name_prefix='cli_test_nw_packet_capture', location='eastus')
     @AllowLargeResponse()
     def test_network_watcher_packet_capture(self, resource_group, resource_group_location):
 
@@ -5837,6 +5872,7 @@ class NetworkSecurityPartnerProviderScenarioTest(ScenarioTest):
         self.cmd('extension add -n virtual-wan')
 
     @ResourceGroupPreparer()
+    @AllowLargeResponse()
     def test_network_security_partner_provider(self, resource_group):
         self.kwargs.update({
             'vwan': 'clitestvwan',
@@ -5880,7 +5916,9 @@ class NetworkVirtualApplianceScenarioTest(ScenarioTest):
         # self.cmd('extension remove -n virtual-wan')
         super(NetworkVirtualApplianceScenarioTest, self).tearDown()
 
+    @unittest.skip('GatewayError')
     @ResourceGroupPreparer(location='westcentralus', name_prefix='test_network_virtual_appliance')
+    @AllowLargeResponse()
     def test_network_virtual_appliance(self, resource_group):
         self.kwargs.update({
             'vwan': 'clitestvwan',
@@ -5892,7 +5930,7 @@ class NetworkVirtualApplianceScenarioTest(ScenarioTest):
         })
 
         self.cmd('network vwan create -n {vwan} -g {rg} --type Standard')
-        self.cmd('network vhub create -g {rg} -n {vhub} --vwan {vwan}  --address-prefix 10.5.0.0/16 --sku Standard')
+        self.cmd('network vhub create -g {rg} -n {vhub} --vwan {vwan} --address-prefix 10.5.0.0/16 --sku Standard')
 
         self.cmd('network virtual-appliance create -n {name} -g {rg} --vhub {vhub} --vendor "barracudasdwanrelease" '
                  '--scale-unit 2 -v latest --asn 10000 --init-config "echo $abc" '
