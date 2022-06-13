@@ -1830,8 +1830,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage file copy start') as c:
         from .completers import dir_path_completer
         from azure.cli.command_modules.storage._validators import validate_source_uri
-        c.extra('file_path', options_list=('--destination-path', '-p'), help='The file path within the file share.',
-                completer=dir_path_completer, required=True)
+        c.register_path_argument(options_list=('--destination-path', '-p'))
         c.register_source_uri_arguments(validator=validate_source_uri)
         c.extra('share_name', share_name_type, options_list=('--destination-share', '-s'), required=True,
                 help='Name of the destination share. The share must exist.')
@@ -1843,8 +1842,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.extra('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
 
     with self.argument_context('storage file copy cancel') as c:
-        c.extra('file_path', options_list=('--destination-path', '-p'), help='The file path within the file share.',
-                completer=dir_path_completer, required=True)
+        c.register_path_argument(options_list=('--destination-path', '-p'))
         c.extra('share_name', share_name_type, options_list=('--destination-share', '-s'), required=True,
                 help='Name of the destination share. The share must exist.')
         c.extra('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
@@ -1923,15 +1921,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Specify to exclude "timestamps", "Etag", "Attributes", "PermissionKey" info from response')
 
     with self.argument_context('storage file metadata show') as c:
-        c.extra('file_path', options_list=('--path', '-p'), help='The file path within the file share.',
-                completer=dir_path_completer, required=True)
+        c.register_path_argument()
         c.extra('share_name', share_name_type, required=True)
         c.extra('snapshot', help="A string that represents the snapshot version, if applicable.")
         c.extra('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
 
     with self.argument_context('storage file metadata update') as c:
-        c.extra('file_path', options_list=('--path', '-p'), help='The file path within the file share.',
-                completer=dir_path_completer, required=True)
+        c.register_path_argument()
         c.extra('share_name', share_name_type, required=True)
         c.extra('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
 
