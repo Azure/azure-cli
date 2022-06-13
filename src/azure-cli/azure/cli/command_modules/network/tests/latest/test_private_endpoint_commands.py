@@ -1430,7 +1430,8 @@ class NetworkPrivateLinkAppGwScenarioTest(ScenarioTest):
         self.cmd('network application-gateway create -g {rg} -n {appgw} '
                  '--sku Standard_v2 '
                  '--public-ip-address {appgw_ip} '
-                 '--enable-private-link')
+                 '--enable-private-link '
+                 '--priority 1001')
 
         show_appgw_data = self.cmd('network application-gateway show -g {rg} -n {appgw}').get_output_in_json()
 
@@ -1519,7 +1520,8 @@ class NetworkPrivateLinkAppGwScenarioTest(ScenarioTest):
                  '--enable-private-link '
                  '--private-link-subnet YetAnotherSubnetName '
                  '--private-link-primary true '
-                 '--private-link-subnet-prefix 10.0.2.0/24')
+                 '--private-link-subnet-prefix 10.0.2.0/24 '
+                 '--priority 1001')
 
         show_appgw_data = self.cmd('network application-gateway show -g {rg} -n {appgw}').get_output_in_json()
 

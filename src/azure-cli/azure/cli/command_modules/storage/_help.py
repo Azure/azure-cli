@@ -1935,6 +1935,7 @@ examples:
 
 helps['storage file generate-sas'] = """
 type: command
+short-summary: Generate a shared access signature for the file.
 examples:
   - name: Generate a sas token for a file.
     text: |
@@ -1948,6 +1949,15 @@ examples:
     text: |
         az storage file generate-sas --account-key 00000000 --account-name mystorageaccount --expiry 2037-12-31T23:59:00Z --https-only --path path/file.txt --permissions rcdw --share-name myshare
     crafted: true
+"""
+
+helps['storage file show'] = """
+type: command
+short-summary: Return all user-defined metadata, standard HTTP properties, and system properties for the file.
+examples:
+  - name:  Show properties of file in file share.
+    text: |
+        az storage file show -p dir/a.txt -s sharename --account-name myadlsaccount --account-key 0000-0000
 """
 
 helps['storage file list'] = """
@@ -1964,9 +1974,35 @@ examples:
     crafted: true
 """
 
+helps['storage file delete'] = """
+type: command
+short-summary: Mark the specified file for deletion.
+long-summary: The file is later deleted during garbage collection.
+"""
+
+helps['storage file resize'] = """
+type: command
+short-summary: Resize a file to the specified size.
+long-summary: If the specified byte value is less than the current size of the file, then all ranges above
+        the specified byte value are cleared.
+parameters:
+    - name: --size
+      short-summary: Size to resize file to (in bytes).
+"""
+
 helps['storage file metadata'] = """
 type: group
 short-summary: Manage file metadata.
+"""
+
+helps['storage file update'] = """
+type: command
+short-summary: Set system properties on the file.
+long-summary: If one property is set for the content_settings, all properties will be overriden.
+examples:
+  - name:  Set system properties on the file.
+    text: |
+        az storage file update -p dir/a.txt -s sharename --account-name myadlsaccount --account-key 0000-0000 --content-type test/type
 """
 
 helps['storage file upload'] = """
@@ -2936,6 +2972,11 @@ long-summary: Note that this value may not include all recently created or recen
 helps['storage share update'] = """
 type: command
 short-summary: Set service-defined properties for the specified share.
+"""
+
+helps['storage share snapshot'] = """
+type: command
+short-summary: Create a snapshot of an existing share under the specified account.
 """
 
 helps['storage share metadata'] = """

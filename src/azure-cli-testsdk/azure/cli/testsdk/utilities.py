@@ -163,8 +163,6 @@ class MSGraphClientPasswordReplacer(RecordingProcessor):
         self._activated = False
 
     def process_request(self, request):
-        if request.body and self.PWD_REPLACEMENT in _byte_to_str(request.body):
-            return request
         if request.path.endswith('/addPassword') and request.method.lower() == 'post':
             self._activated = True
         return request

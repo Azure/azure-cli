@@ -1911,7 +1911,9 @@ def set_extension(cmd, resource_group_name, vm_name, vm_extension_name, publishe
     if not extension_instance_name:
         extension_instance_name = vm_extension_name
 
-    VirtualMachineExtension = cmd.get_models('VirtualMachineExtension')
+    VirtualMachineExtension = cmd.get_models('VirtualMachineExtension',
+                                             resource_type=ResourceType.MGMT_COMPUTE,
+                                             operation_group='virtual_machines')
     instance_name = _get_extension_instance_name(vm.instance_view, publisher, vm_extension_name,
                                                  suggested_name=extension_instance_name)
     if instance_name != extension_instance_name:
@@ -3254,6 +3256,10 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 resource_group_name, vmss_name, vmss))
             logger.info('Guest Attestation Extension has been successfully installed by default'
                         'when Trusted Launch configuration is met')
+            VirtualMachineScaleSetVMInstanceRequiredIDs = cmd.get_models('VirtualMachineScaleSetVMInstanceRequiredIDs')
+            instance_ids = VirtualMachineScaleSetVMInstanceRequiredIDs(instance_ids=['*'])
+            LongRunningOperation(cmd.cli_ctx)(client.virtual_machine_scale_sets.begin_update_instances(
+                resource_group_name, vmss_name, instance_ids))
         except Exception as e:
             logger.error('Failed to install Guest Attestation Extension for Trusted Launch. %s', e)
 

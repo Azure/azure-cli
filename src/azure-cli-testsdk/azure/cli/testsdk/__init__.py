@@ -7,7 +7,8 @@ from .scenario_tests import live_only, record_only, get_sha1_hash
 
 from .base import ScenarioTest, LiveScenarioTest, LocalContextScenarioTest
 from .preparers import (StorageAccountPreparer, ResourceGroupPreparer, RoleBasedServicePrincipalPreparer,
-                        KeyVaultPreparer, ManagedHSMPreparer, ManagedApplicationPreparer, VirtualNetworkPreparer, VnetNicPreparer)
+                        KeyVaultPreparer, ManagedHSMPreparer, ManagedApplicationPreparer, VirtualNetworkPreparer,
+                        VnetNicPreparer, LogAnalyticsWorkspacePreparer)
 from .exceptions import CliTestError
 from .checkers import (JMESPathCheck, JMESPathCheckExists, JMESPathCheckGreaterThan, NoneCheck, StringCheck,
                        StringContainCheck)
@@ -21,7 +22,7 @@ __all__ = ['ScenarioTest', 'LiveScenarioTest', 'ResourceGroupPreparer', 'Storage
            'JMESPathCheckExists', 'NoneCheck', 'live_only', 'record_only', 'StringCheck', 'StringContainCheck',
            'get_sha1_hash', 'KeyVaultPreparer', 'JMESPathCheckGreaterThan', 'api_version_constraint',
            'create_random_name', 'MOCKED_USER_NAME', 'MSGraphNameReplacer', 'LocalContextScenarioTest',
-           'VirtualNetworkPreparer', 'VnetNicPreparer']
+           'VirtualNetworkPreparer', 'VnetNicPreparer', 'LogAnalyticsWorkspacePreparer']
 
 
 __version__ = '0.1.0'

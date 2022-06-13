@@ -1672,7 +1672,7 @@ short-summary: "Enable disk encryption on the OS disk and/or data disks. Encrypt
 long-summary: |
     Note that Azure Active Directory / service principal arguments are unnecessary for vm encryption. The older version of Azure Disk Encryption required AAD arguments.
     For more information, see:
-    ttps://docs.microsoft.com/azure/security/fundamentals/azure-disk-encryption-vms-vmss
+    https://docs.microsoft.com/azure/security/fundamentals/azure-disk-encryption-vms-vmss
 parameters:
   - name: --aad-client-id
     short-summary: Client ID of an AAD app with permissions to write secrets to the key vault.
@@ -2030,12 +2030,12 @@ examples:
 
 helps['vm application'] = """
 type: group
-short-summary: Manage appliations for VM
+short-summary: Manage applications for VM
 """
 
 helps['vm application set'] = """
 type: command
-short-summary: Set appliations for VM.
+short-summary: Set applications for VM.
 examples:
   - name: Set applications for vm
     text: az vm application set -g MyResourceGroup -n MyVm --app-version-ids /subscriptions/subid/resourceGroups/MyResourceGroup/providers/Microsoft.Compute/galleries/myGallery1/applications/MyApplication1/versions/1.0 \

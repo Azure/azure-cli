@@ -4,8 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 import base64
-from uuid import UUID
 
+from uuid import UUID
 from dateutil import parser
 from knack.log import get_logger
 from knack.util import todict, to_camel_case
@@ -29,6 +29,21 @@ def transform_acl_list_output(result):
         new_entry['Permissions'] = result[key]['permission']
         new_result.append(new_entry)
     return new_result
+
+
+def transform_acl_edit(result):
+    if "last_modified" in result.keys():
+        result["lastModified"] = result.pop("last_modified")
+    return result
+
+
+def transform_acl_datetime(result):
+    result = todict(result)
+    if result['start']:
+        result['start'] = result["start"].split('.')[0] + '+00:00'
+    if result['expiry']:
+        result['expiry'] = result["expiry"].split('.')[0] + '+00:00'
+    return result
 
 
 def transform_container_permission_output(result):
@@ -456,3 +471,21 @@ def transform_share_list_handle(result):
         item["handleId"] = item.id
         delattr(item, "id")
     return result
+
+
+def transform_file_show_result(result):
+    result = todict(result)
+    new_result = {
+        "content": result.pop('content', ""),
+        "properties": {
+            "contentLength": result.pop('contentLength', None),
+            "contentRange": result.pop('contentRange', None),
+            "contentSettings": result.pop('contentSettings', None),
+            "copy": result.pop('copy', None),
+            "etag": result.pop('etag', None),
+            "lastModified": result.pop('lastModified', None),
+            "serverEncrypted": result.pop('serverEncrypted', None)
+        }
+    }
+    new_result.update(result)
+    return new_result

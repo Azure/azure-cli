@@ -2243,12 +2243,14 @@ def merge_kubernetes_configurations(existing_file, addition_file, replace, conte
         existing['current-context'] = addition['current-context']
 
     # check that ~/.kube/config is only read- and writable by its owner
-    if platform.system() != 'Windows':
-        existing_file_perms = "{:o}".format(
-            stat.S_IMODE(os.lstat(existing_file).st_mode))
-        if not existing_file_perms.endswith('600'):
-            logger.warning('%s has permissions "%s".\nIt should be readable and writable only by its owner.',
-                           existing_file, existing_file_perms)
+    if platform.system() != "Windows" and not os.path.islink(existing_file):
+        existing_file_perms = "{:o}".format(stat.S_IMODE(os.lstat(existing_file).st_mode))
+        if not existing_file_perms.endswith("600"):
+            logger.warning(
+                '%s has permissions "%s".\nIt should be readable and writable only by its owner.',
+                existing_file,
+                existing_file_perms,
+            )
 
     with open(existing_file, 'w+') as stream:
         yaml.safe_dump(existing, stream, default_flow_style=False)
@@ -2655,7 +2657,7 @@ def aks_get_versions(cmd, client, location):
     return client.list_orchestrators(location, resource_type='managedClusters')
 
 
-def aks_runcommand(cmd, client, resource_group_name, name, command_string="", command_files=None):
+def aks_runcommand(cmd, client, resource_group_name, name, command_string="", command_files=None, no_wait=False):
     colorama.init()
 
     mc = client.get(resource_group_name, name)
@@ -2674,19 +2676,47 @@ def aks_runcommand(cmd, client, resource_group_name, name, command_string="", co
         request_payload.cluster_token = _get_dataplane_aad_token(
             cmd.cli_ctx, "6dae42f8-4368-4678-94ff-3960e28e3630")
 
-    commandResultFuture = client.begin_run_command(
-        resource_group_name, name, request_payload, polling_interval=5, retry_total=0)
-
-    return _print_command_result(cmd.cli_ctx, commandResultFuture.result(300))
+    command_result_poller = sdk_no_wait(
+        no_wait, client.begin_run_command, resource_group_name, name, request_payload, polling_interval=5, retry_total=0
+    )
+    if no_wait:
+        # pylint: disable=protected-access
+        command_result_polling_url = command_result_poller.polling_method()._initial_response.http_response.headers[
+            "location"
+        ]
+        command_id_regex = re.compile(r"commandResults\/(\w*)\?")
+        command_id = command_id_regex.findall(command_result_polling_url)[0]
+        _aks_command_result_in_progess_helper(client, resource_group_name, name, command_id)
+        return
+    return _print_command_result(cmd.cli_ctx, command_result_poller.result(300))
 
 
 def aks_command_result(cmd, client, resource_group_name, name, command_id=""):
     if not command_id:
         raise ValidationError('CommandID cannot be empty.')
 
-    commandResult = client.get_command_result(
-        resource_group_name, name, command_id)
+    commandResult = client.get_command_result(resource_group_name, name, command_id)
+    if commandResult is None:
+        _aks_command_result_in_progess_helper(client, resource_group_name, name, command_id)
+        return
     return _print_command_result(cmd.cli_ctx, commandResult)
+
+
+def _aks_command_result_in_progess_helper(client, resource_group_name, name, command_id):
+    # pylint: disable=unused-argument
+    def command_result_direct_response_handler(pipeline_response, *args, **kwargs):
+        deserialized_data = pipeline_response.context.get("deserialized_data", {})
+        if deserialized_data:
+            provisioning_state = deserialized_data.get("properties", {}).get("provisioningState", None)
+            started_at = deserialized_data.get("properties", {}).get("startedAt", None)
+            print(f"command id: {command_id}, started at: {started_at}, status: {provisioning_state}")
+            print(
+                f"Please use command \"az aks command result -g {resource_group_name} -n {name} -i {command_id}\" "
+                "to get the future execution result"
+            )
+        else:
+            print(f"failed to fetch command result for command id: {command_id}")
+    client.get_command_result(resource_group_name, name, command_id, cls=command_result_direct_response_handler)
 
 
 def _print_command_result(cli_ctx, commandResult):
@@ -2715,8 +2745,8 @@ def _print_command_result(cli_ctx, commandResult):
         return
 
     # *-ing state
-    print(f"{colorama.Fore.BLUE}command is in : {commandResult.provisioning_state} state{colorama.Style.RESET_ALL}")
-    return None
+    print(f"{colorama.Fore.BLUE}command is in {commandResult.provisioning_state} state{colorama.Style.RESET_ALL}")
+    return
 
 
 def _get_command_context(command_files):
