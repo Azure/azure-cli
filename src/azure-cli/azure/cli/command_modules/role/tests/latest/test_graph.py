@@ -522,6 +522,13 @@ class ApplicationScenarioTest(GraphScenarioTestBase):
         self.assertEqual(microsoft_graph_api_object['resourceAccess'],
                          [microsoft_graph_permission1_object, microsoft_graph_permission2_object])
 
+        # Test permission type '=Scope' is missing
+        from azure.cli.core.azclierror import ArgumentUsageError
+        with self.assertRaisesRegex(ArgumentUsageError, 'both permission id and type'):
+            self.cmd('ad app permission add --id {app_id} '
+                     '--api {microsoft_graph_api} '
+                     '--api-permissions {microsoft_graph_permission1}')
+
     @AllowLargeResponse()
     def test_app_permission_grant(self):
         if not self._get_signed_in_user():
