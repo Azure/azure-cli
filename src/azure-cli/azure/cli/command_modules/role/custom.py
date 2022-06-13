@@ -852,17 +852,21 @@ def add_permission(client, identifier, api, api_permissions):
     #         id            <- api_permissions
     #         type
 
-    application = show_application(client, identifier)
-
     resource_access_list = []
     for e in api_permissions:
-        access_id, access_type = e.split('=')
+        try:
+            access_id, access_type = e.split('=')
+        except ValueError as ex:
+            from azure.cli.core.azclierror import ArgumentUsageError
+            raise ArgumentUsageError('Usage error: Permission type should be provided, such as '
+                                     '`--api-permissions e1fe6dd8-ba31-4d61-89e7-88639da4683d=Scope`') from ex
         resource_access = {
             "id": access_id,
             "type": access_type
         }
         resource_access_list.append(resource_access)
 
+    application = show_application(client, identifier)
     required_resource_access_list = application['requiredResourceAccess']
     existing_required_resource_access = next((e for e in required_resource_access_list if e['resourceAppId'] == api),
                                              None)
