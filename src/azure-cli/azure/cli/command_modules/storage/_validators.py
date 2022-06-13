@@ -23,7 +23,7 @@ from azure.cli.command_modules.storage.oauth_token_util import TokenUpdater
 
 from knack.log import get_logger
 from knack.util import CLIError
-from ._client_factory import cf_blob_service, cf_share_service
+from ._client_factory import cf_blob_service, cf_share_service, cf_share_client
 
 storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
 logger = get_logger(__name__)
@@ -566,6 +566,8 @@ def get_content_setting_validator(settings_class, update, guess_from_file=None, 
         if is_storagev2(prefix):
             t_blob_content_settings = cmd.get_models('_models#ContentSettings',
                                                      resource_type=ResourceType.DATA_STORAGE_BLOB)
+            t_file_content_settings = cmd.get_models('_models#ContentSettings',
+                                                     resource_type=ResourceType.DATA_STORAGE_FILESHARE)
 
         # must run certain validators first for an update
         if update:
@@ -584,16 +586,16 @@ def get_content_setting_validator(settings_class, update, guess_from_file=None, 
             cs = ns.get('connection_string')
             sas = ns.get('sas_token')
             token_credential = ns.get('token_credential')
+            account_kwargs = {'connection_string': cs,
+                              'account_name': account,
+                              'account_key': key,
+                              'token_credential': token_credential,
+                              'sas_token': sas}
             if _class_name(settings_class) == _class_name(t_blob_content_settings):
                 container = ns.get('container_name')
                 blob = ns.get('blob_name')
                 lease_id = ns.get('lease_id')
                 if is_storagev2(prefix):
-                    account_kwargs = {'connection_string': cs,
-                                      'account_name': account,
-                                      'account_key': key,
-                                      'token_credential': token_credential,
-                                      'sas_token': sas}
                     client = cf_blob_service(cmd.cli_ctx, account_kwargs).get_blob_client(container=container,
                                                                                           blob=blob)
                     props = client.get_blob_properties(lease=lease_id).content_settings
@@ -606,11 +608,19 @@ def get_content_setting_validator(settings_class, update, guess_from_file=None, 
                     props = client.get_blob_properties(container, blob, lease_id=lease_id).properties.content_settings
 
             elif _class_name(settings_class) == _class_name(t_file_content_settings):
-                client = get_storage_data_service_client(cmd.cli_ctx, t_file_service, account, key, cs, sas)
                 share = ns.get('share_name')
                 directory = ns.get('directory_name')
                 filename = ns.get('file_name')
-                props = client.get_file_properties(share, directory, filename).properties.content_settings
+                account_kwargs["share_name"] = share
+                account_kwargs["snapshot"] = ns.get('snapshot')
+                if is_storagev2(prefix):
+                    client = cf_share_client(cmd.cli_ctx, account_kwargs).\
+                        get_directory_client(directory_path=directory).\
+                        get_file_client(file_name=filename)
+                    props = client.get_file_properties().content_settings
+                else:
+                    client = get_storage_data_service_client(cmd.cli_ctx, t_file_service, account, key, cs, sas)
+                    props = client.get_file_properties(share, directory, filename).properties.content_settings
 
         # create new properties
         new_props = settings_class(
@@ -759,6 +769,8 @@ def get_file_path_validator(default_file_param=None):
 
         path = namespace.path
         dir_name, file_name = os.path.split(path) if path else (None, '')
+        if dir_name and dir_name.startswith('./'):
+            dir_name = dir_name.replace('./', '', 1)
 
         if default_file_param and '.' not in file_name:
             dir_name = path
