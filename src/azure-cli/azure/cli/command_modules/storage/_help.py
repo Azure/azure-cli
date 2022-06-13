@@ -1947,6 +1947,7 @@ examples:
 
 helps['storage file generate-sas'] = """
 type: command
+short-summary: Generate a shared access signature for the file.
 examples:
   - name: Generate a sas token for a file.
     text: |
@@ -1962,6 +1963,15 @@ examples:
     crafted: true
 """
 
+helps['storage file show'] = """
+type: command
+short-summary: Return all user-defined metadata, standard HTTP properties, and system properties for the file.
+examples:
+  - name:  Show properties of file in file share.
+    text: |
+        az storage file show -p dir/a.txt -s sharename --account-name myadlsaccount --account-key 0000-0000
+"""
+
 helps['storage file list'] = """
 type: command
 short-summary: List files and directories in a share.
@@ -1974,6 +1984,22 @@ examples:
     text: |
         az storage file list --share-name MyShare
     crafted: true
+"""
+
+helps['storage file delete'] = """
+type: command
+short-summary: Mark the specified file for deletion.
+long-summary: The file is later deleted during garbage collection.
+"""
+
+helps['storage file resize'] = """
+type: command
+short-summary: Resize a file to the specified size.
+long-summary: If the specified byte value is less than the current size of the file, then all ranges above
+        the specified byte value are cleared.
+parameters:
+    - name: --size
+      short-summary: Size to resize file to (in bytes).
 """
 
 helps['storage file metadata'] = """
@@ -1995,6 +2021,16 @@ short-summary:  Update file metadata.
 examples:
   - name: Update metadata for the file
     text: az storage file metadata update -s MyShare --path /path/to/file --metadata key1=value1
+"""
+
+helps['storage file update'] = """
+type: command
+short-summary: Set system properties on the file.
+long-summary: If one property is set for the content_settings, all properties will be overriden.
+examples:
+  - name:  Set system properties on the file.
+    text: |
+        az storage file update -p dir/a.txt -s sharename --account-name myadlsaccount --account-key 0000-0000 --content-type test/type
 """
 
 helps['storage file upload'] = """

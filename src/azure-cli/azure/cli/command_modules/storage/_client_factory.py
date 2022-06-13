@@ -402,4 +402,5 @@ def cf_share_directory_client(cli_ctx, kwargs):
 
 
 def cf_share_file_client(cli_ctx, kwargs):
-    return cf_share_client(cli_ctx, kwargs).get_file_client(file_path=kwargs.pop('file_path'))
+    return cf_share_client(cli_ctx, kwargs).get_directory_client(directory_path=kwargs.pop('directory_name')).\
+        get_file_client(file_name=kwargs.pop('file_name'))

@@ -104,10 +104,17 @@ def _get_client(client, kwargs):
     if file_name:
         total_path = directory_path + '/' + file_name if directory_path else file_name
         dir_client = client.get_directory_client(directory_path=total_path)
-        if not dir_client.exists():
+        exists = False
+        from azure.core.exceptions import ClientAuthenticationError
+        try:
+            exists = dir_client.exists()
+        except ClientAuthenticationError:
+            exists = False
+        if not exists:
             dir_client = client.get_directory_client(directory_path=directory_path)
             client = dir_client.get_file_client(file_name=file_name)
-            kwargs.pop("recursive")
+            if "recursive" in kwargs:
+                kwargs.pop("recursive")
         else:
             client = dir_client
     else:
