@@ -520,7 +520,7 @@ class ApplicationScenarioTest(GraphScenarioTestBase):
 
         # Test permission type '=Scope' is missing
         from azure.cli.core.azclierror import ArgumentUsageError
-        with self.assertRaisesRegex(ArgumentUsageError, 'Permission type should be provided'):
+        with self.assertRaisesRegex(ArgumentUsageError, 'both permission id and type'):
             self.cmd('ad app permission add --id {app_id} '
                      '--api {microsoft_graph_api} '
                      '--api-permissions {microsoft_graph_permission1}')

@@ -858,7 +858,7 @@ def add_permission(client, identifier, api, api_permissions):
             access_id, access_type = e.split('=')
         except ValueError as ex:
             from azure.cli.core.azclierror import ArgumentUsageError
-            raise ArgumentUsageError('Usage error: Permission type should be provided, such as '
+            raise ArgumentUsageError('Usage error: Please provide both permission id and type, such as '
                                      '`--api-permissions e1fe6dd8-ba31-4d61-89e7-88639da4683d=Scope`') from ex
         resource_access = {
             "id": access_id,
