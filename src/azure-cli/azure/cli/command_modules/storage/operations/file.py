@@ -15,7 +15,9 @@ from azure.cli.command_modules.storage.util import (filter_none, collect_blobs, 
                                                     create_short_lived_container_sas, create_short_lived_share_sas,
                                                     guess_content_type)
 from azure.cli.command_modules.storage.url_quote_util import encode_for_url, make_encoded_file_url_and_params
-from azure.cli.core.profiles import ResourceType
+from azure.cli.core.profiles import ResourceType, get_sdk
+from azure.core.exceptions import HttpResponseError, ResourceNotFoundError
+from .fileshare import _get_client
 
 logger = get_logger(__name__)
 
@@ -109,9 +111,14 @@ def create_share_url(client, share_name, unc=None, protocol=None):
     return url
 
 
-def create_file_url(client, share_name, directory_name, file_name, protocol=None):
-    return client.make_file_url(
-        share_name, directory_name, file_name, protocol=protocol, sas_token=client.sas_token)
+def create_file_url(client, protocol=None, **kwargs):
+    client = _get_client(client, kwargs)
+    url = client.url
+    if url.endswith(client.share_name):
+        url = url + '/'
+    if protocol == 'http':
+        return url.replace('https', 'http', 1)
+    return url
 
 
 def list_share_files(cmd, client, directory_name=None, timeout=None, exclude_dir=False, exclude_extended_info=False,
@@ -129,7 +136,7 @@ def list_share_files(cmd, client, directory_name=None, timeout=None, exclude_dir
 
     if exclude_dir:
         t_file_properties = cmd.get_models('_models#FileProperties', resource_type=ResourceType.DATA_STORAGE_FILESHARE)
-        return list(f for f in results if isinstance(f.properties, t_file_properties))
+        return list(f for f in results if isinstance(f, t_file_properties))
     return results
 
 
@@ -443,9 +450,38 @@ def _make_directory_in_files_share(file_service, file_share, directory_path, exi
 
 
 def _file_share_exists(client, resource_group_name, account_name, share_name):
-    from azure.core.exceptions import HttpResponseError
     try:
         file_share = client.get(resource_group_name, account_name, share_name, expand=None)
         return file_share is not None
     except HttpResponseError:
         return False
+
+
+# pylint: disable=redefined-builtin
+def generate_sas_file(cmd, client, directory_name=None, file_name=None, permission=None, expiry=None, start=None,
+                      id=None, ip=None, protocol=None, **kwargs):
+    t_generate_file_sas = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_FILESHARE,
+                                  '_shared_access_signature#generate_file_sas')
+    file_path = file_name
+    if directory_name:
+        file_path = directory_name + '/' + file_path
+    file_path = file_path.split('/')
+    sas_token = t_generate_file_sas(account_name=client.account_name, share_name=client.share_name, file_path=file_path,
+                                    account_key=client.credential.account_key, permission=permission, expiry=expiry,
+                                    start=start, policy_id=id, ip=ip, protocol=protocol, **kwargs)
+    from urllib.parse import quote
+    return quote(sas_token, safe='&%()$=\',~')
+
+
+def file_exists(client, **kwargs):
+    try:
+        res = client.get_file_properties(**kwargs)
+        return bool(res)
+    except ResourceNotFoundError:
+        return False
+    except HttpResponseError as ex:
+        raise ex
+
+
+def file_updates(client, **kwargs):
+    return client.set_http_headers(**kwargs)

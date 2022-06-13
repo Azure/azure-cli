@@ -2030,12 +2030,12 @@ examples:
 
 helps['vm application'] = """
 type: group
-short-summary: Manage appliations for VM
+short-summary: Manage applications for VM
 """
 
 helps['vm application set'] = """
 type: command
-short-summary: Set appliations for VM.
+short-summary: Set applications for VM.
 examples:
   - name: Set applications for vm
     text: az vm application set -g MyResourceGroup -n MyVm --app-version-ids /subscriptions/subid/resourceGroups/MyResourceGroup/providers/Microsoft.Compute/galleries/myGallery1/applications/MyApplication1/versions/1.0 \

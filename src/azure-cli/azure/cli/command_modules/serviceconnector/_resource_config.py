@@ -1083,6 +1083,15 @@ SUPPORTED_CLIENT_TYPE = {
             CLIENT_TYPE.Dotnet,
             CLIENT_TYPE.Blank
         ],
+        RESOURCE.SignalR: [
+            CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.Blank
+        ],
+        RESOURCE.WebPubSub: [
+            CLIENT_TYPE.Java,
+            CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.Blank
+        ],
         RESOURCE.ConfluentKafka: [
             CLIENT_TYPE.Java,
             CLIENT_TYPE.SpringBoot,
