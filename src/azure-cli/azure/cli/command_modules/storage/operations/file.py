@@ -10,11 +10,8 @@ Commands for storage file share operations
 import os
 from knack.log import get_logger
 
-from azure.cli.command_modules.storage.util import (filter_none, collect_blobs, collect_files, collect_files_track2,
-                                                    create_blob_service_from_storage_client,
-                                                    create_short_lived_container_sas, create_short_lived_share_sas,
+from azure.cli.command_modules.storage.util import (filter_none, collect_blobs, collect_files_track2,
                                                     guess_content_type)
-from azure.cli.command_modules.storage.url_quote_util import encode_for_url, make_encoded_file_url_and_params
 from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.core.exceptions import HttpResponseError, ResourceNotFoundError, ResourceExistsError
 from .fileshare import _get_client
@@ -245,6 +242,7 @@ def storage_file_copy_batch(cmd, client, source_client, share_name=None, destina
         logger.warning('    account %s', client.account_name)
         logger.warning('      share %s', share_name)
         logger.warning('       path %s', destination_path)
+        logger.warning('    source account %s', kwargs.get('source_account_name', ""))
         logger.warning('     source %s', source_container or source_share)
         logger.warning('source type %s', 'blob' if source_container else 'file')
         logger.warning('    pattern %s', pattern)
@@ -350,9 +348,9 @@ def _create_file_and_directory_from_blob(cmd, file_service, blob_service, share,
         raise CLIError(error_template.format(blob_name, share))
 
 
-def _create_file_and_directory_from_file(cmd, file_service, source_file_service, share, source_share, sas, source_file_dir,
-                                         source_file_name, destination_dir=None, metadata=None, timeout=None,
-                                         existing_dirs=None):
+def _create_file_and_directory_from_file(cmd, file_service, source_file_service, share, source_share, sas,
+                                         source_file_dir, source_file_name, destination_dir=None, metadata=None,
+                                         timeout=None, existing_dirs=None):
     """
     Copy a file from one file share to another
     """
