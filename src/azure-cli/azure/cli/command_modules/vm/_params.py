@@ -926,6 +926,7 @@ def load_arguments(self, _):
                        help='Space-separated application configuration overrides for each application version ids. '
                        'It should have the same number of items as the application version ids. Null is available for a application '
                        'which does not have a configuration override.')
+            c.argument('treat_deployment_as_failure', nargs='*', help="Space-separated list of true or false corresponding to the application version ids. If set to true, failure to install or update gallery application version operation will fail this operation")
 
     for scope in ['vm application list', 'vmss application list']:
         with self.argument_context(scope) as c:

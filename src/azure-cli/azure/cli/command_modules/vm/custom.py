@@ -4954,7 +4954,7 @@ def list_capacity_reservation(client, resource_group_name, capacity_reservation_
                                                      capacity_reservation_group_name=capacity_reservation_group_name)
 
 
-def set_vm_applications(cmd, vm_name, resource_group_name, application_version_ids, order_applications=False, application_configuration_overrides=None, no_wait=False):
+def set_vm_applications(cmd, vm_name, resource_group_name, application_version_ids, order_applications=False, application_configuration_overrides=None, treat_deployment_as_failure=None, no_wait=False):
     client = _compute_client_factory(cmd.cli_ctx)
     ApplicationProfile, VMGalleryApplication = cmd.get_models('ApplicationProfile', 'VMGalleryApplication')
     try:
@@ -4976,6 +4976,11 @@ def set_vm_applications(cmd, vm_name, resource_group_name, application_version_i
             if over_ride or over_ride.lower() != 'null':
                 vm.application_profile.gallery_applications[index].configuration_reference = over_ride
             index += 1
+    
+    if treat_deployment_as_failure:
+        index = 0
+        for treat_as_failure in treat_deployment_as_failure:
+            vm.application_profile.gallery_applications[index].treat_failure_as_deployment_failure = treat_as_failure
     return sdk_no_wait(no_wait, client.virtual_machines.begin_create_or_update, resource_group_name, vm_name, vm)
 
 
@@ -4988,7 +4993,7 @@ def list_vm_applications(cmd, vm_name, resource_group_name):
     return vm.application_profile
 
 
-def set_vmss_applications(cmd, vmss_name, resource_group_name, application_version_ids, order_applications=False, application_configuration_overrides=None, no_wait=False):
+def set_vmss_applications(cmd, vmss_name, resource_group_name, application_version_ids, order_applications=False, application_configuration_overrides=None, treat_deployment_as_failure=None, no_wait=False):
     client = _compute_client_factory(cmd.cli_ctx)
     ApplicationProfile, VMGalleryApplication = cmd.get_models('ApplicationProfile', 'VMGalleryApplication')
     try:
@@ -5010,6 +5015,11 @@ def set_vmss_applications(cmd, vmss_name, resource_group_name, application_versi
             if over_ride or over_ride.lower() != 'null':
                 vmss.virtual_machine_profile.application_profile.gallery_applications[index].configuration_reference = over_ride
             index += 1
+    
+    if treat_deployment_as_failure:
+        index = 0
+        for treat_as_failure in treat_deployment_as_failure:
+            vmss.virtual_machine_profile.gallery_applications[index].treat_failure_as_deployment_failure = treat_as_failure
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_update, resource_group_name, vmss_name, vmss)
 
 
