@@ -2448,6 +2448,63 @@ class VMDiskAttachDetachTest(ScenarioTest):
             self.check('storageProfile.dataDisks[3].managedDisk.storageAccountType', 'StandardSSD_LRS'),
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli-test-stdssdk2', location='eastus2euap')
+    @AllowLargeResponse(size_kb=99999)
+    def test_vm_disk_storage_sku2(self, resource_group):
+
+        self.kwargs.update({
+            'vm': 'vm-storage-sku-test',
+            'disk1': 'd1',
+            'disk2': 'd2',
+            'snapshot1': 's1',
+            'image1': 'i1',
+        })
+
+        self.cmd('vm create -g {rg}  -n {vm} --admin-username admin123 --admin-password testPassword0 --image debian '
+                 '--storage-sku os=Premium_LRS 0=PremiumV2_LRS --data-disk-sizes-gb 4 --zone 1 --nsg-rule NONE')
+        self.cmd('disk create -g {rg} -n {disk1} --size-gb 4 --sku PremiumV2_LRS --zone 1')
+        self.cmd('vm disk attach -g {rg} --vm-name {vm} --name {disk1}')
+        # self.cmd('vm disk attach -g {rg} --vm-name {vm} --name {disk2} --new --size-gb 4 --sku PremiumV2_LRS')
+
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'PremiumV2_LRS'),
+            self.check('storageProfile.dataDisks[1].managedDisk.storageAccountType', 'PremiumV2_LRS'),
+        ])
+
+        # create a snpashot
+        self.cmd('snapshot create -g {rg} -n {snapshot1} --size-gb 4 --sku Standard_LRS --tags tag1=s1', checks=[
+            self.check('sku.name', 'Standard_LRS'),
+            self.check('diskSizeGb', 4),
+            self.check('tags.tag1', 's1')
+        ])
+
+        # test that images can be created with different storage skus and os disk caching settings.
+        self.cmd('image create -g {rg} -n {image1} --source {snapshot1} --storage-sku PremiumV2_LRS --os-type linux',
+                 checks=[
+                     self.check('storageProfile.osDisk.storageAccountType', 'PremiumV2_LRS'),
+                 ])
+
+    @unittest.skip('VMSS is not support PremiumV2_LRS yet')
+    @ResourceGroupPreparer(name_prefix='cli-test-stdssdk3', location='eastus2euap')
+    @AllowLargeResponse(size_kb=99999)
+    def test_vmss_disk_storage_sku(self, resource_group):
+        self.kwargs.update({
+            'vmss': 'vmss-storage-sku-test',
+            'disk1': 'd1',
+            'disk2': 'd2',
+        })
+        self.cmd('vmss create -g {rg} -n {vmss} --admin-username admin123 --admin-password testPassword0 --image debian '
+                 '--storage-sku os=Premium_LRS 0=PremiumV2_LRS --data-disk-sizes-gb 4 --zone 1')
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('virtualMachineProfile.storageProfile.dataDisks[0].managedDisk.storageAccountType', 'PremiumV2_LRS'),
+        ])
+        self.cmd('disk create -g {rg} -n {disk1} --size-gb 4 --sku PremiumV2_LRS --zone 1')
+        self.cmd('vmss disk attach -g {rg} --vmss-name {vmss} --disk {disk1}')
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('virtualMachineProfile.storageProfile.dataDisks[0].managedDisk.storageAccountType', 'PremiumV2_LRS'),
+            self.check('virtualMachineProfile.storageProfile.dataDisks[1].managedDisk.storageAccountType', 'PremiumV2_LRS'),
+        ])
+
     @ResourceGroupPreparer(name_prefix='cli-test-stdssdk', location='eastus')
     def test_vm_ultra_ssd_storage_sku(self, resource_group):
 
