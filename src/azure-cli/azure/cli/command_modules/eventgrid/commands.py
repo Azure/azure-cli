@@ -23,7 +23,8 @@ from ._client_factory import (
     partner_namespaces_factory,
     event_channels_factory,
     partner_topics_factory,
-    partner_topic_event_subscriptions_factory
+    partner_topic_event_subscriptions_factory,
+    verified_partner_factory
 )
 
 
@@ -109,6 +110,12 @@ def load_command_table(self, _):
     partner_topic_event_subscriptions_mgmt_util = CliCommandType(
         operations_tmpl='azure.mgmt.eventgrid.operations#PartnerTopicEventSubscriptionsOperations.{}',
         client_factory=partner_topic_event_subscriptions_factory,
+        client_arg_name='self'
+    )
+
+    verified_partner_mgmt_util = CliCommandType(
+        operations_tmpl='azure.mgmt.eventgrid.operations#VerifiedPartnersOperations.{}',
+        client_factory=verified_partner_factory,
         client_arg_name='self'
     )
 
@@ -218,6 +225,10 @@ def load_command_table(self, _):
         g.custom_command('list', 'cli_partner_topic_event_subscription_list')
         g.custom_command('create', 'cli_partner_topic_event_subscription_create_or_update')
         g.custom_command('update', 'cli_partner_topic_event_subscription_update')
+
+    with self.command_group('eventgrid partner verified-partner', verified_partner_mgmt_util, client_factory=verified_partner_factory, is_preview=True) as g:
+        g.show_command('show', 'get')
+        g.custom_command('list', 'cli_verified_partner_list')
 
     custom_tmpl = 'azure.cli.command_modules.eventgrid.custom#{}'
     eventgrid_custom = CliCommandType(operations_tmpl=custom_tmpl)

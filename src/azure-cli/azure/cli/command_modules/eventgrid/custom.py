@@ -1099,6 +1099,17 @@ def cli_partner_topic_event_subscription_list(   # pylint: disable=too-many-retu
     return client.list_by_partner_topic(resource_group_name, partner_topic_name, odata_query, DEFAULT_TOP)
 
 
+def cli_verified_partner_list(
+        client,
+        resource_group_name=None,
+        odata_query=None):
+
+    if resource_group_name:
+        return client.list_by_resource_group(resource_group_name, odata_query, DEFAULT_TOP)
+
+    return client.list_by_subscription(odata_query, DEFAULT_TOP)
+
+
 def cli_system_topic_create_or_update(
         client,
         resource_group_name,
