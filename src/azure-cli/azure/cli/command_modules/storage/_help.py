@@ -2009,7 +2009,7 @@ short-summary: Manage file metadata.
 
 helps['storage file metadata show'] = """
 type: command
-short-summary:  Returns all user-defined metadata for the file.
+short-summary:  Return all user-defined metadata for the file.
 examples:
   - name: Show metadata for the file
     text: az storage file metadata show -s MyShare --path /path/to/file
