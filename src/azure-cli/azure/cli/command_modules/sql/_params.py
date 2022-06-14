@@ -760,10 +760,16 @@ def load_arguments(self, _):
                    arg_type=get_enum_type(AuthenticationType),
                    help='Authentication type.  Allowed values: ADPassword, SQL.')
 
+        c.argument('storage_key',
+                   help='Required. Storage key.')
+
         c.argument('storage_key_type',
                    arg_type=get_enum_type(StorageKeyType),
                    help='Required. Storage key type.  Allowed values: SharedAccessKey,'
                    'StorageAccessKey.')
+
+        c.argument('storage_uri',
+                   help='Required. Storage Uri.')
 
     with self.argument_context('sql db import') as c:
         # Create args that will be used to build up the ImportExistingDatabaseDefinition object
@@ -789,10 +795,16 @@ def load_arguments(self, _):
                    arg_type=get_enum_type(AuthenticationType),
                    help='Authentication type.  Allowed values: ADPassword, SQL.')
 
+        c.argument('storage_key',
+                   help='Required. Storage key.')
+
         c.argument('storage_key_type',
                    arg_type=get_enum_type(StorageKeyType),
                    help='Required. Storage key type.  Allowed values: SharedAccessKey,'
                    'StorageAccessKey.')
+
+        c.argument('storage_uri',
+                   help='Required. Storage Uri.')
 
         # The parameter name '--name' is used for 'database_name', so we need to give a different name
         # for the import extension 'name' parameter to avoid conflicts. This parameter is actually not
