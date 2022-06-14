@@ -124,7 +124,7 @@ DEPENDENCIES = [
     'azure-mgmt-servicelinker==1.0.0',
     'azure-mgmt-servicefabric~=1.0.0',
     'azure-mgmt-signalr==1.0.0b2',
-    'azure-mgmt-sqlvirtualmachine==1.0.0b2',
+    'azure-mgmt-sqlvirtualmachine==1.0.0b3',
     'azure-mgmt-sql==4.0.0b1',
     'azure-mgmt-storage~=20.0.0',
     'azure-mgmt-synapse==2.1.0b2',
