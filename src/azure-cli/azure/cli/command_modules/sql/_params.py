@@ -1401,7 +1401,7 @@ def load_arguments(self, _):
                    'created it cannot be changed.')
 
         c.argument('administrator_login_password',
-                   options_list=['--admin-password', '-p']
+                   options_list=['--admin-password', '-p'],
                    help-'The administrator login password (required for'
                    'server creation).')
 
