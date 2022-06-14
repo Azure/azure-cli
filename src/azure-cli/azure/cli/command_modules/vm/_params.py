@@ -1396,6 +1396,16 @@ def load_arguments(self, _):
         c.argument('enable_auto_key_rotation', arg_type=get_three_state_flag(), min_api='2020-12-01',
                    options_list=['--enable-auto-key-rotation', '--auto-rotation'],
                    help='Enable automatic rotation of keys.')
+
+    with self.argument_context('disk-encryption-set create', min_api='2021-08-01') as c:
+        c.argument('federatedClientId', help='')
+        c.argument('mi_system_assigned', arg_group='Managed Identity', arg_type=get_three_state_flag(),
+                   help='Provide this flag to use system assigned identity. Check out help for more examples')
+        c.argument('mi_user_assigned', arg_group='Managed Identity', nargs='+',
+                   help='List of User Assigned Identity ids. Check out help for more examples')
+
+    with self.argument_context('disk-encryption-set update') as c:
+        c.argument('federatedClientId', help='')
     # endregion
 
     # region DiskAccess

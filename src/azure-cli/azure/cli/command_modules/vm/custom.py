@@ -3277,6 +3277,23 @@ def _build_identities_info(identities):
     return (info, identity_types, external_identities, 'SystemAssigned' in identity_types)
 
 
+def _build_identities_info_from_system_user_assigned(cmd, mi_system_assigned, mi_user_assigned):
+    UserAssignedIdentitiesValue = cmd.get_models('UserAssignedIdentitiesValue')
+    info = {}
+    identity_types = []
+    if mi_user_assigned:
+        if mi_system_assigned:
+            identity_types.append('SystemAssigned')
+        identity_types.append('UserAssigned')
+        info['userAssignedIdentities'] = {e: UserAssignedIdentitiesValue() for e in mi_user_assigned}
+    else:
+        identity_types.append('SystemAssigned')
+    identity_types = ', '.join(identity_types)
+
+    info['type'] = identity_types
+    return info
+
+
 def deallocate_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False):
     client = _compute_client_factory(cmd.cli_ctx)
     if instance_ids and len(instance_ids) == 1:
@@ -4547,21 +4564,35 @@ def _set_log_analytics_workspace_extension(cmd, resource_group_name, vm, vm_name
 # disk encryption set
 def create_disk_encryption_set(
         cmd, client, resource_group_name, disk_encryption_set_name, key_url, source_vault=None, encryption_type=None,
-        location=None, tags=None, no_wait=False, enable_auto_key_rotation=None):
+        location=None, tags=None, no_wait=False, enable_auto_key_rotation=None, federatedClientId=None,
+        mi_system_assigned=None, mi_user_assigned=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
     DiskEncryptionSet, EncryptionSetIdentity, KeyForDiskEncryptionSet, SourceVault = cmd.get_models(
         'DiskEncryptionSet', 'EncryptionSetIdentity', 'KeyForDiskEncryptionSet', 'SourceVault')
-    encryption_set_identity = EncryptionSetIdentity(type='SystemAssigned')
+
+    from azure.cli.core.profiles import ResourceType
+    if cmd.supported_api_version(resource_type=ResourceType.MGMT_COMPUTE,
+                                 operation_group='disk_encryption_sets', min_api='2021-08-01'):
+        identity_info = _build_identities_info_from_system_user_assigned(cmd, mi_system_assigned, mi_user_assigned)
+    else:
+        identity_info = {'type': 'SystemAssigned'}
+
+    encryption_set_identity = EncryptionSetIdentity(type=identity_info['type'])
+    if hasattr(encryption_set_identity, 'user_assigned_identities') and 'userAssignedIdentities' in identity_info:
+        encryption_set_identity.user_assigned_identities = identity_info['userAssignedIdentities']
+
     if source_vault is not None:
         if not is_valid_resource_id(source_vault):
-            source_vault = resource_id(subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
+            source_vault = resource_id(subscription=get_subscription_id(cmd.cli_ctx),
+                                       resource_group=resource_group_name,
                                        namespace='Microsoft.KeyVault', type='vaults', name=source_vault)
         source_vault = SourceVault(id=source_vault)
     key_for_disk_emcryption_set = KeyForDiskEncryptionSet(source_vault=source_vault, key_url=key_url)
     disk_encryption_set = DiskEncryptionSet(location=location, tags=tags, identity=encryption_set_identity,
                                             active_key=key_for_disk_emcryption_set, encryption_type=encryption_type,
-                                            rotation_to_latest_key_version_enabled=enable_auto_key_rotation)
+                                            rotation_to_latest_key_version_enabled=enable_auto_key_rotation,
+                                            federated_client_id=federatedClientId)
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, disk_encryption_set_name,
                        disk_encryption_set)
 
@@ -4573,7 +4604,7 @@ def list_disk_encryption_sets(cmd, client, resource_group_name=None):
 
 
 def update_disk_encryption_set(cmd, instance, client, resource_group_name, key_url=None, source_vault=None,
-                               enable_auto_key_rotation=None):
+                               enable_auto_key_rotation=None, federatedClientId=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
     if key_url:
@@ -4588,6 +4619,12 @@ def update_disk_encryption_set(cmd, instance, client, resource_group_name, key_u
 
     if enable_auto_key_rotation is not None:
         instance.rotation_to_latest_key_version_enabled = enable_auto_key_rotation
+
+    if federatedClientId is not None:
+        if not hasattr(instance, 'federated_client_id'):
+            # TODO need to throw an exception?
+            raise CLIError('')
+        instance.federated_client_id = federatedClientId
 
     return instance
 
