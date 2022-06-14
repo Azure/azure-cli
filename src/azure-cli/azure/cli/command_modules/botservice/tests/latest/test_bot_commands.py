@@ -17,7 +17,6 @@ import requests
 from azure.cli.command_modules.botservice.custom import prepare_webapp_deploy
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, LiveScenarioTest, live_only
 from azure.cli.testsdk.decorators import serial_test
-from azure.mgmt.botservice.models import ErrorException
 from knack.util import CLIError
 
 
@@ -142,7 +141,7 @@ class BotTests(ScenarioTest):
             })
 
             self.cmd(
-                'az bot create -g {rg} -n {botname} -d {description} -e {endpoint} --appid {app_id}  '
+                'az bot create -g {rg} -n {botname} -d {description} -e {endpoint} --appid {app_id}  --app-type MultiTenant'
                 '--tags key1=value1 -l {location}',
                 checks=[
                     self.check('name', '{botname}'),
@@ -152,16 +151,16 @@ class BotTests(ScenarioTest):
                     self.check('tags.key1', 'value1')
                 ])
 
-            self.cmd('az bot show -g {rg} -n {botname}', checks=[
+            self.cmd('az bot show -g {rg} -n {botname} --app-type MultiTenant', checks=[
                 self.check('name', '{botname}')
             ])
 
-            self.cmd('az bot update --description description2 -g {rg} -n {botname}', checks=[
+            self.cmd('az bot update --description description2 -g {rg} -n {botname} --app-type MultiTenant', checks=[
                 self.check('name', '{botname}'),
                 self.check('properties.description', 'description2')
             ])
 
-            self.cmd('az bot delete -g {rg} -n {botname}')
+            self.cmd('az bot delete -g {rg} -n {botname} --app-type MultiTenant')
 
     @ResourceGroupPreparer(random_name_length=20)
     def test_botservice_create_should_be_idempotent_and_return_existing_bot_info(self, resource_group):
@@ -290,7 +289,7 @@ class BotTests(ScenarioTest):
             'password': str(uuid.uuid4())
         })
         self.cmd(
-            'az bot create -g {rg} -n {botname} --appid {app_id} ')
+            'az bot create -g {rg} -n {botname} --appid {app_id} --app-type MultiTenant')
 
     @ResourceGroupPreparer(random_name_length=20)
     @live_only()  # if the path to download already exist the tests fail as by design which makes this not idempotent
@@ -526,7 +525,7 @@ class BotTests(ScenarioTest):
             # clean up the folder
             shutil.rmtree(dir_path)
 
-        self.cmd('az bot create -g {rg} -n {botname} --appid {app_id} ',
+        self.cmd('az bot create -g {rg} -n {botname} --appid {app_id} --app-type MultiTenant',
                  checks={
                      self.check('resourceGroup', '{rg}'),
                      self.check('id', '{botname}'),
@@ -565,7 +564,7 @@ class BotTests(ScenarioTest):
         })
 
         self.cmd(
-            'az bot create -g {rg} -n {botname} -d {description} -e {endpoint} --appid {app_id} --tags '
+            'az bot create -g {rg} -n {botname} -d {description} -e {endpoint} --appid {app_id} --app-type MultiTenant --tags '
             'key1=value1',
             checks=[
                 self.check('name', '{botname}'),
@@ -690,7 +689,7 @@ class BotTests(ScenarioTest):
                          "for more information on App Registrations. See 'az bot create --help' for more CLI " \
                          "information."
         try:
-            self.cmd('az bot create -g {rg} -n {botname} --appid {numbers_id}')
+            self.cmd('az bot create -g {rg} -n {botname} --appid {numbers_id} --app-type MultiTenant')
             raise AssertionError()
         except CLIError as cli_error:
             assert cli_error.__str__() == expected_error
@@ -698,7 +697,7 @@ class BotTests(ScenarioTest):
             raise AssertionError('should have thrown an error for appid that is not valid GUID.')
 
         try:
-            self.cmd('az bot create -g {rg} -n {botname} --appid {short_app_id}')
+            self.cmd('az bot create -g {rg} -n {botname} --appid {short_app_id} --app-type MultiTenant')
             raise AssertionError()
         except CLIError as cli_error:
             assert cli_error.__str__() == expected_error
@@ -706,7 +705,7 @@ class BotTests(ScenarioTest):
             raise AssertionError('should have thrown an error for appid that is not valid GUID.')
 
         try:
-            self.cmd('az bot create -g {rg} -n {botname} --appid ""')
+            self.cmd('az bot create -g {rg} -n {botname} --appid "" --app-type MultiTenant')
             raise AssertionError()
         except CLIError as cli_error:
             assert cli_error.__str__() == expected_error
@@ -721,7 +720,7 @@ class BotTests(ScenarioTest):
         })
 
         try:
-            self.cmd('az bot create -g {rg} -n {botname} --appid {app_id}')
+            self.cmd('az bot create -g {rg} -n {botname} --appid {app_id} --app-type MultiTenant')
             raise AssertionError()
         except CLIError as cli_error:
             assert cli_error.__str__() == "--password cannot have a length of 0 for Web App Bots. This value is used to " \
@@ -742,7 +741,7 @@ class BotTests(ScenarioTest):
         })
 
         self.cmd(
-            'az bot create -g {rg} -n {botname} -d {description} -e {endpoint} --appid {app_id}',
+            'az bot create -g {rg} -n {botname} -d {description} -e {endpoint} --appid {app_id} --app-type MultiTenant',
             checks=[
                 self.check('name', '{botname}'),
                 self.check('properties.description', '{description}'),
@@ -752,7 +751,7 @@ class BotTests(ScenarioTest):
 
         try:
             self.cmd(
-                'az bot create -g {rg2} -n {botname} -d {description} -e {endpoint} --appid {app_id}')
+                'az bot create -g {rg2} -n {botname} -d {description} -e {endpoint} --appid {app_id} --app-type MultiTenant')
             raise AssertionError()
         except CLIError as cli_error:
             assert cli_error.__str__().startswith('Unable to create bot.\nReason: ')
@@ -802,7 +801,7 @@ class BotTests(ScenarioTest):
         })
 
         self.cmd(
-            'az bot create -g {rg} -n {botname} --appid {app_id}',
+            'az bot create -g {rg} -n {botname} --appid {app_id} --app-type MultiTenant',
             checks=[
                 self.check('name', '{botname}'),
             ])

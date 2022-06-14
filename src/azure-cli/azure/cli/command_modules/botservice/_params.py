@@ -58,6 +58,9 @@ def load_arguments(self, _):
         c.argument('description', options_list=['--description', '-d'], help='The description of the bot.', arg_group='Registration Bot Specific')
         c.argument('endpoint', options_list=['-e', '--endpoint'], help='The messaging endpoint of the bot.', arg_group='Registration Bot Specific')
         c.argument('msa_app_id', options_list=['--appid'], help='The Microsoft account ID (MSA ID) to be used with the bot.')
+        c.argument('msa_app_type', options_list=['--app-type'], help='Microsoft App Type for the bot. Possible values include: "UserAssignedMSI", "SingleTenant", "MultiTenant".')
+        c.argument('msa_app_tenant_id', options_list=['--tenant-id'], help='Microsoft App Tenant Id for the bot.')
+        c.argument('msa_app_msi_resource_id', options_list=['--msi-resource-id'], help='Microsoft App Managed Identity Resource Id for the bot.')
         c.argument('tags', arg_type=tags_type)
         c.argument('cmek_key_vault_url', options_list=['--cmk-key-vault-key-url', '--cmk'], help='The key vault key url to enable Customer Managed Keys encryption')
 

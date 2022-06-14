@@ -21,7 +21,6 @@ from azure.mgmt.botservice.models import (
     ConnectionSetting,
     ConnectionSettingProperties,
     ConnectionSettingParameter,
-    ErrorException,
     Sku)
 
 from knack.util import CLIError
@@ -79,20 +78,23 @@ def __handle_failed_name_check(name_response, cmd, client, resource_group_name, 
         existing_bot = get_bot(cmd, client, resource_group_name, resource_name)
         logger.warning('Provided bot name already exists in Resource Group. Returning bot information:')
         return existing_bot
-    except ErrorException as e:
-        if e.error.error.code == 'ResourceNotFound':
-            code = e.error.error.code
-            message = e.error.error.message
-
-            logger.debug('Bot "%s" not found in Resource Group "%s".\n  Code: "%s"\n  Message: '
-                         '"%s"', resource_name, resource_group_name, code, message)
-            raise CLIError('Unable to create bot.\nReason: "{}"'.format(name_response.message))
-
-        # For other error codes, raise them to the user
+    except Exception as e:
         raise e
+    # except ErrorException as e:
+    #     if e.error.error.code == 'ResourceNotFound':
+    #         code = e.error.error.code
+    #         message = e.error.error.message
+
+    #         logger.debug('Bot "%s" not found in Resource Group "%s".\n  Code: "%s"\n  Message: '
+    #                      '"%s"', resource_name, resource_group_name, code, message)
+    #         raise CLIError('Unable to create bot.\nReason: "{}"'.format(name_response.message))
+
+    #     # For other error codes, raise them to the user
+    #     raise e
 
 
-def create(cmd, client, resource_group_name, resource_name, msa_app_id, app_type, description=None, display_name=None,
+def create(cmd, client, resource_group_name, resource_name, msa_app_id, msa_app_type,
+           msa_app_tenant_id=None, msa_app_msi_resource_id=None, description=None, display_name=None,
            endpoint=None, tags=None, location='global', sku_name='F0', cmek_key_vault_url=None):
     # Kind only support azure bot for now
     kind = "azurebot"
@@ -142,6 +144,9 @@ def create(cmd, client, resource_group_name, resource_name, msa_app_id, app_type
             description=description,
             endpoint=endpoint,
             msa_app_id=msa_app_id,
+            msa_app_type=msa_app_type,
+            msa_app_tenant_id=msa_app_tenant_id,
+            msa_app_msi_resource_id=msa_app_msi_resource_id,
             is_cmek_enabled=is_cmek_enabled,
             cmek_key_vault_url=cmek_key_vault_url
         )

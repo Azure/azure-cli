@@ -7,15 +7,15 @@ from knack.util import CLIError
 
 
 def bot_exception_handler(ex):
-    from azure.mgmt.botservice.models import ErrorException
+    # from azure.mgmt.botservice.models import ErrorException
     from msrestazure.azure_exceptions import CloudError
     from msrest.exceptions import ClientRequestError  # pylint: disable=import-error
-    if isinstance(ex, ErrorException):
-        message = 'An error occurred. {0}: {1}'.format(
-            ex.error.error.code,
-            ex.error.error.message
-        )
-        raise CLIError(message)
+    # if isinstance(ex, ErrorException):
+    #     message = 'An error occurred. {0}: {1}'.format(
+    #         ex.error.error.code,
+    #         ex.error.error.message
+    #     )
+    #     raise CLIError(message)
     if isinstance(ex, CloudError) and ex.status_code == 404:
         return None
     if isinstance(ex, ClientRequestError):
