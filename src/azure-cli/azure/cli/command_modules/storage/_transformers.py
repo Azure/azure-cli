@@ -471,3 +471,21 @@ def transform_share_list_handle(result):
         item["handleId"] = item.id
         delattr(item, "id")
     return result
+
+
+def transform_file_show_result(result):
+    result = todict(result)
+    new_result = {
+        "content": result.pop('content', ""),
+        "properties": {
+            "contentLength": result.pop('contentLength', None),
+            "contentRange": result.pop('contentRange', None),
+            "contentSettings": result.pop('contentSettings', None),
+            "copy": result.pop('copy', None),
+            "etag": result.pop('etag', None),
+            "lastModified": result.pop('lastModified', None),
+            "serverEncrypted": result.pop('serverEncrypted', None)
+        }
+    }
+    new_result.update(result)
+    return new_result
