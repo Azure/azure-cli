@@ -393,7 +393,7 @@ def _configure_db_dw_params(arg_ctx):
 
     arg_ctx.argument('license_type',
                      arg_type=get_enum_type(DatabaseLicenseType),
-                     help='The license type to apply for this database.'  
+                     help='The license type to apply for this database.'
                      '``LicenseIncluded`` if you need a license, or ``BasePrice``'
                      'if you have a license and are eligible for the Azure Hybrid'
                      'Benefit.  Allowed values: BasePrice, LicenseIncluded.')
