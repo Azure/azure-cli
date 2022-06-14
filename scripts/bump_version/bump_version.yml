@@ -1,4 +1,4 @@
-name: CLI BUMP VERSION $(PACKAGE) $(TARGET_PACKAGE_VERSION) $(RESOURCE_TYPE) $(TARGET_API_VERSION) $(Date:yyyyMMdd)
+name: CLI BUMP VERSION $(PACKAGE) $(TARGET_PACKAGE_VERSION) $(Date:yyyyMMdd)
 
 resources:
 - repo: self
@@ -38,16 +38,28 @@ jobs:
       inputs:
         versionSpec: '3.10'
         displayName: "Use Python 3.10"
-    - template: ../../.azure-pipelines/templates/azdev_setup.yml
     - bash: |
         set -ev
-        pwd
+        ls
 
         echo package: $(PACKAGE) $(TARGET_PACKAGE_VERSION)
         echo resource_type: $(RESOURCE_TYPE) $(TARGET_API_VERSION)
 
-        git status
-        source env/bin/activate
-        #serial_modules="appservice botservice cloud network azure-cli-core azure-cli-telemetry"
-        #python ../ci/automation_full_test.py "8" "$(Instance_idx)" "latest" "$serial_modules"
+        if [[ not $(PACKAGE) or not $(TARGET_PACKAGE_VERSION)]]; then
+          echo "'PACKAGE' and 'TARGET_PACKAGE_VERSION' are required"
+          exit 1
+        fi
+        sed -i "s/'$(PACKAGE)==.*'/'$(PACKAGE)==$(TARGET_PACKAGE_VERSION)'/g" ./src/azure-cli/setup.py
+        sed -i "s/$(PACKAGE)==.*/$(PACKAGE)==$(TARGET_PACKAGE_VERSION)/g" ./src/azure-cli/requirements.py3.windows.txt
+        sed -i "s/$(PACKAGE)==.*/$(PACKAGE)==$(TARGET_PACKAGE_VERSION)/g" ./src/azure-cli/requirements.py3.Linux.txt
+        sed -i "s/$(PACKAGE)==.*/$(PACKAGE)==$(TARGET_PACKAGE_VERSION)/g" ./src/azure-cli/requirements.py3.Darwin.txt
+
+        if [[ -n $(RESOURCE_TYPE) ]]; then
+          python scripts/bump_version/update_api_profile.py "$(RESOURCE_TYPE)" "$(TARGET_API_VERSION)"
+        fi
+      displayName: "update version"
+    - template: .azure-pipelines/templates/azdev_setup.yml
+    - bash: |
+        serial_modules="appservice botservice cloud network azure-cli-core azure-cli-telemetry"
+        python scripts/ci/automation_full_test.py "8" "$(Instance_idx)" "latest" "$serial_modules"
       displayName: "azdev test"
