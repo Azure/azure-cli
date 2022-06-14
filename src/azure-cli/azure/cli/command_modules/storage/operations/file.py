@@ -10,13 +10,10 @@ Commands for storage file share operations
 import os
 from knack.log import get_logger
 
-from azure.cli.command_modules.storage.util import (filter_none, collect_blobs, collect_files,
-                                                    create_blob_service_from_storage_client,
-                                                    create_short_lived_container_sas, create_short_lived_share_sas,
+from azure.cli.command_modules.storage.util import (filter_none, collect_blobs, collect_files_track2,
                                                     guess_content_type)
-from azure.cli.command_modules.storage.url_quote_util import encode_for_url, make_encoded_file_url_and_params
 from azure.cli.core.profiles import ResourceType, get_sdk
-from azure.core.exceptions import HttpResponseError, ResourceNotFoundError
+from azure.core.exceptions import HttpResponseError, ResourceNotFoundError, ResourceExistsError
 from .fileshare import _get_client
 
 logger = get_logger(__name__)
@@ -225,17 +222,27 @@ def storage_file_download_batch(cmd, client, source, destination, pattern=None, 
     return list(_download_action(f) for f in source_files)
 
 
-def storage_file_copy_batch(cmd, client, source_client, destination_share=None, destination_path=None,
+def storage_file_copy(client, copy_source, **kwargs):
+    result = client.start_copy_from_url(source_url=copy_source, **kwargs)
+    result['id'] = result['copy_id']
+    result['status'] = result['copy_status']
+    del result['copy_id']
+    del result['copy_status']
+    return result
+
+
+def storage_file_copy_batch(cmd, client, source_client, share_name=None, destination_path=None,
                             source_container=None, source_share=None, source_sas=None, pattern=None, dryrun=False,
-                            metadata=None, timeout=None):
+                            metadata=None, timeout=None, **kwargs):
     """
     Copy a group of files asynchronously
     """
     if dryrun:
         logger.warning('copy files or blobs to file share')
         logger.warning('    account %s', client.account_name)
-        logger.warning('      share %s', destination_share)
+        logger.warning('      share %s', share_name)
         logger.warning('       path %s', destination_path)
+        logger.warning('    source account %s', kwargs.get('source_account_name', ""))
         logger.warning('     source %s', source_container or source_share)
         logger.warning('source type %s', 'blob' if source_container else 'file')
         logger.warning('    pattern %s', pattern)
@@ -244,23 +251,16 @@ def storage_file_copy_batch(cmd, client, source_client, destination_share=None, 
     if source_container:
         # copy blobs to file share
 
-        # if the source client is None, recreate one from the destination client.
-        source_client = source_client or create_blob_service_from_storage_client(cmd, client)
-
         # the cache of existing directories in the destination file share. the cache helps to avoid
         # repeatedly create existing directory so as to optimize the performance.
         existing_dirs = set([])
-
-        if not source_sas:
-            source_sas = create_short_lived_container_sas(cmd, source_client.account_name, source_client.account_key,
-                                                          source_container)
 
         # pylint: disable=inconsistent-return-statements
         def action_blob_copy(blob_name):
             if dryrun:
                 logger.warning('  - copy blob %s', blob_name)
             else:
-                return _create_file_and_directory_from_blob(client, source_client, destination_share, source_container,
+                return _create_file_and_directory_from_blob(cmd, client, source_client, share_name, source_container,
                                                             source_sas, blob_name, destination_dir=destination_path,
                                                             metadata=metadata, timeout=timeout,
                                                             existing_dirs=existing_dirs)
@@ -271,17 +271,9 @@ def storage_file_copy_batch(cmd, client, source_client, destination_share=None, 
     if source_share:
         # copy files from share to share
 
-        # if the source client is None, assume the file share is in the same storage account as
-        # destination, therefore client is reused.
-        source_client = source_client or client
-
         # the cache of existing directories in the destination file share. the cache helps to avoid
         # repeatedly create existing directory so as to optimize the performance.
         existing_dirs = set([])
-
-        if not source_sas:
-            source_sas = create_short_lived_share_sas(cmd, source_client.account_name, source_client.account_key,
-                                                      source_share)
 
         # pylint: disable=inconsistent-return-statements
         def action_file_copy(file_info):
@@ -289,13 +281,13 @@ def storage_file_copy_batch(cmd, client, source_client, destination_share=None, 
             if dryrun:
                 logger.warning('  - copy file %s', os.path.join(dir_name, file_name))
             else:
-                return _create_file_and_directory_from_file(client, source_client, destination_share, source_share,
+                return _create_file_and_directory_from_file(cmd, client, source_client, share_name, source_share,
                                                             source_sas, dir_name, file_name,
                                                             destination_dir=destination_path, metadata=metadata,
                                                             timeout=timeout, existing_dirs=existing_dirs)
 
         return list(filter_none(
-            action_file_copy(file) for file in collect_files(cmd, source_client, source_share, pattern)))
+            action_file_copy(file) for file in collect_files_track2(source_client, source_share, pattern)))
     # won't happen, the validator should ensure either source_container or source_share is set
     raise ValueError('Fail to find source. Neither blob container or file share is specified.')
 
@@ -328,7 +320,7 @@ def storage_file_delete_batch(cmd, client, source, pattern=None, dryrun=False, t
         delete_action(f)
 
 
-def _create_file_and_directory_from_blob(file_service, blob_service, share, container, sas, blob_name,
+def _create_file_and_directory_from_blob(cmd, file_service, blob_service, share, container, sas, blob_name,
                                          destination_dir=None, metadata=None, timeout=None, existing_dirs=None):
     """
     Copy a blob to file share and create the directory if needed.
@@ -336,15 +328,19 @@ def _create_file_and_directory_from_blob(file_service, blob_service, share, cont
     from azure.common import AzureException
     from azure.cli.command_modules.storage.util import normalize_blob_file_path
 
-    blob_url = blob_service.make_blob_url(container, encode_for_url(blob_name), sas_token=sas)
+    t_blob_client = cmd.get_models('_blob_client#BlobClient', resource_type=ResourceType.DATA_STORAGE_BLOB)
+    source_client = t_blob_client(account_url=blob_service.url, container_name=container,
+                                  blob_name=blob_name, credential=sas)
+    blob_url = source_client.url
+
     full_path = normalize_blob_file_path(destination_dir, blob_name)
-    file_name = os.path.basename(full_path)
     dir_name = os.path.dirname(full_path)
-    _make_directory_in_files_share(file_service, share, dir_name, existing_dirs)
+    _make_directory_in_files_share(file_service, share, dir_name, existing_dirs, V2=True)
 
     try:
-        file_service.copy_file(share, dir_name, file_name, blob_url, metadata, timeout)
-        return file_service.make_file_url(share, dir_name, file_name)
+        file_client = file_service.get_file_client(full_path)
+        file_client.start_copy_from_url(source_url=blob_url, metadata=metadata, timeout=timeout)
+        return file_client.url
     except AzureException:
         error_template = 'Failed to copy blob {} to file share {}. Please check if you have permission to read ' \
                          'source or set a correct sas token.'
@@ -352,27 +348,32 @@ def _create_file_and_directory_from_blob(file_service, blob_service, share, cont
         raise CLIError(error_template.format(blob_name, share))
 
 
-def _create_file_and_directory_from_file(file_service, source_file_service, share, source_share, sas, source_file_dir,
-                                         source_file_name, destination_dir=None, metadata=None, timeout=None,
-                                         existing_dirs=None):
+def _create_file_and_directory_from_file(cmd, file_service, source_file_service, share, source_share, sas,
+                                         source_file_dir, source_file_name, destination_dir=None, metadata=None,
+                                         timeout=None, existing_dirs=None):
     """
     Copy a file from one file share to another
     """
     from azure.common import AzureException
     from azure.cli.command_modules.storage.util import normalize_blob_file_path
 
-    file_url, source_file_dir, source_file_name = make_encoded_file_url_and_params(source_file_service, source_share,
-                                                                                   source_file_dir, source_file_name,
-                                                                                   sas_token=sas)
+    file_path = source_file_name
+    if source_file_dir:
+        file_path = source_file_dir + '/' + file_path
+    t_file_client = cmd.get_models('_file_client#ShareFileClient', resource_type=ResourceType.DATA_STORAGE_FILESHARE)
+    source_client = t_file_client(account_url=source_file_service.url, share_name=source_share, file_path=file_path,
+                                  credential=sas)
+    file_url = source_client.url
 
     full_path = normalize_blob_file_path(destination_dir, os.path.join(source_file_dir, source_file_name))
     file_name = os.path.basename(full_path)
     dir_name = os.path.dirname(full_path)
-    _make_directory_in_files_share(file_service, share, dir_name, existing_dirs)
+    _make_directory_in_files_share(file_service, share, dir_name, existing_dirs, V2=True)
 
     try:
-        file_service.copy_file(share, dir_name, file_name, file_url, metadata, timeout)
-        return file_service.make_file_url(share, dir_name or None, file_name)
+        file_client = file_service.get_file_client(full_path)
+        file_client.start_copy_from_url(source_url=file_url, metadata=metadata, timeout=timeout)
+        return file_client.url
     except AzureException:
         error_template = 'Failed to copy file {} from share {} to file share {}. Please check if ' \
                          'you have right permission to read source or set a correct sas token.'
@@ -380,7 +381,7 @@ def _create_file_and_directory_from_file(file_service, source_file_service, shar
         raise CLIError(error_template.format(file_name, source_share, share))
 
 
-def _make_directory_in_files_share(file_service, file_share, directory_path, existing_dirs=None):
+def _make_directory_in_files_share(file_service, file_share, directory_path, existing_dirs=None, V2=False):
     """
     Create directories recursively.
 
@@ -404,7 +405,12 @@ def _make_directory_in_files_share(file_service, file_share, directory_path, exi
             continue
 
         try:
-            file_service.create_directory(share_name=file_share, directory_name=dir_name, fail_on_exist=False)
+            if V2:
+                file_service.create_directory(directory_name=dir_name)
+            else:
+                file_service.create_directory(share_name=file_share, directory_name=dir_name, fail_on_exist=False)
+        except ResourceExistsError:
+            pass
         except AzureHttpError:
             from knack.util import CLIError
             raise CLIError('Failed to create directory {}'.format(dir_name))
