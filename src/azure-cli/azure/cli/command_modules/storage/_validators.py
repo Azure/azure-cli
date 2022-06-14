@@ -318,7 +318,8 @@ def process_blob_source_uri(cmd, namespace):
 
 
 def validate_source_uri(cmd, namespace):  # pylint: disable=too-many-statements
-    from .util import create_short_lived_blob_sas, create_short_lived_file_sas
+    from .util import create_short_lived_blob_sas, create_short_lived_blob_sas_v2, \
+        create_short_lived_file_sas, create_short_lived_file_sas_v2
     usage_string = \
         'Invalid usage: {}. Supply only one of the following argument sets to specify source:' \
         '\n\t   --source-uri [--source-sas]' \
@@ -394,12 +395,21 @@ def validate_source_uri(cmd, namespace):  # pylint: disable=too-many-statements
     # Both source account name and either key or sas (or both) are now available
     if not source_sas:
         # generate a sas token even in the same account when the source and destination are not the same kind.
+        prefix = cmd.command_kwargs['resource_type'].value[0]
         if valid_file_source and (ns.get('container_name', None) or not same_account):
             dir_name, file_name = os.path.split(path) if path else (None, '')
-            source_sas = create_short_lived_file_sas(cmd, source_account_name, source_account_key, share,
-                                                     dir_name, file_name)
+            if is_storagev2(prefix):
+                source_sas = create_short_lived_file_sas_v2(cmd, source_account_name, source_account_key, share,
+                                                            dir_name, file_name)
+            else:
+                source_sas = create_short_lived_file_sas(cmd, source_account_name, source_account_key, share,
+                                                         dir_name, file_name)
         elif valid_blob_source and (ns.get('share_name', None) or not same_account):
-            source_sas = create_short_lived_blob_sas(cmd, source_account_name, source_account_key, container, blob)
+            if is_storagev2(prefix):
+                source_sas = create_short_lived_blob_sas_v2(cmd, source_account_name, source_account_key, container,
+                                                            blob)
+            else:
+                source_sas = create_short_lived_blob_sas(cmd, source_account_name, source_account_key, container, blob)
 
     query_params = []
     if source_sas:
