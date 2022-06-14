@@ -55,6 +55,13 @@ class VMImageListByAliasesScenarioTest(ScenarioTest):
         self.assertEqual(result[0]['publisher'], 'Canonical')
         self.assertTrue(result[0]['sku'].endswith('LTS'))
 
+    def test_vm_image_list_by_alias_and_filtered_by_arch(self):
+        result = self.cmd('vm image list --offer ubuntu --architecture x64').get_output_in_json()
+        self.assertTrue(len(result) >= 1)
+        self.assertEqual(result[0]['publisher'], 'Canonical')
+        self.assertTrue(result[0]['sku'].endswith('LTS'))
+        self.assertEqual(result[0]['architecture'], 'x64')
+
 
 class VMUsageScenarioTest(ScenarioTest):
 
@@ -79,6 +86,16 @@ class VMImageListThruServiceScenarioTest(ScenarioTest):
     def test_vm_images_list_thru_services_edge_zone(self):
         result = self.cmd('vm image list --edge-zone microsoftlosangeles1 --offer CentOs --publisher OpenLogic --sku 7.7 -o tsv --all').output
         assert result.index('7.7') >= 0
+
+    @AllowLargeResponse()
+    def test_vm_images_list_thru_services_filtered_by_arch(self):
+        result = self.cmd("vm image list --publisher Debian --architecture Arm64 -o tsv --all").output
+        assert result.index('Arm64') >= 0
+
+    @AllowLargeResponse()
+    def test_vm_images_list_thru_services_edge_zone_by_arch(self):
+        result = self.cmd('vm image list --edge-zone microsoftlosangeles1 --offer CentOs --publisher OpenLogic --sku 7.7 --architecture x64 -o tsv --all').output
+        assert result.index('x64') >= 0
 
 
 class VMOpenPortTest(ScenarioTest):

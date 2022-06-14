@@ -112,6 +112,11 @@ def load_arguments(self, _):
         min_api='2020-12-01',
         is_preview=True
     )
+    
+    architecture_type = CLIArgumentType(
+        help='The name of architecture. ',
+        arg_type=get_enum_type(["x64", "Arm64"])
+    )
 
     t_shared_to = self.get_models('SharedToValues', operation_group='shared_galleries')
     shared_to_type = CLIArgumentType(
@@ -521,6 +526,7 @@ def load_arguments(self, _):
     with self.argument_context('vm image list') as c:
         c.argument('image_location', get_location_type(self.cli_ctx))
         c.argument('edge_zone', edge_zone_type)
+        c.argument('architecture', architecture_type)
 
     with self.argument_context('vm image list-offers') as c:
         c.argument('edge_zone', edge_zone_type)

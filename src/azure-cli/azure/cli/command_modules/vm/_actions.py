@@ -46,7 +46,7 @@ def _get_thread_count():
     return 5  # don't increase too much till https://github.com/Azure/msrestazure-for-python/issues/6 is fixed
 
 
-def load_images_thru_services(cli_ctx, publisher, offer, sku, location, edge_zone):
+def load_images_thru_services(cli_ctx, publisher, offer, sku, location, edge_zone, architecture):
     from concurrent.futures import ThreadPoolExecutor, as_completed
 
     all_images = []
@@ -79,10 +79,11 @@ def load_images_thru_services(cli_ctx, publisher, offer, sku, location, edge_zon
                 skus = [s for s in skus if _matched(sku, s.name)]
             for s in skus:
                 try:
+                    expand = "properties"
                     if edge_zone is not None:
-                        images = edge_zone_client.list(location, edge_zone, publisher, o.name, s.name)
+                        images = edge_zone_client.list(location, edge_zone, publisher, o.name, s.name, expand)
                     else:
-                        images = client.virtual_machine_images.list(location, publisher, o.name, s.name)
+                        images = client.virtual_machine_images.list(location, publisher, o.name, s.name, expand)
                 except ResourceNotFoundError as e:
                     logger.warning(str(e))
                     continue
@@ -91,10 +92,13 @@ def load_images_thru_services(cli_ctx, publisher, offer, sku, location, edge_zon
                         'publisher': publisher,
                         'offer': o.name,
                         'sku': s.name,
-                        'version': i.name
+                        'version': i.name,
+                        'architecture': i.additional_properties.get("properties", {}).get("architecture", None) or ""
                     }
                     if edge_zone is not None:
                         image_info['edge_zone'] = edge_zone
+                    if architecture != image_info['architecture']:
+                        continue
                     all_images.append(image_info)
 
     if edge_zone is not None:
@@ -120,7 +124,7 @@ def load_images_thru_services(cli_ctx, publisher, offer, sku, location, edge_zon
     return all_images
 
 
-def load_images_from_aliases_doc(cli_ctx, publisher=None, offer=None, sku=None):
+def load_images_from_aliases_doc(cli_ctx, publisher=None, offer=None, sku=None, architecture=None):
     import requests
     from azure.cli.core.cloud import CloudEndpointNotSetException
     from azure.cli.core.util import should_disable_connection_verify
@@ -155,12 +159,14 @@ def load_images_from_aliases_doc(cli_ctx, publisher=None, offer=None, sku=None):
                     'publisher': vv['publisher'],
                     'offer': vv['offer'],
                     'sku': vv['sku'],
-                    'version': vv['version']
+                    'version': vv['version'],
+                    'architecture': vv['architecture']
                 })
 
         all_images = [i for i in all_images if (_matched(publisher, i['publisher']) and
                                                 _matched(offer, i['offer']) and
-                                                _matched(sku, i['sku']))]
+                                                _matched(sku, i['sku']) and 
+                                                _matched(architecture, i['architecture']))]
         return all_images
     except KeyError:
         raise CLIError('Could not retrieve image list from {} or local copy'.format(target_url))
