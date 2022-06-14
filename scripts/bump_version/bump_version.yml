@@ -59,6 +59,9 @@ jobs:
       displayName: "update version"
     - template: ../../.azure-pipelines/templates/azdev_setup.yml
     - bash: |
+        set -ev
+
+        source env/bin/activate
         serial_modules="appservice botservice cloud network azure-cli-core azure-cli-telemetry"
         python scripts/ci/automation_full_test.py "8" "$(Instance_idx)" "latest" "$serial_modules"
       displayName: "azdev test"
