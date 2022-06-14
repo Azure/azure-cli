@@ -57,6 +57,7 @@ from .custom import (
     ElasticPoolCapabilitiesAdditionalDetails,
     FailoverPolicyType,
     ResourceIdType,
+    ServicePrincipalType,
     SqlServerMinimalTlsVersionType,
     SqlManagedInstanceMinimalTlsVersionType,
     AuthenticationType
@@ -260,10 +261,12 @@ allow_data_loss_param_type = CLIArgumentType(
 
 aad_admin_login_param_type = CLIArgumentType(
     options_list=['--display-name', '-u'],
+    required=True,
     help='Display name of the Azure AD administrator user or group.')
 
 aad_admin_sid_param_type = CLIArgumentType(
     options_list=['--object-id', '-i'],
+    required=True,
     help='The unique ID of the Azure AD administrator.')
 
 read_scale_param_type = CLIArgumentType(
@@ -1977,6 +1980,13 @@ def load_arguments(self, _):
                    options_list=['--external-admin-principal-type'],
                    help='User, Group or Application')
 
+        c.argument('service_principal_type',
+                   options_list=['--service-principal-type'],
+                   arg_type=get_enum_type(ServicePrincipalType),
+                   required=False,
+                   help='Service Principal type to be used for this Managed Instance. '
+                   'Possible values are SystemAssigned and None')
+
     with self.argument_context('sql mi update') as c:
         # Create args that will be used to build up the ManagedInstance object
         create_args_for_complex_type(
@@ -2026,6 +2036,13 @@ def load_arguments(self, _):
                    required=False,
                    help='Name or ID of the subnet that allows access to an Azure Sql Managed Instance. '
                    'If subnet name is provided, --vnet-name must be provided.')
+
+        c.argument('service_principal_type',
+                   options_list=['--service-principal-type'],
+                   arg_type=get_enum_type(ServicePrincipalType),
+                   required=False,
+                   help='Service Principal type to be used for this Managed Instance. '
+                   'Possible values are SystemAssigned and None')
 
     with self.argument_context('sql mi show') as c:
         c.argument('expand_ad_admin',
