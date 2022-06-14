@@ -123,6 +123,7 @@ def load_command_table(self, _):
         g.custom_command('delete', 'apim_nv_delete', confirmation=True)
         g.custom_command('show-secret', 'apim_nv_show_secret')
         g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='apim_nv_update')
+        g.wait_command('wait')
 
     with self.command_group('apim api operation', apiops_sdk) as g:
         g.custom_command('list', 'apim_api_operation_list')
