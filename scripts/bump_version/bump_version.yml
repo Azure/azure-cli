@@ -45,7 +45,7 @@ jobs:
         echo package: $(PACKAGE) $(TARGET_PACKAGE_VERSION)
         echo resource_type: $(RESOURCE_TYPE) $(TARGET_API_VERSION)
 
-        if [[ not $(PACKAGE) or not $(TARGET_PACKAGE_VERSION)]]; then
+        if [[ -z $(PACKAGE) || -z $(TARGET_PACKAGE_VERSION)]]; then
           echo "'PACKAGE' and 'TARGET_PACKAGE_VERSION' are required"
           exit 1
         fi
