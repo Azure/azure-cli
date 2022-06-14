@@ -1718,9 +1718,9 @@ def process_disk_or_snapshot_create_namespace(cmd, namespace):
     validate_tags(namespace)
     validate_edge_zone(cmd, namespace)
     if namespace.source:
-        usage_error = 'usage error: --source {SNAPSHOT | DISK} | --source VHD_BLOB_URI [--source-storage-account-id ID]'
+        usage_error = 'usage error: --source {SNAPSHOT | DISK | RESTOREPOINT} | --source VHD_BLOB_URI [--source-storage-account-id ID]'
         try:
-            namespace.source_blob_uri, namespace.source_disk, namespace.source_snapshot, source_info = \
+            namespace.source_blob_uri, namespace.source_disk, namespace.source_snapshot, namespace.source_restore_point, source_info = \
                 _figure_out_storage_source(cmd.cli_ctx, namespace.resource_group_name, namespace.source)
             if not namespace.source_blob_uri and namespace.source_storage_account_id:
                 raise CLIError(usage_error)
@@ -1773,13 +1773,14 @@ def process_image_create_namespace(cmd, namespace):
             raise CLIError("'--data-disk-sources' is not allowed when capturing "
                            "images from virtual machines")
     else:
-        namespace.os_blob_uri, namespace.os_disk, namespace.os_snapshot, _ = _figure_out_storage_source(cmd.cli_ctx, namespace.resource_group_name, namespace.source)  # pylint: disable=line-too-long
+        namespace.os_blob_uri, namespace.os_disk, namespace.os_snapshot, _, _ = _figure_out_storage_source(cmd.cli_ctx, namespace.resource_group_name, namespace.source)  # pylint: disable=line-too-long
         namespace.data_blob_uris = []
         namespace.data_disks = []
         namespace.data_snapshots = []
+        # namespace.data_restore_points = []
         if namespace.data_disk_sources:
             for data_disk_source in namespace.data_disk_sources:
-                source_blob_uri, source_disk, source_snapshot, _ = _figure_out_storage_source(
+                source_blob_uri, source_disk, source_snapshot, _, _ = _figure_out_storage_source(
                     cmd.cli_ctx, namespace.resource_group_name, data_disk_source)
                 if source_blob_uri:
                     namespace.data_blob_uris.append(source_blob_uri)
@@ -1787,6 +1788,8 @@ def process_image_create_namespace(cmd, namespace):
                     namespace.data_disks.append(source_disk)
                 if source_snapshot:
                     namespace.data_snapshots.append(source_snapshot)
+                # if source_restore_point:
+                #     namespace.data_restore_points.append(source_restore_point)
         if not namespace.os_type:
             raise CLIError("usage error: os type is required to create the image, "
                            "please specify '--os-type OS_TYPE'")
@@ -1797,12 +1800,15 @@ def _figure_out_storage_source(cli_ctx, resource_group_name, source):
     source_disk = None
     source_snapshot = None
     source_info = None
+    source_restore_point = None
     if urlparse(source).scheme:  # a uri?
         source_blob_uri = source
     elif '/disks/' in source.lower():
         source_disk = source
     elif '/snapshots/' in source.lower():
         source_snapshot = source
+    elif '/restorepoints/' in source.lower():
+        source_restore_point = source
     else:
         source_info, is_snapshot = _get_disk_or_snapshot_info(cli_ctx, resource_group_name, source)
         if is_snapshot:
@@ -1810,7 +1816,7 @@ def _figure_out_storage_source(cli_ctx, resource_group_name, source):
         else:
             source_disk = source_info.id
 
-    return (source_blob_uri, source_disk, source_snapshot, source_info)
+    return (source_blob_uri, source_disk, source_snapshot, source_restore_point, source_info)
 
 
 def _get_disk_or_snapshot_info(cli_ctx, resource_group_name, source):

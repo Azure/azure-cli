@@ -886,6 +886,48 @@ class VMManagedDiskScenarioTest(ScenarioTest):
                      self.check('storageProfile.osDisk.caching', 'ReadWrite'),
                      self.check('storageProfile.dataDisks[0].caching', 'ReadOnly')
                  ])
+        
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_disk_from_restore_point_')
+    def test_vm_disk_from_restore_point(self, resource_group):
+        self.kwargs.update({
+            'rg': resource_group,
+            'vm_name': self.create_random_name('vm_', length=15),
+            'vm_image': 'UbuntuLTS',
+            'collection_name': self.create_random_name('collection_', length=20),
+            'point_name': self.create_random_name('point_', length=15),
+            'disk_name1': self.create_random_name('disk_', length=15),
+            'disk_name2': self.create_random_name('disk_', length=15),
+            'disk_sku': 'Premium_LRS',
+            'disk_size2': '2',
+        })
+        
+        # create a disk and update
+        data_disk = self.cmd('disk create -g {rg} -n {disk_name1} --size-gb 1', checks=[
+            self.check('sku.name', 'Premium_LRS'),
+            self.check('diskSizeGb', 1)
+        ]).get_output_in_json()
+        # create a vm
+        vm = self.cmd('vm create -n {vm_name} -g {rg} --image {vm_image} --attach-data-disks {disk_name1} --admin-username rp_disk_test').get_output_in_json()
+        self.kwargs.update({
+            'vm_id': vm['id'],
+        })
+        
+        # create a restore point collection of the vm
+        collection = self.cmd('restore-point collection create -g {rg} --collection-name {collection_name} --source-id {vm_id}').get_output_in_json()
+        self.kwargs.update({
+            'collection_id': collection['id'],
+        })
+        
+        # create a restore point
+        point = self.cmd('restore-point create -g {rg} -n {point_name} --collection-name {collection_name}').get_output_in_json()
+        self.kwargs.update({
+            'point_id': point['id']
+        })
+        disk_restore_point_id = self.cmd('restore-point show --resource-group {rg} --collection-name {collection_name} --name {point_name} --query \"sourceMetadata.storageProfile.dataDisks[0].diskRestorePoint.id\"').get_output_in_json()
+        self.kwargs['disk_restore_point_id'] = disk_restore_point_id
+        
+        # create disk from restore point
+        self.cmd('disk create --resource-group {rg} --name {disk_name2} --sku {disk_sku} --size-gb {disk_size2} --source {disk_restore_point_id}')
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_disk_upload_')
     def test_vm_disk_upload(self, resource_group):

@@ -287,7 +287,7 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                         size_gb=None, sku='Premium_LRS', os_type=None,
                         source=None, for_upload=None, upload_size_bytes=None,  # pylint: disable=unused-argument
                         # below are generated internally from 'source'
-                        source_blob_uri=None, source_disk=None, source_snapshot=None,
+                        source_blob_uri=None, source_disk=None, source_snapshot=None, source_restore_point=None,
                         source_storage_account_id=None, no_wait=False, tags=None, zone=None,
                         disk_iops_read_write=None, disk_mbps_read_write=None, hyper_v_generation=None,
                         encryption_type=None, disk_encryption_set=None, max_shares=None,
@@ -309,6 +309,8 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         option = DiskCreateOption.import_enum
     elif source_disk or source_snapshot:
         option = DiskCreateOption.copy
+    elif source_restore_point:
+        option = DiskCreateOption.restore
     elif for_upload:
         option = DiskCreateOption.upload
     elif image_reference or gallery_image_reference:
@@ -353,7 +355,7 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
 
     creation_data = CreationData(create_option=option, source_uri=source_blob_uri,
                                  image_reference=image_reference, gallery_image_reference=gallery_image_reference,
-                                 source_resource_id=source_disk or source_snapshot,
+                                 source_resource_id=source_disk or source_snapshot or source_restore_point,
                                  storage_account_id=source_storage_account_id,
                                  upload_size_bytes=upload_size_bytes,
                                  logical_sector_size=logical_sector_size)
@@ -573,7 +575,7 @@ def list_images(cmd, resource_group_name=None):
 def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size_gb=None, sku='Standard_LRS',
                     source=None, for_upload=None, copy_start=None, incremental=None,
                     # below are generated internally from 'source'
-                    source_blob_uri=None, source_disk=None, source_snapshot=None, source_storage_account_id=None,
+                    source_blob_uri=None, source_disk=None, source_snapshot=None, source_restore_point=None, source_storage_account_id=None,
                     hyper_v_generation=None, tags=None, no_wait=False, disk_encryption_set=None,
                     encryption_type=None, network_access_policy=None, disk_access=None, edge_zone=None,
                     public_network_access=None, accelerated_network=None, architecture=None):
