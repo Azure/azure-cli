@@ -1,0 +1,53 @@
+name: CLI BUMP VERSION $(PACKAGE) $(TARGET_PACKAGE_VERSION) $(RESOURCE_TYPE) $(TARGET_API_VERSION) $(Date:yyyyMMdd)
+
+resources:
+- repo: self
+
+trigger:
+  branches:
+    exclude:
+    - '*'
+
+jobs:
+- job: BumpVersionPython310
+  displayName: CLI Bump Version Python310
+  timeoutInMinutes: 9999
+  strategy:
+    maxParallel: 8
+    matrix:
+      instance1:
+        Instance_idx: 1
+      instance2:
+        Instance_idx: 2
+      instance3:
+        Instance_idx: 3
+      instance4:
+        Instance_idx: 4
+      instance5:
+        Instance_idx: 5
+      instance6:
+        Instance_idx: 6
+      instance7:
+        Instance_idx: 7
+      instance8:
+        Instance_idx: 8
+  pool:
+    vmImage: 'ubuntu-20.04'
+  steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.10'
+        displayName: "Use Python 3.10"
+    - template: ../../.azure-pipelines/templates/azdev_setup.yml
+    - bash: |
+        set -ev
+        pwd
+
+        echo package: $(PACKAGE) $(TARGET_PACKAGE_VERSION)
+        echo resource_type: $(RESOURCE_TYPE) $(TARGET_API_VERSION)
+
+        git status
+        source env/bin/activate
+        #serial_modules="appservice botservice cloud network azure-cli-core azure-cli-telemetry"
+        #python ../ci/automation_full_test.py "8" "$(Instance_idx)" "latest" "$serial_modules"
+      dispalyname: "azdev test"
