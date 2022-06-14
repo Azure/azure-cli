@@ -305,6 +305,10 @@ class ApplicationScenarioTest(GraphScenarioTestBase):
                 self.check('length(requiredResourceAccess)', 2)
             ]).get_output_in_json()
 
+        # Update with generic update
+        self.cmd('ad app update --id {app_id} --set isDeviceOnlyAuthSupported=true')
+        self.cmd('ad app show --id {app_id}', checks=self.check('isDeviceOnlyAuthSupported', True))
+
         self.cmd('ad app delete --id {app_id}')
         self.cmd('ad app show --id {app_id}', expect_failure=True)
 
@@ -518,6 +522,13 @@ class ApplicationScenarioTest(GraphScenarioTestBase):
         self.assertEqual(microsoft_graph_api_object['resourceAccess'],
                          [microsoft_graph_permission1_object, microsoft_graph_permission2_object])
 
+        # Test permission type '=Scope' is missing
+        from azure.cli.core.azclierror import ArgumentUsageError
+        with self.assertRaisesRegex(ArgumentUsageError, 'both permission id and type'):
+            self.cmd('ad app permission add --id {app_id} '
+                     '--api {microsoft_graph_api} '
+                     '--api-permissions {microsoft_graph_permission1}')
+
     @AllowLargeResponse()
     def test_app_permission_grant(self):
         if not self._get_signed_in_user():
@@ -615,6 +626,10 @@ class ServicePrincipalScenarioTest(GraphScenarioTestBase):
         self.cmd('ad sp show --id {identifier_uri}')
         # Show with id
         self.cmd('ad sp show --id {id}')
+
+        # Update with generic update
+        self.cmd('ad sp update --id {id} --set appRoleAssignmentRequired=true')
+        self.cmd('ad sp show --id {id}', checks=self.check('appRoleAssignmentRequired', True))
 
         self.cmd('ad sp delete --id {app_id}')
         self.cmd('ad app delete --id {app_id}')

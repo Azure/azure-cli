@@ -863,9 +863,9 @@ class NetworkResourceManagementPrivateLinksTest(ScenarioTest):
                       '--group-id ResourceManagement').get_output_in_json()
         self.kwargs['pe_id'] = result['id']
 
-        result = self.cmd('az network private-endpoint-connection list -g {rg} -n {rmplname} --type Microsoft.Authorization/resourceManagementPrivateLinks', checks=[
-                          self.check('length(@)', 1)]).get_output_in_json()
-        self.kwargs['pe'] = result[0]['name']
+        result = self.cmd('az rest --method "GET" \
+                        --url "https://management.azure.com/subscriptions/{sub}/resourcegroups/{rg}/providers/Microsoft.Authorization/resourceManagementPrivateLinks/{rmplname}?api-version=2020-05-01"').get_output_in_json()
+        self.kwargs['pe'] = result['properties']['privateEndpointConnections'][0]['name']
 
         # Show
         self.cmd('az network private-endpoint-connection show --resource-name {rmplname} --name {pe} --resource-group {rg} --type Microsoft.Authorization/resourceManagementPrivateLinks',
@@ -1430,7 +1430,8 @@ class NetworkPrivateLinkAppGwScenarioTest(ScenarioTest):
         self.cmd('network application-gateway create -g {rg} -n {appgw} '
                  '--sku Standard_v2 '
                  '--public-ip-address {appgw_ip} '
-                 '--enable-private-link')
+                 '--enable-private-link '
+                 '--priority 1001')
 
         show_appgw_data = self.cmd('network application-gateway show -g {rg} -n {appgw}').get_output_in_json()
 
@@ -1519,7 +1520,8 @@ class NetworkPrivateLinkAppGwScenarioTest(ScenarioTest):
                  '--enable-private-link '
                  '--private-link-subnet YetAnotherSubnetName '
                  '--private-link-primary true '
-                 '--private-link-subnet-prefix 10.0.2.0/24')
+                 '--private-link-subnet-prefix 10.0.2.0/24 '
+                 '--priority 1001')
 
         show_appgw_data = self.cmd('network application-gateway show -g {rg} -n {appgw}').get_output_in_json()
 
