@@ -58,7 +58,7 @@ jobs:
           python scripts/bump_version/update_api_profile.py "$(RESOURCE_TYPE)" "$(TARGET_API_VERSION)"
         fi
       displayName: "update version"
-    - template: .azure-pipelines/templates/azdev_setup.yml
+    - template: ../../.azure-pipelines/templates/azdev_setup.yml
     - bash: |
         serial_modules="appservice botservice cloud network azure-cli-core azure-cli-telemetry"
         python scripts/ci/automation_full_test.py "8" "$(Instance_idx)" "latest" "$serial_modules"
