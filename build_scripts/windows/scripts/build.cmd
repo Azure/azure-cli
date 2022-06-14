@@ -117,6 +117,9 @@ for %%a in (%CLI_SRC%\azure-cli %CLI_SRC%\azure-cli-core %CLI_SRC%\azure-cli-tel
 )
 %BUILDING_DIR%\python.exe -m pip install --no-warn-script-location --requirement %CLI_SRC%\azure-cli\requirements.py3.windows.txt
 
+REM Check azure.cli can be executed. This also prints the Python version.
+%BUILDING_DIR%\python.exe -m azure.cli --version
+
 if %errorlevel% neq 0 goto ERROR
 
 pushd %BUILDING_DIR%
