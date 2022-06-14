@@ -1402,7 +1402,7 @@ def load_arguments(self, _):
 
         c.argument('administrator_login_password',
                    options_list=['--admin-password', '-p'],
-                   help-'The administrator login password (required for'
+                   help='The administrator login password (required for'
                    'server creation).')
 
         c.argument('assign_identity',
