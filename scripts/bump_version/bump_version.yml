@@ -1,4 +1,4 @@
-name: CLI BUMP VERSION $(PACKAGE) $(TARGET_PACKAGE_VERSION) $(Date:yyyyMMdd)
+name: CLI BUMP VERSION $(PACKAGE) $(TARGET_PACKAGE_VERSION) $(Date:yyyyMMdd)$(Rev:.r)
 
 resources:
 - repo: self
@@ -40,12 +40,11 @@ jobs:
         displayName: "Use Python 3.10"
     - bash: |
         set -ev
-        ls
 
         echo package: $(PACKAGE) $(TARGET_PACKAGE_VERSION)
         echo resource_type: $(RESOURCE_TYPE) $(TARGET_API_VERSION)
 
-        if [[ -z $(PACKAGE) || -z $(TARGET_PACKAGE_VERSION)]]; then
+        if [[ -z $(PACKAGE) || -z $(TARGET_PACKAGE_VERSION) ]]; then
           echo "'PACKAGE' and 'TARGET_PACKAGE_VERSION' are required"
           exit 1
         fi
