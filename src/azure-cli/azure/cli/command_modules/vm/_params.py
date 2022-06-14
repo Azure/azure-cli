@@ -1322,20 +1322,17 @@ def load_arguments(self, _):
                        'going to be replicated to. This property is updatable. Expected value: '
                        'json-string/json-file/@json-file.')
             c.argument('default_file_link', help='The default configuration link of the artifact, must be a readable storage page blob.')
+            c.argument('exclude_from', arg_type=get_three_state_flag(), help='If set to true, Virtual Machines '
+                       'deployed from the latest version of the Image Definition won\'t use this Image Version.',
+                       arg_group='Publishing Profile')
+            c.argument('end_of_life_date', help='The end of life date of the gallery image version. This property can be '
+                       'used for decommissioning purposes. This property is updatable.', arg_group='Publishing Profile')
 
     with self.argument_context('sig gallery-application create') as c:
         c.argument('package_file_name', help='The name to assign the downloaded package file on the VM. This is limited to 4096 characters.' 
                                              'If not specified, the package file will be named the same as the Gallery Application name.')
         c.argument('config_file_name', help='The name to assign the downloaded config file on the VM. This is limited to 4096 characters. '
                                             'If not specified, the config file will be named the Gallery Application name appended with "_config"')
-
-    for scope in ['create', 'update']:
-        with self.argument_context('sig gallery-application version {}'.format(scope)) as c:
-            c.argument('exclude_from', arg_type=get_three_state_flag(), help='If set to true, Virtual Machines '
-                       'deployed from the latest version of the Image Definition won\'t use this Image Version.',
-                       arg_group='Publishing Profile')
-            c.argument('end_of_life_date', help='The end of life date of the gallery image version. This property can be '
-                       'used for decommissioning purposes. This property is updatable.', arg_group='Publishing Profile')
     # endregion
 
     # region Proximity Placement Group
