@@ -38,6 +38,7 @@ def _replace_line(line, old_str, new_str):
     logger.info(f"Replacing line from:\n{line}")
     line = line.replace(old_str, new_str)
     logger.info(f"to:\n{line}")
+    return line
 
 
 def _replace_resource_type_line(line):
@@ -51,9 +52,9 @@ def _replace_resource_type_line(line):
                          f" Can't be replaced with complex {target_api_version} ")
     if original_sdk_profile and target_sdk_profile:
         if target.get("default"):
-            _replace_line(line, original, target.get('default'))
+            line = _replace_line(line, original, target.get('default'))
     if not original_sdk_profile and not target_sdk_profile:
-        _replace_line(line, original, target)
+        line = _replace_line(line, original, target)
     return line
 
 
@@ -63,7 +64,7 @@ def _replace_sdk_profile_line(line):
     operation = parts[1]
     api_version = parts[3]
     if target.get(operation):
-        _replace_line(line, api_version, target.get(operation))
+        line = _replace_line(line, api_version, target.get(operation))
     return line
 
 
