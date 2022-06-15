@@ -154,7 +154,7 @@ def storage_file_upload(client, local_file_path, content_settings=None,
     with open(local_file_path, 'rb') as stream:
         response = client.upload_file(data=stream, length=count, **upload_args)
 
-    if response['content_md5']:
+    if 'content_md5' in response:
         if isinstance(response['content_md5'], bytearray):
             response['content_md5'] = ''.join(hex(x) for x in response['content_md5'])
 
