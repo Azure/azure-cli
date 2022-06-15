@@ -575,7 +575,7 @@ def list_images(cmd, resource_group_name=None):
 def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size_gb=None, sku='Standard_LRS',
                     source=None, for_upload=None, copy_start=None, incremental=None,
                     # below are generated internally from 'source'
-                    source_blob_uri=None, source_disk=None, source_snapshot=None, source_restore_point=None, source_storage_account_id=None,
+                    source_blob_uri=None, source_disk=None, source_snapshot=None, source_storage_account_id=None,
                     hyper_v_generation=None, tags=None, no_wait=False, disk_encryption_set=None,
                     encryption_type=None, network_access_policy=None, disk_access=None, edge_zone=None,
                     public_network_access=None, accelerated_network=None, architecture=None):

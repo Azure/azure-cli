@@ -1713,7 +1713,7 @@ def validate_vmss_disk(cmd, namespace):
         raise CLIError('usage error: --disk EXIST_DISK --instance-id ID')
 
 
-def process_disk_or_snapshot_create_namespace(cmd, namespace):
+def process_disk_create_namespace(cmd, namespace):
     from azure.core.exceptions import HttpResponseError
     validate_tags(namespace)
     validate_edge_zone(cmd, namespace)
@@ -1721,6 +1721,21 @@ def process_disk_or_snapshot_create_namespace(cmd, namespace):
         usage_error = 'usage error: --source {SNAPSHOT | DISK | RESTOREPOINT} | --source VHD_BLOB_URI [--source-storage-account-id ID]'
         try:
             namespace.source_blob_uri, namespace.source_disk, namespace.source_snapshot, namespace.source_restore_point, source_info = \
+                _figure_out_storage_source(cmd.cli_ctx, namespace.resource_group_name, namespace.source)
+            if not namespace.source_blob_uri and namespace.source_storage_account_id:
+                raise CLIError(usage_error)
+        except HttpResponseError:
+            raise CLIError(usage_error)
+
+
+def process_snapshot_create_namespace(cmd, namespace):
+    from azure.core.exceptions import HttpResponseError
+    validate_tags(namespace)
+    validate_edge_zone(cmd, namespace)
+    if namespace.source:
+        usage_error = 'usage error: --source {SNAPSHOT | DISK} | --source VHD_BLOB_URI [--source-storage-account-id ID]'
+        try:
+            namespace.source_blob_uri, namespace.source_disk, namespace.source_snapshot, _, source_info = \
                 _figure_out_storage_source(cmd.cli_ctx, namespace.resource_group_name, namespace.source)
             if not namespace.source_blob_uri and namespace.source_storage_account_id:
                 raise CLIError(usage_error)
