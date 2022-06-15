@@ -22,8 +22,8 @@ from azure.cli.command_modules.acs._consts import (
     DecoratorEarlyExitException,
     DecoratorMode,
 )
-from azure.cli.command_modules.acs._graph import ensure_aks_service_principal
 from azure.cli.command_modules.acs._helpers import (
+    check_is_managed_aad_cluster,
     check_is_msi_cluster,
     check_is_private_cluster,
     get_user_assigned_identity_by_resource_id,
@@ -240,7 +240,6 @@ class AKSManagedClusterContext(BaseAKSContext):
                 "ensure_default_log_analytics_workspace_for_monitoring"
             ] = ensure_default_log_analytics_workspace_for_monitoring
             external_functions["ensure_aks_acr"] = ensure_aks_acr
-            external_functions["ensure_aks_service_principal"] = ensure_aks_service_principal
             external_functions[
                 "ensure_cluster_identity_permission_on_kubelet_identity"
             ] = ensure_cluster_identity_permission_on_kubelet_identity
@@ -1047,19 +1046,12 @@ class AKSManagedClusterContext(BaseAKSContext):
 
     # pylint: disable=too-many-statements
     def _get_service_principal_and_client_secret(
-        self, read_only: bool = False
+        self, enable_validation: bool = False, read_only: bool = False
     ) -> Tuple[Union[str, None], Union[str, None]]:
         """Internal function to dynamically obtain the values of service_principal and client_secret according to the
         context.
 
-        When service_principal and client_secret are not assigned and enable_managed_identity is True, dynamic
-        completion will not be triggered. For other cases, dynamic completion will be triggered.
-        When client_secret is given but service_principal is not, dns_name_prefix or fqdn_subdomain will be used to
-        create a service principal. The parameters subscription_id, location and name (cluster) are also required when
-        calling function "ensure_aks_service_principal", which internally used GraphRbacManagementClient to send
-        the request.
-        When service_principal is given but client_secret is not, function "ensure_aks_service_principal" would raise
-        CLIError.
+        This function supports the option of enable_validation.
 
         This function supports the option of read_only. When enabled, it will skip dynamic completion and validation.
 
@@ -1102,37 +1094,16 @@ class AKSManagedClusterContext(BaseAKSContext):
         if read_only:
             return service_principal, client_secret
 
-        # dynamic completion for service_principal and client_secret
-        dynamic_completion = False
-        # check whether the parameter meet the conditions of dynamic completion
-        enable_managed_identity = self._get_enable_managed_identity(read_only=True)
-        if not (
-            enable_managed_identity and
-            not service_principal and
-            not client_secret
-        ):
-            dynamic_completion = True
-        # disable dynamic completion if the value is read from `mc`
-        dynamic_completion = (
-            dynamic_completion and
-            not sp_read_from_mc and
-            not secret_read_from_mc
-        )
-        if dynamic_completion:
-            principal_obj = self.external_functions.ensure_aks_service_principal(
-                cli_ctx=self.cmd.cli_ctx,
-                service_principal=service_principal,
-                client_secret=client_secret,
-                subscription_id=self.get_subscription_id(),
-                dns_name_prefix=self._get_dns_name_prefix(enable_validation=False),
-                fqdn_subdomain=self._get_fqdn_subdomain(enable_validation=False),
-                location=self.get_location(),
-                name=self.get_name(),
-            )
-            service_principal = principal_obj.get("service_principal")
-            client_secret = principal_obj.get("client_secret")
+        # these parameters do not need dynamic completion
 
-        # these parameters do not need validation
+        # validation
+        if enable_validation:
+            # only one of service_principal and client_secret is provided, not both
+            if (service_principal or client_secret) and not (service_principal and client_secret):
+                raise RequiredArgumentMissingError(
+                    "Please provide both --service-principal and --client-secret to use sp as the cluster identity. "
+                    "An sp can be created using the 'az ad sp create-for-rbac' command."
+                )
         return service_principal, client_secret
 
     def get_service_principal_and_client_secret(
@@ -1140,19 +1111,10 @@ class AKSManagedClusterContext(BaseAKSContext):
     ) -> Tuple[Union[str, None], Union[str, None]]:
         """Dynamically obtain the values of service_principal and client_secret according to the context.
 
-        When service_principal and client_secret are not assigned and enable_managed_identity is True, dynamic
-        completion will not be triggered. For other cases, dynamic completion will be triggered.
-        When client_secret is given but service_principal is not, dns_name_prefix or fqdn_subdomain will be used to
-        create a service principal. The parameters subscription_id, location and name (cluster) are also required when
-        calling function "ensure_aks_service_principal", which internally used GraphRbacManagementClient to send
-        the request.
-        When service_principal is given but client_secret is not, function "ensure_aks_service_principal" would raise
-        CLIError.
-
         :return: a tuple containing two elements: service_principal of string type or None and client_secret of
         string type or None
         """
-        return self._get_service_principal_and_client_secret()
+        return self._get_service_principal_and_client_secret(enable_validation=True)
 
     def _get_enable_managed_identity(
         self, enable_validation: bool = False, read_only: bool = False
@@ -1296,7 +1258,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         """
         return self.external_functions.get_user_assigned_identity_by_resource_id(self.cmd.cli_ctx, assigned_identity)
 
-    def get_user_assigned_identity_client_id(self) -> str:
+    def get_user_assigned_identity_client_id(self, user_assigned_identity=None) -> str:
         """Helper function to obtain the client_id of user assigned identity.
 
         Note: This is not a parameter of aks_create, and it will not be decorated into the `mc` object.
@@ -1307,12 +1269,12 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         :return: string
         """
-        assigned_identity = self.get_assign_identity()
+        assigned_identity = user_assigned_identity if user_assigned_identity else self.get_assign_identity()
         if assigned_identity is None or assigned_identity == "":
             raise RequiredArgumentMissingError("No assigned identity provided.")
         return self.get_identity_by_msi_client(assigned_identity).client_id
 
-    def get_user_assigned_identity_object_id(self) -> str:
+    def get_user_assigned_identity_object_id(self, user_assigned_identity=None) -> str:
         """Helper function to obtain the principal_id of user assigned identity.
 
         Note: This is not a parameter of aks_create, and it will not be decorated into the `mc` object.
@@ -1323,7 +1285,7 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         :return: string
         """
-        assigned_identity = self.get_assign_identity()
+        assigned_identity = user_assigned_identity if user_assigned_identity else self.get_assign_identity()
         if assigned_identity is None or assigned_identity == "":
             raise RequiredArgumentMissingError("No assigned identity provided.")
         return self.get_identity_by_msi_client(assigned_identity).principal_id
@@ -1803,8 +1765,10 @@ class AKSManagedClusterContext(BaseAKSContext):
             )
             if network_plugin:
                 if network_plugin == "azure" and pod_cidr:
-                    raise InvalidArgumentValueError(
-                        "Please use kubenet as the network plugin type when pod_cidr is specified"
+                    logger.warning(
+                        'When using `--network-plugin azure` without the preview feature '
+                        '`--network-plugin-mode overlay` the provided pod CIDR "%s" will be '
+                        'overwritten with the subnet CIDR.', pod_cidr
                     )
             else:
                 if (
@@ -1910,12 +1874,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         # validation
         if enable_validation:
             network_plugin = self._get_network_plugin(enable_validation=False)
-            if network_plugin:
-                if network_plugin == "azure" and pod_cidr:
-                    raise InvalidArgumentValueError(
-                        "Please use kubenet as the network plugin type when pod_cidr is specified"
-                    )
-            else:
+            if not network_plugin:
                 if (
                     pod_cidr or
                     service_cidr or
@@ -2690,11 +2649,7 @@ class AKSManagedClusterContext(BaseAKSContext):
                     )
             elif self.decorator_mode == DecoratorMode.UPDATE:
                 if enable_aad:
-                    if (
-                        self.mc and
-                        self.mc.aad_profile is not None and
-                        self.mc.aad_profile.managed
-                    ):
+                    if check_is_managed_aad_cluster(self.mc):
                         raise InvalidArgumentValueError(
                             'Cannot specify "--enable-aad" if managed AAD is already enabled'
                         )
@@ -2829,7 +2784,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         if enable_validation:
             if aad_tenant_id:
                 if self.decorator_mode == DecoratorMode.UPDATE:
-                    if self.mc is None or self.mc.aad_profile is None or not self.mc.aad_profile.managed:
+                    if not check_is_managed_aad_cluster(self.mc):
                         raise InvalidArgumentValueError(
                             'Cannot specify "--aad-tenant-id" if managed AAD is not enabled'
                         )
@@ -2881,7 +2836,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         if enable_validation:
             if aad_admin_group_object_ids:
                 if self.decorator_mode == DecoratorMode.UPDATE:
-                    if self.mc is None or self.mc.aad_profile is None or not self.mc.aad_profile.managed:
+                    if not check_is_managed_aad_cluster(self.mc):
                         raise InvalidArgumentValueError(
                             'Cannot specify "--aad-admin-group-object-ids" if managed AAD is not enabled'
                         )
@@ -3013,7 +2968,7 @@ class AKSManagedClusterContext(BaseAKSContext):
                             "--enable-azure-rbac cannot be used together with --disable-rbac"
                         )
                 elif self.decorator_mode == DecoratorMode.UPDATE:
-                    if self.mc is None or self.mc.aad_profile is None or not self.mc.aad_profile.managed:
+                    if not check_is_managed_aad_cluster(self.mc):
                         raise InvalidArgumentValueError(
                             'Cannot specify "--enable-azure-rbac" if managed AAD is not enabled'
                         )
@@ -3055,7 +3010,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         if enable_validation:
             if disable_azure_rbac:
                 if self.decorator_mode == DecoratorMode.UPDATE:
-                    if self.mc is None or self.mc.aad_profile is None or not self.mc.aad_profile.managed:
+                    if not check_is_managed_aad_cluster(self.mc):
                         raise InvalidArgumentValueError(
                             'Cannot specify "--disable-azure-rbac" if managed AAD is not enabled'
                         )
@@ -3467,6 +3422,16 @@ class AKSManagedClusterContext(BaseAKSContext):
         """
         return self._get_private_dns_zone(enable_validation=True)
 
+    def get_user_assignd_identity_from_mc(self) -> Union[str, None]:
+        """Helper function to obtain the (first) user assignd identity from ManagedCluster.
+
+        :return: string or None
+        """
+        user_assigned_identity = None
+        if self.mc and self.mc.identity and self.mc.identity.user_assigned_identities:
+            user_assigned_identity = safe_list_get(list(self.mc.identity.user_assigned_identities.keys()), 0, None)
+        return user_assigned_identity
+
     def _get_assign_kubelet_identity(self, enable_validation: bool = False) -> Union[str, None]:
         """Internal function to obtain the value of assign_kubelet_identity.
 
@@ -3477,22 +3442,39 @@ class AKSManagedClusterContext(BaseAKSContext):
         """
         # read the original value passed by the command
         assign_kubelet_identity = self.raw_param.get("assign_kubelet_identity")
-        # try to read the property value corresponding to the parameter from the `mc` object
-        if (
-            self.mc and
-            self.mc.identity_profile and
-            self.mc.identity_profile.get("kubeletidentity", None) and
-            getattr(self.mc.identity_profile.get("kubeletidentity"), "resource_id") is not None
-        ):
-            assign_kubelet_identity = getattr(self.mc.identity_profile.get("kubeletidentity"), "resource_id")
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.identity_profile and
+                self.mc.identity_profile.get("kubeletidentity", None) and
+                getattr(self.mc.identity_profile.get("kubeletidentity"), "resource_id") is not None
+            ):
+                assign_kubelet_identity = getattr(self.mc.identity_profile.get("kubeletidentity"), "resource_id")
 
         # this parameter does not need dynamic completion
         # validation
         if enable_validation:
-            if assign_kubelet_identity and not self._get_assign_identity(enable_validation=False):
-                raise RequiredArgumentMissingError(
-                    "--assign-kubelet-identity can only be specified when --assign-identity is specified"
-                )
+            if assign_kubelet_identity:
+                if self.decorator_mode == DecoratorMode.CREATE and not self._get_assign_identity(
+                    enable_validation=False
+                ):
+                    raise RequiredArgumentMissingError(
+                        "--assign-kubelet-identity can only be specified when --assign-identity is specified"
+                    )
+                if self.decorator_mode == DecoratorMode.UPDATE:
+                    msg = (
+                        "You're going to update kubelet identity to {}, "
+                        "which will upgrade every node pool in the cluster "
+                        "and might take a while, do you wish to continue?".format(assign_kubelet_identity)
+                    )
+                    if not self.get_yes() and not prompt_y_n(msg, default="n"):
+                        raise DecoratorEarlyExitException
+                    if not self.get_assign_identity() and not self.get_user_assignd_identity_from_mc():
+                        raise RequiredArgumentMissingError(
+                            "--assign-identity is not provided and the cluster identity type "
+                            "is not user assigned, cannot update kubelet identity"
+                        )
         return assign_kubelet_identity
 
     def get_assign_kubelet_identity(self) -> Union[str, None]:
@@ -4081,9 +4063,6 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
 
     def set_up_service_principal_profile(self, mc: ManagedCluster) -> ManagedCluster:
         """Set up service principal profile for the ManagedCluster object.
-
-        The function "ensure_aks_service_principal" will be called if the user provides an incomplete sp and secret
-        pair, which internally used GraphRbacManagementClient to send the request to create sp.
 
         :return: the ManagedCluster object
         """
@@ -4689,8 +4668,8 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             identity_profile = {
                 'kubeletidentity': self.models.UserAssignedIdentity(
                     resource_id=assign_kubelet_identity,
-                    client_id=kubelet_identity.client_id,
-                    object_id=kubelet_identity.principal_id
+                    client_id=kubelet_identity.client_id,       # TODO: may remove, rp would take care of this
+                    object_id=kubelet_identity.principal_id     # TODO: may remove, rp would take care of this
                 )
             }
             cluster_identity_object_id = self.context.get_user_assigned_identity_object_id()
@@ -4776,8 +4755,9 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         """
         # initialize the ManagedCluster object
         mc = self.init_mc()
-        # remove defaults
+        # DO NOT MOVE: remove defaults
         self._remove_defaults_in_mc(mc)
+
         # set up agentpool profile
         mc = self.set_up_agentpool_profile(mc)
         # set up misc direct mc properties
@@ -4816,10 +4796,10 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.set_up_node_resource_group(mc)
         # set up defender
         mc = self.set_up_defender(mc)
-        # restore defaults
+
+        # DO NOT MOVE: keep this at the bottom, restore defaults
         if not bypass_restore_defaults:
             mc = self._restore_defaults_in_mc(mc)
-
         return mc
 
     # pylint: disable=unused-argument,too-many-boolean-expressions
@@ -5578,6 +5558,32 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
 
         return mc
 
+    def update_identity_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update identity profile for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        assign_kubelet_identity = self.context.get_assign_kubelet_identity()
+        if assign_kubelet_identity:
+            identity_profile = {
+                'kubeletidentity': self.models.UserAssignedIdentity(
+                    resource_id=assign_kubelet_identity,
+                )
+            }
+            user_assigned_identity = self.context.get_assign_identity()
+            if not user_assigned_identity:
+                user_assigned_identity = self.context.get_user_assignd_identity_from_mc()
+            cluster_identity_object_id = self.context.get_user_assigned_identity_object_id(user_assigned_identity)
+            # ensure the cluster identity has "Managed Identity Operator" role at the scope of kubelet identity
+            self.context.external_functions.ensure_cluster_identity_permission_on_kubelet_identity(
+                self.cmd,
+                cluster_identity_object_id,
+                assign_kubelet_identity)
+            mc.identity_profile = identity_profile
+        return mc
+
     def update_mc_profile_default(self) -> ManagedCluster:
         """The overall controller used to update the default ManagedCluster profile.
 
@@ -5623,6 +5629,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.update_addon_profiles(mc)
         # update defender
         mc = self.update_defender(mc)
+        # update identity
+        mc = self.update_identity_profile(mc)
         return mc
 
     # pylint: disable=unused-argument

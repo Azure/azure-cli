@@ -7,22 +7,31 @@ import json
 from azure.cli.core._profile import Profile
 from azure.cli.core.util import send_raw_request
 from azure.cli.core.auth.util import resource_to_scopes
-from knack.util import CLIError
+from azure.cli.core.azclierror import HTTPError
 
 
 # pylint: disable=redefined-builtin, too-many-public-methods
 
 class GraphClient:
+    """A lightweight Microsoft Graph API client.
+
+    GraphClient should NEVER be instantiated directly, but always through the client factory
+    azure.cli.command_modules.role.graph_client_factory.
+
+    For full documentation, see doc/microsoft_graph_client.md in this repo.
+    """
     def __init__(self, cli_ctx):
         self.cli_ctx = cli_ctx
         self.tenant = Profile(cli_ctx).get_login_credentials()[2]
         self.scopes = resource_to_scopes(cli_ctx.cloud.endpoints.microsoft_graph_resource_id)
 
         # https://graph.microsoft.com/ (AzureCloud)
+        # https://microsoftgraph.chinacloudapi.cn (AzureChinaCloud)
         self.resource = cli_ctx.cloud.endpoints.microsoft_graph_resource_id
 
         # https://graph.microsoft.com/v1.0
-        self.base_url = cli_ctx.cloud.endpoints.microsoft_graph_resource_id + 'v1.0'
+        # https://microsoftgraph.chinacloudapi.cn/v1.0
+        self.base_url = cli_ctx.cloud.endpoints.microsoft_graph_resource_id.rstrip('/') + '/v1.0'
 
     def _send(self, method, url, param=None, body=None):
         url = self.base_url + url
@@ -36,8 +45,9 @@ class GraphClient:
         while True:
             try:
                 r = send_raw_request(self.cli_ctx, method, url, resource=self.resource, uri_parameters=param, body=body)
-            except CLIError as ex:
+            except HTTPError as ex:
                 raise GraphError(ex.response.json()['error']['message'], ex.response) from ex
+            # Other exceptions like AuthenticationError should not be handled here, so we don't catch CLIError
 
             if r.text:
                 dic = r.json()
@@ -85,7 +95,7 @@ class GraphClient:
         result = self._send("DELETE", "/applications/{id}".format(id=id))
         return result
 
-    def application_patch(self, id, body):
+    def application_update(self, id, body):
         # https://docs.microsoft.com/en-us/graph/api/application-update
         result = self._send("PATCH", "/applications/{id}".format(id=id), body=body)
         return result
@@ -136,7 +146,7 @@ class GraphClient:
         result = self._send("DELETE", "/servicePrincipals/{id}".format(id=id))
         return result
 
-    def service_principal_patch(self, id, body):
+    def service_principal_update(self, id, body):
         # https://docs.microsoft.com/en-us/graph/api/serviceprincipal-update
         result = self._send("PATCH", "/servicePrincipals/{id}".format(id=id), body=body)
         return result
@@ -258,7 +268,7 @@ class GraphClient:
         result = self._send("DELETE", "/users/{}".format(id_or_upn))
         return result
 
-    def user_patch(self, id_or_upn, body):
+    def user_update(self, id_or_upn, body):
         # https://docs.microsoft.com/graph/api/user-update
         result = self._send("PATCH", "/users/{}".format(id_or_upn), body=body)
         return result
@@ -286,7 +296,10 @@ class GraphClient:
 
 def _filter_to_query(filter):
     if filter is not None:
-        return "?$filter={}".format(filter)
+        # https://docs.microsoft.com/en-us/graph/query-parameters#encoding-query-parameters
+        # The values of query parameters should be percent-encoded.
+        from urllib.parse import quote
+        return "?$filter={}".format(quote(filter, safe=''))
     return ''
 
 

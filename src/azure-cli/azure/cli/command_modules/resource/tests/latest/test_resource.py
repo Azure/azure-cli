@@ -88,6 +88,19 @@ class ResourceGroupScenarioTest(ScenarioTest):
         result = self.cmd('group export --name {rg} --resource-ids "{vnet_id}" --skip-resource-name-params --query "parameters"')
 
         self.assertEqual('{}\n', result.output)
+        
+    @ResourceGroupPreparer(name_prefix='cli_test_rg_scenario')
+    def test_resource_group_force_deletion_type(self, resource_group):
+
+        self.cmd('group create -n testrg -l westus --tag a=b c --managed-by test_admin', checks=[
+            self.check('name', 'testrg'),
+            self.check('tags', {'a': 'b', 'c': ''}),
+            self.check('managedBy', 'test_admin')
+        ])
+
+        self.cmd('group delete -n testrg -f Microsoft.Compute/virtualMachines --yes')
+        self.cmd('group exists -n testrg',
+                 checks=self.check('@', False))        
 
 
 class ResourceGroupNoWaitScenarioTest(ScenarioTest):
@@ -194,6 +207,7 @@ class ResourceScenarioTest(ScenarioTest):
 
 class ResourceIDScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_resource_id')
     def test_resource_id_scenario(self, resource_group):
 
@@ -299,6 +313,10 @@ class ResourceCreateAndShowScenarioTest(ScenarioTest):
         self.kwargs['app_config_id'] = result['id'] + '/config/web'
         self.cmd('resource create --id {app_settings_id} --properties "{{\\"key2\\":\\"value12\\"}}"',
                  checks=[self.check('properties.key2', 'value12')])
+
+        self.cmd('resource wait --id {app_settings_id} --created')
+
+        self.cmd('resource wait --id {app_settings_id} --exists')
 
         self.cmd('resource show --id {app_config_id}',
                  checks=self.check('properties.publishingUsername', '${app}'))
@@ -3956,6 +3974,7 @@ class BicepBuildTest(LiveScenarioTest):
 
         self.cmd('az bicep build -f {tf} --outfile {build_path}')
         self.cmd('az bicep decompile -f {build_path}')
+        self.cmd('az bicep decompile -f {build_path} --force')
 
         if os.path.exists(build_path):
             os.remove(build_path)
@@ -3992,6 +4011,24 @@ class BicepInstallationTest(LiveScenarioTest):
         self.cmd('az bicep install --version v0.4.63')
         self.cmd('az bicep upgrade -t win-x64')
         self.cmd('az bicep version')
+
+
+class BicepRestoreTest(LiveScenarioTest):
+    def test_restore(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        bf = os.path.join(curr_dir, 'data', 'external_modules.bicep').replace('\\', '\\\\')
+        out_path = os.path.join(curr_dir, 'data', 'external_modules.json').replace('\\', '\\\\')
+        self.kwargs.update({
+            'bf': bf,
+            'out_path': out_path,
+        })
+
+        self.cmd('az bicep restore -f {bf}')
+        self.cmd('az bicep restore -f {bf} --force')
+        self.cmd('az bicep build -f {bf} --no-restore')
+
+        if os.path.exists(out_path):
+            os.remove(out_path)
 
 
 class DeploymentWithBicepScenarioTest(LiveScenarioTest):

@@ -2769,6 +2769,14 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('provisioningState', 'Succeeded')
         ])
 
+        # clean up nsg set by policy, otherwise would block creating appgw
+        update_subnet = 'network vnet subnet update -n appgw-subnet --resource-group={resource_group} --vnet-name {vnet_name} ' \
+                        '--nsg ""'
+        self.cmd(update_subnet, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('networkSecurityGroup', None),
+        ])
+
         vnet_id = vnet['newVNet']["id"]
         assert vnet_id is not None
         self.kwargs.update({
@@ -2783,8 +2791,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
         # create app gateway
+        # add priority since this is a mandatory parameter since 2021-08-01 API version for network operations
         create_appgw = 'network application-gateway create -n appgw -g {resource_group} ' \
-                       '--sku Standard_v2 --public-ip-address appgw-ip --subnet {vnet_id}/subnets/appgw-subnet'
+                       '--sku Standard_v2 --public-ip-address appgw-ip --subnet {vnet_id}/subnets/appgw-subnet --priority 1001'
         self.cmd(create_appgw)
 
         # construct group id
@@ -4870,11 +4879,13 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         aks_name = self.create_random_name('cliakstest', 16)
         control_plane_identity_name = self.create_random_name('cliakstest', 16)
         kubelet_identity_name = self.create_random_name('cliakstest', 16)
+        new_kubelet_identity_name = self.create_random_name('cliakstest', 16)
         self.kwargs.update({
             'resource_group': resource_group,
             'name': aks_name,
             'control_plane_identity_name': control_plane_identity_name,
             'kubelet_identity_name': kubelet_identity_name,
+            "new_kubelet_identity_name": new_kubelet_identity_name,
             'ssh_key_value': self.generate_ssh_keys()
         })
 
@@ -4910,6 +4921,26 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.exists('identityProfile'),
             self.check('provisioningState', 'Succeeded'),
             self.check('identityProfile.kubeletidentity.resourceId', kubelet_identity_resource_id),
+        ])
+
+        # create new kubelet identity
+        new_kubelet_identity = 'identity create --resource-group={resource_group} --name={new_kubelet_identity_name}'
+        new_identity = self.cmd(new_kubelet_identity, checks=[
+            self.check('name', new_kubelet_identity_name)
+        ]).get_output_in_json()
+        new_kubelet_identity_resource_id = new_identity["id"]
+        assert new_kubelet_identity_resource_id is not None
+        self.kwargs.update({
+            'new_kubelet_identity_resource_id': new_kubelet_identity_resource_id,
+        })
+
+        # update to new kubelet identity
+        self.cmd('aks update --resource-group={resource_group} --name={name} --assign-kubelet-identity {new_kubelet_identity_resource_id} --yes', checks=[
+            self.exists('identity'),
+            self.exists('identityProfile'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('identityProfile.kubeletidentity.resourceId',
+                       new_kubelet_identity_resource_id),
         ])
 
         # delete
@@ -5066,14 +5097,16 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # create
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --tags {tags} ' \
                      '--ssh-key-value={ssh_key_value} --enable-cluster-autoscaler ' \
-                     '--min-count 1 --max-count 3 --cluster-autoscaler-profile scan-interval=30s expander=least-waste'
+                     '-c 1 --min-count 1 --max-count 5 ' \
+                     '--cluster-autoscaler-profile scan-interval=30s expander=least-waste'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('autoScalerProfile.scanInterval', '30s'),
             self.check('autoScalerProfile.expander', 'least-waste'),
             self.check('agentPoolProfiles[0].enableAutoScaling', True),
             self.check('agentPoolProfiles[0].minCount', 1),
-            self.check('agentPoolProfiles[0].maxCount', 3),
+            self.check('agentPoolProfiles[0].count', 1),
+            self.check('agentPoolProfiles[0].maxCount', 5),
             self.check('tags.tag1', 'v1'),
             self.check('tags.tag2', 'v2'),
         ])
@@ -5117,11 +5150,52 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # update autoscaler
         update_autoscaler_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
-                                '--update-cluster-autoscaler --min-count 3 --max-count 3'
+                                '--update-cluster-autoscaler --min-count 3 --max-count 101'
         self.cmd(update_autoscaler_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('agentPoolProfiles[0].minCount', 3),
-            self.check('agentPoolProfiles[0].maxCount', 3)
+            self.check('agentPoolProfiles[0].maxCount', 101)
+        ])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_nodepool_autoscaler_then_update(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        np_name = self.create_random_name('clinp', 12)
+        self.kwargs.update({
+            'name': aks_name,
+            'resource_group': resource_group,
+            'nodepool_name': np_name,
+            'ssh_key_value': self.generate_ssh_keys()
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--ssh-key-value={ssh_key_value} -c 1'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('agentPoolProfiles[0].count', 1),
+        ])
+
+        add_nodepool_cmd = 'aks nodepool add -g {resource_group} --cluster-name {name} -n {nodepool_name} ' \
+                     '--mode user --enable-cluster-autoscaler -c 0 --min-count 0 --max-count 3'
+        self.cmd(add_nodepool_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('count', 0),
+            self.check('minCount', 0),
+            self.check('maxCount', 3),
+        ])
+
+        update_nodepool_cmd = 'aks nodepool update -g {resource_group} --cluster-name {name} -n {nodepool_name} ' \
+                     '--update-cluster-autoscaler --min-count 1 --max-count 101'
+        self.cmd(update_nodepool_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('minCount', 1),
+            self.check('maxCount', 101),
         ])
 
         # delete
@@ -6643,7 +6717,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # use custom feature so it does not require subscription to regiter the feature
         create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
-                     '--kubelet-config={kc_path} --linux-os-config={oc_path} ' \
+                     '--kubelet-config=\'{kc_path}\' --linux-os-config=\'{oc_path}\' ' \
                      '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/CustomNodeConfigPreview ' \
                      '--ssh-key-value={ssh_key_value} -o json'
         self.cmd(create_cmd, checks=[
@@ -6655,7 +6729,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # nodepool add
         nodepool_cmd = 'aks nodepool add --resource-group={resource_group} --cluster-name={name} ' \
-                       '--name=nodepool2 --node-count=1 --kubelet-config={kc_path} --linux-os-config={oc_path} ' \
+                       '--name=nodepool2 --node-count=1 --kubelet-config=\'{kc_path}\' --linux-os-config=\'{oc_path}\' ' \
                        '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/CustomNodeConfigPreview'
         self.cmd(nodepool_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
@@ -6670,7 +6744,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.test_resources_count = 0
         # kwargs for string formatting
         aks_name = self.create_random_name('cliakstest', 16)
-        kubernetes_version = "1.20.7"
+        kubernetes_version = "1.23.5"
 
         self.kwargs.update({
             'resource_group': resource_group,

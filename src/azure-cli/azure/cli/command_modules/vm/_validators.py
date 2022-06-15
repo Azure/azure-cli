@@ -240,7 +240,7 @@ def _parse_image_argument(cmd, namespace):
     """ Systematically determines what type is supplied for the --image parameter. Updates the
         namespace and returns the type for subsequent processing. """
     from msrestazure.tools import is_valid_resource_id
-    from msrestazure.azure_exceptions import CloudError
+    from azure.core.exceptions import HttpResponseError
     import re
 
     # 1 - check if a fully-qualified ID (assumes it is an image ID)
@@ -304,7 +304,7 @@ def _parse_image_argument(cmd, namespace):
         namespace.image = _get_resource_id(cmd.cli_ctx, namespace.image, namespace.resource_group_name,
                                            'images', 'Microsoft.Compute')
         return 'image_id'
-    except CloudError:
+    except HttpResponseError:
         if images is not None:
             err = 'Invalid image "{}". Use a valid image URN, custom image name, custom image id, ' \
                   'VHD blob URI, or pick an image from {}.\nSee vm create -h for more information ' \
@@ -317,7 +317,6 @@ def _parse_image_argument(cmd, namespace):
 
 
 def _get_image_plan_info_if_exists(cmd, namespace):
-    from msrestazure.azure_exceptions import CloudError
     try:
         compute_client = _compute_client_factory(cmd.cli_ctx)
         if namespace.os_version.lower() == 'latest':
@@ -334,7 +333,7 @@ def _get_image_plan_info_if_exists(cmd, namespace):
 
         # pylint: disable=no-member
         return image.plan
-    except CloudError as ex:
+    except ResourceNotFoundError as ex:
         logger.warning("Querying the image of '%s' failed for an error '%s'. Configuring plan settings "
                        "will be skipped", namespace.image, ex.message)
 
@@ -1715,7 +1714,7 @@ def validate_vmss_disk(cmd, namespace):
 
 
 def process_disk_or_snapshot_create_namespace(cmd, namespace):
-    from msrestazure.azure_exceptions import CloudError
+    from azure.core.exceptions import HttpResponseError
     validate_tags(namespace)
     validate_edge_zone(cmd, namespace)
     if namespace.source:
@@ -1745,7 +1744,7 @@ def process_disk_or_snapshot_create_namespace(cmd, namespace):
                     get_default_location_from_resource_group(cmd, namespace)
                 # if the source location differs from target location, then it's copy_start scenario
                 namespace.copy_start = source_info.location != namespace.location
-        except CloudError:
+        except HttpResponseError:
             raise CLIError(usage_error)
 
 
@@ -1990,6 +1989,45 @@ def _disk_encryption_set_format(cmd, namespace, name):
             subscription=get_subscription_id(cmd.cli_ctx), resource_group=namespace.resource_group_name,
             namespace='Microsoft.Compute', type='diskEncryptionSets', name=name)
     return name
+# endregion
+
+
+def process_image_version_create_namespace(cmd, namespace):
+    process_gallery_image_version_namespace(cmd, namespace)
+    process_image_resource_id_namespace(namespace)
+# endregion
+
+
+def process_image_version_update_namespace(cmd, namespace):
+    process_gallery_image_version_namespace(cmd, namespace)
+# endregion
+
+
+def process_image_resource_id_namespace(namespace):
+    """
+    Validate the resource id from different sources
+    Only one of these arguments is allowed to provide
+    Check the format of resource id whether meets requirement
+    """
+    input_num = (1 if namespace.managed_image else 0) + (1 if namespace.virtual_machine else 0) + \
+                (1 if namespace.image_version else 0)
+    if input_num > 1:
+        raise MutuallyExclusiveArgumentError(
+            r'usage error: please specify only one of the --managed-image\--virtual-machine\--image-version arguments')
+
+    if namespace.managed_image or input_num == 0:
+        return
+
+    from ._vm_utils import is_valid_vm_resource_id, is_valid_image_version_id
+    is_vm = namespace.virtual_machine is not None
+    is_valid_function = is_valid_vm_resource_id if is_vm else is_valid_image_version_id
+    resource_id = namespace.virtual_machine if is_vm else namespace.image_version
+
+    if not is_valid_function(resource_id):
+        from azure.cli.core.parser import InvalidArgumentValueError
+        raise InvalidArgumentValueError('usage error: {} is an invalid {} id'
+                                        .format(resource_id, 'VM resource' if is_vm else 'gallery image version'))
+    namespace.managed_image = resource_id
 # endregion
 
 

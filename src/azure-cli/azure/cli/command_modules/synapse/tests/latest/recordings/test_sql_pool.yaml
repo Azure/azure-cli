@@ -49,7 +49,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1196'
     status:
       code: 201
       message: Created
@@ -536,7 +536,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
     status:
       code: 202
       message: Accepted
@@ -2318,23 +2318,21 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - synapse sql pool show
+      - synapse sql pool delete
       Connection:
       - keep-alive
       ParameterSetName:
-      - --name --workspace --resource-group
+      - --name --workspace --resource-group --yes
       User-Agent:
       - AZURECLI/2.36.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.9 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000004/sqlPools/testsqlpool000003?api-version=2021-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000004/operationResults/c4814e3c-109b-4b81-9948-ee47cc41995d?api-version=2021-06-01
   response:
     body:
       string: ''
     headers:
       cache-control:
       - no-cache
-      content-length:
-      - '0'
       date:
       - Thu, 26 May 2022 08:51:03 GMT
       expires:
@@ -2347,6 +2345,50 @@ interactions:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
+    status:
+      code: 204
+      message: No Content
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse sql pool show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --workspace --resource-group
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000004/sqlPools/testsqlpool000003?api-version=2021-06-01
+  response:
+    body:
+      string: '{"error":{"code":"ResourceNotFound","message":"The Resource ''Microsoft.Synapse/workspaces/clitest000004/sqlPools/testsqlpool000003''
+        under resource group ''synapse-cli000001'' was not found. For more details
+        please go to https://aka.ms/ARMResourceNotFoundFix"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '258'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 30 May 2022 07:27:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - gateway
     status:
       code: 404
       message: Not Found

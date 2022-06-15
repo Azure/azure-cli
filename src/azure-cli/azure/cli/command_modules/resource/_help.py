@@ -824,7 +824,7 @@ parameters:
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
         It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
   - name: --template-file -f
-    short-summary: The path to the template file or Bicpe file.
+    short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
     short-summary: The URI to the template file.
   - name: --template-spec -s
@@ -1364,6 +1364,9 @@ examples:
   - name: Delete a resource group.
     text: >
         az group delete -n MyResourceGroup
+  - name: Force delete all the Virtual Machines in a resource group.
+    text: >
+        az group delete -n MyResourceGroup --force-deletion-types Microsoft.Compute/virtualMachines
 """
 
 helps['group deployment'] = """
@@ -2731,6 +2734,8 @@ examples:
     text: az bicep build --file {bicep_file} --outdir {out_dir}
   - name: Build a Bicep file and save the result to the specified file.
     text: az bicep build --file {bicep_file} --outfile {out_file}
+  - name: Build a Bicep file without restoring external modules.
+    text: az bicep build --file {bicep_file} --no-restore
 """
 
 helps['bicep decompile'] = """
@@ -2739,6 +2744,8 @@ short-summary: Attempt to decompile an ARM template file to a Bicep file.
 examples:
   - name: Decompile an ARM template file.
     text: az bicep decompile --file {json_template_file}
+  - name: Decompile an ARM template file and overwrite existing Bicep file.
+    text: az bicep decompile --file {json_template_file} --force
 """
 
 helps['bicep publish'] = """
@@ -2747,6 +2754,16 @@ short-summary: Publish a bicep file to a remote module registry.
 examples:
   - name: Publish a bicep file.
     text: az bicep publish --file {bicep_file} --target "br:{registry}/{module_path}:{tag}"
+"""
+
+helps['bicep restore'] = """
+type: command
+short-summary: Restore external modules for a bicep file.
+examples:
+  - name: Retore external modules.
+    text: az bicep restore --file {bicep_file}
+  - name: Retore external modules and overwrite cached external modules.
+    text: az bicep restore --file {bicep_file} --force
 """
 
 helps['bicep version'] = """

@@ -22,7 +22,7 @@ from azure.cli.core.commands import _is_paged
 from azure.cli.command_modules.backup._client_factory import (
     job_details_cf, protection_container_refresh_operation_results_cf,
     backup_operation_statuses_cf, protection_container_operation_results_cf,
-    backup_crr_job_details_cf, crr_operation_status_cf)
+    backup_crr_job_details_cf, crr_operation_status_cf, resource_guard_proxies_cf, resource_guard_proxy_cf)
 from azure.cli.core.azclierror import ResourceNotFoundError, ValidationError, InvalidArgumentValueError
 
 
@@ -33,9 +33,18 @@ os_windows = 'Windows'
 os_linux = 'Linux'
 password_offset = 33
 password_length = 15
+default_resource_guard = "VaultProxy"
 
 backup_management_type_map = {"AzureVM": "AzureIaasVM", "AzureWorkload": "AzureWorkLoad",
                               "AzureStorage": "AzureStorage", "MAB": "MAB"}
+
+rsc_type = "Microsoft.RecoveryServices/vaults"
+operation_name_map = {"deleteProtection": rsc_type + "/backupFabrics/protectionContainers/protectedItems/delete",
+                      "updateProtection": rsc_type + "/backupFabrics/protectionContainers/protectedItems/write",
+                      "updatePolicy": rsc_type + "/backupPolicies/write",
+                      "deleteRGMapping": rsc_type + "/backupResourceGuardProxies/delete",
+                      "getSecurityPIN": rsc_type + "/backupSecurityPIN/action",
+                      "disableSoftDelete": rsc_type + "/backupconfig/write"}
 
 # Client Utilities
 
@@ -99,6 +108,117 @@ def get_resource_name_and_rg(resource_group_name, name_or_id):
         name = name_or_id
         resource_group = resource_group_name
     return name, resource_group
+
+
+def has_resource_guard_mapping(cli_ctx, resource_group_name, vault_name, operation_name=None):
+    resource_guard_proxies_client = resource_guard_proxies_cf(cli_ctx)
+    resource_guard_mappings = get_list_from_paged_response(resource_guard_proxies_client.get(vault_name,
+                                                                                             resource_group_name))
+    if not resource_guard_mappings:
+        return False
+    if operation_name is None:
+        return True
+    resource_guard_mapping = resource_guard_mappings[0]
+    result = False
+    for operation_detail in resource_guard_mapping.properties.resource_guard_operation_details:
+        if operation_detail.vault_critical_operation == operation_name_map[operation_name]:
+            result = True
+            break
+    return result
+
+
+def get_resource_guard_operation_request(cli_ctx, resource_group_name, vault_name, operation_name):
+    resource_guard_proxy_client = resource_guard_proxy_cf(cli_ctx)
+    resource_guard_mapping = resource_guard_proxy_client.get(vault_name, resource_group_name, default_resource_guard)
+    operation_request = ""
+    for operation_detail in resource_guard_mapping.properties.resource_guard_operation_details:
+        if operation_detail.vault_critical_operation == operation_name_map[operation_name]:
+            operation_request = operation_detail.default_resource_request
+            break
+    return operation_request
+
+
+def is_retention_duration_decreased(old_policy, new_policy, backup_management_type):
+    if backup_management_type == "AzureIaasVM":
+        if old_policy.properties.instant_rp_retention_range_in_days is not None:
+            if (new_policy.properties.instant_rp_retention_range_in_days is None or
+                (new_policy.properties.instant_rp_retention_range_in_days <
+                 old_policy.properties.instant_rp_retention_range_in_days)):
+                return True
+        return is_long_term_retention_decreased(old_policy.properties.retention_policy,
+                                                new_policy.properties.retention_policy)
+    if backup_management_type == "AzureStorage":
+        return is_long_term_retention_decreased(old_policy.properties.retention_policy,
+                                                new_policy.properties.retention_policy)
+    if backup_management_type == "AzureWorkload":
+        return is_workload_policy_retention_decreased(old_policy, new_policy)
+    return False
+
+
+def is_long_term_retention_decreased(old_retention_policy, new_retention_policy):
+    if old_retention_policy.daily_schedule is not None:
+        if (new_retention_policy.daily_schedule is None or
+            (new_retention_policy.daily_schedule.retention_duration.count <
+             old_retention_policy.daily_schedule.retention_duration.count)):
+            return True
+
+    if old_retention_policy.weekly_schedule is not None:
+        if (new_retention_policy.weekly_schedule is None or
+            (new_retention_policy.weekly_schedule.retention_duration.count <
+             old_retention_policy.weekly_schedule.retention_duration.count)):
+            return True
+
+    if old_retention_policy.monthly_schedule is not None:
+        if (new_retention_policy.monthly_schedule is None or
+            (new_retention_policy.monthly_schedule.retention_duration.count <
+             old_retention_policy.monthly_schedule.retention_duration.count)):
+            return True
+
+    if old_retention_policy.yearly_schedule is not None:
+        if (new_retention_policy.yearly_schedule is None or
+            (new_retention_policy.yearly_schedule.retention_duration.count <
+             old_retention_policy.yearly_schedule.retention_duration.count)):
+            return True
+
+    return False
+
+
+def is_simple_term_retention_decreased(old_retention_policy, new_retention_policy):
+    if new_retention_policy.retention_duration.count < old_retention_policy.retention_duration.count:
+        return True
+
+    return False
+
+
+def is_workload_policy_retention_decreased(old_policy, new_policy):
+    old_sub_protection_policies = old_policy.properties.sub_protection_policy
+    for old_sub_protection_policy in old_sub_protection_policies:
+        sub_policy_type = old_sub_protection_policy.policy_type
+        new_sub_protection_policy = get_sub_protection_policy(new_policy, sub_policy_type)
+        if new_sub_protection_policy is None:
+            return True
+        # is SnapshotCopyOnlyFull allowed from CLI?
+        if sub_policy_type == "SnapshotCopyOnlyFull":
+            if (new_sub_protection_policy.snapshot_backup_additional_details.instant_rp_retention_range_in_days <
+                    old_sub_protection_policy.snapshot_backup_additional_details.instant_rp_retention_range_in_days):
+                return True
+        else:
+            if old_sub_protection_policy.retention_policy.retention_policy_type == "SimpleRetentionPolicy":
+                if is_simple_term_retention_decreased(old_sub_protection_policy.retention_policy,
+                                                      new_sub_protection_policy.retention_policy):
+                    return True
+            elif old_sub_protection_policy.retention_policy.retention_policy_type == "LongTermRetentionPolicy":
+                if is_long_term_retention_decreased(old_sub_protection_policy.retention_policy,
+                                                    new_sub_protection_policy.retention_policy):
+                    return True
+    return False
+
+
+def get_sub_protection_policy(policy, sub_policy_type):
+    for sub_protection_policy in policy.properties.sub_protection_policy:
+        if sub_protection_policy.policy_type == sub_policy_type:
+            return sub_protection_policy
+    return None
 
 
 def validate_container(container):
@@ -188,12 +308,9 @@ def track_backup_crr_operation(cli_ctx, result, azure_region):
 
     operation_id = get_operation_id_from_header(result.http_response.headers['Azure-AsyncOperation'])
     operation_status = crr_operation_statuses_client.get(azure_region, operation_id)
-    # print("tracking started", operation_status.__dict__)
     while operation_status.status == OperationStatusValues.in_progress.value:
         time.sleep(5)
         operation_status = crr_operation_statuses_client.get(azure_region, operation_id)
-        # print("tracking continues", operation_status.__dict__)
-    # print("tracking completed", operation_status.__dict__)
     return operation_status
 
 

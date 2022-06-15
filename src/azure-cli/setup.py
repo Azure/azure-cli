@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.36.0"
+VERSION = "2.37.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -51,12 +51,12 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'antlr4-python3-runtime~=4.7.2',
+    "antlr4-python3-runtime~=4.9.3",
     'azure-appconfiguration~=1.1.1',
     'azure-batch~=12.0.0',
     'azure-cli-core=={}'.format(VERSION),
     'azure-cosmos~=3.0,>=3.0.2',
-    'azure-data-tables==12.2.0',
+    'azure-data-tables==12.4.0',
     'azure-datalake-store~=0.0.49',
     'azure-graphrbac~=0.60.0',
     'azure-keyvault-administration==4.0.0b3',
@@ -73,8 +73,8 @@ DEPENDENCIES = [
     'azure-mgmt-billing==6.0.0',
     'azure-mgmt-botservice~=0.3.0',
     'azure-mgmt-cdn==12.0.0',
-    'azure-mgmt-cognitiveservices~=13.1.0',
-    'azure-mgmt-compute~=26.1.0',
+    'azure-mgmt-cognitiveservices~=13.2.0',
+    'azure-mgmt-compute~=27.1.0',
     'azure-mgmt-consumption~=2.0',
     'azure-mgmt-containerinstance~=9.1.0',
     'azure-mgmt-containerregistry==8.2.0',
@@ -92,7 +92,7 @@ DEPENDENCIES = [
     'azure-mgmt-extendedlocation==1.0.0b2',
     'azure-mgmt-hdinsight~=9.0.0',
     'azure-mgmt-imagebuilder~=1.0.0',
-    'azure-mgmt-iotcentral~=9.0.0',
+    'azure-mgmt-iotcentral~=10.0.0b1',
     'azure-mgmt-iothub==2.2.0',
     'azure-mgmt-iothubprovisioningservices==1.1.0',
     'azure-mgmt-keyvault==9.3.0',
@@ -104,13 +104,13 @@ DEPENDENCIES = [
     'azure-mgmt-marketplaceordering==1.1.0',
     'azure-mgmt-media~=9.0',
     'azure-mgmt-monitor~=3.0.0',
-    'azure-mgmt-msi~=6.0.0',
+    'azure-mgmt-msi~=6.0.1',
     'azure-mgmt-netapp~=7.0.0',
-    'azure-mgmt-network~=19.3.0',
+    'azure-mgmt-network~=20.0.0',
     'azure-mgmt-policyinsights~=1.1.0b2',
     'azure-mgmt-privatedns~=1.0.0',
     'azure-mgmt-rdbms~=10.0.0',
-    'azure-mgmt-recoveryservicesbackup~=4.1.1',
+    'azure-mgmt-recoveryservicesbackup~=5.0.0',
     'azure-mgmt-recoveryservices~=2.0.0',
     'azure-mgmt-redhatopenshift==1.1.0',
     'azure-mgmt-redis~=13.1.0',
@@ -142,7 +142,7 @@ DEPENDENCIES = [
     'distro; sys_platform == "linux"',
     'fabric~=2.4',
     'javaproperties~=0.5.1',
-    'jsondiff~=1.3.0',
+    'jsondiff~=2.0.0',
     'packaging>=20.9,<22.0',
     'PyGithub~=1.38',
     'PyNaCl~=1.5.0',

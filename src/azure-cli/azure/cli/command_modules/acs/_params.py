@@ -41,7 +41,7 @@ from azure.cli.command_modules.acs._validators import (
     validate_priority, validate_snapshot_id, validate_snapshot_name,
     validate_spot_max_price, validate_ssh_key, validate_taints,
     validate_vm_set_type, validate_vnet_subnet_id,
-    validate_disable_and_enable_parameters, validate_defender_config_parameter)
+    validate_defender_disable_and_enable_parameters, validate_defender_config_parameter)
 from azure.cli.core.commands.parameters import (
     edge_zone_type, file_type, get_enum_type,
     get_resource_name_completion_list, get_three_state_flag, name_type,
@@ -220,10 +220,8 @@ def load_arguments(self, _):
         c.argument('disable_local_accounts', action='store_true')
         c.argument('disable_rbac', action='store_true')
         c.argument('edge_zone', edge_zone_type)
-        c.argument('admin_username', options_list=[
-                   '--admin-username', '-u'], default='azureuser')
-        c.argument('generate_ssh_keys', action='store_true',
-                   validator=validate_create_parameters)
+        c.argument('admin_username', options_list=['--admin-username', '-u'], default='azureuser')
+        c.argument('generate_ssh_keys', action='store_true', validator=validate_create_parameters)
         c.argument('ssh_key_value', required=False, type=file_type, default=os.path.join('~', '.ssh', 'id_rsa.pub'),
                    completer=FilesCompleter(), validator=validate_ssh_key)
         c.argument('no_ssh_key', options_list=['--no-ssh-key', '-x'])
@@ -237,10 +235,8 @@ def load_arguments(self, _):
         c.argument('load_balancer_outbound_ip_prefixes', validator=validate_load_balancer_outbound_ip_prefixes)
         c.argument('load_balancer_outbound_ports', type=int, validator=validate_load_balancer_outbound_ports)
         c.argument('load_balancer_idle_timeout', type=int, validator=validate_load_balancer_idle_timeout)
-        c.argument('nat_gateway_managed_outbound_ip_count', type=int,
-                   validator=validate_nat_gateway_managed_outbound_ip_count)
-        c.argument('nat_gateway_idle_timeout', type=int,
-                   validator=validate_nat_gateway_idle_timeout)
+        c.argument('nat_gateway_managed_outbound_ip_count', type=int, validator=validate_nat_gateway_managed_outbound_ip_count)
+        c.argument('nat_gateway_idle_timeout', type=int, validator=validate_nat_gateway_idle_timeout)
         c.argument('outbound_type', arg_type=get_enum_type(outbound_types))
         c.argument('network_plugin', arg_type=get_enum_type(network_plugins))
         c.argument('network_policy')
@@ -274,6 +270,8 @@ def load_arguments(self, _):
         c.argument('attach_acr', acr_arg_type)
         c.argument('skip_subnet_role_assignment', action='store_true')
         c.argument('node_resource_group')
+        c.argument('enable_defender', action='store_true')
+        c.argument('defender_config', validator=validate_defender_config_parameter)
         # addons
         c.argument('enable_addons', options_list=['--enable-addons', '-a'])
         c.argument('workspace_resource_id')
@@ -315,10 +313,7 @@ def load_arguments(self, _):
         c.argument('enable_fips_image', action='store_true')
         c.argument('kubelet_config')
         c.argument('linux_os_config')
-        c.argument('enable_defender', action='store_true')
-        c.argument('defender_config', validator=validate_defender_config_parameter)
-        c.argument('yes', options_list=[
-                   '--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
+        c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
 
     with self.argument_context('aks update') as c:
         # managed cluster paramerters
@@ -341,6 +336,7 @@ def load_arguments(self, _):
         c.argument('disable_public_fqdn', action='store_true')
         c.argument('enable_managed_identity', action='store_true')
         c.argument('assign_identity', validator=validate_assign_identity)
+        c.argument('assign_kubelet_identity', validator=validate_assign_kubelet_identity)
         c.argument('enable_aad', action='store_true')
         c.argument('enable_azure_rbac', action='store_true')
         c.argument('disable_azure_rbac', action='store_true')
@@ -354,6 +350,9 @@ def load_arguments(self, _):
         c.argument('gmsa_root_domain_name')
         c.argument('attach_acr', acr_arg_type, validator=validate_acr)
         c.argument('detach_acr', acr_arg_type, validator=validate_acr)
+        c.argument('disable_defender', action='store_true', validator=validate_defender_disable_and_enable_parameters)
+        c.argument('enable_defender', action='store_true')
+        c.argument('defender_config', validator=validate_defender_config_parameter)
         # addons
         c.argument('enable_secret_rotation', action='store_true')
         c.argument('disable_secret_rotation', action='store_true')
@@ -369,11 +368,7 @@ def load_arguments(self, _):
         c.argument('max_count', type=int, validator=validate_nodes_count)
         c.argument('nodepool_labels', nargs='*', validator=validate_nodepool_labels,
                    help='space-separated labels: key[=value] [key[=value] ...]. See https://aka.ms/node-labels for syntax of labels.')
-        c.argument('disable_defender', action='store_true', validator=validate_disable_and_enable_parameters)
-        c.argument('enable_defender', action='store_true')
-        c.argument('defender_config', validator=validate_defender_config_parameter)
-        c.argument('yes', options_list=[
-                   '--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
+        c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
 
     with self.argument_context('aks disable-addons', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
         c.argument('addons', options_list=['--addons', '-a'])
@@ -428,10 +423,8 @@ def load_arguments(self, _):
         c.argument('aad_tenant_id')
 
     with self.argument_context('aks upgrade', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
-        c.argument('kubernetes_version',
-                   completer=get_k8s_upgrades_completion_list)
-        c.argument('yes', options_list=[
-                   '--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
+        c.argument('kubernetes_version', completer=get_k8s_upgrades_completion_list)
+        c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
 
     with self.argument_context('aks scale', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
         c.argument('nodepool_name', validator=validate_nodepool_name, help='Node pool name, up to 12 alphanumeric characters.')
