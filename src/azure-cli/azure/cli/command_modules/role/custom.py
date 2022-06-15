@@ -721,7 +721,7 @@ def update_application(instance, display_name=None, identifier_uris=None,  # pyl
 def patch_application(cmd, identifier, parameters):
     graph_client = _graph_client_factory(cmd.cli_ctx)
     object_id = _resolve_application(graph_client, identifier)
-    return graph_client.application_patch(object_id, parameters)
+    return graph_client.application_update(object_id, parameters)
 
 
 def show_application(client, identifier):
@@ -788,7 +788,7 @@ def reset_application_credential(cmd, client, identifier, create_cert=False, cer
         raise CLIError("can't find an application matching '{}'".format(identifier))
     result = _reset_credential(
         cmd, app, client.application_add_password, client.application_remove_password,
-        client.application_patch, create_cert=create_cert, cert=cert, years=years,
+        client.application_update, create_cert=create_cert, cert=cert, years=years,
         end_date=end_date, keyvault=keyvault, append=append, display_name=display_name)
     result['tenant'] = client.tenant
     return result
@@ -796,7 +796,7 @@ def reset_application_credential(cmd, client, identifier, create_cert=False, cer
 
 def delete_application_credential(cmd, client, identifier, key_id, cert=False):  # pylint: disable=unused-argument
     sp = show_application(client, identifier)
-    _delete_credential(sp, client.application_remove_password, client.application_patch,
+    _delete_credential(sp, client.application_remove_password, client.application_update,
                        key_id=key_id, cert=cert)
 
 
@@ -852,17 +852,21 @@ def add_permission(client, identifier, api, api_permissions):
     #         id            <- api_permissions
     #         type
 
-    application = show_application(client, identifier)
-
     resource_access_list = []
     for e in api_permissions:
-        access_id, access_type = e.split('=')
+        try:
+            access_id, access_type = e.split('=')
+        except ValueError as ex:
+            from azure.cli.core.azclierror import ArgumentUsageError
+            raise ArgumentUsageError('Usage error: Please provide both permission id and type, such as '
+                                     '`--api-permissions e1fe6dd8-ba31-4d61-89e7-88639da4683d=Scope`') from ex
         resource_access = {
             "id": access_id,
             "type": access_type
         }
         resource_access_list.append(resource_access)
 
+    application = show_application(client, identifier)
     required_resource_access_list = application['requiredResourceAccess']
     existing_required_resource_access = next((e for e in required_resource_access_list if e['resourceAppId'] == api),
                                              None)
@@ -875,7 +879,7 @@ def add_permission(client, identifier, api, api_permissions):
         }
         required_resource_access_list.append(required_resource_access)
     body = {'requiredResourceAccess': required_resource_access_list}
-    client.application_patch(application[ID], body)
+    client.application_update(application[ID], body)
     logger.warning('Invoking `az ad app permission grant --id %s --api %s` is needed to make the '
                    'change effective', identifier, api)
 
@@ -916,7 +920,7 @@ def delete_permission(client, identifier, api, api_permissions=None):
         required_resource_access_list.remove(existing_required_resource_access)
 
     body = {'requiredResourceAccess': required_resource_access_list}
-    return client.application_patch(application[ID], body)
+    return client.application_update(application[ID], body)
 
 
 def list_permissions(cmd, identifier):
@@ -983,10 +987,15 @@ def create_service_principal(cmd, identifier):
     return _create_service_principal(cmd.cli_ctx, identifier)
 
 
+def update_service_principal(instance):  # pylint: disable=unused-argument
+    # Do not PATCH back properties retrieved with GET and leave everything else to generic update.
+    return {}
+
+
 def patch_service_principal(cmd, identifier, parameters):
     graph_client = _graph_client_factory(cmd.cli_ctx)
-    object_id = _resolve_service_principal(graph_client.service_principals, identifier)
-    return graph_client.service_principals.update(object_id, parameters)
+    object_id = _resolve_service_principal(graph_client, identifier)
+    return graph_client.service_principal_update(object_id, parameters)
 
 
 def _create_service_principal(cli_ctx, identifier, resolve_app=True):
@@ -1058,7 +1067,7 @@ def reset_service_principal_credential(cmd, client, identifier, create_cert=Fals
     result = _reset_credential(
         cmd, sp,
         client.service_principal_add_password, client.service_principal_remove_password,
-        client.service_principal_patch,
+        client.service_principal_update,
         create_cert=create_cert, cert=cert, years=years,
         end_date=end_date, keyvault=keyvault, append=append, display_name=display_name)
     result['tenant'] = client.tenant
@@ -1068,7 +1077,7 @@ def reset_service_principal_credential(cmd, client, identifier, create_cert=Fals
 def delete_service_principal_credential(cmd, client,  # pylint: disable=unused-argument
                                         identifier, key_id, cert=False):
     sp = show_service_principal(client, identifier)
-    _delete_credential(sp, client.service_principal_remove_password, client.service_principal_patch,
+    _delete_credential(sp, client.service_principal_remove_password, client.service_principal_update,
                        key_id=key_id, cert=cert)
 
 
@@ -1801,7 +1810,7 @@ def update_user(client, upn_or_object_id, display_name=None, force_change_passwo
     _set_user_properties(body, display_name=display_name, password=password, mail_nickname=mail_nickname,
                          force_change_password_next_sign_in=force_change_password_next_sign_in,
                          account_enabled=account_enabled)
-    return client.user_patch(upn_or_object_id, body)
+    return client.user_update(upn_or_object_id, body)
 
 
 def _set_user_properties(body, **kwargs):

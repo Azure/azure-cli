@@ -1827,8 +1827,39 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('share_name', share_name_type, options_list=('--destination-share', '-s'),
                    help='Name of the destination share. The share must exist.')
 
+    with self.argument_context('storage file copy start') as c:
+        from .completers import dir_path_completer
+        from azure.cli.command_modules.storage._validators import validate_source_uri
+        c.register_path_argument(options_list=('--destination-path', '-p'))
+        c.register_source_uri_arguments(validator=validate_source_uri)
+        c.extra('share_name', share_name_type, options_list=('--destination-share', '-s'), required=True,
+                help='Name of the destination share. The share must exist.')
+        c.extra('file_snapshot', default=None, arg_group='Copy Source',
+                help='The file snapshot for the source storage account.')
+        c.extra('metadata', nargs='+',
+                help='Metadata in space-separated key=value pairs. This overwrites any existing metadata.',
+                validator=validate_metadata)
+        c.extra('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
+
     with self.argument_context('storage file copy cancel') as c:
         c.register_path_argument(options_list=('--destination-path', '-p'))
+        c.extra('share_name', share_name_type, options_list=('--destination-share', '-s'), required=True,
+                help='Name of the destination share. The share must exist.')
+        c.extra('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
+
+    with self.argument_context('storage file copy start-batch') as c:
+        c.argument('share_name', share_name_type, options_list=('--destination-share'),
+                   help='Name of the destination share. The share must exist.')
+
+    with self.argument_context('storage file copy start-batch', arg_group='Copy Source') as c:
+        from ._validators import get_source_file_or_blob_service_client_track2
+        c.argument('source_client', ignore_type, validator=get_source_file_or_blob_service_client_track2)
+        c.extra('source_account_name')
+        c.extra('source_account_key')
+        c.extra('source_uri')
+        c.argument('source_sas')
+        c.argument('source_container')
+        c.argument('source_share')
 
     with self.argument_context('storage file delete') as c:
         c.register_path_argument()
@@ -1880,7 +1911,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.ignore('sas_token')
 
     with self.argument_context('storage file list') as c:
-        from .completers import dir_path_completer
         c.extra('share_name', share_name_type, required=True)
         c.extra('snapshot', help="A string that represents the snapshot version, if applicable.")
         c.argument('directory_name', options_list=('--path', '-p'), help='The directory path within the file share.',
@@ -1892,9 +1922,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage file metadata show') as c:
         c.register_path_argument()
+        c.extra('share_name', share_name_type, required=True)
+        c.extra('snapshot', help="A string that represents the snapshot version, if applicable.")
+        c.extra('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
 
     with self.argument_context('storage file metadata update') as c:
         c.register_path_argument()
+        c.extra('share_name', share_name_type, required=True)
+        c.extra('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
 
     with self.argument_context('storage file resize') as c:
         c.register_path_argument()
@@ -1958,24 +1993,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage file delete-batch') as c:
         from ._validators import process_file_batch_source_parameters
         c.argument('source', options_list=('--source', '-s'), validator=process_file_batch_source_parameters)
-
-    with self.argument_context('storage file copy start') as c:
-        from azure.cli.command_modules.storage._validators import validate_source_uri
-
-        c.register_path_argument(options_list=('--destination-path', '-p'))
-        c.register_source_uri_arguments(validator=validate_source_uri)
-        c.extra('file_snapshot', default=None, arg_group='Copy Source',
-                help='The file snapshot for the source storage account.')
-
-    with self.argument_context('storage file copy start-batch', arg_group='Copy Source') as c:
-        from ._validators import get_source_file_or_blob_service_client
-        c.argument('source_client', ignore_type, validator=get_source_file_or_blob_service_client)
-        c.extra('source_account_name')
-        c.extra('source_account_key')
-        c.extra('source_uri')
-        c.argument('source_sas')
-        c.argument('source_container')
-        c.argument('source_share')
 
     with self.argument_context('storage cors list') as c:
         c.extra('services', validator=get_char_options_validator('bfqt', 'services'), default='bfqt',

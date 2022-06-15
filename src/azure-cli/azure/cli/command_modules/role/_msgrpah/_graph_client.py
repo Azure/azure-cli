@@ -95,7 +95,7 @@ class GraphClient:
         result = self._send("DELETE", "/applications/{id}".format(id=id))
         return result
 
-    def application_patch(self, id, body):
+    def application_update(self, id, body):
         # https://docs.microsoft.com/en-us/graph/api/application-update
         result = self._send("PATCH", "/applications/{id}".format(id=id), body=body)
         return result
@@ -146,7 +146,7 @@ class GraphClient:
         result = self._send("DELETE", "/servicePrincipals/{id}".format(id=id))
         return result
 
-    def service_principal_patch(self, id, body):
+    def service_principal_update(self, id, body):
         # https://docs.microsoft.com/en-us/graph/api/serviceprincipal-update
         result = self._send("PATCH", "/servicePrincipals/{id}".format(id=id), body=body)
         return result
@@ -268,7 +268,7 @@ class GraphClient:
         result = self._send("DELETE", "/users/{}".format(id_or_upn))
         return result
 
-    def user_patch(self, id_or_upn, body):
+    def user_update(self, id_or_upn, body):
         # https://docs.microsoft.com/graph/api/user-update
         result = self._send("PATCH", "/users/{}".format(id_or_upn), body=body)
         return result
@@ -296,7 +296,10 @@ class GraphClient:
 
 def _filter_to_query(filter):
     if filter is not None:
-        return "?$filter={}".format(filter)
+        # https://docs.microsoft.com/en-us/graph/query-parameters#encoding-query-parameters
+        # The values of query parameters should be percent-encoded.
+        from urllib.parse import quote
+        return "?$filter={}".format(quote(filter, safe=''))
     return ''
 
 
