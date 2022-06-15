@@ -1,8 +1,7 @@
 interactions:
 - request:
-    body: '{"location": "eastus", "identity": {"type": "None"}, "properties": {"redisConfiguration":
-      {}, "tenantSettings": {}, "publicNetworkAccess": "Enabled", "sku": {"name":
-      "Basic", "family": "c", "capacity": 0}}}'
+    body: '{"location": "eastus", "properties": {"redisConfiguration": {}, "tenantSettings":
+      {}, "sku": {"name": "Basic", "family": "c", "capacity": 0}}}'
     headers:
       Accept:
       - application/json
@@ -13,45 +12,38 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '206'
+      - '142'
       Content-Type:
       - application/json
       ParameterSetName:
       - --location --name --resource-group --sku --vm-size
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-redis/13.1.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.37.0 azsdk-python-mgmt-redis/13.1.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_plr000001/providers/Microsoft.Cache/redis/cli-test-acfr-plr000002?api-version=2021-06-01
   response:
     body:
-      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_plr000001/providers/Microsoft.Cache/Redis/cli-test-acfr-plr000002\",\r\n
-        \ \"location\": \"East US\",\r\n  \"name\": \"cli-test-acfr-plr000002\",\r\n
-        \ \"type\": \"Microsoft.Cache/Redis\",\r\n  \"tags\": {},\r\n  \"properties\":
-        {\r\n    \"provisioningState\": \"Creating\",\r\n    \"redisVersion\": \"4.0.14\",\r\n
-        \   \"sku\": {\r\n      \"name\": \"Basic\",\r\n      \"family\": \"C\",\r\n
-        \     \"capacity\": 0\r\n    },\r\n    \"enableNonSslPort\": false,\r\n    \"instances\":
-        [\r\n      {\r\n        \"sslPort\": 15000,\r\n        \"isMaster\": false,\r\n
-        \       \"isPrimary\": false\r\n      }\r\n    ],\r\n    \"publicNetworkAccess\":
-        \"Enabled\",\r\n    \"tenantSettings\": {},\r\n    \"redisConfiguration\":
-        {\r\n      \"maxclients\": \"256\",\r\n      \"maxmemory-reserved\": \"2\",\r\n
-        \     \"maxfragmentationmemory-reserved\": \"12\",\r\n      \"maxmemory-delta\":
-        \"2\"\r\n    },\r\n    \"accessKeys\": {\r\n      \"primaryKey\": \"YHsUoRmcVwhPUyx66NjB9oRCdP3MdZxeOAzCaND5O4I=\",\r\n
-        \     \"secondaryKey\": \"BQtQ5QEz8FeZXoPY7vzMmVGhFnsL6jOMMAzCaE7cALo=\"\r\n
-        \   },\r\n    \"hostName\": \"cli-test-acfr-plr000002.redis.cache.windows.net\",\r\n
-        \   \"port\": 6379,\r\n    \"sslPort\": 6380,\r\n    \"linkedServers\": []\r\n
-        \ }\r\n}"
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_plr000001/providers/Microsoft.Cache/Redis/cli-test-acfr-plr000002",
+        "location": "East US", "name": "cli-test-acfr-plr000002", "type": "Microsoft.Cache/Redis",
+        "tags": {}, "properties": {"provisioningState": "Creating", "redisVersion":
+        "4.0.14", "sku": {"name": "Basic", "family": "C", "capacity": 0}, "enableNonSslPort":
+        false, "instances": [{"sslPort": 15000, "isMaster": false, "isPrimary": false}],
+        "publicNetworkAccess": "Enabled", "tenantSettings": {}, "redisConfiguration":
+        {"maxclients": "256", "maxmemory-reserved": "30", "maxfragmentationmemory-reserved":
+        "30", "maxmemory-delta": "30"}, "hostName": "cli-test-acfr-plr000002.redis.cache.windows.net",
+        "port": 6379, "sslPort": 6380, "linkedServers": [], "****": "****"}}'
     headers:
       azure-asyncoperation:
       - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
+        US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5?api-version=2021-06-01
       cache-control:
       - no-cache
       content-length:
-      - '1166'
+      - '817'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 Dec 2021 03:10:33 GMT
+      - Wed, 15 Jun 2022 08:16:05 GMT
       expires:
       - '-1'
       location:
@@ -67,7 +59,7 @@ interactions:
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
       x-rp-server-mvid:
-      - d4ea5ce3-f7e2-40fb-b84e-6ac2f809a5f4
+      - 29179e76-95ff-4e01-9257-39bee29e6f65
     status:
       code: 201
       message: Created
@@ -85,20 +77,20 @@ interactions:
       ParameterSetName:
       - --location --name --resource-group --sku --vm-size
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-redis/13.1.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.37.0 azsdk-python-mgmt-redis/13.1.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5?api-version=2021-06-01
   response:
     body:
       string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"name\":
-        \"8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"status\": \"InProgress\",\r\n
+        US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5\",\r\n  \"name\":
+        \"de01ca7c-7682-4b09-834c-c0dab44f79d5\",\r\n  \"status\": \"InProgress\",\r\n
         \ \"startTime\": null,\r\n  \"endTime\": null,\r\n  \"percentComplete\": null,\r\n
         \ \"properties\": null,\r\n  \"error\": null\r\n}"
     headers:
       azure-asyncoperation:
       - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
+        US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5?api-version=2021-06-01
       cache-control:
       - no-cache
       content-length:
@@ -106,7 +98,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 30 Dec 2021 03:11:03 GMT
+      - Wed, 15 Jun 2022 08:16:36 GMT
       expires:
       - '-1'
       pragma:
@@ -122,7 +114,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - d4ea5ce3-f7e2-40fb-b84e-6ac2f809a5f4
+      - 29179e76-95ff-4e01-9257-39bee29e6f65
     status:
       code: 200
       message: OK
@@ -140,20 +132,20 @@ interactions:
       ParameterSetName:
       - --location --name --resource-group --sku --vm-size
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-redis/13.1.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.37.0 azsdk-python-mgmt-redis/13.1.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5?api-version=2021-06-01
   response:
     body:
       string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"name\":
-        \"8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"status\": \"InProgress\",\r\n
+        US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5\",\r\n  \"name\":
+        \"de01ca7c-7682-4b09-834c-c0dab44f79d5\",\r\n  \"status\": \"InProgress\",\r\n
         \ \"startTime\": null,\r\n  \"endTime\": null,\r\n  \"percentComplete\": null,\r\n
         \ \"properties\": null,\r\n  \"error\": null\r\n}"
     headers:
       azure-asyncoperation:
       - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
+        US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5?api-version=2021-06-01
       cache-control:
       - no-cache
       content-length:
@@ -161,7 +153,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 30 Dec 2021 03:11:33 GMT
+      - Wed, 15 Jun 2022 08:17:06 GMT
       expires:
       - '-1'
       pragma:
@@ -177,7 +169,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - d4ea5ce3-f7e2-40fb-b84e-6ac2f809a5f4
+      - 29179e76-95ff-4e01-9257-39bee29e6f65
     status:
       code: 200
       message: OK
@@ -195,20 +187,20 @@ interactions:
       ParameterSetName:
       - --location --name --resource-group --sku --vm-size
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-redis/13.1.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.37.0 azsdk-python-mgmt-redis/13.1.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5?api-version=2021-06-01
   response:
     body:
       string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"name\":
-        \"8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"status\": \"InProgress\",\r\n
+        US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5\",\r\n  \"name\":
+        \"de01ca7c-7682-4b09-834c-c0dab44f79d5\",\r\n  \"status\": \"InProgress\",\r\n
         \ \"startTime\": null,\r\n  \"endTime\": null,\r\n  \"percentComplete\": null,\r\n
         \ \"properties\": null,\r\n  \"error\": null\r\n}"
     headers:
       azure-asyncoperation:
       - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
+        US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5?api-version=2021-06-01
       cache-control:
       - no-cache
       content-length:
@@ -216,7 +208,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 30 Dec 2021 03:12:04 GMT
+      - Wed, 15 Jun 2022 08:17:36 GMT
       expires:
       - '-1'
       pragma:
@@ -232,7 +224,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - d4ea5ce3-f7e2-40fb-b84e-6ac2f809a5f4
+      - 29179e76-95ff-4e01-9257-39bee29e6f65
     status:
       code: 200
       message: OK
@@ -250,20 +242,20 @@ interactions:
       ParameterSetName:
       - --location --name --resource-group --sku --vm-size
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-redis/13.1.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.37.0 azsdk-python-mgmt-redis/13.1.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5?api-version=2021-06-01
   response:
     body:
       string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"name\":
-        \"8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"status\": \"InProgress\",\r\n
+        US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5\",\r\n  \"name\":
+        \"de01ca7c-7682-4b09-834c-c0dab44f79d5\",\r\n  \"status\": \"InProgress\",\r\n
         \ \"startTime\": null,\r\n  \"endTime\": null,\r\n  \"percentComplete\": null,\r\n
         \ \"properties\": null,\r\n  \"error\": null\r\n}"
     headers:
       azure-asyncoperation:
       - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
+        US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5?api-version=2021-06-01
       cache-control:
       - no-cache
       content-length:
@@ -271,7 +263,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 30 Dec 2021 03:12:34 GMT
+      - Wed, 15 Jun 2022 08:18:07 GMT
       expires:
       - '-1'
       pragma:
@@ -287,7 +279,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - d4ea5ce3-f7e2-40fb-b84e-6ac2f809a5f4
+      - 29179e76-95ff-4e01-9257-39bee29e6f65
     status:
       code: 200
       message: OK
@@ -305,20 +297,20 @@ interactions:
       ParameterSetName:
       - --location --name --resource-group --sku --vm-size
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-redis/13.1.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.37.0 azsdk-python-mgmt-redis/13.1.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5?api-version=2021-06-01
   response:
     body:
       string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"name\":
-        \"8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"status\": \"InProgress\",\r\n
+        US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5\",\r\n  \"name\":
+        \"de01ca7c-7682-4b09-834c-c0dab44f79d5\",\r\n  \"status\": \"InProgress\",\r\n
         \ \"startTime\": null,\r\n  \"endTime\": null,\r\n  \"percentComplete\": null,\r\n
         \ \"properties\": null,\r\n  \"error\": null\r\n}"
     headers:
       azure-asyncoperation:
       - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
+        US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5?api-version=2021-06-01
       cache-control:
       - no-cache
       content-length:
@@ -326,7 +318,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 30 Dec 2021 03:13:04 GMT
+      - Wed, 15 Jun 2022 08:18:38 GMT
       expires:
       - '-1'
       pragma:
@@ -342,7 +334,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - d4ea5ce3-f7e2-40fb-b84e-6ac2f809a5f4
+      - 29179e76-95ff-4e01-9257-39bee29e6f65
     status:
       code: 200
       message: OK
@@ -360,20 +352,20 @@ interactions:
       ParameterSetName:
       - --location --name --resource-group --sku --vm-size
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-redis/13.1.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.37.0 azsdk-python-mgmt-redis/13.1.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5?api-version=2021-06-01
   response:
     body:
       string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"name\":
-        \"8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"status\": \"InProgress\",\r\n
+        US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5\",\r\n  \"name\":
+        \"de01ca7c-7682-4b09-834c-c0dab44f79d5\",\r\n  \"status\": \"InProgress\",\r\n
         \ \"startTime\": null,\r\n  \"endTime\": null,\r\n  \"percentComplete\": null,\r\n
         \ \"properties\": null,\r\n  \"error\": null\r\n}"
     headers:
       azure-asyncoperation:
       - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
+        US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5?api-version=2021-06-01
       cache-control:
       - no-cache
       content-length:
@@ -381,7 +373,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 30 Dec 2021 03:13:35 GMT
+      - Wed, 15 Jun 2022 08:19:08 GMT
       expires:
       - '-1'
       pragma:
@@ -397,7 +389,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - d4ea5ce3-f7e2-40fb-b84e-6ac2f809a5f4
+      - 29179e76-95ff-4e01-9257-39bee29e6f65
     status:
       code: 200
       message: OK
@@ -415,20 +407,20 @@ interactions:
       ParameterSetName:
       - --location --name --resource-group --sku --vm-size
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-redis/13.1.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.37.0 azsdk-python-mgmt-redis/13.1.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5?api-version=2021-06-01
   response:
     body:
       string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"name\":
-        \"8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"status\": \"InProgress\",\r\n
+        US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5\",\r\n  \"name\":
+        \"de01ca7c-7682-4b09-834c-c0dab44f79d5\",\r\n  \"status\": \"InProgress\",\r\n
         \ \"startTime\": null,\r\n  \"endTime\": null,\r\n  \"percentComplete\": null,\r\n
         \ \"properties\": null,\r\n  \"error\": null\r\n}"
     headers:
       azure-asyncoperation:
       - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
+        US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5?api-version=2021-06-01
       cache-control:
       - no-cache
       content-length:
@@ -436,7 +428,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 30 Dec 2021 03:14:05 GMT
+      - Wed, 15 Jun 2022 08:19:38 GMT
       expires:
       - '-1'
       pragma:
@@ -452,7 +444,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - d4ea5ce3-f7e2-40fb-b84e-6ac2f809a5f4
+      - 29179e76-95ff-4e01-9257-39bee29e6f65
     status:
       code: 200
       message: OK
@@ -470,20 +462,20 @@ interactions:
       ParameterSetName:
       - --location --name --resource-group --sku --vm-size
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-redis/13.1.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.37.0 azsdk-python-mgmt-redis/13.1.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5?api-version=2021-06-01
   response:
     body:
       string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"name\":
-        \"8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"status\": \"InProgress\",\r\n
+        US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5\",\r\n  \"name\":
+        \"de01ca7c-7682-4b09-834c-c0dab44f79d5\",\r\n  \"status\": \"InProgress\",\r\n
         \ \"startTime\": null,\r\n  \"endTime\": null,\r\n  \"percentComplete\": null,\r\n
         \ \"properties\": null,\r\n  \"error\": null\r\n}"
     headers:
       azure-asyncoperation:
       - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
+        US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5?api-version=2021-06-01
       cache-control:
       - no-cache
       content-length:
@@ -491,7 +483,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 30 Dec 2021 03:14:35 GMT
+      - Wed, 15 Jun 2022 08:20:09 GMT
       expires:
       - '-1'
       pragma:
@@ -507,7 +499,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - d4ea5ce3-f7e2-40fb-b84e-6ac2f809a5f4
+      - 29179e76-95ff-4e01-9257-39bee29e6f65
     status:
       code: 200
       message: OK
@@ -525,20 +517,20 @@ interactions:
       ParameterSetName:
       - --location --name --resource-group --sku --vm-size
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-redis/13.1.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.37.0 azsdk-python-mgmt-redis/13.1.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5?api-version=2021-06-01
   response:
     body:
       string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"name\":
-        \"8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"status\": \"InProgress\",\r\n
+        US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5\",\r\n  \"name\":
+        \"de01ca7c-7682-4b09-834c-c0dab44f79d5\",\r\n  \"status\": \"InProgress\",\r\n
         \ \"startTime\": null,\r\n  \"endTime\": null,\r\n  \"percentComplete\": null,\r\n
         \ \"properties\": null,\r\n  \"error\": null\r\n}"
     headers:
       azure-asyncoperation:
       - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
+        US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5?api-version=2021-06-01
       cache-control:
       - no-cache
       content-length:
@@ -546,7 +538,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 30 Dec 2021 03:15:06 GMT
+      - Wed, 15 Jun 2022 08:20:39 GMT
       expires:
       - '-1'
       pragma:
@@ -562,7 +554,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - d4ea5ce3-f7e2-40fb-b84e-6ac2f809a5f4
+      - 29179e76-95ff-4e01-9257-39bee29e6f65
     status:
       code: 200
       message: OK
@@ -580,20 +572,20 @@ interactions:
       ParameterSetName:
       - --location --name --resource-group --sku --vm-size
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-redis/13.1.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.37.0 azsdk-python-mgmt-redis/13.1.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5?api-version=2021-06-01
   response:
     body:
       string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"name\":
-        \"8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"status\": \"InProgress\",\r\n
+        US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5\",\r\n  \"name\":
+        \"de01ca7c-7682-4b09-834c-c0dab44f79d5\",\r\n  \"status\": \"InProgress\",\r\n
         \ \"startTime\": null,\r\n  \"endTime\": null,\r\n  \"percentComplete\": null,\r\n
         \ \"properties\": null,\r\n  \"error\": null\r\n}"
     headers:
       azure-asyncoperation:
       - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
+        US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5?api-version=2021-06-01
       cache-control:
       - no-cache
       content-length:
@@ -601,7 +593,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 30 Dec 2021 03:15:37 GMT
+      - Wed, 15 Jun 2022 08:21:10 GMT
       expires:
       - '-1'
       pragma:
@@ -617,7 +609,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - d4ea5ce3-f7e2-40fb-b84e-6ac2f809a5f4
+      - 29179e76-95ff-4e01-9257-39bee29e6f65
     status:
       code: 200
       message: OK
@@ -635,20 +627,20 @@ interactions:
       ParameterSetName:
       - --location --name --resource-group --sku --vm-size
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-redis/13.1.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.37.0 azsdk-python-mgmt-redis/13.1.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5?api-version=2021-06-01
   response:
     body:
       string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"name\":
-        \"8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"status\": \"InProgress\",\r\n
+        US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5\",\r\n  \"name\":
+        \"de01ca7c-7682-4b09-834c-c0dab44f79d5\",\r\n  \"status\": \"InProgress\",\r\n
         \ \"startTime\": null,\r\n  \"endTime\": null,\r\n  \"percentComplete\": null,\r\n
         \ \"properties\": null,\r\n  \"error\": null\r\n}"
     headers:
       azure-asyncoperation:
       - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
+        US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5?api-version=2021-06-01
       cache-control:
       - no-cache
       content-length:
@@ -656,7 +648,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 30 Dec 2021 03:16:07 GMT
+      - Wed, 15 Jun 2022 08:21:41 GMT
       expires:
       - '-1'
       pragma:
@@ -672,7 +664,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - d4ea5ce3-f7e2-40fb-b84e-6ac2f809a5f4
+      - 29179e76-95ff-4e01-9257-39bee29e6f65
     status:
       code: 200
       message: OK
@@ -690,20 +682,20 @@ interactions:
       ParameterSetName:
       - --location --name --resource-group --sku --vm-size
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-redis/13.1.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.37.0 azsdk-python-mgmt-redis/13.1.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5?api-version=2021-06-01
   response:
     body:
       string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"name\":
-        \"8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"status\": \"InProgress\",\r\n
+        US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5\",\r\n  \"name\":
+        \"de01ca7c-7682-4b09-834c-c0dab44f79d5\",\r\n  \"status\": \"InProgress\",\r\n
         \ \"startTime\": null,\r\n  \"endTime\": null,\r\n  \"percentComplete\": null,\r\n
         \ \"properties\": null,\r\n  \"error\": null\r\n}"
     headers:
       azure-asyncoperation:
       - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
+        US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5?api-version=2021-06-01
       cache-control:
       - no-cache
       content-length:
@@ -711,7 +703,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 30 Dec 2021 03:16:37 GMT
+      - Wed, 15 Jun 2022 08:22:11 GMT
       expires:
       - '-1'
       pragma:
@@ -727,7 +719,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - d4ea5ce3-f7e2-40fb-b84e-6ac2f809a5f4
+      - 29179e76-95ff-4e01-9257-39bee29e6f65
     status:
       code: 200
       message: OK
@@ -745,20 +737,20 @@ interactions:
       ParameterSetName:
       - --location --name --resource-group --sku --vm-size
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-redis/13.1.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.37.0 azsdk-python-mgmt-redis/13.1.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5?api-version=2021-06-01
   response:
     body:
       string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"name\":
-        \"8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"status\": \"InProgress\",\r\n
+        US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5\",\r\n  \"name\":
+        \"de01ca7c-7682-4b09-834c-c0dab44f79d5\",\r\n  \"status\": \"InProgress\",\r\n
         \ \"startTime\": null,\r\n  \"endTime\": null,\r\n  \"percentComplete\": null,\r\n
         \ \"properties\": null,\r\n  \"error\": null\r\n}"
     headers:
       azure-asyncoperation:
       - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
+        US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5?api-version=2021-06-01
       cache-control:
       - no-cache
       content-length:
@@ -766,7 +758,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 30 Dec 2021 03:17:07 GMT
+      - Wed, 15 Jun 2022 08:22:42 GMT
       expires:
       - '-1'
       pragma:
@@ -782,7 +774,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - d4ea5ce3-f7e2-40fb-b84e-6ac2f809a5f4
+      - 29179e76-95ff-4e01-9257-39bee29e6f65
     status:
       code: 200
       message: OK
@@ -800,20 +792,20 @@ interactions:
       ParameterSetName:
       - --location --name --resource-group --sku --vm-size
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-redis/13.1.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.37.0 azsdk-python-mgmt-redis/13.1.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5?api-version=2021-06-01
   response:
     body:
       string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"name\":
-        \"8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"status\": \"InProgress\",\r\n
+        US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5\",\r\n  \"name\":
+        \"de01ca7c-7682-4b09-834c-c0dab44f79d5\",\r\n  \"status\": \"InProgress\",\r\n
         \ \"startTime\": null,\r\n  \"endTime\": null,\r\n  \"percentComplete\": null,\r\n
         \ \"properties\": null,\r\n  \"error\": null\r\n}"
     headers:
       azure-asyncoperation:
       - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
+        US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5?api-version=2021-06-01
       cache-control:
       - no-cache
       content-length:
@@ -821,7 +813,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 30 Dec 2021 03:17:38 GMT
+      - Wed, 15 Jun 2022 08:23:12 GMT
       expires:
       - '-1'
       pragma:
@@ -837,7 +829,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - d4ea5ce3-f7e2-40fb-b84e-6ac2f809a5f4
+      - 29179e76-95ff-4e01-9257-39bee29e6f65
     status:
       code: 200
       message: OK
@@ -855,20 +847,20 @@ interactions:
       ParameterSetName:
       - --location --name --resource-group --sku --vm-size
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-redis/13.1.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.37.0 azsdk-python-mgmt-redis/13.1.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5?api-version=2021-06-01
   response:
     body:
       string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"name\":
-        \"8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"status\": \"InProgress\",\r\n
+        US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5\",\r\n  \"name\":
+        \"de01ca7c-7682-4b09-834c-c0dab44f79d5\",\r\n  \"status\": \"InProgress\",\r\n
         \ \"startTime\": null,\r\n  \"endTime\": null,\r\n  \"percentComplete\": null,\r\n
         \ \"properties\": null,\r\n  \"error\": null\r\n}"
     headers:
       azure-asyncoperation:
       - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
+        US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5?api-version=2021-06-01
       cache-control:
       - no-cache
       content-length:
@@ -876,7 +868,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 30 Dec 2021 03:18:08 GMT
+      - Wed, 15 Jun 2022 08:23:42 GMT
       expires:
       - '-1'
       pragma:
@@ -892,7 +884,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - d4ea5ce3-f7e2-40fb-b84e-6ac2f809a5f4
+      - 29179e76-95ff-4e01-9257-39bee29e6f65
     status:
       code: 200
       message: OK
@@ -910,20 +902,20 @@ interactions:
       ParameterSetName:
       - --location --name --resource-group --sku --vm-size
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-redis/13.1.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.37.0 azsdk-python-mgmt-redis/13.1.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5?api-version=2021-06-01
   response:
     body:
       string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"name\":
-        \"8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"status\": \"InProgress\",\r\n
+        US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5\",\r\n  \"name\":
+        \"de01ca7c-7682-4b09-834c-c0dab44f79d5\",\r\n  \"status\": \"InProgress\",\r\n
         \ \"startTime\": null,\r\n  \"endTime\": null,\r\n  \"percentComplete\": null,\r\n
         \ \"properties\": null,\r\n  \"error\": null\r\n}"
     headers:
       azure-asyncoperation:
       - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
+        US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5?api-version=2021-06-01
       cache-control:
       - no-cache
       content-length:
@@ -931,7 +923,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 30 Dec 2021 03:18:38 GMT
+      - Wed, 15 Jun 2022 08:24:13 GMT
       expires:
       - '-1'
       pragma:
@@ -947,7 +939,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - d4ea5ce3-f7e2-40fb-b84e-6ac2f809a5f4
+      - 29179e76-95ff-4e01-9257-39bee29e6f65
     status:
       code: 200
       message: OK
@@ -965,20 +957,20 @@ interactions:
       ParameterSetName:
       - --location --name --resource-group --sku --vm-size
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-redis/13.1.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.37.0 azsdk-python-mgmt-redis/13.1.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5?api-version=2021-06-01
   response:
     body:
       string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"name\":
-        \"8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"status\": \"InProgress\",\r\n
+        US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5\",\r\n  \"name\":
+        \"de01ca7c-7682-4b09-834c-c0dab44f79d5\",\r\n  \"status\": \"InProgress\",\r\n
         \ \"startTime\": null,\r\n  \"endTime\": null,\r\n  \"percentComplete\": null,\r\n
         \ \"properties\": null,\r\n  \"error\": null\r\n}"
     headers:
       azure-asyncoperation:
       - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
+        US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5?api-version=2021-06-01
       cache-control:
       - no-cache
       content-length:
@@ -986,7 +978,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 30 Dec 2021 03:19:09 GMT
+      - Wed, 15 Jun 2022 08:24:43 GMT
       expires:
       - '-1'
       pragma:
@@ -1002,7 +994,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - d4ea5ce3-f7e2-40fb-b84e-6ac2f809a5f4
+      - 29179e76-95ff-4e01-9257-39bee29e6f65
     status:
       code: 200
       message: OK
@@ -1020,20 +1012,20 @@ interactions:
       ParameterSetName:
       - --location --name --resource-group --sku --vm-size
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-redis/13.1.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.37.0 azsdk-python-mgmt-redis/13.1.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5?api-version=2021-06-01
   response:
     body:
       string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"name\":
-        \"8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"status\": \"InProgress\",\r\n
+        US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5\",\r\n  \"name\":
+        \"de01ca7c-7682-4b09-834c-c0dab44f79d5\",\r\n  \"status\": \"InProgress\",\r\n
         \ \"startTime\": null,\r\n  \"endTime\": null,\r\n  \"percentComplete\": null,\r\n
         \ \"properties\": null,\r\n  \"error\": null\r\n}"
     headers:
       azure-asyncoperation:
       - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
+        US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5?api-version=2021-06-01
       cache-control:
       - no-cache
       content-length:
@@ -1041,7 +1033,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 30 Dec 2021 03:19:40 GMT
+      - Wed, 15 Jun 2022 08:25:14 GMT
       expires:
       - '-1'
       pragma:
@@ -1057,7 +1049,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - d4ea5ce3-f7e2-40fb-b84e-6ac2f809a5f4
+      - 29179e76-95ff-4e01-9257-39bee29e6f65
     status:
       code: 200
       message: OK
@@ -1075,20 +1067,20 @@ interactions:
       ParameterSetName:
       - --location --name --resource-group --sku --vm-size
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-redis/13.1.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.37.0 azsdk-python-mgmt-redis/13.1.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5?api-version=2021-06-01
   response:
     body:
       string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"name\":
-        \"8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"status\": \"InProgress\",\r\n
+        US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5\",\r\n  \"name\":
+        \"de01ca7c-7682-4b09-834c-c0dab44f79d5\",\r\n  \"status\": \"InProgress\",\r\n
         \ \"startTime\": null,\r\n  \"endTime\": null,\r\n  \"percentComplete\": null,\r\n
         \ \"properties\": null,\r\n  \"error\": null\r\n}"
     headers:
       azure-asyncoperation:
       - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
+        US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5?api-version=2021-06-01
       cache-control:
       - no-cache
       content-length:
@@ -1096,7 +1088,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 30 Dec 2021 03:20:10 GMT
+      - Wed, 15 Jun 2022 08:25:44 GMT
       expires:
       - '-1'
       pragma:
@@ -1112,7 +1104,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - d4ea5ce3-f7e2-40fb-b84e-6ac2f809a5f4
+      - 29179e76-95ff-4e01-9257-39bee29e6f65
     status:
       code: 200
       message: OK
@@ -1130,20 +1122,20 @@ interactions:
       ParameterSetName:
       - --location --name --resource-group --sku --vm-size
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-redis/13.1.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.37.0 azsdk-python-mgmt-redis/13.1.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5?api-version=2021-06-01
   response:
     body:
       string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"name\":
-        \"8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"status\": \"InProgress\",\r\n
+        US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5\",\r\n  \"name\":
+        \"de01ca7c-7682-4b09-834c-c0dab44f79d5\",\r\n  \"status\": \"InProgress\",\r\n
         \ \"startTime\": null,\r\n  \"endTime\": null,\r\n  \"percentComplete\": null,\r\n
         \ \"properties\": null,\r\n  \"error\": null\r\n}"
     headers:
       azure-asyncoperation:
       - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
+        US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5?api-version=2021-06-01
       cache-control:
       - no-cache
       content-length:
@@ -1151,7 +1143,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 30 Dec 2021 03:20:41 GMT
+      - Wed, 15 Jun 2022 08:26:14 GMT
       expires:
       - '-1'
       pragma:
@@ -1167,7 +1159,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - d4ea5ce3-f7e2-40fb-b84e-6ac2f809a5f4
+      - 29179e76-95ff-4e01-9257-39bee29e6f65
     status:
       code: 200
       message: OK
@@ -1185,20 +1177,20 @@ interactions:
       ParameterSetName:
       - --location --name --resource-group --sku --vm-size
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-redis/13.1.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.37.0 azsdk-python-mgmt-redis/13.1.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5?api-version=2021-06-01
   response:
     body:
       string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"name\":
-        \"8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"status\": \"InProgress\",\r\n
+        US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5\",\r\n  \"name\":
+        \"de01ca7c-7682-4b09-834c-c0dab44f79d5\",\r\n  \"status\": \"InProgress\",\r\n
         \ \"startTime\": null,\r\n  \"endTime\": null,\r\n  \"percentComplete\": null,\r\n
         \ \"properties\": null,\r\n  \"error\": null\r\n}"
     headers:
       azure-asyncoperation:
       - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
+        US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5?api-version=2021-06-01
       cache-control:
       - no-cache
       content-length:
@@ -1206,7 +1198,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 30 Dec 2021 03:21:12 GMT
+      - Wed, 15 Jun 2022 08:26:44 GMT
       expires:
       - '-1'
       pragma:
@@ -1222,7 +1214,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - d4ea5ce3-f7e2-40fb-b84e-6ac2f809a5f4
+      - 29179e76-95ff-4e01-9257-39bee29e6f65
     status:
       code: 200
       message: OK
@@ -1240,20 +1232,20 @@ interactions:
       ParameterSetName:
       - --location --name --resource-group --sku --vm-size
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-redis/13.1.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.37.0 azsdk-python-mgmt-redis/13.1.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5?api-version=2021-06-01
   response:
     body:
       string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"name\":
-        \"8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"status\": \"InProgress\",\r\n
+        US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5\",\r\n  \"name\":
+        \"de01ca7c-7682-4b09-834c-c0dab44f79d5\",\r\n  \"status\": \"InProgress\",\r\n
         \ \"startTime\": null,\r\n  \"endTime\": null,\r\n  \"percentComplete\": null,\r\n
         \ \"properties\": null,\r\n  \"error\": null\r\n}"
     headers:
       azure-asyncoperation:
       - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
+        US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5?api-version=2021-06-01
       cache-control:
       - no-cache
       content-length:
@@ -1261,7 +1253,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 30 Dec 2021 03:21:42 GMT
+      - Wed, 15 Jun 2022 08:27:16 GMT
       expires:
       - '-1'
       pragma:
@@ -1277,7 +1269,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - d4ea5ce3-f7e2-40fb-b84e-6ac2f809a5f4
+      - 29179e76-95ff-4e01-9257-39bee29e6f65
     status:
       code: 200
       message: OK
@@ -1295,20 +1287,20 @@ interactions:
       ParameterSetName:
       - --location --name --resource-group --sku --vm-size
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-redis/13.1.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.37.0 azsdk-python-mgmt-redis/13.1.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5?api-version=2021-06-01
   response:
     body:
       string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"name\":
-        \"8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"status\": \"InProgress\",\r\n
+        US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5\",\r\n  \"name\":
+        \"de01ca7c-7682-4b09-834c-c0dab44f79d5\",\r\n  \"status\": \"InProgress\",\r\n
         \ \"startTime\": null,\r\n  \"endTime\": null,\r\n  \"percentComplete\": null,\r\n
         \ \"properties\": null,\r\n  \"error\": null\r\n}"
     headers:
       azure-asyncoperation:
       - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
+        US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5?api-version=2021-06-01
       cache-control:
       - no-cache
       content-length:
@@ -1316,7 +1308,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 30 Dec 2021 03:22:12 GMT
+      - Wed, 15 Jun 2022 08:27:47 GMT
       expires:
       - '-1'
       pragma:
@@ -1332,7 +1324,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - d4ea5ce3-f7e2-40fb-b84e-6ac2f809a5f4
+      - 29179e76-95ff-4e01-9257-39bee29e6f65
     status:
       code: 200
       message: OK
@@ -1350,20 +1342,20 @@ interactions:
       ParameterSetName:
       - --location --name --resource-group --sku --vm-size
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-redis/13.1.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.37.0 azsdk-python-mgmt-redis/13.1.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5?api-version=2021-06-01
   response:
     body:
       string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"name\":
-        \"8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"status\": \"InProgress\",\r\n
+        US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5\",\r\n  \"name\":
+        \"de01ca7c-7682-4b09-834c-c0dab44f79d5\",\r\n  \"status\": \"InProgress\",\r\n
         \ \"startTime\": null,\r\n  \"endTime\": null,\r\n  \"percentComplete\": null,\r\n
         \ \"properties\": null,\r\n  \"error\": null\r\n}"
     headers:
       azure-asyncoperation:
       - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
+        US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5?api-version=2021-06-01
       cache-control:
       - no-cache
       content-length:
@@ -1371,7 +1363,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 30 Dec 2021 03:22:43 GMT
+      - Wed, 15 Jun 2022 08:28:17 GMT
       expires:
       - '-1'
       pragma:
@@ -1387,7 +1379,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - d4ea5ce3-f7e2-40fb-b84e-6ac2f809a5f4
+      - 29179e76-95ff-4e01-9257-39bee29e6f65
     status:
       code: 200
       message: OK
@@ -1405,20 +1397,20 @@ interactions:
       ParameterSetName:
       - --location --name --resource-group --sku --vm-size
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-redis/13.1.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.37.0 azsdk-python-mgmt-redis/13.1.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5?api-version=2021-06-01
   response:
     body:
       string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"name\":
-        \"8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"status\": \"InProgress\",\r\n
+        US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5\",\r\n  \"name\":
+        \"de01ca7c-7682-4b09-834c-c0dab44f79d5\",\r\n  \"status\": \"InProgress\",\r\n
         \ \"startTime\": null,\r\n  \"endTime\": null,\r\n  \"percentComplete\": null,\r\n
         \ \"properties\": null,\r\n  \"error\": null\r\n}"
     headers:
       azure-asyncoperation:
       - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
+        US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5?api-version=2021-06-01
       cache-control:
       - no-cache
       content-length:
@@ -1426,7 +1418,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 30 Dec 2021 03:23:13 GMT
+      - Wed, 15 Jun 2022 08:28:47 GMT
       expires:
       - '-1'
       pragma:
@@ -1442,7 +1434,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - d4ea5ce3-f7e2-40fb-b84e-6ac2f809a5f4
+      - 29179e76-95ff-4e01-9257-39bee29e6f65
     status:
       code: 200
       message: OK
@@ -1460,20 +1452,20 @@ interactions:
       ParameterSetName:
       - --location --name --resource-group --sku --vm-size
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-redis/13.1.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.37.0 azsdk-python-mgmt-redis/13.1.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5?api-version=2021-06-01
   response:
     body:
       string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"name\":
-        \"8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"status\": \"InProgress\",\r\n
+        US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5\",\r\n  \"name\":
+        \"de01ca7c-7682-4b09-834c-c0dab44f79d5\",\r\n  \"status\": \"InProgress\",\r\n
         \ \"startTime\": null,\r\n  \"endTime\": null,\r\n  \"percentComplete\": null,\r\n
         \ \"properties\": null,\r\n  \"error\": null\r\n}"
     headers:
       azure-asyncoperation:
       - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
+        US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5?api-version=2021-06-01
       cache-control:
       - no-cache
       content-length:
@@ -1481,7 +1473,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 30 Dec 2021 03:23:43 GMT
+      - Wed, 15 Jun 2022 08:29:17 GMT
       expires:
       - '-1'
       pragma:
@@ -1497,7 +1489,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - d4ea5ce3-f7e2-40fb-b84e-6ac2f809a5f4
+      - 29179e76-95ff-4e01-9257-39bee29e6f65
     status:
       code: 200
       message: OK
@@ -1515,130 +1507,20 @@ interactions:
       ParameterSetName:
       - --location --name --resource-group --sku --vm-size
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-redis/13.1.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.37.0 azsdk-python-mgmt-redis/13.1.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5?api-version=2021-06-01
   response:
     body:
       string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"name\":
-        \"8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"status\": \"InProgress\",\r\n
+        US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5\",\r\n  \"name\":
+        \"de01ca7c-7682-4b09-834c-c0dab44f79d5\",\r\n  \"status\": \"Succeeded\",\r\n
         \ \"startTime\": null,\r\n  \"endTime\": null,\r\n  \"percentComplete\": null,\r\n
         \ \"properties\": null,\r\n  \"error\": null\r\n}"
     headers:
       azure-asyncoperation:
       - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
-      cache-control:
-      - no-cache
-      content-length:
-      - '353'
-      content-type:
-      - application/json
-      date:
-      - Thu, 30 Dec 2021 03:24:15 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-rp-server-mvid:
-      - d4ea5ce3-f7e2-40fb-b84e-6ac2f809a5f4
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - redis create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --location --name --resource-group --sku --vm-size
-      User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-redis/13.1.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
-  response:
-    body:
-      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"name\":
-        \"8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"status\": \"InProgress\",\r\n
-        \ \"startTime\": null,\r\n  \"endTime\": null,\r\n  \"percentComplete\": null,\r\n
-        \ \"properties\": null,\r\n  \"error\": null\r\n}"
-    headers:
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
-      cache-control:
-      - no-cache
-      content-length:
-      - '353'
-      content-type:
-      - application/json
-      date:
-      - Thu, 30 Dec 2021 03:24:45 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-rp-server-mvid:
-      - d4ea5ce3-f7e2-40fb-b84e-6ac2f809a5f4
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - redis create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --location --name --resource-group --sku --vm-size
-      User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-redis/13.1.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
-  response:
-    body:
-      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"name\":
-        \"8dd7026c-5f8b-4598-8b91-2e9ae0f23c84\",\r\n  \"status\": \"Succeeded\",\r\n
-        \ \"startTime\": null,\r\n  \"endTime\": null,\r\n  \"percentComplete\": null,\r\n
-        \ \"properties\": null,\r\n  \"error\": null\r\n}"
-    headers:
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
-        US/asyncOperations/8dd7026c-5f8b-4598-8b91-2e9ae0f23c84?api-version=2021-06-01
+        US/asyncOperations/de01ca7c-7682-4b09-834c-c0dab44f79d5?api-version=2021-06-01
       cache-control:
       - no-cache
       content-length:
@@ -1646,7 +1528,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 30 Dec 2021 03:25:15 GMT
+      - Wed, 15 Jun 2022 08:29:48 GMT
       expires:
       - '-1'
       pragma:
@@ -1662,7 +1544,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - d4ea5ce3-f7e2-40fb-b84e-6ac2f809a5f4
+      - 29179e76-95ff-4e01-9257-39bee29e6f65
     status:
       code: 200
       message: OK
@@ -1680,22 +1562,29 @@ interactions:
       ParameterSetName:
       - --location --name --resource-group --sku --vm-size
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-redis/13.1.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.37.0 azsdk-python-mgmt-redis/13.1.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_plr000001/providers/Microsoft.Cache/redis/cli-test-acfr-plr000002?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_plr000001/providers/Microsoft.Cache/Redis/cli-test-acfr-plr000002","location":"East
-        US","name":"cli-test-acfr-plr000002","type":"Microsoft.Cache/Redis","tags":{},"properties":{"provisioningState":"Succeeded","redisVersion":"4.0.14","sku":{"name":"Basic","family":"C","capacity":0},"enableNonSslPort":false,"instances":[{"sslPort":15000,"isMaster":true,"isPrimary":true}],"publicNetworkAccess":"Enabled","tenantSettings":{},"redisConfiguration":{"maxclients":"256","maxmemory-reserved":"2","maxfragmentationmemory-reserved":"12","maxmemory-delta":"2"},"accessKeys":null,"hostName":"cli-test-acfr-plr000002.redis.cache.windows.net","port":6379,"sslPort":6380,"linkedServers":[]}}'
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_plr000001/providers/Microsoft.Cache/Redis/cli-test-acfr-plr000002",
+        "location": "East US", "name": "cli-test-acfr-plr000002", "type": "Microsoft.Cache/Redis",
+        "tags": {}, "properties": {"provisioningState": "Succeeded", "redisVersion":
+        "4.0.14", "sku": {"name": "Basic", "family": "C", "capacity": 0}, "enableNonSslPort":
+        false, "instances": [{"sslPort": 15000, "isMaster": true, "isPrimary": true}],
+        "publicNetworkAccess": "Enabled", "tenantSettings": {}, "redisConfiguration":
+        {"maxclients": "256", "maxmemory-reserved": "30", "maxfragmentationmemory-reserved":
+        "30", "maxmemory-delta": "30"}, "hostName": "cli-test-acfr-plr000002.redis.cache.windows.net",
+        "port": 6379, "sslPort": 6380, "linkedServers": [], "****": "****"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '765'
+      - '816'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 Dec 2021 03:25:16 GMT
+      - Wed, 15 Jun 2022 08:29:49 GMT
       expires:
       - '-1'
       pragma:
@@ -1711,7 +1600,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - d4ea5ce3-f7e2-40fb-b84e-6ac2f809a5f4
+      - 29179e76-95ff-4e01-9257-39bee29e6f65
     status:
       code: 200
       message: OK
@@ -1729,7 +1618,7 @@ interactions:
       ParameterSetName:
       - --name -g --type
       User-Agent:
-      - python/3.7.8 (Windows-10-10.0.19041-SP0) AZURECLI/2.31.0
+      - python/3.8.10 (Windows-10-10.0.19044-SP0) AZURECLI/2.37.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_plr000001/providers/Microsoft.Cache/Redis/cli-test-acfr-plr000002/privateLinkResources?api-version=2021-06-01
   response:
@@ -1743,7 +1632,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 Dec 2021 03:25:19 GMT
+      - Wed, 15 Jun 2022 08:29:50 GMT
       expires:
       - '-1'
       pragma:
@@ -1759,7 +1648,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - d4ea5ce3-f7e2-40fb-b84e-6ac2f809a5f4
+      - 29179e76-95ff-4e01-9257-39bee29e6f65
     status:
       code: 200
       message: OK
