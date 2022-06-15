@@ -146,7 +146,7 @@ def load_arguments(self, _):
         c.argument('docker_registry_server_password', options_list=['--docker-registry-server-password', '-w'], help='The container registry server password. Required for private registries.')
         c.argument('multicontainer_config_type', options_list=['--multicontainer-config-type'], help="Linux only.", arg_type=get_enum_type(MULTI_CONTAINER_TYPES))
         c.argument('multicontainer_config_file', options_list=['--multicontainer-config-file'], help="Linux only. Config file for multicontainer apps. (local or remote)")
-        c.argument('runtime', options_list=['--runtime', '-r'], help="canonicalized web runtime in the format of Framework:Version, e.g. \"PHP:7.2\". Allowed delimiters: \"|\" or \":\". If using powershell, please use the \":\" delimiter or be sure to properly escape the \"|\" character. "
+        c.argument('runtime', options_list=['--runtime', '-r'], help="canonicalized web runtime in the format of Framework:Version, e.g. \"PHP:7.2\"."
                                                                      "Use `az webapp list-runtimes` for available list")  # TODO ADD completer
         c.argument('plan', options_list=['--plan', '-p'], configured_default='appserviceplan',
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
@@ -632,7 +632,7 @@ def load_arguments(self, _):
                    configured_default='appserviceplan')
         c.argument('sku', arg_type=sku_arg_type)
         c.argument('os_type', options_list=['--os-type'], arg_type=get_enum_type(OS_TYPES), help="Set the OS type for the app to be created.")
-        c.argument('runtime', options_list=['--runtime', '-r'], help="canonicalized web runtime in the format of Framework:Version, e.g. \"PHP:7.2\". Allowed delimiters: \"|\" or \":\". If using powershell, please use the \":\" delimiter or be sure to properly escape the \"|\" character. "
+        c.argument('runtime', options_list=['--runtime', '-r'], help="canonicalized web runtime in the format of Framework:Version, e.g. \"PHP:7.2\"."
                                                                      "Use `az webapp list-runtimes` for available list.")
         c.argument('dryrun', help="show summary of the create and deploy operation instead of executing it",
                    default=False, action='store_true')
