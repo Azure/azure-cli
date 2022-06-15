@@ -17,7 +17,8 @@ from azure.mgmt.sqlvirtualmachine.models import (
     DayOfWeek,
     SqlVmGroupImageSku,
     SqlImageSku,
-    SqlManagementMode
+    SqlManagementMode,
+    AssessmentDayOfWeek
 )
 
 from azure.cli.core.commands.parameters import (
@@ -336,12 +337,12 @@ def load_arguments(self, _):
                    arg_type=get_enum_type(['1', '2', '3', '4', '5', '6']))
         c.argument('assessment_monthly_occurrence',
                    options_list=['--assessment-monthly-occurrence', '--am-month-occ'],
-                   help='Occurence of the DayOfWeek day within a month to schedule assessment. Supports values 1,2,3,4 and -1. Use -1 for last DayOfWeek day of the month (for example - last Tuesday of the month).',
+                   help='Occurrence of the DayOfWeek day within a month to schedule assessment. Supports values 1,2,3,4 and -1. Use -1 for last DayOfWeek day of the month (for example - last Tuesday of the month).',
                    arg_type=get_enum_type(['1', '2', '3', '4', '-1']))
         c.argument('assessment_day_of_week',
                    options_list=['--assessment-day-of-week', '--am-day'],
                    help='Day of the week to run assessment.',
-                   arg_type=get_enum_type(DayOfWeek))
+                   arg_type=get_enum_type(AssessmentDayOfWeek))
         c.argument('assessment_start_time_local',
                    options_list=['--assessment-start-time-local', '--am-time'],
                    help='Time of the day in HH:mm format. Examples include 17:30, 05:13.',
