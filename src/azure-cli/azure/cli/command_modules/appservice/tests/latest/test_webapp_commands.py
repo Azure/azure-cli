@@ -2478,7 +2478,7 @@ class TunnelProxyTest(unittest.TestCase):
 
 
 class WebappSlotTest(ScenarioTest):
-    @live_only()  # Uses storage account keys, so must be live only to not fail credscan
+    @live_only()  # Uses storage account keys, so must be live_only to not fail credscan
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_WEBAPP)
     def test_slot_create_from_configuration_source(self, resource_group):
         webapp_name = self.create_random_name(prefix='webapp-e2e', length=24)
