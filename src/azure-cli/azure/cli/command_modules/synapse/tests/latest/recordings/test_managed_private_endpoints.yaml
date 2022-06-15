@@ -908,7 +908,7 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"properties": {"privateLinkResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test/providers/Microsoft.Storage/storageAccounts/test",
+    body: '{"properties": {"privateLinkResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bigdataqa/providers/Microsoft.Storage/storageAccounts/hozhao1210gen2",
       "groupId": "dfs"}}'
     headers:
       Accept:
@@ -918,7 +918,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '183'
+      - '198'
       Content-Type:
       - application/json
       User-Agent:
@@ -927,14 +927,14 @@ interactions:
     uri: https://clitest000003.dev.azuresynapse.net/managedVirtualNetworks/default/managedPrivateEndpoints/AzureDataLakeStoragePE?api-version=2019-06-01-preview
   response:
     body:
-      string: '{"name":"AzureDataLakeStoragePE","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000003/managedVirtualNetworks/default/managedPrivateEndpoints/AzureDataLakeStoragePE","type":"Microsoft.Synapse/workspaces/managedVirtualNetworks/managedPrivateEndpoints","properties":{"privateLinkResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test/providers/Microsoft.Storage/storageAccounts/test","groupId":"dfs","provisioningState":"Provisioning","connectionState":{},"isReserved":false,"fqdns":[],"isCompliant":false}}'
+      string: '{"name":"AzureDataLakeStoragePE","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000003/managedVirtualNetworks/default/managedPrivateEndpoints/AzureDataLakeStoragePE","type":"Microsoft.Synapse/workspaces/managedVirtualNetworks/managedPrivateEndpoints","properties":{"privateLinkResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bigdataqa/providers/Microsoft.Storage/storageAccounts/hozhao1210gen2","groupId":"dfs","provisioningState":"Provisioning","connectionState":{},"isReserved":false,"fqdns":[],"isCompliant":false}}'
     headers:
       access-control-allow-headers:
       - Location
       access-control-expose-headers:
       - Location
       content-length:
-      - '625'
+      - '640'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -963,7 +963,7 @@ interactions:
     uri: https://clitest000003.dev.azuresynapse.net/managedVirtualNetworks/default/managedPrivateEndpoints/AzureDataLakeStoragePE?api-version=2019-06-01-preview
   response:
     body:
-      string: '{"name":"AzureDataLakeStoragePE","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000003/managedVirtualNetworks/default/managedPrivateEndpoints/AzureDataLakeStoragePE","type":"Microsoft.Synapse/workspaces/managedVirtualNetworks/managedPrivateEndpoints","properties":{"privateLinkResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test/providers/Microsoft.Storage/storageAccounts/test","groupId":"dfs","provisioningState":"Failed","connectionState":{},"isReserved":false,"fqdns":[],"isCompliant":false}}'
+      string: '{"name":"AzureDataLakeStoragePE","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000003/managedVirtualNetworks/default/managedPrivateEndpoints/AzureDataLakeStoragePE","type":"Microsoft.Synapse/workspaces/managedVirtualNetworks/managedPrivateEndpoints","properties":{"privateLinkResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bigdataqa/providers/Microsoft.Storage/storageAccounts/hozhao1210gen2","groupId":"dfs","provisioningState":"Succeeded","connectionState":{"status":"Pending","description":"","actionsRequired":"None"},"isReserved":false,"fqdns":[],"isCompliant":false}}'
     headers:
       content-length:
       - '619'
@@ -978,6 +978,68 @@ interactions:
     status:
       code: 200
       message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - azsdk-python-synapse-managedprivateendpoints/0.3.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://clitest000003.dev.azuresynapse.net/managedVirtualNetworks/default/managedPrivateEndpoints?api-version=2019-06-01-preview
+  response:
+    body:
+      string: '{"value":[{"name":"AzureDataLakeStoragePE","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000003/managedVirtualNetworks/default/managedPrivateEndpoints/AzureDataLakeStoragePE","type":"Microsoft.Synapse/workspaces/managedVirtualNetworks/managedPrivateEndpoints","properties":{"privateLinkResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bigdataqa/providers/Microsoft.Storage/storageAccounts/hozhao1210gen2","groupId":"dfs","provisioningState":"Succeeded","connectionState":{"status":"Pending","description":"","actionsRequired":"None"},"isReserved":false,"fqdns":[],"isCompliant":false}},{"name":"synapse-ws-sql--clitest000003","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000003/managedVirtualNetworks/default/managedPrivateEndpoints/synapse-ws-sql--clitest000003","type":"Microsoft.Synapse/workspaces/managedVirtualNetworks/managedPrivateEndpoints","properties":{"privateLinkResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000003","groupId":"sql","provisioningState":"Succeeded","connectionState":{"status":"Approved","description":"Approved
+        by Microsoft.Synapse Resource Provider","actionsRequired":""},"isReserved":true,"fqdns":["clitest000003.eebda115-86aa-409a-92eb-93588e90ced4.sql.azuresynapse.net"],"isCompliant":false}},{"name":"synapse-ws-sqlOnDemand--clitest000003","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000003/managedVirtualNetworks/default/managedPrivateEndpoints/synapse-ws-sqlOnDemand--clitest000003","type":"Microsoft.Synapse/workspaces/managedVirtualNetworks/managedPrivateEndpoints","properties":{"privateLinkResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000003","groupId":"sqlOnDemand","provisioningState":"Succeeded","connectionState":{"status":"Approved","description":"Approved
+        by Microsoft.Synapse Resource Provider","actionsRequired":""},"isReserved":true,"fqdns":["clitest000003-ondemand.eebda115-86aa-409a-92eb-93588e90ced4.sql.azuresynapse.net"],"isCompliant":false}}]}'
+    headers:
+      content-length:
+      - '2402'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 09 Jun 2022 07:42:23 GMT
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      User-Agent:
+      - azsdk-python-synapse-managedprivateendpoints/0.3.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+    method: DELETE
+    uri: https://clitest000003.dev.azuresynapse.net/managedVirtualNetworks/default/managedPrivateEndpoints/AzureDataLakeStoragePE?api-version=2019-06-01-preview
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      date:
+      - Thu, 09 Jun 2022 07:42:25 GMT
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+    status:
+      code: 202
+      message: Accepted
 - request:
     body: null
     headers:
@@ -1027,19 +1089,57 @@ interactions:
     uri: https://clitest000003.dev.azuresynapse.net/managedVirtualNetworks/default/managedPrivateEndpoints/AzureDataLakeStoragePE?api-version=2019-06-01-preview
   response:
     body:
-      string: ''
+      string: '{"error":{"code":"UnknownError","message":"{\"CorrelationId\":\"\",\"StatusCode\":404,\"Message\":\"Resource
+        not found: Message=PrivateEndpoint has been deleted: ClientId=63bbcb06-62ed-4eb4-b498-4758959f0fe9,
+        ReferenceName=AzureDataLakeStoragePE, Cluster: 63bbcb06-62ed-4eb4-b498-4758959f0fe9.\",\"ExceptionDetail\":\"Microsoft.Analytics.Clusters.Common.NetworkServiceException:
+        PrivateEndpoint has been deleted: ClientId=63bbcb06-62ed-4eb4-b498-4758959f0fe9,
+        ReferenceName=AzureDataLakeStoragePE, Cluster: 63bbcb06-62ed-4eb4-b498-4758959f0fe9.\\r\\n   at
+        Microsoft.Analytics.Clusters.Services.NetworkService.NetworkServiceImpl.GetPrivateEndpointAsync(String
+        clientId, String referenceName, AbstractMetadataContext dbContext) in C:\\\\source\\\\Services\\\\NetworkService\\\\Service\\\\NetworkServiceImpl.cs:line
+        3469\\r\\n   at Microsoft.Analytics.Clusters.Services.NetworkService.StatefulBE.Controllers.NetworkController.GetPrivateEndpointAsync(String
+        clientId, String referenceName) in C:\\\\source\\\\Services\\\\NetworkService\\\\NetworkServiceBE\\\\Controllers\\\\NetworkController.cs:line
+        278\\r\\n   at lambda_method(Closure , Object )\\r\\n   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.AwaitableObjectResultExecutor.Execute(IActionResultTypeMapper
+        mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)\\r\\n   at
+        Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker
+        invoker, ValueTask`1 actionResultValueTask)\\r\\n   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker
+        invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)\\r\\n   at
+        Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed
+        context)\\r\\n   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State&
+        next, Scope& scope, Object& state, Boolean& isCompleted)\\r\\n   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.InvokeInnerFilterAsync()\\r\\n---
+        End of stack trace from previous location where exception was thrown ---\\r\\n   at
+        Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResourceFilter>g__Awaited|24_0(ResourceInvoker
+        invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)\\r\\n   at
+        Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResourceExecutedContextSealed
+        context)\\r\\n   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Next(State&
+        next, Scope& scope, Object& state, Boolean& isCompleted)\\r\\n   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.InvokeFilterPipelineAsync()\\r\\n---
+        End of stack trace from previous location where exception was thrown ---\\r\\n   at
+        Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker
+        invoker, Task task, IDisposable scope)\\r\\n   at Microsoft.AspNetCore.Routing.EndpointMiddleware.<Invoke>g__AwaitRequestTask|6_0(Endpoint
+        endpoint, Task requestTask, ILogger logger)\\r\\n   at Microsoft.Analytics.Clusters.Services.NetworkService.StatefulBE.ActivePartitionInstanceMiddleware.InvokeAsync(HttpContext
+        context) in C:\\\\source\\\\Services\\\\NetworkService\\\\NetworkServiceBE\\\\ActivePartitionInstanceMiddleware.cs:line
+        90\\r\\n   at Microsoft.AspNetCore.Builder.UseMiddlewareExtensions.<>c__DisplayClass5_1.<<UseMiddlewareInterface>b__1>d.MoveNext()\\r\\n---
+        End of stack trace from previous location where exception was thrown ---\\r\\n   at
+        Microsoft.Analytics.Clusters.Common.Web.ServiceFabricResourceNotFoundMiddleware.InvokeAsync(HttpContext
+        httpContext) in C:\\\\source\\\\Shared\\\\Web\\\\ServiceFabricResourceNotFoundMiddleware.cs:line
+        50\\r\\n   at Microsoft.Analytics.Clusters.Common.Web.ExceptionMiddleware.InvokeAsync(HttpContext
+        httpContext) in C:\\\\source\\\\Shared\\\\Web\\\\ExceptionMiddleware.cs:line
+        54\",\"ErrorType\":\"PrivateEndpointNotFound\",\"ErrorNumber\":2145,\"ErrorOn\":\"2022-06-09T07:43:27.1661541+00:00\"}"}}'
     headers:
       content-length:
-      - '0'
+      - '4119'
+      content-type:
+      - application/json; charset=utf-8
       date:
       - Thu, 26 May 2022 10:58:09 GMT
       server:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-ms-failure-cause:
+      - gateway
     status:
-      code: 202
-      message: Accepted
+      code: 500
+      message: Internal Server Error
 - request:
     body: null
     headers:
