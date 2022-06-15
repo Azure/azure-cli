@@ -700,9 +700,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_custom_command('update', 'file_updates', resource_type=ResourceType.DATA_STORAGE_FILESHARE)
         g.storage_custom_command('exists', 'file_exists', transform=create_boolean_result_output_transformer('exists'))
 
-        from ._transformers import transform_file_upload
-        g.storage_custom_command('upload', 'storage_file_upload', transform=transform_file_upload,
-                                 exception_handler=file_related_exception_handler)
+        g.storage_custom_command('upload', 'storage_file_upload', exception_handler=file_related_exception_handler)
         g.storage_custom_command('upload-batch', 'storage_file_upload_batch',
                                  custom_command_type=get_custom_sdk('file', client_factory=cf_share_client))
 

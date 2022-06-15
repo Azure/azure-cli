@@ -160,12 +160,15 @@ def storage_file_upload(client, local_file_path, content_settings=None,
     with open(local_file_path, 'rb') as stream:
         response = client.upload_file(data=stream, length=count, **upload_args)
 
+    if isinstance(response['content_md5'], bytearray):
+        response['content_md5'] = ''.join(hex(x) for x in response['content_md5'])
+
     return response
 
 
 def storage_file_upload_batch(cmd, client, destination, source, destination_path=None, pattern=None, dryrun=False,
                               validate_content=False, content_settings=None, max_connections=1, metadata=None,
-                              progress_callback=None):
+                              progress_callback=None, dsts=None):
     """ Upload local files to Azure Storage File Share in batch """
 
     from azure.cli.command_modules.storage.util import glob_files_locally, normalize_blob_file_path
@@ -178,8 +181,14 @@ def storage_file_upload_batch(cmd, client, destination, source, destination_path
         logger.info('    account %s', client.account_name)
         logger.info('      share %s', destination)
         logger.info('      total %d', len(source_files))
-        return [{'File': make_file_url(client, os.path.dirname(dst) or None, os.path.basename(dst)),
-                 'Type': guess_content_type(src, content_settings, settings_class).content_type} for src, dst in
+
+        kwargs = {
+            'dir_name': os.path.dirname(dsts),
+            'file_name': os.path.basename(dsts)
+        }
+        
+        return [{'File': create_file_url(client, **kwargs),
+                 'Type': guess_content_type(src, content_settings, settings_class).content_type} for src, dsts in
                 source_files]
 
     # TODO: Performance improvement
@@ -195,22 +204,13 @@ def storage_file_upload_batch(cmd, client, destination, source, destination_path
         storage_file_upload(client.get_file_client(dst), src, content_settings, metadata, validate_content,
                             progress_callback, max_connections)
 
-        return make_file_url(client, dir_name, file_name)
+        args = {
+            'dir_name': dir_name,
+            'file_name': file_name
+        }
+        return create_file_url(client, **args)
 
     return list(_upload_action(src, dst) for src, dst in source_files)
-
-
-def make_file_url(client, directory_name, file_name, sas_token=None):
-
-    if not directory_name:
-        url = '{}/{}'.format(client.primary_endpoint, file_name)
-    else:
-        url = '{}/{}/{}'.format(client.primary_endpoint, directory_name, file_name)
-
-    if sas_token:
-        url += '?' + sas_token
-
-    return url
 
 
 def storage_file_download_batch(cmd, client, source, destination, pattern=None, dryrun=False, validate_content=False,

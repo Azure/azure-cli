@@ -1917,7 +1917,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.extra('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
 
     with self.argument_context('storage file upload') as c:
-        from ._validators import validate_file_path, add_progress_callback_v2
+        from ._validators import add_progress_callback_v2
         t_file_content_settings = self.get_sdk('file.models#ContentSettings')
 
         c.register_path_argument(default_file_param='local_file_path')
@@ -1926,7 +1926,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Path of the local file to upload as the file content.')
         c.extra('no_progress', progress_type, validator=add_progress_callback_v2)
         c.argument('max_connections', type=int, help='Maximum number of parallel connections to use.')
-        c.extra('share_name', share_name_type, required=True, validator=validate_file_path)
+        c.extra('share_name', share_name_type, required=True)
         c.argument('validate_content', action='store_true', min_api='2016-05-31',
                    help='If true, calculates an MD5 hash for each range of the file. The storage service checks the '
                         'hash of the content that has arrived with the hash that was sent. This is primarily valuable '

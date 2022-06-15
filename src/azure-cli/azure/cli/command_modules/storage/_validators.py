@@ -2196,11 +2196,3 @@ def validate_blob_arguments(namespace):
     if not namespace.blob_url and not all([namespace.blob_name, namespace.container_name]):
         raise RequiredArgumentMissingError(
             "Please specify --blob-url or combination of blob name, container name and storage account arguments.")
-
-
-def validate_file_path(namespace):
-    if namespace.directory_name and namespace.file_name:
-        namespace.file_path = os.path.join(namespace.directory_name, namespace.file_name)
-    if not namespace.directory_name and namespace.file_name:
-        namespace.file_path = namespace.file_name
-    del namespace.file_name, namespace.directory_name
