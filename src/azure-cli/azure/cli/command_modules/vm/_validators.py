@@ -1309,8 +1309,9 @@ def _validate_vm_vmss_set_applications(cmd, namespace):  # pylint: disable=unuse
         if len(namespace.application_version_ids) != len(namespace.treat_deployment_as_failure):
             raise ArgumentUsageError('usage error: --treat-deployment-as-failure should have the same number of items as'
                                  ' --application-version-ids')
-        if not all(isinstance(i, bool) for i in namespace.treat_deployment_as_failure):
-            raise ArgumentUsageError('usage error: --treat-deployment-as-failure only accepts a list of "true" or "false" values')
+        for boolean_value_in_string in namespace.treat_deployment_as_failure:
+            if boolean_value_in_string.lower() != 'true' and boolean_value_in_string.lower() != 'false':
+                raise ArgumentUsageError('usage error: --treat-deployment-as-failure only accepts a list of "true" or "false" values')
 
 
 def _resolve_role_id(cli_ctx, role, scope):
