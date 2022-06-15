@@ -380,8 +380,7 @@ def _configure_db_dw_params(arg_ctx):
     arg_ctx.argument('catalog_collation',
                      arg_group=creation_arg_group,
                      arg_type=get_enum_type(CatalogCollationType),
-                     help='Collation of the metadata catalog.  Allowed values:'
-                     'DATABASE_DEFAULT, SQL_Latin1_General_CP1_CI_AS.')
+                     help='Collation of the metadata catalog.')
 
     # WideWorldImportersStd and WideWorldImportersFull cannot be successfully created.
     # AdventureWorksLT is the only sample name that is actually supported.
@@ -389,14 +388,14 @@ def _configure_db_dw_params(arg_ctx):
                      arg_group=creation_arg_group,
                      arg_type=get_enum_type([SampleName.adventure_works_lt]),
                      help='The name of the sample schema to apply when creating this'
-                     'database.  Allowed values: AdventureWorksLT.')
+                     'database.')
 
     arg_ctx.argument('license_type',
                      arg_type=get_enum_type(DatabaseLicenseType),
                      help='The license type to apply for this database.'
                      '``LicenseIncluded`` if you need a license, or ``BasePrice``'
                      'if you have a license and are eligible for the Azure Hybrid'
-                     'Benefit.  Allowed values: BasePrice, LicenseIncluded.')
+                     'Benefit.')
 
     arg_ctx.argument('zone_redundant',
                      arg_type=zone_redundant_param_type)
@@ -758,15 +757,14 @@ def load_arguments(self, _):
         c.argument('authentication_type',
                    options_list=['--auth-type', '-a'],
                    arg_type=get_enum_type(AuthenticationType),
-                   help='Authentication type.  Allowed values: ADPassword, SQL.')
+                   help='Authentication type.')
 
         c.argument('storage_key',
                    help='Required. Storage key.')
 
         c.argument('storage_key_type',
                    arg_type=get_enum_type(StorageKeyType),
-                   help='Required. Storage key type.  Allowed values: SharedAccessKey,'
-                   'StorageAccessKey.')
+                   help='Required. Storage key type.')
 
         c.argument('storage_uri',
                    help='Required. Storage Uri.')
@@ -793,15 +791,14 @@ def load_arguments(self, _):
         c.argument('authentication_type',
                    options_list=['--auth-type', '-a'],
                    arg_type=get_enum_type(AuthenticationType),
-                   help='Authentication type.  Allowed values: ADPassword, SQL.')
+                   help='Authentication type.')
 
         c.argument('storage_key',
                    help='Required. Storage key.')
 
         c.argument('storage_key_type',
                    arg_type=get_enum_type(StorageKeyType),
-                   help='Required. Storage key type.  Allowed values: SharedAccessKey,'
-                   'StorageAccessKey.')
+                   help='Required. Storage key type.')
 
         c.argument('storage_uri',
                    help='Required. Storage Uri.')
@@ -1206,8 +1203,7 @@ def load_arguments(self, _):
 
         c.argument('license_type',
                    arg_type=get_enum_type(ElasticPoolLicenseType),
-                   help='The license type to apply for this elastic pool.'
-                   'Allowed values: BasePrice, LicenseIncluded.')
+                   help='The license type to apply for this elastic pool.')
 
         c.argument('zone_redundant',
                    arg_type=zone_redundant_param_type)
