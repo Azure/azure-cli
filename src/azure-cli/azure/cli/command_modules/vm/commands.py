@@ -543,16 +543,16 @@ def load_command_table(self, _):
         g.command('delete', 'begin_delete')
         g.generic_update_command('update', setter_type=compute_custom, setter_name='update_image_galleries', setter_arg_name='gallery')
 
-    with self.command_group('sig', community_gallery_sdk, client_factory=cf_community_gallery, operation_group='galleries', min_api='2021-07-01') as g:
-        g.command('show-community', 'get', is_experimental=True)
+    with self.command_group('sig', community_gallery_sdk, client_factory=cf_community_gallery, operation_group='shared_galleries', min_api='2022-01-03') as g:
+        g.command('show-community', 'get')
 
-    with self.command_group('sig image-definition', community_gallery_image_sdk, client_factory=cf_community_gallery_image, operation_group='galleries', min_api='2021-07-01') as g:
-        g.command('show-community', 'get', is_experimental=True)
-        g.custom_command('list-community', 'sig_community_image_definition_list', is_experimental=True)
+    with self.command_group('sig image-definition', community_gallery_image_sdk, client_factory=cf_community_gallery_image, operation_group='shared_galleries', min_api='2022-01-03') as g:
+        g.command('show-community', 'get')
+        g.custom_command('list-community', 'sig_community_image_definition_list')
 
-    with self.command_group('sig image-version', community_gallery_image_version_sdk, client_factory=cf_community_gallery_image_version, operation_group='galleries', min_api='2021-07-01') as g:
-        g.command('show-community', 'get', is_experimental=True)
-        g.custom_command('list-community', 'sig_community_image_version_list', is_experimental=True)
+    with self.command_group('sig image-version', community_gallery_image_version_sdk, client_factory=cf_community_gallery_image_version, operation_group='shared_galleries', min_api='2022-01-03') as g:
+        g.command('show-community', 'get')
+        g.custom_command('list-community', 'sig_community_image_version_list')
 
     with self.command_group('sig image-definition', compute_gallery_images_sdk, operation_group='gallery_images', min_api='2018-06-01') as g:
         g.custom_command('create', 'create_gallery_image')

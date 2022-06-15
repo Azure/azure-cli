@@ -5293,10 +5293,7 @@ class VMGalleryImage(ScenarioTest):
             'gallery': self.create_random_name('gellery', 16),
             'image': self.create_random_name('image', 16),
             'version': '1.1.2',
-            'captured': 'managedImage1',
-            'location': resource_group_location,
-            'subId': '0b1f6471-1bf0-4dda-aec3-cb9272f09590',
-            'tenantId': '2f4a9838-26b7-47ee-be60-ccc1fdec5953',
+            'captured': 'managedImage1'
         })
 
         self.cmd('sig create -g {rg} --gallery-name {gallery} --permissions Community --publisher-uri puburi --publisher-email abc@123.com --eula eula --public-name-prefix pubname')
@@ -5318,7 +5315,7 @@ class VMGalleryImage(ScenarioTest):
                 self.check('uniqueId', '/CommunityGalleries/{public_name}/Images/{image}/Versions/{version}')
             ])
 
-        self.kwargs['community_gallery_image_version'] = self.cmd('sig image-version show -g {rg} --gallery-image-definition {image} --gallery-image-version {version} --gallery-name {gallery}').get_output_in_json()['id']
+        self.kwargs['community_gallery_image_version'] = self.cmd('sig image-version show-community -g {rg} --gallery-image-definition {image} --gallery-image-version {version}').get_output_in_json()['id']
         self.cmd('vm create -g {rg} -n {vm_with_community_gallery_version} --image {community_gallery_image_version} --admin-username gallerytest --generate-ssh-keys --nsg-rule None')
 
         self.cmd('vm show -g {rg} -n {vm_with_community_gallery_version}', checks=[
