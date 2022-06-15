@@ -226,7 +226,7 @@ def load_arguments(self, _):
                    arg_group=storage_arg_group,
                    help='The Storage Account Type.',
                    arg_type=get_enum_type(['GRS', 'LRS']))
-        c.argument('collation', 
+        c.argument('collation',
                    help='Collation defines the rules that sort and compare data, and cannot be changed after SQL pool creation. The default collation is "SQL_Latin1_General_CP1_CI_AS".')
 
     with self.argument_context('synapse sql pool update') as c:
