@@ -163,7 +163,7 @@ def storage_file_upload(client, local_file_path, content_settings=None,
 
 def storage_file_upload_batch(cmd, client, destination, source, destination_path=None, pattern=None, dryrun=False,
                               validate_content=False, content_settings=None, max_connections=1, metadata=None,
-                              progress_callback=None, dsts=None):
+                              progress_callback=None):
     """ Upload local files to Azure Storage File Share in batch """
 
     from azure.cli.command_modules.storage.util import glob_files_locally, normalize_blob_file_path
@@ -176,26 +176,27 @@ def storage_file_upload_batch(cmd, client, destination, source, destination_path
         logger.info('    account %s', client.account_name)
         logger.info('      share %s', destination)
         logger.info('      total %d', len(source_files))
+        dst = None
         kwargs = {
-            'dir_name': os.path.dirname(dsts),
-            'file_name': os.path.basename(dsts)
+            'dir_name': os.path.dirname(dst),
+            'file_name': os.path.basename(dst)
         }
 
         return [{'File': create_file_url(client, **kwargs),
-                 'Type': guess_content_type(src, content_settings, settings_class).content_type} for src, dsts in
+                 'Type': guess_content_type(src, content_settings, settings_class).content_type} for src, dst in
                 source_files]
 
     # TODO: Performance improvement
     # 1. Upload files in parallel
-    def _upload_action(src, dst):
-        dst = normalize_blob_file_path(destination_path, dst)
-        dir_name = os.path.dirname(dst)
-        file_name = os.path.basename(dst)
+    def _upload_action(src, dst2):
+        dst2 = normalize_blob_file_path(destination_path, dst2)
+        dir_name = os.path.dirname(dst2)
+        file_name = os.path.basename(dst2)
 
         _make_directory_in_files_share(client, destination, dir_name, V2=True)
 
         logger.warning('uploading %s', src)
-        storage_file_upload(client.get_file_client(dst), src, content_settings, metadata, validate_content,
+        storage_file_upload(client.get_file_client(dst2), src, content_settings, metadata, validate_content,
                             progress_callback, max_connections)
 
         args = {
